@@ -159,6 +159,13 @@ internal static partial class ValuesBarExecution
             or KaseDevStopV2 { MaType: null, StdDev1: >= double.MinValue and <= double.MaxValue, StdDev2: >= double.MinValue and <= double.MaxValue, StdDev3: >= double.MinValue and <= double.MaxValue, StdDev4: >= double.MinValue and <= double.MaxValue }
             or LinearTrailingStop { Mult: >= double.MinValue and <= double.MaxValue }
             or PercentageTrailingStops { Pct: >= double.MinValue and <= double.MaxValue }
+            or BilateralStochasticOscillator { MaType: null }
+            or BreakoutRsi
+            or CCTStochRelativeStrengthIndex
+            or CCTStochRSI { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage or MovingAvgType.WildersSmoothingMethod }
+            or ChandeCompositeMomentumIndex or ChandeForecastOscillator or ChandeKrollRSquaredIndex { MaType: null }
+            or ChandeMomentumOscillatorAbsolute or ChandeMomentumOscillatorAbsoluteAverage or ChandeMomentumOscillatorAverage or ChandeMomentumOscillatorAverageDisparityIndex
+            or ChandeMomentumOscillatorFilter { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -504,6 +511,18 @@ internal static partial class ValuesBarExecution
         KaseDevStopV2 stop => new GeneratedKaseStopV2State(stop),
         LinearTrailingStop stop => new GeneratedLinearStopState(Math.Max(1, stop.Length), stop.Mult),
         PercentageTrailingStops stop => new GeneratedPercentageStopsState(stop.Length, stop.Pct, count),
+        BilateralStochasticOscillator oscillator => new GeneratedBilateralState(oscillator.Length),
+        BreakoutRsi rsi => new GeneratedBreakoutRsiState(rsi.Length),
+        CCTStochRelativeStrengthIndex => new GeneratedCctRsiState(5, 8, 13, 14, 21, 3, 8, MovingAvgType.ExponentialMovingAverage, count),
+        CCTStochRSI rsi => new GeneratedCctRsiState(rsi.Length1, rsi.Length2, rsi.Length3, rsi.Length4, rsi.Length5, rsi.SmoothLength1, rsi.SmoothLength2, rsi.MaType, count),
+        ChandeCompositeMomentumIndex => new GeneratedChandeCompositeState(),
+        ChandeForecastOscillator forecast => new GeneratedChandeForecastState(forecast.Length, count),
+        ChandeKrollRSquaredIndex kroll => new GeneratedChandeKrollState(kroll.Length),
+        ChandeMomentumOscillatorAbsolute oscillator => new GeneratedChandeAbsoluteState(Math.Max(1, oscillator.Length), count),
+        ChandeMomentumOscillatorAbsoluteAverage => new GeneratedChandeAverageState(count, true),
+        ChandeMomentumOscillatorAverage => new GeneratedChandeAverageState(count, false),
+        ChandeMomentumOscillatorAverageDisparityIndex => new GeneratedChandeDisparityState(),
+        ChandeMomentumOscillatorFilter oscillator => new GeneratedChandeFilterState(Math.Max(1, oscillator.Length), count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -3920,6 +3939,159 @@ internal static partial class ValuesBarExecution
             outputs[0] = _longStop; outputs[1] = _shortStop;
         }
         public void Dispose() { _high.Dispose(); _low.Dispose(); }
+    }
+
+    private sealed class GeneratedBilateralState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly BilateralStochasticWindow _window = new(MovingAvgType.SimpleMovingAverage, length, 20);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Bull; outputs[1] = point.Bear;
+            outputs[2] = point.Bso; outputs[3] = point.SignalLine;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedBreakoutRsiState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly BreakoutRsiWindow _window = new(length, 2);
+        private double _previousPrice;
+        private bool _started;
+        public void Reset() { _window.Reset(); _previousPrice = 0; _started = false; }
+        public double Update(in Bar bar)
+        {
+            var price = BreakoutRsiWindow.Price(bar.Open, bar.High, bar.Low, bar.Close);
+            var high = bar.High; var low = bar.Low;
+            if (!CalculationsHelper.IsWithinBarRange(price, low, high))
+            {
+                var previous = _started ? _previousPrice : price;
+                high = Math.Max(previous, price); low = Math.Min(previous, price);
+            }
+            var value = _window.Next(price, bar.Open, high, low, bar.Close, bar.Volume, true).Value;
+            _previousPrice = price; _started = true;
+            return value;
+        }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedCctRsiState : IMultiOutputState, IDisposable
+    {
+        private readonly PriceRsiWindow[] _rsi;
+        private readonly StrengthAverage[] _means;
+        private readonly int[] _periods;
+        private RollingMinMax[] _extrema;
+        public GeneratedCctRsiState(int length1, int length2, int length3, int length4, int length5, int smooth1, int smooth2, MovingAvgType kind, int count)
+        {
+            var lengths = new[] { length1, length2, length3, length4, length5 }.Select(n => Math.Max(1, n)).ToArray();
+            _rsi = lengths.Select(n => new PriceRsiWindow(kind, n, count)).ToArray();
+            _means = new[] { smooth2, smooth1, smooth1, smooth1, 9 }.Select(n => new StrengthAverage(kind, Math.Max(1, n), count)).ToArray();
+            _periods = [lengths[1], lengths[2], lengths[4], lengths[3], lengths[0], lengths[2], lengths[1]];
+            _extrema = _periods.Select(n => new RollingMinMax(n)).ToArray();
+        }
+        public void Reset()
+        {
+            foreach (var rsi in _rsi) rsi.Reset();
+            foreach (var mean in _means) mean.Reset();
+            _extrema = _periods.Select(n => new RollingMinMax(n)).ToArray();
+        }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            Span<double> strengths = stackalloc double[5];
+            for (var i = 0; i < 5; i++) strengths[i] = _rsi[i].Next(bar.Close, true);
+            _extrema[0].Add(strengths[4]); _extrema[1].Add(strengths[4]); _extrema[2].Add(strengths[4]);
+            _extrema[3].Add(strengths[3]); _extrema[4].Add(strengths[0]); _extrema[5].Add(strengths[2]); _extrema[6].Add(strengths[1]);
+            outputs[0] = CctRsiRatio.Percent(strengths[4], _extrema[0].Min, _extrema[1].Min, _extrema[1].Max);
+            outputs[1] = CctRsiRatio.Percent(strengths[4], _extrema[2].Min, _extrema[2].Min, _extrema[2].Max);
+            outputs[2] = CctRsiRatio.Percent(strengths[3], _extrema[3].Min, _extrema[3].Min, _extrema[3].Max);
+            var type4 = CctRsiRatio.Percent(strengths[4], _extrema[1].Min, _extrema[1].Min, _extrema[0].Max);
+            var type5 = CctRsiRatio.Percent(strengths[0], _extrema[4].Min, _extrema[4].Min, _extrema[4].Max);
+            var type6 = CctRsiRatio.Percent(strengths[2], _extrema[5].Min, _extrema[5].Min, _extrema[5].Max);
+            var custom = CctRsiRatio.Percent(strengths[1], _extrema[6].Min, _extrema[6].Min, _extrema[6].Max);
+            outputs[3] = _means[0].Next(new StrengthValue(type4), true).Mantissa;
+            outputs[4] = _means[1].Next(new StrengthValue(type5), true).Mantissa;
+            outputs[5] = _means[2].Next(new StrengthValue(type6), true).Mantissa;
+            outputs[6] = _means[3].Next(new StrengthValue(custom), true).Mantissa;
+            outputs[7] = _means[4].Next(new StrengthValue(outputs[0]), true).Mantissa;
+        }
+        public void Dispose()
+        {
+            foreach (var rsi in _rsi) rsi.Dispose();
+            foreach (var mean in _means) mean.Dispose();
+            _extrema = [];
+        }
+    }
+
+    private sealed class GeneratedChandeCompositeState : IMultiOutputState, IDisposable
+    {
+        private readonly ChandeCompositeWindow _window = new(MovingAvgType.DoubleExponentialMovingAverage, 5, 10, 20, 3);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Line; outputs[1] = point.SignalLine;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedChandeForecastState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly ExactLinearFitWindow _window = new(length, observedHistory: Math.Max(1, length) > count, compact: true);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).PercentResidual(bar.Close);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedChandeKrollState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly ChandeKrollWindow _window = new(MovingAvgType.SimpleMovingAverage, length, 3);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedChandeAbsoluteState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly ChandeMomentumWindow _window = new(Math.Min(period, Math.Max(1, count)));
+        private int _seen;
+        public void Reset() { _window.Reset(); _seen = 0; }
+        public double Update(in Bar bar)
+        {
+            var value = _window.Next(bar.Close, true);
+            if (_seen < period) { _seen++; return 0; }
+            return Math.Abs(value);
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedChandeAverageState(int count, bool absolute) : IIndicatorState, IDisposable
+    {
+        private readonly ChandeMomentumAverageWindow _window = new(Math.Min(5, Math.Max(1, count)), Math.Min(10, Math.Max(1, count)), Math.Min(20, Math.Max(1, count)));
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) { var value = _window.Next(bar.Close, true); return absolute ? Math.Abs(value) : value; }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedChandeDisparityState : IIndicatorState, IDisposable
+    {
+        private readonly ChandeDisparityWindow _window = new(MovingAvgType.ExponentialMovingAverage, 200, 50, 20);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedChandeFilterState(int period, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly ChandeMomentumWindow _window = new(Math.Min(period, Math.Max(1, count)), 3);
+        private readonly WmaValueState _signal = new(period, count);
+        public void Reset() { _window.Reset(); _signal.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value; outputs[1] = _signal.Update(new Bar(default, 0, 0, 0, value, 0));
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
