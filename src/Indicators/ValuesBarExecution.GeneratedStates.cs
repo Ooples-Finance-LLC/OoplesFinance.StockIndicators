@@ -250,6 +250,7 @@ internal static partial class ValuesBarExecution
             or GroverLlorensCycleOscillator { MaType: null }
             or HarmonicMeanMovingAverage
             or HalfTrend { MaType: null }
+            or GuppyCountBackLine { Length: <= 1_073_741_824 }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -738,6 +739,7 @@ internal static partial class ValuesBarExecution
         HarmonicMeanMovingAverage harmonic => new GeneratedHarmonicState(harmonic.Length, count),
         HalfTrend trend => new GeneratedHalfTrendState(trend.Length),
         HawkeyeVolumeIndicator hawkeye => new GeneratedHawkeyeState(hawkeye.Divisor),
+        GuppyCountBackLine countBack => new GeneratedCountBackState(countBack.Length, count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5588,6 +5590,72 @@ internal static partial class ValuesBarExecution
             _previousMidpoint = ExactVarianceWindow.Units(PriceMean.Of(bar.High, bar.Low));
         }
         public void Dispose() => Reset();
+    }
+
+    private readonly record struct GeneratedCountBackPoint(double High, double Low, int Higher, int Lower);
+
+    private sealed class GeneratedCountBackDeque : IDisposable
+    {
+        private int[] _values;
+        private int _start;
+        public int Count { get; private set; }
+        public GeneratedCountBackDeque(int capacity) => _values = System.Buffers.ArrayPool<int>.Shared.Rent(capacity);
+        public int First => _values[_start];
+        public int Last => _values[(int)(((long)_start + Count - 1) % _values.Length)];
+        public void Add(int value) { _values[(int)(((long)_start + Count) % _values.Length)] = value; Count++; }
+        public void RemoveFirst() { _start = (_start + 1) % _values.Length; Count--; }
+        public void RemoveLast() => Count--;
+        public void Reset() { _start = 0; Count = 0; }
+        public void Dispose() { if (_values.Length == 0) return; System.Buffers.ArrayPool<int>.Shared.Return(_values); _values = Array.Empty<int>(); Reset(); }
+    }
+
+    private sealed class GeneratedCountBackState : IIndicatorState, IDisposable
+    {
+        private readonly int _length;
+        private readonly PooledRingBuffer<GeneratedCountBackPoint> _history;
+        private readonly GeneratedCountBackDeque _higher, _lower, _tops, _bottoms;
+        private int _position = -1, _firstIndex;
+        public GeneratedCountBackState(int length, int count)
+        {
+            _length = Math.Max(1, length);
+            var capacity = (int)Math.Min(Math.Max(1, count), 2L * _length);
+            _history = new(capacity);
+            _higher = new(capacity); _lower = new(capacity); _tops = new(capacity); _bottoms = new(capacity);
+        }
+        private GeneratedCountBackPoint At(int index) => _history[index - _firstIndex];
+        public void Reset() { _position = -1; _firstIndex = 0; _history.Clear(); _higher.Reset(); _lower.Reset(); _tops.Reset(); _bottoms.Reset(); }
+        public double Update(in Bar bar)
+        {
+            _position++;
+            var retainedStart = _position - _history.Capacity + 1;
+            while (_higher.Count > 0 && _higher.First < retainedStart) _higher.RemoveFirst();
+            while (_lower.Count > 0 && _lower.First < retainedStart) _lower.RemoveFirst();
+            while (_higher.Count > 0 && At(_higher.Last).High <= bar.High) _higher.RemoveLast();
+            while (_lower.Count > 0 && At(_lower.Last).Low >= bar.Low) _lower.RemoveLast();
+            var point = new GeneratedCountBackPoint(bar.High, bar.Low, _higher.Count == 0 ? -1 : _higher.Last, _lower.Count == 0 ? -1 : _lower.Last);
+            if (_history.TryAdd(point, out _)) _firstIndex++;
+            _higher.Add(_position); _lower.Add(_position);
+
+            var windowStart = _position - _length + 1;
+            while (_tops.Count > 0 && _tops.First < windowStart) _tops.RemoveFirst();
+            while (_bottoms.Count > 0 && _bottoms.First < windowStart) _bottoms.RemoveFirst();
+            while (_tops.Count > 0 && At(_tops.Last).High <= bar.High) _tops.RemoveLast();
+            while (_bottoms.Count > 0 && At(_bottoms.Last).Low >= bar.Low) _bottoms.RemoveLast();
+            _tops.Add(_position); _bottoms.Add(_position);
+
+            // Equal extremes select the latest bar; an outside-bar tie selects its high.
+            var rising = _tops.First >= _bottoms.First;
+            var pivot = Math.Max(_tops.First, _bottoms.First);
+            var bound = pivot - _length;
+            var previous = rising ? At(pivot).Lower : At(pivot).Higher;
+            if (previous >= 0 && previous >= bound)
+            {
+                var second = rising ? At(previous).Lower : At(previous).Higher;
+                if (second >= 0 && second >= bound) return rising ? At(second).Low : At(second).High;
+            }
+            return bar.Close;
+        }
+        public void Dispose() { _history.Dispose(); _higher.Dispose(); _lower.Dispose(); _tops.Dispose(); _bottoms.Dispose(); }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
