@@ -196,6 +196,17 @@ internal static partial class ValuesBarExecution
             or EhlersMesaPredictIndicatorV1
             or EhlersMesaPredictIndicatorV2 { MaType: null }
             or EhlersAnticipateIndicator { MaType: null, Length: <= AnticipateWindow.MaximumLength, Bw: >= double.MinValue and <= double.MaxValue }
+            or EhlersConvolutionIndicator
+            or EhlersPhaseCalculation { MaType: null }
+            or EhlersFourierSeriesAnalysis { Bw: >= double.MinValue and <= double.MaxValue }
+            or EhlersDiscreteFourierTransform or EhlersDiscreteFourierTransformSpectralEstimate
+            or EhlersSpectrumDerivedFilterBank { MinLength: < int.MaxValue, MaxLength: < int.MaxValue, Length2: < int.MaxValue }
+            or EhlersRestoringPullIndicator { MaType: null, MinLength: < int.MaxValue, MaxLength: < int.MaxValue, Length2: < int.MaxValue }
+            or EhlersSignalToNoiseRatioV1 { MaType: null }
+            or EhlersSignalToNoiseRatioV2 or EhlersAlternateSignalToNoiseRatio or EhlersEnhancedSignalToNoiseRatio
+            or SuperSmoother or EhlersSquelchIndicator
+            or EhlersVariableIndexDynamicAverage { MaType: null, SecondAverage: null }
+            or EhlersSwissArmyKnife { Delta: >= 0 and <= double.MaxValue }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -603,6 +614,21 @@ internal static partial class ValuesBarExecution
         EhlersMesaPredictIndicatorV1 mesa => new GeneratedMesaPredictV1State(mesa.Length1, mesa.Length2, mesa.LowerLength, mesa.UpperLength),
         EhlersMesaPredictIndicatorV2 mesa => new GeneratedMesaPredictV2State(mesa.Length1, mesa.Length2, mesa.Length3, mesa.Length4),
         EhlersAnticipateIndicator anticipate => new GeneratedAnticipateState(anticipate.Length, anticipate.Bw),
+        EhlersPhaseCalculation phase => new GeneratedFourierPhaseState(phase.Length),
+        EhlersConvolutionIndicator convolution => new GeneratedEhlersConvolutionState(convolution.Length1, convolution.Length2, convolution.Length3),
+        EhlersFourierSeriesAnalysis fourier => new GeneratedFourierSeriesState(fourier.Length, fourier.Bw),
+        EhlersDiscreteFourierTransform fourier => new GeneratedDiscreteFourierState(fourier.MinLength, fourier.MaxLength, fourier.Length),
+        EhlersDiscreteFourierTransformSpectralEstimate spectrum => new GeneratedDftSpectrumState(spectrum.Length1, spectrum.Length2),
+        EhlersSpectrumDerivedFilterBank bank => new GeneratedSpectrumBankState(bank.MinLength, bank.MaxLength, bank.Length1, bank.Length2),
+        EhlersRestoringPullIndicator pull => new GeneratedRestoringPullState(pull.MinLength, pull.MaxLength, pull.Length1, pull.Length2),
+        EhlersSignalToNoiseRatioV1 noise => new GeneratedHilbertNoiseState(noise.Length),
+        EhlersSignalToNoiseRatioV2 noise => new GeneratedMamaNoiseState(noise.Length, 1),
+        EhlersAlternateSignalToNoiseRatio noise => new GeneratedMamaNoiseState(noise.Length, 0),
+        EhlersEnhancedSignalToNoiseRatio noise => new GeneratedEnhancedMamaNoiseState(noise.Length),
+        SuperSmoother smoother => new GeneratedSuperSmootherAliasState(smoother.Length),
+        EhlersVariableIndexDynamicAverage => new GeneratedEhlersVidyaState(),
+        EhlersSquelchIndicator squelch => new GeneratedSquelchState(squelch.Length1, squelch.Length2, squelch.Length3),
+        EhlersSwissArmyKnife knife => new GeneratedSwissArmyState(knife.Length, knife.Delta),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -4551,6 +4577,149 @@ internal static partial class ValuesBarExecution
         private readonly AnticipateWindow _window = new(MovingAvgType.EhlersHannMovingAverage, length, bandwidth);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedFourierPhaseState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly FourierPhaseWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Phase;
+            outputs[1] = point.Signal;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedEhlersConvolutionState(int highLength, int lowLength, int correlationLength) : IMultiOutputState, IDisposable
+    {
+        private readonly EhlersConvolutionWindow _window = new(highLength, lowLength, correlationLength);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Value;
+            outputs[1] = point.Slope;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedFourierSeriesState(int length, double bandwidth) : IMultiOutputState, IDisposable
+    {
+        private readonly FourierSeriesWindow _window = new(length, bandwidth);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Wave;
+            outputs[1] = point.Roc;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDiscreteFourierState(int minimum, int maximum, int cutoff) : IIndicatorState, IDisposable
+    {
+        private readonly OoplesFinance.StockIndicators.Streaming.DiscreteFourierCycle _window = new(minimum, maximum, cutoff);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true, out _);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDftSpectrumState(int upper, int lower) : IIndicatorState, IDisposable
+    {
+        private readonly DftSpectrumWindow _window = new(upper, lower);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedSpectrumBankState(int minimum, int maximum, int cutoff, int median) : IIndicatorState, IDisposable
+    {
+        private readonly OoplesFinance.StockIndicators.Streaming.EhlersSpectrumDerivedFilterBankEngine _window = new(minimum, maximum, cutoff, median);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedRestoringPullState(int minimum, int maximum, int cutoff, int median) : IMultiOutputState, IDisposable
+    {
+        private readonly OoplesFinance.StockIndicators.Streaming.EhlersSpectrumDerivedFilterBankEngine _window = new(minimum, maximum, cutoff, median);
+        private readonly OoplesFinance.StockIndicators.Streaming.EmaState _signal = new(Math.Max(1, minimum));
+        private bool _signalInvalid;
+        public void Reset() { _window.Reset(); _signal.Reset(); _signalInvalid = false; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var cycle = _window.Next(bar.Close, true);
+            var ratio = 2 * Math.PI / cycle;
+            var pull = bar.Volume * (ratio * ratio);
+            _signalInvalid |= !double.IsFinite(pull);
+            outputs[0] = pull;
+            outputs[1] = _signalInvalid ? double.NaN : _signal.GetNext(pull, commit: true);
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedHilbertNoiseState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly HilbertNoiseWindow _window = new(MovingAvgType.ExponentialMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedMamaNoiseState(int length, int mode) : IIndicatorState, IDisposable
+    {
+        private readonly MamaNoiseWindow _window = new(length, mode);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true).Snr;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedEnhancedMamaNoiseState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly MamaNoiseWindow _window = new(length, 2);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, bar.High, bar.Low, true);
+            outputs[0] = point.Snr;
+            outputs[1] = point.InPhase;
+            outputs[2] = point.Quadrature;
+            outputs[3] = point.Period;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedSuperSmootherAliasState(int length) : IIndicatorState
+    {
+        private readonly OoplesFinance.StockIndicators.Streaming.EhlersSuperSmootherFilterEngine _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedEhlersVidyaState : IIndicatorState, IDisposable
+    {
+        private readonly EhlersVidyaWindow _window = new(MovingAvgType.WeightedMovingAverage, 9, 30);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedSquelchState(int lag, int threshold, int horizon) : IIndicatorState, IDisposable
+    {
+        private readonly SquelchWindow _window = new(lag, threshold, horizon);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedSwissArmyState(int length, double delta) : IMultiOutputState, IDisposable
+    {
+        private readonly SwissArmyWindow _window = new(length, delta);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs) => _window.Next(bar.Close, true).Values.AsSpan().CopyTo(outputs);
         public void Dispose() => _window.Dispose();
     }
 
