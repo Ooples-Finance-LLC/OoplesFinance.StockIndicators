@@ -35,6 +35,9 @@ def contract_receipts(root, targets, read):
     receipts = {}
     known_options = {option for option, _ in targets}
     for path in sorted((root / 'benchmarks/results/remaining-indicators').glob('*-contracts.json')):
+        # Shared GPU fixture receipts describe test methods, not facade coverage.
+        if path.name.endswith('-gpu-contracts.json'):
+            continue
         relative = path.relative_to(root).as_posix()
         record = json.loads(read(relative))
         for name in record['types']:

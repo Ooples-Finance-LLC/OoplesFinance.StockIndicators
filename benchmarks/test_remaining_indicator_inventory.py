@@ -1,10 +1,33 @@
 import unittest
+import json
+import tempfile
 from pathlib import Path
 
-from build_remaining_indicator_inventory import enum_members, inventory, source_text
+from build_remaining_indicator_inventory import contract_receipts, enum_members, inventory, source_text
 
 
 class RemainingInventoryTests(unittest.TestCase):
+    def test_shared_gpu_receipts_do_not_claim_facade_coverage(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            receipts = root / 'benchmarks/results/remaining-indicators'
+            receipts.mkdir(parents=True)
+            (receipts / 'family-cpu-contracts.json').write_text(json.dumps({'types': ['Example']}))
+            (receipts / 'batch-gpu-contracts.json').write_text(json.dumps({'methods': ['GpuTest']}))
+            result = contract_receipts(root, [('ExampleSpecOptions', 'Example')],
+                                       lambda relative: (root / relative).read_text())
+            self.assertEqual({'ExampleSpecOptions': [
+                'benchmarks/results/remaining-indicators/family-cpu-contracts.json']}, result)
+
+    def test_family_receipt_without_types_is_still_rejected(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            receipts = root / 'benchmarks/results/remaining-indicators'
+            receipts.mkdir(parents=True)
+            (receipts / 'family-contracts.json').write_text('{}')
+            with self.assertRaises(KeyError):
+                contract_receipts(root, [], lambda relative: (root / relative).read_text())
+
     def test_unrecognized_enum_syntax_cannot_silently_drop_entries(self):
         with self.assertRaises(ValueError):
             enum_members('public enum IndicatorName { None, Example = 2 }')
