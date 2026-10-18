@@ -251,6 +251,7 @@ internal static partial class ValuesBarExecution
             or HarmonicMeanMovingAverage
             or HalfTrend { MaType: null }
             or GuppyCountBackLine { Length: <= 1_073_741_824 }
+            or HirashimaSugitaRS { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -740,6 +741,7 @@ internal static partial class ValuesBarExecution
         HalfTrend trend => new GeneratedHalfTrendState(trend.Length),
         HawkeyeVolumeIndicator hawkeye => new GeneratedHawkeyeState(hawkeye.Divisor),
         GuppyCountBackLine countBack => new GeneratedCountBackState(countBack.Length, count),
+        HirashimaSugitaRS bands => new GeneratedHirashimaState(bands.Length),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5656,6 +5658,14 @@ internal static partial class ValuesBarExecution
             return bar.Close;
         }
         public void Dispose() { _history.Dispose(); _higher.Dispose(); _lower.Dispose(); _tops.Dispose(); _bottoms.Dispose(); }
+    }
+
+    private sealed class GeneratedHirashimaState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly HirashimaWindow _window = new(MovingAvgType.WeightedMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs) => _window.Next(bar.Close, true, outputs);
+        public void Dispose() => Reset();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
