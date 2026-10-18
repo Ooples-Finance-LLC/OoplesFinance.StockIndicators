@@ -1,0 +1,78 @@
+{
+  "status": "third-stage-checks-passed-inherited-macd-failures-and-performance-pending",
+  "context": "Six new families in the combined working candidate; the isolated committed tree was not separately built or tested. Unaffected passing family receipts are retained under the recorded ElderRay-only source diff, not reruns of rebuilt assemblies. Common GPU fixtures do not establish per-indicator GPU performance.",
+  "input_sha256": "6f322184dccc472f8e1a3c6f304af1643602d5ab2bc48f7309f3a191cb50078d",
+  "validation_base_head": "9709e6b7d82fd46f40e9527c65cafd2f48cbc47a",
+  "family_check_counts": {
+    "unit": 320,
+    "parity": 56
+  },
+  "family_cpu_receipts": [
+    "doublesmoothed-cpu-contracts.json",
+    "dynamicmomentum-cpu-contracts.json",
+    "dynamicfilters-cpu-contracts.json",
+    "edgeefficiency-cpu-contracts.json",
+    "earningthermometer-cpu-contracts.json",
+    "elderpair-cpu-contracts.json"
+  ],
+  "checks": {
+    "discovery": {
+      "status": "passed",
+      "verified_count": 225,
+      "log_sha256": "c9702d56f200ecb93ce69c276ece3fcc1cdad2b15ebfce3ba26dc791077baf18"
+    },
+    "gpu": {
+      "status": "passed",
+      "verified_count": 100,
+      "log_sha256": "0ab61d7fc8c74cefefab4d87f1365950230732cba251e6d55dd94146ea20ab6b"
+    },
+    "verify-gpu-partition": {
+      "status": "passed",
+      "verified_count": null,
+      "log_sha256": "d0c1ff84296fa475ae8c240a4223f57b3e5243c0b5cded7af84ec2e19f7e1e72",
+      "result": "Verified 100 local GPU cases; 1554 methods remain assigned to hosted CI"
+    },
+    "inventory": {
+      "status": "passed",
+      "verified_count": 6,
+      "log_sha256": "3edc6a722c29dc39f3c78c617e94a65dbfcee72e00849be670964045328f674c",
+      "result": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.414s\n\nOK"
+    }
+  },
+  "discovery_evidence": "third14-discovery.trx.gz",
+  "gpu_evidence": "third14-gpu-contracts.json",
+  "gpu_trx_evidence": "third14-gpu.trx.gz",
+  "inherited_failed_unit_cases": 3,
+  "inherited_failure_evidence": "combined113-known-macd-failures.trx.gz",
+  "pending": [
+    "inherited MACD unit-contract failures",
+    "raw timing and performance comparison",
+    "required hosted checks"
+  ],
+  "family_execution_inputs_sha256": {
+    "doublesmoothed": {
+      "unit": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696",
+      "parity": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696"
+    },
+    "dynamicmomentum": {
+      "unit": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696",
+      "parity": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696"
+    },
+    "dynamicfilters": {
+      "unit": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696",
+      "parity": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696"
+    },
+    "edgeefficiency": {
+      "unit": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696",
+      "parity": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696"
+    },
+    "earningthermometer": {
+      "unit": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696",
+      "parity": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696"
+    },
+    "elderpair": {
+      "unit": "6f322184dccc472f8e1a3c6f304af1643602d5ab2bc48f7309f3a191cb50078d",
+      "parity": "6f322184dccc472f8e1a3c6f304af1643602d5ab2bc48f7309f3a191cb50078d"
+    }
+  }
+}
