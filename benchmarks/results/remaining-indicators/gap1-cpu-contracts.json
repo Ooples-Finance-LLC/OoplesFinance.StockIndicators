@@ -1,4 +1,4 @@
-{
+{"types":["DirectionalTrendIndex","CoralTrendIndicator","CorrectedMovingAverage"],
   "status": "numerical-and-parity-verified-performance-pending",
   "changes": [
     "DirectionalTrend finite-difference fast path with original exact overflow fallback",
