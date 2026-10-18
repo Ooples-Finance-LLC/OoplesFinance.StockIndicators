@@ -172,6 +172,10 @@ internal static partial class ValuesBarExecution
             or PoweredKaufmanAdaptiveMovingAverage
             or AdaptiveTrailingStop { Multiplier: >= double.MinValue and <= double.MaxValue }
             or AverageAbsoluteErrorNormalization or BelkhayateTiming or BayesianOscillator { MaType: null }
+            or CalmarRatio
+            or DemandIndex or DemandOscillator { MaType: null }
+            or DampingIndex { MaType: null }
+            or DetrendedSyntheticPrice
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -541,6 +545,11 @@ internal static partial class ValuesBarExecution
         AverageAbsoluteErrorNormalization normalization => new GeneratedAbsoluteErrorState(normalization.Length),
         BelkhayateTiming => new GeneratedBelkhayateState(),
         BayesianOscillator oscillator => new GeneratedBayesianState(oscillator.Length),
+        CalmarRatio ratio => new GeneratedCalmarState(ratio.Length),
+        DemandIndex => new GeneratedDemandIndexState(),
+        DemandOscillator => new GeneratedDemandOscillatorState(),
+        DampingIndex damping => new GeneratedDampingState(damping.Length, count),
+        DetrendedSyntheticPrice synthetic => new GeneratedSyntheticPriceState(synthetic.Length),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -4202,6 +4211,57 @@ internal static partial class ValuesBarExecution
             outputs[2] = point.Prime;
         }
         public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedCalmarState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly CalmarWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDemandIndexState : IIndicatorState
+    {
+        private readonly DemandIndexWindow _window = new();
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, true).Value;
+    }
+
+    private sealed class GeneratedDemandOscillatorState : IMultiOutputState, IDisposable
+    {
+        private readonly DemandOscillatorWindow _window = new(MovingAvgType.ExponentialMovingAverage, 10, 2, 20);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, true);
+            outputs[0] = point.Line; outputs[1] = point.SignalLine;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedDampingState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly DampingWindow _window = new(MovingAvgType.SimpleMovingAverage, length, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedSyntheticPriceState(int length) : IIndicatorState
+    {
+        private readonly double _alpha = length > 2 ? 2d / (length + 1d) : .67;
+        private double _high, _low, _fast, _slow;
+        private bool _seeded;
+        public void Reset() { _high = _low = _fast = _slow = 0; _seeded = false; }
+        public double Update(in Bar bar)
+        {
+            var price = PriceMean.Of(Math.Max(bar.High, _high), Math.Min(bar.Low, _low));
+            var fast = VidyaBlend.Compute(_seeded ? _fast : price, price, _alpha);
+            var slow = VidyaBlend.Compute(_seeded ? _slow : price, price, _alpha / 2);
+            _high = bar.High; _low = bar.Low; _fast = fast; _slow = slow; _seeded = true;
+            return fast - slow;
+        }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
