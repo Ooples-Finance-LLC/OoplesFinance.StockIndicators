@@ -240,6 +240,8 @@ internal static partial class ValuesBarExecution
             or FoldedRelativeStrengthIndex { MaType: null } or FisherTransformStochasticOscillator
             or ForecastOscillator { MaType: null }
             or FreedomOfMovement { MaType: null } or FunctionToCandles { MaType: null }
+            or GainLossMovingAverage { MaType: null, SecondAverage: null }
+            or GannHiLoActivator { MaType: null, SecondAverage: null } or GannTrendOscillator
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -717,6 +719,9 @@ internal static partial class ValuesBarExecution
         ForecastOscillator forecast => new GeneratedForecastOscillatorState(forecast.Length, count),
         FreedomOfMovement freedom => new GeneratedFreedomState(freedom.Length),
         FunctionToCandles candles => new GeneratedFunctionCandlesState(candles.Length),
+        GainLossMovingAverage gain => new GeneratedGainLossAverageState(gain.Length, gain.SignalLength, count),
+        GannHiLoActivator gann => new GeneratedGannHiLoState(gann.Length, count),
+        GannTrendOscillator gann => new GeneratedGannTrendState(Math.Max(1, gann.Length)),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5431,6 +5436,45 @@ internal static partial class ValuesBarExecution
             _previousClose = bar.Close; _started = true;
         }
         public void Dispose() { _close.Dispose(); _open.Dispose(); _high.Dispose(); _low.Dispose(); }
+    }
+
+    private sealed class GeneratedGainLossAverageState(int length, int signal, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly GainLossAverageWindow _window = new(MovingAvgType.WildersSmoothingMethod, length, signal, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, true); outputs[0] = point.Value; outputs[1] = point.Signal; }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedGannHiLoState(int length, int count) : IIndicatorState, IDisposable
+    {
+        // Match the builder's guarded SMA rounding; periods beyond the source never warm up.
+        private readonly Streaming.SimpleMovingAverageSmoother? _high = Math.Max(1, length) <= count ? new(length) : null;
+        private readonly Streaming.SimpleMovingAverageSmoother? _low = Math.Max(1, length) <= count ? new(length) : null;
+        private double _previousHigh, _previousLow, _line;
+        public void Reset() { _high?.Reset(); _low?.Reset(); _previousHigh = _previousLow = _line = 0; }
+        public double Update(in Bar bar)
+        {
+            var high = _high?.Next(bar.High, true) ?? 0; var low = _low?.Next(bar.Low, true) ?? 0;
+            _line = bar.Close > _previousHigh ? low : bar.Close < _previousLow ? high : _line;
+            _previousHigh = high; _previousLow = low; return _line;
+        }
+        public void Dispose() { _high?.Dispose(); _low?.Dispose(); }
+    }
+
+    private sealed class GeneratedGannTrendState(int length) : IIndicatorState, IDisposable
+    {
+        private RollingMinMax _high = new(length), _low = new(length);
+        private double _highOne, _highTwo, _lowOne, _lowTwo, _line;
+        public void Reset() { _high = new(length); _low = new(length); _highOne = _highTwo = _lowOne = _lowTwo = _line = 0; }
+        public double Update(in Bar bar)
+        {
+            _high.Add(bar.High); _low.Add(bar.Low); var high = _high.Max; var low = _low.Min;
+            _line = _highTwo > _highOne && high > _highOne ? 1 : _lowTwo < _lowOne && low < _lowOne ? -1 : _line;
+            _highTwo = _highOne; _lowTwo = _lowOne; _highOne = high; _lowOne = low; return _line;
+        }
+        public void Dispose() => Reset();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
