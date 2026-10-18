@@ -101,8 +101,12 @@ internal sealed class CertifiedKaufmanBinaryWindow
         var efficiency = full && travel.Sign != 0 ? (value - _prices.Peek()).Abs() / travel : (F)0;
         var coefficient = efficiency * _fast + _slow;
         var previous = _started ? _average : Interval.Exact(value);
-        var change = Interval.Exact(coefficient * coefficient) * (Interval.Exact(value) - previous);
-        var average = change.IsZero ? previous : previous + change;
+        var gain = coefficient * coefficient;
+        var change = Interval.Exact(gain) * (Interval.Exact(value) - previous);
+        // Combine the repeated previous-average term before bounding. The exact
+        // recurrence is unchanged, while ordinary gains contract its uncertainty.
+        var average = change.IsZero ? previous
+            : Interval.Exact(gain * value) + Interval.Exact((F)1 - gain) * previous;
         var expired = full ? _changes.Peek() : default;
         var sum = _sum + change - expired;
         var squares = _squares + change.Square() - expired.Square();
