@@ -262,6 +262,8 @@ internal static partial class ValuesBarExecution
             or JmaRsxClone
             or JrcFractalDimension { MaType: null }
             or JapaneseCorrelationCoefficient { MaType: null, SecondAverage: null, ThirdAverage: null }
+            or MayerMultiple { MaType: null }
+            or OceanIndicator { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -762,6 +764,8 @@ internal static partial class ValuesBarExecution
         JmaRsxClone rsx => new GeneratedRsxState(rsx.Length),
         JrcFractalDimension jrc => new GeneratedJrcState(jrc.Length1, jrc.Length2, jrc.SmoothLength),
         JapaneseCorrelationCoefficient ratio => new GeneratedJapaneseState(Math.Max(1, ratio.Length), count),
+        MayerMultiple ratio => new GeneratedMayerState(Math.Max(1, ratio.Length), count),
+        OceanIndicator ocean => new GeneratedOceanState(Math.Max(1, ocean.Length), count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5829,6 +5833,39 @@ internal static partial class ValuesBarExecution
             _closes.TryAdd(close, out _); return value;
         }
         public void Dispose() { _highMean.Dispose(); _lowMean.Dispose(); _closeMean.Dispose(); _high.Dispose(); _low.Dispose(); _closes.Dispose(); }
+    }
+
+    private sealed class GeneratedMayerState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.RollingWindowSum _mean = new(Math.Min(length, Math.Max(1, count)), trackMeanRoundoff: true);
+        public void Reset() => _mean.Reset();
+        public double Update(in Bar bar)
+        {
+            var mean = bar.Close;
+            if (length != 1)
+            {
+                mean = _mean.Average(bar.Close, true, out var samples);
+                if (samples < length) mean = 0;
+            }
+            return mean != 0 ? bar.Close / mean : 0;
+        }
+        public void Dispose() => _mean.Dispose();
+    }
+    private sealed class GeneratedOceanState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly PooledRingBuffer<double> _logs = new(Math.Min(length, Math.Max(1, count)));
+        private readonly Streaming.EmaState _signal = new(length);
+        private readonly double _rootLength = MathHelper.Sqrt(length);
+        public void Reset() { _logs.Clear(); _signal.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var log = bar.Close > 0 ? Math.Log(bar.Close) * 1000 : 0;
+            var prior = Streaming.EhlersStreamingWindow.GetOffsetValue(_logs, log, length);
+            var value = (log - prior) / _rootLength * 100;
+            var signal = _signal.GetNext(value, true);
+            _logs.TryAdd(log, out _); outputs[0] = value; outputs[1] = signal;
+        }
+        public void Dispose() => _logs.Dispose();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
