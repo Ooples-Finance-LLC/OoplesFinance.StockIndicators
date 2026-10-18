@@ -9,18 +9,30 @@ internal sealed class CorrectedAverageWindow : IDisposable
 {
     private static readonly BigInteger Unit = BigInteger.One << 1074;
     private readonly int _length; private readonly Average? _average;
-    private readonly Queue<BigInteger> _history = new();
-    private BigInteger _sum, _squares, _previous, _previousPrice; private int _count;
+    private readonly Queue<double> _history = new();
+    private JurikDyadic _sum, _squares;
+    private BigInteger _previous, _previousPrice; private int _count;
     internal CorrectedAverageWindow(MovingAvgType kind, int length, bool external = false)
     { _length = Math.Max(1, length); if (!external) _average = new(kind, _length); }
     private static BigInteger Units(RocBankValue value) => ExactVarianceWindow.Units(value.Mantissa) << value.UpperShift;
     internal (double Value, Signal Signal, double Gain) Next(double price, bool commit, double? externalMean = null)
     {
         var current = ExactVarianceWindow.Units(price); var full = _history.Count == _length;
-        var expired = full ? _history.Peek() : BigInteger.Zero;
-        var sum = _sum + current - expired; var squares = _squares + current * current - expired * expired;
+        var expired = full ? _history.Peek() : 0;
+        var sum = _sum; sum.Add(price); sum.Add(-expired);
+        var square = JurikDyadic.FromDouble(price); square.Square();
+        var expiredSquare = JurikDyadic.FromDouble(expired); expiredSquare.Square();
+        var squares = _squares; squares.AddExact(square); squares.Subtract(expiredSquare);
         var ready = _history.Count >= _length - 1;
-        var deviation = ready ? ExactPopulationDeviation.RootRatio(_length * squares - sum * sum, (BigInteger)_length * _length) : 0;
+        // Exact centered moments retain compact storage when their exponent span permits it.
+        // SqrtMean rounds once; wide inputs retain the existing arbitrary-precision contract.
+        double deviation = 0;
+        if (ready)
+        {
+            var radicand = squares; radicand.Multiply(_length);
+            var squaredSum = sum; squaredSum.Square(); radicand.Subtract(squaredSum);
+            deviation = radicand.SqrtMean((long)_length * _length);
+        }
         var sigma = ExactVarianceWindow.Units(deviation); var variance = RocBankValue.RoundUnits(sigma * sigma, Unit);
         var mean = Units(externalMean.HasValue ? new RocBankValue(externalMean.Value) : _average!.Next(new(price), commit));
         var previous = _count == 0 ? mean : _previous;
@@ -34,7 +46,7 @@ internal sealed class CorrectedAverageWindow : IDisposable
             : spread.Sign > 0 ? Signal.Buy : spread.Sign < 0 ? Signal.Sell : Signal.None;
         if (commit)
         {
-            if (full) _history.Dequeue(); _history.Enqueue(current); _sum = sum; _squares = squares;
+            if (full) _history.Dequeue(); _history.Enqueue(price); _sum = sum; _squares = squares;
             _previous = line; _previousPrice = current; if (_count < _length) _count++;
         }
         return (ExactMeanAccumulator.UnitRatio(line, BigInteger.One), signal, gain);
@@ -46,7 +58,7 @@ internal sealed class CorrectedAverageWindow : IDisposable
             ?? CalculationsHelper.GetMovingAverageList(data, kind, length, input).ToArray();
         data.RestoreInputSeries(caller); return result;
     }
-    internal void Reset() { _history.Clear(); _sum = _squares = _previous = _previousPrice = default; _count = 0; _average?.Reset(); }
+    internal void Reset() { _history.Clear(); _sum = _squares = default; _previous = _previousPrice = default; _count = 0; _average?.Reset(); }
     public void Dispose() => _average?.Dispose();
     private sealed class Average : IDisposable
     {
