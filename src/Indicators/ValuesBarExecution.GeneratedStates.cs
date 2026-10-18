@@ -253,6 +253,7 @@ internal static partial class ValuesBarExecution
             or HalfTrend { MaType: null }
             or GuppyCountBackLine { Length: <= 1_073_741_824 }
             or HirashimaSugitaRS { MaType: null }
+            or HighLowIndex { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -744,6 +745,7 @@ internal static partial class ValuesBarExecution
         GuppyCountBackLine countBack => new GeneratedCountBackState(countBack.Length, count),
         HirashimaSugitaRS bands => new GeneratedHirashimaState(bands.Length),
         HerrickPayoffIndex payoff => new GeneratedHerrickState(payoff.PointValue),
+        HighLowIndex index => new GeneratedHighLowIndexState(Math.Max(1, index.Length), count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5676,6 +5678,27 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(PriceMean.Of(bar.High, bar.Low), bar.Open, bar.Close, bar.Volume, true).Value;
         public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedHighLowIndexState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.RollingWindowMax _high = new(Math.Min(length, Math.Max(1, count)));
+        private readonly Streaming.RollingWindowMin _low = new(Math.Min(length, Math.Max(1, count)));
+        private readonly Streaming.RollingWindowSum _advances = new(Math.Min(length, Math.Max(1, count)));
+        private readonly Streaming.RollingWindowSum _declines = new(Math.Min(length, Math.Max(1, count)));
+        private readonly Streaming.EmaState _ema = new(length);
+        private double _previousHigh, _previousLow;
+        public void Reset() { _high.Reset(); _low.Reset(); _advances.Reset(); _declines.Reset(); _ema.Reset(); _previousHigh = _previousLow = 0; }
+        public double Update(in Bar bar)
+        {
+            var high = _high.Add(bar.High, out _); var low = _low.Add(bar.Low, out _);
+            var advances = _advances.Add(high > _previousHigh ? 1 : 0, out _);
+            var declines = _declines.Add(low < _previousLow ? 1 : 0, out _);
+            _previousHigh = high; _previousLow = low;
+            var total = advances + declines;
+            return _ema.GetNext(total == 0 ? 0 : 100 * advances / total, true);
+        }
+        public void Dispose() { _high.Dispose(); _low.Dispose(); _advances.Dispose(); _declines.Dispose(); }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
