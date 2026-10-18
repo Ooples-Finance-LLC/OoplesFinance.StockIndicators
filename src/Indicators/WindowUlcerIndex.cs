@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -52,31 +51,132 @@ public sealed class WindowUlcerIndex : MultiOutputIndicatorBase, IIndicatorValid
                 )
             );
 
-    private sealed class State(int period) : IMultiOutputState
+    internal sealed class State(int period) : IMultiOutputState
     {
-        private readonly Queue<BigInteger> _prices = new();
+        private struct Entry(double price)
+        {
+            internal double Price = price;
+            internal double Peak = -1; // No cached contribution yet; actual peaks are nonnegative.
+            internal RocBankValue Drawdown;
+        }
 
-        public void Reset() => _prices.Clear();
+        private readonly List<Entry> _prices = new();
+        private int _start;
+        private JurikDyadic _squares;
+#if !NETFRAMEWORK
+        private Core.SmaCpuKernel.Certificate _drawdownProof = new(200);
+        private bool _drawdownCertified = true;
+#endif
+
+        public void Reset()
+        {
+            _prices.Clear(); _start = 0; _squares = default;
+#if !NETFRAMEWORK
+            _drawdownProof = new(200); _drawdownCertified = true;
+#endif
+        }
+
+        private void AccumulateSquare(RocBankValue drawdown, bool add)
+        {
+            if (drawdown.Mantissa == 0) return;
+            var square = JurikDyadic.FromDouble(drawdown.Mantissa);
+            square.ScaleByPowerOfTwo(drawdown.UpperShift);
+            square.Square();
+            if (add) _squares.AddExact(square); else _squares.Subtract(square);
+        }
+
+        private RocBankValue Drawdown(double price, double peak)
+        {
+            if (peak == 0 || price == peak) return default; // NOSONAR: S1244 - An exactly zero peak or zero drawdown has an exact zero result.
+#if !NETFRAMEWORK
+            // Every peak is a retained price. The 200-term common-grid proof
+            // makes subtraction and multiplication by 100 exact; only division
+            // rounds. A rejected proof leaves all cached contributions valid.
+            if (_drawdownCertified) return new RocBankValue((price - peak) * 100 / peak);
+#endif
+            var numerator = JurikDyadic.FromDouble(price);
+            numerator.Subtract(JurikDyadic.FromDouble(peak));
+            numerator.Multiply(100);
+            double ratio = numerator.Ratio(JurikDyadic.FromDouble(peak));
+            // Preserve extended unpublished percentages even when final RMS is finite.
+            return double.IsInfinity(ratio) ? RocBankValue.Return(price, peak) : new RocBankValue(ratio);
+        }
+
+        private void ReplaceContribution(ref Entry entry, double peak)
+        {
+            AccumulateSquare(entry.Drawdown, false);
+            entry.Peak = peak;
+            entry.Drawdown = Drawdown(entry.Price, peak);
+            AccumulateSquare(entry.Drawdown, true);
+        }
 
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
+            double value = bar.Close;
+            if (!FrameworkCompatibility.IsFinite(value))
+                throw new ArgumentOutOfRangeException(nameof(value));
+#if !NETFRAMEWORK
+            if (_drawdownCertified) _drawdownCertified = _drawdownProof.Include(value);
+#endif
             if (_prices.Count == period)
-                _prices.Dequeue();
-            _prices.Enqueue(ExactVarianceWindow.Units(bar.Close));
-            if (_prices.Count < period)
-                return;
-            var peak = BigInteger.Zero;
-            var squares = BigInteger.Zero;
-            foreach (var price in _prices)
             {
-                peak = BigInteger.Max(peak, price);
-                if (peak.IsZero)
-                    return;
-                var drawdown = RocBankValue.RoundUnits((100 * (price - peak)) << 1074, peak);
-                squares += drawdown * drawdown;
+                AccumulateSquare(_prices[_start].Drawdown, false);
+                _prices[_start] = new Entry(value);
+                if (++_start == period) _start = 0;
             }
-            output[0] = ExactPopulationDeviation.RootRatio(squares, period);
+            else _prices.Add(new Entry(value));
+            if (_prices.Count < period) return;
+
+            double peak = 0;
+            int index = _start;
+            int last = _start == 0 ? period - 1 : _start - 1;
+#if !NETFRAMEWORK
+            // All ring growth is complete for this update. Borrow entries only
+            // until the scan ends; no helper can resize or retain this span.
+            var entries = System.Runtime.InteropServices.CollectionsMarshal.AsSpan(_prices);
+#endif
+            // Repair only the surviving prefix affected by expiration. Once an
+            // old/new prefix peak agrees, every later surviving peak also agrees.
+            for (int offset = 0; offset < period - 1; offset++)
+            {
+#if !NETFRAMEWORK
+                ref var entry = ref entries[index];
+#else
+                var entry = _prices[index];
+#endif
+                peak = Math.Max(peak, entry.Price);
+                if (entry.Peak == peak) // NOSONAR: S1244 - Reuse is valid only for an identical peak; nearby peaks change drawdown.
+                {
+                    int priorLast = last == 0 ? period - 1 : last - 1;
+#if !NETFRAMEWORK
+                    peak = entries[priorLast].Peak;
+#else
+                    peak = _prices[priorLast].Peak;
+#endif
+                    break;
+                }
+                ReplaceContribution(ref entry, peak);
+#if NETFRAMEWORK
+                _prices[index] = entry;
+#endif
+                if (++index == period) index = 0;
+            }
+#if !NETFRAMEWORK
+            ref var latest = ref entries[last];
+#else
+            var latest = _prices[last];
+#endif
+            // The appended entry is always new, even when the surviving suffix
+            // was skipped. On the initial full window no sentinel peak can match.
+            ReplaceContribution(ref latest, Math.Max(peak, latest.Price));
+#if NETFRAMEWORK
+            _prices[last] = latest;
+#endif
+            // A positive first price guarantees positive peaks in every prefix.
+            // Absent windows still repair their suffix for subsequent recovery.
+            if (_prices[_start].Price <= 0) return;
+            output[0] = _squares.SqrtMean(period);
             output[1] = 1;
         }
     }

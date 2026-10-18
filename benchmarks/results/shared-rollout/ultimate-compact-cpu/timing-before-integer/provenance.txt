@@ -1,0 +1,1 @@
+Production c6843789. 10 warmups, 10 measured iterations. Baseline has noisy arms, notably Skender LatestOnly 10k; retain full distributions, do not treat their means as stable qualification. TA 10k LatestOnly 1900.30 us vs native parallel 51.48 us; clear loss. No winning qualification.

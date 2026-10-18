@@ -1,0 +1,7 @@
+{
+  "production_commit": "415d6ed4",
+  "fixture_commit": "415d6ed4",
+  "fixture_sha256": "68119863d20c88c456adb5cd0ef54d18e743c384817d18a3f45fc82e258445da",
+  "command": "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --alloc-shared QuanTAlib.Maaf 1000 3",
+  "scope": "Managed allocations across this process, including worker threads; ten warmups and three measured samples per arm. Input preparation and disposal excluded, owned results retained during samples. Native parallel replays complete prefixes. No timing or GPU claim. AiDotNet initialization log is preserved; execution is explicitly CPU."
+}

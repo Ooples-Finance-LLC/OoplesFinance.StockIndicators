@@ -1,0 +1,15 @@
+{
+  "scope": "Warmed 1000-bar calls with default9/26/52 including returned rows; Extended includes full enumeration/materialization. Original production oracle retains validation. No native timing or whole-builder claim.",
+  "samples": [
+    {
+      "snapshot": "Extended",
+      "original_bytes": 296048,
+      "compact_bytes": 176080
+    },
+    {
+      "snapshot": "Calculate",
+      "original_bytes": 153120,
+      "compact_bytes": 128992
+    }
+  ]
+}

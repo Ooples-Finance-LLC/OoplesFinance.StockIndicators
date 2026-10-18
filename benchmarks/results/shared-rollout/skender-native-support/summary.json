@@ -1,0 +1,22 @@
+{
+  "reason": "Sonar reported 3.115% duplicated new lines at 5dc099ed. Consolidate repeated native partition setup, eager List joining, normalization and date checks without changing arithmetic or fixture inputs.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderStrengthBenchmarks.cs": "21a1f49c5bf8414e8fc2043a1f56b2cbe0278a0bcc23ca91c27f7b493079a672",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderEmaFamilyBenchmarks.cs": "999efe270ef71bb1d3fec259cab5adcf65e9af1c2ff369b3330cf4af68ee98d7",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderSmoothingBenchmarks.cs": "4dd44c01a7e319252c1697ec47801c2b5747c13d2e849b5d02128960d8b4035b",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderFiniteWindowBenchmarks.cs": "2ea34bec25d63bd4bbb37ccbf4966cce643cf4e44cba29046b499b455397d9f2",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderAtrFamilyBenchmarks.cs": "4b6ada362499ce82addc8bfbd8bce92069a5880896222fc9a48a56abd928b289",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderStochasticBenchmarks.cs": "03a4f60d41d616c03a8bb10a60dce7f539d86bfa9c8f30175761e1f0e8087adf",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderRocBenchmarks.cs": "e999c5e6d341be3c0237534280f24af351603beefcc9d6216de60d6d070f0bf8",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderBenchmarkBase.cs": "3c1b7cfd3e6ceeece53783532284da7d11a6b0dfab3ab9748b9ab469dd5d04d8"
+  },
+  "validation": {
+    "comparator_cases_passed": 356,
+    "production_source_changed": false,
+    "gpu_cases_passed": 100,
+    "hosted_contract_methods": 1255,
+    "gpu_receipt": "../local-gpu-contracts/receipt.json"
+  },
+  "timing_status": "First native timings remain pending; replace the seven queued preserved candidates with this verified implementation. No competitor timings discarded or rerun.",
+  "contract": "At most eight workers. Full prefixes for recursive paths; required finite overlap retained for Awesome/BOP/CCI/Stochastic/ROC. Native calculation and result joining remain inside timing; references and normalization stay outside timing. Existing exact comparisons, output ownership and date checks remain active."
+}

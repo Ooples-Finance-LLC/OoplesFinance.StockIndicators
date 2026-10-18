@@ -1,0 +1,45 @@
+{
+  "status": "49 focused contract cases passed. First direct-native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderFiniteWindowBenchmarks.cs": "9fc05d09bc4d8667ca6622ec653715b2ad57a19d6f14af5afe6762400fecae04",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderFiniteWindowBenchmarkTests.cs": "efe30261cf29c149e94bdbe8e45eedb5cced2a3a7a607850bd50f1f420075fbe"
+  },
+  "native_package": "Skender.Stock.Indicators 2.7.3",
+  "native_source_commit": "fd739aa4b592f68d5a68d14c602319c027bb0538",
+  "native_source_repository": "https://github.com/facioquo/stock-indicators-dotnet",
+  "native_source_sha256": {
+    "Awesome.Api.cs": "abba8ef8d66137a4c48bad30321b0c0e10dcda6089a316c5ba6ec0c324f064bf",
+    "Awesome.Models.cs": "0a7b657a47969f591af4c8f9d70207dc40a26ed9addc7f1fc4de2d3e4e98159d",
+    "Awesome.Series.cs": "afbfc92acb8214b4f93eb839c36183ab804193fb9b91802867560e5b92aa37f1",
+    "Bop.Api.cs": "57a27b02bdb47bbeb2f8441e79b0dd529c4f117b9e146c4284a856bf1f9f0877",
+    "Bop.Models.cs": "1fa8562c36e679b4d1ab7ec2a3334be2283359af03157568cd718b9a1078ae7f",
+    "Bop.Series.cs": "b148fbba4648063d27269357faae722a78ceeef08f1adb328083b8c0997e9cca",
+    "Cci.Api.cs": "47d5ec2112925962e5e156787efcb1ce98a2f9e357ad779eeba7fe4f06e25fc3",
+    "Cci.Models.cs": "28068506a4d1af98e33e967f89b92faede7f2038d1ec5dfb30c694d222a87cfc",
+    "Cci.Series.cs": "1a04cf5b6ed07bd5d6b35d8e4627773339d1ea40e8620743c7b07e262f14d25f"
+  },
+  "operations": [
+    "Skender.GetAwesome",
+    "Skender.GetBop",
+    "Skender.GetCci"
+  ],
+  "contract": "Public Awesome tuple API retains decimal-derived median values; BOP and CCI use public quote APIs. Native outputs are eager Lists. Parallel workers retain only the preceding 33 Awesome or 19 BOP/CCI bars needed for the first owned row; fixed-window arithmetic order is unchanged. Input views are prepared outside timing; native computation and joined output are measured. Separate exact-rational references reproduce owned and native BOP rounding. Tests verify startup, worker/lookback boundaries, dates, presence and independent retained results.",
+  "validation": {
+    "comparator_cases_passed": 49,
+    "production_source_changed": false,
+    "gpu_cases_passed": 100,
+    "hosted_contract_methods": 1249,
+    "gpu_receipt": "../../local-gpu-contracts/receipt.json"
+  },
+  "benchmark_cases": 24,
+  "analysis_annotation": {
+    "rule": "S1244",
+    "reason": "Exact equality defines absent BOP values; a tolerance would change the contract. Two inline comments follow the existing reference convention. No executable text changed.",
+    "annotated_source_sha256": "e3dd37f1aa97c988f1a0208055dea6048f517ca74749677f724c920e2386e6e0"
+  },
+  "shared_support_refactor": {
+    "evidence": "../../skender-native-support/summary.json",
+    "source_sha256": "2ea34bec25d63bd4bbb37ccbf4966cce643cf4e44cba29046b499b455397d9f2",
+    "note": "Original source hashes and per-fixture evidence retained above; shared-support refactor validated all 356 affected cases."
+  }
+}

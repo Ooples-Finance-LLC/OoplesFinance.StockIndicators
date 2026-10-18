@@ -1,0 +1,7 @@
+[
+  {
+    "ProcessId": 19616,
+    "Name": "dotnet.exe",
+    "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" test tests/AiDotNet.Tests/AiDotNetTests.csproj -f net10.0 --filter FullyQualifiedName~ForecasterFusedTrainingTests.Probe -nologo -v q --logger trx;LogFileName=C:\\Users\\cheat\\AppData\\Local\\Temp\\claude\\C--Users-cheat\\e0895c24-7292-4070-bcd2-12cd785acd56\\scratchpad\\fft16_0.trx"
+  }
+]

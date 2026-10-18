@@ -1,0 +1,24 @@
+{
+  "status": "27 comparator cases and 100 local GPU cases passed. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaWindowNativeBenchmarks.cs": "42bf47a3664c0423cae1e6f8c6e5419b76621edd4d3fa3f4671fcd73c1aec745",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedMappedBenchmarkBase.cs": "3b49e0446805024ee5a769be827d87aeb035df899e48a15e79975e6cba531ad0",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedBenchmarkSupport.cs": "1b57a5d028ae3ae45151b00a1cd4ba3a70a8ed9821b0e80d01c5641fde1d45aa",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/MeanErrorComparison.cs": "c88180226c46f53ba53fd1e4f08b38cd2b10fb51f38bbf88fdd49554cc867c81",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/RangeAccelerationComparison.cs": "8fcf312ca721f123129f614135b74f2729995a68c18c060850860dd443b66b5d",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaWindowNativeBenchmarkTests.cs": "b74dfaf587f41fbf8d6af27c6bf2f40ef0d443196140803481131b1ea0dcd21e"
+  },
+  "operations": [
+    "TaLib.Functions.AvgDev",
+    "TaLib.Functions.Accbands"
+  ],
+  "native_package": "TALib.NETCore 0.5.0",
+  "native_package_dll_sha256": "980edcda5db3ab7b0cdd9ef877aa784aa93728129f134c023a1e08acedeefcbe",
+  "contract": "Eager packed double columns; AvgDev independent windows and Accbands full prefixes retain native arithmetic. Native and owned paths use their respective independent references. Tests cover warmup, worker boundaries, repeated ownership and exact serial/parallel bit patterns. No production changes.",
+  "validation": {
+    "comparator_cases_passed": 27,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1288
+  },
+  "benchmark_cases": 16
+}

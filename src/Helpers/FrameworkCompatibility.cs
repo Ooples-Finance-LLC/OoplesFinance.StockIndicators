@@ -5,7 +5,13 @@ namespace OoplesFinance.StockIndicators.Helpers;
 // APIs used by the comparison indicators must also work on .NET Framework 4.6.1.
 internal static class FrameworkCompatibility
 {
-    internal static bool IsFinite(double value) => !double.IsNaN(value) && !double.IsInfinity(value);
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    internal static bool IsFinite(double value) =>
+#if NETFRAMEWORK
+        !double.IsNaN(value) && !double.IsInfinity(value);
+#else
+        double.IsFinite(value);
+#endif
 
     internal static double Clamp(double value, double minimum, double maximum)
     {

@@ -69,7 +69,7 @@ public sealed class BalanceOfPowerWithValidity
         return result;
     }
 
-    private sealed class State(int period) : IMultiOutputState
+    internal sealed class State(int period) : IMultiOutputState
     {
         private readonly Queue<(double Value, bool Missing)> _window = new();
         private ExactMeanAccumulator _sum;

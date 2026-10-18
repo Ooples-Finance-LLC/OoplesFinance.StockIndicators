@@ -1,0 +1,438 @@
+[
+  {
+    "operation": "QuanTAlib.Kama",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 382318.9236111111,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 382318.9236111111,
+              "StandardError": 2317.568796695278,
+              "Level": 12,
+              "Margin": 11683.572160639495,
+              "Lower": 370635.3514504716,
+              "Upper": 394002.49577175063
+            },
+            "allocated_bytes": 84010
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 372567.16796875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 372567.16796875,
+              "StandardError": 1812.3790407589515,
+              "Level": 12,
+              "Margin": 8664.825764061243,
+              "Lower": 363902.34220468876,
+              "Upper": 381231.99373281124
+            },
+            "allocated_bytes": 35255
+          }
+        },
+        "evidence": "results/shared-rollout/kama-rate-cache-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededAdaptiveBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/shared-rollout/seeded-adaptive-shared-cpu/quanta/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededAdaptiveBenchmarks-report-full-compressed.json",
+        "saved_native_methods": {
+          "NativeSingle": {
+            "mean_ns": 192976.15017361112,
+            "allocated_bytes": 48596,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 192976.15017361112,
+              "StandardError": 954.2340837532412,
+              "Level": 12,
+              "Margin": 4810.585468517851,
+              "Lower": 188165.56470509327,
+              "Upper": 197786.73564212897
+            }
+          },
+          "NativeParallel": {
+            "mean_ns": 285245.61631944444,
+            "allocated_bytes": 192768,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 285245.61631944444,
+              "StandardError": 908.3357336211562,
+              "Level": 12,
+              "Margin": 4579.197866739994,
+              "Lower": 280666.41845270444,
+              "Upper": 289824.81418618443
+            }
+          }
+        },
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 3789991.6666666665,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 3789991.6666666665,
+              "StandardError": 31131.086252329842,
+              "Level": 12,
+              "Margin": 156941.3141852942,
+              "Lower": 3633050.352481372,
+              "Upper": 3946932.980851961
+            },
+            "allocated_bytes": 804676
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 3747164.0625,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 3747164.0625,
+              "StandardError": 6138.804056844125,
+              "Level": 12,
+              "Margin": 33197.9311399664,
+              "Lower": 3713966.1313600335,
+              "Upper": 3780361.9936399665
+            },
+            "allocated_bytes": 323567
+          }
+        },
+        "evidence": "results/shared-rollout/kama-rate-cache-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededAdaptiveBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/shared-rollout/seeded-adaptive-shared-cpu/quanta/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededAdaptiveBenchmarks-report-full-compressed.json",
+        "saved_native_methods": {
+          "NativeSingle": {
+            "mean_ns": 1951926.9097222222,
+            "allocated_bytes": 480718,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 1951926.9097222222,
+              "StandardError": 8135.763402642911,
+              "Level": 12,
+              "Margin": 41014.868224067875,
+              "Lower": 1910912.0414981544,
+              "Upper": 1992941.77794629
+            }
+          },
+          "NativeParallel": {
+            "mean_ns": 2846807.65625,
+            "allocated_bytes": 1884862,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 2846807.65625,
+              "StandardError": 21819.230766501874,
+              "Level": 12,
+              "Margin": 104315.83495823947,
+              "Lower": 2742491.8212917605,
+              "Upper": 2951123.4912082395
+            }
+          }
+        },
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Skender.GetKama",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 396554.9045138889,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 396554.9045138889,
+              "StandardError": 4280.751305739687,
+              "Level": 12,
+              "Margin": 21580.574804803717,
+              "Lower": 374974.32970908517,
+              "Upper": 418135.4793186926
+            },
+            "allocated_bytes": 84011
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 378034.6484375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 378034.6484375,
+              "StandardError": 2289.7386737733145,
+              "Level": 12,
+              "Margin": 10947.040440927944,
+              "Lower": 367087.60799657204,
+              "Upper": 388981.68887842796
+            },
+            "allocated_bytes": 35255
+          }
+        },
+        "evidence": "results/shared-rollout/kama-rate-cache-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededAdaptiveBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/shared-rollout/seeded-adaptive-shared-cpu/skender/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededAdaptiveBenchmarks-report-full-compressed.json",
+        "saved_native_methods": {
+          "NativeSingle": {
+            "mean_ns": 75507.28081597222,
+            "allocated_bytes": 108408,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 75507.28081597222,
+              "StandardError": 528.2506523938473,
+              "Level": 12,
+              "Margin": 2663.072882647161,
+              "Lower": 72844.20793332506,
+              "Upper": 78170.35369861938
+            }
+          },
+          "NativeParallel": {
+            "mean_ns": 155279.04296875,
+            "allocated_bytes": 498200,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 155279.04296875,
+              "StandardError": 392.77217820231914,
+              "Level": 12,
+              "Margin": 1877.8094496550468,
+              "Lower": 153401.23351909497,
+              "Upper": 157156.85241840503
+            }
+          }
+        },
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 3825333.6805555555,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 3825333.6805555555,
+              "StandardError": 15834.89328747843,
+              "Level": 12,
+              "Margin": 79828.53352361807,
+              "Lower": 3745505.1470319373,
+              "Upper": 3905162.2140791737
+            },
+            "allocated_bytes": 804676
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 3810299.6875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 3810299.6875,
+              "StandardError": 28876.520633397995,
+              "Level": 12,
+              "Margin": 138056.12089617582,
+              "Lower": 3672243.566603824,
+              "Upper": 3948355.808396176
+            },
+            "allocated_bytes": 323567
+          }
+        },
+        "evidence": "results/shared-rollout/kama-rate-cache-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededAdaptiveBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/shared-rollout/seeded-adaptive-shared-cpu/skender/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSeededAdaptiveBenchmarks-report-full-compressed.json",
+        "saved_native_methods": {
+          "NativeSingle": {
+            "mean_ns": 1054620.46875,
+            "allocated_bytes": 1081262,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 1054620.46875,
+              "StandardError": 19111.76055373277,
+              "Level": 12,
+              "Margin": 91371.65654553498,
+              "Lower": 963248.812204465,
+              "Upper": 1145992.125295535
+            }
+          },
+          "NativeParallel": {
+            "mean_ns": 3713118.125,
+            "allocated_bytes": 4949644,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 3713118.125,
+              "StandardError": 10578.799972310973,
+              "Level": 12,
+              "Margin": 50576.3179177715,
+              "Lower": 3662541.8070822284,
+              "Upper": 3763694.4429177716
+            }
+          }
+        },
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ]
+  },
+  {
+    "operation": "TaLib.Functions.Kama",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 390558.90625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 390558.90625,
+              "StandardError": 2913.1221584715518,
+              "Level": 12,
+              "Margin": 13927.38238796438,
+              "Lower": 376631.5238620356,
+              "Upper": 404486.2886379644
+            },
+            "allocated_bytes": 83994
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 385007.763671875,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 385007.763671875,
+              "StandardError": 443.5729961332463,
+              "Level": 12,
+              "Margin": 2398.790651212018,
+              "Lower": 382608.97302066296,
+              "Upper": 387406.55432308704
+            },
+            "allocated_bytes": 35254
+          }
+        },
+        "evidence": "results/shared-rollout/kama-rate-cache-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdaptiveVariantBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-kama-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 3982252.734375,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 3982252.734375,
+              "StandardError": 49021.28774966904,
+              "Level": 12,
+              "Margin": 265101.3650275422,
+              "Lower": 3717151.369347458,
+              "Upper": 4247354.099402542
+            },
+            "allocated_bytes": 804634
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 3890862.1875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 3890862.1875,
+              "StandardError": 15741.58140169028,
+              "Level": 12,
+              "Margin": 75259.12462511992,
+              "Lower": 3815603.06287488,
+              "Upper": 3966121.31212512
+            },
+            "allocated_bytes": 323524
+          }
+        },
+        "evidence": "results/shared-rollout/kama-rate-cache-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdaptiveVariantBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-kama-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 417706.16319444444,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 417706.16319444444,
+              "StandardError": 11076.640575625359,
+              "Level": 12,
+              "Margin": 55840.728287041304,
+              "Lower": 361865.43490740313,
+              "Upper": 473546.89148148574
+            },
+            "allocated_bytes": 84023
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 387170.61631944444,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 387170.61631944444,
+              "StandardError": 1173.5005305434495,
+              "Level": 12,
+              "Margin": 5915.974597476362,
+              "Lower": 381254.6417219681,
+              "Upper": 393086.5909169208
+            },
+            "allocated_bytes": 35251
+          }
+        },
+        "evidence": "results/shared-rollout/kama-rate-cache-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdaptiveVariantBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-kaufmanadaptivemovingaverage-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 3954371.09375,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 3954371.09375,
+              "StandardError": 13988.58824886518,
+              "Level": 12,
+              "Margin": 75648.64184147086,
+              "Lower": 3878722.4519085293,
+              "Upper": 4030019.7355914707
+            },
+            "allocated_bytes": 804623
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 3865600,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 3865600,
+              "StandardError": 13256.254985749549,
+              "Level": 12,
+              "Margin": 71688.26959057382,
+              "Lower": 3793911.730409426,
+              "Upper": 3937288.269590574
+            },
+            "allocated_bytes": 323524
+          }
+        },
+        "evidence": "results/shared-rollout/kama-rate-cache-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdaptiveVariantBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/trady-indicator-kaufmanadaptivemovingaverage-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ]
+  }
+]

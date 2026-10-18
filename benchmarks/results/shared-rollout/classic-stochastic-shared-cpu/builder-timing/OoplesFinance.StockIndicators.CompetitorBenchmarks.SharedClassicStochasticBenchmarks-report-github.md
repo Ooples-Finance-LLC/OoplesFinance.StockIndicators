@@ -1,0 +1,34 @@
+```
+
+BenchmarkDotNet v0.15.8, Windows 11 (10.0.26220.9606)
+AMD Ryzen 9 3950X 3.70GHz, 1 CPU, 32 logical and 16 physical cores
+.NET SDK 10.0.402
+  [Host] : .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+
+Job=ShortRun  MinIterationTime=100ms  Toolchain=InProcessEmitToolchain
+IterationCount=10  LaunchCount=1  UnrollFactor=1
+WarmupCount=10
+
+```
+| Method            | Count | Operation            | Mean       | Error     | StdDev    | Gen0      | Gen1     | Gen2    | Allocated   |
+|------------------ |------ |--------------------- |-----------:|----------:|----------:|----------:|---------:|--------:|------------:|
+| **BuilderFull**       | **1000**  | **Skender.GetStochRsi**  |   **474.9 μs** |  **33.33 μs** |  **19.84 μs** |   **15.6250** |        **-** |       **-** |   **189.39 KB** |
+| BuilderLatestOnly | 1000  | Skender.GetStochRsi  |   427.0 μs |   6.49 μs |   4.29 μs |   15.6250 |        - |       - |   141.81 KB |
+| **BuilderFull**       | **1000**  | **TaLib(...)Stoch [21]** |   **373.0 μs** |  **26.97 μs** |  **16.05 μs** |  **160.1563** |  **39.0625** |       **-** |  **1315.72 KB** |
+| BuilderLatestOnly | 1000  | TaLib(...)Stoch [21] |   363.9 μs |  38.41 μs |  25.41 μs |  156.2500 |  23.4375 |       - |  1268.09 KB |
+| **BuilderFull**       | **1000**  | **TaLib(...)tochF [22]** |   **213.3 μs** |   **3.40 μs** |   **2.02 μs** |   **85.9375** |  **19.5313** |       **-** |   **710.39 KB** |
+| BuilderLatestOnly | 1000  | TaLib(...)tochF [22] |   203.4 μs |   6.29 μs |   3.74 μs |   80.0781 |   9.7656 |       - |   662.77 KB |
+| **BuilderFull**       | **1000**  | **TaLib(...)chRsi [24]** |   **789.7 μs** |  **12.36 μs** |   **8.18 μs** |   **78.1250** |  **15.6250** |       **-** |   **656.93 KB** |
+| BuilderLatestOnly | 1000  | TaLib(...)chRsi [24] |   790.2 μs |  16.27 μs |  10.76 μs |   70.3125 |        - |       - |   609.32 KB |
+| **BuilderFull**       | **1000**  | **Trady(...)lator [40]** |   **354.5 μs** |  **30.92 μs** |  **18.40 μs** |   **19.5313** |   **1.9531** |       **-** |   **172.51 KB** |
+| BuilderLatestOnly | 1000  | Trady(...)lator [40] |   367.3 μs |  57.22 μs |  34.05 μs |   13.6719 |        - |       - |    124.9 KB |
+| **BuilderFull**       | **10000** | **Skender.GetStochRsi**  | **4,645.4 μs** | **178.53 μs** | **118.09 μs** |  **218.7500** | **125.0000** |       **-** |  **1883.95 KB** |
+| BuilderLatestOnly | 10000 | Skender.GetStochRsi  | 4,584.1 μs | 222.39 μs | 132.34 μs |  156.2500 |  62.5000 |       - |  1414.08 KB |
+| **BuilderFull**       | **10000** | **TaLib(...)Stoch [21]** | **3,896.6 μs** | **355.70 μs** | **211.67 μs** | **1656.2500** | **375.0000** | **62.5000** |  **12920.7 KB** |
+| BuilderLatestOnly | 10000 | TaLib(...)Stoch [21] | 3,283.1 μs |  65.10 μs |  38.74 μs | 1531.2500 | 125.0000 |       - | 12450.25 KB |
+| **BuilderFull**       | **10000** | **TaLib(...)tochF [22]** | **2,003.7 μs** |  **31.06 μs** |  **18.48 μs** |  **843.7500** | **828.1250** |       **-** |  **6970.07 KB** |
+| BuilderLatestOnly | 10000 | TaLib(...)tochF [22] | 1,991.0 μs | 216.47 μs | 143.18 μs |  796.8750 | 265.6250 |       - |   6500.2 KB |
+| **BuilderFull**       | **10000** | **TaLib(...)chRsi [24]** | **8,046.9 μs** |  **85.12 μs** |  **44.52 μs** |  **769.2308** | **692.3077** |       **-** |  **6617.59 KB** |
+| BuilderLatestOnly | 10000 | TaLib(...)chRsi [24] | 8,006.9 μs | 171.09 μs | 101.82 μs |  692.3077 | 230.7692 |       - |  6147.78 KB |
+| **BuilderFull**       | **10000** | **Trady(...)lator [40]** | **3,665.4 μs** | **238.69 μs** | **157.88 μs** |  **187.5000** |  **93.7500** |       **-** |  **1720.17 KB** |
+| BuilderLatestOnly | 10000 | Trady(...)lator [40] | 3,441.9 μs |  86.07 μs |  56.93 μs |  125.0000 |  31.2500 |       - |  1250.29 KB |

@@ -1,0 +1,18 @@
+{
+  "verification": {
+    "focused_cpu_gpu_tests": 32,
+    "skipped": 0,
+    "inventory_tests": 14,
+    "initial_benchmark_cases": 60,
+    "confirmation_cases": 6
+  },
+  "package": "AiDotNet.Tensors 0.134.4",
+  "host_video_adapter": "Radeon RX 5500 XT (Windows video-controller query)",
+  "kernel": "One cached OpenCL FP64 comparison kernel for all five patterns. Operation, period and shadow containment are arguments; no unbounded compilation variants. Ordered comparisons preserve finite binary64 values, including signed zeros and subnormals.",
+  "workspace": "Reuse existing SMA/presence device scratch for high/low. Lazy host high/low columns; no public output pooling. Retained four-column count capped at floor(1048576*7/9) to preserve the existing 56 MiB payload budget. Shared gate covers argument binding, dispatch and readback.",
+  "contracts": "BuildAsync remains the endpoint; default Full unchanged. Required GPU dispatches actual device work for supported nonempty standalone inputs. Empty, mixed and sourced required-GPU graphs reject. Auto stays CPU.",
+  "measurement": "End-to-end warmed execution includes fresh builder, input validation/ownership, staging, transfers, device dispatch, readback and publication. Setup warms compilation/workspace and checks both history modes against CPU plus the native/reference checks in SharedContainmentGapBenchmarks. Native APIs, fixtures and contract differences are documented in containment-gap/evidence.json.",
+  "confirmation": "Repeated only UpsideTasukiGap/10000 after initial GPU Full/native intervals overlapped, using five warmups/fifteen measured iterations. selected-paths uses latest CPU/GPU rows and fastest measured native rows. Both GPU history modes show nonoverlapping-interval wins against both tested native arms for all ten workloads after confirmation.",
+  "result": "GPU beats tested native paths; CPU is faster than GPU on every measured workload. No GPU crossover or universal hardware claim.",
+  "cpu_inventory": "cpu-native preserves 1k CPU qualification, updates 10k/100k CPU rows, and retains fastest measured native rows across the CPU and GPU campaigns. CpuFull/CpuLatestOnly are aliased to BuilderFull/BuilderLatestOnly for inventory, with OriginalMethod and SelectedEvidence retained. Direct API coverage remains 80."
+}

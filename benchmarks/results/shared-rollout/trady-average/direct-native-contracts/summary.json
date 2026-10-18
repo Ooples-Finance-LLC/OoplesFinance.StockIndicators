@@ -1,0 +1,32 @@
+{
+  "status": "65 focused contract cases passed. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTradyAverageBenchmarks.cs": "74c42641f7d547204da814a01b32f20cb2c2270a7568a66caa5f1f2d94489b66",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedAverageOscillatorBenchmarks.cs": "eb943dbe9de030220bb201154b95339e17ab741fe60843aacfc5cfffb20b26fa",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/AverageDifferenceComparison.cs": "e1cbb3c6594363e3fde6727eeabc674abc946c17335bd05ec3e7bff349746020",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTradyAverageBenchmarkTests.cs": "a0425a07ac2a2bb1792b7ba97a7238212526c1fbacbe7639f9d52b9285a0eab2"
+  },
+  "native_package": "Trady.Analysis 3.2.8",
+  "native_package_dll_sha256": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+  "operations": [
+    "ExponentialMovingAverage",
+    "WeightedMovingAverage",
+    "SimpleMovingAverageOscillator",
+    "ExponentialMovingAverageOscillator"
+  ],
+  "contract": "Public tuple APIs with prepared decimal inputs and eager native Lists. WMA20 workers retain 19 preceding bars; SMA12/26 oscillator workers retain 25; EMA variants retain full prefixes. Compute(startIndex,endIndex) requests only owned output rows. All native computation and joining remain timed. Independent decimal references verify every native value and null; WMA divides each weighted term before summation. Owned binary64 references verify full startup and mature values, including WMA full-period startup weights and denominator. Exact repeated serial/parallel comparisons verify worker boundaries and retained result ownership.",
+  "reference_corrections": "New full-startup verification exposed an unobserved startup error in the shared benchmark WMA reference, corrected to the existing production contract; its mature reference values are unchanged. Native WMA termwise decimal division is verified directly against the pinned installed assembly, rather than weakening exact comparison. No production source changes.",
+  "inspected_upstream_wma_source": {
+    "commit": "08de02a68dd69fce3f7fc1dd916419117da7457e",
+    "sha256": "5e07b02976de27d130d0081497348c5ed34eeea5a9a11272f45713722c008ff8",
+    "note": "Diagnostic upstream source only; package identity and observed arithmetic are established by the pinned assembly and passing exact tests, not by claiming this commit built the package."
+  },
+  "validation": {
+    "comparator_cases_passed": 65,
+    "production_source_changed": false,
+    "gpu_cases_passed": 100,
+    "hosted_contract_methods": 1263,
+    "gpu_receipt": "../../local-gpu-contracts/receipt.json"
+  },
+  "benchmark_cases": 32
+}

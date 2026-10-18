@@ -1,0 +1,4 @@
+Source commit b749d291. Production SHA256 c7380574377d2c0eef6b037a508c7983d94a550321a41aba18c2a32061a23743.
+2 snapshot-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedHurstSnapshotBenchmarks*Snapshot*. Native methods are absent from benchmark setup and timing; separate golden tests check their contracts. Saved competitor results referenced without rerunning. Same original input generator; saved native retains aligned double[] and snapshot API retains eager immutable records. Saved native runtime .NET10.0.12 differs from current .NET10.0.13; no serial ratio or win claim. Parallel qualification missing. Coverage stays 269/401.
+24 focused tests passed; build and verification evidence in parent directory. No full-suite claim.

@@ -1,0 +1,1 @@
+{"Operation":"QuanTAlib.Zlema","Count":10000,"Repetitions":3,"Arms":[{"Method":"BuilderFull","Bytes":[562736,562736,562736]},{"Method":"BuilderLatestOnly","Bytes":[81328,81328,81328]},{"Method":"NativeSingle","Bytes":[480584,480584,480584]},{"Method":"NativeParallel","Bytes":[1884664,1884664,1884664]}]}

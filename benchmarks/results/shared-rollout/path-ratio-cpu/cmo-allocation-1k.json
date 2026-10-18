@@ -1,0 +1,39 @@
+{
+  "Operation": "Skender.GetCmo",
+  "Count": 1000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        67432,
+        67432,
+        67432
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        18640,
+        18640,
+        18640
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        108456,
+        108456,
+        108456
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        135880,
+        135880,
+        135880
+      ]
+    }
+  ]
+}

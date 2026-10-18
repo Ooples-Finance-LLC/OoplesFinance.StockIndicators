@@ -48,7 +48,7 @@ public sealed class CompensatedExponentialAverage
     private sealed class State(int period, int order) : IIndicatorState
     {
         private readonly double _alpha = 2d / ((long)period + 1);
-        private readonly RocBankValue[] _stages = new RocBankValue[order];
+        private readonly JurikDyadic[] _stages = new JurikDyadic[order];
         private double _residual = 1;
 
         public void Reset()
@@ -60,20 +60,32 @@ public sealed class CompensatedExponentialAverage
         public double Update(in Bar bar)
         {
             _residual = _residual > 1e-10 ? (1 - _alpha) * _residual : 0;
-            var compensation = _residual > 1e-10 ? 1 / (1 - _residual) : 1;
-            var value = new RocBankValue(bar.Close);
-            var total = new ExactMeanAccumulator();
+            var compensate = _residual > 1e-10;
+            var compensation = compensate ? 1 / (1 - _residual) : 1;
+            var value = JurikDyadic.FromDouble(bar.Close);
+            var total = new JurikDyadic();
             for (var stage = 0; stage < order; stage++)
             {
-                var next = new ExactMeanAccumulator();
-                _stages[stage].AddTo(ref next);
-                AddProduct(ref next, _stages[stage], _alpha, -1);
-                AddProduct(ref next, value, _alpha, 1);
-                _stages[stage] = RocBankValue.Round(next);
-                value = _stages[stage].Multiply(compensation);
-                value.AddTo(
-                    ref total,
-                    order == 2
+                // FMA is valid only when the subtraction certificate proves the
+                // difference exact. Otherwise retain it in exact dyadic arithmetic.
+                if (JurikDyadic.TryBlend(_stages[stage], value, _alpha, out var next))
+                    _stages[stage] = next;
+                else
+                {
+                    next = value;
+                    next.Subtract(_stages[stage]);
+                    next.Multiply(_alpha);
+                    next.AddExact(_stages[stage]);
+                    _stages[stage] = next.Rounded();
+                }
+                value = _stages[stage];
+                if (compensate)
+                {
+                    value.Multiply(compensation);
+                    value = value.Rounded();
+                }
+                var weighted = value;
+                weighted.Multiply(order == 2
                         ? (stage == 0 ? 2 : -1)
                         : (
                             stage == 0 ? 3
@@ -81,21 +93,9 @@ public sealed class CompensatedExponentialAverage
                             : 1
                         )
                 );
+                total.AddExact(weighted);
             }
             return total.Mean(1);
-        }
-
-        private static void AddProduct(
-            ref ExactMeanAccumulator total,
-            RocBankValue value,
-            double factor,
-            int sign
-        )
-        {
-            var term = new ExactMeanAccumulator();
-            term.AddProduct(value.Mantissa, factor, sign);
-            term.ScaleByPowerOfTwo(value.UpperShift);
-            total.AddExact(term);
         }
     }
 }

@@ -1,0 +1,23 @@
+{
+  "status": "33 focused contract cases passed. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTradyMacdBenchmarks.cs": "1a337fcd0de19ab109f30e1e77cb8ab0db2ab3cc86c52ab8f6527e4d97af08cb",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/EmaDifferenceSignalComparison.cs": "1029c456c10433905cc5e6a26d1ed3e52e82d06d5f7f8cf0a8966fba1f52317c",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTradyMacdBenchmarkTests.cs": "7653cb159f8c110b7ea165a06aed7798046f14fc88c2dbff05129df4b1b462a2"
+  },
+  "native_package": "Trady.Analysis 3.2.8",
+  "native_package_dll_sha256": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+  "operations": [
+    "MovingAverageConvergenceDivergence",
+    "MovingAverageConvergenceDivergenceHistogram"
+  ],
+  "contract": "Public decimal tuple APIs return eager native Lists of decimal triples or nullable decimal histogram values. Parallel workers retain full prefixes for recursive EMA states and request only their owned range through named Compute(startIndex,endIndex) arguments. Native computation, output allocation and joining remain timed; normalization and references remain outside. Exact independent decimal references check all native values and nulls. Owned grid references check all five values and five presence columns, including unselected columns. Repeated serial/parallel results remain independent after later results are cleared.",
+  "validation": {
+    "comparator_cases_passed": 33,
+    "production_source_changed": false,
+    "gpu_cases_passed": 100,
+    "hosted_contract_methods": 1265,
+    "gpu_receipt": "../../local-gpu-contracts/receipt.json"
+  },
+  "benchmark_cases": 16
+}

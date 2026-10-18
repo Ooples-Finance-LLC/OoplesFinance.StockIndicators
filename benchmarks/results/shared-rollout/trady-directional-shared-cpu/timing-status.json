@@ -1,0 +1,12 @@
+{
+  "status": "completed",
+  "reason": "28 builder-only cases completed exit0 without observed competing jobs.",
+  "source_commit": "033ecc10",
+  "reuse_binaries": true,
+  "next_filter": "*SharedTradyDirectionalBenchmarks*Builder*",
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-tradydirectional-binaries-033ecc10",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-tradydirectional-builder-20261013-a",
+  "evidence": "builder-timing"
+}

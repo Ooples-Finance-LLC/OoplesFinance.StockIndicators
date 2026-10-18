@@ -1,0 +1,26 @@
+{
+  "status": "43 affected contract cases passed (33 new and10 existing).100 local GPU cases passed. First native timings pending; catalog qualification unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderRetrospectiveNativeBenchmarks.cs": "67c8a9a2b95564c11e874b58c47e261518627bd28bcbc92514743a465676cff2",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedRetrospectiveSnapshotBenchmarks.cs": "9a762ac77ef0540249de769dd0977bb3e2749bcd9508dadce3297bd768bb05df",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/RetrospectivePriceComparison.cs": "3daa0e07f51d1996dad9d7431a79a1ad60fc5c8bce0574bf85243ee097467dd1",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderRetrospectiveNativeBenchmarkTests.cs": "d2173946f938f3378ac9a0b8298bedc66f8deca2d48d4874678c9aa539119253",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedRetrospectiveSnapshotBenchmarkTests.cs": "07affeffeba5d2a946076cbecad4539d5c7522034c18c5afb55a68419b8b166e"
+  },
+  "operations": [
+    "Skender.GetDpo",
+    "Skender.GetFcb"
+  ],
+  "contract": "Snapshot API retained; no BuildAsync facade introduced. Native serial returns eager native Lists; parallel joins native rows into independently owned arrays. DPO period20 replays original prefixes with11 future bars for shifted output; FCB span20 replays prefixes carrying confirmed bands, no future extension. Decimal FCB normalization is setup-only. Snapshot, native values/presence and dates checked against independent references.",
+  "validation": {
+    "comparator_cases_passed": 43,
+    "new_fixture_cases_passed": 33,
+    "affected_existing_cases_passed": 10,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1300
+  },
+  "benchmark_cases": 12,
+  "baseline_gap": "Saved serial LibraryPair comparisons normalize results; no compatible direct-native serial/parallel pair in catalog. Save first three-arm baseline for reuse.",
+  "native_package": "Skender.Stock.Indicators2.7.3",
+  "native_package_dll_sha256": "0408495cde22e3795c6efcb16d88da9e82d0aa0dbd88e5d39b41db9fb171bf93"
+}

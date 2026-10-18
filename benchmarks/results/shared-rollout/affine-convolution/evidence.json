@@ -1,0 +1,15 @@
+{
+  "verification": {
+    "final_focused_tests": 65,
+    "skipped": 0,
+    "final_benchmark_cases": 20,
+    "prototype_benchmark_cases": 10
+  },
+  "recognition": "All copied coefficients must form an exact Int32 arithmetic progression with an Int32 step. Near-progressions, fractional coefficients and out-of-range values retain the general exact kernel.",
+  "recurrence": "Before inserting x, add step*sum to the weighted response. When full, subtract (first+step*length)*oldest, evict from the exact sum, then add first*x and x. Prefix mass is exact; zero mass divides by retained count. Negative mass preserves the original exact-zero sign convention.",
+  "scheduling": "Affine convolution and fixed WMA use a 512-bar minimum for bounded workers. General convolution/Gaussian/sine retain their previous work-based threshold. Existing period/chunk caps and parallel gate still apply.",
+  "prototype": "serial-threshold report used the same recurrence with the 8192-bar constant-work threshold (the final early 512 return was absent). It improved 10k but lost/regressed at 1k. That scheduling choice is superseded; only unchanged native measurements can be selected from it.",
+  "comparison": "weighted-native merges latest convolution/WMA builder rows and fastest measured native rows across prior campaigns, the prototype and final reports. Gaussian/sine rows are retained unchanged. SelectedEvidence identifies original reports. Native arithmetic and exact complete-ratio arithmetic have different rounding boundaries; each setup checks its own independent reference. Full owns OHLCV snapshots in addition to values.",
+  "result": "Convolution and WMA now win both sizes and history modes against both selected native arms with nonoverlapping confidence intervals and lower managed allocation. Gaussian and sine remain losses. Direct API coverage stays 87.",
+  "base_commit": "a9ab72b5"
+}

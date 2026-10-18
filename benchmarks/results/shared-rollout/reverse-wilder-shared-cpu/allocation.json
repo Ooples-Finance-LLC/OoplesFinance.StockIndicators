@@ -1,0 +1,39 @@
+{
+  "Operation": "QuanTAlib.Rma",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        5225344,
+        5225344,
+        5224688
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        4743280,
+        4743936,
+        4743936
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        480352,
+        480352,
+        480352
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        1882808,
+        1882808,
+        1882808
+      ]
+    }
+  ]
+}

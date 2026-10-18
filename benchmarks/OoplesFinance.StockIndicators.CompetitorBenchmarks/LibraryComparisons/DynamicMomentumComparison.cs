@@ -1,3 +1,4 @@
+using OoplesFinance.StockIndicators.Builder;
 using System.Numerics;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
@@ -18,7 +19,7 @@ internal static class DynamicMomentumComparison
     ) =>
         new(
             Id,
-            nameof(DynamicMomentumSnapshot),
+            nameof(DynamicMomentumStrength),
             (d, _) =>
                 VolumePriceComparison.Mask(
                     new Trady.Analysis.Indicator.DynamicMomentumIndex(
@@ -33,19 +34,7 @@ internal static class DynamicMomentumComparison
                         .Select(v => (double?)v.Tick)
                         .ToArray()
                 ),
-            (d, _) =>
-                VolumePriceComparison.Mask(
-                    DynamicMomentumSnapshot
-                        .FromValues(
-                            d.Closes.Select(x => (double?)x).ToArray(),
-                            sd,
-                            smooth,
-                            rsi,
-                            upper,
-                            lower
-                        )
-                        .ToArray()
-                ),
+            (d, _) => Owned(d.IndicatorBars, sd, smooth, rsi, upper, lower),
             (d, _) =>
                 VolumePriceComparison.Mask(
                     Reference(
@@ -72,6 +61,16 @@ internal static class DynamicMomentumComparison
                 ),
             ErrorBudget: IndicatorErrorBudget.Exact
         );
+
+    internal static ComparisonSeries Owned(Bar[] bars, int sd, int smooth, int rsi, int upper, int lower)
+    {
+        var indicator = new DynamicMomentumStrength(sd, smooth, rsi, upper, lower);
+        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
+        var values = run[indicator.Value].ToArray();
+        var present = run[indicator.IsDefined].ToArray();
+        return VolumePriceComparison.Mask(values.Select((value, i) => present[i] > 0 ? (double?)value : null).ToArray());
+    }
 
     internal static double?[] Reference(
         double?[] input,

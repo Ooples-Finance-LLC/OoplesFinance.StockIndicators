@@ -125,12 +125,12 @@ public sealed class NullableStrengthOscillator
                 )
             );
 
-    private sealed class Calculator(int period, NullableStrengthConvention convention, int lag)
+    internal sealed class Calculator(int period, NullableStrengthConvention convention, int lag)
     {
         private readonly Queue<double?> _history = new();
         private int _seedSteps,
             _known;
-        private BigInteger _gainSeed,
+        private ExactMeanAccumulator _gainSeed,
             _lossSeed;
         private PositiveStrengthValue _gain,
             _loss;
@@ -141,14 +141,14 @@ public sealed class NullableStrengthOscillator
             _history.Clear();
             _seedSteps = 0;
             _known = 0;
-            _gainSeed = 0;
-            _lossSeed = 0;
+            _gainSeed = default;
+            _lossSeed = default;
             _gain = default;
             _loss = default;
             _poisoned = false;
         }
 
-        internal double? Next(double? price)
+        internal double? Next(double? price, bool publish = true)
         {
             if (_poisoned)
                 return null;
@@ -157,19 +157,21 @@ public sealed class NullableStrengthOscillator
             _history.Enqueue(price);
             if (!ready)
                 return null;
-            BigInteger? difference =
-                price.HasValue && prior.HasValue
-                    ? ExactVarianceWindow.Units(price.Value)
-                        - ExactVarianceWindow.Units(prior.Value)
-                    : null;
-            var up = difference.HasValue ? BigInteger.Max(difference.Value, 0) : BigInteger.Zero;
-            var down = difference.HasValue ? BigInteger.Max(-difference.Value, 0) : BigInteger.Zero;
+            var hasDifference = price.HasValue && prior.HasValue;
             if (_seedSteps < period)
             {
-                _gainSeed += up;
-                _lossSeed += down;
-                if (difference.HasValue)
+                if (hasDifference)
+                {
+                    if (price!.Value > prior!.Value)
+                    {
+                        _gainSeed.Add(price.Value); _gainSeed.Add(prior.Value, -1);
+                    }
+                    else if (price.Value < prior.Value)
+                    {
+                        _lossSeed.Add(prior.Value); _lossSeed.Add(price.Value, -1);
+                    }
                     _known++;
+                }
                 if (++_seedSteps < period)
                     return null;
                 if (_known == 0)
@@ -179,25 +181,38 @@ public sealed class NullableStrengthOscillator
                 }
                 _gain = PositiveStrengthValue.Seed(_gainSeed, _known);
                 _loss = PositiveStrengthValue.Seed(_lossSeed, _known);
-                _gainSeed = 0;
-                _lossSeed = 0;
+                _gainSeed = default;
+                _lossSeed = default;
             }
             else
             {
-                if (!difference.HasValue)
+                if (!hasDifference)
                 {
                     _poisoned = true;
                     return null;
                 }
-                _gain = IsMomentum(convention)
-                    ? _gain.UpdateExponential(up, period)
-                    : _gain.Update(up, period);
-                _loss = IsMomentum(convention)
-                    ? _loss.UpdateExponential(down, period)
-                    : _loss.Update(down, period);
+                if (PositiveStrengthValue.TryDifference(price!.Value, prior!.Value, out var compactChange))
+                {
+                    _gain = _gain.Update(Math.Max(compactChange, 0), period, IsMomentum(convention));
+                    _loss = _loss.Update(Math.Max(-compactChange, 0), period, IsMomentum(convention));
+                }
+                else
+                {
+                    var difference = ExactVarianceWindow.Units(price!.Value) - ExactVarianceWindow.Units(prior!.Value);
+                    var up = BigInteger.Max(difference, 0);
+                    var down = BigInteger.Max(-difference, 0);
+                    _gain = IsMomentum(convention)
+                        ? _gain.UpdateExponential(up, period)
+                        : _gain.Update(up, period);
+                    _loss = IsMomentum(convention)
+                        ? _loss.UpdateExponential(down, period)
+                        : _loss.Update(down, period);
+                }
             }
+            // Historical replay needs the recurrence and poisoning behavior,
+            // but only the requested bar needs a rounded output ratio.
             if (
-                _loss.IsZero
+                !publish || _loss.IsZero
                 || convention == NullableStrengthConvention.RelativeMomentumIndex && _gain.IsZero
             )
                 return null;
@@ -217,7 +232,7 @@ public sealed class NullableStrengthOscillator
         }
     }
 
-    private sealed class State(int period, NullableStrengthConvention convention, int lag)
+    internal sealed class State(int period, NullableStrengthConvention convention, int lag)
         : IMultiOutputState
     {
         private readonly Calculator _calculator = new(period, convention, lag);

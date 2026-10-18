@@ -1,0 +1,41 @@
+{
+  "Operation": "QuanTAlib.Qema",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        869200,
+        869200,
+        869856
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        387792,
+        387792,
+        387792
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        2082112,
+        2082112,
+        2082112
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        9096888,
+        9096888,
+        9096888
+      ]
+    }
+  ],
+  "production_commit": "944572c2",
+  "qualification": "allocation-only; no latency qualification"
+}

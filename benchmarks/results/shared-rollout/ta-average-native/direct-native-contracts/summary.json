@@ -1,0 +1,26 @@
+{
+  "status": "40 contract cases and 100 local GPU cases passed. First native timings pending; qualification unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaPackedBenchmarkBase.cs": "a7527a88c94e00ab013a9f3b06f038f2d09b61a4f6cb73a8c0de41ad82d0bade",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaAverageNativeBenchmarks.cs": "52c2f6d25533b134b1649231f977c92b6a25d111404191c3e6a529ffd4731033",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedMappedBenchmarkBase.cs": "3b49e0446805024ee5a769be827d87aeb035df899e48a15e79975e6cba531ad0",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedBenchmarkSupport.cs": "1b57a5d028ae3ae45151b00a1cd4ba3a70a8ed9821b0e80d01c5641fde1d45aa",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/ClassicAverageComparison.cs": "9af3bd9934ba4a392c53a43bb30eb0fa1a3a20171a394a4c7abb1b27caaa225d",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/ClassicOscillatorComparison.cs": "b6ee006993e51fd38deb54d9caa59cded7584efe2df3b3b757f51ab809ac6926",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaAverageNativeBenchmarkTests.cs": "38d66646327dd168ecad4a7623ce96287336300e97e468e97e63a482691ee1ad"
+  },
+  "operations": [
+    "TaLib.Functions.Ma",
+    "TaLib.Functions.Apo",
+    "TaLib.Functions.Ppo"
+  ],
+  "native_package": "TALib.NETCore 0.5.0",
+  "native_package_dll_sha256": "980edcda5db3ab7b0cdd9ef877aa784aa93728129f134c023a1e08acedeefcbe",
+  "contract": "One eager packed column. Original native prefixes preserve rolling SMA arithmetic. MA period20; APO/PPO12/26 SMA. Lookbacks19/25. Native and builder paths use separate independent references. Shared packed base unchanged; no production changes.",
+  "validation": {
+    "comparator_cases_passed": 40,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1294
+  },
+  "benchmark_cases": 24
+}

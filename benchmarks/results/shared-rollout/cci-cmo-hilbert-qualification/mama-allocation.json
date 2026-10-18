@@ -1,0 +1,39 @@
+{
+  "Operation": "TaLib.Functions.Mama",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        804960,
+        804960,
+        804960
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        323832,
+        323832,
+        323832
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        159920,
+        159920,
+        159920
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        889264,
+        880824,
+        880824
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "status": "35 focused contract cases passed. First direct-native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderRocBenchmarks.cs": "bf3f47fde02b9d518c610f540cf47d05eb4310a13788fdae8a8c0cae255e95c7",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderRocBenchmarkTests.cs": "d61e31b27a6aff21e52ae36312ea9e39cb7e94bcee6c2bec3246ba6c0aaa31d9",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedRocBenchmarks.cs": "451322cc17598350ad3b8b125a460e4862ccd9a4c408a7fb5c8596a9268614f0"
+  },
+  "native_package": "Skender.Stock.Indicators 2.7.3",
+  "native_source_commit": "fd739aa4b592f68d5a68d14c602319c027bb0538",
+  "native_source_repository": "https://github.com/facioquo/stock-indicators-dotnet",
+  "native_source_sha256": {
+    "Roc.Api.cs": "b614fe8659eceae169333d0544b263a8ee54aa2752d9cf4391608cfc9782df5b",
+    "Roc.Models.cs": "993c974bc3c312feaa5412acbac2cd7354828a7fec7e497621bfdb15df6b1bd5",
+    "Roc.Series.cs": "40566c0c46299ff523ebb348a2cdfbda861da40a8e5f0c03fbea0997e9744f1b",
+    "RocWb.Api.cs": "ef9f5f4f3a716e9aab4236bcae091e28f88c2a794efe6544ef93e32b28abc4e0",
+    "RocWb.Series.cs": "233557a5a3e9be0f2ee7a3d3f1bf6f2f4ae269dbdd9f318f8b4b55ede0869130"
+  },
+  "operations": [
+    "Skender.GetRoc",
+    "Skender.GetRocWb"
+  ],
+  "contract": "Public tuple APIs preserve converted close inputs and eager native Lists. ROC20/SMA20 workers retain 39 preceding bars; ROC bands retain full prefixes for recursive EMA. Native calculations and joined output allocation remain timed. Independent integer-grid references verify all five or seven owned output columns and separately round each native floating operation. Exact serial/parallel/repeated comparisons verify warmup, worker boundaries, dates, values, presence and retained ownership.",
+  "validation": {
+    "comparator_cases_passed": 35,
+    "production_source_changed": false,
+    "gpu_cases_passed": 100,
+    "hosted_contract_methods": 1255,
+    "gpu_receipt": "../../local-gpu-contracts/receipt.json"
+  },
+  "benchmark_cases": 16,
+  "shared_support_refactor": {
+    "evidence": "../../skender-native-support/summary.json",
+    "source_sha256": "e999c5e6d341be3c0237534280f24af351603beefcc9d6216de60d6d070f0bf8",
+    "note": "Original source hashes and per-fixture evidence retained above; shared-support refactor validated all 356 affected cases."
+  }
+}

@@ -80,14 +80,14 @@ public sealed class SeededHilbertTrendline : MultiOutputIndicatorBase, IIndicato
         {
             output.Clear();
             _index++;
-            var price = midpoint
-                ? RocBankValue.RoundUnits(
-                    ExactVarianceWindow.Units(bar.High) + ExactVarianceWindow.Units(bar.Low),
-                    2
-                )
-                : ExactVarianceWindow.Units(bar.Close);
+            var price = JurikDyadic.FromDouble(midpoint ? bar.High : bar.Close);
+            if (midpoint)
+            {
+                price.Add(bar.Low);
+                price = price.Rounded(2);
+            }
             _filter.Update(price);
-            output[0] = ExactMeanAccumulator.UnitRatio(price, 1);
+            output[0] = price.Mean(1);
             output[3] = 1;
             if (_index < 6)
             {
@@ -98,8 +98,8 @@ public sealed class SeededHilbertTrendline : MultiOutputIndicatorBase, IIndicato
             var count = (int)Math.Min((int)(_period + .5), _index + 1);
             _means.Update(price, count == 0 ? 1 : count);
             if (_index >= 11)
-                output[0] = ExactMeanAccumulator.UnitRatio(_means.RoundedUnits, 1);
-            output[1] = ExactMeanAccumulator.UnitRatio(_filter.SmoothPrice, 1);
+                output[0] = _means.Average.Mean(1);
+            output[1] = _filter.SmoothPrice.Mean(1);
             output[4] = 1;
             if (count > 0)
             {

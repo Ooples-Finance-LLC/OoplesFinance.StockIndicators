@@ -35,7 +35,12 @@ public sealed class WindowVortex : MultiOutputIndicatorBase, IIndicatorValidatio
     public IIndicatorOutput NegativeIsDefined => Outputs[3];
 
     /// <inheritdoc/>
-    protected internal override object CreateState() => new State(Period);
+    protected internal override object CreateState() =>
+#if !NETFRAMEWORK
+        new CompactState(Period);
+#else
+        new State(Period);
+#endif
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -49,6 +54,43 @@ public sealed class WindowVortex : MultiOutputIndicatorBase, IIndicatorValidatio
                 )
             );
 
+#if !NETFRAMEWORK
+    internal sealed class CompactState(int period, int count = 0) : IMultiOutputState
+    {
+        private readonly Queue<(JurikDyadic Range, JurikDyadic Positive, JurikDyadic Negative)> _window
+            = new(Math.Min(period, Math.Max(0, count - 1)));
+        private JurikDyadic _range, _positive, _negative;
+        private Bar _previous;
+        private bool _started;
+
+        public void Reset()
+        {
+            _window.Clear(); _range = _positive = _negative = default;
+            _previous = default; _started = false;
+        }
+
+        public void Update(in Bar bar, Span<double> output)
+        {
+            output.Clear();
+            if (!_started) { _started = true; _previous = bar; return; }
+            var range = ExactTrueInterval.Range(bar.High, bar.Low, _previous.Close);
+            var positive = ExactTrueInterval.AbsoluteDifference(bar.High, _previous.Low);
+            var negative = ExactTrueInterval.AbsoluteDifference(bar.Low, _previous.High);
+            _previous = bar;
+            if (_window.Count == period)
+            {
+                var old = _window.Dequeue();
+                _range.Subtract(old.Range); _positive.Subtract(old.Positive); _negative.Subtract(old.Negative);
+            }
+            _window.Enqueue((range, positive, negative));
+            _range.AddExact(range); _positive.AddExact(positive); _negative.AddExact(negative);
+            if (_window.Count < period || _range.Sign == 0) return;
+            output[0] = _positive.Ratio(_range);
+            output[1] = _negative.Ratio(_range);
+            output[2] = output[3] = 1;
+        }
+    }
+#else
     private sealed class State(int period) : IMultiOutputState
     {
         private readonly Queue<(
@@ -107,4 +149,5 @@ public sealed class WindowVortex : MultiOutputIndicatorBase, IIndicatorValidatio
             output[2] = output[3] = 1;
         }
     }
+#endif
 }

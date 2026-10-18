@@ -1,0 +1,38 @@
+{
+  "production_commit": "415d6ed4",
+  "execution_commit": "1f6786d5",
+  "fixture_sha256": "6f1fe15d366e0ddbefbe2b33994d677e11ac0407e5a4b4186e1a948a1877c655",
+  "qualification": "diagnostic-only-not-added-to-timing-qualified-catalog",
+  "warmup_count": 10,
+  "requested_iteration_count": 10,
+  "retained_iterations": {
+    "BuilderFull": 10,
+    "BuilderLatestOnly": 10,
+    "NativeSingle": 10,
+    "NativeParallel": 10
+  },
+  "load_samples": {
+    "pre": {
+      "Utc": "2026-10-12T02:19:00.9704962Z",
+      "Cpu": 50,
+      "Jobs": []
+    },
+    "during": {
+      "Utc": "2026-10-12T02:19:20.6560847Z",
+      "Cpu": 43,
+      "Jobs": []
+    },
+    "post": {
+      "Utc": "2026-10-12T02:20:11.5225541Z",
+      "Cpu": 90,
+      "Jobs": [
+        {
+          "ProcessId": 24716,
+          "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" build tests\\AiDotNet.Tensors.Tests\\AiDotNet.Tensors.Tests.csproj -c Debug -f net10.0 -v q -nologo"
+        }
+      ]
+    }
+  },
+  "limitations": "Pre/during/post CPU 50/43/90 percent. No competing dotnet build/test/run in first two samples; an AiDotNet.Tensors build appeared in the post sample and exited before its creation time could be inspected. Its overlap with measured iterations is unknown. These samples do not establish isolation. Preserve as diagnostics, do not infer a qualified win or repeat immediately. Relative Volatility has broad overlapping confidence intervals. RVI received minimum-iteration-time warnings. All setups verified reference parity.",
+  "command": "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter '*SharedRelativeVolatilityBenchmarks*Count: 10000)' '*SharedMedianAdaptiveBenchmarks*Count: 10000)' --warmupCount 10 --iterationCount 10 --exporters json --artifacts C:/Users/cheat/temp/si-rvi-maaf-415d6ed4"
+}

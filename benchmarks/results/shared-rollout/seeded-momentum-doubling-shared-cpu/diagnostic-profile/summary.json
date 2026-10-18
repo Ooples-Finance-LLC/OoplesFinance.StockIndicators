@@ -1,0 +1,188 @@
+{
+  "scope": "Sampled thread time with TSI.State.Update on stack; includes setup/benchmark workload, not qualified latency. SDK export probe wait excluded. Synthetic CPU_TIME/UNMANAGED_CODE_TIME leaves ignored for managed attribution.",
+  "tsi_sampled_ms": 1231.398818235588,
+  "inclusive": [
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.SeededTrueStrength+State.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&,value class System.Span`1<float64>)",
+      1231.398818235588
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.SeededTrueStrength+State.Numerator(value class OoplesFinance.StockIndicators.Helpers.JurikDyadic,value class OoplesFinance.StockIndicators.Helpers.JurikDyadic,int32)",
+      686.670200656315
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Multiply(float64)",
+      428.9037005517962
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.SeededTrueStrength+State.R(value class OoplesFinance.StockIndicators.Helpers.JurikDyadic,int64)",
+      150.27169655552007
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Ratio(value class OoplesFinance.StockIndicators.Helpers.JurikDyadic)",
+      144.8768968200693
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Promote()",
+      116.91189794616548
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Normalize()",
+      114.13509899330029
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.AddExact(value class OoplesFinance.StockIndicators.Helpers.JurikDyadic)",
+      102.5417982698441
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.TryRatio(value class System.Int128,int32,value class System.Int128,int32,float64&)",
+      96.71519807605819
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Magnitude(value class System.Int128)",
+      66.19549871444679
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Bits(value class System.UInt128)",
+      53.71669932479972
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Shift(value class System.Int128,int32,value class System.Int128&)",
+      31.57359923496233
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Add(float64)",
+      28.580399826240864
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator.CompactDivRem(value class System.UInt128,value class System.UInt128)",
+      13.233699938773952
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.SeededTrueStrength+State.Publish(value class System.Nullable`1<float64>,int32,value class System.Span`1<float64>)",
+      2.0197999118804546
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Subtract(value class OoplesFinance.StockIndicators.Helpers.JurikDyadic)",
+      2.002799958992
+    ]
+  ],
+  "exclusive": [
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.SeededTrueStrength+State.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&,value class System.Span`1<float64>)",
+      270.84732397441985
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.SeededTrueStrength+State.Numerator(value class OoplesFinance.StockIndicators.Helpers.JurikDyadic,value class OoplesFinance.StockIndicators.Helpers.JurikDyadic,int32)",
+      200.551600794789
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Multiply(float64)",
+      114.03000332546299
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.SeededTrueStrength+State.R(value class OoplesFinance.StockIndicators.Helpers.JurikDyadic,int64)",
+      79.65489795379699
+    ],
+    [
+      "System.Private.CoreLib.il!System.Int128.BigMul(value class System.Int128,value class System.Int128,value class System.Int128&)",
+      78.82269984760251
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Normalize()",
+      71.92129980087157
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.TryRatio(value class System.Int128,int32,value class System.Int128,int32,float64&)",
+      55.60579861240376
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Promote()",
+      52.91799840984277
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Magnitude(value class System.Int128)",
+      46.07829902095773
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.AddExact(value class OoplesFinance.StockIndicators.Helpers.JurikDyadic)",
+      41.50959960918499
+    ],
+    [
+      "System.Private.CoreLib.il!System.UInt128.op_RightShift(value class System.UInt128,int32)",
+      37.408699680710015
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Add(float64)",
+      28.580399826240864
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Ratio(value class OoplesFinance.StockIndicators.Helpers.JurikDyadic)",
+      26.081700131607704
+    ],
+    [
+      "System.Private.CoreLib.il!System.UInt128.BigMul(value class System.UInt128,value class System.UInt128,value class System.UInt128&)",
+      23.38409972095542
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Bits(value class System.UInt128)",
+      19.863099632073045
+    ],
+    [
+      "System.Private.CoreLib.il!System.Int128.op_CheckedSubtraction(value class System.Int128,value class System.Int128)",
+      18.09659972686768
+    ],
+    [
+      "System.Private.CoreLib.il!System.Int128.op_CheckedMultiply(value class System.Int128,value class System.Int128)",
+      11.125899380302144
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Shift(value class System.Int128,int32,value class System.Int128&)",
+      9.201999398422231
+    ],
+    [
+      "System.Private.CoreLib.il!System.UInt128.op_BitwiseAnd(value class System.UInt128,value class System.UInt128)",
+      8.082899931144766
+    ],
+    [
+      "System.Private.CoreLib.il!System.Math.BigMul(unsigned int64,unsigned int64)",
+      6.0188999383926785
+    ],
+    [
+      "System.Private.CoreLib.il!System.UInt128.op_UnsignedRightShift(value class System.UInt128,int32)",
+      6.012199900245832
+    ],
+    [
+      "System.Private.CoreLib.il!System.Int128.op_CheckedAddition(value class System.Int128,value class System.Int128)",
+      5.975699838447326
+    ],
+    [
+      "System.Private.CoreLib.il!System.Int128.op_CheckedUnaryNegation(value class System.Int128)",
+      4.035099983215332
+    ],
+    [
+      "System.Private.CoreLib.il!System.Int128.op_CheckedExplicit(value class System.Int128)",
+      3.9713999298096496
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator.CompactDivRem(value class System.UInt128,value class System.UInt128)",
+      3.6664000505447802
+    ],
+    [
+      "System.Private.CoreLib.il!System.UInt128.op_Addition(value class System.UInt128,value class System.UInt128)",
+      2.0271999835968018
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.SeededTrueStrength+State.Publish(value class System.Nullable`1<float64>,int32,value class System.Span`1<float64>)",
+      2.0197999118804546
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Subtract(value class OoplesFinance.StockIndicators.Helpers.JurikDyadic)",
+      2.002799958992
+    ],
+    [
+      "System.Private.CoreLib.il!System.UInt128.op_CheckedIncrement(value class System.UInt128)",
+      1.9043999628070196
+    ]
+  ]
+}

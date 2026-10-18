@@ -12,6 +12,13 @@ on:
 permissions:
   contents: read
 
+# Apply before checkout, including its temporary Git configuration. Benchmark
+# evidence paths exceed Windows' legacy path limit on the hosted runner.
+env:
+  GIT_CONFIG_COUNT: '1'
+  GIT_CONFIG_KEY_0: core.longpaths
+  GIT_CONFIG_VALUE_0: 'true'
+
 # Keep only the newest CI run for each PR or branch; each run fans out into many shards.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}

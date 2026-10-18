@@ -1,0 +1,10 @@
+WindowPriceRange CPU/GPU rollout; published AiDotNet.Tensors 0.134.4, net10 Release.
+200 focused tests passed, zero skips. After early scheduling: four tests passed, including all period/history/backend combinations at 511/512/513/1025 bars. 21 inventory tests passed. Benchmark builds passed.
+21 original benchmark cases plus two final affected 1k builder cases completed, with independent scan/native/presence checks. Both native serial and seeded parallel tuple APIs measured; input conversion/chunk preparation excluded from timing.
+CPU state now uses one once-rounded subtraction instead of ExactMeanAccumulator per bar; canonical positive exact zero and overflow preserved. Independent accumulator comparison covers signed zeros, subnormals and wide exponents. Shared bounded engine handles standalone and mixed roots; Required GPU uses existing window scan and buffers. Input errors precede output overflow; ownership and cancellation/recovery tested.
+Final CPU Full: 1k 19.45 us /61.65 KiB; 10k 99.97 us /554.17 KiB; 100k 1252.78 us /5480.84 KiB.
+Best native parallel: 1k 241.39 us /1051.73 KiB; 10k 3251.62 us /10346.50 KiB; 100k 29202.52 us /100344.57 KiB. CPU wins both history modes at all sizes.
+GPU Full: 1k 314.18 us, 10k 495.45 us, 100k 2395.18 us. GPU loses native parallel at 1k, wins at 10k/100k, but CPU is faster throughout. Auto stays CPU. Large-period device scans remain unqualified.
+Full owns OHLCV snapshots; native returns nullable decimal values with missing partial-window startup. Owned values include partial-window ranges. ShortRun timings have minimum-iteration/distribution warnings and are host-specific.
+Source reviewed: https://github.com/lppkarl/Trady/blob/master/Trady.Analysis/Indicator/HighestHighLowestLowDifference.cs (separate Highest/Lowest tuple states, subtraction; measured package 3.2.8).
+Evidence preserves per-row original statistics/memory provenance. Direct qualification now 102/401 APIs.

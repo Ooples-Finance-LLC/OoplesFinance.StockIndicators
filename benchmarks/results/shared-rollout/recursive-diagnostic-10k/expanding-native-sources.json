@@ -1,0 +1,10 @@
+{
+  "Rema": {
+    "source": "https://github.com/mihakralj/QuanTAlib/blob/a2af99711d22a2833af2eb18054f0049a3fb0224/lib/averages/Rema.cs",
+    "sha256": "cf953441a2227277a55dc38b2831a2fa8a04cce59593ba2c7929f48b44ef640c"
+  },
+  "Zlema": {
+    "source": "https://github.com/mihakralj/QuanTAlib/blob/a2af99711d22a2833af2eb18054f0049a3fb0224/lib/averages/Zlema.cs",
+    "sha256": "711e1aad8af4cae58d41700a8107e65a14f181b1e662b979dfa07539f65165d7"
+  }
+}

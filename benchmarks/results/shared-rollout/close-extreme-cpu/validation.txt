@@ -1,0 +1,32 @@
+Zero-decay rolling close extrema CPU qualification.
+
+Native source: QuanTAlib 1.0.0, repository commit a2af99711d22a2833af2eb18054f0049a3fb0224, lib/statistics/Min.cs and Max.cs.
+Native serial and eight-worker arms call the public Calc(TValue) API directly; input preparation is outside timing. Workers replay P-1 inputs, without copied input slices.
+Independent scan oracle verifies available-window startup and every result on the binary-grid fixture; native serial and parallel must match bitwise.
+Builder Full owns OHLCV snapshots; native returns only values. LatestOnly still returns every indicator value.
+Nonzero decay retains its existing recursive execution, with explicit regression coverage.
+81 focused tests passed, zero skips; 18 inventory tests passed. Release net10 benchmark build passed.
+20 benchmark cases, five warmups and fifteen measurements. Reported intervals do not overlap for builder versus either native arm at both counts and history modes.
+BDN reports several short minimum iterations and a multimodal LatestOnly distribution; this is host/workload-specific evidence, not a universal claim.
+
+Means in microseconds / allocated KiB:
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.BuilderFull(Operation: "Max", Count: 1000): 19.18 / 58.47
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.BuilderLatestOnly(Operation: "Max", Count: 1000): 14.55 / 10.96
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.BuilderReference(Operation: "Max", Count: 1000): 33.91 / 61.54
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.NativeSingle(Operation: "Max", Count: 1000): 98.87 / 382.05
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.NativeParallel(Operation: "Max", Count: 1000): 55.69 / 389.60
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.BuilderFull(Operation: "Max", Count: 10000): 72.23 / 552.95
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.BuilderLatestOnly(Operation: "Max", Count: 10000): 42.66 / 83.21
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.BuilderReference(Operation: "Max", Count: 10000): 293.15 / 554.20
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.NativeSingle(Operation: "Max", Count: 10000): 1029.23 / 3876.64
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.NativeParallel(Operation: "Max", Count: 10000): 436.66 / 3884.88
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.BuilderFull(Operation: "Min", Count: 1000): 21.02 / 58.89
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.BuilderLatestOnly(Operation: "Min", Count: 1000): 16.43 / 11.38
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.BuilderReference(Operation: "Min", Count: 1000): 33.02 / 61.96
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.NativeSingle(Operation: "Min", Count: 1000): 112.57 / 382.05
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.NativeParallel(Operation: "Min", Count: 1000): 49.59 / 389.60
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.BuilderFull(Operation: "Min", Count: 10000): 73.95 / 556.32
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.BuilderLatestOnly(Operation: "Min", Count: 10000): 48.36 / 86.59
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.BuilderReference(Operation: "Min", Count: 10000): 323.69 / 554.63
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.NativeSingle(Operation: "Min", Count: 10000): 1194.52 / 3876.64
+OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCloseExtremeBenchmarks.NativeParallel(Operation: "Min", Count: 10000): 470.10 / 3884.88

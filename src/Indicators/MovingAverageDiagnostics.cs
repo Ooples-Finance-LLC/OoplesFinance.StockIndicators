@@ -33,7 +33,7 @@ public sealed class WindowMeanAbsoluteDeviation : IndicatorBase, IIndicatorValid
             ),
         ];
 
-    private sealed class State(int period) : IIndicatorState
+    internal sealed class State(int period) : IIndicatorState
     {
         private readonly RoundedMeanErrorWindow _window = new(period);
 
@@ -112,7 +112,7 @@ public sealed class MovingAverageDiagnostics
                 )
             );
 
-    private sealed class State(int period) : IMultiOutputState
+    internal sealed class State(int period) : IMultiOutputState
     {
         private readonly RoundedMeanErrorWindow _window = new(period);
 

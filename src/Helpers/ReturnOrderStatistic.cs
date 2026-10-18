@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace OoplesFinance.StockIndicators.Helpers;
 
 // Rank exact one-bar returns without materializing their possibly overflowing quotient.
@@ -33,24 +35,72 @@ internal sealed class ReturnOrderStatistic : IDisposable
 
     public void Dispose() { _window.Clear(); _root = null; }
 
-    private readonly struct ReturnKey : IComparable<ReturnKey>
+    internal readonly struct ReturnKey : IComparable<ReturnKey>
     {
+#if NETFRAMEWORK
         private readonly double _current, _previous;
+#else
+        private readonly ExactMeanAccumulator.ProductFactor _current, _previous;
+        private readonly double _roundedRatio;
+#endif
         internal ReturnKey(double current, double previous)
         {
             if (double.IsNaN(current) || double.IsInfinity(current) || double.IsNaN(previous) || double.IsInfinity(previous))
                 throw new ArgumentOutOfRangeException(nameof(current), "Return ranking requires finite prices.");
             // A zero previous price explicitly represents zero return, as in the public formula.
-            _current = previous == 0 ? 1 : previous < 0 ? -current : current;
-            _previous = previous == 0 ? 1 : Math.Abs(previous);
+            double numerator = previous == 0 ? 1 : previous < 0 ? -current : current;
+            double denominator = previous == 0 ? 1 : Math.Abs(previous);
+#if NETFRAMEWORK
+            _current = numerator; _previous = denominator;
+#else
+            _current = new(numerator); _previous = new(denominator);
+            _roundedRatio = numerator / denominator;
+#endif
         }
         public int CompareTo(ReturnKey other)
         {
-            var difference = new ExactMeanAccumulator();
-            difference.AddProduct(_current, other._previous);
-            difference.AddProduct(other._current, _previous, -1);
+#if !NETFRAMEWORK
+            // IEEE division is monotone. Distinct rounded ratios prove the
+            // exact order; equal rounded values do not prove an exact tie.
+            if (_roundedRatio < other._roundedRatio) return -1;
+            if (_roundedRatio > other._roundedRatio) return 1;
+            return CompareExact(in other);
+#else
+            var difference = JurikDyadic.FromDouble(_current);
+            difference.Multiply(other._previous);
+            var right = JurikDyadic.FromDouble(other._current);
+            right.Multiply(_previous);
+            difference.Subtract(right);
             return difference.Sign;
+#endif
         }
+#if !NETFRAMEWORK
+        private int CompareExact(in ReturnKey other)
+        {
+            int sign = Math.Sign(_current.Mantissa), otherSign = Math.Sign(other._current.Mantissa);
+            if (sign != otherSign) return sign.CompareTo(otherSign);
+            if (sign == 0) return 0;
+            UInt128 left = (UInt128)(ulong)Math.Abs(_current.Mantissa) * (ulong)other._previous.Mantissa;
+            UInt128 right = (UInt128)(ulong)Math.Abs(other._current.Mantissa) * (ulong)_previous.Mantissa;
+            int leftScale = _current.Scale + other._previous.Scale;
+            int rightScale = other._current.Scale + _previous.Scale;
+            int topOrder = (Bits(left) + leftScale).CompareTo(Bits(right) + rightScale);
+            if (topOrder != 0) return sign * topOrder;
+            // Each exact product has at most 106 bits. Equal top exponents
+            // imply that aligning the smaller product still needs at most
+            // 106 bits, even when the original price exponents are extreme.
+            if (leftScale > rightScale) left <<= leftScale - rightScale;
+            else right <<= rightScale - leftScale;
+            return sign * left.CompareTo(right);
+        }
+
+        private static int Bits(UInt128 value)
+        {
+            ulong upper = (ulong)(value >> 64);
+            return upper == 0 ? 64 - BitOperations.LeadingZeroCount((ulong)value)
+                : 128 - BitOperations.LeadingZeroCount(upper);
+        }
+#endif
     }
 
     private Node Insert(Node? node, ReturnKey key)

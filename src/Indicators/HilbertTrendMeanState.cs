@@ -1,37 +1,36 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Indicators;
 
 internal sealed class HilbertTrendMeanState
 {
-    private readonly BigInteger[] _prices = new BigInteger[50],
-        _means = new BigInteger[3];
+    private readonly JurikDyadic[] _prices = new JurikDyadic[50],
+        _means = new JurikDyadic[3];
     private int _cursor;
-    internal BigInteger RoundedUnits { get; private set; }
+    internal JurikDyadic Average { get; private set; }
 
     internal void Reset()
     {
         Array.Clear(_prices, 0, 50);
         Array.Clear(_means, 0, 3);
         _cursor = 0;
-        RoundedUnits = 0;
+        Average = default;
     }
 
-    internal void Update(BigInteger price, int? count)
+    internal void Update(JurikDyadic price, int? count)
     {
         _prices[_cursor] = price;
         if (count.HasValue)
         {
-            BigInteger sum = 0;
+            JurikDyadic sum = default;
             for (var lag = 0; lag < count.Value; lag++)
-                sum += _prices[(_cursor - lag + 50) % 50];
-            var mean =
-                count.Value == 0 ? BigInteger.Zero : RocBankValue.RoundUnits(sum, count.Value);
-            RoundedUnits = RocBankValue.RoundUnits(
-                4 * mean + 3 * _means[0] + 2 * _means[1] + _means[2],
-                10
-            );
+                sum.AddExact(_prices[(_cursor - lag + 50) % 50]);
+            var mean = count.Value == 0 ? default : sum.Rounded(count.Value);
+            var weighted = mean; weighted.Multiply(4);
+            var term = _means[0]; term.Multiply(3); weighted.AddExact(term);
+            term = _means[1]; term.Multiply(2); weighted.AddExact(term);
+            weighted.AddExact(_means[2]);
+            Average = weighted.Rounded(10);
             _means[2] = _means[1];
             _means[1] = _means[0];
             _means[0] = mean;

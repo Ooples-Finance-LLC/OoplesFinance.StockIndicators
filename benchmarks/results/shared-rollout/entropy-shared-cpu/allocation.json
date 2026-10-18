@@ -1,0 +1,39 @@
+{
+  "Operation": "QuanTAlib.Entropy",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        565208,
+        565208,
+        565208
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        83800,
+        83800,
+        83800
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        52821480,
+        52821480,
+        52821480
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        53429040,
+        53429040,
+        53429040
+      ]
+    }
+  ]
+}

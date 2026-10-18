@@ -1,0 +1,80 @@
+[
+  {
+    "Operation": "Skender.GetChaikinOsc",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          964368,
+          963688,
+          963688
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          482560,
+          483216,
+          482560
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          3880816,
+          3880816,
+          3880816
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          17547472,
+          17560400,
+          17547472
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Functions.AdOsc",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          723616,
+          724296,
+          723616
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          242488,
+          242488,
+          242488
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          79992,
+          79992,
+          79992
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          440304,
+          440304,
+          440304
+        ]
+      }
+    ]
+  }
+]

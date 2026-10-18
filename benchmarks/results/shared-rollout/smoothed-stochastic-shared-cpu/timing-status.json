@@ -1,0 +1,8 @@
+{
+  "status": "completed",
+  "source_commit": "fd9f0c6d",
+  "builder_cases": 12,
+  "evidence": "builder-timing/summary.json",
+  "competitor_timing": "saved compatible serial baselines reused; no native timing repeated",
+  "limitations": "Cross-run serial ratios only; arithmetic/output containers differ. Missing parallel baselines remain gaps. Skender 10000-bar stochastic and SMI latency gaps remain open."
+}

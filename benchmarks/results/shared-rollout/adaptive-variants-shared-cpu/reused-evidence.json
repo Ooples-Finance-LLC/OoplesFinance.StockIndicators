@@ -1,0 +1,10 @@
+{
+  "production_build": "../price-relative-shared-cpu/build.log.gz",
+  "production_sha256": "a51e23c4d9c6810f3203fd85f54ac3d5578589ce5bc96ecda160373d87d3834f",
+  "production_rebuilt": false,
+  "historical_unit_evidence": "../seeded-adaptive-shared-cpu/unit.log.gz",
+  "historical_unit_count": 14,
+  "historical_unit_rerun": false,
+  "historical_provenance": "../seeded-adaptive-shared-cpu/provenance.txt",
+  "current_competitor_production_sha256": "a51e23c4d9c6810f3203fd85f54ac3d5578589ce5bc96ecda160373d87d3834f"
+}

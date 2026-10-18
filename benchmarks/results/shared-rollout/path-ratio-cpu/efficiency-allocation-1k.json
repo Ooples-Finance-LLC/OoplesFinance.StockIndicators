@@ -1,0 +1,39 @@
+{
+  "Operation": "Trady.Indicator.EfficiencyRatio",
+  "Count": 1000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        67432,
+        67432,
+        67432
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        19536,
+        18976,
+        18640
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        556704,
+        556704,
+        556704
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        554136,
+        554472,
+        554136
+      ]
+    }
+  ]
+}

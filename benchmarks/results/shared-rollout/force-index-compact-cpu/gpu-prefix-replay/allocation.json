@@ -1,0 +1,55 @@
+{
+  "Operation": "Skender.GetForceIndex",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        642736,
+        642736,
+        642736
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        161608,
+        161608,
+        161608
+      ]
+    },
+    {
+      "Method": "GpuFull",
+      "Bytes": [
+        642664,
+        642664,
+        642664
+      ]
+    },
+    {
+      "Method": "GpuLatestOnly",
+      "Bytes": [
+        161536,
+        161536,
+        161536
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1403128,
+        1400440,
+        1400440
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        6384464,
+        6384464,
+        6384464
+      ]
+    }
+  ]
+}

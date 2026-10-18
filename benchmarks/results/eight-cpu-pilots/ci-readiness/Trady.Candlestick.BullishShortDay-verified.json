@@ -1,0 +1,86 @@
+[
+  {
+    "Pair": "Trady.Candlestick.BullishShortDay",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 1542692.6666666667,
+    "AllocatedBytes": 64480
+  },
+  {
+    "Pair": "Trady.Candlestick.BullishShortDay",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 407261,
+    "AllocatedBytes": 21552
+  },
+  {
+    "Pair": "Trady.Candlestick.BullishShortDay",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 741653004,
+    "AllocatedBytes": 1191297088
+  },
+  {
+    "Pair": "Trady.Candlestick.BullishShortDay",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 5233509.833333333,
+    "AllocatedBytes": 577624
+  },
+  {
+    "Pair": "Trady.Candlestick.BullishShortDay",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 3708061.3333333335,
+    "AllocatedBytes": 94224
+  },
+  {
+    "Pair": "Trady.Candlestick.BullishShortDay",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 92334691749,
+    "AllocatedBytes": 119401893864
+  },
+  {
+    "Pair": "Trady.Candlestick.BullishShortDay.Tuple",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 565554.3333333334,
+    "AllocatedBytes": 73256
+  },
+  {
+    "Pair": "Trady.Candlestick.BullishShortDay.Tuple",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 426520,
+    "AllocatedBytes": 22312
+  },
+  {
+    "Pair": "Trady.Candlestick.BullishShortDay.Tuple",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 737024033.8333334,
+    "AllocatedBytes": 1190977112
+  },
+  {
+    "Pair": "Trady.Candlestick.BullishShortDay.Tuple",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 1103014.5,
+    "AllocatedBytes": 577632
+  },
+  {
+    "Pair": "Trady.Candlestick.BullishShortDay.Tuple",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 1209291,
+    "AllocatedBytes": 94272
+  },
+  {
+    "Pair": "Trady.Candlestick.BullishShortDay.Tuple",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 89025658486.83333,
+    "AllocatedBytes": 119395740224
+  }
+]

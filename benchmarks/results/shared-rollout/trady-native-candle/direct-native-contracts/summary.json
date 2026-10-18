@@ -1,0 +1,31 @@
+{
+  "status": "65 distinct contract cases covered: 64 passing follow-up cases and one completed case retained from an intentionally aborted run. 100 local GPU cases passed for the combined candle source state. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTradyNativeCandleBenchmarks.cs": "8f7af6450a399795b634f9b426c645ec7eaaaa5ac9b373d87feb0a60e3b6fdc3",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/DelayedDarkCloudComparison.cs": "4b53c7df17532af51882a64fa8685046f1a7bd1a80da2794eb336d711d2bbd36",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/TrendMethodsComparison.cs": "5331eeab039bbdc05bd330b0afca368328012b428f724ed1fd6a6dbcb2bed12c",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/TradyCandleComparison.cs": "ab8dbe62c62694cc4bbb5b5ee627b403e3e678ac49e60b342b11c8435dcd9581",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTradyNativeCandleBenchmarkTests.cs": "0c6ce186be8a89a207d987673b9b18f0a364812b31379b5a3bfc27f3be4571f0"
+  },
+  "native_package": "Trady.Analysis 3.2.8",
+  "native_package_dll_sha256": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+  "operations": [
+    "DarkCloudCover",
+    "DragonifyDoji",
+    "RisingThreeMethods",
+    "FallingThreeMethods"
+  ],
+  "contract": "Public OHLC tuple APIs return eager bool Lists for DragonifyDoji and nullable bool Lists for the other patterns. Three-method patterns retain full prefixes for unbounded anchor searches, DarkCloudCover uses 23 preceding bars, and doji is pointwise. Named Compute(startIndex,endIndex) returns owned rows; all native computation and joining remain timed. Independent references verify raw native values/nulls and owned startup values.",
+  "validation": {
+    "comparator_cases_passed": 65,
+    "followup_cases_passed": 64,
+    "retained_completed_case": "FallingThreeMethods, 10000 bars",
+    "retained_run_status": "Intentionally aborted after the retained case passed; the whole original run is not claimed to have passed.",
+    "ownership_scope": "All sizes through 1000 bars; native serial/parallel independent-reference checks remain at 10000. The retained original FallingThreeMethods case also passed repeated ownership checks at 10000.",
+    "source_compatibility": "The original test differs only by retaining additional repeated ownership checks at 10000. Fixture/reference implementations are unchanged. Original test source and both TRX records are retained.",
+    "production_source_changed": false,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1281
+  },
+  "benchmark_cases": 32
+}

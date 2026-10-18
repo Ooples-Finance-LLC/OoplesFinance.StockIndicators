@@ -1,0 +1,478 @@
+{
+  "scope": "Supplemental standard-size coverage audit. Of267 catalog mappings with native comparisons,243 contain both1000 and10000bar rows;24 lack one standard size. Extra100000bar rows do not imply a missing standard size. Connors is handled by its separate preserved candidate; the other23 mappings need92 missing-size CPU cases across eight fixtures.",
+  "catalog_sha256": "55b722f067dad474154ddf286686fbb8625700243d8f3dc008bb577d50299264",
+  "partial_native_size_mappings": [
+    {
+      "pair_id": "QuanTAlib.Ltma",
+      "saved_native_sizes": [
+        10000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/laguerre-triangular-10k/laguerre-cpu-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "QuanTAlib.Trima",
+      "saved_native_sizes": [
+        10000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/laguerre-triangular-10k/triangular-cpu-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "Skender.GetCmo",
+      "saved_native_sizes": [
+        10000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/path-ratio-certified-cpu/cmo-cpu-native-10k.json.gz"
+      ]
+    },
+    {
+      "pair_id": "Skender.GetConnorsRsi",
+      "saved_native_sizes": [
+        10000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/connors-cpu/certified-order-10k.json.gz"
+      ]
+    },
+    {
+      "pair_id": "Skender.GetUlcerIndex",
+      "saved_native_sizes": [
+        10000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/ulcer-cpu/prefix-repair-10k.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Acos",
+      "saved_native_sizes": [
+        10000,
+        100000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/arithmetic-fusion/pointwise-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Atan",
+      "saved_native_sizes": [
+        10000,
+        100000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/arithmetic-fusion/pointwise-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Ceil",
+      "saved_native_sizes": [
+        10000,
+        100000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/arithmetic-fusion/pointwise-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Cos",
+      "saved_native_sizes": [
+        10000,
+        100000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/arithmetic-fusion/pointwise-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Cosh",
+      "saved_native_sizes": [
+        10000,
+        100000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/arithmetic-fusion/pointwise-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Exp",
+      "saved_native_sizes": [
+        10000,
+        100000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/arithmetic-fusion/pointwise-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Floor",
+      "saved_native_sizes": [
+        10000,
+        100000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/arithmetic-fusion/pointwise-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.HtDcPeriod",
+      "saved_native_sizes": [
+        10000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/hilbert-cpu/period-10k-certified.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Ln",
+      "saved_native_sizes": [
+        10000,
+        100000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/arithmetic-fusion/pointwise-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Log10",
+      "saved_native_sizes": [
+        10000,
+        100000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/arithmetic-fusion/pointwise-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Rsi",
+      "saved_native_sizes": [
+        10000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/wilder-strength-cpu/rsi-10k.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Sin",
+      "saved_native_sizes": [
+        10000,
+        100000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/arithmetic-fusion/pointwise-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Sinh",
+      "saved_native_sizes": [
+        10000,
+        100000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/arithmetic-fusion/pointwise-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Sqrt",
+      "saved_native_sizes": [
+        10000,
+        100000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/arithmetic-fusion/pointwise-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Tan",
+      "saved_native_sizes": [
+        10000,
+        100000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/arithmetic-fusion/pointwise-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Tanh",
+      "saved_native_sizes": [
+        10000,
+        100000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/arithmetic-fusion/pointwise-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "TaLib.Functions.Trima",
+      "saved_native_sizes": [
+        10000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/laguerre-triangular-10k/triangular-cpu-native.json.gz"
+      ]
+    },
+    {
+      "pair_id": "Trady.Indicator.DynamicMomentumIndex",
+      "saved_native_sizes": [
+        1000
+      ],
+      "missing_native_sizes": [
+        10000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/dynamic-momentum-cpu/deferred-output-1k.json.gz"
+      ]
+    },
+    {
+      "pair_id": "Trady.Indicator.EfficiencyRatio",
+      "saved_native_sizes": [
+        10000
+      ],
+      "missing_native_sizes": [
+        1000
+      ],
+      "current_catalog_evidence": [
+        "results/shared-rollout/path-ratio-cpu/cpu-native-10k.json.gz"
+      ]
+    }
+  ],
+  "saved_artifact_audit": {
+    "scope": "Saved JSON benchmark reports in the affected indicator families, recursively, including earlier candidate directories. No timing was run. Matches need source/fixture and statistical review before reuse.",
+    "reports": [
+      {
+        "path": "benchmarks/results/shared-rollout/arithmetic-fusion/arithmetic-native.json.gz",
+        "sha256": "a66c00a38a464606eec7bb46f4119e2dc65fe44756c3addfba432614bb1e517d",
+        "rows": 32
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/arithmetic-fusion/pointwise-native.json.gz",
+        "sha256": "58460d931257b2600e11eb4336e794d557887bf96224a2f8b3033d6a212db56c",
+        "rows": 112
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/connors-cpu/certified-order-10k.json.gz",
+        "sha256": "0420b7ea4140e448a32d69f8c887f39a91e3c280de42e35f54d0fc19a74a45c2",
+        "rows": 4
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/connors-cpu/initial-10k.json.gz",
+        "sha256": "7fcc51f9c82ec80ec43c2100ec42c76089df4e2e0c6e5242366a748c22ff58e8",
+        "rows": 4
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/dynamic-momentum-cpu/deferred-output-1k.json.gz",
+        "sha256": "59a6a15c246ea7ecee009622d465a834e67a1ad5db8b9cccd3f087078b062df8",
+        "rows": 4
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/gpu-pointwise/cpu-gpu-native.json.gz",
+        "sha256": "2703dd576ad717aca6aac20da81c889c58a2391d9a90d71f1051695e0ed33935",
+        "rows": 84
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/hilbert-cpu/period-10k-certified.json.gz",
+        "sha256": "fa5fb8296331118e9c51c96eb7371bd84209522e126a178fb58127aa1e42c800",
+        "rows": 4
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/hilbert-cpu/period-10k.json.gz",
+        "sha256": "52a3fe586678cc86d57f677cc59ab3b5d69f6e19a911d658dfa79877b2836ddd",
+        "rows": 4
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/hilbert-phasor-shared-cpu/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedHilbertBenchmarks-report-full-compressed.json",
+        "sha256": "d43730c377780ad83e4a9faeb9095c70bfb3f51423c71a7cd0244237b0823a74",
+        "rows": 8
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/hilbert-signals-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedHilbertSignalBenchmarks-report-full-compressed.json",
+        "sha256": "3d3dd8fb2df2dd980a83c46ab95b53b0e5638597b2031bad1e053c7052ba172a",
+        "rows": 16
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/hilbert-trendline-shared-cpu/skender/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedHilbertTrendlineBenchmarks-report-full-compressed.json",
+        "sha256": "3771c93c06224fd1bd7cd879615297e45d5a36a266647aa3b25aeb3c0ff97c01",
+        "rows": 8
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/hilbert-trendline-shared-cpu/quanta/qualified-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedHilbertTrendlineBenchmarks-report-full-compressed.json",
+        "sha256": "7337ccdf0dfa4b7da7b0cff2554ea457e0527792ee4e0a825da80cfb6d34b18e",
+        "rows": 8
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/laguerre-triangular-10k/laguerre-all-paths.json.gz",
+        "sha256": "d8e1defa021f32a55306ed5eb534f46668fd797d77001be588bb9bf54d2d5ad6",
+        "rows": 4
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/laguerre-triangular-10k/laguerre-cpu-native.json.gz",
+        "sha256": "a3d1cc6628d827be03cfd8679fc517d2eba78f919b6ec4386a9ef9b6baf6c31e",
+        "rows": 4
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/laguerre-triangular-10k/triangular-all-paths.json.gz",
+        "sha256": "43ed2cb2077243d5ad4d50e6daa50e28c06f6f2c007853cfa77c66b2fc74078f",
+        "rows": 12
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/laguerre-triangular-10k/triangular-cpu-native.json.gz",
+        "sha256": "32b2c684f5a5b5e7037fd2c709199a78ee5683cca1a159a8452bf3dafae6b3e0",
+        "rows": 8
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/path-ratio-certified-cpu/cmo-cpu-native-10k.json.gz",
+        "sha256": "84e5be2bb55ff3fadb209174efc72e73874401ba933d12983b8d10ed178d1862",
+        "rows": 4
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/path-ratio-certified-cpu/cmo-six-arm-10k.json.gz",
+        "sha256": "d4082f0f9e54e77841893afa5851a0f867d0ff5fb2c3b1497b5d57558fbdce4e",
+        "rows": 6
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/path-ratio-cpu/cpu-native-10k.json.gz",
+        "sha256": "50f8aa2b243ee4aad62b767ce80731d8a0fee25fa5ba5853a338ad08e6cd1fb6",
+        "rows": 8
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/pointwise/before-presence.json.gz",
+        "sha256": "82e0c5aef7b447f65ca9c8a754284980aed95ba5c51652f8e937487c96679b06",
+        "rows": 112
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/pointwise/pointwise.json.gz",
+        "sha256": "405ade519640ff856d9923b556b8fcf56aae104bb79a3c0b49773fcbcdbe3e2f",
+        "rows": 112
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/pointwise-batch/current.json.gz",
+        "sha256": "6b99c0667e150da3a86e7783ab1169237afe53cdbdbfa2ce1152ed4fef96de17",
+        "rows": 24
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/pointwise-batch/initial.json.gz",
+        "sha256": "5744ba8ad0acd388f08acbefa9d170371e2b6abbd40d22d6b07b64db0e164b69",
+        "rows": 24
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/pointwise-batch/parallel-10k.json.gz",
+        "sha256": "28ad0fa465b199adf2e58f144f26be9f16edc09c1122ebde9c7d42e8bb8188a7",
+        "rows": 12
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/pointwise-local-record/all-paths.json.gz",
+        "sha256": "23bcb24af62fff4c2f81db1aba8f36c68289ba01712091287f1025fcefc20249",
+        "rows": 24
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/ulcer-cpu/cached-parallel-10k.json.gz",
+        "sha256": "a195586730ff1f536cb71f84429b478bb98586ebe61531dae8e85442f279643c",
+        "rows": 4
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/ulcer-cpu/positive-peak-10k.json.gz",
+        "sha256": "02abac9eaa6952a11b43b3628a7994f36e029b98ecc2586a92dc322fba5e9c7e",
+        "rows": 4
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/ulcer-cpu/prefix-repair-10k.json.gz",
+        "sha256": "7f41aff9a2698921412b7d1333f54acce68908a6ccd97e20ec5f8dcd9306b0dd",
+        "rows": 4
+      },
+      {
+        "path": "benchmarks/results/shared-rollout/wilder-strength-cpu/rsi-10k.json.gz",
+        "sha256": "fb37e8ab56e83f3c63e6bcfeba1148deba2a1ba37558e26bc78a03c1ce661573",
+        "rows": 4
+      }
+    ],
+    "candidate_rows": []
+  },
+  "change": "Add1000 to the existing pointwise benchmark size parameters. No production changes. Other fixtures already expose the missing size. Explicit timing filters exclude all previously measured sizes and all GPU timing arms.",
+  "validation": {
+    "missing_size_fixture_cases": 23,
+    "gpu_cases": 100
+  },
+  "benchmark_cases": 92,
+  "new_queue_stages": 8,
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedPointwiseBenchmarks.cs": "df6ff8aeabe190784efdca5dee4997a806000e73e4e21f533f049c100c6456e3",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedZeroSeedLaguerreBenchmarks.cs": "e99f2d3c5ddc42b04db5f96f938381f8a88f8ca12b72bb8c103a988fa244a236",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTriangularBenchmarks.cs": "1424a1728fd8620690b49e53f4b0d0d6afc7c4a46dc0363ac431f08a28a3bb00",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedPathRatioBenchmarks.cs": "b788fb9a66d13c576742587d8d63772e5a37b8aec598d9117572add0f5511547",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedUlcerBenchmarks.cs": "0d9f5ca06f88219d03c3d7c23701f23040350716d2fa299305869ce330d2378f",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedWilderStrengthBenchmarks.cs": "2847c078da46ec2329b80c14261058c5e9715260f01621abf7ed9f99c65b4534",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedHilbertBenchmarks.cs": "fd9d7c55337dc57a7fa87dfc2f1451c936f46e6f7b383a842d83fcbaa947154f",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedDynamicMomentumBenchmarks.cs": "b53becfad92db2a53837ded095021fe3b9feb9165a47c4aad6e1fcbd6fbda6bd",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/MissingSizeBenchmarkTests.cs": "4fd6d0c2bc0cbc42c3fd270cb5c28bc37fb7d930d0314e7c44d39fdd3d6ee419"
+  },
+  "status": "Fixture contracts verified; timing and catalog qualification remain pending. Native results at already measured sizes are retained without rerunning."
+}

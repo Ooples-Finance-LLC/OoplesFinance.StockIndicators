@@ -1,0 +1,37 @@
+{
+  "status": "214 affected contract cases passed (153 new and 61 star reversal). 100 local GPU cases passed. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaCandleBenchmarkBase.cs": "c5156d486d2a74e8d54960c1dfcb6113dd4f19da1fe7178f14683dd2b8acbbba",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaStarReversalBenchmarks.cs": "e0685b5054d60f9f76a20fcc1263eb0502308b92223f97b33c6e987540549f04",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaReversalContinuationBenchmarks.cs": "d4ec7617c2492d918efb981fd9c17f0c653018c5aaa4dddb3d13378a1e506f03",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/ExhaustionComparison.cs": "5c5c383935b40ef995f6a777e5a22604a7869ed4a134f5d97de7912e7fe393dd",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/CrowSoldierComparison.cs": "eb000d7826b5b323aff63517dde3a9068fbe0358bde46104fada77ae13d26be8",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PenetrationCandleComparison.cs": "1f3027a73f64b47d61ad7b2b0412fad9cb738aa48b9984bc936be3a31bd325c3",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/StarReversalComparison.cs": "a5df5dec659cd51235e6a180c4b05fc0bd36fa656b4d9008313f2bc7aace04d9",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/GapContinuationComparison.cs": "531871cf38e21b41a399ff2c13db22ab65497f3fde8874a5b108c33833dea82e",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaReversalContinuationBenchmarkTests.cs": "031f173a6c0327a112b7e40e0aff21889bb3f21e09709da093b077b761cfc84f",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaStarReversalBenchmarkTests.cs": "b5f1c8539c3bf47c6268093e467caecb91fb888306038397cd031e90b24fee45"
+  },
+  "native_package": "TALib.NETCore 0.5.0",
+  "native_package_dll_sha256": "980edcda5db3ab7b0cdd9ef877aa784aa93728129f134c023a1e08acedeefcbe",
+  "operations": [
+    "AdvanceBlock",
+    "Stalled",
+    "ThreeStarsInSouth",
+    "ThreeBlackCrows",
+    "IdenticalThreeCrows",
+    "ThreeWhiteSoldiers",
+    "PiercingLine",
+    "DarkCloudCover"
+  ],
+  "contract": "Direct native OHLC span APIs return eager packed int arrays, aligned within the timed method. Native workers retain 11, 12 or 13 preceding bars according to the pattern lookback. Defaults match the existing paired fixtures, including DarkCloudCover penetration 0.5. A shared TA candle base consolidates input preparation, range validation, alignment and joining across this fixture and the five star reversals. Independent references check all published values and startup; repeated calls retain earlier results.",
+  "validation": {
+    "comparator_cases_passed": 214,
+    "new_fixture_cases_passed": 153,
+    "affected_star_reversal_cases_passed": 61,
+    "production_source_changed": false,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1283
+  },
+  "benchmark_cases": 64
+}

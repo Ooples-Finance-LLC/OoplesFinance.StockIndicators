@@ -1,0 +1,39 @@
+{
+  "Operation": "QuanTAlib.Slope",
+  "Count": 1000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        134160,
+        134160,
+        134160
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        85472,
+        85472,
+        85472
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        442600,
+        442600,
+        442600
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        466576,
+        466576,
+        466576
+      ]
+    }
+  ]
+}

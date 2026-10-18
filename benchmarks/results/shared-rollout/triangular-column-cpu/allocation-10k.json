@@ -1,0 +1,1 @@
+{"Operation":"TaLib.Functions.Trima","Count":10000,"Repetitions":5,"Arms":[{"Method":"BuilderFull","Bytes":[563240,563576,563240,563576,563240]},{"Method":"BuilderLatestOnly","Bytes":[81832,81832,81832,81832,81832]},{"Method":"NativeSingle","Bytes":[79904,79904,79904,79904,79904]},{"Method":"NativeParallel","Bytes":[80328,80328,80328,80328,80328]}]}

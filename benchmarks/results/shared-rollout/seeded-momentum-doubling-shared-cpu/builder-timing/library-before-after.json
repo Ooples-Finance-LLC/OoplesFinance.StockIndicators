@@ -1,0 +1,229 @@
+{
+  "note": "Original library measurements retained. CPU/architecture/core count matched. Descriptive cross-run ratios only when runtime also matches; incompatible comparisons explicitly withheld. No competitor win claim.",
+  "measurements": [
+    {
+      "operation": "Skender.GetPmo",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_mean_ms": 0.9320870370370371,
+      "new_mean_ms": 0.9490162393162394,
+      "old_allocated_bytes": 82911,
+      "new_allocated_bytes": 82906,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "Skender.GetPmo",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_mean_ms": 0.867717265625,
+      "new_mean_ms": 0.959034765625,
+      "old_allocated_bytes": 34124,
+      "new_allocated_bytes": 34134,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "Skender.GetPmo",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_mean_ms": 9.009279797979799,
+      "new_mean_ms": 8.902253125,
+      "old_allocated_bytes": 804001,
+      "new_allocated_bytes": 803985,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "Skender.GetPmo",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_mean_ms": 8.881254545454548,
+      "new_mean_ms": 8.83840101010101,
+      "old_allocated_bytes": 322913,
+      "new_allocated_bytes": 322913,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "Skender.GetTrix",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_mean_ms": 0.8779787109375,
+      "new_mean_ms": 0.85220765625,
+      "old_allocated_bytes": 91254,
+      "new_allocated_bytes": 91254,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "Skender.GetTrix",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_mean_ms": 0.8863675,
+      "new_mean_ms": 0.800779453125,
+      "old_allocated_bytes": 42497,
+      "new_allocated_bytes": 42495,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "Skender.GetTrix",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_mean_ms": 8.9656875,
+      "new_mean_ms": 8.432516666666668,
+      "old_allocated_bytes": 884321,
+      "new_allocated_bytes": 884345,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "Skender.GetTrix",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_mean_ms": 8.789058585858587,
+      "new_mean_ms": 8.152177777777778,
+      "old_allocated_bytes": 403247,
+      "new_allocated_bytes": 403273,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "Skender.GetTsi",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_mean_ms": 1.4314659375,
+      "new_mean_ms": 1.186090451388889,
+      "old_allocated_bytes": 82956,
+      "new_allocated_bytes": 82958,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "Skender.GetTsi",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_mean_ms": 1.433329296875,
+      "new_mean_ms": 1.1819735243055556,
+      "old_allocated_bytes": 34201,
+      "new_allocated_bytes": 34198,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "Skender.GetTsi",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_mean_ms": 14.835767142857144,
+      "new_mean_ms": 12.505011666666668,
+      "old_allocated_bytes": 804510,
+      "new_allocated_bytes": 804773,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "Skender.GetTsi",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_mean_ms": 14.52398095238095,
+      "new_mean_ms": 12.16341388888889,
+      "old_allocated_bytes": 323422,
+      "new_allocated_bytes": 323134,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "TaLib.Functions.Trix",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_mean_ms": 0.9124167534722223,
+      "new_mean_ms": 0.83883390625,
+      "old_allocated_bytes": 91254,
+      "new_allocated_bytes": 91252,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "TaLib.Functions.Trix",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_mean_ms": 0.90581650390625,
+      "new_mean_ms": 0.807711328125,
+      "old_allocated_bytes": 42497,
+      "new_allocated_bytes": 42494,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "TaLib.Functions.Trix",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_mean_ms": 9.504382777777778,
+      "new_mean_ms": 8.428051041666667,
+      "old_allocated_bytes": 884418,
+      "new_allocated_bytes": 884321,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    },
+    {
+      "operation": "TaLib.Functions.Trix",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_mean_ms": 9.532169999999999,
+      "new_mean_ms": 8.38543425925926,
+      "old_allocated_bytes": 403247,
+      "new_allocated_bytes": 403203,
+      "library_comparison_unavailable": {
+        "reason": "RuntimeVersion differs; ratios and win claims withheld",
+        "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+        "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+      }
+    }
+  ]
+}

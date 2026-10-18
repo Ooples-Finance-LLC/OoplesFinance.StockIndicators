@@ -1,0 +1,11 @@
+MinIndex, MaxIndex and MinMaxIndex CPU qualification.
+
+WindowExtremeIndex uses the shared lazy deque in standalone and mixed bounded CPU execution. Standalone workers add their absolute input origin after seeded local evaluation; mixed workers use the longest shared seed origin, including shorter-period members. All indices fit exactly in binary64 for array-backed inputs.
+
+94 focused bounded-window tests passed, zero skipped. Coverage includes periods 1/3/20/4096/4097/Int32.MaxValue, serial/eight-worker execution, signed-zero/equal extrema, independent absolute-index scans, unequal mixed periods, full snapshots and invalid worker-boundary input. Nineteen inventory tests and Release net10 benchmark build passed.
+
+Thirty timing cases passed independent setup checks with five warmups and fifteen measurements. Native TA-Lib calls retain int arrays for MinIndex/MaxIndex and two double arrays for MinMaxIndex. Native parallel reads the original close span with disjoint output spans and P-1 preceding inputs, without copies or output rebasing. Input preparation and comparison conversions are outside timing. Native emits only the defined suffix; builder retains partial startup, double-valued outputs, and Full OHLCV snapshots.
+
+The initial harness used an exclusive input end, but TA-Lib ValidateInputRange requires an inclusive end. Setup correctly rejected all cases and produced zero usable timings. The input end was corrected to end-1; output assertions and independent oracles were unchanged. Published evidence is only from the corrected campaign.
+
+At 10k MaxIndex Full is 73.63 us / 552.97 KiB versus evaluator 284.44 us and native parallel 9.60 us / 39.44 KiB. MinIndex Full is 79.58 us versus native 11.23 us; MinMaxIndex Full is 121.15 us versus evaluator 487.36 us and native 21.90 us. Both builder modes still lose all tested comparisons. These are qualified performance gaps, not wins. Direct native qualification increases to 96/401 APIs. GPU index execution remains unqualified.

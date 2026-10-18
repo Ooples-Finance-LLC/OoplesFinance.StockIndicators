@@ -48,10 +48,43 @@ public sealed class RollingPriceSum : IndicatorBase, IIndicatorValidationContrac
         return values;
     }
 
-    private sealed class State(int period) : IIndicatorState
+    private sealed class State(int period) : IIndicatorState, IOwnedHistoryBatchState
     {
         private readonly Queue<double> _prices = new();
         private ExactMeanAccumulator _sum;
+
+        public bool TryComputeBatch(OwnedBarHistory bars, double[][] output)
+        {
+#if NETFRAMEWORK
+            return false;
+#else
+            var values = output[0];
+            if (period > bars.Count) { values.AsSpan().Clear(); return true; }
+            // Reuse the pilot's grid proof. Every partial/window sum is exact;
+            // eviction occurs first so no temporary contains period+1 terms.
+            // Failed speculation does not mutate this state: the engine replays
+            // its established exact accumulator before publishing anything.
+            var proof = new Core.SmaCpuKernel.GridFacts();
+            double sum = 0;
+            var offset = 0;
+            for (var chunk = 0; chunk < bars.ChunkCount; chunk++)
+            {
+                var input = bars.Chunk(chunk);
+                for (var j = 0; j < input.Length; j++)
+                {
+                    var i = offset + j;
+                    var value = input[j].Close;
+                    proof.Include(value);
+                    if (!proof.Certifies(period)) return false;
+                    if (i >= period) sum -= bars[i - period].Close;
+                    sum += value;
+                    values[i] = i < period - 1 ? 0 : sum;
+                }
+                offset += input.Length;
+            }
+            return true;
+#endif
+        }
 
         public void Reset()
         {

@@ -1,0 +1,39 @@
+{
+  "Operation": "QuanTAlib.Jma",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        564168,
+        564168,
+        564168
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        82760,
+        82760,
+        82760
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        3970472,
+        3970472,
+        3970472
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        17568504,
+        17568504,
+        17568504
+      ]
+    }
+  ]
+}

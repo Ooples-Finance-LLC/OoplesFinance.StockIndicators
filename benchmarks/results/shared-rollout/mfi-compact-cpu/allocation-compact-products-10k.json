@@ -1,0 +1,41 @@
+{
+  "Operation": "TaLib.Functions.Mfi",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        648632,
+        648632,
+        648632
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        168160,
+        167504,
+        167504
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        80200,
+        80200,
+        80200
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        82376,
+        82376,
+        82376
+      ]
+    }
+  ],
+  "Production": "603182ad plus compact exact MFI product history change",
+  "Evidence": "Allocation-only warmed process-wide measurements; all raw samples retained; no latency qualification."
+}

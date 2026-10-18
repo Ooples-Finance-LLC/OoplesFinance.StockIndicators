@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "reason": "8 builder-only cases completed exit0 without observed competing jobs.",
+  "source_commit": "15155bbf",
+  "reuse_binaries": true,
+  "next_filter": "*SharedAlligatorBenchmarks*Builder*",
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "preflight_evidence": "external-processes.json",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-alligator-binaries-15155bbf",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-alligator-builder-20261013-a",
+  "evidence": "builder-timing"
+}

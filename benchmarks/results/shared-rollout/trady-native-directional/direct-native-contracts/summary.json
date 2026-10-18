@@ -1,0 +1,27 @@
+{
+  "status": "99 focused contract cases passed. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTradyNativeDirectionalBenchmarks.cs": "273e65de0a8fbb877cf3f755dad73d0b0be5c5464886e4b825acbeddac56b338",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/DirectionalComparison.cs": "8fac8b0e593524040272229439eb4580becead4627102fa703ac4a8bedd46c48",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTradyNativeDirectionalBenchmarkTests.cs": "9e89ef69c3231117eac41a63dc49145e2f7a7dce06bfb7e4b33aed978431334f"
+  },
+  "native_package": "Trady.Analysis 3.2.8",
+  "native_package_dll_sha256": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+  "operations": [
+    "PlusDirectionalMovement",
+    "MinusDirectionalMovement",
+    "PlusDirectionalIndicator",
+    "MinusDirectionalIndicator",
+    "DirectionalMovementIndex",
+    "AverageDirectionalIndex",
+    "AverageDirectionalIndexRating"
+  ],
+  "contract": "Public tuple APIs return eager native decimal Lists. Raw positive/negative movement uses high/low scalar inputs and one preceding bar; smoothed measures use High/Low/Close triples and full prefixes to preserve recursive Wilder states. Named Compute(startIndex,endIndex) requests only owned outputs. All native computation and result joining remain timed. Independent decimal references check native values and nulls; binary64 grid references check owned values and presence. Repeated serial/parallel calls preserve earlier results.",
+  "validation": {
+    "comparator_cases_passed": 99,
+    "production_source_changed": false,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1267
+  },
+  "benchmark_cases": 56
+}

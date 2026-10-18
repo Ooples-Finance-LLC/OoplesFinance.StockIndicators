@@ -1,0 +1,12 @@
+Aroon fused GPU window (published AiDotNet.Tensors 0.134.4, net10 Release)
+127 focused Aroon/shared GPU workspace/pointwise/midpoint/index/candle tests passed, zero skips; actual GPU dispatch asserted. TRX: aroon-gpu.trx.
+20 inventory tests passed. Benchmark build passed. All 60 benchmark cases completed, including independent CPU/native setup and six-output GPU parity.
+Kernel: one scan finds high/low indices and calculates Up/Down/Oscillator. Period/extra-bar/tie policy are runtime arguments to one fixed compiled key. Reuses five existing device buffers and two host columns. Only window-defined presence is published from host index/period metadata.
+Exact integer numerators fit below 2^38; final FP64 division, positive exact zero, oldest/newest ties, startup and Int32.MaxValue period covered.
+Adversarial review: no writes alias device inputs; shared workspace lock covers dispatch/readback; failure clears retained workspace; immutable output arrays remain run-owned; unsupported sourced/mixed/empty Required-GPU requests reject.
+10k GPU Full 681-708 us versus CPU 148-163 us. 100k GPU Full 3.70-4.28 ms versus CPU 2.30-2.59 ms.
+GPU beats Skender/Trady at 100k but CPU remains faster; TA-Lib wins. Auto remains CPU. GPU scan is O(N*period); large-period speed is unqualified.
+Managed allocations at 100k: GPU Full about 7822 KiB, Latest about 3130 KiB; CPU Full about 7833-7836 KiB, Latest about 3139-3140 KiB. These exclude device memory; retained workspace is bounded separately.
+Full owns OHLCV snapshots and six published output slots. Native arms retain their public output shapes and preconverted inputs, including suffix-only TA-Lib arrays.
+Evidence retains fastest native arms across campaigns with original statistics and memory provenance. Direct API coverage remains 101/401.
+ShortRun results include minimum-iteration/distribution warnings; timings are host-specific.

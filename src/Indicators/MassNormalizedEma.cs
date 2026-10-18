@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -147,8 +146,7 @@ public sealed class MassNormalizedQuadrupleEma
 
 internal sealed class MassNormalizedStage(double alpha)
 {
-    private static readonly BigInteger Grid = BigInteger.One << 1074;
-    private readonly BigInteger _alpha = ExactVarianceWindow.Units(alpha);
+    private readonly ExactMeanAccumulator _retention = Retention(alpha);
     private double _mean,
         _mass,
         _residual = 1;
@@ -161,15 +159,58 @@ internal sealed class MassNormalizedStage(double alpha)
 
     internal double Next(double input)
     {
+        if (_residual == 0)
+        {
+            // A previous update has already reset mass to one. Factor the exact
+            // convex sum; keep the first zero-residual update on the path below
+            // because it must still use the previous, nonunit startup mass.
+            var previous = JurikDyadic.FromDouble(_mean);
+            var next = JurikDyadic.FromDouble(input);
+            if (JurikDyadic.TryBlend(previous, next, alpha, out var blended))
+            {
+                var value = blended.Mean(1);
+                // The reusable blend canonicalizes zero. This stage publishes
+                // directly, so use exact arithmetic to retain negative underflow.
+                if (value != 0) // NOSONAR: Preserve the signed-zero rounding contract.
+                {
+                    _mean = value;
+                    return _mean;
+                }
+            }
+            next.Subtract(previous);
+            next.Multiply(alpha);
+            next.AddExact(previous);
+            _mean = next.Mean(1);
+            return _mean;
+        }
         _residual = _residual > 1e-10 ? (1 - alpha) * _residual : 0;
-        var previousWeight = (Grid - _alpha) * ExactVarianceWindow.Units(_mass);
-        var currentWeight = _alpha * Grid;
-        var weight = previousWeight + currentWeight;
-        var numerator =
-            ExactVarianceWindow.Units(input) * currentWeight
-            + ExactVarianceWindow.Units(_mean) * previousWeight;
-        _mean = ExactMeanAccumulator.UnitRatio(numerator, _residual == 0 ? Grid * Grid : weight);
-        _mass = _residual == 0 ? 1 : ExactMeanAccumulator.UnitRatio(weight, Grid);
+        if (_mass == 0) // NOSONAR: Only the initial/reset state has zero mass.
+        {
+            // The exact numerator alpha*input divided by alpha is the input,
+            // including tiny alphas whose floating product would underflow.
+            _mean = input == 0 ? 0 : input; // NOSONAR: Preserve canonical exact zero.
+            _mass = alpha;
+            return _mean;
+        }
+        // Retain exact weights on their natural binary scales instead of padding
+        // every term to the minimum-subnormal grid. No intermediate is rounded.
+        var previousWeight = _retention;
+        previousWeight.Multiply(_mass);
+        var weight = previousWeight;
+        weight.Add(alpha);
+        var numerator = previousWeight;
+        numerator.Multiply(_mean);
+        numerator.AddProduct(input, alpha);
+        _mean = _residual == 0 ? numerator.Mean(1) : numerator.Ratio(weight);
+        _mass = _residual == 0 ? 1 : weight.Mean(1);
         return _mean;
+    }
+
+    private static ExactMeanAccumulator Retention(double alpha)
+    {
+        var retention = new ExactMeanAccumulator();
+        retention.Add(1);
+        retention.Add(alpha, -1);
+        return retention;
     }
 }

@@ -10,6 +10,42 @@ public sealed class BuilderStorageTests
     private static Bar Candle(int i) => new(DateTime.UnixEpoch.AddMinutes(i), i + 1, i + 3, i, i + 2, 100);
 
     [Fact]
+    public async Task LegacyCatalogsRetainConfigurationAndStayIsolatedAfterTypedBuild()
+    {
+        var bars = Enumerable.Range(0, 9).Select(Candle).ToArray();
+        StockIndicatorBuilder Builder() => new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(new RollingPriceSum(3));
+        var first = Builder();
+        var second = Builder();
+        using var run = await first.BuildAsync();
+        using var otherRun = await second.BuildAsync();
+        Action<StockIndicatorBuilder, Action<object>>[] configure =
+        [
+            (b, capture) => b.ConfigureIndicators(c => capture(c)),
+            (b, capture) => b.ConfigureSignals(c => capture(c)),
+            (b, capture) => b.ConfigureNotifications(c => capture(c)),
+            (b, capture) => b.ConfigureAutoTrading(c => capture(c)),
+            (b, capture) => b.ConfigureBehavior(c => capture(c))
+        ];
+        foreach (var apply in configure)
+        {
+            object? original = null;
+            apply(first, c => original = c);
+            Assert.NotNull(original);
+            apply(first, c => Assert.Same(original, c));
+            apply(second, c => Assert.NotSame(original, c));
+        }
+        first.ConfigureBehavior(b => b.SkipFirstUpdate = true);
+        first.ConfigureBehavior(b => Assert.True(b.SkipFirstUpdate));
+        second.ConfigureBehavior(b => Assert.False(b.SkipFirstUpdate));
+        var source = IndicatorDataSource.FromValidatedHistory(new Lazy<StockData>(() =>
+            new StockData(new[] { 1d }, new[] { 2d }, new[] { 0d }, new[] { 1d }, new[] { 1d }, new[] { DateTime.UnixEpoch })));
+        first.AddDataSource("Market", source);
+        Assert.Same(source, first.GetNamedSource("MARKET"));
+        Assert.Null(second.GetNamedSource("market"));
+    }
+
+    [Fact]
     public async Task SynchronousAndAsynchronousSourcesPublishIdenticalOwnedHistory()
     {
         var bars = Enumerable.Range(0, 80).Select(Candle).ToArray();

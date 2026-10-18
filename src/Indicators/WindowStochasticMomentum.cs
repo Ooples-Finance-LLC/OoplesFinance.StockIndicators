@@ -44,7 +44,7 @@ public sealed class WindowStochasticMomentum
                 )
             );
 
-    private sealed class State(int period) : IMultiOutputState
+    internal sealed class State(int period) : IMultiOutputState
     {
         private readonly StochasticMomentumWindow _window = new(period);
 
@@ -144,7 +144,7 @@ public sealed class DoubleSmoothedStochasticMomentum
                 )
             );
 
-    private sealed class State(int period, int first, int second, int signalPeriod)
+    internal sealed class State(int period, int first, int second, int signalPeriod)
         : IMultiOutputState
     {
         private readonly StochasticMomentumWindow _window = new(period);

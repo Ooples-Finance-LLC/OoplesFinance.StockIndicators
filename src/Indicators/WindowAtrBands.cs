@@ -116,7 +116,7 @@ public sealed class WindowAtrBands : MultiOutputIndicatorBase, IIndicatorValidat
                 )
             );
 
-    private sealed class State(
+    internal sealed class State(
         int centerPeriod,
         int atrPeriod,
         double multiplier,

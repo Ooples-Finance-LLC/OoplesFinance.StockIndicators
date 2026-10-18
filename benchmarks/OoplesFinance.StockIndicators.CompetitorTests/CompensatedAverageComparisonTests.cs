@@ -1,4 +1,5 @@
 using OoplesFinance.StockIndicators.CompetitorBenchmarks;
+using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
 using Xunit;
@@ -7,6 +8,32 @@ namespace OoplesFinance.StockIndicators.CompetitorTests;
 
 public sealed class CompensatedAverageComparisonTests
 {
+    [Theory]
+    [InlineData(2)]
+    [InlineData(3)]
+    public async Task ExactFactoredUpdatesPreserveBitsAcrossCompensationCutoff(int order)
+    {
+        foreach (int period in new[] { 1, 3, 20, int.MaxValue })
+        foreach (double scale in new[] { double.Epsilon, 1d, 1e280 })
+        {
+            // Period 20 crosses the compensation cutoff within this sequence.
+            // Alternating signs and zeros exercise exact cancellation and underflow.
+            double[] prices = Enumerable.Range(0, 384)
+                .Select(i => i % 11 == 0 ? -0d : (i % 17 - 8) * scale).ToArray();
+            var expected = CompensatedAverageComparison.Reference(prices, period, order, false);
+            var bars = prices.Select((value, i) =>
+                new Bar(DateTime.UnixEpoch.AddDays(i), value, value, value, value, 0)).ToArray();
+            foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+            {
+                var indicator = new CompensatedExponentialAverage(period, order);
+                using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                    .ConfigureIndicators(indicator).ConfigureHistory(history).BuildAsync();
+                Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits),
+                    run[indicator].ToArray().Select(BitConverter.DoubleToInt64Bits));
+            }
+        }
+    }
+
     [Theory]
     [InlineData(2, 1)]
     [InlineData(3, 1)]

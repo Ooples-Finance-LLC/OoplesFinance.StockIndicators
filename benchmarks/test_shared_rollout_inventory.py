@@ -1,0 +1,623 @@
+import gzip
+import json
+import os
+import tempfile
+import unittest
+from pathlib import Path
+
+from build_shared_rollout_inventory import inventory
+
+
+class InventoryDiagnosticsTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.manifest = json.loads(Path(__file__).with_name('competitor-library-manifest.json').read_text())
+        self.rows = [dict(FullName=f'Historical(PairId: "{p["Id"]}", Bars: {count})',
+                          Method=method, Statistics={'Mean': 1}, Memory={'BytesAllocatedPerOperation': 64})
+                     for p in self.manifest if p['Status'] == 'paired'
+                     for count in (1000, 10000) for method in ('Ooples', 'Competitor')]
+
+    def write(self):
+        (self.root / 'competitor-library-manifest.json').write_text(json.dumps(self.manifest))
+        folder = self.root / 'results' / '2026-10-06-library-comparisons'
+        folder.mkdir(parents=True, exist_ok=True)
+        with gzip.open(folder / 'fixture.json.gz', 'wt') as stream:
+            json.dump({'Benchmarks': self.rows}, stream)
+
+    def qualification(self, name):
+        path = self.root / 'qualification.json'
+        rows = [dict(FullName=name, Method=method,
+                     Statistics={'Mean': 1, 'ConfidenceInterval': {'Lower': .9, 'Upper': 1.1}},
+                     Memory={'BytesAllocatedPerOperation': 64})
+                for method in ('BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel')]
+        path.write_text(json.dumps({'Benchmarks': rows}))
+        return path
+
+    def test_convolution_gpu_fixture_cpu_arms(self):
+        self.write()
+        path = self.qualification('SharedGpuConvolutionBenchmarks.BuilderFull(Operation: "Convolution", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Convolution'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_commodity_channel_fixture_cpu_arms(self):
+        self.write()
+        path = self.qualification('SharedCommodityChannelBenchmarks.BuilderFull(Operation: "TaLib.Functions.Cci", Count: 10000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['TaLib.Functions.Cci'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_money_flow_fixture_cpu_arms(self):
+        self.write()
+        path = self.qualification('SharedMoneyFlowIndexBenchmarks.BuilderFull(Operation: "TaLib.Functions.Mfi", Count: 10000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['TaLib.Functions.Mfi'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_skender_money_flow_fixture_cpu_arms(self):
+        self.write()
+        path = self.qualification('SharedMoneyFlowIndexBenchmarks.BuilderFull(Operation: "Skender.GetMfi", Count: 10000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Skender.GetMfi'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_vortex_fixture_cpu_arms(self):
+        self.write()
+        path = self.qualification('SharedVortexBenchmarks.BuilderFull(Operation: "Skender.GetVortex", Count: 10000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Skender.GetVortex'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_choppiness_fixture_cpu_arms(self):
+        self.write()
+        path = self.qualification('SharedChoppinessBenchmarks.BuilderFull(Operation: "Skender.GetChop", Count: 10000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Skender.GetChop'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_ultimate_fixture_cpu_arms(self):
+        self.write()
+        path = self.qualification('SharedUltimateBenchmarks.BuilderFull(Operation: "TaLib.Functions.UltOsc", Count: 10000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['TaLib.Functions.UltOsc'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_skender_ultimate_fixture_cpu_arms(self):
+        self.write()
+        path = self.qualification('SharedUltimateBenchmarks.BuilderFull(Operation: "Skender.GetUltimate", Count: 10000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Skender.GetUltimate'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_endpoint_gpu_fixture_cpu_arms(self):
+        self.write()
+        path = self.qualification('SharedGpuEndpointBenchmarks.BuilderFull(Operation: "Epma", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Epma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_regression_gpu_fixture_cpu_arms(self):
+        self.write()
+        for operation in ('LinearReg', 'LinearRegSlope', 'LinearRegIntercept', 'Tsf'):
+            path = self.qualification(f'SharedGpuRegressionBenchmarks.BuilderFull(Operation: "{operation}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual(['TaLib.Functions.' + operation], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_gpu_path_ratio_fixture_cpu_arms(self):
+        self.write()
+        for operation in ('Skender.GetCmo', 'Trady.Indicator.EfficiencyRatio'):
+            path = self.qualification(f'SharedGpuPathRatioBenchmarks.BuilderFull(Operation: "{operation}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([operation], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_path_ratio_explicit_operations(self):
+        self.write()
+        for operation in ('Skender.GetCmo', 'Trady.Indicator.EfficiencyRatio'):
+            path = self.qualification(f'SharedPathRatioBenchmarks.BuilderFull(Operation: "{operation}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([operation], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_fisher_explicit_operation(self):
+        self.write()
+        path = self.qualification('SharedFisherBenchmarks.BuilderFull(Operation: "Skender.GetFisherTransform", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Skender.GetFisherTransform'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_regression_statistics_explicit_operations(self):
+        self.write()
+        for operation in ('QuanTAlib.Slope', 'Skender.GetSlope'):
+            path = self.qualification(f'SharedRegressionStatisticsBenchmarks.BuilderFull(Operation: "{operation}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([operation], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_schaff_explicit_operation(self):
+        self.write()
+        path = self.qualification('SharedSchaffCycleBenchmarks.BuilderFull(Operation: "Skender.GetStc", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Skender.GetStc'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_klinger_explicit_operation(self):
+        self.write()
+        path = self.qualification('SharedKlingerBenchmarks.BuilderFull(Operation: "Skender.GetKvo", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Skender.GetKvo'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_expanding_recurrence_explicit_operations(self):
+        self.write()
+        for operation in ('QuanTAlib.Rema', 'QuanTAlib.Zlema'):
+            path = self.qualification(f'SharedExpandingRecurrenceBenchmarks.BuilderFull(Operation: "{operation}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([operation], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_holt_winter_explicit_operation(self):
+        self.write()
+        path = self.qualification('SharedHoltWinterBenchmarks.BuilderFull(Operation: "QuanTAlib.Hwma", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Hwma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_zero_seed_laguerre_explicit_operation(self):
+        self.write()
+        path = self.qualification('SharedZeroSeedLaguerreBenchmarks.BuilderFull(Operation: "QuanTAlib.Ltma", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Ltma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_median_adaptive_explicit_operation(self):
+        self.write()
+        path = self.qualification('SharedMedianAdaptiveBenchmarks.BuilderFull(Operation: "QuanTAlib.Maaf", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Maaf'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_gpu_weighted_average_explicit_operation(self):
+        self.write()
+        path = self.qualification('SharedWeightedAverageBenchmarks.BuilderFull(Operation: "TaLib.Functions.Wma", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(result['measured_current_apis'], 1)
+
+    def test_native_ema_qualification_keeps_both_namespaces(self):
+        self.write()
+        for api in ('QuanTAlib.Ema', 'Skender.GetEma', 'QuanTAlib.Dema', 'QuanTAlib.Tema', 'QuanTAlib.Qema'):
+            path = self.qualification(f'SharedNativeEmaBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_seeded_ema_qualification_keeps_native_seed_modes_separate(self):
+        self.write()
+        for api in ('Skender.GetDema', 'Skender.GetTema', 'TaLib.Functions.Dema', 'TaLib.Functions.Tema'):
+            path = self.qualification(f'SharedSeededEmaBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_wilder_qualification_preserves_all_native_mappings(self):
+        self.write()
+        for api in ('QuanTAlib.Smma', 'Skender.GetSmma', 'Trady.Indicator.ModifiedMovingAverage'):
+            path = self.qualification(f'SharedWilderAverageBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_fibonacci_builder_maps_native_api(self):
+        self.write()
+        path = self.qualification('SharedFibonacciWeightedBenchmarks.BuilderFull(Operation: "QuanTAlib.Fwma", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Fwma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_seeded_atr_builder_maps_all_native_apis(self):
+        self.write()
+        for api in ('Skender.GetAtr', 'TaLib.Functions.Atr', 'TaLib.Functions.Natr', 'Trady.Indicator.AverageTrueRange'):
+            path = self.qualification(f'SharedSeededAtrBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_wilder_strength_builder_maps_native_apis(self):
+        self.write()
+        for api in ('TaLib.Functions.Rsi', 'TaLib.Functions.Cmo'):
+            path = self.qualification(f'SharedWilderStrengthBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_hilbert_builder_maps_native_apis(self):
+        self.write()
+        for api in ('TaLib.Functions.HtDcPeriod', 'TaLib.Functions.HtPhasor', 'TaLib.Functions.Mama'):
+            path = self.qualification(f'SharedHilbertBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_connors_builder_maps_native_api(self):
+        self.write()
+        path = self.qualification('SharedConnorsBenchmarks.BuilderFull(Operation: "Skender.GetConnorsRsi", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Skender.GetConnorsRsi'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_dynamic_momentum_builder_maps_native_api(self):
+        self.write()
+        path = self.qualification('SharedDynamicMomentumBenchmarks.BuilderFull(Operation: "Trady.Indicator.DynamicMomentumIndex", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Trady.Indicator.DynamicMomentumIndex'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_ulcer_builder_maps_native_api(self):
+        self.write()
+        path = self.qualification('SharedUlcerBenchmarks.BuilderFull(Operation: "Skender.GetUlcerIndex", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['Skender.GetUlcerIndex'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_relative_volatility_builder_maps_native_api(self):
+        self.write()
+        path = self.qualification('SharedRelativeVolatilityBenchmarks.BuilderFull(Operation: "QuanTAlib.Rvi", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Rvi'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_triangular_builder_maps_both_native_apis(self):
+        self.write()
+        for api in ('QuanTAlib.Trima', 'TaLib.Functions.Trima'):
+            path = self.qualification(f'SharedTriangularBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_sinc_builder_maps_native_api(self):
+        self.write()
+        path = self.qualification('SharedWindowedSincBenchmarks.BuilderFull(Operation: "QuanTAlib.Afirma", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Afirma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_sma_qualification_updates_each_prior_pilot_api(self):
+        self.write()
+        for api in ('QuanTAlib.Sma', 'Skender.GetSma', 'TaLib.Functions.Sma', 'Trady.Indicator.SimpleMovingAverage'):
+            path = self.qualification(f'SharedSmaBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_ta_directional_qualification_preserves_selected_api(self):
+        self.write()
+        for name in ('PlusDM', 'MinusDM', 'PlusDI', 'MinusDI', 'Dx', 'Adx', 'Adxr'):
+            api = 'TaLib.Functions.' + name
+            path = self.qualification(f'SharedTaDirectionalBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_gpu_fixed_weighted_average_maps_native_api(self):
+        self.write()
+        path = self.qualification('SharedGpuFixedWmaBenchmarks.BuilderFull(Operation: "Wma", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Wma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_double_weighted_average_maps_native_api(self):
+        self.write()
+        path = self.qualification('SharedWeightedWindowBenchmarks.BuilderFull(Operation: "Dwma", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual(['QuanTAlib.Dwma'], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_midpoint_qualification_maps_both_price_sources(self):
+        self.write()
+        for family in ('SharedMidpointBenchmarks', 'SharedGpuMidpointBenchmarks'):
+            for api in ('MidPoint', 'MidPrice'):
+                path = self.qualification(f'{family}.BuilderFull(Operation: "{api}", Count: 1000)')
+                result = inventory(self.root, [path])
+                qualified = [row['pair_id'] for row in result['pairs'] if row.get('current')]
+                self.assertEqual(['TaLib.Functions.' + api], qualified)
+
+    def test_extreme_index_qualification_preserves_output_contract(self):
+        self.write()
+        for family in ('SharedExtremeIndexBenchmarks', 'SharedGpuExtremeIndexBenchmarks'):
+            for api in ('MinIndex', 'MaxIndex', 'MinMaxIndex'):
+                path = self.qualification(f'{family}.BuilderFull(Operation: "{api}", Count: 1000)')
+                result = inventory(self.root, [path])
+                qualified = [row['pair_id'] for row in result['pairs'] if row.get('current')]
+                self.assertEqual(['TaLib.Functions.' + api], qualified)
+
+    def test_aroon_qualification_preserves_native_namespaces(self):
+        self.write()
+        for family in ('SharedAroonBenchmarks', 'SharedGpuAroonBenchmarks'):
+            for api in ('TaLib.Functions.Aroon', 'TaLib.Functions.AroonOsc', 'Skender.GetAroon', 'Trady.Indicator.Aroon', 'Trady.Indicator.AroonOscillator'):
+                path = self.qualification(f'{family}.BuilderFull(Operation: "{api}", Count: 1000)')
+                result = inventory(self.root, [path])
+                self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_price_range_qualification_preserves_trady_namespace(self):
+        self.write()
+        api = 'Trady.Indicator.HighestHighLowestLowDifference'
+        path = self.qualification(f'SharedPriceRangeBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_trady_extrema_qualification_preserves_alias_and_source(self):
+        self.write()
+        for name in ('Highest', 'Lowest', 'HighestClose', 'LowestClose', 'HighestHigh', 'LowestLow'):
+            path = self.qualification(f'SharedTradyExtremaBenchmarks.BuilderFull(Operation: "{name}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual(['Trady.Indicator.' + name], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_historical_extrema_qualification_keeps_expanding_identity(self):
+        self.write()
+        for name in ('HistoricalHighest', 'HistoricalLowest', 'HistoricalHighestClose', 'HistoricalLowestClose', 'HistoricalHighestHigh', 'HistoricalLowestLow'):
+            path = self.qualification(f'SharedHistoricalExtremaBenchmarks.BuilderFull(Operation: "{name}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual(['Trady.Indicator.' + name], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_trady_momentum_qualification_preserves_aliases(self):
+        self.write()
+        for name in ('Momentum', 'Difference', 'UpMomentum', 'PositiveDifference', 'DownMomentum', 'NegativeDifference'):
+            path = self.qualification(f'SharedTradyMomentumBenchmarks.BuilderFull(Operation: "{name}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual(['Trady.Indicator.' + name], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_percentile_qualification_preserves_library_and_median(self):
+        self.write()
+        for api in ('QuanTAlib.Median', 'QuanTAlib.Percentile', 'Trady.Indicator.Median', 'Trady.Indicator.Percentile'):
+            path = self.qualification(f'SharedRollingPercentileBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_return_qualification_preserves_trady_aliases(self):
+        self.write()
+        for name in ('RateOfChange', 'PercentageDifference'):
+            path = self.qualification(f'SharedTradyReturnBenchmarks.BuilderFull(Operation: "{name}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual(['Trady.Indicator.' + name], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_true_range_qualification_preserves_all_native_namespaces(self):
+        self.write()
+        for api in ('TaLib.Functions.TRange', 'Skender.GetTr', 'Trady.Indicator.TrueRange'):
+            path = self.qualification(f'SharedTrueRangeBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_native_dispersion_qualification_keeps_library_identity(self):
+        self.write()
+        for api in ('QuanTAlib.Variance', 'QuanTAlib.Stddev', 'QuanTAlib.Zscore', 'Trady.Indicator.StandardDeviation'):
+            path = self.qualification(f'SharedNativeDispersionBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_detailed_deviation_qualification_preserves_skender_identity(self):
+        self.write()
+        api = 'Skender.GetStdDev'
+        path = self.qualification(f'SharedDetailedDeviationBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_hull_qualification_preserves_quan_identity(self):
+        self.write()
+        api = 'QuanTAlib.Hma'
+        path = self.qualification(f'SharedHullBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_native_hull_qualification_preserves_library_identity(self):
+        self.write()
+        for api in ('Skender.GetHma', 'Trady.Indicator.HullMovingAverage'):
+            path = self.qualification(f'SharedNativeHullBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_sample_shape_qualification_preserves_quan_identity(self):
+        self.write()
+        for api in ('QuanTAlib.Skew', 'QuanTAlib.Kurtosis'):
+            path = self.qualification(f'SharedSampleShapeBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_log_volatility_qualification_preserves_quan_identity(self):
+        self.write()
+        for api in ('QuanTAlib.Historical', 'QuanTAlib.Realized'):
+            path = self.qualification(f'SharedLogVolatilityBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_mode_qualification_keeps_native_namespace(self):
+        self.write()
+        api = 'QuanTAlib.Mode'
+        path = self.qualification(f'SharedWindowModeBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+        result = inventory(self.root, [path])
+        self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_gpu_median_qualification_keeps_native_namespace(self):
+        self.write()
+        for api in ('Trady.Indicator.Median', 'QuanTAlib.Median', 'Trady.Indicator.Percentile', 'QuanTAlib.Percentile'):
+            path = self.qualification(f'SharedGpuMedianBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            self.assertEqual([api], [r['pair_id'] for r in result['pairs'] if r.get('current')])
+
+    def test_alma_preserves_competitor_identity(self):
+        self.write()
+        for api in ('QuanTAlib.Alma', 'Skender.GetAlma'):
+            path = self.qualification(f'SharedAlmaWindowBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            qualified = [row['pair_id'] for row in result['pairs'] if row.get('current')]
+            self.assertEqual([api], qualified)
+
+    def test_close_extrema_preserve_quantalib_identity(self):
+        self.write()
+        for family in ('SharedCloseExtremeBenchmarks', 'SharedGpuCloseExtremeBenchmarks'):
+            for api in ('Min', 'Max'):
+                path = self.qualification(f'{family}.BuilderFull(Operation: "{api}", Count: 1000)')
+                result = inventory(self.root, [path])
+                qualified = [row['pair_id'] for row in result['pairs'] if row.get('current')]
+                self.assertEqual(['QuanTAlib.' + api], qualified)
+
+    def test_missing_bars_names_file_and_benchmark(self):
+        self.rows[0]['FullName'] = self.rows[0]['FullName'].replace('Bars: 1000', 'MissingCount')
+        self.write()
+        with self.assertRaisesRegex(ValueError, 'Missing Bars: fixture.json.gz: Historical'):
+            inventory(self.root, [])
+
+    def test_missing_measurement_names_pair_count_and_method(self):
+        missing = self.rows.pop(0)
+        self.write()
+        with self.assertRaises(ValueError) as raised:
+            inventory(self.root, [])
+        self.assertIn(self.manifest[0]['Id'], str(raised.exception))
+        self.assertIn('bars=1000', str(raised.exception))
+        self.assertIn('method=' + missing['Method'], str(raised.exception))
+
+    def test_missing_pilot_names_id(self):
+        self.manifest = [p for p in self.manifest if p['Id'] != 'QuanTAlib.Jma']
+        self.rows = [r for r in self.rows if '"QuanTAlib.Jma"' not in r['FullName']]
+        self.write()
+        with self.assertRaisesRegex(ValueError, 'Pilot ID missing.*QuanTAlib.Jma'):
+            inventory(self.root, [])
+
+    def test_unknown_qualification_names_workload_and_file(self):
+        self.write()
+        path = self.qualification('SharedPointwiseBenchmarks.BuilderFull(Operation: "Missing", Count: 10000)')
+        with self.assertRaises(ValueError) as raised:
+            inventory(self.root, [path])
+        self.assertIn('TaLib.Functions.Missing/10000', str(raised.exception))
+        self.assertIn(str(path), str(raised.exception))
+
+    def test_supported_qualification_formats_keep_all_four_methods(self):
+        self.write()
+        for name, pair in [('SharedPointwiseBenchmarks.BuilderFull(Operation: "Sin", Count: 10000)', 'Sin'),
+                           ('SharedDispersionBenchmarks.BuilderFull(Variance: False, Count: 10000)', 'StdDev'),
+                           ('SharedDispersionBenchmarks.BuilderFull(Variance: True, Count: 10000)', 'Var'),
+                           ('SharedRollingSumBenchmarks.BuilderFull(Count: 10000)', 'Sum'),
+                           ('SharedRegressionBenchmarks.BuilderFull(Operation: "LinearReg", Count: 10000)', 'LinearReg'),
+                           ('SharedPairInputBenchmarks.BuilderFull(Operation: "Add", Count: 10000)', 'Add'),
+                           ('SharedPairInputBenchmarks.BuilderFull(Operation: "Correl", Count: 10000)', 'Correl'),
+                           ('SharedPairInputBenchmarks.BuilderFull(Operation: "Beta", Count: 10000)', 'Beta'),
+                           ('SharedPriceProjectionBenchmarks.BuilderFull(Operation: "MedPrice", Count: 10000)', 'MedPrice'),
+                           ('SharedGeneratedStateBenchmarks.BuilderFull(Operation: "MinMax", Count: 10000)', 'MinMax'),
+                           ('SharedGeneratedStateBenchmarks.BuilderFull(Operation: "TRange", Count: 10000)', 'TRange'),
+                           ('SharedRecursiveStateBenchmarks.BuilderFull(Operation: "Ema", Count: 10000)', 'Ema'),
+                           ('SharedRecursiveStateBenchmarks.BuilderFull(Operation: "Ad", Count: 10000)', 'Ad'),
+                           ('SharedLaggedChangeBenchmarks.BuilderFull(Operation: "Mom", Count: 10000)', 'Mom'),
+                           ('SharedLaggedChangeBenchmarks.BuilderFull(Operation: "RocP", Count: 10000)', 'RocP'),
+                           ('SharedLaggedChangeBenchmarks.BuilderFull(Operation: "Roc", Count: 10000)', 'Roc'),
+                           ('SharedLaggedChangeBenchmarks.BuilderFull(Operation: "RocR", Count: 10000)', 'RocR'),
+                           ('SharedLaggedChangeBenchmarks.BuilderFull(Operation: "RocR100", Count: 10000)', 'RocR100')]:
+            with self.subTest(pair=pair):
+                result = inventory(self.root, [self.qualification(name)])
+                row = next(r for r in result['pairs'] if r['pair_id'] == 'TaLib.Functions.' + pair)
+                self.assertEqual(4, len(row['current'][0]['methods']))
+                self.assertFalse(row['current'][0]['full_clear_win'])
+
+    def test_candle_qualification_uses_candles_namespace(self):
+        self.write()
+        path = self.qualification('SharedEngulfingBenchmarks.BuilderFull(Count: 10000)')
+        result = inventory(self.root, [path])
+        row = next(r for r in result['pairs'] if r['pair_id'] == 'TaLib.Candles.Engulfing')
+        self.assertEqual(4, len(row['current'][0]['methods']))
+        self.assertFalse(row['current'][0]['full_clear_win'])
+
+    def test_weighted_qualification_uses_quantalib_namespace(self):
+        self.write()
+        for operation in ('Wma', 'Convolution', 'Gma', 'Sinema', 'Epma', 'Mma'):
+            path = self.qualification(f'SharedWeightedWindowBenchmarks.BuilderFull(Operation: "{operation}", Count: 10000)')
+            result = inventory(self.root, [path])
+            row = next(r for r in result['pairs'] if r['pair_id'] == 'QuanTAlib.' + operation)
+            self.assertEqual(4, len(row['current'][0]['methods']))
+
+    def test_body_shadow_qualification_uses_talib_candles_namespace(self):
+        self.write()
+        for operation in ('BeltHold', 'Marubozu', 'ClosingMarubozu', 'SpinningTop', 'HighWave', 'LongLine', 'ShortLine'):
+            path = self.qualification(f'SharedBodyShadowBenchmarks.BuilderFull(Operation: "{operation}", Count: 10000)')
+            result = inventory(self.root, [path])
+            row = next(r for r in result['pairs'] if r['pair_id'] == 'TaLib.Candles.' + operation)
+            self.assertEqual(4, len(row['current'][0]['methods']))
+
+    def test_candle_qualification_uses_trady_namespace(self):
+        self.write()
+        for operation in ('DragonflyDoji', 'GravestoneDoji', 'Doji', 'Bullish', 'Bearish', 'UpTrend', 'DownTrend', 'BullishEngulfingPattern', 'BearishEngulfingPattern'):
+            benchmark = 'SharedShadowDojiBenchmarks' if operation in ('DragonflyDoji', 'GravestoneDoji') else 'SharedBasicCandleBenchmarks'
+            if operation in ('UpTrend', 'DownTrend', 'BullishEngulfingPattern', 'BearishEngulfingPattern'):
+                benchmark = 'SharedTrendCandleBenchmarks'
+            path = self.qualification(f'{benchmark}.BuilderFull(Operation: "{operation}", Count: 10000)')
+            result = inventory(self.root, [path])
+            row = next(r for r in result['pairs'] if r['pair_id'] == 'Trady.Candlestick.' + operation)
+            self.assertEqual(4, len(row['current'][0]['methods']))
+
+    def test_percentile_qualification_uses_trady_namespace(self):
+        self.write()
+        for operation in ('LongDay', 'ShortDay', 'BullishLongDay', 'BearishLongDay', 'BullishShortDay', 'BearishShortDay', 'LongUpperShadow', 'LongLowerShadow'):
+            path = self.qualification(f'SharedPercentileCandleBenchmarks.BuilderFull(Operation: "{operation}", Count: 10000)')
+            result = inventory(self.root, [path])
+            row = next(r for r in result['pairs'] if r['pair_id'] == 'Trady.Candlestick.' + operation)
+            self.assertEqual(4, len(row['current'][0]['methods']))
+
+    def test_containment_gap_qualification_uses_trady_namespace(self):
+        self.write()
+        for operation in ('Harami', 'BullishHarami', 'BearishHarami', 'UpsideTasukiGap', 'DownsideTasukiGap'):
+            path = self.qualification(f'SharedContainmentGapBenchmarks.BuilderFull(Operation: "{operation}", Count: 10000)')
+            result = inventory(self.root, [path])
+            row = next(r for r in result['pairs'] if r['pair_id'] == 'Trady.Candlestick.' + operation)
+            self.assertEqual(4, len(row['current'][0]['methods']))
+
+    def test_gpu_campaign_cpu_subset_uses_trady_namespace(self):
+        self.write()
+        for operation in ('Harami', 'BullishHarami', 'BearishHarami', 'UpsideTasukiGap', 'DownsideTasukiGap'):
+            path = self.qualification(f'SharedGpuContainmentGapBenchmarks.CpuFull(Operation: "{operation}", Count: 100000)')
+            result = inventory(self.root, [path])
+            row = next(r for r in result['pairs'] if r['pair_id'] == 'Trady.Candlestick.' + operation)
+            self.assertEqual(4, len(row['current'][0]['methods']))
+            self.assertEqual(100000, row['current'][0]['bars'])
+
+    def test_trend_reversal_qualification_uses_trady_namespace(self):
+        self.write()
+        for operation in ('BullishAbandonedBaby', 'BearishAbandonedBaby', 'MorningStar', 'EveningStar', 'MorningDojiStar', 'EveningDojiStar', 'MoringinDojiStar'):
+            path = self.qualification(f'SharedTrendReversalBenchmarks.BuilderFull(Operation: "{operation}", Count: 10000)')
+            result = inventory(self.root, [path])
+            row = next(r for r in result['pairs'] if r['pair_id'] == 'Trady.Candlestick.' + operation)
+            self.assertEqual(4, len(row['current'][0]['methods']))
+
+    def test_deviation_bands_qualification_uses_explicit_native_api(self):
+        self.write()
+        api = 'Skender.GetBollingerBands'
+        path = self.qualification(f'SharedDeviationBandsBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+        result = inventory(self.root, [path])
+        row = next(r for r in result['pairs'] if r['pair_id'] == api)
+        self.assertEqual(4, len(row['current'][0]['methods']))
+
+    def test_trady_bands_qualification_uses_explicit_native_apis(self):
+        self.write()
+        for api in ('Trady.Indicator.BollingerBands', 'Trady.Indicator.BollingerBandWidth'):
+            path = self.qualification(f'SharedTradyBandsBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+            result = inventory(self.root, [path])
+            row = next(r for r in result['pairs'] if r['pair_id'] == api)
+            self.assertEqual(4, len(row['current'][0]['methods']))
+
+    def test_classic_bands_qualification_uses_explicit_native_api(self):
+        self.write()
+        api = 'TaLib.Functions.Bbands'
+        path = self.qualification(f'SharedClassicBandsBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+        result = inventory(self.root, [path])
+        row = next(r for r in result['pairs'] if r['pair_id'] == api)
+        self.assertEqual(4, len(row['current'][0]['methods']))
+
+    def test_prior_channel_qualification_uses_explicit_native_api(self):
+        self.write()
+        api = 'Skender.GetDonchian'
+        path = self.qualification(f'SharedPriorChannelBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+        result = inventory(self.root, [path])
+        row = next(r for r in result['pairs'] if r['pair_id'] == api)
+        self.assertEqual(4, len(row['current'][0]['methods']))
+
+    def test_skender_williams_qualification_uses_explicit_native_api(self):
+        self.write()
+        api = 'Skender.GetWilliamsR'
+        path = self.qualification(f'SharedSkenderWilliamsBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+        result = inventory(self.root, [path])
+        row = next(r for r in result['pairs'] if r['pair_id'] == api)
+        self.assertEqual(4, len(row['current'][0]['methods']))
+
+    def test_skender_wma_qualification_uses_explicit_native_api(self):
+        self.write()
+        api = 'Skender.GetWma'
+        path = self.qualification(f'SharedSkenderWmaBenchmarks.BuilderFull(Operation: "{api}", Count: 1000)')
+        result = inventory(self.root, [path])
+        row = next(r for r in result['pairs'] if r['pair_id'] == api)
+        self.assertEqual(4, len(row['current'][0]['methods']))
+
+    def test_qualification_paths_use_one_benchmark_root(self):
+        self.write()
+        path = self.qualification('SharedPairInputBenchmarks.BuilderFull(Operation: "Add", Count: 10000)')
+        for input_path in (path.resolve(), Path(os.path.relpath(path))):
+            with self.subTest(path=input_path):
+                result = inventory(self.root, [input_path])
+                row = next(r for r in result['pairs'] if r['pair_id'] == 'TaLib.Functions.Add')
+                self.assertEqual('qualification.json', row['current'][0]['evidence'])
+
+    def test_external_qualification_is_an_explicit_absolute_file_uri(self):
+        self.write()
+        path = self.qualification('SharedPairInputBenchmarks.BuilderFull(Operation: "Add", Count: 10000)')
+        with tempfile.TemporaryDirectory() as external:
+            outside = Path(external) / 'report with spaces.json'
+            outside.write_bytes(path.read_bytes())
+            result = inventory(self.root, [outside])
+            row = next(r for r in result['pairs'] if r['pair_id'] == 'TaLib.Functions.Add')
+            self.assertEqual(outside.resolve().as_uri(), row['current'][0]['evidence'])
+            self.assertIn('%20', row['current'][0]['evidence'])
+
+
+if __name__ == '__main__':
+    unittest.main()

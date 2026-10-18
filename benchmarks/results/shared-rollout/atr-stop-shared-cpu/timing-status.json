@@ -1,0 +1,14 @@
+{
+  "status": "completed",
+  "source_commit": "42f8bb09",
+  "reuse_binaries": true,
+  "next_filter": "*SharedAtrStopBenchmarks*Builder*",
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-atrstop-binaries-42f8bb09",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "reason": "16 builder-only cases completed exit0 without observed competing jobs.",
+  "preflight_evidence": "preflight-processes.jsonl",
+  "interruption_evidence": "interrupted-timing-b",
+  "completed_stem": "si-atrstop-builder-20261013-c",
+  "evidence": "builder-timing"
+}

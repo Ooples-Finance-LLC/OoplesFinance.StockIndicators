@@ -6,6 +6,107 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 public sealed class ExactWeightedAccumulatorTests
 {
     [Fact]
+    public void WideNormalizationAndDivisionPreserveByteAndLimbBoundaries()
+    {
+        foreach (int width in new[] { 7, 8, 63, 64, 65, 127, 128, 129, 512 })
+        foreach (int shift in new[] { 0, 1, 63, 64, 1074 })
+        foreach (int offset in new[] { -1, 0, 1 })
+        foreach (int sign in new[] { -1, 1 })
+        {
+            var weight = sign * (((System.Numerics.BigInteger.One << width) + offset) << shift);
+            var sum = new ExactMeanAccumulator(); sum.Add(1, weight);
+            foreach (long divisor in new[] { 1L, long.MaxValue })
+                Assert.Equal(BitConverter.DoubleToInt64Bits((new ReferenceFraction(weight) / new ReferenceFraction(divisor)).ToDouble()),
+                    BitConverter.DoubleToInt64Bits(sum.Mean(divisor)));
+            sum.Add(1, -weight);
+            Assert.Equal(0, BitConverter.DoubleToInt64Bits(sum.Mean(1)));
+        }
+    }
+
+    [Fact]
+    public void CachedProductFactorsPreserveWideProductsSignsAndIntegerWeights()
+    {
+        double[] inputs = [0, -0d, double.Epsilon, -double.Epsilon, double.MaxValue, -double.MaxValue,
+            Math.BitIncrement(1d), -Math.BitDecrement(1d), .125,
+            Math.ScaleB(1, 32) - 1, Math.ScaleB(1, 31) - 1, Math.ScaleB(1, 31) + 1, -(Math.ScaleB(1, 32) - 1)];
+        foreach (double left in inputs)
+        foreach (double right in inputs)
+        foreach (int weight in new[] { int.MinValue, -1, 0, 1, int.MaxValue })
+        {
+            var sum = new ExactMeanAccumulator();
+            sum.AddProduct(new ExactMeanAccumulator.ProductFactor(left), new ExactMeanAccumulator.ProductFactor(right), weight);
+            var exact = ReferenceFraction.FromDouble(left) * ReferenceFraction.FromDouble(right) * new ReferenceFraction(weight);
+            Assert.Equal(BitConverter.DoubleToInt64Bits((exact / new ReferenceFraction(17)).ToDouble()),
+                BitConverter.DoubleToInt64Bits(sum.Mean(17)));
+            sum.AddFactor(new ExactMeanAccumulator.ProductFactor(.1));
+            exact += ReferenceFraction.FromDouble(.1);
+            Assert.Equal(BitConverter.DoubleToInt64Bits((exact / new ReferenceFraction(17)).ToDouble()),
+                BitConverter.DoubleToInt64Bits(sum.Mean(17)));
+        }
+    }
+
+    [Fact]
+    public void NonfiniteProductOperandsAreRejectedEvenWithZeroFactorsOrWeight()
+    {
+        foreach (double invalid in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+        foreach (int weight in new[] { 0, 1 })
+        {
+            var sum = new ExactMeanAccumulator();
+            Assert.Throws<ArithmeticException>(() => sum.AddProduct(0d, invalid, weight));
+            Assert.Throws<ArithmeticException>(() => sum.AddProduct(invalid, 0d, weight));
+        }
+    }
+
+    [Fact]
+    public void FixedCoefficientBoundsPreserveCompactLimitsAndWideFallback()
+    {
+        double[] inputs = [0, -0d, double.Epsilon, -double.Epsilon, double.MaxValue, -double.MaxValue,
+            Math.BitIncrement(1d), .125, Math.ScaleB(1, 32) - 1, Math.ScaleB(1, 31) - 1, Math.ScaleB(1, 31) + 1];
+        foreach (double left in inputs)
+        foreach (double right in inputs)
+        {
+            var sum = new ExactMeanAccumulator();
+            var price = new ExactMeanAccumulator.ProductFactor(left);
+            var coefficient = new ExactMeanAccumulator.ProductCoefficient(right);
+            sum.AddProduct(in price, in coefficient);
+            var exact = ReferenceFraction.FromDouble(left) * ReferenceFraction.FromDouble(right);
+            Assert.Equal(BitConverter.DoubleToInt64Bits((exact / new ReferenceFraction(17)).ToDouble()),
+                BitConverter.DoubleToInt64Bits(sum.Mean(17)));
+        }
+        foreach (double invalid in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+            Assert.Throws<ArithmeticException>(() => new ExactMeanAccumulator.ProductCoefficient(invalid));
+    }
+
+    [Fact]
+    public void CompactScaledRatiosDoNotAllocate()
+    {
+        // Cancel denominator powers of two before sizing the division workspace.
+        static double Run() => ExactMeanAccumulator.ScaledRatio(305235, 31920, 0);
+        for (var i = 0; i < 100; i++) Run();
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        double total = 0;
+        for (var i = 0; i < 1000; i++) total += Run();
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+        Assert.Equal(9562.5, total);
+    }
+
+    [Fact]
+    public void ScaledRatiosMatchIndependentRationalsAtSignedIntegerBoundaries()
+    {
+        var boundary = System.Numerics.BigInteger.One << 63;
+        foreach (var numerator in new[] { -boundary - 1, -boundary, -boundary + 1, -1, 0, 1, boundary - 1, boundary, boundary + 1 })
+        foreach (var denominator in new[] { System.Numerics.BigInteger.One, 3, boundary - 1, boundary, boundary + 1 })
+        foreach (var power in new[] { -2149, -1075, -1074, -63, 0, 63, 1023, 2047 })
+        {
+            var expected = new ReferenceFraction(numerator) / new ReferenceFraction(denominator);
+            var scale = new ReferenceFraction(System.Numerics.BigInteger.One << Math.Abs(power));
+            expected = power < 0 ? expected / scale : expected * scale;
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected.ToDouble()),
+                BitConverter.DoubleToInt64Bits(ExactMeanAccumulator.ScaledRatio(numerator, denominator, power)));
+        }
+    }
+
+    [Fact]
     public void WideWeightedMeansRoundMidpointsToEven()
     {
         // Multiplication by this odd divisor forces a >64-bit significand,
@@ -80,5 +181,51 @@ public sealed class ExactWeightedAccumulatorTests
         var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
         Assert.Equal(0, allocated);
         Assert.Equal(100031.25, result);
+    }
+
+    [Fact]
+    public void NormalizedProductsAndRatioDenominatorsDoNotAllocate()
+    {
+        static double Run()
+        {
+            var numerator = new ExactMeanAccumulator();
+            var denominator = new ExactMeanAccumulator();
+            numerator.AddProduct(10.125, 3); numerator.AddProduct(11.25, -1);
+            denominator.Add(3); denominator.Add(-1);
+            return numerator.Ratio(denominator);
+        }
+        for (var i = 0; i < 100; i++) Run();
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        double total = 0;
+        for (var i = 0; i < 1000; i++) total += Run();
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+        Assert.Equal(9562.5, total);
+    }
+
+    [Fact]
+    public void CanonicalOperandsPreserveProductsBigWeightsAndMultiplication()
+    {
+        var random = new Random(517);
+        for (var trial = 0; trial < 256; trial++)
+        {
+            var actual = new ExactMeanAccumulator();
+            var expected = new ReferenceFraction(0);
+            for (var term = 0; term < 8; term++)
+            {
+                var left = Math.ScaleB(random.Next(-4096, 4097) / 8d, random.Next(-1000, 1001));
+                var right = Math.ScaleB(random.Next(-4096, 4097) / 8d, random.Next(-1000, 1001));
+                var weight = term % 2 == 0 ? int.MinValue : int.MaxValue;
+                actual.AddProduct(left, right, weight);
+                expected += ReferenceFraction.FromDouble(left) * ReferenceFraction.FromDouble(right) * new ReferenceFraction(weight);
+            }
+            var bigWeight = (System.Numerics.BigInteger.One << 90) + 3;
+            actual.Add(.125, bigWeight);
+            expected += ReferenceFraction.FromDouble(.125) * new ReferenceFraction(bigWeight);
+            actual.Multiply(-.5);
+            expected *= ReferenceFraction.FromDouble(-.5);
+            var divisor = trial + 1;
+            Assert.Equal(BitConverter.DoubleToInt64Bits((expected / new ReferenceFraction(divisor)).ToDouble()),
+                BitConverter.DoubleToInt64Bits(actual.Mean(divisor)));
+        }
     }
 }

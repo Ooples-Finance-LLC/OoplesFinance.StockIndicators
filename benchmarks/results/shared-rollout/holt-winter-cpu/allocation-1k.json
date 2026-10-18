@@ -1,0 +1,39 @@
+{
+  "Operation": "QuanTAlib.Hwma",
+  "Count": 1000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        58240,
+        58240,
+        58240
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        9168,
+        9168,
+        9168
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        48376,
+        48376,
+        48376
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        191000,
+        191000,
+        191000
+      ]
+    }
+  ]
+}

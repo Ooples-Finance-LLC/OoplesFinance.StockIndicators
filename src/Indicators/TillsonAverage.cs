@@ -97,14 +97,13 @@ public sealed class TillsonAverage : MultiOutputIndicatorBase, IIndicatorValidat
         private readonly int _period;
         private readonly TillsonSeed _seed;
         private readonly long _first;
-        private readonly BigInteger _factorNumerator,
-            _factorDenominator;
+        private readonly BigInteger[] _coefficients;
+        private readonly BigInteger _denominator;
         private readonly BigInteger[] _stages = new BigInteger[6],
             _sums = new BigInteger[6];
         private long _index = -1;
-        private BigInteger _lastNumerator,
-            _lastDenominator = BigInteger.One;
-        public BigInteger RoundedUnits => RocBankValue.RoundUnits(_lastNumerator, _lastDenominator);
+        private BigInteger _lastNumerator;
+        public BigInteger RoundedUnits => RocBankValue.RoundUnits(_lastNumerator, _denominator);
 
         internal State(int period, double factor, TillsonSeed seed, int suppression)
         {
@@ -114,8 +113,20 @@ public sealed class TillsonAverage : MultiOutputIndicatorBase, IIndicatorValidat
             var units = ExactVarianceWindow.Units(factor);
             var grid = BigInteger.One << 1074;
             var divisor = BigInteger.GreatestCommonDivisor(BigInteger.Abs(units), grid);
-            _factorNumerator = units / divisor;
-            _factorDenominator = grid / divisor;
+            var n = units / divisor;
+            var q = grid / divisor;
+            var combined = q + n;
+            // Exact coefficients of E3..E6 over the common denominator q^3.
+            // Cache these fixed products instead of reconstructing the polynomial
+            // on every bar. Oversized terms still cancel before final rounding.
+            _coefficients =
+            [
+                combined * combined * combined,
+                -3 * n * combined * combined,
+                3 * n * n * combined,
+                -n * n * n
+            ];
+            _denominator = q * q * q;
         }
 
         public void Reset()
@@ -124,7 +135,6 @@ public sealed class TillsonAverage : MultiOutputIndicatorBase, IIndicatorValidat
             Array.Clear(_sums, 0, 6);
             _index = -1;
             _lastNumerator = 0;
-            _lastDenominator = BigInteger.One;
         }
 
         public void Update(in Bar bar, Span<double> output) =>
@@ -165,16 +175,11 @@ public sealed class TillsonAverage : MultiOutputIndicatorBase, IIndicatorValidat
             }
             if (_index < _first)
                 return;
-            var a = _stages[2];
-            var b = a - _stages[3];
-            var c = a - 2 * _stages[3] + _stages[4];
-            var d = a - 3 * _stages[3] + 3 * _stages[4] - _stages[5];
-            var n = _factorNumerator;
-            var q = _factorDenominator;
-            var numerator = ((d * n + 3 * c * q) * n + 3 * b * q * q) * n + a * q * q * q;
-            _lastNumerator = numerator;
-            _lastDenominator = q * q * q;
-            output[0] = ExactMeanAccumulator.UnitRatio(_lastNumerator, _lastDenominator);
+            _lastNumerator = _coefficients[0] * _stages[2]
+                + _coefficients[1] * _stages[3]
+                + _coefficients[2] * _stages[4]
+                + _coefficients[3] * _stages[5];
+            output[0] = ExactMeanAccumulator.UnitRatio(_lastNumerator, _denominator);
             output[1] = 1;
         }
 

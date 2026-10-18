@@ -1,0 +1,15 @@
+{
+  "base_commit": "08a6edf92b89e19a060b87645c58e4bda2cda766",
+  "source_sha256": {
+    "src/Indicators/ArnaudLegouxWindow.cs": "72d453201bf3daa6f567d6d835d8182ae8208115ae6037a071fd11459d65ddc0",
+    "tests/ModelsTests/SharedAlmaWindowTests.cs": "06fb32160a0ceb73b18a03c48417fb7339127005a723621c775a18503ba7b7ad"
+  },
+  "verification": {
+    "unit_cases": 120,
+    "shared_alma_unit_cases": 18,
+    "comparator_cases": 16,
+    "gpu_cases": 100,
+    "skipped": 0
+  },
+  "interpretation": "Modern ALMA retains normalized ProductFactor weights instead of general JurikDyadic states. Each weighted term multiplies two at-most-53-bit mantissas exactly in Int128, retaining the same exponent and exact accumulation/publication. Weight generation, input decoding, queue order and framework fallback are unchanged. Reduced representation and arithmetic work, not measured latency."
+}

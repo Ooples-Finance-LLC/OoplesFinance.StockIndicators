@@ -49,7 +49,12 @@ public sealed class VolumeWeightedPrice
     public override IIndicatorOutput PrimaryOutput => Value;
 
     /// <inheritdoc/>
-    protected internal override object CreateState() => new State(Period, TypicalPrice, StartDate);
+    protected internal override object CreateState() =>
+#if !NETFRAMEWORK
+        new CompactState(Period, TypicalPrice, StartDate);
+#else
+        new State(Period, TypicalPrice, StartDate);
+#endif
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -94,6 +99,85 @@ public sealed class VolumeWeightedPrice
 
     private static ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
 
+#if !NETFRAMEWORK
+    internal sealed class CompactState(int? period, bool typical, DateTime? start) : IMultiOutputState
+    {
+        private readonly Queue<Bar> _window = new();
+        private JurikDyadic _weighted, _mass;
+
+        internal (JurikDyadic Weighted, JurikDyadic Mass) Totals => (_weighted, _mass);
+        internal void Seed(JurikDyadic weighted, JurikDyadic mass)
+        {
+            _weighted = weighted;
+            _mass = mass;
+        }
+
+        public void Reset()
+        {
+            _window.Clear();
+            _weighted = _mass = default;
+        }
+
+        public void Update(in Bar bar, Span<double> output)
+        {
+            output.Clear();
+            if (!Accumulate(in bar)) return;
+            if (_weighted.TryDouble(out var weighted) && _mass.TryDouble(out var mass)
+                && (!typical || Binary64ArithmeticCertificate.TryProduct(mass, 3, out mass)))
+            {
+                // Both operands are exact binary64 values: one hardware division
+                // gives the required rounding, including signed underflow zero.
+                output[0] = weighted == 0 ? 0 : weighted / mass;
+            }
+            else
+            {
+                var denominator = _mass;
+                if (typical) denominator.Multiply(3);
+                output[0] = _weighted.Sign == 0 ? 0 : _weighted.Ratio(denominator);
+            }
+            output[1] = 1;
+        }
+
+        internal bool Accumulate(in Bar bar)
+        {
+            if (start is DateTime anchor && bar.Time < anchor) return false;
+            if (period is int length)
+            {
+                if (_window.Count == length) Add(_window.Dequeue(), -1);
+                _window.Enqueue(bar);
+            }
+            Add(in bar, 1);
+            return !(period is int required && _window.Count < required || _mass.Sign == 0);
+        }
+
+        private void Add(in Bar bar, int sign)
+        {
+            JurikDyadic numerator;
+            if (TryOrdinaryProduct(in bar, out var product)) numerator = JurikDyadic.FromDouble(product);
+            else
+            {
+                numerator = JurikDyadic.FromDouble(bar.Close);
+                if (typical) { numerator.Add(bar.High); numerator.Add(bar.Low); }
+                // Weight the complete exact price sum. Division by three belongs
+                // only in the final ratio, never in an intermediate typical price.
+                numerator.Multiply(bar.Volume);
+            }
+            if (sign > 0) _weighted.AddExact(numerator);
+            else _weighted.Subtract(numerator);
+            _mass.Add(sign > 0 ? bar.Volume : -bar.Volume);
+        }
+
+        private bool TryOrdinaryProduct(in Bar bar, out double product)
+        {
+            product = 0;
+            if (bar.Volume == 0) return true;
+            double price = bar.Close;
+            if (typical && (!Binary64ArithmeticCertificate.TryDifference(price, -bar.High, out price)
+                || !Binary64ArithmeticCertificate.TryDifference(price, -bar.Low, out price))) return false;
+            return price == 0 || Binary64ArithmeticCertificate.TryProduct(price, bar.Volume, out product);
+        }
+    }
+#else
     private sealed class State(int? period, bool typical, DateTime? start) : IMultiOutputState
     {
         private readonly Queue<Bar> _window = new();
@@ -135,4 +219,5 @@ public sealed class VolumeWeightedPrice
             _mass.Add(bar.Volume, typical ? 3 * sign : sign);
         }
     }
+#endif
 }

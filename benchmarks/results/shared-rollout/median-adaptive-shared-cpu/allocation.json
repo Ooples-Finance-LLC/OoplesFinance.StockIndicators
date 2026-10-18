@@ -1,0 +1,1 @@
+{"Operation":"QuanTAlib.Maaf","Count":10000,"Repetitions":3,"Arms":[{"Method":"BuilderFull","Bytes":[563944,563944,563944]},{"Method":"BuilderLatestOnly","Bytes":[82536,82536,82536]},{"Method":"NativeSingle","Bytes":[34435696,34435696,34435696]},{"Method":"NativeParallel","Bytes":[154792176,154792176,154792176]}]}

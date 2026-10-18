@@ -1,0 +1,11 @@
+Source: bf8e9ce7 plus shared volume-weighted-price CPU workers and tests in this commit.
+Command: dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedVolumeWeightedPriceBenchmarks* --warmupCount 10 --iterationCount 10 --exporters json csv --artifacts C:/Users/cheat/temp/si-volume-workers-timing
+All 24 cases completed; runner exited zero. No competing .NET build/test jobs observed before launch or during sampled process checks. Brief unobserved activity cannot be excluded.
+Production net10 build: zero warnings/errors. Harness build: 60 existing warnings, zero errors. All 37 compact volume-weighted-price unit tests and 35 independent-reference/fixture/allocation tests passed. Production/test/harness production DLL SHA256 matched.
+Unanchored rolling windows use the shared bounded executor with period-1 captured overlap. Cumulative workers merge exact block totals and replay only their assigned captured range; anchored rolling workers seed from preceding participating arrivals. Worker budgets, shared admission gate, input precedence, slot-major output validation and owned Full/Latest columns are retained.
+Full reuses owned OHLCV capture. Parallel cumulative/anchored LatestOnly temporarily rents bar capture from ArrayPool; warmed managed-allocation samples exclude retained pool storage. Large anchored rolling periods and competing calls execute inline.
+Fixture arithmetic, workload and native paths are unchanged from previous-current.json. Multi-second 10k Trady native cases use one invocation per iteration, other cases use adaptive batching; all retain ten warmups and ten measured iterations.
+Win qualification uses upper builder CI below both same-run native lower bounds. Historical catalog measurements and other pairs remain unchanged. All allocation samples and warnings/outliers are retained.
+Coverage remains 201/401 APIs; coverage is not wins. Volume-weighted-price GPU execution and remaining CPU/GPU latency and coverage gaps remain open.
+OoplesFinance.StockIndicators.dll SHA256 59ad849979f21d270fea3b072e00f2f7b27ab6cebf3475fbfaaa64615b128231
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 bd17fa83ffbc8e63f36b0b92310c843da3576dc001b856653734435234124ae7

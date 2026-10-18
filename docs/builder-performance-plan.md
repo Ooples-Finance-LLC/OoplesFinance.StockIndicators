@@ -1,6 +1,16 @@
 # Builder performance: profile-led implementation plan
 
-## Current focus: fused Asin/SMA pilot
+## Current status (2026-10-15)
+
+The approved shared rollout now extends beyond the original fused pilot. See the
+[current performance report](../benchmarks/LIBRARY_COMPARISONS.md#shared-rollout-status-2026-10-15)
+for the 401-mapping coverage split, the eight historical pilot results, and the
+verified pivot, Rickshaw, Asin and SMA follow-ups. Their matching-runtime builder
+timings remain pending; green correctness checks do not close the performance gate.
+
+The original plan below is retained as historical profiling rationale.
+
+## Earlier focus: fused Asin/SMA pilot
 
 The active implementation uses `Core/SmaCpuKernel.cs`: a reusable CPU loop with
 value-type input and output operators. `FusedBarExecution` connects it to owned

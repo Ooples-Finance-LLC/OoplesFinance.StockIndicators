@@ -1,0 +1,16 @@
+{
+  "production_commit": "432e31fc",
+  "command": "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter '*SharedRegressionBenchmarks*LinearRegSlope*10000*' --warmupCount 10 --iterationCount 10 --exporters json --artifacts C:/Users/cheat/temp/si-certified-slope-10k",
+  "sha256": {
+    "src/Indicators/ValuesBarExecution.Regression.cs": "317b2843ce1cdcc31855f3c0eae21ef57fb1f8fdd70c9fb381a2bd95a617fe40",
+    "src/Indicators/ValuesBarExecution.BoundedWindows.cs": "07cf51abf5902ccbc36cace4d1d1b0401997946868701f4dc90ce11eea0a583f",
+    "src/Indicators/ValuesBarExecution.BoundedBatch.cs": "2158c94b60f0c5f2b6c9b74f6c17016b5ec877f3794f086ba4ed7e18971c199a",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedRegressionBenchmarks.cs": "6edd5054b237dc0aee0c3cf29cf0330859e7c72432a2826190dc6b15a17f20df"
+  },
+  "cpu_load_pre_percent": 13,
+  "cpu_load_post_percent": 2,
+  "process_observations": "No competing dotnet build/test or testhost was observed immediately before or after the run. A dotnet --version process was present. No continuous process trace was captured.",
+  "samples": "Ten warmups and ten requested measurement iterations per arm. BDN retained ten observations for Full, LatestOnly and native parallel, nine for native serial.",
+  "interpretation": "LatestOnly mean 47.413 us versus native parallel 49.496 us; their confidence intervals overlap narrowly (48.923-48.983 us), so approximately matched rather than an established win. Full mean 79.995 us still loses to native parallel. LatestOnly allocation 86086 B exceeds native parallel 80292 B. Prior same-workload saved LatestOnly checkpoint was 1771.148 us; it is historical evidence, not a simultaneous control.",
+  "scope": "Period 20, 10000 eighth-unit input prices. Builder retains startup outputs; native returns its packed completed windows. Full additionally owns OHLCV bars. Native parallel includes P-1 seed overlap. In-process BDN ShortRun with 100ms minimum iteration time. This does not qualify all inputs, periods, graph shapes or GPU performance."
+}

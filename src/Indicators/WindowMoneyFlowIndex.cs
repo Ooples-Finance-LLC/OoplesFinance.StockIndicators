@@ -50,7 +50,11 @@ public sealed class WindowMoneyFlowIndex
 
     /// <inheritdoc/>
     protected internal override object CreateState() =>
+#if !NETFRAMEWORK
+        new CompactState(Period, MinimumTotalOne, SuppressedBars);
+#else
         new State(Period, MinimumTotalOne, SuppressedBars);
+#endif
 
     /// <inheritdoc/>
     public IEnumerable<IndicatorValidationRule> ValidationRules =>
@@ -72,6 +76,81 @@ public sealed class WindowMoneyFlowIndex
                 )
             );
 
+#if !NETFRAMEWORK
+    internal sealed class CompactState(int period, bool minimumTotalOne, int suppressed, int count = 0) : IMultiOutputState
+    {
+        private readonly Queue<Flow> _flows = new(Math.Min(period, Math.Max(0, count - 1)));
+        private readonly struct Flow
+        {
+            private readonly Int128 _product;
+            private readonly int _exponent;
+            internal readonly int Direction;
+
+            internal Flow(double price, double volume, int direction)
+            {
+                Direction = direction;
+                if (direction == 0) { _product = 0; _exponent = 0; return; }
+                var a = ExactMeanAccumulator.DecomposeFinite(price);
+                var b = ExactMeanAccumulator.DecomposeFinite(volume);
+                // Each finite binary64 factor has at most 53 significant bits.
+                // Keep the exact product even when hardware multiplication would
+                // overflow or underflow. Nonzero decomposed factors are odd.
+                _product = (Int128)a.Integer * b.Integer;
+                _exponent = a.Exponent + b.Exponent;
+            }
+
+            internal JurikDyadic Value => JurikDyadic.FromBinaryProduct(_product, _exponent);
+        }
+        private JurikDyadic _positive, _negative;
+        private double _previous;
+        private bool _started;
+        private long _changes;
+
+        public void Reset()
+        {
+            _flows.Clear(); _positive = _negative = default;
+            _previous = 0; _started = false; _changes = 0;
+        }
+
+        public void Update(in Bar bar, Span<double> output)
+        {
+            output.Clear();
+            double typical = ExactTypicalPrice.Calculate(bar.High, bar.Low, bar.Close);
+            if (!_started) { _previous = typical; _started = true; return; }
+            int direction = typical.CompareTo(_previous);
+            _previous = typical;
+            var flow = new Flow(typical, bar.Volume, direction);
+            if (_flows.Count == period)
+            {
+                var old = _flows.Dequeue();
+                if (old.Direction > 0) _positive.Subtract(old.Value);
+                else if (old.Direction < 0) _negative.Subtract(old.Value);
+            }
+            _flows.Enqueue(flow);
+            if (direction > 0) _positive.AddExact(flow.Value);
+            else if (direction < 0) _negative.AddExact(flow.Value);
+            if (_changes < (long)period + suppressed) _changes++;
+            if (_changes < (long)period + suppressed) return;
+            var total = _positive;
+            total.AddExact(_negative);
+            output[1] = 1;
+            if (minimumTotalOne)
+            {
+                var threshold = total;
+                threshold.Add(-1);
+                if (threshold.Sign < 0) return;
+            }
+            else if (_negative.Sign == 0) { output[0] = 100; return; }
+            if (total.Sign == 0) { output[0] = double.NegativeInfinity; return; }
+            // The exact-integer contract canonicalizes an exactly zero numerator,
+            // including when signed volume makes the denominator negative.
+            if (_positive.Sign == 0) return;
+            var numerator = _positive;
+            numerator.Multiply(100);
+            output[0] = numerator.Ratio(total);
+        }
+    }
+#else
     private sealed class State(int period, bool minimumTotalOne, int suppressed) : IMultiOutputState
     {
         private readonly Queue<(BigInteger Positive, BigInteger Negative)> _flows = new();
@@ -137,4 +216,5 @@ public sealed class WindowMoneyFlowIndex
                 );
         }
     }
+#endif
 }

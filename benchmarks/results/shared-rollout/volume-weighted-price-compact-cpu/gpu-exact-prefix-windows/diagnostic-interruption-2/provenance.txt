@@ -1,0 +1,2 @@
+Source: 9d21002b; production and harness binaries unchanged from the verified GPU batch.
+DIAGNOSTIC ONLY. The retry began with no competing .NET jobs observed at 2026-10-13T02:15:33.2671707Z. At 2026-10-13T02:17:00.4511520Z external AiDotNet test PID 21316 (ZzClapNormProbeTests) appeared. Only confirmed own benchmark PID 26676 was stopped; runner exit -1. No timing qualifies or enters the catalog.

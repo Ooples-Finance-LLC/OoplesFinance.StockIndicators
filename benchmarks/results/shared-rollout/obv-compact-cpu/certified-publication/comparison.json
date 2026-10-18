@@ -1,0 +1,110 @@
+[
+  {
+    "operation": "Skender.GetObv",
+    "bars": 1000,
+    "method": "BuilderFull",
+    "before_ns": 23387.069091796875,
+    "after_ns": 17969.7900390625,
+    "ratio": 0.7683643456360031,
+    "nonoverlapping_improvement": true
+  },
+  {
+    "operation": "Skender.GetObv",
+    "bars": 1000,
+    "method": "BuilderLatestOnly",
+    "before_ns": 18787.88330078125,
+    "after_ns": 13205.03662109375,
+    "ratio": 0.7028485545545543,
+    "nonoverlapping_improvement": true
+  },
+  {
+    "operation": "Skender.GetObv",
+    "bars": 10000,
+    "method": "BuilderFull",
+    "before_ns": 291148.9453125,
+    "after_ns": 165169.873046875,
+    "ratio": 0.5673036969774786,
+    "nonoverlapping_improvement": true
+  },
+  {
+    "operation": "Skender.GetObv",
+    "bars": 10000,
+    "method": "BuilderLatestOnly",
+    "before_ns": 180938.54166666666,
+    "after_ns": 128406.162109375,
+    "ratio": 0.709667276670831,
+    "nonoverlapping_improvement": true
+  },
+  {
+    "operation": "TaLib.Functions.Obv",
+    "bars": 1000,
+    "method": "BuilderFull",
+    "before_ns": 20016.829833984375,
+    "after_ns": 12458.629760742188,
+    "ratio": 0.6224077370928163,
+    "nonoverlapping_improvement": true
+  },
+  {
+    "operation": "TaLib.Functions.Obv",
+    "bars": 1000,
+    "method": "BuilderLatestOnly",
+    "before_ns": 12658.05419921875,
+    "after_ns": 7620.772705078125,
+    "ratio": 0.6020493027710749,
+    "nonoverlapping_improvement": true
+  },
+  {
+    "operation": "TaLib.Functions.Obv",
+    "bars": 10000,
+    "method": "BuilderFull",
+    "before_ns": 160771.29991319444,
+    "after_ns": 110357.24826388889,
+    "ratio": 0.686423810241469,
+    "nonoverlapping_improvement": true
+  },
+  {
+    "operation": "TaLib.Functions.Obv",
+    "bars": 10000,
+    "method": "BuilderLatestOnly",
+    "before_ns": 123081.3671875,
+    "after_ns": 66463.95263671875,
+    "ratio": 0.5400001166339722,
+    "nonoverlapping_improvement": true
+  },
+  {
+    "operation": "Trady.Indicator.OnBalanceVolume",
+    "bars": 1000,
+    "method": "BuilderFull",
+    "before_ns": 18023.5400390625,
+    "after_ns": 11800.212944878473,
+    "ratio": 0.6547111676898,
+    "nonoverlapping_improvement": true
+  },
+  {
+    "operation": "Trady.Indicator.OnBalanceVolume",
+    "bars": 1000,
+    "method": "BuilderLatestOnly",
+    "before_ns": 12664.126247829861,
+    "after_ns": 7393.291473388672,
+    "ratio": 0.5837979919582367,
+    "nonoverlapping_improvement": true
+  },
+  {
+    "operation": "Trady.Indicator.OnBalanceVolume",
+    "bars": 10000,
+    "method": "BuilderFull",
+    "before_ns": 160507.21571180556,
+    "after_ns": 106782.07465277778,
+    "ratio": 0.6652789669251225,
+    "nonoverlapping_improvement": true
+  },
+  {
+    "operation": "Trady.Indicator.OnBalanceVolume",
+    "bars": 10000,
+    "method": "BuilderLatestOnly",
+    "before_ns": 120232.60498046875,
+    "after_ns": 72578.39626736111,
+    "ratio": 0.6036498691777588,
+    "nonoverlapping_improvement": true
+  }
+]

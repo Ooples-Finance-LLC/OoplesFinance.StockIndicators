@@ -1,0 +1,14 @@
+Range doji shared CPU qualification in progress;priorHEADeecefbd3. PRODUCTION UNCHANGED. A candidate local JurikDyadic/ring adapter passed correctness but failed all5 allocation-improvement assertions: both existing and candidate states allocate0bytes over256warmedordinaryupdates. Candidate removed; no benefit claimed. Initial6passed5failed evidence retained. Hypothesis that existing accumulator always allocates was wrong.
+Restoredproductionnet10zero warnings/errors;harness60existingwarnings0errors.11newunit/state/facade+29existingcompetitor/reference/contract=40passed0failed0skipped on restored production. Originalstate+independentreference decisions acrossall5variants,period1/3/10/intMax-1,empty/startup/expiration,wide/subnormal/signedzero/randomexponents,FullOHLCV/Latest/mutation/disposal/mixedroots,cancel/rawvalidation verified.
+256ordinary warmed updates: measuredbelow. Constructionexcluded; this is not a wholeBuildAsync allocation claim. Native fixture/fullbuildallocation/timing qualification still pending;catalog244/401unchanged.
+Commands: dotnet build src/OoplesFinance.StockIndicators.csproj -c Release -f net10.0 --no-restore -p:GeneratePackageOnBuild=false -m:1; unitfilterRangeDojiSharedExecutionTests; competitorfilterAverageRangeDojiTests. Tests/harnessRelease --no-restore -p:BuildProjectReferences=false -p:GeneratePackageOnBuild=false -m:1. Detailedlogsretained.
+Pendingseparate RMAoverflowdispatcher andstaleRollingPriceSumGPUassertion unchangedpendingapproval;no fullsuitegreenclaim.
+kind=2; existing256=0; construction excluded
+kind=1; existing256=0; construction excluded
+kind=4; existing256=0; construction excluded
+kind=0; existing256=0; construction excluded
+kind=3; existing256=0; construction excluded
+src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll SHA256 06b438cf8cab266db107e434c00bc4dbe04ad1720546d23d11dd8a41e12c1670
+tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll SHA256 06b438cf8cab266db107e434c00bc4dbe04ad1720546d23d11dd8a41e12c1670
+benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll SHA256 06b438cf8cab266db107e434c00bc4dbe04ad1720546d23d11dd8a41e12c1670
+benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 959fecba1f20955051357ffa54c8907cb000622cdcc795b98c1bcb982ef14955

@@ -1,0 +1,22 @@
+[
+  {
+    "ProcessId": 29872,
+    "Name": "dotnet.exe",
+    "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" test tests/AiDotNet.Tests/AiDotNetTests.csproj -f net10.0 --filter FullyQualifiedName~ForecasterFusedTrainingTests.Probe -nologo -v q --logger trx;LogFileName=C:\\Users\\cheat\\AppData\\Local\\Temp\\claude\\C--Users-cheat\\e0895c24-7292-4070-bcd2-12cd785acd56\\scratchpad\\fft11.trx"
+  },
+  {
+    "ProcessId": 15748,
+    "Name": "dotnet.exe",
+    "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" test tests/AiDotNet.Evolution.Tests/AiDotNet.Evolution.Tests.csproj -c Release -f net10.0 --filter FullyQualifiedName~OpenEvolve|FullyQualifiedName~CliRunTests"
+  },
+  {
+    "ProcessId": 20436,
+    "Name": "dotnet.exe",
+    "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" exec \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\vstest.console.dll\" --testAdapterPath:C:\\Users\\cheat\\.nuget\\packages\\coverlet.collector\\10.1.0\\build\\net10.0\\ --framework:\".NETCoreApp,Version=v10.0\" --testCaseFilter:\"FullyQualifiedName~OpenEvolve|FullyQualifiedName~CliRunTests\" C:\\Users\\cheat\\source\\repos\\AiDotNet.Evolution-wt\\pr169\\tests\\AiDotNet.Evolution.Tests\\bin\\Release\\net10.0\\AiDotNet.Evolution.Tests.dll --logger:Console;Verbosity=minimal --nologo --artifactsProcessingMode-collect --testSessionCorrelationId:15748_bf2a6c05-9b2f-4d1a-a3eb-0fb399882c2c"
+  },
+  {
+    "ProcessId": 32892,
+    "Name": "testhost.exe",
+    "CommandLine": "\"C:\\Users\\cheat\\source\\repos\\AiDotNet.Evolution-wt\\pr169\\tests\\AiDotNet.Evolution.Tests\\bin\\Release\\net10.0\\testhost.exe\"  --runtimeconfig \"C:\\Users\\cheat\\source\\repos\\AiDotNet.Evolution-wt\\pr169\\tests\\AiDotNet.Evolution.Tests\\bin\\Release\\net10.0\\AiDotNet.Evolution.Tests.runtimeconfig.json\" --depsfile \"C:\\Users\\cheat\\source\\repos\\AiDotNet.Evolution-wt\\pr169\\tests\\AiDotNet.Evolution.Tests\\bin\\Release\\net10.0\\AiDotNet.Evolution.Tests.deps.json\" --port 58044 --endpoint 127.0.0.1:058044 --role client --parentprocessid 20436 --telemetryoptedin false"
+  }
+]

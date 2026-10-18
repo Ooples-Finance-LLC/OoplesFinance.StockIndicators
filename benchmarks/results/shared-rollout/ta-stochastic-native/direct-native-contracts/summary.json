@@ -1,0 +1,27 @@
+{
+  "status": "40 contract cases and 100 local GPU cases passed. First native timings pending; qualification unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaPackedBenchmarkBase.cs": "a7527a88c94e00ab013a9f3b06f038f2d09b61a4f6cb73a8c0de41ad82d0bade",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaStochasticNativeBenchmarks.cs": "03f1bac524b71e108570da04818d43f77da7872887a94f91ede398dd6ce1f2a1",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedMappedBenchmarkBase.cs": "3b49e0446805024ee5a769be827d87aeb035df899e48a15e79975e6cba531ad0",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedBenchmarkSupport.cs": "1b57a5d028ae3ae45151b00a1cd4ba3a70a8ed9821b0e80d01c5641fde1d45aa",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/ClassicStochasticComparison.cs": "aca670735575cfe8d4bf3b86ce51a9c616061246486a82d441c8a77310751a1b",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/ClassicStochasticRsiComparison.cs": "2acf10b28a4d38aa424ab1df6d733f52a716ec66359a9c094f8a4bfc91683c69",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/ClassicStochNativeReference.cs": "5e9e57020f13becc2a9a1654014bd07a0d080fcc942ea2ca8f0772fd06bd1ee7",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaStochasticNativeBenchmarkTests.cs": "aa482803c07739e48259027439f3e66366d4602426f917f855dd819f6d94ca8f"
+  },
+  "operations": [
+    "TaLib.Functions.Stoch",
+    "TaLib.Functions.StochF",
+    "TaLib.Functions.StochRsi"
+  ],
+  "native_package": "TALib.NETCore 0.5.0",
+  "native_package_dll_sha256": "980edcda5db3ab7b0cdd9ef877aa784aa93728129f134c023a1e08acedeefcbe",
+  "contract": "Two eager packed K/D columns. Full native prefixes preserve RSI recurrence and smoothing arithmetic. Stoch defaults5/3/3 SMA, StochF5/3 SMA, StochRsi14/5/3 SMA. Lookbacks8/6/20. Native and builder paths use separate independent references. Shared packed base unchanged; no production changes.",
+  "validation": {
+    "comparator_cases_passed": 40,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1292
+  },
+  "benchmark_cases": 24
+}

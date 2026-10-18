@@ -1,0 +1,74 @@
+[
+  {
+    "operation": "Skender.GetChaikinOsc",
+    "bars": 1000,
+    "method": "BuilderFull",
+    "before_ns": 928534.2592592593,
+    "after_ns": 431009.6875,
+    "ratio": 0.4641828593851121,
+    "clear_improvement": true
+  },
+  {
+    "operation": "Skender.GetChaikinOsc",
+    "bars": 1000,
+    "method": "BuilderLatestOnly",
+    "before_ns": 954613.984375,
+    "after_ns": 456269.4140625,
+    "ratio": 0.47796221460261384,
+    "clear_improvement": true
+  },
+  {
+    "operation": "Skender.GetChaikinOsc",
+    "bars": 10000,
+    "method": "BuilderFull",
+    "before_ns": 9454597.97979798,
+    "after_ns": 4779644.0625,
+    "ratio": 0.5055364673054167,
+    "clear_improvement": true
+  },
+  {
+    "operation": "Skender.GetChaikinOsc",
+    "bars": 10000,
+    "method": "BuilderLatestOnly",
+    "before_ns": 9353316.161616161,
+    "after_ns": 4296702.34375,
+    "ratio": 0.45937743036877865,
+    "clear_improvement": true
+  },
+  {
+    "operation": "TaLib.Functions.AdOsc",
+    "bars": 1000,
+    "method": "BuilderFull",
+    "before_ns": 861088.4548611111,
+    "after_ns": 463853.203125,
+    "ratio": 0.5386824088819272,
+    "clear_improvement": true
+  },
+  {
+    "operation": "TaLib.Functions.AdOsc",
+    "bars": 1000,
+    "method": "BuilderLatestOnly",
+    "before_ns": 870443.90625,
+    "after_ns": 403598.59375,
+    "ratio": 0.4636698480534627,
+    "clear_improvement": true
+  },
+  {
+    "operation": "TaLib.Functions.AdOsc",
+    "bars": 10000,
+    "method": "BuilderFull",
+    "before_ns": 8834827.777777778,
+    "after_ns": 4139387.5,
+    "ratio": 0.46853063852719257,
+    "clear_improvement": true
+  },
+  {
+    "operation": "TaLib.Functions.AdOsc",
+    "bars": 10000,
+    "method": "BuilderLatestOnly",
+    "before_ns": 8549479.999999998,
+    "after_ns": 4103013.5416666665,
+    "ratio": 0.47991381249697845,
+    "clear_improvement": true
+  }
+]

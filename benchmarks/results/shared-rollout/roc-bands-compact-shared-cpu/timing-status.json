@@ -1,0 +1,9 @@
+{
+  "status": "completed",
+  "source_commit": "0a7de81b",
+  "preserved_executable_directory": "C:\\Users\\cheat\\temp\\si-rocbands-compact-binaries-0a7de81b",
+  "competitor_timing": "reuse saved results; no competitor timing rerun",
+  "completed_stem": "si-rocbands-compact-builder-20261013-a",
+  "evidence": "builder-timing",
+  "reason": "4 cases completed exit0 uninterrupted with no competing .NET jobs observed."
+}

@@ -1,0 +1,13 @@
+Source: 92aad489, clean worktree at benchmark launch.
+Command: dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedForceIndexBenchmarks* *SharedGpuAdlDetailsBenchmarks* *SharedMoneyFlowIndexBenchmarks* --warmupCount 10 --iterationCount 10 --exporters json csv --artifacts C:/Users/cheat/temp/si-pending-qualified-92aad489
+All 36 cases completed; runner exited zero. No competing .NET build/test jobs observed at prelaunch or sampled process checks. Sampling cannot rule out brief unobserved activity.
+Production net10 build: zero warnings/errors. Harness rebuilt against that production binary: 60 existing warnings, zero errors.
+Fixture setups validate eager output, histories, presence and independent references before timing; ADL also verifies actual GPU execution and all five columns.
+Force Index and Skender ADL native parallel arms replay full prefixes to preserve recurrence/mean rounding. This is measured work, not proof of the optimal native parallel strategy.
+Catalog coverage is measured APIs, not wins. Clear wins require the builder confidence upper bound below both same-run native lower bounds.
+MFI gpu_current remains the previous unchanged GPU run with its original native comparators. Its CPU arms used the archived prototype publisher. This run qualifies final CPU source.
+Prior ADL CPU current rows are preserved in prior-adl-current.json and the original volume-retained-qualification reports. Current ADL includes CPU/GPU and same-run native evidence.
+Managed allocations exclude retained GPU host staging and device buffers. Warnings and outliers remain in raw reports and compressed log.
+OoplesFinance.StockIndicators.dll SHA256 8ff579373de28014f7becf00f96f1f717953f31a98ab4754d47dd228d5651d4a
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 0523c0bfb539286dad29d2e85bfa77a43026d10535949b7deef2667d9c2f3859
+BenchmarkDotNet warnings: Force Index BuilderFull minimum observed iteration 14.937 ms; ADL NativeParallel 96.572 ms (target 100 ms). Duplicate CSV exporter warning and statistical outlier removals are retained. These results use the reported intervals; no precision beyond those intervals is claimed.

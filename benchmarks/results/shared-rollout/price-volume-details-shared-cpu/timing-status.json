@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "reason": "12 builder-only cases completed exit0 without observed competing jobs.",
+  "source_commit": "d074d154",
+  "reuse_binaries": true,
+  "next_filter": "*SharedPriceVolumeDetailsBenchmarks*Builder*",
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "preflight_evidence": "external-processes.json",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-pricedetails-binaries-d074d154",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-pricedetails-builder-20261013-a",
+  "evidence": "builder-timing"
+}

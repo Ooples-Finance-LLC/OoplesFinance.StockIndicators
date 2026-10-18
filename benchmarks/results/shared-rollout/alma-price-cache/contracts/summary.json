@@ -1,0 +1,42 @@
+{
+  "baseline_source_commit": "a2fd4dc9",
+  "baseline_production_base": "48b981d7",
+  "compatibility": "Entire SharedAlmaWindowBenchmarks fixture and benchmark package project text-identical to saved campaign commit. P20/offset.85/sigma6, dyadic inputs, serial/eight-worker native paths unchanged. Native report contains both mappings. Cross-run descriptive comparisons only; historical monitoring limits retained.",
+  "baselines": {
+    "QuanTAlib.Alma": {
+      "path": "benchmarks/results/shared-rollout/alma-coefficient-cache/alma-native.json.gz",
+      "sha256": "e379ad64119012ebd77de5e2beb5075341d43af6d99fb0c2c8d2c9ade7ac5e60",
+      "environment": {
+        "ProcessorName": "AMD Ryzen 9 3950X",
+        "Architecture": "X64",
+        "LogicalCoreCount": 32,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)"
+      }
+    },
+    "Skender.GetAlma": {
+      "path": "benchmarks/results/shared-rollout/alma-coefficient-cache/alma-native.json.gz",
+      "sha256": "e379ad64119012ebd77de5e2beb5075341d43af6d99fb0c2c8d2c9ade7ac5e60",
+      "environment": {
+        "ProcessorName": "AMD Ryzen 9 3950X",
+        "Architecture": "X64",
+        "LogicalCoreCount": 32,
+        "RuntimeVersion": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)"
+      }
+    }
+  },
+  "status": "21 unit and16 comparator cases passed;100 local GPU cases passed. Latency unmeasured; candidate timing pending.",
+  "source_sha256": {
+    "src/Indicators/ArnaudLegouxWindow.cs": "b557b0af100d1147dc71206dd516226856a71a48cb6296362a36ba7c61acc1dc",
+    "tests/ModelsTests/SharedAlmaWindowTests.cs": "905df98a63363bb8f2981c34f6f47deb2f6e2a6ae384115c228df4939d55c07c",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedAlmaWindowBenchmarks.cs": "dc9d509695bd58ead4aff040567812e3c67e2f2a834426d744f72ffbdffff540",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/AlmaComparisonTests.cs": "fe0bb5cee61586ee292a90a514cb4a663c7f504f4a6bf08a28215749ecfdc55b"
+  },
+  "change": "Modern ALMA retains exact decoded price factors with a finite flag. Each finite input is decoded on insertion rather than once per weighted term. Invalid state inputs retain the original deferred error until a published window visits them. Eviction and reset retain the original behavior. Framework implementation unchanged.",
+  "tradeoff": "Complete period20 windows decode one new price rather than20 retained prices. The cached factor and validity flag require a larger queue entry than the previous double. No total allocation or latency improvement claimed. Existing tests confirm zero steady-state per-bar allocation.",
+  "validation": {
+    "unit_cases": 21,
+    "comparator_cases": 16,
+    "gpu_cases": 100
+  },
+  "benchmark_cases": 8
+}

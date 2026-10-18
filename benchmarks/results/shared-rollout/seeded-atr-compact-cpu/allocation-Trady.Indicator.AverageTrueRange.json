@@ -1,0 +1,39 @@
+{
+  "Operation": "Trady.Indicator.AverageTrueRange",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        562544,
+        562544,
+        562544
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        81136,
+        81136,
+        81136
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        16594256,
+        14151112,
+        13146056
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        61015312,
+        62035744,
+        63385704
+      ]
+    }
+  ]
+}

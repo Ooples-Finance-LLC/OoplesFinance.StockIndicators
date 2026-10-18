@@ -1,0 +1,25 @@
+{
+  "status": "46 focused contract cases passed. First direct-native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTradyStrengthBenchmarks.cs": "de8b32e41497e2d89ac4749f7f11243c1c43a4cd07f8c5c2cc41cfb002197167",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTradyStrengthBenchmarkTests.cs": "7ed4b8f5ddcd63c50b49fa322bab38c554a186b30d46bae3aaac4dbed40b74b9"
+  },
+  "native_package": "Trady.Analysis 3.2.8",
+  "native_package_dll_sha256": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+  "operations": [
+    "RelativeStrength",
+    "RelativeStrengthIndex",
+    "NetMomentumOscillator",
+    "RelativeMomentum",
+    "RelativeMomentumIndex"
+  ],
+  "contract": "Public tuple APIs with input conversion prepared outside timing. Eager native List returned without normalization copy. Parallel workers retain full input prefixes and request only their owned range using Compute(startIndex,endIndex); native Lists copied into joined output. Independent decimal references verify values and presence, including warmup and worker boundaries. Repeated results remain independently owned.",
+  "validation": {
+    "comparator_cases_passed": 46,
+    "production_source_changed": false,
+    "gpu_cases_passed": 100,
+    "hosted_contract_methods": 1243,
+    "gpu_receipt": "../../local-gpu-contracts/receipt.json"
+  },
+  "benchmark_cases": 40
+}

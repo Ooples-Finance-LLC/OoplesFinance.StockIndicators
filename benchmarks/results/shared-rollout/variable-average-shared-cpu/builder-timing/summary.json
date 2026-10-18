@@ -1,0 +1,95 @@
+[
+  {
+    "operation": "TaLib.Functions.Mavp",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 4401066.25,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 4401066.25,
+              "StandardError": 208344.2342652239,
+              "Level": 12,
+              "Margin": 996075.57153108,
+              "Lower": 3404990.6784689203,
+              "Upper": 5397141.82153108
+            },
+            "allocated_bytes": 5612404
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 3867484.375,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 3867484.375,
+              "StandardError": 30227.217202890617,
+              "Level": 12,
+              "Margin": 152384.6342377775,
+              "Lower": 3715099.7407622226,
+              "Upper": 4019869.0092377774
+            },
+            "allocated_bytes": 5613170
+          }
+        },
+        "evidence": "results/shared-rollout/variable-average-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedVariableAverageBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-mavp-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 4.8601924280350435,
+          "BuilderLatestOnly": 4.270946449606125
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 41778280,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 41778280,
+              "StandardError": 509132.8745715055,
+              "Level": 12,
+              "Margin": 2434119.7672813316,
+              "Lower": 39344160.23271867,
+              "Upper": 44212399.76728133
+            },
+            "allocated_bytes": 59318130
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 41530725,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 41530725,
+              "StandardError": 137937.41844129894,
+              "Level": 12,
+              "Margin": 745949.3537562261,
+              "Lower": 40784775.64624377,
+              "Upper": 42276674.35375623
+            },
+            "allocated_bytes": 59318782
+          }
+        },
+        "evidence": "results/shared-rollout/variable-average-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedVariableAverageBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-functions-mavp-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 34.058380434782606,
+          "BuilderLatestOnly": 33.85656929347826
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 905533.3333333334,
+        "allocated_bytes": 59968,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-mavp-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 1226666.6666666667,
+        "allocated_bytes": 536968,
+        "evidence": "results/2026-10-06-library-comparisons/talib-functions-mavp-short.json.gz"
+      }
+    ]
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "Operation": "QuanTAlib.Vidya",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        1618016,
+        1618016,
+        1618016
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        1136888,
+        1136888,
+        1136888
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        9206536,
+        9206536,
+        9206536
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        40947088,
+        40947088,
+        40947088
+      ]
+    }
+  ]
+}

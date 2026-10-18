@@ -1,0 +1,39 @@
+{
+  "Operation": "QuanTAlib.Kama",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        804360,
+        804360,
+        804360
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        335568,
+        323232,
+        323232
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        480664,
+        480664,
+        480664
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        1885328,
+        1885328,
+        1885328
+      ]
+    }
+  ]
+}

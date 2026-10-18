@@ -1,0 +1,64 @@
+{
+  "revision": "ff9e16d3",
+  "date": "2026-10-12",
+  "count": 10000,
+  "period": 20,
+  "requestedWarmups": 10,
+  "requestedIterations": 10,
+  "preflightCpuPercent": 5,
+  "completionCpuPercent": 9,
+  "processSamples": {
+    "during": [
+      {
+        "ProcessId": 31672,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"dotnet\" --version"
+      },
+      {
+        "ProcessId": 35140,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 28892,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 31536,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedGpuPathRatioBenchmarks*Skender*10000* --warmupCount 10 --iterationCount 10 --exporters json --artifacts C:/Users/cheat/temp/si-cmo-certified-six-arm"
+      }
+    ],
+    "after": [
+      {
+        "ProcessId": 31672,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"dotnet\" --version"
+      },
+      {
+        "ProcessId": 35140,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 28892,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      }
+    ]
+  },
+  "limits": [
+    "No competing build/test observed before, during or after the run; snapshots do not establish continuous machine exclusivity.",
+    "BenchmarkDotNet reported a minimum observed Full iteration of 44.182 ms, below requested 100 ms. No rerun was performed.",
+    "BenchmarkDotNet removed one GPU Full and two GPU LatestOnly outliers. Raw measurements are retained.",
+    "Prepared exact eighth-unit inputs, P20, warmed cached GPU; managed allocations exclude cached device/workspace memory.",
+    "CPU-only projection is used for existing four-arm qualification. Six-arm report retains GPU losses. Count stays 183/401; only Skender.GetCmo at 10k updated."
+  ],
+  "sourceHashes": {
+    "src/Indicators/ValuesBarExecution.BoundedWindows.cs": "e4b839d532b16cac477545a9fd7d2a4e7343a261b1849a69720ceee9b450de66",
+    "src/Indicators/TensorsGpuExecution.PathRatio.cs": "8918fea4fbcc9fab880fe68ee21a0eac8c482a448df00cd7ad34eaf344f5689c",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedGpuPathRatioBenchmarks.cs": "0806408aeba631268000c21af4006da945d52e6b43181bb123bd9df77bfc8d94",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedPathRatioBenchmarks.cs": "592362b6c66c460a2138c58b7ab5fced2193fc0ae41c71dd734f406f45ea6ff7"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "verification": {
+    "focused_tests": 76,
+    "skipped": 0,
+    "inventory_tests": 12,
+    "valid_benchmark_cases": 80
+  },
+  "native_package": "Trady.Analysis 3.2.8",
+  "source_studied": {
+    "repository": "karlwancl/Trady",
+    "commit": "08de02a68dd69fce3f7fc1dd916419117da7457e",
+    "limitation": "Source checkout is not proven to be the exact NuGet package revision."
+  },
+  "native_contract": "Raw ByTuple Compute(skip, null) output lists, 20 output bars per block with 19 lookback bars; serial loop versus at most eight workers. Prepared tuple arrays and block copies excluded from timing for both native arms. No normalization or flattening in timed arms. Full builder additionally owns OHLCV snapshots.",
+  "setup_checks": "Full-data decimal reference, both history modes and ordinary evaluator, serial/parallel equality including nullable values, 256-bar unpartitioned native prefix, true and false outcomes. Period 20/default percentiles match the three Trady wrappers that ignore their parameters.",
+  "initial_fixture": "Initial report has 60 valid cases and 20 intentionally rejected setup failures: directional short fixtures had no true outcomes. Corrected two fixtures by appending .125-body bullish and bearish candles; reran only those 20 cases. all-paths combines the 80 valid rows, with SelectedEvidence on each.",
+  "unpartitioned_campaign": "Aborted due to repeated full-series percentile construction; not qualification evidence. Small blocks exercise the same public native implementation with a stronger baseline.",
+  "scope": "CPU bounded replay for eight percentile candle types. No new GPU support or global completion claim. Threshold remains 8192 bars and period cap remains 4096 for parallel execution."
+}

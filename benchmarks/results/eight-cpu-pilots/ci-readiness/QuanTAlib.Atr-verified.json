@@ -1,0 +1,44 @@
+[
+  {
+    "Pair": "QuanTAlib.Atr",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 65568.419921875,
+    "AllocatedBytes": 61762
+  },
+  {
+    "Pair": "QuanTAlib.Atr",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 11196.956420898438,
+    "AllocatedBytes": 10980
+  },
+  {
+    "Pair": "QuanTAlib.Atr",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 1000,
+    "MeanNanoseconds": 48442.44873046875,
+    "AllocatedBytes": 88766
+  },
+  {
+    "Pair": "QuanTAlib.Atr",
+    "Method": "OoplesBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 207292.883984375,
+    "AllocatedBytes": 566245
+  },
+  {
+    "Pair": "QuanTAlib.Atr",
+    "Method": "OoplesLatestOnlyBuilderBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 102428.5791015625,
+    "AllocatedBytes": 82986
+  },
+  {
+    "Pair": "QuanTAlib.Atr",
+    "Method": "CompetitorNativeBatch",
+    "Bars": 10000,
+    "MeanNanoseconds": 487907.1015625,
+    "AllocatedBytes": 880781
+  }
+]

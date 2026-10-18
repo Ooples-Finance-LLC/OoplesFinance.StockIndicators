@@ -47,7 +47,7 @@ public sealed class EngulfingPattern : IndicatorBase, IIndicatorValidationContra
         return result;
     }
 
-    private sealed class State : IIndicatorState
+    internal sealed class State : IIndicatorState
     {
         private double _open;
         private double _close;

@@ -1,0 +1,128 @@
+[
+  {
+    "bars": 1000,
+    "evidence": "results/shared-rollout/force-adl-mfi-qualification/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedForceIndexBenchmarks-report-full-compressed.json",
+    "methods": {
+      "BuilderFull": {
+        "mean_ns": 305427.03125,
+        "allocated_bytes": 66394,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 305427.03125,
+          "StandardError": 16075.029602371575,
+          "Level": 12,
+          "Margin": 76853.31132407514,
+          "Lower": 228573.71992592484,
+          "Upper": 382280.34257407516
+        }
+      },
+      "BuilderLatestOnly": {
+        "mean_ns": 237144.7998046875,
+        "allocated_bytes": 17611,
+        "confidence_interval": {
+          "N": 8,
+          "Mean": 237144.7998046875,
+          "StandardError": 2032.7123601804092,
+          "Level": 12,
+          "Margin": 10992.66963658705,
+          "Lower": 226152.13016810044,
+          "Upper": 248137.46944127456
+        }
+      },
+      "NativeSingle": {
+        "mean_ns": 56825.184461805555,
+        "allocated_bytes": 140444,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 56825.184461805555,
+          "StandardError": 395.4037360231475,
+          "Level": 12,
+          "Margin": 1993.3510017050476,
+          "Lower": 54831.833460100504,
+          "Upper": 58818.535463510605
+        }
+      },
+      "NativeParallel": {
+        "mean_ns": 152590.02821180556,
+        "allocated_bytes": 642488,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 152590.02821180556,
+          "StandardError": 1301.1813813801439,
+          "Level": 12,
+          "Margin": 6559.652764186902,
+          "Lower": 146030.37544761866,
+          "Upper": 159149.68097599247
+        }
+      }
+    },
+    "fastest_measured_native": "NativeSingle",
+    "full_mean_ratio": 5.374853317991243,
+    "full_clear_win": false,
+    "latest_mean_ratio": 4.173234139945148,
+    "latest_clear_win": false
+  },
+  {
+    "bars": 10000,
+    "evidence": "results/shared-rollout/force-adl-mfi-qualification/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedForceIndexBenchmarks-report-full-compressed.json",
+    "methods": {
+      "BuilderFull": {
+        "mean_ns": 2408356.5625,
+        "allocated_bytes": 642867,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 2408356.5625,
+          "StandardError": 14649.76228416826,
+          "Level": 12,
+          "Margin": 70039.23286603305,
+          "Lower": 2338317.329633967,
+          "Upper": 2478395.795366033
+        }
+      },
+      "BuilderLatestOnly": {
+        "mean_ns": 2369516.5625,
+        "allocated_bytes": 161744,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 2369516.5625,
+          "StandardError": 9923.472788561969,
+          "Level": 12,
+          "Margin": 47443.25593794401,
+          "Lower": 2322073.306562056,
+          "Upper": 2416959.818437944
+        }
+      },
+      "NativeSingle": {
+        "mean_ns": 956119.1015625,
+        "allocated_bytes": 1400473,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 956119.1015625,
+          "StandardError": 16908.27593997936,
+          "Level": 12,
+          "Margin": 80836.98922563055,
+          "Lower": 875282.1123368695,
+          "Upper": 1036956.0907881305
+        }
+      },
+      "NativeParallel": {
+        "mean_ns": 2212831.0546875,
+        "allocated_bytes": 6384595,
+        "confidence_interval": {
+          "N": 8,
+          "Mean": 2212831.0546875,
+          "StandardError": 15666.534799544537,
+          "Level": 12,
+          "Margin": 84722.77965890011,
+          "Lower": 2128108.2750286,
+          "Upper": 2297553.8343464
+        }
+      }
+    },
+    "fastest_measured_native": "NativeSingle",
+    "full_mean_ratio": 2.518887614068413,
+    "full_clear_win": false,
+    "latest_mean_ratio": 2.4782650598944325,
+    "latest_clear_win": false
+  }
+]

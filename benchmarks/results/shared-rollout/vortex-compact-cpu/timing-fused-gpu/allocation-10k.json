@@ -1,0 +1,55 @@
+{
+  "Operation": "Skender.GetVortex",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        803568,
+        803568,
+        803568
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        323096,
+        322440,
+        322440
+      ]
+    },
+    {
+      "Method": "GpuFull",
+      "Bytes": [
+        802752,
+        802752,
+        802752
+      ]
+    },
+    {
+      "Method": "GpuLatestOnly",
+      "Bytes": [
+        321624,
+        321624,
+        321624
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1800512,
+        1800512,
+        1800512
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        1822656,
+        1821984,
+        1821984
+      ]
+    }
+  ]
+}

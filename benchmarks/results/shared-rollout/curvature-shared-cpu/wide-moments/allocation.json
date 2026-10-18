@@ -1,0 +1,39 @@
+{
+  "Operation": "QuanTAlib.Curvature",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        4106408,
+        4105496,
+        4106408
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        3625256,
+        3624344,
+        3624344
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        8447408,
+        8447408,
+        8447408
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        8600248,
+        8600248,
+        8600248
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "Operation": "QuanTAlib.Frama",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        562680,
+        562680,
+        562680
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        81272,
+        81272,
+        81272
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        480512,
+        480512,
+        480512
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        1884088,
+        1884088,
+        1884088
+      ]
+    }
+  ]
+}

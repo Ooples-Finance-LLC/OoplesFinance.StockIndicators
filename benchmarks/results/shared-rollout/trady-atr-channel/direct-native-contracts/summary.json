@@ -1,0 +1,23 @@
+{
+  "status": "25 focused contract and 100 local GPU cases passed. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTradyAtrChannelBenchmarks.cs": "c350d3d9499798d7ea43f8254a5953d8f5656afdf353fd22f9ef58c4231a3b5d",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/ChandelierComparison.cs": "cf39169c105dafdd953f5876d18b73180f4c390a1a7ccebc2889d2e905c3560c",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/AtrEnvelopeComparison.cs": "656a503c1a36152f27d32b613d0d0710803b0809e96cb062214c17f71fdae417",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTradyAtrChannelBenchmarkTests.cs": "18ccea424d68b47534bb25a46712b92a6ebc96d62ebbb4e0d92e20e2a7ef18ec"
+  },
+  "native_package": "Trady.Analysis 3.2.8",
+  "native_package_dll_sha256": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+  "operations": [
+    "ChandelierExit",
+    "KeltnerChannels"
+  ],
+  "contract": "Public tuple APIs return eager decimal Lists in native tuple order (long/short or lower/middle/upper). Full prefixes preserve recursive ATR and EMA states; named Compute(startIndex,endIndex) returns owned rows. All native computation and joining remain timed. Independent decimal references verify native values and nulls; independent binary64 references verify all builder values and masks, including absent Keltner width. Repeated calls preserve earlier results.",
+  "validation": {
+    "comparator_cases_passed": 25,
+    "production_source_changed": false,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1273
+  },
+  "benchmark_cases": 16
+}

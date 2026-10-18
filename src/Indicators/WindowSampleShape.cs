@@ -57,9 +57,11 @@ public sealed class WindowSampleShape : MultiOutputIndicatorBase, IIndicatorVali
                 )
             );
 
-    private sealed class State(int period, bool kurtosis) : IMultiOutputState
+    internal sealed class State(int period, bool kurtosis) : IMultiOutputState
     {
         private readonly Queue<double> _history = new();
+        private int _grid;
+        private bool _hasGrid;
         private BigInteger _s1,
             _s2,
             _s3,
@@ -69,11 +71,31 @@ public sealed class WindowSampleShape : MultiOutputIndicatorBase, IIndicatorVali
         {
             _history.Clear();
             _s1 = _s2 = _s3 = _s4 = 0;
+            _grid = 0;
+            _hasGrid = false;
         }
 
         private void Add(double price, int sign)
         {
-            var x = ExactVarianceWindow.Units(price);
+            var parts = new ExactMeanAccumulator.ProductFactor(price);
+            if (parts.Mantissa != 0 && (!_hasGrid || parts.Scale < _grid))
+            {
+                if (_hasGrid)
+                {
+                    int shift = _grid - parts.Scale;
+                    _s1 <<= shift; _s2 <<= 2 * shift; _s3 <<= 3 * shift;
+                    if (kurtosis) _s4 <<= 4 * shift;
+                }
+                _grid = parts.Scale;
+                _hasGrid = true;
+            }
+#if !NETFRAMEWORK
+            if (TrySmallAdd(parts, sign)) return;
+#endif
+            // The same power of two cancels from numerator and denominator of
+            // both statistics. Preserve exact moments without minimum-unit padding.
+            var x = parts.Mantissa == 0 ? BigInteger.Zero
+                : new BigInteger(parts.Mantissa) << (parts.Scale - _grid);
             var x2 = x * x;
             _s1 += sign * x;
             _s2 += sign * x2;
@@ -81,6 +103,29 @@ public sealed class WindowSampleShape : MultiOutputIndicatorBase, IIndicatorVali
             if (kurtosis)
                 _s4 += sign * x2 * x2;
         }
+
+#if !NETFRAMEWORK
+        private bool TrySmallAdd(ExactMeanAccumulator.ProductFactor parts, int sign)
+        {
+            if (parts.Mantissa == 0) return true;
+            int shift = parts.Scale - _grid;
+            if (shift is < 0 or > 8 || Math.Abs(parts.Mantissa) > (256L >> shift)
+                || _s1.GetBitLength() > 31 || _s2.GetBitLength() > 31
+                || _s3.GetBitLength() > 31 || kurtosis && _s4.GetBitLength() > 31) return false;
+            // |x| <= 256, so even x^4 is at most 2^32. Adding/subtracting
+            // it from a 31-bit moment fits Int64; retain the same exact fields
+            // so a subsequent wider price or grid change can use the fallback.
+            checked
+            {
+                long x = parts.Mantissa << shift, square = x * x;
+                _s1 = (long)_s1 + sign * x;
+                _s2 = (long)_s2 + sign * square;
+                _s3 = (long)_s3 + sign * square * x;
+                if (kurtosis) _s4 = (long)_s4 + sign * square * square;
+            }
+            return true;
+        }
+#endif
 
         public void Update(in Bar bar, Span<double> outputs)
         {
@@ -92,6 +137,7 @@ public sealed class WindowSampleShape : MultiOutputIndicatorBase, IIndicatorVali
             outputs[1] = 1;
             if (_history.Count < (kurtosis ? 4 : 3))
                 return;
+            if (kurtosis && TrySmallKurtosis(outputs)) return;
             var n = new BigInteger(_history.Count);
             var a = n * _s2 - _s1 * _s1;
             if (a.IsZero)
@@ -108,17 +154,40 @@ public sealed class WindowSampleShape : MultiOutputIndicatorBase, IIndicatorVali
                     + 6 * n * _s1 * _s1 * _s2
                     - 3 * BigInteger.Pow(_s1, 4);
                 var top = (n * n - 1) * c - 3 * (n - 1) * (n - 1) * a * a;
-                outputs[0] = ExactMeanAccumulator.UnitRatio(top << 1074, a * a * (n - 2) * (n - 3));
+                outputs[0] = ExactMeanAccumulator.ScaledRatio(top, a * a * (n - 2) * (n - 3), 0);
             }
             else
             {
                 var b = n * n * _s3 - 3 * n * _s1 * _s2 + 2 * _s1 * _s1 * _s1;
                 outputs[0] =
                     b.Sign
-                    * ExactPopulationDeviation.RootRatio(
-                        (b * b * n * (n - 1)) << 2148,
-                        a * a * a * (n - 2) * (n - 2)
+                    * ExactPopulationDeviation.ScaledRootRatio(
+                        b * b * n * (n - 1),
+                        a * a * a * (n - 2) * (n - 2), 0
                     );
+            }
+        }
+
+        private bool TrySmallKurtosis(Span<double> outputs)
+        {
+            if (_history.Count > 32 || _s1 < -512 || _s1 > 512 || _s2 > 8192
+                || _s3 < -131072 || _s3 > 131072 || _s4 > 2097152) return false;
+            // These moment bounds give |a| < 2^19 and |c| < 2^41. Thus
+            // |top| < 2^52 and bottom < 2^48: all integer intermediates fit
+            // Int64 and both division operands are exact binary64 integers.
+            // One hardware division therefore rounds the exact rational once.
+            checked
+            {
+                long n = _history.Count, s1 = (long)_s1, s2 = (long)_s2,
+                    s3 = (long)_s3, s4 = (long)_s4;
+                long square = s1 * s1, a = n * s2 - square;
+                if (a == 0) { outputs[1] = 0; return true; }
+                long c = n * n * n * s4 - 4 * n * s1 * (n * s3)
+                    + 6 * n * square * s2 - 3 * square * square;
+                long top = (n * n - 1) * c - 3 * (n - 1) * (n - 1) * a * a;
+                long bottom = a * a * (n - 2) * (n - 3);
+                outputs[0] = (double)top / bottom;
+                return true;
             }
         }
     }

@@ -1,0 +1,12 @@
+Source: 9616a618 plus Chaikin shared-column storage and mixed ownership tests in this commit.
+Command: dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedSmoothedAccumulationBenchmarks* --warmupCount 10 --iterationCount 10 --exporters json csv --artifacts C:/Users/cheat/temp/si-chaikin-shared-columns-qualified
+All 16 cases completed; runner exited zero. No competing .NET build/test jobs observed before launch or during sampled process checks. Brief unobserved activity cannot be excluded.
+Production net10 build: zero warnings/errors. All 18 focused Chaikin/OBV unit cases and 20 Chaikin competitor/fixture cases passed. Harness build: 60 existing warnings, zero errors.
+Setup verifies all eight builder columns and native outputs against separate independent exact/native arithmetic references bitwise, then cross-compares within 1e-10 relative tolerance. Presence, dates, counts, eager results and both history modes are checked.
+Skender exposes oscillator and flow details; TA exposes oscillator only. All eight builder outputs remain available; disabled detail values/flags share one run-owned zero array, enabled detail flags share one run-owned presence array. These different output surfaces are reflected in the allocation comparisons.
+Native parallel arms perform measured full-prefix replay to preserve cumulative/EMA recurrence rounding. This is not proof of the optimal native parallel strategy. Both serial and parallel arms determine clear wins.
+Allocation command: --alloc-shared <operation> 10000 3 for both operations. Managed samples include workers; all repetitions are preserved, including variability.
+Reported confidence intervals and raw warnings/outliers are retained. Coverage 197/401 means measured APIs, not wins. Builder parallel execution and GPU support remain outstanding.
+OoplesFinance.StockIndicators.dll SHA256 5d5189c9f94aaba61abe0ed43af7a09ceec0fde68c2b81ee3a2aed04f46df0df
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 6dbcd6a83b049a90548a96db5d7ae1bc662c23d89e4f5b628b5f5fae5b9be518
+BenchmarkDotNet warnings: BuilderFull minimum iteration 11.047 ms and NativeParallel 87.417 ms (100 ms recommended), duplicate CSV exporter and outlier removals. All are preserved. Prior interrupted timing remains diagnostic only; no latency before/after claim uses it.

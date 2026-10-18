@@ -1,0 +1,29 @@
+{
+  "productionRevision": "143fe7ad",
+  "fixtureRevision": "accompanying commit",
+  "date": "2026-10-12",
+  "period": 20,
+  "count": 1000,
+  "warmupsPerArm": 10,
+  "samplesPerArm": 3,
+  "nativeVersions": [
+    "Skender.Stock.Indicators 2.7.3",
+    "Trady.Analysis 3.2.8"
+  ],
+  "sourceInspected": [
+    "https://github.com/DaveSkender/Stock.Indicators/blob/2.7.3/src/a-d/Cmo/Cmo.Series.cs",
+    "https://github.com/karlwancl/Trady/blob/08de02a68dd69fce3f7fc1dd916419117da7457e/Trady.Analysis/Indicator/EfficiencyRatio.cs"
+  ],
+  "contracts": [
+    "Inputs prepared outside measurement: matching binary64 bars/tuples and decimal eighth-unit prices.",
+    "Native serial retains public eager lists; up-to-eight-worker native parallel replay includes P preceding prices, preparation and local native results inside measurement. Trady requests assigned output indices.",
+    "Setup validates Skender dates and bitwise values/presence, exact decimal Trady results and parallel equality, plus independent native and exact builder references. Builder retains values and presence; Full owns OHLCV."
+  ],
+  "verification": "41 comparison/probe tests and 68 inventory tests passed; benchmark build succeeded.",
+  "limits": [
+    "No timing or qualification increase. Coverage remains 181/401.",
+    "All managed threads counted; owned results retained during sample; disposal afterwards.",
+    "Trady builder LatestOnly samples varied from 18640 to 19536 B; native parallel varied from 554136 to 554472 B. No repeat or dropped samples.",
+    "Trady source inspection uses a repository commit; executable package setup agreement independently checks the pinned 3.2.8 API."
+  ]
+}

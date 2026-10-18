@@ -1,0 +1,46 @@
+Top 25 Functions (Exclusive)                                                  Inclusive           Exclusive           
+1.  Monitor.Wait(class System.Object,int32)                                   75.11%              75.11%              
+2.  Thread.<PollGC>g__PollGCWorker|70_0()                                     10.57%              10.57%              
+3.  PairStatisticsWindow.ReadSmall(int64,int64,int64,int32,int32,int32,boo    7.27%               6.63%               
+    l)                                            
+4.  ValuesBarExecution.ComputePairColumn(value class OoplesFinance.StockIn    13.1%               5.57%               
+    dicators.Indicators.Bar[],float64[][],class OoplesFinance.StockIndicat                                            
+    ors.Indicators.OwnedBarBuffer,int32,int32,int32,value class System.Rea                                            
+    dOnlySpan`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,                                            
+    value class System.ReadOnlySpan`1<value class OoplesFinance.StockIndic                                            
+    ators.Indicators.Bar>,value class System.Threading.CancellationToken,c                                            
+    lass OoplesFinance.StockIndicators.Indicators.IIndicator)                                            
+5.  OpenClNativeBindings.CreateCommandQueue(int,int,unsigned int64,int32&)    0.39%               0.39%               
+                                                
+6.  Math.ConvertToInt64Checked(float64)                                       0.26%               0.26%               
+7.  Monitor.TryEnter_Slowpath(class System.Object,int32)                      0.24%               0.24%               
+8.  ExactPopulationDeviation.CompareWideMidpoint(unsigned int64,unsigned i    0.4%                0.2%                
+    nt64,unsigned int64,int32,int32&)                                            
+9.  ExactPopulationDeviation+WideMidpoint.Compare(unsigned int64,unsigned     0.57%               0.17%               
+    int64,unsigned int64,int32,int32&)                                            
+10. UInt128.op_RightShift(value class System.UInt128,int32)                   0.13%               0.12%               
+11. Monitor.Enter_Slowpath(class System.Object)                               0.12%               0.12%               
+12. ManualResetEventSlim.Wait(int32,value class System.Threading.Cancellat    75.81%              0.07%               
+    ionToken)                                            
+13. DirectOpenClProgram.TryCreateFromCache(class AiDotNet.Tensors.Engines.    0.08%               0.06%               
+    DirectGpu.OpenCL.DirectOpenClContext,class System.String,class System.                                            
+    String)                                            
+14. ExactPopulationDeviation.TryWideScaledRoot(unsigned int64,unsigned int    0.63%               0.05%               
+    64,int32,float64&)                                            
+15. UInt128.op_Multiply(value class System.UInt128,value class System.UInt    0.07%               0.05%               
+    128)                                            
+16. Monitor.PulseAll(class System.Object)                                     0.04%               0.04%               
+17. InitHelpers.InitClassSlow(value class System.Runtime.CompilerServices.    0.03%               0.02%               
+    MethodTable*)                                            
+18. OpenClNativeBindings.get_IsAvailable()                                    0.02%               0.02%               
+19. Math.BigMul(unsigned int64,unsigned int64,unsigned int64&)                0.02%               0.02%               
+20. Thread.SpinWait(int32)                                                    9.88%               0.01%               
+21. CompetitorBenchmarks!Program+<<Main>$>d__0.MoveNext()                     3.71%               0.01%               
+22. UInt128.op_UnsignedRightShift(value class System.UInt128,int32)           0.01%               0.01%               
+23. RuntimeHelpers.<GetHashCode>g__GetHashCodeWorker|15_0(class System.Obj    0.01%               0.01%               
+    ect)                                            
+24. AsyncMethodBuilderCore.Start(!!0&)                                        3.71%               0.01%               
+25. ValuesBarExecution.FillBoundedWindow(value class OoplesFinance.StockIn    3.04%               0.01%               
+    dicators.Indicators.Bar[],float64[][],class OoplesFinance.StockIndicat                                            
+    ors.Indicators.IIndicator,value class System.Threading.CancellationTok                                            
+    en,class OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)                                            

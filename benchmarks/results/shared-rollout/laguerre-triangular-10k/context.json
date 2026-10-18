@@ -1,0 +1,64 @@
+{
+  "revision": "54441b95",
+  "date": "2026-10-12",
+  "count": 10000,
+  "triangularPeriod": 20,
+  "laguerreGamma": 0.1,
+  "requestedWarmups": 10,
+  "requestedIterations": 10,
+  "preflightCpuPercent": 14,
+  "completionCpuPercent": 5,
+  "processSamples": {
+    "during": [
+      {
+        "ProcessId": 31672,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"dotnet\" --version"
+      },
+      {
+        "ProcessId": 35140,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 28892,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 30076,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedZeroSeedLaguerreBenchmarks*10000* *SharedTriangularBenchmarks*10000* --warmupCount 10 --iterationCount 10 --exporters json --artifacts C:/Users/cheat/temp/si-laguerre-triangular-10k"
+      }
+    ],
+    "completion": [
+      {
+        "ProcessId": 31672,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"dotnet\" --version"
+      },
+      {
+        "ProcessId": 35140,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 28892,
+        "Name": "dotnet.exe",
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      }
+    ]
+  },
+  "limits": [
+    "No competing build/test observed before, during or at completion; snapshots do not establish continuous machine exclusivity.",
+    "BDN warned that the shortest Laguerre Full iteration was 12.404 ms, below requested 100 ms. No rerun.",
+    "BDN removed triangular outliers: one QuanTAlib GPU LatestOnly, one QuanTAlib native serial, two QuanTAlib native parallel and two TA-Lib native parallel. Raw measurements retained.",
+    "Prepared inputs; Full owns OHLCV, LatestOnly retains output columns. Warmed GPU cached device/workspace memory excluded from managed allocation.",
+    "Only these three 10k API entries added; measured coverage rises 183 to 186 of 401, not a win count. Triangular loses to TA-Lib despite beating QuanTAlib. Laguerre loses despite lower LatestOnly allocation."
+  ],
+  "sourceHashes": {
+    "src/Indicators/ZeroSeedLaguerreFilter.cs": "cd29fcddb938367796e4c1cec2566559f448fd0d559e432f8f4fa4f95f49c5fa",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTriangularBenchmarks.cs": "1424a1728fd8620690b49e53f4b0d0d6afc7c4a46dc0363ac431f08a28a3bb00",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedZeroSeedLaguerreBenchmarks.cs": "36315102d04352bf08d30a0e661bfa3bd27712a6663c49e009d90cc34c439eec"
+  }
+}
