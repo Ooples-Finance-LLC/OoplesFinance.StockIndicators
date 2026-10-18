@@ -183,6 +183,11 @@ internal static partial class ValuesBarExecution
             or CommoditySelectionIndex { MaType: null } or ConstanceBrownCompositeIndex { MaType: null }
             or FollowingAdaptiveMovingAverage
             or EhlersMesaAdaptiveMovingAverage { FastLimit: >= double.MinValue and <= double.MaxValue, SlowLimit: >= double.MinValue and <= double.MaxValue }
+            or EhlersClassicHilbertTransformer or EhlersHilbertTransformer or EhlersHilbertTransformerIndicator
+            or EhlersInstantaneousPhaseIndicator
+            or EhlersHilbertTransformIndicator { IMult: >= double.MinValue and <= double.MaxValue, QMult: >= double.MinValue and <= double.MaxValue }
+            or EhlersInstantaneousTrendlineV1 or EhlersHilbertOscillator or EhlersSineWaveIndicatorV1
+            or EhlersSineWaveIndicatorV2 { Alpha: >= double.MinValue and <= double.MaxValue }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -571,6 +576,15 @@ internal static partial class ValuesBarExecution
         ConstanceBrownCompositeIndex brown => new GeneratedBrownCompositeState(brown),
         FollowingAdaptiveMovingAverage => new GeneratedFollowingMamaState(),
         EhlersMesaAdaptiveMovingAverage mama => new GeneratedMamaOutputsState(mama.FastLimit, mama.SlowLimit),
+        EhlersClassicHilbertTransformer transformer => new GeneratedClassicHilbertState(transformer.Length1, transformer.Length2),
+        EhlersHilbertTransformer transformer => new GeneratedHilbertTransformerState(transformer.Length1, transformer.Length2, 1, false),
+        EhlersHilbertTransformerIndicator transformer => new GeneratedHilbertTransformerState(transformer.Length1, transformer.Length2, transformer.Length3, true),
+        EhlersHilbertTransformIndicator transform => new GeneratedHilbertPhaseState(transform.Length, transform.IMult, transform.QMult),
+        EhlersInstantaneousPhaseIndicator phase => new GeneratedInstantaneousPhaseState(phase.Length1, phase.Length2),
+        EhlersSineWaveIndicatorV1 => new GeneratedMamaDerivedState(0),
+        EhlersHilbertOscillator => new GeneratedMamaDerivedState(1),
+        EhlersInstantaneousTrendlineV1 => new GeneratedMamaDerivedState(2),
+        EhlersSineWaveIndicatorV2 sine => new GeneratedCyberSineState(sine.Length, sine.Alpha),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -4353,6 +4367,79 @@ internal static partial class ValuesBarExecution
             outputs[5] = point.Smooth;
             outputs[6] = point.Real;
             outputs[7] = point.Imag;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedClassicHilbertState(int upper, int lower) : IMultiOutputState, IDisposable
+    {
+        private readonly ClassicHilbertWindow _window = new(upper, lower);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Real;
+            outputs[1] = point.Imaginary;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedHilbertTransformerState(int upper, int lower, int smoothing, bool smooth) : IMultiOutputState, IDisposable
+    {
+        private readonly HilbertTransformerWindow _window = new(upper, lower, smoothing, smooth);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Real;
+            outputs[1] = point.Imaginary;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedHilbertPhaseState(int lag, double real, double imaginary) : IMultiOutputState, IDisposable
+    {
+        private readonly HilbertPhaseWindow _window = new(lag, real, imaginary, 1, false);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Imaginary;
+            outputs[1] = point.Real;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedInstantaneousPhaseState(int lag, int horizon) : IIndicatorState, IDisposable
+    {
+        private readonly HilbertPhaseWindow _window = new(lag, .635, .338, horizon, true);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Cycle;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedMamaDerivedState(int mode) : IMultiOutputState, IDisposable
+    {
+        private readonly MamaDerivedWindow _window = new(mode);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.First;
+            outputs[1] = point.Second;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedCyberSineState(int length, double alpha) : IMultiOutputState, IDisposable
+    {
+        private readonly CyberSineWindow _window = new(length, alpha);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Sine;
+            outputs[1] = point.Lead;
         }
         public void Dispose() => _window.Reset();
     }
