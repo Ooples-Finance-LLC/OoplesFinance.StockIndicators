@@ -1,0 +1,37 @@
+{
+  "batch": "fallingrising-shared-execution",
+  "types": [
+    "FallingRisingFilter"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 16,
+    "parity_passed": 4,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "fallingrising-unit-verified.trx.gz",
+        "passed_cases": 16,
+        "trx_sha256": "c2bb27e68c9376ca1264f09989f4ee83cad250e052bd0231629f2c610ff7db87"
+      },
+      {
+        "file": "fallingrising-parity-verified.trx.gz",
+        "passed_cases": 4,
+        "trx_sha256": "71b45e821014e5ac3f4fe340a183e33d9f205a2ec20ec27630e0e5b77e67a6c2"
+      }
+    ],
+    "context": "Executed in the 9-facade fifth-stage working candidate with inherited unresolved MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "69b813a74e4ac37a8aba106d6c14848816525342e496eeff5f5ed8da16e63343",
+    "test_execution_input_sha256": {
+      "unit": "69b813a74e4ac37a8aba106d6c14848816525342e496eeff5f5ed8da16e63343",
+      "parity": "69b813a74e4ac37a8aba106d6c14848816525342e496eeff5f5ed8da16e63343"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "fc0e396cc6f1d5c805f524bd25c994da7e48c5ec"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}
