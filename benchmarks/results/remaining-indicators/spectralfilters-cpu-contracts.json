@@ -1,0 +1,39 @@
+{
+  "batch": "spectralfilters-shared-execution",
+  "types": [
+    "EhlersCombFilterSpectralEstimate",
+    "EhlersDominantCycleTunedBypassFilter",
+    "EhlersAutoCorrelationReversals"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 68,
+    "parity_passed": 12,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "spectralfilters-unit-verified.trx.gz",
+        "passed_cases": 68,
+        "trx_sha256": "d20d89d150686ebe0ad7e1b8a9145ac83e99a475ace3ed973148ce4274ee46e5"
+      },
+      {
+        "file": "spectralfilters-parity-verified.trx.gz",
+        "passed_cases": 12,
+        "trx_sha256": "c98fa898284a55b7b21954ebb8b9935c1b620dd4164d8d69874ae1f266868910"
+      }
+    ],
+    "context": "Executed in the combined 113-facade working candidate; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+    "test_execution_input_sha256": {
+      "unit": "b2b1f08b943dd8cc72787bf0f3572442482f4dff9425b147dd6283bd3af2bd5a",
+      "parity": "b2b1f08b943dd8cc72787bf0f3572442482f4dff9425b147dd6283bd3af2bd5a"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "b7e13308b78c1e23f9f21cbbd9323a7d9d6548ee"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}
