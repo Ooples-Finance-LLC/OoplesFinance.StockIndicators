@@ -259,6 +259,8 @@ internal static partial class ValuesBarExecution
             or Inertia
             or InertiaIndicator { MaType: null }
             or HybridConvolutionFilter { Length: < int.MaxValue }
+            or JmaRsxClone
+            or JrcFractalDimension { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -756,6 +758,8 @@ internal static partial class ValuesBarExecution
         InertiaIndicator inertia => new GeneratedInertiaState(inertia.Length, 14),
         HybridConvolutionFilter filter => new GeneratedHybridState(Math.Max(1, filter.Length), count),
         InsyncIndex insync => new GeneratedInsyncState(insync),
+        JmaRsxClone rsx => new GeneratedRsxState(rsx.Length),
+        JrcFractalDimension jrc => new GeneratedJrcState(jrc.Length1, jrc.Length2, jrc.SmoothLength),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5778,6 +5782,25 @@ internal static partial class ValuesBarExecution
         public double Update(in Bar bar) => _window.Next(bar.Close, CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close),
             bar.High, bar.Low, bar.Volume, bar.High, bar.Low, true);
         public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedRsxState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly RsxWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => Reset();
+    }
+    private sealed class GeneratedJrcState(int length, int scale, int smooth) : IMultiOutputState, IDisposable
+    {
+        private readonly JrcWindow _window = new(MovingAvgType.SimpleMovingAverage, length, scale, smooth);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = point.Line; outputs[1] = point.SignalLine;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
