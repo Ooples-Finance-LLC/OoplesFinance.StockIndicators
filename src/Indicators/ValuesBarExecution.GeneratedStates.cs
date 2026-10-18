@@ -261,6 +261,7 @@ internal static partial class ValuesBarExecution
             or HybridConvolutionFilter { Length: < int.MaxValue }
             or JmaRsxClone
             or JrcFractalDimension { MaType: null }
+            or JapaneseCorrelationCoefficient { MaType: null, SecondAverage: null, ThirdAverage: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -760,6 +761,7 @@ internal static partial class ValuesBarExecution
         InsyncIndex insync => new GeneratedInsyncState(insync),
         JmaRsxClone rsx => new GeneratedRsxState(rsx.Length),
         JrcFractalDimension jrc => new GeneratedJrcState(jrc.Length1, jrc.Length2, jrc.SmoothLength),
+        JapaneseCorrelationCoefficient ratio => new GeneratedJapaneseState(Math.Max(1, ratio.Length), count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5801,6 +5803,32 @@ internal static partial class ValuesBarExecution
             outputs[0] = point.Line; outputs[1] = point.SignalLine;
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedJapaneseState : IIndicatorState, IDisposable
+    {
+        private readonly int _lag;
+        private readonly Streaming.SimpleMovingAverageSmoother _highMean, _lowMean, _closeMean;
+        private readonly Streaming.RollingWindowMax _high;
+        private readonly Streaming.RollingWindowMin _low;
+        private readonly PooledRingBuffer<double> _closes;
+        public GeneratedJapaneseState(int length, int count)
+        {
+            _lag = length; var half = MathHelper.MinOrMax((int)Math.Ceiling(length / 2d));
+            _highMean = new(half); _lowMean = new(half); _closeMean = new(half);
+            _high = new(half); _low = new(half); _closes = new(Math.Min(length, Math.Max(1, count)));
+        }
+        public void Reset() { _highMean.Reset(); _lowMean.Reset(); _closeMean.Reset(); _high.Reset(); _low.Reset(); _closes.Clear(); }
+        public double Update(in Bar bar)
+        {
+            var high = _high.Add(_highMean.Next(bar.High, true), out _);
+            var low = _low.Add(_lowMean.Next(bar.Low, true), out _);
+            var close = _closeMean.Next(bar.Close, true);
+            var prior = Streaming.EhlersStreamingWindow.GetOffsetValue(_closes, close, _lag);
+            var value = ExactDifferenceRatio.Of(close, prior, high, low);
+            _closes.TryAdd(close, out _); return value;
+        }
+        public void Dispose() { _highMean.Dispose(); _lowMean.Dispose(); _closeMean.Dispose(); _high.Dispose(); _low.Dispose(); _closes.Dispose(); }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
