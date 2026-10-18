@@ -1,0 +1,4 @@
+Source commit 3a85878c. Production SHA256 789412792a2a9b96a396bf7828ed0404e7699f8d477f5027d6abb0cd5d163651.
+4 builder-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedRollingStatisticsBenchmarks*Skender.GetSmaAnalysis*. Native methods are absent from benchmark setup and timing; separate golden tests check their contracts. Saved competitor results referenced without rerunning. Same original input generator; saved native retains aligned double[] and builder retains owned IIndicatorRun. Runtime mismatch recorded where present; no ratio for incompatible runtimes. Cross-run serial comparisons only, no best-path or same-run wins; parallel qualification missing. Coverage stays 269/401.
+42 focused tests passed; build and verification evidence in parent directory. No full-suite claim.

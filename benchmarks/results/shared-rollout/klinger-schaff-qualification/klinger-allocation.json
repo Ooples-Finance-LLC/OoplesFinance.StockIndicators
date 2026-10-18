@@ -1,0 +1,1 @@
+{"Operation":"Skender.GetKvo","Count":10000,"Repetitions":3,"Arms":[{"Method":"BuilderFull","Bytes":[804112,803456,803456]},{"Method":"BuilderLatestOnly","Bytes":[322328,322328,322328]},{"Method":"NativeSingle","Bytes":[2120608,2120608,2120608]},{"Method":"NativeParallel","Bytes":[9625816,9625816,9625816]}]}

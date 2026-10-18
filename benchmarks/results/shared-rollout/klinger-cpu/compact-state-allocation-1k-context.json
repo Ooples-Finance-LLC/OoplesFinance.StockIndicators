@@ -1,0 +1,16 @@
+{
+  "production_commit": "d904dee4",
+  "fixture_commit": "d904dee4",
+  "fixture_sha256": "d6c34aa9f6cc4f7fb0a5191f2f3e02c7b116d8813a7b274912617b5e29f8ec59",
+  "command": "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --alloc-shared Skender.GetKvo 1000 3",
+  "warmups": 10,
+  "samples_per_arm": 3,
+  "scope": "Managed allocations across all process threads, including construction, execution and retained results. Setup and result disposal are excluded. Native serial retains the original eagerly calculated Skender result collection. Native parallel replays full prefixes through the public API and retains disjoint result ranges. No timings collected.",
+  "measurement_revision_note": "Measured before the validation-only reference correction in this commit. Klinger execution state and benchmark methods were unchanged by that correction; no allocation replay was necessary. Final production/benchmark builds and affected tests passed after the correction.",
+  "competitor_package": "Skender.Stock.Indicators 2.7.3",
+  "source_review": [
+    "https://github.com/facioquo/stock-indicators-dotnet/blob/2.7.3/src/e-k/Kvo/Kvo.Api.cs",
+    "https://github.com/facioquo/stock-indicators-dotnet/blob/2.7.3/src/e-k/Kvo/Kvo.Series.cs"
+  ],
+  "limitations": "Allocation evidence only, not a latency or GPU win. Timing qualification remains pending. Test-build framework/analyzer warnings remain."
+}

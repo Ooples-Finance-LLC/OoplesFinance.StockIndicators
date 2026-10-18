@@ -1,0 +1,4 @@
+Source commit 59e7a94e. Production SHA256 53cece4e2ec87a03d0153c4b9440dbf67aa211ab284d805c2646e1d00d5cec0a.
+16 builder-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedSeededMomentumBenchmarks*Builder*. Native methods are absent from benchmark setup and timing; separate golden tests check their contracts. Saved competitor results referenced without rerunning. Same original input generator; saved native retains aligned double[] and builder retains owned IIndicatorRun. Cross-run serial comparisons only, no best-path or same-run wins; parallel qualification missing. Coverage stays 269/401.
+55 focused tests passed; build and verification evidence in parent directory. No full-suite claim.

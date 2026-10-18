@@ -1,0 +1,39 @@
+{
+  "Operation": "Skender.GetKama",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        805016,
+        804360,
+        804360
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        323232,
+        323232,
+        323232
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1080400,
+        1080400,
+        1080400
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        4944176,
+        4944176,
+        5005696
+      ]
+    }
+  ]
+}

@@ -1,0 +1,188 @@
+[
+  {
+    "operation": "TaLib.Candles.PiercingLine",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 29715.620930989582,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 29715.620930989582,
+              "StandardError": 587.1010526996612,
+              "Level": 12,
+              "Margin": 2959.755725303634,
+              "Lower": 26755.86520568595,
+              "Upper": 32675.376656293214
+            },
+            "allocated_bytes": 71800
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 21689.927842881945,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 21689.927842881945,
+              "StandardError": 194.94988456870166,
+              "Level": 12,
+              "Margin": 982.8019117769678,
+              "Lower": 20707.125931104976,
+              "Upper": 22672.729754658914
+            },
+            "allocated_bytes": 22763
+          }
+        },
+        "evidence": "results/shared-rollout/penetration-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPenetrationBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-piercingline-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.5765246986569803,
+          "BuilderLatestOnly": 0.4208150030769937
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 198962.353515625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 198962.353515625,
+              "StandardError": 2664.223963503487,
+              "Level": 12,
+              "Margin": 12737.42187535301,
+              "Lower": 186224.931640272,
+              "Upper": 211699.775390978
+            },
+            "allocated_bytes": 576178
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 151874.27978515625,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 151874.27978515625,
+              "StandardError": 912.619594201533,
+              "Level": 12,
+              "Margin": 4935.339548997088,
+              "Lower": 146938.94023615916,
+              "Upper": 156809.61933415334
+            },
+            "allocated_bytes": 94775
+          }
+        },
+        "evidence": "results/shared-rollout/penetration-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPenetrationBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-piercingline-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.3317848633597272,
+          "BuilderLatestOnly": 0.2532619175235974
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 51542.667643229164,
+        "allocated_bytes": 12368,
+        "evidence": "results/2026-10-06-library-comparisons/talib-piercingline-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 599672.7864583334,
+        "allocated_bytes": 120371,
+        "evidence": "results/2026-10-06-library-comparisons/talib-piercingline-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "TaLib.Candles.DarkCloudCover",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 25937.53662109375,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 25937.53662109375,
+              "StandardError": 242.74789969384668,
+              "Level": 12,
+              "Margin": 1312.7521230170482,
+              "Lower": 24624.7844980767,
+              "Upper": 27250.2887441108
+            },
+            "allocated_bytes": 71806
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 23789.7216796875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 23789.7216796875,
+              "StandardError": 490.09686855459154,
+              "Level": 12,
+              "Margin": 2343.1102865542152,
+              "Lower": 21446.611393133284,
+              "Upper": 26132.831966241716
+            },
+            "allocated_bytes": 22772
+          }
+        },
+        "evidence": "results/shared-rollout/penetration-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPenetrationBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-darkcloudcover-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.9956862482160431,
+          "BuilderLatestOnly": 0.9132362518223235
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 190042.63671875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 190042.63671875,
+              "StandardError": 763.5607180853241,
+              "Level": 12,
+              "Margin": 3650.5170462136075,
+              "Lower": 186392.11967253638,
+              "Upper": 193693.15376496362
+            },
+            "allocated_bytes": 576197
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 151514.2333984375,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 151514.2333984375,
+              "StandardError": 469.5765689009328,
+              "Level": 12,
+              "Margin": 2539.4149177859463,
+              "Lower": 148974.81848065156,
+              "Upper": 154053.64831622344
+            },
+            "allocated_bytes": 94783
+          }
+        },
+        "evidence": "results/shared-rollout/penetration-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPenetrationBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/talib-darkcloudcover-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "BuilderFull": 0.5595229021268802,
+          "BuilderLatestOnly": 0.44608770457171354
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 26049.90946451823,
+        "allocated_bytes": 12368,
+        "evidence": "results/2026-10-06-library-comparisons/talib-darkcloudcover-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 339651.220703125,
+        "allocated_bytes": 120368,
+        "evidence": "results/2026-10-06-library-comparisons/talib-darkcloudcover-short.json.gz"
+      }
+    ]
+  }
+]

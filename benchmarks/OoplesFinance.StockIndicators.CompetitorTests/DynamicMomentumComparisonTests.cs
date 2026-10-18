@@ -76,6 +76,22 @@ public sealed class DynamicMomentumComparisonTests
         );
     }
 
+    [Theory]
+    [InlineData(1d)]
+    [InlineData(1e-200)]
+    [InlineData(double.Epsilon)]
+    [InlineData(double.MaxValue / 8)]
+    public void BuilderMatchesIndependentReferenceAcrossPeriodSwitchesAndExtremePrices(double scale)
+    {
+        var values = Enumerable.Range(0, 100).Select(i => (double?)((i * 13 % 7 - 3) * scale)).ToArray();
+        var bars = values.Select(v => new Bar(default, v!.Value, v.Value, v.Value, v.Value, 0)).ToArray();
+        foreach (var (sd, smooth) in new[] { (3, 5), (5, 2), (1, 1) })
+            ComparisonVerifier.Compare(
+                VolumePriceComparison.Mask(DynamicMomentumComparison.Reference(values, sd, smooth, 4, 8, 1)),
+                DynamicMomentumComparison.Owned(bars, sd, smooth, 4, 8, 1),
+                "dynamic builder", IndicatorErrorBudget.Exact);
+    }
+
     [Fact]
     public void InvalidParametersAndNonfiniteInputAreRejected()
     {

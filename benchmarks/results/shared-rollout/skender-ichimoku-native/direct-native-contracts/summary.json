@@ -1,0 +1,25 @@
+{
+  "status": "33 affected contract cases passed (23 new and10 existing).100 local GPU cases passed. First timings pending; qualification unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderIchimokuNativeBenchmarks.cs": "95b11a6ecbc69b16dc87f966d01e021cbc4726346a1645c5a2ebdead9b705933",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedIchimokuSnapshotBenchmarks.cs": "7cacc3fa35a5d52a6fb55384b835ada85ec7b614c3f3566a93e360946de0bc7d",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/IchimokuCloudComparison.cs": "430aa11bc10fcbb9972e3a8abd88d7181d979fe22cfd4af35c66193bf0227d6c",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderIchimokuNativeBenchmarkTests.cs": "07301eb6ead7a5d0608d39a51966a083ed0a9828c8ab65103cecbea1594258db",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedIchimokuSnapshotBenchmarkTests.cs": "daa9835c458b4ddb8529d25ef5adce94e58239bf1f95c5ec330c0c89bb6ce80d"
+  },
+  "operations": [
+    "Skender.GetIchimoku"
+  ],
+  "native_package": "Skender.Stock.Indicators 2.7.3",
+  "native_package_dll_sha256": "0408495cde22e3795c6efcb16d88da9e82d0aa0dbd88e5d39b41db9fb171bf93",
+  "contract": "Standalone snapshot retained; defaults9/26/52,forward26/backward26. Native workers include77 preceding bars and26 future bars to preserve all5 shifted fields. Eager native decimal result rows retain dates and masks; normalization outside timing. Both native paths match independent references and exact serial/parallel fields. Existing Skender/Trady snapshot checks reverified; Trady native timing remains separate pending work.",
+  "validation": {
+    "comparator_cases_passed": 33,
+    "new_fixture_cases_passed": 23,
+    "affected_existing_cases_passed": 10,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1304
+  },
+  "benchmark_cases": 6,
+  "baseline_gap": "Saved normalized serial LibraryPair evidence retained; no compatible direct-native serial/parallel pair in catalog."
+}

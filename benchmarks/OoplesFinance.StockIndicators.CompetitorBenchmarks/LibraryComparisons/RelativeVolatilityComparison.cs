@@ -1,3 +1,4 @@
+using OoplesFinance.StockIndicators.Builder;
 using System.Numerics;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
@@ -10,7 +11,7 @@ internal static class RelativeVolatilityComparison
     internal static ComparisonPair Pair() =>
         new(
             "QuanTAlib.Rvi",
-            nameof(RelativeVolatilitySnapshot),
+            nameof(RelativeVolatilityStrength),
             (d, p) =>
             {
                 var indicator = new QuanTAlib.Rvi(p);
@@ -20,12 +21,20 @@ internal static class RelativeVolatilityComparison
                         .ToArray()
                 );
             },
-            (d, p) => new(0, RelativeVolatilitySnapshot.Calculate(d.IndicatorBars, p).ToArray()),
+            (d, p) => new(0, Owned(d.IndicatorBars, p)),
             (d, p) => new(0, Reference(d.Closes, p)),
             MinimumInputCount: 0,
             CompetitorReference: (d, p) => new(0, NativeReference(d.Closes, p)),
             ErrorBudget: IndicatorErrorBudget.Exact
         );
+
+    internal static double[] Owned(Bar[] bars, int period)
+    {
+        var indicator = new RelativeVolatilityStrength(period);
+        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
+        return run[indicator].ToArray();
+    }
 
     internal static double[] Reference(double[] prices, int period)
     {

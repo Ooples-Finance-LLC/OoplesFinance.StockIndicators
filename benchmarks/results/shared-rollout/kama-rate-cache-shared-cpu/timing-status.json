@@ -1,0 +1,12 @@
+{
+  "status": "completed",
+  "source_commit": "c56c366f",
+  "preserved_executable_directory": "C:\\Users\\cheat\\temp\\si-kama-rates-binaries-c56c366f",
+  "filters": [
+    "*SharedSeededAdaptiveBenchmarks*Builder*",
+    "*SharedAdaptiveVariantBenchmarks*Builder*"
+  ],
+  "competitor_timing": "reuse saved results; older seeded fixture native correctness setup only, not timed",
+  "completed_stem": "si-kama-rates-builder-20261013-a",
+  "evidence": "builder-timing"
+}

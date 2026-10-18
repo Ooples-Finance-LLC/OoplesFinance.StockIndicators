@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -73,11 +72,11 @@ public sealed class SeededPriceMomentum : MultiOutputIndicatorBase, IIndicatorVa
                 )
             );
 
-    private sealed class State(int period, int smooth, int signal) : IMultiOutputState
+    internal sealed class State(int period, int smooth, int signal) : IMultiOutputState
     {
         private long _index = -1;
-        private BigInteger _previous,
-            _first,
+        private double _previous;
+        private JurikDyadic _first,
             _second,
             _signal,
             _firstSum,
@@ -85,71 +84,98 @@ public sealed class SeededPriceMomentum : MultiOutputIndicatorBase, IIndicatorVa
             _signalSum;
         private bool _missing;
 
-        private static BigInteger R(BigInteger x, BigInteger n) => RocBankValue.RoundUnits(x, n);
+        private static JurikDyadic R(JurikDyadic numerator, JurikDyadic denominator)
+        {
+            // Stored stages round to binary64 precision but retain upper exponents.
+            for (int shift = 0; ; shift += 1024)
+            {
+                var value = numerator.Ratio(denominator);
+                if (!double.IsInfinity(value))
+                {
+                    var result = JurikDyadic.FromDouble(value);
+                    if (shift != 0) result.ScaleByPowerOfTwo(shift);
+                    return result;
+                }
+                numerator.ScaleByPowerOfTwo(-1024);
+            }
+        }
+
+        private static JurikDyadic R(JurikDyadic numerator, long divisor) =>
+            R(numerator, JurikDyadic.FromDouble(divisor));
+
+        private static JurikDyadic Smooth(JurikDyadic previous, JurikDyadic current, int priorWeight, long divisor)
+        {
+            previous.Multiply(priorWeight);
+            current.ScaleByPowerOfTwo(1);
+            previous.AddExact(current);
+            return R(previous, divisor);
+        }
 
         public void Reset()
         {
             _index = -1;
-            _previous = _first = _second = _signal = _firstSum = _secondSum = _signalSum = 0;
+            _previous = 0;
+            _first = _second = _signal = _firstSum = _secondSum = _signalSum = default;
             _missing = false;
         }
 
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            var value = ExactVarianceWindow.Units(bar.Close);
+            var value = bar.Close;
             if (++_index == 0)
             {
                 _previous = value;
                 return;
             }
-            if (_previous.IsZero)
+            if (_previous == 0)
                 _missing = true;
-            var roc = _missing
-                ? BigInteger.Zero
-                : R(
-                    (100 * (value - _previous) * _previous.Sign) << 1074,
-                    BigInteger.Abs(_previous)
-                );
+            var previous = _previous;
             _previous = value;
             if (_missing)
                 return;
+            var roc = JurikDyadic.FromDouble(value);
+            roc.Subtract(JurikDyadic.FromDouble(previous));
+            roc.Multiply(100);
+            roc = R(roc, JurikDyadic.FromDouble(previous));
             if (_index <= period)
             {
-                _firstSum += roc;
+                _firstSum.AddExact(roc);
                 if (_index < period)
                     return;
                 _first = R(_firstSum, period);
-                _firstSum = 0;
+                _firstSum = default;
             }
             else
-                _first = R(_first * (period - 2) + 2 * roc, period);
-            var scaled = R(10 * _first, 1);
+                _first = Smooth(_first, roc, period - 2, period);
+            var scaled = _first;
+            scaled.Multiply(10);
+            scaled = scaled.Rounded();
             var secondStart = (long)period + smooth - 1;
             if (_index <= secondStart)
             {
-                _secondSum += scaled;
+                _secondSum.AddExact(scaled);
                 if (_index < secondStart)
                     return;
                 _second = R(_secondSum, smooth);
-                _secondSum = 0;
+                _secondSum = default;
             }
             else
-                _second = R(_second * (smooth - 2) + 2 * scaled, smooth);
-            output[0] = ExactMeanAccumulator.UnitRatio(_second, 1);
+                _second = Smooth(_second, scaled, smooth - 2, smooth);
+            output[0] = _second.Mean(1);
             output[2] = 1;
             var signalStart = secondStart + signal - 1;
             if (_index <= signalStart)
             {
-                _signalSum += _second;
+                _signalSum.AddExact(_second);
                 if (_index < signalStart)
                     return;
                 _signal = R(_signalSum, signal);
-                _signalSum = 0;
+                _signalSum = default;
             }
             else
-                _signal = R(_signal * (signal - 1) + 2 * _second, (long)signal + 1);
-            output[1] = ExactMeanAccumulator.UnitRatio(_signal, 1);
+                _signal = Smooth(_signal, _second, signal - 1, (long)signal + 1);
+            output[1] = _signal.Mean(1);
             output[3] = 1;
         }
     }

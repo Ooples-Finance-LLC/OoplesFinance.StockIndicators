@@ -1,0 +1,11 @@
+Source: c267eaf1 plus compact CMF state, direct benchmark fixture and tests in this commit.
+Command: dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedCmfBenchmarks* --warmupCount 10 --iterationCount 10 --exporters json csv --artifacts C:/Users/cheat/temp/si-cmf-compact-timing
+All eight cases completed; runner exited zero. No competing .NET build/test jobs observed before launch or during sampled process checks. Brief unobserved activity cannot be excluded.
+Production net10 build: zero warnings/errors. Harness build: 60 existing warnings, zero errors. All 8 compact CMF unit tests and 19 CMF reference/fixture/allocation tests passed. Production/test/harness production DLL SHA256 matched.
+Modern state uses compact exact dyadic arithmetic with existing arbitrary-precision fallback. Multiplier and complete flow round independently; exact window sums use published flow values. Flow canonicalizes underflow zero; multiplier/CMF retain rounded underflow signs. Framework state remains unchanged.
+Setup independently validates all four builder columns and three nullable native outputs. Native parallel uses period-1 overlap, preserving each window summation order; native invocation, conversion and result publication remain measured.
+Win qualification uses upper builder CI below both same-run native lower bounds. No before/after timing claim is made. All historical catalog measurements remain unchanged.
+All three warmed allocation samples are retained. Warnings/outliers remain in raw log.
+Coverage rises 197 to 198/401 APIs; coverage is not wins. GPU execution, CPU parallelism, remaining latency and coverage gaps remain open.
+OoplesFinance.StockIndicators.dll SHA256 d26c056500bbf6ec629c119a6f46a021b63a695ab21628de4697aa67a521db9f
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 43053990445b4ed7bde211181ff4e6db585f256153fe7a580089e845479f93b5

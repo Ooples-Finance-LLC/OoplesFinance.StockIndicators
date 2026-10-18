@@ -1,0 +1,8 @@
+{
+  "package": "Trady.Analysis 3.2.8",
+  "dll_sha256": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+  "observation": "Live stack in RisingThreeMethods -> BullishLongDay -> LongDay -> Percentile. Pinned DLL LongDay.ComputeByIndexImpl calls TuplesExtension.Percentile with both nullable range arguments empty, then indexes the full result. This repeats full-series percentile computation within each native predicate evaluation.",
+  "inspection": "dotnet-stack 9.0.661903 on verified local test process; dotnet-ildasm 0.12.2 with DOTNET_ROLL_FORWARD=Major. Extracted only the relevant class from saved IL.",
+  "effect": "Retain one serial and one parallel reference verification at 10000 bars; repeated result-ownership tests remain through 1000 bars. Native benchmark methods unchanged.",
+  "timing_limit": "The completed 8m19s case includes setup, repeated assertions, multiple native calls and contention; it is not a benchmark result."
+}

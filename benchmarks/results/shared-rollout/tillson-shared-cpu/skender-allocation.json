@@ -1,0 +1,39 @@
+{
+  "Operation": "Skender.GetT3",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        7844224,
+        7844224,
+        7844224
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        7363096,
+        7362440,
+        7363096
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        920400,
+        920400,
+        920400
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        4224176,
+        4224176,
+        4276608
+      ]
+    }
+  ]
+}

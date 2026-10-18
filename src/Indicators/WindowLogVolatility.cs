@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -64,11 +63,12 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
                 )
             );
 
-    private sealed class State(int period, bool realized, bool annualized) : IMultiOutputState
+    internal sealed class State(int period, bool realized, bool annualized) : IMultiOutputState
     {
-        private readonly Queue<BigInteger?> _returns = new();
+        private readonly Queue<double?> _returns = new();
+        private readonly long _denominator = realized ? period : (long)period * (period - 1);
         private double _previous;
-        private BigInteger _sum,
+        private JurikDyadic _sum,
             _squares;
         private int _missing;
         private bool _poisoned;
@@ -77,7 +77,7 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
         {
             _returns.Clear();
             _previous = 0;
-            _sum = _squares = 0;
+            _sum = _squares = default;
             _missing = 0;
             _poisoned = false;
         }
@@ -91,17 +91,19 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
             _previous = value;
             if (prior != 0) // NOSONAR: Exact zero boundary or certified equal rounded endpoints.
             {
-                BigInteger? next =
+                double? next =
                     value != 0 && Math.Sign(value) == Math.Sign(prior) // NOSONAR: Exact zero boundary or certified equal rounded endpoints.
-                        ? ExactVarianceWindow.Units(CertifiedLogReturn.Of(value, prior))
+                        ? CertifiedLogReturn.Of(value, prior)
                         : null;
                 if (_returns.Count == period)
                 {
                     var old = _returns.Dequeue();
                     if (old.HasValue)
                     {
-                        _sum -= old.Value;
-                        _squares -= old.Value * old.Value;
+                        var expired = JurikDyadic.FromDouble(old.Value);
+                        if (!realized) _sum.Subtract(expired);
+                        expired.Square();
+                        _squares.Subtract(expired);
                     }
                     else
                         _missing--;
@@ -109,8 +111,10 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
                 _returns.Enqueue(next);
                 if (next.HasValue)
                 {
-                    _sum += next.Value;
-                    _squares += next.Value * next.Value;
+                    var current = JurikDyadic.FromDouble(next.Value);
+                    if (!realized) _sum.AddExact(current);
+                    current.Square();
+                    _squares.AddExact(current);
                 }
                 else
                 {
@@ -127,12 +131,16 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
                 output[1] = 0;
                 return;
             }
-            var numerator = realized ? _squares : period * _squares - _sum * _sum;
-            var denominator = realized ? (BigInteger)period : (BigInteger)period * (period - 1);
-            output[0] = ExactPopulationDeviation.RootRatio(
-                numerator * (annualized ? 252 : 1),
-                denominator
-            );
+            var numerator = _squares;
+            if (!realized)
+            {
+                numerator.Multiply(period);
+                var sumSquared = _sum;
+                sumSquared.Square();
+                numerator.Subtract(sumSquared);
+            }
+            if (annualized) numerator.Multiply(252);
+            output[0] = numerator.SqrtMean(_denominator);
         }
     }
 }

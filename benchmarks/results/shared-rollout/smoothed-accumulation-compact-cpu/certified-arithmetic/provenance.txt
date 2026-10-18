@@ -1,0 +1,12 @@
+Source: a8556051 plus Chaikin certified candle-flow/EMA arithmetic and tests in this commit.
+Command: dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedSmoothedAccumulationBenchmarks* --warmupCount 10 --iterationCount 10 --exporters json csv --artifacts C:/Users/cheat/temp/si-chaikin-certified
+All 16 cases completed; runner exited zero. No competing .NET build/test jobs observed before launch or during sampled process checks. Brief unobserved activity cannot be excluded.
+Production net10 build: zero warnings/errors. All 15 Chaikin unit cases and 20 Chaikin competitor/fixture cases passed. Harness build: 60 existing warnings, zero errors.
+Ordinary candle arithmetic requires exact subtraction/product certificates before separately rounding multiplier and complete flow. Uncertified inputs retain exact dyadic arithmetic.
+EMA recurrence cancels a factor two exactly. Normal power-of-two means use one FMA rounding plus exact exponent scaling; subnormal or overflowing FMA results retain exact fallback. Other finite means require a certified exact numerator.
+Before/after compares sequential qualified runs with shared-columns. Current wins use only same-run native serial/parallel confidence bounds. Prior current rows are preserved here; interrupted timing is not used.
+Native parallel uses measured full-prefix replay, not a claim of optimal native parallel implementation. All eight builder outputs remain owned. Managed allocation excludes retained buffers. Warnings/outliers remain in raw log.
+Parallel builder execution and GPU support remain outstanding. Coverage remains 197/401 APIs; coverage is not wins.
+OoplesFinance.StockIndicators.dll SHA256 9609aab76c48f3d27b6c914832c7c4099cd92f1cc43686f391d6f40f1adf9165
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 a8c76b63221f03c58559e44cf78ff7fdca561b4b379d3792eb588cf94c7eab5d
+BenchmarkDotNet minimum-iteration warnings: BuilderFull 26.919 ms, NativeSingle 92.724 ms, NativeParallel 66.720 ms (100 ms recommended). Duplicate CSV exporter warning and outlier removals are retained.

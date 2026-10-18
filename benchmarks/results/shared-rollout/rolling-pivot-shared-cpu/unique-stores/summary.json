@@ -1,0 +1,25 @@
+{
+  "base_commit": "0006d23d15b571c78709e75d13500972dc5caa51",
+  "source_sha256": {
+    "src/Indicators/ValuesBarExecution.cs": "3f1c016235fb3465d6fb5968bff7555c93bc7817bfd5e902a4e4c68249eeaa4b",
+    "src/Indicators/ValuesBarExecution.Pivots.cs": "64afefd7352681b0af32ee036659eeefedcb5922d2d0eb423aabe170091a7725",
+    "tests/ModelsTests/PivotSharedExecutionTests.cs": "332e8b7ecde5d8e491ff8d1379ebe63aecec5a544ddbbe7e930dbe9393f1dd6b"
+  },
+  "verification": {
+    "unit_cases": 22,
+    "independent_comparator_cases": 12,
+    "local_gpu_cases": 100,
+    "skipped": 0
+  },
+  "output_stores_per_bar": {
+    "before": 18,
+    "after": {
+      "Standard": 8,
+      "Fibonacci": 8,
+      "Woodie": 8,
+      "Camarilla": 10,
+      "Demark": 4
+    }
+  },
+  "interpretation": "Serial and worker pivot execution writes each defined level and the shared presence flag once; permanently absent columns retain freshly allocated positive zero. All 18 outputs remain published. Counts describe output stores, not measured latency."
+}

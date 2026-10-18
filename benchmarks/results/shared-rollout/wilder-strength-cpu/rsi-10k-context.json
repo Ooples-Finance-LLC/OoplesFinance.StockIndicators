@@ -1,0 +1,7 @@
+{
+  "production_commit": "3d07822e",
+  "warmup_count": 20,
+  "iteration_count": 15,
+  "contention_observation": "No other dotnet build/test processes at preflight, during-run check or completion; preflight CPU sampled idle.",
+  "scope": "Four CPU arms at 10000 bars; RSI only."
+}

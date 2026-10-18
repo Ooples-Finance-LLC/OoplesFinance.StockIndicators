@@ -78,7 +78,7 @@ public sealed class WindowDeviationBands : MultiOutputIndicatorBase, IIndicatorV
                 )
             );
 
-    private sealed class State(WindowDeviationBands owner) : IMultiOutputState
+    internal sealed class State(WindowDeviationBands owner) : IMultiOutputState
     {
         private static readonly BigInteger Grid = BigInteger.One << 1074;
         private readonly WindowDispersion.State _window = new(
@@ -97,6 +97,16 @@ public sealed class WindowDeviationBands : MultiOutputIndicatorBase, IIndicatorV
             var deviation = _window.Update(bar);
             if (_window.Count < owner.Period)
                 return;
+            // Hardware multiplication has the same once-rounded binary64 result
+            // as the exact product whenever it stays finite, including underflow.
+            // Overflow retains the extended-exponent path below for cancellation.
+            double finiteHalf = owner.Factor * deviation;
+            if (FrameworkCompatibility.IsFinite(finiteHalf))
+            {
+                FillFinite(_window.Mean, finiteHalf, bar.Close, output);
+                FillZScore(output);
+                return;
+            }
             var center = ExactVarianceWindow.Units(_window.Mean);
             var half = RocBankValue.RoundUnits(
                 _factor * ExactVarianceWindow.Units(deviation),
@@ -114,16 +124,54 @@ public sealed class WindowDeviationBands : MultiOutputIndicatorBase, IIndicatorV
                 );
                 output[9] = 1;
             }
-            if (_window.HasVariance)
-            {
-                output[4] = _window.Reading(WindowDispersionOutput.ZScore);
-                output[10] = 1;
-            }
+            FillZScore(output);
             if (!center.IsZero)
             {
                 output[5] = Ratio(2 * half * Grid * (owner.WidthAsPercent ? 100 : 1), center);
                 output[11] = 1;
             }
+        }
+
+        private void FillFinite(double center, double half, double close, Span<double> output)
+        {
+            output[0] = center;
+            // Each band is one correctly rounded binary64 addition. Exact zero
+            // is canonical in the accumulator contract, including signed inputs.
+            double upper = center + half, lower = center - half;
+            output[1] = upper == 0 ? 0 : upper;
+            output[2] = lower == 0 ? 0 : lower;
+            output[6] = output[7] = output[8] = 1;
+            if (half != 0)
+            {
+                // Do not use the published bands: those have already rounded.
+                var position = new ExactMeanAccumulator(); position.Add(close); position.Add(center, -1); position.Add(half);
+                var width = new ExactMeanAccumulator(); width.Add(half, 2);
+                output[3] = position.Ratio(width);
+                output[9] = 1;
+            }
+            if (center != 0)
+            {
+                // Doubling a finite binary64 value is exact when it stays finite.
+                // A single division then rounds the ratio once. Percent scaling
+                // and overflowing doubles keep the exact numerator path.
+                double widthValue = half * 2;
+                if (!owner.WidthAsPercent && FrameworkCompatibility.IsFinite(widthValue))
+                    output[5] = widthValue == 0 ? 0 : widthValue / center;
+                else
+                {
+                    var width = new ExactMeanAccumulator(); width.Add(half, owner.WidthAsPercent ? 200 : 2);
+                    var mean = new ExactMeanAccumulator(); mean.Add(center);
+                    output[5] = width.Ratio(mean);
+                }
+                output[11] = 1;
+            }
+        }
+
+        private void FillZScore(Span<double> output)
+        {
+            if (!_window.HasVariance) return;
+            output[4] = _window.Reading(WindowDispersionOutput.ZScore);
+            output[10] = 1;
         }
 
         private static double Ratio(BigInteger n, BigInteger d) =>

@@ -1,0 +1,13 @@
+{
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "source_commit": "e31ddee8",
+  "status": "completed",
+  "reason": "4 builder-only cases completed exit0 without observed competing jobs.",
+  "next_filter": "*SharedPriceRelativeBenchmarks*Builder*",
+  "preflight_evidence": "external-processes.json",
+  "reuse_binaries": true,
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-prs-binaries-e31ddee8",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-prs-builder-20261013-a",
+  "evidence": "builder-timing"
+}

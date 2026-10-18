@@ -1,0 +1,39 @@
+{
+  "Operation": "Skender.GetHtTrendline",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        967608,
+        967608,
+        968264
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        486480,
+        486480,
+        486480
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        2120688,
+        2120688,
+        2120688
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        9626480,
+        9626480,
+        9661720
+      ]
+    }
+  ]
+}

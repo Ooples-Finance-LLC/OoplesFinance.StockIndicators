@@ -1,0 +1,19 @@
+{
+  "production_commit": "7a518455",
+  "fixture_commit": "8b8daab1",
+  "command": "dotnet-trace collect --profile dotnet-sampled-thread-time --output si-hilbert-8b8daab1.nettrace -- dotnet OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --profile-hilbert TaLib.Functions.HtDcPeriod 10000 500",
+  "report_command": "dotnet-trace report si-hilbert-8b8daab1.nettrace topN -n 16",
+  "scope": "Unprivileged Windows sampled thread time. Includes fixture setup, independent references, device initialization, 100 warmup builds and 500 measured-loop builds. Percentages include waiting threads; they are not CPU utilization or an isolated steady-state profile.",
+  "samples": [
+    { "method": "Monitor.Wait", "inclusive_percent": 96.56, "exclusive_percent": 96.56 },
+    { "method": "ValuesBarExecution.Node.Append", "inclusive_percent": 2.93, "exclusive_percent": 1.10 },
+    { "method": "HilbertPhaseState.Fir", "inclusive_percent": 1.22, "exclusive_percent": 0.82 },
+    { "method": "JurikDyadic.Multiply(double)", "inclusive_percent": 0.27, "exclusive_percent": 0.26 },
+    { "method": "HilbertPhaseState.Blend", "inclusive_percent": 0.21, "exclusive_percent": 0.16 },
+    { "method": "JurikDyadic.AddExact", "inclusive_percent": 0.16, "exclusive_percent": 0.16 },
+    { "method": "HilbertPhaseState.Shift", "inclusive_percent": 0.15, "exclusive_percent": 0.15 },
+    { "method": "JurikDyadic.Rounded(int)", "inclusive_percent": 0.15, "exclusive_percent": 0.14 },
+    { "method": "HilbertPhaseState.ProductSum", "inclusive_percent": 0.12, "exclusive_percent": 0.10 }
+  ],
+  "interpretation": "The FIR and other exact arithmetic stages plus history copying are optimization candidates. Inlined arithmetic may be attributed to Append; its samples cannot be identified solely as dispatch overhead. No speedup follows from these percentages."
+}

@@ -1,0 +1,132 @@
+[
+  {
+    "operation": "Skender.GetDpo",
+    "snapshot": [
+      {
+        "bars": 1000,
+        "methods": {
+          "Snapshot": {
+            "mean_ns": 53202.864583333336,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 53202.864583333336,
+              "StandardError": 102.5692320344884,
+              "Level": 12,
+              "Margin": 517.0828264710573,
+              "Lower": 52685.78175686228,
+              "Upper": 53719.947409804394
+            },
+            "allocated_bytes": 56024
+          }
+        },
+        "evidence": "results/shared-rollout/retrospective-price-shared-cpu/snapshot-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRetrospectiveSnapshotBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getdpo-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "Snapshot": 0.05237877190535574
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "Snapshot": {
+            "mean_ns": 588309.9609375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 588309.9609375,
+              "StandardError": 5411.998185057146,
+              "Level": 12,
+              "Margin": 25874.290230866114,
+              "Lower": 562435.670706634,
+              "Upper": 614184.251168366
+            },
+            "allocated_bytes": 560054
+          }
+        },
+        "evidence": "results/shared-rollout/retrospective-price-shared-cpu/snapshot-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRetrospectiveSnapshotBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getdpo-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "Snapshot": 0.25558691499587277
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 1015733.3333333334,
+        "allocated_bytes": 264696,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getdpo-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 2301800,
+        "allocated_bytes": 2587752,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getdpo-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Skender.GetFcb",
+    "snapshot": [
+      {
+        "bars": 1000,
+        "methods": {
+          "Snapshot": {
+            "mean_ns": 26208.365885416668,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 26208.365885416668,
+              "StandardError": 609.7130366593901,
+              "Level": 12,
+              "Margin": 3073.7496428371433,
+              "Lower": 23134.616242579526,
+              "Upper": 29282.11552825381
+            },
+            "allocated_bytes": 57399
+          }
+        },
+        "evidence": "results/shared-rollout/retrospective-price-shared-cpu/snapshot-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRetrospectiveSnapshotBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getfcb-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "Snapshot": 0.0204438746863543
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "Snapshot": {
+            "mean_ns": 443491.49305555556,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 443491.49305555556,
+              "StandardError": 955.1823564925552,
+              "Level": 12,
+              "Margin": 4815.366001028273,
+              "Lower": 438676.1270545273,
+              "Upper": 448306.85905658384
+            },
+            "allocated_bytes": 561398
+          }
+        },
+        "evidence": "results/shared-rollout/retrospective-price-shared-cpu/snapshot-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRetrospectiveSnapshotBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getfcb-short.json.gz",
+        "cross_run_serial_mean_ratios": {
+          "Snapshot": 0.05508834713846328
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 1281966.6666666667,
+        "allocated_bytes": 261592,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getfcb-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 8050550,
+        "allocated_bytes": 2546584,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getfcb-short.json.gz"
+      }
+    ]
+  }
+]

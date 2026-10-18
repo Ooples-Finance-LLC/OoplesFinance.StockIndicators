@@ -66,7 +66,7 @@ public sealed class RangeAccelerationBands : MultiOutputIndicatorBase, IIndicato
                 )
             );
 
-    private sealed class State(int period) : IMultiOutputState
+    internal sealed class State(int period) : IMultiOutputState
     {
         private readonly Queue<BigInteger[]> _window = new();
         private readonly BigInteger[] _sums = new BigInteger[3];

@@ -47,13 +47,14 @@ public static class PivotTrendSnapshot
         if (maxTrendPeriods <= leftSpan)
             throw new ArgumentOutOfRangeException(nameof(maxTrendPeriods));
         var points = FractalSnapshot.Calculate(bars, leftSpan, rightSpan, useClose);
-        var result = points
-            .Select(p => new PivotTrendValue(p.Bear, p.Bull, null, null, null, null))
-            .ToArray();
+        // Allocate line columns only when a qualifying pair exists. Final records
+        // are created once, after both retrospective passes have finished.
+        var lines = new double?[2][];
+        var trends = new PivotTrendDirection?[2][];
         for (var side = 0; side < 2; side++)
         {
             int? previous = null;
-            for (var i = 0; i < result.Length; i++)
+            for (var i = 0; i < points.Count; i++)
             {
                 var current = side == 0 ? points[i].Bear : points[i].Bull;
                 if (previous.HasValue && (long)i - previous.Value > maxTrendPeriods)
@@ -66,6 +67,8 @@ public static class PivotTrendSnapshot
                     var old = (side == 0 ? points[start].Bear : points[start].Bull)!.Value;
                     if (!current.Value.Equals(old)) // NOSONAR: S1244 - Only exactly equal pivots reset the anchor without a trend.
                     {
+                        lines[side] ??= new double?[points.Count];
+                        trends[side] ??= new PivotTrendDirection?[points.Count];
                         var trend =
                             side == 0
                                 ? current.Value > old
@@ -80,24 +83,19 @@ public static class PivotTrendSnapshot
                             sum.Add(old, i - j);
                             sum.Add(current.Value, j - start);
                             var value = sum.Mean(i - start);
-                            result[j] =
-                                side == 0
-                                    ? result[j] with
-                                    {
-                                        HighLine = value,
-                                        HighTrend = j == start ? result[j].HighTrend : trend,
-                                    }
-                                    : result[j] with
-                                    {
-                                        LowLine = value,
-                                        LowTrend = j == start ? result[j].LowTrend : trend,
-                                    };
+                            lines[side][j] = value;
+                            if (j != start)
+                                trends[side][j] = trend;
                         }
                     }
                 }
                 previous = i;
             }
         }
+        var result = new PivotTrendValue[points.Count];
+        for (var i = 0; i < result.Length; i++)
+            result[i] = new(points[i].Bear, points[i].Bull,
+                lines[0]?[i], lines[1]?[i], trends[0]?[i], trends[1]?[i]);
         return result;
     }
 }

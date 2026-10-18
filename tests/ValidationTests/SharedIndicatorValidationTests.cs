@@ -264,6 +264,65 @@ public sealed partial class SharedIndicatorValidationTests
         }
     }
 
+    [Fact]
+    public void ConnorsDiscoveryRetainsIndependentPeriodsAtTheirSupportedMinimum()
+    {
+        var cases = IndicatorValidationDiscovery.Discover(new[] { typeof(IIndicator).Assembly })
+            .Where(c => c.IndicatorType == typeof(ConnorsStrength)).ToArray();
+        var expected = new (string Name, int Rsi, int Streak, int Rank)[]
+        {
+            ("default", 3, 2, 100), ("minimum-periods", 2, 2, 2),
+            ("shorter-periods", 2, 2, 50), ("longer-periods", 4, 3, 150),
+            ("minimum-rsiPeriod", 2, 2, 100), ("longer-rsiPeriod", 4, 2, 100),
+            ("minimum-streakPeriod", 3, 2, 100), ("longer-streakPeriod", 3, 3, 100),
+            ("minimum-rankPeriod", 3, 2, 2), ("longer-rankPeriod", 3, 2, 150)
+        };
+        Assert.Equal(expected.Length, cases.Length);
+        foreach (var row in expected)
+        {
+            var indicator = Assert.IsType<ConnorsStrength>(Assert.Single(cases, c => c.Name == row.Name).Factory());
+            Assert.Equal((row.Rsi, row.Streak, row.Rank),
+                (indicator.RsiPeriod, indicator.StreakPeriod, indicator.RankPeriod));
+        }
+    }
+
+    [Fact]
+    public void PromotedDiscoveryRespectsMinimumsAndDependentPeriodOrdering()
+    {
+        var cases = IndicatorValidationDiscovery.Discover(new[] { typeof(IIndicator).Assembly });
+        Check<KlingerVolumeWithSignal>(new (string, int[])[]
+        {
+            ("default", [34, 55, 13]), ("minimum-periods", [3, 4, 1]),
+            ("shorter-periods", [17, 28, 6]), ("longer-periods", [51, 82, 20]),
+            ("minimum-fastPeriod", [3, 55, 13]), ("longer-fastPeriod", [51, 55, 13]),
+            ("minimum-slowPeriod", [34, 35, 13]), ("longer-slowPeriod", [34, 82, 13]),
+            ("minimum-signalPeriod", [34, 55, 1]), ("longer-signalPeriod", [34, 55, 20])
+        }, i => [i.FastPeriod, i.SlowPeriod, i.SignalPeriod]);
+        Check<SingleStochasticCycle>(new (string, int[])[]
+        {
+            ("default", [10, 23, 50]), ("minimum-periods", [1, 1, 2]),
+            ("shorter-periods", [5, 12, 25]), ("longer-periods", [15, 34, 75]),
+            ("minimum-cyclePeriod", [1, 23, 50]), ("longer-cyclePeriod", [15, 23, 50]),
+            ("minimum-fastPeriod", [10, 1, 50]), ("longer-fastPeriod", [10, 34, 50]),
+            ("minimum-slowPeriod", [10, 23, 24]), ("longer-slowPeriod", [10, 23, 75])
+        }, i => [i.CyclePeriod, i.FastPeriod, i.SlowPeriod]);
+        Check<RelativeVolatilityStrength>(new (string, int[])[]
+        {
+            ("default", [14]), ("minimum-periods", [2]),
+            ("shorter-periods", [7]), ("longer-periods", [21])
+        }, i => [i.Period]);
+
+        void Check<T>(IReadOnlyList<(string Name, int[] Periods)> expected, Func<T, int[]> periods)
+            where T : IIndicator
+        {
+            var selected = cases.Where(c => c.IndicatorType == typeof(T)).ToArray();
+            Assert.Equal(expected.Count, selected.Length);
+            foreach (var row in expected)
+                Assert.Equal(row.Periods, periods(Assert.IsType<T>(
+                    Assert.Single(selected, c => c.Name == row.Name).Factory())));
+        }
+    }
+
     public sealed class CustomerWithSmoothingPeriods : Identity
     {
         public CustomerWithSmoothingPeriods(int momentumLength = 2, int firstSmooth = 5, int secondSmooth = 25)

@@ -115,27 +115,48 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
     ) : IIndicatorState
     {
         private readonly Queue<double> _history = new();
-        private readonly BigInteger _scale = ExactVarianceWindow.Units(multiplier);
+        private readonly (long Integer, int Exponent) _scale = Decompose(multiplier);
+        // Exact integer moments on the finest grid observed since reset. The
+        // exponent is separate: 12.5 needs integer 25, not 1,078 integer bits.
+        private int _grid;
+        private bool _hasGrid;
         private BigInteger _sum,
             _squares,
             _current;
 
         internal int Count => _history.Count;
-        internal double Mean => Count == 0 ? 0 : ExactMeanAccumulator.UnitRatio(_sum, Count);
+        internal double Mean => Count == 0 ? 0 : ExactMeanAccumulator.ScaledRatio(_sum, Count, _grid);
         internal bool HasVariance => Count > 1 && Count * _squares > _sum * _sum;
 
         public void Reset()
         {
             _history.Clear();
             _sum = _squares = _current = 0;
+            _grid = 0;
+            _hasGrid = false;
         }
 
         public double Update(in Bar bar)
         {
-            var value = ExactVarianceWindow.Units(bar.Close);
+            var parts = Decompose(bar.Close);
+            if (parts.Integer != 0 && (!_hasGrid || parts.Exponent < _grid))
+            {
+                if (_hasGrid)
+                {
+                    var shift = _grid - parts.Exponent;
+                    _sum <<= shift;
+                    _squares <<= 2 * shift;
+                }
+                _grid = parts.Exponent;
+                _hasGrid = true;
+            }
+#if !NETFRAMEWORK
+            if (TrySmallUpdate(parts, bar.Close)) return Reading(output);
+#endif
+            var value = OnGrid(parts);
             if (_history.Count == period)
             {
-                var expired = ExactVarianceWindow.Units(_history.Dequeue());
+                var expired = OnGrid(Decompose(_history.Dequeue()));
                 _sum -= expired;
                 _squares -= expired * expired;
             }
@@ -148,27 +169,132 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
 
         internal double Reading(WindowDispersionOutput selected)
         {
-            if (_history.Count < 2 || _scale.IsZero)
+            if (_history.Count < 2 || _scale.Integer == 0)
                 return 0;
+#if !NETFRAMEWORK
+            if (TrySmallReading(selected, out var compact)) return compact;
+#endif
             var n = new BigInteger(_history.Count);
             var variance = n * _squares - _sum * _sum;
             var denominator = n * (sample ? n - 1 : n);
             if (selected == WindowDispersionOutput.Variance)
-                return ExactMeanAccumulator.UnitRatio(variance * _scale, denominator << 2148);
+                return ExactMeanAccumulator.ScaledRatio(variance * _scale.Integer, denominator,
+                    2 * _grid + _scale.Exponent);
             if (selected == WindowDispersionOutput.StandardDeviation)
-                return _scale.Sign
-                    * ExactPopulationDeviation.RootRatio(
-                        variance * _scale * _scale,
-                        denominator << 2148
+                return Math.Sign(_scale.Integer)
+                    * ExactPopulationDeviation.ScaledRootRatio(
+                        variance * _scale.Integer * _scale.Integer,
+                        denominator, 2 * (_grid + _scale.Exponent)
                     );
             if (variance.IsZero)
                 return 0;
-            var deviation = (n * _current - _sum) * _scale;
+            var deviation = (n * _current - _sum) * _scale.Integer;
             return deviation.Sign
-                * ExactPopulationDeviation.RootRatio(
+                * ExactPopulationDeviation.ScaledRootRatio(
                     deviation * deviation * denominator,
-                    n * n * variance
+                    n * n * variance, 2 * _scale.Exponent
                 );
         }
+
+#if !NETFRAMEWORK
+        private bool TrySmallUpdate((long Integer, int Exponent) parts, double close)
+        {
+            if (_sum.GetBitLength() > 31 || _squares.GetBitLength() > 31
+                || !TrySmallGrid(parts, out long current)) return false;
+            bool full = _history.Count == period;
+            long expired = 0;
+            if (full && !TrySmallGrid(Decompose(_history.Peek()), out expired)) return false;
+            // Each price magnitude is at most 2^26 and retained moments fit
+            // signed 32-bit values. All intermediate updates fit signed 64 bits.
+            long sum = (long)_sum + current - expired;
+            long squares = (long)_squares + current * current - expired * expired;
+            if (full) _history.Dequeue();
+            _history.Enqueue(close);
+            _sum = sum;
+            _squares = squares;
+            _current = current;
+            return true;
+        }
+
+        private bool TrySmallGrid((long Integer, int Exponent) parts, out long value)
+        {
+            value = 0;
+            if (parts.Integer == 0) return true;
+            int shift = parts.Exponent - _grid;
+            const long maximum = 1L << 26;
+            if (shift is < 0 or > 26 || Math.Abs(parts.Integer) > (maximum >> shift)) return false;
+            value = parts.Integer << shift;
+            return true;
+        }
+
+        private bool TrySmallReading(WindowDispersionOutput selected, out double result)
+        {
+            result = 0;
+            // These bounds make n*squares, sum*sum and n*current-sum exact Int64
+            // operations. A power-of-two multiplier changes only the binary grid.
+            int n = _history.Count;
+            if (n > 4096 || _scale.Integer is not (1 or -1)
+                || _sum.GetBitLength() > 31 || _squares.GetBitLength() > 31) return false;
+            long sum = (long)_sum;
+            long variance = n * (long)_squares - sum * sum;
+            long denominator = (long)n * (sample ? n - 1 : n);
+            if (selected == WindowDispersionOutput.Variance)
+            {
+                long numerator = variance * _scale.Integer;
+                int power = 2 * _grid + _scale.Exponent;
+                // Exact binary64 integer operands plus a normal final exponent
+                // allow one hardware division, then an exact exponent adjustment.
+                if (variance <= (1L << 53))
+                {
+                    if (variance == 0) return true;
+                    long bits = BitConverter.DoubleToInt64Bits((double)numerator / denominator);
+                    long exponent = ((bits >> 52) & 2047) + power;
+                    if (exponent is > 0 and < 2047)
+                    {
+                        result = BitConverter.Int64BitsToDouble(bits + ((long)power << 52));
+                        return true;
+                    }
+                }
+                result = ExactMeanAccumulator.ScaledRatio(numerator, denominator, power);
+                return true;
+            }
+            if (selected == WindowDispersionOutput.StandardDeviation)
+            {
+                if (variance == 0) { result = _scale.Integer * 0d; return true; }
+                if (!TryCompactRoot((ulong)variance, (ulong)denominator,
+                    2 * (_grid + _scale.Exponent), out result)) return false;
+                result *= _scale.Integer;
+                return true;
+            }
+            if (variance == 0) return true;
+            if (_current.GetBitLength() > 31) return false;
+            long deviation = n * (long)_current - sum;
+            ulong magnitude = (ulong)Math.Abs(deviation);
+            if (magnitude == 0) return true;
+            if (magnitude > ulong.MaxValue / magnitude) return false;
+            ulong top = magnitude * magnitude, bottom = (ulong)variance;
+            // Cancel n^2 exactly for population Z; for sample Z retain (n-1)/n.
+            if (sample)
+            {
+                if (top > ulong.MaxValue / (uint)(n - 1) || bottom > ulong.MaxValue / (uint)n) return false;
+#pragma warning disable S3949 // n is 2..4096; the preceding MaxValue/factor guards prove both unsigned products fit.
+                top = checked(top * (uint)(n - 1)); bottom = checked(bottom * (uint)n);
+#pragma warning restore S3949
+            }
+            if (!TryCompactRoot(top, bottom, 2 * _scale.Exponent, out result)) return false;
+            result *= Math.Sign(deviation) * _scale.Integer;
+            return true;
+        }
+
+        private static bool TryCompactRoot(ulong numerator, ulong denominator, int power, out double result) =>
+            numerator <= (1UL << 53) && denominator <= ExactPopulationDeviation.SmallRootMaximumDenominator
+                ? ExactPopulationDeviation.TrySmallScaledRoot(numerator, (uint)denominator, power, out result)
+                : ExactPopulationDeviation.TryWideScaledRoot(numerator, denominator, power, out result);
+#endif
+
+        private BigInteger OnGrid((long Integer, int Exponent) value) => value.Integer == 0
+            ? BigInteger.Zero : new BigInteger(value.Integer) << (value.Exponent - _grid);
+
+        private static (long Integer, int Exponent) Decompose(double value) => ExactMeanAccumulator.DecomposeFinite(value);
     }
 }

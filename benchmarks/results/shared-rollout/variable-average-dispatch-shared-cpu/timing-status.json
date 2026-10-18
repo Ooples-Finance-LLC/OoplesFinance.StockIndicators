@@ -1,0 +1,12 @@
+{
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "next_filter": "*SharedVariableAverageBenchmarks*Builder*",
+  "reason": "4 builder-only cases completed exit0 without observed competing jobs.",
+  "source_commit": "e2f446c5",
+  "reuse_binaries": true,
+  "status": "completed",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-variableavgdispatch-binaries-e2f446c5",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json during preservation.",
+  "completed_stem": "si-variableavgdispatch-builder-20261013-a",
+  "evidence": "builder-timing"
+}

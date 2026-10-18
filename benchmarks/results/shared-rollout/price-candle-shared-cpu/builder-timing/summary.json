@@ -1,0 +1,287 @@
+[
+  {
+    "operation": "Skender.GetDoji",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 179414.765625,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 179414.765625,
+              "StandardError": 1653.1620824989816,
+              "Level": 12,
+              "Margin": 7903.623404631652,
+              "Lower": 171511.14222036835,
+              "Upper": 187318.38902963165
+            },
+            "allocated_bytes": 515696
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 176873.076171875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 176873.076171875,
+              "StandardError": 2751.1094890796235,
+              "Level": 12,
+              "Margin": 13152.813978001055,
+              "Lower": 163720.26219387393,
+              "Upper": 190025.89014987607
+            },
+            "allocated_bytes": 466947
+          }
+        },
+        "evidence": "results/shared-rollout/price-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getdoji-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 1684913.28125,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 1684913.28125,
+              "StandardError": 11647.64414530862,
+              "Level": 12,
+              "Margin": 62989.09114841078,
+              "Lower": 1621924.1901015893,
+              "Upper": 1747902.3723984107
+            },
+            "allocated_bytes": 5124652
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 1639483.4375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 1639483.4375,
+              "StandardError": 30037.572467198846,
+              "Level": 12,
+              "Margin": 143607.0082197874,
+              "Lower": 1495876.4292802126,
+              "Upper": 1783090.4457197874
+            },
+            "allocated_bytes": 4643522
+          }
+        },
+        "evidence": "results/shared-rollout/price-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getdoji-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 2163100,
+        "allocated_bytes": 405792,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getdoji-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 7370533.333333333,
+        "allocated_bytes": 3973080,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getdoji-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Skender.GetMarubozu",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 118861.30859375,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 118861.30859375,
+              "StandardError": 2981.5772507482166,
+              "Level": 12,
+              "Margin": 14254.660200111031,
+              "Lower": 104606.64839363897,
+              "Upper": 133115.96879386104
+            },
+            "allocated_bytes": 147665
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 102069.3359375,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 102069.3359375,
+              "StandardError": 791.3310167612941,
+              "Level": 12,
+              "Margin": 3989.341352224998,
+              "Lower": 98079.994585275,
+              "Upper": 106058.677289725
+            },
+            "allocated_bytes": 98908
+          }
+        },
+        "evidence": "results/shared-rollout/price-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getmarubozu-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 1035227.8125,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 1035227.8125,
+              "StandardError": 8551.758044368087,
+              "Level": 12,
+              "Margin": 40885.207654922284,
+              "Lower": 994342.6048450777,
+              "Upper": 1076113.0201549223
+            },
+            "allocated_bytes": 1444198
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 969826.328125,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 969826.328125,
+              "StandardError": 10392.395513479994,
+              "Level": 12,
+              "Margin": 49685.13449471768,
+              "Lower": 920141.1936302823,
+              "Upper": 1019511.4626197177
+            },
+            "allocated_bytes": 963061
+          }
+        },
+        "evidence": "results/shared-rollout/price-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getmarubozu-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 2292100,
+        "allocated_bytes": 404784,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getmarubozu-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 8140166.666666667,
+        "allocated_bytes": 3973080,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getmarubozu-short.json.gz"
+      }
+    ]
+  },
+  {
+    "operation": "Skender.GetHeikinAshi",
+    "builder": [
+      {
+        "bars": 1000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 127967.919921875,
+            "confidence_interval": {
+              "N": 10,
+              "Mean": 127967.919921875,
+              "StandardError": 1457.79220403381,
+              "Level": 12,
+              "Margin": 6969.5770940223465,
+              "Lower": 120998.34282785266,
+              "Upper": 134937.49701589736
+            },
+            "allocated_bytes": 90600
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 118975.0244140625,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 118975.0244140625,
+              "StandardError": 671.2986132708448,
+              "Level": 12,
+              "Margin": 3630.3040350138217,
+              "Lower": 115344.72037904868,
+              "Upper": 122605.32844907632
+            },
+            "allocated_bytes": 41844
+          }
+        },
+        "evidence": "results/shared-rollout/price-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getheikinashi-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      },
+      {
+        "bars": 10000,
+        "methods": {
+          "BuilderFull": {
+            "mean_ns": 1223101.0850694445,
+            "confidence_interval": {
+              "N": 9,
+              "Mean": 1223101.0850694445,
+              "StandardError": 9110.696697786543,
+              "Level": 12,
+              "Margin": 45929.80473937787,
+              "Lower": 1177171.2803300666,
+              "Upper": 1269030.8898088224
+            },
+            "allocated_bytes": 883060
+          },
+          "BuilderLatestOnly": {
+            "mean_ns": 1172566.2109375,
+            "confidence_interval": {
+              "N": 8,
+              "Mean": 1172566.2109375,
+              "StandardError": 6831.863886291221,
+              "Level": 12,
+              "Margin": 36945.91727550854,
+              "Lower": 1135620.2936619914,
+              "Upper": 1209512.1282130086
+            },
+            "allocated_bytes": 401934
+          }
+        },
+        "evidence": "results/shared-rollout/price-candle-shared-cpu/builder-timing/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceCandleBenchmarks-report-full-compressed.json",
+        "saved_serial_evidence": "results/2026-10-06-library-comparisons/skender-getheikinashi-short.json.gz",
+        "saved_serial_comparison_unavailable": {
+          "reason": "RuntimeVersion differs; ratio withheld",
+          "saved_runtime": ".NET 10.0.12 (10.0.12, 10.0.1226.42308)",
+          "current_runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)"
+        }
+      }
+    ],
+    "saved_competitor": [
+      {
+        "bars": 1000,
+        "mean_ns": 1097133.3333333333,
+        "allocated_bytes": 344728,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getheikinashi-short.json.gz"
+      },
+      {
+        "bars": 10000,
+        "mean_ns": 3136433.3333333335,
+        "allocated_bytes": 3377728,
+        "evidence": "results/2026-10-06-library-comparisons/skender-getheikinashi-short.json.gz"
+      }
+    ]
+  }
+]

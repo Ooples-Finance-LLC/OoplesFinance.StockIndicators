@@ -1,3 +1,4 @@
+using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
 using Skender.Stock.Indicators;
@@ -12,7 +13,7 @@ internal static class ConnorsComparison
     internal static ComparisonPair Pair(int rsi = 3, int streak = 2, int rank = 100) =>
         new(
             "Skender.GetConnorsRsi",
-            nameof(ConnorsStrengthSnapshot),
+            nameof(ConnorsStrength),
             (d, _) => Native(d, rsi, streak, rank),
             (d, _) => Owned(d.IndicatorBars, rsi, streak, rank),
             (d, _) => Series(Reference(d.Closes, rsi, streak, rank, false)),
@@ -47,13 +48,17 @@ internal static class ConnorsComparison
 
     internal static ComparisonSeries Owned(Bar[] bars, int rsi, int streak, int rank)
     {
-        var rows = ConnorsStrengthSnapshot.Calculate(bars, rsi, streak, rank);
-        return Series([
-            rows.Select(v => v.Rsi).ToArray(),
-            rows.Select(v => v.RsiStreak).ToArray(),
-            rows.Select(v => v.PercentRank).ToArray(),
-            rows.Select(v => v.ConnorsRsi).ToArray(),
-        ]);
+        var indicator = new ConnorsStrength(rsi, streak, rank);
+        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
+        var columns = new double?[4][];
+        for (int slot = 0; slot < 4; slot++)
+        {
+            var values = run[indicator.Outputs[slot]].ToArray();
+            var present = run[indicator.Outputs[slot + 4]].ToArray();
+            columns[slot] = values.Select((value, i) => present[i] > 0 ? (double?)value : null).ToArray();
+        }
+        return Series(columns);
     }
 
     private static double?[] Rsi(double[] prices, int period, bool native)

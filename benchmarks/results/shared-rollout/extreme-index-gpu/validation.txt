@@ -1,0 +1,11 @@
+GPU absolute extreme-index qualification.
+
+Required GPU now supports standalone MinIndex/MaxIndex and a plain matching-period opposite-index pair in either root order. The pair uses one kernel dispatch and one scan per window to write both output arrays, reusing the existing Right device buffer. Kernel keys 18/19/20 are fixed; periods are runtime arguments. No new scratch buffer or host index calculation. Newest ties and absolute indices are preserved.
+
+191 focused CPU/GPU tests passed with zero skips, including all six new index cases. Tests cover independent scan references, period 1/3/20/Int32.MaxValue, extreme exponents, signed zeros, startup, reversed root order, both history modes, snapshot ownership, concurrent arithmetic/index workspace reuse, five-field input errors and recovery, cancellation, and rejection of unequal-period/duplicate/sourced/three-root pairs. Nineteen inventory tests passed. Release net10 benchmark build passed after correcting a missing namespace import in the new benchmark.
+
+All 36 cases passed setup verification at 10k/100k using five warmups and fifteen measurements. Timings include host staging, transfers, device dispatch, readback and publication after compilation/workspace warmup. Native returns only its defined suffix; single native index APIs return int arrays, while the builder returns doubles. Full additionally owns all OHLCV snapshots. Native input preparation and oracle conversions are outside timing. Prior faster native source rows are retained with verified provenance.
+
+At 100k MinMaxIndex Full is GPU 2585.17 us / 6260.32 KiB, CPU 2279.52 us / 6271.33 KiB, and native parallel 311.43 us / 1567.79 KiB. GPU LatestOnly is 1589.33 us versus CPU 681.70 us and native 311.43 us. Single index GPU Full is about 1965-1999 us versus CPU 1441-1454 us and native 95-97 us. All index comparisons remain losses. Auto remains CPU; no GPU crossover is established. The device scan is O(N*period); large-period performance is not qualified. Direct API qualification remains 96/401.
+
+Sonar confirmed the prior benchmark setup deduplication passes at 2.9% against its 3% threshold on f5298b40; new-head hosted checks must complete after publication.

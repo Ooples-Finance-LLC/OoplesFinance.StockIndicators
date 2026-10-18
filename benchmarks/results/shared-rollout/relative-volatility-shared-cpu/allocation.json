@@ -1,0 +1,1 @@
+{"Operation":"QuanTAlib.Rvi","Count":10000,"Repetitions":3,"Arms":[{"Method":"BuilderFull","Bytes":[613096,613096,613096]},{"Method":"BuilderLatestOnly","Bytes":[131688,131688,131688]},{"Method":"NativeSingle","Bytes":[10325168,10325168,10325168]},{"Method":"NativeParallel","Bytes":[10474816,10474816,10474816]}]}

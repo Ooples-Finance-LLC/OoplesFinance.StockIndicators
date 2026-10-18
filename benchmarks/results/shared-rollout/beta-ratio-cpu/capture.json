@@ -1,0 +1,12 @@
+{
+  "production_commit": "95c136a4",
+  "tool": "dotnet-trace",
+  "profile": "dotnet-sampled-thread-time",
+  "operation": "Beta",
+  "count": 10000,
+  "warmup_calls": 100,
+  "measured_loop_calls": 3000,
+  "command": "--profile-pair Beta 10000 3000",
+  "interpretation": "Sampled thread wall time includes waits and runtime pauses. Concurrent repository work was active. Not a latency qualification or CPU-utilization measurement.",
+  "after_change": "Same production base plus CertifiedCompactRatio midpoint certificate in JurikDyadic extended division"
+}

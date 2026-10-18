@@ -30,8 +30,10 @@ internal struct ExactMeanAccumulator
         var magnitude = (long)(bits & 0xfffffffffffffUL);
         if (exponent != 0) magnitude += 1L << 52;
         if (magnitude == 0 || weight == 0) return;
+        var zeros = TrailingBinaryZeros(magnitude);
+        magnitude >>= zeros;
         var signed = (bits >> 63) == 0 ? magnitude : -magnitude;
-        var scale = Math.Max(0, exponent - 1);
+        var scale = Math.Max(0, exponent - 1) + zeros;
         var absoluteWeight = Math.Abs((long)weight);
         if (magnitude <= long.MaxValue / absoluteWeight)
             AddSmall(signed * weight, scale);
@@ -64,6 +66,16 @@ internal struct ExactMeanAccumulator
         AddLarge(product, scale);
     }
 
+    internal void Multiply(ExactMeanAccumulator factor)
+    {
+        if (IsZero || factor.IsZero) { this = default; return; }
+        var scale = checked(_scale + factor._scale - 1074);
+        var product = (_wide ? _large : new BigInteger(_small))
+            * (factor._wide ? factor._large : new BigInteger(factor._small));
+        this = default;
+        AddLarge(product, scale);
+    }
+
     internal void Add(double value, BigInteger weight)
     {
         if (weight >= int.MinValue && weight <= int.MaxValue)
@@ -76,22 +88,68 @@ internal struct ExactMeanAccumulator
         AddLarge(new BigInteger(term._small) * weight, term._scale);
     }
 
-    internal void AddProduct(double left, double right, int weight = 1)
+    internal readonly struct ProductFactor
     {
-        static (long Mantissa, int Scale) Decode(double value)
+        internal readonly long Mantissa;
+        internal readonly int Scale;
+
+        internal ProductFactor(double value, int binaryExponent = 0)
         {
             var bits = BitConverter.DoubleToInt64Bits(value);
             var exponent = (int)((bits >> 52) & 2047);
             if (exponent == 2047) throw new ArithmeticException("An exact finite product requires finite inputs.");
             var mantissa = (bits & ((1L << 52) - 1)) + (exponent == 0 ? 0 : 1L << 52);
-            return (bits < 0 ? -mantissa : mantissa, Math.Max(0, exponent - 1));
+            if (mantissa == 0) { Mantissa = 0; Scale = 0; return; }
+            // Fixed coefficients and retained prices can reuse this exact decoding.
+            var zeros = TrailingBinaryZeros(mantissa);
+            Mantissa = (bits < 0 ? -mantissa : mantissa) >> zeros;
+            Scale = checked(Math.Max(0, exponent - 1) + zeros + binaryExponent);
         }
-        var a = Decode(left); var b = Decode(right);
+    }
+
+    internal void AddFactor(ProductFactor value) => AddSmall(value.Mantissa, value.Scale);
+
+    // Reuse a finite price's binary decoding across weighted formulas.
+    internal void AddFactor(ProductFactor value, int weight)
+    {
+        if (value.Mantissa == 0 || weight == 0) return;
+        if (Math.Abs(value.Mantissa) <= long.MaxValue / Math.Abs((long)weight))
+            AddSmall(value.Mantissa * weight, value.Scale);
+        else AddLarge(new BigInteger(value.Mantissa) * weight, value.Scale);
+    }
+
+
+    internal readonly struct ProductCoefficient
+    {
+        internal readonly ProductFactor Factor;
+        internal readonly long PartnerLimit;
+
+        internal ProductCoefficient(double value)
+        {
+            Factor = new ProductFactor(value);
+            PartnerLimit = Factor.Mantissa == 0 ? long.MaxValue : long.MaxValue / Math.Abs(Factor.Mantissa);
+        }
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    internal void AddProduct(in ProductFactor price, in ProductCoefficient coefficient)
+    {
+        var factor = coefficient.Factor;
+        if (price.Mantissa == 0 || factor.Mantissa == 0) return;
+        var scale = price.Scale + factor.Scale - 1074;
+        // This bound is exact and fixed with the coefficient, so each window
+        // term needs only comparison and multiplication, not another division.
+        if (Math.Abs(price.Mantissa) <= coefficient.PartnerLimit)
+            AddSmall(price.Mantissa * factor.Mantissa, scale);
+        else AddLarge(new BigInteger(price.Mantissa) * factor.Mantissa, scale);
+    }
+
+    internal void AddProduct(double left, double right, int weight = 1) =>
+        AddProduct(new ProductFactor(left), new ProductFactor(right), weight);
+
+    internal void AddProduct(ProductFactor a, ProductFactor b, int weight = 1)
+    {
         if (a.Mantissa == 0 || b.Mantissa == 0 || weight == 0) return;
-        // Removing powers of two is exact and lets ordinary prices times integral
-        // volume stay in the allocation-free signed-integer representation.
-        while ((a.Mantissa & 1) == 0) { a.Mantissa >>= 1; a.Scale++; }
-        while ((b.Mantissa & 1) == 0) { b.Mantissa >>= 1; b.Scale++; }
         var scale = a.Scale + b.Scale - 1074;
         if (Math.Abs(a.Mantissa) <= long.MaxValue / Math.Abs(b.Mantissa))
         {
@@ -103,6 +161,47 @@ internal struct ExactMeanAccumulator
             }
         }
         AddLarge(new BigInteger(a.Mantissa) * b.Mantissa * weight, scale);
+    }
+
+    // Callers have already excluded zero. Signed two's-complement integers have
+    // the same trailing-zero count as their magnitude, including negatives.
+    internal static int TrailingBinaryZeros(long value)
+    {
+#if NETFRAMEWORK
+        var count = 0;
+        while ((value & 1) == 0) { value >>= 1; count++; }
+        return count;
+#else
+        return BitOperations.TrailingZeroCount(unchecked((ulong)value));
+#endif
+    }
+
+    // Nonzero exact integers use the same power-of-two normalization as small
+    // significands, including extended-range rounded returns.
+    internal static int TrailingBinaryZeros(BigInteger value)
+    {
+#if NETFRAMEWORK
+        var bytes = value.ToByteArray();
+        var index = 0;
+        while (bytes[index] == 0) index++;
+        return index * 8 + TrailingBinaryZeros((long)bytes[index]);
+#else
+        return (int)BigInteger.TrailingZeroCount(value);
+#endif
+    }
+
+    internal static (long Integer, int Exponent) DecomposeFinite(double value)
+    {
+        var bits = BitConverter.DoubleToInt64Bits(value);
+        var exponent = (int)((bits >> 52) & 2047);
+        if (exponent == 2047) throw new ArgumentOutOfRangeException(nameof(value));
+        var integer = bits & ((1L << 52) - 1);
+        if (exponent != 0) integer |= 1L << 52;
+        if (integer == 0) return (0, 0);
+        var power = exponent == 0 ? -1074 : exponent - 1075;
+        var zeros = TrailingBinaryZeros(integer);
+        integer >>= zeros;
+        return (bits < 0 ? -integer : integer, power + zeros);
     }
 
     // Same binary64 quantization as Mean, with an exact (possibly wide) divisor.
@@ -136,13 +235,39 @@ internal struct ExactMeanAccumulator
     }
 
     internal static double UnitRatio(BigInteger numerator, BigInteger denominator)
+        => ScaledRatio(numerator, denominator, -1074);
+
+    // Keep powers of two separate so ordinary prices do not require thousand-bit
+    // numerators merely to represent their position on the binary64 grid.
+    internal static double ScaledRatio(BigInteger numerator, BigInteger denominator, int binaryExponent)
     {
         if (denominator.Sign <= 0) throw new ArgumentOutOfRangeException(nameof(denominator));
-        var top = new ExactMeanAccumulator(); top.AddLarge(numerator, 0);
+#if !NETFRAMEWORK
+        // Signed bit lengths include -2^63 but exclude +2^63. Keep already
+        // compact moments out of AddLarge's byte-array normalization path.
+        if (numerator.GetBitLength() <= 63 && denominator.GetBitLength() <= 63)
+            return ScaledRatio((long)numerator, (long)denominator, binaryExponent);
+#endif
+        var top = new ExactMeanAccumulator(); top.AddLarge(numerator, binaryExponent + 1074);
         var bottom = new ExactMeanAccumulator(); bottom.AddLarge(denominator, 1074);
         return top.Ratio(bottom);
     }
 
+    internal static double ScaledRatio(long numerator, long denominator, int binaryExponent)
+    {
+        if (denominator <= 0) throw new ArgumentOutOfRangeException(nameof(denominator));
+        if (numerator == 0) return 0;
+        var numeratorZeros = TrailingBinaryZeros(numerator);
+        var denominatorZeros = TrailingBinaryZeros(denominator);
+        var compact = new ExactMeanAccumulator
+        {
+            _small = numerator >> numeratorZeros,
+            _scale = binaryExponent + 1074 + numeratorZeros - denominatorZeros
+        };
+        return compact.Mean(denominator >> denominatorZeros);
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     private void AddSmall(long value, int scale)
     {
         if (value == 0) return;
@@ -178,17 +303,20 @@ internal struct ExactMeanAccumulator
         if (total.IsZero) { this = default; return; }
         // Discard only exact powers of two, so old tiny inputs do not permanently force
         // a wide representation after they leave a rolling window.
-        var bytes = BigInteger.Abs(total).ToByteArray();
-        var trailing = 0;
-        var index = 0;
-        while (bytes[index] == 0) { trailing += 8; index++; }
-        var low = bytes[index];
-        while ((low & 1) == 0) { trailing++; low >>= 1; }
+        var trailing = TrailingBinaryZeros(total);
         total >>= trailing;
         _scale = common + trailing;
         _wide = total < long.MinValue || total > long.MaxValue;
         if (_wide) { _large = total; _small = 0; }
         else { _small = (long)total; _large = default; }
+    }
+
+    internal void Square()
+    {
+        var value = _wide ? _large : new BigInteger(_small);
+        var scale = checked(2 * _scale - 1074);
+        this = default;
+        AddLarge(value * value, scale);
     }
 
     internal double SqrtMean(long count)
@@ -218,6 +346,18 @@ internal struct ExactMeanAccumulator
     internal static double SquaredUnitMean(BigInteger numerator, long count)
         => new ExactMeanAccumulator { _wide = true, _large = numerator, _scale = -1074 }.Mean(count);
 
+    internal (double Mantissa, int Exponent) NormalizedMean(long count)
+    {
+        if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
+        if (IsZero) return (0, 0);
+        var magnitude = _small < 0 ? unchecked((ulong)(~_small)) + 1 : (ulong)_small;
+        var bits = _wide ? BitLength(BigInteger.Abs(_large)) : BitLength(magnitude);
+        var exponent = checked(_scale - 1074 + bits - 1);
+        var normalized = this;
+        normalized._scale = 1075 - bits;
+        return (normalized.Mean(count), exponent);
+    }
+
     internal double Mean(long count)
     {
         if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
@@ -225,6 +365,7 @@ internal struct ExactMeanAccumulator
         if (!_wide && TrySmallMean((ulong)count, out var value)) return value;
         var signed = _wide ? _large : new BigInteger(_small);
         var magnitude = BigInteger.Abs(signed);
+        if (count == 1) return RoundSum(magnitude, signed.Sign < 0);
         var divisor = new BigInteger(count);
         var exponent = BitLength(magnitude) - BitLength(divisor);
         if (exponent >= 0 ? magnitude < (divisor << exponent) : (magnitude << -exponent) < divisor) exponent--;
@@ -238,22 +379,57 @@ internal struct ExactMeanAccumulator
         return Encode((ulong)mantissa, grid, signed.Sign < 0);
     }
 
+    private double RoundSum(BigInteger magnitude, bool negative)
+    {
+        var grid = Math.Max(0, BitLength(magnitude) + _scale - 53);
+        var shift = grid - _scale;
+        ulong mantissa;
+        if (shift > 0)
+        {
+            // Retain one guard bit. A set bit below it distinguishes greater
+            // than halfway from a tie without allocating a divisor/remainder.
+            var guarded = (ulong)(magnitude >> (shift - 1));
+            mantissa = guarded >> 1;
+            if ((guarded & 1) != 0
+                && ((mantissa & 1) != 0 || TrailingBinaryZeros(magnitude) < shift - 1))
+                mantissa++;
+        }
+        else mantissa = (ulong)magnitude << -shift;
+        return Encode(mantissa, grid, negative);
+    }
+
     private bool TrySmallMean(ulong divisor, out double value)
     {
         var magnitude = _small < 0 ? unchecked((ulong)(~_small)) + 1 : (ulong)_small;
         var bits = BitLength(magnitude);
+#if !NETFRAMEWORK
+        // Hardware division is the same single rounding when BOTH operands are
+        // exactly representable binary64 values. Refuse an overflowing total even
+        // if its mean would be finite, fractional minimum-unit scales, and integers
+        // wider than 53 bits. Those cases retain the integer rounding path below.
+        if (bits <= 53 && divisor <= (1UL << 53) && _scale >= 0 && _scale <= 2098 - bits)
+        {
+            int biasedExponent = bits + _scale - 52;
+            ulong payload = biasedExponent > 0
+                ? ((ulong)biasedExponent << 52) | ((magnitude << (53 - bits)) & 0xfffffffffffffUL)
+                : magnitude << _scale;
+            if (_small < 0) payload |= 1UL << 63;
+            value = BitConverter.Int64BitsToDouble(unchecked((long)payload)) / divisor;
+            return true;
+        }
+#endif
         var exponent = bits - BitLength(divisor);
         if (exponent >= 0 ? magnitude < (divisor << exponent) : (magnitude << -exponent) < divisor) exponent--;
         var grid = Math.Max(0, exponent + _scale - 52);
         var shift = grid - _scale;
         if (shift < 0)
         {
-            if (bits - shift > 64) { value = 0; return false; }
+            if (bits - shift > 64) return TryExtendedMean(magnitude, divisor, grid, shift, out value);
             magnitude <<= -shift;
         }
         else
         {
-            if (BitLength(divisor) + shift > 64) { value = 0; return false; }
+            if (BitLength(divisor) + shift > 64) return TryExtendedMean(magnitude, divisor, grid, shift, out value);
             divisor <<= shift;
         }
         var mantissa = magnitude / divisor;
@@ -264,6 +440,56 @@ internal struct ExactMeanAccumulator
         value = Encode(mantissa, grid, _small < 0);
         return true;
     }
+
+    private bool TryExtendedMean(ulong magnitude, ulong divisor, int grid, int shift, out double value)
+    {
+#if !NETFRAMEWORK
+        // A compact numerator/divisor can need up to 116 bits to align the
+        // binary64 rounding grid. Keep that division off the BigInteger heap.
+        // Very small subnormal scales may need more; retain the exact fallback.
+        if (shift < 0 ? BitLength(magnitude) - shift <= 128 : BitLength(divisor) + shift <= 128)
+        {
+            UInt128 top = magnitude, bottom = divisor;
+            if (shift < 0) top <<= -shift;
+            else bottom <<= shift;
+            var (mantissa, remainder) = CompactDivRem(top, bottom);
+            var otherHalf = bottom - remainder;
+            if (remainder > otherHalf || remainder == otherHalf && (mantissa & 1) != 0) mantissa++;
+            value = Encode((ulong)mantissa, grid, _small < 0);
+            return true;
+        }
+#endif
+        value = 0;
+        return false;
+    }
+
+#if !NETFRAMEWORK
+    internal static (UInt128 Quotient, UInt128 Remainder) CompactDivRem(UInt128 numerator, UInt128 denominator)
+    {
+#if NET10_0_OR_GREATER
+        // Earlier targets use the stable portable API below; the x64 intrinsic
+        // requires preview-feature opt-in on .NET 8.
+        // x64 DIV returns both halves of the rounding decision directly. Its
+        // quotient must fit ulong: upper < divisor proves that precondition and
+        // also excludes division by zero. Other cases use the portable runtime.
+        if (System.Runtime.Intrinsics.X86.X86Base.X64.IsSupported
+            && denominator <= ulong.MaxValue)
+        {
+            ulong divisor = (ulong)denominator;
+            ulong upper = (ulong)(numerator >> 64);
+            if (upper < divisor)
+            {
+#pragma warning disable SYSLIB5004 // Operands are runtime values; quotient overflow is guarded above.
+                var (quotient, remainder) = System.Runtime.Intrinsics.X86.X86Base.X64.DivRem(
+                    unchecked((ulong)numerator), upper, divisor);
+#pragma warning restore SYSLIB5004
+                return (quotient, remainder);
+            }
+        }
+#endif
+        return UInt128.DivRem(numerator, denominator);
+    }
+#endif
 
     internal static double Encode(ulong mantissa, int grid, bool negative)
     {
@@ -276,6 +502,9 @@ internal struct ExactMeanAccumulator
 
     private static int BitLength(ulong value)
     {
+#if !NETFRAMEWORK
+        return 64 - BitOperations.LeadingZeroCount(value);
+#else
         var bits = 0;
         if (value >= (1UL << 32)) { value >>= 32; bits += 32; }
         if (value >= (1UL << 16)) { value >>= 16; bits += 16; }
@@ -284,13 +513,18 @@ internal struct ExactMeanAccumulator
         if (value >= (1UL << 2)) { value >>= 2; bits += 2; }
         if (value >= 2) { value >>= 1; bits++; }
         return bits + (value == 0 ? 0 : 1);
+#endif
     }
 
     private static int BitLength(BigInteger value)
     {
+#if !NETFRAMEWORK
+        return checked((int)value.GetBitLength());
+#else
         var bytes = value.ToByteArray();
         var last = bytes.Length - 1;
         while (last > 0 && bytes[last] == 0) last--;
         return last * 8 + BitLength(bytes[last]);
+#endif
     }
 }

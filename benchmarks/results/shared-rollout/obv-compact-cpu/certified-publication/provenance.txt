@@ -1,0 +1,10 @@
+Source: 77a880b8 plus certified OBV CPU publication diff in this commit.
+Command: dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedObvBenchmarks* --warmupCount 10 --iterationCount 10 --exporters json csv --artifacts C:/Users/cheat/temp/si-obv-certified-publication
+24/24 CPU/native cases completed. No competing .NET jobs observed before launch or during sampled checks.
+Build: net10 production succeeded with zero warnings/errors; benchmark build succeeded with 60 existing warnings.
+Verification: 20 focused OBV/ADL CPU/GPU unit cases, zero skips; 17 OBV competitor/fixture cases passed.
+Before/after uses separate sequential runs of the same CPU fixture (prior CPU methods invoked through SharedGpuObvBenchmarks); same-run native arms are retained for current comparisons.
+Warnings and outliers retained in benchmark.log.gz. Device/retained workspace allocation is not included.
+Catalog current rows contain this CPU/native run. gpu_current preserves the prior unchanged GPU run and its same-run CPU/native comparators; no GPU/native ratios were recalculated across runs.
+OoplesFinance.StockIndicators.dll SHA256 a77c11502b0a95f828adb6bd443ef14f3ac9be3dc399c93727351fcf2276699a
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 b32a8a0dccb2841a623498264a44f27b029047fc36b76a6419378916bd3292f4

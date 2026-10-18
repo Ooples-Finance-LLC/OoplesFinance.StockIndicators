@@ -1,0 +1,11 @@
+Zero-decay Min/Max Required-GPU qualification using published AiDotNet.Tensors 0.134.4.
+
+Two fixed compiled kernel keys share the existing workspace, lock, retention limit and failure cleanup. No new device buffer or scratch allocation. Each output scans its available period on-device, selecting newest ties to preserve signed-zero bits. No host extremum computation. Nonzero decay, sourced graphs and mixed Required-GPU requests remain unsupported.
+
+91 focused tests passed, zero skipped, including six new extrema cases with actual device dispatch, independent reverse-scan references, signed-zero ties, extreme exponents, startup, large periods, both histories, concurrent workspace reuse, input error precedence, recovery, cancellation and snapshot ownership. Eighteen inventory tests and the Release net10 benchmark build passed.
+
+All 24 benchmark cases passed setup correctness checks at 10k/100k, using five warmups and fifteen measured iterations. Timings include staging, transfer, dispatch, readback and publication after kernel/workspace warmup. Native input preparation is excluded; native returns only values, while Full also owns OHLCV snapshots. Native parallel directly calls Calc(TValue) with P-1 seeds.
+
+At 100k, GPU Full Max/Min takes 1933.67/1957.15 us versus native parallel 3566.16/3852.32 us. CPU Full is faster at 1560.90/1561.86 us; Auto remains CPU. GPU LatestOnly takes 1159.39/1154.33 us versus CPU 412.29/439.35 us. CPU remains a clear win against both measured native arms at all three sizes and history modes.
+
+The device algorithm is O(N*period), so these period-20 results do not qualify large-period performance or a CPU/GPU crossover. BDN reported several short minimum iterations and multimodal distributions; confidence intervals are retained in the raw report. Qualification retains the fastest native arm across campaigns and verifies row-level provenance. Direct API qualification remains 93/401.

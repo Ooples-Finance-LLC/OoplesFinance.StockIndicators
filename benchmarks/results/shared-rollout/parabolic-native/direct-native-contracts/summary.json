@@ -1,0 +1,32 @@
+{
+  "status": "98 affected cases passed (57 new and 41 existing). 100 local GPU cases passed. First timings pending; qualification unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedParabolicNativeBenchmarks.cs": "f83a9dc7d49d2161d57a90278098974767dbf29635aa8072e86a545a8310dc2c",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedParabolicSnapshotBenchmarks.cs": "0070cecc6e3d9e005efd588d10fdbecbe3bf1e1488c319b4e3c5e4e26288cdde",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/ParabolicComparison.cs": "6ebe4c94193480550f6b2e9bdcce4ab7f26adc6807f60a92d1c276d3d952bc25",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedParabolicNativeBenchmarkTests.cs": "16bc69c2980d27637c5a4cf2563d7ea46932a386bbb56b0f70be926fe1b947a6",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedParabolicSnapshotBenchmarkTests.cs": "29a72ab274be5532094110d2a5d0297033e37288489e41db366f094bf8d3fb19"
+  },
+  "operations": [
+    "TaLib.Functions.Sar",
+    "TaLib.Functions.SarExt",
+    "Skender.GetParabolicSar",
+    "Trady.Indicator.ParabolicStopAndReverse"
+  ],
+  "native_packages": [
+    "Trady.Analysis 3.2.8",
+    "Skender.Stock.Indicators 2.7.3",
+    "TALib.NETCore 0.5.0"
+  ],
+  "native_package_dll_sha256": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+  "contract": "Four standalone parabolic snapshots versus eager native serial and parallel paths. Full prefix replay retains TA packed SAR/SAR-ext doubles, Skender dates/SAR/reversal fields and startup suppression, and Trady decimal sequential cache behavior. Defaults .02 acceleration/.2 maximum. Normalization is setup-only.",
+  "validation": {
+    "comparator_cases_passed": 98,
+    "new_fixture_cases_passed": 57,
+    "affected_existing_cases_passed": 41,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1308
+  },
+  "benchmark_cases": 24,
+  "baseline_gap": "Saved normalized serial LibraryPair evidence retained; no compatible direct-native serial/parallel pair in catalog."
+}

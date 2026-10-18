@@ -1,0 +1,55 @@
+{
+  "Operation": "Skender.GetSlope",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        1124040,
+        1124024,
+        1123368
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        642240,
+        642240,
+        642240
+      ]
+    },
+    {
+      "Method": "GpuFull",
+      "Bytes": [
+        1123216,
+        1123216,
+        1123888
+      ]
+    },
+    {
+      "Method": "GpuLatestOnly",
+      "Bytes": [
+        642088,
+        642088,
+        642744
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1640400,
+        1640400,
+        1640400
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        7464664,
+        7464664,
+        7464664
+      ]
+    }
+  ]
+}

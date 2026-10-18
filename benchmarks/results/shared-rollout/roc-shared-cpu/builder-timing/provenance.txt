@@ -1,0 +1,4 @@
+Source commit 59f778dc. Production SHA256 709ebb96e542f42f278021b66b08bd4f1ebcf5c595fe10345cdd61796f0ef072.
+8 builder-only cases; 10 warmups and 10 iterations, N>=7; exit0, uninterrupted; no competing .NET jobs observed in preflight, ten-second samples or completion. Brief unobserved activity cannot be excluded.
+Filter *SharedRocBenchmarks*Builder*. Native methods are absent from benchmark setup and timing; separate golden tests check their contracts. Saved competitor results referenced without rerunning. Same original input generator; saved native retains aligned double[] and builder retains owned IIndicatorRun. Cross-run serial comparisons only, no best-path or same-run wins; parallel qualification missing. Coverage stays 269/401.
+40 focused tests passed; build and verification evidence in parent directory. No full-suite claim.

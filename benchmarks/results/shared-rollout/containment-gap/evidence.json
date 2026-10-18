@@ -1,0 +1,20 @@
+{
+  "verification": {
+    "focused_tests": 74,
+    "skipped": 0,
+    "inventory_tests": 13,
+    "initial_benchmark_cases": 50,
+    "confirmation_cases": 5
+  },
+  "native_package": "Trady.Analysis 3.2.8",
+  "source_studied": {
+    "repository": "karlwancl/Trady",
+    "commit": "08de02a68dd69fce3f7fc1dd916419117da7457e",
+    "limitation": "Checkout is not proven to be the exact package revision."
+  },
+  "native_contract": "Prepared OHLC decimal tuples; raw nullable Boolean output lists. NativeSingle evaluates the complete input; NativeParallel uses at most eight workers and P+1 lookback bars for directional patterns, one for plain Harami. Preparation, normalization and flattening are excluded from timing. Full builder additionally owns OHLCV snapshots.",
+  "directional_api": "Reflection of the benchmark Trady.Analysis.dll confirmed that BullishHaramiByTuple and BearishHaramiByTuple derive from plain Harami. Timed arms instead instantiate the public generic directional classes with tuple input and identity mapping. Setup verifies their equality with the IOhlcv directional wrappers, as well as the full-data independent reference. containedShadows=false matches both APIs.",
+  "setup_checks": "Serial/parallel equality, exact nullable startup masks, true and false outcomes, independent full-data reference, ordinary wrapper equality, both builder history modes and ordinary evaluator.",
+  "confirmation": "The initial 1k BearishHarami Full case had a wide interval. Repeated only that workload (all five arms) with five warmups and fifteen measured iterations. Qualification uses latest builder rows and fastest measured native rows, with SelectedEvidence for each. Original reports retained.",
+  "scope": "Bounded CPU replay for five patterns. Extreme periods whose P+2 would overflow retain existing shared serial state. No new GPU support in this batch."
+}

@@ -1,0 +1,9 @@
+{
+  "production_commit": "4f12c9cc",
+  "fixture_commit": "02f617e4",
+  "fixture_sha256": "4bbe7f8512517b008e797eedfa3f20b6a267ea2d435aa5474fec667833608d8d",
+  "warmup_count": 20,
+  "iteration_count": 15,
+  "contention_observation": "Preflight CPU 5%, completion 7%. No competing dotnet builds/tests observed in preflight and completion process samples. The next process sample occurred after the 36-second run completed; no during-run sample was captured. Reusable MSBuild nodes and dotnet --version were present. Not continuous isolation.",
+  "scope": "Four CPU arms at 10000 bars, default Connors periods. Includes shared CPU registration, fixed-width exact cross-products and monotone ratio certificates. Native tuple results are retained directly; parallel includes full-prefix replay and temporary outputs."
+}

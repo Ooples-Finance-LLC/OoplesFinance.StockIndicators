@@ -1,0 +1,16 @@
+{
+  "production_commit": "f7fa53c5",
+  "fixture_commit": "2ffd53fc",
+  "fixture_sha256": "3135f1f708302ceba9f76512cfac8231191cb36326598f334784b1bce2c8d330",
+  "warmup_count": 10,
+  "requested_iteration_count": 10,
+  "retained_iterations": {
+    "BuilderFull": 10,
+    "BuilderLatestOnly": 10,
+    "NativeSingle": 10,
+    "NativeParallel": 8
+  },
+  "contention_observation": "CPU 6% preflight, 9% in a during-run sample (log still collecting overhead measurements), 11% after. No competing dotnet build/test/run processes observed in these samples. Sampled observations do not guarantee continuous isolation.",
+  "scope": "Four CPU arms, 10000 bars, period14. Measures contribution cache and bounded parallel integration together. Both builders beat native serial but lose to native parallel. No isolated attribution to either production change.",
+  "command": "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter \"*SharedUlcerBenchmarks*Count: 10000)\" --warmupCount 10 --iterationCount 10 --exporters json --artifacts C:/Users/cheat/temp/si-ulcer-f7fa53c5"
+}

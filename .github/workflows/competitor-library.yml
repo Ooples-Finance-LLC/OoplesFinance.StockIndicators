@@ -6,6 +6,11 @@ on:
       - 'benchmarks/**'
       - '.github/workflows/competitor-library.yml'
       - 'scripts/*competitor*.py'
+      - 'scripts/competitor-gpu-methods.json'
+      - 'Directory.Build.*'
+      - 'Directory.Packages.props'
+      - 'global.json'
+      - '[Nn]u[Gg]et.[Cc]onfig'
   push:
     branches: [master, main]
     paths:
@@ -13,7 +18,18 @@ on:
       - 'benchmarks/**'
       - '.github/workflows/competitor-library.yml'
       - 'scripts/*competitor*.py'
+      - 'scripts/competitor-gpu-methods.json'
+      - 'Directory.Build.*'
+      - 'Directory.Packages.props'
+      - 'global.json'
+      - '[Nn]u[Gg]et.[Cc]onfig'
   workflow_dispatch:
+    inputs:
+      measure_performance:
+        description: 'Run fresh library and competitor timings instead of reusing saved evidence'
+        type: boolean
+        required: false
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -27,7 +43,7 @@ jobs:
       shards: ${{ steps.shards.outputs.matrix }}
       count: ${{ steps.shards.outputs.count }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
@@ -40,7 +56,11 @@ jobs:
         run: >-
           python scripts/run-competitor-contracts.py discover
           benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorTests.dll
-          contract-methods.json
+          all-contract-methods.json
+      - name: Require source-matched local GPU contracts and partition hosted methods
+        run: >-
+          python scripts/verify-competitor-local-gpu.py verify
+          all-contract-methods.json contract-methods.json
       - name: Check committed API inventory
         run: |
           dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --comparison-manifest actual-manifest.json
@@ -57,17 +77,18 @@ jobs:
               print('matrix=' + json.dumps(list(range(count))), file=output)
               print('count=' + str(count), file=output)
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: competitor-binaries
           path: benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/
           retention-days: 7
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: competitor-contract-binaries
           path: |
             benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/
             contract-methods.json
+            all-contract-methods.json
           retention-days: 7
   contracts:
     needs: build
@@ -79,11 +100,11 @@ jobs:
       matrix:
         shard: ${{ fromJSON(needs.build.outputs.shards) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: competitor-contract-binaries
           path: contracts
@@ -93,7 +114,7 @@ jobs:
           contracts/benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorTests.dll
           contracts/contract-methods.json
           ${{ matrix.shard }} ${{ needs.build.outputs.count }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: competitor-contract-results-${{ matrix.shard }}
@@ -113,13 +134,13 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: competitor-binaries
           path: binaries
       - name: Verify complete trajectories
         run: dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --verify-library-shard ${{ matrix.shard }} ${{ needs.build.outputs.count }} shard-${{ matrix.shard }}.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: competitor-shard-${{ matrix.shard }}
           path: shard-${{ matrix.shard }}.json
@@ -128,8 +149,8 @@ jobs:
     needs: [build, contracts, correctness]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: competitor-shard-*
           path: results
@@ -137,6 +158,9 @@ jobs:
       - run: python scripts/verify-competitor-shards.py benchmarks/competitor-library-manifest.json results ${{ needs.build.outputs.count }}
   performance:
     needs: [build, complete-union]
+    # Reuse saved competitor timings during normal PR validation. Fresh native
+    # baselines require an explicitly requested manual run.
+    if: github.event_name == 'workflow_dispatch' && inputs.measure_performance
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -148,11 +172,11 @@ jobs:
       COMPARISON_SHARD: ${{ matrix.shard }}
       COMPARISON_SHARDS: ${{ needs.build.outputs.count }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: competitor-binaries
           path: binaries
@@ -165,7 +189,7 @@ jobs:
         run: >-
           python scripts/verify-competitor-performance.py benchmarks/competitor-library-manifest.json
           performance ${{ matrix.shard }} ${{ needs.build.outputs.count }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: competitor-performance-${{ matrix.shard }}
@@ -173,11 +197,11 @@ jobs:
           retention-days: 14
   performance-summary:
     needs: [build, performance]
-    if: always()
+    if: always() && github.event_name == 'workflow_dispatch' && inputs.measure_performance
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Require all performance shards to pass
@@ -185,7 +209,7 @@ jobs:
           BUILD_RESULT: ${{ needs.build.result }}
           PERFORMANCE_RESULT: ${{ needs.performance.result }}
         run: test "$BUILD_RESULT" = success && test "$PERFORMANCE_RESULT" = success
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: competitor-performance-[0-9]*
           path: performance-shards
@@ -206,7 +230,7 @@ jobs:
               summary.write("Download **competitor-performance-summary** from this run for every indicator's timing, dispersion, allocation, and ratio, plus raw evidence.\n\n")
               summary.write("Both libraries are measured at 1,000 and 10,000 bars. Unavailable APIs are listed explicitly. Shared-runner ShortRun timings are diagnostic, not speed guarantees.\n")
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: competitor-performance-summary
           path: performance-summary/

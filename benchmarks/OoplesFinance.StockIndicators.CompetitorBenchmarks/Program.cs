@@ -1,6 +1,115 @@
 using BenchmarkDotNet.Running;
 using OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
+if (args.Length == 4 && args[0] == "--profile-pair")
+{
+    var count = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
+    var iterations = int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture);
+    if (count < 64 || iterations < 1 || args[1] is not ("Correl" or "Beta"))
+        throw new ArgumentException("Expected Correl/Beta, at least 64 bars, and positive iterations.");
+    var benchmark = new SharedPairInputBenchmarks { Operation = args[1], Count = count };
+    try
+    {
+        benchmark.Setup();
+        for (int i = 0; i < 100; i++) benchmark.BuilderLatestOnly().Dispose();
+        Console.WriteLine("Pair warmup complete; starting steady-state builder loop.");
+        for (int i = 0; i < iterations; i++) benchmark.BuilderLatestOnly().Dispose();
+    }
+    finally { benchmark.Cleanup(); }
+    return;
+}
+
+if (args.Length == 3 && args[0] == "--profile-mfi")
+{
+    var count = int.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture);
+    var iterations = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
+    if (count < 64 || iterations < 1)
+        throw new ArgumentException("Expected at least 64 bars and positive iterations.");
+    var benchmark = new SharedMoneyFlowIndexBenchmarks { Count = count };
+    try
+    {
+        benchmark.Setup();
+        for (int i = 0; i < 100; i++) benchmark.BuilderLatestOnly().Dispose();
+        Console.WriteLine("MFI warmup complete; starting steady-state builder loop.");
+        for (int i = 0; i < iterations; i++) benchmark.BuilderLatestOnly().Dispose();
+    }
+    finally { benchmark.Cleanup(); }
+    return;
+}
+
+if (args.Length == 3 && args[0] == "--profile-ulcer")
+{
+    var count = int.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture);
+    var iterations = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
+    if (count < 64 || iterations < 1)
+        throw new ArgumentException("Expected at least 64 bars and positive iterations.");
+    var benchmark = new SharedUlcerBenchmarks { Count = count };
+    try
+    {
+        benchmark.Setup();
+        for (int i = 0; i < 100; i++) benchmark.BuilderLatestOnly().Dispose();
+        Console.WriteLine("Ulcer warmup complete; starting steady-state builder loop.");
+        for (int i = 0; i < iterations; i++) benchmark.BuilderLatestOnly().Dispose();
+    }
+    finally { benchmark.Cleanup(); }
+    return;
+}
+
+if (args.Length == 4 && args[0] == "--profile-hilbert")
+{
+    var count = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
+    var iterations = int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture);
+    if (count < 64 || iterations < 1 || args[1] is not
+        ("TaLib.Functions.HtDcPeriod" or "TaLib.Functions.HtPhasor" or "TaLib.Functions.Mama"))
+        throw new ArgumentException("Expected a supported Hilbert operation, at least 64 bars, and positive iterations.");
+    var benchmark = new SharedHilbertBenchmarks { Operation = args[1], Count = count };
+    try
+    {
+        benchmark.Setup();
+        for (int i = 0; i < 100; i++) benchmark.BuilderLatestOnly().Dispose();
+        Console.WriteLine("Hilbert warmup complete; starting steady-state builder loop.");
+        for (int i = 0; i < iterations; i++) benchmark.BuilderLatestOnly().Dispose();
+    }
+    finally { benchmark.Cleanup(); }
+    return;
+}
+
+if (args.Length == 4 && args[0] == "--profile-strength")
+{
+    var count = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
+    var iterations = int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture);
+    if (count < 64 || iterations < 1 || args[1] is not ("TaLib.Functions.Rsi" or "TaLib.Functions.Cmo"))
+        throw new ArgumentException("Expected RSI/CMO, at least 64 bars, and a positive iteration count.");
+    var benchmark = new SharedWilderStrengthBenchmarks { Operation = args[1], Count = count };
+    try
+    {
+        benchmark.Setup();
+        for (int i = 0; i < 100; i++) benchmark.BuilderLatestOnly().Dispose();
+        Console.WriteLine("Strength warmup complete; starting steady-state builder loop.");
+        for (int i = 0; i < iterations; i++) benchmark.BuilderLatestOnly().Dispose();
+    }
+    finally { benchmark.Cleanup(); }
+    return;
+}
+
+if (args.Length == 4 && args[0] == "--profile-directional")
+{
+    var count = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
+    var iterations = int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture);
+    if (count < 64 || iterations < 1 || !TaDirectionalComparison.Names.Contains(args[1]))
+        throw new ArgumentException("Expected a directional API name, at least 64 bars, and a positive iteration count.");
+    var benchmark = new SharedTaDirectionalBenchmarks { Operation = "TaLib.Functions." + args[1], Count = count };
+    try
+    {
+        benchmark.Setup();
+        for (int i = 0; i < 100; i++) benchmark.BuilderLatestOnly().Dispose();
+        Console.WriteLine("Directional warmup complete; starting steady-state builder loop.");
+        for (int i = 0; i < iterations; i++) benchmark.BuilderLatestOnly().Dispose();
+    }
+    finally { benchmark.Cleanup(); }
+    return;
+}
+
 if (args.Length == 4 && args[0] == "--profile-cost-boundary")
 {
     PilotCostBoundaryProfile.Run(args[1], args[2], int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture));
@@ -100,6 +209,14 @@ if (args.Length > 0 && args[0].Equals("--verify", StringComparison.OrdinalIgnore
 if (args.Length > 0 && args[0].Equals("--verify-workloads", StringComparison.OrdinalIgnoreCase))
 {
     WorkloadCheck.Run(Console.Out);
+    return;
+}
+
+if (args.Length == 4 && args[0] is "--alloc-shared" or "--alloc-shared-gpu")
+{
+    SharedAllocationProbe.Write(Console.Out, args[1],
+        int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture),
+        int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture), includeGpu: args[0] == "--alloc-shared-gpu");
     return;
 }
 

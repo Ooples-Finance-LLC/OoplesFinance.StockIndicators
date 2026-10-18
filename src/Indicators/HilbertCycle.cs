@@ -113,7 +113,7 @@ internal sealed class HilbertCycleState(bool periodOnly, int suppression) : IMul
     {
         output.Clear();
         _index++;
-        _phase.Update(ExactVarianceWindow.Units(bar.Close));
+        _phase.Update(bar.Close);
         if (_index >= 12)
             _smoothed = .33 * _phase.Period + .67 * _smoothed;
         if (_index < 32L + suppression)
@@ -125,8 +125,8 @@ internal sealed class HilbertCycleState(bool periodOnly, int suppression) : IMul
         }
         else
         {
-            output[0] = ExactMeanAccumulator.UnitRatio(_phase.InPhase, 1);
-            output[1] = ExactMeanAccumulator.UnitRatio(_phase.Quadrature, 1);
+            output[0] = _phase.InPhase.Mean(1);
+            output[1] = _phase.Quadrature.Mean(1);
             output[2] = output[3] = 1;
         }
     }

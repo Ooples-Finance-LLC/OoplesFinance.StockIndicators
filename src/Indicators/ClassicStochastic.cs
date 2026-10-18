@@ -93,7 +93,7 @@ public sealed class ClassicStochastic : MultiOutputIndicatorBase, IIndicatorVali
                 )
             );
 
-    private sealed class State : IMultiOutputState, IDisposable
+    internal sealed class State : IMultiOutputState, IDisposable
     {
         private readonly FiftySeedStochastic.RawState _raw;
         private readonly IWideAverageState _k,

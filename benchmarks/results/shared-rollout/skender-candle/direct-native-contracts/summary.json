@@ -1,0 +1,37 @@
+{
+  "status": "56 focused contract cases passed, including 34 new fixture cases and 22 existing affected comparison cases. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderCandleBenchmarks.cs": "11da3a746f0baf0dcbbdcb546071fa3a951d0b0193267bf1491f1111703141c3",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderBenchmarkBase.cs": "3c1b7cfd3e6ceeece53783532284da7d11a6b0dfab3ab9748b9ab469dd5d04d8",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedPriceCandleBenchmarks.cs": "6b737575f53f2c6f1ededa342c3639c06ef3861974e63ddd35f8db48b645960b",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PriceCandleComparison.cs": "4dc4583554deded9f4f52574b84fd9b7868fac78b8c20041a9bbe88dd7a581e7",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/HeikinAshiComparison.cs": "1361f48f0144ff99296c6a2ab095fd81f168705239a3c36f37324c055b2d261f",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderCandleBenchmarkTests.cs": "0f858165549601b648398b301ae497fb2e23a254445c86bde5f381da58f53cfc"
+  },
+  "native_package": "Skender.Stock.Indicators 2.7.3",
+  "native_source_commit": "fd739aa4b592f68d5a68d14c602319c027bb0538",
+  "native_source_repository": "https://github.com/facioquo/stock-indicators-dotnet",
+  "native_source_sha256": {
+    "Doji.Api.cs": "957e6c6552009f1077eee35e37d0ce02cb400667fa475d9e266d47911dac37cc",
+    "Doji.Series.cs": "7dc43acf76df516dcc40a59c88e999a0a799e87d492267f224e67b867a92c2da",
+    "HeikinAshi.Api.cs": "c917bc00a0c349b38df1976408963d9833e2d5b138052889c73fd81d1908f6ab",
+    "HeikinAshi.Models.cs": "58dbc4d1c1324f53fe4fe781e3fe48a0cc4b0dc044608cdc82b31e71d87b639c",
+    "HeikinAshi.Series.cs": "b30826e4d13dd1028901611a53ff4d7eed8ffff1968a529b34ec5803b8bf76c6",
+    "Marubozu.Api.cs": "ba78ce41d3076c51b2fbe6fb0ee86bf5f634383870bc28eb6f3cf9c8ad0bff98",
+    "Marubozu.Series.cs": "ddd362531497e47f5a6fbc28c04764ec5794dd940849455665f18f3c15c20178"
+  },
+  "operations": [
+    "Skender.GetDoji",
+    "Skender.GetMarubozu",
+    "Skender.GetHeikinAshi"
+  ],
+  "contract": "Public quote APIs with eager native Lists. Doji/Marubozu workers use independent chunks without overlap; Heikin-Ashi workers retain full prefixes for recursive opens. Native calculation and joined outputs remain timed. Independent references verify all 12 owned pattern columns or five owned Heikin-Ashi columns. Normalization is shared with existing comparators outside timing. Exact serial/parallel/repeated comparisons verify values, presence, dates and retained ownership; decimal OHLCV, prices, size, body and wick fields are also compared directly. Nested Candle objects must be independently owned.",
+  "validation": {
+    "comparator_cases_passed": 56,
+    "production_source_changed": false,
+    "gpu_cases_passed": 100,
+    "hosted_contract_methods": 1257,
+    "gpu_receipt": "../../local-gpu-contracts/receipt.json"
+  },
+  "benchmark_cases": 24
+}

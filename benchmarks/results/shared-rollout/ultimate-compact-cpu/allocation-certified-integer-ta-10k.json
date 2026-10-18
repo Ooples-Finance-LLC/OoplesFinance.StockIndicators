@@ -1,0 +1,44 @@
+{
+  "baseCommit": "c6843789",
+  "productionChange": "Certified integer Ultimate CPU regions with exact single-rounding ratio publication.",
+  "measurement": "Warmed managed total allocation, including workers. Pooled capture retention is not counted as per-call allocation. GPU jobs in another Tensors session prevented latency qualification.",
+  "report": {
+    "Operation": "TaLib.Functions.UltOsc",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          643360,
+          644016,
+          643360
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          162232,
+          162232,
+          162232
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          79840,
+          79840,
+          79840
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          80280,
+          80280,
+          80280
+        ]
+      }
+    ]
+  }
+}

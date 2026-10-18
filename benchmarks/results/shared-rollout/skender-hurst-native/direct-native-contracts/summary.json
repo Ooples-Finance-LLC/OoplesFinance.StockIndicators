@@ -1,0 +1,25 @@
+{
+  "status": "19 affected contract cases passed (14 new and5 existing).100 local GPU cases passed. First native timings pending; catalog qualification unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderHurstNativeBenchmarks.cs": "1f9e00050b9262fc24c5fe30667199ab7aae79de8834fcadc2d5eaa6c944d45e",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedHurstSnapshotBenchmarks.cs": "c8d1d5ae378e52afa28229f90f7a9b52cea7877b20003062c2e892d8c39db9ab",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/HurstComparison.cs": "d0dd3bb85e90025493d4193da44ca3934bbb9518fdabc2fd1e0139b21672855e",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderHurstNativeBenchmarkTests.cs": "a39bc53eea1910322dc6354b32f1719f2331f072f284e18c6e5bcebe5fd4a64e",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedHurstSnapshotBenchmarkTests.cs": "a571a5211309e4e6828ce1ae0ca9f6304cf7f33a64be12013641ad969ccaa4d5"
+  },
+  "operations": [
+    "Skender.GetHurst"
+  ],
+  "native_package": "Skender.Stock.Indicators 2.7.3",
+  "native_package_dll_sha256": "0408495cde22e3795c6efcb16d88da9e82d0aa0dbd88e5d39b41db9fb171bf93",
+  "contract": "Standalone Hurst snapshot retained. Native serial returns eager List<HurstResult>; parallel joins independently owned native rows. Twenty-return local regressions use20 preceding closes per worker. Both exponents, dates, startup masks and worker boundaries verified; serial/parallel values exact. Independent mathematical reference uses existing1e-10 error budget. Normalization outside timing.",
+  "validation": {
+    "comparator_cases_passed": 19,
+    "new_fixture_cases_passed": 14,
+    "affected_existing_cases_passed": 5,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1302
+  },
+  "benchmark_cases": 6,
+  "baseline_gap": "Saved normalized serial LibraryPair results retained; no compatible direct-native serial/parallel pair in catalog. Save first three-arm baseline for reuse."
+}

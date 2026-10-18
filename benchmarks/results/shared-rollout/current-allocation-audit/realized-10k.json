@@ -1,0 +1,41 @@
+{
+  "Operation": "QuanTAlib.Realized",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        643824,
+        643824,
+        643824
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        162696,
+        162696,
+        162696
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        480656,
+        480656,
+        480656
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        1885048,
+        1885048,
+        1885048
+      ]
+    }
+  ],
+  "production_commit": "944572c2",
+  "qualification": "allocation-only; no latency qualification"
+}

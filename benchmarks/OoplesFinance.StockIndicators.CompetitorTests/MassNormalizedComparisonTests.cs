@@ -1,4 +1,5 @@
 using OoplesFinance.StockIndicators.CompetitorBenchmarks;
+using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
 using Xunit;
@@ -7,6 +8,31 @@ namespace OoplesFinance.StockIndicators.CompetitorTests;
 
 public sealed class MassNormalizedComparisonTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ScaledWeightsPreserveBitsInBothHistoryModes(bool quadruple)
+    {
+        foreach (double alpha in new[] { double.Epsilon, .1, Math.BitDecrement(1d), 1d })
+        foreach (double scale in new[] { double.Epsilon, 1d, 1e280 })
+        {
+            var alphas = Enumerable.Repeat(alpha, quadruple ? 4 : 1).ToArray();
+            var prices = Enumerable.Range(0, 384)
+                .Select(i => i % 11 == 0 ? -0d : (i % 17 - 8) * scale).ToArray();
+            var expected = MassNormalizedComparison.Reference(prices, alphas, false);
+            var bars = prices.Select((value, i) =>
+                new Bar(DateTime.UnixEpoch.AddDays(i), value, value, value, value, 0)).ToArray();
+            foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+            {
+                var indicator = MassNormalizedComparison.Indicator(3, alphas);
+                using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                    .ConfigureIndicators(indicator).ConfigureHistory(history).BuildAsync();
+                Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits),
+                    run[indicator].ToArray().Select(BitConverter.DoubleToInt64Bits));
+            }
+        }
+    }
+
     [Theory]
     [InlineData(false, .2)]
     [InlineData(true, .2)]

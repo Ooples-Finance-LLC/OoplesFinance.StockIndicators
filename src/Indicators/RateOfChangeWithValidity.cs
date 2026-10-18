@@ -1,4 +1,3 @@
-using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
 namespace OoplesFinance.StockIndicators.Indicators;
@@ -69,7 +68,7 @@ public sealed class RateOfChangeWithValidity
         return values;
     }
 
-    private sealed class State(int period) : IMultiOutputState
+    internal sealed class State(int period) : IMultiOutputState
     {
         private readonly Queue<double> _history = new();
 
@@ -87,12 +86,7 @@ public sealed class RateOfChangeWithValidity
             _history.Enqueue(bar.Close);
             if (previous == 0)
                 return;
-            var numerator = new ExactMeanAccumulator();
-            numerator.Add(bar.Close, 100);
-            numerator.Add(previous, -100);
-            var denominator = new ExactMeanAccumulator();
-            denominator.Add(previous);
-            outputs[0] = numerator.Ratio(denominator);
+            outputs[0] = LaggedPriceChange.Calculate(bar.Close, previous, PriceChangeKind.Percent);
             outputs[1] = 1;
         }
     }

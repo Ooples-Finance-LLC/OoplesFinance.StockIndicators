@@ -1,0 +1,7 @@
+{
+  "production_build": "../pivot-snapshot-shared-cpu/build.log.gz",
+  "production_sha256": "2d2b58165cfea070ff98bd479173aa49bbbf3d8db6dcc7e8691c38cbe28e2a46",
+  "production_rebuilt": false,
+  "unit_rerun": false,
+  "current_competitor_production_sha256": "2d2b58165cfea070ff98bd479173aa49bbbf3d8db6dcc7e8691c38cbe28e2a46"
+}

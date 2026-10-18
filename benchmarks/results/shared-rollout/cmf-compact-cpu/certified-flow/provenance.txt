@@ -1,0 +1,11 @@
+Source: 446d165e plus certified CMF difference/product fast paths and regression tests in this commit.
+Command: dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedCmfBenchmarks* --warmupCount 10 --iterationCount 10 --exporters json csv --artifacts C:/Users/cheat/temp/si-cmf-certified-timing
+All eight cases completed; runner exited zero. No competing .NET build/test jobs observed before launch or during sampled process checks. Brief unobserved activity cannot be excluded.
+Production net10 build: zero warnings/errors. Harness build: 60 existing warnings, zero errors. All 11 compact CMF unit tests and 18 CMF reference/fixture tests passed. Production/test/harness production DLL SHA256 matched.
+Exact difference/product certificates permit separately rounded hardware divisions for ordinary multiplier and complete flow. Uncertified differences/products retain compact dyadic and arbitrary-precision fallback. Multiplier and complete flow round independently; exact window sums use published flow values. Flow canonicalizes underflow zero; multiplier/CMF retain rounded underflow signs. Framework state remains unchanged.
+Setup independently validates all four builder columns and three nullable native outputs. Native parallel uses period-1 overlap, preserving each window summation order; native invocation, conversion and result publication remain measured.
+Win qualification uses upper builder CI below both same-run native lower bounds. Before/after compares sequential runs with cmf-compact-cpu; prior current rows are preserved here. All historical catalog measurements remain unchanged.
+All three warmed allocation samples are retained. Warnings/outliers remain in raw log.
+Coverage remains 198/401 APIs; coverage is not wins. GPU execution, CPU parallelism, remaining latency and coverage gaps remain open.
+OoplesFinance.StockIndicators.dll SHA256 3b13bcacc839935b8f5b8dea14b7130c77bd8f6c05d413d88c2481c96725e437
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 ccf71fc03ca94002c3b0fa507b06c20d6d6ffc37d77c6c4b5388ad1bfaaa97e3

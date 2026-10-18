@@ -380,9 +380,17 @@
     "id": "exact-small-mean-ties-away",
     "module": "reference-arithmetic",
     "file": "src/Helpers/ExactMeanAccumulator.cs",
-    "before": "remainder > otherHalf || remainder == otherHalf && (mantissa & 1) != 0",
-    "after": "remainder >= otherHalf",
+    "before": "if (remainder > otherHalf || remainder == otherHalf && (mantissa & 1) != 0) mantissa++;\n        value = Encode(mantissa, grid, _small < 0);",
+    "after": "if (remainder >= otherHalf) mantissa++;\n        value = Encode(mantissa, grid, _small < 0);",
     "filter": "FullyQualifiedName~SmaExtremeRangeTests"
+  },
+  {
+    "id": "exact-extended-mean-ties-away",
+    "module": "reference-arithmetic",
+    "file": "src/Helpers/ExactMeanAccumulator.cs",
+    "before": "if (remainder > otherHalf || remainder == otherHalf && (mantissa & 1) != 0) mantissa++;\n            value = Encode((ulong)mantissa, grid, _small < 0);",
+    "after": "if (remainder >= otherHalf) mantissa++;\n            value = Encode((ulong)mantissa, grid, _small < 0);",
+    "filter": "FullyQualifiedName~ExtendedCompactDivisionRoundsBothSignsOfHalfwayCasesToEven"
   },
   {
     "id": "exact-wide-mean-lost-scale",
@@ -2550,8 +2558,8 @@
     "file": "src/Helpers/ExactLinearFitWindow.cs",
     "filter": "FullyQualifiedName~LinearRegressionNumericalTests",
     "id": "linear-regression-eviction",
-    "before": "_weighted - _sum + expired",
-    "after": "_weighted - _sum"
+    "before": "priorWeighted - priorSum + expired",
+    "after": "priorWeighted - priorSum"
   },
   {
     "module": "linear-regression",

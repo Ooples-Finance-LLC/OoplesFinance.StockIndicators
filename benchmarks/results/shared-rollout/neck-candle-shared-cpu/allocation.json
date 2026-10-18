@@ -1,0 +1,119 @@
+[
+  {
+    "Operation": "TaLib.Candles.OnNeck",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          582184,
+          582840,
+          582184
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          100776,
+          100776,
+          100776
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81032,
+          81032,
+          81032
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Candles.InNeck",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          582184,
+          582840,
+          582184
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          100776,
+          100776,
+          100776
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81032,
+          81032,
+          81032
+        ]
+      }
+    ]
+  },
+  {
+    "Operation": "TaLib.Candles.Thrusting",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          582184,
+          582840,
+          582184
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          100776,
+          100776,
+          100776
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          40064,
+          40064,
+          40064
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          81032,
+          81032,
+          81032
+        ]
+      }
+    ]
+  }
+]

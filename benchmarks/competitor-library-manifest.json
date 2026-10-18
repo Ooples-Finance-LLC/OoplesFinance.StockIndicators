@@ -318,12 +318,12 @@
       "QuanTAlib.Maaf"
     ],
     "Status": "paired",
-    "OoplesIndicator": "MedianAdaptiveSnapshot",
+    "OoplesIndicator": "MedianAdaptiveAverage",
     "Outputs": [
       "Value"
     ],
     "ExclusionReason": null,
-    "CompetitorLimitation": "MedianAdaptiveSnapshot preserves raw first-three prices, four-price 1/2/2/1 smoothing, descending-by-two upper-median windows and a signed median error denominator. The final filter length is at least three; finite signed thresholds are supported. Complete smoothing updates round once and error thresholds compare exact ratios, preserving wide and tiny distinctions. Independent order-statistic/rational and staged-native references cover odd/even periods, startup, negative/zero medians, threshold neighbors, wide/subnormal inputs, huge periods, fresh/prefix calls and corrupted outputs. Native staged differences/products can overflow; owned history grows lazily."
+    "CompetitorLimitation": "MedianAdaptiveAverage executes through BuildAsync with reusable ring and sorted buffers, sorting once per mature bar and deleting the two oldest occurrences for each shorter candidate. MedianAdaptiveSnapshot remains the batch reference. It preserves raw first-three prices, four-price 1/2/2/1 smoothing, descending-by-two upper-median windows and a signed median error denominator. The final filter length is at least three; finite signed thresholds are supported. Complete smoothing updates round once and error thresholds compare exact ratios, preserving wide and tiny distinctions. Independent order-statistic/rational and staged-native references cover odd/even periods, startup, negative/zero medians, threshold neighbors, wide/subnormal inputs, huge periods, fresh/prefix calls and corrupted outputs. Native staged differences/products can overflow; owned history grows lazily."
   },
   {
     "Id": "QuanTAlib.Mama",
@@ -501,12 +501,12 @@
       "QuanTAlib.Rvi"
     ],
     "Status": "paired",
-    "OoplesIndicator": "RelativeVolatilitySnapshot",
+    "OoplesIndicator": "RelativeVolatilityStrength",
     "Outputs": [
       "Value"
     ],
     "ExclusionReason": null,
-    "CompetitorLimitation": "RelativeVolatilitySnapshot uses sample deviations of up/down changes, then available-history simple averages and a bounded ratio; previous close starts at zero. Exact changes and once-rounded deviation/mean stages use extended upper exponents, preserving finite ratios after unpublished overflow. An independent pairwise squared-distance/root oracle and native scalar-deviation/SIMD-mean oracle verify every output, period/startup boundaries, huge periods, wide/subnormal changes and corruption. Native squared deviations can underflow to zero and inherited reset retains nested histories; both limitations have explicit regressions. Owned calls start fresh and histories grow lazily."
+    "CompetitorLimitation": "RelativeVolatilityStrength executes through BuildAsync with compact exact rolling states: sample deviations of up/down changes, then available-history simple averages and a bounded ratio; previous close starts at zero. RelativeVolatilitySnapshot remains the batch reference. Exact changes and once-rounded deviation/mean stages use extended upper exponents, preserving finite ratios after unpublished overflow. An independent pairwise squared-distance/root oracle and native scalar-deviation/SIMD-mean oracle verify every output, period/startup boundaries, huge periods, wide/subnormal changes and corruption. Native squared deviations can underflow to zero and inherited reset retains nested histories; both limitations have explicit regressions. Owned calls start fresh and histories grow lazily."
   },
   {
     "Id": "QuanTAlib.Sinema",
@@ -1011,7 +1011,7 @@
       "System.Collections.Generic.IEnumerable\u00601[Skender.Stock.Indicators.ConnorsRsiResult] GetConnorsRsi[TQuote](System.Collections.Generic.IEnumerable\u00601[TQuote], Int32, Int32, Int32)"
     ],
     "Status": "paired",
-    "OoplesIndicator": "ConnorsStrengthSnapshot",
+    "OoplesIndicator": "ConnorsStrength",
     "Outputs": [
       "Rsi",
       "RsiStreak",
@@ -1391,13 +1391,13 @@
       "System.Collections.Generic.IEnumerable\u00601[Skender.Stock.Indicators.KvoResult] GetKvo[TQuote](System.Collections.Generic.IEnumerable\u00601[TQuote], Int32, Int32, Int32)"
     ],
     "Status": "paired",
-    "OoplesIndicator": "KlingerVolumeSnapshot",
+    "OoplesIndicator": "KlingerVolumeWithSignal",
     "Outputs": [
       "Oscillator",
       "Signal"
     ],
     "ExclusionReason": null,
-    "CompetitorLimitation": "KlingerVolumeSnapshot preserves the two-bar force startup, direction/range branches and independently mean-seeded fast/slow/signal EMAs. Exact HLC comparisons and ranges avoid intermediate overflow; complete force and EMA stages round once with extended upper exponents. Both nullable outputs, startup, configurations, zero/cancelling ranges, wide/subnormal candles, final overflow and mutations have independent references. Native double-stage and quote conversion behavior are modeled separately. Maximum periods use constant storage; native derived period arithmetic can overflow."
+    "CompetitorLimitation": "KlingerVolumeWithSignal executes through shared CPU BuildAsync with compact exact state and explicit output presence. KlingerVolumeSnapshot remains the batch reference. It preserves the two-bar force startup, direction/range branches and independently mean-seeded fast/slow/signal EMAs. Exact HLC comparisons and ranges avoid intermediate overflow; complete force and EMA stages round once with extended upper exponents. Both nullable outputs, startup, configurations, zero/cancelling ranges, wide/subnormal candles, final overflow and mutations have independent references. Native double-stage and quote conversion behavior are modeled separately. Maximum periods use constant storage; native derived period arithmetic can overflow."
   },
   {
     "Id": "Skender.GetMaEnvelopes",
@@ -1741,7 +1741,7 @@
       "System.Collections.Generic.IEnumerable\u00601[Skender.Stock.Indicators.SlopeResult] GetSlope[TQuote](System.Collections.Generic.IEnumerable\u00601[TQuote], Int32)"
     ],
     "Status": "paired",
-    "OoplesIndicator": "RegressionSnapshot",
+    "OoplesIndicator": "RegressionWithFinalLine",
     "Outputs": [
       "Slope",
       "Intercept",
@@ -1750,7 +1750,7 @@
       "Line"
     ],
     "ExclusionReason": null,
-    "CompetitorLimitation": "All five outputs and presence flags are verified. RegressionSnapshot supplies global one-based intercepts and the retrospective final-window Line overlay: Line can be present on rows whose own rolling statistics are still in startup, and repaints when input is appended. The causal WindowRegressionStatistics API is separate. Exact Ooples moments avoid overflowing intermediate arithmetic; Skender publishes Line as decimal."
+    "CompetitorLimitation": "All five outputs and presence flags are verified. RegressionWithFinalLine supplies global one-based intercepts and the retrospective final-window Line overlay through BuildAsync: Line can be present on rows whose own rolling statistics are still in startup, and repaints when input is appended. The causal WindowRegressionStatistics API is separate. Exact Ooples moments avoid overflowing intermediate arithmetic; Skender publishes Line as decimal."
   },
   {
     "Id": "Skender.GetSma",
@@ -1844,12 +1844,12 @@
       "System.Collections.Generic.IEnumerable\u00601[Skender.Stock.Indicators.StcResult] GetStc[TQuote](System.Collections.Generic.IEnumerable\u00601[TQuote], Int32, Int32, Int32)"
     ],
     "Status": "paired",
-    "OoplesIndicator": "SchaffTrendCycleSnapshot",
+    "OoplesIndicator": "SingleStochasticCycle",
     "Outputs": [
       "Stc"
     ],
     "ExclusionReason": null,
-    "CompetitorLimitation": "SchaffTrendCycleSnapshot retains Skender\u0027s single-stochastic STC convention: independently mean-seeded fast/slow EMAs, complete cycle window on MACD, then three-value SMA. Flat windows contribute zero; all startup masks are explicit. Reuses the verified EMA arithmetic with extended upper exponents and lazy cycle history, so overflowing unpublished MACD cannot poison bounded output. Independent rational-grid and native staged references cover configurations, startup, tiny/wide inputs, quote/tuple routes, repeat/prefix calls and output/presence mutations. Native zero cycle fails in its nested stochastic despite permissive outer validation; owned rejects nonpositive cycles immediately."
+    "CompetitorLimitation": "SingleStochasticCycle executes through shared CPU BuildAsync with compact SMA-seeded EMA arithmetic and lazy exact monotonic extrema queues. SchaffTrendCycleSnapshot remains the batch reference. It retains Skender\u0027s single-stochastic STC convention: independently mean-seeded fast/slow EMAs, complete cycle window on MACD, then three-value SMA. Flat windows contribute zero; all startup masks are explicit. Reuses the verified EMA arithmetic with extended upper exponents and lazy cycle history, so overflowing unpublished MACD cannot poison bounded output. Independent rational-grid and native staged references cover configurations, startup, tiny/wide inputs, quote/tuple routes, repeat/prefix calls and output/presence mutations. Native zero cycle fails in its nested stochastic despite permissive outer validation; owned rejects nonpositive cycles immediately."
   },
   {
     "Id": "Skender.GetStdDev",
@@ -1879,7 +1879,7 @@
       "System.Collections.Generic.IEnumerable\u00601[Skender.Stock.Indicators.StdDevChannelsResult] GetStdDevChannels[TQuote](System.Collections.Generic.IEnumerable\u00601[TQuote], System.Nullable\u00601[System.Int32], Double)"
     ],
     "Status": "paired",
-    "OoplesIndicator": "RegressionChannelSnapshot",
+    "OoplesIndicator": "RegressionWithChannels",
     "Outputs": [
       "Centerline",
       "UpperChannel",
@@ -1887,7 +1887,7 @@
       "BreakPoint"
     ],
     "ExclusionReason": null,
-    "CompetitorLimitation": "RegressionChannelSnapshot fits nonoverlapping blocks backward from the last row; leading incomplete rows are absent and BreakPoint remains a defined false value there. Null period fits the entire input, requiring at least two rows. Reuses the verified regression-moment engine with exact fitted positions, rounded population deviation and wide channel arithmetic. Native global-coordinate binary64 regressions and the unused final-line decimal cast inside CalcSlope have separate references; that cast can reject prices whose channels would otherwise be finite. Block shifts on append, all outputs, quote/tuple/reusable routes, extreme inputs, genuine final overflow and mutations are verified."
+    "CompetitorLimitation": "RegressionWithChannels uses BuildAsync to fit nonoverlapping blocks aligned backward from the last row; leading incomplete rows are absent and BreakPoint remains a defined false value there. Null period fits the entire input, requiring at least two rows. Reuses the verified regression-moment engine with exact fitted positions, rounded population deviation and wide channel arithmetic. Native global-coordinate binary64 regressions and the unused final-line decimal cast inside CalcSlope have separate references; that cast can reject prices whose channels would otherwise be finite. Block shifts on append, all outputs, quote/tuple/reusable routes, extreme inputs, genuine final overflow and mutations are verified."
   },
   {
     "Id": "Skender.GetStoch",
@@ -5411,12 +5411,12 @@
       "Trady.Analysis.Indicator.DynamicMomentumIndex\u00602"
     ],
     "Status": "paired",
-    "OoplesIndicator": "DynamicMomentumSnapshot",
+    "OoplesIndicator": "DynamicMomentumStrength",
     "Outputs": [
       "Value"
     ],
     "ExclusionReason": null,
-    "CompetitorLimitation": "DynamicMomentumSnapshot selects a fixed-period nullable Wilder RSI from the complete original history for each bar. Population deviation divides by calendar window size while its mean skips missing values; smoothed deviation also skips missing values after calendar startup. Exact moments and once-rounded deviation/mean/volatility stages preserve tiny and wide inputs. Period clamping precedes integer conversion, avoiding native integer overflow. Independent pairwise-distance and decimal references cover selected periods, nullable inputs, output masks and mutations. Native decimal rounding can select different periods; its implementation repeatedly reconstructs volatility histories. Owned requires positive periods and ordered positive limits."
+    "CompetitorLimitation": "DynamicMomentumStrength executes through BuildAsync and selects a fixed-period nullable Wilder RSI from the complete original history for each bar. It retains one close history and lazily catches up per-period states without caching output trajectories; DynamicMomentumSnapshot remains the batch facade. Population deviation divides by calendar window size while its mean skips missing values; smoothed deviation also skips missing values after calendar startup. Exact moments and once-rounded deviation/mean/volatility stages preserve tiny and wide inputs. Period clamping precedes integer conversion, avoiding native integer overflow. Independent pairwise-distance and decimal references cover selected periods, nullable inputs, output masks and mutations. Native decimal rounding can select different periods; its implementation repeatedly reconstructs volatility histories. Owned requires positive periods and ordered positive limits."
   },
   {
     "Id": "Trady.Indicator.EfficiencyRatio",

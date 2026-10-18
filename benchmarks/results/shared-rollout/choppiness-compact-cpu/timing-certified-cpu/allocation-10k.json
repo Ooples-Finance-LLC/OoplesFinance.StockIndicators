@@ -1,0 +1,39 @@
+{
+  "Operation": "Skender.GetChop",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        648048,
+        648048,
+        648048
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        166920,
+        166920,
+        166920
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1640512,
+        1640512,
+        1640512
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        1660416,
+        1660416,
+        1660416
+      ]
+    }
+  ]
+}

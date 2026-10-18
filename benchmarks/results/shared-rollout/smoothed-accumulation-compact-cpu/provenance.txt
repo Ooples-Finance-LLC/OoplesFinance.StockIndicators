@@ -1,0 +1,11 @@
+Production source: f5aa4910; new direct Chaikin fixture and allocation routing in this commit. Production binary reused without rebuilding.
+Harness build: 60 existing warnings, zero errors. All 67 fixture/allocation-probe tests passed. Production unchanged from the verified build.
+Setup verifies all eight builder columns and native outputs against separate independent exact/native arithmetic references bitwise, then cross-compares within 1e-10 relative tolerance. Presence, dates, counts, eager results and both history modes are checked.
+Skender exposes oscillator and flow details; TA exposes oscillator only. Disabled builder columns remain retained. These different output surfaces are reflected in allocation comparisons.
+Native parallel arms perform measured full-prefix replay to preserve cumulative/EMA recurrence rounding. This is not proof of the optimal native parallel strategy.
+Allocation command: --alloc-shared <operation> 10000 3 for Skender.GetChaikinOsc and TaLib.Functions.AdOsc. Managed samples include workers; all repetitions are preserved, including variability.
+Timing command: --filter *SharedSmoothedAccumulationBenchmarks* --warmupCount 10 --iterationCount 10 --exporters json csv --artifacts C:/Users/cheat/temp/si-chaikin-compact-qualified
+Timing is NOT qualified: prelaunch process check was quiet, but external PID 22960 appeared running dotnet build tests/AiDotNet.Tensors.Tests/AiDotNet.Tensors.Tests.csproj -f net10.0 -v q -nologo. Only our verified PID 31720 was stopped; runner exited -1 after 15 of 16 cases. Partial log and process observation retained under diagnostic-interrupted. No latency comparison is promoted.
+Catalog remains unchanged at 195/401 measured APIs. Direct latency, builder parallel execution and GPU support remain outstanding.
+OoplesFinance.StockIndicators.dll SHA256 3b1b35569f54f01eaf90d74b33086e95f7ad85de034b5a8fd3de59fd8c349f92
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 f9423026d5145e64daf18e66baf38931b0e26da8580a3f5337b7aa46dd57556a

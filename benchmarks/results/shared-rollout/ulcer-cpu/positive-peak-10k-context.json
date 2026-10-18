@@ -1,0 +1,11 @@
+{
+  "production_commit": "2ffd53fc",
+  "fixture_commit": "2ffd53fc",
+  "fixture_sha256": "3135f1f708302ceba9f76512cfac8231191cb36326598f334784b1bce2c8d330",
+  "warmup_count": 3,
+  "requested_iteration_count": 5,
+  "contention_observation": "CPU 16% preflight and 14% after. No competing dotnet build/test/run processes observed at these samples. The 16.6-second run finished before the next process sample; no during-run sample. Not continuous isolation.",
+  "scope": "Four CPU arms, 10000 bars, period14. Native tuple API and up to eight workers with P-1 overlap. LatestOnly allocation win but clear latency loss against both native methods.",
+  "limitations": "Short run; Full and NativeParallel retained four samples after one outlier removed each. BuilderFull minimum iteration 61.921ms and LatestOnly 94.869ms were below recommended 100ms. Raw samples and confidence intervals retained. No isolated attribution to zero-drawdown shortcut.",
+  "command": "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter \"*SharedUlcerBenchmarks*Count: 10000)\" --exporters json --artifacts C:/Users/cheat/temp/si-ulcer-2ffd53fc"
+}

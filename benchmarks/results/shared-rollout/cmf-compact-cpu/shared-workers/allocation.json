@@ -1,0 +1,39 @@
+{
+  "Operation": "Skender.GetCmf",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        813360,
+        813360,
+        813360
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        332232,
+        332232,
+        332232
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        3041040,
+        3041040,
+        3041040
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        3170136,
+        3170136,
+        3170136
+      ]
+    }
+  ]
+}

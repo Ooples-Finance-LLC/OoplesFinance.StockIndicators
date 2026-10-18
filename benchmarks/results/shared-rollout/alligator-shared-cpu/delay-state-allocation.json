@@ -1,0 +1,8 @@
+{
+  "source": "unit.log.gz: UnpublishedDelaysAvoidGrowingStorage",
+  "updates": 4000,
+  "includes_state_construction": true,
+  "original_allocated_bytes": 198400,
+  "compact_allocated_bytes": 72,
+  "scope": "Alligator periods3/2/1, all offsets int.MaxValue, finite4000-bar source; no line reaches publication. Current-thread managed allocation, not whole BuildAsync or ordinary-delay allocation."
+}

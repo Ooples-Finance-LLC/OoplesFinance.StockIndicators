@@ -1,0 +1,41 @@
+Top 25 Functions (Exclusive)                                                  Inclusive           Exclusive           
+1.  Monitor.Wait(class System.Object,int32)                                   74.9%               74.9%               
+2.  JurikDyadic.Ratio(value class OoplesFinance.StockIndicators.Helpers.Ju    6.03%               5.32%               
+    rikDyadic)                                            
+3.  ValuesBarExecution+ReturnBetaKernel.Update(value class OoplesFinance.S    20.6%               5.14%               
+    tockIndicators.Indicators.Bar&)                                            
+4.  ReturnBetaWindow.Accumulate(value class OoplesFinance.StockIndicators.    5.91%               4.51%               
+    Helpers.RocBankValue,value class OoplesFinance.StockIndicators.Helpers                                            
+    .RocBankValue,int32)                                            
+5.  ReturnBetaWindow+Moments.Beta(bool)                                       9.28%               2.58%               
+6.  Thread.<PollGC>g__PollGCWorker|70_0()                                     1.89%               1.89%               
+7.  PersistentParallelExecutor.RunParticipantChunks(class Job,int32)          22.38%              1.71%               
+8.  JurikDyadic.TryRatio(value class System.Int128,int32,value class Syste    0.68%               0.56%               
+    m.Int128,int32,float64&)                                            
+9.  OpenClNativeBindings.CreateCommandQueue(int,int,unsigned int64,int32&)    0.28%               0.28%               
+                                                
+10. JurikDyadic.AddExact(value class OoplesFinance.StockIndicators.Helpers    0.73%               0.27%               
+    .JurikDyadic)                                            
+11. JurikDyadic.Subtract(value class OoplesFinance.StockIndicators.Helpers    0.65%               0.26%               
+    .JurikDyadic)                                            
+12. Char].Trim()                                                              0.24%               0.24%               
+13. Int128.BigMul(value class System.Int128,value class System.Int128,valu    0.3%                0.2%                
+    e class System.Int128&)                                            
+14. JurikDyadic.Multiply(float64)                                             0.36%               0.19%               
+15. JurikDyadic.Normalize()                                                   0.26%               0.16%               
+16. ReturnBetaWindow+Moments.Add(value class OoplesFinance.StockIndicators    1.1%                0.15%               
+    .Helpers.JurikDyadic,value class OoplesFinance.StockIndicators.Helpers                                            
+    .JurikDyadic,int32)                                            
+17. JurikDyadic.Magnitude(value class System.Int128)                          0.22%               0.15%               
+18. JurikDyadic.Shift(value class System.Int128,int32,value class System.I    0.23%               0.08%               
+    nt128&)                                            
+19. Int128.op_CheckedSubtraction(value class System.Int128,value class Sys    0.08%               0.08%               
+    tem.Int128)                                            
+20. UInt128.BigMul(value class System.UInt128,value class System.UInt128,v    0.09%               0.07%               
+    alue class System.UInt128&)                                            
+21. JurikDyadic.Promote()                                                     0.19%               0.07%               
+22. JurikDyadic.Multiply(value class OoplesFinance.StockIndicators.Helpers    0.29%               0.07%               
+    .JurikDyadic)                                            
+23. ReturnBetaWindow.Add(float64,float64)                                     1.31%               0.06%               
+24. UInt128.op_RightShift(value class System.UInt128,int32)                   0.07%               0.06%               
+25. ReturnBetaWindow.Beta(int32,bool)                                         1.64%               0.05%               

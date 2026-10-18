@@ -1,0 +1,55 @@
+{
+  "Operation": "TaLib.Functions.LinearRegSlope",
+  "Count": 1000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        58336,
+        58336,
+        58336
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        9544,
+        9544,
+        9544
+      ]
+    },
+    {
+      "Method": "GpuFull",
+      "Bytes": [
+        58136,
+        58136,
+        58136
+      ]
+    },
+    {
+      "Method": "GpuLatestOnly",
+      "Bytes": [
+        9344,
+        9344,
+        9344
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        7904,
+        7904,
+        7904
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        8288,
+        8288,
+        8288
+      ]
+    }
+  ]
+}

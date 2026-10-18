@@ -1,0 +1,108 @@
+{
+  "production_commit": "e45827ba2c618d3b0260c5e3baf4b76ce93d0bf8",
+  "target_framework": "net10.0",
+  "counter": "GC.GetTotalAllocatedBytes(precise: true)",
+  "warmup_calls_per_arm": 10,
+  "result_lifetime": "Retained through sample; disposable results released after sample.",
+  "qualification": "Allocation-only probe; no latency measurements or catalog qualification increase.",
+  "commands": [
+    "--alloc-shared QuanTAlib.Historical 10000 5",
+    "--alloc-shared QuanTAlib.Realized 10000 5"
+  ],
+  "reports": [
+    {
+      "Operation": "QuanTAlib.Historical",
+      "Count": 10000,
+      "Repetitions": 5,
+      "Arms": [
+        {
+          "Method": "BuilderFull",
+          "Bytes": [
+            645344,
+            645344,
+            645344,
+            645344,
+            645344
+          ]
+        },
+        {
+          "Method": "BuilderLatestOnly",
+          "Bytes": [
+            164320,
+            164320,
+            164320,
+            164320,
+            164320
+          ]
+        },
+        {
+          "Method": "NativeSingle",
+          "Bytes": [
+            4301240,
+            4301240,
+            4301240,
+            4301240,
+            4301240
+          ]
+        },
+        {
+          "Method": "NativeParallel",
+          "Bytes": [
+            4312176,
+            4312176,
+            4312176,
+            4312176,
+            4312176
+          ]
+        }
+      ]
+    },
+    {
+      "Operation": "QuanTAlib.Realized",
+      "Count": 10000,
+      "Repetitions": 5,
+      "Arms": [
+        {
+          "Method": "BuilderFull",
+          "Bytes": [
+            645344,
+            645344,
+            645344,
+            645344,
+            645344
+          ]
+        },
+        {
+          "Method": "BuilderLatestOnly",
+          "Bytes": [
+            164320,
+            164320,
+            164320,
+            164320,
+            164320
+          ]
+        },
+        {
+          "Method": "NativeSingle",
+          "Bytes": [
+            480656,
+            480656,
+            480656,
+            480656,
+            480656
+          ]
+        },
+        {
+          "Method": "NativeParallel",
+          "Bytes": [
+            1885048,
+            1885048,
+            1885048,
+            1885048,
+            1885048
+          ]
+        }
+      ]
+    }
+  ]
+}

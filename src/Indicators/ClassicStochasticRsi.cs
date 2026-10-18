@@ -94,7 +94,7 @@ public sealed class ClassicStochasticRsi : MultiOutputIndicatorBase, IIndicatorV
                 )
             );
 
-    private sealed class State : IMultiOutputState, IDisposable
+    internal sealed class State : IMultiOutputState, IDisposable
     {
         private readonly IMultiOutputState _rsi,
             _signal;

@@ -1,0 +1,66 @@
+{
+  "revision": "71af8461",
+  "productionRevision": "143fe7ad",
+  "date": "2026-10-12",
+  "count": 10000,
+  "period": 20,
+  "requestedWarmups": 10,
+  "requestedIterations": 10,
+  "preflightCpuPercent": 6,
+  "completionCpuPercent": 17,
+  "contention": "No competing builds/tests observed in preflight, two mid-run snapshots or completion. Reusable MSBuild nodes and dotnet --version were present. Sampling does not establish continuous machine exclusivity.",
+  "processSamples": {
+    "during": [
+      {
+        "ProcessId": 31672,
+        "CommandLine": "\"dotnet\" --version"
+      },
+      {
+        "ProcessId": 35140,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 28892,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 36792,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedPathRatioBenchmarks*10000* --warmupCount 10 --iterationCount 10 --exporters json --artifacts C:/Users/cheat/temp/si-path-timing-10k"
+      }
+    ],
+    "late": [
+      {
+        "ProcessId": 31672,
+        "CommandLine": "\"dotnet\" --version"
+      },
+      {
+        "ProcessId": 35140,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 28892,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 36792,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter *SharedPathRatioBenchmarks*10000* --warmupCount 10 --iterationCount 10 --exporters json --artifacts C:/Users/cheat/temp/si-path-timing-10k"
+      }
+    ],
+    "after": [
+      {
+        "ProcessId": 31672,
+        "CommandLine": "\"dotnet\" --version"
+      },
+      {
+        "ProcessId": 35140,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      },
+      {
+        "ProcessId": 28892,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.401\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false"
+      }
+    ]
+  },
+  "durationSeconds": 36.25,
+  "interpretation": "EfficiencyRatio Full and LatestOnly clearly beat both tested native arms. CMO Full and LatestOnly lose to native parallel. Allocation improvements alone are not speed wins. Evidence covers only these 10k/P20 inputs and worker budgets."
+}

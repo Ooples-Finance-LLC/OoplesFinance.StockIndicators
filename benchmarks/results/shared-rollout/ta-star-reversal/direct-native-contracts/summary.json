@@ -1,0 +1,26 @@
+{
+  "status": "61 focused contract cases passed. 100 local GPU cases passed for the combined candle source state. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaStarReversalBenchmarks.cs": "6c2b893135cf610baba3547d1c3248a708db1a204dc28741713cc09960c30354",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/StarReversalComparison.cs": "a5df5dec659cd51235e6a180c4b05fc0bd36fa656b4d9008313f2bc7aace04d9",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/GapContinuationComparison.cs": "531871cf38e21b41a399ff2c13db22ab65497f3fde8874a5b108c33833dea82e",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaStarReversalBenchmarkTests.cs": "b5f1c8539c3bf47c6268093e467caecb91fb888306038397cd031e90b24fee45"
+  },
+  "native_package": "TALib.NETCore 0.5.0",
+  "operations": [
+    "MorningStar",
+    "EveningStar",
+    "MorningDojiStar",
+    "EveningDojiStar",
+    "AbandonedBaby"
+  ],
+  "contract": "Direct native OHLC span APIs return eager packed int arrays, aligned to original rows within timed methods. Parallel workers retain the required 12-bar overlap. Native lookback and output ranges are checked. Independent native floating-point and owned exact references validate each respective arithmetic contract; startup and result ownership are checked across all cases. Original fixture inputs and default penetration 0.3 are preserved.",
+  "validation": {
+    "comparator_cases_passed": 61,
+    "production_source_changed": false,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1281
+  },
+  "benchmark_cases": 40,
+  "native_package_dll_sha256": "980edcda5db3ab7b0cdd9ef877aa784aa93728129f134c023a1e08acedeefcbe"
+}

@@ -1,0 +1,1 @@
+Rejected experiment, NOT production: bfa19985 plus replacing final ExactMeanAccumulator log(mantissa)+exponent*log(2) with JurikDyadic Multiply/AddExact/Mean. Correctness passed 18 unit +9 competitor cases, but 10k LatestOnly regressed from 1185.11 to 1343.28 us with unchanged allocation. Removed before publication. 10 warmups, 10 iterations.

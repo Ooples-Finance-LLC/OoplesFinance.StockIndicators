@@ -115,43 +115,52 @@ public sealed class SeededPhaseAdaptiveAverage
 
     private sealed class State(Configuration owner) : IMultiOutputState, IWideAverageState
     {
-        private static readonly BigInteger Grid = BigInteger.One << 1074;
-
-        private static BigInteger U(double value) => ExactVarianceWindow.Units(value);
-
-        private static BigInteger Round(BigInteger n, BigInteger d) =>
-            RocBankValue.RoundUnits(n, d);
-
         private readonly HilbertPhaseState _hilbert = new(
             owner.DelayedZeroSeed ? 12 : 6,
             owner.DelayedZeroSeed,
             owner.RetainOlderZeroPhase
         );
-        private BigInteger _mama,
+        private JurikDyadic _mama,
             _fama,
             _seed;
         private double _phase;
         private long _index = -1;
-        public BigInteger RoundedUnits => _mama;
+        public BigInteger RoundedUnits => _mama.RoundedUnits();
 
         public void Reset()
         {
             _hilbert.Reset();
-            _mama = _fama = _seed = 0;
+            _mama = _fama = _seed = default;
             _phase = 0;
             _index = -1;
         }
 
-        private static BigInteger Adaptive(BigInteger value, BigInteger old, double alpha) =>
-            Round(value * U(alpha) + old * (Grid - U(alpha)), Grid);
+        private static JurikDyadic Adaptive(JurikDyadic value, JurikDyadic old, double alpha)
+        {
+            if (JurikDyadic.TryBlend(old, value, alpha, out var blended)) return blended;
+            // old + alpha * (value - old) retains the exact complement of alpha;
+            // computing a rounded binary64 (1 - alpha) would change the contract.
+            value.Subtract(old);
+            value.Multiply(alpha);
+            value.AddExact(old);
+            return value.Rounded();
+        }
 
-        public void Update(in Bar bar, Span<double> output) =>
-            UpdateUnits(
-                owner.UseMidpoint ? Round(U(bar.High) + U(bar.Low), 2) : U(bar.Close),
-                output
-            );
+        public void Update(in Bar bar, Span<double> output)
+        {
+            var price = JurikDyadic.FromDouble(owner.UseMidpoint ? bar.High : bar.Close);
+            if (owner.UseMidpoint)
+            {
+                price.Add(bar.Low);
+                price = price.Rounded(2);
+            }
+            Update(price, output);
+        }
 
-        public void UpdateUnits(BigInteger price, Span<double> output)
+        public void UpdateUnits(BigInteger price, Span<double> output) =>
+            Update(JurikDyadic.FromUnits(price), output);
+
+        private void Update(JurikDyadic price, Span<double> output)
         {
             output.Clear();
             _index++;
@@ -160,8 +169,8 @@ public sealed class SeededPhaseAdaptiveAverage
             {
                 if (!owner.DelayedZeroSeed)
                 {
-                    _seed += price;
-                    _mama = _fama = Round(_seed, _index + 1);
+                    _seed.AddExact(price);
+                    _mama = _fama = _seed.Rounded((int)_index + 1);
                 }
             }
             else
@@ -185,8 +194,8 @@ public sealed class SeededPhaseAdaptiveAverage
                 )
             )
             {
-                output[0] = ExactMeanAccumulator.UnitRatio(_mama, 1);
-                output[1] = ExactMeanAccumulator.UnitRatio(_fama, 1);
+                output[0] = _mama.Mean(1);
+                output[1] = _fama.Mean(1);
                 output[2] = output[3] = 1;
             }
         }

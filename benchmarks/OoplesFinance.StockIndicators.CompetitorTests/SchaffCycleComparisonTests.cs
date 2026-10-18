@@ -70,6 +70,7 @@ public sealed class SchaffCycleComparisonTests
                 .ToArray();
             var actual = SchaffTrendCycleSnapshot.Calculate(bars, 3, 2, 5).ToArray();
             Assert.Equal(SchaffCycleComparison.Reference(prices, 3, 2, 5), actual);
+            Assert.Equal(actual, SchaffCycleComparison.Owned(bars, 3, 2, 5));
             Assert.All(actual.Where(v => v.HasValue), v => Assert.InRange(v!.Value, 0, 100));
             Assert.Equal(actual, SchaffTrendCycleSnapshot.Calculate(bars, 3, 2, 5));
         }

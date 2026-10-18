@@ -1,0 +1,12 @@
+{
+  "production_commit": "a84f3926",
+  "fixture_commit": "f812f96c",
+  "fixture_sha256": "7a604cd51aef6c9e4c1502d8f6f104ae006b63ecb748a2a03a825c6c3fc13a75",
+  "warmup_count": 3,
+  "requested_iteration_count": 5,
+  "native_serial_retained_iterations": 4,
+  "contention_observation": "Preflight CPU 6%, completion 8%; no competing dotnet build/test/run processes observed at those samples. The next process sample occurred after the 84-second run; no during-run sample. Not continuous isolation.",
+  "scope": "Four CPU arms, 1000 bars, default 5/10/14/30/5 parameters. Native public tuple API; parallel prefix inputs with disjoint output ranges. No 10000-bar claim or isolated attribution to deferred publication.",
+  "limitations": "Short run. BDN reports BuilderFull minimum observed iteration time 29.506ms, below recommended 100ms; native serial removed one outlier. Preserve wide confidence intervals and raw samples.",
+  "command": "dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --filter \"*SharedDynamicMomentumBenchmarks*Count: 1000)\" --exporters json --artifacts C:/Users/cheat/temp/si-dynamic-a84f3926"
+}

@@ -1,4 +1,5 @@
 using System.Numerics;
+using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
 using Skender.Stock.Indicators;
@@ -11,11 +12,11 @@ internal static class SchaffCycleComparison
     internal static ComparisonPair Pair(int cycle = 10, int fast = 23, int slow = 50) =>
         new(
             "Skender.GetStc",
-            nameof(SchaffTrendCycleSnapshot),
+            nameof(SingleStochasticCycle),
             (d, _) => Series(d.Quotes.GetStc(cycle, fast, slow).Select(r => r.Stc).ToArray()),
             (d, _) =>
                 Series(
-                    SchaffTrendCycleSnapshot.Calculate(d.IndicatorBars, cycle, fast, slow).ToArray()
+                    Owned(d.IndicatorBars, cycle, fast, slow)
                 ),
             (d, _) => Series(Reference(d.Closes, cycle, fast, slow)),
             ["Stc"],
@@ -31,6 +32,15 @@ internal static class SchaffCycleComparison
                 ),
             ErrorBudget: IndicatorErrorBudget.Exact
         );
+
+    internal static double?[] Owned(Bar[] bars, int cycle, int fast, int slow)
+    {
+        var indicator = new SingleStochasticCycle(cycle, fast, slow);
+        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicator)
+            .BuildAsync().GetAwaiter().GetResult();
+        var values = run[indicator.Value].ToArray(); var present = run[indicator.IsDefined].ToArray();
+        return values.Select((value, i) => present[i] == 1 ? (double?)value : null).ToArray(); // NOSONAR: S1244 - Presence columns are discrete 0/1 flags, not approximate measurements.
+    }
 
     internal static ComparisonSeries Series(double?[] values) =>
         RetrospectivePriceComparison.Series(["Stc"], [values]);

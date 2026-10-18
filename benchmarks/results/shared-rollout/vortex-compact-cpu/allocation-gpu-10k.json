@@ -1,0 +1,59 @@
+{
+  "productionCommit": "7ba14a85",
+  "measurement": "Warmed managed total allocations; includes worker allocations. Setup verifies all GPU columns bitwise and requires GPU backend. No latency qualification; other repository jobs active. Device memory excluded.",
+  "report": {
+    "Operation": "Skender.GetVortex",
+    "Count": 10000,
+    "Repetitions": 3,
+    "Arms": [
+      {
+        "Method": "BuilderFull",
+        "Bytes": [
+          822000,
+          822000,
+          822000
+        ]
+      },
+      {
+        "Method": "BuilderLatestOnly",
+        "Bytes": [
+          340872,
+          340872,
+          340872
+        ]
+      },
+      {
+        "Method": "GpuFull",
+        "Bytes": [
+          802816,
+          802816,
+          802816
+        ]
+      },
+      {
+        "Method": "GpuLatestOnly",
+        "Bytes": [
+          321688,
+          321688,
+          321688
+        ]
+      },
+      {
+        "Method": "NativeSingle",
+        "Bytes": [
+          1800512,
+          1800512,
+          1800512
+        ]
+      },
+      {
+        "Method": "NativeParallel",
+        "Bytes": [
+          1821984,
+          1821984,
+          1821984
+        ]
+      }
+    ]
+  }
+}

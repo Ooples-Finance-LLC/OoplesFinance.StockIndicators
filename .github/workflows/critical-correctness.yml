@@ -21,7 +21,7 @@ jobs:
         with:
           ref: ${{ inputs.source-ref }}
           persist-credentials: false
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Verify mutation evidence accounting
@@ -50,7 +50,7 @@ jobs:
           dotnet-version: |
             8.x
             10.x
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Require every critical fault to be detected
@@ -73,7 +73,7 @@ jobs:
         with:
           ref: ${{ inputs.source-ref }}
           persist-credentials: false
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - uses: actions/download-artifact@v8

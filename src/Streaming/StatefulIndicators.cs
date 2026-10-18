@@ -7049,6 +7049,7 @@ internal sealed class WmaState : IDisposable
 internal sealed class EmaState
 {
     private readonly int _length;
+    private readonly ExactMeanAccumulator.ProductCoefficient _previousWeight;
     private int _count;
     private ExactMeanAccumulator _sum;
     private double _prevEma;
@@ -7056,6 +7057,7 @@ internal sealed class EmaState
     public EmaState(int length)
     {
         _length = Math.Max(1, length);
+        _previousWeight = new(_length - 1);
     }
 
     public double GetNext(double value, bool commit)
@@ -7083,7 +7085,7 @@ internal sealed class EmaState
         {
             var weighted = new ExactMeanAccumulator();
             weighted.Add(value, 2);
-            weighted.Add(_prevEma, _length - 1);
+            weighted.AddProduct(new ExactMeanAccumulator.ProductFactor(_prevEma), _previousWeight);
             updated = weighted.Mean((long)_length + 1);
         }
         if (commit)

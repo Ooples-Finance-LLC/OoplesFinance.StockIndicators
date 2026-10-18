@@ -1,0 +1,169 @@
+{
+  "scoped_thread_time_ms": 6107.455140914928,
+  "intervals": 3368,
+  "leaf": [
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.WindowRangeMidpoint+State.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      "ms": 2744.2934905565235,
+      "percent": 44.93350220735987
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.WindowExtremeDeque.Add(float64)",
+      "ms": 1114.520976086807,
+      "percent": 18.248533151237293
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.WindowRangeMidpoint+State.OoplesFinance.StockIndicators.Indicators.IIndicatorState.Update(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      "ms": 866.1268959117874,
+      "percent": 14.18146962896951
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.ComputeBoundedRegion(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[],class OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int32,int32,int32,value class System.ReadOnlySpan`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.ReadOnlySpan`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.IIndicator)",
+      "ms": 657.9442896711362,
+      "percent": 10.772805931286346
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.FrameworkCompatibility.IsFinite(float64)",
+      "ms": 366.5115926969547,
+      "percent": 6.0010525536508394
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.AllFieldsFinite(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      "ms": 245.04639425697314,
+      "percent": 4.012250415322149
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+StateWindowKernel.OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.IBoundedKernel<OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.StateWindowKernel>.Update(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      "ms": 72.72560078315928,
+      "percent": 1.1907676619015595
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+StateWindowKernel.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      "ms": 40.28590095157642,
+      "percent": 0.6596184502722584
+    }
+  ],
+  "inclusive": [
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+<>c__DisplayClass45_0`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+StateWindowKernel].<FillBoundedWindow>b__0(int32)",
+      "ms": 6107.455140914928,
+      "percent": 100.00000000000001
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.ComputeBoundedRegion(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[],class OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int32,int32,int32,value class System.ReadOnlySpan`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.ReadOnlySpan`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.IIndicator)",
+      "ms": 6107.455140914928,
+      "percent": 100.00000000000001
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.WindowRangeMidpoint+State.OoplesFinance.StockIndicators.Indicators.IIndicatorState.Update(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      "ms": 5042.203256357952,
+      "percent": 82.55817095698887
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.WindowRangeMidpoint+State.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      "ms": 4176.0763604461645,
+      "percent": 68.37670132801937
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+StateWindowKernel.OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.IBoundedKernel<OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.StateWindowKernel>.Update(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      "ms": 3373.9539894340487,
+      "percent": 55.24320542006655
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+StateWindowKernel.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      "ms": 3293.5825892148923,
+      "percent": 53.92724978282029
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.WindowExtremeDeque.Add(float64)",
+      "ms": 1114.520976086807,
+      "percent": 18.248533151237293
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder.BuildAsync(value class System.Threading.CancellationToken)",
+      "ms": 743.4092015508686,
+      "percent": 12.172159834144963
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder.BuildWithHistoryAsync(value class System.Threading.CancellationToken)",
+      "ms": 743.4092015508686,
+      "percent": 12.172159834144963
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder+<BuildWithHistoryAsync>d__48.MoveNext()",
+      "ms": 743.4092015508686,
+      "percent": 12.172159834144963
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.Execute(value class OoplesFinance.StockIndicators.Indicators.Bar[],class System.Collections.Generic.IReadOnlyList`1<class OoplesFinance.StockIndicators.Indicators.IIndicator>,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.OwnedBarHistory,class OoplesFinance.StockIndicators.Indicators.TensorsGpuExecution)",
+      "ms": 743.4092015508686,
+      "percent": 12.172159834144963
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.FillBoundedWindow(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[],class OoplesFinance.StockIndicators.Indicators.IIndicator,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+      "ms": 743.4092015508686,
+      "percent": 12.172159834144963
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.FillBoundedWindow(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[],class OoplesFinance.StockIndicators.Indicators.IIndicator,int32,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+      "ms": 743.4092015508686,
+      "percent": 12.172159834144963
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.FrameworkCompatibility.IsFinite(float64)",
+      "ms": 366.5115926969547,
+      "percent": 6.0010525536508394
+    },
+    {
+      "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.AllFieldsFinite(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      "ms": 245.04639425697314,
+      "percent": 4.012250415322149
+    }
+  ],
+  "last_active_second": {
+    "end_ms": 3801.8860000556947,
+    "scoped_thread_time_ms": 4735.795842875097,
+    "leaf": [
+      {
+        "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.WindowRangeMidpoint+State.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+        "ms": 2200.629600028987,
+        "percent": 46.46799974158064
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.WindowExtremeDeque.Add(float64)",
+        "ms": 949.7505785638809,
+        "percent": 20.054719630550803
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.ComputeBoundedRegion(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[],class OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int32,int32,int32,value class System.ReadOnlySpan`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.ReadOnlySpan`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.IIndicator)",
+        "ms": 569.5749740303049,
+        "percent": 12.027017061709243
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.WindowRangeMidpoint+State.OoplesFinance.StockIndicators.Indicators.IIndicatorState.Update(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+        "ms": 517.3115957136138,
+        "percent": 10.923435318519862
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.FrameworkCompatibility.IsFinite(float64)",
+        "ms": 246.46769489765393,
+        "percent": 5.204356418118388
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.AllFieldsFinite(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+        "ms": 146.61449780101657,
+        "percent": 3.095878763895511
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+StateWindowKernel.OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.IBoundedKernel<OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.StateWindowKernel>.Update(required_modifier System.Runtime.InteropServices.InAttribute value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+        "ms": 65.16100088806297,
+        "percent": 1.375925040900914
+      },
+      {
+        "frame": "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+StateWindowKernel.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+        "ms": 40.28590095157642,
+        "percent": 0.8506680247246234
+      }
+    ]
+  }
+}

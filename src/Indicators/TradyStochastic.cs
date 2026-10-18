@@ -135,7 +135,7 @@ public sealed class StochasticSmaKdj : MultiOutputIndicatorBase, IIndicatorValid
                 )
             );
 
-    private sealed class State(int period, int k, int d) : IMultiOutputState
+    internal sealed class State(int period, int k, int d) : IMultiOutputState
     {
         private readonly StochasticSmaState _state = new(period, k, d);
 
@@ -216,7 +216,7 @@ public sealed class StochasticSmaDifference : MultiOutputIndicatorBase, IIndicat
                 )
             );
 
-    private sealed class State(int period, int k, int d) : IMultiOutputState
+    internal sealed class State(int period, int k, int d) : IMultiOutputState
     {
         private readonly StochasticSmaState _state = new(period, k, d);
 

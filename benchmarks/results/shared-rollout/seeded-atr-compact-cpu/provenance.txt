@@ -1,0 +1,9 @@
+Production source: 56d278a7 (compact seeded ATR CPU execution). This evidence commit adds allocation probe routing and four focused routing checks.
+Timing not started: preflight at 2026-10-13T02:35:15.2185014Z found external AiDotNet test PID 32296. No timing enters the catalog; coverage remains 201/401.
+Allocation command (each operation): dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --alloc-shared <operation> 10000 3
+Four eager arms use identical fixture inputs; ten warmup calls precede three measured managed-allocation samples per arm. Total allocated bytes include worker threads. Results remain alive through measurement; disposal occurs afterward. The probe boxes the native result struct to retain its arrays. All samples and variability are preserved.
+Prior compact ATR verification: clean net10 production build, 21 unit checks and 30 competitor/reference/fixture checks passed, zero skips. Allocation routing adds four passing checks; harness build has 60 existing warnings and zero errors. Production is reused unchanged.
+Exact range boundary, seed and recurrence rounding, extended unpublished overflow, normalized signed underflow zero, zero-close presence, both histories, all detailed columns, input-before-output validation, cancellation/recovery and owned results are covered.
+GPU execution and timing for seeded ATR remain pending. QuanTAlib.Atr maps to ScaledTrueRange and is not this temporally averaged family.
+OoplesFinance.StockIndicators.dll SHA256 1f83761cf52e14aed153abdd8cf7758fb8c373c96637156683b0229e7b2e5b3e
+OoplesFinance.StockIndicators.CompetitorBenchmarks.dll SHA256 05fb7fffe7960bb3d0b9e55730669159c1f3530dd61ecd0917cf8d9f10382105

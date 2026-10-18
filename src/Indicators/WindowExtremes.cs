@@ -90,7 +90,7 @@ public sealed class WindowRangeMidpoint : IndicatorBase, IIndicatorValidationCon
             ),
         ];
 
-    private sealed class State(int period, bool candleRanges) : IIndicatorState
+    internal sealed class State(int period, bool candleRanges) : IIndicatorState
     {
         private readonly WindowExtremeDeque _minimum = new(period, false);
         private readonly WindowExtremeDeque _maximum = new(period, true);
@@ -105,6 +105,13 @@ public sealed class WindowRangeMidpoint : IndicatorBase, IIndicatorValidationCon
         {
             _minimum.Add(candleRanges ? bar.Low : bar.Close);
             _maximum.Add(candleRanges ? bar.High : bar.Close);
+            double total = _minimum.Value + _maximum.Value;
+            if (total == 0) return 0; // NOSONAR: S1244 - Exact cancellation and signed zeros use canonical positive zero.
+            // Scaling by one half commutes with rounding while the result
+            // remains normal. Overflow and the subnormal boundary retain the
+            // exact accumulator to avoid intermediate overflow/double rounding.
+            if (FrameworkCompatibility.IsFinite(total) && Math.Abs(total) >= 4.450147717014403E-308)
+                return total * .5;
             var sum = new ExactMeanAccumulator();
             sum.Add(_minimum.Value);
             sum.Add(_maximum.Value);
@@ -115,37 +122,52 @@ public sealed class WindowRangeMidpoint : IndicatorBase, IIndicatorValidationCon
 
 internal sealed class WindowExtremeDeque(long period, bool maximum, bool newestTie = true)
 {
-    private readonly LinkedList<(double Value, long Index)> _candidates = new();
+    private (double Value, long Index)[] _candidates = [];
+    private int _head, _count;
     private long _next;
-    internal double Value => _candidates.First!.Value.Value;
-    internal long Index => _candidates.First!.Value.Index;
+    internal double Value => _candidates[_head].Value;
+    internal long Index => _candidates[_head].Index;
 
     internal void Reset()
     {
-        _candidates.Clear();
+        _head = _count = 0;
         _next = 0;
     }
 
     internal void Add(double value)
     {
-        while (
-            _candidates.Last is { } last
-            && (
-                maximum
-                    ? newestTie
-                        ? value >= last.Value.Value
-                        : value > last.Value.Value
-                    : newestTie
-                        ? value <= last.Value.Value
-                        : value < last.Value.Value
-            )
-        )
-            _candidates.RemoveLast();
-        _candidates.AddLast((value, _next));
+        // Expire before insertion so a full period never needs a spare slot.
         var expired = _next - period;
-        while (_candidates.First!.Value.Index <= expired)
-            _candidates.RemoveFirst();
+        while (_count > 0 && _candidates[_head].Index <= expired)
+        {
+            _head = Slot(1);
+            _count--;
+        }
+        while (_count > 0)
+        {
+            double last = _candidates[Slot(_count - 1)].Value;
+            bool replace = maximum
+                ? newestTie ? value >= last : value > last
+                : newestTie ? value <= last : value < last;
+            if (!replace) break;
+            _count--;
+        }
+        if (_count == _candidates.Length)
+        {
+            int capacity = (int)Math.Min(period, Math.Min(int.MaxValue, Math.Max(4L, 2L * _candidates.Length)));
+            var grown = new (double Value, long Index)[capacity];
+            for (int i = 0; i < _count; i++) grown[i] = _candidates[Slot(i)];
+            _candidates = grown;
+            _head = 0;
+        }
+        _candidates[Slot(_count++)] = (value, _next);
         _next++;
+    }
+
+    private int Slot(int offset)
+    {
+        int untilWrap = _candidates.Length - _head;
+        return offset >= untilWrap ? offset - untilWrap : _head + offset;
     }
 }
 

@@ -22,6 +22,11 @@ public sealed record ZigZagValue(
 public static class ZigZagSnapshot
 {
     private readonly record struct Point(int Index, BigInteger Price, ZigZagPointKind? Kind);
+    private struct PendingRow
+    {
+        internal double? ZigZag, RetraceHigh, RetraceLow;
+        internal ZigZagPointKind? PointType;
+    }
 
     /// <summary>Calculates all retrospective outputs using closes, or candle highs/lows when selected.</summary>
     /// <remarks>The first segment is absent except for its endpoint. Ratios use exact signed arithmetic; convex line interpolation rounds once.
@@ -41,17 +46,14 @@ public static class ZigZagSnapshot
                 || highLow && (!FrameworkCompatibility.IsFinite(b.High) || !FrameworkCompatibility.IsFinite(b.Low))
             )
                 throw new ArgumentOutOfRangeException(nameof(bars));
-        var result = Enumerable
-            .Range(0, bars.Count)
-            .Select(_ => new ZigZagValue(null, null, null, null))
-            .ToArray();
         if (bars.Count == 0)
-            return result;
+            return Array.Empty<ZigZagValue>();
+        var result = new PendingRow[bars.Count];
         BigInteger U(double v) => ExactVarianceWindow.Units(v);
         var threshold = U(percentChange);
         var grid = BigInteger.One << 1074;
         var highs = bars.Select(b => U(highLow ? b.High : b.Close)).ToArray();
-        var lows = bars.Select(b => U(highLow ? b.Low : b.Close)).ToArray();
+        var lows = highLow ? bars.Select(b => U(b.Low)).ToArray() : highs;
         bool Reversal(BigInteger change, BigInteger price) =>
             price.Sign > 0
                 ? change * 100 * grid >= threshold * price
@@ -123,11 +125,10 @@ public static class ZigZagSnapshot
             var a = points[k - 1];
             var b = points[k];
             for (var i = a.Index + 1; i <= b.Index; i++)
-                result[i] = result[i] with
-                {
-                    ZigZag = a.Index > 0 || i == b.Index ? Line(a, b, i) : null,
-                    PointType = i == b.Index ? b.Kind : null,
-                };
+            {
+                result[i].ZigZag = a.Index > 0 || i == b.Index ? Line(a, b, i) : null;
+                result[i].PointType = i == b.Index ? b.Kind : null;
+            }
             if (!a.Kind.HasValue)
                 continue;
             var prior = a.Kind == ZigZagPointKind.Low ? previousHigh : previousLow;
@@ -138,17 +139,14 @@ public static class ZigZagSnapshot
             if (prior.Index == 0 || prior.Index == b.Index)
                 continue;
             for (var i = prior.Index; i <= b.Index; i++)
-                result[i] =
-                    a.Kind == ZigZagPointKind.Low
-                        ? result[i] with
-                        {
-                            RetraceHigh = Line(prior, b, i),
-                        }
-                        : result[i] with
-                        {
-                            RetraceLow = Line(prior, b, i),
-                        };
+                if (a.Kind == ZigZagPointKind.Low)
+                    result[i].RetraceHigh = Line(prior, b, i);
+                else
+                    result[i].RetraceLow = Line(prior, b, i);
         }
-        return result;
+        var rows = new ZigZagValue[result.Length];
+        for (var i = 0; i < rows.Length; i++)
+            rows[i] = new(result[i].ZigZag, result[i].PointType, result[i].RetraceHigh, result[i].RetraceLow);
+        return rows;
     }
 }

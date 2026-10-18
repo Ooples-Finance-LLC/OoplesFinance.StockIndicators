@@ -5,13 +5,15 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 // Reuses the published Tensors OpenCL runtime and typed FP64 buffers. Financial
 // semantics stay here; no private backend access or duplicated native bindings.
-internal sealed class TensorsGpuExecution
+internal sealed partial class TensorsGpuExecution
 {
     private static readonly Lazy<(TensorsGpuExecution? Engine, string Reason)> Shared = new(Create);
     private readonly OpenClContext _context;
     private readonly object _gate = new();
     private readonly Dictionary<(int Period, bool Sma, bool Asin, bool FromMean, bool Presence), CompiledKernel> _kernels = new();
-    // One reusable workspace, bounded to 40 MiB (host input + up to four FP64 buffers).
+    // One reusable workspace, bounded to 56 MiB. Four-column candle execution
+    // uses a lower count cap to allow two extra host inputs within the same budget.
+    // Packed kernels likewise lower the cap for their three- or five-column layouts.
     // Published host arrays are never cached or pooled.
     private const int MaxRetainedCount = 1_048_576;
     private Workspace? _workspace;
@@ -50,7 +52,7 @@ internal sealed class TensorsGpuExecution
         }
     }
 
-    internal void Execute(FusedBarExecution plan, Bar[] source, OwnedBarHistory history,
+    internal void Execute(FusedBarExecution plan, Bar[] source, OwnedBarHistory? history,
         bool fromMean, CancellationToken cancellation)
     {
         // Binding, reusable scratch and readback share the package's in-order queue.
@@ -61,7 +63,7 @@ internal sealed class TensorsGpuExecution
             Workspace work;
             if (retain)
             {
-                if (_workspace is not null && _workspace.Count != source.Length)
+                if (_workspace is not null && (_workspace.Count != source.Length || _workspace.IsPackedBars))
                 {
                     _workspace.Dispose();
                     _workspace = null;
@@ -110,26 +112,41 @@ internal sealed class TensorsGpuExecution
             {
                 // Do not reuse potentially failed buffers/queue work after a driver error
                 // or cancellation. OpenCL retains pending command references on release.
-                if (retain) _workspace = null;
-                work.Dispose();
+                if (retain)
+                {
+                    _workspace = null;
+                    work.Dispose();
+                }
                 throw;
             }
             finally { if (!retain) work.Dispose(); }
         }
     }
 
-    private sealed class Workspace(OpenClContext context, int count) : IDisposable
+    private sealed class Workspace(OpenClContext context, int count, bool packedBars = false, int packedColumns = 3) : IDisposable
     {
         internal int Count => count;
-        internal double[] Input { get; } = GC.AllocateUninitializedArray<double>(count);
-        private OpenClBuffer<double>? _input, _sma, _asin, _presence;
+        internal bool IsPackedBars => packedBars;
+        internal int PackedColumns => packedColumns;
+        private double[]? _inputHost, _packedHost;
+        internal double[] Input => _inputHost ??= GC.AllocateUninitializedArray<double>(count);
+        internal double[] PackedHost => _packedHost ??= GC.AllocateUninitializedArray<double>(checked(packedColumns * count));
+        private double[]? _rightInput, _highInput, _lowInput;
+        internal double[] HighInput => _highInput ??= GC.AllocateUninitializedArray<double>(count);
+        internal double[] LowInput => _lowInput ??= GC.AllocateUninitializedArray<double>(count);
+        internal double[] RightInput => _rightInput ??= GC.AllocateUninitializedArray<double>(count);
+        private OpenClBuffer<double>? _input, _sma, _asin, _presence, _right, _packedInput, _packedOutput;
         internal OpenClBuffer<double> DeviceInput => _input ??= new(context, count);
         internal OpenClBuffer<double> Sma => _sma ??= new(context, count);
         internal OpenClBuffer<double> Asin => _asin ??= new(context, count);
         internal OpenClBuffer<double> Presence => _presence ??= new(context, count);
+        internal OpenClBuffer<double> Right => _right ??= new(context, count);
+        internal OpenClBuffer<double> PackedInput => _packedInput ??= new(context, checked(packedColumns * count));
+        internal OpenClBuffer<double> PackedOutput => _packedOutput ??= new(context, checked(packedColumns * count));
         public void Dispose()
         {
-            _input?.Dispose(); _sma?.Dispose(); _asin?.Dispose(); _presence?.Dispose();
+            _packedInput?.Dispose(); _packedOutput?.Dispose();
+            _input?.Dispose(); _sma?.Dispose(); _asin?.Dispose(); _presence?.Dispose(); _right?.Dispose();
         }
     }
 

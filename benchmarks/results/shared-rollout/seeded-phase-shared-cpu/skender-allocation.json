@@ -1,0 +1,39 @@
+{
+  "Operation": "Skender.GetMama",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        804960,
+        804960,
+        804960
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        323832,
+        323832,
+        323832
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1960664,
+        1960664,
+        1960664
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        8907296,
+        8906288,
+        8906288
+      ]
+    }
+  ]
+}

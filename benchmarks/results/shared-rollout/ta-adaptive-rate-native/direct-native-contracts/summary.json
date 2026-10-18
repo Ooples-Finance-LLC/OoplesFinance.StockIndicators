@@ -1,0 +1,38 @@
+{
+  "status": "193 affected contract cases passed (40 new and153 existing). 100 local GPU cases passed. First timings pending; qualification unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaPackedBenchmarkBase.cs": "d2ea9faa0229a64802519196485edb8e5736c1ac9aa0d5108ab4798022a592da",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaAdaptiveRateNativeBenchmarks.cs": "d78d00d635c193aa102f6523561a144c90a77be210c91e4d95a82d340694079e",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaAverageNativeBenchmarks.cs": "52c2f6d25533b134b1649231f977c92b6a25d111404191c3e6a529ffd4731033",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaStochasticNativeBenchmarks.cs": "03f1bac524b71e108570da04818d43f77da7872887a94f91ede398dd6ce1f2a1",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaMacdNativeBenchmarks.cs": "f035e50d07906b145a6cc894c3054a33c4bb22c6f230415882f26d6b67823391",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaWindowNativeBenchmarks.cs": "f0d3b96c2aefb2a7f85e6398c94dbcaa714aa20468c582004b3e5a9838231deb",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedMappedBenchmarkBase.cs": "3b49e0446805024ee5a769be827d87aeb035df899e48a15e79975e6cba531ad0",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedBenchmarkSupport.cs": "1b57a5d028ae3ae45151b00a1cd4ba3a70a8ed9821b0e80d01c5641fde1d45aa",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/TripleRateComparison.cs": "b20fd13adfe4b3fc9c17f81b9a474f8a505f205a517ba79ccb343f9e99b801e4",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/TaAdaptiveComparison.cs": "64263201334d5cbf606d1f05aeba11f233c2d8a22c1ac1e8f821da6bb98172c0",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SeededAdaptiveComparison.cs": "41e5e6073832ecb80552352659b24ca3b52b15ff6e18327ef319193e4e72d3d5",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/VariablePeriodComparison.cs": "41e6e05bd88c14349df46603702d263e71778d79b8847b74e3b717148ddef202",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaAdaptiveRateNativeBenchmarkTests.cs": "71aaab2fa9e83782249e5175e20f1c4caf9255a5187ae32ce2941e2f6783a052",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaAverageNativeBenchmarkTests.cs": "38d66646327dd168ecad4a7623ce96287336300e97e468e97e63a482691ee1ad",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaStochasticNativeBenchmarkTests.cs": "aa482803c07739e48259027439f3e66366d4602426f917f855dd819f6d94ca8f",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaMacdNativeBenchmarkTests.cs": "b1b7e81d834655533fef5e2f9a4d3f2b799cc9722883db1e06f9f150719cc1e2",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTaWindowNativeBenchmarkTests.cs": "b74dfaf587f41fbf8d6af27c6bf2f40ef0d443196140803481131b1ea0dcd21e"
+  },
+  "operations": [
+    "TaLib.Functions.Trix",
+    "TaLib.Functions.Kama",
+    "TaLib.Functions.Mavp"
+  ],
+  "native_package": "TALib.NETCore 0.5.0",
+  "native_package_dll_sha256": "980edcda5db3ab7b0cdd9ef877aa784aa93728129f134c023a1e08acedeefcbe",
+  "contract": "Eager packed scalar native columns retain full prefixes. Trix20 cascadedmeans/lookback58; KAMA20 fast2 slow30/lookback20; Mavp SMA min2 max30/lookback29 with selector1+abs(close%11) prepared outside timing. All extra Trix/KAMA owner values, presence and latest outputs independently verified. Shared setup hooks added; five fixture families reverified. No production changes.",
+  "validation": {
+    "comparator_cases_passed": 193,
+    "new_fixture_cases_passed": 40,
+    "affected_existing_cases_passed": 153,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1296
+  },
+  "benchmark_cases": 24
+}

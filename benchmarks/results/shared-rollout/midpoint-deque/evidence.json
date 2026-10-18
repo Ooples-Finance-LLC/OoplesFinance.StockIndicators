@@ -1,0 +1,18 @@
+{
+  "base_commit": "a2fd4dc9",
+  "verification": {
+    "initial_focused_tests": 86,
+    "final_focused_tests": 87,
+    "skipped": 0,
+    "inventory_tests": 17,
+    "initial_benchmark_cases": 20,
+    "final_builder_cases": 8
+  },
+  "storage": "WindowExtremeDeque uses lazy array storage instead of allocating one LinkedList node per input. Growth is bounded by retained candidate count and period, including periods above Int32.MaxValue. Reset retains capacity. Expiry before insertion avoids a spare slot; oldest/newest ties preserve the selected index and signed-zero value. All existing consumers reuse this implementation.",
+  "midpoint": "WindowRangeMidpoint joins standalone and mixed bounded CPU execution with P-1 seeds and the existing period/chunk caps. Its two-value sum uses the normal-result scaling certificate; zero retains canonical positive zero and overflow/subnormal cases retain the exact accumulator. Full remains default and retains owned snapshots.",
+  "scheduling": "Initial all-paths measurements use the prior 8192-bar constant-work threshold. Final parallel-threshold measurements change only midpoint to the established 512-bar stateful-kernel minimum. Qualification replaces builder rows with the final campaign and retains the unchanged native serial/parallel arms.",
+  "adversarial_review": "Independent scans cover min/max, oldest/newest ties, growth, wrap, reset, maximum periods and signed zeros. A warmed-up allocation test verifies zero update/reset node allocations. Rational midpoint tests cover overflow, subnormal and normal boundaries. Shared route tests cover owned snapshots, worker seeds, mixed periods, 511/512/513 thresholds and invalid-input precedence.",
+  "benchmark_contract": "TA-Lib's direct span midpoint functions scan each requested window. Parallel calls write disjoint output spans with P-1 seed inputs and no input-slice allocations. Native returns only its defined suffix; builder also returns partial-window startup and owns snapshots. Prepared price arrays are excluded from timing. Decimal oracle arithmetic is exact for this bounded eighth-integer fixture; zero is canonicalized because decimal cancellation can preserve negative zero. An initial campaign stopped in setup on that oracle mismatch and produced no usable timings; its assertions were not weakened.",
+  "result": "At 1k, final Full midpoint times are 17.72/17.87 us versus initial 32.10/32.44 us; LatestOnly is 14.12/12.91 us. At 10k Full is 104.30/101.00 us and LatestOnly 70.88/74.05 us. Both operations beat native serial in both modes/sizes, but still lose to native parallel (6.53/7.02 us at 1k, 46.60/50.70 us at 10k). Managed Full allocation is about 65/558 KiB at 1k/10k, LatestOnly 18/88 KiB, and native parallel 8/78 KiB. Full snapshot ownership and partial-window outputs remain additional work.",
+  "limitations": "Direct qualification adds two APIs, reaching 91; qualification is not a win claim. BuilderReference is the current ordinary evaluator, not a pre-change baseline. This batch removes node allocation for shared deque consumers but does not qualify all of those consumers or add GPU dispatch. The full rollout and pending arithmetic redesign remain incomplete."
+}

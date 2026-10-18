@@ -1,0 +1,55 @@
+{
+  "Operation": "QuanTAlib.Epma",
+  "Count": 1000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        66424,
+        66424,
+        66424
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        17736,
+        17736,
+        17736
+      ]
+    },
+    {
+      "Method": "GpuFull",
+      "Bytes": [
+        59744,
+        59744,
+        59744
+      ]
+    },
+    {
+      "Method": "GpuLatestOnly",
+      "Bytes": [
+        11056,
+        11056,
+        11056
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        262408,
+        262408,
+        262408
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        293848,
+        293848,
+        293848
+      ]
+    }
+  ]
+}

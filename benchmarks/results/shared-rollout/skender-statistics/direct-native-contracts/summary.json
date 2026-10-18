@@ -1,0 +1,37 @@
+{
+  "status": "43 focused contract cases passed. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderStatisticsBenchmarks.cs": "5d11b5dd151d34ab76382ac2ab19b16942b5e1cfd9b0968fc8a26dd627f8ce15",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSkenderBenchmarkBase.cs": "3c1b7cfd3e6ceeece53783532284da7d11a6b0dfab3ab9748b9ab469dd5d04d8",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedSkenderStatisticsBenchmarkTests.cs": "847f1f31d92d32dc9c90fb9a5a3980400f90f73b3ec3b332f2a4a9ed0193e396"
+  },
+  "native_package": "Skender.Stock.Indicators 2.7.3",
+  "native_source_commit": "fd739aa4b592f68d5a68d14c602319c027bb0538",
+  "native_source_repository": "https://github.com/facioquo/stock-indicators-dotnet",
+  "native_source_sha256": {
+    "Beta.Api.cs": "79c0cea3252ebebb63d5db796fa815bdf09386d560bf44587dce1fc188632ea5",
+    "Beta.Models.cs": "b9e818f35c6ff43fa86e51b5d3f7f8f0e1cd0ae1715bc075b5735fa204280738",
+    "Beta.Series.cs": "62140882fcd4f948f9b74723cca665a35881dd81d889ca75bac42e4df1e6c1f0",
+    "Correlation.Api.cs": "adb5dec0c48d14c41793c549c727c1fca65890b60b3c458e1be3a2bf9620a0d2",
+    "Correlation.Models.cs": "f209ada47be2738a28955db8ed66ded241debe22c919ff763619999cf8f5e21d",
+    "Correlation.Series.cs": "837b74e2e80b9bfdd06a447e7d9a153dac765f046e5bcf28cc453668c58416d0",
+    "Epma.Api.cs": "8bf8cd23bd90779b2aed0eb1c63f213f96a68434e1a612fc6386caf922cf61bc",
+    "Epma.Models.cs": "4f034665d8a65707115bf7c141df45d23ead2b25f05972478c1e0316c8bba765",
+    "Epma.Series.cs": "bc597d58d5828ef00e8cab6fba92e9d229d188a9e3cdfc59eb5dc1617438c374",
+    "Slope.Series.cs": "e5e92db452179c0407d1b506a585e63997d1ba4309942480c1cca400b3dc8d3c"
+  },
+  "operations": [
+    "Skender.GetBeta",
+    "Skender.GetCorrelation",
+    "Skender.GetEpma"
+  ],
+  "contract": "Public tuple APIs and eager native Lists. Beta uses closes as evaluation and opens as market, retaining 20 preceding bars; Correlation retains 19 preceding bars. Pair inputs remain raw doubles as in their existing comparators. EPMA preserves decimal quote conversion and full prefixes because its native regression uses absolute indices and floating rounding is not translation invariant. Native calculation and joined outputs remain timed. Independent references verify all owned values and presence, including EPMA expanding startup; a separate integer-grid reference rounds each native EPMA operation. Exact serial/parallel/repeated comparisons verify dates, warmup, worker boundaries and retained ownership.",
+  "validation": {
+    "comparator_cases_passed": 43,
+    "production_source_changed": false,
+    "gpu_cases_passed": 100,
+    "hosted_contract_methods": 1259,
+    "gpu_receipt": "../../local-gpu-contracts/receipt.json"
+  },
+  "benchmark_cases": 24
+}

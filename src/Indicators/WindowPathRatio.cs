@@ -118,43 +118,60 @@ public sealed class WindowPathRatio : MultiOutputIndicatorBase, IIndicatorValida
         return output;
     }
 
-    private sealed class Calculator(int period, PathRatioConvention convention)
+    internal sealed class Calculator(int period, PathRatioConvention convention)
     {
         private readonly Queue<double?> _prices = new();
-        private readonly Queue<ExactMeanAccumulator> _steps = new();
-        private ExactMeanAccumulator _path;
-        private double? _previous;
+        private JurikDyadic _path;
+        private double? _previous, _beforeWindow;
 
         internal void Reset()
         {
             _prices.Clear();
-            _steps.Clear();
             _path = default;
-            _previous = null;
+            _previous = _beforeWindow = null;
+        }
+
+        private static JurikDyadic Distance(double? left, double? right)
+        {
+            if (!left.HasValue || !right.HasValue) return default;
+            var result = JurikDyadic.FromDouble(Math.Max(left.Value, right.Value));
+            result.Subtract(JurikDyadic.FromDouble(Math.Min(left.Value, right.Value)));
+            return result;
         }
 
         internal double? Next(double? value)
         {
-            var step = new ExactMeanAccumulator();
-            if (value.HasValue && _previous.HasValue)
-            {
-                step.Add(Math.Max(value.Value, _previous.Value));
-                step.Add(Math.Min(value.Value, _previous.Value), -1);
-            }
-            if (_steps.Count == period)
-                _path.Subtract(_steps.Dequeue());
-            _steps.Enqueue(step);
-            _path.AddExact(step);
-            _previous = value;
+            var step = Distance(value, _previous);
             var mature = _prices.Count == period;
             var first = mature ? _prices.Dequeue() : null;
+            if (mature)
+            {
+                // Prices already retain the outgoing step's endpoints. Recompute
+                // it exactly instead of retaining a second queue of wide structs.
+                _path.Subtract(Distance(first, _beforeWindow));
+                _beforeWindow = first;
+            }
+            _path.AddExact(step);
+            _previous = value;
             _prices.Enqueue(value);
-            if (!mature || !value.HasValue || !first.HasValue || _path.IsExactlyZero)
+            if (!mature || !value.HasValue || !first.HasValue || _path.Sign == 0)
                 return null;
-            var numerator = new ExactMeanAccumulator();
-            var scale = convention == PathRatioConvention.SignedPercent ? 100 : 1;
-            numerator.Add(value.Value, scale);
-            numerator.Add(first.Value, -scale);
+            var numerator = JurikDyadic.FromDouble(value.Value);
+            numerator.Subtract(JurikDyadic.FromDouble(first.Value));
+#if !NETFRAMEWORK
+            if (convention == PathRatioConvention.SignedPercent && numerator.TryDouble(out var net)
+                && _path.TryDouble(out var distance))
+            {
+                double scaled = net * 100;
+                // Both operands are exact binary64 values. Since 100 is an integer,
+                // the product residual is a multiple of the smallest subnormal:
+                // FMA cannot round a nonzero residual to zero. Only a proven exact,
+                // finite numerator may bypass the extended arithmetic ratio.
+                if (double.IsFinite(scaled) && Math.FusedMultiplyAdd(net, 100, -scaled) == 0)
+                    return scaled == 0 ? 0 : scaled / distance;
+            }
+#endif
+            if (convention == PathRatioConvention.SignedPercent) numerator.Multiply(100);
             var ratio = numerator.Ratio(_path);
             return convention == PathRatioConvention.AbsoluteFraction ? Math.Abs(ratio) : ratio;
         }

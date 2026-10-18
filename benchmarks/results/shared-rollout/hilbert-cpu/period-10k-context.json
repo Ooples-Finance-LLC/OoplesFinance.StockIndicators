@@ -1,0 +1,8 @@
+{
+  "production_commit": "7a518455",
+  "fixture_sha256": "d222f5c766412b87db7f1addd8d897efbb46850d3ed93bd3deaa43f1238e1a86",
+  "warmup_count": 20,
+  "iteration_count": 15,
+  "contention_observation": "Preflight CPU 0%; no other dotnet build/test workloads at preflight, during-run process sample, or completion. Reusable MSBuild nodes and a dotnet --version process were present.",
+  "scope": "Four CPU arms at 10000 bars; Hilbert cycle period only. Native outputs are retained directly; parallel includes full-prefix replay and scratch."
+}

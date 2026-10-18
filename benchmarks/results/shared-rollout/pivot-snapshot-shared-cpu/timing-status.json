@@ -1,0 +1,12 @@
+{
+  "competitor_timing": "reuse saved baseline; no native execution in benchmark setup or timing",
+  "next_filter": "*SharedPivotSnapshotBenchmarks*Snapshot*",
+  "reason": "4 snapshot-only cases completed exit0 without observed competing jobs.",
+  "source_commit": "841b786f",
+  "reuse_binaries": true,
+  "status": "completed",
+  "preserved_executable_directory": "C:/Users/cheat/temp/si-pivotsnapshot-binaries-841b786f",
+  "snapshot_verified": "Production and harness SHA256 matched binary-hashes.json before the next batch build.",
+  "completed_stem": "si-pivotsnapshot-snapshot-20261013-a",
+  "evidence": "snapshot-timing"
+}

@@ -1,0 +1,17 @@
+{
+  "productionRevision": "f10ddc86",
+  "fixtureRevision": "accompanying commit",
+  "date": "2026-10-12",
+  "period": 20,
+  "count": 1000,
+  "warmupsPerArm": 10,
+  "samplesPerArm": 3,
+  "verification": "33 focused comparison/probe tests; 66 inventory tests. Each GPU setup checks actual GPU backend and bitwise equality to CPU Full in both history modes. CPU setup checks all rows against independent integer reference, including startup.",
+  "limits": [
+    "Allocation only; no timing or qualification increase.",
+    "All managed threads counted; returned results retained during sample; disposal afterwards.",
+    "GPU cached device/workspace memory excluded.",
+    "Native retains 981 completed-window doubles; builder retains 1000 doubles including available-history startup. Full additionally owns OHLCV bars.",
+    "No machine-exclusive window requested."
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "status": "69 focused contract and 100 local GPU cases passed. First native timings pending; qualification counts unchanged.",
+  "source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTradyNativeVolumeBenchmarks.cs": "0d20072e27f6cdf21658ff6b0d908493c36f8d7c2de5d894df2c12061aa6c53a",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/VolumeRecurrenceComparison.cs": "09b15f7a587e0a9b899f1599395365af30a1ac1e906e768e4acd0a877929f8fe",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/AccumulationDistributionComparison.cs": "fa89e95ae9dc6356521e77304b73d356ab325d11b8adb5d5f8fe6e24a1453575",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedTradyNativeVolumeBenchmarkTests.cs": "0b1803b86c8829752f6f75240751244172d4f6b38987b162e762909b947d2494"
+  },
+  "native_package": "Trady.Analysis 3.2.8",
+  "native_package_dll_sha256": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+  "operations": [
+    "PositiveVolumeIndex",
+    "NegativeVolumeIndex",
+    "AccumulationDistributionLine"
+  ],
+  "contract": "Public tuple APIs return eager native decimal Lists. PVI/NVI input order is Close/Volume; ADL order High/Low/Close/Volume, confirmed by pinned assembly TupleElementNamesAttribute. Full prefixes preserve accumulated state and original seeds. Named Compute(startIndex,endIndex) returns owned rows; computation and joining remain timed. Existing decimal reference arithmetic is exposed before binary64 conversion. Independent decimal and binary64 references check all values/presence; repeated calls retain earlier results.",
+  "validation": {
+    "comparator_cases_passed": 69,
+    "new_fixture_cases_passed": 37,
+    "existing_reference_cases_passed": 32,
+    "production_source_changed": false,
+    "local_gpu_cases_passed": 100,
+    "hosted_contract_methods": 1277
+  },
+  "benchmark_cases": 24
+}

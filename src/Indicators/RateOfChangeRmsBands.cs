@@ -150,12 +150,12 @@ public sealed class RateOfChangeRmsBands
         return output;
     }
 
-    private sealed class State(int period, int emaPeriod, int deviationPeriod) : IMultiOutputState
+    internal sealed class State(int period, int emaPeriod, int deviationPeriod) : IMultiOutputState
     {
         private readonly Queue<double> _prices = new();
-        private readonly Queue<(double Value, bool Present)> _returns = new();
-        private ExactMeanAccumulator _seed,
-            _squares;
+        private readonly Queue<(JurikDyadic Square, bool Present)> _returns = new();
+        private ExactMeanAccumulator _seed;
+        private JurikDyadic _squares;
         private double _ema;
         private int _seedCount,
             _missing;
@@ -165,7 +165,8 @@ public sealed class RateOfChangeRmsBands
         {
             _prices.Clear();
             _returns.Clear();
-            _seed = _squares = default;
+            _seed = default;
+            _squares = default;
             _ema = 0;
             _seedCount = _missing = 0;
             _emaPossible = true;
@@ -192,13 +193,17 @@ public sealed class RateOfChangeRmsBands
             {
                 var old = _returns.Dequeue();
                 if (old.Present)
-                    _squares.AddProduct(old.Value, old.Value, -1);
+                    _squares.Subtract(old.Square);
                 else
                     _missing--;
             }
-            _returns.Enqueue((roc, present));
+            // Retain each exact square once. Ordinary return windows use the
+            // compact integer root; wide exponent spans keep the exact fallback.
+            var square = JurikDyadic.FromDouble(roc);
+            square.Square();
+            _returns.Enqueue((square, present));
             if (present)
-                _squares.AddProduct(roc, roc);
+                _squares.AddExact(square);
             else
                 _missing++;
             if (_returns.Count != deviationPeriod || _missing != 0)

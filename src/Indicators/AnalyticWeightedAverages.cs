@@ -113,16 +113,7 @@ internal sealed class CachedAnalyticKernelState : IIndicatorState
 
     internal CachedAnalyticKernelState(int period, Func<int, double> coefficient)
     {
-        var weights = new List<double>();
-        _state = new NormalizedKernelState(
-            period,
-            lag =>
-            {
-                while (weights.Count <= lag)
-                    weights.Add(coefficient(weights.Count));
-                return weights[lag];
-            }
-        );
+        _state = new NormalizedKernelState(period, coefficient);
     }
 
     public void Reset() => _state.Reset();

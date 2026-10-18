@@ -30,6 +30,78 @@ internal struct JurikDyadic
         var result = new JurikDyadic(); result.Add(value); return result;
 #endif
     }
+#if !NETFRAMEWORK
+    // Callers supply an exact signed product with at most 106 significant bits.
+    // Its odd factors are already normalized; zero has no meaningful exponent.
+    internal static JurikDyadic FromBinaryProduct(Int128 product, int exponent) =>
+        new() { _fixed = true, _integer = product, _exponent = product == 0 ? 0 : exponent };
+
+    // Exact bounded integer, normalized for the existing rational publisher.
+    internal static JurikDyadic FromInteger(Int128 value)
+    {
+        // Preserve the simple representation when binary64 is exact, allowing
+        // the existing simple/simple ratio path to use correctly rounded division.
+        const long exactLimit = 1L << 53;
+        if (value != 0 && value >= -exactLimit && value <= exactLimit) return FromDouble((double)value);
+        var result = new JurikDyadic { _fixed = true, _integer = value };
+        result.Normalize();
+        return result;
+    }
+
+    // Publish an integer ratio without constructing and promoting two dyadic
+    // wrappers. Factoring powers of two also exposes exactly representable
+    // operands above 2^53. Integer ratios cannot approach binary64 underflow or
+    // overflow, so scaling their rounded quotient introduces no second rounding.
+    internal static double IntegerRatio(Int128 numerator, Int128 denominator)
+    {
+        if (numerator == 0 || denominator == 0) return 0;
+        const long exactLimit = 1L << 53;
+        if (numerator >= -exactLimit && numerator <= exactLimit
+            && denominator >= -exactLimit && denominator <= exactLimit)
+            return (double)numerator / (double)denominator;
+        int numeratorScale = (int)Int128.TrailingZeroCount(numerator);
+        int denominatorScale = (int)Int128.TrailingZeroCount(denominator);
+        numerator >>= numeratorScale;
+        denominator >>= denominatorScale;
+        if (numerator >= -exactLimit && numerator <= exactLimit
+            && denominator >= -exactLimit && denominator <= exactLimit)
+            return Math.ScaleB((double)numerator / (double)denominator, numeratorScale - denominatorScale);
+        if (TryRatio(numerator, numeratorScale, denominator, denominatorScale, out double result)) return result;
+        var top = new ExactMeanAccumulator(); top.Add(Math.ScaleB(1d, numeratorScale), (BigInteger)numerator);
+        var bottom = new ExactMeanAccumulator(); bottom.Add(Math.ScaleB(1d, denominatorScale), (BigInteger)denominator);
+        return top.Ratio(bottom);
+    }
+
+    internal static JurikDyadic FromFactor(in ExactMeanAccumulator.ProductFactor factor) =>
+        new() { _fixed = true, _integer = factor.Mantissa, _exponent = factor.Scale - 1074 };
+#endif
+    internal static JurikDyadic FromUnits(BigInteger units)
+    {
+        if (units.IsZero) return default;
+#if !NETFRAMEWORK
+        var magnitude = BigInteger.Abs(units);
+        int zeros = (int)BigInteger.TrailingZeroCount(magnitude);
+        if (magnitude.GetBitLength() - zeros <= 127)
+            return new JurikDyadic { _fixed = true, _integer = (Int128)(units >> zeros), _exponent = zeros - 1074 };
+#endif
+        var sum = new ExactMeanAccumulator();
+        sum.Add(1, units);
+        sum.ScaleByPowerOfTwo(-1074);
+        var result = new JurikDyadic(); result.SetFallback(sum); return result;
+    }
+    internal BigInteger RoundedUnits()
+    {
+        var rounded = Rounded();
+#if !NETFRAMEWORK
+        if (!rounded._wide)
+        {
+            rounded.Promote();
+            return (BigInteger)rounded._integer << (rounded._exponent + 1074);
+        }
+#endif
+        var value = RocBankValue.Round(rounded.Accumulator());
+        return ExactVarianceWindow.Units(value.Mantissa) << value.UpperShift;
+    }
     internal void Add(double value)
     {
 #if !NETFRAMEWORK
@@ -113,10 +185,68 @@ internal struct JurikDyadic
 #endif
         var product = Accumulator(); product.Multiply(factor); SetFallback(product);
     }
+    internal void Multiply(JurikDyadic other)
+    {
+#if !NETFRAMEWORK
+        if (!_wide && !other._wide)
+        {
+            Promote(); other.Promote();
+            if (_integer == 0 || other._integer == 0) { this = default; return; }
+            var size = Bits(Magnitude(_integer)) + Bits(Magnitude(other._integer));
+            if (size <= 127 || size == 128 && Magnitude(_integer) * Magnitude(other._integer) <= (UInt128)Int128.MaxValue)
+            {
+                _integer *= other._integer;
+                _exponent = checked(_exponent + other._exponent);
+                Normalize();
+                return;
+            }
+        }
+#endif
+        var product = Accumulator(); product.Multiply(other.Accumulator()); SetFallback(product);
+    }
+
+    internal void Square()
+    {
+#if !NETFRAMEWORK
+        if (!_wide)
+        {
+            Promote();
+            if (Bits(Magnitude(_integer)) <= 63)
+            {
+                _integer *= _integer;
+                _exponent = checked(2 * _exponent);
+                Normalize();
+                return;
+            }
+        }
+#endif
+        var squared = Accumulator(); squared.Square(); SetFallback(squared);
+    }
+
+    internal double SqrtMean(long count)
+    {
+        if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
+#if !NETFRAMEWORK
+        if (!_wide)
+        {
+            Promote();
+            if (_integer >= 0 && ExactPopulationDeviation.TryCompactScaledRoot(
+                (UInt128)_integer, (ulong)count, _exponent, out var result)) return result;
+            return ExactPopulationDeviation.ScaledRootRatio((System.Numerics.BigInteger)_integer, count, _exponent);
+        }
+#endif
+        return Accumulator().SqrtMean(count);
+    }
+
     internal double Mean(int count)
     {
 #if !NETFRAMEWORK
         if (!_wide && count == 1) return _fixed ? RoundedDouble() : _simple;
+        if (!_wide && count > 0)
+        {
+            if (!_fixed && double.IsFinite(_simple)) return _simple == 0 ? 0 : _simple / count;
+            if (_fixed && TryRatio(_integer, _exponent, count, 0, out var result)) return result;
+        }
 #endif
         return Accumulator().Mean(count);
     }
@@ -132,19 +262,20 @@ internal struct JurikDyadic
 #endif
         return Accumulator().Ratio(denominator.Accumulator());
     }
-    internal JurikDyadic Rounded()
+    internal JurikDyadic Rounded(int count = 1)
     {
+        if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
 #if !NETFRAMEWORK
-        if (!_wide && !_fixed) return this;
+        if (count == 1 && !_wide && !_fixed) return this;
 #endif
-        var value = Mean(1);
+        var value = Mean(count);
         var result = new JurikDyadic();
         if (!double.IsInfinity(value)) return FromDouble(value);
-        var wide = RocBankValue.Round(Accumulator());
+        var wide = RocBankValue.Round(Accumulator(), count: count);
         result.Add(wide.Mantissa); result.ScaleByPowerOfTwo(wide.UpperShift);
         return result;
     }
-    internal static JurikDyadic SumProduct(JurikDyadic sum, JurikDyadic term, double factor)
+    internal static JurikDyadic SumProduct(in JurikDyadic sum, in JurikDyadic term, double factor)
     {
 #if !NETFRAMEWORK
         if (sum.TryDouble(out var addend) && term.TryDouble(out var operand))
@@ -156,7 +287,8 @@ internal struct JurikDyadic
             }
         }
 #endif
-        term.Multiply(factor); term.AddExact(sum); return term.Rounded();
+        var product = term;
+        product.Multiply(factor); product.AddExact(sum); return product.Rounded();
     }
     internal static bool TryBlend(JurikDyadic old, JurikDyadic next, double weight, out JurikDyadic result)
     {
@@ -220,7 +352,7 @@ internal struct JurikDyadic
         _exponent = Math.Max(0, exponent - 1) - 1074;
         _fixed = true; Normalize();
     }
-    internal bool TryDouble(out double value)
+    internal readonly bool TryDouble(out double value)
     {
         value = 0;
         if (!_wide && !_fixed) { value = _simple; return true; }
@@ -229,7 +361,7 @@ internal struct JurikDyadic
         if (bits > 53 || _exponent + bits - 1 > 1023) return false;
         value = RoundedDouble(); return true;
     }
-    private double RoundedDouble()
+    private readonly double RoundedDouble()
     {
         if (_integer == 0) return 0;
         var magnitude = Magnitude(_integer);
@@ -289,17 +421,44 @@ internal struct JurikDyadic
         if (exponent < -1075) { result = negative ? -0d : 0d; return true; }
         var grid = Math.Max(exponent - 52, -1074);
         var shift = scale - grid;
+        UInt128 quotient, remainder;
         if (shift >= 0)
         {
-            if (shift >= 128 || Bits(top) + shift > 128) return false;
-            top <<= shift;
+            if (shift < 128 && Bits(top) + shift <= 128)
+            {
+                top <<= shift;
+                (quotient, remainder) = ExactMeanAccumulator.CompactDivRem(top, bottom);
+            }
+            else
+            {
+                if (CertifiedCompactRatio.TryDivide(top, bottom, scale, out result))
+                {
+                    if (negative) result = -result;
+                    return true;
+                }
+                // Produce the rounding-grid quotient without materializing the
+                // shifted numerator. Each remainder stays below the denominator;
+                // comparing with its complement avoids overflowing a doubled value.
+                (quotient, remainder) = ExactMeanAccumulator.CompactDivRem(top, bottom);
+                for (int bit = 0; bit < shift; bit++)
+                {
+                    quotient <<= 1;
+                    var complement = bottom - remainder;
+                    if (remainder >= complement)
+                    {
+                        remainder -= complement;
+                        quotient++;
+                    }
+                    else remainder += remainder;
+                }
+            }
         }
         else
         {
             if (-shift >= 128 || Bits(bottom) - shift > 128) return false;
             bottom <<= -shift;
+            (quotient, remainder) = ExactMeanAccumulator.CompactDivRem(top, bottom);
         }
-        var quotient = top / bottom; var remainder = top % bottom;
         var otherHalf = bottom - remainder;
         if (remainder > otherHalf || remainder == otherHalf && (quotient & 1) != 0) quotient++;
         result = Math.ScaleB((double)quotient, grid);

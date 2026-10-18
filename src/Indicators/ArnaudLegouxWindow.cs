@@ -103,22 +103,41 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
         return output;
     }
 
-    private sealed class State(int period, double offset, double sigma, bool fullWindowOnly)
+    internal sealed class State(int period, double offset, double sigma, bool fullWindowOnly)
         : IMultiOutputState
     {
         private static readonly BigInteger Grid = BigInteger.One << 1074;
+#if NETFRAMEWORK
         private readonly Queue<double> _history = new();
+#else
+        private readonly Queue<(ExactMeanAccumulator.ProductFactor Factor, bool Finite)> _history = new();
+#endif
         private readonly BigInteger _offset = ExactVarianceWindow.Units(offset);
+#if NETFRAMEWORK
         private readonly BigInteger _sigmaSquared = BigInteger.Pow(
             ExactVarianceWindow.Units(sigma),
             2
         );
-        private double[] _weights = [];
+        private ExactMeanAccumulator.ProductCoefficient[] _weights = [];
+        private ExactMeanAccumulator _denominator;
+#else
+        private readonly JurikDyadic _sigmaSquared = Square(sigma);
+        private ExactMeanAccumulator.ProductFactor[] _weights = [];
+        private JurikDyadic _denominator;
+
+        private static JurikDyadic Square(double value)
+        {
+            var result = JurikDyadic.FromDouble(value);
+            result.Square();
+            return result;
+        }
+#endif
 
         public void Reset()
         {
             _history.Clear();
             _weights = [];
+            _denominator = default;
         }
 
         private void PrepareWeights(int n)
@@ -130,18 +149,43 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
                 center.Sign <= 0 ? 0
                 : center >= (n - 1) * Grid ? n - 1
                 : (int)((center + Grid / 2) / Grid);
+#if NETFRAMEWORK
             var divisor = new BigInteger(2L * n * n) << 4296;
-            _weights = new double[n];
+            _weights = new ExactMeanAccumulator.ProductCoefficient[n];
+#else
+            // The same factored squared-distance formula on an unscaled exact
+            // dyadic grid avoids thousands of zero bits in each coefficient.
+            var twiceCenter = JurikDyadic.FromDouble(offset);
+            twiceCenter.Multiply(n - 1);
+            twiceCenter.Multiply(2);
+            var divisor = Square(n);
+            divisor.Multiply(2);
+            _weights = new ExactMeanAccumulator.ProductFactor[n];
+#endif
+            _denominator = default;
             for (var i = 0; i < n; i++)
             {
+#if NETFRAMEWORK
                 // Difference of squares factored before multiplication: no rounded
                 // center or overflowing squared distance can create a false tie.
                 var difference = (i - peak) * Grid * ((i + (long)peak) * Grid - 2 * center);
                 var numerator = difference * _sigmaSquared;
-                _weights[i] =
+                var weight =
                     numerator >= 746 * divisor
                         ? 0
                         : Math.Exp(-ExactMeanAccumulator.UnitRatio(numerator << 1074, divisor));
+                _weights[i] = new ExactMeanAccumulator.ProductCoefficient(weight);
+                _denominator.AddFactor(_weights[i].Factor);
+#else
+                var numerator = JurikDyadic.FromDouble(i + (long)peak);
+                numerator.Subtract(twiceCenter);
+                numerator.Multiply(i - peak);
+                numerator.Multiply(_sigmaSquared);
+                var weight = Math.Exp(-numerator.Ratio(divisor));
+                var factor = new ExactMeanAccumulator.ProductFactor(weight);
+                _weights[i] = factor;
+                _denominator.AddExact(JurikDyadic.FromFactor(in factor));
+#endif
             }
         }
 
@@ -150,19 +194,42 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
             output.Clear();
             if (_history.Count == period)
                 _history.Dequeue();
+#if NETFRAMEWORK
             _history.Enqueue(bar.Close);
+#else
+            // Decode each retained price once instead of once per window term.
+            // Invalid state inputs must still wait until a published window
+            // reaches them, matching the original full-window startup behavior.
+            bool finite = double.IsFinite(bar.Close);
+            _history.Enqueue((finite ? new ExactMeanAccumulator.ProductFactor(bar.Close) : default, finite));
+#endif
             if (fullWindowOnly && _history.Count < period)
                 return;
             PrepareWeights(_history.Count);
+#if NETFRAMEWORK
             var numerator = new ExactMeanAccumulator();
-            var denominator = new ExactMeanAccumulator();
+#else
+            var numerator = new JurikDyadic();
+#endif
             var i = 0;
             foreach (var price in _history)
             {
-                numerator.AddProduct(price, _weights[i]);
-                denominator.Add(_weights[i++]);
+#if NETFRAMEWORK
+                var factor = new ExactMeanAccumulator.ProductFactor(price);
+                numerator.AddProduct(in factor, in _weights[i++]);
+#else
+                if (!price.Finite) throw new ArithmeticException("An exact finite product requires finite inputs.");
+                var factor = price.Factor;
+                // Both normalized mantissas have at most 53 bits. Their exact
+                // product fits Int128 and needs no general dyadic multiplication.
+                var weight = _weights[i++];
+                var product = JurikDyadic.FromBinaryProduct(
+                    (Int128)factor.Mantissa * weight.Mantissa,
+                    factor.Scale + weight.Scale - 2148);
+                numerator.AddExact(product);
+#endif
             }
-            output[0] = numerator.Ratio(denominator);
+            output[0] = numerator.Ratio(_denominator);
             output[1] = 1;
         }
     }

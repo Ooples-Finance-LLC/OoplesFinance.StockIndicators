@@ -67,7 +67,7 @@ public sealed class WindowCorrelation : MultiOutputIndicatorBase, IIndicatorVali
                 )
             );
 
-    private sealed class State(
+    internal sealed class State(
         int period,
         CandlePriceField left,
         CandlePriceField right,
@@ -175,7 +175,7 @@ public sealed class WindowPairStatistics : MultiOutputIndicatorBase, IIndicatorV
                 )
             );
 
-    private sealed class State(int period, CandlePriceField left, CandlePriceField right)
+    internal sealed class State(int period, CandlePriceField left, CandlePriceField right)
         : IMultiOutputState
     {
         private readonly PairStatisticsWindow _window = new(period);
@@ -201,6 +201,13 @@ public sealed class WindowPairStatistics : MultiOutputIndicatorBase, IIndicatorV
 internal sealed class PairStatisticsWindow(int period)
 {
     private readonly Queue<(double A, double B)> _history = new();
+    // Keep the binary exponent separate from the moments. The finest observed
+    // grid is retained until reset; wider inputs still use exact BigInteger math.
+    private int _grid;
+    private bool _hasGrid;
+    private bool _wide;
+    private readonly long _smallBound = (1L << 30) / period;
+    private long _smallX, _smallY, _smallXX, _smallYY, _smallXY, _smallA, _smallB, _smallC, _maximum;
     private BigInteger _x,
         _y,
         _xx,
@@ -233,12 +240,97 @@ internal sealed class PairStatisticsWindow(int period)
     {
         _history.Clear();
         _x = _y = _xx = _yy = _xy = _a = _b = _c = 0;
+        _grid = 0;
+        _hasGrid = false;
+        _wide = false;
+        _smallX = _smallY = _smallXX = _smallYY = _smallXY = _smallA = _smallB = _smallC = _maximum = 0;
+    }
+
+    // Bound period * max(abs(integer)) by 2^30. Every sum then fits 30 bits,
+    // n*sum(square) and sum*sum fit 60 bits, and their differences fit Int64.
+    // The bound is conservative across evictions and is reset only by Reset.
+    private bool TryAccumulateSmall((long Integer, int Exponent) left, (long Integer, int Exponent) right, int sign)
+    {
+        if (sign < 0)
+        {
+            // Every expired sample was admitted by the same monotone grid and
+            // magnitude certificate. Rechecking it cannot strengthen the proof.
+            var expiredX = left.Integer << (left.Exponent - _grid);
+            var expiredY = right.Integer << (right.Exponent - _grid);
+            unchecked
+            {
+                _smallX -= expiredX; _smallY -= expiredY;
+                _smallXX -= expiredX * expiredX; _smallYY -= expiredY * expiredY;
+                _smallXY -= expiredX * expiredY;
+            }
+            return true;
+        }
+        var hasValue = left.Integer != 0 || right.Integer != 0;
+        var grid = _grid;
+        if (hasValue)
+        {
+            var next = left.Integer == 0 ? right.Exponent : right.Integer == 0 ? left.Exponent : Math.Min(left.Exponent, right.Exponent);
+            grid = _hasGrid ? Math.Min(_grid, next) : next;
+        }
+        var shift = _hasGrid ? _grid - grid : 0;
+        if (!TryNormalize(_maximum, shift, _smallBound, out var maximum)
+            || !TryNormalize(left.Integer, left.Exponent - grid, _smallBound, out var x)
+            || !TryNormalize(right.Integer, right.Exponent - grid, _smallBound, out var y)) return false;
+        if (shift > 0)
+        {
+            _smallX <<= shift; _smallY <<= shift;
+            _smallXX <<= 2 * shift; _smallYY <<= 2 * shift; _smallXY <<= 2 * shift;
+        }
+        _grid = grid;
+        _hasGrid |= hasValue;
+        _maximum = Math.Max(maximum, Math.Max(Math.Abs(x), Math.Abs(y)));
+        // The preceding certificate proves these operations cannot overflow.
+        unchecked
+        {
+            _smallX += x; _smallY += y;
+            _smallXX += x * x; _smallYY += y * y; _smallXY += x * y;
+        }
+        return true;
+    }
+
+    private static bool TryNormalize(long value, int shift, long bound, out long result)
+    {
+        result = 0;
+        if (value == 0) return true;
+        if (shift is < 0 or > 30 || value < -(bound >> shift) || value > (bound >> shift)) return false;
+        result = value << shift;
+        return true;
     }
 
     private void Accumulate(double a, double b, int sign)
     {
-        var x = ExactVarianceWindow.Units(a);
-        var y = ExactVarianceWindow.Units(b);
+        var left = ExactMeanAccumulator.DecomposeFinite(a);
+        var right = ExactMeanAccumulator.DecomposeFinite(b);
+        if (!_wide)
+        {
+            if (TryAccumulateSmall(left, right, sign)) return;
+            _x = _smallX; _y = _smallY;
+            _xx = _smallXX; _yy = _smallYY; _xy = _smallXY;
+            _wide = true;
+        }
+        if (left.Integer != 0 || right.Integer != 0)
+        {
+            var grid = left.Integer == 0 ? right.Exponent : right.Integer == 0 ? left.Exponent
+                : Math.Min(left.Exponent, right.Exponent);
+            if (!_hasGrid || grid < _grid)
+            {
+                if (_hasGrid)
+                {
+                    var shift = _grid - grid;
+                    _x <<= shift; _y <<= shift;
+                    _xx <<= 2 * shift; _yy <<= 2 * shift; _xy <<= 2 * shift;
+                }
+                _grid = grid;
+                _hasGrid = true;
+            }
+        }
+        var x = left.Integer == 0 ? BigInteger.Zero : new BigInteger(left.Integer) << (left.Exponent - _grid);
+        var y = right.Integer == 0 ? BigInteger.Zero : new BigInteger(right.Integer) << (right.Exponent - _grid);
         _x += sign * x;
         _y += sign * y;
         _xx += sign * x * x;
@@ -255,30 +347,68 @@ internal sealed class PairStatisticsWindow(int period)
         }
         _history.Enqueue((a, b));
         Accumulate(a, b, 1);
-        var n = new BigInteger(_history.Count);
-        _a = n * _xx - _x * _x;
-        _b = n * _yy - _y * _y;
-        _c = n * _xy - _x * _y;
+        if (_wide)
+        {
+            var n = new BigInteger(_history.Count);
+            _a = n * _xx - _x * _x;
+            _b = n * _yy - _y * _y;
+            _c = n * _xy - _x * _y;
+        }
+        else
+        {
+            long n = _history.Count;
+            // Each product fits 60 bits; the signed difference fits 61 bits.
+            unchecked
+            {
+                _smallA = n * _smallXX - _smallX * _smallX;
+                _smallB = n * _smallYY - _smallY * _smallY;
+                _smallC = n * _smallXY - _smallX * _smallY;
+            }
+        }
     }
 
     internal double? Read(int slot, bool flatZero)
     {
         if (_history.Count < period)
             return null;
+        if (!_wide)
+            return ReadSmall(_smallA, _smallB, _smallC, period, _grid, slot, flatZero);
+        return ReadWide(_a, _b, _c, period, _grid, slot, flatZero);
+    }
+
+    internal static double? ReadSmall(long a, long b, long c, int period, int grid, int slot, bool flatZero)
+    {
+        if (slot >= 2)
+            return ExactMeanAccumulator.ScaledRatio(slot == 2 ? c : slot == 3 ? a : b,
+                (long)period * period, 2 * grid);
+        if (a == 0 || b == 0) return flatZero ? 0 : null;
+        if (c == 0) return 0;
+        if (a <= int.MaxValue && b <= int.MaxValue && Math.Abs(c) <= int.MaxValue && slot == 1)
+            return ExactMeanAccumulator.ScaledRatio(c * c, a * b, 0);
+#if !NETFRAMEWORK
+        if (slot == 0 && a <= uint.MaxValue && b <= uint.MaxValue && Math.Abs(c) <= uint.MaxValue
+            && ExactPopulationDeviation.TryWideScaledRoot((ulong)Math.Abs(c) * (ulong)Math.Abs(c),
+                (ulong)a * (ulong)b, 0, out var root)) return c < 0 ? -root : root;
+#endif
+        return ReadWide(new BigInteger(a), new BigInteger(b), new BigInteger(c), period, grid, slot, flatZero);
+    }
+
+    private static double? ReadWide(BigInteger a, BigInteger b, BigInteger c, int period, int grid, int slot, bool flatZero)
+    {
         if (slot >= 2)
         {
-            var n = new BigInteger(_history.Count);
-            return ExactMeanAccumulator.UnitRatio(
-                slot == 2 ? _c
-                    : slot == 3 ? _a
-                    : _b,
-                (n * n) << 1074
+            var n = new BigInteger(period);
+            return ExactMeanAccumulator.ScaledRatio(
+                slot == 2 ? c
+                    : slot == 3 ? a
+                    : b,
+                n * n, 2 * grid
             );
         }
-        if (_a.IsZero || _b.IsZero)
+        if (a.IsZero || b.IsZero)
             return flatZero ? 0 : null;
         return slot == 0
-            ? _c.Sign * ExactPopulationDeviation.RootRatio((_c * _c) << 2148, _a * _b)
-            : ExactMeanAccumulator.UnitRatio((_c * _c) << 1074, _a * _b);
+            ? c.Sign * ExactPopulationDeviation.ScaledRootRatio(c * c, a * b, 0)
+            : ExactMeanAccumulator.ScaledRatio(c * c, a * b, 0);
     }
 }

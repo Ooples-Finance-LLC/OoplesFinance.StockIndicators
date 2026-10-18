@@ -1,0 +1,39 @@
+{
+  "Operation": "Skender.GetForceIndex",
+  "Count": 10000,
+  "Repetitions": 3,
+  "Arms": [
+    {
+      "Method": "BuilderFull",
+      "Bytes": [
+        642720,
+        642720,
+        642720
+      ]
+    },
+    {
+      "Method": "BuilderLatestOnly",
+      "Bytes": [
+        161592,
+        161592,
+        161592
+      ]
+    },
+    {
+      "Method": "NativeSingle",
+      "Bytes": [
+        1400440,
+        1400440,
+        1400440
+      ]
+    },
+    {
+      "Method": "NativeParallel",
+      "Bytes": [
+        6384464,
+        6384464,
+        6384464
+      ]
+    }
+  ]
+}
