@@ -219,6 +219,9 @@ internal static partial class ValuesBarExecution
             or DiNapoliPercentagePriceOscillator or DiNapoliPreferredStochasticOscillator
             or DistanceWeightedMovingAverage or InverseDistanceWeightedMovingAverage
             or DisparityIndex { MaType: null }
+            or DoubleSmoothedMomenta { MaType: null, SecondAverage: null, ThirdAverage: null, FourthAverage: null, FifthAverage: null }
+            or DoubleSmoothedRelativeStrengthIndex
+            or DynamicMomentumIndex { MaType: null } or DynamicMomentumOscillator { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -663,6 +666,10 @@ internal static partial class ValuesBarExecution
         DistanceWeightedMovingAverage distance => new GeneratedDistanceMassState(distance.Length, count, true),
         InverseDistanceWeightedMovingAverage distance => new GeneratedDistanceMassState(distance.Length, count, false),
         DisparityIndex disparity => new GeneratedDisparityState(Math.Max(1, disparity.Length), count),
+        DoubleSmoothedMomenta momenta => new GeneratedDoubleMomentaState(momenta.MomentumLength, momenta.FirstSmooth, momenta.SecondSmooth, count),
+        DoubleSmoothedRelativeStrengthIndex => new GeneratedDoubleRangeStrengthState(count),
+        DynamicMomentumIndex => new GeneratedDynamicMomentumIndexState(),
+        DynamicMomentumOscillator oscillator => new GeneratedDynamicMomentumOscillatorState(Math.Max(1, oscillator.Length), count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5001,6 +5008,64 @@ internal static partial class ValuesBarExecution
         public void Reset() => _average?.Reset();
         public double Update(in Bar bar) => RoundedPercentageChange.Of(bar.Close, _average?.Next(bar.Close, true) ?? 0);
         public void Dispose() => _average?.Dispose();
+    }
+
+    private sealed class GeneratedDoubleMomentaState(int lookback, int first, int second, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly MomentaRangeWindow _window = new(MovingAvgType.ExponentialMovingAverage, lookback, first, second, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Value; outputs[1] = value.Signal;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDoubleRangeStrengthState(int count) : IMultiOutputState, IDisposable
+    {
+        private readonly RangeGainLossWindow _window = new(MovingAvgType.ExponentialMovingAverage, 2, [5, 25], 25, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Value; outputs[1] = value.Signal;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDynamicMomentumIndexState : IMultiOutputState, IDisposable
+    {
+        private readonly DynamicMomentumWindow _window = new(MovingAvgType.SimpleMovingAverage, 5, 10, 14, 5, 30);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.Close, true);
+            outputs[0] = value.Line; outputs[1] = value.SignalLine; outputs[2] = value.Histogram;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedDynamicMomentumOscillatorState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.RollingWindowMax _high = new(Math.Min(length, Math.Max(1, count)));
+        private readonly Streaming.RollingWindowMin _low = new(Math.Min(length, Math.Max(1, count)));
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _fast = length <= count ? new(length) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _slow = 20 <= count ? new(20) : null;
+        private double _highest, _lowest = double.MaxValue;
+        public void Reset() { _high.Reset(); _low.Reset(); _fast?.Reset(); _slow?.Reset(); _highest = 0; _lowest = double.MaxValue; }
+        public double Update(in Bar bar)
+        {
+            var high = _high.Add(bar.High, out _); var low = _low.Add(bar.Low, out _);
+            var fastK = ClampedRangePosition.Percent(bar.Close, low, high);
+            var fastD = _fast?.Next(fastK, true) ?? 0;
+            var slowD = _slow?.Next(fastD, true) ?? 0;
+            _highest = fastD > _highest ? fastD : _highest;
+            _lowest = fastD < _lowest ? fastD : _lowest;
+            var midpoint = MathHelper.MinOrMax((_lowest + _highest) / 2, 100, 0);
+            return MathHelper.MinOrMax(midpoint - (slowD - fastD), 100, 0);
+        }
+        public void Dispose() { _high.Dispose(); _low.Dispose(); _fast?.Dispose(); _slow?.Dispose(); }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
