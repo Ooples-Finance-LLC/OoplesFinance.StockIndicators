@@ -59,7 +59,10 @@ internal sealed class CorrectedAverageWindow : IDisposable
         {
             if (_recursive is not null) return _recursive.Next(value, commit);
             if (_fallback is not null) return new(_fallback.Next(value.Publish(), commit));
-            var sum = _sum; var weighted = _weighted; weighted.Subtract(sum); value.AddTo(ref weighted, _length);
+            var sum = _sum; var weighted = _weighted;
+            // Only the weighted mean consumes this recurrence. Simple means use the exact sum alone.
+            if (_kind == MovingAvgType.WeightedMovingAverage)
+            { weighted.Subtract(sum); value.AddTo(ref weighted, _length); }
             if (_history.Count == _length) _history.Peek().AddTo(ref sum, -1); value.AddTo(ref sum);
             var result = _kind == MovingAvgType.WeightedMovingAverage ? RocBankValue.Round(weighted, count: (long)_length * (_length + 1L) / 2)
                 : _history.Count + 1L < _length ? default : RocBankValue.Round(sum, count: _length);
