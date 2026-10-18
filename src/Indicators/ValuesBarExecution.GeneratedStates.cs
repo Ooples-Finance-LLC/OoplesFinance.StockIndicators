@@ -222,6 +222,7 @@ internal static partial class ValuesBarExecution
             or DoubleSmoothedMomenta { MaType: null, SecondAverage: null, ThirdAverage: null, FourthAverage: null, FifthAverage: null }
             or DoubleSmoothedRelativeStrengthIndex
             or DynamicMomentumIndex { MaType: null } or DynamicMomentumOscillator { MaType: null }
+            or DynamicSupportAndResistance { MaType: null } or DynamicallyAdjustableFilter or DynamicallyAdjustableMovingAverage
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -670,6 +671,9 @@ internal static partial class ValuesBarExecution
         DoubleSmoothedRelativeStrengthIndex => new GeneratedDoubleRangeStrengthState(count),
         DynamicMomentumIndex => new GeneratedDynamicMomentumIndexState(),
         DynamicMomentumOscillator oscillator => new GeneratedDynamicMomentumOscillatorState(Math.Max(1, oscillator.Length), count),
+        DynamicSupportAndResistance support => new GeneratedDynamicSupportState(support.Length, count),
+        DynamicallyAdjustableFilter filter => new GeneratedDynamicFilterState(filter.Length),
+        DynamicallyAdjustableMovingAverage average => new GeneratedDynamicAverageState(average.FastLength, average.SlowLength),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5066,6 +5070,34 @@ internal static partial class ValuesBarExecution
             return MathHelper.MinOrMax(midpoint - (slowD - fastD), 100, 0);
         }
         public void Dispose() { _high.Dispose(); _low.Dispose(); _fast?.Dispose(); _slow?.Dispose(); }
+    }
+
+    private sealed class GeneratedDynamicSupportState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly DynamicSupportWindow _window = new(MovingAvgType.WildersSmoothingMethod, length, false, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = value.Support; outputs[1] = value.Resistance; outputs[2] = value.Middle;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDynamicFilterState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly DynamicFilterWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedDynamicAverageState(int fast, int slow) : IIndicatorState, IDisposable
+    {
+        private readonly DynamicAverageWindow _window = new(fast, slow);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => Reset();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
