@@ -37,6 +37,7 @@ internal static partial class ValuesBarExecution
 
     private static bool IsGeneratedState(IIndicator indicator) =>
         IsDemarkCountState(indicator) ||
+        indicator is GroverLlorensActivator { MaType: null } grover && double.IsFinite(grover.Mult) ||
         indicator is FXSniperIndicator { MaType: null } sniper && double.IsFinite(sniper.B) ||
         indicator is FastandSlowKurtosisOscillator { MaType: null } kurtosis && double.IsFinite(kurtosis.Ratio) ||
         indicator is FibonacciRetrace { MaType: null } retrace && double.IsFinite(retrace.Factor) ||
@@ -244,6 +245,7 @@ internal static partial class ValuesBarExecution
             or GainLossMovingAverage { MaType: null, SecondAverage: null }
             or GannHiLoActivator { MaType: null, SecondAverage: null } or GannTrendOscillator
             or GopalakrishnanRangeIndex { MaType: null, SecondAverage: null }
+            or GroverLlorensCycleOscillator { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -726,6 +728,8 @@ internal static partial class ValuesBarExecution
         GannTrendOscillator gann => new GeneratedGannTrendState(Math.Max(1, gann.Length)),
         GopalakrishnanRangeIndex range => new GeneratedGopalakrishnanState(range.Length, count),
         GrandTrendForecasting grand => new GeneratedGrandTrendState(grand.Length, grand.ForecastLength, grand.Mult),
+        GroverLlorensActivator activator => new GeneratedGroverState(activator.Length, activator.Mult, false),
+        GroverLlorensCycleOscillator cycle => new GeneratedGroverState(cycle.Length, 10, true),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5497,6 +5501,14 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs)
         { var point = _window.Next(bar.Close, true); outputs[0] = point.Trend; outputs[1] = point.Upper; outputs[2] = point.Middle; outputs[3] = point.Lower; }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedGroverState(int length, double multiplier, bool cycle) : IIndicatorState, IDisposable
+    {
+        private readonly GroverWindow _window = new(MovingAvgType.WildersSmoothingMethod, length, cycle ? 20 : 1, multiplier, cycle);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true).Line;
         public void Dispose() => Reset();
     }
 
