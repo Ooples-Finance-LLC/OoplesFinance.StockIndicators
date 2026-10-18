@@ -1,0 +1,37 @@
+{
+  "batch": "dema2lines-shared-execution",
+  "types": [
+    "Dema2Lines"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 30,
+    "parity_passed": 4,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "dema2lines-unit-verified.trx.gz",
+        "passed_cases": 30,
+        "trx_sha256": "2fb39c644003d52508ae682a51801486c0fbdc8f70fb0e3bcca550fbcfdbf564"
+      },
+      {
+        "file": "dema2lines-parity-verified.trx.gz",
+        "passed_cases": 4,
+        "trx_sha256": "1385c1c3adeaca3f5d3c727adcc2c47b17f0bf457337889d6900d43ce6380c9c"
+      }
+    ],
+    "context": "Executed in the 14-facade follow-on working candidate with inherited unresolved MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "766bf7006df16711e91b86c07f83e351dc2019699347abbc5c80a46aad3de270",
+    "test_execution_input_sha256": {
+      "unit": "aa7bb094ab9dcff4a43871ee796f162c22f80bccb1cd7bbd0445dff4689eda63",
+      "parity": "aa7bb094ab9dcff4a43871ee796f162c22f80bccb1cd7bbd0445dff4689eda63"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "ee7078a17110e39d923f1607a7ba4512a71c0799"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

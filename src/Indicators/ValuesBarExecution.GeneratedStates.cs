@@ -213,6 +213,8 @@ internal static partial class ValuesBarExecution
             or DirectionalTrendIndex { MaType: null }
             or CoralTrendIndicator or CorrectedMovingAverage { MaType: null }
             or CubedWeightedMovingAverage
+            or Dema2Lines { MaType: null }
+            or DemarkPressureRatioV1 or DemarkPressureRatioV2 or DemarkRangeExpansionIndex
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -647,6 +649,10 @@ internal static partial class ValuesBarExecution
         CoralTrendIndicator coral => new GeneratedCoralTrendState(coral.Length),
         CorrectedMovingAverage corrected => new GeneratedCorrectedAverageState(corrected.Length),
         CubedWeightedMovingAverage cube => new GeneratedCubicWeightedState(cube.Length, count),
+        Dema2Lines lines => new GeneratedDemaTwoLinesState(lines.FastLength, lines.SlowLength),
+        DemarkPressureRatioV1 pressure => new GeneratedDemarkPressureState(pressure.Length, count, false),
+        DemarkPressureRatioV2 pressure => new GeneratedDemarkPressureState(pressure.Length, count, true),
+        DemarkRangeExpansionIndex range => new GeneratedDemarkRangeState(range.Length),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -4902,6 +4908,38 @@ internal static partial class ValuesBarExecution
             return _cube.Ratio(_denominator);
         }
         public void Dispose() { Reset(); _values.Dispose(); }
+    }
+
+    private sealed class GeneratedDemaTwoLinesState(int fast, int slow) : IMultiOutputState
+    {
+        private readonly Streaming.EmaState _fastFirst = new(fast), _fastSecond = new(fast);
+        private readonly Streaming.EmaState _slowFirst = new(slow), _slowSecond = new(slow);
+        public void Reset() { _fastFirst.Reset(); _slowFirst.Reset(); _fastSecond.Reset(); _slowSecond.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var first = _fastFirst.GetNext(bar.Close, true);
+            var second = _slowFirst.GetNext(bar.Close, true);
+            outputs[0] = _fastSecond.GetNext(first, true);
+            outputs[1] = _slowSecond.GetNext(second, true);
+        }
+    }
+
+    private sealed class GeneratedDemarkPressureState(int length, int count, bool second) : IIndicatorState, IDisposable
+    {
+        // The period only controls eviction. A window larger than the complete
+        // input cannot evict, so its storage may be capped at the input count.
+        private readonly DemarkPressureWindow _window = new(Math.Min(Math.Max(1, length), Math.Max(1, count)), second);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Open, bar.High, bar.Low, bar.Close, bar.Volume, true);
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedDemarkRangeState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly DemarkRangeWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true);
+        public void Dispose() => Reset();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
