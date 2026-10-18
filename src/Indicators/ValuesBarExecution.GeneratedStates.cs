@@ -180,6 +180,9 @@ internal static partial class ValuesBarExecution
             or ChandeMomentumOscillatorSignal { MaType: null }
             or ElderForceIndex or MfiCore or WilliamsAD
             or ButterworthFilter or InverseFisherTransformCore or EhlersReflex or EhlersTrendflex
+            or CommoditySelectionIndex { MaType: null } or ConstanceBrownCompositeIndex { MaType: null }
+            or FollowingAdaptiveMovingAverage
+            or EhlersMesaAdaptiveMovingAverage { FastLimit: >= double.MinValue and <= double.MaxValue, SlowLimit: >= double.MinValue and <= double.MaxValue }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -564,6 +567,10 @@ internal static partial class ValuesBarExecution
         InverseFisherTransformCore => new GeneratedInverseRsiFisherState(5, 9, count),
         EhlersReflex filter => new GeneratedTrendflexState(filter.Length, true),
         EhlersTrendflex filter => new GeneratedTrendflexState(filter.Length, false),
+        CommoditySelectionIndex commodity => new GeneratedCommoditySelectionState(commodity.Length),
+        ConstanceBrownCompositeIndex brown => new GeneratedBrownCompositeState(brown),
+        FollowingAdaptiveMovingAverage => new GeneratedFollowingMamaState(),
+        EhlersMesaAdaptiveMovingAverage mama => new GeneratedMamaOutputsState(mama.FastLimit, mama.SlowLimit),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -4297,6 +4304,57 @@ internal static partial class ValuesBarExecution
             return outputs[1];
         }
         public void Dispose() => _state.Dispose();
+    }
+
+    private sealed class GeneratedCommoditySelectionState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly CommoditySelectionWindow _window = new(MovingAvgType.WildersSmoothingMethod, length, 50, 3000, 10);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = point.Value; outputs[1] = point.Signal;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedBrownCompositeState(ConstanceBrownCompositeIndex brown) : IMultiOutputState, IDisposable
+    {
+        private readonly BrownCompositeWindow _window = new(MovingAvgType.SimpleMovingAverage, brown.FastLength, brown.SlowLength, brown.Length1, brown.Length2, brown.SmoothLength);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Line; outputs[1] = point.Fast; outputs[2] = point.Slow;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedFollowingMamaState : IIndicatorState, IDisposable
+    {
+        private readonly MamaWindow _window = new(.5, .05);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Values.Fama;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedMamaOutputsState(double fast, double slow) : IMultiOutputState, IDisposable
+    {
+        private readonly MamaWindow _window = new(fast, slow);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true).Values;
+            outputs[0] = point.Fama;
+            outputs[1] = point.Mama;
+            outputs[2] = point.I1;
+            outputs[3] = point.Q1;
+            outputs[4] = point.SmoothPeriod;
+            outputs[5] = point.Smooth;
+            outputs[6] = point.Real;
+            outputs[7] = point.Imag;
+        }
+        public void Dispose() => _window.Reset();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
