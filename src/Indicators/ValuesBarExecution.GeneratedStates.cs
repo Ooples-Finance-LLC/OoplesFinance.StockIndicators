@@ -143,6 +143,7 @@ internal static partial class ValuesBarExecution
             or EhlersCorrelationTrendIndicator or EhlersCorrelationCycleIndicator or EhlersCorrelationAngleIndicator or EhlersMarketStateIndicator
             or EhlersHurstCoefficient or EhlersSpearmanRankIndicator
             or EhlersNoiseEliminationTechnology { Length: < int.MaxValue }
+            or Pmo { MaType: null } or PriceMomentumOscillator { MaType: null } or DecisionPointPriceMomentumOscillator
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -463,6 +464,9 @@ internal static partial class ValuesBarExecution
         EhlersNoiseEliminationTechnology noise => new GeneratedNoiseEliminationState(noise.Length),
         EhlersSpearmanRankIndicator rank => new GeneratedChronologicalSpearmanState(rank.Length),
         EhlersAdaptiveRelativeStrengthIndexV1 rsi => new GeneratedAdaptiveRsiV1State(rsi.CycPart, false),
+        Pmo pmo => new GeneratedPriceMomentumState(pmo.Length, 20, pmo.SignalLength, count, false),
+        PriceMomentumOscillator pmo => new GeneratedPriceMomentumState(pmo.Length1, pmo.Length2, pmo.SignalLength, count, false),
+        DecisionPointPriceMomentumOscillator pmo => new GeneratedPriceMomentumState(checked(Math.Max(1, pmo.Length) * 2 + 7), checked(Math.Max(1, pmo.Length) + 6), 10, count, true),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -3620,6 +3624,19 @@ internal static partial class ValuesBarExecution
             return result;
         }
         public void Dispose() => _values.Dispose();
+    }
+
+    private sealed class GeneratedPriceMomentumState(int first, int second, int signal, int count, bool histogram) : IMultiOutputState, IDisposable
+    {
+        private readonly PriceMomentumWindow _window = new(MovingAvgType.ExponentialMovingAverage, first, second, signal, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Value; outputs[1] = point.Signal;
+            if (histogram) outputs[2] = point.Histogram;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
