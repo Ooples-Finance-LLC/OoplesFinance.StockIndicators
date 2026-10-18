@@ -166,6 +166,12 @@ internal static partial class ValuesBarExecution
             or ChandeCompositeMomentumIndex or ChandeForecastOscillator or ChandeKrollRSquaredIndex { MaType: null }
             or ChandeMomentumOscillatorAbsolute or ChandeMomentumOscillatorAbsoluteAverage or ChandeMomentumOscillatorAverage or ChandeMomentumOscillatorAverageDisparityIndex
             or ChandeMomentumOscillatorFilter { MaType: null }
+            or Ama or AdaptiveRsi or AsymmetricalRsi or AsymmetricalRelativeStrengthIndex
+            or AdaptiveRelativeStrengthIndex { MaType: null }
+            or AdaptiveStochastic or ApirineSlowRelativeStrengthIndex { MaType: null }
+            or PoweredKaufmanAdaptiveMovingAverage
+            or AdaptiveTrailingStop { Multiplier: >= double.MinValue and <= double.MaxValue }
+            or AverageAbsoluteErrorNormalization or BelkhayateTiming or BayesianOscillator { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -523,6 +529,18 @@ internal static partial class ValuesBarExecution
         ChandeMomentumOscillatorAverage => new GeneratedChandeAverageState(count, false),
         ChandeMomentumOscillatorAverageDisparityIndex => new GeneratedChandeDisparityState(),
         ChandeMomentumOscillatorFilter oscillator => new GeneratedChandeFilterState(Math.Max(1, oscillator.Length), count),
+        Ama average => new GeneratedAdaptiveRangeState(average.Length),
+        AdaptiveRsi => new GeneratedAdaptivePriceRsiState(14, count),
+        AdaptiveRelativeStrengthIndex average => new GeneratedAdaptivePriceRsiState(Math.Max(1, average.Length), count),
+        AsymmetricalRsi oscillator => new GeneratedAsymmetricRsiState(oscillator.UpLength, count),
+        AsymmetricalRelativeStrengthIndex oscillator => new GeneratedAsymmetricRsiState(oscillator.Length, count),
+        AdaptiveStochastic oscillator => new GeneratedAdaptiveStochasticState(oscillator.MinLength, oscillator.MaxLength),
+        ApirineSlowRelativeStrengthIndex oscillator => new GeneratedApirineRsiState(oscillator.Length, oscillator.SmoothLength, count),
+        PoweredKaufmanAdaptiveMovingAverage average => new GeneratedPoweredKaufmanState(average.Length),
+        AdaptiveTrailingStop stop => new GeneratedAdaptiveStopState(stop.Length, stop.Multiplier),
+        AverageAbsoluteErrorNormalization normalization => new GeneratedAbsoluteErrorState(normalization.Length),
+        BelkhayateTiming => new GeneratedBelkhayateState(),
+        BayesianOscillator oscillator => new GeneratedBayesianState(oscillator.Length),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -4092,6 +4110,98 @@ internal static partial class ValuesBarExecution
             outputs[0] = value; outputs[1] = _signal.Update(new Bar(default, 0, 0, 0, value, 0));
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAdaptiveRangeState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly AdaptiveRangeMeanWindow _window = new(2, 14, period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAdaptivePriceRsiState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly PriceRsiWindow _rsi = new(MovingAvgType.WildersSmoothingMethod, period, count);
+        private double _previous;
+        public void Reset() { _rsi.Reset(); _previous = 0; }
+        public double Update(in Bar bar) => _previous = AdaptiveRsiBlend.Next(bar.Close, _previous, _rsi.Next(bar.Close, true));
+        public void Dispose() => _rsi.Dispose();
+    }
+
+    private sealed class GeneratedAsymmetricRsiState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly AsymmetricGainLossWindow _window = new(period, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAdaptiveStochasticState(int fast, int slow) : IIndicatorState, IDisposable
+    {
+        private readonly AdaptiveStochasticWindow _window = new(50, fast, slow);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedApirineRsiState(int period, int smooth, int count) : IIndicatorState, IDisposable
+    {
+        private readonly ApirineRsiWindow _window = new(MovingAvgType.WildersSmoothingMethod, period, smooth, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedPoweredKaufmanState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly PoweredKaufmanWindow _window = new(period, 3);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Power;
+            outputs[1] = point.Average;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAdaptiveStopState(int period, double factor) : IIndicatorState, IDisposable
+    {
+        private readonly PoweredKaufmanWindow _window = new(period, factor);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Stop;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAbsoluteErrorState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly AbsoluteErrorWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedBelkhayateState : IIndicatorState, IDisposable
+    {
+        private readonly BelkhayateWindow _window = new();
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true);
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedBayesianState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly BayesianWindow _window = new(MovingAvgType.SimpleMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Down;
+            outputs[1] = point.Up;
+            outputs[2] = point.Prime;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
