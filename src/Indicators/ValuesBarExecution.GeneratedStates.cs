@@ -188,6 +188,14 @@ internal static partial class ValuesBarExecution
             or EhlersHilbertTransformIndicator { IMult: >= double.MinValue and <= double.MaxValue, QMult: >= double.MinValue and <= double.MaxValue }
             or EhlersInstantaneousTrendlineV1 or EhlersHilbertOscillator or EhlersSineWaveIndicatorV1
             or EhlersSineWaveIndicatorV2 { Alpha: >= double.MinValue and <= double.MaxValue }
+            or EhlersDualDifferentiatorDominantCycle or EhlersHomodyneDominantCycle or EhlersPhaseAccumulationDominantCycle
+            or EhlersCycleAmplitude { Delta: >= double.MinValue and <= double.MaxValue }
+            or EhlersTrendExtraction { MaType: null, Delta: >= double.MinValue and <= double.MaxValue }
+            or EhlersEmpiricalModeDecomposition { MaType: null, SecondAverage: null, ThirdAverage: null, Delta: >= double.MinValue and <= double.MaxValue, Fraction: >= double.MinValue and <= double.MaxValue }
+            or EhlersFMDemodulatorIndicator { MaType: null }
+            or EhlersMesaPredictIndicatorV1
+            or EhlersMesaPredictIndicatorV2 { MaType: null }
+            or EhlersAnticipateIndicator { MaType: null, Length: <= AnticipateWindow.MaximumLength, Bw: >= double.MinValue and <= double.MaxValue }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -585,6 +593,16 @@ internal static partial class ValuesBarExecution
         EhlersHilbertOscillator => new GeneratedMamaDerivedState(1),
         EhlersInstantaneousTrendlineV1 => new GeneratedMamaDerivedState(2),
         EhlersSineWaveIndicatorV2 sine => new GeneratedCyberSineState(sine.Length, sine.Alpha),
+        EhlersDualDifferentiatorDominantCycle cycle => new GeneratedHilbertCycleState(cycle.Length1, cycle.Length2, cycle.Length3, 1, 0),
+        EhlersHomodyneDominantCycle cycle => new GeneratedHilbertCycleState(cycle.Length1, cycle.Length2, cycle.Length3, 1, 1),
+        EhlersPhaseAccumulationDominantCycle cycle => new GeneratedHilbertCycleState(cycle.Length1, cycle.Length2, cycle.Length3, cycle.Length4, 2),
+        EhlersCycleAmplitude amplitude => new GeneratedCycleAmplitudeState(amplitude.Length, amplitude.Delta, count),
+        EhlersTrendExtraction trend => new GeneratedTrendExtractionState(trend.Length, trend.Delta),
+        EhlersEmpiricalModeDecomposition decomposition => new GeneratedEmpiricalDecompositionState(decomposition.Length1, decomposition.Length2, decomposition.Delta, decomposition.Fraction),
+        EhlersFMDemodulatorIndicator demodulator => new GeneratedFmDemodulatorState(demodulator.FastLength, demodulator.SlowLength),
+        EhlersMesaPredictIndicatorV1 mesa => new GeneratedMesaPredictV1State(mesa.Length1, mesa.Length2, mesa.LowerLength, mesa.UpperLength),
+        EhlersMesaPredictIndicatorV2 mesa => new GeneratedMesaPredictV2State(mesa.Length1, mesa.Length2, mesa.Length3, mesa.Length4),
+        EhlersAnticipateIndicator anticipate => new GeneratedAnticipateState(anticipate.Length, anticipate.Bw),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -4442,6 +4460,98 @@ internal static partial class ValuesBarExecution
             outputs[1] = point.Lead;
         }
         public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedHilbertCycleState(int upper, int lower, int minimum, int horizon, int mode) : IIndicatorState, IDisposable
+    {
+        private readonly HilbertCycleWindow _window = new(upper, lower, minimum, horizon, mode);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedCycleAmplitudeState(int length, double delta, int count) : IIndicatorState, IDisposable
+    {
+        private readonly CycleAmplitudeWindow _window = new(length, delta, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedTrendExtractionState(int length, double delta) : IMultiOutputState, IDisposable
+    {
+        private readonly TrendExtractionWindow _window = new(MovingAvgType.SimpleMovingAverage, length, delta);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Trend;
+            outputs[1] = point.Band;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedEmpiricalDecompositionState(int length, int extremaLength, double delta, double fraction) : IMultiOutputState, IDisposable
+    {
+        private readonly EmpiricalDecompositionWindow _window = new(MovingAvgType.SimpleMovingAverage, length, extremaLength, delta, fraction);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Trend;
+            outputs[1] = point.Peak;
+            outputs[2] = point.Valley;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedFmDemodulatorState(int fast, int slow) : IIndicatorState
+    {
+        private readonly int _fast = Math.Max(1, fast);
+        private readonly TwoPoleWindow _window = new(slow, 3);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar)
+        {
+            var difference = bar.Close - bar.Open;
+            var scaled = _fast * difference;
+            return _window.Next(Math.Max(-1, Math.Min(1, scaled)), true);
+        }
+    }
+
+    private sealed class GeneratedMesaPredictV1State(int horizon, int order, int smooth, int window) : IMultiOutputState, IDisposable
+    {
+        private readonly OoplesFinance.StockIndicators.Streaming.MesaPredictionKernel _window = new(horizon, order, smooth, window);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Ssf;
+            outputs[1] = point.Predict;
+            outputs[2] = point.PrePredict;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedMesaPredictV2State(int history, int high, int smooth, int horizon) : IMultiOutputState, IDisposable
+    {
+        private readonly MesaPredictV2Window _window = new(MovingAvgType.EhlersHannMovingAverage, history, high, smooth, horizon);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Filter;
+            outputs[1] = point.Predict;
+            outputs[2] = point.Extrap;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAnticipateState(int length, double bandwidth) : IIndicatorState, IDisposable
+    {
+        private readonly AnticipateWindow _window = new(MovingAvgType.EhlersHannMovingAverage, length, bandwidth);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
