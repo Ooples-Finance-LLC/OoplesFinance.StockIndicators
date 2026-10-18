@@ -40,6 +40,7 @@ internal static partial class ValuesBarExecution
         indicator is FXSniperIndicator { MaType: null } sniper && double.IsFinite(sniper.B) ||
         indicator is FastandSlowKurtosisOscillator { MaType: null } kurtosis && double.IsFinite(kurtosis.Ratio) ||
         indicator is FibonacciRetrace { MaType: null } retrace && double.IsFinite(retrace.Factor) ||
+        indicator is GrandTrendForecasting grand && double.IsFinite(grand.Mult) && grand.Mult >= 0 ||
         indicator is EhlersTruncatedBandPassFilter truncated && IsTruncatedBandShared(truncated) ||
         indicator is EhlersVossPredictiveFilter voss && IsVossShared(voss) ||
         indicator is BollingerBandsAvgTrueRange ratio && StrengthWindow.Supports(ratio.MaType) && double.IsFinite(ratio.StdDevMult) ||
@@ -242,6 +243,7 @@ internal static partial class ValuesBarExecution
             or FreedomOfMovement { MaType: null } or FunctionToCandles { MaType: null }
             or GainLossMovingAverage { MaType: null, SecondAverage: null }
             or GannHiLoActivator { MaType: null, SecondAverage: null } or GannTrendOscillator
+            or GopalakrishnanRangeIndex { MaType: null, SecondAverage: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -722,6 +724,8 @@ internal static partial class ValuesBarExecution
         GainLossMovingAverage gain => new GeneratedGainLossAverageState(gain.Length, gain.SignalLength, count),
         GannHiLoActivator gann => new GeneratedGannHiLoState(gann.Length, count),
         GannTrendOscillator gann => new GeneratedGannTrendState(Math.Max(1, gann.Length)),
+        GopalakrishnanRangeIndex range => new GeneratedGopalakrishnanState(range.Length, count),
+        GrandTrendForecasting grand => new GeneratedGrandTrendState(grand.Length, grand.ForecastLength, grand.Mult),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5474,6 +5478,25 @@ internal static partial class ValuesBarExecution
             _line = _highTwo > _highOne && high > _highOne ? 1 : _lowTwo < _lowOne && low < _lowOne ? -1 : _line;
             _highTwo = _highOne; _lowTwo = _lowOne; _highOne = high; _lowOne = low; return _line;
         }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedGopalakrishnanState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly GopalakrishnanWindow _window = new(length);
+        private readonly StrengthAverage _signal = new(MovingAvgType.WeightedMovingAverage, Math.Max(2, length), count);
+        public void Reset() { _window.Reset(); _signal.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        { var line = _window.Next(bar.High, bar.Low, true); outputs[0] = line; outputs[1] = _signal.Next(new StrengthValue(line), true).Mantissa; }
+        public void Dispose() { _window.Reset(); _signal.Dispose(); }
+    }
+
+    private sealed class GeneratedGrandTrendState(int length, int horizon, double multiplier) : IMultiOutputState, IDisposable
+    {
+        private readonly GrandForecastWindow _window = new(length, horizon, multiplier);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, true); outputs[0] = point.Trend; outputs[1] = point.Upper; outputs[2] = point.Middle; outputs[3] = point.Lower; }
         public void Dispose() => Reset();
     }
 
