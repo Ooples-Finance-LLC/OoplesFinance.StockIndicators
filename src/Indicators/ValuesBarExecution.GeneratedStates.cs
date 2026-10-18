@@ -176,6 +176,10 @@ internal static partial class ValuesBarExecution
             or DemandIndex or DemandOscillator { MaType: null }
             or DampingIndex { MaType: null }
             or DetrendedSyntheticPrice
+            or KlingerSignal or MassIndexCore
+            or ChandeMomentumOscillatorSignal { MaType: null }
+            or ElderForceIndex or MfiCore or WilliamsAD
+            or ButterworthFilter or InverseFisherTransformCore or EhlersReflex or EhlersTrendflex
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -550,6 +554,16 @@ internal static partial class ValuesBarExecution
         DemandOscillator => new GeneratedDemandOscillatorState(),
         DampingIndex damping => new GeneratedDampingState(damping.Length, count),
         DetrendedSyntheticPrice synthetic => new GeneratedSyntheticPriceState(synthetic.Length),
+        KlingerSignal signal => new GeneratedKlingerSignalState(signal.FastLength, signal.SlowLength, signal.SignalLength),
+        ChandeMomentumOscillatorSignal signal => new GeneratedChandeSignalState(signal.Length, count, signal.SignalLength),
+        MassIndexCore mass => new GeneratedMassState(21, mass.Length, count),
+        ElderForceIndex force => new GeneratedForceState(force.Length),
+        MfiCore flow => new GeneratedMoneyFlowState(flow.Length, count),
+        WilliamsAD => new GeneratedWilliamsAccumulationState(),
+        ButterworthFilter filter => new GeneratedTwoPoleState(filter.Length, 0),
+        InverseFisherTransformCore => new GeneratedInverseRsiFisherState(5, 9, count),
+        EhlersReflex filter => new GeneratedTrendflexState(filter.Length, true),
+        EhlersTrendflex filter => new GeneratedTrendflexState(filter.Length, false),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -4262,6 +4276,27 @@ internal static partial class ValuesBarExecution
             _high = bar.High; _low = bar.Low; _fast = fast; _slow = slow; _seeded = true;
             return fast - slow;
         }
+    }
+
+    private sealed class GeneratedKlingerSignalState(int fast, int slow, int signal) : IIndicatorState, IDisposable
+    {
+        private readonly KlingerWindow _window = new(MovingAvgType.ExponentialMovingAverage, fast, slow, signal);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, true).SignalLine;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedChandeSignalState(int period, int count, int signalLength) : IIndicatorState, IDisposable
+    {
+        private readonly GeneratedChandeState _state = new(period, count, signalLength);
+        public void Reset() => _state.Reset();
+        public double Update(in Bar bar)
+        {
+            Span<double> outputs = stackalloc double[2];
+            _state.Update(in bar, outputs);
+            return outputs[1];
+        }
+        public void Dispose() => _state.Dispose();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
