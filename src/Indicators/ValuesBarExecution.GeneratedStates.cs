@@ -149,6 +149,16 @@ internal static partial class ValuesBarExecution
             or ChartmillValueIndicator { MaType: null } or CenterOfLinearity or ChopZone { MaType: null }
             or ConfluenceIndicator { MaType: null }
             or CoppockCurve { MaType: null } or DerivativeOscillator { MaType: null } or DidiIndex { MaType: null }
+            or AtrTrailingStops { MaType: null, Multiplier: >= double.MinValue and <= double.MaxValue }
+            or AverageTrueRangeTrailingStops { MaType: null, Multiplier: >= double.MinValue and <= double.MaxValue }
+            or ChandelierExit { MaType: null, Mult: >= double.MinValue and <= double.MaxValue }
+            or ChandelierExitLong { MaType: null } or ChandelierExitShort { MaType: null }
+            or MotionToAttractionTrailingStop
+            or ElderSafeZoneStops { MaType: null, Mult: >= double.MinValue and <= double.MaxValue }
+            or KaseDevStopV1 { MaType: null, StdDev1: >= double.MinValue and <= double.MaxValue, StdDev2: >= double.MinValue and <= double.MaxValue, StdDev3: >= double.MinValue and <= double.MaxValue, StdDev4: >= double.MinValue and <= double.MaxValue }
+            or KaseDevStopV2 { MaType: null, StdDev1: >= double.MinValue and <= double.MaxValue, StdDev2: >= double.MinValue and <= double.MaxValue, StdDev3: >= double.MinValue and <= double.MaxValue, StdDev4: >= double.MinValue and <= double.MaxValue }
+            or LinearTrailingStop { Mult: >= double.MinValue and <= double.MaxValue }
+            or PercentageTrailingStops { Pct: >= double.MinValue and <= double.MaxValue }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -483,6 +493,17 @@ internal static partial class ValuesBarExecution
         CoppockCurve curve => new GeneratedCoppockState(curve.Length, count),
         DerivativeOscillator derivative => new GeneratedDerivativeState(derivative.Length),
         DidiIndex didi => new GeneratedDidiState(didi.ShortLength, didi.MediumLength, didi.LongLength, count),
+        AtrTrailingStops stop => new GeneratedAtrStopsState(stop.Length, stop.Multiplier, count),
+        AverageTrueRangeTrailingStops stop => new GeneratedAtrStopsState(stop.Length, stop.Multiplier, count),
+        ChandelierExit stop => new GeneratedChandelierAliasState(stop.Length, stop.Mult, false),
+        ChandelierExitLong stop => new GeneratedChandelierAliasState(stop.Length, 3, false),
+        ChandelierExitShort stop => new GeneratedChandelierAliasState(stop.Length, 3, true),
+        MotionToAttractionTrailingStop stop => new GeneratedMotionStopState(stop.Length),
+        ElderSafeZoneStops stop => new GeneratedElderSafeStopState(stop.Length, stop.Mult),
+        KaseDevStopV1 stop => new GeneratedKaseStopV1State(stop),
+        KaseDevStopV2 stop => new GeneratedKaseStopV2State(stop),
+        LinearTrailingStop stop => new GeneratedLinearStopState(Math.Max(1, stop.Length), stop.Mult),
+        PercentageTrailingStops stop => new GeneratedPercentageStopsState(stop.Length, stop.Pct, count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -3795,6 +3816,110 @@ internal static partial class ValuesBarExecution
 #pragma warning restore S1244
         }
         public void Dispose() { _short?.Dispose(); _medium?.Dispose(); _long?.Dispose(); }
+    }
+
+    private sealed class GeneratedAtrStopsState(int period, double factor, int count) : IIndicatorState, IDisposable
+    {
+        private readonly AtrTrailingWindow _window = new(MovingAvgType.ExponentialMovingAverage, 63, period, factor, false, Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedChandelierAliasState(int period, double factor, bool shortSide) : IIndicatorState, IDisposable
+    {
+        private readonly ChandelierWindow _window = new(MovingAvgType.WildersSmoothingMethod, period, factor);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
+            return shortSide ? point.Short : point.Long;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedMotionStopState(int period) : IIndicatorState
+    {
+        private readonly MotionAttractionWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Stop;
+    }
+
+    private sealed class GeneratedElderSafeStopState(int period, double factor) : IIndicatorState, IDisposable
+    {
+        private readonly ElderSafeZoneWindow _window = new(MovingAvgType.ExponentialMovingAverage, 63, period, 3, factor);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true).Value;
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedKaseStopV1State(KaseDevStopV1 stop) : IMultiOutputState, IDisposable
+    {
+        private readonly KaseStopV1Window _window = new(MovingAvgType.SimpleMovingAverage, stop.FastLength, stop.SlowLength, stop.Length, stop.StdDev1, stop.StdDev2, stop.StdDev3, stop.StdDev4);
+        private double _previousTypical;
+        private bool _started;
+        public void Reset() { _window.Reset(); _previousTypical = 0; _started = false; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var input = KaseStopV1Window.Typical(bar.High, bar.Low, bar.Close);
+            var high = bar.High; var low = bar.Low;
+            if (!CalculationsHelper.IsWithinBarRange(input, low, high))
+            {
+                var previous = _started ? _previousTypical : input;
+                high = Math.Max(previous, input); low = Math.Min(previous, input);
+            }
+            var point = _window.Next(high, low, bar.Close, input, true);
+            outputs[0] = point.Dev1; outputs[1] = point.Dev2; outputs[2] = point.Dev3; outputs[3] = point.WarningLine;
+            _previousTypical = input; _started = true;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedKaseStopV2State(KaseDevStopV2 stop) : IMultiOutputState, IDisposable
+    {
+        private readonly KaseStopV2Window _window = new(MovingAvgType.SimpleMovingAverage, stop.FastLength, stop.SlowLength, stop.Length, stop.StdDev1, stop.StdDev2, stop.StdDev3, stop.StdDev4);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = point.Dev1; outputs[1] = point.Dev2; outputs[2] = point.Dev3; outputs[3] = point.Dev4;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedLinearStopState(int period, double multiplier) : IIndicatorState
+    {
+        private readonly GeneratedLinearChannelState _channel = new(period, multiplier);
+        private double _side;
+        public void Reset() { _channel.Reset(); _side = 0; }
+        public double Update(in Bar bar)
+        {
+            Span<double> bounds = stackalloc double[2];
+            _channel.Update(in bar, bounds);
+            _side = bar.Close > bounds[0] ? 1 : bar.Close < bounds[1] ? 0 : _side;
+            return (_side * bounds[1]) + ((1 - _side) * bounds[0]);
+        }
+    }
+
+    private sealed class GeneratedPercentageStopsState(int period, double percentage, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.RollingWindowMax _high = new(Math.Min(Math.Max(1, period), Math.Max(1, count)));
+        private readonly Streaming.RollingWindowMin _low = new(Math.Min(Math.Max(1, period), Math.Max(1, count)));
+        private double _previousHigh, _previousLow, _longStop, _shortStop;
+        private bool _started;
+        public void Reset() { _high.Reset(); _low.Reset(); _previousHigh = _previousLow = _longStop = _shortStop = 0; _started = false; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var previousHigh = _started ? _previousHigh : bar.Close;
+            var previousLow = _started ? _previousLow : bar.Close;
+            var longStop = _started ? _longStop : bar.Close;
+            var shortStop = _started ? _shortStop : bar.Close;
+            _longStop = bar.High > previousHigh ? RoundedPercentageBand.Percent(bar.High, percentage, -1) : longStop;
+            _shortStop = bar.Low < previousLow ? RoundedPercentageBand.Percent(bar.Low, percentage, 1) : shortStop;
+            _previousHigh = _high.Add(bar.High, out _); _previousLow = _low.Add(bar.Low, out _); _started = true;
+            outputs[0] = _longStop; outputs[1] = _shortStop;
+        }
+        public void Dispose() { _high.Dispose(); _low.Dispose(); }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
