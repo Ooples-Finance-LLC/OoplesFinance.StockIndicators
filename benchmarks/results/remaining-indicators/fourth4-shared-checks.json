@@ -1,0 +1,63 @@
+{
+  "status": "fourth-stage-checks-passed-inherited-macd-failures-and-performance-pending",
+  "context": "Three new families in the combined working candidate; the isolated committed tree was not separately built or tested. Endpoint receipts retain their original execution fingerprint under the recorded WavePair-test-only repair. Common GPU fixtures do not establish per-indicator GPU performance.",
+  "input_sha256": "93b0c2391c6bbab1299323d43e81322dc37920c1889a8decd77e34e945367313",
+  "validation_base_head": "ea992b2cc29f900f0049affd947415e83f3af931",
+  "family_check_counts": {
+    "unit": 95,
+    "parity": 16
+  },
+  "family_cpu_receipts": [
+    "endpoint-cpu-contracts.json",
+    "wavepair-cpu-contracts.json",
+    "enhancedindex-cpu-contracts.json"
+  ],
+  "checks": {
+    "discovery": {
+      "status": "passed",
+      "verified_count": 228,
+      "log_sha256": "af0a05d0fa4f27563217fe9a0c4c5f15c181a9fbe25677a4f092342eff4d7346"
+    },
+    "gpu": {
+      "status": "passed",
+      "verified_count": 100,
+      "log_sha256": "2d34d733455fc9aeb253ad2639625299a92d011ad97bcc177e2223faeedf72ac"
+    },
+    "verify-gpu-partition": {
+      "status": "passed",
+      "verified_count": null,
+      "log_sha256": "77998a9accbeed827879abad120d633d6d4a87a845b0e3c33802981074b22c92",
+      "result": "Verified 100 local GPU cases; 1557 methods remain assigned to hosted CI"
+    },
+    "inventory": {
+      "status": "passed",
+      "verified_count": 6,
+      "log_sha256": "7389171a9307d38565d216ed68eef3de6ce5afb8aec2089767fc22dd84f0bf45",
+      "result": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.394s\n\nOK"
+    }
+  },
+  "discovery_evidence": "fourth4-discovery.trx.gz",
+  "gpu_evidence": "fourth4-gpu-contracts.json",
+  "gpu_trx_evidence": "fourth4-gpu.trx.gz",
+  "inherited_failed_unit_cases": 3,
+  "inherited_failure_evidence": "combined113-known-macd-failures.trx.gz",
+  "pending": [
+    "inherited MACD unit-contract failures",
+    "raw timing and performance comparison",
+    "required hosted checks"
+  ],
+  "family_execution_inputs_sha256": {
+    "endpoint": {
+      "unit": "f5656a95b0e984020fd9c3c16bcbf28acafd862678dc508ef068552a10c1d2d8",
+      "parity": "f5656a95b0e984020fd9c3c16bcbf28acafd862678dc508ef068552a10c1d2d8"
+    },
+    "wavepair": {
+      "unit": "93b0c2391c6bbab1299323d43e81322dc37920c1889a8decd77e34e945367313",
+      "parity": "93b0c2391c6bbab1299323d43e81322dc37920c1889a8decd77e34e945367313"
+    },
+    "enhancedindex": {
+      "unit": "93b0c2391c6bbab1299323d43e81322dc37920c1889a8decd77e34e945367313",
+      "parity": "93b0c2391c6bbab1299323d43e81322dc37920c1889a8decd77e34e945367313"
+    }
+  }
+}
