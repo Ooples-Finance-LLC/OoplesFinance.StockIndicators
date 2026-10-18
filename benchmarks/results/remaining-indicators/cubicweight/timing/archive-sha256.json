@@ -1,0 +1,15 @@
+{
+  "log.gz": "d1a4a06d7d7d4728f2e5f0c545a8075b62018a58ebb9ff77fe2a7789e66a190f",
+  "preserved-candidate-manifest.json": "9914d38ad0e95daf38e0e0ae89388f0e329281eb627fc680a89ea4f2862c1b30",
+  "processes.jsonl.gz": "08faf231ed738e916e0f8de0bb4c32b4385bb1e385d032e9758f10db4e6ed908",
+  "quiet-preflight.json": "c9535697956416328d8f4f78a8fd425d43552d48d8cdb8620b1d46c4faa76fc3",
+  "record-si-remaining-timing.py": "621244c385651b4de5dee4f235b8ecf2671ca43b18024e27adb8f08cf9b83a86",
+  "report-full-compressed.json": "38d868e2ab1e4cc7e7151ec10e3fa641c4ce7bc55f3dd55422c5af84e707b14b",
+  "run-si-remaining-cubicweight.ps1": "1ff14bdd027dcd592a5d99196c35bfa0955281a4f6be9de723729c04a70c4fcf",
+  "runner-exit.json": "37d2bb56c4776b2912013f831d8d6f1151173e8a5b62ad0027a73390f66345c8",
+  "si-quiet-process-monitor.ps1": "354b7f5300b1f1973bfd31c74c6d557182bb51b131dbd539587f804b3c3dfc27",
+  "stderr.log.gz": "22cd1417deab71ccbbbf06a53d00685e5f10623cff019b65c265d23e25ef008a",
+  "summary.json": "d4f3bff023e9b25712585624c63dcfa09679f0abe080f97ead5f180092893a05",
+  "verify-si-quiet-evidence.py": "36ea29298d3f44009479f6c0bb51664b04029ed0f30085726b1831ed542a3dbf",
+  "verify-si-remaining-snapshot.py": "2da74424efda127a9cafaf39f2e39d4aa84e9fe04baaf40dae916509bbe0efb5"
+}
