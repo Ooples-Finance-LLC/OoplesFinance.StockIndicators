@@ -226,6 +226,7 @@ internal static partial class ValuesBarExecution
             or EdgePreservingFilter { MaType: null } or EfficientPrice
             or EfficientAutoLine { FastAlpha: >= -double.MaxValue and <= double.MaxValue, SlowAlpha: >= -double.MaxValue and <= double.MaxValue }
             or EarningSupportResistanceLevels or ElderMarketThermometer { MaType: null, SecondAverage: null }
+            or ElderImpulseSystem or ElderRayIndex { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -682,6 +683,8 @@ internal static partial class ValuesBarExecution
         EfficientAutoLine line => new GeneratedEfficiencyOutputState(line.Length, true, line.FastAlpha, line.SlowAlpha),
         EarningSupportResistanceLevels => new GeneratedEarningLevelsState(),
         ElderMarketThermometer thermometer => new GeneratedElderThermometerState(thermometer.Length),
+        ElderImpulseSystem impulse => new GeneratedElderImpulseState(impulse.Length),
+        ElderRayIndex ray => new GeneratedElderRayState(ray.Length),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5146,6 +5149,41 @@ internal static partial class ValuesBarExecution
             outputs[0] = value.Value; outputs[1] = value.Signal;
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedElderImpulseState(int length) : IIndicatorState
+    {
+        private readonly Streaming.EmaState _trend = new(length), _fast = new(12), _slow = new(26), _signal = new(9);
+        private double _previousTrend, _previousHistogram;
+        private bool _started;
+        public void Reset() { _trend.Reset(); _fast.Reset(); _slow.Reset(); _signal.Reset(); _previousTrend = _previousHistogram = 0; _started = false; }
+        public double Update(in Bar bar)
+        {
+            var trend = _trend.GetNext(bar.Close, true);
+            var line = _fast.GetNext(bar.Close, true) - _slow.GetNext(bar.Close, true);
+            var histogram = line - _signal.GetNext(line, true);
+            var result = !_started ? 0 : trend > _previousTrend && histogram > _previousHistogram ? 1
+                : trend < _previousTrend && histogram < _previousHistogram ? -1 : 0;
+            _previousTrend = trend; _previousHistogram = histogram; _started = true;
+            return result;
+        }
+    }
+
+    private sealed class GeneratedElderRayState(int length) : IIndicatorState
+    {
+        private readonly Streaming.EmaState _average = new(length);
+        private double _previousClose;
+        private bool _started;
+        public void Reset() { _average.Reset(); _previousClose = 0; _started = false; }
+        public double Update(in Bar bar)
+        {
+            // The legacy builder derives the range even for an unchained close.
+            var high = CalculationsHelper.IsWithinBarRange(bar.Close, bar.Low, bar.High)
+                ? bar.High : Math.Max(_started ? _previousClose : bar.Close, bar.Close);
+            var average = _average.GetNext(bar.Close, true);
+            _previousClose = bar.Close; _started = true;
+            return high - average;
+        }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
