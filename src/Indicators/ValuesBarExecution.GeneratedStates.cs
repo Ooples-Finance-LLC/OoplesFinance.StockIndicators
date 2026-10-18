@@ -38,6 +38,7 @@ internal static partial class ValuesBarExecution
     private static bool IsGeneratedState(IIndicator indicator) =>
         IsDemarkCountState(indicator) ||
         indicator is GroverLlorensActivator { MaType: null } grover && double.IsFinite(grover.Mult) ||
+        indicator is HampelFilter hampel && double.IsFinite(hampel.ScalingFactor) ||
         indicator is FXSniperIndicator { MaType: null } sniper && double.IsFinite(sniper.B) ||
         indicator is FastandSlowKurtosisOscillator { MaType: null } kurtosis && double.IsFinite(kurtosis.Ratio) ||
         indicator is FibonacciRetrace { MaType: null } retrace && double.IsFinite(retrace.Factor) ||
@@ -246,6 +247,7 @@ internal static partial class ValuesBarExecution
             or GannHiLoActivator { MaType: null, SecondAverage: null } or GannTrendOscillator
             or GopalakrishnanRangeIndex { MaType: null, SecondAverage: null }
             or GroverLlorensCycleOscillator { MaType: null }
+            or HarmonicMeanMovingAverage
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -730,6 +732,8 @@ internal static partial class ValuesBarExecution
         GrandTrendForecasting grand => new GeneratedGrandTrendState(grand.Length, grand.ForecastLength, grand.Mult),
         GroverLlorensActivator activator => new GeneratedGroverState(activator.Length, activator.Mult, false),
         GroverLlorensCycleOscillator cycle => new GeneratedGroverState(cycle.Length, 10, true),
+        HampelFilter hampel => new GeneratedHampelState(hampel.Length, hampel.ScalingFactor),
+        HarmonicMeanMovingAverage harmonic => new GeneratedHarmonicState(harmonic.Length, count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5510,6 +5514,41 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true).Line;
         public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedHampelState(int length, double factor) : IIndicatorState, IDisposable
+    {
+        private readonly HampelWindow _window = new(length, factor);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedHarmonicState : IIndicatorState, IDisposable
+    {
+        private readonly int _length;
+        private readonly PooledRingBuffer<double> _history;
+        public GeneratedHarmonicState(int length, int count)
+        {
+            _length = Math.Max(1, length);
+            _history = new(Math.Max(1, Math.Min(_length, count)));
+        }
+        public void Reset() => _history.Clear();
+        public double Update(in Bar bar)
+        {
+            var value = bar.Close;
+            if (_history.Count + 1 >= _length)
+            {
+                var sum = new ExactReciprocalSum();
+                sum.Add(value);
+                var start = _history.Count - (_length - 1);
+                for (var i = _history.Count - 1; i >= start; i--) sum.Add(_history[i]);
+                value = sum.Mean;
+            }
+            _history.TryAdd(bar.Close, out _);
+            return value;
+        }
+        public void Dispose() => _history.Dispose();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
