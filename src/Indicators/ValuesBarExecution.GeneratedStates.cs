@@ -39,6 +39,7 @@ internal static partial class ValuesBarExecution
         IsDemarkCountState(indicator) ||
         indicator is FXSniperIndicator { MaType: null } sniper && double.IsFinite(sniper.B) ||
         indicator is FastandSlowKurtosisOscillator { MaType: null } kurtosis && double.IsFinite(kurtosis.Ratio) ||
+        indicator is FibonacciRetrace { MaType: null } retrace && double.IsFinite(retrace.Factor) ||
         indicator is EhlersTruncatedBandPassFilter truncated && IsTruncatedBandShared(truncated) ||
         indicator is EhlersVossPredictiveFilter voss && IsVossShared(voss) ||
         indicator is BollingerBandsAvgTrueRange ratio && StrengthWindow.Supports(ratio.MaType) && double.IsFinite(ratio.StdDevMult) ||
@@ -236,6 +237,8 @@ internal static partial class ValuesBarExecution
             or FastSlowKurtosisOscillator or FastSlowRsiOscillator or FastSlowStochasticOscillator
             or FastSlowDegreeOscillator { MaType: null }
             or FearAndGreedIndicator { MaType: null } or FireflyOscillator { MaType: null }
+            or FoldedRelativeStrengthIndex { MaType: null } or FisherTransformStochasticOscillator
+            or ForecastOscillator { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -707,6 +710,10 @@ internal static partial class ValuesBarExecution
         FastSlowDegreeOscillator degree => new GeneratedFastSlowDegreeState(degree.Length),
         FearAndGreedIndicator fear => new GeneratedFearGreedState(fear.FastLength, fear.SlowLength, fear.SmoothLength),
         FireflyOscillator firefly => new GeneratedFireflyState(firefly.Length),
+        FoldedRelativeStrengthIndex folded => new GeneratedFoldedRsiState(folded.Length, count),
+        FisherTransformStochasticOscillator fisher => new GeneratedFisherStochasticState(fisher.Length),
+        FibonacciRetrace retrace => new GeneratedFibonacciRetraceState(retrace.Length2, retrace.Factor),
+        ForecastOscillator forecast => new GeneratedForecastOscillatorState(forecast.Length, count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5323,6 +5330,45 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs)
         { var point = _window.Next(bar.High, bar.Low, bar.Close, true); outputs[0] = point.Line; outputs[1] = point.SignalLine; }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedFoldedRsiState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly PriceRsiWindow _rsi = new(MovingAvgType.ExponentialMovingAverage, length, count);
+        // Shared runs have a known total count: a longer sum cannot expire during this run.
+        private readonly FoldedRsiSum _sum = new(Math.Min(Math.Max(1, length), Math.Max(1, count)));
+        private readonly StrengthAverage _signal = new(MovingAvgType.ExponentialMovingAverage, length, count);
+        public void Reset() { _rsi.Reset(); _sum.Reset(); _signal.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        { var line = _sum.Next(_rsi.Next(bar.Close, true), true); outputs[0] = line; outputs[1] = _signal.Next(new StrengthValue(line), true).Mantissa; }
+        public void Dispose() { _rsi.Dispose(); _sum.Dispose(); _signal.Dispose(); }
+    }
+
+    private sealed class GeneratedFisherStochasticState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly FisherStochasticWindow _window = new(MovingAvgType.WeightedMovingAverage, length, 30, 5);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Line;
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedFibonacciRetraceState(int range, double factor) : IMultiOutputState, IDisposable
+    {
+        // Both published bands depend only on the range; the mean is used only for trade signals.
+        private readonly FibonacciRetraceWindow _window = new(MovingAvgType.SimpleMovingAverage, 1, range, factor, includeMean: false);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.High, bar.Low, bar.Close, true); outputs[0] = point.Upper; outputs[1] = point.Lower; }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedForecastOscillatorState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly OneBarReturnWindow _window = new(false, MovingAvgType.SimpleMovingAverage, length, capacityHint: count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, true); outputs[0] = point.Value; outputs[1] = point.Signal; }
         public void Dispose() { Reset(); _window.Dispose(); }
     }
 
