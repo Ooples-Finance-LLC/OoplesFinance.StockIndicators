@@ -39,6 +39,7 @@ internal static partial class ValuesBarExecution
         IsDemarkCountState(indicator) ||
         indicator is GroverLlorensActivator { MaType: null } grover && double.IsFinite(grover.Mult) ||
         indicator is HampelFilter hampel && double.IsFinite(hampel.ScalingFactor) ||
+        indicator is HawkeyeVolumeIndicator hawkeye && double.IsFinite(hawkeye.Divisor) ||
         indicator is FXSniperIndicator { MaType: null } sniper && double.IsFinite(sniper.B) ||
         indicator is FastandSlowKurtosisOscillator { MaType: null } kurtosis && double.IsFinite(kurtosis.Ratio) ||
         indicator is FibonacciRetrace { MaType: null } retrace && double.IsFinite(retrace.Factor) ||
@@ -248,6 +249,7 @@ internal static partial class ValuesBarExecution
             or GopalakrishnanRangeIndex { MaType: null, SecondAverage: null }
             or GroverLlorensCycleOscillator { MaType: null }
             or HarmonicMeanMovingAverage
+            or HalfTrend { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -734,6 +736,8 @@ internal static partial class ValuesBarExecution
         GroverLlorensCycleOscillator cycle => new GeneratedGroverState(cycle.Length, 10, true),
         HampelFilter hampel => new GeneratedHampelState(hampel.Length, hampel.ScalingFactor),
         HarmonicMeanMovingAverage harmonic => new GeneratedHarmonicState(harmonic.Length, count),
+        HalfTrend trend => new GeneratedHalfTrendState(trend.Length),
+        HawkeyeVolumeIndicator hawkeye => new GeneratedHawkeyeState(hawkeye.Divisor),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5549,6 +5553,41 @@ internal static partial class ValuesBarExecution
             return value;
         }
         public void Dispose() => _history.Dispose();
+    }
+
+    private sealed class GeneratedHalfTrendState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly HalfTrendWindow _window = new(MovingAvgType.SimpleMovingAverage, length, 100);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedHawkeyeState : IMultiOutputState, IDisposable
+    {
+        private static readonly System.Numerics.BigInteger Unit = System.Numerics.BigInteger.One << 1074;
+        private readonly System.Numerics.BigInteger _denominator;
+        private readonly int _sign;
+        private System.Numerics.BigInteger _previousHigh, _previousLow, _previousMidpoint;
+        public GeneratedHawkeyeState(double divisor)
+        {
+            var units = ExactVarianceWindow.Units(divisor);
+            _sign = units.Sign;
+            _denominator = units.IsZero ? System.Numerics.BigInteger.One : System.Numerics.BigInteger.Abs(units);
+        }
+        public void Reset() => _previousHigh = _previousLow = _previousMidpoint = default;
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            // Rolling range/volume means affect trade signals, not the two published thresholds.
+            var offset = (_previousHigh - _previousLow) * Unit * _sign;
+            var midpoint = _previousMidpoint * _denominator;
+            outputs[0] = ExactMeanAccumulator.UnitRatio(midpoint + offset, _denominator);
+            outputs[1] = ExactMeanAccumulator.UnitRatio(midpoint - offset, _denominator);
+            _previousHigh = ExactVarianceWindow.Units(bar.High);
+            _previousLow = ExactVarianceWindow.Units(bar.Low);
+            _previousMidpoint = ExactVarianceWindow.Units(PriceMean.Of(bar.High, bar.Low));
+        }
+        public void Dispose() => Reset();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
