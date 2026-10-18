@@ -215,6 +215,10 @@ internal static partial class ValuesBarExecution
             or CubedWeightedMovingAverage
             or Dema2Lines { MaType: null }
             or DemarkPressureRatioV1 or DemarkPressureRatioV2 or DemarkRangeExpansionIndex
+            or DiNapoliMovingAverageConvergenceDivergence { Lc: > 0 and <= double.MaxValue, Sc: > 0 and <= double.MaxValue, Sp: > 0 and <= double.MaxValue }
+            or DiNapoliPercentagePriceOscillator or DiNapoliPreferredStochasticOscillator
+            or DistanceWeightedMovingAverage or InverseDistanceWeightedMovingAverage
+            or DisparityIndex { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -653,6 +657,12 @@ internal static partial class ValuesBarExecution
         DemarkPressureRatioV1 pressure => new GeneratedDemarkPressureState(pressure.Length, count, false),
         DemarkPressureRatioV2 pressure => new GeneratedDemarkPressureState(pressure.Length, count, true),
         DemarkRangeExpansionIndex range => new GeneratedDemarkRangeState(range.Length),
+        DiNapoliMovingAverageConvergenceDivergence macd => new GeneratedDiNapoliOscillatorState(macd.Lc, macd.Sc, macd.Sp, false),
+        DiNapoliPercentagePriceOscillator => new GeneratedDiNapoliOscillatorState(17.5185, 8.3896, 9.0503, true),
+        DiNapoliPreferredStochasticOscillator stochastic => new GeneratedDiNapoliStochasticState(stochastic.Length),
+        DistanceWeightedMovingAverage distance => new GeneratedDistanceMassState(distance.Length, count, true),
+        InverseDistanceWeightedMovingAverage distance => new GeneratedDistanceMassState(distance.Length, count, false),
+        DisparityIndex disparity => new GeneratedDisparityState(Math.Max(1, disparity.Length), count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -4940,6 +4950,57 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true);
         public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedDiNapoliOscillatorState(double lc, double sc, double sp, bool percentage) : IMultiOutputState
+    {
+        private readonly double _fastCoefficient = RoundedFractionalEma.Coefficient(sc, nameof(sc));
+        private readonly double _slowCoefficient = RoundedFractionalEma.Coefficient(lc, nameof(lc));
+        private readonly double _signalCoefficient = RoundedFractionalEma.Coefficient(sp, nameof(sp));
+        private double _fast, _slow, _signal;
+        public void Reset() { _fast = _slow = _signal = 0; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            _fast = RoundedFractionalEma.Next(bar.Close, _fast, _fastCoefficient);
+            _slow = RoundedFractionalEma.Next(bar.Close, _slow, _slowCoefficient);
+            var line = percentage ? RoundedFractionalEma.Percentage(_fast, _slow) : _fast - _slow;
+            _signal = RoundedFractionalEma.Next(line, _signal, _signalCoefficient);
+            var offset = percentage ? 0 : 2;
+            if (!percentage) { outputs[0] = _fast; outputs[1] = _slow; }
+            outputs[offset] = line; outputs[offset + 1] = _signal; outputs[offset + 2] = line - _signal;
+        }
+    }
+
+    private sealed class GeneratedDiNapoliStochasticState(int length) : IMultiOutputState, IDisposable
+    {
+        private RollingMinMax _high = new(length), _low = new(length);
+        private double _line, _signal;
+        public void Reset() { _high = new(length); _low = new(length); _line = _signal = 0; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            _high.Add(bar.High); _low.Add(bar.Low);
+            var fast = ClampedRangePosition.Percent(bar.Close, _low.Min, _high.Max);
+            _line += (fast - _line) / 3;
+            _signal += (_line - _signal) / 3;
+            outputs[0] = _line; outputs[1] = _signal;
+        }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedDistanceMassState(int length, int count, bool reciprocal) : IIndicatorState, IDisposable
+    {
+        private readonly DistanceMassWindowMean _window = new(length, reciprocal, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDisparityState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _average = length <= count ? new(length) : null;
+        public void Reset() => _average?.Reset();
+        public double Update(in Bar bar) => RoundedPercentageChange.Of(bar.Close, _average?.Next(bar.Close, true) ?? 0);
+        public void Dispose() => _average?.Dispose();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
