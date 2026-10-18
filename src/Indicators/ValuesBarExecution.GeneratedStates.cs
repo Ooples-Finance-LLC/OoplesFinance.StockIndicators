@@ -4918,10 +4918,36 @@ internal static partial class ValuesBarExecution
 
     private sealed class GeneratedDirectionalTrendState(int length, int count) : IIndicatorState, IDisposable
     {
-        private readonly DirectionalStrengthWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, 10, 5, count);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, true);
-        public void Dispose() => _window.Dispose();
+        private readonly StrengthWindow _strength = new(MovingAvgType.ExponentialMovingAverage, [length, 10, 5], count);
+        private double _high, _low;
+        public void Reset() { _strength.Reset(); _high = _low = 0; }
+        public double Update(in Bar bar)
+        {
+            var up = bar.High > _high ? bar.High - _high : 0;
+            var down = bar.Low < _low ? _low - bar.Low : 0;
+            StrengthValue change;
+            if (double.IsFinite(up) && double.IsFinite(down))
+            {
+                // Each subtraction rounds once, just like the exact sum divided by one.
+                // Nonnegative finite differences cannot overflow when subtracted.
+                change = new StrengthValue(up - down);
+            }
+            else
+            {
+                var wideUp = new ExactMeanAccumulator();
+                if (bar.High > _high) { wideUp.Add(bar.High); wideUp.Add(_high, -1); }
+                var wideDown = new ExactMeanAccumulator();
+                if (bar.Low < _low) { wideDown.Add(_low); wideDown.Add(bar.Low, -1); }
+                var net = new ExactMeanAccumulator();
+                StrengthValue.Round(wideUp, 1).AddTo(ref net);
+                StrengthValue.Round(wideDown, 1).AddTo(ref net, -1);
+                change = StrengthValue.Round(net, 1);
+            }
+            var result = _strength.NextChange(change, true);
+            _high = bar.High; _low = bar.Low;
+            return result;
+        }
+        public void Dispose() => _strength.Dispose();
     }
 
     private sealed class GeneratedCoralTrendState(int length) : IIndicatorState

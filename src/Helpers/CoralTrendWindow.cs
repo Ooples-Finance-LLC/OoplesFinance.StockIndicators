@@ -6,14 +6,19 @@ namespace OoplesFinance.StockIndicators.Helpers;
 internal sealed class CoralTrendWindow
 {
     private static readonly BigInteger Unit = BigInteger.One << 1074;
-    private readonly BigInteger _gain, _carry, _coefficient;
+    private static readonly BigInteger UnitCube = Unit * Unit * Unit;
+    private readonly BigInteger _gain, _carry, _firstBlend, _secondBlend, _thirdBlend;
     private readonly BigInteger[] _stages = new BigInteger[6], _scratch = new BigInteger[6];
     private BigInteger _previousSpread;
     internal CoralTrendWindow(int length, double cd)
     {
         if (double.IsNaN(cd) || double.IsInfinity(cd)) throw new ArgumentOutOfRangeException(nameof(cd));
         var gain = 4d / (Math.Max(1, length) + 3d);
-        _gain = ExactVarianceWindow.Units(gain); _carry = ExactVarianceWindow.Units(1 - gain); _coefficient = ExactVarianceWindow.Units(cd);
+        _gain = ExactVarianceWindow.Units(gain); _carry = ExactVarianceWindow.Units(1 - gain);
+        var coefficient = ExactVarianceWindow.Units(cd); var square = coefficient * coefficient;
+        _firstBlend = 3 * coefficient * Unit * Unit;
+        _secondBlend = 3 * square * Unit;
+        _thirdBlend = square * coefficient;
     }
     internal (double Value, Signal Signal) Next(double price, bool final)
     {
@@ -28,10 +33,10 @@ internal sealed class CoralTrendWindow
         var firstDifference = next[2] - next[3];
         var secondDifference = next[2] - 2 * next[3] + next[4];
         var thirdDifference = next[2] - 3 * next[3] + 3 * next[4] - next[5];
-        var square = _coefficient * _coefficient; var unitSquare = Unit * Unit; var unitCube = unitSquare * Unit;
-        var blend = next[2] * unitCube + 3 * _coefficient * firstDifference * unitSquare
-            + 3 * square * secondDifference * Unit + square * _coefficient * thirdDifference;
-        var line = RocBankValue.RoundUnits(blend, unitCube); var spread = input - line;
+        // Exact integer coefficients depend only on cd, so compute them once per window.
+        var blend = next[2] * UnitCube + _firstBlend * firstDifference
+            + _secondBlend * secondDifference + _thirdBlend * thirdDifference;
+        var line = RocBankValue.RoundUnits(blend, UnitCube); var spread = input - line;
         var signal = spread.Sign > 0 && spread > _previousSpread ? Signal.StrongBuy : spread.Sign < 0 && spread < _previousSpread ? Signal.StrongSell
             : spread.Sign > 0 ? Signal.Buy : spread.Sign < 0 ? Signal.Sell : Signal.None;
         if (final) { Array.Copy(next, _stages, next.Length); _previousSpread = spread; }
