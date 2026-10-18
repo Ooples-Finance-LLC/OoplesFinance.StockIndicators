@@ -264,6 +264,8 @@ internal static partial class ValuesBarExecution
             or JapaneseCorrelationCoefficient { MaType: null, SecondAverage: null, ThirdAverage: null }
             or MayerMultiple { MaType: null }
             or OceanIndicator { MaType: null }
+            or KaseIndicator { MaType: null }
+            or KaseConvergenceDivergence { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -766,6 +768,8 @@ internal static partial class ValuesBarExecution
         JapaneseCorrelationCoefficient ratio => new GeneratedJapaneseState(Math.Max(1, ratio.Length), count),
         MayerMultiple ratio => new GeneratedMayerState(Math.Max(1, ratio.Length), count),
         OceanIndicator ocean => new GeneratedOceanState(Math.Max(1, ocean.Length), count),
+        KaseIndicator kase => new GeneratedKaseRatioState(kase.Length),
+        KaseConvergenceDivergence kase => new GeneratedKaseConvergenceState(kase.Length1, kase.Length2, kase.Length3),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5866,6 +5870,25 @@ internal static partial class ValuesBarExecution
             _logs.TryAdd(log, out _); outputs[0] = value; outputs[1] = signal;
         }
         public void Dispose() => _logs.Dispose();
+    }
+
+    private sealed class GeneratedKaseRatioState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly KaseRatioWindow _window = new(MovingAvgType.SimpleMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, true);
+            outputs[0] = point.Up; outputs[1] = point.Down;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+    private sealed class GeneratedKaseConvergenceState(int length, int peakLength, int signalLength) : IIndicatorState, IDisposable
+    {
+        private readonly KaseConvergenceWindow _window = new(MovingAvgType.SimpleMovingAverage, length, peakLength, signalLength);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true).Value;
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
