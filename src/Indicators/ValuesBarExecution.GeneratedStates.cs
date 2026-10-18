@@ -208,6 +208,8 @@ internal static partial class ValuesBarExecution
             or EhlersVariableIndexDynamicAverage { MaType: null, SecondAverage: null }
             or EhlersSwissArmyKnife { Delta: >= 0 and <= double.MaxValue }
             or EhlersCombFilterSpectralEstimate { Bw: >= 0 and <= double.MaxValue } or EhlersDominantCycleTunedBypassFilter or EhlersAutoCorrelationReversals { MaType: null }
+            or AverageDirectionalIndex { MaType: null } or MomentumOscillator { MaType: null }
+            or VolumePriceTrend { MaType: null } or StandardDevation { MaType: MovingAvgType.SimpleMovingAverage } or Vhf
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -633,6 +635,11 @@ internal static partial class ValuesBarExecution
         EhlersAutoCorrelationReversals reversal => new GeneratedAutocorrelationReversalState(reversal.Length1, reversal.Length2, reversal.Length3),
         EhlersCombFilterSpectralEstimate comb => new GeneratedCombSpectrumState(comb.Length1, comb.Length2, comb.Bw),
         EhlersDominantCycleTunedBypassFilter tuned => new GeneratedTunedBypassState(tuned.MinLength, tuned.MaxLength, Math.Max(3, tuned.Length1), tuned.Length2),
+        AverageDirectionalIndex direction => new GeneratedDirectionalState(direction.Length, count),
+        MomentumOscillator momentum => new GeneratedMomentumState(Math.Max(1, momentum.Length), count),
+        VolumePriceTrend volume => new GeneratedVolumeTrendState(volume.Length),
+        StandardDevation deviation => new GeneratedStandardDeviationAliasState(Math.Max(1, deviation.Length), count),
+        Vhf filter => new GeneratedVerticalHorizontalState(filter.Length, count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -862,7 +869,7 @@ internal static partial class ValuesBarExecution
         Kvo oscillator => new GeneratedKlingerState(oscillator.Length, 55, 13),
         KlingerVolumeOscillator oscillator => new GeneratedKlingerState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength),
         UltimateOscillator oscillator => new GeneratedUltimateState(oscillator.Length1, oscillator.Length2, oscillator.Length3),
-        StdDev deviation => new GeneratedOrderedDeviationState(deviation.Length, count),
+        StdDev deviation => new GeneratedStandardDeviationAliasState(deviation.Length, count),
         HistoricalVolatility volatility => new GeneratedHistoricalVolatilityState(Math.Max(1, volatility.Length), count),
         Variance variance => new GeneratedVarianceState(variance.Length, count),
         CoefficientOfVariation variation => new GeneratedCoefficientState(variation.Length, count),
@@ -4755,6 +4762,82 @@ internal static partial class ValuesBarExecution
         }
         public void Dispose() => _window.Dispose();
     }
+
+    private sealed class GeneratedStandardDeviationAliasState(int period, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.RollingStandardDeviation? _line = period <= count ? new(period) : null;
+        private readonly double[] _window = period > 1 && period <= count ? new double[period] : [];
+        private int _seen, _next;
+        private double _sum, _roundoff;
+        private bool _exactRequired;
+
+        public void Reset()
+        {
+            _line?.Reset();
+            Array.Clear(_window, 0, _window.Length);
+            _seen = _next = 0;
+            _sum = _roundoff = 0;
+            _exactRequired = false;
+        }
+
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            double value = _line?.Next(bar.Close, true) ?? 0;
+            outputs[0] = value;
+            if (_window.Length == 0) { outputs[1] = period == 1 ? value : 0; return; }
+
+            double expired = _window[_next];
+            _window[_next] = value;
+            if (++_next == period) _next = 0;
+            double previous = _sum;
+            _sum += value;
+            _roundoff = MeanRoundoff.AfterAddition(_roundoff, _sum);
+            _exactRequired |= ExactMeanAccumulator.SevereCancellation(previous, value, _sum);
+            if (_seen >= period)
+            {
+                previous = _sum;
+                _sum -= expired;
+                _roundoff = MeanRoundoff.AfterAddition(_roundoff, _sum);
+                _exactRequired |= ExactMeanAccumulator.SevereCancellation(previous, -expired, _sum);
+                if (Math.Abs(_sum) <= 1e-4 * Math.Max(Math.Abs(expired), Math.Abs(value)))
+                    Rebuild(false);
+            }
+            _seen++;
+            double mean = _seen >= period ? _sum / period : 0;
+            if (_seen >= period && (_exactRequired || MeanRoundoff.RequiresExact(_sum, period, _roundoff)))
+            {
+                var exact = new ExactMeanAccumulator();
+                int index = _next;
+                for (int j = 0; j < period; j++)
+                {
+                    exact.Add(_window[index]);
+                    if (++index == period) index = 0;
+                }
+                mean = exact.Mean(period);
+            }
+            outputs[1] = mean;
+            if (_seen % period == 0) Rebuild(true);
+        }
+
+        private void Rebuild(bool periodic)
+        {
+            _sum = _roundoff = 0;
+            // Cancellation rebuilds preserve the flag; only periodic rebuilds reset it.
+            if (periodic) _exactRequired = false;
+            int index = _next;
+            for (int j = 0; j < period; j++)
+            {
+                double previous = _sum, value = _window[index];
+                _sum += value;
+                _roundoff = MeanRoundoff.AfterAddition(_roundoff, _sum);
+                if (periodic) _exactRequired |= ExactMeanAccumulator.SevereCancellation(previous, value, _sum);
+                if (++index == period) index = 0;
+            }
+        }
+
+        public void Dispose() => _line?.Dispose();
+    }
+
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
     {
