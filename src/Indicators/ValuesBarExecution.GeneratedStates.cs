@@ -239,6 +239,7 @@ internal static partial class ValuesBarExecution
             or FearAndGreedIndicator { MaType: null } or FireflyOscillator { MaType: null }
             or FoldedRelativeStrengthIndex { MaType: null } or FisherTransformStochasticOscillator
             or ForecastOscillator { MaType: null }
+            or FreedomOfMovement { MaType: null } or FunctionToCandles { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -714,6 +715,8 @@ internal static partial class ValuesBarExecution
         FisherTransformStochasticOscillator fisher => new GeneratedFisherStochasticState(fisher.Length),
         FibonacciRetrace retrace => new GeneratedFibonacciRetraceState(retrace.Length2, retrace.Factor),
         ForecastOscillator forecast => new GeneratedForecastOscillatorState(forecast.Length, count),
+        FreedomOfMovement freedom => new GeneratedFreedomState(freedom.Length),
+        FunctionToCandles candles => new GeneratedFunctionCandlesState(candles.Length),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5370,6 +5373,38 @@ internal static partial class ValuesBarExecution
         public void Update(in Bar bar, Span<double> outputs)
         { var point = _window.Next(bar.Close, true); outputs[0] = point.Value; outputs[1] = point.Signal; }
         public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedFreedomState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly FreedomWindow _window = new(MovingAvgType.SimpleMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, bar.Volume, true); outputs[0] = point.Score; outputs[1] = point.Demand; }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedFunctionCandlesState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly FunctionCandleRsi _close = new(MovingAvgType.WildersSmoothingMethod, length);
+        private readonly FunctionCandleRsi _open = new(MovingAvgType.WildersSmoothingMethod, length);
+        private readonly FunctionCandleRsi _high = new(MovingAvgType.WildersSmoothingMethod, length);
+        private readonly FunctionCandleRsi _low = new(MovingAvgType.WildersSmoothingMethod, length);
+        private double _previousClose;
+        private bool _started;
+        public void Reset() { _close.Reset(); _open.Reset(); _high.Reset(); _low.Reset(); _previousClose = 0; _started = false; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            // Match the builder's CustomRange for selected inputs outside the candle.
+            var withinRange = CalculationsHelper.IsWithinBarRange(bar.Close, bar.Low, bar.High);
+            var previous = _started ? _previousClose : bar.Close;
+            var high = withinRange ? bar.High : Math.Max(previous, bar.Close);
+            var low = withinRange ? bar.Low : Math.Min(previous, bar.Close);
+            outputs[0] = _close.Next(bar.Close, true); outputs[1] = _open.Next(bar.Open, true);
+            outputs[2] = _high.Next(high, true); outputs[3] = _low.Next(low, true);
+            _previousClose = bar.Close; _started = true;
+        }
+        public void Dispose() { _close.Dispose(); _open.Dispose(); _high.Dispose(); _low.Dispose(); }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
