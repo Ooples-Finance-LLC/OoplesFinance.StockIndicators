@@ -223,6 +223,9 @@ internal static partial class ValuesBarExecution
             or DoubleSmoothedRelativeStrengthIndex
             or DynamicMomentumIndex { MaType: null } or DynamicMomentumOscillator { MaType: null }
             or DynamicSupportAndResistance { MaType: null } or DynamicallyAdjustableFilter or DynamicallyAdjustableMovingAverage
+            or EdgePreservingFilter { MaType: null } or EfficientPrice
+            or EfficientAutoLine { FastAlpha: >= -double.MaxValue and <= double.MaxValue, SlowAlpha: >= -double.MaxValue and <= double.MaxValue }
+            or EarningSupportResistanceLevels or ElderMarketThermometer { MaType: null, SecondAverage: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -674,6 +677,11 @@ internal static partial class ValuesBarExecution
         DynamicSupportAndResistance support => new GeneratedDynamicSupportState(support.Length, count),
         DynamicallyAdjustableFilter filter => new GeneratedDynamicFilterState(filter.Length),
         DynamicallyAdjustableMovingAverage average => new GeneratedDynamicAverageState(average.FastLength, average.SlowLength),
+        EdgePreservingFilter filter => new GeneratedEdgePreservingState(filter.Length),
+        EfficientPrice price => new GeneratedEfficiencyOutputState(price.Length, false, .0001, .005),
+        EfficientAutoLine line => new GeneratedEfficiencyOutputState(line.Length, true, line.FastAlpha, line.SlowAlpha),
+        EarningSupportResistanceLevels => new GeneratedEarningLevelsState(),
+        ElderMarketThermometer thermometer => new GeneratedElderThermometerState(thermometer.Length),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5098,6 +5106,46 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
         public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedEdgePreservingState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly EdgePreservingWindow _window = new(MovingAvgType.SimpleMovingAverage, length, 50);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedEfficiencyOutputState(int length, bool autoLine, double fast, double slow) : IIndicatorState, IDisposable
+    {
+        private readonly EfficiencyOutputWindow _window = new(length, autoLine, fast, slow);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedEarningLevelsState : IIndicatorState
+    {
+        private double _previousLow, _laggedLow;
+        public void Reset() { _previousLow = _laggedLow = 0; }
+        public double Update(in Bar bar)
+        {
+            var mean = new ExactMeanAccumulator(); mean.Add(bar.High); mean.Add(_laggedLow);
+            _laggedLow = _previousLow; _previousLow = bar.Low;
+            return mean.Mean(2);
+        }
+    }
+
+    private sealed class GeneratedElderThermometerState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly ElderThermometerWindow _window = new(MovingAvgType.ExponentialMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = _window.Next(bar.High, bar.Low, true);
+            outputs[0] = value.Value; outputs[1] = value.Signal;
+        }
+        public void Dispose() => _window.Dispose();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable

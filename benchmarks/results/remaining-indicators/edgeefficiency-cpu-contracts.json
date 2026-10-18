@@ -1,0 +1,39 @@
+{
+  "batch": "edgeefficiency-shared-execution",
+  "types": [
+    "EdgePreservingFilter",
+    "EfficientAutoLine",
+    "EfficientPrice"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 49,
+    "parity_passed": 12,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "edgeefficiency-unit-verified.trx.gz",
+        "passed_cases": 49,
+        "trx_sha256": "72e6b060a4dec6f343c952cd1642aa1c1b18596e40f959cc9bd79159e651b86c"
+      },
+      {
+        "file": "edgeefficiency-parity-verified.trx.gz",
+        "passed_cases": 12,
+        "trx_sha256": "9a9721ca4baa37eb7d66491eeae02014b85391e87ae6118297f184aaf89bebc8"
+      }
+    ],
+    "context": "Executed in the 14-facade third-stage working candidate with inherited unresolved MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "6f322184dccc472f8e1a3c6f304af1643602d5ab2bc48f7309f3a191cb50078d",
+    "test_execution_input_sha256": {
+      "unit": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696",
+      "parity": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "9709e6b7d82fd46f40e9527c65cafd2f48cbc47a"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}
