@@ -1,0 +1,39 @@
+{
+  "status": "shared-checks-passed-known-macd-failures-and-performance-pending",
+  "context": "Historical combined 113-facade candidate; not the later follow-on candidate or an isolated committed tree. Common GPU fixtures are not per-indicator GPU performance qualification.",
+  "validation_base_head": "b7e13308b78c1e23f9f21cbbd9323a7d9d6548ee",
+  "input_sha256": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+  "checks": {
+    "discovery": {
+      "status": "passed",
+      "verified_count": 211,
+      "log_sha256": "148fa39055f3baa8945572b6adb3a1cbb34eb4a3f7f7ae16ea03451b91ff752a"
+    },
+    "gpu": {
+      "status": "passed",
+      "verified_count": 100,
+      "log_sha256": "d0d1a8c206aab0e1e07e574aac8a2f468f1c8056e6b6dad02900013c2d15dd35"
+    },
+    "verify-gpu-partition": {
+      "status": "passed",
+      "verified_count": null,
+      "log_sha256": "2f709231ec39d26f5ecd70cdce80ced6290c44e27d875089f82084f6eef158ad",
+      "result": "Verified 100 local GPU cases; 1540 methods remain assigned to hosted CI"
+    },
+    "inventory": {
+      "status": "passed",
+      "verified_count": null,
+      "log_sha256": "6c11835ecdbf850aecfcd66a56902b86e93a016a5217c020a6de38beb0b10b49",
+      "result": "....\n----------------------------------------------------------------------\nRan 4 tests in 1.799s\n\nOK"
+    }
+  },
+  "discovery_evidence": "combined113-discovery.trx.gz",
+  "gpu_evidence": "../shared-rollout/local-gpu-contracts/receipt.json",
+  "known_failed_unit_cases": 3,
+  "known_failures_evidence": "combined113-known-macd-failures.trx.gz",
+  "pending": [
+    "MACD unit-contract failures",
+    "raw timing and performance comparison",
+    "required hosted checks"
+  ]
+}
