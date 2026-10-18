@@ -144,6 +144,8 @@ internal static partial class ValuesBarExecution
             or EhlersHurstCoefficient or EhlersSpearmanRankIndicator
             or EhlersNoiseEliminationTechnology { Length: < int.MaxValue }
             or Pmo { MaType: null } or PriceMomentumOscillator { MaType: null } or DecisionPointPriceMomentumOscillator
+            or DoubleSmoothedStochastic { MaType: null } or DTOscillator { MaType: null }
+            or DoubleStochasticOscillator { MaType: null } or DMIStochastic { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -467,6 +469,10 @@ internal static partial class ValuesBarExecution
         Pmo pmo => new GeneratedPriceMomentumState(pmo.Length, 20, pmo.SignalLength, count, false),
         PriceMomentumOscillator pmo => new GeneratedPriceMomentumState(pmo.Length1, pmo.Length2, pmo.SignalLength, count, false),
         DecisionPointPriceMomentumOscillator pmo => new GeneratedPriceMomentumState(checked(Math.Max(1, pmo.Length) * 2 + 7), checked(Math.Max(1, pmo.Length) + 6), 10, count, true),
+        DoubleSmoothedStochastic stochastic => new GeneratedDoubleSmoothedStochasticState(stochastic.Length),
+        DTOscillator oscillator => new GeneratedDtOscillatorState(oscillator.Length),
+        DoubleStochasticOscillator stochastic => new GeneratedDoubleStochasticState(Math.Max(1, stochastic.Length)),
+        DMIStochastic stochastic => new GeneratedDmiStochasticState(Math.Max(1, stochastic.Length), count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -3637,6 +3643,70 @@ internal static partial class ValuesBarExecution
             if (histogram) outputs[2] = point.Histogram;
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDoubleSmoothedStochasticState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly DoubleSmoothedStochasticWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, 3, 15, 3);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = point.Dss; outputs[1] = point.SignalLine;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedDtOscillatorState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly DtOscillatorWindow _window = new(MovingAvgType.WildersSmoothingMethod, length, 8, 5, 3);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Line; outputs[1] = point.SignalLine;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedDoubleStochasticState(int length) : IMultiOutputState, IDisposable
+    {
+        private RollingMinMax _high = new(length), _low = new(length), _oscillator = new(Math.Max(2, length));
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother _line = new(3), _signal = new(3);
+        public void Reset()
+        {
+            _high = new(length); _low = new(length); _oscillator = new(Math.Max(2, length));
+            _line.Reset(); _signal.Reset();
+        }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            _high.Add(bar.High); _low.Add(bar.Low);
+            var first = ClampedRangePosition.Percent(bar.Close, _low.Min, _high.Max);
+            _oscillator.Add(first);
+            var second = ClampedRangePosition.Percent(first, _oscillator.Min, _oscillator.Max);
+            var line = _line.Next(second, true);
+            outputs[0] = line; outputs[1] = _signal.Next(line, true);
+        }
+        public void Dispose() { _line.Dispose(); _signal.Dispose(); }
+    }
+
+    private sealed class GeneratedDmiStochasticState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly DirectionalIndexWindow _directional = new(MovingAvgType.SimpleMovingAverage, length, Math.Max(1, count));
+        private RollingMinMax _range = new(10);
+        private readonly Streaming.SimpleMovingAverageSmoother _first = new(3), _second = new(3);
+        public void Reset() { _directional.Reset(); _range = new(10); _first.Reset(); _second.Reset(); }
+        public double Update(in Bar bar)
+        {
+            var point = _directional.Next(bar.High, bar.Low, bar.Close, true);
+            var oscillator = point.Minus - point.Plus; _range.Add(oscillator);
+            var range = _range.Max - _range.Min;
+#pragma warning disable S1244 // Preserve the batch formula's exact zero-range rule and operation order.
+            var fast = range != 0 ? MathHelper.MinOrMax((oscillator - _range.Min) / range * 100, 100, 0) : 0;
+#pragma warning restore S1244
+            return _second.Next(_first.Next(fast, true), true);
+        }
+        public void Dispose() { _directional.Dispose(); _first.Dispose(); _second.Dispose(); }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
