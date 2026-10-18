@@ -41,6 +41,7 @@ internal static partial class ValuesBarExecution
         indicator is HampelFilter hampel && double.IsFinite(hampel.ScalingFactor) ||
         indicator is HawkeyeVolumeIndicator hawkeye && double.IsFinite(hawkeye.Divisor) ||
         indicator is HerrickPayoffIndex payoff && double.IsFinite(payoff.PointValue) ||
+        indicator is InsyncIndex { MaType: null } insync && double.IsFinite(insync.StdDevMult) && double.IsFinite(insync.Divisor) ||
         indicator is FXSniperIndicator { MaType: null } sniper && double.IsFinite(sniper.B) ||
         indicator is FastandSlowKurtosisOscillator { MaType: null } kurtosis && double.IsFinite(kurtosis.Ratio) ||
         indicator is FibonacciRetrace { MaType: null } retrace && double.IsFinite(retrace.Factor) ||
@@ -754,6 +755,7 @@ internal static partial class ValuesBarExecution
         Inertia inertia => new GeneratedInertiaState(inertia.SmoothLength, inertia.RviLength),
         InertiaIndicator inertia => new GeneratedInertiaState(inertia.Length, 14),
         HybridConvolutionFilter filter => new GeneratedHybridState(Math.Max(1, filter.Length), count),
+        InsyncIndex insync => new GeneratedInsyncState(insync),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5765,6 +5767,17 @@ internal static partial class ValuesBarExecution
             return value;
         }
         public void Dispose() => _values.Dispose();
+    }
+
+    private sealed class GeneratedInsyncState(InsyncIndex spec) : IIndicatorState, IDisposable
+    {
+        private readonly InsyncWindow _window = new(spec.FastLength, spec.SlowLength, spec.MfiLength, spec.BbLength,
+            spec.CciLength, spec.DpoLength, spec.RocLength, spec.RsiLength, spec.StochLength,
+            spec.StochKLength, spec.StochDLength, spec.SmaLength, spec.StdDevMult, spec.Divisor);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close),
+            bar.High, bar.Low, bar.Volume, bar.High, bar.Low, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
