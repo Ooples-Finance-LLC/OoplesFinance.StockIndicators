@@ -235,6 +235,7 @@ internal static partial class ValuesBarExecution
             or FallingRisingFilter
             or FastSlowKurtosisOscillator or FastSlowRsiOscillator or FastSlowStochasticOscillator
             or FastSlowDegreeOscillator { MaType: null }
+            or FearAndGreedIndicator { MaType: null } or FireflyOscillator { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -704,6 +705,8 @@ internal static partial class ValuesBarExecution
         FastSlowRsiOscillator => new GeneratedFastSlowCompositeState(true),
         FastSlowStochasticOscillator => new GeneratedFastSlowCompositeState(false),
         FastSlowDegreeOscillator degree => new GeneratedFastSlowDegreeState(degree.Length),
+        FearAndGreedIndicator fear => new GeneratedFearGreedState(fear.FastLength, fear.SlowLength, fear.SmoothLength),
+        FireflyOscillator firefly => new GeneratedFireflyState(firefly.Length),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5302,6 +5305,24 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs)
         { var point = _window.Next(bar.Close, true); outputs[0] = point.Line; outputs[1] = point.SignalLine; outputs[2] = point.Histogram; }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedFearGreedState(int fast, int slow, int smooth) : IMultiOutputState, IDisposable
+    {
+        private readonly FearGreedWindow _window = new(MovingAvgType.WeightedMovingAverage, fast, slow, smooth);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.High, bar.Low, bar.Close, true); outputs[0] = point.Line; outputs[1] = point.SignalLine; }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedFireflyState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly FireflyWindow _window = new(MovingAvgType.ZeroLagExponentialMovingAverage, length, 3);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.High, bar.Low, bar.Close, true); outputs[0] = point.Line; outputs[1] = point.SignalLine; }
         public void Dispose() { Reset(); _window.Dispose(); }
     }
 
