@@ -255,6 +255,8 @@ internal static partial class ValuesBarExecution
             or HirashimaSugitaRS { MaType: null }
             or HighLowIndex { MaType: null }
             or InternalBarStrengthIndicator
+            or Inertia
+            or InertiaIndicator { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -748,6 +750,8 @@ internal static partial class ValuesBarExecution
         HerrickPayoffIndex payoff => new GeneratedHerrickState(payoff.PointValue),
         HighLowIndex index => new GeneratedHighLowIndexState(Math.Max(1, index.Length), count),
         InternalBarStrengthIndicator strength => new GeneratedInternalBarState(strength.Length),
+        Inertia inertia => new GeneratedInertiaState(inertia.SmoothLength, inertia.RviLength),
+        InertiaIndicator inertia => new GeneratedInertiaState(inertia.Length, 14),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5713,6 +5717,16 @@ internal static partial class ValuesBarExecution
             outputs[0] = point.Value; outputs[1] = point.Signal;
         }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedInertiaState(int length, int rviLength) : IIndicatorState, IDisposable
+    {
+        private readonly RelativeVolatilityWindow _high = new(MovingAvgType.WildersSmoothingMethod, 10, rviLength);
+        private readonly RelativeVolatilityWindow _low = new(MovingAvgType.WildersSmoothingMethod, 10, rviLength);
+        private readonly InertiaSmoother _regression = new(MovingAvgType.LinearRegression, length);
+        public void Reset() { _high.Reset(); _low.Reset(); _regression.Reset(); }
+        public double Update(in Bar bar) => _regression.Next(Helpers.RelativeVolatilityWindow.Mean(_high.Next(bar.High, true), _low.Next(bar.Low, true)), true);
+        public void Dispose() { _high.Dispose(); _low.Dispose(); _regression.Reset(); }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
