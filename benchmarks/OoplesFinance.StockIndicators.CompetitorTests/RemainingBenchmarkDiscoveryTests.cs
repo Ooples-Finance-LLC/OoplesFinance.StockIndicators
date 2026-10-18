@@ -7,6 +7,9 @@ namespace OoplesFinance.StockIndicators.CompetitorTests;
 public sealed class RemainingBenchmarkDiscoveryTests
 {
     [Theory]
+    [InlineData(typeof(RemainingMomentumCompositesBenchmarks), 24)]
+    [InlineData(typeof(RemainingConfluenceBenchmarks), 8)]
+    [InlineData(typeof(RemainingPriceNormalizersBenchmarks), 24)]
     [InlineData(typeof(RemainingStochCompositesBenchmarks), 16)]
     [InlineData(typeof(RemainingSmoothedStochPairBenchmarks), 16)]
     [InlineData(typeof(RemainingPmoFamilyBenchmarks), 24)]

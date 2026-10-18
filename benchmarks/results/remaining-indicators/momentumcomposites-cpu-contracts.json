@@ -1,0 +1,34 @@
+{
+  "batch": "momentumcomposites-shared-execution",
+  "types": [
+    "CoppockCurve",
+    "DerivativeOscillator",
+    "DidiIndex"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 48,
+    "parity_passed": 12,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "momentumcomposites-unit-verified.trx.gz",
+        "passed_cases": 48,
+        "trx_sha256": "6c687471c391dbc6fa0be3248e98c428ab1feff8a09385bf13979ae3cd4faa24"
+      },
+      {
+        "file": "momentumcomposites-parity-verified.trx.gz",
+        "passed_cases": 12,
+        "trx_sha256": "c272a6a4f0f9c2b13a6db8f725d599608947de32280f77793c5033f4c60ef927"
+      }
+    ],
+    "context": "Executed in the combined 113-facade working candidate; the isolated committed tree was not separately built or tested.",
+    "combined_input_sha256": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+    "combined_validation_base_head": "b7e13308b78c1e23f9f21cbbd9323a7d9d6548ee"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

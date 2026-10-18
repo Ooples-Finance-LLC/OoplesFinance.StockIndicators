@@ -1,0 +1,34 @@
+{
+  "batch": "pricenormalizers-shared-execution",
+  "types": [
+    "ChartmillValueIndicator",
+    "CenterOfLinearity",
+    "ChopZone"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 39,
+    "parity_passed": 12,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "pricenormalizers-unit-verified.trx.gz",
+        "passed_cases": 39,
+        "trx_sha256": "e390065ed46ec33f0bdd7c0ec06f61e06a3210a0d3b16203c5fd843ab67e701e"
+      },
+      {
+        "file": "pricenormalizers-parity-verified.trx.gz",
+        "passed_cases": 12,
+        "trx_sha256": "1e95652605d0cc0698f480504086c20cff77c0d6c7efbdf258539a6080d05c49"
+      }
+    ],
+    "context": "Executed in the combined 113-facade working candidate; the isolated committed tree was not separately built or tested.",
+    "combined_input_sha256": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+    "combined_validation_base_head": "b7e13308b78c1e23f9f21cbbd9323a7d9d6548ee"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

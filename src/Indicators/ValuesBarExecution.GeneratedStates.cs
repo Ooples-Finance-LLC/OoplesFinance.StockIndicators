@@ -146,6 +146,9 @@ internal static partial class ValuesBarExecution
             or Pmo { MaType: null } or PriceMomentumOscillator { MaType: null } or DecisionPointPriceMomentumOscillator
             or DoubleSmoothedStochastic { MaType: null } or DTOscillator { MaType: null }
             or DoubleStochasticOscillator { MaType: null } or DMIStochastic { MaType: null }
+            or ChartmillValueIndicator { MaType: null } or CenterOfLinearity or ChopZone { MaType: null }
+            or ConfluenceIndicator { MaType: null }
+            or CoppockCurve { MaType: null } or DerivativeOscillator { MaType: null } or DidiIndex { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -473,6 +476,13 @@ internal static partial class ValuesBarExecution
         DTOscillator oscillator => new GeneratedDtOscillatorState(oscillator.Length),
         DoubleStochasticOscillator stochastic => new GeneratedDoubleStochasticState(Math.Max(1, stochastic.Length)),
         DMIStochastic stochastic => new GeneratedDmiStochasticState(Math.Max(1, stochastic.Length), count),
+        ChartmillValueIndicator chart => new GeneratedChartmillState(chart.Length, count),
+        CenterOfLinearity center => new GeneratedCenterLinearityState(center.Length),
+        ChopZone chop => new GeneratedChopZoneState(chop.Length, count),
+        ConfluenceIndicator confluence => new GeneratedConfluenceState(confluence.Length),
+        CoppockCurve curve => new GeneratedCoppockState(curve.Length, count),
+        DerivativeOscillator derivative => new GeneratedDerivativeState(derivative.Length),
+        DidiIndex didi => new GeneratedDidiState(didi.ShortLength, didi.MediumLength, didi.LongLength, count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -3707,6 +3717,84 @@ internal static partial class ValuesBarExecution
             return _second.Next(_first.Next(fast, true), true);
         }
         public void Dispose() { _directional.Dispose(); _first.Dispose(); _second.Dispose(); }
+    }
+
+    private sealed class GeneratedChartmillState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly ChartmillWindow _window = new(MovingAvgType.SimpleMovingAverage, length, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Open, bar.Close, PriceMean.Of(bar.High, bar.Low), true);
+            outputs[0] = point.Close; outputs[1] = point.Open; outputs[2] = point.High; outputs[3] = point.Low;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedCenterLinearityState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly CenterLinearityWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedChopZoneState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly ChopZoneWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, 34, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, false, true);
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedConfluenceState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly ConfluenceWindow _window = new(MovingAvgType.SimpleMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar)
+        {
+            var close = UltimatePowerWeights.Fraction.Of(bar.Close);
+            var full = (UltimatePowerWeights.Fraction.Of(bar.Open) + UltimatePowerWeights.Fraction.Of(bar.High)
+                + UltimatePowerWeights.Fraction.Of(bar.Low) + close) / 4;
+            return _window.Next(close, full, true).Value;
+        }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedCoppockState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly RocBankWindow _window = new(MovingAvgType.WeightedMovingAverage, [11, 14], [1, 1], [1, 1], length, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Signal;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDerivativeState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly DerivativeWindow _window = new(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length), 9, 5, 3);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDidiState(int shortLength, int mediumLength, int longLength, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _short = Math.Max(1, shortLength) <= count ? new(Math.Max(1, shortLength)) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _medium = Math.Max(1, mediumLength) <= count ? new(Math.Max(1, mediumLength)) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _long = Math.Max(1, longLength) <= count ? new(Math.Max(1, longLength)) : null;
+        public void Reset() { _short?.Reset(); _medium?.Reset(); _long?.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var medium = _medium?.Next(bar.Close, true) ?? 0;
+            var first = _short?.Next(bar.Close, true) ?? 0;
+            var last = _long?.Next(bar.Close, true) ?? 0;
+#pragma warning disable S1244 // Preserve the exact zero-denominator rule from the batch outputs.
+            outputs[0] = medium == 0 ? 0 : first / medium;
+            outputs[1] = medium == 0 ? 0 : 1;
+            outputs[2] = medium == 0 ? 0 : last / medium;
+#pragma warning restore S1244
+        }
+        public void Dispose() { _short?.Dispose(); _medium?.Dispose(); _long?.Dispose(); }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
