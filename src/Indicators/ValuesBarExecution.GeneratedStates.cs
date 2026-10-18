@@ -210,6 +210,9 @@ internal static partial class ValuesBarExecution
             or EhlersCombFilterSpectralEstimate { Bw: >= 0 and <= double.MaxValue } or EhlersDominantCycleTunedBypassFilter or EhlersAutoCorrelationReversals { MaType: null }
             or AverageDirectionalIndex { MaType: null } or MomentumOscillator { MaType: null }
             or VolumePriceTrend { MaType: null } or StandardDevation { MaType: MovingAvgType.SimpleMovingAverage } or Vhf
+            or DirectionalTrendIndex { MaType: null }
+            or CoralTrendIndicator or CorrectedMovingAverage { MaType: null }
+            or CubedWeightedMovingAverage
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -640,6 +643,10 @@ internal static partial class ValuesBarExecution
         VolumePriceTrend volume => new GeneratedVolumeTrendState(volume.Length),
         StandardDevation deviation => new GeneratedStandardDeviationAliasState(Math.Max(1, deviation.Length), count),
         Vhf filter => new GeneratedVerticalHorizontalState(filter.Length, count),
+        DirectionalTrendIndex trend => new GeneratedDirectionalTrendState(trend.Length, count),
+        CoralTrendIndicator coral => new GeneratedCoralTrendState(coral.Length),
+        CorrectedMovingAverage corrected => new GeneratedCorrectedAverageState(corrected.Length),
+        CubedWeightedMovingAverage cube => new GeneratedCubicWeightedState(cube.Length, count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -4838,6 +4845,64 @@ internal static partial class ValuesBarExecution
         public void Dispose() => _line?.Dispose();
     }
 
+
+    private sealed class GeneratedDirectionalTrendState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly DirectionalStrengthWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, 10, 5, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedCoralTrendState(int length) : IIndicatorState
+    {
+        private readonly CoralTrendWindow _window = new(length, .4);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+    }
+
+    private sealed class GeneratedCorrectedAverageState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly CorrectedAverageWindow _window = new(MovingAvgType.SimpleMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedCubicWeightedState : IIndicatorState, IDisposable
+    {
+        private readonly int _length;
+        private readonly PooledRingBuffer<double> _values;
+        private readonly System.Numerics.BigInteger _squareWeight, _cubeWeight;
+        private readonly ExactMeanAccumulator _denominator;
+        private ExactMeanAccumulator _sum, _linear, _square, _cube;
+        public GeneratedCubicWeightedState(int length, int count)
+        {
+            _length = Math.Max(1, length);
+            _values = new(Math.Min(_length, Math.Max(1, count)));
+            var n = new System.Numerics.BigInteger(_length);
+            _squareWeight = n * n; _cubeWeight = _squareWeight * n;
+            var triangular = n * (n + 1) / 2;
+            var denominator = new ExactMeanAccumulator(); denominator.Add(1, triangular * triangular);
+            _denominator = denominator;
+        }
+        public void Reset() { _values.Clear(); _sum = _linear = _square = _cube = default; }
+        public double Update(in Bar bar)
+        {
+            // Shift each old weight w to w-1 before adding the new n-weighted
+            // sample. Update highest moments first; every operation is exact.
+            _cube.Subtract(_square); _cube.Subtract(_square); _cube.Subtract(_square);
+            _cube.AddExact(_linear); _cube.AddExact(_linear); _cube.AddExact(_linear);
+            _cube.Subtract(_sum); _cube.Add(bar.Close, _cubeWeight);
+            _square.Subtract(_linear); _square.Subtract(_linear);
+            _square.AddExact(_sum); _square.Add(bar.Close, _squareWeight);
+            _linear.Subtract(_sum); _linear.Add(bar.Close, _length);
+            if (_values.Count == _length) _sum.Add(_values[0], -1);
+            _sum.Add(bar.Close); _values.TryAdd(bar.Close, out _);
+            return _cube.Ratio(_denominator);
+        }
+        public void Dispose() { Reset(); _values.Dispose(); }
+    }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
     {
