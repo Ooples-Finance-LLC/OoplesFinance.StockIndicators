@@ -43,6 +43,9 @@ internal static partial class ValuesBarExecution
         indicator is HerrickPayoffIndex payoff && double.IsFinite(payoff.PointValue) ||
         indicator is InsyncIndex { MaType: null } insync && double.IsFinite(insync.StdDevMult) && double.IsFinite(insync.Divisor) ||
         indicator is LBRPaintBars { MaType: null } paint && double.IsFinite(paint.AtrMult) ||
+        indicator is KaufmanAdaptiveBands bands && double.IsFinite(bands.StdDevFactor) && bands.StdDevFactor >= 0 ||
+        indicator is KaufmanBinaryWave wave && double.IsFinite(wave.FastSc) && wave.FastSc >= 0
+            && double.IsFinite(wave.SlowSc) && wave.SlowSc >= 0 && double.IsFinite(wave.FilterPct) && wave.FilterPct >= 0 ||
         indicator is FXSniperIndicator { MaType: null } sniper && double.IsFinite(sniper.B) ||
         indicator is FastandSlowKurtosisOscillator { MaType: null } kurtosis && double.IsFinite(kurtosis.Ratio) ||
         indicator is FibonacciRetrace { MaType: null } retrace && double.IsFinite(retrace.Factor) ||
@@ -270,6 +273,7 @@ internal static partial class ValuesBarExecution
             or KasePeakOscillatorV1
             or KasePeakOscillatorV2 { MaType: null }
             or LindaRaschke310Oscillator { MaType: null, SecondAverage: null, ThirdAverage: null, FourthAverage: null }
+            or KarobeinOscillator { MaType: null } or KwanIndicator { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -778,6 +782,10 @@ internal static partial class ValuesBarExecution
         KasePeakOscillatorV2 peak => new GeneratedKasePeakV2State(peak.Length),
         LBRPaintBars paint => new GeneratedLbrPaintState(paint.Length, paint.LbLength, paint.AtrMult),
         LindaRaschke310Oscillator linda => new GeneratedLindaState(linda.FastLength, linda.SlowLength, linda.SmoothLength, count),
+        KaufmanAdaptiveBands bands => new GeneratedKaufmanBandsState(bands.Length, bands.StdDevFactor),
+        KaufmanBinaryWave wave => new GeneratedKaufmanBinaryState(wave.Length, wave.FastSc, wave.SlowSc, wave.FilterPct),
+        KarobeinOscillator oscillator => new GeneratedKarobeinState(oscillator.Length),
+        KwanIndicator kwan => new GeneratedKwanState(kwan.Length, kwan.SmoothLength),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5951,6 +5959,40 @@ internal static partial class ValuesBarExecution
             outputs[3] = ppo; outputs[4] = ppoSignal; outputs[5] = ppo - ppoSignal;
         }
         public void Dispose() { _fast?.Dispose(); _slow?.Dispose(); _macdSignal?.Dispose(); _ppoSignal?.Dispose(); }
+    }
+
+    private sealed class GeneratedKaufmanBandsState(int length, double exponent) : IMultiOutputState, IDisposable
+    {
+        private readonly KaufmanAdaptiveBandWindow _window = new(length, exponent);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Upper; outputs[1] = point.Middle; outputs[2] = point.Lower;
+        }
+        public void Dispose() => _window.Reset();
+    }
+    private sealed class GeneratedKaufmanBinaryState(int length, double fast, double slow, double filter) : IIndicatorState, IDisposable
+    {
+        private readonly CertifiedKaufmanBinaryWindow _window = new(length, fast, slow, filter);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedKarobeinState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly KarobeinWindow _window = new(MovingAvgType.ExponentialMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Line;
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+    private sealed class GeneratedKwanState(int length, int delay) : IIndicatorState, IDisposable
+    {
+        private readonly KwanWindow _window = new(MovingAvgType.WildersSmoothingMethod, length, delay);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true).Value;
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
