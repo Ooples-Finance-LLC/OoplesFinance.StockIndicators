@@ -30,6 +30,11 @@ public sealed class MacZAdditionArithmeticTests
                 .Divide(MacZWindow.Number.Integer(3 * power + 7));
             values.Add(value);
             values.Add(value.Divide(-15));
+            // Mixed exponents can cancel only part or all of an even
+            // denominator, and must not cancel extra numerator powers of two.
+            foreach (var shift in new[] { 1, 63, 1074, 1100 })
+                values.Add(MacZWindow.Number.Integer(sign * (power + 15))
+                    .Divide(MacZWindow.Number.Integer((3 * power + 7) << shift)));
             values.Add(MacZWindow.Number.Integer(sign * (power + 16))
                 .Divide(MacZWindow.Number.Integer(3 * power + 7)));
         }

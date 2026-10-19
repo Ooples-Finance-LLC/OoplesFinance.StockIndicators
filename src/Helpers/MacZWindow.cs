@@ -45,15 +45,18 @@ internal sealed class MacZWindow : IDisposable
             var aScale = b.Denominator / common; var bScale = a.Denominator / common;
             var coefficient = (a._coefficient << (a._exponent - power)) * aScale + (b._coefficient << (b._exponent - power)) * bScale;
             var denominator = a.Denominator * aScale;
-            if (a._exponent == b._exponent)
+            // Reduced inputs leave only the original denominator GCD and
+            // powers of two introduced by exponent alignment as common factors.
+            // Intersect that bound with the denominator before cancelling: the
+            // coefficient may contain additional powers of two that do not.
+            var reductionBound = common;
+            if (a._exponent != b._exponent && denominator.IsEven)
             {
-                // Reduced inputs leave common factors only in the original
-                // denominator GCD. Avoid reducing against their full product.
-                var remaining = BigInteger.GreatestCommonDivisor(BigInteger.Abs(coefficient), common);
-                return new(coefficient / remaining, power, denominator / remaining, reduced: true);
+                var shift = Math.Max(a._exponent - power, b._exponent - power);
+                reductionBound = BigInteger.GreatestCommonDivisor(denominator, common << shift);
             }
-            // Exponent alignment can introduce other factors; retain full reduction.
-            return new(coefficient, power, denominator);
+            var remaining = BigInteger.GreatestCommonDivisor(BigInteger.Abs(coefficient), reductionBound);
+            return new(coefficient / remaining, power, denominator / remaining, reduced: true);
         }
         public static Number operator -(Number a, Number b) => a + new Number(-b._coefficient, b._exponent, b.Denominator, reduced: true);
         public static Number operator *(Number a, Number b)
