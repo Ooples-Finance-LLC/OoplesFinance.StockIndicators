@@ -82,8 +82,22 @@ internal sealed class MacZWindow : IDisposable
             if (side > 0 || side == 0 && !significand.IsEven) significand++;
             return new(Sign * significand, checked(binaryPower / 2 + grid));
         }
-        internal Number Times(long value) => new(_coefficient * value, _exponent, Denominator);
-        internal Number Divide(long divisor) => new(_coefficient, _exponent, Denominator * divisor);
+        internal Number Times(long value)
+        {
+            // The state is already reduced. Only the scalar can introduce a
+            // common factor; avoid a full GCD of two growing recursive values.
+            var scalar = new BigInteger(value);
+            var common = BigInteger.GreatestCommonDivisor(BigInteger.Abs(scalar), Denominator);
+            return new(_coefficient * (scalar / common), _exponent, Denominator / common, reduced: true);
+        }
+        internal Number Divide(long divisor)
+        {
+            // Preserve the existing zero-denominator constructor behavior.
+            if (divisor == 0) return new(_coefficient, _exponent);
+            var scalar = new BigInteger(divisor);
+            var common = BigInteger.GreatestCommonDivisor(BigInteger.Abs(_coefficient), BigInteger.Abs(scalar));
+            return new(_coefficient / common, _exponent, Denominator * (scalar / common), reduced: true);
+        }
         // Recursive states are bounded to 106 significant bits. Finite-window
         // means retain their exact divisor, including binary64 midpoint ties.
         internal Number Round()
