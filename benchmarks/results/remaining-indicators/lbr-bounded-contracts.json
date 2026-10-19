@@ -1,0 +1,21 @@
+{
+  "status": "focused-contracts-passed-performance-pending",
+  "target": "Release/net10.0",
+  "production_sha256": "d819a9b72a48a721b1f32b8ae1b591055001b7b2919c04a640193b02badc03a0",
+  "unit_sha256": "9a394b51a00fbbfb00772a4978a01316007ad46a49e8b43a534e21a0a69e6fc9",
+  "source_changes": {
+    "src/Builder/Compute/IndicatorCompute.cs": "b01b88590eef41d5699ceb52c48448f8e0778c5ceba9790a210e068158ca9b3c",
+    "tests/ModelsTests/SharedGeneratedLbrLindaTests.cs": "4a8777768b1f383252983f2ce36971c1dd6c322cee14609995650af36be76423",
+    "tests/ValidationTests/BatchSmoothingWarmupTests.cs": "432e30d28941683148bb3c28ecb7b4db36743a4e3ebf13beff808559b3b66aad"
+  },
+  "counts": {
+    "warmup": 10,
+    "lbr": 76,
+    "parity": 8
+  },
+  "context": "Validated in the combined isolated working candidate including pending Karobein changes and other uncommitted stage-nine routes. Individual commits were not separately built.",
+  "pending": [
+    "controlled performance measurements",
+    "remaining rollout checks"
+  ]
+}
