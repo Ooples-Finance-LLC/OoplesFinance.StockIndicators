@@ -123,9 +123,25 @@ internal sealed class RelativeSpreadKernel : IDisposable
     private Number _spread, _gain, _loss;
     private double _rsi;
     private bool _hasPrevious;
+    private readonly MovingAvgType _kind;
+    private readonly int _fastLength, _slowLength, _smoothLength;
+    private readonly bool _allowCertified;
+    private readonly List<double>? _replay;
+    private CertifiedRelativeSpread? _certified;
+    internal long CertifiedCount { get; private set; }
+    internal int FallbackCount { get; private set; }
     internal RelativeSpreadKernel(MovingAvgType kind, int fast, int slow, int period, int smooth)
-    { _fast = new(kind, fast); _slow = new(kind, slow); _period = Math.Max(1, period); _signal = new(kind, smooth); }
+        : this(kind, fast, slow, period, smooth, true) { }
+    internal RelativeSpreadKernel(MovingAvgType kind, int fast, int slow, int period, int smooth, bool allowCertified)
+    {
+        _fast = new(kind, fast); _slow = new(kind, slow); _period = Math.Max(1, period); _signal = new(kind, smooth);
+        _kind = kind; _fastLength = fast; _slowLength = slow; _smoothLength = smooth;
+        _allowCertified = allowCertified && CertifiedRelativeSpread.Supports(kind);
+        if (_allowCertified) { _replay = new(); _certified = new(kind, fast, slow, _period, smooth); }
+    }
     internal double StrengthFromSpread(Number spread, bool final)
+    { UseExact(); return StrengthFromSpreadExact(spread, final); }
+    private double StrengthFromSpreadExact(Number spread, bool final)
     {
         var change = _hasPrevious ? spread - _spread : default;
         var gain = (_gain.Times(_period - 1L) + (change.Sign > 0 ? change : default)).Divide(_period);
@@ -137,13 +153,37 @@ internal sealed class RelativeSpreadKernel : IDisposable
     internal double Next(double price, bool final)
     {
         StreamingInputValidation.Finite(price, nameof(price));
+        if (_certified is not null)
+        {
+            if (_certified.TryNext(price, final, out var result))
+            {
+                if (final) { _replay!.Add(price); CertifiedCount++; }
+                return result;
+            }
+            UseExact();
+        }
+        return NextExact(price, final);
+    }
+    private void UseExact()
+    {
+        if (_certified is null) return;
+        _certified = null; FallbackCount++;
+        foreach (var price in _replay!) NextExact(price, true);
+        _replay.Clear();
+    }
+    private double NextExact(double price, bool final)
+    {
         var value = Number.Of(price);
         var spread = _fast.Next(value, final) - _slow.Next(value, final);
-        return _signal.Next(Number.Of(StrengthFromSpread(spread, final)), final).Publish();
+        return _signal.Next(Number.Of(StrengthFromSpreadExact(spread, final)), final).Publish();
     }
     internal void Reset()
-    { _fast.Reset(); _slow.Reset(); _signal.Reset(); _spread = _gain = _loss = default; _rsi = 0; _hasPrevious = false; }
-    public void Dispose() { _fast.Dispose(); _slow.Dispose(); _signal.Dispose(); }
+    {
+        _fast.Reset(); _slow.Reset(); _signal.Reset(); _spread = _gain = _loss = default; _rsi = 0; _hasPrevious = false;
+        _replay?.Clear(); CertifiedCount = 0; FallbackCount = 0;
+        _certified = _allowCertified ? new(_kind, _fastLength, _slowLength, _period, _smoothLength) : null;
+    }
+    public void Dispose() { _replay?.Clear(); _certified = null; _fast.Dispose(); _slow.Dispose(); _signal.Dispose(); }
     private sealed class Average : IDisposable
     {
         private readonly MovingAvgType _kind; private readonly int _length;
