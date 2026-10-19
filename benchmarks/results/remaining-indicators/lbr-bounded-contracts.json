@@ -17,5 +17,9 @@
   "pending": [
     "controlled performance measurements",
     "remaining rollout checks"
+  ],
+  "types": [
+    "LBRPaintBars",
+    "LindaRaschke310Oscillator"
   ]
 }
