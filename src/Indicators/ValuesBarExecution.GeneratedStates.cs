@@ -42,6 +42,7 @@ internal static partial class ValuesBarExecution
         indicator is HawkeyeVolumeIndicator hawkeye && double.IsFinite(hawkeye.Divisor) ||
         indicator is HerrickPayoffIndex payoff && double.IsFinite(payoff.PointValue) ||
         indicator is InsyncIndex { MaType: null } insync && double.IsFinite(insync.StdDevMult) && double.IsFinite(insync.Divisor) ||
+        indicator is LBRPaintBars { MaType: null } paint && double.IsFinite(paint.AtrMult) ||
         indicator is FXSniperIndicator { MaType: null } sniper && double.IsFinite(sniper.B) ||
         indicator is FastandSlowKurtosisOscillator { MaType: null } kurtosis && double.IsFinite(kurtosis.Ratio) ||
         indicator is FibonacciRetrace { MaType: null } retrace && double.IsFinite(retrace.Factor) ||
@@ -268,6 +269,7 @@ internal static partial class ValuesBarExecution
             or KaseConvergenceDivergence { MaType: null }
             or KasePeakOscillatorV1
             or KasePeakOscillatorV2 { MaType: null }
+            or LindaRaschke310Oscillator { MaType: null, SecondAverage: null, ThirdAverage: null, FourthAverage: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -774,6 +776,8 @@ internal static partial class ValuesBarExecution
         KaseConvergenceDivergence kase => new GeneratedKaseConvergenceState(kase.Length1, kase.Length2, kase.Length3),
         KasePeakOscillatorV1 peak => new GeneratedKasePeakV1State(peak.Length, peak.SmoothLength),
         KasePeakOscillatorV2 peak => new GeneratedKasePeakV2State(peak.Length),
+        LBRPaintBars paint => new GeneratedLbrPaintState(paint.Length, paint.LbLength, paint.AtrMult),
+        LindaRaschke310Oscillator linda => new GeneratedLindaState(linda.FastLength, linda.SlowLength, linda.SmoothLength, count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5912,6 +5916,41 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true).Value;
         public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedLbrPaintState(int length, int lookback, double multiplier) : IMultiOutputState, IDisposable
+    {
+        private readonly LbrPaintWindow _window = new(MovingAvgType.SimpleMovingAverage, length, lookback, multiplier);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = point.Upper; outputs[1] = point.Lower; outputs[2] = point.Width;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+    private sealed class GeneratedLindaState(int fast, int slow, int signal, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _fast = Math.Max(1, fast) <= count ? new(fast) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _slow = Math.Max(1, slow) <= count ? new(slow) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _macdSignal = Math.Max(1, signal) <= count ? new(signal) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _ppoSignal = Math.Max(1, signal) <= count ? new(signal) : null;
+        private bool _macdInvalid, _ppoInvalid;
+        public void Reset()
+        { _fast?.Reset(); _slow?.Reset(); _macdSignal?.Reset(); _ppoSignal?.Reset(); _macdInvalid = _ppoInvalid = false; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var f = _fast?.Next(bar.Close, true) ?? 0;
+            var s = _slow?.Next(bar.Close, true) ?? 0;
+            var ppo = RoundedPercentageChange.Of(f, s);
+            var macd = f - s;
+            _macdInvalid |= double.IsInfinity(macd); _ppoInvalid |= double.IsInfinity(ppo);
+            var macdSignal = _macdInvalid ? double.NaN : _macdSignal?.Next(macd, true) ?? 0;
+            var ppoSignal = _ppoInvalid ? double.NaN : _ppoSignal?.Next(ppo, true) ?? 0;
+            outputs[0] = macd; outputs[1] = macdSignal; outputs[2] = macd - macdSignal;
+            outputs[3] = ppo; outputs[4] = ppoSignal; outputs[5] = ppo - ppoSignal;
+        }
+        public void Dispose() { _fast?.Dispose(); _slow?.Dispose(); _macdSignal?.Dispose(); _ppoSignal?.Dispose(); }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
