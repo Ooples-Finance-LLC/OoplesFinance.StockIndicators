@@ -15617,6 +15617,18 @@ internal static partial class IndicatorCompute
     {
         if (maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides)
         {
+            // A batch shorter than the window publishes only warmup zeros. Avoid
+            // allocating a period-sized ring, but retain exact-input validation.
+            if (Math.Max(1, length) > input.Length)
+            {
+                var warmup = new ExactMeanAccumulator();
+                for (var i = 0; i < input.Length; i++)
+                {
+                    warmup.Add(input[i]);
+                    output[i] = 0;
+                }
+                return;
+            }
             using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, length));
             for (var i = 0; i < input.Length; i++) output[i] = mean.Next(input[i], true);
         }
