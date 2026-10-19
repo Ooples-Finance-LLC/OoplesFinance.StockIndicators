@@ -338,6 +338,19 @@ internal static partial class ValuesBarExecution
             or RobustWeightingOscillator { MaType: null, SecondAverage: null, ThirdAverage: null }
             or ReverseMovingAverageConvergenceDivergence
             or SimpleCycle or SimplePriceZone or SigmaSpikes { MaType: null }
+            or SimpleLines { Multiplier: > double.NegativeInfinity and < double.PositiveInfinity }
+            or SentimentZoneOscillator { MaType: null }
+            or RandomWalkIndex { MaType: null }
+            or RSINGIndicator { MaType: null, SecondAverage: null }
+            or SellGravitationIndex { MaType: null, SecondAverage: null }
+            or RainbowOscillator { MaType: null }
+            or SchaffTrendCycle { MaType: null } or SchaffTrendCycleShk { MaType: null }
+            or StationaryExtrapolatedLevels { MaType: null } or StationaryExtrapolatedLevelsOscillator { MaType: null }
+            or SettingLessTrendStepFiltering or SqueezeMomentumIndicator { MaType: null }
+            or SharpModifiedMovingAverage { MaType: null }
+            or SequentiallyFilteredMovingAverage { MaType: null }
+            or ReversalPoints { MaType: null }
+            or ShapeshiftingMovingAverage { Length: <= 1_073_741_824 }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -935,6 +948,22 @@ internal static partial class ValuesBarExecution
         SimpleCycle simple => new GeneratedSimpleCycleState(simple.Length),
         SimplePriceZone zone => new GeneratedSimplePriceZoneState(zone.Length),
         SigmaSpikes sigma => new GeneratedSigmaSpikesState(sigma.Length),
+        SimpleLines lines => new GeneratedSimpleLinesState(lines.Length, lines.Multiplier),
+        SentimentZoneOscillator sentiment => new GeneratedSentimentZoneState(sentiment.Length),
+        RandomWalkIndex walk => new GeneratedRandomWalkState(walk.Length),
+        RSINGIndicator rsing => new GeneratedRsingState(rsing.Length),
+        SellGravitationIndex sell => new GeneratedSellGravitationState(sell.Length),
+        RainbowOscillator rainbow => new GeneratedRainbowState(rainbow.Length),
+        SchaffTrendCycle schaff => new GeneratedSchaffFirstState(schaff.FastLength, schaff.SlowLength, schaff.CycleLength),
+        SchaffTrendCycleShk shk => new GeneratedSchaffShkState(shk.FastLength, shk.SlowLength, shk.CycleLength, shk.D1Length, shk.D2Length),
+        StationaryExtrapolatedLevels levels => new GeneratedStationaryLevelsState(levels.Length),
+        StationaryExtrapolatedLevelsOscillator oscillator => new GeneratedStationaryOscillatorState(oscillator.Length),
+        SettingLessTrendStepFiltering => new GeneratedSettingLessStepState(),
+        SqueezeMomentumIndicator squeeze => new GeneratedSqueezeMomentumState(squeeze.Length),
+        SharpModifiedMovingAverage sharp => new GeneratedSharpRollingState(sharp.Length, count),
+        SequentiallyFilteredMovingAverage sharp => new GeneratedSequentialStreakState(sharp.Length, count),
+        ReversalPoints sharp => new GeneratedReversalBoundedState(sharp.Length, count),
+        ShapeshiftingMovingAverage sharp => new GeneratedShapeshiftingWeightsState(sharp.Length, count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -7140,6 +7169,241 @@ internal static partial class ValuesBarExecution
         public void Update(in Bar bar, Span<double> outputs)
         { var point = _window.Next(bar.Close, true); outputs[0] = point.Line; outputs[1] = point.Signal; }
         public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedSimpleLinesState(int length, double multiplier) : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.SimpleLinesKernel _window = new(length, multiplier);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => Reset();
+    }
+    private sealed class GeneratedSentimentZoneState : IIndicatorState, IDisposable
+    {
+        private readonly int _length;
+        private readonly Streaming.IMovingAverageSmoother _average;
+        private double _previous;
+        internal GeneratedSentimentZoneState(int length)
+        { _length = Math.Max(1, length); _average = Streaming.MovingAverageSmootherFactory.Create(MovingAvgType.TripleExponentialMovingAverage, _length); }
+        public void Reset() { _previous = 0; _average.Reset(); }
+        public double Update(in Bar bar)
+        {
+            var vote = bar.Close > _previous ? 1d : -1d;
+            var average = _average.Next(vote, true); _previous = bar.Close;
+            return 100 * average / _length;
+        }
+        public void Dispose() => _average.Dispose();
+    }
+
+    private sealed class GeneratedRandomWalkState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly RandomWalkWindow _window = new(MovingAvgType.WildersSmoothingMethod, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.High, bar.Low, bar.Close, true); outputs[0] = point.High; outputs[1] = point.Low; }
+        public void Dispose() => _window.Dispose();
+    }
+    private sealed class GeneratedRsingState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly RsingWindow _window = new(MovingAvgType.WeightedMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, bar.High, bar.Low, bar.Volume, true); outputs[0] = point.Line; outputs[1] = point.Signal; }
+        public void Dispose() => _window.Dispose();
+    }
+    private sealed class GeneratedSellGravitationState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly SellGravitationWindow _window = new(MovingAvgType.ExponentialMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, bar.Open, bar.High, bar.Low, true); outputs[0] = point.Line; outputs[1] = point.Signal; }
+        public void Dispose() => _window.Dispose();
+    }
+    private sealed class GeneratedRainbowState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly RainbowWindow _window = new(MovingAvgType.SimpleMovingAverage, length, 10);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, true); outputs[0] = point.Line; outputs[1] = point.Upper; outputs[2] = point.Lower; }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedSchaffFirstState(int fast, int slow, int cycle) : IIndicatorState, IDisposable
+    {
+        private readonly SchaffFirstPassWindow _window = new(MovingAvgType.ExponentialMovingAverage, fast, slow, cycle);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+    private sealed class GeneratedSchaffShkState(int fast, int slow, int cycle, int first, int second) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.SchaffCycleKernel _window = new(MovingAvgType.ExponentialMovingAverage, fast, slow, cycle, first, second);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, true); outputs[0] = point.Stc; outputs[1] = point.Macd; }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedStationaryLevelsState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly StationaryLevelsWindow _window = new(MovingAvgType.SimpleMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, true); outputs[0] = point.Upper; outputs[1] = point.Middle; outputs[2] = point.Lower; outputs[3] = point.Deviation; }
+        public void Dispose() => _window.Dispose();
+    }
+    private sealed class GeneratedStationaryOscillatorState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly StationaryLevelsOscillatorWindow _window = new(MovingAvgType.SimpleMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedSettingLessStepState : IIndicatorState, IDisposable
+    {
+        private readonly SettingLessStepWindow _window = new();
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => Reset();
+    }
+    private sealed class GeneratedSqueezeMomentumState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly SqueezeMomentumWindow _window = new(MovingAvgType.SimpleMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedSharpRollingState : IIndicatorState, IDisposable
+    {
+        private readonly int _length;
+        private readonly PooledRingBuffer<double> _history;
+        private readonly System.Numerics.BigInteger _divisor;
+        private readonly ExactMeanAccumulator _denominator;
+        private ExactMeanAccumulator _sum, _aged;
+        internal GeneratedSharpRollingState(int length, int count)
+        {
+            _length = Math.Max(1, length); _history = new(Math.Min(_length, Math.Max(1, count)));
+            _divisor = new System.Numerics.BigInteger(_length) * (_length + 1L);
+            var denominator = new ExactMeanAccumulator(); denominator.Add(1, _divisor); _denominator = denominator;
+        }
+        public void Reset() { _history.Clear(); _sum = _aged = default; }
+        public double Update(in Bar bar)
+        {
+            // A = sum(lag * price). Shifting the window gives A' = A + S - n * expired.
+            var aged = _aged; aged.AddExact(_sum); var sum = _sum;
+            if (_history.Count == _length) { var expired = _history[0]; aged.Add(expired, -_length); sum.Add(expired, -1); }
+            sum.Add(bar.Close);
+            var mean = _history.Count >= _length - 1 ? sum.Mean(_length) : 0;
+            var numerator = sum; numerator.Multiply(3d * (_length - 1L));
+            var correction = aged; correction.Multiply(6); numerator.Subtract(correction);
+            numerator.Add(mean, _divisor);
+            _sum = sum; _aged = aged; _history.TryAdd(bar.Close, out _);
+            return numerator.Ratio(_denominator);
+        }
+        public void Dispose() => _history.Dispose();
+    }
+
+    private sealed class GeneratedSequentialStreakState : IIndicatorState, IDisposable
+    {
+        private readonly int _length;
+        private readonly PooledRingBuffer<double> _prices;
+        private ExactMeanAccumulator _sum;
+        private int _direction, _streak;
+        private double _previousMean, _previousOutput;
+        private bool _hasPrevious;
+        internal GeneratedSequentialStreakState(int length, int count)
+        {
+            _length = Math.Max(1, length);
+            _prices = new(Math.Min(_length, Math.Max(1, count)));
+        }
+        public void Reset()
+        {
+            _prices.Clear(); _sum = default; _direction = _streak = 0;
+            _previousMean = _previousOutput = 0; _hasPrevious = false;
+        }
+        public double Update(in Bar bar)
+        {
+            if (_prices.Count == _length) _sum.Add(_prices[0], -1);
+            _sum.Add(bar.Close);
+            var mean = _prices.Count >= _length - 1 ? _sum.Mean(_length) : 0;
+            var direction = mean.CompareTo(_hasPrevious ? _previousMean : 0);
+            // A full window sums to +/-length exactly when its nonzero directions agree.
+            _streak = direction == 0 ? 0 : direction == _direction
+                ? (_streak < _length ? _streak + 1 : _length) : 1;
+            var result = _streak == _length ? mean : _hasPrevious ? _previousOutput : bar.Close;
+            _prices.TryAdd(bar.Close, out _);
+            _direction = direction; _previousMean = mean; _previousOutput = result; _hasPrevious = true;
+            return result;
+        }
+        public void Dispose() => _prices.Dispose();
+    }
+
+    private sealed class GeneratedReversalBoundedState : IIndicatorState, IDisposable
+    {
+        private readonly int _length;
+        private readonly PooledRingBuffer<double> _ratios;
+        private readonly StrengthAverage _first, _second;
+        private ExactMeanAccumulator _sum;
+        private double _previous;
+        internal GeneratedReversalBoundedState(int length, int count)
+        {
+            _length = Math.Max(1, length);
+            var smooth = MathHelper.MinOrMax((int)Math.Ceiling(_length / 2d));
+            _first = new(MovingAvgType.ExponentialMovingAverage, smooth);
+            _second = new(MovingAvgType.ExponentialMovingAverage, smooth);
+            _ratios = new(Math.Min(_length, Math.Max(1, count)));
+        }
+        public void Reset() { _previous = 0; _sum = default; _ratios.Clear(); _first.Reset(); _second.Reset(); }
+        public double Update(in Bar bar)
+        {
+            var change = new ExactMeanAccumulator(); change.Add(bar.Close); change.Add(_previous, -1);
+            var first = _first.Next(StrengthValue.Round(change, 1).Absolute, true);
+            var second = _second.Next(first, true);
+            var numerator = new ExactMeanAccumulator(); first.AddTo(ref numerator);
+            var denominator = new ExactMeanAccumulator(); second.AddTo(ref denominator);
+            var ratio = numerator.Ratio(denominator);
+            if (_ratios.Count == _length) _sum.Add(_ratios[0], -1);
+            _sum.Add(ratio); _ratios.TryAdd(ratio, out _); _previous = bar.Close;
+            return _sum.Mean(1);
+        }
+        public void Dispose() { _ratios.Dispose(); _first.Dispose(); _second.Dispose(); }
+    }
+
+    private sealed class GeneratedShapeshiftingWeightsState : IIndicatorState, IDisposable
+    {
+        private readonly double[] _weights;
+        private readonly ExactMeanAccumulator _mass;
+        private readonly PooledRingBuffer<double> _prices;
+        internal GeneratedShapeshiftingWeightsState(int length, int count)
+        {
+            length = Math.Max(2, length);
+            _weights = new double[Math.Min(length, Math.Max(1, count))];
+            var d = new System.Numerics.BigInteger(length - 1);
+            var cube = d * d * d; var fourth = cube * d; var linearStep = 2 * cube;
+            System.Numerics.BigInteger power = 0, first = 1, second = 14, third = 36, linear = 0;
+            var mass = new ExactMeanAccumulator();
+            for (var j = 0; j < length; j++)
+            {
+                var denominator = fourth + power;
+                var weight = ExactMeanAccumulator.UnitRatio((denominator - linear) << 1074, denominator);
+                if (j < _weights.Length) _weights[j] = weight;
+                mass.Add(weight);
+                // Fourth finite differences reproduce j^4 exactly; no floating recurrence.
+                power += first; first += second; second += third; third += 24; linear += linearStep;
+            }
+            _mass = mass; _prices = new(_weights.Length);
+        }
+        public void Reset() => _prices.Clear();
+        public double Update(in Bar bar)
+        {
+            var sum = new ExactMeanAccumulator(); sum.AddProduct(bar.Close, _weights[0]);
+            for (var j = 1; j < _weights.Length && j <= _prices.Count; j++)
+                sum.AddProduct(_prices[_prices.Count - j], _weights[j]);
+            var value = sum.Ratio(_mass); _prices.TryAdd(bar.Close, out _); return value;
+        }
+        public void Dispose() => _prices.Dispose();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
