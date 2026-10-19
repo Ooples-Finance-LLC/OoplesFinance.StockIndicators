@@ -43,8 +43,17 @@ internal sealed class MacZWindow : IDisposable
             var power = Math.Min(a._exponent, b._exponent);
             var common = BigInteger.GreatestCommonDivisor(a.Denominator, b.Denominator);
             var aScale = b.Denominator / common; var bScale = a.Denominator / common;
-            // Exponent alignment can create further factors, so fully reduce the sum.
-            return new((a._coefficient << (a._exponent - power)) * aScale + (b._coefficient << (b._exponent - power)) * bScale, power, a.Denominator * aScale);
+            var coefficient = (a._coefficient << (a._exponent - power)) * aScale + (b._coefficient << (b._exponent - power)) * bScale;
+            var denominator = a.Denominator * aScale;
+            if (a._exponent == b._exponent)
+            {
+                // Reduced inputs leave common factors only in the original
+                // denominator GCD. Avoid reducing against their full product.
+                var remaining = BigInteger.GreatestCommonDivisor(BigInteger.Abs(coefficient), common);
+                return new(coefficient / remaining, power, denominator / remaining, reduced: true);
+            }
+            // Exponent alignment can introduce other factors; retain full reduction.
+            return new(coefficient, power, denominator);
         }
         public static Number operator -(Number a, Number b) => a + new Number(-b._coefficient, b._exponent, b.Denominator, reduced: true);
         public static Number operator *(Number a, Number b)
