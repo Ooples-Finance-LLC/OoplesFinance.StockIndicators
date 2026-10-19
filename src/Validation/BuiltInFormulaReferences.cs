@@ -3513,8 +3513,12 @@ internal static partial class BuiltInFormulaReferences
             for (var slot = 0; slot < macdKeys.Length; slot++)
             {
                 var key = macdKeys[slot];
-                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
-                    bars => RoundedMacd(bars, macdOptions)[key], IndicatorErrorBudget.Exact);
+                yield return macdKeys.Length == 1 && key != "Macd"
+                    ? IndicatorValidationRule.ReferenceWithDependentOverflowRejection(slot,
+                        bars => RoundedMacd(bars, macdOptions)[key],
+                        bars => RoundedMacd(bars, macdOptions)["Macd"], IndicatorErrorBudget.Exact)
+                    : IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                        bars => RoundedMacd(bars, macdOptions)[key], IndicatorErrorBudget.Exact);
             }
             yield break;
         }

@@ -1,0 +1,134 @@
+{
+  "types": [
+    "LinearQuadraticConvergenceDivergenceOscillator",
+    "LogisticCorrelation",
+    "MotionSmoothnessIndex",
+    "MacZIndicator",
+    "MacZVwapIndicator",
+    "KurtosisIndicator",
+    "MarketDirectionIndicator",
+    "MassThrust",
+    "MassThrustIndicator",
+    "MassThrustOscillator",
+    "MobilityOscillator",
+    "McClellanOscillator",
+    "MidpointOscillator",
+    "ModifiedGannHiloActivator",
+    "MorphedSineWave",
+    "MoveTracker",
+    "GuppyDistanceIndicator",
+    "GuppyMultipleMovingAverage",
+    "MacdLine",
+    "MacdSignal",
+    "MacdHistogram"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "base_head": "9ecbbc18be365dcd7917af4dcaa75fb4c78de305",
+  "combined_input_sha256": "fb1954c7b44f966d73b187fc81c0d1b8d2d3ce2e49cf3bef08959fd8269c762a",
+  "manifest_sha256": "e0a1b701c352e9732aea9df239b700200cf9e5bf64756c36cd450515d6062d66",
+  "unit_class_counts": {
+    "SharedGeneratedLinearQuadraticTests": 20,
+    "SharedGeneratedLogisticMotionTests": 42,
+    "SharedGeneratedMacZTests": 62,
+    "SharedGeneratedMacZVwapTests": 69,
+    "SharedGeneratedKurtosisTests": 22,
+    "SharedGeneratedMarketMassTests": 67,
+    "SharedGeneratedMobilityTests": 20,
+    "SharedGeneratedBreadthMidpointTests": 40,
+    "SharedGeneratedModifiedMotionTests": 56,
+    "SharedGeneratedGuppyRibbonsTests": 227,
+    "SharedGeneratedMacdAliasesTests": 56,
+    "DependentOutputRepresentabilityTests": 9,
+    "GuppyOverflowBoundaryTests": 4,
+    "OutputRepresentabilityTests": 11
+  },
+  "parity_class_counts": {
+    "RemainingLinearQuadraticBenchmarkTests": 4,
+    "RemainingLogisticMotionBenchmarkTests": 8,
+    "RemainingMacZBenchmarkTests": 4,
+    "RemainingMacZVwapBenchmarkTests": 4,
+    "RemainingKurtosisBenchmarkTests": 4,
+    "RemainingMarketMassBenchmarkTests": 16,
+    "RemainingMobilityBenchmarkTests": 4,
+    "RemainingBreadthMidpointBenchmarkTests": 8,
+    "RemainingModifiedMotionBenchmarkTests": 12,
+    "RemainingGuppyRibbonsBenchmarkTests": 8,
+    "RemainingMacdAliasesBenchmarkTests": 12
+  },
+  "unique_check_counts": {
+    "unit": 705,
+    "finite_smoothing": 1,
+    "parity": 84,
+    "discovery": 266,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/tenth-integrated-unit-repair.trx.gz",
+    "benchmarks/results/remaining-indicators/tenth-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/tenth-integrated-parity.trx.gz",
+    "benchmarks/results/remaining-indicators/tenth-integrated-discovery.trx.gz",
+    "benchmarks/results/remaining-indicators/tenth-integrated-finite-smoothing.trx.gz"
+  ],
+  "production_sha256": "4d2abc7500f6dfa0fab4b4b4aa9f5f30ffc98ee9d1b6c36b996fb75bcd4c7207",
+  "fixture_sha256": "dc29377237f25e97f351d6715f16217b2aaa490d16db8fb24215e81035a6e765",
+  "input_repairs": [
+    {
+      "before_input_sha256": "9cdc91cff0bd0042750d7f7b46b6d275efbb947df5bc3925d25287fbb91e4fc5",
+      "after_input_sha256": "0ce6bc4f68662a84ed391a298f144294fb04efbd3c48bbee7391791b79e925bf",
+      "added_files": {
+        "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/RemainingGuppyRibbonsBenchmarks.cs": {
+          "source": "Z:\\StockIndicators-work\\si-staged-eighth\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\LibraryComparisons\\RemainingGuppyRibbonsBenchmarks.cs",
+          "sha256": "f6d8306911e3054804e7ec502ad7ed50f00d66c1a7cda214f84db601a97e438b",
+          "manifest_sha256": "067956c3beebaf275b6e7ba96cbc794a2765c4102c61712c15aa67b6151d243f"
+        },
+        "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/RemainingGuppyRibbonsBenchmarkTests.cs": {
+          "source": "Z:\\StockIndicators-work\\si-staged-eighth\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\RemainingGuppyRibbonsBenchmarkTests.cs",
+          "sha256": "14ea488728f0d4c5bb9a477006a9e4dd679ea7a615398c65eb6b03712ee64267",
+          "manifest_sha256": "067956c3beebaf275b6e7ba96cbc794a2765c4102c61712c15aa67b6151d243f"
+        },
+        "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/RemainingMacdAliasesBenchmarks.cs": {
+          "source": "C:\\Users\\cheat\\temp\\si-staged-combined\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\LibraryComparisons\\RemainingMacdAliasesBenchmarks.cs",
+          "sha256": "7fb32525ec617d8c02db269ce3e5c28395ce98dc81115b0e96b7fd285fc731c4",
+          "manifest_sha256": "7f175b49003a6900d2b652ea394171726e5e8ece9f9421825687a3b6cf451d8b"
+        },
+        "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/RemainingMacdAliasesBenchmarkTests.cs": {
+          "source": "C:\\Users\\cheat\\temp\\si-staged-combined\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\RemainingMacdAliasesBenchmarkTests.cs",
+          "sha256": "131a842bb111af408edb5283b37c2c5dc1ad0d0ee1493770654dfa8889472572",
+          "manifest_sha256": "7f175b49003a6900d2b652ea394171726e5e8ece9f9421825687a3b6cf451d8b"
+        }
+      },
+      "reason": "Restore missing previously-deferred Guppy/MACD benchmark and parity fixture sources from hash-verified staged manifests. Production/example/unit sources unchanged; reuse their builds. Rebuild harness and comparator."
+    },
+    {
+      "reason": "Correct new test to existing McClellan first-output primary contract; production unchanged.",
+      "before_input_sha256": "0ce6bc4f68662a84ed391a298f144294fb04efbd3c48bbee7391791b79e925bf",
+      "after_input_sha256": "fb1954c7b44f966d73b187fc81c0d1b8d2d3ce2e49cf3bef08959fd8269c762a",
+      "file": "tests/ModelsTests/SharedGeneratedBreadthMidpointTests.cs",
+      "before_sha256": "950d3d220fcda47b3586e9bf3938cde5e4541078ec2e3cbe3a6ff1b2d40c26d3",
+      "after_sha256": "598bf00d83f73cbed353f31c9136e1c6e65a1fd778217c4fe68e44ee9c2baa2f",
+      "original_trx": "Z:\\StockIndicators-work\\si-tenth-certified-validation-20261019\\primary-test-repair\\unit.trx",
+      "original_trx_sha256": "092e898f374eace3d9ff41c8aa8a33753224116e8ef57c128c30f81d4a119b28",
+      "replaced_test": "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedGeneratedBreadthMidpointTests.OutputOrderAndPrimaryRemainStable",
+      "retained_passed_cases": 704
+    }
+  ],
+  "context": "Combined working candidate validated. Original unit TRX retains its one failed test-expectation assertion; all passing cases explicitly reused after assertion-only repair, and that case passed in the separate repair TRX. Other checks fresh. Selective commits not separately rebuilt; source fingerprint identifies tested composition.",
+  "pending": [
+    "controlled raw timing",
+    "remaining rollout"
+  ],
+  "unit_repair": {
+    "reason": "Correct new test to existing McClellan first-output primary contract; production unchanged.",
+    "before_input_sha256": "0ce6bc4f68662a84ed391a298f144294fb04efbd3c48bbee7391791b79e925bf",
+    "after_input_sha256": "fb1954c7b44f966d73b187fc81c0d1b8d2d3ce2e49cf3bef08959fd8269c762a",
+    "file": "tests/ModelsTests/SharedGeneratedBreadthMidpointTests.cs",
+    "before_sha256": "950d3d220fcda47b3586e9bf3938cde5e4541078ec2e3cbe3a6ff1b2d40c26d3",
+    "after_sha256": "598bf00d83f73cbed353f31c9136e1c6e65a1fd778217c4fe68e44ee9c2baa2f",
+    "original_trx": "Z:\\StockIndicators-work\\si-tenth-certified-validation-20261019\\primary-test-repair\\unit.trx",
+    "original_trx_sha256": "092e898f374eace3d9ff41c8aa8a33753224116e8ef57c128c30f81d4a119b28",
+    "replaced_test": "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedGeneratedBreadthMidpointTests.OutputOrderAndPrimaryRemainStable",
+    "retained_passed_cases": 704
+  }
+}
