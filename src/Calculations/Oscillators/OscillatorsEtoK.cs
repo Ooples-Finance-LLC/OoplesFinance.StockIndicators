@@ -736,11 +736,17 @@ public static partial class Calculations
             var superGmmaOscRaw = GuppyRibbonArithmetic.Percent(superGmmaFast, superGmmaSlow);
             superGmmaOscRawList.Add(superGmmaOscRaw);
 
-            var superGmmaOsc = superGmmaOscRawSumWindow.Next(superGmmaOscRaw, true);
+            var superGmmaOsc = double.IsFinite(superGmmaOscRaw) || smoothLength > 1
+                ? superGmmaOscRawSumWindow.Next(superGmmaOscRaw, true) : superGmmaOscRaw;
             superGmmaOscList.Add(superGmmaOsc);
         }
 
-        var superGmmaSignalList = GetMovingAverageList(stockData, maType, signalLength, superGmmaOscRawList);
+        var finiteSignalCount = superGmmaOscRawList.FindIndex(value => !double.IsFinite(value));
+        var finiteSignalInput = finiteSignalCount < 0 ? superGmmaOscRawList
+            : FiniteSignalInput.Create(superGmmaOscRawList, out finiteSignalCount);
+        if (finiteSignalCount < 0) finiteSignalCount = superGmmaOscRawList.Count;
+        var superGmmaSignalList = GetMovingAverageList(stockData, maType, signalLength, finiteSignalInput);
+        for (var i = finiteSignalCount; i < superGmmaSignalList.Count; i++) superGmmaSignalList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var superGmmaOsc = superGmmaOscList[i];

@@ -274,6 +274,9 @@ internal static partial class ValuesBarExecution
             or KasePeakOscillatorV2 { MaType: null }
             or LindaRaschke310Oscillator { MaType: null, SecondAverage: null, ThirdAverage: null, FourthAverage: null }
             or KarobeinOscillator { MaType: null } or KwanIndicator { MaType: null }
+            or MacdLine or MacdSignal or MacdHistogram
+            or GuppyDistanceIndicator { SecondAverage: null, ThirdAverage: null, FourthAverage: null, FifthAverage: null, Average6Average: null, Average7Average: null, Average8Average: null, Average9Average: null, Average10Average: null, Average11Average: null, Average12Average: null, MaType: null }
+            or GuppyMultipleMovingAverage { SecondAverage: null, ThirdAverage: null, FourthAverage: null, FifthAverage: null, Average6Average: null, Average7Average: null, Average8Average: null, Average9Average: null, Average10Average: null, Average11Average: null, Average12Average: null, Average13Average: null, Average14Average: null, Average15Average: null, Average16Average: null, Average17Average: null, Average18Average: null, Average19Average: null, Average20Average: null, Average21Average: null, Average22Average: null, Average23Average: null, Average24Average: null, Average25Average: null, Average26Average: null, Average27Average: null, Average28Average: null, MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -786,6 +789,11 @@ internal static partial class ValuesBarExecution
         KaufmanBinaryWave wave => new GeneratedKaufmanBinaryState(wave.Length, wave.FastSc, wave.SlowSc, wave.FilterPct),
         KarobeinOscillator oscillator => new GeneratedKarobeinState(oscillator.Length),
         KwanIndicator kwan => new GeneratedKwanState(kwan.Length, kwan.SmoothLength),
+        MacdLine oscillator => new GeneratedEmaGapSignalState(oscillator.FastLength, oscillator.SlowLength, 9),
+        MacdSignal oscillator => new GeneratedMacdAliasState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength, 1),
+        MacdHistogram oscillator => new GeneratedMacdAliasState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength, 2),
+        GuppyDistanceIndicator guppy => new GeneratedGuppyDistanceState([guppy.Length1, guppy.Length2, guppy.Length3, guppy.Length4, guppy.Length5, guppy.Length6, guppy.Length7, guppy.Length8, guppy.Length9, guppy.Length10, guppy.Length11, guppy.Length12]),
+        GuppyMultipleMovingAverage guppy => new GeneratedGuppyMultipleState([guppy.Length1, guppy.Length2, guppy.Length3, guppy.Length5, guppy.Length7, guppy.Length9, guppy.Length10, guppy.Length11, guppy.Length12, guppy.Length13, guppy.Length14, guppy.Length15, guppy.Length16, guppy.Length18, guppy.Length19, guppy.Length21, guppy.Length22, guppy.Length23, guppy.Length25, guppy.Length26, 52, 55, 58, 61, 64, 67, 70]),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -5993,6 +6001,54 @@ internal static partial class ValuesBarExecution
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true).Value;
         public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedMacdAliasState(int fast, int slow, int signal, int slot) : IIndicatorState
+    {
+        private readonly GeneratedEmaGapSignalState _state = new(fast, slow, signal);
+        public void Reset() => _state.Reset();
+        public double Update(in Bar bar)
+        {
+            Span<double> outputs = stackalloc double[3];
+            _state.Update(in bar, outputs);
+            return outputs[slot];
+        }
+    }
+
+    private sealed class GeneratedGuppyDistanceState(int[] lengths) : IMultiOutputState
+    {
+        private readonly Streaming.EmaState[] _averages = lengths.Select(length => new Streaming.EmaState(length)).ToArray();
+        public void Reset() { foreach (var average in _averages) average.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            Span<double> values = stackalloc double[12];
+            for (var i = 0; i < values.Length; i++) values[i] = _averages[i].GetNext(bar.Close, commit: true);
+            outputs[0] = GuppyRibbonArithmetic.Distance(values[0], values[1], values[2], values[3], values[4], values[5]);
+            outputs[1] = GuppyRibbonArithmetic.Distance(values[6], values[7], values[8], values[9], values[10], values[11]);
+        }
+    }
+
+    private sealed class GeneratedGuppyMultipleState(int[] lengths) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.EmaState[] _averages = lengths.Select(length => new Streaming.EmaState(length)).ToArray();
+        private readonly ExactPartialMeanWindow _smooth = new(1);
+        private readonly Streaming.EmaState _signal = new(13);
+        private bool _invalidSignal;
+        public void Reset() { foreach (var average in _averages) average.Reset(); _smooth.Reset(); _signal.Reset(); _invalidSignal = false; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            Span<double> values = stackalloc double[27];
+            for (var i = 0; i < values.Length; i++) values[i] = _averages[i].GetNext(bar.Close, commit: true);
+            var fast = GuppyRibbonArithmetic.Mean(values[..11]);
+            var slow = GuppyRibbonArithmetic.Mean(values[11..]);
+            var raw = GuppyRibbonArithmetic.Percent(fast, slow);
+            _invalidSignal |= !double.IsFinite(raw);
+            // Preserve the unrepresentable primary output for the public output
+            // validator; finite-only smoothers must not obscure that rejection.
+            outputs[0] = double.IsFinite(raw) ? _smooth.Next(raw, true) : raw;
+            outputs[1] = _invalidSignal ? double.NaN : _signal.GetNext(raw, commit: true);
+        }
+        public void Dispose() => _smooth.Dispose();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable

@@ -45,6 +45,20 @@ public sealed class IndicatorValidationRule
     public bool IncludesStartup { get; private set; }
 
     internal Func<IReadOnlyList<Bar>, IReadOnlyList<double>>? OverflowReference { get; private set; }
+    internal Func<IReadOnlyList<Bar>, IReadOnlyList<double>>? OverflowSourceReference { get; private set; }
+
+    // A scalar projection may expose only the NaN invalidated by an upstream
+    // overflow. Require independent proof of that source at the same bar;
+    // this never permits publication of a nonfinite output.
+    internal static IndicatorValidationRule ReferenceWithDependentOverflowRejection(int outputSlot,
+        Func<IReadOnlyList<Bar>, IReadOnlyList<double>> reference,
+        Func<IReadOnlyList<Bar>, IReadOnlyList<double>> overflowSource,
+        IndicatorErrorBudget errorBudget)
+    {
+        var rule = ReferenceWithOverflowRejection(outputSlot, reference, errorBudget);
+        rule.OverflowSourceReference = overflowSource ?? throw new ArgumentNullException(nameof(overflowSource));
+        return rule;
+    }
 
     internal static IndicatorValidationRule ConstantAverage(int slot) => new("ConstantAverage", context =>
     {

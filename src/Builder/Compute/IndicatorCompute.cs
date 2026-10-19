@@ -17900,13 +17900,19 @@ internal static partial class IndicatorCompute
             var superGmmaFast = fast[i].Mean(11);
             var superGmmaSlow = slow[i].Mean(16);
             oscillatorRaw[i] = GuppyRibbonArithmetic.Percent(superGmmaFast, superGmmaSlow);
-            output[i] = rawSum.Next(oscillatorRaw[i], true);
+            output[i] = double.IsFinite(oscillatorRaw[i]) || smoothLength > 1
+                ? rawSum.Next(oscillatorRaw[i], true) : oscillatorRaw[i];
         }
 
         if (series == MacdSeries.Signal)
         {
-            // the signal is an average of the RAW oscillator, not of the smoothed one this arm just wrote
+            // The signal uses the raw oscillator. Preserve its finite prefix,
+            // then invalidate the dependent suffix without entering a finite-only kernel.
+            var finiteCount = 0;
+            while (finiteCount < count && double.IsFinite(oscillatorRaw[finiteCount])) finiteCount++;
+            oscillatorRaw[finiteCount..].Clear();
             MovingAverage(data, maType, Math.Max(1, signalLength), raw.Span, output);
+            output[finiteCount..].Fill(double.NaN);
         }
 
         return buffer;
