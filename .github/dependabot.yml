@@ -10,6 +10,16 @@ updates:
   # NuGet package updates.
   - package-ecosystem: "nuget"
     directory: "/"
+    # Group all update levels; keep security updates in their own grouped PR.
+    groups:
+      nuget-updates:
+        applies-to: version-updates
+        patterns:
+          - "*"
+      nuget-security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
@@ -49,6 +59,16 @@ updates:
   # what keeps those pins moving, so this ecosystem is required, not optional.
   - package-ecosystem: "github-actions"
     directory: "/"
+    # Group all update levels; keep security updates in their own grouped PR.
+    groups:
+      github-actions-updates:
+        applies-to: version-updates
+        patterns:
+          - "*"
+      github-actions-security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
     schedule:
       interval: "weekly"
       day: "monday"
