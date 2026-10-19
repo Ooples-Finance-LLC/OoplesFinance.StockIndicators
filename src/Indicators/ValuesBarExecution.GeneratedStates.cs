@@ -51,6 +51,9 @@ internal static partial class ValuesBarExecution
         indicator is MacZVwapIndicator { MaType: null } maczVwap && double.IsFinite(maczVwap.Gamma) ||
         indicator is MultiLevelIndicator level && double.IsFinite(level.Factor) ||
         indicator is NegativeVolumeDisparityIndicator { MaType: null } disparity && double.IsFinite(disparity.Top) && double.IsFinite(disparity.Bottom) ||
+        indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
+            && adaptiveFilter.FastAlpha >= 0 && adaptiveFilter.FastAlpha <= 1 && adaptiveFilter.SlowAlpha >= 0 && adaptiveFilter.SlowAlpha <= 1 ||
+        indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is FXSniperIndicator { MaType: null } sniper && double.IsFinite(sniper.B) ||
         indicator is FastandSlowKurtosisOscillator { MaType: null } kurtosis && double.IsFinite(kurtosis.Ratio) ||
         indicator is FibonacciRetrace { MaType: null } retrace && double.IsFinite(retrace.Factor) ||
@@ -299,6 +302,18 @@ internal static partial class ValuesBarExecution
             or NaturalMarketMirror { MaType: null } or NaturalMarketRiver { MaType: null } or NaturalMarketCombo { MaType: null }
             or MirroredMovingAverageConvergenceDivergence { MaType: null, SecondAverage: null, ThirdAverage: null, FourthAverage: null }
             or MirroredPercentagePriceOscillator { MaType: null, SecondAverage: null, ThirdAverage: null, FourthAverage: null }
+            or MovingAverageAdaptiveQ
+            or MovingAverageV3 { MaType: null, SecondAverage: null }
+            or MultiDepthZeroLagExponentialMovingAverage
+            or NormalizedMacd or NickRypockTrailingReverse
+            or MovingAverageConvergenceDivergenceLeader { MaType: null, SecondAverage: null, ThirdAverage: null, FourthAverage: null, FifthAverage: null }
+            or PercentagePriceOscillatorLeader
+            or PercentChangeOscillator { MaType: null } or PerformanceIndex
+            or PremierStochasticOscillator { MaType: null }
+            or PrettyGoodOscillator { MaType: null, SecondAverage: null }
+            or PriceZoneOscillator { MaType: null, SecondAverage: null }
+            or PriceVolumeRank { MaType: null, SecondAverage: null }
+            or PsychologicalLine
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -848,6 +863,22 @@ internal static partial class ValuesBarExecution
         NaturalMarketCombo natural => new GeneratedNaturalMarketComboState(natural.Length, natural.SmoothLength, count),
         MirroredMovingAverageConvergenceDivergence mirrored => new GeneratedMirroredPairState(mirrored.Length, mirrored.SignalLength, false),
         MirroredPercentagePriceOscillator mirrored => new GeneratedMirroredPairState(mirrored.Length, mirrored.SignalLength, true),
+        MovingAverageAdaptiveQ adaptive => new GeneratedAdaptiveQState(adaptive.Length),
+        MovingAverageAdaptiveFilter adaptive => new GeneratedAdaptiveFilterState(adaptive.Length, adaptive.Filter, adaptive.FastAlpha, adaptive.SlowAlpha),
+        MovingAverageV3 average => new GeneratedMovingAverageV3State(average.Length),
+        ModularFilter modular => new GeneratedModularState(modular.Length, modular.Beta),
+        MultiDepthZeroLagExponentialMovingAverage depth => new GeneratedMultiDepthState(depth.Length),
+        NormalizedMacd normalized => new GeneratedNormalizedMacdState(normalized.FastLength, normalized.SlowLength),
+        NickRypockTrailingReverse nick => new GeneratedNickReverseState(nick.Length),
+        MovingAverageConvergenceDivergenceLeader leader => new GeneratedMacdLeaderState(leader.FastLength, leader.SlowLength, leader.SignalLength),
+        PercentagePriceOscillatorLeader leader => new GeneratedPpoLeaderState(leader.Length),
+        PercentChangeOscillator change => new GeneratedPercentChangeState(change.Length, count),
+        PerformanceIndex performance => new GeneratedPerformanceIndexState(performance.Length, count),
+        PremierStochasticOscillator premier => new GeneratedPremierState(premier.Length, premier.SmoothLength),
+        PrettyGoodOscillator pretty => new GeneratedPrettyGoodState(pretty.Length, count),
+        PriceZoneOscillator zone => new GeneratedPriceZoneState(zone.Length),
+        PriceVolumeRank rank => new GeneratedPriceVolumeRankState(rank.FastLength, rank.SlowLength, count),
+        PsychologicalLine psychological => new GeneratedPsychologicalState(psychological.Length, count),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -6527,6 +6558,214 @@ internal static partial class ValuesBarExecution
             outputs[3] = mirror; outputs[4] = mirrorSignal; outputs[5] = mirror - mirrorSignal;
         }
         public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedAdaptiveQState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly MovingAverageAdaptiveQWindow _window = new(length, .667, .0645);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => Reset();
+    }
+    private sealed class GeneratedAdaptiveFilterState(int length, double filter, double fast, double slow) : IIndicatorState, IDisposable
+    {
+        private readonly MovingAverageAdaptiveFilterWindow _window = new(length, filter, fast, slow);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedMovingAverageV3State(int length) : IIndicatorState, IDisposable
+    {
+        private readonly MovingAverageV3Window _window = new(MovingAvgType.ExponentialMovingAverage, length, 3);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+    private sealed class GeneratedModularState(int length, double beta) : IIndicatorState, IDisposable
+    {
+        private readonly ModularWindow _window = new(length, beta);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedMultiDepthState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly MultiDepthWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Two; outputs[1] = point.One; outputs[2] = point.Three;
+        }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedNormalizedMacdState(int fastLength, int slowLength) : IIndicatorState, IDisposable
+    {
+        private double _fast, _slow;
+        private bool _started;
+        public void Reset() { _fast = _slow = 0; _started = false; }
+        public double Update(in Bar bar)
+        {
+            if (!_started) { _fast = _slow = bar.Close; _started = true; return 0; }
+            _fast = RoundedSeededEma.Next(bar.Close, _fast, fastLength);
+            _slow = RoundedSeededEma.Next(bar.Close, _slow, slowLength);
+            return RoundedPercentageChange.Of(_fast, _slow);
+        }
+        public void Dispose() => Reset();
+    }
+    private sealed class GeneratedNickReverseState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly double _percent = Math.Max(1, length);
+        private double _high, _low;
+        private int _trend;
+        public void Reset() { _high = _low = 0; _trend = 0; }
+        public double Update(in Bar bar)
+        {
+            double high = 0, low = 0, value; var trend = _trend;
+            if (_trend >= 0)
+            {
+                high = bar.Close > _high ? bar.Close : _high;
+                value = RoundedPercentageBand.Percent(high, _percent, -1);
+                if (bar.Close <= value) { trend = -1; low = bar.Close; value = RoundedPercentageBand.Percent(low, _percent, 1); }
+            }
+            else
+            {
+                low = bar.Close < _low ? bar.Close : _low;
+                value = RoundedPercentageBand.Percent(low, _percent, 1);
+                if (bar.Close > value) { trend = 1; high = bar.Close; value = RoundedPercentageBand.Percent(high, _percent, -1); }
+            }
+            _high = high; _low = low; _trend = trend; return value;
+        }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedMacdLeaderState(int fastLength, int slowLength, int signalLength) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.EmaState _fast = new(fastLength), _slow = new(slowLength);
+        private readonly Streaming.EmaState _diffFast = new(fastLength), _diffSlow = new(slowLength), _signal = new(signalLength);
+        private bool _fastInvalid, _slowInvalid, _signalInvalid;
+        public void Reset()
+        {
+            _fast.Reset(); _slow.Reset(); _diffFast.Reset(); _diffSlow.Reset(); _signal.Reset();
+            _fastInvalid = _slowInvalid = _signalInvalid = false;
+        }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var fast = _fast.GetNext(bar.Close, true); var slow = _slow.GetNext(bar.Close, true);
+            var diffFast = bar.Close - fast; var diffSlow = bar.Close - slow;
+            _fastInvalid |= !double.IsFinite(diffFast); _slowInvalid |= !double.IsFinite(diffSlow);
+            var first = fast + (_fastInvalid ? double.NaN : _diffFast.GetNext(diffFast, true));
+            var second = slow + (_slowInvalid ? double.NaN : _diffSlow.GetNext(diffSlow, true));
+            var value = first - second;
+            _signalInvalid |= !double.IsFinite(value);
+            if (!_signalInvalid) _ = _signal.GetNext(value, true);
+            outputs[0] = value; outputs[1] = first; outputs[2] = second;
+        }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedPpoLeaderState(int signalLength) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.EmaState _fast = new(12), _slow = new(26);
+        private readonly Streaming.EmaState _diffFast = new(12), _diffSlow = new(26), _signal = new(signalLength);
+        private bool _fastInvalid, _slowInvalid, _signalInvalid;
+        public void Reset()
+        {
+            _fast.Reset(); _slow.Reset(); _diffFast.Reset(); _diffSlow.Reset(); _signal.Reset();
+            _fastInvalid = _slowInvalid = _signalInvalid = false;
+        }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var fast = _fast.GetNext(bar.Close, true); var slow = _slow.GetNext(bar.Close, true);
+            var diffFast = bar.Close - fast; var diffSlow = bar.Close - slow;
+            _fastInvalid |= !double.IsFinite(diffFast); _slowInvalid |= !double.IsFinite(diffSlow);
+            var first = fast + (_fastInvalid ? double.NaN : _diffFast.GetNext(diffFast, true));
+            var second = slow + (_slowInvalid ? double.NaN : _diffSlow.GetNext(diffSlow, true));
+            var value = RoundedFractionalEma.Percentage(first, second);
+            _signalInvalid |= !double.IsFinite(value);
+            var signal = _signalInvalid ? double.NaN : _signal.GetNext(value, true);
+            outputs[0] = value; outputs[1] = signal; outputs[2] = value - signal;
+        }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedPercentChangeState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly OneBarReturnWindow _window = new(true, MovingAvgType.WeightedMovingAverage, length, capacityHint: count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, true); outputs[0] = point.Value; outputs[1] = point.Signal; }
+        public void Dispose() => _window.Dispose();
+    }
+    private sealed class GeneratedPerformanceIndexState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly PooledRingBuffer<double>? _history = Math.Max(1, length) < count ? new(Math.Max(1, length)) : null;
+        public void Reset() => _history?.Clear();
+        public double Update(in Bar bar)
+        {
+            var previous = _history is not null && _history.Count == _history.Capacity ? _history[0] : 0;
+            var value = RoundedPercentageChange.Of(bar.Close, previous);
+            _history?.TryAdd(bar.Close, out _);
+            return value;
+        }
+        public void Dispose() => _history?.Dispose();
+    }
+
+    private sealed class GeneratedPremierState(int length, int smoothLength) : IIndicatorState, IDisposable
+    {
+        private readonly PremierStochasticWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, smoothLength);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true);
+        public void Dispose() => _window.Dispose();
+    }
+    private sealed class GeneratedPrettyGoodState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly PrettyGoodWindow _window = new(MovingAvgType.SimpleMovingAverage, length, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+    private sealed class GeneratedPriceZoneState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly PriceZoneWindow _window = new(MovingAvgType.ExponentialMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+    private sealed class GeneratedPriceVolumeRankState(int fastLength, int slowLength, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly RocBankAverage _fast = new(MovingAvgType.SimpleMovingAverage, Math.Max(1, fastLength), count);
+        private readonly RocBankAverage _slow = new(MovingAvgType.SimpleMovingAverage, Math.Max(1, slowLength), count);
+        private double _previous, _volume;
+        public void Reset() { _fast.Reset(); _slow.Reset(); _previous = _volume = 0; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            double value = bar.Close > _previous ? bar.Volume > _volume ? 1 : 2 : bar.Volume <= _volume ? 3 : 4;
+            var fast = _fast.Next(new(value), true).Publish(); var slow = _slow.Next(new(value), true).Publish();
+            _previous = bar.Close; _volume = bar.Volume;
+            outputs[0] = value; outputs[1] = slow; outputs[2] = fast;
+        }
+        public void Dispose() { _fast.Dispose(); _slow.Dispose(); }
+    }
+    private sealed class GeneratedPsychologicalState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly int _length = Math.Max(1, length);
+        private readonly PooledRingBuffer<double> _conditions = new(Math.Min(Math.Max(1, length), Math.Max(1, count)));
+        private double _previous, _sum;
+        private bool _started;
+        public void Reset() { _conditions.Clear(); _previous = _sum = 0; _started = false; }
+        public double Update(in Bar bar)
+        {
+            var condition = _started && bar.Close > _previous ? 1d : 0d;
+            if (_conditions.Count == _conditions.Capacity) _sum -= _conditions[0];
+            _conditions.TryAdd(condition, out _); _sum += condition;
+            _previous = bar.Close; _started = true;
+            return 100d * _sum / _length;
+        }
+        public void Dispose() => _conditions.Dispose();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
