@@ -325,6 +325,19 @@ internal static partial class ValuesBarExecution
             or RexOscillator { MaType: null, SecondAverage: null }
             or RelativeDifferenceOfSquaresOscillator
             or RecursiveDifferenciator { MaType: null, Alpha: > double.NegativeInfinity and < double.PositiveInfinity }
+            or RecursiveRelativeStrengthIndex { MaType: null }
+            or RecursiveStochastic { Alpha: >= double.NegativeInfinity and <= double.PositiveInfinity }
+            or RelativeVigorIndex { MaType: null, SecondAverage: null }
+            or Repulse { MaType: null, SecondAverage: null, ThirdAverage: null }
+            or RangeIdentifier or RatioOchlAverager
+            or RangeActionVerificationIndex { MaType: null, SecondAverage: null }
+            or RelativeSpreadStrength { MaType: null, SecondAverage: null, ThirdAverage: null }
+            or RetrospectiveCandlestickChart
+            or ReverseEngineeringRsi { Length: >= 2, RsiLevel: > 0 and < 100 }
+            or RetentionAccelerationFilter
+            or RobustWeightingOscillator { MaType: null, SecondAverage: null, ThirdAverage: null }
+            or ReverseMovingAverageConvergenceDivergence
+            or SimpleCycle or SimplePriceZone or SigmaSpikes { MaType: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -906,6 +919,22 @@ internal static partial class ValuesBarExecution
         RexOscillator rex => new GeneratedRexState(rex.Length, count),
         RelativeDifferenceOfSquaresOscillator squares => new GeneratedRelativeSquaresState(squares.Length, count),
         RecursiveDifferenciator recursive => new GeneratedRecursiveDifferenciatorState(recursive.Length, recursive.Alpha),
+        RecursiveRelativeStrengthIndex strength => new GeneratedRecursiveRsiState(strength.Length),
+        RecursiveStochastic stochastic => new GeneratedRecursiveStochasticState(stochastic.Length, stochastic.Alpha),
+        RelativeVigorIndex vigor => new GeneratedRelativeVigorState(vigor.Length, count),
+        Repulse repulse => new GeneratedRepulseState(repulse.Length),
+        RangeIdentifier => new GeneratedRangeIdentifierState(),
+        RatioOchlAverager => new GeneratedRatioOchlState(),
+        RangeActionVerificationIndex ravi => new GeneratedRaviState(ravi.FastLength, ravi.SlowLength, count),
+        RelativeSpreadStrength spread => new GeneratedRelativeSpreadState(spread.FastLength, spread.SlowLength, spread.Length, spread.SmoothLength),
+        RetrospectiveCandlestickChart candle => new GeneratedRetrospectiveCandleState(candle.Length),
+        ReverseEngineeringRsi inverse => new GeneratedReverseRsiState(inverse.Length, inverse.RsiLevel),
+        RetentionAccelerationFilter retention => new GeneratedRetentionAccelerationState(retention.Length),
+        RobustWeightingOscillator robust => new GeneratedRobustWeightingState(robust.Length),
+        ReverseMovingAverageConvergenceDivergence inverse => new GeneratedReverseMacdState(inverse.FastLength, inverse.SlowLength),
+        SimpleCycle simple => new GeneratedSimpleCycleState(simple.Length),
+        SimplePriceZone zone => new GeneratedSimplePriceZoneState(zone.Length),
+        SigmaSpikes sigma => new GeneratedSigmaSpikesState(sigma.Length),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -6964,6 +6993,152 @@ internal static partial class ValuesBarExecution
         private readonly RecursiveDifferenciatorWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, alpha);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true).Line;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedRecursiveRsiState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly RecursiveRsiWindow _window = new(MovingAvgType.SimpleMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+    private sealed class GeneratedRecursiveStochasticState(int length, double alpha) : IIndicatorState, IDisposable
+    {
+        private readonly RecursiveStochasticWindow _window = new(length, alpha);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedRelativeVigorState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly RelativeVigorWindow _window = new(MovingAvgType.SimpleMovingAverage, length, capacityHint: count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, bar.Open, bar.High, bar.Low, true); outputs[0] = point.Value; outputs[1] = point.Signal; }
+        public void Dispose() => _window.Dispose();
+    }
+    private sealed class GeneratedRepulseState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly RepulseWindow _window = new(MovingAvgType.ExponentialMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Open, bar.High, bar.Low, bar.Close, true); outputs[0] = point.Line; outputs[1] = point.Signal; }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedRangeIdentifierState : IMultiOutputState, IDisposable
+    {
+        private double _upper, _lower;
+        public void Reset() { _upper = 0; _lower = 0; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            if (!(bar.Close < _upper && bar.Close > _lower)) { _upper = bar.High; _lower = bar.Low; }
+            outputs[0] = _upper; outputs[1] = PriceMean.Of(_upper, _lower); outputs[2] = _lower;
+        }
+        public void Dispose() => Reset();
+    }
+    private sealed class GeneratedRatioOchlState : IIndicatorState, IDisposable
+    {
+        private readonly RatioOchlWindow _window = new();
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Open, bar.High, bar.Low, bar.Close, true);
+        public void Dispose() => Reset();
+    }
+    private sealed class GeneratedRaviState(int fast, int slow, int count) : IIndicatorState, IDisposable
+    {
+        private readonly AverageGapWindow _window = new(MovingAvgType.SimpleMovingAverage, fast, slow, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedRelativeSpreadState(int fast, int slow, int length, int smooth) : IIndicatorState, IDisposable
+    {
+        private readonly OoplesFinance.StockIndicators.Streaming.RelativeSpreadKernel _window = new(MovingAvgType.ExponentialMovingAverage, fast, slow, length, smooth);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+    private sealed class GeneratedRetrospectiveCandleState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly RetrospectiveCandleWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Open, bar.High, bar.Low, bar.Close, true);
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedReverseRsiState(int length, double target) : IIndicatorState, IDisposable
+    {
+        private readonly ReverseRsiWindow _window = new(length, target);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedRetentionAccelerationState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly RetentionAccelerationWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true).Value;
+        public void Dispose() => Reset();
+    }
+    private sealed class GeneratedRobustWeightingState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly RobustWeightingWindow _window = new(MovingAvgType.SimpleMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedReverseMacdState : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.IMovingAverageSmoother _fast, _slow, _signal;
+        private readonly double _fastAlpha, _slowAlpha;
+        private double _previousFast, _previousSlow;
+        private bool _signalInvalid;
+        internal GeneratedReverseMacdState(int fast, int slow)
+        {
+            fast = Math.Max(1, fast); slow = Math.Max(1, slow);
+            _fastAlpha = 2d / (1d + fast); _slowAlpha = 2d / (1d + slow);
+            _fast = Streaming.MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, fast);
+            _slow = Streaming.MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, slow);
+            _signal = Streaming.MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, 9);
+        }
+        public void Reset()
+        { _fast.Reset(); _slow.Reset(); _signal.Reset(); _previousFast = _previousSlow = 0; _signalInvalid = false; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var line = RoundedReverseMacd.Equilibrium(_previousFast, _previousSlow, _fastAlpha, _slowAlpha);
+            _signalInvalid |= double.IsNaN(line) || double.IsInfinity(line);
+            var signal = _signalInvalid ? double.NaN : _signal.Next(line, true);
+            outputs[0] = line; outputs[1] = signal; outputs[2] = line - signal;
+            _previousFast = _fast.Next(bar.Close, true); _previousSlow = _slow.Next(bar.Close, true);
+        }
+        public void Dispose() { _fast.Dispose(); _slow.Dispose(); _signal.Dispose(); }
+    }
+
+    private sealed class GeneratedSimpleCycleState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly SimpleCycleWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => Reset();
+    }
+    private sealed class GeneratedSimplePriceZoneState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly SimplePriceZoneWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => Reset();
+    }
+    private sealed class GeneratedSigmaSpikesState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly SigmaSpikesWindow _window = new(MovingAvgType.ExponentialMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, true); outputs[0] = point.Line; outputs[1] = point.Signal; }
         public void Dispose() => _window.Dispose();
     }
 
