@@ -49,6 +49,8 @@ internal static partial class ValuesBarExecution
         indicator is LogisticCorrelation logistic && double.IsFinite(logistic.K) ||
         indicator is MacZIndicator { MaType: null } macz && double.IsFinite(macz.Mult) ||
         indicator is MacZVwapIndicator { MaType: null } maczVwap && double.IsFinite(maczVwap.Gamma) ||
+        indicator is MultiLevelIndicator level && double.IsFinite(level.Factor) ||
+        indicator is NegativeVolumeDisparityIndicator { MaType: null } disparity && double.IsFinite(disparity.Top) && double.IsFinite(disparity.Bottom) ||
         indicator is FXSniperIndicator { MaType: null } sniper && double.IsFinite(sniper.B) ||
         indicator is FastandSlowKurtosisOscillator { MaType: null } kurtosis && double.IsFinite(kurtosis.Ratio) ||
         indicator is FibonacciRetrace { MaType: null } retrace && double.IsFinite(retrace.Factor) ||
@@ -287,6 +289,16 @@ internal static partial class ValuesBarExecution
             or MobilityOscillator { MaType: null }
             or McClellanOscillator { MaType: null } or MidpointOscillator { MaType: null }
             or ModifiedGannHiloActivator { MaType: null } or MorphedSineWave or MoveTracker
+            or MomentaRelativeStrengthIndex { MaType: null, SecondAverage: null, ThirdAverage: null }
+            or MultiVoteOnBalanceVolume { MaType: null }
+            or NormalizedRelativeVigorIndex { MaType: null, SecondAverage: null, ThirdAverage: null } or NthOrderDifferencingOscillator
+            or NarrowBandpassFilter
+            or NaturalMarketSlope
+            or NaturalDirectionalIndex { MaType: null } or NaturalStochasticIndicator { MaType: null }
+            or NaturalDirectionalCombo { MaType: null }
+            or NaturalMarketMirror { MaType: null } or NaturalMarketRiver { MaType: null } or NaturalMarketCombo { MaType: null }
+            or MirroredMovingAverageConvergenceDivergence { MaType: null, SecondAverage: null, ThirdAverage: null, FourthAverage: null }
+            or MirroredPercentagePriceOscillator { MaType: null, SecondAverage: null, ThirdAverage: null, FourthAverage: null }
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -820,6 +832,22 @@ internal static partial class ValuesBarExecution
         ModifiedGannHiloActivator gann => new GeneratedModifiedGannState(gann.Length),
         MorphedSineWave sine => new GeneratedMorphedSineState(sine.Length),
         MoveTracker => new GeneratedMoveTrackerState(),
+        MultiLevelIndicator level => new GeneratedMultiLevelState(level.Length, level.Factor),
+        MomentaRelativeStrengthIndex momenta => new GeneratedMomentaRsiState(momenta.Length1, momenta.Length2, count),
+        MultiVoteOnBalanceVolume vote => new GeneratedMultiVoteState(vote.Length),
+        NormalizedRelativeVigorIndex vigor => new GeneratedNormalizedVigorState(vigor.Length, count),
+        NthOrderDifferencingOscillator difference => new GeneratedNthDifferenceState(difference.Length, count),
+        NegativeVolumeDisparityIndicator disparity => new GeneratedNegativeDisparityState(disparity.Length, disparity.SignalLength, disparity.Top, disparity.Bottom),
+        NarrowBandpassFilter narrow => new GeneratedNarrowBandpassState(narrow.Length, count),
+        NaturalMarketSlope slope => new GeneratedNaturalSlopeState(slope.Length, count),
+        NaturalDirectionalIndex natural => new GeneratedNaturalDirectionalState(natural.Length, natural.SmoothLength, count),
+        NaturalStochasticIndicator natural => new GeneratedNaturalStochasticState(natural.Length, natural.SmoothLength, count),
+        NaturalDirectionalCombo natural => new GeneratedNaturalComboState(natural.Length, natural.SmoothLength, count),
+        NaturalMarketMirror natural => new GeneratedNaturalMarketState(natural.Length, count, true),
+        NaturalMarketRiver natural => new GeneratedNaturalMarketState(natural.Length, count, false),
+        NaturalMarketCombo natural => new GeneratedNaturalMarketComboState(natural.Length, natural.SmoothLength, count),
+        MirroredMovingAverageConvergenceDivergence mirrored => new GeneratedMirroredPairState(mirrored.Length, mirrored.SignalLength, false),
+        MirroredPercentagePriceOscillator mirrored => new GeneratedMirroredPairState(mirrored.Length, mirrored.SignalLength, true),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -6222,6 +6250,281 @@ internal static partial class ValuesBarExecution
             var move = _started ? bar.Close - _previousPrice : 0;
             outputs[0] = move; outputs[1] = move - _previousMove;
             _previousPrice = bar.Close; _previousMove = move; _started = true;
+        }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedMultiLevelState(int length, double factor) : IIndicatorState, IDisposable
+    {
+        private readonly MultiLevelWindow _window = new(length, factor);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Open, true);
+        public void Dispose() => Reset();
+    }
+    private sealed class GeneratedMomentaRsiState(int lookback, int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly RangeGainLossWindow _window = new(MovingAvgType.ExponentialMovingAverage,
+            Math.Max(1, lookback), new[] { length }, length, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var next = _window.Next(bar.Close, true);
+            outputs[0] = next.Value; outputs[1] = next.Signal;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedMultiVoteState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.EmaState _signal = new(length);
+        private double _high, _low, _close, _value;
+        public void Reset() { _high = _low = _close = _value = 0; _signal.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            double highVote = bar.High > _high ? 1 : bar.High < _high ? -1 : 0;
+            double lowVote = bar.Low > _low ? 1 : bar.Low < _low ? -1 : 0;
+            double closeVote = bar.Close > _close ? 1 : bar.Close < _close ? -1 : 0;
+            var votes = highVote + lowVote + closeVote;
+            var volume = bar.Volume / 1000000;
+            var value = _value + (volume * votes);
+            outputs[0] = value; outputs[1] = _signal.GetNext(value, commit: true);
+            _high = bar.High; _low = bar.Low; _close = bar.Close; _value = value;
+        }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedNormalizedVigorState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly NormalizedVigorWindow _window = new(MovingAvgType.SymmetricallyWeightedMovingAverage, length, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var next = _window.Next(bar.Close, bar.Open, bar.High, bar.Low, true);
+            outputs[0] = next.Value; outputs[1] = next.Signal;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+    private sealed class GeneratedNthDifferenceState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly NthDifferenceWindow _window = new(length, 2, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedNegativeDisparityState(int length, int signal, double top, double bottom) : IMultiOutputState, IDisposable
+    {
+        private readonly NegativeVolumeDisparityWindow _window = new(MovingAvgType.SimpleMovingAverage, length, signal, top, bottom);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var next = _window.Next(bar.Close, bar.Volume, true);
+            outputs[0] = next.Line.Publish(); outputs[1] = next.SignalLine.Publish();
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedNarrowBandpassState : IIndicatorState, IDisposable
+    {
+        private readonly double[] _weights;
+        private readonly PooledRingBuffer<double> _prices;
+        public GeneratedNarrowBandpassState(int length, int count)
+        {
+            length = Math.Max(2, length);
+            // A run of count bars can consume only lags 1 through count - 1.
+            // Keep the original period in the weight formula and endpoint tests.
+            var capacity = Math.Min(length, Math.Max(1, count));
+            _weights = new double[capacity];
+            for (var j = 1; j < capacity && j < length - 1; j++)
+            {
+                if (2L * j == length) continue;
+                var x = (double)j / (length - 1);
+                var window = new ExactMeanAccumulator(); window.Add(.42);
+                window.AddProduct(-.5, Math.Cos(2 * Math.PI * x));
+                window.AddProduct(.08, Math.Cos(4 * Math.PI * x));
+                var product = new ExactMeanAccumulator();
+                product.AddProduct(Math.Sin(2 * Math.PI * j / length), window.Mean(1));
+                _weights[j] = product.Mean(1);
+            }
+            _prices = new(capacity);
+        }
+        public void Reset() => _prices.Clear();
+        public double Update(in Bar bar)
+        {
+            var sum = new ExactMeanAccumulator();
+            for (var j = 1; j < _weights.Length && j <= _prices.Count; j++)
+                sum.AddProduct(_prices[_prices.Count - j], _weights[j]);
+            var value = sum.Mean(1); _prices.TryAdd(bar.Close, out _); return value;
+        }
+        public void Dispose() { _prices.Clear(); _prices.Dispose(); }
+    }
+
+    private sealed class GeneratedNaturalSlopeState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly ExactLinearFitWindow _window = new(length, observedHistory: Math.Max(1, length) > count, compact: true);
+        private readonly double _scale = Math.Log(Math.Max(1, length));
+        private double _previous;
+        public void Reset() { _window.Reset(); _previous = 0; }
+        public double Update(in Bar bar)
+        {
+            var logarithm = bar.Close > 0 ? Math.Log(bar.Close) * 1000 : 0;
+            var current = _window.Next(logarithm, true).Last;
+            var value = (current - _previous) * _scale; _previous = current; return value;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private static double[] NaturalLagWeights(int length)
+    {
+        var weights = new double[Math.Min(Math.Max(1, length), 256)];
+        for (var j = 0; j < weights.Length; j++) weights[j] = 1 / Math.Sqrt(j + 1);
+        return weights;
+    }
+    private sealed class GeneratedNaturalDirectionalState(int length, int smooth, int count) : IIndicatorState, IDisposable
+    {
+        private readonly int _length = Math.Max(1, length);
+        private readonly double[] _weights = NaturalLagWeights(length);
+        private readonly PooledRingBuffer<double> _logs = new(Math.Min(Math.Max(1, length), Math.Max(1, count)));
+        private readonly Streaming.EmaState _signal = new(smooth);
+        public void Reset() { _logs.Clear(); _signal.Reset(); }
+        public double Update(in Bar bar)
+        {
+            var logarithm = bar.Close > 0 ? Math.Log(bar.Close) * 1000 : 0;
+            double sum = 0, denominator = 0, absolute = 0;
+            for (var j = 0; j < _length; j++)
+            {
+                var previous = j < _logs.Count ? _logs[_logs.Count - j - 1] : 0;
+                var current = j == 0 ? logarithm : j <= _logs.Count ? _logs[_logs.Count - j] : 0;
+                absolute += Math.Abs(previous - current);
+                var fraction = absolute != 0 ? (logarithm - current) / absolute : 0;
+                var ratio = j < _weights.Length ? _weights[j] : 1 / Math.Sqrt(j + 1);
+                sum += fraction * ratio; denominator += ratio;
+            }
+            var value = _signal.GetNext(denominator != 0 ? sum / denominator * 100 : 0, true);
+            _logs.TryAdd(logarithm, out _); return value;
+        }
+        public void Dispose() { Reset(); _logs.Dispose(); }
+    }
+    private sealed class GeneratedNaturalStochasticState(int length, int smooth, int count) : IIndicatorState, IDisposable
+    {
+        private readonly int _length = Math.Max(1, length);
+        private readonly double[] _weights = NaturalLagWeights(length);
+        private readonly Streaming.RollingWindowMax _high = new(Math.Min(Math.Max(1, length), Math.Max(1, count)));
+        private readonly Streaming.RollingWindowMin _low = new(Math.Min(Math.Max(1, length), Math.Max(1, count)));
+        private readonly PooledRingBuffer<double> _fractions = new(Math.Min(Math.Max(1, length), Math.Max(1, count)));
+        private readonly Streaming.EmaState _signal = new(smooth);
+        public void Reset() { _high.Reset(); _low.Reset(); _fractions.Clear(); _signal.Reset(); }
+        public double Update(in Bar bar)
+        {
+            var high = _high.Add(bar.High, out _); var low = _low.Add(bar.Low, out _);
+            var current = ExactRangePosition.Fraction(bar.Close, low, high);
+            double sum = 0, denominator = 0;
+            for (var j = 0; j < _length; j++)
+            {
+                var fraction = j == 0 ? current : j <= _fractions.Count ? _fractions[_fractions.Count - j] : 0;
+                var ratio = j < _weights.Length ? _weights[j] : 1 / Math.Sqrt(j + 1);
+                sum += fraction * ratio; denominator += ratio;
+            }
+            var value = _signal.GetNext(denominator != 0 ? (200 * sum / denominator) - 100 : 0, true);
+            _fractions.TryAdd(current, out _); return value;
+        }
+        public void Dispose() { Reset(); _high.Dispose(); _low.Dispose(); _fractions.Dispose(); }
+    }
+
+    private sealed class GeneratedNaturalComboState(int length, int smooth, int count) : IIndicatorState, IDisposable
+    {
+        private readonly GeneratedNaturalDirectionalState _directional = new(length, smooth, count);
+        private readonly GeneratedNaturalStochasticState _stochastic = new(length, smooth, count);
+        public void Reset() { _directional.Reset(); _stochastic.Reset(); }
+        public double Update(in Bar bar)
+        {
+            var directional = _directional.Update(in bar); var stochastic = _stochastic.Update(in bar);
+            var combined = Math.Sign(directional) != Math.Sign(stochastic) ? directional * stochastic
+                : ((Math.Abs(directional) * stochastic) + (Math.Abs(stochastic) * directional)) / 2;
+            return Math.Sign(combined) * Math.Sqrt(Math.Abs(combined));
+        }
+        public void Dispose() { _directional.Dispose(); _stochastic.Dispose(); }
+    }
+
+    private sealed class GeneratedNaturalMarketState : IIndicatorState, IDisposable
+    {
+        private readonly int _length;
+        private readonly bool _mirror;
+        private readonly double[] _coefficients;
+        private readonly PooledRingBuffer<double> _logs;
+        private readonly Streaming.EmaState? _ema;
+        private readonly WmaValueState? _weighted;
+        public GeneratedNaturalMarketState(int length, int count, bool mirror, bool weighted = false)
+        {
+            _length = Math.Max(1, length); _mirror = mirror;
+            _logs = new(Math.Min(_length, Math.Max(1, count)));
+            _coefficients = new double[Math.Min(_length, 256)];
+            for (var j = 0; j < _coefficients.Length; j++)
+                _coefficients[j] = mirror ? Math.Sqrt(j + 1) : Math.Sqrt(j) - Math.Sqrt(j + 1);
+            if (weighted) _weighted = new(_length, count); else _ema = new(_length);
+        }
+        public void Reset() { _logs.Clear(); _ema?.Reset(); _weighted?.Reset(); }
+        public double Update(in Bar bar)
+        {
+            var logarithm = bar.Close > 0 ? Math.Log(bar.Close) * 1000 : 0;
+            double sum = 0;
+            for (var j = 0; j < _length; j++)
+            {
+                var previous = j < _logs.Count ? _logs[_logs.Count - j - 1] : 0;
+                if (_mirror)
+                {
+                    var root = j < _coefficients.Length ? _coefficients[j] : Math.Sqrt(j + 1);
+                    sum += (logarithm - previous) / root * 100;
+                }
+                else
+                {
+                    var current = j == 0 ? logarithm : j <= _logs.Count ? _logs[_logs.Count - j] : 0;
+                    var coefficient = j < _coefficients.Length ? _coefficients[j] : Math.Sqrt(j) - Math.Sqrt(j + 1);
+                    sum += (previous - current) * coefficient;
+                }
+            }
+            var raw = _mirror ? sum / _length : sum;
+            var sample = new Bar(default, 0, 0, 0, raw, 0);
+            var value = _weighted is null ? _ema!.GetNext(raw, true) : _weighted.Update(in sample);
+            _logs.TryAdd(logarithm, out _); return value;
+        }
+        public void Dispose() { Reset(); _logs.Dispose(); }
+    }
+    private sealed class GeneratedNaturalMarketComboState(int length, int smooth, int count) : IIndicatorState, IDisposable
+    {
+        private readonly GeneratedNaturalMarketState _river = new(length, count, false, true);
+        private readonly GeneratedNaturalMarketState _mirror = new(length, count, true, true);
+        private readonly WmaValueState _signal = new(Math.Max(1, smooth), count);
+        public void Reset() { _river.Reset(); _mirror.Reset(); _signal.Reset(); }
+        public double Update(in Bar bar)
+        {
+            var river = _river.Update(in bar); var mirror = _mirror.Update(in bar);
+            var combined = Math.Sign(mirror) != Math.Sign(river) ? mirror * river
+                : ((Math.Abs(mirror) * river) + (Math.Abs(river) * mirror)) / 2;
+            var value = Math.Sign(combined) * Math.Sqrt(Math.Abs(combined));
+            // The published Nmc is unsmoothed; retain evaluation of the signal path.
+            var sample = new Bar(default, 0, 0, 0, value, 0); _ = _signal.Update(in sample);
+            return value;
+        }
+        public void Dispose() { _river.Dispose(); _mirror.Dispose(); _signal.Reset(); }
+    }
+
+    private sealed class GeneratedMirroredPairState(int length, int signalLength, bool percentage) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.EmaState _open = new(length), _close = new(length);
+        private readonly Streaming.EmaState _signal = new(signalLength), _mirrorSignal = new(signalLength);
+        private bool _invalid, _mirrorInvalid;
+        public void Reset() { _open.Reset(); _close.Reset(); _signal.Reset(); _mirrorSignal.Reset(); _invalid = _mirrorInvalid = false; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var open = _open.GetNext(bar.Open, true); var close = _close.GetNext(bar.Close, true);
+            var value = percentage ? RoundedPercentageChange.Of(close, open) : close - open;
+            var mirror = percentage ? RoundedPercentageChange.Of(open, close) : open - close;
+            _invalid |= !double.IsFinite(value); _mirrorInvalid |= !double.IsFinite(mirror);
+            var signal = _invalid ? double.NaN : _signal.GetNext(value, true);
+            var mirrorSignal = _mirrorInvalid ? double.NaN : _mirrorSignal.GetNext(mirror, true);
+            outputs[0] = value; outputs[1] = signal; outputs[2] = value - signal;
+            outputs[3] = mirror; outputs[4] = mirrorSignal; outputs[5] = mirror - mirrorSignal;
         }
         public void Dispose() => Reset();
     }
