@@ -46,6 +46,9 @@ internal static partial class ValuesBarExecution
         indicator is KaufmanAdaptiveBands bands && double.IsFinite(bands.StdDevFactor) && bands.StdDevFactor >= 0 ||
         indicator is KaufmanBinaryWave wave && double.IsFinite(wave.FastSc) && wave.FastSc >= 0
             && double.IsFinite(wave.SlowSc) && wave.SlowSc >= 0 && double.IsFinite(wave.FilterPct) && wave.FilterPct >= 0 ||
+        indicator is LogisticCorrelation logistic && double.IsFinite(logistic.K) ||
+        indicator is MacZIndicator { MaType: null } macz && double.IsFinite(macz.Mult) ||
+        indicator is MacZVwapIndicator { MaType: null } maczVwap && double.IsFinite(maczVwap.Gamma) ||
         indicator is FXSniperIndicator { MaType: null } sniper && double.IsFinite(sniper.B) ||
         indicator is FastandSlowKurtosisOscillator { MaType: null } kurtosis && double.IsFinite(kurtosis.Ratio) ||
         indicator is FibonacciRetrace { MaType: null } retrace && double.IsFinite(retrace.Factor) ||
@@ -277,6 +280,13 @@ internal static partial class ValuesBarExecution
             or MacdLine or MacdSignal or MacdHistogram
             or GuppyDistanceIndicator { SecondAverage: null, ThirdAverage: null, FourthAverage: null, FifthAverage: null, Average6Average: null, Average7Average: null, Average8Average: null, Average9Average: null, Average10Average: null, Average11Average: null, Average12Average: null, MaType: null }
             or GuppyMultipleMovingAverage { SecondAverage: null, ThirdAverage: null, FourthAverage: null, FifthAverage: null, Average6Average: null, Average7Average: null, Average8Average: null, Average9Average: null, Average10Average: null, Average11Average: null, Average12Average: null, Average13Average: null, Average14Average: null, Average15Average: null, Average16Average: null, Average17Average: null, Average18Average: null, Average19Average: null, Average20Average: null, Average21Average: null, Average22Average: null, Average23Average: null, Average24Average: null, Average25Average: null, Average26Average: null, Average27Average: null, Average28Average: null, MaType: null }
+            or LinearQuadraticConvergenceDivergenceOscillator
+            or MotionSmoothnessIndex
+            or KurtosisIndicator
+            or MarketDirectionIndicator or MassThrust or MassThrustIndicator { MaType: null } or MassThrustOscillator { MaType: null }
+            or MobilityOscillator { MaType: null }
+            or McClellanOscillator { MaType: null } or MidpointOscillator { MaType: null }
+            or ModifiedGannHiloActivator { MaType: null } or MorphedSineWave or MoveTracker
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -794,6 +804,22 @@ internal static partial class ValuesBarExecution
         MacdHistogram oscillator => new GeneratedMacdAliasState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength, 2),
         GuppyDistanceIndicator guppy => new GeneratedGuppyDistanceState([guppy.Length1, guppy.Length2, guppy.Length3, guppy.Length4, guppy.Length5, guppy.Length6, guppy.Length7, guppy.Length8, guppy.Length9, guppy.Length10, guppy.Length11, guppy.Length12]),
         GuppyMultipleMovingAverage guppy => new GeneratedGuppyMultipleState([guppy.Length1, guppy.Length2, guppy.Length3, guppy.Length5, guppy.Length7, guppy.Length9, guppy.Length10, guppy.Length11, guppy.Length12, guppy.Length13, guppy.Length14, guppy.Length15, guppy.Length16, guppy.Length18, guppy.Length19, guppy.Length21, guppy.Length22, guppy.Length23, guppy.Length25, guppy.Length26, 52, 55, 58, 61, 64, 67, 70]),
+        LinearQuadraticConvergenceDivergenceOscillator oscillator => new GeneratedLinearQuadraticState(oscillator.Length),
+        LogisticCorrelation logistic => new GeneratedLogisticState(logistic.Length, logistic.K, count),
+        MotionSmoothnessIndex motion => new GeneratedMotionSmoothnessState(motion.Length),
+        MacZIndicator macz => new GeneratedMacZState(macz.FastLength, macz.SlowLength, macz.SignalLength, macz.Length, macz.Mult),
+        MacZVwapIndicator macz => new GeneratedMacZVwapState(macz.FastLength, macz.SlowLength, macz.SignalLength, macz.Length1, macz.Length2, macz.Gamma),
+        KurtosisIndicator => new GeneratedKurtosisState(count),
+        MarketDirectionIndicator market => new GeneratedMarketDirectionState(market.Length),
+        MassThrust mass => new GeneratedMassThrustState(false, mass.Length),
+        MassThrustIndicator mass => new GeneratedMassThrustState(false, mass.Length),
+        MassThrustOscillator mass => new GeneratedMassThrustState(true, mass.Length),
+        MobilityOscillator mobility => new GeneratedMobilityState(mobility.Length),
+        McClellanOscillator => new GeneratedMcClellanState(),
+        MidpointOscillator midpoint => new GeneratedMidpointOscillatorState(midpoint.Length, count),
+        ModifiedGannHiloActivator gann => new GeneratedModifiedGannState(gann.Length),
+        MorphedSineWave sine => new GeneratedMorphedSineState(sine.Length),
+        MoveTracker => new GeneratedMoveTrackerState(),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -6049,6 +6075,155 @@ internal static partial class ValuesBarExecution
             outputs[1] = _invalidSignal ? double.NaN : _signal.GetNext(raw, commit: true);
         }
         public void Dispose() => _smooth.Dispose();
+    }
+
+    private sealed class GeneratedLinearQuadraticState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly LinearQuadraticWindow _window = new(MovingAvgType.SimpleMovingAverage, length, 25);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedLogisticState(int length, double gain, int count) : IIndicatorState, IDisposable
+    {
+        private readonly LogisticCorrelationWindow _window = new(Math.Min(Math.Max(1, length), Math.Max(1, count)), gain);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+    private sealed class GeneratedMotionSmoothnessState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly MotionSmoothnessWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedMacZState(int fast, int slow, int signal, int length, double multiplier) : IMultiOutputState, IDisposable
+    {
+        private readonly MacZWindow _window = new(MovingAvgType.SimpleMovingAverage, fast, slow, signal, length, multiplier);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Line; outputs[1] = point.SignalLine; outputs[2] = point.Histogram;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedMacZVwapState(int fast, int slow, int signal, int volumeLength, int deviationLength, double gamma) : IMultiOutputState, IDisposable
+    {
+        private readonly MacZVwapWindow _window = new(MovingAvgType.SimpleMovingAverage, fast, slow, signal, volumeLength, deviationLength, gamma);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, bar.Volume, true);
+            outputs[0] = point.Line; outputs[1] = point.SignalLine; outputs[2] = point.Histogram;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedKurtosisState(int count) : IMultiOutputState, IDisposable
+    {
+        private readonly KurtosisWindow _window = new(3, 1, 3, 65, Math.Max(1, count));
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Line; outputs[1] = point.Signal;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedMarketDirectionState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly MarketDirectionWindow _window = new(length, 55);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Reset();
+    }
+    private sealed class GeneratedMassThrustState(bool oscillator, int length) : IMultiOutputState, IDisposable
+    {
+        private readonly MassThrustWindow _window = new(oscillator, MovingAvgType.ExponentialMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, bar.Volume, true);
+            outputs[0] = point.Value; outputs[1] = point.SignalLine;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedMobilityState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly MobilityWindow _window = new(MovingAvgType.WeightedMovingAverage, 10, length, 7);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = point.Line; outputs[1] = point.SignalLine;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedMcClellanState : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.RollingWindowSum _advances = new(19), _declines = new(19);
+        private readonly Streaming.MacdEngine _macd = new(MovingAvgType.ExponentialMovingAverage, 19, 39, 9);
+        private double _previous;
+        public void Reset() { _advances.Reset(); _declines.Reset(); _macd.Reset(); _previous = 0; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var advances = _advances.Add(bar.Close > _previous ? 1d : 0d, out _);
+            var declines = _declines.Add(bar.Close < _previous ? 1d : 0d, out _);
+            var rana = advances + declines != 0 ? 1000 * (advances - declines) / (advances + declines) : 0;
+            var line = _macd.Next(rana, true, out var signal, out var histogram);
+            _previous = bar.Close;
+            outputs[0] = advances; outputs[1] = declines; outputs[2] = line; outputs[3] = signal; outputs[4] = histogram;
+        }
+        public void Dispose() { _advances.Dispose(); _declines.Dispose(); _macd.Dispose(); }
+    }
+    private sealed class GeneratedMidpointOscillatorState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.RollingWindowMax _high = new(Math.Min(Math.Max(1, length), Math.Max(1, count)));
+        private readonly Streaming.RollingWindowMin _low = new(Math.Min(Math.Max(1, length), Math.Max(1, count)));
+        private readonly Streaming.IMovingAverageSmoother _signal = Streaming.MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, 9);
+        public void Reset() { _high.Reset(); _low.Reset(); _signal.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var line = RoundedMidpointOscillator.Of(bar.Close, _high.Add(bar.High, out _), _low.Add(bar.Low, out _));
+            outputs[0] = line; outputs[1] = _signal.Next(line, true);
+        }
+        public void Dispose() { _high.Dispose(); _low.Dispose(); _signal.Dispose(); }
+    }
+
+    private sealed class GeneratedModifiedGannState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly ModifiedGannWindow _window = new(MovingAvgType.SimpleMovingAverage, length, 1);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Open, bar.Close, true).Value;
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+    private sealed class GeneratedMorphedSineState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly MorphedSineWindow _window = new(length, 100);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Reset();
+    }
+    private sealed class GeneratedMoveTrackerState : IMultiOutputState, IDisposable
+    {
+        private double _previousPrice, _previousMove;
+        private bool _started;
+        public void Reset() { _previousPrice = _previousMove = 0; _started = false; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var move = _started ? bar.Close - _previousPrice : 0;
+            outputs[0] = move; outputs[1] = move - _previousMove;
+            _previousPrice = bar.Close; _previousMove = move; _started = true;
+        }
+        public void Dispose() => Reset();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
