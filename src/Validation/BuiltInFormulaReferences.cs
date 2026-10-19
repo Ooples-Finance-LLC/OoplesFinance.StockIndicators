@@ -3416,11 +3416,13 @@ internal static partial class BuiltInFormulaReferences
             var leaderOptions = builtIn.CreateOptions();
             var percentage = builtIn.BatchName == IndicatorName.PercentagePriceOscillatorLeader;
             var leaderKeys = percentage ? new[] { "Ppo", "Signal", "Histogram" } : new[] { "Macd", "I1", "I2" };
+            var leaderCache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, LeaderReference>();
+            LeaderReference Reference(IReadOnlyList<Bar> bars) => leaderCache.GetValue(bars, b => LeaderOscillatorReference(b, leaderOptions, percentage));
             for (var slot = 0; slot < leaderKeys.Length; slot++)
             {
                 var key = leaderKeys[slot];
-                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
-                    bars => RoundedLeaderOscillator(bars, leaderOptions, percentage)[key], IndicatorErrorBudget.Exact);
+                yield return IndicatorValidationRule.ReferenceWithDependentOverflowRejection(slot,
+                    bars => Reference(bars).Values[key], bars => Reference(bars).OverflowSources[key], IndicatorErrorBudget.Exact);
             }
             yield break;
         }
