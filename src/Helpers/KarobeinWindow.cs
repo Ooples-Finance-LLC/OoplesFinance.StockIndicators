@@ -6,44 +6,80 @@ namespace OoplesFinance.StockIndicators.Helpers;
 internal sealed class KarobeinWindow : IDisposable
 {
     private readonly Average _price, _fall, _rise;
-    private Number _previous, _line, _slope;
-    internal KarobeinWindow(MovingAvgType kind, int length)
-    { _price = new(kind, length); _fall = new(kind, length); _rise = new(kind, length); }
+    private readonly CertifiedKarobeinWindow? _certified;
+    internal int ExactReplayUpdates => _certified?.ExactReplayUpdates ?? 0;
+    private Number _previous, _line, _olderLine;
+    private double _publishedLine, _olderPublishedLine;
+    internal KarobeinWindow(MovingAvgType kind, int length, bool certify = true)
+    {
+        _price = new(kind, length); _fall = new(kind, length); _rise = new(kind, length);
+        if (certify && StrengthWindow.Supports(kind)) _certified = new(kind, length);
+    }
     private static Number Clamp(Number value) => value.Sign < 0 ? default : (value - Number.Integer(1)).Sign > 0 ? Number.Integer(1) : value;
     private static Number Fold(Number ratio, Number fall, Number rise)
     {
         if (ratio.Sign == 0) return default;
         var first = ratio + rise;
         if (first.Sign == 0) throw new ArgumentException("Karobein has an exact pole in its rising-ratio denominator.");
-        var c = Clamp(ratio.Divide(first));
-        var second = ratio + c * fall;
+        // Opposite signs clamp ratio / first to zero, leaving a final value of one.
+        if (ratio.Sign != first.Sign) return Number.Integer(1);
+        // For 0 < ratio / first < 1, cancel ratio from the final difference/sum.
+        // Otherwise the inner clamp is one and the same identity uses ratio.
+        var basis = rise.Sign == first.Sign ? first : ratio;
+        var second = basis + fall;
         if (second.Sign == 0) throw new ArgumentException("Karobein has an exact pole in its falling-ratio denominator.");
-        return Clamp(ratio.Times(2).Divide(second) - Number.Integer(1));
+        return Clamp((basis - fall).Divide(second));
     }
-    private static Signal Trade(Number line, Number previous, Number oldSlope)
+    internal static bool TryCertifiedTrade(double line, double previous, double older, out Signal signal)
     {
-        var slope = line - previous; var acceleration = slope - oldSlope;
+        // Published values are nearest-rounded exact outputs in [0, 1]. Adjacent
+        // doubles enclose each exact value; round each subtraction outwards too.
+        // Ambiguous comparisons retain the exact rational path below.
+        var slopeLow = Math.BitDecrement(Math.BitDecrement(line) - Math.BitIncrement(previous));
+        var slopeHigh = Math.BitIncrement(Math.BitIncrement(line) - Math.BitDecrement(previous));
+        var oldLow = Math.BitDecrement(Math.BitDecrement(previous) - Math.BitIncrement(older));
+        var oldHigh = Math.BitIncrement(Math.BitIncrement(previous) - Math.BitDecrement(older));
+        var accelerationLow = Math.BitDecrement(slopeLow - oldHigh);
+        var accelerationHigh = Math.BitIncrement(slopeHigh - oldLow);
+        if (slopeLow > 0 && (accelerationLow > 0 || accelerationHigh <= 0))
+        { signal = accelerationLow > 0 ? Signal.StrongBuy : Signal.Buy; return true; }
+        if (slopeHigh < 0 && (accelerationHigh < 0 || accelerationLow >= 0))
+        { signal = accelerationHigh < 0 ? Signal.StrongSell : Signal.Sell; return true; }
+        signal = default; return false;
+    }
+    private static Signal Trade(Number line, Number previous, Number older,
+        double published, double previousPublished, double olderPublished)
+    {
+        if (TryCertifiedTrade(published, previousPublished, olderPublished, out var certified)) return certified;
+        // Denominators are positive. Signals need only the signs of the exact
+        // first and second differences, so neither fraction needs reduction.
+        var slope = line.Numerator * previous.Denominator - previous.Numerator * line.Denominator;
+        var oldSlope = previous.Numerator * older.Denominator - older.Numerator * previous.Denominator;
+        var acceleration = slope * older.Denominator - oldSlope * line.Denominator;
         return slope.Sign > 0 && acceleration.Sign > 0 ? Signal.StrongBuy : slope.Sign < 0 && acceleration.Sign < 0 ? Signal.StrongSell
             : slope.Sign > 0 ? Signal.Buy : slope.Sign < 0 ? Signal.Sell : Signal.None;
     }
     internal (double Line, Signal Trade) Next(double price, bool final)
     {
+        if (_certified is not null) return _certified.Next(price, final);
         StreamingInputValidation.Finite(price, nameof(price)); var input = Number.Of(price);
         // Preview every stage first: a pole rejection cannot commit only part of a bar.
         var mean = _price.Next(input, false); var delta = mean - _previous;
         var ratio = _previous.Sign == 0 ? default : mean.Divide(_previous);
         var falling = delta.Sign < 0 ? ratio : default; var rising = delta.Sign > 0 ? ratio : default;
         var fall = _fall.Next(falling, false); var rise = _rise.Next(rising, false);
-        var line = Fold(ratio, fall, rise); var trade = Trade(line, _line, _slope); var published = line.Publish();
+        var line = Fold(ratio, fall, rise); var published = line.Publish();
+        var trade = Trade(line, _line, _olderLine, published, _publishedLine, _olderPublishedLine);
         if (final)
         {
             _price.Next(input, true); _fall.Next(falling, true); _rise.Next(rising, true);
-            _previous = mean; _slope = line - _line; _line = line;
+            _previous = mean; _olderLine = _line; _line = line;
+            _olderPublishedLine = _publishedLine; _publishedLine = published;
         }
         return (published, trade);
     }
-    internal void Reset() { _price.Reset(); _fall.Reset(); _rise.Reset(); _previous = _line = _slope = default; }
-    public void Dispose() { _price.Dispose(); _fall.Dispose(); _rise.Dispose(); }
+    internal void Reset() { _certified?.Reset(); _price.Reset(); _fall.Reset(); _rise.Reset(); _previous = _line = _olderLine = default; _publishedLine = _olderPublishedLine = 0; }
+    public void Dispose() { _certified?.Dispose(); _price.Dispose(); _fall.Dispose(); _rise.Dispose(); }
     internal static (double[] Values, Signal[] Signals) Calculate(StockData data, MovingAvgType kind, int length, bool callbacks)
     {
         length = Math.Max(1, length);
@@ -51,28 +87,54 @@ internal sealed class KarobeinWindow : IDisposable
             foreach (var value in series) StreamingInputValidation.Finite(value, nameof(data));
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var count = input.Count; var caller = data.CaptureInputSeries();
-        Number[] Mean(Number[] values)
+        IEnumerable<Number> Mean(Number[] values)
         {
             var replacement = callbacks ? ComponentAverage.Take(values.Select(v => v.Publish()).ToArray(), length) : null;
             if (replacement is not null) return Enumerable.Range(0, count).Select(i => i < replacement.Count ? Number.Of(replacement[i]) : default).ToArray();
             if (!StrengthWindow.Supports(kind)) return CalculationsHelper.GetMovingAverageList(data, kind, length, values.Select(v => v.Publish()).ToList()).Select(Number.Of).ToArray();
-            using var average = new Average(kind, length); return values.Select(v => average.Next(v, true)).ToArray();
+            return Smooth();
+            IEnumerable<Number> Smooth()
+            {
+                using var average = new Average(kind, length);
+                foreach (var value in values) yield return average.Next(value, true);
+            }
         }
         try
         {
-            var mean = Mean(input.Select(Number.Of).ToArray()); var ratios = new Number[count]; var falls = new Number[count]; var rises = new Number[count];
+            if (StrengthWindow.Supports(kind) && (!callbacks || !ComponentAverage.HasOverrides))
+            {
+                // Preserve the three average requests even when no callback is
+                // armed. No input is observed on that branch of Take.
+                if (callbacks)
+                    for (var stage = 0; stage < 3; stage++) ComponentAverage.Take(Array.Empty<double>(), length);
+                using var window = new KarobeinWindow(kind, length);
+                var boundedValues = new double[count]; var boundedSignals = new Signal[count];
+                for (var i = 0; i < count; i++)
+                {
+                    var point = window.Next(input[i], true);
+                    boundedValues[i] = point.Line; boundedSignals[i] = point.Trade;
+                }
+                return (boundedValues, boundedSignals);
+            }
+            var mean = Mean(input.Select(Number.Of).ToArray()).ToArray(); var ratios = new Number[count]; var falls = new Number[count]; var rises = new Number[count];
             for (var i = 1; i < count; i++)
             {
                 ratios[i] = mean[i - 1].Sign == 0 ? default : mean[i].Divide(mean[i - 1]);
                 var delta = mean[i] - mean[i - 1];
                 if (delta.Sign < 0) falls[i] = ratios[i]; else if (delta.Sign > 0) rises[i] = ratios[i];
             }
-            var fall = Mean(falls); var rise = Mean(rises); var values = new double[count]; var signals = new Signal[count];
-            Number previous = default, slope = default;
+            // Keep only the current exact smoothed fractions, rather than retaining
+            // every growing numerator and denominator for the full input history.
+            using var fall = Mean(falls).GetEnumerator();
+            using var rise = Mean(rises).GetEnumerator();
+            var values = new double[count]; var signals = new Signal[count];
+            Number previous = default, older = default;
             for (var i = 0; i < count; i++)
             {
-                var line = Fold(ratios[i], fall[i], rise[i]); values[i] = line.Publish(); signals[i] = Trade(line, previous, slope);
-                slope = line - previous; previous = line;
+                fall.MoveNext(); rise.MoveNext();
+                var line = Fold(ratios[i], fall.Current, rise.Current); values[i] = line.Publish();
+                signals[i] = Trade(line, previous, older, values[i], i > 0 ? values[i - 1] : 0, i > 1 ? values[i - 2] : 0);
+                older = previous; previous = line;
             }
             return (values, signals);
         }
