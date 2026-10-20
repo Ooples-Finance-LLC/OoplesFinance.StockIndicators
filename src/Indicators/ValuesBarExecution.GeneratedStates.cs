@@ -61,6 +61,9 @@ internal static partial class ValuesBarExecution
         indicator is EhlersTruncatedBandPassFilter truncated && IsTruncatedBandShared(truncated) ||
         indicator is EhlersVossPredictiveFilter voss && IsVossShared(voss) ||
         indicator is BollingerBandsAvgTrueRange ratio && StrengthWindow.Supports(ratio.MaType) && double.IsFinite(ratio.StdDevMult) ||
+        indicator is InformationRatio { MaType: null } information && double.IsFinite(information.Bmk) ||
+        indicator is SharpeRatio { MaType: null } sharpe && double.IsFinite(sharpe.Bmk) ||
+        indicator is SortinoRatio { MaType: null, SecondAverage: null } sortino && double.IsFinite(sortino.Bmk) ||
         indicator is NormalizedVolume or OCHistogram { MaType: null, SecondAverage: null } or ModifiedPriceVolumeTrend { MaType: null } ||
         indicator is OmegaRatio omega && double.IsFinite(omega.Bmk) ||
         indicator is RunningEquity { MaType: null } ||
@@ -502,6 +505,9 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        InformationRatio information => new GeneratedRiskRatioState(information.Length, information.Bmk, count, 0),
+        SharpeRatio sharpe => new GeneratedRiskRatioState(sharpe.Length, sharpe.Bmk, count, 1),
+        SortinoRatio sortino => new GeneratedRiskRatioState(sortino.Length, sortino.Bmk, count, 2),
         NormalizedVolume volume => new GeneratedNormalizedVolumeState(volume.Length, count),
         OCHistogram histogram => new GeneratedOcHistogramState(histogram.Length),
         ModifiedPriceVolumeTrend trend => new GeneratedModifiedPriceVolumeTrendState(trend.Length),
