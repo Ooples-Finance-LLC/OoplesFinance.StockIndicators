@@ -61,6 +61,8 @@ internal static partial class ValuesBarExecution
         indicator is EhlersTruncatedBandPassFilter truncated && IsTruncatedBandShared(truncated) ||
         indicator is EhlersVossPredictiveFilter voss && IsVossShared(voss) ||
         indicator is BollingerBandsAvgTrueRange ratio && StrengthWindow.Supports(ratio.MaType) && double.IsFinite(ratio.StdDevMult) ||
+        indicator is NormalizedVolume or OCHistogram { MaType: null, SecondAverage: null } or ModifiedPriceVolumeTrend { MaType: null } ||
+        indicator is OmegaRatio omega && double.IsFinite(omega.Bmk) ||
         indicator is RunningEquity { MaType: null } ||
         indicator is SimpleReturns or LogReturns ||
         indicator is NetVolume or Range or MarketFacilitationIndex ||
@@ -500,6 +502,10 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        NormalizedVolume volume => new GeneratedNormalizedVolumeState(volume.Length, count),
+        OCHistogram histogram => new GeneratedOcHistogramState(histogram.Length),
+        ModifiedPriceVolumeTrend trend => new GeneratedModifiedPriceVolumeTrendState(trend.Length),
+        OmegaRatio omega => new GeneratedTargetReturnState(omega.Length, omega.Bmk, false, count),
         RollingMax maximum => new GeneratedRollingCloseExtremeState(maximum.Length, count, true),
         RollingMin minimum => new GeneratedRollingCloseExtremeState(minimum.Length, count, false),
         SimpleReturns returns => new GeneratedLaggedReturnState(returns.Length, count, false),
