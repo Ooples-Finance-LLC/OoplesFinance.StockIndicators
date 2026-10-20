@@ -61,7 +61,9 @@ internal static partial class ValuesBarExecution
         indicator is EhlersTruncatedBandPassFilter truncated && IsTruncatedBandShared(truncated) ||
         indicator is EhlersVossPredictiveFilter voss && IsVossShared(voss) ||
         indicator is BollingerBandsAvgTrueRange ratio && StrengthWindow.Supports(ratio.MaType) && double.IsFinite(ratio.StdDevMult) ||
-        indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 } or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
+        indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 }
+            or RollingMax { Length: > 0 } or RollingMin { Length: > 0 }
+            or TrueRange or BalanceOfPower or Wma or WilliamsR or Ema or Adl
             or Wwma or Smma or ModifiedMa or Dema or Tema or Zlema or Tma or Hma or Rsi or Atr or Roc or Momentum
             or Cci or Cmo or Trix or Apo or Ppo or Macd or Aroon or Dpo or Cmf or Mfi or ForceIndex or Obv
             or Nvi or Pvi or Vroc or Pvt or Adx or MassIndex or ChaikinOscillator or Emv or Vwap or AroonUp or AroonDown
@@ -495,6 +497,8 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        RollingMax maximum => new GeneratedRollingCloseExtremeState(maximum.Length, count, true),
+        RollingMin minimum => new GeneratedRollingCloseExtremeState(minimum.Length, count, false),
         HighestHigh high when high.Length >= count => new PrefixPriceExtremeState(true),
         LowestLow low when low.Length >= count => new PrefixPriceExtremeState(false),
         HighestHigh high => new PriceExtremeState(high.Length, count, true),
