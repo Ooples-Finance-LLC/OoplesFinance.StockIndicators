@@ -39,6 +39,7 @@ internal static partial class ValuesBarExecution
         indicator is KendallRankCorrelationCoefficient or RSquared ||
         indicator is LinearWeightedMovingAverageCore or LeoMovingAverage or McGinleyDynamic ||
         indicator is GeoMa or GeometricMeanMovingAverage ||
+        indicator is GeneralFilterEstimator ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
@@ -518,6 +519,7 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        GeneralFilterEstimator estimator => new GeneratedGeneralFilterState(estimator.Length),
         ElasticVolumeWeightedMovingAverageV1 average => new GeneratedElasticVolumeState(average.Length, count, 0),
         ElasticVolumeWeightedMovingAverageV2 average => new GeneratedElasticVolumeState(average.Length, count, 1),
         InformationRatio information => new GeneratedRiskRatioState(information.Length, information.Bmk, count, 0),
