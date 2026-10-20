@@ -383,6 +383,19 @@ internal static partial class ValuesBarExecution
             or TTMScalperIndicator
             or TurboScaler { MaType: null, PctMultiplier: > double.NegativeInfinity and < double.PositiveInfinity }
             or UberTrendIndicator
+            or VaradiOscillator { MaType: null }
+            or UhlMaCrossoverSystem { MaType: null }
+            or UltimateMovingAverage { MaType: null }
+            or UltimateMovingAverageBands { MaType: null, StdDevMult: > double.NegativeInfinity and < double.PositiveInfinity }
+            or VariableIndexDynamicAverage { MaType: null } or Vidya { MaType: null }
+            or Vma or VariableMovingAverageBands { MaType: null, SecondAverage: null, Mult: > double.NegativeInfinity and < double.PositiveInfinity }
+            or WaddahAttarExplosion { Sensitivity: > double.NegativeInfinity and < double.PositiveInfinity }
+            or WaveTrendOscillator
+            or VolatilityMovingAverage { MaType: null, SecondAverage: null, ThirdAverage: null }
+            or ZweigMarketBreadthIndicator { MaType: null }
+            or ZeroLagSmoothedCycle
+            or VostroIndicator { MaType: null, Level: > double.NegativeInfinity and < double.PositiveInfinity }
+            or WilliamsFractalUp or WilliamsFractalDown or WilliamsFractalsUp or WilliamsFractalsDown or WilliamsFractals
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -1028,6 +1041,25 @@ internal static partial class ValuesBarExecution
         TTMScalperIndicator => new GeneratedTtmScalperState(),
         TurboScaler scaler => new GeneratedTurboScalerState(scaler.Length, 0.5),
         UberTrendIndicator trend => new GeneratedUberTrendState(trend.Length),
+        VaradiOscillator oscillator => new GeneratedVaradiState(oscillator.Length),
+        UhlMaCrossoverSystem crossover => new GeneratedUhlState(Math.Max(1, crossover.Length), count),
+        UltimateMovingAverage => new GeneratedUltimateAverageState(),
+        UltimateMovingAverageBands bands => new GeneratedUltimateBandsState(bands.MinLength, bands.MaxLength, bands.StdDevMult),
+        VariableIndexDynamicAverage average => new GeneratedVidyaAliasState(average.Length, count),
+        Vidya average => new GeneratedVidyaAliasState(average.Length, count),
+        Vma average => new GeneratedVmaState(average.Length),
+        VariableMovingAverageBands bands => new GeneratedVariableBandsState(bands.Length, bands.Mult),
+        WaddahAttarExplosion explosion => new GeneratedWaddahState(explosion.FastLength, explosion.SlowLength, explosion.Sensitivity),
+        WaveTrendOscillator oscillator => new GeneratedWaveTrendState(oscillator.Length),
+        VolatilityMovingAverage average => new GeneratedVolatilityAverageState(Math.Max(1, average.Length), count),
+        ZweigMarketBreadthIndicator breadth => new GeneratedZweigState(Math.Max(1, breadth.Length), count),
+        ZeroLagSmoothedCycle cycle => new GeneratedZeroLagCycleState(cycle.Length),
+        VostroIndicator vostro => new GeneratedVostroState(Math.Max(1, vostro.Length1), Math.Max(1, vostro.Length2), vostro.Level, count),
+        WilliamsFractalUp fractal => new GeneratedWilliamsFractalState(Math.Max(2, fractal.Length), count, true),
+        WilliamsFractalDown fractal => new GeneratedWilliamsFractalState(Math.Max(2, fractal.Length), count, false),
+        WilliamsFractalsUp fractal => new GeneratedWilliamsFractalState(Math.Max(2, fractal.Length), count, true),
+        WilliamsFractalsDown fractal => new GeneratedWilliamsFractalState(Math.Max(2, fractal.Length), count, false),
+        WilliamsFractals fractal => new GeneratedWilliamsFractalState(Math.Max(2, fractal.Length), count, true),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -8158,6 +8190,374 @@ internal static partial class ValuesBarExecution
         }
         public void Reset() { _history.Clear(); _up = _down = _upVolume = _downVolume = _previousPrice = default; _started = false; }
         public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedVaradiState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly VaradiWindow _window = new(MovingAvgType.SimpleMovingAverage, length);
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true).Value;
+        public void Reset() => _window.Reset();
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedUhlState(int length, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.SimpleMovingAverageSmoother? _average = length <= count ? new(length) : null;
+        private readonly Streaming.RollingStandardDeviation? _deviation = length <= count ? new(length) : null;
+        private readonly double[] _lag = length <= count ? new double[length] : [];
+        private int _next;
+        private double _previousCma, _previousCts;
+        private bool _hasPrevious;
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            double value = bar.Close;
+            double sma = _average?.Next(value, true) ?? 0;
+            double deviation = _deviation?.Next(value, true) ?? 0;
+            double previousDeviation = _lag.Length == 0 ? 0 : _lag[_next];
+            double variance = previousDeviation * previousDeviation;
+            double previousCma = _hasPrevious ? _previousCma : value;
+            double previousCts = _hasPrevious ? _previousCts : value;
+            double cmaDistance = MathHelper.Pow(sma - previousCma, 2);
+            double ctsDistance = MathHelper.Pow(value - previousCts, 2);
+            double ka = variance < cmaDistance && cmaDistance != 0 ? 1 - (variance / cmaDistance) : 0;
+            double kb = variance < ctsDistance && ctsDistance != 0 ? 1 - (variance / ctsDistance) : 0;
+            _previousCma = (ka * sma) + ((1 - ka) * previousCma);
+            _previousCts = (kb * value) + ((1 - kb) * previousCts);
+            if (_lag.Length != 0)
+            {
+                _lag[_next] = deviation;
+                if (++_next == length) _next = 0;
+            }
+            _hasPrevious = true;
+            outputs[0] = _previousCts; outputs[1] = _previousCma;
+        }
+        public void Reset()
+        {
+            _average?.Reset(); _deviation?.Reset();
+            Array.Clear(_lag, 0, _lag.Length);
+            _next = 0; _previousCma = _previousCts = 0; _hasPrevious = false;
+        }
+        public void Dispose() { _average?.Dispose(); _deviation?.Dispose(); }
+    }
+
+    private sealed class GeneratedUltimateAverageState : IIndicatorState, IDisposable
+    {
+        // The facade's obsolete Length property does not configure this calculation.
+        private readonly UltimateAverageWindow _window = new(MovingAvgType.SimpleMovingAverage, 5, 50, 1);
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, bar.Volume, true);
+        public void Reset() => _window.Reset();
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedUltimateBandsState(int minimum, int maximum, double multiplier) : IMultiOutputState, IDisposable
+    {
+        private readonly UltimateAverageWindow _average = new(MovingAvgType.SimpleMovingAverage, minimum, maximum, 1);
+        private readonly UltimateBandWindow _bands = new(minimum, multiplier);
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var center = _average.NextPoint(bar.Close, bar.High, bar.Low, bar.Volume, true);
+            var point = _bands.Next(bar.Close, center, true);
+            outputs[0] = point.Upper; outputs[1] = point.Middle; outputs[2] = point.Lower;
+        }
+        public void Reset() { _average.Reset(); _bands.Reset(); }
+        public void Dispose() { _average.Dispose(); _bands.Reset(); }
+    }
+
+    private sealed class GeneratedVidyaAliasState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly ChandeMomentumWindow _momentum = new(Math.Min(Math.Max(1, length), Math.Max(1, count)));
+        private readonly double _alpha = 2d / (Math.Max(1, length) + 1d);
+        private double _previous;
+        private bool _started;
+        public double Update(in Bar bar)
+        {
+            double momentum = Math.Abs(_momentum.Next(bar.Close, true) / 100);
+            _previous = VidyaBlend.Compute(_started ? _previous : bar.Close, bar.Close, _alpha * momentum);
+            _started = true;
+            return _previous;
+        }
+        public void Reset() { _momentum.Reset(); _previous = 0; _started = false; }
+        public void Dispose() => _momentum.Dispose();
+    }
+
+    private sealed class GeneratedVmaState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.ExactVariableMovingAverageEngine _window = new(length);
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Reset() => _window.Reset();
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedVariableBandsState(int length, double multiplier) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.ExactVariableMovingAverageEngine _line = new(length), _range = new(length);
+        private readonly VariableAverageExpression _multiplier = VariableAverageExpression.Constant(UltimatePowerWeights.Fraction.Of(multiplier));
+        private UltimatePowerWeights.Fraction _previousPrice;
+        private bool _started;
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            VariableBandWindow.Validate(bar.Close, bar.High, bar.Low);
+            var price = UltimatePowerWeights.Fraction.Of(bar.Close);
+            var trueRange = VariableBandWindow.TrueRange(bar.High, bar.Low, _started ? _previousPrice : price);
+            var line = _line.NextExpression(price, true);
+            var range = _range.NextExpression(trueRange, true);
+            var width = _multiplier * range;
+            outputs[0] = (line + width).Publish();
+            outputs[1] = line.Publish();
+            outputs[2] = (line - width).Publish();
+            _previousPrice = price; _started = true;
+        }
+        public void Reset() { _line.Reset(); _range.Reset(); _previousPrice = default; _started = false; }
+        public void Dispose() { _line.Dispose(); _range.Dispose(); _previousPrice = default; _started = false; }
+    }
+
+    private sealed class GeneratedWaddahState : IMultiOutputState, IDisposable
+    {
+        private readonly Ema _fast, _slow, _lagFast, _lagSlow;
+        private readonly MacZWindow.Number _sensitivity;
+        private readonly int _length;
+        private readonly Queue<double> _history = new();
+        private System.Numerics.BigInteger _sum, _squares;
+        private MacZWindow.Number _p1, _p2, _p3;
+        public GeneratedWaddahState(int fast, int slow, double sensitivity)
+        {
+            Streaming.StreamingInputValidation.Finite(sensitivity, nameof(sensitivity));
+            _sensitivity = MacZWindow.Number.Of(sensitivity); _length = Math.Max(1, fast);
+            _fast = new(fast); _slow = new(slow); _lagFast = new(fast); _lagSlow = new(slow);
+        }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            double price = bar.Close;
+            Streaming.StreamingInputValidation.Finite(price, nameof(price));
+            var p = MacZWindow.Number.Of(price); var delta = p - _p1; var lagDelta = _p2 - _p3;
+            // Exact linear filters of differences equal the difference of separately lagged MACDs.
+            var t1 = (_fast.Next(delta, true) - _slow.Next(delta, true)) * _sensitivity;
+            var t2 = (_lagFast.Next(lagDelta, true) - _lagSlow.Next(lagDelta, true)) * _sensitivity;
+            var units = ExactVarianceWindow.Units(price); var sum = _sum + units; var squares = _squares + units * units;
+            if (_history.Count == _length) { var old = ExactVarianceWindow.Units(_history.Peek()); sum -= old; squares -= old * old; }
+            var moment = _history.Count < _length - 1 ? System.Numerics.BigInteger.Zero : _length * squares - sum * sum;
+            var denominator = (System.Numerics.BigInteger)_length * _length;
+            var width = ExactPopulationDeviation.RootRatio(16 * moment, denominator);
+            var up = t1.Sign > 0 ? t1 : default; var down = t1.Sign < 0 ? t1.Times(-1) : default;
+            if (_history.Count == _length) _history.Dequeue();
+            _history.Enqueue(price); _sum = sum; _squares = squares;
+            _p3 = _p2; _p2 = _p1; _p1 = p;
+            outputs[0] = t1.Publish(); outputs[1] = t2.Publish(); outputs[2] = width;
+            outputs[3] = up.Publish(); outputs[4] = down.Publish();
+        }
+        public void Reset()
+        {
+            _fast.Reset(); _slow.Reset(); _lagFast.Reset(); _lagSlow.Reset(); _history.Clear(); _sum = _squares = default;
+            _p1 = _p2 = _p3 = default;
+        }
+        public void Dispose() => Reset();
+
+        private sealed class Ema
+        {
+            private readonly int _length; private long _count; private MacZWindow.Number _sum, _previous;
+            internal Ema(int length) => _length = Math.Max(1, length);
+            internal MacZWindow.Number Next(MacZWindow.Number value, bool final)
+            {
+                var sum = _sum; MacZWindow.Number result;
+                if (_count < _length) { sum += value; result = sum.Divide(_count + 1); }
+                else result = (_previous.Times(_length - 1L) + value.Times(2)).Divide(_length + 1L);
+                if (final) { _sum = sum; _previous = result; _count++; }
+                return result;
+            }
+            internal void Reset() { _count = 0; _sum = _previous = default; }
+        }
+    }
+
+    private sealed class GeneratedWaveTrendState(int channel) : IMultiOutputState, IDisposable
+    {
+        private readonly WaveTrendWindow _window = new(MovingAvgType.ExponentialMovingAverage, channel, 21, 4);
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var price = WaveTrendWindow.Price(bar.Open, bar.High, bar.Low, bar.Close);
+            var point = _window.Next(price, true);
+            outputs[0] = point.Line; outputs[1] = point.SignalLine;
+        }
+        public void Reset() => _window.Reset();
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedVolatilityAverageState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly VolatilityAverageWindow.Average _mean = new(MovingAvgType.SimpleMovingAverage, 10);
+        private readonly VolatilityAverageWindow.Average _scores = new(MovingAvgType.SimpleMovingAverage, 3);
+        private readonly VolatilityAverageWindow.Average _output = new(MovingAvgType.SimpleMovingAverage, 3);
+        private readonly Queue<PeriodicChannelWindow.Number> _moments = new();
+        private readonly PeriodicChannelWindow.Number[] _history = new PeriodicChannelWindow.Number[Math.Min(length, count)];
+        private PeriodicChannelWindow.Number _sum, _squares;
+        private int _next, _stored;
+        public double Update(in Bar bar)
+        {
+            Streaming.StreamingInputValidation.Finite(bar.Close, "price");
+            var value = PeriodicChannelWindow.Number.Of(bar.Close);
+            var mean = _mean.Next(VolatilityAverageWindow.Radical.Of(value), true).Rational();
+            bool full = _moments.Count == 10;
+            var expired = full ? _moments.Peek() : default;
+            int size = full ? 10 : _moments.Count + 1;
+            var sum = _sum + value - expired;
+            var squares = _squares + value * value - expired * expired;
+            var variance = (squares.Times(size) - sum * sum).Divide((long)size * size);
+            if (full) _moments.Dequeue();
+            _moments.Enqueue(value); _sum = sum; _squares = squares;
+            var score = VolatilityAverageWindow.Radical.QuotientRoot((value - mean).Times(100), variance);
+            int period = VolatilityAverageWindow.Period(_scores.Next(score, true), length, 10);
+            var weighted = value.Times(period);
+            int index = _next;
+            for (int lag = 1; lag < period && lag <= _stored; lag++)
+            {
+                if (--index < 0) index = _history.Length - 1;
+                weighted += _history[index].Times(period - lag);
+            }
+            var average = weighted.Divide((long)period * (period + 1L) / 2);
+            var line = _output.Next(VolatilityAverageWindow.Radical.Of(average), true).Rational();
+            if (_history.Length != 0)
+            {
+                _history[_next] = value;
+                if (++_next == _history.Length) _next = 0;
+                if (_stored < _history.Length) _stored++;
+            }
+            return line.Publish();
+        }
+        public void Reset()
+        {
+            _mean.Reset(); _scores.Reset(); _output.Reset(); _moments.Clear();
+            Array.Clear(_history, 0, _history.Length); _sum = _squares = default; _next = _stored = 0;
+        }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedZweigState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly sbyte[] _votes = new sbyte[Math.Min(length, count)];
+        private readonly Streaming.IMovingAverageSmoother _average = Streaming.MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, length);
+        private int _next, _stored, _advances, _declines;
+        private double _previous;
+        public double Update(in Bar bar)
+        {
+            sbyte vote = bar.Close > _previous ? (sbyte)1 : bar.Close < _previous ? (sbyte)-1 : (sbyte)0;
+            if (_votes.Length != 0)
+            {
+                if (_stored == _votes.Length)
+                {
+                    if (_votes[_next] > 0) _advances--;
+                    else if (_votes[_next] < 0) _declines--;
+                }
+                else _stored++;
+                _votes[_next] = vote;
+                if (++_next == _votes.Length) _next = 0;
+            }
+            if (vote > 0) _advances++;
+            else if (vote < 0) _declines++;
+            // Binary flags and their totals are exact in binary64 at every supported period.
+            int total = _advances + _declines;
+            double ratio = total != 0 ? (double)_advances / total : 0;
+            double result = _average.Next(ratio, true);
+            _previous = bar.Close;
+            return result;
+        }
+        public void Reset()
+        {
+            Array.Clear(_votes, 0, _votes.Length); _next = _stored = _advances = _declines = 0;
+            _previous = 0; _average.Reset();
+        }
+        public void Dispose() => _average.Dispose();
+    }
+
+    private sealed class GeneratedZeroLagCycleState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly ZeroLagCycleWindow _window = new(length);
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Line; outputs[1] = point.Filter;
+        }
+        public void Reset() => _window.Reset();
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedVostroState(int length1, int length2, double level, int count) : IIndicatorState, IDisposable
+    {
+        private readonly PooledRingBuffer<double> _prices = new(Math.Min(length1, Math.Max(1, count)));
+        private readonly PooledRingBuffer<double> _ranges = new(Math.Min(length1, Math.Max(1, count)));
+        private readonly double[] _weightedHistory = new double[Math.Min(length2, count)];
+        private readonly long _denominator = (long)length2 * (length2 + 1L) / 2;
+        private ExactMeanAccumulator _sum, _numerator;
+        private int _stored, _next;
+        private double _previousLow, _previousHigh, _priceSum, _rangeSum;
+        public double Update(in Bar bar)
+        {
+            // Preserve WmaState's configured weights and zero-padded startup denominator.
+            _numerator.Subtract(_sum); _numerator.Add(bar.Close, length2);
+            double average = _numerator.Mean(_denominator);
+            _sum.Add(bar.Close);
+            if (_stored == length2) _sum.Add(_weightedHistory[_next], -1);
+            if (_weightedHistory.Length != 0)
+            {
+                _weightedHistory[_next] = bar.Close;
+                if (++_next == _weightedHistory.Length) _next = 0;
+                if (_stored < _weightedHistory.Length) _stored++;
+            }
+            // Match the verified Vostro arm's accumulation order and overflow persistence.
+            _priceSum += bar.Close;
+            _rangeSum += bar.High - bar.Low;
+            if (_prices.TryAdd(bar.Close, out var removedPrice)) _priceSum -= removedPrice;
+            if (_ranges.TryAdd(bar.High - bar.Low, out var removedRange)) _rangeSum -= removedRange;
+            double center = _priceSum * .2;
+            double scale = _rangeSum * .04;
+            double low = scale != 0 ? (bar.Low - center) / scale : 0;
+            double high = scale != 0 ? (bar.High - center) / scale : 0;
+            double candidate = high > level && bar.High > average ? 90 : low < -level && bar.Low < average ? -90 : 0;
+            double result = (high > level && _previousHigh > level) || (low < -level && _previousLow < -level) ? 0 : candidate;
+            _previousLow = low; _previousHigh = high;
+            return result;
+        }
+        public void Reset()
+        {
+            _prices.Clear(); _ranges.Clear(); Array.Clear(_weightedHistory, 0, _weightedHistory.Length);
+            _sum = _numerator = default; _stored = _next = 0; _previousLow = _previousHigh = _priceSum = _rangeSum = 0;
+        }
+        public void Dispose() { _prices.Dispose(); _ranges.Dispose(); }
+    }
+
+    private sealed class GeneratedWilliamsFractalState(int length, int count, bool upper) : IIndicatorState, IDisposable
+    {
+        private readonly double[] _history = new double[(int)Math.Min((long)length + 8, count)];
+        private int _index, _next;
+        public double Update(in Bar bar)
+        {
+            double current = upper ? bar.High : bar.Low;
+            int older = Math.Min(6, _index - length);
+            double result = 0;
+            if (older >= 2)
+            {
+                Span<double> neighborhood = stackalloc double[9];
+                for (int j = 0; j < older + 3; j++)
+                {
+                    int offset = length + older - j;
+                    if (offset == 0) neighborhood[j] = current;
+                    else
+                    {
+                        int slot = _next - offset;
+                        if (slot < 0) slot += _history.Length;
+                        neighborhood[j] = _history[slot];
+                    }
+                }
+                result = WilliamsFractalPattern.IsFractal(neighborhood.Slice(0, older + 3), upper) ? 1 : 0;
+            }
+            if (_history.Length != 0)
+            {
+                _history[_next] = current;
+                if (++_next == _history.Length) _next = 0;
+            }
+            _index++;
+            return result;
+        }
+        public void Reset() { Array.Clear(_history, 0, _history.Length); _index = _next = 0; }
+        public void Dispose() { }
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable
