@@ -367,6 +367,22 @@ internal static partial class ValuesBarExecution
             or TFSMboIndicator { MaType: null, SecondAverage: null, ThirdAverage: null }
             or TFSMboPercentagePriceOscillator { MaType: null, SecondAverage: null, ThirdAverage: null }
             or TopsAndBottomsFinder { MaType: null }
+            or TrendDirectionForceIndex { MaType: null, SecondAverage: null, Length2: < int.MaxValue }
+            or TrendAnalysisIndex { MaType: null }
+            or TrendAnalysisIndicator { MaType: null }
+            or TrendDetectionIndex
+            or Trender { MaType: null, AtrMult: > double.NegativeInfinity and < double.PositiveInfinity }
+            or TrendForceHistogram
+            or TrendImpulseFilter { MaType: null }
+            or TrendPersistenceRate
+            or TrendExhaustionIndicator { MaType: null }
+            or TrueRangeAdjustedExponentialMovingAverage { Mult: > double.NegativeInfinity and < double.PositiveInfinity }
+            or Trimean
+            or TreynorRatio { Beta: > double.NegativeInfinity and < double.PositiveInfinity, Bmk: > double.NegativeInfinity and < double.PositiveInfinity }
+            or UpsidePotentialRatio { Bmk: > double.NegativeInfinity and < double.PositiveInfinity }
+            or TTMScalperIndicator
+            or TurboScaler { MaType: null, PctMultiplier: > double.NegativeInfinity and < double.PositiveInfinity }
+            or UberTrendIndicator
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -996,6 +1012,22 @@ internal static partial class ValuesBarExecution
         TFSMboIndicator tfs => new GeneratedTfsPairState(tfs.FastLength, tfs.SlowLength, tfs.SignalLength, count, false),
         TFSMboPercentagePriceOscillator => new GeneratedTfsPairState(25, 200, 18, count, true),
         TopsAndBottomsFinder sharp => new GeneratedTopsBottomsState(sharp.Length),
+        TrendDirectionForceIndex sharp => new GeneratedTrendDirectionForceState(sharp.Length1, sharp.Length2),
+        TrendAnalysisIndex trend => new GeneratedTrendAnalysisIndexState(trend.Length1, trend.Length2),
+        TrendAnalysisIndicator trend => new GeneratedTrendAnalysisIndicatorState(trend.Length1, trend.Length2),
+        TrendDetectionIndex trend => new GeneratedTrendDetectionState(trend.Length1, trend.Length2, count),
+        Trender trend => new GeneratedTrenderState(trend.Length, trend.AtrMult),
+        TrendForceHistogram trend => new GeneratedTrendForceHistogramState(trend.Length, count),
+        TrendImpulseFilter trend => new GeneratedTrendImpulseState(trend.Length1, trend.Length2, count),
+        TrendPersistenceRate trend => new GeneratedTrendPersistenceState(trend.Length, count),
+        TrendExhaustionIndicator trend => new GeneratedTrendExhaustionState(trend.Length, count),
+        TrueRangeAdjustedExponentialMovingAverage trend => new GeneratedTrueRangeAdjustedState(trend.Length, trend.Mult),
+        Trimean rank => new GeneratedTrimeanState(rank.Length, count),
+        TreynorRatio ratio => new GeneratedTargetReturnState(ratio.Length, ratio.Bmk, false, count, ratio.Beta),
+        UpsidePotentialRatio ratio => new GeneratedTargetReturnState(ratio.Length, ratio.Bmk, true, count),
+        TTMScalperIndicator => new GeneratedTtmScalperState(),
+        TurboScaler scaler => new GeneratedTurboScalerState(scaler.Length, 0.5),
+        UberTrendIndicator trend => new GeneratedUberTrendState(trend.Length),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -7657,6 +7689,475 @@ internal static partial class ValuesBarExecution
         }
         public void Reset() { _mean.Reset(); _previousMean = _previousRise = _previousFall = default; _riseStreak = _fallStreak = _seen = 0; _previousUp = _previousDown = false; }
         public void Dispose() { Reset(); _mean.Dispose(); }
+    }
+
+    private sealed class GeneratedTrendDirectionForceState(int length, int lookback) : IIndicatorState, IDisposable
+    {
+        private readonly ExactTrendForceWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, lookback);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedTrendAnalysisIndexState(int length, int width) : IMultiOutputState, IDisposable
+    {
+        private readonly TrendAnalysisIndexWindow _window = new(MovingAvgType.SimpleMovingAverage, length, width);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, true); outputs[0] = point.Line; outputs[1] = point.SignalLine; }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedTrendAnalysisIndicatorState(int length, int width) : IMultiOutputState, IDisposable
+    {
+        private readonly TrendAnalysisIndicatorWindow _window = new(MovingAvgType.SimpleMovingAverage, length, width);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.Close, true); outputs[0] = point.Line; outputs[1] = point.SignalLine; }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedTrendDetectionState : IMultiOutputState, IDisposable
+    {
+        private readonly int _short, _long;
+        private readonly PooledRingBuffer<double> _prices;
+        private readonly PooledRingBuffer<RocBankValue> _momenta;
+        private ExactMeanAccumulator _direction, _shortAbsolute, _longAbsolute;
+        internal GeneratedTrendDetectionState(int shortLength, int longLength, int count)
+        {
+            _short = Math.Max(1, shortLength); _long = Math.Max(_short, longLength);
+            _prices = new(Math.Min(_short, Math.Max(1, count))); _momenta = new(Math.Min(Math.Max(_short, _long), Math.Max(1, count)));
+        }
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = Next(bar.Close, true); outputs[0] = point.Line; outputs[1] = point.Direction; }
+        private static RocBankValue Absolute(RocBankValue value) => new(Math.Abs(value.Mantissa), value.UpperShift);
+        internal (double Line, double Direction) Next(double price, bool commit)
+        {
+            var change = new ExactMeanAccumulator();
+            if (_prices.Count == _short) { change.Add(price); change.Add(_prices[0], -1); }
+            var momentum = RocBankValue.Round(change);
+            var direction = _direction; var shortAbsolute = _shortAbsolute; var longAbsolute = _longAbsolute;
+            if (_momenta.Count >= _short)
+            {
+                var old = _momenta[_momenta.Count - _short]; old.AddTo(ref direction, -1); Absolute(old).AddTo(ref shortAbsolute, -1);
+            }
+            if (_momenta.Count >= _long) Absolute(_momenta[_momenta.Count - _long]).AddTo(ref longAbsolute, -1);
+            momentum.AddTo(ref direction); Absolute(momentum).AddTo(ref shortAbsolute); Absolute(momentum).AddTo(ref longAbsolute);
+            var line = shortAbsolute; line.Subtract(longAbsolute);
+            // Add the magnitude of the exact direction total without publishing it:
+            // an overflowing direction can still cancel the long absolute total.
+            var negativeMagnitude = direction;
+            if (direction.Sign >= 0) { negativeMagnitude = default; negativeMagnitude.Subtract(direction); }
+            line.Subtract(negativeMagnitude);
+            if (commit)
+            {
+                _prices.TryAdd(price, out _); _momenta.TryAdd(momentum, out _);
+                _direction = direction; _shortAbsolute = shortAbsolute; _longAbsolute = longAbsolute;
+            }
+            return (line.Mean(1), direction.Mean(1));
+        }
+        public void Reset() { _prices.Clear(); _momenta.Clear(); _direction = default; _shortAbsolute = default; _longAbsolute = default; }
+        public void Dispose() { _prices.Dispose(); _momenta.Dispose(); }
+    }
+
+    private sealed class GeneratedTrenderState(int length, double factor) : IMultiOutputState, IDisposable
+    {
+        private readonly TrenderWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, factor);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        { var point = _window.Next(bar.High, bar.Low, bar.Close, true); outputs[0] = point.TrendUp; outputs[1] = point.TrendDn; outputs[2] = point.Trender; }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedTrendForceHistogramState : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.RollingWindowMax _high;
+        private readonly Streaming.RollingWindowMin _low;
+        private double _previousHigh, _previousLow, _a, _b, _c, _d;
+        private ExactMeanAccumulator _sum;
+        private int _index;
+        internal GeneratedTrendForceHistogramState(int length, int count)
+        { var capacity = Math.Min(Math.Max(2, length), Math.Max(1, count)); _high = new(capacity); _low = new(capacity); }
+        public double Update(in Bar bar)
+        {
+            var a = bar.Close > _previousHigh ? 1d : 0d;
+            var b = bar.Close < _previousLow ? 1d : 0d;
+            var c = a == 1d ? _c + 1 : b - _b == 1d ? 0 : _c;
+            var d = b == 1d ? _d + 1 : a - _a == 1d ? 0 : _d;
+            var average = (c + d) / 2; _sum.Add(average);
+            var result = average - _sum.Mean(_index + 1);
+            _previousHigh = _high.Add(bar.Close, out _); _previousLow = _low.Add(bar.Close, out _);
+            _a = a; _b = b; _c = c; _d = d; _index++;
+            return result;
+        }
+        public void Reset() { _high.Reset(); _low.Reset(); _previousHigh = _previousLow = _a = _b = _c = _d = 0; _sum = default; _index = 0; }
+        public void Dispose() { _high.Dispose(); _low.Dispose(); }
+    }
+
+    private sealed class GeneratedTrendImpulseState : IIndicatorState, IDisposable
+    {
+        private readonly Streaming.RollingWindowMax _high;
+        private readonly Streaming.RollingWindowMin _low;
+        private readonly Streaming.IMovingAverageSmoother _signal;
+        private double _previousHigh, _previousLow, _previous;
+        private bool _seeded;
+        internal GeneratedTrendImpulseState(int length, int smoothing, int count)
+        {
+            var capacity = Math.Min(Math.Max(2, length), Math.Max(1, count)); _high = new(capacity); _low = new(capacity);
+            _signal = Streaming.MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, smoothing));
+        }
+        public double Update(in Bar bar)
+        {
+            var previous = _seeded ? _previous : bar.Close;
+            var breakout = bar.Close > _previousHigh || bar.Close < _previousLow ? 1d : 0d;
+            var value = (breakout * bar.Close) + ((1 - breakout) * previous);
+            var result = _signal.Next(value, true);
+            _previousHigh = _high.Add(bar.Close, out _); _previousLow = _low.Add(bar.Close, out _); _previous = value; _seeded = true;
+            return result;
+        }
+        public void Reset() { _high.Reset(); _low.Reset(); _signal.Reset(); _previousHigh = _previousLow = _previous = 0; _seeded = false; }
+        public void Dispose() { _high.Dispose(); _low.Dispose(); _signal.Dispose(); }
+    }
+
+    private sealed class GeneratedTrendPersistenceState : IIndicatorState, IDisposable
+    {
+        private readonly int _length;
+        private readonly PooledRingBuffer<sbyte> _votes;
+        private readonly Streaming.IMovingAverageSmoother _mean = Streaming.MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, 5);
+        private double _previous, _previous2;
+        private long _balance;
+        internal GeneratedTrendPersistenceState(int length, int count)
+        { _length = Math.Max(1, length); _votes = new(Math.Min(_length, Math.Max(1, count))); }
+        public double Update(in Bar bar)
+        {
+            var mean = _mean.Next(bar.Close, true);
+            var difference = (_previous - _previous2) / .01;
+            var vote = (sbyte)((difference > 1 ? 1 : 0) - (difference < -1 ? 1 : 0));
+            if (_votes.TryAdd(vote, out var expired)) _balance -= expired;
+            _balance += vote;
+            var result = Math.Abs(100d * _balance / _length);
+            _previous2 = _previous; _previous = mean;
+            return result;
+        }
+        public void Reset() { _mean.Reset(); _votes.Clear(); _previous = _previous2 = 0; _balance = 0; }
+        public void Dispose() { _mean.Dispose(); _votes.Dispose(); }
+    }
+
+    private sealed class GeneratedTrendExhaustionState : IMultiOutputState, IDisposable
+    {
+        private readonly int _length;
+        private readonly double _coefficient;
+        private readonly Streaming.RollingWindowMax _high;
+        private readonly SignalMean _signal;
+        private double _rises, _highs, _previous, _previousClose, _previousHigh;
+        internal GeneratedTrendExhaustionState(int length, int count)
+        {
+            _length = Math.Max(1, length); _coefficient = 2d / unchecked(_length + 1);
+            _high = new(Math.Min(Math.Max(2, _length), Math.Max(1, count)));
+            _signal = new(_length, count);
+        }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            _rises += bar.Close > _previousClose ? 1 : 0;
+            _highs += bar.High > _previousHigh ? 1 : 0;
+            var ratio = _rises != 0 ? _highs / _rises : 0;
+            var value = _previous + (_coefficient * (ratio - _previous));
+            var signal = value;
+            if (_length != 1)
+            { signal = _signal.Next(value); }
+            outputs[0] = value; outputs[1] = signal;
+            _previous = value; _previousClose = bar.Close; _previousHigh = _high.Add(bar.High, out _);
+        }
+        public void Reset() { _high.Reset(); _signal.Reset(); _rises = _highs = _previous = _previousClose = _previousHigh = 0; }
+        public void Dispose() { _high.Dispose(); _signal.Dispose(); }
+
+        private sealed class SignalMean(int period, int count) : IDisposable
+        {
+            private readonly double[] _window = period > 1 && period <= count ? new double[period] : [];
+            private int _seen, _next;
+            private double _sum, _roundoff;
+            private bool _exactRequired;
+
+            public void Reset()
+            {
+                Array.Clear(_window, 0, _window.Length);
+                _seen = _next = 0;
+                _sum = _roundoff = 0;
+                _exactRequired = false;
+            }
+
+            internal double Next(double value)
+            {
+                if (_window.Length == 0) return period == 1 ? value : 0;
+
+                double expired = _window[_next];
+                _window[_next] = value;
+                if (++_next == period) _next = 0;
+                double previous = _sum;
+                _sum += value;
+                _roundoff = MeanRoundoff.AfterAddition(_roundoff, _sum);
+                _exactRequired |= ExactMeanAccumulator.SevereCancellation(previous, value, _sum);
+                if (_seen >= period)
+                {
+                    previous = _sum;
+                    _sum -= expired;
+                    _roundoff = MeanRoundoff.AfterAddition(_roundoff, _sum);
+                    _exactRequired |= ExactMeanAccumulator.SevereCancellation(previous, -expired, _sum);
+                    if (Math.Abs(_sum) <= 1e-4 * Math.Max(Math.Abs(expired), Math.Abs(value)))
+                        Rebuild(false);
+                }
+                _seen++;
+                double mean = _seen >= period ? _sum / period : 0;
+                if (_seen >= period && (_exactRequired || MeanRoundoff.RequiresExact(_sum, period, _roundoff)))
+                {
+                    var exact = new ExactMeanAccumulator();
+                    int index = _next;
+                    for (int j = 0; j < period; j++)
+                    {
+                        exact.Add(_window[index]);
+                        if (++index == period) index = 0;
+                    }
+                    mean = exact.Mean(period);
+                }
+                if (_seen % period == 0) Rebuild(true);
+                return mean;
+            }
+
+            private void Rebuild(bool periodic)
+            {
+                _sum = _roundoff = 0;
+                // Cancellation rebuilds preserve the flag; only periodic rebuilds reset it.
+                if (periodic) _exactRequired = false;
+                int index = _next;
+                for (int j = 0; j < period; j++)
+                {
+                    double previous = _sum, value = _window[index];
+                    _sum += value;
+                    _roundoff = MeanRoundoff.AfterAddition(_roundoff, _sum);
+                    if (periodic) _exactRequired |= ExactMeanAccumulator.SevereCancellation(previous, value, _sum);
+                    if (++index == period) index = 0;
+                }
+            }
+
+            public void Dispose() => Reset();
+        }
+    }
+
+    private sealed class GeneratedTrueRangeAdjustedState(int length, double multiplier) : IIndicatorState, IDisposable
+    {
+        private readonly TrueRangeAdjustedWindow _window = new(length, multiplier);
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true).Line;
+        public void Reset() => _window.Reset();
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedTrimeanState : IMultiOutputState, IDisposable
+    {
+        private readonly int _capacity;
+        private RollingOrderStatistic? _linear;
+        private readonly PooledRingBuffer<double>? _prices;
+        private OrderStatisticTree _tree = new();
+        internal GeneratedTrimeanState(int length, int count)
+        {
+            length = Math.Max(1, length); _capacity = Math.Min(length, Math.Max(1, count));
+            // Preserve the original backend: equal signed-zero keys retain their first tree value.
+            if (length <= RollingWindowSettings.SmallWindowThreshold) _linear = new(_capacity);
+            else _prices = new(_capacity);
+        }
+        private double Percentile(double percentile)
+        {
+            if (_linear is not null) return _linear.PercentileNearestRank(percentile);
+            var rank = Math.Min(Math.Max((int)Math.Ceiling(percentile / 100 * _tree.Count), 1), _tree.Count);
+            return _tree.SelectByRank(rank);
+        }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            if (_linear is not null) _linear.Add(bar.Close);
+            else { if (_prices!.TryAdd(bar.Close, out var expired)) _tree.Remove(expired); _tree.Insert(bar.Close); }
+            var first = Percentile(25); var median = Percentile(50); var third = Percentile(75);
+            outputs[0] = PriceMean.Of(first, median, median, third); outputs[1] = first; outputs[2] = median; outputs[3] = third;
+        }
+        public void Reset()
+        { if (_linear is not null) { _linear.Dispose(); _linear = new(_capacity); } else { _prices!.Clear(); _tree = new(); } }
+        public void Dispose() { _linear?.Dispose(); _prices?.Dispose(); _tree = new(); }
+    }
+
+    private sealed class GeneratedTargetReturnState : IIndicatorState, IDisposable
+    {
+        private readonly struct Fraction
+        {
+            internal readonly System.Numerics.BigInteger N;
+            private readonly System.Numerics.BigInteger _d;
+            internal System.Numerics.BigInteger D => _d.IsZero ? System.Numerics.BigInteger.One : _d;
+            internal Fraction(System.Numerics.BigInteger numerator, System.Numerics.BigInteger denominator)
+            {
+                if (denominator.IsZero) throw new DivideByZeroException();
+                if (denominator.Sign < 0) { numerator = -numerator; denominator = -denominator; }
+                var gcd = System.Numerics.BigInteger.GreatestCommonDivisor(System.Numerics.BigInteger.Abs(numerator), denominator);
+                N = numerator / gcd; _d = denominator / gcd;
+            }
+            public static Fraction operator +(Fraction a, Fraction b)
+            {
+                var common = System.Numerics.BigInteger.GreatestCommonDivisor(a.D, b.D);
+                return new Fraction(a.N * (b.D / common) + b.N * (a.D / common), a.D * (b.D / common));
+            }
+            public static Fraction operator -(Fraction a, Fraction b) => a + new Fraction(-b.N, b.D);
+            internal Fraction Square() => new(N * N, D * D);
+            internal Fraction Times(int n) => new(N * n, D);
+        }
+        private readonly int _length;
+        private readonly PooledRingBuffer<double> _prices;
+        private readonly PooledRingBuffer<(Fraction Up, Fraction Down)> _returns;
+        private readonly Fraction _benchmark;
+        private readonly Fraction? _beta;
+        private readonly bool _potential;
+        private readonly (Fraction Up, Fraction Down) _padding;
+        private Fraction _up, _down;
+
+        internal GeneratedTargetReturnState(int length, double benchmark, bool potential, int count, double? beta = null)
+        {
+            length = Math.Max(1, length); _length = length;
+            if (MathHelper.IsValueNullOrInfinity(benchmark)) throw new ArgumentOutOfRangeException(nameof(benchmark));
+            var target = Math.Pow(1 + benchmark, length / 360d) - 1;
+            if (MathHelper.IsValueNullOrInfinity(target)) throw new ArgumentOutOfRangeException(nameof(benchmark), "The period benchmark must be finite and real.");
+            _benchmark = new Fraction(ExactVarianceWindow.Units(target), System.Numerics.BigInteger.One << 1074);
+            if (beta.HasValue)
+            {
+                if (MathHelper.IsValueNullOrInfinity(beta.Value)) throw new ArgumentOutOfRangeException(nameof(beta));
+                _beta = new Fraction(ExactVarianceWindow.Units(beta.Value), System.Numerics.BigInteger.One << 1074);
+            }
+            _potential = potential; var capacity = Math.Min(length, Math.Max(1, count)); _prices = new(capacity); _returns = new(capacity);
+            _padding = Contributions(default); Reset();
+        }
+        private (Fraction Up, Fraction Down) Contributions(Fraction value)
+        {
+            if (_beta.HasValue) return (value, default);
+            var difference = value - _benchmark;
+            return difference.N.Sign > 0 ? (difference, default) :
+                (default, _potential ? difference.Square() : new Fraction(-difference.N, difference.D));
+        }
+        public double Update(in Bar bar) => Next(bar.Close, true);
+        internal double Next(double price, bool commit)
+        {
+            var previous = _prices.Count == _length ? _prices[0] : 0;
+            var relative = previous == 0 ? default : new Fraction(ExactVarianceWindow.Units(price) - ExactVarianceWindow.Units(previous), ExactVarianceWindow.Units(previous));
+            var current = Contributions(relative);
+            var expired = _returns.Count == _length ? _returns[0] : _padding;
+            var up = _up + current.Up - expired.Up; var down = _down + current.Down - expired.Down;
+            var result = down.N.IsZero ? 0 : _potential
+                ? ExactPopulationDeviation.RootRatio((up.N * up.N * down.D) << 2148, up.D * up.D * _length * down.N)
+                : ExactMeanAccumulator.UnitRatio((up.N * down.D) << 1074, up.D * down.N);
+            if (_beta is { } beta)
+            {
+                var count = Math.Min(_returns.Count + 1, _length);
+                var excess = new Fraction(up.N, up.D * count) - _benchmark;
+                result = beta.N.IsZero ? 0 : ExactMeanAccumulator.UnitRatio((excess.N * beta.D * beta.N.Sign) << 1074, excess.D * System.Numerics.BigInteger.Abs(beta.N));
+            }
+            if (commit) { _prices.TryAdd(price, out _); _returns.TryAdd(current, out _); _up = up; _down = down; }
+            return result;
+        }
+        public void Reset()
+        { _prices.Clear(); _returns.Clear(); _up = _padding.Up.Times(_length); _down = _padding.Down.Times(_length); }
+        public void Dispose() { _prices.Dispose(); _returns.Dispose(); }
+    }
+
+    private sealed class GeneratedTtmScalperState : IIndicatorState, IDisposable
+    {
+        private double _previous, _previous2, _previous3, _last;
+        private bool _sell;
+        public double Update(in Bar bar)
+        {
+            var sell = _previous < bar.Close && (_previous2 < _previous || _previous3 < _previous);
+            var buy = _previous > bar.Close && (_previous2 > _previous || _previous3 > _previous);
+            if (sell && !_sell) _last = bar.High;
+            else if (buy && _sell) _last = bar.Low;
+            _sell = sell ? true : buy ? false : _sell;
+            _previous3 = _previous2; _previous2 = _previous; _previous = bar.Close;
+            return _last;
+        }
+        public void Reset() { _previous = _previous2 = _previous3 = _last = 0; _sell = false; }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedTurboScalerState : IMultiOutputState, IDisposable
+    {
+        private readonly MacZWindow.Number _alpha;
+        private readonly UnroundedMovingAverage _first, _second;
+        private readonly Range _lineRange, _triggerRange;
+        internal GeneratedTurboScalerState(int length, double alpha)
+        {
+            _alpha = MacZWindow.Number.Of(alpha);
+            _first = new(MovingAvgType.SimpleMovingAverage, length); _second = new(MovingAvgType.SimpleMovingAverage, length);
+            _lineRange = new(length); _triggerRange = new(length);
+        }
+        private MacZWindow.Number Blend(MacZWindow.Number value, MacZWindow.Number mean) => mean + _alpha * (value - mean);
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var value = MacZWindow.Number.Of(bar.Close); var first = _first.Next(value, true); var second = _second.Next(first, true);
+            outputs[0] = _lineRange.Next(value, Blend(value, first), true).Publish();
+            outputs[1] = _triggerRange.Next(first, Blend(first, second), true).Publish();
+        }
+        public void Reset() { _first.Reset(); _second.Reset(); _lineRange.Reset(); _triggerRange.Reset(); }
+        public void Dispose() { Reset(); _first.Dispose(); _second.Dispose(); }
+        private sealed class Range
+        {
+            private readonly int _length; private long _index;
+            private readonly LinkedList<(long Index, MacZWindow.Number Value)> _highs = new(), _lows = new();
+            internal Range(int length) => _length = Math.Max(1, length);
+            private MacZWindow.Number Extreme(LinkedList<(long Index, MacZWindow.Number Value)> deque, MacZWindow.Number value, bool maximum, bool final)
+            {
+                var expiry = _index - _length + 1; var first = deque.First;
+                while (first is not null && first.Value.Index < expiry) first = first.Next;
+                var result = first is null || (maximum ? (value - first.Value.Value).Sign > 0 : (value - first.Value.Value).Sign < 0) ? value : first.Value.Value;
+                if (final)
+                {
+                    while (deque.First is { } old && old.Value.Index < expiry) deque.RemoveFirst();
+                    while (deque.Last is { } last && (maximum ? (last.Value.Value - value).Sign <= 0 : (last.Value.Value - value).Sign >= 0)) deque.RemoveLast();
+                    deque.AddLast((_index, value));
+                }
+                return result;
+            }
+            internal MacZWindow.Number Next(MacZWindow.Number value, MacZWindow.Number blend, bool final)
+            {
+                var high = Extreme(_highs, blend, true, final); var low = Extreme(_lows, blend, false, final); var width = high - low;
+                var result = width.Sign == 0 ? default : (value - low).Divide(width);
+                if (final) _index++; return result;
+            }
+            internal void Reset() { _index = 0; _highs.Clear(); _lows.Clear(); }
+        }
+    }
+
+    private sealed class GeneratedUberTrendState : IIndicatorState, IDisposable
+    {
+        private readonly int _length;
+        private readonly Queue<(MacZWindow.Number Up, MacZWindow.Number Down, MacZWindow.Number UpVolume, MacZWindow.Number DownVolume)> _history = new();
+        private MacZWindow.Number _up, _down, _upVolume, _downVolume, _previousPrice;
+        private bool _started;
+        internal GeneratedUberTrendState(int length) => _length = Math.Max(1, length);
+        public double Update(in Bar bar) => Next(bar.Close, bar.Volume, true);
+        private double Next(double price, double volume, bool final)
+        {
+            Streaming.StreamingInputValidation.Finite(price, nameof(price)); Streaming.StreamingInputValidation.Finite(volume, nameof(volume));
+            var current = MacZWindow.Number.Of(price); var change = _started ? current - _previousPrice : default;
+            var advance = change.Sign > 0 ? change : default; var decline = change.Sign < 0 ? default(MacZWindow.Number) - change : default;
+            var full = _history.Count == _length; var old = full ? _history.Peek() : default;
+            var up = _up + advance - old.Up; var down = _down + decline - old.Down;
+            var upContribution = change.Sign > 0 && up.Sign != 0 ? MacZWindow.Number.Of(volume).Divide(up) : default;
+            var downContribution = change.Sign < 0 && down.Sign != 0 ? MacZWindow.Number.Of(volume).Divide(down) : default;
+            var upVolume = _upVolume + upContribution - old.UpVolume; var downVolume = _downVolume + downContribution - old.DownVolume;
+            var numerator = up * downVolume; var denominator = down * upVolume;
+            // Preserve the nested quotient's defined zero-denominator cases before cross multiplication.
+            var value = down.Sign == 0 || upVolume.Sign == 0 || downVolume.Sign == 0 ? MacZWindow.Number.Of(-1)
+                : (numerator + denominator).Sign == 0 ? default : (numerator - denominator).Divide(numerator + denominator);
+            if (final)
+            {
+                if (full) _history.Dequeue(); _history.Enqueue((advance, decline, upContribution, downContribution));
+                _up = up; _down = down; _upVolume = upVolume; _downVolume = downVolume; _previousPrice = current; _started = true;
+            }
+            return value.Publish();
+        }
+        public void Reset() { _history.Clear(); _up = _down = _upVolume = _downVolume = _previousPrice = default; _started = false; }
+        public void Dispose() => Reset();
     }
 
     private sealed class GeneratedAdaptiveCyberState(int length, double alpha) : IMultiOutputState, IDisposable

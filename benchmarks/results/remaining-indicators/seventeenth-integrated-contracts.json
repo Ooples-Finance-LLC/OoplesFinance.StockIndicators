@@ -1,0 +1,76 @@
+{
+  "types": [
+    "TrendDirectionForceIndex",
+    "TrendAnalysisIndex",
+    "TrendAnalysisIndicator",
+    "TrendDetectionIndex",
+    "Trender",
+    "TrendForceHistogram",
+    "TrendImpulseFilter",
+    "TrendPersistenceRate",
+    "TrendExhaustionIndicator",
+    "TrueRangeAdjustedExponentialMovingAverage",
+    "Trimean",
+    "TreynorRatio",
+    "UpsidePotentialRatio",
+    "TTMScalperIndicator",
+    "TurboScaler",
+    "UberTrendIndicator"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "base_head": "8ea69b761d81b82cc5b706c47b2e871a2342b33b",
+  "combined_input_sha256": "a7c9d24db698baf00fc37aeb0253713726aa37c0d4b73a16f1a1222a26684577",
+  "manifest_sha256": "cd6205001d5352ce64d06d1f87203589d2a18bafd4f875e8dae4138a7ac73b09",
+  "unit_class_counts": {
+    "SharedGeneratedTrendDirectionForceTests": 26,
+    "SharedGeneratedTrendAnalysisTests": 46,
+    "SharedGeneratedTrendDetectionTests": 26,
+    "SharedGeneratedTrenderTests": 24,
+    "SharedGeneratedTrendBreakoutsTests": 42,
+    "SharedGeneratedTrendPersistenceTests": 17,
+    "SharedGeneratedTrendExhaustionTests": 18,
+    "SharedGeneratedTrueRangeAdjustedTests": 23,
+    "SharedGeneratedTrimeanTests": 22,
+    "SharedGeneratedTargetReturnsTests": 44,
+    "SharedGeneratedTtmScalperTests": 7,
+    "SharedGeneratedTurboScalerTests": 24,
+    "SharedGeneratedUberTrendTests": 18
+  },
+  "parity_class_counts": {
+    "RemainingTrendDirectionForceBenchmarkTests": 4,
+    "RemainingTrendAnalysisBenchmarkTests": 8,
+    "RemainingTrendDetectionBenchmarkTests": 4,
+    "RemainingTrenderBenchmarkTests": 4,
+    "RemainingTrendBreakoutsBenchmarkTests": 8,
+    "RemainingTrendPersistenceBenchmarkTests": 4,
+    "RemainingTrendExhaustionBenchmarkTests": 4,
+    "RemainingTrueRangeAdjustedBenchmarkTests": 4,
+    "RemainingTrimeanBenchmarkTests": 4,
+    "RemainingTargetReturnsBenchmarkTests": 8,
+    "RemainingTtmScalperBenchmarkTests": 4,
+    "RemainingTurboScalerBenchmarkTests": 4,
+    "RemainingUberTrendBenchmarkTests": 4
+  },
+  "unique_check_counts": {
+    "unit": 337,
+    "finite_smoothing": 0,
+    "parity": 64,
+    "discovery": 336,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/seventeenth-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/seventeenth-integrated-parity.trx.gz",
+    "benchmarks/results/remaining-indicators/seventeenth-integrated-discovery.trx.gz"
+  ],
+  "production_sha256": "9765fc24cd73e15eb49f03db88b813bd2c0a1479ccf4754566839fe71427bd19",
+  "fixture_sha256": "a2229f40a0de6d5d60ddbfe86651744fb7d079a4f1430e279d3dbadfd4f6467d",
+  "input_repairs": [],
+  "context": "Fresh scoped checks on combined working candidate. Selective commits are not separately rebuilt; source fingerprint identifies tested composition. Earlier numerical repairs retained.",
+  "pending": [
+    "controlled raw timing",
+    "remaining rollout"
+  ]
+}
