@@ -37,23 +37,23 @@ internal static partial class ValuesBarExecution
 
     private static bool IsGeneratedState(IIndicator indicator) =>
         IsDemarkCountState(indicator) ||
-        indicator is GroverLlorensActivator { MaType: null } grover && double.IsFinite(grover.Mult) ||
-        indicator is HampelFilter hampel && double.IsFinite(hampel.ScalingFactor) ||
-        indicator is HawkeyeVolumeIndicator hawkeye && double.IsFinite(hawkeye.Divisor) ||
-        indicator is HerrickPayoffIndex payoff && double.IsFinite(payoff.PointValue) ||
-        indicator is InsyncIndex { MaType: null } insync && double.IsFinite(insync.StdDevMult) && double.IsFinite(insync.Divisor) ||
+        indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
+        indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
+            && adaptiveFilter.FastAlpha >= 0 && adaptiveFilter.FastAlpha <= 1 && adaptiveFilter.SlowAlpha >= 0 && adaptiveFilter.SlowAlpha <= 1 ||
+        indicator is NegativeVolumeDisparityIndicator { MaType: null } disparity && double.IsFinite(disparity.Top) && double.IsFinite(disparity.Bottom) ||
+        indicator is MultiLevelIndicator level && double.IsFinite(level.Factor) ||
+        indicator is MacZVwapIndicator { MaType: null } maczVwap && double.IsFinite(maczVwap.Gamma) ||
+        indicator is MacZIndicator { MaType: null } macz && double.IsFinite(macz.Mult) ||
+        indicator is LogisticCorrelation logistic && double.IsFinite(logistic.K) ||
         indicator is LBRPaintBars { MaType: null } paint && double.IsFinite(paint.AtrMult) ||
         indicator is KaufmanAdaptiveBands bands && double.IsFinite(bands.StdDevFactor) && bands.StdDevFactor >= 0 ||
         indicator is KaufmanBinaryWave wave && double.IsFinite(wave.FastSc) && wave.FastSc >= 0
             && double.IsFinite(wave.SlowSc) && wave.SlowSc >= 0 && double.IsFinite(wave.FilterPct) && wave.FilterPct >= 0 ||
-        indicator is LogisticCorrelation logistic && double.IsFinite(logistic.K) ||
-        indicator is MacZIndicator { MaType: null } macz && double.IsFinite(macz.Mult) ||
-        indicator is MacZVwapIndicator { MaType: null } maczVwap && double.IsFinite(maczVwap.Gamma) ||
-        indicator is MultiLevelIndicator level && double.IsFinite(level.Factor) ||
-        indicator is NegativeVolumeDisparityIndicator { MaType: null } disparity && double.IsFinite(disparity.Top) && double.IsFinite(disparity.Bottom) ||
-        indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
-            && adaptiveFilter.FastAlpha >= 0 && adaptiveFilter.FastAlpha <= 1 && adaptiveFilter.SlowAlpha >= 0 && adaptiveFilter.SlowAlpha <= 1 ||
-        indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
+        indicator is InsyncIndex { MaType: null } insync && double.IsFinite(insync.StdDevMult) && double.IsFinite(insync.Divisor) ||
+        indicator is HerrickPayoffIndex payoff && double.IsFinite(payoff.PointValue) ||
+        indicator is HawkeyeVolumeIndicator hawkeye && double.IsFinite(hawkeye.Divisor) ||
+        indicator is HampelFilter hampel && double.IsFinite(hampel.ScalingFactor) ||
+        indicator is GroverLlorensActivator { MaType: null } grover && double.IsFinite(grover.Mult) ||
         indicator is FXSniperIndicator { MaType: null } sniper && double.IsFinite(sniper.B) ||
         indicator is FastandSlowKurtosisOscillator { MaType: null } kurtosis && double.IsFinite(kurtosis.Ratio) ||
         indicator is FibonacciRetrace { MaType: null } retrace && double.IsFinite(retrace.Factor) ||
@@ -164,12 +164,46 @@ internal static partial class ValuesBarExecution
             or EhlersCorrelationTrendIndicator or EhlersCorrelationCycleIndicator or EhlersCorrelationAngleIndicator or EhlersMarketStateIndicator
             or EhlersHurstCoefficient or EhlersSpearmanRankIndicator
             or EhlersNoiseEliminationTechnology { Length: < int.MaxValue }
-            or Pmo { MaType: null } or PriceMomentumOscillator { MaType: null } or DecisionPointPriceMomentumOscillator
-            or DoubleSmoothedStochastic { MaType: null } or DTOscillator { MaType: null }
-            or DoubleStochasticOscillator { MaType: null } or DMIStochastic { MaType: null }
-            or ChartmillValueIndicator { MaType: null } or CenterOfLinearity or ChopZone { MaType: null }
-            or ConfluenceIndicator { MaType: null }
-            or CoppockCurve { MaType: null } or DerivativeOscillator { MaType: null } or DidiIndex { MaType: null }
+            or EhlersClassicHilbertTransformer or EhlersHilbertTransformer or EhlersHilbertTransformerIndicator
+            or EhlersInstantaneousPhaseIndicator
+            or EhlersHilbertTransformIndicator { IMult: >= double.MinValue and <= double.MaxValue, QMult: >= double.MinValue and <= double.MaxValue }
+            or EhlersInstantaneousTrendlineV1 or EhlersHilbertOscillator or EhlersSineWaveIndicatorV1
+            or EhlersSineWaveIndicatorV2 { Alpha: >= double.MinValue and <= double.MaxValue }
+            or FollowingAdaptiveMovingAverage
+            or EhlersMesaAdaptiveMovingAverage { FastLimit: >= double.MinValue and <= double.MaxValue, SlowLimit: >= double.MinValue and <= double.MaxValue }
+            or EhlersDualDifferentiatorDominantCycle or EhlersHomodyneDominantCycle or EhlersPhaseAccumulationDominantCycle
+            or EhlersSignalToNoiseRatioV1 { MaType: null }
+            or EhlersSignalToNoiseRatioV2 or EhlersAlternateSignalToNoiseRatio or EhlersEnhancedSignalToNoiseRatio
+            or EhlersCycleAmplitude { Delta: >= double.MinValue and <= double.MaxValue }
+            or EhlersTrendExtraction { MaType: null, Delta: >= double.MinValue and <= double.MaxValue }
+            or EhlersEmpiricalModeDecomposition { MaType: null, SecondAverage: null, ThirdAverage: null, Delta: >= double.MinValue and <= double.MaxValue, Fraction: >= double.MinValue and <= double.MaxValue }
+            or EhlersConvolutionIndicator
+            or EhlersPhaseCalculation { MaType: null }
+            or EhlersFourierSeriesAnalysis { Bw: >= double.MinValue and <= double.MaxValue }
+            or EhlersDiscreteFourierTransform or EhlersDiscreteFourierTransformSpectralEstimate
+            or EhlersCombFilterSpectralEstimate { Bw: >= 0 and <= double.MaxValue } or EhlersDominantCycleTunedBypassFilter or EhlersAutoCorrelationReversals { MaType: null }
+            or EhlersMesaPredictIndicatorV1
+            or EhlersMesaPredictIndicatorV2 { MaType: null }
+            or EhlersAnticipateIndicator { MaType: null, Length: <= AnticipateWindow.MaximumLength, Bw: >= double.MinValue and <= double.MaxValue }
+            or EhlersFMDemodulatorIndicator { MaType: null }
+            or SuperSmoother or EhlersSquelchIndicator
+            or EhlersVariableIndexDynamicAverage { MaType: null, SecondAverage: null }
+            or EhlersSwissArmyKnife { Delta: >= 0 and <= double.MaxValue }
+            or EhlersSpectrumDerivedFilterBank { MinLength: < int.MaxValue, MaxLength: < int.MaxValue, Length2: < int.MaxValue }
+            or EhlersRestoringPullIndicator { MaType: null, MinLength: < int.MaxValue, MaxLength: < int.MaxValue, Length2: < int.MaxValue }
+            or ButterworthFilter or InverseFisherTransformCore or EhlersReflex or EhlersTrendflex
+            or ElderForceIndex or MfiCore or WilliamsAD
+            or KlingerSignal or MassIndexCore
+            or ChandeMomentumOscillatorSignal { MaType: null }
+            or MacdLine or MacdSignal or MacdHistogram
+            or AverageDirectionalIndex { MaType: null } or MomentumOscillator { MaType: null }
+            or VolumePriceTrend { MaType: null } or StandardDevation { MaType: MovingAvgType.SimpleMovingAverage } or Vhf
+            or Ama or AdaptiveRsi or AsymmetricalRsi or AsymmetricalRelativeStrengthIndex
+            or AdaptiveRelativeStrengthIndex { MaType: null }
+            or AdaptiveStochastic or ApirineSlowRelativeStrengthIndex { MaType: null }
+            or PoweredKaufmanAdaptiveMovingAverage
+            or AdaptiveTrailingStop { Multiplier: >= double.MinValue and <= double.MaxValue }
+            or AverageAbsoluteErrorNormalization or BelkhayateTiming or BayesianOscillator { MaType: null }
             or AtrTrailingStops { MaType: null, Multiplier: >= double.MinValue and <= double.MaxValue }
             or AverageTrueRangeTrailingStops { MaType: null, Multiplier: >= double.MinValue and <= double.MaxValue }
             or ChandelierExit { MaType: null, Mult: >= double.MinValue and <= double.MaxValue }
@@ -187,50 +221,17 @@ internal static partial class ValuesBarExecution
             or ChandeCompositeMomentumIndex or ChandeForecastOscillator or ChandeKrollRSquaredIndex { MaType: null }
             or ChandeMomentumOscillatorAbsolute or ChandeMomentumOscillatorAbsoluteAverage or ChandeMomentumOscillatorAverage or ChandeMomentumOscillatorAverageDisparityIndex
             or ChandeMomentumOscillatorFilter { MaType: null }
-            or Ama or AdaptiveRsi or AsymmetricalRsi or AsymmetricalRelativeStrengthIndex
-            or AdaptiveRelativeStrengthIndex { MaType: null }
-            or AdaptiveStochastic or ApirineSlowRelativeStrengthIndex { MaType: null }
-            or PoweredKaufmanAdaptiveMovingAverage
-            or AdaptiveTrailingStop { Multiplier: >= double.MinValue and <= double.MaxValue }
-            or AverageAbsoluteErrorNormalization or BelkhayateTiming or BayesianOscillator { MaType: null }
+            or ChartmillValueIndicator { MaType: null } or CenterOfLinearity or ChopZone { MaType: null }
+            or CommoditySelectionIndex { MaType: null } or ConstanceBrownCompositeIndex { MaType: null }
+            or ConfluenceIndicator { MaType: null }
+            or CoppockCurve { MaType: null } or DerivativeOscillator { MaType: null } or DidiIndex { MaType: null }
+            or Pmo { MaType: null } or PriceMomentumOscillator { MaType: null } or DecisionPointPriceMomentumOscillator
+            or DoubleSmoothedStochastic { MaType: null } or DTOscillator { MaType: null }
+            or DoubleStochasticOscillator { MaType: null } or DMIStochastic { MaType: null }
             or CalmarRatio
             or DemandIndex or DemandOscillator { MaType: null }
             or DampingIndex { MaType: null }
             or DetrendedSyntheticPrice
-            or KlingerSignal or MassIndexCore
-            or ChandeMomentumOscillatorSignal { MaType: null }
-            or ElderForceIndex or MfiCore or WilliamsAD
-            or ButterworthFilter or InverseFisherTransformCore or EhlersReflex or EhlersTrendflex
-            or CommoditySelectionIndex { MaType: null } or ConstanceBrownCompositeIndex { MaType: null }
-            or FollowingAdaptiveMovingAverage
-            or EhlersMesaAdaptiveMovingAverage { FastLimit: >= double.MinValue and <= double.MaxValue, SlowLimit: >= double.MinValue and <= double.MaxValue }
-            or EhlersClassicHilbertTransformer or EhlersHilbertTransformer or EhlersHilbertTransformerIndicator
-            or EhlersInstantaneousPhaseIndicator
-            or EhlersHilbertTransformIndicator { IMult: >= double.MinValue and <= double.MaxValue, QMult: >= double.MinValue and <= double.MaxValue }
-            or EhlersInstantaneousTrendlineV1 or EhlersHilbertOscillator or EhlersSineWaveIndicatorV1
-            or EhlersSineWaveIndicatorV2 { Alpha: >= double.MinValue and <= double.MaxValue }
-            or EhlersDualDifferentiatorDominantCycle or EhlersHomodyneDominantCycle or EhlersPhaseAccumulationDominantCycle
-            or EhlersCycleAmplitude { Delta: >= double.MinValue and <= double.MaxValue }
-            or EhlersTrendExtraction { MaType: null, Delta: >= double.MinValue and <= double.MaxValue }
-            or EhlersEmpiricalModeDecomposition { MaType: null, SecondAverage: null, ThirdAverage: null, Delta: >= double.MinValue and <= double.MaxValue, Fraction: >= double.MinValue and <= double.MaxValue }
-            or EhlersFMDemodulatorIndicator { MaType: null }
-            or EhlersMesaPredictIndicatorV1
-            or EhlersMesaPredictIndicatorV2 { MaType: null }
-            or EhlersAnticipateIndicator { MaType: null, Length: <= AnticipateWindow.MaximumLength, Bw: >= double.MinValue and <= double.MaxValue }
-            or EhlersConvolutionIndicator
-            or EhlersPhaseCalculation { MaType: null }
-            or EhlersFourierSeriesAnalysis { Bw: >= double.MinValue and <= double.MaxValue }
-            or EhlersDiscreteFourierTransform or EhlersDiscreteFourierTransformSpectralEstimate
-            or EhlersSpectrumDerivedFilterBank { MinLength: < int.MaxValue, MaxLength: < int.MaxValue, Length2: < int.MaxValue }
-            or EhlersRestoringPullIndicator { MaType: null, MinLength: < int.MaxValue, MaxLength: < int.MaxValue, Length2: < int.MaxValue }
-            or EhlersSignalToNoiseRatioV1 { MaType: null }
-            or EhlersSignalToNoiseRatioV2 or EhlersAlternateSignalToNoiseRatio or EhlersEnhancedSignalToNoiseRatio
-            or SuperSmoother or EhlersSquelchIndicator
-            or EhlersVariableIndexDynamicAverage { MaType: null, SecondAverage: null }
-            or EhlersSwissArmyKnife { Delta: >= 0 and <= double.MaxValue }
-            or EhlersCombFilterSpectralEstimate { Bw: >= 0 and <= double.MaxValue } or EhlersDominantCycleTunedBypassFilter or EhlersAutoCorrelationReversals { MaType: null }
-            or AverageDirectionalIndex { MaType: null } or MomentumOscillator { MaType: null }
-            or VolumePriceTrend { MaType: null } or StandardDevation { MaType: MovingAvgType.SimpleMovingAverage } or Vhf
             or DirectionalTrendIndex { MaType: null }
             or CoralTrendIndicator or CorrectedMovingAverage { MaType: null }
             or CubedWeightedMovingAverage
@@ -264,6 +265,8 @@ internal static partial class ValuesBarExecution
             or GroverLlorensCycleOscillator { MaType: null }
             or HarmonicMeanMovingAverage
             or HalfTrend { MaType: null }
+            or GuppyDistanceIndicator { SecondAverage: null, ThirdAverage: null, FourthAverage: null, FifthAverage: null, Average6Average: null, Average7Average: null, Average8Average: null, Average9Average: null, Average10Average: null, Average11Average: null, Average12Average: null, MaType: null }
+            or GuppyMultipleMovingAverage { SecondAverage: null, ThirdAverage: null, FourthAverage: null, FifthAverage: null, Average6Average: null, Average7Average: null, Average8Average: null, Average9Average: null, Average10Average: null, Average11Average: null, Average12Average: null, Average13Average: null, Average14Average: null, Average15Average: null, Average16Average: null, Average17Average: null, Average18Average: null, Average19Average: null, Average20Average: null, Average21Average: null, Average22Average: null, Average23Average: null, Average24Average: null, Average25Average: null, Average26Average: null, Average27Average: null, Average28Average: null, MaType: null }
             or GuppyCountBackLine { Length: <= 1_073_741_824 }
             or HirashimaSugitaRS { MaType: null }
             or HighLowIndex { MaType: null }
@@ -280,11 +283,8 @@ internal static partial class ValuesBarExecution
             or KaseConvergenceDivergence { MaType: null }
             or KasePeakOscillatorV1
             or KasePeakOscillatorV2 { MaType: null }
-            or LindaRaschke310Oscillator { MaType: null, SecondAverage: null, ThirdAverage: null, FourthAverage: null }
             or KarobeinOscillator { MaType: null } or KwanIndicator { MaType: null }
-            or MacdLine or MacdSignal or MacdHistogram
-            or GuppyDistanceIndicator { SecondAverage: null, ThirdAverage: null, FourthAverage: null, FifthAverage: null, Average6Average: null, Average7Average: null, Average8Average: null, Average9Average: null, Average10Average: null, Average11Average: null, Average12Average: null, MaType: null }
-            or GuppyMultipleMovingAverage { SecondAverage: null, ThirdAverage: null, FourthAverage: null, FifthAverage: null, Average6Average: null, Average7Average: null, Average8Average: null, Average9Average: null, Average10Average: null, Average11Average: null, Average12Average: null, Average13Average: null, Average14Average: null, Average15Average: null, Average16Average: null, Average17Average: null, Average18Average: null, Average19Average: null, Average20Average: null, Average21Average: null, Average22Average: null, Average23Average: null, Average24Average: null, Average25Average: null, Average26Average: null, Average27Average: null, Average28Average: null, MaType: null }
+            or LindaRaschke310Oscillator { MaType: null, SecondAverage: null, ThirdAverage: null, FourthAverage: null }
             or LinearQuadraticConvergenceDivergenceOscillator
             or MotionSmoothnessIndex
             or KurtosisIndicator
@@ -718,20 +718,75 @@ internal static partial class ValuesBarExecution
         EhlersNoiseEliminationTechnology noise => new GeneratedNoiseEliminationState(noise.Length),
         EhlersSpearmanRankIndicator rank => new GeneratedChronologicalSpearmanState(rank.Length),
         EhlersAdaptiveRelativeStrengthIndexV1 rsi => new GeneratedAdaptiveRsiV1State(rsi.CycPart, false),
-        Pmo pmo => new GeneratedPriceMomentumState(pmo.Length, 20, pmo.SignalLength, count, false),
-        PriceMomentumOscillator pmo => new GeneratedPriceMomentumState(pmo.Length1, pmo.Length2, pmo.SignalLength, count, false),
-        DecisionPointPriceMomentumOscillator pmo => new GeneratedPriceMomentumState(checked(Math.Max(1, pmo.Length) * 2 + 7), checked(Math.Max(1, pmo.Length) + 6), 10, count, true),
-        DoubleSmoothedStochastic stochastic => new GeneratedDoubleSmoothedStochasticState(stochastic.Length),
-        DTOscillator oscillator => new GeneratedDtOscillatorState(oscillator.Length),
-        DoubleStochasticOscillator stochastic => new GeneratedDoubleStochasticState(Math.Max(1, stochastic.Length)),
-        DMIStochastic stochastic => new GeneratedDmiStochasticState(Math.Max(1, stochastic.Length), count),
-        ChartmillValueIndicator chart => new GeneratedChartmillState(chart.Length, count),
-        CenterOfLinearity center => new GeneratedCenterLinearityState(center.Length),
-        ChopZone chop => new GeneratedChopZoneState(chop.Length, count),
-        ConfluenceIndicator confluence => new GeneratedConfluenceState(confluence.Length),
-        CoppockCurve curve => new GeneratedCoppockState(curve.Length, count),
-        DerivativeOscillator derivative => new GeneratedDerivativeState(derivative.Length),
-        DidiIndex didi => new GeneratedDidiState(didi.ShortLength, didi.MediumLength, didi.LongLength, count),
+        EhlersClassicHilbertTransformer transformer => new GeneratedClassicHilbertState(transformer.Length1, transformer.Length2),
+        EhlersHilbertTransformer transformer => new GeneratedHilbertTransformerState(transformer.Length1, transformer.Length2, 1, false),
+        EhlersHilbertTransformerIndicator transformer => new GeneratedHilbertTransformerState(transformer.Length1, transformer.Length2, transformer.Length3, true),
+        EhlersHilbertTransformIndicator transform => new GeneratedHilbertPhaseState(transform.Length, transform.IMult, transform.QMult),
+        EhlersInstantaneousPhaseIndicator phase => new GeneratedInstantaneousPhaseState(phase.Length1, phase.Length2),
+        EhlersSineWaveIndicatorV1 => new GeneratedMamaDerivedState(0),
+        EhlersHilbertOscillator => new GeneratedMamaDerivedState(1),
+        EhlersInstantaneousTrendlineV1 => new GeneratedMamaDerivedState(2),
+        EhlersSineWaveIndicatorV2 sine => new GeneratedCyberSineState(sine.Length, sine.Alpha),
+        FollowingAdaptiveMovingAverage => new GeneratedFollowingMamaState(),
+        EhlersMesaAdaptiveMovingAverage mama => new GeneratedMamaOutputsState(mama.FastLimit, mama.SlowLimit),
+        EhlersDualDifferentiatorDominantCycle cycle => new GeneratedHilbertCycleState(cycle.Length1, cycle.Length2, cycle.Length3, 1, 0),
+        EhlersHomodyneDominantCycle cycle => new GeneratedHilbertCycleState(cycle.Length1, cycle.Length2, cycle.Length3, 1, 1),
+        EhlersPhaseAccumulationDominantCycle cycle => new GeneratedHilbertCycleState(cycle.Length1, cycle.Length2, cycle.Length3, cycle.Length4, 2),
+        EhlersSignalToNoiseRatioV1 noise => new GeneratedHilbertNoiseState(noise.Length),
+        EhlersSignalToNoiseRatioV2 noise => new GeneratedMamaNoiseState(noise.Length, 1),
+        EhlersAlternateSignalToNoiseRatio noise => new GeneratedMamaNoiseState(noise.Length, 0),
+        EhlersEnhancedSignalToNoiseRatio noise => new GeneratedEnhancedMamaNoiseState(noise.Length),
+        EhlersCycleAmplitude amplitude => new GeneratedCycleAmplitudeState(amplitude.Length, amplitude.Delta, count),
+        EhlersTrendExtraction trend => new GeneratedTrendExtractionState(trend.Length, trend.Delta),
+        EhlersEmpiricalModeDecomposition decomposition => new GeneratedEmpiricalDecompositionState(decomposition.Length1, decomposition.Length2, decomposition.Delta, decomposition.Fraction),
+        EhlersPhaseCalculation phase => new GeneratedFourierPhaseState(phase.Length),
+        EhlersConvolutionIndicator convolution => new GeneratedEhlersConvolutionState(convolution.Length1, convolution.Length2, convolution.Length3),
+        EhlersFourierSeriesAnalysis fourier => new GeneratedFourierSeriesState(fourier.Length, fourier.Bw),
+        EhlersDiscreteFourierTransform fourier => new GeneratedDiscreteFourierState(fourier.MinLength, fourier.MaxLength, fourier.Length),
+        EhlersDiscreteFourierTransformSpectralEstimate spectrum => new GeneratedDftSpectrumState(spectrum.Length1, spectrum.Length2),
+        EhlersAutoCorrelationReversals reversal => new GeneratedAutocorrelationReversalState(reversal.Length1, reversal.Length2, reversal.Length3),
+        EhlersCombFilterSpectralEstimate comb => new GeneratedCombSpectrumState(comb.Length1, comb.Length2, comb.Bw),
+        EhlersDominantCycleTunedBypassFilter tuned => new GeneratedTunedBypassState(tuned.MinLength, tuned.MaxLength, Math.Max(3, tuned.Length1), tuned.Length2),
+        EhlersMesaPredictIndicatorV1 mesa => new GeneratedMesaPredictV1State(mesa.Length1, mesa.Length2, mesa.LowerLength, mesa.UpperLength),
+        EhlersMesaPredictIndicatorV2 mesa => new GeneratedMesaPredictV2State(mesa.Length1, mesa.Length2, mesa.Length3, mesa.Length4),
+        EhlersAnticipateIndicator anticipate => new GeneratedAnticipateState(anticipate.Length, anticipate.Bw),
+        EhlersFMDemodulatorIndicator demodulator => new GeneratedFmDemodulatorState(demodulator.FastLength, demodulator.SlowLength),
+        SuperSmoother smoother => new GeneratedSuperSmootherAliasState(smoother.Length),
+        EhlersVariableIndexDynamicAverage => new GeneratedEhlersVidyaState(),
+        EhlersSquelchIndicator squelch => new GeneratedSquelchState(squelch.Length1, squelch.Length2, squelch.Length3),
+        EhlersSwissArmyKnife knife => new GeneratedSwissArmyState(knife.Length, knife.Delta),
+        EhlersSpectrumDerivedFilterBank bank => new GeneratedSpectrumBankState(bank.MinLength, bank.MaxLength, bank.Length1, bank.Length2),
+        EhlersRestoringPullIndicator pull => new GeneratedRestoringPullState(pull.MinLength, pull.MaxLength, pull.Length1, pull.Length2),
+        ButterworthFilter filter => new GeneratedTwoPoleState(filter.Length, 0),
+        InverseFisherTransformCore => new GeneratedInverseRsiFisherState(5, 9, count),
+        EhlersReflex filter => new GeneratedTrendflexState(filter.Length, true),
+        EhlersTrendflex filter => new GeneratedTrendflexState(filter.Length, false),
+        ElderForceIndex force => new GeneratedForceState(force.Length),
+        MfiCore flow => new GeneratedMoneyFlowState(flow.Length, count),
+        WilliamsAD => new GeneratedWilliamsAccumulationState(),
+        KlingerSignal signal => new GeneratedKlingerSignalState(signal.FastLength, signal.SlowLength, signal.SignalLength),
+        ChandeMomentumOscillatorSignal signal => new GeneratedChandeSignalState(signal.Length, count, signal.SignalLength),
+        MassIndexCore mass => new GeneratedMassState(21, mass.Length, count),
+        MacdLine oscillator => new GeneratedEmaGapSignalState(oscillator.FastLength, oscillator.SlowLength, 9),
+        MacdSignal oscillator => new GeneratedMacdAliasState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength, 1),
+        MacdHistogram oscillator => new GeneratedMacdAliasState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength, 2),
+        AverageDirectionalIndex direction => new GeneratedDirectionalState(direction.Length, count),
+        MomentumOscillator momentum => new GeneratedMomentumState(Math.Max(1, momentum.Length), count),
+        VolumePriceTrend volume => new GeneratedVolumeTrendState(volume.Length),
+        StandardDevation deviation => new GeneratedStandardDeviationAliasState(Math.Max(1, deviation.Length), count),
+        Vhf filter => new GeneratedVerticalHorizontalState(filter.Length, count),
+        Ama average => new GeneratedAdaptiveRangeState(average.Length),
+        AdaptiveRsi => new GeneratedAdaptivePriceRsiState(14, count),
+        AdaptiveRelativeStrengthIndex average => new GeneratedAdaptivePriceRsiState(Math.Max(1, average.Length), count),
+        AsymmetricalRsi oscillator => new GeneratedAsymmetricRsiState(oscillator.UpLength, count),
+        AsymmetricalRelativeStrengthIndex oscillator => new GeneratedAsymmetricRsiState(oscillator.Length, count),
+        AdaptiveStochastic oscillator => new GeneratedAdaptiveStochasticState(oscillator.MinLength, oscillator.MaxLength),
+        ApirineSlowRelativeStrengthIndex oscillator => new GeneratedApirineRsiState(oscillator.Length, oscillator.SmoothLength, count),
+        PoweredKaufmanAdaptiveMovingAverage average => new GeneratedPoweredKaufmanState(average.Length),
+        AdaptiveTrailingStop stop => new GeneratedAdaptiveStopState(stop.Length, stop.Multiplier),
+        AverageAbsoluteErrorNormalization normalization => new GeneratedAbsoluteErrorState(normalization.Length),
+        BelkhayateTiming => new GeneratedBelkhayateState(),
+        BayesianOscillator oscillator => new GeneratedBayesianState(oscillator.Length),
         AtrTrailingStops stop => new GeneratedAtrStopsState(stop.Length, stop.Multiplier, count),
         AverageTrueRangeTrailingStops stop => new GeneratedAtrStopsState(stop.Length, stop.Multiplier, count),
         ChandelierExit stop => new GeneratedChandelierAliasState(stop.Length, stop.Mult, false),
@@ -755,79 +810,27 @@ internal static partial class ValuesBarExecution
         ChandeMomentumOscillatorAverage => new GeneratedChandeAverageState(count, false),
         ChandeMomentumOscillatorAverageDisparityIndex => new GeneratedChandeDisparityState(),
         ChandeMomentumOscillatorFilter oscillator => new GeneratedChandeFilterState(Math.Max(1, oscillator.Length), count),
-        Ama average => new GeneratedAdaptiveRangeState(average.Length),
-        AdaptiveRsi => new GeneratedAdaptivePriceRsiState(14, count),
-        AdaptiveRelativeStrengthIndex average => new GeneratedAdaptivePriceRsiState(Math.Max(1, average.Length), count),
-        AsymmetricalRsi oscillator => new GeneratedAsymmetricRsiState(oscillator.UpLength, count),
-        AsymmetricalRelativeStrengthIndex oscillator => new GeneratedAsymmetricRsiState(oscillator.Length, count),
-        AdaptiveStochastic oscillator => new GeneratedAdaptiveStochasticState(oscillator.MinLength, oscillator.MaxLength),
-        ApirineSlowRelativeStrengthIndex oscillator => new GeneratedApirineRsiState(oscillator.Length, oscillator.SmoothLength, count),
-        PoweredKaufmanAdaptiveMovingAverage average => new GeneratedPoweredKaufmanState(average.Length),
-        AdaptiveTrailingStop stop => new GeneratedAdaptiveStopState(stop.Length, stop.Multiplier),
-        AverageAbsoluteErrorNormalization normalization => new GeneratedAbsoluteErrorState(normalization.Length),
-        BelkhayateTiming => new GeneratedBelkhayateState(),
-        BayesianOscillator oscillator => new GeneratedBayesianState(oscillator.Length),
+        ChartmillValueIndicator chart => new GeneratedChartmillState(chart.Length, count),
+        CenterOfLinearity center => new GeneratedCenterLinearityState(center.Length),
+        ChopZone chop => new GeneratedChopZoneState(chop.Length, count),
+        CommoditySelectionIndex commodity => new GeneratedCommoditySelectionState(commodity.Length),
+        ConstanceBrownCompositeIndex brown => new GeneratedBrownCompositeState(brown),
+        ConfluenceIndicator confluence => new GeneratedConfluenceState(confluence.Length),
+        CoppockCurve curve => new GeneratedCoppockState(curve.Length, count),
+        DerivativeOscillator derivative => new GeneratedDerivativeState(derivative.Length),
+        DidiIndex didi => new GeneratedDidiState(didi.ShortLength, didi.MediumLength, didi.LongLength, count),
+        Pmo pmo => new GeneratedPriceMomentumState(pmo.Length, 20, pmo.SignalLength, count, false),
+        PriceMomentumOscillator pmo => new GeneratedPriceMomentumState(pmo.Length1, pmo.Length2, pmo.SignalLength, count, false),
+        DecisionPointPriceMomentumOscillator pmo => new GeneratedPriceMomentumState(checked(Math.Max(1, pmo.Length) * 2 + 7), checked(Math.Max(1, pmo.Length) + 6), 10, count, true),
+        DoubleSmoothedStochastic stochastic => new GeneratedDoubleSmoothedStochasticState(stochastic.Length),
+        DTOscillator oscillator => new GeneratedDtOscillatorState(oscillator.Length),
+        DoubleStochasticOscillator stochastic => new GeneratedDoubleStochasticState(Math.Max(1, stochastic.Length)),
+        DMIStochastic stochastic => new GeneratedDmiStochasticState(Math.Max(1, stochastic.Length), count),
         CalmarRatio ratio => new GeneratedCalmarState(ratio.Length),
         DemandIndex => new GeneratedDemandIndexState(),
         DemandOscillator => new GeneratedDemandOscillatorState(),
         DampingIndex damping => new GeneratedDampingState(damping.Length, count),
         DetrendedSyntheticPrice synthetic => new GeneratedSyntheticPriceState(synthetic.Length),
-        KlingerSignal signal => new GeneratedKlingerSignalState(signal.FastLength, signal.SlowLength, signal.SignalLength),
-        ChandeMomentumOscillatorSignal signal => new GeneratedChandeSignalState(signal.Length, count, signal.SignalLength),
-        MassIndexCore mass => new GeneratedMassState(21, mass.Length, count),
-        ElderForceIndex force => new GeneratedForceState(force.Length),
-        MfiCore flow => new GeneratedMoneyFlowState(flow.Length, count),
-        WilliamsAD => new GeneratedWilliamsAccumulationState(),
-        ButterworthFilter filter => new GeneratedTwoPoleState(filter.Length, 0),
-        InverseFisherTransformCore => new GeneratedInverseRsiFisherState(5, 9, count),
-        EhlersReflex filter => new GeneratedTrendflexState(filter.Length, true),
-        EhlersTrendflex filter => new GeneratedTrendflexState(filter.Length, false),
-        CommoditySelectionIndex commodity => new GeneratedCommoditySelectionState(commodity.Length),
-        ConstanceBrownCompositeIndex brown => new GeneratedBrownCompositeState(brown),
-        FollowingAdaptiveMovingAverage => new GeneratedFollowingMamaState(),
-        EhlersMesaAdaptiveMovingAverage mama => new GeneratedMamaOutputsState(mama.FastLimit, mama.SlowLimit),
-        EhlersClassicHilbertTransformer transformer => new GeneratedClassicHilbertState(transformer.Length1, transformer.Length2),
-        EhlersHilbertTransformer transformer => new GeneratedHilbertTransformerState(transformer.Length1, transformer.Length2, 1, false),
-        EhlersHilbertTransformerIndicator transformer => new GeneratedHilbertTransformerState(transformer.Length1, transformer.Length2, transformer.Length3, true),
-        EhlersHilbertTransformIndicator transform => new GeneratedHilbertPhaseState(transform.Length, transform.IMult, transform.QMult),
-        EhlersInstantaneousPhaseIndicator phase => new GeneratedInstantaneousPhaseState(phase.Length1, phase.Length2),
-        EhlersSineWaveIndicatorV1 => new GeneratedMamaDerivedState(0),
-        EhlersHilbertOscillator => new GeneratedMamaDerivedState(1),
-        EhlersInstantaneousTrendlineV1 => new GeneratedMamaDerivedState(2),
-        EhlersSineWaveIndicatorV2 sine => new GeneratedCyberSineState(sine.Length, sine.Alpha),
-        EhlersDualDifferentiatorDominantCycle cycle => new GeneratedHilbertCycleState(cycle.Length1, cycle.Length2, cycle.Length3, 1, 0),
-        EhlersHomodyneDominantCycle cycle => new GeneratedHilbertCycleState(cycle.Length1, cycle.Length2, cycle.Length3, 1, 1),
-        EhlersPhaseAccumulationDominantCycle cycle => new GeneratedHilbertCycleState(cycle.Length1, cycle.Length2, cycle.Length3, cycle.Length4, 2),
-        EhlersCycleAmplitude amplitude => new GeneratedCycleAmplitudeState(amplitude.Length, amplitude.Delta, count),
-        EhlersTrendExtraction trend => new GeneratedTrendExtractionState(trend.Length, trend.Delta),
-        EhlersEmpiricalModeDecomposition decomposition => new GeneratedEmpiricalDecompositionState(decomposition.Length1, decomposition.Length2, decomposition.Delta, decomposition.Fraction),
-        EhlersFMDemodulatorIndicator demodulator => new GeneratedFmDemodulatorState(demodulator.FastLength, demodulator.SlowLength),
-        EhlersMesaPredictIndicatorV1 mesa => new GeneratedMesaPredictV1State(mesa.Length1, mesa.Length2, mesa.LowerLength, mesa.UpperLength),
-        EhlersMesaPredictIndicatorV2 mesa => new GeneratedMesaPredictV2State(mesa.Length1, mesa.Length2, mesa.Length3, mesa.Length4),
-        EhlersAnticipateIndicator anticipate => new GeneratedAnticipateState(anticipate.Length, anticipate.Bw),
-        EhlersPhaseCalculation phase => new GeneratedFourierPhaseState(phase.Length),
-        EhlersConvolutionIndicator convolution => new GeneratedEhlersConvolutionState(convolution.Length1, convolution.Length2, convolution.Length3),
-        EhlersFourierSeriesAnalysis fourier => new GeneratedFourierSeriesState(fourier.Length, fourier.Bw),
-        EhlersDiscreteFourierTransform fourier => new GeneratedDiscreteFourierState(fourier.MinLength, fourier.MaxLength, fourier.Length),
-        EhlersDiscreteFourierTransformSpectralEstimate spectrum => new GeneratedDftSpectrumState(spectrum.Length1, spectrum.Length2),
-        EhlersSpectrumDerivedFilterBank bank => new GeneratedSpectrumBankState(bank.MinLength, bank.MaxLength, bank.Length1, bank.Length2),
-        EhlersRestoringPullIndicator pull => new GeneratedRestoringPullState(pull.MinLength, pull.MaxLength, pull.Length1, pull.Length2),
-        EhlersSignalToNoiseRatioV1 noise => new GeneratedHilbertNoiseState(noise.Length),
-        EhlersSignalToNoiseRatioV2 noise => new GeneratedMamaNoiseState(noise.Length, 1),
-        EhlersAlternateSignalToNoiseRatio noise => new GeneratedMamaNoiseState(noise.Length, 0),
-        EhlersEnhancedSignalToNoiseRatio noise => new GeneratedEnhancedMamaNoiseState(noise.Length),
-        SuperSmoother smoother => new GeneratedSuperSmootherAliasState(smoother.Length),
-        EhlersVariableIndexDynamicAverage => new GeneratedEhlersVidyaState(),
-        EhlersSquelchIndicator squelch => new GeneratedSquelchState(squelch.Length1, squelch.Length2, squelch.Length3),
-        EhlersSwissArmyKnife knife => new GeneratedSwissArmyState(knife.Length, knife.Delta),
-        EhlersAutoCorrelationReversals reversal => new GeneratedAutocorrelationReversalState(reversal.Length1, reversal.Length2, reversal.Length3),
-        EhlersCombFilterSpectralEstimate comb => new GeneratedCombSpectrumState(comb.Length1, comb.Length2, comb.Bw),
-        EhlersDominantCycleTunedBypassFilter tuned => new GeneratedTunedBypassState(tuned.MinLength, tuned.MaxLength, Math.Max(3, tuned.Length1), tuned.Length2),
-        AverageDirectionalIndex direction => new GeneratedDirectionalState(direction.Length, count),
-        MomentumOscillator momentum => new GeneratedMomentumState(Math.Max(1, momentum.Length), count),
-        VolumePriceTrend volume => new GeneratedVolumeTrendState(volume.Length),
-        StandardDevation deviation => new GeneratedStandardDeviationAliasState(Math.Max(1, deviation.Length), count),
-        Vhf filter => new GeneratedVerticalHorizontalState(filter.Length, count),
         DirectionalTrendIndex trend => new GeneratedDirectionalTrendState(trend.Length, count),
         CoralTrendIndicator coral => new GeneratedCoralTrendState(coral.Length),
         CorrectedMovingAverage corrected => new GeneratedCorrectedAverageState(corrected.Length),
@@ -886,6 +889,8 @@ internal static partial class ValuesBarExecution
         HarmonicMeanMovingAverage harmonic => new GeneratedHarmonicState(harmonic.Length, count),
         HalfTrend trend => new GeneratedHalfTrendState(trend.Length),
         HawkeyeVolumeIndicator hawkeye => new GeneratedHawkeyeState(hawkeye.Divisor),
+        GuppyDistanceIndicator guppy => new GeneratedGuppyDistanceState([guppy.Length1, guppy.Length2, guppy.Length3, guppy.Length4, guppy.Length5, guppy.Length6, guppy.Length7, guppy.Length8, guppy.Length9, guppy.Length10, guppy.Length11, guppy.Length12]),
+        GuppyMultipleMovingAverage guppy => new GeneratedGuppyMultipleState([guppy.Length1, guppy.Length2, guppy.Length3, guppy.Length5, guppy.Length7, guppy.Length9, guppy.Length10, guppy.Length11, guppy.Length12, guppy.Length13, guppy.Length14, guppy.Length15, guppy.Length16, guppy.Length18, guppy.Length19, guppy.Length21, guppy.Length22, guppy.Length23, guppy.Length25, guppy.Length26, 52, 55, 58, 61, 64, 67, 70]),
         GuppyCountBackLine countBack => new GeneratedCountBackState(countBack.Length, count),
         HirashimaSugitaRS bands => new GeneratedHirashimaState(bands.Length),
         HerrickPayoffIndex payoff => new GeneratedHerrickState(payoff.PointValue),
@@ -904,17 +909,12 @@ internal static partial class ValuesBarExecution
         KaseConvergenceDivergence kase => new GeneratedKaseConvergenceState(kase.Length1, kase.Length2, kase.Length3),
         KasePeakOscillatorV1 peak => new GeneratedKasePeakV1State(peak.Length, peak.SmoothLength),
         KasePeakOscillatorV2 peak => new GeneratedKasePeakV2State(peak.Length),
-        LBRPaintBars paint => new GeneratedLbrPaintState(paint.Length, paint.LbLength, paint.AtrMult),
-        LindaRaschke310Oscillator linda => new GeneratedLindaState(linda.FastLength, linda.SlowLength, linda.SmoothLength, count),
         KaufmanAdaptiveBands bands => new GeneratedKaufmanBandsState(bands.Length, bands.StdDevFactor),
         KaufmanBinaryWave wave => new GeneratedKaufmanBinaryState(wave.Length, wave.FastSc, wave.SlowSc, wave.FilterPct),
         KarobeinOscillator oscillator => new GeneratedKarobeinState(oscillator.Length),
         KwanIndicator kwan => new GeneratedKwanState(kwan.Length, kwan.SmoothLength),
-        MacdLine oscillator => new GeneratedEmaGapSignalState(oscillator.FastLength, oscillator.SlowLength, 9),
-        MacdSignal oscillator => new GeneratedMacdAliasState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength, 1),
-        MacdHistogram oscillator => new GeneratedMacdAliasState(oscillator.FastLength, oscillator.SlowLength, oscillator.SignalLength, 2),
-        GuppyDistanceIndicator guppy => new GeneratedGuppyDistanceState([guppy.Length1, guppy.Length2, guppy.Length3, guppy.Length4, guppy.Length5, guppy.Length6, guppy.Length7, guppy.Length8, guppy.Length9, guppy.Length10, guppy.Length11, guppy.Length12]),
-        GuppyMultipleMovingAverage guppy => new GeneratedGuppyMultipleState([guppy.Length1, guppy.Length2, guppy.Length3, guppy.Length5, guppy.Length7, guppy.Length9, guppy.Length10, guppy.Length11, guppy.Length12, guppy.Length13, guppy.Length14, guppy.Length15, guppy.Length16, guppy.Length18, guppy.Length19, guppy.Length21, guppy.Length22, guppy.Length23, guppy.Length25, guppy.Length26, 52, 55, 58, 61, 64, 67, 70]),
+        LBRPaintBars paint => new GeneratedLbrPaintState(paint.Length, paint.LbLength, paint.AtrMult),
+        LindaRaschke310Oscillator linda => new GeneratedLindaState(linda.FastLength, linda.SlowLength, linda.SmoothLength, count),
         LinearQuadraticConvergenceDivergenceOscillator oscillator => new GeneratedLinearQuadraticState(oscillator.Length),
         LogisticCorrelation logistic => new GeneratedLogisticState(logistic.Length, logistic.K, count),
         MotionSmoothnessIndex motion => new GeneratedMotionSmoothnessState(motion.Length),
@@ -983,6 +983,16 @@ internal static partial class ValuesBarExecution
         RecursiveStochastic stochastic => new GeneratedRecursiveStochasticState(stochastic.Length, stochastic.Alpha),
         RelativeVigorIndex vigor => new GeneratedRelativeVigorState(vigor.Length, count),
         Repulse repulse => new GeneratedRepulseState(repulse.Length),
+        TimePriceIndicator sharp => new GeneratedTimePriceState(sharp.Length, count),
+        TFSMboIndicator tfs => new GeneratedTfsPairState(tfs.FastLength, tfs.SlowLength, tfs.SignalLength, count, false),
+        TFSMboPercentagePriceOscillator => new GeneratedTfsPairState(25, 200, 18, count, true),
+        TrendAnalysisIndex trend => new GeneratedTrendAnalysisIndexState(trend.Length1, trend.Length2),
+        TrendAnalysisIndicator trend => new GeneratedTrendAnalysisIndicatorState(trend.Length1, trend.Length2),
+        TrendDetectionIndex trend => new GeneratedTrendDetectionState(trend.Length1, trend.Length2, count),
+        Trender trend => new GeneratedTrenderState(trend.Length, trend.AtrMult),
+        TrendExhaustionIndicator trend => new GeneratedTrendExhaustionState(trend.Length, count),
+        Trimean rank => new GeneratedTrimeanState(rank.Length, count),
+        TurboScaler scaler => new GeneratedTurboScalerState(scaler.Length, 0.5),
         RangeIdentifier => new GeneratedRangeIdentifierState(),
         RatioOchlAverager => new GeneratedRatioOchlState(),
         RangeActionVerificationIndex ravi => new GeneratedRaviState(ravi.FastLength, ravi.SlowLength, count),
@@ -1021,27 +1031,17 @@ internal static partial class ValuesBarExecution
         StrengthOfMovement sharp => new GeneratedMovementStrengthState(sharp.Length1, sharp.Length2),
         SuperTrend sharp => new GeneratedSuperTrendState(sharp.Length),
         SwingIndex sharp => new GeneratedSwingIndexState(sharp.LimitMove),
-        TimePriceIndicator sharp => new GeneratedTimePriceState(sharp.Length, count),
         TickLineMomentumOscillator sharp => new GeneratedTickLineState(sharp.Length, count),
         TFSTetherLineIndicator sharp => new GeneratedTetherLineState(sharp.Length, count),
-        TFSMboIndicator tfs => new GeneratedTfsPairState(tfs.FastLength, tfs.SlowLength, tfs.SignalLength, count, false),
-        TFSMboPercentagePriceOscillator => new GeneratedTfsPairState(25, 200, 18, count, true),
         TopsAndBottomsFinder sharp => new GeneratedTopsBottomsState(sharp.Length),
         TrendDirectionForceIndex sharp => new GeneratedTrendDirectionForceState(sharp.Length1, sharp.Length2),
-        TrendAnalysisIndex trend => new GeneratedTrendAnalysisIndexState(trend.Length1, trend.Length2),
-        TrendAnalysisIndicator trend => new GeneratedTrendAnalysisIndicatorState(trend.Length1, trend.Length2),
-        TrendDetectionIndex trend => new GeneratedTrendDetectionState(trend.Length1, trend.Length2, count),
-        Trender trend => new GeneratedTrenderState(trend.Length, trend.AtrMult),
         TrendForceHistogram trend => new GeneratedTrendForceHistogramState(trend.Length, count),
         TrendImpulseFilter trend => new GeneratedTrendImpulseState(trend.Length1, trend.Length2, count),
         TrendPersistenceRate trend => new GeneratedTrendPersistenceState(trend.Length, count),
-        TrendExhaustionIndicator trend => new GeneratedTrendExhaustionState(trend.Length, count),
         TrueRangeAdjustedExponentialMovingAverage trend => new GeneratedTrueRangeAdjustedState(trend.Length, trend.Mult),
-        Trimean rank => new GeneratedTrimeanState(rank.Length, count),
         TreynorRatio ratio => new GeneratedTargetReturnState(ratio.Length, ratio.Bmk, false, count, ratio.Beta),
         UpsidePotentialRatio ratio => new GeneratedTargetReturnState(ratio.Length, ratio.Bmk, true, count),
         TTMScalperIndicator => new GeneratedTtmScalperState(),
-        TurboScaler scaler => new GeneratedTurboScalerState(scaler.Length, 0.5),
         UberTrendIndicator trend => new GeneratedUberTrendState(trend.Length),
         VaradiOscillator oscillator => new GeneratedVaradiState(oscillator.Length),
         UhlMaCrossoverSystem crossover => new GeneratedUhlState(Math.Max(1, crossover.Length), count),
@@ -3860,6 +3860,84 @@ internal static partial class ValuesBarExecution
         public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true);
     }
 
+    // Both deviation batch facades follow SmaCpuKernel.ProcessGuarded.
+    // The streaming SMA has different cancellation fallback rounding.
+    private sealed class GeneratedStandardDeviationAliasState(int period, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.RollingStandardDeviation? _line = period <= count ? new(period) : null;
+        private readonly double[] _window = period > 1 && period <= count ? new double[period] : [];
+        private int _seen, _next;
+        private double _sum, _roundoff;
+        private bool _exactRequired;
+
+        public void Reset()
+        {
+            _line?.Reset();
+            Array.Clear(_window, 0, _window.Length);
+            _seen = _next = 0;
+            _sum = _roundoff = 0;
+            _exactRequired = false;
+        }
+
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            double value = _line?.Next(bar.Close, true) ?? 0;
+            outputs[0] = value;
+            if (_window.Length == 0) { outputs[1] = period == 1 ? value : 0; return; }
+
+            double expired = _window[_next];
+            _window[_next] = value;
+            if (++_next == period) _next = 0;
+            double previous = _sum;
+            _sum += value;
+            _roundoff = MeanRoundoff.AfterAddition(_roundoff, _sum);
+            _exactRequired |= ExactMeanAccumulator.SevereCancellation(previous, value, _sum);
+            if (_seen >= period)
+            {
+                previous = _sum;
+                _sum -= expired;
+                _roundoff = MeanRoundoff.AfterAddition(_roundoff, _sum);
+                _exactRequired |= ExactMeanAccumulator.SevereCancellation(previous, -expired, _sum);
+                if (Math.Abs(_sum) <= 1e-4 * Math.Max(Math.Abs(expired), Math.Abs(value)))
+                    Rebuild(false);
+            }
+            _seen++;
+            double mean = _seen >= period ? _sum / period : 0;
+            if (_seen >= period && (_exactRequired || MeanRoundoff.RequiresExact(_sum, period, _roundoff)))
+            {
+                var exact = new ExactMeanAccumulator();
+                int index = _next;
+                for (int j = 0; j < period; j++)
+                {
+                    exact.Add(_window[index]);
+                    if (++index == period) index = 0;
+                }
+                mean = exact.Mean(period);
+            }
+            outputs[1] = mean;
+            if (_seen % period == 0) Rebuild(true);
+        }
+
+        private void Rebuild(bool periodic)
+        {
+            _sum = _roundoff = 0;
+            // Cancellation rebuilds preserve the flag; only periodic rebuilds reset it.
+            if (periodic) _exactRequired = false;
+            int index = _next;
+            for (int j = 0; j < period; j++)
+            {
+                double previous = _sum, value = _window[index];
+                _sum += value;
+                _roundoff = MeanRoundoff.AfterAddition(_roundoff, _sum);
+                if (periodic) _exactRequired |= ExactMeanAccumulator.SevereCancellation(previous, value, _sum);
+                if (++index == period) index = 0;
+            }
+        }
+
+        public void Dispose() => _line?.Dispose();
+    }
+
+
     private sealed class GeneratedOrderedDeviationState(int period, int count) : IMultiOutputState, IDisposable
     {
         private readonly Streaming.RollingStandardDeviation? _line = period <= count ? new(period) : null;
@@ -4224,159 +4302,493 @@ internal static partial class ValuesBarExecution
         public void Dispose() => _values.Dispose();
     }
 
-    private sealed class GeneratedPriceMomentumState(int first, int second, int signal, int count, bool histogram) : IMultiOutputState, IDisposable
+    private sealed class GeneratedClassicHilbertState(int upper, int lower) : IMultiOutputState, IDisposable
     {
-        private readonly PriceMomentumWindow _window = new(MovingAvgType.ExponentialMovingAverage, first, second, signal, count);
+        private readonly ClassicHilbertWindow _window = new(upper, lower);
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs)
         {
             var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Value; outputs[1] = point.Signal;
-            if (histogram) outputs[2] = point.Histogram;
+            outputs[0] = point.Real;
+            outputs[1] = point.Imaginary;
         }
-        public void Dispose() => _window.Dispose();
+        public void Dispose() => _window.Reset();
     }
 
-    private sealed class GeneratedDoubleSmoothedStochasticState(int length) : IMultiOutputState, IDisposable
+    private sealed class GeneratedHilbertTransformerState(int upper, int lower, int smoothing, bool smooth) : IMultiOutputState, IDisposable
     {
-        private readonly DoubleSmoothedStochasticWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, 3, 15, 3);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
-            outputs[0] = point.Dss; outputs[1] = point.SignalLine;
-        }
-        public void Dispose() { Reset(); _window.Dispose(); }
-    }
-
-    private sealed class GeneratedDtOscillatorState(int length) : IMultiOutputState, IDisposable
-    {
-        private readonly DtOscillatorWindow _window = new(MovingAvgType.WildersSmoothingMethod, length, 8, 5, 3);
+        private readonly HilbertTransformerWindow _window = new(upper, lower, smoothing, smooth);
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs)
         {
             var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Line; outputs[1] = point.SignalLine;
+            outputs[0] = point.Real;
+            outputs[1] = point.Imaginary;
         }
-        public void Dispose() { Reset(); _window.Dispose(); }
+        public void Dispose() => _window.Reset();
     }
 
-    private sealed class GeneratedDoubleStochasticState(int length) : IMultiOutputState, IDisposable
+    private sealed class GeneratedHilbertPhaseState(int lag, double real, double imaginary) : IMultiOutputState, IDisposable
     {
-        private RollingMinMax _high = new(length), _low = new(length), _oscillator = new(Math.Max(2, length));
-        private readonly Streaming.RoundedSimpleMovingAverageSmoother _line = new(3), _signal = new(3);
-        public void Reset()
-        {
-            _high = new(length); _low = new(length); _oscillator = new(Math.Max(2, length));
-            _line.Reset(); _signal.Reset();
-        }
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            _high.Add(bar.High); _low.Add(bar.Low);
-            var first = ClampedRangePosition.Percent(bar.Close, _low.Min, _high.Max);
-            _oscillator.Add(first);
-            var second = ClampedRangePosition.Percent(first, _oscillator.Min, _oscillator.Max);
-            var line = _line.Next(second, true);
-            outputs[0] = line; outputs[1] = _signal.Next(line, true);
-        }
-        public void Dispose() { _line.Dispose(); _signal.Dispose(); }
-    }
-
-    private sealed class GeneratedDmiStochasticState(int length, int count) : IIndicatorState, IDisposable
-    {
-        private readonly DirectionalIndexWindow _directional = new(MovingAvgType.SimpleMovingAverage, length, Math.Max(1, count));
-        private RollingMinMax _range = new(10);
-        private readonly Streaming.SimpleMovingAverageSmoother _first = new(3), _second = new(3);
-        public void Reset() { _directional.Reset(); _range = new(10); _first.Reset(); _second.Reset(); }
-        public double Update(in Bar bar)
-        {
-            var point = _directional.Next(bar.High, bar.Low, bar.Close, true);
-            var oscillator = point.Minus - point.Plus; _range.Add(oscillator);
-            var range = _range.Max - _range.Min;
-#pragma warning disable S1244 // Preserve the batch formula's exact zero-range rule and operation order.
-            var fast = range != 0 ? MathHelper.MinOrMax((oscillator - _range.Min) / range * 100, 100, 0) : 0;
-#pragma warning restore S1244
-            return _second.Next(_first.Next(fast, true), true);
-        }
-        public void Dispose() { _directional.Dispose(); _first.Dispose(); _second.Dispose(); }
-    }
-
-    private sealed class GeneratedChartmillState(int length, int count) : IMultiOutputState, IDisposable
-    {
-        private readonly ChartmillWindow _window = new(MovingAvgType.SimpleMovingAverage, length, count);
+        private readonly HilbertPhaseWindow _window = new(lag, real, imaginary, 1, false);
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs)
         {
-            var point = _window.Next(bar.High, bar.Low, bar.Open, bar.Close, PriceMean.Of(bar.High, bar.Low), true);
-            outputs[0] = point.Close; outputs[1] = point.Open; outputs[2] = point.High; outputs[3] = point.Low;
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Imaginary;
+            outputs[1] = point.Real;
         }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedInstantaneousPhaseState(int lag, int horizon) : IIndicatorState, IDisposable
+    {
+        private readonly HilbertPhaseWindow _window = new(lag, .635, .338, horizon, true);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Cycle;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedMamaDerivedState(int mode) : IMultiOutputState, IDisposable
+    {
+        private readonly MamaDerivedWindow _window = new(mode);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.First;
+            outputs[1] = point.Second;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedCyberSineState(int length, double alpha) : IMultiOutputState, IDisposable
+    {
+        private readonly CyberSineWindow _window = new(length, alpha);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Sine;
+            outputs[1] = point.Lead;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedFollowingMamaState : IIndicatorState, IDisposable
+    {
+        private readonly MamaWindow _window = new(.5, .05);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Values.Fama;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedMamaOutputsState(double fast, double slow) : IMultiOutputState, IDisposable
+    {
+        private readonly MamaWindow _window = new(fast, slow);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true).Values;
+            outputs[0] = point.Fama;
+            outputs[1] = point.Mama;
+            outputs[2] = point.I1;
+            outputs[3] = point.Q1;
+            outputs[4] = point.SmoothPeriod;
+            outputs[5] = point.Smooth;
+            outputs[6] = point.Real;
+            outputs[7] = point.Imag;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedHilbertCycleState(int upper, int lower, int minimum, int horizon, int mode) : IIndicatorState, IDisposable
+    {
+        private readonly HilbertCycleWindow _window = new(upper, lower, minimum, horizon, mode);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedHilbertNoiseState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly HilbertNoiseWindow _window = new(MovingAvgType.ExponentialMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true).Value;
         public void Dispose() => _window.Dispose();
     }
 
-    private sealed class GeneratedCenterLinearityState(int length) : IIndicatorState, IDisposable
+    private sealed class GeneratedMamaNoiseState(int length, int mode) : IIndicatorState, IDisposable
     {
-        private readonly CenterLinearityWindow _window = new(length);
+        private readonly MamaNoiseWindow _window = new(length, mode);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true).Snr;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedEnhancedMamaNoiseState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly MamaNoiseWindow _window = new(length, 2);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, bar.High, bar.Low, true);
+            outputs[0] = point.Snr;
+            outputs[1] = point.InPhase;
+            outputs[2] = point.Quadrature;
+            outputs[3] = point.Period;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedCycleAmplitudeState(int length, double delta, int count) : IIndicatorState, IDisposable
+    {
+        private readonly CycleAmplitudeWindow _window = new(length, delta, count);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
         public void Dispose() => _window.Dispose();
     }
 
-    private sealed class GeneratedChopZoneState(int length, int count) : IIndicatorState, IDisposable
+    private sealed class GeneratedTrendExtractionState(int length, double delta) : IMultiOutputState, IDisposable
     {
-        private readonly ChopZoneWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, 34, count);
+        private readonly TrendExtractionWindow _window = new(MovingAvgType.SimpleMovingAverage, length, delta);
         public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, false, true);
-        public void Dispose() { Reset(); _window.Dispose(); }
-    }
-
-    private sealed class GeneratedConfluenceState(int length) : IIndicatorState, IDisposable
-    {
-        private readonly ConfluenceWindow _window = new(MovingAvgType.SimpleMovingAverage, length);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar)
+        public void Update(in Bar bar, Span<double> outputs)
         {
-            var close = UltimatePowerWeights.Fraction.Of(bar.Close);
-            var full = (UltimatePowerWeights.Fraction.Of(bar.Open) + UltimatePowerWeights.Fraction.Of(bar.High)
-                + UltimatePowerWeights.Fraction.Of(bar.Low) + close) / 4;
-            return _window.Next(close, full, true).Value;
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Trend;
+            outputs[1] = point.Band;
         }
-        public void Dispose() => Reset();
-    }
-
-    private sealed class GeneratedCoppockState(int length, int count) : IIndicatorState, IDisposable
-    {
-        private readonly RocBankWindow _window = new(MovingAvgType.WeightedMovingAverage, [11, 14], [1, 1], [1, 1], length, count);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true).Signal;
         public void Dispose() => _window.Dispose();
     }
 
-    private sealed class GeneratedDerivativeState(int length) : IIndicatorState, IDisposable
+    private sealed class GeneratedEmpiricalDecompositionState(int length, int extremaLength, double delta, double fraction) : IMultiOutputState, IDisposable
     {
-        private readonly DerivativeWindow _window = new(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length), 9, 5, 3);
+        private readonly EmpiricalDecompositionWindow _window = new(MovingAvgType.SimpleMovingAverage, length, extremaLength, delta, fraction);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Trend;
+            outputs[1] = point.Peak;
+            outputs[2] = point.Valley;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedFourierPhaseState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly FourierPhaseWindow _window = new(length);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Phase;
+            outputs[1] = point.Signal;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedEhlersConvolutionState(int highLength, int lowLength, int correlationLength) : IMultiOutputState, IDisposable
+    {
+        private readonly EhlersConvolutionWindow _window = new(highLength, lowLength, correlationLength);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Value;
+            outputs[1] = point.Slope;
+        }
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedFourierSeriesState(int length, double bandwidth) : IMultiOutputState, IDisposable
+    {
+        private readonly FourierSeriesWindow _window = new(length, bandwidth);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Wave;
+            outputs[1] = point.Roc;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDiscreteFourierState(int minimum, int maximum, int cutoff) : IIndicatorState, IDisposable
+    {
+        private readonly OoplesFinance.StockIndicators.Streaming.DiscreteFourierCycle _window = new(minimum, maximum, cutoff);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true, out _);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDftSpectrumState(int upper, int lower) : IIndicatorState, IDisposable
+    {
+        private readonly DftSpectrumWindow _window = new(upper, lower);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAutocorrelationReversalState(int length, int smoothing, int firstLag) : IIndicatorState, IDisposable
+    {
+        private readonly AutocorrelationReversalWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, smoothing, firstLag, true);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true, 0).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedCombSpectrumState(int upper, int lower, double bandwidth) : IIndicatorState, IDisposable
+    {
+        private readonly CombSpectrumWindow _window = new(upper, lower, bandwidth);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedTunedBypassState(int minimum, int maximum, int cutoff, int median) : IMultiOutputState, IDisposable
+    {
+        private readonly TunedBypassWindow _window = new(minimum, maximum, cutoff, median);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.First;
+            outputs[1] = point.Second;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedMesaPredictV1State(int horizon, int order, int smooth, int window) : IMultiOutputState, IDisposable
+    {
+        private readonly OoplesFinance.StockIndicators.Streaming.MesaPredictionKernel _window = new(horizon, order, smooth, window);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Ssf;
+            outputs[1] = point.Predict;
+            outputs[2] = point.PrePredict;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedMesaPredictV2State(int history, int high, int smooth, int horizon) : IMultiOutputState, IDisposable
+    {
+        private readonly MesaPredictV2Window _window = new(MovingAvgType.EhlersHannMovingAverage, history, high, smooth, horizon);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Filter;
+            outputs[1] = point.Predict;
+            outputs[2] = point.Extrap;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAnticipateState(int length, double bandwidth) : IIndicatorState, IDisposable
+    {
+        private readonly AnticipateWindow _window = new(MovingAvgType.EhlersHannMovingAverage, length, bandwidth);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedFmDemodulatorState(int fast, int slow) : IIndicatorState
+    {
+        private readonly int _fast = Math.Max(1, fast);
+        private readonly TwoPoleWindow _window = new(slow, 3);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar)
+        {
+            var difference = bar.Close - bar.Open;
+            var scaled = _fast * difference;
+            return _window.Next(Math.Max(-1, Math.Min(1, scaled)), true);
+        }
+    }
+
+    private sealed class GeneratedSuperSmootherAliasState(int length) : IIndicatorState
+    {
+        private readonly OoplesFinance.StockIndicators.Streaming.EhlersSuperSmootherFilterEngine _window = new(length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+    }
+
+    private sealed class GeneratedEhlersVidyaState : IIndicatorState, IDisposable
+    {
+        private readonly EhlersVidyaWindow _window = new(MovingAvgType.WeightedMovingAverage, 9, 30);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedSquelchState(int lag, int threshold, int horizon) : IIndicatorState, IDisposable
+    {
+        private readonly SquelchWindow _window = new(lag, threshold, horizon);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedSwissArmyState(int length, double delta) : IMultiOutputState, IDisposable
+    {
+        private readonly SwissArmyWindow _window = new(length, delta);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs) => _window.Next(bar.Close, true).Values.AsSpan().CopyTo(outputs);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedSpectrumBankState(int minimum, int maximum, int cutoff, int median) : IIndicatorState, IDisposable
+    {
+        private readonly OoplesFinance.StockIndicators.Streaming.EhlersSpectrumDerivedFilterBankEngine _window = new(minimum, maximum, cutoff, median);
         public void Reset() => _window.Reset();
         public double Update(in Bar bar) => _window.Next(bar.Close, true);
         public void Dispose() => _window.Dispose();
     }
 
-    private sealed class GeneratedDidiState(int shortLength, int mediumLength, int longLength, int count) : IMultiOutputState, IDisposable
+    private sealed class GeneratedRestoringPullState(int minimum, int maximum, int cutoff, int median) : IMultiOutputState, IDisposable
     {
-        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _short = Math.Max(1, shortLength) <= count ? new(Math.Max(1, shortLength)) : null;
-        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _medium = Math.Max(1, mediumLength) <= count ? new(Math.Max(1, mediumLength)) : null;
-        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _long = Math.Max(1, longLength) <= count ? new(Math.Max(1, longLength)) : null;
-        public void Reset() { _short?.Reset(); _medium?.Reset(); _long?.Reset(); }
+        private readonly OoplesFinance.StockIndicators.Streaming.EhlersSpectrumDerivedFilterBankEngine _window = new(minimum, maximum, cutoff, median);
+        private readonly OoplesFinance.StockIndicators.Streaming.EmaState _signal = new(Math.Max(1, minimum));
+        private bool _signalInvalid;
+        public void Reset() { _window.Reset(); _signal.Reset(); _signalInvalid = false; }
         public void Update(in Bar bar, Span<double> outputs)
         {
-            var medium = _medium?.Next(bar.Close, true) ?? 0;
-            var first = _short?.Next(bar.Close, true) ?? 0;
-            var last = _long?.Next(bar.Close, true) ?? 0;
-#pragma warning disable S1244 // Preserve the exact zero-denominator rule from the batch outputs.
-            outputs[0] = medium == 0 ? 0 : first / medium;
-            outputs[1] = medium == 0 ? 0 : 1;
-            outputs[2] = medium == 0 ? 0 : last / medium;
-#pragma warning restore S1244
+            var cycle = _window.Next(bar.Close, true);
+            var ratio = 2 * Math.PI / cycle;
+            var pull = bar.Volume * (ratio * ratio);
+            _signalInvalid |= !double.IsFinite(pull);
+            outputs[0] = pull;
+            outputs[1] = _signalInvalid ? double.NaN : _signal.GetNext(pull, commit: true);
         }
-        public void Dispose() { _short?.Dispose(); _medium?.Dispose(); _long?.Dispose(); }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedKlingerSignalState(int fast, int slow, int signal) : IIndicatorState, IDisposable
+    {
+        private readonly KlingerWindow _window = new(MovingAvgType.ExponentialMovingAverage, fast, slow, signal);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, true).SignalLine;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedChandeSignalState(int period, int count, int signalLength) : IIndicatorState, IDisposable
+    {
+        private readonly GeneratedChandeState _state = new(period, count, signalLength);
+        public void Reset() => _state.Reset();
+        public double Update(in Bar bar)
+        {
+            Span<double> outputs = stackalloc double[2];
+            _state.Update(in bar, outputs);
+            return outputs[1];
+        }
+        public void Dispose() => _state.Dispose();
+    }
+
+    private sealed class GeneratedMacdAliasState(int fast, int slow, int signal, int slot) : IIndicatorState
+    {
+        private readonly GeneratedEmaGapSignalState _state = new(fast, slow, signal);
+        public void Reset() => _state.Reset();
+        public double Update(in Bar bar)
+        {
+            Span<double> outputs = stackalloc double[3];
+            _state.Update(in bar, outputs);
+            return outputs[slot];
+        }
+    }
+
+    private sealed class GeneratedAdaptiveRangeState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly AdaptiveRangeMeanWindow _window = new(2, 14, period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAdaptivePriceRsiState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly PriceRsiWindow _rsi = new(MovingAvgType.WildersSmoothingMethod, period, count);
+        private double _previous;
+        public void Reset() { _rsi.Reset(); _previous = 0; }
+        public double Update(in Bar bar) => _previous = AdaptiveRsiBlend.Next(bar.Close, _previous, _rsi.Next(bar.Close, true));
+        public void Dispose() => _rsi.Dispose();
+    }
+
+    private sealed class GeneratedAsymmetricRsiState(int period, int count) : IIndicatorState, IDisposable
+    {
+        private readonly AsymmetricGainLossWindow _window = new(period, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAdaptiveStochasticState(int fast, int slow) : IIndicatorState, IDisposable
+    {
+        private readonly AdaptiveStochasticWindow _window = new(50, fast, slow);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedApirineRsiState(int period, int smooth, int count) : IIndicatorState, IDisposable
+    {
+        private readonly ApirineRsiWindow _window = new(MovingAvgType.WildersSmoothingMethod, period, smooth, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedPoweredKaufmanState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly PoweredKaufmanWindow _window = new(period, 3);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Power;
+            outputs[1] = point.Average;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAdaptiveStopState(int period, double factor) : IIndicatorState, IDisposable
+    {
+        private readonly PoweredKaufmanWindow _window = new(period, factor);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Stop;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedAbsoluteErrorState(int period) : IIndicatorState, IDisposable
+    {
+        private readonly AbsoluteErrorWindow _window = new(period);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedBelkhayateState : IIndicatorState, IDisposable
+    {
+        private readonly BelkhayateWindow _window = new();
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true);
+        public void Dispose() => _window.Reset();
+    }
+
+    private sealed class GeneratedBayesianState(int period) : IMultiOutputState, IDisposable
+    {
+        private readonly BayesianWindow _window = new(MovingAvgType.SimpleMovingAverage, period);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Down;
+            outputs[1] = point.Up;
+            outputs[2] = point.Prime;
+        }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
     private sealed class GeneratedAtrStopsState(int period, double factor, int count) : IIndicatorState, IDisposable
@@ -4636,96 +5048,183 @@ internal static partial class ValuesBarExecution
         public void Dispose() => _window.Dispose();
     }
 
-    private sealed class GeneratedAdaptiveRangeState(int period) : IIndicatorState, IDisposable
+    private sealed class GeneratedChartmillState(int length, int count) : IMultiOutputState, IDisposable
     {
-        private readonly AdaptiveRangeMeanWindow _window = new(2, 14, period);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true);
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedAdaptivePriceRsiState(int period, int count) : IIndicatorState, IDisposable
-    {
-        private readonly PriceRsiWindow _rsi = new(MovingAvgType.WildersSmoothingMethod, period, count);
-        private double _previous;
-        public void Reset() { _rsi.Reset(); _previous = 0; }
-        public double Update(in Bar bar) => _previous = AdaptiveRsiBlend.Next(bar.Close, _previous, _rsi.Next(bar.Close, true));
-        public void Dispose() => _rsi.Dispose();
-    }
-
-    private sealed class GeneratedAsymmetricRsiState(int period, int count) : IIndicatorState, IDisposable
-    {
-        private readonly AsymmetricGainLossWindow _window = new(period, count);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true);
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedAdaptiveStochasticState(int fast, int slow) : IIndicatorState, IDisposable
-    {
-        private readonly AdaptiveStochasticWindow _window = new(50, fast, slow);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
-        public void Dispose() => _window.Reset();
-    }
-
-    private sealed class GeneratedApirineRsiState(int period, int smooth, int count) : IIndicatorState, IDisposable
-    {
-        private readonly ApirineRsiWindow _window = new(MovingAvgType.WildersSmoothingMethod, period, smooth, count);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true);
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedPoweredKaufmanState(int period) : IMultiOutputState, IDisposable
-    {
-        private readonly PoweredKaufmanWindow _window = new(period, 3);
+        private readonly ChartmillWindow _window = new(MovingAvgType.SimpleMovingAverage, length, count);
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs)
         {
-            var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Power;
-            outputs[1] = point.Average;
+            var point = _window.Next(bar.High, bar.Low, bar.Open, bar.Close, PriceMean.Of(bar.High, bar.Low), true);
+            outputs[0] = point.Close; outputs[1] = point.Open; outputs[2] = point.High; outputs[3] = point.Low;
         }
         public void Dispose() => _window.Dispose();
     }
 
-    private sealed class GeneratedAdaptiveStopState(int period, double factor) : IIndicatorState, IDisposable
+    private sealed class GeneratedCenterLinearityState(int length) : IIndicatorState, IDisposable
     {
-        private readonly PoweredKaufmanWindow _window = new(period, factor);
+        private readonly CenterLinearityWindow _window = new(length);
         public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true).Stop;
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
         public void Dispose() => _window.Dispose();
     }
 
-    private sealed class GeneratedAbsoluteErrorState(int period) : IIndicatorState, IDisposable
+    private sealed class GeneratedChopZoneState(int length, int count) : IIndicatorState, IDisposable
     {
-        private readonly AbsoluteErrorWindow _window = new(period);
+        private readonly ChopZoneWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, 34, count);
         public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true);
-        public void Dispose() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, false, true);
+        public void Dispose() { Reset(); _window.Dispose(); }
     }
 
-    private sealed class GeneratedBelkhayateState : IIndicatorState, IDisposable
+    private sealed class GeneratedCommoditySelectionState(int length) : IMultiOutputState, IDisposable
     {
-        private readonly BelkhayateWindow _window = new();
+        private readonly CommoditySelectionWindow _window = new(MovingAvgType.WildersSmoothingMethod, length, 50, 3000, 10);
         public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, true);
-        public void Dispose() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = point.Value; outputs[1] = point.Signal;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
     }
 
-    private sealed class GeneratedBayesianState(int period) : IMultiOutputState, IDisposable
+    private sealed class GeneratedBrownCompositeState(ConstanceBrownCompositeIndex brown) : IMultiOutputState, IDisposable
     {
-        private readonly BayesianWindow _window = new(MovingAvgType.SimpleMovingAverage, period);
+        private readonly BrownCompositeWindow _window = new(MovingAvgType.SimpleMovingAverage, brown.FastLength, brown.SlowLength, brown.Length1, brown.Length2, brown.SmoothLength);
         public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs)
         {
             var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Down;
-            outputs[1] = point.Up;
-            outputs[2] = point.Prime;
+            outputs[0] = point.Line; outputs[1] = point.Fast; outputs[2] = point.Slow;
         }
-        public void Dispose() { _window.Reset(); _window.Dispose(); }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedConfluenceState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly ConfluenceWindow _window = new(MovingAvgType.SimpleMovingAverage, length);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar)
+        {
+            var close = UltimatePowerWeights.Fraction.Of(bar.Close);
+            var full = (UltimatePowerWeights.Fraction.Of(bar.Open) + UltimatePowerWeights.Fraction.Of(bar.High)
+                + UltimatePowerWeights.Fraction.Of(bar.Low) + close) / 4;
+            return _window.Next(close, full, true).Value;
+        }
+        public void Dispose() => Reset();
+    }
+
+    private sealed class GeneratedCoppockState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly RocBankWindow _window = new(MovingAvgType.WeightedMovingAverage, [11, 14], [1, 1], [1, 1], length, count);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true).Signal;
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDerivativeState(int length) : IIndicatorState, IDisposable
+    {
+        private readonly DerivativeWindow _window = new(MovingAvgType.ExponentialMovingAverage, Math.Max(1, length), 9, 5, 3);
+        public void Reset() => _window.Reset();
+        public double Update(in Bar bar) => _window.Next(bar.Close, true);
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDidiState(int shortLength, int mediumLength, int longLength, int count) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _short = Math.Max(1, shortLength) <= count ? new(Math.Max(1, shortLength)) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _medium = Math.Max(1, mediumLength) <= count ? new(Math.Max(1, mediumLength)) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _long = Math.Max(1, longLength) <= count ? new(Math.Max(1, longLength)) : null;
+        public void Reset() { _short?.Reset(); _medium?.Reset(); _long?.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var medium = _medium?.Next(bar.Close, true) ?? 0;
+            var first = _short?.Next(bar.Close, true) ?? 0;
+            var last = _long?.Next(bar.Close, true) ?? 0;
+#pragma warning disable S1244 // Preserve the exact zero-denominator rule from the batch outputs.
+            outputs[0] = medium == 0 ? 0 : first / medium;
+            outputs[1] = medium == 0 ? 0 : 1;
+            outputs[2] = medium == 0 ? 0 : last / medium;
+#pragma warning restore S1244
+        }
+        public void Dispose() { _short?.Dispose(); _medium?.Dispose(); _long?.Dispose(); }
+    }
+
+    private sealed class GeneratedPriceMomentumState(int first, int second, int signal, int count, bool histogram) : IMultiOutputState, IDisposable
+    {
+        private readonly PriceMomentumWindow _window = new(MovingAvgType.ExponentialMovingAverage, first, second, signal, count);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Value; outputs[1] = point.Signal;
+            if (histogram) outputs[2] = point.Histogram;
+        }
+        public void Dispose() => _window.Dispose();
+    }
+
+    private sealed class GeneratedDoubleSmoothedStochasticState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly DoubleSmoothedStochasticWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, 3, 15, 3);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = point.Dss; outputs[1] = point.SignalLine;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedDtOscillatorState(int length) : IMultiOutputState, IDisposable
+    {
+        private readonly DtOscillatorWindow _window = new(MovingAvgType.WildersSmoothingMethod, length, 8, 5, 3);
+        public void Reset() => _window.Reset();
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var point = _window.Next(bar.Close, true);
+            outputs[0] = point.Line; outputs[1] = point.SignalLine;
+        }
+        public void Dispose() { Reset(); _window.Dispose(); }
+    }
+
+    private sealed class GeneratedDoubleStochasticState(int length) : IMultiOutputState, IDisposable
+    {
+        private RollingMinMax _high = new(length), _low = new(length), _oscillator = new(Math.Max(2, length));
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother _line = new(3), _signal = new(3);
+        public void Reset()
+        {
+            _high = new(length); _low = new(length); _oscillator = new(Math.Max(2, length));
+            _line.Reset(); _signal.Reset();
+        }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            _high.Add(bar.High); _low.Add(bar.Low);
+            var first = ClampedRangePosition.Percent(bar.Close, _low.Min, _high.Max);
+            _oscillator.Add(first);
+            var second = ClampedRangePosition.Percent(first, _oscillator.Min, _oscillator.Max);
+            var line = _line.Next(second, true);
+            outputs[0] = line; outputs[1] = _signal.Next(line, true);
+        }
+        public void Dispose() { _line.Dispose(); _signal.Dispose(); }
+    }
+
+    private sealed class GeneratedDmiStochasticState(int length, int count) : IIndicatorState, IDisposable
+    {
+        private readonly DirectionalIndexWindow _directional = new(MovingAvgType.SimpleMovingAverage, length, Math.Max(1, count));
+        private RollingMinMax _range = new(10);
+        private readonly Streaming.SimpleMovingAverageSmoother _first = new(3), _second = new(3);
+        public void Reset() { _directional.Reset(); _range = new(10); _first.Reset(); _second.Reset(); }
+        public double Update(in Bar bar)
+        {
+            var point = _directional.Next(bar.High, bar.Low, bar.Close, true);
+            var oscillator = point.Minus - point.Plus; _range.Add(oscillator);
+            var range = _range.Max - _range.Min;
+#pragma warning disable S1244 // Preserve the batch formula's exact zero-range rule and operation order.
+            var fast = range != 0 ? MathHelper.MinOrMax((oscillator - _range.Min) / range * 100, 100, 0) : 0;
+#pragma warning restore S1244
+            return _second.Next(_first.Next(fast, true), true);
+        }
+        public void Dispose() { _directional.Dispose(); _first.Dispose(); _second.Dispose(); }
     }
 
     private sealed class GeneratedCalmarState(int length) : IIndicatorState, IDisposable
@@ -4778,491 +5277,6 @@ internal static partial class ValuesBarExecution
             return fast - slow;
         }
     }
-
-    private sealed class GeneratedKlingerSignalState(int fast, int slow, int signal) : IIndicatorState, IDisposable
-    {
-        private readonly KlingerWindow _window = new(MovingAvgType.ExponentialMovingAverage, fast, slow, signal);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, true).SignalLine;
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedChandeSignalState(int period, int count, int signalLength) : IIndicatorState, IDisposable
-    {
-        private readonly GeneratedChandeState _state = new(period, count, signalLength);
-        public void Reset() => _state.Reset();
-        public double Update(in Bar bar)
-        {
-            Span<double> outputs = stackalloc double[2];
-            _state.Update(in bar, outputs);
-            return outputs[1];
-        }
-        public void Dispose() => _state.Dispose();
-    }
-
-    private sealed class GeneratedCommoditySelectionState(int length) : IMultiOutputState, IDisposable
-    {
-        private readonly CommoditySelectionWindow _window = new(MovingAvgType.WildersSmoothingMethod, length, 50, 3000, 10);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
-            outputs[0] = point.Value; outputs[1] = point.Signal;
-        }
-        public void Dispose() { Reset(); _window.Dispose(); }
-    }
-
-    private sealed class GeneratedBrownCompositeState(ConstanceBrownCompositeIndex brown) : IMultiOutputState, IDisposable
-    {
-        private readonly BrownCompositeWindow _window = new(MovingAvgType.SimpleMovingAverage, brown.FastLength, brown.SlowLength, brown.Length1, brown.Length2, brown.SmoothLength);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Line; outputs[1] = point.Fast; outputs[2] = point.Slow;
-        }
-        public void Dispose() { Reset(); _window.Dispose(); }
-    }
-
-    private sealed class GeneratedFollowingMamaState : IIndicatorState, IDisposable
-    {
-        private readonly MamaWindow _window = new(.5, .05);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true).Values.Fama;
-        public void Dispose() => _window.Reset();
-    }
-
-    private sealed class GeneratedMamaOutputsState(double fast, double slow) : IMultiOutputState, IDisposable
-    {
-        private readonly MamaWindow _window = new(fast, slow);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, true).Values;
-            outputs[0] = point.Fama;
-            outputs[1] = point.Mama;
-            outputs[2] = point.I1;
-            outputs[3] = point.Q1;
-            outputs[4] = point.SmoothPeriod;
-            outputs[5] = point.Smooth;
-            outputs[6] = point.Real;
-            outputs[7] = point.Imag;
-        }
-        public void Dispose() => _window.Reset();
-    }
-
-    private sealed class GeneratedClassicHilbertState(int upper, int lower) : IMultiOutputState, IDisposable
-    {
-        private readonly ClassicHilbertWindow _window = new(upper, lower);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Real;
-            outputs[1] = point.Imaginary;
-        }
-        public void Dispose() => _window.Reset();
-    }
-
-    private sealed class GeneratedHilbertTransformerState(int upper, int lower, int smoothing, bool smooth) : IMultiOutputState, IDisposable
-    {
-        private readonly HilbertTransformerWindow _window = new(upper, lower, smoothing, smooth);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Real;
-            outputs[1] = point.Imaginary;
-        }
-        public void Dispose() => _window.Reset();
-    }
-
-    private sealed class GeneratedHilbertPhaseState(int lag, double real, double imaginary) : IMultiOutputState, IDisposable
-    {
-        private readonly HilbertPhaseWindow _window = new(lag, real, imaginary, 1, false);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Imaginary;
-            outputs[1] = point.Real;
-        }
-        public void Dispose() => _window.Reset();
-    }
-
-    private sealed class GeneratedInstantaneousPhaseState(int lag, int horizon) : IIndicatorState, IDisposable
-    {
-        private readonly HilbertPhaseWindow _window = new(lag, .635, .338, horizon, true);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true).Cycle;
-        public void Dispose() => _window.Reset();
-    }
-
-    private sealed class GeneratedMamaDerivedState(int mode) : IMultiOutputState, IDisposable
-    {
-        private readonly MamaDerivedWindow _window = new(mode);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, true);
-            outputs[0] = point.First;
-            outputs[1] = point.Second;
-        }
-        public void Dispose() => _window.Reset();
-    }
-
-    private sealed class GeneratedCyberSineState(int length, double alpha) : IMultiOutputState, IDisposable
-    {
-        private readonly CyberSineWindow _window = new(length, alpha);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Sine;
-            outputs[1] = point.Lead;
-        }
-        public void Dispose() => _window.Reset();
-    }
-
-    private sealed class GeneratedHilbertCycleState(int upper, int lower, int minimum, int horizon, int mode) : IIndicatorState, IDisposable
-    {
-        private readonly HilbertCycleWindow _window = new(upper, lower, minimum, horizon, mode);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
-        public void Dispose() => _window.Reset();
-    }
-
-    private sealed class GeneratedCycleAmplitudeState(int length, double delta, int count) : IIndicatorState, IDisposable
-    {
-        private readonly CycleAmplitudeWindow _window = new(length, delta, count);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true);
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedTrendExtractionState(int length, double delta) : IMultiOutputState, IDisposable
-    {
-        private readonly TrendExtractionWindow _window = new(MovingAvgType.SimpleMovingAverage, length, delta);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Trend;
-            outputs[1] = point.Band;
-        }
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedEmpiricalDecompositionState(int length, int extremaLength, double delta, double fraction) : IMultiOutputState, IDisposable
-    {
-        private readonly EmpiricalDecompositionWindow _window = new(MovingAvgType.SimpleMovingAverage, length, extremaLength, delta, fraction);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Trend;
-            outputs[1] = point.Peak;
-            outputs[2] = point.Valley;
-        }
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedFmDemodulatorState(int fast, int slow) : IIndicatorState
-    {
-        private readonly int _fast = Math.Max(1, fast);
-        private readonly TwoPoleWindow _window = new(slow, 3);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar)
-        {
-            var difference = bar.Close - bar.Open;
-            var scaled = _fast * difference;
-            return _window.Next(Math.Max(-1, Math.Min(1, scaled)), true);
-        }
-    }
-
-    private sealed class GeneratedMesaPredictV1State(int horizon, int order, int smooth, int window) : IMultiOutputState, IDisposable
-    {
-        private readonly OoplesFinance.StockIndicators.Streaming.MesaPredictionKernel _window = new(horizon, order, smooth, window);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Ssf;
-            outputs[1] = point.Predict;
-            outputs[2] = point.PrePredict;
-        }
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedMesaPredictV2State(int history, int high, int smooth, int horizon) : IMultiOutputState, IDisposable
-    {
-        private readonly MesaPredictV2Window _window = new(MovingAvgType.EhlersHannMovingAverage, history, high, smooth, horizon);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Filter;
-            outputs[1] = point.Predict;
-            outputs[2] = point.Extrap;
-        }
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedAnticipateState(int length, double bandwidth) : IIndicatorState, IDisposable
-    {
-        private readonly AnticipateWindow _window = new(MovingAvgType.EhlersHannMovingAverage, length, bandwidth);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedFourierPhaseState(int length) : IMultiOutputState, IDisposable
-    {
-        private readonly FourierPhaseWindow _window = new(length);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Phase;
-            outputs[1] = point.Signal;
-        }
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedEhlersConvolutionState(int highLength, int lowLength, int correlationLength) : IMultiOutputState, IDisposable
-    {
-        private readonly EhlersConvolutionWindow _window = new(highLength, lowLength, correlationLength);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Value;
-            outputs[1] = point.Slope;
-        }
-        public void Dispose() => _window.Reset();
-    }
-
-    private sealed class GeneratedFourierSeriesState(int length, double bandwidth) : IMultiOutputState, IDisposable
-    {
-        private readonly FourierSeriesWindow _window = new(length, bandwidth);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, true);
-            outputs[0] = point.Wave;
-            outputs[1] = point.Roc;
-        }
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedDiscreteFourierState(int minimum, int maximum, int cutoff) : IIndicatorState, IDisposable
-    {
-        private readonly OoplesFinance.StockIndicators.Streaming.DiscreteFourierCycle _window = new(minimum, maximum, cutoff);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true, out _);
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedDftSpectrumState(int upper, int lower) : IIndicatorState, IDisposable
-    {
-        private readonly DftSpectrumWindow _window = new(upper, lower);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedSpectrumBankState(int minimum, int maximum, int cutoff, int median) : IIndicatorState, IDisposable
-    {
-        private readonly OoplesFinance.StockIndicators.Streaming.EhlersSpectrumDerivedFilterBankEngine _window = new(minimum, maximum, cutoff, median);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true);
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedRestoringPullState(int minimum, int maximum, int cutoff, int median) : IMultiOutputState, IDisposable
-    {
-        private readonly OoplesFinance.StockIndicators.Streaming.EhlersSpectrumDerivedFilterBankEngine _window = new(minimum, maximum, cutoff, median);
-        private readonly OoplesFinance.StockIndicators.Streaming.EmaState _signal = new(Math.Max(1, minimum));
-        private bool _signalInvalid;
-        public void Reset() { _window.Reset(); _signal.Reset(); _signalInvalid = false; }
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var cycle = _window.Next(bar.Close, true);
-            var ratio = 2 * Math.PI / cycle;
-            var pull = bar.Volume * (ratio * ratio);
-            _signalInvalid |= !double.IsFinite(pull);
-            outputs[0] = pull;
-            outputs[1] = _signalInvalid ? double.NaN : _signal.GetNext(pull, commit: true);
-        }
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedHilbertNoiseState(int length) : IIndicatorState, IDisposable
-    {
-        private readonly HilbertNoiseWindow _window = new(MovingAvgType.ExponentialMovingAverage, length);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true).Value;
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedMamaNoiseState(int length, int mode) : IIndicatorState, IDisposable
-    {
-        private readonly MamaNoiseWindow _window = new(length, mode);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, bar.High, bar.Low, true).Snr;
-        public void Dispose() => _window.Reset();
-    }
-
-    private sealed class GeneratedEnhancedMamaNoiseState(int length) : IMultiOutputState, IDisposable
-    {
-        private readonly MamaNoiseWindow _window = new(length, 2);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, bar.High, bar.Low, true);
-            outputs[0] = point.Snr;
-            outputs[1] = point.InPhase;
-            outputs[2] = point.Quadrature;
-            outputs[3] = point.Period;
-        }
-        public void Dispose() => _window.Reset();
-    }
-
-    private sealed class GeneratedSuperSmootherAliasState(int length) : IIndicatorState
-    {
-        private readonly OoplesFinance.StockIndicators.Streaming.EhlersSuperSmootherFilterEngine _window = new(length);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true);
-    }
-
-    private sealed class GeneratedEhlersVidyaState : IIndicatorState, IDisposable
-    {
-        private readonly EhlersVidyaWindow _window = new(MovingAvgType.WeightedMovingAverage, 9, 30);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedSquelchState(int lag, int threshold, int horizon) : IIndicatorState, IDisposable
-    {
-        private readonly SquelchWindow _window = new(lag, threshold, horizon);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
-        public void Dispose() => _window.Reset();
-    }
-
-    private sealed class GeneratedSwissArmyState(int length, double delta) : IMultiOutputState, IDisposable
-    {
-        private readonly SwissArmyWindow _window = new(length, delta);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs) => _window.Next(bar.Close, true).Values.AsSpan().CopyTo(outputs);
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedAutocorrelationReversalState(int length, int smoothing, int firstLag) : IIndicatorState, IDisposable
-    {
-        private readonly AutocorrelationReversalWindow _window = new(MovingAvgType.ExponentialMovingAverage, length, smoothing, firstLag, true);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true, 0).Value;
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedCombSpectrumState(int upper, int lower, double bandwidth) : IIndicatorState, IDisposable
-    {
-        private readonly CombSpectrumWindow _window = new(upper, lower, bandwidth);
-        public void Reset() => _window.Reset();
-        public double Update(in Bar bar) => _window.Next(bar.Close, true).Value;
-        public void Dispose() => _window.Reset();
-    }
-
-    private sealed class GeneratedTunedBypassState(int minimum, int maximum, int cutoff, int median) : IMultiOutputState, IDisposable
-    {
-        private readonly TunedBypassWindow _window = new(minimum, maximum, cutoff, median);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.Close, true);
-            outputs[0] = point.First;
-            outputs[1] = point.Second;
-        }
-        public void Dispose() => _window.Dispose();
-    }
-
-    private sealed class GeneratedStandardDeviationAliasState(int period, int count) : IMultiOutputState, IDisposable
-    {
-        private readonly Streaming.RollingStandardDeviation? _line = period <= count ? new(period) : null;
-        private readonly double[] _window = period > 1 && period <= count ? new double[period] : [];
-        private int _seen, _next;
-        private double _sum, _roundoff;
-        private bool _exactRequired;
-
-        public void Reset()
-        {
-            _line?.Reset();
-            Array.Clear(_window, 0, _window.Length);
-            _seen = _next = 0;
-            _sum = _roundoff = 0;
-            _exactRequired = false;
-        }
-
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            double value = _line?.Next(bar.Close, true) ?? 0;
-            outputs[0] = value;
-            if (_window.Length == 0) { outputs[1] = period == 1 ? value : 0; return; }
-
-            double expired = _window[_next];
-            _window[_next] = value;
-            if (++_next == period) _next = 0;
-            double previous = _sum;
-            _sum += value;
-            _roundoff = MeanRoundoff.AfterAddition(_roundoff, _sum);
-            _exactRequired |= ExactMeanAccumulator.SevereCancellation(previous, value, _sum);
-            if (_seen >= period)
-            {
-                previous = _sum;
-                _sum -= expired;
-                _roundoff = MeanRoundoff.AfterAddition(_roundoff, _sum);
-                _exactRequired |= ExactMeanAccumulator.SevereCancellation(previous, -expired, _sum);
-                if (Math.Abs(_sum) <= 1e-4 * Math.Max(Math.Abs(expired), Math.Abs(value)))
-                    Rebuild(false);
-            }
-            _seen++;
-            double mean = _seen >= period ? _sum / period : 0;
-            if (_seen >= period && (_exactRequired || MeanRoundoff.RequiresExact(_sum, period, _roundoff)))
-            {
-                var exact = new ExactMeanAccumulator();
-                int index = _next;
-                for (int j = 0; j < period; j++)
-                {
-                    exact.Add(_window[index]);
-                    if (++index == period) index = 0;
-                }
-                mean = exact.Mean(period);
-            }
-            outputs[1] = mean;
-            if (_seen % period == 0) Rebuild(true);
-        }
-
-        private void Rebuild(bool periodic)
-        {
-            _sum = _roundoff = 0;
-            // Cancellation rebuilds preserve the flag; only periodic rebuilds reset it.
-            if (periodic) _exactRequired = false;
-            int index = _next;
-            for (int j = 0; j < period; j++)
-            {
-                double previous = _sum, value = _window[index];
-                _sum += value;
-                _roundoff = MeanRoundoff.AfterAddition(_roundoff, _sum);
-                if (periodic) _exactRequired |= ExactMeanAccumulator.SevereCancellation(previous, value, _sum);
-                if (++index == period) index = 0;
-            }
-        }
-
-        public void Dispose() => _line?.Dispose();
-    }
-
 
     private sealed class GeneratedDirectionalTrendState(int length, int count) : IIndicatorState, IDisposable
     {
@@ -5917,6 +5931,42 @@ internal static partial class ValuesBarExecution
         public void Dispose() => Reset();
     }
 
+    private sealed class GeneratedGuppyDistanceState(int[] lengths) : IMultiOutputState
+    {
+        private readonly Streaming.EmaState[] _averages = lengths.Select(length => new Streaming.EmaState(length)).ToArray();
+        public void Reset() { foreach (var average in _averages) average.Reset(); }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            Span<double> values = stackalloc double[12];
+            for (var i = 0; i < values.Length; i++) values[i] = _averages[i].GetNext(bar.Close, commit: true);
+            outputs[0] = GuppyRibbonArithmetic.Distance(values[0], values[1], values[2], values[3], values[4], values[5]);
+            outputs[1] = GuppyRibbonArithmetic.Distance(values[6], values[7], values[8], values[9], values[10], values[11]);
+        }
+    }
+
+    private sealed class GeneratedGuppyMultipleState(int[] lengths) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.EmaState[] _averages = lengths.Select(length => new Streaming.EmaState(length)).ToArray();
+        private readonly ExactPartialMeanWindow _smooth = new(1);
+        private readonly Streaming.EmaState _signal = new(13);
+        private bool _invalidSignal;
+        public void Reset() { foreach (var average in _averages) average.Reset(); _smooth.Reset(); _signal.Reset(); _invalidSignal = false; }
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            Span<double> values = stackalloc double[27];
+            for (var i = 0; i < values.Length; i++) values[i] = _averages[i].GetNext(bar.Close, commit: true);
+            var fast = GuppyRibbonArithmetic.Mean(values[..11]);
+            var slow = GuppyRibbonArithmetic.Mean(values[11..]);
+            var raw = GuppyRibbonArithmetic.Percent(fast, slow);
+            _invalidSignal |= !double.IsFinite(raw);
+            // Preserve the unrepresentable primary output for the public output
+            // validator; finite-only smoothers must not obscure that rejection.
+            outputs[0] = double.IsFinite(raw) ? _smooth.Next(raw, true) : raw;
+            outputs[1] = _invalidSignal ? double.NaN : _signal.GetNext(raw, commit: true);
+        }
+        public void Dispose() => _smooth.Dispose();
+    }
+
     private readonly record struct GeneratedCountBackPoint(double High, double Low, int Higher, int Lower);
 
     private sealed class GeneratedCountBackDeque : IDisposable
@@ -6205,41 +6255,6 @@ internal static partial class ValuesBarExecution
         public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
-    private sealed class GeneratedLbrPaintState(int length, int lookback, double multiplier) : IMultiOutputState, IDisposable
-    {
-        private readonly LbrPaintWindow _window = new(MovingAvgType.SimpleMovingAverage, length, lookback, multiplier);
-        public void Reset() => _window.Reset();
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
-            outputs[0] = point.Upper; outputs[1] = point.Lower; outputs[2] = point.Width;
-        }
-        public void Dispose() { _window.Reset(); _window.Dispose(); }
-    }
-    private sealed class GeneratedLindaState(int fast, int slow, int signal, int count) : IMultiOutputState, IDisposable
-    {
-        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _fast = Math.Max(1, fast) <= count ? new(fast) : null;
-        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _slow = Math.Max(1, slow) <= count ? new(slow) : null;
-        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _macdSignal = Math.Max(1, signal) <= count ? new(signal) : null;
-        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _ppoSignal = Math.Max(1, signal) <= count ? new(signal) : null;
-        private bool _macdInvalid, _ppoInvalid;
-        public void Reset()
-        { _fast?.Reset(); _slow?.Reset(); _macdSignal?.Reset(); _ppoSignal?.Reset(); _macdInvalid = _ppoInvalid = false; }
-        public void Update(in Bar bar, Span<double> outputs)
-        {
-            var f = _fast?.Next(bar.Close, true) ?? 0;
-            var s = _slow?.Next(bar.Close, true) ?? 0;
-            var ppo = RoundedPercentageChange.Of(f, s);
-            var macd = f - s;
-            _macdInvalid |= double.IsInfinity(macd); _ppoInvalid |= double.IsInfinity(ppo);
-            var macdSignal = _macdInvalid ? double.NaN : _macdSignal?.Next(macd, true) ?? 0;
-            var ppoSignal = _ppoInvalid ? double.NaN : _ppoSignal?.Next(ppo, true) ?? 0;
-            outputs[0] = macd; outputs[1] = macdSignal; outputs[2] = macd - macdSignal;
-            outputs[3] = ppo; outputs[4] = ppoSignal; outputs[5] = ppo - ppoSignal;
-        }
-        public void Dispose() { _fast?.Dispose(); _slow?.Dispose(); _macdSignal?.Dispose(); _ppoSignal?.Dispose(); }
-    }
-
     private sealed class GeneratedKaufmanBandsState(int length, double exponent) : IMultiOutputState, IDisposable
     {
         private readonly KaufmanAdaptiveBandWindow _window = new(length, exponent);
@@ -6274,52 +6289,39 @@ internal static partial class ValuesBarExecution
         public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
 
-    private sealed class GeneratedMacdAliasState(int fast, int slow, int signal, int slot) : IIndicatorState
+    private sealed class GeneratedLbrPaintState(int length, int lookback, double multiplier) : IMultiOutputState, IDisposable
     {
-        private readonly GeneratedEmaGapSignalState _state = new(fast, slow, signal);
-        public void Reset() => _state.Reset();
-        public double Update(in Bar bar)
-        {
-            Span<double> outputs = stackalloc double[3];
-            _state.Update(in bar, outputs);
-            return outputs[slot];
-        }
-    }
-
-    private sealed class GeneratedGuppyDistanceState(int[] lengths) : IMultiOutputState
-    {
-        private readonly Streaming.EmaState[] _averages = lengths.Select(length => new Streaming.EmaState(length)).ToArray();
-        public void Reset() { foreach (var average in _averages) average.Reset(); }
+        private readonly LbrPaintWindow _window = new(MovingAvgType.SimpleMovingAverage, length, lookback, multiplier);
+        public void Reset() => _window.Reset();
         public void Update(in Bar bar, Span<double> outputs)
         {
-            Span<double> values = stackalloc double[12];
-            for (var i = 0; i < values.Length; i++) values[i] = _averages[i].GetNext(bar.Close, commit: true);
-            outputs[0] = GuppyRibbonArithmetic.Distance(values[0], values[1], values[2], values[3], values[4], values[5]);
-            outputs[1] = GuppyRibbonArithmetic.Distance(values[6], values[7], values[8], values[9], values[10], values[11]);
+            var point = _window.Next(bar.High, bar.Low, bar.Close, true);
+            outputs[0] = point.Upper; outputs[1] = point.Lower; outputs[2] = point.Width;
         }
+        public void Dispose() { _window.Reset(); _window.Dispose(); }
     }
-
-    private sealed class GeneratedGuppyMultipleState(int[] lengths) : IMultiOutputState, IDisposable
+    private sealed class GeneratedLindaState(int fast, int slow, int signal, int count) : IMultiOutputState, IDisposable
     {
-        private readonly Streaming.EmaState[] _averages = lengths.Select(length => new Streaming.EmaState(length)).ToArray();
-        private readonly ExactPartialMeanWindow _smooth = new(1);
-        private readonly Streaming.EmaState _signal = new(13);
-        private bool _invalidSignal;
-        public void Reset() { foreach (var average in _averages) average.Reset(); _smooth.Reset(); _signal.Reset(); _invalidSignal = false; }
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _fast = Math.Max(1, fast) <= count ? new(fast) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _slow = Math.Max(1, slow) <= count ? new(slow) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _macdSignal = Math.Max(1, signal) <= count ? new(signal) : null;
+        private readonly Streaming.RoundedSimpleMovingAverageSmoother? _ppoSignal = Math.Max(1, signal) <= count ? new(signal) : null;
+        private bool _macdInvalid, _ppoInvalid;
+        public void Reset()
+        { _fast?.Reset(); _slow?.Reset(); _macdSignal?.Reset(); _ppoSignal?.Reset(); _macdInvalid = _ppoInvalid = false; }
         public void Update(in Bar bar, Span<double> outputs)
         {
-            Span<double> values = stackalloc double[27];
-            for (var i = 0; i < values.Length; i++) values[i] = _averages[i].GetNext(bar.Close, commit: true);
-            var fast = GuppyRibbonArithmetic.Mean(values[..11]);
-            var slow = GuppyRibbonArithmetic.Mean(values[11..]);
-            var raw = GuppyRibbonArithmetic.Percent(fast, slow);
-            _invalidSignal |= !double.IsFinite(raw);
-            // Preserve the unrepresentable primary output for the public output
-            // validator; finite-only smoothers must not obscure that rejection.
-            outputs[0] = double.IsFinite(raw) ? _smooth.Next(raw, true) : raw;
-            outputs[1] = _invalidSignal ? double.NaN : _signal.GetNext(raw, commit: true);
+            var f = _fast?.Next(bar.Close, true) ?? 0;
+            var s = _slow?.Next(bar.Close, true) ?? 0;
+            var ppo = RoundedPercentageChange.Of(f, s);
+            var macd = f - s;
+            _macdInvalid |= double.IsInfinity(macd); _ppoInvalid |= double.IsInfinity(ppo);
+            var macdSignal = _macdInvalid ? double.NaN : _macdSignal?.Next(macd, true) ?? 0;
+            var ppoSignal = _ppoInvalid ? double.NaN : _ppoSignal?.Next(ppo, true) ?? 0;
+            outputs[0] = macd; outputs[1] = macdSignal; outputs[2] = macd - macdSignal;
+            outputs[3] = ppo; outputs[4] = ppoSignal; outputs[5] = ppo - ppoSignal;
         }
-        public void Dispose() => _smooth.Dispose();
+        public void Dispose() { _fast?.Dispose(); _slow?.Dispose(); _macdSignal?.Dispose(); _ppoSignal?.Dispose(); }
     }
 
     private sealed class GeneratedLinearQuadraticState(int length) : IIndicatorState, IDisposable
@@ -8565,9 +8567,9 @@ internal static partial class ValuesBarExecution
         public void Dispose() { }
     }
 
-    private sealed class GeneratedWoodiePivotState : IMultiOutputState, IDisposable
+    private sealed class GeneratedDailyPivotState(bool standard) : IMultiOutputState, IDisposable
     {
-        private readonly Streaming.DailyPivotLevels _daily = new(false, woodie: true);
+        private readonly Streaming.DailyPivotLevels _daily = new(standard);
         public void Update(in Bar bar, Span<double> outputs)
         {
             var levels = _daily.Next(bar.Time, bar.Open, bar.High, bar.Low, bar.Close, true);
@@ -8577,9 +8579,9 @@ internal static partial class ValuesBarExecution
         public void Dispose() { }
     }
 
-    private sealed class GeneratedDailyPivotState(bool standard) : IMultiOutputState, IDisposable
+    private sealed class GeneratedWoodiePivotState : IMultiOutputState, IDisposable
     {
-        private readonly Streaming.DailyPivotLevels _daily = new(standard);
+        private readonly Streaming.DailyPivotLevels _daily = new(false, woodie: true);
         public void Update(in Bar bar, Span<double> outputs)
         {
             var levels = _daily.Next(bar.Time, bar.Open, bar.High, bar.Low, bar.Close, true);
