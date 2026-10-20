@@ -413,6 +413,7 @@ internal static partial class ValuesBarExecution
             or VostroIndicator { MaType: null, Level: > double.NegativeInfinity and < double.PositiveInfinity }
             or WilliamsFractalUp or WilliamsFractalDown or WilliamsFractalsUp or WilliamsFractalsDown or WilliamsFractals
             or WoodiePivotPoint
+            or CamarillaPivotPoint or FibonacciPivotPoint or DemarkPivotPoint or FloorPivotPoint
             or StandardPivotPoints or DynamicPivotPoints
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
@@ -1110,6 +1111,10 @@ internal static partial class ValuesBarExecution
         WilliamsFractalsDown fractal => new GeneratedWilliamsFractalState(Math.Max(2, fractal.Length), count, false),
         WilliamsFractals fractal => new GeneratedWilliamsFractalState(Math.Max(2, fractal.Length), count, true),
         WoodiePivotPoint => new GeneratedWoodiePivotState(),
+        CamarillaPivotPoint => new GeneratedPivotFamiliesState(0),
+        FibonacciPivotPoint => new GeneratedPivotFamiliesState(1),
+        DemarkPivotPoint => new GeneratedPivotFamiliesState(2),
+        FloorPivotPoint => new GeneratedPivotFamiliesState(3),
         StandardPivotPoints => new GeneratedDailyPivotState(true),
         DynamicPivotPoints => new GeneratedDailyPivotState(false),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
