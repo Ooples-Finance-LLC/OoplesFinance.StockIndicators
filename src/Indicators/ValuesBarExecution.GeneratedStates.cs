@@ -36,6 +36,7 @@ internal static partial class ValuesBarExecution
     }
 
     private static bool IsGeneratedState(IIndicator indicator) =>
+        indicator is LinearWeightedMovingAverageCore or LeoMovingAverage or McGinleyDynamic ||
         indicator is GeoMa or GeometricMeanMovingAverage ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
@@ -523,6 +524,9 @@ internal static partial class ValuesBarExecution
         MedianMa median => new GeneratedWindowStatisticsState(median.Length, count, 3),
         GeoMa geometric => new GeneratedGeometricMeansState(geometric.Length, count, false),
         GeometricMeanMovingAverage geometric => new GeneratedGeometricMeansState(geometric.Length, count, true),
+        LinearWeightedMovingAverageCore average => new GeneratedAverageCompositionsState(average.Length, count, 0),
+        LeoMovingAverage average => new GeneratedAverageCompositionsState(average.Length, count, 1),
+        McGinleyDynamic average => new GeneratedAverageCompositionsState(average.Length, count, 2),
         NormalizedVolume volume => new GeneratedNormalizedVolumeState(volume.Length, count),
         OCHistogram histogram => new GeneratedOcHistogramState(histogram.Length),
         ModifiedPriceVolumeTrend trend => new GeneratedModifiedPriceVolumeTrendState(trend.Length),
