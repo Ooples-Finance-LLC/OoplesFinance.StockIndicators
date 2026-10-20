@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
         indicator is EhlersTruncatedBandPassFilter truncated && IsTruncatedBandShared(truncated) ||
         indicator is EhlersVossPredictiveFilter voss && IsVossShared(voss) ||
         indicator is BollingerBandsAvgTrueRange ratio && StrengthWindow.Supports(ratio.MaType) && double.IsFinite(ratio.StdDevMult) ||
+        indicator is NaturalMa or FareySequenceWeightedMovingAverage or OptimalWeightedMovingAverage ||
         indicator is Midpoint or Midprice ||
         indicator is InformationRatio { MaType: null } information && double.IsFinite(information.Bmk) ||
         indicator is SharpeRatio { MaType: null } sharpe && double.IsFinite(sharpe.Bmk) ||
@@ -511,6 +512,9 @@ internal static partial class ValuesBarExecution
         SortinoRatio sortino => new GeneratedRiskRatioState(sortino.Length, sortino.Bmk, count, 2),
         Midpoint midpoint => new GeneratedRangeStatisticsState(midpoint.Length, count, 2),
         Midprice midprice => new GeneratedRangeStatisticsState(midprice.Length, count, 3),
+        NaturalMa natural => new GeneratedWindowMeansState(natural.Length, count, 0),
+        FareySequenceWeightedMovingAverage farey => new GeneratedWindowMeansState(farey.Length, count, 1),
+        OptimalWeightedMovingAverage optimal => new GeneratedWindowMeansState(optimal.Length, count, 2),
         NormalizedVolume volume => new GeneratedNormalizedVolumeState(volume.Length, count),
         OCHistogram histogram => new GeneratedOcHistogramState(histogram.Length),
         ModifiedPriceVolumeTrend trend => new GeneratedModifiedPriceVolumeTrendState(trend.Length),

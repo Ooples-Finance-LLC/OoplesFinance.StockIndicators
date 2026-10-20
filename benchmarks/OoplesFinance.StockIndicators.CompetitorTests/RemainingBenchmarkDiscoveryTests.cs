@@ -8,6 +8,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
 {
     [InlineData(typeof(RemainingRangeStatisticsBenchmarks), 16)]
     [Theory]
+    [InlineData(typeof(RemainingWindowMeansBenchmarks), 24)]
     [InlineData(typeof(RemainingRiskRatiosBenchmarks), 24)]
     [InlineData(typeof(RemainingVolumeReturnFollowupsBenchmarks), 32)]
     [InlineData(typeof(RemainingRunningEquityBenchmarks), 8)]
