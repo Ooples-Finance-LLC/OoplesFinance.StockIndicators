@@ -414,6 +414,7 @@ internal static partial class ValuesBarExecution
             or WilliamsFractalUp or WilliamsFractalDown or WilliamsFractalsUp or WilliamsFractalsDown or WilliamsFractals
             or WoodiePivotPoint
             or CamarillaPivotPoint or FibonacciPivotPoint or DemarkPivotPoint or FloorPivotPoint
+            or ElasticVolumeWeightedMovingAverageV1 { MaType: null } or ElasticVolumeWeightedMovingAverageV2
             or StandardPivotPoints or DynamicPivotPoints
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
@@ -512,6 +513,8 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        ElasticVolumeWeightedMovingAverageV1 average => new GeneratedElasticVolumeState(average.Length, count, 0),
+        ElasticVolumeWeightedMovingAverageV2 average => new GeneratedElasticVolumeState(average.Length, count, 1),
         InformationRatio information => new GeneratedRiskRatioState(information.Length, information.Bmk, count, 0),
         SharpeRatio sharpe => new GeneratedRiskRatioState(sharpe.Length, sharpe.Bmk, count, 1),
         SortinoRatio sortino => new GeneratedRiskRatioState(sortino.Length, sortino.Bmk, count, 2),
