@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
         indicator is EhlersTruncatedBandPassFilter truncated && IsTruncatedBandShared(truncated) ||
         indicator is EhlersVossPredictiveFilter voss && IsVossShared(voss) ||
         indicator is BollingerBandsAvgTrueRange ratio && StrengthWindow.Supports(ratio.MaType) && double.IsFinite(ratio.StdDevMult) ||
+        indicator is SimpleReturns or LogReturns ||
         indicator is NetVolume or Range or MarketFacilitationIndex ||
         indicator is HighestHigh { Length: > 0 } or LowestLow { Length: > 0 }
             or RollingMax { Length: > 0 } or RollingMin { Length: > 0 }
@@ -500,6 +501,8 @@ internal static partial class ValuesBarExecution
     {
         RollingMax maximum => new GeneratedRollingCloseExtremeState(maximum.Length, count, true),
         RollingMin minimum => new GeneratedRollingCloseExtremeState(minimum.Length, count, false),
+        SimpleReturns returns => new GeneratedLaggedReturnState(returns.Length, count, false),
+        LogReturns returns => new GeneratedLaggedReturnState(returns.Length, count, true),
         NetVolume => new GeneratedNetVolumeState(),
         Range => new GeneratedRawRangeState(),
         MarketFacilitationIndex => new GeneratedMarketFacilitationState(),
