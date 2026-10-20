@@ -36,6 +36,7 @@ internal static partial class ValuesBarExecution
     }
 
     private static bool IsGeneratedState(IIndicator indicator) =>
+        indicator is KendallRankCorrelationCoefficient or RSquared ||
         indicator is LinearWeightedMovingAverageCore or LeoMovingAverage or McGinleyDynamic ||
         indicator is GeoMa or GeometricMeanMovingAverage ||
         IsDemarkCountState(indicator) ||
@@ -527,6 +528,8 @@ internal static partial class ValuesBarExecution
         LinearWeightedMovingAverageCore average => new GeneratedAverageCompositionsState(average.Length, count, 0),
         LeoMovingAverage average => new GeneratedAverageCompositionsState(average.Length, count, 1),
         McGinleyDynamic average => new GeneratedAverageCompositionsState(average.Length, count, 2),
+        KendallRankCorrelationCoefficient correlation => new GeneratedCorrelationStatisticsState(correlation.Length, count, false),
+        RSquared correlation => new GeneratedCorrelationStatisticsState(correlation.Length, count, true),
         NormalizedVolume volume => new GeneratedNormalizedVolumeState(volume.Length, count),
         OCHistogram histogram => new GeneratedOcHistogramState(histogram.Length),
         ModifiedPriceVolumeTrend trend => new GeneratedModifiedPriceVolumeTrendState(trend.Length),
