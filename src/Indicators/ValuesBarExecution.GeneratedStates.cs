@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
         indicator is EhlersTruncatedBandPassFilter truncated && IsTruncatedBandShared(truncated) ||
         indicator is EhlersVossPredictiveFilter voss && IsVossShared(voss) ||
         indicator is BollingerBandsAvgTrueRange ratio && StrengthWindow.Supports(ratio.MaType) && double.IsFinite(ratio.StdDevMult) ||
+        indicator is Midpoint or Midprice ||
         indicator is InformationRatio { MaType: null } information && double.IsFinite(information.Bmk) ||
         indicator is SharpeRatio { MaType: null } sharpe && double.IsFinite(sharpe.Bmk) ||
         indicator is SortinoRatio { MaType: null, SecondAverage: null } sortino && double.IsFinite(sortino.Bmk) ||
@@ -508,6 +509,8 @@ internal static partial class ValuesBarExecution
         InformationRatio information => new GeneratedRiskRatioState(information.Length, information.Bmk, count, 0),
         SharpeRatio sharpe => new GeneratedRiskRatioState(sharpe.Length, sharpe.Bmk, count, 1),
         SortinoRatio sortino => new GeneratedRiskRatioState(sortino.Length, sortino.Bmk, count, 2),
+        Midpoint midpoint => new GeneratedRangeStatisticsState(midpoint.Length, count, 2),
+        Midprice midprice => new GeneratedRangeStatisticsState(midprice.Length, count, 3),
         NormalizedVolume volume => new GeneratedNormalizedVolumeState(volume.Length, count),
         OCHistogram histogram => new GeneratedOcHistogramState(histogram.Length),
         ModifiedPriceVolumeTrend trend => new GeneratedModifiedPriceVolumeTrendState(trend.Length),
