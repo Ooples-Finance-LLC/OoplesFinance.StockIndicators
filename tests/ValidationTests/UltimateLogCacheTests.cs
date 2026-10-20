@@ -62,4 +62,65 @@ public sealed class UltimateLogCacheTests
         var expected = SmallLog(new Fraction(19, 16), 98);
         Parallel.For(0, 32, _ => Same(expected, UltimatePowerWeights.Log(new Fraction(19, 16), 96)));
     }
+
+    private static UltimatePowerWeights.Bounds ReferenceLog(Fraction value, int bits)
+    {
+        var power = 0;
+        while (value < 1) { value *= 2; power--; }
+        while (value >= 2) { value /= 2; power++; }
+        var precision = bits + (int)new BigInteger(Math.Abs(power)).GetBitLength() + 2;
+        var core = SmallLog(value, precision);
+        var two = SmallLog(2, precision);
+        return power >= 0
+            ? new(core.Lower + power * two.Lower, core.Upper + power * two.Upper)
+            : new(core.Lower + power * two.Upper, core.Upper + power * two.Lower);
+    }
+
+    [Theory]
+    [InlineData(96)]
+    [InlineData(128)]
+    [InlineData(256)]
+    [InlineData(512)]
+    public void ScaledRatiosKeepEveryExactEndpoint(int bits)
+    {
+        foreach (var value in new[] { new Fraction(1, 50), new Fraction(19, 50),
+            new Fraction(2, 1), new Fraction(37, 2), new Fraction(int.MaxValue, 1),
+            new Fraction(1, int.MaxValue), new Fraction(BigInteger.One << 80, 3) })
+        {
+            var expected = ReferenceLog(value, bits);
+            for (var repeat = 0; repeat < 3; repeat++)
+                Same(expected, UltimatePowerWeights.Log(value, bits));
+        }
+    }
+
+    [Fact]
+    public void CompleteLogEvictionPreservesScaledEndpoints()
+    {
+        var value = new Fraction(19, 50);
+        var expected = ReferenceLog(value, 96);
+        Same(expected, UltimatePowerWeights.Log(value, 96));
+        for (var i = 1; i <= 600; i++)
+            _ = UltimatePowerWeights.Log(new Fraction(i, 10000), 96);
+        Same(expected, UltimatePowerWeights.Log(value, 96));
+    }
+
+    [Fact]
+    public void CompleteLogThreadsKeepPrecisionAndScaleSeparate()
+    {
+        var values = new[] { new Fraction(19, 50), new Fraction(37, 2), new Fraction(1, 50) };
+        var expected = values.Select(value => ReferenceLog(value, 96)).ToArray();
+        Parallel.For(0, 24, index =>
+        {
+            var item = index % values.Length;
+            Same(expected[item], UltimatePowerWeights.Log(values[item], 96));
+        });
+    }
+
+    [Fact]
+    public void NonpositiveLogArgumentsStillRejectAfterCacheWarmup()
+    {
+        _ = UltimatePowerWeights.Log(new Fraction(1, 50), 96);
+        Assert.Throws<ArgumentOutOfRangeException>(() => UltimatePowerWeights.Log(0, 96));
+        Assert.Throws<ArgumentOutOfRangeException>(() => UltimatePowerWeights.Log(-1, 96));
+    }
 }

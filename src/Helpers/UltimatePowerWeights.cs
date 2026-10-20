@@ -87,6 +87,9 @@ internal static class UltimatePowerWeights
     [ThreadStatic]
     private static Dictionary<(int Numerator, int Denominator, int Bits), Bounds>? _smallLogs;
 
+    [ThreadStatic]
+    private static Dictionary<(int Numerator, int Denominator, int Bits), Bounds>? _logs;
+
     private static Bounds SmallLog(Fraction value, int bits)
     {
         if (bits > 256 || value.Numerator > int.MaxValue || value.Denominator > int.MaxValue)
@@ -119,6 +122,25 @@ internal static class UltimatePowerWeights
     internal static Bounds Log(Fraction value, int bits)
     {
         if (value.Sign <= 0) throw new ArgumentOutOfRangeException(nameof(value));
+        if (bits > 256 || value.Numerator > int.MaxValue || value.Denominator > int.MaxValue)
+            return CalculateLog(value, bits);
+        var key = ((int)value.Numerator, (int)value.Denominator, bits);
+        var cache = _logs ??= new();
+        if (cache.TryGetValue(key, out var cached)) return cached;
+        var result = CalculateLog(value, bits);
+        // Scaling the cached small logarithms still combines large exact
+        // fractions. Reuse that unchanged result, with the same storage bounds.
+        if (Bits(result.Lower.Numerator) <= 4096 && Bits(result.Lower.Denominator) <= 4096
+            && Bits(result.Upper.Numerator) <= 4096 && Bits(result.Upper.Denominator) <= 4096)
+        {
+            if (cache.Count == 512) cache.Clear();
+            cache.Add(key, result);
+        }
+        return result;
+    }
+
+    private static Bounds CalculateLog(Fraction value, int bits)
+    {
         var exponent = Bits(value.Numerator) - Bits(value.Denominator);
         var scale = exponent >= 0 ? new Fraction(BigInteger.One << exponent, BigInteger.One)
             : Fraction.Grid(-exponent);
