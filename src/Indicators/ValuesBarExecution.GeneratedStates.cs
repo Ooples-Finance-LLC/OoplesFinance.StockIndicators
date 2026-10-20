@@ -36,6 +36,7 @@ internal static partial class ValuesBarExecution
     }
 
     private static bool IsGeneratedState(IIndicator indicator) =>
+        indicator is GeoMa or GeometricMeanMovingAverage ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
@@ -520,6 +521,8 @@ internal static partial class ValuesBarExecution
         PercentRank rank => new GeneratedWindowStatisticsState(rank.Length, count, 1),
         MedianValue median => new GeneratedWindowStatisticsState(median.Length, count, 2),
         MedianMa median => new GeneratedWindowStatisticsState(median.Length, count, 3),
+        GeoMa geometric => new GeneratedGeometricMeansState(geometric.Length, count, false),
+        GeometricMeanMovingAverage geometric => new GeneratedGeometricMeansState(geometric.Length, count, true),
         NormalizedVolume volume => new GeneratedNormalizedVolumeState(volume.Length, count),
         OCHistogram histogram => new GeneratedOcHistogramState(histogram.Length),
         ModifiedPriceVolumeTrend trend => new GeneratedModifiedPriceVolumeTrendState(trend.Length),
