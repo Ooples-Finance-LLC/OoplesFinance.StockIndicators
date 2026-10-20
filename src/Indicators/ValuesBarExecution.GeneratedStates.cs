@@ -396,6 +396,8 @@ internal static partial class ValuesBarExecution
             or ZeroLagSmoothedCycle
             or VostroIndicator { MaType: null, Level: > double.NegativeInfinity and < double.PositiveInfinity }
             or WilliamsFractalUp or WilliamsFractalDown or WilliamsFractalsUp or WilliamsFractalsDown or WilliamsFractals
+            or WoodiePivotPoint
+            or StandardPivotPoints or DynamicPivotPoints
             or EhlersAdaptiveCyberCycle { Alpha: > 0 and < 1 }
             or EhlersAdaptiveCenterOfGravityOscillator
             or EhlersSmoothedAdaptiveMomentum { MaType: MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage }
@@ -1060,6 +1062,9 @@ internal static partial class ValuesBarExecution
         WilliamsFractalsUp fractal => new GeneratedWilliamsFractalState(Math.Max(2, fractal.Length), count, true),
         WilliamsFractalsDown fractal => new GeneratedWilliamsFractalState(Math.Max(2, fractal.Length), count, false),
         WilliamsFractals fractal => new GeneratedWilliamsFractalState(Math.Max(2, fractal.Length), count, true),
+        WoodiePivotPoint => new GeneratedWoodiePivotState(),
+        StandardPivotPoints => new GeneratedDailyPivotState(true),
+        DynamicPivotPoints => new GeneratedDailyPivotState(false),
         EhlersAdaptiveCyberCycle cycle => new GeneratedAdaptiveCyberState(cycle.Length, cycle.Alpha),
         EhlersAdaptiveCenterOfGravityOscillator gravity => new GeneratedAdaptiveGravityState(gravity.Length),
         EhlersSmoothedAdaptiveMomentum momentum => new GeneratedSmoothedAdaptiveMomentumState(momentum.Length1, momentum.Length2, momentum.MaType),
@@ -8557,6 +8562,30 @@ internal static partial class ValuesBarExecution
             return result;
         }
         public void Reset() { Array.Clear(_history, 0, _history.Length); _index = _next = 0; }
+        public void Dispose() { }
+    }
+
+    private sealed class GeneratedWoodiePivotState : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.DailyPivotLevels _daily = new(false, woodie: true);
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var levels = _daily.Next(bar.Time, bar.Open, bar.High, bar.Low, bar.Close, true);
+            levels.AsSpan().CopyTo(outputs);
+        }
+        public void Reset() => _daily.Reset();
+        public void Dispose() { }
+    }
+
+    private sealed class GeneratedDailyPivotState(bool standard) : IMultiOutputState, IDisposable
+    {
+        private readonly Streaming.DailyPivotLevels _daily = new(standard);
+        public void Update(in Bar bar, Span<double> outputs)
+        {
+            var levels = _daily.Next(bar.Time, bar.Open, bar.High, bar.Low, bar.Close, true);
+            levels.AsSpan().CopyTo(outputs);
+        }
+        public void Reset() => _daily.Reset();
         public void Dispose() { }
     }
 

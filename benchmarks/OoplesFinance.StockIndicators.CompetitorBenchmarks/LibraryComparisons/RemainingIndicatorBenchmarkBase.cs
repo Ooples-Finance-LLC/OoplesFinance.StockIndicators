@@ -12,6 +12,7 @@ public abstract class RemainingIndicatorBenchmarkBase
     private Bar[] _bars = null!;
     protected virtual double OpenOffset => 0;
     protected virtual double GetOpen(int index, double price) => price + OpenOffset;
+    protected virtual DateTime GetTime(int index) => default;
     protected abstract IIndicator Create();
 
     [GlobalSetup]
@@ -20,7 +21,7 @@ public abstract class RemainingIndicatorBenchmarkBase
         _bars = Enumerable.Range(0, Count).Select(i =>
         {
             double price = 10 + (i * 13 % 101) / 8d;
-            return new Bar(default, GetOpen(i, price), price + 1, price - 2, price, i % 7 + 1);
+            return new Bar(GetTime(i), GetOpen(i, price), price + 1, price - 2, price, i % 7 + 1);
         }).ToArray();
         var indicator = Create();
         using var expected = Build(indicator, legacy: true);
