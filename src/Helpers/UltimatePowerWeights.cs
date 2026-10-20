@@ -163,23 +163,28 @@ internal static class UltimatePowerWeights
         // every Taylor degree. Each multiplication and division rounds outward.
         var precision = checked(bits + squares + Bits(bits) + 16);
         var scale = BigInteger.One << precision;
+        var scaleMask = scale - 1;
         var yLow = y.Numerator * scale / y.Denominator;
         var yHigh = CeilingPositive(y.Numerator * scale, y.Denominator);
         var totalLow = scale; var totalHigh = scale;
-        var termLow = scale; var termHigh = scale; BigInteger tail; var index = 0;
+        // The tail bound already computes the next upper Taylor term. Carry
+        // that exact integer into the next iteration instead of recomputing it.
+        var termLow = scale; var nextHigh = yHigh; BigInteger tail; var index = 0;
         do
         {
             index++;
             termLow = (termLow * yLow >> precision) / index;
-            termHigh = CeilingPositive((termHigh * yHigh + scale - 1) >> precision, index);
+            var termHigh = nextHigh;
             totalLow += termLow; totalHigh += termHigh;
-            var first = CeilingPositive((termHigh * yHigh + scale - 1) >> precision, index + 1);
-            tail = CeilingPositive(first * scale * (index + 2), scale * (index + 2) - yHigh);
+            nextHigh = CeilingPositive((termHigh * yHigh + scaleMask) >> precision, index + 1);
+            var tailScale = scale * (index + 2);
+            tail = CeilingPositive(nextHigh * tailScale, tailScale - yHigh);
         } while (tail > 2);
-        var lower = scale * scale / (totalHigh + tail);
-        var upper = CeilingPositive(scale * scale, totalLow);
+        var scaleSquared = scale * scale;
+        var lower = scaleSquared / (totalHigh + tail);
+        var upper = CeilingPositive(scaleSquared, totalLow);
         for (var i = 0; i < squares; i++)
-        { lower = lower * lower >> precision; upper = (upper * upper + scale - 1) >> precision; }
+        { lower = lower * lower >> precision; upper = (upper * upper + scaleMask) >> precision; }
         return new(new Fraction(lower, scale), new Fraction(upper, scale));
     }
 
