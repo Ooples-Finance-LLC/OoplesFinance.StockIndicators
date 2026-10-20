@@ -61,6 +61,11 @@ internal sealed class MacZWindow : IDisposable
         public static Number operator -(Number a, Number b) => a + new Number(-b._coefficient, b._exponent, b.Denominator, reduced: true);
         public static Number operator *(Number a, Number b)
         {
+            // Both fractions are reduced. With equal denominators, neither
+            // numerator has a cross factor to cancel (including exact squares).
+            if (a.Denominator == b.Denominator)
+                return new(a._coefficient * b._coefficient, checked(a._exponent + b._exponent),
+                    a.Denominator * b.Denominator, reduced: true);
             var crossA = BigInteger.GreatestCommonDivisor(BigInteger.Abs(a._coefficient), b.Denominator);
             var crossB = BigInteger.GreatestCommonDivisor(BigInteger.Abs(b._coefficient), a.Denominator);
             return new((a._coefficient / crossA) * (b._coefficient / crossB), checked(a._exponent + b._exponent),
