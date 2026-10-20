@@ -81,7 +81,30 @@ internal static class UltimatePowerWeights
         return bits;
     }
 
+    // Weight ratios repeat across bars even when the exponent changes. Reuse
+    // their exact intervals without changing precision or rounding decisions.
+    // Thread ownership avoids locks; both entry count and integer sizes are bounded.
+    [ThreadStatic]
+    private static Dictionary<(int Numerator, int Denominator, int Bits), Bounds>? _smallLogs;
+
     private static Bounds SmallLog(Fraction value, int bits)
+    {
+        if (bits > 256 || value.Numerator > int.MaxValue || value.Denominator > int.MaxValue)
+            return CalculateSmallLog(value, bits);
+        var key = ((int)value.Numerator, (int)value.Denominator, bits);
+        var cache = _smallLogs ??= new();
+        if (cache.TryGetValue(key, out var cached)) return cached;
+        var result = CalculateSmallLog(value, bits);
+        if (Bits(result.Lower.Numerator) <= 4096 && Bits(result.Lower.Denominator) <= 4096
+            && Bits(result.Upper.Numerator) <= 4096 && Bits(result.Upper.Denominator) <= 4096)
+        {
+            if (cache.Count == 512) cache.Clear();
+            cache.Add(key, result);
+        }
+        return result;
+    }
+
+    private static Bounds CalculateSmallLog(Fraction value, int bits)
     {
         var z = (value - 1) / (value + 1); var square = z * z;
         var term = z; Fraction sum = 0; var index = 0; var tolerance = Fraction.Grid(bits);
