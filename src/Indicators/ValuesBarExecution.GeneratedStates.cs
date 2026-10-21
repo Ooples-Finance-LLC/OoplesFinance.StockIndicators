@@ -59,6 +59,8 @@ internal static partial class ValuesBarExecution
         indicator is RapidRelativeStrengthIndex { MaType: null } or StochRsi { MaType: null }
             or StochasticRsiOscillator or StochasticRelativeStrengthIndex { MaType: null } ||
         indicator is Pfe or PolarizedFractalEfficiency { MaType: null } ||
+        indicator is T3 { MaType: null } ||
+        indicator is TillsonT3MovingAverage { MaType: null } tillson && double.IsFinite(tillson.VFactor) ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
@@ -538,6 +540,8 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        T3 tillson => new GeneratedTillsonAliasState(tillson.Length, .7),
+        TillsonT3MovingAverage tillson => new GeneratedTillsonAliasState(tillson.Length, tillson.VFactor),
         Pfe efficiency => new GeneratedPolarizedEfficiencyState(efficiency.Length, 5),
         PolarizedFractalEfficiency efficiency => new GeneratedPolarizedEfficiencyState(efficiency.Length, efficiency.SmoothLength),
         RapidRelativeStrengthIndex oscillator => new GeneratedRsiFollowupState(oscillator.Length, 1, 1, oscillator.Length, count, true),
