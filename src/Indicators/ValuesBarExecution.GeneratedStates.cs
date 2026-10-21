@@ -51,6 +51,8 @@ internal static partial class ValuesBarExecution
         indicator is IchimokuTenkanSen or IchimokuKijunSen or IchimokuSenkouSpanA or IchimokuSenkouSpanB or IchimokuChikouSpan ||
         indicator is Kst or KnowSureThing { MaType: null, SecondAverage: null, ThirdAverage: null, FourthAverage: null, FifthAverage: null } ||
         indicator is ShinoharaIntensityRatioA or ShinoharaIntensityRatioB ||
+        indicator is StochasticD or Stochastic { MaType: null } or StochasticK { MaType: null } or PricePosition { MaType: null }
+            or StochasticOscillator { MaType: null } or StochasticFastOscillator { MaType: null } or StochasticRegular { MaType: null } ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
@@ -530,6 +532,13 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        Stochastic oscillator => new GeneratedStochasticState(oscillator.KLength, oscillator.DLength, 3, MovingAvgType.SimpleMovingAverage, 0, count),
+        StochasticK oscillator => new GeneratedStochasticState(oscillator.Length, oscillator.SmoothLength1, oscillator.SmoothLength2, MovingAvgType.SimpleMovingAverage, 0, count),
+        PricePosition oscillator => new GeneratedStochasticState(oscillator.Length, oscillator.SmoothLength1, oscillator.SmoothLength2, MovingAvgType.SimpleMovingAverage, 0, count),
+        StochasticOscillator oscillator => new GeneratedStochasticState(oscillator.Length, oscillator.SmoothLength1, oscillator.SmoothLength2, MovingAvgType.SimpleMovingAverage, 0, count),
+        StochasticFastOscillator oscillator => new GeneratedStochasticState(oscillator.Length, oscillator.SmoothLength1, oscillator.SmoothLength2, MovingAvgType.ExponentialMovingAverage, 2, count),
+        StochasticRegular oscillator => new GeneratedStochasticState(oscillator.Length1, oscillator.Length2, 1, MovingAvgType.SimpleMovingAverage, 1, count),
+        StochasticD oscillator => new GeneratedStochasticDState(oscillator.Length, count),
         ShinoharaIntensityRatioA ratio => new GeneratedShinoharaState(ratio.Length, count, false),
         ShinoharaIntensityRatioB ratio => new GeneratedShinoharaState(ratio.Length, count, true),
         Kst bank => new GeneratedKstState([10, 15, 20, 30], [bank.Length, 10, 10, 15], 9, count),
