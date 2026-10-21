@@ -43,8 +43,8 @@ jobs:
       shards: ${{ steps.shards.outputs.matrix }}
       count: ${{ steps.shards.outputs.count }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
       - run: python -m unittest discover -s scripts -p "test_verify_competitor*.py"
@@ -77,12 +77,12 @@ jobs:
               print('matrix=' + json.dumps(list(range(count))), file=output)
               print('count=' + str(count), file=output)
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: competitor-binaries
           path: benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/
           retention-days: 7
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: competitor-contract-binaries
           path: |
@@ -101,11 +101,11 @@ jobs:
       matrix:
         shard: ${{ fromJSON(needs.build.outputs.shards) }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: competitor-contract-binaries
           path: contracts
@@ -115,7 +115,7 @@ jobs:
           contracts/benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorTests.dll
           contracts/contract-methods.json
           ${{ matrix.shard }} ${{ needs.build.outputs.count }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: competitor-contract-results-${{ matrix.shard }}
@@ -132,16 +132,16 @@ jobs:
       matrix:
         shard: ${{ fromJSON(needs.build.outputs.shards) }}
     steps:
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: competitor-binaries
           path: binaries
       - name: Verify complete trajectories
         run: dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --verify-library-shard ${{ matrix.shard }} ${{ needs.build.outputs.count }} shard-${{ matrix.shard }}.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: competitor-shard-${{ matrix.shard }}
           path: shard-${{ matrix.shard }}.json
@@ -150,8 +150,8 @@ jobs:
     needs: [build, contracts, correctness]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: competitor-shard-*
           path: results
@@ -173,11 +173,11 @@ jobs:
       COMPARISON_SHARD: ${{ matrix.shard }}
       COMPARISON_SHARDS: ${{ needs.build.outputs.count }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: competitor-binaries
           path: binaries
@@ -190,7 +190,7 @@ jobs:
         run: >-
           python scripts/verify-competitor-performance.py benchmarks/competitor-library-manifest.json
           performance ${{ matrix.shard }} ${{ needs.build.outputs.count }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: competitor-performance-${{ matrix.shard }}
@@ -202,7 +202,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Require all performance shards to pass
@@ -210,7 +210,7 @@ jobs:
           BUILD_RESULT: ${{ needs.build.result }}
           PERFORMANCE_RESULT: ${{ needs.performance.result }}
         run: test "$BUILD_RESULT" = success && test "$PERFORMANCE_RESULT" = success
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: competitor-performance-[0-9]*
           path: performance-shards
@@ -231,7 +231,7 @@ jobs:
               summary.write("Download **competitor-performance-summary** from this run for every indicator's timing, dispersion, allocation, and ratio, plus raw evidence.\n\n")
               summary.write("Both libraries are measured at 1,000 and 10,000 bars. Unavailable APIs are listed explicitly. Shared-runner ShortRun timings are diagnostic, not speed guarantees.\n")
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: competitor-performance-summary
           path: performance-summary/
