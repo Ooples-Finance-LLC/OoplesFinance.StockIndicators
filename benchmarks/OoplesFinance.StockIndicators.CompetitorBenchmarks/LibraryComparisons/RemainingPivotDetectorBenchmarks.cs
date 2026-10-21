@@ -13,7 +13,7 @@ public class RemainingPivotDetectorBenchmarks : RemainingIndicatorBenchmarkBase
     [Benchmark] public double Shared() => Run(legacy: false);
     protected override IIndicator Create() => Operation switch
     {
-        "PivotDetectorOscillator" => new PivotDetectorOscillator(),
+        "PivotDetectorOscillator" => new PivotDetectorOscillator(14),
         _ => throw new InvalidOperationException($"Unknown benchmark operation: {Operation}.")
     };
 }
