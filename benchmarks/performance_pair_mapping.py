@@ -8,6 +8,51 @@ import re
 import zipfile
 
 
+def ternary_native_mappings(source, operations, pairs):
+    """Resolve only two-way dispatch whose complete branches are direct native calls."""
+    if len(operations) != 2 or len(set(operations)) != 2:
+        return {}
+    result = {}
+    call = re.compile(r'\s*(?:new\s+)?(QuanTAlib\.\w+|Functions\.\w+<[^<>]+>|Candles\.\w+<[^<>]+>)\s*\(')
+
+    def read_call(start):
+        match = call.match(source, start)
+        if not match:
+            return None
+        depth, index = 1, match.end()
+        # Strings/comments are outside this deliberately small expression grammar.
+        while index < len(source) and depth:
+            char = source[index]
+            if char in '\"\';' or source[index:index + 2] in ('//', '/*'):
+                return None
+            depth += (char == '(') - (char == ')')
+            index += 1
+        if depth:
+            return None
+        native = match[1].split('<')[0]
+        pair = native if native.startswith('QuanTAlib.') else 'TaLib.' + native
+        return pair, index
+
+    for condition in re.finditer(r'\bOperation\s*==\s*"([^"\\]+)"\s*\?', source):
+        selected = condition[1]
+        if selected not in operations:
+            continue
+        first = read_call(condition.end())
+        if first is None:
+            continue
+        colon = re.match(r'\s*:', source[first[1]:])
+        if colon is None:
+            continue
+        second = read_call(first[1] + colon.end())
+        if second is None or not re.match(r'\s*;', source[second[1]:]):
+            continue
+        other = next(op for op in operations if op != selected)
+        for operation, native in ((selected, first[0]), (other, second[0])):
+            if native in pairs:
+                result.setdefault(operation, set()).add(native)
+    return result
+
+
 def source_mappings(source, fixture, pairs):
     match = re.search(r'\[Params\((.*?)\)\]\s*public string Operation', source, re.S)
     if match:
@@ -19,9 +64,10 @@ def source_mappings(source, fixture, pairs):
         return []  # A multi-API batch is not an individual API measurement.
     else:
         operations = [fixture]
+    ternary = ternary_native_mappings(source, operations, pairs)
     rows = []
     for operation in operations:
-        candidates = set()
+        candidates = set(ternary.get(operation, ()))
         if operation in pairs:
             candidates.add(operation)
         # Require the actual switch arm, not an unrelated reference in the file.
