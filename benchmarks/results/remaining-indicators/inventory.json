@@ -1801,7 +1801,13 @@
       "options": [
         "DominantCycleTunedRelativeStrengthIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "DominantCycleTunedRelativeStrengthIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/cycle-tuned-rsi-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "DonchianChannelWidth",
@@ -9875,21 +9881,39 @@
       "options": [
         "TurboStochasticsFastSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "TurboStochasticsFastSpecOptions": [
+          "benchmarks/results/remaining-indicators/turbo-followups-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "TurboStochasticsSlow",
       "options": [
         "TurboStochasticsSlowSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "TurboStochasticsSlowSpecOptions": [
+          "benchmarks/results/remaining-indicators/turbo-followups-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "TurboTrigger",
       "options": [
         "TurboTriggerSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "TurboTriggerSpecOptions": [
+          "benchmarks/results/remaining-indicators/turbo-followups-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "TwiggsMoneyFlow",
@@ -13061,6 +13085,7 @@
     "benchmarks/results/remaining-indicators/countback-cpu-contracts.json": "d5133875e5aefbea7aa817fbe8dc4936dceb21b2c34acbdfbd6980e0826e9a19",
     "benchmarks/results/remaining-indicators/cubicweight-cpu-contracts.json": "1160ca6602b0ef2cfe1cfcda71770c5f664d29a07aaf819edd080c3d8b56a115",
     "benchmarks/results/remaining-indicators/cumulative-contracts.json": "df22718d18ef29454a49ac78faa6619c8d0054f92c2490cd5d8d865dd6f9bc08",
+    "benchmarks/results/remaining-indicators/cycle-tuned-rsi-integrated-contracts.json": "c3894fc1d22db060301d50e8a924881b2dc9459a15eff67f1a24111edb7aa178",
     "benchmarks/results/remaining-indicators/cycledecomposition-cpu-contracts.json": "fb69eb51b9f06e1b4ba36a58002574f0a30c08988ed600ae7ea5b944f4255c8d",
     "benchmarks/results/remaining-indicators/cycletrend-contracts.json": "eb798f32e5e030d78860e763f109a058090e9f9e67fddd1abbb3766f5344a07d",
     "benchmarks/results/remaining-indicators/damping-cpu-contracts.json": "dac50ce984407c22b261739c483ac494b7dbd04f39ab28e2d15f7f326daead71",
@@ -13262,6 +13287,7 @@
     "benchmarks/results/remaining-indicators/trendwindow-contracts.json": "32e63184f9118c5885bfb89ce0f354437f70cda2d18c3bdcddcbb969e2fec52b",
     "benchmarks/results/remaining-indicators/truestrength-contracts.json": "0d0395603bb7ff803dceea689c66a0b16c16e5c6493d494242a60b58709fed8f",
     "benchmarks/results/remaining-indicators/truncatedband-contracts.json": "7a918e4d4ced8b39865802a157ab493ed16ca0e35fe13d1b7630470f9bb00a9d",
+    "benchmarks/results/remaining-indicators/turbo-followups-integrated-contracts.json": "956514efe0f19af88d6cd06a0498c6e696e06afbcf8c71d758dd09241cb7bc0e",
     "benchmarks/results/remaining-indicators/twelfth-integrated-contracts.json": "bd87b0be0898a2864a6738e34462c8b98aefba906583582fa15fa1296ee84536",
     "benchmarks/results/remaining-indicators/ultimatemomentum-contracts.json": "6d4a96b05a9467482b5743abde8458d8ab5aada891c773f658707af86f6d2449",
     "benchmarks/results/remaining-indicators/ultimatepair-contracts.json": "977d7050d3468e8b1ad385eefd7549034101ffde0f3dab35c6c7abdc5e98d9dd",
@@ -13504,6 +13530,7 @@
     "src/Indicators/ValuesBarExecution.CorrelationStatistics.cs": "7bc077825f914837064a3655dfb46b07ecae15653c7b5faeca72a9baccbc834e",
     "src/Indicators/ValuesBarExecution.Curvature.cs": "83d1662a42c387fbd37b40e23bddb2d237987c8a5a99c85c1bb0538a100d3b7d",
     "src/Indicators/ValuesBarExecution.CurvatureWide.cs": "27f1a6c4057985667d8388065fb48117b3a5a65308e87ac05f5a058842b068c6",
+    "src/Indicators/ValuesBarExecution.CycleTunedRsi.cs": "c502f8334291158ab6a38247683ee8b654e2cac481453f60ec5f62b9d1f76acd",
     "src/Indicators/ValuesBarExecution.DeviationAverage.cs": "e5d2fb18a1c1f8cb45514a4acaf7a837c19a94ddb739eead7c51f32f3f4c96df",
     "src/Indicators/ValuesBarExecution.DeviationRatio.cs": "c5e93d6742ef428af5f4e5238454cb6d74b2741f093822056538727f7dbc1b99",
     "src/Indicators/ValuesBarExecution.ElasticVolume.cs": "59e0b971e7f66eb57d1f4b45e91dbd65265024e7ddddb50d4afa6e42c5f522b8",
@@ -13514,7 +13541,7 @@
     "src/Indicators/ValuesBarExecution.GOscillators.cs": "4a4b6c6d79f77b11a17788eeb49c882405866ba632948a0afdb4e5887108d3c5",
     "src/Indicators/ValuesBarExecution.GatorMeanness.cs": "56179f71b9f44a134b2400cf59572d12a30274cddcfde71874745ea0cf351ff3",
     "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "e3776bd08dc97ce8160a867134d170ff5e9acde145c386d6ca73dd695114eb65",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "2500d3bbe25e8a542ffd776880214ed8f12e285561b20a3aca5497b434f4e081",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Ichimoku.cs": "459397c5a7db8d4e7705eee86fb78d66bcfbc55b279a915f5acd7870fcff0fd7",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
@@ -13567,6 +13594,7 @@
     "src/Indicators/ValuesBarExecution.Triangular.cs": "a7cc907c59d3c17e5987fbbae6b385703ad704b5fd2cf2e4e7b6497ce52a57d2",
     "src/Indicators/ValuesBarExecution.TripleRate.cs": "471b85b75f2c2ccdf139da222d2dc9266945838a5391a56c4fe4231dff7c0f91",
     "src/Indicators/ValuesBarExecution.TrueRange.cs": "2bb456459c323b86905775c2909ff19df4143aa4b6e705db5bd4b00ddd472c20",
+    "src/Indicators/ValuesBarExecution.TurboFollowups.cs": "afcffcc24251cf0a16ec09a5b9af9bc73627683204a7f0cc3199089df390903a",
     "src/Indicators/ValuesBarExecution.Ultimate.cs": "af074c00625cd0385aabb85ef4e24c275ca8f6c438d7635b46528cd9cf4835cd",
     "src/Indicators/ValuesBarExecution.VariableSma.cs": "876ef5c14c8a1b1b4c776c4e8cba47da439feef2eefe241f792823c4fd44705b",
     "src/Indicators/ValuesBarExecution.VolumeReturnFollowups.cs": "05a50467dab4989562da5748408d4db5685488f2986aa975146f1e4ef7f27d71",
