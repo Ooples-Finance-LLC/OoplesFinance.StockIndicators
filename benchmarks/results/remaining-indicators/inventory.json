@@ -5442,7 +5442,13 @@
       "options": [
         "JmaSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "JmaSpecOptions": [
+          "benchmarks/results/remaining-indicators/recursivealiases-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "KalmanSmoother",
@@ -5599,7 +5605,13 @@
       "options": [
         "KamaSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "KamaSpecOptions": [
+          "benchmarks/results/remaining-indicators/kama-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "KaufmanBinaryWave",
@@ -5916,7 +5928,13 @@
       "options": [
         "LiquidRelativeStrengthIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "LiquidRelativeStrengthIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/natural-liquid-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "LogReturns",
@@ -12959,6 +12977,7 @@
     "benchmarks/results/remaining-indicators/insync-cpu-contracts.json": "4a713d5f052e27c7d95ff8aedc26a4aa7b1d982a90a14807b4504be8f88913fd",
     "benchmarks/results/remaining-indicators/internalbar-cpu-contracts.json": "46452570339c919796efd1a4d4a1f9638b9c4720ca909245ba81ff7b09ab85cb",
     "benchmarks/results/remaining-indicators/japanese-cpu-contracts.json": "2564fe1b46627ffd37dba75b8db4de72154d0a59c1386828dc77efbc88124998",
+    "benchmarks/results/remaining-indicators/kama-integrated-contracts.json": "21a520374516b522be02ed343922690ae5f14f6ed84e73f86620c0a1d264f890",
     "benchmarks/results/remaining-indicators/karobeinkwan-adaptive-contracts.json": "55070b46ac4b3d266330a3f87b484fe8014653dcddfc4e06e52fe6c4080c3086",
     "benchmarks/results/remaining-indicators/kasecore-cpu-contracts.json": "46e740b8229f01f2524c59b65c9e437f96374c98ffc28ad3ed7dbbbaf91bde2b",
     "benchmarks/results/remaining-indicators/kasepeak-cpu-contracts.json": "0fed45cfde0fa93f38ccd17d3ffd8c621645d46dfdb0731f0b8e6b60760aa863",
@@ -12975,6 +12994,7 @@
     "benchmarks/results/remaining-indicators/median-contracts.json": "b18775b513e4c448d9c1873727276e24b1162a57aeaf82856d0596236c745af1",
     "benchmarks/results/remaining-indicators/momentumcomposites-cpu-contracts.json": "457a8a90410ee628ccf123d5f089992a5e677b8b5f9aa3a3f0ead190c25ba723",
     "benchmarks/results/remaining-indicators/moneyflowpercent-contracts.json": "7fe650d2ef69da7a28d6f133eeda224b7701ba490cd24be0b9aca9bfba5a54e6",
+    "benchmarks/results/remaining-indicators/natural-liquid-integrated-contracts.json": "ee8e2afe6cd4dda6be8fdccf9002a2b45004ea663ee7eed54b5208c06385a8f9",
     "benchmarks/results/remaining-indicators/nineteenth-integrated-contracts.json": "7b9856aa9eac881ea7615ba995eabffe544b48179cd14ec117ba667ffd83189b",
     "benchmarks/results/remaining-indicators/ninth-adaptive-contracts.json": "e6451e8bc7fe4aeb3b37548bd45accee064877963536e78e38654d8554b30c59",
     "benchmarks/results/remaining-indicators/normalization-cpu-contracts.json": "452dadf28444da371dd6730593633f4b83503e16300ad824482ecbb9787c4249",
@@ -13006,6 +13026,7 @@
     "benchmarks/results/remaining-indicators/rangestops-cpu-contracts.json": "ae523193e6bcd0ed5e084b88a40a2b70ed0a45f868b43f2b57d22612cc9826e2",
     "benchmarks/results/remaining-indicators/ratio-contracts.json": "3fa30f61f1befe6d233fccacab9ef8628629da2f0cd693346e6336da64f301ea",
     "benchmarks/results/remaining-indicators/ratioswitch-contracts.json": "724e2d4f066285b642f02b372b8a909c74e366fbd4b97370001b56a61d46b116",
+    "benchmarks/results/remaining-indicators/recursivealiases-integrated-contracts.json": "ab02eafce0b95c1ac5a0ce40f1ffa3dd2d34e52dc61095cd8cb9cf619aa271a5",
     "benchmarks/results/remaining-indicators/recursiveenvelopes-contracts.json": "53992db6915405f5d358fb371d75d409eee2390090a7f33460cae8210b30c09a",
     "benchmarks/results/remaining-indicators/recursiveextra-contracts.json": "bd4b8d492d0d1a6ae0da8bd91a374c5bc3abbb20046825db268a915510ae7c60",
     "benchmarks/results/remaining-indicators/regression-contracts.json": "d4dcf685acb25640598dc00e7ab31fc0acab5fb5b52d5a050213497b1caef95d",
@@ -13301,12 +13322,14 @@
     "src/Indicators/ValuesBarExecution.GOscillators.cs": "4a4b6c6d79f77b11a17788eeb49c882405866ba632948a0afdb4e5887108d3c5",
     "src/Indicators/ValuesBarExecution.GatorMeanness.cs": "56179f71b9f44a134b2400cf59572d12a30274cddcfde71874745ea0cf351ff3",
     "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "d3e7e429171edbe45c6e9e18623e5febd32b9594f21877700e7f350c688364d8",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "4f2393a9de2c208bdd5b9397eafaa63052d6465a683dc3fe480618a63d383b7f",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
+    "src/Indicators/ValuesBarExecution.Kama.cs": "d1bc729aa26955e46b55057f916b73b5d359fed7a803295ad2583168d25bd045",
     "src/Indicators/ValuesBarExecution.LaggedReturns.cs": "86122ae31d6b8addab098c72675ba5cb4708a5bb13e63e4dace2598820e43154",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
+    "src/Indicators/ValuesBarExecution.NaturalLiquid.cs": "aaef1701de66854ca353ac6483c01233e537dab13cfcbcf17abb88314742f1b1",
     "src/Indicators/ValuesBarExecution.NullableBalanceOfPower.cs": "bade785e091a9687d4fe4bc7cba2fca53e304fc723dd343921fde6bb49d92f23",
     "src/Indicators/ValuesBarExecution.OldestHilbert.cs": "d6adeb033cb9857cd3a7fd84159fc7fc17f9201c79b6fce084cec9e514fd9b98",
     "src/Indicators/ValuesBarExecution.OnBalanceVolume.cs": "31f417d74484fc11cfb7ac419f0828cc17c8b66776bad717c37941ee80bd6077",
@@ -13321,6 +13344,7 @@
     "src/Indicators/ValuesBarExecution.QuarticAverage.cs": "bcd8f8053135e1ce2ff1d31549b36fe0650cf5c88cad740e871004fe8dc1951b",
     "src/Indicators/ValuesBarExecution.RangeStatistics.cs": "5750db5fc02a859066364fc4332c1f2cf73148243674fbf2f8bec2db628519d1",
     "src/Indicators/ValuesBarExecution.RateOfChange.cs": "3d7913c09b401e0b3537163d920e99b36b64b7d23003ad87111483eced78f707",
+    "src/Indicators/ValuesBarExecution.RecursiveAliases.cs": "8b3e195cceacfa2e0877053319a6a20b344a7d8546e40dd96a2c80b820dac19f",
     "src/Indicators/ValuesBarExecution.Regression.cs": "0699d0e7298ffbd15a6f963efd0faebc1c4409b31bdc4baeefd62084876a1719",
     "src/Indicators/ValuesBarExecution.RegressionStatistics.cs": "ba7f0f7faf929081e3584708991a12a4c7c819b8240483eb2761419e4f094b0e",
     "src/Indicators/ValuesBarExecution.Rickshaw.cs": "4aefbe7300928a69a40234a04325663c088d163ced52732fe48b78ec31222b0a",
