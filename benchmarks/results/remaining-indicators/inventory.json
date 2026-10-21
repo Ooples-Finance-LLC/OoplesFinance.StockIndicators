@@ -7069,14 +7069,26 @@
       "options": [
         "OptimizedTrendTrackerSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "OptimizedTrendTrackerSpecOptions": [
+          "benchmarks/results/remaining-indicators/optimized-trend-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "OscOscillator",
       "options": [
         "OscOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "OscOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/osc-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "OscarIndicator",
@@ -10149,7 +10161,13 @@
       "options": [
         "UtBotAlertsSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "UtBotAlertsSpecOptions": [
+          "benchmarks/results/remaining-indicators/utbot-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ValueChartIndicator",
@@ -13240,7 +13258,9 @@
     "benchmarks/results/remaining-indicators/ohlcvolatility-contracts.json": "1d5edbfd26d6ebdf9ef380436a0949aba07842171abd3cb39b5c4fe699c0bc67",
     "benchmarks/results/remaining-indicators/onelc-contracts.json": "37585e178c05f37e7d3660483fe89469d00df864824585ca5c83955f9984571b",
     "benchmarks/results/remaining-indicators/openclose-contracts.json": "8f247f405099edc945ebf4a999600d70f8d288601d219434b212ba9dcda77d12",
+    "benchmarks/results/remaining-indicators/optimized-trend-integrated-contracts.json": "7e1a2dc519d2df7a90a45b886eaf0d8ce8bf6ab8cb70b4e8cc3cd9e64690e5ec",
     "benchmarks/results/remaining-indicators/orderedvol-contracts.json": "5bd5f63b1578750f7281b719af97bbb3bc33e5ee3bbb42128d7839d13588ad44",
+    "benchmarks/results/remaining-indicators/osc-integrated-contracts.json": "bb67f16fe24597df0ac2bd430f4235758763152fb97d938e4dbc9eaecd6a00e4",
     "benchmarks/results/remaining-indicators/oscar-phase-integrated-contracts.json": "169c5cb79ea9bf3adc7cb261dfb93071c8c6ae8837e1b837325dbe1f047f15f7",
     "benchmarks/results/remaining-indicators/oscillator-contracts.json": "a0ecd34360e016bb6e502f553b181f91e17dede91b3028a1184ce78f102a4367",
     "benchmarks/results/remaining-indicators/oscillatoralias-contracts.json": "cf98dfcaf7b380585620d7c4debd7789055f96b87f6915b5ad5348bd7fd8f1db",
@@ -13326,6 +13346,7 @@
     "benchmarks/results/remaining-indicators/ultimatemomentum-contracts.json": "6d4a96b05a9467482b5743abde8458d8ab5aada891c773f658707af86f6d2449",
     "benchmarks/results/remaining-indicators/ultimatepair-contracts.json": "977d7050d3468e8b1ad385eefd7549034101ffde0f3dab35c6c7abdc5e98d9dd",
     "benchmarks/results/remaining-indicators/unipseudo-contracts.json": "7c0c6b68779308899d7a3d2102e38137ad9f432072bbbc9027dd9066c4bd087d",
+    "benchmarks/results/remaining-indicators/utbot-integrated-contracts.json": "82d44b6afc19a3c4dd61edd04a2c01b4b55477b33f33c179e59d2f7e5c78762e",
     "benchmarks/results/remaining-indicators/valuechart-contracts.json": "34625de22bf366efd139df16e3d52aec214baa8651e14ef205842f8b233eff2d",
     "benchmarks/results/remaining-indicators/variablelength-contracts.json": "fed51af6af609d4f6d0c294f545183638cd88fbc6820e4296cdc11bb31ff0acc",
     "benchmarks/results/remaining-indicators/verticalaverage-contracts.json": "b04dffeef1c3f9dc0f94e7d1acc82271334f72bd90779cff57b80a5e7fe8078d",
@@ -13575,7 +13596,7 @@
     "src/Indicators/ValuesBarExecution.GOscillators.cs": "4a4b6c6d79f77b11a17788eeb49c882405866ba632948a0afdb4e5887108d3c5",
     "src/Indicators/ValuesBarExecution.GatorMeanness.cs": "56179f71b9f44a134b2400cf59572d12a30274cddcfde71874745ea0cf351ff3",
     "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "8a6685f6ee8d791440feabfe42cb97d4ccb6d8cd284e2741b98b873692f32ef5",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "5c61e252599a1ef2acd8edab27c06e756f4e1d1292ea4c41934a3c9788009ac0",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Ichimoku.cs": "459397c5a7db8d4e7705eee86fb78d66bcfbc55b279a915f5acd7870fcff0fd7",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
@@ -13592,6 +13613,8 @@
     "src/Indicators/ValuesBarExecution.ObvFollowups.cs": "46ac88ef7da0faa8eaf1431090cbef8c2b15b1336d41754d637fede81c9c80c5",
     "src/Indicators/ValuesBarExecution.OldestHilbert.cs": "d6adeb033cb9857cd3a7fd84159fc7fc17f9201c79b6fce084cec9e514fd9b98",
     "src/Indicators/ValuesBarExecution.OnBalanceVolume.cs": "31f417d74484fc11cfb7ac419f0828cc17c8b66776bad717c37941ee80bd6077",
+    "src/Indicators/ValuesBarExecution.OptimizedTrend.cs": "c61e3c44cf80c1c22a3a74911797618b843b41fd3556ff069de58a24b17894bf",
+    "src/Indicators/ValuesBarExecution.Osc.cs": "211feef04faf79f638131115a92b8861262f1a7bf9b118d4c7008690f860d162",
     "src/Indicators/ValuesBarExecution.OscarPhase.cs": "d9d72813abd77aedbe9696729c6e6af8cffa38443e3747dbefc406c9dde0bfb3",
     "src/Indicators/ValuesBarExecution.Overshoot.cs": "fcada6e7177d7c71701dc4cd187ad679e4f5143a35c4a336cc3ede4cb101ac22",
     "src/Indicators/ValuesBarExecution.PairStatistics.cs": "e6253a7b79f715de3afa2968ef8ca4027d82e1cdb880187ae9192b5f1f99176f",
@@ -13634,6 +13657,7 @@
     "src/Indicators/ValuesBarExecution.TrueRange.cs": "2bb456459c323b86905775c2909ff19df4143aa4b6e705db5bd4b00ddd472c20",
     "src/Indicators/ValuesBarExecution.TurboFollowups.cs": "afcffcc24251cf0a16ec09a5b9af9bc73627683204a7f0cc3199089df390903a",
     "src/Indicators/ValuesBarExecution.Ultimate.cs": "af074c00625cd0385aabb85ef4e24c275ca8f6c438d7635b46528cd9cf4835cd",
+    "src/Indicators/ValuesBarExecution.UtBot.cs": "7c03ae67c87ab5ac630dfdecd56d943db6eebb777e803e7948cd66f597f7fb7f",
     "src/Indicators/ValuesBarExecution.VariableSma.cs": "876ef5c14c8a1b1b4c776c4e8cba47da439feef2eefe241f792823c4fd44705b",
     "src/Indicators/ValuesBarExecution.VolumeReturnFollowups.cs": "05a50467dab4989562da5748408d4db5685488f2986aa975146f1e4ef7f27d71",
     "src/Indicators/ValuesBarExecution.VolumeWeightedPrice.cs": "d81fd156c5e6a28467bb3a50d8c532ba788f154785bd0a946c4de4c000f3923b",
