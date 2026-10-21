@@ -7303,7 +7303,16 @@
         "PfeSpecOptions",
         "PolarizedFractalEfficiencySpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "PfeSpecOptions": [
+          "benchmarks/results/remaining-indicators/polarized-efficiency-integrated-contracts.json"
+        ],
+        "PolarizedFractalEfficiencySpecOptions": [
+          "benchmarks/results/remaining-indicators/polarized-efficiency-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "PolynomialLeastSquaresMovingAverage",
@@ -7903,7 +7912,13 @@
       "options": [
         "RapidRelativeStrengthIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "RapidRelativeStrengthIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/rsi-followups-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "RateOfChange",
@@ -9097,7 +9112,19 @@
         "StochasticRelativeStrengthIndexSpecOptions",
         "StochasticRsiOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "StochRsiSpecOptions": [
+          "benchmarks/results/remaining-indicators/rsi-followups-integrated-contracts.json"
+        ],
+        "StochasticRelativeStrengthIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/rsi-followups-integrated-contracts.json"
+        ],
+        "StochasticRsiOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/rsi-followups-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "StollerAverageRangeChannels",
@@ -13104,6 +13131,7 @@
     "benchmarks/results/remaining-indicators/parabolic-sar-integrated-contracts.json": "97b892678287d4ea039b702f1340e0a8b14f949f384b7bbf4fdf9236dea8bc6b",
     "benchmarks/results/remaining-indicators/pivotfamilies-integrated-contracts.json": "cf593b467644abf480ad43c4c64e128d1a4ddab46bfc9e8fb6efa48fc988790e",
     "benchmarks/results/remaining-indicators/pmofamily-cpu-contracts.json": "16d76b00cc854bac1ba27e44f14ee6a767bc16460b9fdb64b5e4648809755a47",
+    "benchmarks/results/remaining-indicators/polarized-efficiency-integrated-contracts.json": "9a9f7a76c937a9000edf9ac0f36d908d83af83139edaa9cdf30efe87553feb69",
     "benchmarks/results/remaining-indicators/polefilter-contracts.json": "14f8ce4bf6f089d654d38e64b0f2e87c833b3c425e14209dde54db912af10b3a",
     "benchmarks/results/remaining-indicators/polynomialfit-contracts.json": "f8d2c2dcede02bb18c105d60cac4c44b9758004738f81c75019942536d3ed33d",
     "benchmarks/results/remaining-indicators/poweredkaufman-cpu-contracts.json": "1d3870304993a31aab97c790b9f860fe60c69def7e8977d7514c6d36a4f6014e",
@@ -13137,6 +13165,7 @@
     "benchmarks/results/remaining-indicators/riskratios-integrated-contracts.json": "60ade3a26f48742a4450659625509fafec113b7d3c9ef8b30fa1110fef4b564e",
     "benchmarks/results/remaining-indicators/rollingextrema-contracts.json": "bbf84a577ead1b115713b27fa6df58a2ae57b4c20b51a48881d6ffb55f76ab4d",
     "benchmarks/results/remaining-indicators/roofing-contracts.json": "c24495d59beef30de42eaf09461f214ff89cf9fa7797d74bd9701fb181baebf1",
+    "benchmarks/results/remaining-indicators/rsi-followups-integrated-contracts.json": "b8ae6a926fe40b3a0caae4e43039ede989b41394f0929c1b75c7166a56128bd6",
     "benchmarks/results/remaining-indicators/rsxjrc-cpu-contracts.json": "b6375bc35362a11c1fb7f2a6224f11364656bc89d2c3f0c5701b78e1c61989a7",
     "benchmarks/results/remaining-indicators/runningequity-integrated-contracts.json": "4f3c84a1f642b394f415a60e18d102a797b45c6820c9ce471ea8148562656c9a",
     "benchmarks/results/remaining-indicators/scalperhurst-contracts.json": "49088bf1bbcab08c416cec9ae693854076266a6aa5ad662fdc18489fcb6d9572",
@@ -13422,7 +13451,7 @@
     "src/Indicators/ValuesBarExecution.GOscillators.cs": "4a4b6c6d79f77b11a17788eeb49c882405866ba632948a0afdb4e5887108d3c5",
     "src/Indicators/ValuesBarExecution.GatorMeanness.cs": "56179f71b9f44a134b2400cf59572d12a30274cddcfde71874745ea0cf351ff3",
     "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "b0e128f251931eace8430f7a369aba2bdb119e8516ac8cb2e599a15efffa53d2",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "8345b591fc2b4d1767efe6dff849b63113845273b308dbeaf5a460ce518e04f9",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Ichimoku.cs": "459397c5a7db8d4e7705eee86fb78d66bcfbc55b279a915f5acd7870fcff0fd7",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
@@ -13442,6 +13471,7 @@
     "src/Indicators/ValuesBarExecution.Pivots.cs": "64afefd7352681b0af32ee036659eeefedcb5922d2d0eb423aabe170091a7725",
     "src/Indicators/ValuesBarExecution.Pointwise.cs": "205402997bcf24bef42a4e9189c059de5e9e4df156d653a5a2c168c90c981832",
     "src/Indicators/ValuesBarExecution.PointwiseBatch.cs": "fff765514e3ab0154b2cab98100f8f33500a853571767a1e1550e75d5449c3d7",
+    "src/Indicators/ValuesBarExecution.PolarizedEfficiency.cs": "0bf709ed231d389d6011f4f45526ddfadeab356606c09059f013f9948fb67317",
     "src/Indicators/ValuesBarExecution.PriceCandle.cs": "2f8d3c781c605cb5928bb4cbdb916ed99d0fdd66b715612e79f8e1659f89a977",
     "src/Indicators/ValuesBarExecution.PriceProjection.cs": "e1cb31a0795c59229160d0dac09307ed1af8067e75c95548c930610500f49438",
     "src/Indicators/ValuesBarExecution.PriceRelative.cs": "f68a481de1292230da92b18249a274bde10415648690b1a1ff837937ec22873c",
@@ -13455,6 +13485,7 @@
     "src/Indicators/ValuesBarExecution.RiskRatios.cs": "0016d0315ae2350230e33ff97ceb0470d835cff88fdf4e3af76859431183ec90",
     "src/Indicators/ValuesBarExecution.RollingDiagnostics.cs": "2be514e07a85c008516e28aa5aad86320ec50c8699829766d39cb0cbef3ed686",
     "src/Indicators/ValuesBarExecution.RollingExtrema.cs": "67324e6e91236bae1118e52a3022fd4b913989f580eb5de81ceec8115e586def",
+    "src/Indicators/ValuesBarExecution.RsiFollowups.cs": "8de4f13dee5b7d1c98250a625ecb50af0f372b63acdb467812d724a543c6e25f",
     "src/Indicators/ValuesBarExecution.RunningEquity.cs": "91e112bd7f3006d31137fb0089652a64e0f93783eaeadb22c5be307fd94ada5d",
     "src/Indicators/ValuesBarExecution.ScaledTrueRange.cs": "942f68214d90bd3044b0165c67dccc6535aff9ffe7cf91540eb6cf47786a8ca1",
     "src/Indicators/ValuesBarExecution.SeededAdaptive.cs": "8409a3a6d5aa382357701c9ad11ff73031cfb5626bdc50abba1d9a8c559b816c",
