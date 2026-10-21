@@ -4598,15 +4598,20 @@
       ],
       "status": "contract-receipts-recorded-performance-pending",
       "contract_receipts": {
+        "FloorPivotPointR1SpecOptions": [
+          "benchmarks/results/remaining-indicators/flooraliases-integrated-contracts.json"
+        ],
+        "FloorPivotPointS1SpecOptions": [
+          "benchmarks/results/remaining-indicators/flooraliases-integrated-contracts.json"
+        ],
         "FloorPivotPointSpecOptions": [
           "benchmarks/results/remaining-indicators/pivotfamilies-integrated-contracts.json"
+        ],
+        "PivotPointSpecOptions": [
+          "benchmarks/results/remaining-indicators/flooraliases-integrated-contracts.json"
         ]
       },
-      "options_without_receipts": [
-        "FloorPivotPointR1SpecOptions",
-        "FloorPivotPointS1SpecOptions",
-        "PivotPointSpecOptions"
-      ]
+      "options_without_receipts": []
     },
     {
       "indicator": "FoldedRelativeStrengthIndex",
@@ -4738,7 +4743,13 @@
       "options": [
         "GOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "GOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/goscillators-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "GainLossMovingAverage",
@@ -4771,7 +4782,13 @@
       "options": [
         "GannSwingOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "GannSwingOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/goscillators-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "GannTrendOscillator",
@@ -4804,7 +4821,13 @@
       "options": [
         "GatorOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "GatorOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/gatormeanness-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "GeneralFilterEstimator",
@@ -5991,7 +6014,13 @@
       "options": [
         "MarketMeannessIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "MarketMeannessIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/gatormeanness-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "MartinRatio",
@@ -12892,6 +12921,7 @@
     "benchmarks/results/remaining-indicators/fifteenth-integrated-contracts.json": "e7ed320b04d43866eb8efbff7c3381d977137334b4262793398c1c2ced095a32",
     "benchmarks/results/remaining-indicators/finitevolume-contracts.json": "b3031ed8d8633d40e1a1b74c2ea665df4ff4babed191b1cf513fab66870f850e",
     "benchmarks/results/remaining-indicators/fisherframa-contracts.json": "461f0aab4514eeb18b012d0637543036a0844147267e1036036899e79d56a566",
+    "benchmarks/results/remaining-indicators/flooraliases-integrated-contracts.json": "02f4628f5f73466e22498e2fb8d65bf021b562ccfbd28f0b2c3cd6f5f0e7542a",
     "benchmarks/results/remaining-indicators/fmdemodulator-cpu-contracts.json": "2f4bb5e1c00887c6af77616b294b0096bd6d042be916767f79dff6e1ccf2243f",
     "benchmarks/results/remaining-indicators/foldedfisher-cpu-contracts.json": "2284be7daf0ce4f06bf7b747fd623023b682f839eedd04127c9c99b903c39f92",
     "benchmarks/results/remaining-indicators/fourierconvolution-cpu-contracts.json": "15c2b1b9b538d3aaab965f4b839306c9326e9d36511ac9eaf6e1689c1090c3ec",
@@ -12903,9 +12933,11 @@
     "benchmarks/results/remaining-indicators/gainlosspair-contracts.json": "994db10fa4d5f5fc84466930a73c1b97b60bf513a40a2a4cff36056518720fe0",
     "benchmarks/results/remaining-indicators/gap1-cpu-contracts.json": "e90d60e4614696763817766d86fdb1a1cecbf64d213f09e164e8711da4a4b9bb",
     "benchmarks/results/remaining-indicators/garmanklass-contracts.json": "0a16d96b49b43449d92b8b670b914e07ffa18fcfb5af56c7cd9da779df7ce105",
+    "benchmarks/results/remaining-indicators/gatormeanness-integrated-contracts.json": "ea1db430b4784dc068ea8c2989ca52fd9048c0e23c517c499cec250949e4c4a4",
     "benchmarks/results/remaining-indicators/generalfilter-integrated-contracts.json": "90f241fdc915c964b21525a4bc5036928020261e099eab40acd1940ad99ef9ce",
     "benchmarks/results/remaining-indicators/geometricmeans-integrated-contracts.json": "dbe4e6ab99fe4cef03b6fa97b2eb2879a5b15d3ecbe016dc558b08b5f4379b5e",
     "benchmarks/results/remaining-indicators/gopalgrand-cpu-contracts.json": "a1da631452691c3555aa131dee6c5186d9cfc72c0a83de79e4aff267adec4a86",
+    "benchmarks/results/remaining-indicators/goscillators-integrated-contracts.json": "19dc1cba2ba68a89bf362d078ca9b53c42cf7c235312bfb9cd56d994f107fbe2",
     "benchmarks/results/remaining-indicators/grover-cpu-contracts.json": "7876dc0c08c0728df592cac3704494435ca74c7bfc85fd7e10e07ff5deddc4e0",
     "benchmarks/results/remaining-indicators/guppy-macd-integrated-contracts.json": "d0acd2cd3711beca42df3d493f24d288d427062db97d6a4b6022d184b8ead309",
     "benchmarks/results/remaining-indicators/halfhawkeye-cpu-contracts.json": "3cb7ec843025bfb59efbf32568a0bc1e0ddb90151c72cfdd2c1fbb582134b721",
@@ -13264,9 +13296,12 @@
     "src/Indicators/ValuesBarExecution.ElasticVolume.cs": "59e0b971e7f66eb57d1f4b45e91dbd65265024e7ddddb50d4afa6e42c5f522b8",
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
+    "src/Indicators/ValuesBarExecution.FloorAliases.cs": "d84f58b4d0b463947ba6ff0953ead99ebb5e3ba843d32945ace681554d2849c4",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
+    "src/Indicators/ValuesBarExecution.GOscillators.cs": "4a4b6c6d79f77b11a17788eeb49c882405866ba632948a0afdb4e5887108d3c5",
+    "src/Indicators/ValuesBarExecution.GatorMeanness.cs": "56179f71b9f44a134b2400cf59572d12a30274cddcfde71874745ea0cf351ff3",
     "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "2fc9e12c5d7d0febc8db2da389894470b19e5462fda8926fcacb521826e29717",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "d3e7e429171edbe45c6e9e18623e5febd32b9594f21877700e7f350c688364d8",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.LaggedReturns.cs": "86122ae31d6b8addab098c72675ba5cb4708a5bb13e63e4dace2598820e43154",
