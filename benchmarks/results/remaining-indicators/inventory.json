@@ -9364,7 +9364,13 @@
       "options": [
         "SwamiStochasticsSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "SwamiStochasticsSpecOptions": [
+          "benchmarks/results/remaining-indicators/swami-tdi-certified-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "SwingIndex",
@@ -9652,7 +9658,13 @@
       "options": [
         "TradersDynamicIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "TradersDynamicIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/swami-tdi-certified-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "TradingMadeMoreSimplerOscillator",
@@ -10403,6 +10415,7 @@
       "status": "contract-receipts-recorded-performance-pending",
       "contract_receipts": {
         "VervoortModifiedBollingerBandIndicatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/vervoort-modified-certified-integrated-contracts.json",
           "benchmarks/results/remaining-indicators/vervoortmodified-contracts.json"
         ]
       },
@@ -10440,7 +10453,13 @@
       "options": [
         "VolatilityBasedMomentumSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "VolatilityBasedMomentumSpecOptions": [
+          "benchmarks/results/remaining-indicators/volatility-momentum-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "VolatilityIndexDynamicAverageIndicator",
@@ -10646,7 +10665,13 @@
       "options": [
         "VolumePositiveNegativeIndicatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "VolumePositiveNegativeIndicatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/volume-positive-negative-certified-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "VolumePriceConfirmationIndicator",
@@ -13411,6 +13436,7 @@
     "benchmarks/results/remaining-indicators/stochastic-macd-integrated-contracts.json": "29e3ff22317fa4bba9c0c83c16261fdd41eea89324c664033eaa538b2e7ae3a4",
     "benchmarks/results/remaining-indicators/stochcomposites-cpu-contracts.json": "ec367e3b95b044e3ead98d6fa78bff67b24c3b806f449ef8b8e276bae474f5b7",
     "benchmarks/results/remaining-indicators/strength-contracts.json": "c8388656a7749864f725a5e6fa22a27ff90b3ea0e2ced35c249f2b428607689a",
+    "benchmarks/results/remaining-indicators/swami-tdi-certified-integrated-contracts.json": "cae8dc4befb774dc6c81caa916748674011a08f9b8806ce6e31ede6c32dba125",
     "benchmarks/results/remaining-indicators/swenlin-integrated-contracts.json": "89aef1ed984f6a349c17fb7bb1f0690d03aeb3e9d5a51e4f75aca9add9564bc5",
     "benchmarks/results/remaining-indicators/symmetric-contracts.json": "166810cfd981551049dc64f6c3037477b1bfce8487feb4e7fe8c00d718cb43a9",
     "benchmarks/results/remaining-indicators/syntheticprice-cpu-contracts.json": "0d81cb8d54c9583d58b508f5686527d007459b0389af2943ec2080e96313b768",
@@ -13439,14 +13465,17 @@
     "benchmarks/results/remaining-indicators/variablelength-contracts.json": "fed51af6af609d4f6d0c294f545183638cd88fbc6820e4296cdc11bb31ff0acc",
     "benchmarks/results/remaining-indicators/verticalaverage-contracts.json": "b04dffeef1c3f9dc0f94e7d1acc82271334f72bd90779cff57b80a5e7fe8078d",
     "benchmarks/results/remaining-indicators/verticalhorizontal-contracts.json": "c40cc49677391800509e476758328f867d96d8d9b3e99fe0530d1d4308b2b472",
+    "benchmarks/results/remaining-indicators/vervoort-modified-certified-integrated-contracts.json": "4ebd59dd0c190ee31f4234980f49321b79cedfb088dda608a7f6c2d3acb816a3",
     "benchmarks/results/remaining-indicators/vervoortmodified-contracts.json": "3821a4740e66846f41cac4819e303a55ec1655ffd5c9217e9c6659ceb69010c4",
     "benchmarks/results/remaining-indicators/vervoortvolatility-contracts.json": "9abf14f7f0b2e7e6b0a57d52de3895805f2a2b5074d00157335d59d60219bc97",
+    "benchmarks/results/remaining-indicators/volatility-momentum-integrated-contracts.json": "d733dc921ab86b758c6b32f462ca7ea4dd92621a8c045a94b0629b5f3889b540",
     "benchmarks/results/remaining-indicators/volatilitybands-contracts.json": "926df27339bf65bc27dc6557d8a2d30c85727cbbe9011699ad89caa44822801c",
     "benchmarks/results/remaining-indicators/volatilitygeometry-contracts.json": "1cea8a81219495a9cfa9dad26110988d29f9e42113c3db84641bbb1fe05626d5",
     "benchmarks/results/remaining-indicators/volatilityindex-contracts.json": "255f838295db08ee817df02bac82450d786136b7de34b6c12dcfc5b7de19a809",
     "benchmarks/results/remaining-indicators/volatilitystops-contracts.json": "67156f8f4a1a14a988f74563e87f1ca7d0d2d297682dcd1ca8fb907274c3e07c",
     "benchmarks/results/remaining-indicators/volatilitywave-contracts.json": "310d4f3201a38b63d029823cacfcd09de993a72550ca98723ab6aaef75c4acd7",
     "benchmarks/results/remaining-indicators/volume-contracts.json": "1e80ae57d2f76d8978e29acfecc682a114126173f7f51d34dc6aa7d36a327ad2",
+    "benchmarks/results/remaining-indicators/volume-positive-negative-certified-integrated-contracts.json": "8661f48123059708f575a26912f79ca860d8e8ed6841d57bab60b30fa5c939e0",
     "benchmarks/results/remaining-indicators/volumeadjusted-contracts.json": "97f74b034b1ca2b8cb1b1d61728f09306b41dfd8944c220961fd743d7a0a6233",
     "benchmarks/results/remaining-indicators/volumealias-contracts.json": "19020aca691f72ae8cde5ba154f47ca1fb0d25edda731ccc20f7ca08dcefe4fb",
     "benchmarks/results/remaining-indicators/volumealiases-cpu-contracts.json": "e241f47234885641b9e65b3b728760d4bebdf5df271d73e511737cf83fe0adb7",
@@ -13685,7 +13714,7 @@
     "src/Indicators/ValuesBarExecution.GOscillators.cs": "4a4b6c6d79f77b11a17788eeb49c882405866ba632948a0afdb4e5887108d3c5",
     "src/Indicators/ValuesBarExecution.GatorMeanness.cs": "56179f71b9f44a134b2400cf59572d12a30274cddcfde71874745ea0cf351ff3",
     "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "205b7d256672e22373fdb011bd149754a2b86ba00c5f7b92844d29591315d32a",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "b307cee644975d9d940acc53e49f14f3cecc00d608488c4e140bc6446a613b6c",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Ichimoku.cs": "459397c5a7db8d4e7705eee86fb78d66bcfbc55b279a915f5acd7870fcff0fd7",
     "src/Indicators/ValuesBarExecution.ImpulsePair.cs": "22eb567c61c55733702c849068aaa24497b122f1aeda3865e9b9f21442e3a611",
@@ -13744,6 +13773,7 @@
     "src/Indicators/ValuesBarExecution.Stochastic.cs": "22f2f5673fc96f4293ff612e015b5e6a51a0a1e3d6dc90af38589a23a5cd0dc3",
     "src/Indicators/ValuesBarExecution.StochasticComponents.cs": "44842134b0eed05b0dd106fa2a8ef813882d914644b9537f5ea4e7549e64e6d3",
     "src/Indicators/ValuesBarExecution.StochasticMacd.cs": "8667d1287e58467f4b45cef47111c76f59666baff4b1f400e32a308ae790253d",
+    "src/Indicators/ValuesBarExecution.SwamiTdi.cs": "269804e11ef63ae2bc7eedaa7c8cc4ac639e7dc83269142479a507048ed7d20d",
     "src/Indicators/ValuesBarExecution.Swenlin.cs": "17371e81afd6f348077b1720d022b29ebe793b703a0ec98b4304ed4fc5d2e784",
     "src/Indicators/ValuesBarExecution.ThreeHull.cs": "05ad1e419f0f766814237facc2dab2355ad5eea03ca5a8adbe92b34f7d2c85a6",
     "src/Indicators/ValuesBarExecution.Tillson.cs": "711865b0ab717995a0bca2b6a407fa57b26482cbc08893d4eb6cb49f019ed139",
@@ -13756,6 +13786,8 @@
     "src/Indicators/ValuesBarExecution.Ultimate.cs": "af074c00625cd0385aabb85ef4e24c275ca8f6c438d7635b46528cd9cf4835cd",
     "src/Indicators/ValuesBarExecution.UtBot.cs": "7c03ae67c87ab5ac630dfdecd56d943db6eebb777e803e7948cd66f597f7fb7f",
     "src/Indicators/ValuesBarExecution.VariableSma.cs": "876ef5c14c8a1b1b4c776c4e8cba47da439feef2eefe241f792823c4fd44705b",
+    "src/Indicators/ValuesBarExecution.VolatilityMomentum.cs": "6073855db75570fabe20cb836881f13d53aa9b3e4edf13f0f355200f79cbf6fa",
+    "src/Indicators/ValuesBarExecution.VolumePositiveNegative.cs": "1a16a5faf9820d958ca76a604f3dc8b47417df8f4a7d68e2c4ed2de8d84684c6",
     "src/Indicators/ValuesBarExecution.VolumeReturnFollowups.cs": "05a50467dab4989562da5748408d4db5685488f2986aa975146f1e4ef7f27d71",
     "src/Indicators/ValuesBarExecution.VolumeWeightedPrice.cs": "d81fd156c5e6a28467bb3a50d8c532ba788f154785bd0a946c4de4c000f3923b",
     "src/Indicators/ValuesBarExecution.Vortex.cs": "9eade6cecbb89bb9ea2388202af602774069734f55d0d90f6b54b11c507d14aa",
