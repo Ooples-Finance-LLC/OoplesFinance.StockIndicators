@@ -1,0 +1,31 @@
+{
+  "types": [
+    "Pfe",
+    "PolarizedFractalEfficiency"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "8774eb9cce78d01a70d25fea2fce40c7f68cb00d",
+  "combined_input_sha256": "860745ad14571c63fcafd48d04291adfd34c578c26461c8dc3a2faea887dfa86",
+  "benchmark_fixture": {
+    "type": "RemainingPolarizedEfficiencyBenchmarks",
+    "operations": [
+      "Pfe",
+      "PolarizedFractalEfficiency"
+    ]
+  },
+  "checks": {
+    "unit": 130,
+    "parity": 8,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/polarized-efficiency-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/polarized-efficiency-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}
