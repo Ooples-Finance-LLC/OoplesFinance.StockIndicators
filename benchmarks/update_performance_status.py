@@ -162,7 +162,7 @@ def render(document, repo, work):
         path = work / relative
         if path.exists():
             receipt = read(path)
-            local_validation.append([label, receipt.get('status', 'unknown'), receipt.get('step', 'not started'), receipt.get('updated_utc', 'unknown')])
+            local_validation.append([label, receipt.get('status', 'unknown'), receipt.get('step', 'not recorded'), receipt.get('updated_utc', 'unknown')])
     navigation = read(work / 'si-unmapped-navigation-after-support-resistance-20261020.json')
     chain = read(work / 'si-pending-chain-static-reconciliation-v19-20261020.json')
     now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds')
