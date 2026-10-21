@@ -155,6 +155,9 @@ def render(document, repo, work):
         ('Recursive aliases, KAMA, Liquid RSI and compatibility publication', 'si-pr266-recursive-kama-liquid-20261021/status.json'),
         ('Kase and Ichimoku publication', 'si-pr266-kase-ichimoku-20261021/status.json'),
         ('KST and portable-helper publication', 'si-pr266-kst-compat-20261021/status.json'),
+        ('Paired timing tooling and report publication', 'si-pr266-report-followup-20261021/status.json'),
+        ('Shinohara and Stochastic publication', 'si-pr266-shinohara-stochastic-20261021/status.json'),
+        ('Current snapshot report publication', 'si-pr266-current-snapshot-report-20261021/status.json'),
         ('Framework compatibility repair', 'si-Z-only-candidates-20261020/rollout-framework-compat-20261021/status.json')]:
         path = work / relative
         if path.exists():
