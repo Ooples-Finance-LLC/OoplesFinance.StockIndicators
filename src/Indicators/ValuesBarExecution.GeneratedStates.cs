@@ -67,6 +67,7 @@ internal static partial class ValuesBarExecution
         indicator is ThreeHMA or TripleHullMovingAverage
             or ThreeHma { MaType: MovingAvgType.WeightedMovingAverage } or _3HMA { MaType: MovingAvgType.WeightedMovingAverage } ||
         indicator is DominantCycleTunedRelativeStrengthIndex ||
+        indicator is TurboTrigger { MaType: null } or TurboStochasticsFast { MaType: null } or TurboStochasticsSlow { MaType: null } ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
@@ -546,6 +547,9 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        TurboTrigger turbo => new GeneratedTurboFollowupState(turbo.Length, 1, 0, count, 0),
+        TurboStochasticsFast turbo => new GeneratedTurboFollowupState(turbo.Length1, turbo.Length2, turbo.TurboLength, count, 1),
+        TurboStochasticsSlow turbo => new GeneratedTurboFollowupState(turbo.Length1, turbo.Length2, turbo.TurboLength, count, 2),
         DominantCycleTunedRelativeStrengthIndex cycle => new GeneratedCycleTunedRsiState(cycle.Length),
         ThreeHMA hull => new GeneratedThreeHullState(hull.Length, count),
         ThreeHma hull => new GeneratedThreeHullState(hull.Length, count),

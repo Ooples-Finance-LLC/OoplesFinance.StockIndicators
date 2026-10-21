@@ -4,10 +4,10 @@ internal sealed class TurboTriggerWindow : IDisposable
 {
     private readonly RocBankAverage[]? _averages;
     private readonly IMovingAverageSmoother[]? _fallback;
-    internal TurboTriggerWindow(MovingAvgType kind, int length, int smoothing)
+    internal TurboTriggerWindow(MovingAvgType kind, int length, int smoothing, int capacityHint = int.MaxValue)
     {
         var periods = new[] { smoothing, smoothing, smoothing, smoothing, length, length, length, length };
-        if (StrengthWindow.Supports(kind)) _averages = periods.Select(n => new RocBankAverage(kind, Math.Max(1, n), int.MaxValue)).ToArray();
+        if (StrengthWindow.Supports(kind)) _averages = periods.Select(n => new RocBankAverage(kind, Math.Max(1, n), capacityHint)).ToArray();
         else _fallback = periods.Select(n => MovingAverageSmootherFactory.Create(kind, Math.Max(1, n))).ToArray();
     }
     private RocBankValue Stage(int slot, RocBankValue value, bool commit) => _averages is not null ? _averages[slot].Next(value, commit) : new(_fallback![slot].Next(value.Publish(), commit));
