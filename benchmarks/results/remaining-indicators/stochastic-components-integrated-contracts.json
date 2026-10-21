@@ -1,0 +1,31 @@
+{
+  "types": [
+    "StochasticCustomOscillator",
+    "StochasticMomentumIndex"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "1e305292d4b50e7db9b3ac628be6286a569ea667",
+  "combined_input_sha256": "30c826475475c61a8b4c0f0722e0b1dc27176ccdd86167792b595660df4c0eb9",
+  "benchmark_fixture": {
+    "type": "RemainingStochasticComponentsBenchmarks",
+    "operations": [
+      "StochasticCustomOscillator",
+      "StochasticMomentumIndex"
+    ]
+  },
+  "checks": {
+    "unit": 171,
+    "parity": 8,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/stochastic-components-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/stochastic-components-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}
