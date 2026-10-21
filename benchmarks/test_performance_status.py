@@ -4,10 +4,27 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from update_performance_status import formula_rows, fresh_results, ci_snapshot_html, measurement_totals
+from update_performance_status import formula_rows, fresh_results, ci_snapshot_html, measurement_totals, reconcile_visible_sections
 
 
 class PerformanceStatusTests(unittest.TestCase):
+    def test_all_current_surfaces_use_same_ledger_and_archive_is_preserved(self):
+        source = ('<section class="hero"><p class="lede">stale</p></section>'
+                  '<section id="current-competitors"><p>stale wins</p></section>'
+                  '<table><tr><td>Fresh candidate old</td><td>999 wins</td></tr></table>'
+                  '<section id="explorer">immutable archive</section>')
+        totals = dict(expected=16, measured=3, faster=1, slower=1, inconclusive=1, pending=13)
+        result = reconcile_visible_sections(source, totals, 'abc123', 1)
+        self.assertNotIn('stale', result)
+        self.assertNotIn('999 wins', result)
+        self.assertIn('3 of 16 slots measured: 1 faster, 1 slower, 1 inconclusive, 13 pending', result)
+        self.assertIn('3 / 16 matched slots measured; 13 pending', result)
+        self.assertIn('<section id="explorer">immutable archive</section>', result)
+        self.assertEqual(result, reconcile_visible_sections(result, totals, 'abc123', 1))
+        changed = reconcile_visible_sections(result, dict(expected=16, measured=4, faster=2, slower=1, inconclusive=1, pending=12), 'new', 2)
+        self.assertIn('<td>4 / 16</td>', changed)
+        self.assertNotIn('<td>3 / 16</td>', changed)
+
     def test_measurement_totals_separate_pending_and_inconclusive(self):
         totals = measurement_totals([
             ['A', 'Full', 8, 3, 1, 1, 1, 5],
