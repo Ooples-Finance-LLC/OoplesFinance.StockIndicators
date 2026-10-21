@@ -10,6 +10,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingAdaptiveV2Benchmarks), 40)]
     [InlineData(typeof(RemainingRangeStatisticsBenchmarks), 16)]
     [Theory]
+    [InlineData(typeof(RemainingTurboFollowupsBenchmarks), 24)]
     [InlineData(typeof(RemainingCycleTunedRsiBenchmarks), 8)]
     [InlineData(typeof(RemainingThreeHullBenchmarks), 32)]
     [InlineData(typeof(RemainingSelfAdjustingRsiBenchmarks), 8)]
