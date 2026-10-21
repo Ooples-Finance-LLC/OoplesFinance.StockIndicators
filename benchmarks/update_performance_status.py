@@ -106,6 +106,24 @@ def ci_snapshot_html(receipt, published_head):
     return content
 
 
+def reconcile_visible_sections(document, totals, candidate, completed):
+    """Keep legacy report surfaces tied to the same current measurement ledger."""
+    current = ('<section id="current-competitors" class="section"><h2>Complete current competitor results</h2>'
+               '<p>The <a href="#status-pairs">Every competitor pair table above</a> is the complete current results view, '
+               'including pending slots for all four libraries and both history modes. '
+               f"{totals['measured']} of {totals['expected']} slots measured: {totals['faster']} faster, "
+               f"{totals['slower']} slower, {totals['inconclusive']} inconclusive, {totals['pending']} pending. "
+               'All current summaries use this same ledger. Dated results below are historical evidence.</p></section>')
+    document = re.sub(r'<section id="current-competitors".*?</section>', lambda _: current, document, flags=re.S)
+    document = re.sub(r'(<section class="hero">.*?<p class="lede">).*?(</p>)',
+                      lambda m: m[1] + f"Timing candidate {html.escape(candidate)}: {totals['measured']} / {totals['expected']} matched slots measured; {totals['pending']} pending. {completed} fixture batches completed. Full-library superiority remains unproven." + m[2],
+                      document, count=1, flags=re.S)
+    document = re.sub(r'<tr><td>(?:Fresh candidate [^<]*|Current matched candidate)</td>.*?</tr>',
+                      lambda _: '<tr><td>Current matched candidate</td><td>' + str(totals['measured']) + ' / ' + str(totals['expected']) + '</td><td>API pair × two sizes × two history modes</td><td>Only qualified same-run measurements; pending is not a win</td></tr>',
+                      document, count=1, flags=re.S)
+    return document
+
+
 def render(document, repo, work):
     baseline = embedded(document, 'dataset')
     inventory = read(repo / 'benchmarks/results/remaining-indicators/inventory.json')
@@ -122,6 +140,7 @@ def render(document, repo, work):
     for label, relative in [
         ('Oscillators and Floor aliases publication', 'si-pr266-followons-20261021/status.json'),
         ('Recursive aliases, KAMA, Liquid RSI and compatibility publication', 'si-pr266-recursive-kama-liquid-20261021/status.json'),
+        ('Kase and Ichimoku publication', 'si-pr266-kase-ichimoku-20261021/status.json'),
         ('Framework compatibility repair', 'si-Z-only-candidates-20261020/rollout-framework-compat-20261021/status.json')]:
         path = work / relative
         if path.exists():
@@ -261,6 +280,7 @@ Each row reconciles: faster + slower + inconclusive + pending = expected. Blank 
     if section:
         updated = re.sub(r'Status: [^.]+\.', 'Status: ' + html.escape(status['status']) + '.', section[0], count=1)
         result = result[:section.start()] + updated + result[section.end():]
+    result = reconcile_visible_sections(result, totals, status['commit'][:8], len(status['completed']))
     assert embedded(result, 'dataset') == baseline
     assert result.count('id="rollout-status"') == 1
     return result, data
