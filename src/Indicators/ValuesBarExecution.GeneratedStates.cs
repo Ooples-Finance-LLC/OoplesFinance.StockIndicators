@@ -36,6 +36,10 @@ internal static partial class ValuesBarExecution
     }
 
     private static bool IsGeneratedState(IIndicator indicator) =>
+        indicator is MartinRatio { MaType: null } martin && double.IsFinite(martin.Bmk) ||
+        indicator is MiddleHighLowMovingAverage { MaType: null } ||
+        indicator is OvershootReductionMovingAverage { MaType: null } ||
+        indicator is OscarIndicator or PhaseChangeIndex { MaType: null } ||
         indicator is KendallRankCorrelationCoefficient or RSquared ||
         indicator is LinearWeightedMovingAverageCore or LeoMovingAverage or McGinleyDynamic ||
         indicator is GeoMa or GeometricMeanMovingAverage ||
@@ -547,6 +551,11 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        MartinRatio martin => new GeneratedMartinRatioState(martin.Length, martin.Bmk, count),
+        MiddleHighLowMovingAverage average => new GeneratedMiddleMeanState(average.Length1, average.Length2, count),
+        OvershootReductionMovingAverage average => new GeneratedOvershootState(average.Length, count),
+        OscarIndicator oscar => new GeneratedOscarState(oscar.Length),
+        PhaseChangeIndex phase => new GeneratedPhaseChangeState(phase.Length, phase.SmoothLength),
         TurboTrigger turbo => new GeneratedTurboFollowupState(turbo.Length, 1, 0, count, 0),
         TurboStochasticsFast turbo => new GeneratedTurboFollowupState(turbo.Length1, turbo.Length2, turbo.TurboLength, count, 1),
         TurboStochasticsSlow turbo => new GeneratedTurboFollowupState(turbo.Length1, turbo.Length2, turbo.TurboLength, count, 2),
