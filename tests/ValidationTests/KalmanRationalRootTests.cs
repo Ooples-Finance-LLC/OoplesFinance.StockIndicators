@@ -9,6 +9,8 @@ public sealed class KalmanRationalRootTests
     [InlineData(200)]
     [InlineData(800)]
     [InlineData(1250)]
+    [InlineData(5000)]
+    [InlineData(20000)]
     [InlineData(1)]
     [InlineData(17)]
     public void ExactSpecializationPreservesBitsSignalsPreviewAndReset(int length)

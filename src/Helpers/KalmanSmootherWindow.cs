@@ -1,3 +1,4 @@
+using System.Numerics;
 using OoplesFinance.StockIndicators.Streaming;
 using F = OoplesFinance.StockIndicators.Helpers.UltimatePowerWeights.Fraction;
 namespace OoplesFinance.StockIndicators.Helpers;
@@ -36,6 +37,8 @@ internal sealed class KalmanSmootherWindow
     }
     private readonly F _q, _r;
     private readonly F? _rationalRoot;
+    private readonly BigInteger _denominatorStep, _gainStep, _rootStep;
+    private BigInteger _denominator = BigInteger.One, _levelUnits, _velocityUnits, _marginUnits;
     private Value _level, _velocity, _margin;
     private bool _started;
     internal KalmanSmootherWindow(int length, bool allowRationalRoot = true)
@@ -46,17 +49,21 @@ internal sealed class KalmanSmootherWindow
             var numerator = ExactPopulationDeviation.IntegerRoot(_r.Numerator);
             var denominator = ExactPopulationDeviation.IntegerRoot(_r.Denominator);
             if (numerator * numerator == _r.Numerator && denominator * denominator == _r.Denominator)
+            {
                 _rationalRoot = new F(numerator, denominator);
+                _denominatorStep = _q.Denominator / BigInteger.GreatestCommonDivisor(_q.Denominator, denominator) * denominator;
+                _gainStep = _q.Numerator * (_denominatorStep / _q.Denominator);
+                _rootStep = numerator * (_denominatorStep / denominator);
+            }
         }
     }
     internal (double Line, Signal Trade) Next(double price, bool final)
     {
         StreamingInputValidation.Finite(price, nameof(price));
+        if (_rationalRoot.HasValue) return NextRational(price, final);
         var x = new Value(F.Of(price), 0); var prior = _started ? _level : x;
         var delta = x - prior; var velocity = _velocity + delta.Scale(_q);
-        // A rational root keeps every B coefficient exactly zero, avoiding
-        // large cancelling conjugate terms and repeated root-bound refinement.
-        var level = prior + (_rationalRoot is { } root ? delta.Scale(root) : delta.RootTimes(_r)) + velocity;
+        var level = prior + delta.RootTimes(_r) + velocity;
         var margin = x - level; var sign = margin.Sign(_r); var change = (margin - _margin).Sign(_r);
         var trade = sign > 0 && change > 0 ? Signal.StrongBuy : sign < 0 && change < 0 ? Signal.StrongSell
             : sign > 0 ? Signal.Buy : sign < 0 ? Signal.Sell : Signal.None;
@@ -64,7 +71,34 @@ internal sealed class KalmanSmootherWindow
         if (final) { _level = level; _velocity = velocity; _margin = margin; _started = true; }
         return (output, trade);
     }
-    internal void Reset() { _level = _velocity = _margin = default; _started = false; }
+    private (double Line, Signal Trade) NextRational(double price, bool final)
+    {
+        // All three states share D * 2^1074. Move them to D * step together;
+        // no fraction reduction is needed to preserve the exact recurrence.
+        var input = ExactVarianceWindow.Units(price) * _denominator;
+        var prior = _started ? _levelUnits : input;
+        var delta = input - prior;
+        var velocity = _velocityUnits * _denominatorStep + delta * _gainStep;
+        var level = prior * _denominatorStep + delta * _rootStep + velocity;
+        var denominator = _denominator * _denominatorStep;
+        var margin = input * _denominatorStep - level;
+        var sign = margin.Sign;
+        var change = (margin - _marginUnits * _denominatorStep).Sign;
+        var trade = sign > 0 && change > 0 ? Signal.StrongBuy : sign < 0 && change < 0 ? Signal.StrongSell
+            : sign > 0 ? Signal.Buy : sign < 0 ? Signal.Sell : Signal.None;
+        var output = ExactMeanAccumulator.UnitRatio(level, denominator);
+        if (final)
+        {
+            _denominator = denominator; _levelUnits = level; _velocityUnits = velocity;
+            _marginUnits = margin; _started = true;
+        }
+        return (output, trade);
+    }
+    internal void Reset()
+    {
+        _level = _velocity = _margin = default; _started = false;
+        _denominator = BigInteger.One; _levelUnits = _velocityUnits = _marginUnits = default;
+    }
     internal static (double[] Values, Signal[] Signals) Calculate(StockData data, int length)
     {
         foreach (var series in new[] { data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, data.Volumes, data.ChainedValues, data.InputValues })
