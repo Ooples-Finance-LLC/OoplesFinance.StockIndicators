@@ -13,6 +13,8 @@ from pathlib import Path
 import re
 import time
 
+from performance_pair_mapping import reconcile
+
 
 START = '<!-- rollout-status:start -->'
 END = '<!-- rollout-status:end -->'
@@ -37,7 +39,7 @@ def fresh_results(folder):
         if hashlib.sha256(Path(receipt['report']).read_bytes()).hexdigest() != receipt['report_sha256']:
             raise ValueError('Raw report hash mismatch: ' + str(path))
         for row in receipt['comparisons']:
-            key = (row['operation'], row['bars'], row['mode'])
+            key = (receipt['fixture'], row['operation'], row['bars'], row['mode'])
             if key in seen:
                 raise ValueError('Ambiguous fresh comparison: ' + str(key))
             seen.add(key)
@@ -90,6 +92,8 @@ def render(document, repo, work):
                   else 'The saved GPU receipt failed the combined-source fingerprint gate; fresh validation is pending.')
     publication_validation = work / 'si-pr266-publication-20261021/validation-status.json'
     validation = read(publication_validation) if publication_validation.exists() else {'status': 'combined C# validation pending'}
+    pending_path = work / 'si-pr266-general-filter-20261021/status.json'
+    pending_publication = read(pending_path) if pending_path.exists() else {}
     controllers = ('Validation controllers are running; the benchmark retry waits without holding them.'
                    if status['status'] == 'waiting-quiet-validation-resumed'
                    else 'Owned validation controllers are held while the timing runner waits or measures.'
@@ -99,11 +103,16 @@ def render(document, repo, work):
     for row in baseline['rows']:
         assert row['bars'] not in old[row['pair']]
         old[row['pair']][row['bars']] = row
-    fresh_by_key = {(r['operation'], r['bars'], r['mode']): r for r in fresh}
+    mapping_path = Path(__file__).resolve().parent / 'results/remaining-indicators/competitor-operation-mapping.json'
+    operation_mapping = read(mapping_path) if mapping_path.exists() else {'mappings': []}
+    fresh_by_key, unmatched = reconcile(fresh, operation_mapping['mappings'], set(old), operation_mapping.get('snapshot'))
     mapped = defaultdict(list)
     for fixture, pairs in coverage['fixtures'].items():
         for pair in pairs:
             mapped[pair].append(fixture)
+    for row in operation_mapping['mappings']:
+        if row['fixture'] not in mapped[row['pair']]:
+            mapped[row['pair']].append(row['fixture'])
     summary = []
     for library in sorted({r['library'] for r in baseline['rows']}):
         pairs = {r['pair'] for r in baseline['rows'] if r['library'] == library}
@@ -146,7 +155,8 @@ def render(document, repo, work):
     data = dict(updated_utc=now, published_head=head, candidate=status['commit'][:8],
                 formula_counts=dict(counts), formulas=formulas, competitor_summary=summary,
                 baseline_pairs=len(old), baseline_comparisons=len(baseline['rows']), fresh=fresh,
-                runner=status, publication_validation=validation, queue=queue, remaining_assessment=navigation['remaining'])
+                unmatched_fresh=unmatched, mapped_api_pairs=operation_mapping.get('mapped_pairs', 0),
+                runner=status, publication_validation=validation, pending_publication=pending_publication, queue=queue, remaining_assessment=navigation['remaining'])
     content = f'''{START}<section id="rollout-status" class="section">
 <div class="kicker">Current status — updated {now}</div><h2>Where the work stands</h2>
 <p class="sub"><strong>Not finished. Current performance superiority is unproven.</strong>
@@ -160,12 +170,16 @@ Quiet window: {status.get('quiet_seconds', 0)} / 240 seconds, last runner update
 step {html.escape(validation.get('step', 'pending'))}. {gpu_status}
 <a href="https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/pull/266/checks">live GitHub checks</a>
 reported a commit-message lint failure on historical subjects. No current-head performance claim follows from earlier correctness receipts.</p>
+<p>Next unpublished batch validation: {html.escape(pending_publication.get('status', 'no receipt'))}; step {html.escape(pending_publication.get('step', 'unknown'))}; input {html.escape(pending_publication.get('input_head', 'unknown')[:8])}; last update {html.escape(pending_publication.get('updated_utc', 'unknown'))}. This batch is not included in the published coverage totals.</p>
 <h3>Current competitor coverage</h3><p>Each library total counts API pairs × two sizes. Both Ooples history modes are shown separately.
 Each row reconciles: faster + slower + inconclusive + pending = expected. Blank timings mean unmeasured, never zero.</p>'''
     content += table(['Library', 'Mode', 'Expected', 'Measured', 'Faster', 'Slower', 'Inconclusive', 'Pending'], summary, 'status-summary')
     content += f'<p>{len(old)} historical API pairs, {len(baseline["rows"])} size comparisons. The {len(fixtures)} benchmark fixtures are a different unit and do not prove complete API coverage. Explicit source-name matches are navigation only; unmapped families still require reconciliation.</p>'
     content += '<h3>Every competitor pair</h3><p>Search by API, indicator, fixture or verdict. Current timings use matched builder/native runs. The last two columns retain October 8 baseline means for reference only; they cannot establish a before/after speedup across different hosts and builds.</p><input id="status-pair-search" aria-label="Search competitor comparisons" placeholder="Search competitor comparisons" style="width:100%;padding:12px">'
     content += table(['API pair', 'Ooples indicator', 'Bars', 'Mode', 'Current verdict', 'Current Ooples ms', 'Current native ms', 'Native / Ooples', 'Measured UTC', 'Fixture navigation', 'Oct 8 Ooples ms', 'Oct 8 native ms'], pair_rows, 'status-pairs')
+    content += f'<h3>Measurement reconciliation</h3><p>{len(fresh)} fresh measurement rows = {len(fresh_by_key)} matched API slots + {len(unmatched)} supplemental or unresolved rows. Multiple fixtures for a slot require review; the report never chooses the fastest result. Static operation mapping covers {operation_mapping.get("mapped_pairs", 0)} of {len(old)} API pairs; mapping is not measurement.</p>'
+    if unmatched:
+        content += table(['Fixture', 'Operation', 'Bars', 'Mode', 'Measured verdict', 'Mapping status', 'Evidence'], [[r['fixture'], r['operation'], r['bars'], r['mode'], r['verdict'], r['mapping_status'], r['evidence']] for r in unmatched], 'status-unmatched')
     content += '<h3>All formula correctness receipts</h3><p>' + '; '.join(f'{v} {html.escape(k)}' for k, v in sorted(counts.items())) + f' = {len(formulas)} formulas. These categories are disjoint. Receipt coverage is historical correctness evidence, not proof of optimization or current performance. Options without receipts remain visible.</p><input id="status-formula-search" aria-label="Search formula coverage" placeholder="Search formula, option or evidence" style="width:100%;padding:12px">'
     content += table(['Formula', 'Published evidence', 'Options lacking receipts', 'Receipt files'],
                      [[r['formula'], r['state'], ', '.join(r['missing']) or ('no builder options mapped' if not r['options'] else 'none'), ', '.join(r['receipts']) or 'none'] for r in formulas], 'status-formulas')
@@ -199,8 +213,10 @@ def main():
     parser.add_argument('--report', type=Path, required=True)
     parser.add_argument('--work', type=Path, required=True)
     parser.add_argument('--watch', action='store_true')
+    parser.add_argument('--inventory-repo', type=Path, default=Path(__file__).resolve().parents[1],
+                        help='Checkout holding the published inventory; may differ from this report generator.')
     args = parser.parse_args()
-    repo = Path(__file__).resolve().parents[1]
+    repo = args.inventory_repo
     while True:
         try:
             original = args.report.read_text(encoding='utf-8')
