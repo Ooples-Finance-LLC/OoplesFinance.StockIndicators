@@ -10,6 +10,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingAdaptiveV2Benchmarks), 40)]
     [InlineData(typeof(RemainingRangeStatisticsBenchmarks), 16)]
     [Theory]
+    [InlineData(typeof(RemainingPivotAverageBenchmarks), 8)]
     [InlineData(typeof(RemainingPivotDetectorBenchmarks), 8)]
     [InlineData(typeof(RemainingRangeIndicatorBenchmarks), 8)]
     [InlineData(typeof(RemainingImpulsePairBenchmarks), 16)]

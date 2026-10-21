@@ -36,6 +36,7 @@ internal static partial class ValuesBarExecution
     }
 
     private static bool IsGeneratedState(IIndicator indicator) =>
+        indicator is PivotPointAverage { MaType: null } ||
         indicator is PivotDetectorOscillator { MaType: null } ||
         indicator is TheRangeIndicator { MaType: null } ||
         indicator is ImpulseMovingAverageConvergenceDivergence { MaType: null } or ImpulsePercentagePriceOscillator ||
@@ -558,6 +559,7 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        PivotPointAverage pivot => new GeneratedPivotAverageState(pivot.Length, pivot.InputLength, count),
         PivotDetectorOscillator => new GeneratedPivotDetectorState(),
         TheRangeIndicator range => new GeneratedRangeIndicatorState(range.Length),
         ImpulseMovingAverageConvergenceDivergence impulse => new GeneratedImpulsePairState(impulse.Length, impulse.SignalLength, count, false),
