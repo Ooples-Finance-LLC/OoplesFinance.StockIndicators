@@ -1,8 +1,45 @@
 import unittest
-from performance_pair_mapping import reconcile, source_mappings
+import hashlib
+import tempfile
+import zipfile
+from pathlib import Path
+from unittest.mock import patch
+from performance_pair_mapping import reconcile, source_mappings, snapshot_mappings
 
 
 class PairMappingTests(unittest.TestCase):
+    def test_reviewed_helper_requires_both_exact_files_and_records_dependency(self):
+        fixture = b'class Example {}'
+        helper = b'class Helper {}'
+        reviewed = dict(fixture='F', operation='F', pair='Library.Sum', source='F.cs',
+                        source_sha256=hashlib.sha256(fixture).hexdigest(), helper='H.cs',
+                        helper_sha256=hashlib.sha256(helper).hexdigest())
+        with tempfile.TemporaryDirectory() as folder:
+            archive = Path(folder) / 'source.zip'
+            for fixture_data, helper_data, pairs, expected in [
+                    (fixture, helper, {'Library.Sum'}, 1),
+                    (fixture + b'changed', helper, {'Library.Sum'}, 0),
+                    (fixture, helper + b'changed', {'Library.Sum'}, 0),
+                    (fixture, None, {'Library.Sum'}, 0),
+                    (fixture, helper, {'Other.Api'}, 0)]:
+                with self.subTest(fixture=fixture_data, helper=helper_data, pairs=pairs):
+                    with zipfile.ZipFile(archive, 'w') as source:
+                        source.writestr('F.cs', fixture_data)
+                        if helper_data is not None:
+                            source.writestr('H.cs', helper_data)
+                    with patch('performance_pair_mapping.REVIEWED_HELPER_MAPPINGS', [reviewed]):
+                        result = snapshot_mappings(archive, [dict(fixture='F', source='F.cs')], pairs)
+                    self.assertEqual(expected, result['mapped_pairs'])
+                    if expected:
+                        row = result['mappings'][0]
+                        self.assertEqual('Library.Sum', row['pair'])
+                        self.assertEqual([dict(source='H.cs', sha256=reviewed['helper_sha256'])],
+                                         row['dependencies'])
+                        fresh = [dict(fixture='F', operation='F', bars=1000, mode='BuilderFull')]
+                        matched, unmatched = reconcile(fresh, result['mappings'], pairs)
+                        self.assertEqual(1, len(matched))
+                        self.assertEqual([], unmatched)
+
     def test_direct_skender_result_requires_typed_receiver_and_full_native_body(self):
         source = ('using Skender.Stock.Indicators;\nprivate Quote[] _quotes = null!;\n'
                   'public List<FractalResult> NativeSingle() => '

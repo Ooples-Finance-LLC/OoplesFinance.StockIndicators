@@ -1,11 +1,21 @@
 """Conservative API navigation from the exact benchmark source snapshot.
 
-Only explicit qualified parameters or native calls establish an alias. Unknown
-wrappers and batched operations remain unresolved; this creates no timings.
+Explicit qualified parameters, native calls, or hash-pinned reviewed helper paths
+establish an alias. Unknown wrappers and batched operations remain unresolved;
+this creates no timings.
 """
 import hashlib
 import re
 import zipfile
+
+
+# Reviewed Single<TaSumOperation> -> Calculate<T> -> Functions.Sum<double>.
+# Match both complete files; any edit requires renewed source review.
+REVIEWED_HELPER_MAPPINGS = [dict(
+    fixture='SharedRollingSumBenchmarks', operation='SharedRollingSumBenchmarks',
+    pair='TaLib.Functions.Sum', source='benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedRollingSumBenchmarks.cs',
+    source_sha256='cbe65ca986433b4852bbc1574480321378963e0e5cfc90810d556feb2d7a7d92',
+    helper='benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PackedWindowBenchmarkExecution.cs', helper_sha256='2abc7bfd10cb5cad44cb75322a8675e8a2eea7aa24b3beff25d8cd6acea5fa21')]
 
 
 def direct_skender_mapping(source, pairs):
@@ -111,6 +121,18 @@ def snapshot_mappings(archive, fixtures, pairs):
             data = source.read(fixture['source'])
             for row in source_mappings(data.decode('utf-8-sig'), fixture['fixture'], pairs):
                 rows.append(dict(row, source=fixture['source'], source_sha256=hashlib.sha256(data).hexdigest()))
+            for reviewed in REVIEWED_HELPER_MAPPINGS:
+                if (reviewed['fixture'] != fixture['fixture'] or reviewed['source'] != fixture['source']
+                        or reviewed['pair'] not in pairs
+                        or hashlib.sha256(data).hexdigest() != reviewed['source_sha256']
+                        or reviewed['helper'] not in source.namelist()):
+                    continue
+                if hashlib.sha256(source.read(reviewed['helper'])).hexdigest() != reviewed['helper_sha256']:
+                    continue
+                rows.append(dict(fixture=reviewed['fixture'], operation=reviewed['operation'],
+                                 pair=reviewed['pair'], source=reviewed['source'],
+                                 source_sha256=reviewed['source_sha256'],
+                                 dependencies=[dict(source=reviewed['helper'], sha256=reviewed['helper_sha256'])]))
     return {'snapshot': archive.parent.name, 'archive_sha256': hashlib.sha256(archive.read_bytes()).hexdigest(),
             'status': 'Static operation mapping only; measurements and wrapper reconciliation remain separate.',
             'mappings': rows, 'mapped_pairs': len({r['pair'] for r in rows}),
