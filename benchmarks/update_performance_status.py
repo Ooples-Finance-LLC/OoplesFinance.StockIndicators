@@ -11,6 +11,7 @@ import html
 import json
 from pathlib import Path
 import re
+import subprocess
 import time
 
 from performance_pair_mapping import reconcile
@@ -22,6 +23,18 @@ END = '<!-- rollout-status:end -->'
 
 def read(path):
     return json.loads(path.read_text(encoding='utf-8-sig'))
+
+
+def published_inventory(repo, head):
+    if not re.fullmatch(r'[0-9a-f]{40}', head):
+        raise ValueError('Published inventory requires an exact commit ID')
+    try:
+        raw = subprocess.check_output(
+            ['git', 'show', head + ':benchmarks/results/remaining-indicators/inventory.json'],
+            cwd=repo, stderr=subprocess.PIPE)
+    except subprocess.CalledProcessError as error:
+        raise ValueError('Inventory is unavailable at the confirmed published commit') from error
+    return json.loads(raw.decode('utf-8-sig'))
 
 
 def embedded(document, name):
@@ -126,14 +139,14 @@ def reconcile_visible_sections(document, totals, candidate, completed):
 
 def render(document, repo, work):
     baseline = embedded(document, 'dataset')
-    inventory = read(repo / 'benchmarks/results/remaining-indicators/inventory.json')
+    publication = read(work / 'si-pr266-publication-20261021/published.json')
+    inventory = published_inventory(repo, publication['published_head'])
     formulas = formula_rows(inventory)
     folder = work / 'si-competitor-refresh-20261021'
     status = read(folder / 'status.json')
     fresh = fresh_results(folder)
     coverage = read(folder / 'coverage-navigation.json')
     fixtures = read(folder / 'cpu-fixtures.json')
-    publication = read(work / 'si-pr266-publication-20261021/published.json')
     ci_path = work / 'si-pr266-hosted-ci.json'
     hosted_ci = read(ci_path) if ci_path.exists() else {}
     local_validation = []
@@ -141,6 +154,7 @@ def render(document, repo, work):
         ('Oscillators and Floor aliases publication', 'si-pr266-followons-20261021/status.json'),
         ('Recursive aliases, KAMA, Liquid RSI and compatibility publication', 'si-pr266-recursive-kama-liquid-20261021/status.json'),
         ('Kase and Ichimoku publication', 'si-pr266-kase-ichimoku-20261021/status.json'),
+        ('KST and portable-helper publication', 'si-pr266-kst-compat-20261021/status.json'),
         ('Framework compatibility repair', 'si-Z-only-candidates-20261020/rollout-framework-compat-20261021/status.json')]:
         path = work / relative
         if path.exists():
@@ -217,7 +231,7 @@ def render(document, repo, work):
         queue.append([slug, ', '.join(batch['new_factory_types']), *stages])
     counts = Counter(r['state'] for r in formulas)
     head = publication['published_head'][:8]
-    data = dict(updated_utc=now, published_head=head, candidate=status['commit'][:8],
+    data = dict(updated_utc=now, published_head=head, inventory_commit=publication['published_head'], candidate=status['commit'][:8],
                 formula_counts=dict(counts), formulas=formulas, competitor_summary=summary, measurement_totals=totals,
                 baseline_pairs=len(old), baseline_comparisons=len(baseline['rows']), fresh=fresh,
                 unmatched_fresh=unmatched, mapped_api_pairs=operation_mapping.get('mapped_pairs', 0),
@@ -257,7 +271,7 @@ Each row reconciles: faster + slower + inconclusive + pending = expected. Blank 
     content += f'<h3>Measurement reconciliation</h3><p>{len(fresh)} fresh measurement rows = {len(fresh_by_key)} matched API slots + {len(unmatched)} supplemental or unresolved rows. Multiple fixtures for a slot require review; the report never chooses the fastest result. Static operation mapping covers {operation_mapping.get("mapped_pairs", 0)} of {len(old)} API pairs; mapping is not measurement.</p>'
     if unmatched:
         content += table(['Fixture', 'Operation', 'Bars', 'Mode', 'Measured verdict', 'Mapping status', 'Evidence'], [[r['fixture'], r['operation'], r['bars'], r['mode'], r['verdict'], r['mapping_status'], r['evidence']] for r in unmatched], 'status-unmatched')
-    content += '<h3>All formula correctness receipts</h3><p>' + '; '.join(f'{v} {html.escape(k)}' for k, v in sorted(counts.items())) + f' = {len(formulas)} formulas. These categories are disjoint. Receipt coverage is historical correctness evidence, not proof of optimization or current performance. Options without receipts remain visible.</p><input id="status-formula-search" aria-label="Search formula coverage" placeholder="Search formula, option or evidence" style="width:100%;padding:12px">'
+    content += '<h3>All formula correctness receipts</h3><p>' + '; '.join(f'{v} {html.escape(k)}' for k, v in sorted(counts.items())) + f' = {len(formulas)} formulas. These categories are disjoint. Inventory comes from confirmed published commit {head}; unpublished validation work is excluded. Receipt coverage is historical correctness evidence, not proof of optimization or current performance. Options without receipts remain visible.</p><input id="status-formula-search" aria-label="Search formula coverage" placeholder="Search formula, option or evidence" style="width:100%;padding:12px">'
     content += table(['Formula', 'Published evidence', 'Options lacking receipts', 'Receipt files'],
                      [[r['formula'], r['state'], ', '.join(r['missing']) or ('no builder options mapped' if not r['options'] else 'none'), ', '.join(r['receipts']) or 'none'] for r in formulas], 'status-formulas')
     content += '<details><summary>Prepared batch queue — last recorded validation stages</summary><p>Prepared code is not completed integration. A missing status path is unknown, not a failure or pass.</p>'
