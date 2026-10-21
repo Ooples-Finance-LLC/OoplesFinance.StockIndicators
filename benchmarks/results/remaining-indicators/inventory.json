@@ -5509,7 +5509,13 @@
       "options": [
         "KalmanSmootherSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "KalmanSmootherSpecOptions": [
+          "benchmarks/results/remaining-indicators/kalman-rational-root-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "KarobeinOscillator",
@@ -13292,6 +13298,7 @@
     "benchmarks/results/remaining-indicators/insync-cpu-contracts.json": "4a713d5f052e27c7d95ff8aedc26a4aa7b1d982a90a14807b4504be8f88913fd",
     "benchmarks/results/remaining-indicators/internalbar-cpu-contracts.json": "46452570339c919796efd1a4d4a1f9638b9c4720ca909245ba81ff7b09ab85cb",
     "benchmarks/results/remaining-indicators/japanese-cpu-contracts.json": "2564fe1b46627ffd37dba75b8db4de72154d0a59c1386828dc77efbc88124998",
+    "benchmarks/results/remaining-indicators/kalman-rational-root-integrated-contracts.json": "6c454d481cd10169d2ae9d5533207ac3af57d8cd28c978a0f7d5054f7b6a68aa",
     "benchmarks/results/remaining-indicators/kama-integrated-contracts.json": "21a520374516b522be02ed343922690ae5f14f6ed84e73f86620c0a1d264f890",
     "benchmarks/results/remaining-indicators/karobeinkwan-adaptive-contracts.json": "55070b46ac4b3d266330a3f87b484fe8014653dcddfc4e06e52fe6c4080c3086",
     "benchmarks/results/remaining-indicators/kase-serial-integrated-contracts.json": "a0aa858651270d04785e38ac8e16520defd834e5bfd2b889f6a339b4233a76bd",
@@ -13665,11 +13672,12 @@
     "src/Indicators/ValuesBarExecution.GOscillators.cs": "4a4b6c6d79f77b11a17788eeb49c882405866ba632948a0afdb4e5887108d3c5",
     "src/Indicators/ValuesBarExecution.GatorMeanness.cs": "56179f71b9f44a134b2400cf59572d12a30274cddcfde71874745ea0cf351ff3",
     "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "f554f9c88fccf39915f8dfb6f1265c1db286e2fc7a697c912393218d142a8cc4",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "efaed7ea3bb3ae89a78252e51ba15cda6dc8c110a3190c11bc6de951750bf08a",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Ichimoku.cs": "459397c5a7db8d4e7705eee86fb78d66bcfbc55b279a915f5acd7870fcff0fd7",
     "src/Indicators/ValuesBarExecution.ImpulsePair.cs": "22eb567c61c55733702c849068aaa24497b122f1aeda3865e9b9f21442e3a611",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
+    "src/Indicators/ValuesBarExecution.KalmanSmoother.cs": "707fb7a0d4670aa1b13a345bd40a2d41df87e04e97257e250a147cfa7bb42a6d",
     "src/Indicators/ValuesBarExecution.Kama.cs": "d1bc729aa26955e46b55057f916b73b5d359fed7a803295ad2583168d25bd045",
     "src/Indicators/ValuesBarExecution.KaseSerial.cs": "3c3ddefe36808ecd16ecea7f7631c6a7e336ef31c9f1f7e3d2168a62254e6700",
     "src/Indicators/ValuesBarExecution.Kst.cs": "722ae7a66386e7869e5c1d4d6c272b3266cf4c2ec42b0aa1c8cad26852a03fe7",
