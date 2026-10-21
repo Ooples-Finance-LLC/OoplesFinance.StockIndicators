@@ -1,6 +1,6 @@
 {
-  "snapshot": "si-elastic-volume-3d8eb093-preserved",
-  "archive_sha256": "ad99489a7ea0ea10b9063ad86d3852060f2df2725db39ece1b63b0032fff96a6",
+  "snapshot": "si-published-843d042a-preserved",
+  "archive_sha256": "56d26c6fb3dc9538f498a8561e2660621b08b545ba365bebd8fa1f93b9d415e0",
   "status": "Static operation mapping only; measurements and wrapper reconciliation remain separate.",
   "mappings": [
     {
