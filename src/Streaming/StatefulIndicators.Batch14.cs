@@ -617,7 +617,7 @@ public sealed class GuppyMultipleMovingAverageState : IStreamingIndicatorState, 
         var superGmmaFast = GuppyRibbonArithmetic.Mean(stackalloc double[] { emaF1, emaF2, emaF3, emaF4, emaF5, emaF6, emaF7, emaF8, emaF9, emaF10, emaF11 });
         var superGmmaSlow = GuppyRibbonArithmetic.Mean(stackalloc double[] { emaS1, emaS2, emaS3, emaS4, emaS5, emaS6, emaS7, emaS8, emaS9, emaS10, emaS11, emaS12, emaS13, emaS14, emaS15, emaS16 });
         var superGmmaOscRaw = GuppyRibbonArithmetic.Percent(superGmmaFast, superGmmaSlow);
-        var finite = double.IsFinite(superGmmaOscRaw);
+        var finite = FrameworkCompatibility.IsFinite(superGmmaOscRaw);
         var invalidSignal = _invalidSignal || !finite;
         var superGmmaOsc = finite || _smoothLength > 1
             ? _oscRawSum.Next(superGmmaOscRaw, isFinal) : superGmmaOscRaw;
