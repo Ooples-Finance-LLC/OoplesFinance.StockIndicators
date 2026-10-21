@@ -36,6 +36,7 @@ internal static partial class ValuesBarExecution
     }
 
     private static bool IsGeneratedState(IIndicator indicator) =>
+        indicator is StochasticMacdOscillator ||
         indicator is PivotPointAverage { MaType: null } ||
         indicator is PivotDetectorOscillator { MaType: null } ||
         indicator is TheRangeIndicator { MaType: null } ||
@@ -559,6 +560,7 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        StochasticMacdOscillator oscillator => new GeneratedStochasticMacdState(oscillator.Length, count),
         PivotPointAverage pivot => new GeneratedPivotAverageState(pivot.Length, pivot.InputLength, count),
         PivotDetectorOscillator => new GeneratedPivotDetectorState(),
         TheRangeIndicator range => new GeneratedRangeIndicatorState(range.Length),
