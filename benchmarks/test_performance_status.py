@@ -5,10 +5,27 @@ import tempfile
 import subprocess
 import unittest
 
-from update_performance_status import formula_rows, fresh_results, ci_snapshot_html, measurement_totals, reconcile_visible_sections, published_inventory
+from update_performance_status import formula_rows, fresh_results, ci_snapshot_html, measurement_totals, reconcile_visible_sections, published_inventory, local_validation_rows
 
 
 class PerformanceStatusTests(unittest.TestCase):
+    def test_publication_rows_discover_new_batches_without_duplicates_or_state_inference(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            cases = [
+                ('si-pr266-kst-compat-20261021', {'status': 'checks-passed-and-published'}),
+                ('si-pr266-future-indicator-20261022', {'status': 'waiting-for-integration', 'step': 'dependencies'}),
+                ('unrelated-project', {'status': 'failed'})]
+            for name, receipt in cases:
+                path = root / name / 'status.json'
+                path.parent.mkdir()
+                path.write_text(json.dumps(receipt), encoding='utf-8')
+            rows = local_validation_rows(root)
+            self.assertEqual(2, len(rows))
+            self.assertIn(['KST and portable-helper publication', 'checks-passed-and-published',
+                           'not recorded', 'unknown'], rows)
+            self.assertIn(['future indicator', 'waiting-for-integration', 'dependencies', 'unknown'], rows)
+
     def test_published_inventory_ignores_newer_commits_and_dirty_inventory(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

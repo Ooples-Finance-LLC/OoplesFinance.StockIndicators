@@ -137,6 +137,28 @@ def reconcile_visible_sections(document, totals, candidate, completed):
     return document
 
 
+def local_validation_rows(work):
+    known = {work / relative: label for label, relative in [
+        ('Oscillators and Floor aliases publication', 'si-pr266-followons-20261021/status.json'),
+        ('Recursive aliases, KAMA, Liquid RSI and compatibility publication', 'si-pr266-recursive-kama-liquid-20261021/status.json'),
+        ('Kase and Ichimoku publication', 'si-pr266-kase-ichimoku-20261021/status.json'),
+        ('KST and portable-helper publication', 'si-pr266-kst-compat-20261021/status.json'),
+        ('Paired timing tooling and report publication', 'si-pr266-report-followup-20261021/status.json'),
+        ('Shinohara and Stochastic publication', 'si-pr266-shinohara-stochastic-20261021/status.json'),
+        ('Current snapshot report publication', 'si-pr266-current-snapshot-report-20261021/status.json'),
+        ('Framework compatibility repair', 'si-Z-only-candidates-20261020/rollout-framework-compat-20261021/status.json')]}
+    paths = set(work.glob('si-pr266-*/status.json')) | {p for p in known if p.exists()}
+    rows = []
+    for path in sorted(paths):
+        label = known.get(path)
+        if label is None:
+            label = re.sub(r'-\d{8}$', '', path.parent.name.removeprefix('si-pr266-')).replace('-', ' ')
+        receipt = read(path)
+        rows.append([label, receipt.get('status', 'unknown'), receipt.get('step', 'not recorded'),
+                     receipt.get('updated_utc', 'unknown')])
+    return rows
+
+
 def render(document, repo, work):
     baseline = embedded(document, 'dataset')
     publication = read(work / 'si-pr266-publication-20261021/published.json')
@@ -149,20 +171,7 @@ def render(document, repo, work):
     fixtures = read(folder / 'cpu-fixtures.json')
     ci_path = work / 'si-pr266-hosted-ci.json'
     hosted_ci = read(ci_path) if ci_path.exists() else {}
-    local_validation = []
-    for label, relative in [
-        ('Oscillators and Floor aliases publication', 'si-pr266-followons-20261021/status.json'),
-        ('Recursive aliases, KAMA, Liquid RSI and compatibility publication', 'si-pr266-recursive-kama-liquid-20261021/status.json'),
-        ('Kase and Ichimoku publication', 'si-pr266-kase-ichimoku-20261021/status.json'),
-        ('KST and portable-helper publication', 'si-pr266-kst-compat-20261021/status.json'),
-        ('Paired timing tooling and report publication', 'si-pr266-report-followup-20261021/status.json'),
-        ('Shinohara and Stochastic publication', 'si-pr266-shinohara-stochastic-20261021/status.json'),
-        ('Current snapshot report publication', 'si-pr266-current-snapshot-report-20261021/status.json'),
-        ('Framework compatibility repair', 'si-Z-only-candidates-20261020/rollout-framework-compat-20261021/status.json')]:
-        path = work / relative
-        if path.exists():
-            receipt = read(path)
-            local_validation.append([label, receipt.get('status', 'unknown'), receipt.get('step', 'not recorded'), receipt.get('updated_utc', 'unknown')])
+    local_validation = local_validation_rows(work)
     navigation = read(work / 'si-unmapped-navigation-after-support-resistance-20261020.json')
     chain = read(work / 'si-pending-chain-static-reconciliation-v19-20261020.json')
     now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds')
