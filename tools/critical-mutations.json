@@ -6563,16 +6563,16 @@
     "id": "zscore-fast-loses-short-period",
     "module": "numerical",
     "file": "src/Helpers/StandardizedScoreWindow.cs",
-    "before": "new ExactLinearFitWindow(MathHelper.MinOrMax((int)Math.Ceiling(length / 2d)))",
-    "after": "new ExactLinearFitWindow(length)",
+    "before": "new ExactLinearFitWindow(MathHelper.MinOrMax((int)Math.Ceiling(length / 2d)), observedHistory)",
+    "after": "new ExactLinearFitWindow(length, observedHistory)",
     "filter": "FullyQualifiedName~ZScoreNumericalTests.DirectRoutesPreserveExactNormalizationPeriodsAndSelectedInputs"
   },
   {
     "id": "zscore-preview-commits-window",
     "module": "numerical",
     "file": "src/Helpers/StandardizedScoreWindow.cs",
-    "before": "if (commit) { _window.TryAdd",
-    "after": "if (true) { _window.TryAdd",
+    "before": "if (commit)\n        {",
+    "after": "if (true)\n        {",
     "filter": "FullyQualifiedName~ZScoreNumericalTests.DirectRoutesPreserveExactNormalizationPeriodsAndSelectedInputs"
   },
   {
@@ -6851,7 +6851,7 @@
     "id": "rank-logistic-drops-startup-pairs",
     "module": "numerical",
     "file": "src/Helpers/KendallCorrelationWindow.cs",
-    "before": "var padding = _prices.Capacity - count;",
+    "before": "var padding = _length - count;",
     "after": "var padding = 0;",
     "filter": "FullyQualifiedName~RankLogisticNumericalTests.WideFitsTiesTinyCorrelationsAndSignedGainsMatchEveryRoute"
   },
@@ -8402,8 +8402,8 @@
     "id": "moneyflow-percent-customer-wrong-source",
     "module": "numerical",
     "file": "src/Builder/Compute/IndicatorCompute.cs",
-    "before": "contributions.Span, flows.WritableSpan",
-    "after": "SpanCompat.AsReadOnlySpan(data.Volumes), flows.WritableSpan",
+    "before": "contributions.Span, flows!.Value.WritableSpan",
+    "after": "SpanCompat.AsReadOnlySpan(data.Volumes), flows!.Value.WritableSpan",
     "filter": "FullyQualifiedName~MoneyFlowPercentNumericalTests.CustomerAveragesConsumeVolumeThenTrueRangeFlow",
     "scope": "internal static ComputeBuffer ComputeTwiggsMoneyFlowFast("
   },
@@ -8852,8 +8852,8 @@
     "id": "trade-volume-customer-wrong-source",
     "module": "numerical",
     "file": "src/Builder/Compute/IndicatorCompute.cs",
-    "before": "line.Span, means.WritableSpan",
-    "after": "SpanCompat.AsReadOnlySpan(data.ClosePrices), means.WritableSpan",
+    "before": "line.Span, means!.Value.WritableSpan",
+    "after": "SpanCompat.AsReadOnlySpan(data.ClosePrices), means!.Value.WritableSpan",
     "filter": "FullyQualifiedName~TradeVolumeNumericalTests.CustomerSignalReceivesCumulativeLineForEveryOutputRequest",
     "scope": "internal static ComputeBuffer ComputeTradeVolumeIndexFast("
   },
@@ -19637,16 +19637,16 @@
     "id": "dynamic-support-high-window",
     "module": "numerical",
     "file": "src/Helpers/DynamicSupportWindow.cs",
-    "before": "_high = new(length);",
-    "after": "_high = new(length + 1);",
+    "before": "_high = new(capacity);",
+    "after": "_high = new(capacity + 1);",
     "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother"
   },
   {
     "id": "dynamic-support-low-window",
     "module": "numerical",
     "file": "src/Helpers/DynamicSupportWindow.cs",
-    "before": "_low = new(length);",
-    "after": "_low = new(length + 1);",
+    "before": "_low = new(capacity);",
+    "after": "_low = new(capacity + 1);",
     "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother"
   },
   {
@@ -21792,8 +21792,8 @@
     "id": "hurst-band-mean-period",
     "module": "numerical",
     "file": "src/Helpers/HurstBandWindow.cs",
-    "before": "_mean = new(length)",
-    "after": "_mean = new(length + 1)",
+    "before": "_mean = new(Math.Min(length, Math.Max(1, maxInputCount)))",
+    "after": "_mean = new(Math.Min(length + 1, Math.Max(1, maxInputCount)))",
     "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
   },
   {
@@ -22383,24 +22383,24 @@
     "id": "efficient-step-efficiency-period",
     "module": "numerical",
     "file": "src/Helpers/EfficientTrendStepWindow.cs",
-    "before": "_efficiency = new(Math.Max(1, length))",
-    "after": "_efficiency = new(Math.Max(1, length) + 1)",
+    "before": "? new(Math.Max(1, length)) : null",
+    "after": "? new(Math.Max(1, length) + 1) : null",
     "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
   },
   {
     "id": "efficient-step-fast-period",
     "module": "numerical",
     "file": "src/Helpers/EfficientTrendStepWindow.cs",
-    "before": "_fast = new(fastLength)",
-    "after": "_fast = new(slowLength)",
+    "before": "? new(fastLength) : null",
+    "after": "? new(slowLength) : null",
     "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
   },
   {
     "id": "efficient-step-slow-period",
     "module": "numerical",
     "file": "src/Helpers/EfficientTrendStepWindow.cs",
-    "before": "_slow = new(slowLength)",
-    "after": "_slow = new(fastLength)",
+    "before": "? new(slowLength) : null",
+    "after": "? new(fastLength) : null",
     "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
   },
   {
@@ -22487,24 +22487,24 @@
     "id": "efficient-step-preview-efficiency",
     "module": "numerical",
     "file": "src/Helpers/EfficientTrendStepWindow.cs",
-    "before": "_efficiency.Next(close, commit)",
-    "after": "_efficiency.Next(close, true)",
+    "before": "_efficiency?.Next(close, commit)",
+    "after": "_efficiency?.Next(close, true)",
     "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
   },
   {
     "id": "efficient-step-preview-fast",
     "module": "numerical",
     "file": "src/Helpers/EfficientTrendStepWindow.cs",
-    "before": "_fast.Next(close, commit)",
-    "after": "_fast.Next(close, true)",
+    "before": "_fast?.Next(close, commit)",
+    "after": "_fast?.Next(close, true)",
     "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
   },
   {
     "id": "efficient-step-preview-slow",
     "module": "numerical",
     "file": "src/Helpers/EfficientTrendStepWindow.cs",
-    "before": "_slow.Next(close, commit)",
-    "after": "_slow.Next(close, true)",
+    "before": "_slow?.Next(close, commit)",
+    "after": "_slow?.Next(close, true)",
     "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
   },
   {
@@ -22519,24 +22519,24 @@
     "id": "efficient-step-reset-efficiency",
     "module": "numerical",
     "file": "src/Helpers/EfficientTrendStepWindow.cs",
-    "before": "_efficiency.Reset();",
-    "after": "if (_hasPrevious && !_hasPrevious) _efficiency.Reset();",
+    "before": "_efficiency?.Reset();",
+    "after": "if (_hasPrevious && !_hasPrevious) _efficiency?.Reset();",
     "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
   },
   {
     "id": "efficient-step-reset-fast",
     "module": "numerical",
     "file": "src/Helpers/EfficientTrendStepWindow.cs",
-    "before": "_fast.Reset();",
-    "after": "if (_hasPrevious && !_hasPrevious) _fast.Reset();",
+    "before": "_fast?.Reset();",
+    "after": "if (_hasPrevious && !_hasPrevious) _fast?.Reset();",
     "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
   },
   {
     "id": "efficient-step-reset-slow",
     "module": "numerical",
     "file": "src/Helpers/EfficientTrendStepWindow.cs",
-    "before": "_slow.Reset();",
-    "after": "if (_hasPrevious && !_hasPrevious) _slow.Reset();",
+    "before": "_slow?.Reset();",
+    "after": "if (_hasPrevious && !_hasPrevious) _slow?.Reset();",
     "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
   },
   {
@@ -22941,8 +22941,8 @@
     "id": "kirshenbaum-fit-period",
     "module": "numerical",
     "file": "src/Helpers/KirshenbaumWindow.cs",
-    "before": "_fit = new(_length)",
-    "after": "_fit = new(_length + 1)",
+    "before": "_fit = new(_length, observedHistory: _length > maxInputCount)",
+    "after": "_fit = new(_length + 1, observedHistory: _length > maxInputCount)",
     "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
   },
   {
@@ -36992,8 +36992,8 @@
     "module": "numerical",
     "file": "src/Helpers/ImpulseResponseWindow.cs",
     "scope": "internal sealed class ImpulseResponseWindow",
-    "before": "_history[_history.Count - lag]",
-    "after": "_history[_history.Count - 1]",
+    "before": "var index = _nextHistory - lag;",
+    "after": "var index = _nextHistory - 1;",
     "filter": "FullyQualifiedName~ImpulseResponseNumericalTests"
   },
   {
@@ -44775,19 +44775,19 @@
   {
     "id": "adaptive-fit-range-expiry",
     "module": "numerical",
-    "file": "src/Helpers/AdaptiveFitWindow.cs",
-    "scope": "internal sealed class AdaptiveFitWindow",
-    "before": "if (skip) { skip = false; continue; }",
-    "after": "if (skip) { skip = false; }",
+    "file": "src/Helpers/ExactWindowExtreme.cs",
+    "scope": "internal BigInteger Preview(BigInteger value)",
+    "before": "while (first < _count && _candidates[Slot(first)].Index <= _index - _length) first++;",
+    "after": "while (false && first < _count && _candidates[Slot(first)].Index <= _index - _length) first++;",
     "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
   },
   {
     "id": "adaptive-fit-range-maximum",
     "module": "numerical",
-    "file": "src/Helpers/AdaptiveFitWindow.cs",
-    "scope": "internal sealed class AdaptiveFitWindow",
-    "before": "BigInteger.Max(maximum, retained)",
-    "after": "range",
+    "file": "src/Helpers/ExactWindowExtreme.cs",
+    "scope": "internal BigInteger Preview(BigInteger value)",
+    "before": "BigInteger.Max(value, retained)",
+    "after": "value",
     "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
   },
   {
@@ -45135,19 +45135,19 @@
   {
     "id": "atr-filter-floor",
     "module": "numerical",
-    "file": "src/Helpers/AtrFilterWindow.cs",
-    "scope": "internal sealed class AtrFilterWindow",
-    "before": "BigInteger.Min(lowest, retained)",
-    "after": "BigInteger.Max(lowest, retained)",
+    "file": "src/Helpers/ExactWindowExtreme.cs",
+    "scope": "internal BigInteger Preview(BigInteger value)",
+    "before": "BigInteger.Min(value, retained)",
+    "after": "BigInteger.Max(value, retained)",
     "filter": "FullyQualifiedName~AtrFilterNumericalTests.WideAndSubnormalRangesRetainAdaptiveDeviation"
   },
   {
     "id": "atr-filter-floor-expiry",
     "module": "numerical",
-    "file": "src/Helpers/AtrFilterWindow.cs",
-    "scope": "internal sealed class AtrFilterWindow",
-    "before": "var skip = _deviations.Count == _lookback;",
-    "after": "var skip = false;",
+    "file": "src/Helpers/ExactWindowExtreme.cs",
+    "scope": "internal BigInteger Preview(BigInteger value)",
+    "before": "while (first < _count && _candidates[Slot(first)].Index <= _index - _length) first++;",
+    "after": "while (false && first < _count && _candidates[Slot(first)].Index <= _index - _length) first++;",
     "filter": "FullyQualifiedName~AtrFilterNumericalTests.WideAndSubnormalRangesRetainAdaptiveDeviation"
   },
   {
@@ -51311,8 +51311,8 @@
     "module": "numerical",
     "file": "src/Helpers/BetterVolumeWindow.cs",
     "scope": "internal sealed class BetterVolumeWindow",
-    "before": "if (commit) { _count++;",
-    "after": "if (true) { _count++;",
+    "before": "if (commit) { _count++; _previousClose = close; _previousOpen = open;",
+    "after": "if (true) { _count++; _previousClose = close; _previousOpen = open;",
     "filter": "FullyQualifiedName~BetterVolumeNumericalTests.WideAllocationRangesAndSignalsMatchIndependentRoundedStages"
   },
   {
@@ -53975,8 +53975,8 @@
     "module": "numerical",
     "file": "src/Helpers/CoralTrendWindow.cs",
     "scope": "internal sealed class CoralTrendWindow",
-    "before": "_coefficient = ExactVarianceWindow.Units(cd)",
-    "after": "_coefficient = ExactVarianceWindow.Units(.4)",
+    "before": "var coefficient = ExactVarianceWindow.Units(cd)",
+    "after": "var coefficient = ExactVarianceWindow.Units(.4)",
     "filter": "FullyQualifiedName~CoralTrendNumericalTests.HandOpeningPolynomialAndUnitPeriodCancellationArePreserved"
   },
   {
@@ -54065,8 +54065,8 @@
     "module": "numerical",
     "file": "src/Helpers/CoralTrendWindow.cs",
     "scope": "internal sealed class CoralTrendWindow",
-    "before": "var blend = next[2] * unitCube",
-    "after": "var blend = next[3] * unitCube",
+    "before": "var blend = next[2] * UnitCube",
+    "after": "var blend = next[3] * UnitCube",
     "filter": "FullyQualifiedName~CoralTrendNumericalTests.HandOpeningPolynomialAndUnitPeriodCancellationArePreserved"
   },
   {
@@ -54074,8 +54074,8 @@
     "module": "numerical",
     "file": "src/Helpers/CoralTrendWindow.cs",
     "scope": "internal sealed class CoralTrendWindow",
-    "before": "3 * _coefficient * firstDifference",
-    "after": "2 * _coefficient * firstDifference",
+    "before": "_firstBlend = 3 * coefficient",
+    "after": "_firstBlend = 2 * coefficient",
     "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
   },
   {
@@ -54083,8 +54083,8 @@
     "module": "numerical",
     "file": "src/Helpers/CoralTrendWindow.cs",
     "scope": "internal sealed class CoralTrendWindow",
-    "before": "3 * square * secondDifference",
-    "after": "2 * square * secondDifference",
+    "before": "_secondBlend = 3 * square",
+    "after": "_secondBlend = 2 * square",
     "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
   },
   {
@@ -54092,8 +54092,8 @@
     "module": "numerical",
     "file": "src/Helpers/CoralTrendWindow.cs",
     "scope": "internal sealed class CoralTrendWindow",
-    "before": "square * _coefficient * thirdDifference",
-    "after": "square * Unit * thirdDifference",
+    "before": "_thirdBlend = square * coefficient",
+    "after": "_thirdBlend = square * Unit",
     "filter": "FullyQualifiedName~CoralTrendNumericalTests.OverflowingCoefficientCubeStillProducesFiniteScaledOutput"
   },
   {
@@ -54101,8 +54101,8 @@
     "module": "numerical",
     "file": "src/Helpers/CoralTrendWindow.cs",
     "scope": "internal sealed class CoralTrendWindow",
-    "before": "var square = _coefficient * _coefficient",
-    "after": "var square = _coefficient * Unit",
+    "before": "var square = coefficient * coefficient",
+    "after": "var square = coefficient * Unit",
     "filter": "FullyQualifiedName~CoralTrendNumericalTests.OverflowingCoefficientCubeStillProducesFiniteScaledOutput"
   },
   {
@@ -54110,8 +54110,8 @@
     "module": "numerical",
     "file": "src/Helpers/CoralTrendWindow.cs",
     "scope": "internal sealed class CoralTrendWindow",
-    "before": "RoundUnits(blend, unitCube)",
-    "after": "RoundUnits(blend, unitSquare)",
+    "before": "RoundUnits(blend, UnitCube)",
+    "after": "RoundUnits(blend, Unit * Unit)",
     "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
   },
   {
@@ -54254,8 +54254,8 @@
     "module": "numerical",
     "file": "src/Helpers/CorrectedAverageWindow.cs",
     "scope": "internal sealed class CorrectedAverageWindow",
-    "before": "_sum + current - expired",
-    "after": "_sum + current + expired",
+    "before": "sum.Add(-expired);",
+    "after": "sum.Add(expired);",
     "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
   },
   {
@@ -54263,8 +54263,8 @@
     "module": "numerical",
     "file": "src/Helpers/CorrectedAverageWindow.cs",
     "scope": "internal sealed class CorrectedAverageWindow",
-    "before": "_squares + current * current - expired * expired",
-    "after": "_squares + current * current + expired * expired",
+    "before": "squares.Subtract(expiredSquare);",
+    "after": "squares.AddExact(expiredSquare);",
     "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
   },
   {
@@ -54281,8 +54281,8 @@
     "module": "numerical",
     "file": "src/Helpers/CorrectedAverageWindow.cs",
     "scope": "internal sealed class CorrectedAverageWindow",
-    "before": "ExactPopulationDeviation.RootRatio(_length * squares - sum * sum, (BigInteger)_length * _length)",
-    "after": "ExactPopulationDeviation.RootRatio(_length * squares - sum * sum, (BigInteger)_length * _length * 4)",
+    "before": "radicand.SqrtMean((long)_length * _length)",
+    "after": "radicand.SqrtMean((long)_length * _length * 4)",
     "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
   },
   {
@@ -62633,8 +62633,8 @@
     "module": "numerical",
     "file": "src/Helpers/HirashimaWindow.cs",
     "scope": "internal sealed class HirashimaWindow",
-    "before": "Publish(basis),",
-    "after": "Publish(width),",
+    "before": "bands[2] = Publish(basis);",
+    "after": "bands[2] = Publish(width);",
     "filter": "FullyQualifiedName~HirashimaNumericalTests.HandPartialRegressionsDetermineCenterAndBothBandWidths"
   },
   {
@@ -67250,8 +67250,8 @@
     "module": "numerical",
     "file": "src/Helpers/MacZWindow.cs",
     "scope": "internal sealed class MacZWindow",
-    "before": "checked(a._exponent + b._exponent)",
-    "after": "checked(a._exponent - b._exponent)",
+    "before": "return new((a._coefficient / crossA) * (b._coefficient / crossB), checked(a._exponent + b._exponent),",
+    "after": "return new((a._coefficient / crossA) * (b._coefficient / crossB), checked(a._exponent - b._exponent),",
     "filter": "FullyQualifiedName~MacZNumericalTests.TinyMeansAndDeviationSurviveUntilCompleteQuotient"
   },
   {
@@ -74912,9 +74912,9 @@
     "id": "relative-spread-wide-round-spread",
     "module": "numerical",
     "file": "src/Streaming/RelativeSpreadPrecision.cs",
-    "scope": "internal sealed class RelativeSpreadKernel : IDisposable",
-    "before": "StrengthFromSpread(spread, final)",
-    "after": "StrengthFromSpread(Number.Of(spread.Publish()), final)",
+    "scope": "private double NextExact(double price, bool final)",
+    "before": "StrengthFromSpreadExact(spread, final)",
+    "after": "StrengthFromSpreadExact(Number.Of(spread.Publish()), final)",
     "filter": "FullyQualifiedName~RelativeSpreadNumericalTests.ExtremeAndSubnormalSpreadChangesRemainVisible"
   },
   {
@@ -81050,7 +81050,7 @@
     "id": "value-chart-wide-rounded-range",
     "module": "numerical",
     "file": "src/Helpers/ValueChartWindow.cs",
-    "scope": "private Number[] Coordinates(",
+    "scope": "private (Number Close, Number Open, Number High, Number Low) Coordinates(",
     "before": "Number.Of(highest) - Number.Of(lowest)",
     "after": "Number.Of(highest - lowest)",
     "filter": "FullyQualifiedName~ValueChartNumericalTests.OneBarCoordinatesRetainExactMedianAndRange"
@@ -81059,7 +81059,7 @@
     "id": "value-chart-wide-range-history-total",
     "module": "numerical",
     "file": "src/Helpers/ValueChartWindow.cs",
-    "scope": "private Number[] Coordinates(",
+    "scope": "private (Number Close, Number Open, Number High, Number Low) Coordinates(",
     "before": "_rangeSum + range",
     "after": "range",
     "filter": "FullyQualifiedName~ValueChartNumericalTests.RangePeriodClampsAt530AndFiveRangeHistoryExpires"
@@ -81068,7 +81068,7 @@
     "id": "value-chart-wide-range-history-length",
     "module": "numerical",
     "file": "src/Helpers/ValueChartWindow.cs",
-    "scope": "private Number[] Coordinates(",
+    "scope": "private (Number Close, Number Open, Number High, Number Low) Coordinates(",
     "before": "_ranges.Count == 4",
     "after": "_ranges.Count == 3",
     "filter": "FullyQualifiedName~ValueChartNumericalTests.RangePeriodClampsAt530AndFiveRangeHistoryExpires"
@@ -81077,7 +81077,7 @@
     "id": "value-chart-wide-range-expiry",
     "module": "numerical",
     "file": "src/Helpers/ValueChartWindow.cs",
-    "scope": "private Number[] Coordinates(",
+    "scope": "private (Number Close, Number Open, Number High, Number Low) Coordinates(",
     "before": "_rangeSum -= _ranges.Dequeue();",
     "after": "_ranges.Dequeue();",
     "filter": "FullyQualifiedName~ValueChartNumericalTests.RangePeriodClampsAt530AndFiveRangeHistoryExpires"
@@ -81086,7 +81086,7 @@
     "id": "value-chart-wide-coordinate-scale",
     "module": "numerical",
     "file": "src/Helpers/ValueChartWindow.cs",
-    "scope": "private Number[] Coordinates(",
+    "scope": "private (Number Close, Number Open, Number High, Number Low) Coordinates(",
     "before": ".Times(25).Divide(total)",
     "after": ".Times(5).Divide(total)",
     "filter": "FullyQualifiedName~ValueChartNumericalTests.OneBarCoordinatesRetainExactMedianAndRange"
@@ -81095,7 +81095,7 @@
     "id": "value-chart-wide-zero-range",
     "module": "numerical",
     "file": "src/Helpers/ValueChartWindow.cs",
-    "scope": "private Number[] Coordinates(",
+    "scope": "private (Number Close, Number Open, Number High, Number Low) Coordinates(",
     "before": "total.Sign == 0 ? default",
     "after": "total.Sign == 0 ? Number.Of(1)",
     "filter": "FullyQualifiedName~ValueChartNumericalTests.InvalidBarCannotAdvanceStateAndZeroRangePublishesZero"
@@ -81104,7 +81104,7 @@
     "id": "value-chart-wide-preview-commit",
     "module": "numerical",
     "file": "src/Helpers/ValueChartWindow.cs",
-    "scope": "private Number[] Coordinates(",
+    "scope": "private (Number Close, Number Open, Number High, Number Low) Coordinates(",
     "before": "if (final)",
     "after": "if (true)",
     "filter": "FullyQualifiedName~ValueChartNumericalTests.OneBarCoordinatesRetainExactMedianAndRange"
@@ -81113,9 +81113,9 @@
     "id": "value-chart-wide-native-selected",
     "module": "numerical",
     "file": "src/Helpers/ValueChartWindow.cs",
-    "scope": "internal double[] Next(",
-    "before": "custom ? Number.Of(bar.Close) : Median(bar.High, bar.Low)",
-    "after": "Median(bar.High, bar.Low)",
+    "scope": "internal void Next(double open, double high, double low, double close, Span<double> output,",
+    "before": "custom ? Number.Of(close) : Median(high, low)",
+    "after": "Median(high, low)",
     "filter": "FullyQualifiedName~ValueChartNumericalTests.SelectedPricesPreserveProjectedRangesAndOriginalOpen"
   },
   {
@@ -81419,27 +81419,27 @@
     "id": "variable-adaptive-wide-native-open",
     "module": "numerical",
     "file": "src/Helpers/VariableAdaptiveWindow.cs",
-    "scope": "internal (double Value, Signal Trade) Next(",
-    "before": "Number.Of(bar.Open)",
-    "after": "Number.Of(bar.Close)",
+    "scope": "internal (double Value, Signal Trade) NextValidated(",
+    "before": "Number.Of(open)",
+    "after": "Number.Of(close)",
     "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.HalfGainHasIndependentHandValues"
   },
   {
     "id": "variable-adaptive-wide-native-high",
     "module": "numerical",
     "file": "src/Helpers/VariableAdaptiveWindow.cs",
-    "scope": "internal (double Value, Signal Trade) Next(",
-    "before": "Number.Of(bar.High)",
-    "after": "Number.Of(bar.Close)",
+    "scope": "internal (double Value, Signal Trade) NextValidated(",
+    "before": "Number.Of(high)",
+    "after": "Number.Of(close)",
     "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.HalfGainHasIndependentHandValues"
   },
   {
     "id": "variable-adaptive-wide-native-low",
     "module": "numerical",
     "file": "src/Helpers/VariableAdaptiveWindow.cs",
-    "scope": "internal (double Value, Signal Trade) Next(",
-    "before": "Number.Of(bar.Low)",
-    "after": "Number.Of(bar.Close)",
+    "scope": "internal (double Value, Signal Trade) NextValidated(",
+    "before": "Number.Of(low)",
+    "after": "Number.Of(close)",
     "filter": "FullyQualifiedName~VariableAdaptiveNumericalTests.HalfGainHasIndependentHandValues"
   },
   {
@@ -84543,8 +84543,8 @@
     "module": "numerical",
     "file": "src/Helpers/WilsonWindow.cs",
     "scope": "internal sealed class WilsonWindow",
-    "before": "(bands[2] - bands[3]).Sign < 0",
-    "after": "(bands[2] - bands[3]).Sign > 0",
+    "before": "(u1 - u2).Sign < 0",
+    "after": "(u1 - u2).Sign > 0",
     "filter": "FullyQualifiedName~WilsonNumericalTests.StandardMeansRetainExtremeAndSignedPrices"
   },
   {
@@ -84552,8 +84552,8 @@
     "module": "numerical",
     "file": "src/Helpers/WilsonWindow.cs",
     "scope": "internal sealed class WilsonWindow",
-    "before": "(bands[0] - bands[1]).Sign > 0",
-    "after": "(bands[0] - bands[1]).Sign < 0",
+    "before": "(s1 - s2).Sign > 0",
+    "after": "(s1 - s2).Sign < 0",
     "filter": "FullyQualifiedName~WilsonNumericalTests.StandardMeansRetainExtremeAndSignedPrices"
   },
   {
@@ -84569,7 +84569,7 @@
     "id": "wilson-wide-native-delta",
     "module": "numerical",
     "file": "src/Helpers/WilsonWindow.cs",
-    "scope": "internal sealed class WilsonWindow",
+    "scope": "internal (double[] Lines, Signal Trade) Next(double price, bool final)",
     "before": "current - _previous",
     "after": "current + _previous",
     "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
@@ -84578,7 +84578,7 @@
     "id": "wilson-wide-native-preview",
     "module": "numerical",
     "file": "src/Helpers/WilsonWindow.cs",
-    "scope": "internal sealed class WilsonWindow",
+    "scope": "internal (double[] Lines, Signal Trade) Next(double price, bool final)",
     "before": "if (final) { _previous",
     "after": "if (true) { _previous",
     "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals"
@@ -86594,27 +86594,27 @@
     "module": "numerical",
     "file": "src/Helpers/KarobeinWindow.cs",
     "scope": "internal sealed class KarobeinWindow",
-    "before": "var second = ratio + c * fall;",
-    "after": "var second = ratio + c * rise;",
-    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+    "before": "var second = basis + fall;",
+    "after": "var second = basis + rise;",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands|FullyQualifiedName~CertifiedKarobeinWindowTests.BoundsPreserveExactValuesSignalsPreviewsAndReset"
   },
   {
     "id": "karobein-wide-fold-scale",
     "module": "numerical",
     "file": "src/Helpers/KarobeinWindow.cs",
     "scope": "internal sealed class KarobeinWindow",
-    "before": "ratio.Times(2).Divide(second)",
-    "after": "ratio.Divide(second)",
-    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+    "before": "(basis - fall).Divide(second)",
+    "after": "(basis - fall).Divide(second).Divide(2) - Number.Integer(1).Divide(2)",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands|FullyQualifiedName~CertifiedKarobeinWindowTests.BoundsPreserveExactValuesSignalsPreviewsAndReset"
   },
   {
     "id": "karobein-wide-fold-offset",
     "module": "numerical",
     "file": "src/Helpers/KarobeinWindow.cs",
     "scope": "internal sealed class KarobeinWindow",
-    "before": "Divide(second) - Number.Integer(1)",
-    "after": "Divide(second)",
-    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands"
+    "before": "(basis - fall).Divide(second)",
+    "after": "(basis - fall).Divide(second) + Number.Integer(1)",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.IndependentRatioAndSmoothingHands|FullyQualifiedName~CertifiedKarobeinWindowTests.BoundsPreserveExactValuesSignalsPreviewsAndReset"
   },
   {
     "id": "karobein-wide-lower-clamp",
@@ -86711,9 +86711,9 @@
     "module": "numerical",
     "file": "src/Helpers/KarobeinWindow.cs",
     "scope": "internal sealed class KarobeinWindow",
-    "before": "_previous = _line = _slope = default;",
-    "after": "_line = _slope = default;",
-    "filter": "FullyQualifiedName~KarobeinNumericalTests.PreviewResetAndSignedInputsRemainCausal"
+    "before": "_previous = _line = _olderLine = default;",
+    "after": "_line = _olderLine = default;",
+    "filter": "FullyQualifiedName~KarobeinNumericalTests.PreviewResetAndSignedInputsRemainCausal|FullyQualifiedName~CertifiedKarobeinWindowTests.BoundsPreserveExactValuesSignalsPreviewsAndReset"
   },
   {
     "id": "karobein-wide-selected",
@@ -87869,8 +87869,8 @@
     "id": "kaufman-certified-gain",
     "module": "kaufman-binary-numerical",
     "file": "src/Helpers/CertifiedKaufmanBinaryWindow.cs",
-    "before": "Interval.Exact(coefficient * coefficient)",
-    "after": "Interval.Exact(coefficient)",
+    "before": "var gain = coefficient * coefficient;",
+    "after": "var gain = coefficient;",
     "filter": "FullyQualifiedName~CertifiedKaufmanBinaryTests.CertifiedAndAmbiguousDecisionsMatchExactReplay"
   },
   {
@@ -93341,5 +93341,32 @@
     "before": "var primaryPmo = _primaryEngine.Next(bar.Close, false);",
     "after": "var primaryPmo = _primaryEngine.Next(bar.Close, true);",
     "filter": "FullyQualifiedName~PairedNumericalTests.IdenticalPriceMomentumLegsCancelBeyondBinary64"
+  },
+  {
+    "id": "macz-wide-product-exponent-integer",
+    "module": "numerical",
+    "file": "src/Helpers/MacZWindow.cs",
+    "scope": "internal sealed class MacZWindow",
+    "before": "return new(a._coefficient * b._coefficient, checked(a._exponent + b._exponent),",
+    "after": "return new(a._coefficient * b._coefficient, checked(a._exponent - b._exponent),",
+    "filter": "FullyQualifiedName~MacZNumericalTests.TinyMeansAndDeviationSurviveUntilCompleteQuotient"
+  },
+  {
+    "id": "wilson-wide-native-delta-span",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal Signal Next(double price, bool final, Span<double> lines)",
+    "before": "current - _previous",
+    "after": "current + _previous",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals|FullyQualifiedName~WilsonSpanTests.SpanPreservesExactLinesSignalsPreviewAndReset"
+  },
+  {
+    "id": "wilson-wide-native-preview-span",
+    "module": "numerical",
+    "file": "src/Helpers/WilsonWindow.cs",
+    "scope": "internal Signal Next(double price, bool final, Span<double> lines)",
+    "before": "if (final) { _previous",
+    "after": "if (true) { _previous",
+    "filter": "FullyQualifiedName~WilsonNumericalTests.HandValuesDetermineThresholdOrderAndSignals|FullyQualifiedName~WilsonSpanTests.SpanPreservesExactLinesSignalsPreviewAndReset"
   }
 ]
