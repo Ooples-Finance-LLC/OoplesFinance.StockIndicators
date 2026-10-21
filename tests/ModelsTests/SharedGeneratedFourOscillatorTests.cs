@@ -35,7 +35,7 @@ public sealed class SharedGeneratedFourOscillatorTests
     {
         var bars = BarsOf([1, 3, 3, 1, 2]);
         var root = Create(kind, int.MaxValue);
-        var rules = OoplesFinance.StockIndicators.Validation.BuiltInFormulaReferences.For((IBuiltInIndicator)root).ToArray(); Assert.NotEmpty(rules);
+        var rules = OoplesFinance.StockIndicators.Validation.BuiltInFormulaReferences.For(root).ToArray(); Assert.NotEmpty(rules);
         var type = typeof(ValuesBarExecution).GetNestedType("GeneratedFourOscillatorState", System.Reflection.BindingFlags.NonPublic)!;
         using var disposable = (IDisposable)Activator.CreateInstance(type, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic, null, [int.MaxValue, 8, 10, 17, kind == 1], null)!;
         var state = (IMultiOutputState)disposable;
@@ -55,7 +55,8 @@ public sealed class SharedGeneratedFourOscillatorTests
     public async Task CustomAveragesAndOriginalCandleExtremesKeepContracts()
     {
         var first = new _4MovingAverageConvergenceDivergence(3, 7, maType: new Ema());
-        var second = new _4MovingAverageConvergenceDivergence(3, 7, secondAverage: new Ema());
+        Assert.Throws<ArgumentException>("secondAverage", () => new _4MovingAverageConvergenceDivergence(3, 7, secondAverage: new Ema()));
+        var second = new _4MovingAverageConvergenceDivergence(3, 7, maType: new Ema(), secondAverage: new Ema());
         Assert.False(ValuesBarExecution.SupportsOwned([first])); Assert.False(ValuesBarExecution.SupportsOwned([second]));
         await Compare([first, second, Create(0, 3), Create(1, 3)],
             [new(default, 0, 2, 1, 9, 1), new(default, 0, 4, -1, -8, 1), new(default, 0, 2, 2, 3, 1)]);
@@ -66,8 +67,8 @@ public sealed class SharedGeneratedFourOscillatorTests
         IIndicator root = kind == 0 ? new _4MovingAverageConvergenceDivergence(2, 1, 5, 3, int.MaxValue, 0, -3, double.MaxValue)
             : new _4PercentagePriceOscillator(2, 1, 5, 3, int.MaxValue, 0, -3, double.MaxValue);
         await Compare([root], BarsOf([1, 0, -1, double.MaxValue, -double.MaxValue, 2, 3]));
-        IIndicator custom = kind == 0 ? new _4MovingAverageConvergenceDivergence(average10Average: new Ema())
-            : new _4PercentagePriceOscillator(average10Average: new Ema());
+        IIndicator custom = kind == 0 ? new _4MovingAverageConvergenceDivergence(maType: new Ema(), secondAverage: new Ema(), thirdAverage: new Ema(), fourthAverage: new Ema(), fifthAverage: new Ema(), average6Average: new Ema(), average7Average: new Ema(), average8Average: new Ema(), average9Average: new Ema(), average10Average: new Ema())
+            : new _4PercentagePriceOscillator(maType: new Ema(), secondAverage: new Ema(), thirdAverage: new Ema(), fourthAverage: new Ema(), fifthAverage: new Ema(), average6Average: new Ema(), average7Average: new Ema(), average8Average: new Ema(), average9Average: new Ema(), average10Average: new Ema());
         Assert.False(ValuesBarExecution.SupportsOwned([custom])); await Compare([custom], BarsOf([1, 3, 2]));
     }
     [Theory, InlineData(double.NaN), InlineData(double.PositiveInfinity), InlineData(double.NegativeInfinity)]

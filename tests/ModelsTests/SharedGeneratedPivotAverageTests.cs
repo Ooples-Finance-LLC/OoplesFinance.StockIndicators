@@ -58,7 +58,11 @@ public sealed class SharedGeneratedPivotAverageTests
     [Fact]
     public async Task CustomAveragesRetainFallback()
     {
-        IIndicator[] roots = [new PivotPointAverage(3, maType: new Ema()), new PivotPointAverage(3, secondAverage: new Ema()), new PivotPointAverage(3, thirdAverage: new Ema())];
+        Assert.Throws<ArgumentException>("secondAverage", () => new PivotPointAverage(3, secondAverage: new Ema()));
+        Assert.Throws<ArgumentException>("thirdAverage", () => new PivotPointAverage(3, maType: new Ema(), thirdAverage: new Ema()));
+        IIndicator[] roots = [new PivotPointAverage(3, maType: new Ema()),
+            new PivotPointAverage(3, maType: new Ema(), secondAverage: new Ema()),
+            new PivotPointAverage(3, maType: new Ema(), secondAverage: new Ema(), thirdAverage: new Ema())];
         foreach (var root in roots) { Assert.False(ValuesBarExecution.SupportsOwned([root])); await Compare([root], CalendarBars()); }
     }
     [Theory, MemberData(nameof(CalendarCases))]
