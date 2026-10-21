@@ -55,7 +55,8 @@ public sealed class SharedGeneratedImpulsePairTests
     public async Task CustomAveragesAndOriginalCandleExtremesKeepContracts()
     {
         var first = new ImpulseMovingAverageConvergenceDivergence(3, 7, new Ema());
-        var second = new ImpulseMovingAverageConvergenceDivergence(3, 7, secondAverage: new Ema());
+        Assert.Throws<ArgumentException>("secondAverage", () => new ImpulseMovingAverageConvergenceDivergence(3, 7, secondAverage: new Ema()));
+        var second = new ImpulseMovingAverageConvergenceDivergence(3, 7, new Ema(), new Ema());
         Assert.False(ValuesBarExecution.SupportsOwned([first])); Assert.False(ValuesBarExecution.SupportsOwned([second]));
         await Compare([first, second, Create(0, 3), Create(1, 3)],
             [new(default, 0, 2, 1, 9, 1), new(default, 0, 4, -1, -8, 1), new(default, 0, 2, 2, 3, 1)]);
