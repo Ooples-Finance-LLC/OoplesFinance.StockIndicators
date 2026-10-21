@@ -36,6 +36,7 @@ internal static partial class ValuesBarExecution
     }
 
     private static bool IsGeneratedState(IIndicator indicator) =>
+        indicator is ImpulseMovingAverageConvergenceDivergence { MaType: null } or ImpulsePercentagePriceOscillator ||
         indicator is DecisionPointBreadthSwenlinTradingOscillator ||
         indicator is OscOscillator { MaType: null } ||
         indicator is UtBotAlerts { MaType: null } bot && double.IsFinite(bot.KeyValue) ||
@@ -555,6 +556,8 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        ImpulseMovingAverageConvergenceDivergence impulse => new GeneratedImpulsePairState(impulse.Length, impulse.SignalLength, count, false),
+        ImpulsePercentagePriceOscillator impulse => new GeneratedImpulsePairState(impulse.Length, 9, count, true),
         DecisionPointBreadthSwenlinTradingOscillator breadth => new GeneratedSwenlinState(breadth.Length),
         OscOscillator oscillator => new GeneratedOscState(oscillator.Length, count),
         UtBotAlerts bot => new GeneratedUtBotState(bot.Length, bot.KeyValue),
