@@ -8554,7 +8554,16 @@
         "ShinoharaIntensityRatioASpecOptions",
         "ShinoharaIntensityRatioBSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ShinoharaIntensityRatioASpecOptions": [
+          "benchmarks/results/remaining-indicators/shinohara-integrated-contracts.json"
+        ],
+        "ShinoharaIntensityRatioBSpecOptions": [
+          "benchmarks/results/remaining-indicators/shinohara-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "SigmaSpikes",
@@ -8999,7 +9008,13 @@
       "options": [
         "StochasticFastOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "StochasticFastOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/stochastic-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "StochasticMomentumIndex",
@@ -9024,14 +9039,38 @@
         "StochasticOscillatorSpecOptions",
         "StochasticSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "PricePositionSpecOptions": [
+          "benchmarks/results/remaining-indicators/stochastic-integrated-contracts.json"
+        ],
+        "StochasticDSpecOptions": [
+          "benchmarks/results/remaining-indicators/stochastic-integrated-contracts.json"
+        ],
+        "StochasticKSpecOptions": [
+          "benchmarks/results/remaining-indicators/stochastic-integrated-contracts.json"
+        ],
+        "StochasticOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/stochastic-integrated-contracts.json"
+        ],
+        "StochasticSpecOptions": [
+          "benchmarks/results/remaining-indicators/stochastic-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "StochasticRegular",
       "options": [
         "StochasticRegularSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "StochasticRegularSpecOptions": [
+          "benchmarks/results/remaining-indicators/stochastic-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "StochasticRelativeStrengthIndex",
@@ -13083,6 +13122,7 @@
     "benchmarks/results/remaining-indicators/runningequity-integrated-contracts.json": "4f3c84a1f642b394f415a60e18d102a797b45c6820c9ce471ea8148562656c9a",
     "benchmarks/results/remaining-indicators/scalperhurst-contracts.json": "49088bf1bbcab08c416cec9ae693854076266a6aa5ad662fdc18489fcb6d9572",
     "benchmarks/results/remaining-indicators/seventeenth-integrated-contracts.json": "24a6d3480327b6a5dfd8d6f3be9a1885ef28d8ec12e2e74da261d53bb44f9515",
+    "benchmarks/results/remaining-indicators/shinohara-integrated-contracts.json": "dca489ce9924b002ca110e766e67771ee260d90c59824ba564f923ed062248af",
     "benchmarks/results/remaining-indicators/signalaliases-cpu-contracts.json": "19d43e273f4fb35dc1c83bda06aeadb615d17799ca56c5a0589be9aa55594e38",
     "benchmarks/results/remaining-indicators/signalnoise-cpu-contracts.json": "0aaeeac33ecf06c9b599e72a229673cbc41fef8457d0de6b9e10b7fb9d4d8291",
     "benchmarks/results/remaining-indicators/sixteenth-integrated-contracts.json": "8044fdf43d8461c33943745f7286cfec4d8827a2c64ff0d235dde86fa10ec523",
@@ -13093,6 +13133,7 @@
     "benchmarks/results/remaining-indicators/standardizedscore-contracts.json": "d1240f8ebf536e3f97147ca9827b2ae966fed47f33b80b637d16fe52de45658c",
     "benchmarks/results/remaining-indicators/statisticalquality-contracts.json": "96e68e031f9e8ca0bf2f269dbb83029e9a0b924a396b09a2743a4d3f1fe1b624",
     "benchmarks/results/remaining-indicators/steppedchannels-contracts.json": "10445eca5bf5ca141e192a68d4f2972ff57a1b4d19b10c52718b80f4d3b80e70",
+    "benchmarks/results/remaining-indicators/stochastic-integrated-contracts.json": "ff4a8b0a902e10e2451e8d083b583f36e9a07f87de215876db25364edacf6dc7",
     "benchmarks/results/remaining-indicators/stochcomposites-cpu-contracts.json": "ec367e3b95b044e3ead98d6fa78bff67b24c3b806f449ef8b8e276bae474f5b7",
     "benchmarks/results/remaining-indicators/strength-contracts.json": "c8388656a7749864f725a5e6fa22a27ff90b3ea0e2ced35c249f2b428607689a",
     "benchmarks/results/remaining-indicators/symmetric-contracts.json": "166810cfd981551049dc64f6c3037477b1bfce8487feb4e7fe8c00d718cb43a9",
@@ -13361,7 +13402,7 @@
     "src/Indicators/ValuesBarExecution.GOscillators.cs": "4a4b6c6d79f77b11a17788eeb49c882405866ba632948a0afdb4e5887108d3c5",
     "src/Indicators/ValuesBarExecution.GatorMeanness.cs": "56179f71b9f44a134b2400cf59572d12a30274cddcfde71874745ea0cf351ff3",
     "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "b8062888bfa03a14eb4af2c55b9f9462c1b2d3efe3c3f41aa50032edbd94a6b1",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "34f51fc78cb1331a5f9796c4f898fa3fdfcb1792816ddf0ce1529764d4878a7c",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Ichimoku.cs": "459397c5a7db8d4e7705eee86fb78d66bcfbc55b279a915f5acd7870fcff0fd7",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
@@ -13398,7 +13439,9 @@
     "src/Indicators/ValuesBarExecution.SeededAdaptive.cs": "8409a3a6d5aa382357701c9ad11ff73031cfb5626bdc50abba1d9a8c559b816c",
     "src/Indicators/ValuesBarExecution.SeededAtr.cs": "745b9216b810bc30ca87821cfc17e8354b909ed19caa25dbe3fbe4e8d92b9136",
     "src/Indicators/ValuesBarExecution.ShadowDoji.cs": "b63a97109ede63d6e3ba7020c73ef8d293b40337631a4abfa41fa3a042b471b6",
+    "src/Indicators/ValuesBarExecution.Shinohara.cs": "9bbefe20b45eea02116b5a2c7801cb79d58d29b98d1fef6d926820b8711210a0",
     "src/Indicators/ValuesBarExecution.SmoothedStochastic.cs": "e320f83a7332f8b060dad3355b62d4a5f65904b19c7536786b18dea3621d1b08",
+    "src/Indicators/ValuesBarExecution.Stochastic.cs": "22f2f5673fc96f4293ff612e015b5e6a51a0a1e3d6dc90af38589a23a5cd0dc3",
     "src/Indicators/ValuesBarExecution.Tillson.cs": "711865b0ab717995a0bca2b6a407fa57b26482cbc08893d4eb6cb49f019ed139",
     "src/Indicators/ValuesBarExecution.TradyStochastic.cs": "731bc7b1e181f348f828cd87101365360b9950d40da287466dad2e38cf482e06",
     "src/Indicators/ValuesBarExecution.Triangular.cs": "a7cc907c59d3c17e5987fbbae6b385703ad704b5fd2cf2e4e7b6497ce52a57d2",
