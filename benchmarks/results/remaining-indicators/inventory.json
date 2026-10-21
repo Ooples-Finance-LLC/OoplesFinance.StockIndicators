@@ -7058,7 +7058,13 @@
       "options": [
         "ParabolicSarSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ParabolicSarSpecOptions": [
+          "benchmarks/results/remaining-indicators/parabolic-sar-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ParabolicWeightedMovingAverage",
@@ -9001,7 +9007,13 @@
       "options": [
         "StochasticCustomOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "StochasticCustomOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/stochastic-components-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "StochasticFastOscillator",
@@ -9021,7 +9033,13 @@
       "options": [
         "StochasticMomentumIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "StochasticMomentumIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/stochastic-components-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "StochasticMovingAverageConvergenceDivergenceOscillator",
@@ -13083,6 +13101,7 @@
     "benchmarks/results/remaining-indicators/oscillator-contracts.json": "a0ecd34360e016bb6e502f553b181f91e17dede91b3028a1184ce78f102a4367",
     "benchmarks/results/remaining-indicators/oscillatoralias-contracts.json": "cf98dfcaf7b380585620d7c4debd7789055f96b87f6915b5ad5348bd7fd8f1db",
     "benchmarks/results/remaining-indicators/otherstops-cpu-contracts.json": "50b6e7c4295bdce66f89c8066c1f5509834fb795e514666a5b34e9dd57fc87fc",
+    "benchmarks/results/remaining-indicators/parabolic-sar-integrated-contracts.json": "97b892678287d4ea039b702f1340e0a8b14f949f384b7bbf4fdf9236dea8bc6b",
     "benchmarks/results/remaining-indicators/pivotfamilies-integrated-contracts.json": "cf593b467644abf480ad43c4c64e128d1a4ddab46bfc9e8fb6efa48fc988790e",
     "benchmarks/results/remaining-indicators/pmofamily-cpu-contracts.json": "16d76b00cc854bac1ba27e44f14ee6a767bc16460b9fdb64b5e4648809755a47",
     "benchmarks/results/remaining-indicators/polefilter-contracts.json": "14f8ce4bf6f089d654d38e64b0f2e87c833b3c425e14209dde54db912af10b3a",
@@ -13133,6 +13152,7 @@
     "benchmarks/results/remaining-indicators/standardizedscore-contracts.json": "d1240f8ebf536e3f97147ca9827b2ae966fed47f33b80b637d16fe52de45658c",
     "benchmarks/results/remaining-indicators/statisticalquality-contracts.json": "96e68e031f9e8ca0bf2f269dbb83029e9a0b924a396b09a2743a4d3f1fe1b624",
     "benchmarks/results/remaining-indicators/steppedchannels-contracts.json": "10445eca5bf5ca141e192a68d4f2972ff57a1b4d19b10c52718b80f4d3b80e70",
+    "benchmarks/results/remaining-indicators/stochastic-components-integrated-contracts.json": "0174ee1365711933baf2545ef3debd02eb3d091298d4646dd34c631f54dc4edf",
     "benchmarks/results/remaining-indicators/stochastic-integrated-contracts.json": "ff4a8b0a902e10e2451e8d083b583f36e9a07f87de215876db25364edacf6dc7",
     "benchmarks/results/remaining-indicators/stochcomposites-cpu-contracts.json": "ec367e3b95b044e3ead98d6fa78bff67b24c3b806f449ef8b8e276bae474f5b7",
     "benchmarks/results/remaining-indicators/strength-contracts.json": "c8388656a7749864f725a5e6fa22a27ff90b3ea0e2ced35c249f2b428607689a",
@@ -13402,7 +13422,7 @@
     "src/Indicators/ValuesBarExecution.GOscillators.cs": "4a4b6c6d79f77b11a17788eeb49c882405866ba632948a0afdb4e5887108d3c5",
     "src/Indicators/ValuesBarExecution.GatorMeanness.cs": "56179f71b9f44a134b2400cf59572d12a30274cddcfde71874745ea0cf351ff3",
     "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "34f51fc78cb1331a5f9796c4f898fa3fdfcb1792816ddf0ce1529764d4878a7c",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "b0e128f251931eace8430f7a369aba2bdb119e8516ac8cb2e599a15efffa53d2",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Ichimoku.cs": "459397c5a7db8d4e7705eee86fb78d66bcfbc55b279a915f5acd7870fcff0fd7",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
@@ -13417,6 +13437,7 @@
     "src/Indicators/ValuesBarExecution.OldestHilbert.cs": "d6adeb033cb9857cd3a7fd84159fc7fc17f9201c79b6fce084cec9e514fd9b98",
     "src/Indicators/ValuesBarExecution.OnBalanceVolume.cs": "31f417d74484fc11cfb7ac419f0828cc17c8b66776bad717c37941ee80bd6077",
     "src/Indicators/ValuesBarExecution.PairStatistics.cs": "e6253a7b79f715de3afa2968ef8ca4027d82e1cdb880187ae9192b5f1f99176f",
+    "src/Indicators/ValuesBarExecution.ParabolicSar.cs": "516cd2cf35b7c405c59c686422bddf8986ef6b8917e508b51898c5c2afab1708",
     "src/Indicators/ValuesBarExecution.PivotFamilies.cs": "90d659f3c1c61126cbd59861542d039781d69912670138619daacd088928741a",
     "src/Indicators/ValuesBarExecution.Pivots.cs": "64afefd7352681b0af32ee036659eeefedcb5922d2d0eb423aabe170091a7725",
     "src/Indicators/ValuesBarExecution.Pointwise.cs": "205402997bcf24bef42a4e9189c059de5e9e4df156d653a5a2c168c90c981832",
@@ -13442,6 +13463,7 @@
     "src/Indicators/ValuesBarExecution.Shinohara.cs": "9bbefe20b45eea02116b5a2c7801cb79d58d29b98d1fef6d926820b8711210a0",
     "src/Indicators/ValuesBarExecution.SmoothedStochastic.cs": "e320f83a7332f8b060dad3355b62d4a5f65904b19c7536786b18dea3621d1b08",
     "src/Indicators/ValuesBarExecution.Stochastic.cs": "22f2f5673fc96f4293ff612e015b5e6a51a0a1e3d6dc90af38589a23a5cd0dc3",
+    "src/Indicators/ValuesBarExecution.StochasticComponents.cs": "44842134b0eed05b0dd106fa2a8ef813882d914644b9537f5ea4e7549e64e6d3",
     "src/Indicators/ValuesBarExecution.Tillson.cs": "711865b0ab717995a0bca2b6a407fa57b26482cbc08893d4eb6cb49f019ed139",
     "src/Indicators/ValuesBarExecution.TradyStochastic.cs": "731bc7b1e181f348f828cd87101365360b9950d40da287466dad2e38cf482e06",
     "src/Indicators/ValuesBarExecution.Triangular.cs": "a7cc907c59d3c17e5987fbbae6b385703ad704b5fd2cf2e4e7b6497ce52a57d2",
