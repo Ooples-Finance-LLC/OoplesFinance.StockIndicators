@@ -35,12 +35,12 @@ internal sealed class KarobeinWindow : IDisposable
         // Published values are nearest-rounded exact outputs in [0, 1]. Adjacent
         // doubles enclose each exact value; round each subtraction outwards too.
         // Ambiguous comparisons retain the exact rational path below.
-        var slopeLow = Math.BitDecrement(Math.BitDecrement(line) - Math.BitIncrement(previous));
-        var slopeHigh = Math.BitIncrement(Math.BitIncrement(line) - Math.BitDecrement(previous));
-        var oldLow = Math.BitDecrement(Math.BitDecrement(previous) - Math.BitIncrement(older));
-        var oldHigh = Math.BitIncrement(Math.BitIncrement(previous) - Math.BitDecrement(older));
-        var accelerationLow = Math.BitDecrement(slopeLow - oldHigh);
-        var accelerationHigh = Math.BitIncrement(slopeHigh - oldLow);
+        var slopeLow = FrameworkCompatibility.BitDecrement(FrameworkCompatibility.BitDecrement(line) - FrameworkCompatibility.BitIncrement(previous));
+        var slopeHigh = FrameworkCompatibility.BitIncrement(FrameworkCompatibility.BitIncrement(line) - FrameworkCompatibility.BitDecrement(previous));
+        var oldLow = FrameworkCompatibility.BitDecrement(FrameworkCompatibility.BitDecrement(previous) - FrameworkCompatibility.BitIncrement(older));
+        var oldHigh = FrameworkCompatibility.BitIncrement(FrameworkCompatibility.BitIncrement(previous) - FrameworkCompatibility.BitDecrement(older));
+        var accelerationLow = FrameworkCompatibility.BitDecrement(slopeLow - oldHigh);
+        var accelerationHigh = FrameworkCompatibility.BitIncrement(slopeHigh - oldLow);
         if (slopeLow > 0 && (accelerationLow > 0 || accelerationHigh <= 0))
         { signal = accelerationLow > 0 ? Signal.StrongBuy : Signal.Buy; return true; }
         if (slopeHigh < 0 && (accelerationHigh < 0 || accelerationLow >= 0))

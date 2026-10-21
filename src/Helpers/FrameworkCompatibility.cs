@@ -13,6 +13,38 @@ internal static class FrameworkCompatibility
         double.IsFinite(value);
 #endif
 
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    internal static double BitIncrement(double value) =>
+#if NETFRAMEWORK
+        BitIncrementPortable(value);
+#else
+        Math.BitIncrement(value);
+#endif
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    internal static double BitDecrement(double value) =>
+#if NETFRAMEWORK
+        BitDecrementPortable(value);
+#else
+        Math.BitDecrement(value);
+#endif
+
+    internal static double BitIncrementPortable(double value)
+    {
+        if (double.IsNaN(value) || value == double.PositiveInfinity) return value;
+        if (value == 0) return double.Epsilon;
+        var bits = BitConverter.DoubleToInt64Bits(value);
+        return BitConverter.Int64BitsToDouble(bits + (value > 0 ? 1 : -1));
+    }
+
+    internal static double BitDecrementPortable(double value)
+    {
+        if (double.IsNaN(value) || value == double.NegativeInfinity) return value;
+        if (value == 0) return -double.Epsilon;
+        var bits = BitConverter.DoubleToInt64Bits(value);
+        return BitConverter.Int64BitsToDouble(bits + (value > 0 ? -1 : 1));
+    }
+
     internal static double Clamp(double value, double minimum, double maximum)
     {
         if (minimum > maximum) throw new ArgumentException("Minimum exceeds maximum.");
