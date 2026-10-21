@@ -36,6 +36,8 @@ internal static partial class ValuesBarExecution
     }
 
     private static bool IsGeneratedState(IIndicator indicator) =>
+        indicator is _4MovingAverageConvergenceDivergence fourMacd && double.IsFinite(fourMacd.BlueMult) && double.IsFinite(fourMacd.YellowMult) ||
+        indicator is _4PercentagePriceOscillator fourPpo && double.IsFinite(fourPpo.BlueMult) && double.IsFinite(fourPpo.YellowMult) ||
         indicator is StochasticMacdOscillator ||
         indicator is PivotPointAverage { MaType: null } ||
         indicator is PivotDetectorOscillator { MaType: null } ||
@@ -560,6 +562,8 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        _4MovingAverageConvergenceDivergence four => new GeneratedFourOscillatorState(four.Length1, four.Length2, four.Length3, four.Length4, false),
+        _4PercentagePriceOscillator four => new GeneratedFourOscillatorState(four.Length1, four.Length2, four.Length3, four.Length4, true),
         StochasticMacdOscillator oscillator => new GeneratedStochasticMacdState(oscillator.Length, count),
         PivotPointAverage pivot => new GeneratedPivotAverageState(pivot.Length, pivot.InputLength, count),
         PivotDetectorOscillator => new GeneratedPivotDetectorState(),
