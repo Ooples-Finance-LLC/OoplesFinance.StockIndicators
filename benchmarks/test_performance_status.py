@@ -5,10 +5,26 @@ import tempfile
 import subprocess
 import unittest
 
-from update_performance_status import formula_rows, fresh_results, ci_snapshot_html, measurement_totals, reconcile_visible_sections, published_inventory, local_validation_rows
+from update_performance_status import formula_rows, fresh_results, ci_snapshot_html, measurement_totals, reconcile_visible_sections, published_inventory, local_validation_rows, hosted_measurement_html
 
 
 class PerformanceStatusTests(unittest.TestCase):
+    def test_hosted_run_success_does_not_imply_verified_timings(self):
+        result = hosted_measurement_html(dict(source_sha='a' * 40, run_id=123,
+            status='completed', conclusion='success', updated_utc='2026-10-21'))
+        self.assertIn('/actions/runs/123', result)
+        self.assertIn('not be added to their totals', result)
+        self.assertIn('not a verified performance result', result)
+        self.assertIn('401 paired APIs', result)
+
+    def test_hosted_run_requires_pinned_source_and_run_identity(self):
+        for receipt in [dict(source_sha='master', run_id=1),
+                        dict(source_sha='a' * 40, run_id='javascript:bad'),
+                        dict(source_sha='a' * 40, run_id=True)]:
+            with self.assertRaises(ValueError):
+                hosted_measurement_html(receipt)
+        self.assertEqual('', hosted_measurement_html({}))
+
     def test_publication_rows_discover_new_batches_without_duplicates_or_state_inference(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

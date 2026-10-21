@@ -119,6 +119,28 @@ def ci_snapshot_html(receipt, published_head):
     return content
 
 
+def hosted_measurement_html(receipt):
+    if not receipt:
+        return ''
+    source = receipt.get('source_sha', '')
+    if not re.fullmatch(r'[0-9a-f]{40}', source):
+        raise ValueError('Hosted measurement requires an exact source commit')
+    run_id = receipt.get('run_id')
+    if type(run_id) is not int or run_id <= 0:
+        raise ValueError('Hosted measurement requires a numeric run ID')
+    url = f'https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/{run_id}'
+    state = html.escape(receipt.get('status', 'unknown'))
+    conclusion = html.escape(receipt.get('conclusion') or 'pending')
+    updated = html.escape(receipt.get('updated_utc', 'unknown'))
+    return (f'<h3>Fresh full-library timing run</h3><p><a href="{url}">GitHub run {run_id}</a> '
+            f'uses pinned commit {source[:8]}. Recorded status: {state}; conclusion: {conclusion}; updated {updated}. '
+            'The run requests all 401 paired APIs at 1,000 and 10,000 bars, after correctness gates. '
+            'Its LibraryPair measurements include wrappers and output normalization. They are separate from '
+            'the builder history modes above and will not be added to their totals. Shared-runner timings '
+            'are diagnostic. A successful workflow alone is not a verified performance result; raw artifacts '
+            'must be checked before results are imported.</p>')
+
+
 def reconcile_visible_sections(document, totals, candidate, completed):
     """Keep legacy report surfaces tied to the same current measurement ledger."""
     current = ('<section id="current-competitors" class="section"><h2>Complete current competitor results</h2>'
@@ -171,6 +193,8 @@ def render(document, repo, work):
     fixtures = read(folder / 'cpu-fixtures.json')
     ci_path = work / 'si-pr266-hosted-ci.json'
     hosted_ci = read(ci_path) if ci_path.exists() else {}
+    hosted_path = work / 'si-hosted-competitor-refresh-20261021/status.json'
+    hosted_measurement = read(hosted_path) if hosted_path.exists() else {}
     local_validation = local_validation_rows(work)
     navigation = read(work / 'si-unmapped-navigation-after-support-resistance-20261020.json')
     chain = read(work / 'si-pending-chain-static-reconciliation-v19-20261020.json')
@@ -247,7 +271,7 @@ def render(document, repo, work):
                 formula_counts=dict(counts), formulas=formulas, competitor_summary=summary, measurement_totals=totals,
                 baseline_pairs=len(old), baseline_comparisons=len(baseline['rows']), fresh=fresh,
                 unmatched_fresh=unmatched, mapped_api_pairs=operation_mapping.get('mapped_pairs', 0),
-                runner=status, hosted_ci=hosted_ci, local_validation=local_validation, publication_validation=validation, pending_publication=pending_publication, queue=queue, remaining_assessment=navigation['remaining'])
+                runner=status, hosted_ci=hosted_ci, hosted_measurement=hosted_measurement, local_validation=local_validation, publication_validation=validation, pending_publication=pending_publication, queue=queue, remaining_assessment=navigation['remaining'])
     content = f'''{START}<section id="rollout-status" class="section">
 <div class="kicker">Current status — updated {now}</div><h2>Where the work stands</h2>
 <p class="sub"><strong>Not finished. Current performance superiority is unproven.</strong>
@@ -266,6 +290,7 @@ Formula correctness receipts and the dated archives below are separate evidence 
 {len(status['completed'])} / {len(fixtures)} fixture batches completed; {len(status['failed'])} failures recorded.
 Quiet window: {status.get('quiet_seconds', 0)} / 240 seconds, last runner update {html.escape(status['updated_utc'])}.
 {controllers}</p>
+{hosted_measurement_html(hosted_measurement)}
 <p>Earlier publication receipt: six inventory tests passed. Recorded validation: <strong>{html.escape(validation['status'])}</strong>,
 step {html.escape(validation.get('step', 'pending'))}. {gpu_status}
 <a href="https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/pull/266/checks">live GitHub checks</a>
