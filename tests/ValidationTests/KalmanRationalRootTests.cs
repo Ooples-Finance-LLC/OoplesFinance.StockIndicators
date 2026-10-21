@@ -26,7 +26,7 @@ public sealed class KalmanRationalRootTests
         {
             for (var i = 0; i < 80; i++)
             {
-                var price = i % 7 switch { 0 => 1e150, 1 => -1e150, 2 => double.Epsilon,
+                var price = (i % 7) switch { 0 => 1e150, 1 => -1e150, 2 => double.Epsilon,
                     3 => -double.Epsilon, 4 => -0d, _ => 10 + (i * 13 % 101) / 8d };
                 Compare(-price, false); Compare(price, false); Compare(price, true);
             }
