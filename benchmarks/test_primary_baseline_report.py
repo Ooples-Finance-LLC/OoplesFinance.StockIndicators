@@ -1,7 +1,8 @@
 import json
+import copy
 
 from test_hosted_performance_results import HostedResultsTests
-from primary_baseline_report import measured_dataset, replace_primary, embedded, script
+from primary_baseline_report import measured_dataset, replace_primary, embedded, script, refresh
 
 
 class PrimaryBaselineTests(HostedResultsTests):
@@ -30,3 +31,28 @@ class PrimaryBaselineTests(HostedResultsTests):
         path.write_bytes(path.read_bytes().replace(b'100,', b'1,'))
         with self.assertRaisesRegex(ValueError, 'comparison values'):
             measured_dataset(self.folder, self.source, self.run, self.manifest, {})
+
+    def test_status_refresh_preserves_imported_baseline_without_artifacts(self):
+        dataset = measured_dataset(self.folder, self.source, self.run, self.manifest, {})
+        document = ('<body><section class="hero"><p class="lede">Builder timing pending</p></section>'
+            + script('dataset', dataset) + script('archived-baseline-dataset', {'rows': []}) + '</body>')
+        result = refresh(document, self.root, self.root / 'different-evidence-root')
+        self.assertEqual(dataset, embedded(result, 'dataset'))
+        self.assertEqual({'rows': []}, embedded(result, 'archived-baseline-dataset'))
+        self.assertIn('1 / 1 APIs at 10,000 bars', result)
+        self.assertNotIn('Builder timing pending', result)
+
+    def test_next_measurement_refresh_updates_existing_source_labels(self):
+        dataset = measured_dataset(self.folder, self.source, self.run, self.manifest, {})
+        document = ('<body><section class="hero"><p class="lede">old</p></section>'
+            '<section id="explorer"><p class="sub">old source</p></section>'
+            '<h3>Fresh full-library timing run</h3><p>old</p>' + script('dataset', {'rows': []}) + '</body>')
+        first = replace_primary(document, dataset)
+        next_data = copy.deepcopy(dataset)
+        next_data['evidence']['sourceSha'] = 'b' * 40
+        next_data['evidence']['runUrl'] = 'https://example.test/new-run'
+        updated = replace_primary(first, next_data)
+        self.assertIn('Measured source bbbbbbbb.', updated)
+        self.assertIn('Refreshed baseline source: bbbbbbbb.', updated)
+        self.assertNotIn('Measured source aaaaaaaa.', updated)
+        self.assertNotIn('Refreshed baseline source: aaaaaaaa.', updated)
