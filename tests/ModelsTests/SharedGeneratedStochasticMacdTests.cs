@@ -53,6 +53,27 @@ public sealed class SharedGeneratedStochasticMacdTests
         }
     }
     [Fact]
+    public void AdjustedRangesForgetPriorClosesOnReset()
+    {
+        var type = typeof(ValuesBarExecution).GetNestedType("GeneratedStochasticMacdState", System.Reflection.BindingFlags.NonPublic)!;
+        using var disposable = (IDisposable)Activator.CreateInstance(type, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic, null, [2, 3], null)!;
+        var state = (IMultiOutputState)disposable;
+        // At the second bar, EMA(12)=405 and EMA(26)=377 exactly.
+        // The adjusted [351,702] range gives 280/351; EMA(9) gives one fifth.
+        var line = 280d / 351; var signal = line / 5;
+        for (var repeat = 0; repeat < 2; repeat++)
+        {
+            var first = new Bar(default, 0, 1, 1, 351, 1);
+            var second = new Bar(default, 0, 1, 1, 702, 1);
+            var distant = new Bar(default, 0, 1, 1, 10000, 1);
+            var outputs = new double[3];
+            state.Update(in first, outputs); Bits([0, 0, 0], outputs);
+            state.Update(in second, outputs); Bits([line, signal, line - signal], outputs);
+            state.Update(in distant, outputs);
+            state.Reset();
+        }
+    }
+    [Fact]
     public async Task ZeroAndTiedPricesKeepAllOutputs()
         => await Compare([new StochasticMacdOscillator(1), new StochasticMacdOscillator(3)], BarsOf([0, 0, 1, 1, -1, -1, 0]));
     [Fact]
