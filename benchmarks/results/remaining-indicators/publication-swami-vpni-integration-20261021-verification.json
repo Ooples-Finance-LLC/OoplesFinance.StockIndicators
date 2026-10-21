@@ -1,0 +1,100 @@
+{
+  "input_head": "5f67cf800e2fce50607a8dc4c9daf8ffc14a9493",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "parallel_batch_note": "Merge qualified Swami/TDI and published VPN; reuse unchanged numerical qualifications, verify combined dispatch and parity plus current-source GPU.",
+  "reused_numerical_qualifications": {
+    "2b3b5a0a6249ca564eee8a761b7ed4b20cac19b1": {
+      "source_changes": [
+        "src/Helpers/CertifiedVolumePositiveNegative.cs",
+        "src/Helpers/VolumePositiveNegativeWindow.cs",
+        "src/Indicators/ValuesBarExecution.GeneratedStates.cs",
+        "src/Indicators/ValuesBarExecution.VolumePositiveNegative.cs"
+      ],
+      "qualification": {
+        "passed": 203,
+        "class_counts": {
+          "TradersDynamicNumericalTests": 98,
+          "SwamiNumericalTests": 74,
+          "SharedGeneratedSwamiTdiTests": 20,
+          "ComparisonFrameworkCompatibilityTests": 4,
+          "SwamiCertifiedTests": 7
+        },
+        "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\swami-certified\\unit\\unit.trx",
+        "sha256": "9567aedb708fd9ab36c66e14fbcf51bda7a86d4f18e906fcf4bf1a2b0c2e76a8"
+      },
+      "note": "Only the other independently qualified family and reviewed dispatch additions changed; mathematical helpers and numerical assertions for this family are unchanged."
+    },
+    "622a65a0edbe80ea1213307fd3d74426a3ffe5fb": {
+      "source_changes": [
+        "src/Helpers/CertifiedSwami.cs",
+        "src/Helpers/SwamiWindow.cs",
+        "src/Indicators/ValuesBarExecution.GeneratedStates.cs",
+        "src/Indicators/ValuesBarExecution.SwamiTdi.cs"
+      ],
+      "qualification": {
+        "passed": 111,
+        "class_counts": {
+          "VolumePositiveNegativeNumericalTests": 83,
+          "VolumePositiveNegativeCertifiedTests": 11,
+          "SharedGeneratedVolumePositiveNegativeTests": 13,
+          "ComparisonFrameworkCompatibilityTests": 4
+        },
+        "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\vpni-certified\\unit\\unit.trx",
+        "sha256": "197a7aa1c58caa71ca88ff450eb40674062f3b5f503e9d94577f7b3c5a83a383"
+      },
+      "note": "Only the other independently qualified family and reviewed dispatch additions changed; mathematical helpers and numerical assertions for this family are unchanged."
+    }
+  },
+  "step": "complete",
+  "updated_utc": "2026-10-21T22:48:21.752283+00:00",
+  "unit": {
+    "passed": 37,
+    "class_counts": {
+      "SharedGeneratedVolumePositiveNegativeTests": 13,
+      "SharedGeneratedSwamiTdiTests": 20,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\swami-integration\\unit\\unit.trx",
+    "sha256": "621c2d0199fd8054c4a94f22e3c656b03c83711e13c2ca3032651cd76289714a",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-swami-vpni-integration-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 418,
+    "class_counts": {
+      "RemainingBenchmarkDiscoveryTests": 406,
+      "RemainingSwamiTdiBenchmarkTests": 8,
+      "RemainingVolumePositiveNegativeBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\swami-integration\\parity\\parity.trx",
+    "sha256": "346c37ce268b6a07b8fa2dbfcf0e45d448e8d71881db410b50e98108ac05f798",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-swami-vpni-integration-20261021-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-swami-certified-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "13efb2db9b1f62b73d42c096414166401c9aadf4e2d23f863bfeaee998e235f4",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-swami-certified-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "13efb2db9b1f62b73d42c096414166401c9aadf4e2d23f863bfeaee998e235f4",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-swami-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "13efb2db9b1f62b73d42c096414166401c9aadf4e2d23f863bfeaee998e235f4",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-swami-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "13efb2db9b1f62b73d42c096414166401c9aadf4e2d23f863bfeaee998e235f4"
+  },
+  "source_fingerprint_sha256": "a8df145ae347320a9e4f6824e71f54757143f57f47242e685c9a7c6bdea53e3d",
+  "inventory_tests_passed": 6,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Merged-source integration checks supplement the unchanged source-pinned Swami/TDI and VPN numerical qualifications. Counts overlap and must not be added as unique coverage."
+}

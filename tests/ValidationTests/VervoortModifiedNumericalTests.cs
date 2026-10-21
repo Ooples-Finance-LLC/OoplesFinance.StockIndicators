@@ -24,9 +24,14 @@ public sealed class VervoortModifiedNumericalTests
     [Theory, MemberData(nameof(Cases))]
     public Task SelectedInputsPreserveBands(IndicatorValidationCase c)
         => new OrdinalFamilyNumericalTests().SelectedSourcePreservesTheFormulaAndOriginalCandleFields(c);
-    [Theory, MemberData(nameof(Cases))]
-    public Task EnrolledConfigurationsPassNumericalFixtures(IndicatorValidationCase c)
-        => new OrdinalFamilyNumericalTests().PublicConfigurationsPassEveryNumericalClass(c);
+    // Serializable names allow an unfinished configuration to be selected on
+    // its own, without repeating every completed exact-reference calculation.
+    public static IEnumerable<object[]> ConfigurationNames => Cases
+        .Select(c => new object[] { ((IndicatorValidationCase)c[0]).ToString().Split('/').Last() });
+    [Theory, MemberData(nameof(ConfigurationNames))]
+    public Task EnrolledConfigurationsPassNumericalFixtures(string configuration)
+        => new OrdinalFamilyNumericalTests().PublicConfigurationsPassEveryNumericalClass(
+            Cases.Select(c => (IndicatorValidationCase)c[0]).Single(c => c.ToString().EndsWith("/" + configuration, StringComparison.Ordinal)));
     [Fact]
     public void HandBandUsesPopulationSpreadAndFiftyCenter()
     {
