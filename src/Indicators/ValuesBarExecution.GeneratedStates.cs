@@ -36,6 +36,7 @@ internal static partial class ValuesBarExecution
     }
 
     private static bool IsGeneratedState(IIndicator indicator) =>
+        indicator is TheRangeIndicator { MaType: null } ||
         indicator is ImpulseMovingAverageConvergenceDivergence { MaType: null } or ImpulsePercentagePriceOscillator ||
         indicator is DecisionPointBreadthSwenlinTradingOscillator ||
         indicator is OscOscillator { MaType: null } ||
@@ -556,6 +557,7 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        TheRangeIndicator range => new GeneratedRangeIndicatorState(range.Length),
         ImpulseMovingAverageConvergenceDivergence impulse => new GeneratedImpulsePairState(impulse.Length, impulse.SignalLength, count, false),
         ImpulsePercentagePriceOscillator impulse => new GeneratedImpulsePairState(impulse.Length, 9, count, true),
         DecisionPointBreadthSwenlinTradingOscillator breadth => new GeneratedSwenlinState(breadth.Length),
