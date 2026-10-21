@@ -5742,7 +5742,16 @@
         "KnowSureThingSpecOptions",
         "KstSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "KnowSureThingSpecOptions": [
+          "benchmarks/results/remaining-indicators/kst-integrated-contracts.json"
+        ],
+        "KstSpecOptions": [
+          "benchmarks/results/remaining-indicators/kst-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "KurtosisIndicator",
@@ -13013,6 +13022,7 @@
     "benchmarks/results/remaining-indicators/kasestops-cpu-contracts.json": "ff0a42c8c827de937e9e5b8bf9560d62f5dd755e5aff33cb5bbab38fdfd0323f",
     "benchmarks/results/remaining-indicators/kaufmanpair-adaptive-contracts.json": "1f08a8a97592a62df76cc1baa0f66e45ebb9194f8c716191f53341aa29b9eba2",
     "benchmarks/results/remaining-indicators/keltnerchannels-contracts.json": "5fb932ab524ad3414f8c18e5eca9b94deb28408266d9f40b26b6e01763cfb227",
+    "benchmarks/results/remaining-indicators/kst-integrated-contracts.json": "0a6989df4ef7dc25de9076c49c70f28602c2f8ba026c156e10163fb2f4878da0",
     "benchmarks/results/remaining-indicators/laggedreturns-integrated-contracts.json": "cf1ea77b527d699d472243fc7c14b442eec611fba2db2d4e70edcf136e0b4a3c",
     "benchmarks/results/remaining-indicators/laguerre-contracts.json": "2718bb13a5a667fabb6789e6a5816b79c155eb08eec10f5a5c59858057d6b267",
     "benchmarks/results/remaining-indicators/lbr-bounded-contracts.json": "14cba192ebbbc7281db4363019a754984006417fd0ab392523c47aa788ea8103",
@@ -13351,12 +13361,13 @@
     "src/Indicators/ValuesBarExecution.GOscillators.cs": "4a4b6c6d79f77b11a17788eeb49c882405866ba632948a0afdb4e5887108d3c5",
     "src/Indicators/ValuesBarExecution.GatorMeanness.cs": "56179f71b9f44a134b2400cf59572d12a30274cddcfde71874745ea0cf351ff3",
     "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "fa598e3d22e6edc325cd3f2c05682cf29970145043f977637f02354fa98f504a",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "b8062888bfa03a14eb4af2c55b9f9462c1b2d3efe3c3f41aa50032edbd94a6b1",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Ichimoku.cs": "459397c5a7db8d4e7705eee86fb78d66bcfbc55b279a915f5acd7870fcff0fd7",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Kama.cs": "d1bc729aa26955e46b55057f916b73b5d359fed7a803295ad2583168d25bd045",
     "src/Indicators/ValuesBarExecution.KaseSerial.cs": "3c3ddefe36808ecd16ecea7f7631c6a7e336ef31c9f1f7e3d2168a62254e6700",
+    "src/Indicators/ValuesBarExecution.Kst.cs": "722ae7a66386e7869e5c1d4d6c272b3266cf4c2ec42b0aa1c8cad26852a03fe7",
     "src/Indicators/ValuesBarExecution.LaggedReturns.cs": "86122ae31d6b8addab098c72675ba5cb4708a5bb13e63e4dace2598820e43154",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
