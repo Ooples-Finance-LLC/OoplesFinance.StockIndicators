@@ -10,6 +10,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingAdaptiveV2Benchmarks), 40)]
     [InlineData(typeof(RemainingRangeStatisticsBenchmarks), 16)]
     [Theory]
+    [InlineData(typeof(RemainingObvFollowupsBenchmarks), 16)]
     [InlineData(typeof(RemainingTillsonAliasesBenchmarks), 16)]
     [InlineData(typeof(RemainingPolarizedEfficiencyBenchmarks), 16)]
     [InlineData(typeof(RemainingRsiFollowupsBenchmarks), 32)]

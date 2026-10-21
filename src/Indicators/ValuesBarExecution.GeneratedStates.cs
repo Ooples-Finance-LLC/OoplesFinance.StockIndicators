@@ -61,6 +61,7 @@ internal static partial class ValuesBarExecution
         indicator is Pfe or PolarizedFractalEfficiency { MaType: null } ||
         indicator is T3 { MaType: null } ||
         indicator is TillsonT3MovingAverage { MaType: null } tillson && double.IsFinite(tillson.VFactor) ||
+        indicator is OnBalanceVolumeModified { MaType: null } or OnBalanceVolumeReflex { MaType: null } ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
@@ -540,6 +541,8 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        OnBalanceVolumeModified volume => new GeneratedObvFollowupState(volume.Length1, volume.Length2, false),
+        OnBalanceVolumeReflex volume => new GeneratedObvFollowupState(volume.Length, volume.SignalLength, true),
         T3 tillson => new GeneratedTillsonAliasState(tillson.Length, .7),
         TillsonT3MovingAverage tillson => new GeneratedTillsonAliasState(tillson.Length, tillson.VFactor),
         Pfe efficiency => new GeneratedPolarizedEfficiencyState(efficiency.Length, 5),
