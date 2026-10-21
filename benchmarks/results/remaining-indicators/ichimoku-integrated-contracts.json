@@ -1,0 +1,37 @@
+{
+  "types": [
+    "IchimokuTenkanSen",
+    "IchimokuKijunSen",
+    "IchimokuSenkouSpanA",
+    "IchimokuSenkouSpanB",
+    "IchimokuChikouSpan"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "d75919edc8c8eca4f89744c9ac160fb60040216b",
+  "combined_input_sha256": "da28f3c08584239da77d4836c28563f95d806b3b59ff6742ec0c2dec3141e708",
+  "benchmark_fixture": {
+    "type": "RemainingIchimokuBenchmarks",
+    "operations": [
+      "IchimokuTenkanSen",
+      "IchimokuKijunSen",
+      "IchimokuSenkouSpanA",
+      "IchimokuSenkouSpanB",
+      "IchimokuChikouSpan"
+    ]
+  },
+  "checks": {
+    "unit": 68,
+    "parity": 20,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/ichimoku-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/ichimoku-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}
