@@ -85,6 +85,9 @@ def render(document, repo, work):
     navigation = read(work / 'si-unmapped-navigation-after-support-resistance-20261020.json')
     chain = read(work / 'si-pending-chain-static-reconciliation-v19-20261020.json')
     now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds')
+    gpu_status = ('Fresh source-matched GPU validation passed all 100 cases and is published.'
+                  if 'Fresh source-matched GPU100passed with master dependencies' in publication['verification']
+                  else 'The saved GPU receipt failed the combined-source fingerprint gate; fresh validation is pending.')
     publication_validation = work / 'si-pr266-publication-20261021/validation-status.json'
     validation = read(publication_validation) if publication_validation.exists() else {'status': 'combined C# validation pending'}
     controllers = ('Validation controllers are running; the benchmark retry waits without holding them.'
@@ -154,7 +157,7 @@ contains the published integration checkpoint {head}. The timing candidate is {s
 Quiet window: {status.get('quiet_seconds', 0)} / 240 seconds, last runner update {html.escape(status['updated_utc'])}.
 {controllers}</p>
 <p>Publication checks: six inventory tests passed. Combined validation: <strong>{html.escape(validation['status'])}</strong>,
-step {html.escape(validation.get('step', 'pending'))}. The saved GPU receipt failed the combined-source fingerprint gate and is being revalidated.
+step {html.escape(validation.get('step', 'pending'))}. {gpu_status}
 <a href="https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/pull/266/checks">live GitHub checks</a>
 reported a commit-message lint failure on historical subjects. No current-head performance claim follows from earlier correctness receipts.</p>
 <h3>Current competitor coverage</h3><p>Each library total counts API pairs × two sizes. Both Ooples history modes are shown separately.
