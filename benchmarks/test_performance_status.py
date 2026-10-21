@@ -4,10 +4,27 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from update_performance_status import formula_rows, fresh_results
+from update_performance_status import formula_rows, fresh_results, ci_snapshot_html
 
 
 class PerformanceStatusTests(unittest.TestCase):
+    def test_hosted_ci_is_tied_to_exact_published_commit(self):
+        receipt = {'head': 'current', 'checked_utc': 'today', 'checks': [
+            {'name': 'net461', 'status': 'completed', 'conclusion': 'failure', 'url': 'evidence'},
+            {'name': 'contracts', 'status': 'in_progress', 'conclusion': None}]}
+        rendered = ci_snapshot_html(receipt, 'current')
+        self.assertIn('matches the published commit', rendered)
+        self.assertIn('1 failure, 1 in_progress', rendered)
+        self.assertIn('net461', rendered)
+        self.assertIn('different commit', ci_snapshot_html(receipt, 'new'))
+
+    def test_missing_ci_is_unknown_and_ci_text_is_escaped(self):
+        self.assertIn('No hosted CI snapshot', ci_snapshot_html({}, 'current'))
+        rendered = ci_snapshot_html({'head': '<old>', 'checks': [
+            {'name': '<script>', 'conclusion': 'failure', 'url': '<url>'}]}, 'current')
+        self.assertNotIn('<script>', rendered)
+        self.assertIn('&lt;script&gt;', rendered)
+
     def test_partial_alias_coverage_is_not_complete(self):
         rows = formula_rows({'counts': {'batch_formulas': 3}, 'batch_formulas': [
             {'indicator': 'A', 'options': ['A', 'Alias'], 'contract_receipts': {'A': ['a.json']}},

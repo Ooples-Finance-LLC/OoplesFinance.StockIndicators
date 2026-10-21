@@ -74,6 +74,21 @@ def table(headers, rows, name):
             + '</tbody></table></div>')
 
 
+def ci_snapshot_html(receipt, published_head):
+    if not receipt:
+        return '<p>No hosted CI snapshot is recorded for this report.</p>'
+    same = receipt.get('head') == published_head
+    scope = 'matches the published commit' if same else 'is for a different commit; it does not establish current CI status'
+    counts = Counter(row.get('conclusion') or row.get('status', 'unknown') for row in receipt.get('checks', []))
+    text = ', '.join(f'{count} {state}' for state, count in sorted(counts.items()))
+    content = f'<p>Hosted CI snapshot {html.escape(receipt.get("head", "unknown")[:8])} at {html.escape(receipt.get("checked_utc", "unknown"))} {scope}: {html.escape(text)}.</p>'
+    failed = [[row['name'], row.get('conclusion'), row.get('url', '')] for row in receipt.get('checks', [])
+              if row.get('conclusion') not in [None, 'success', 'skipped', 'neutral']]
+    if failed:
+        content += table(['Check', 'Recorded result', 'Evidence URL'], failed, 'status-hosted-ci')
+    return content
+
+
 def render(document, repo, work):
     baseline = embedded(document, 'dataset')
     inventory = read(repo / 'benchmarks/results/remaining-indicators/inventory.json')
@@ -84,6 +99,16 @@ def render(document, repo, work):
     coverage = read(folder / 'coverage-navigation.json')
     fixtures = read(folder / 'cpu-fixtures.json')
     publication = read(work / 'si-pr266-publication-20261021/published.json')
+    ci_path = work / 'si-pr266-hosted-ci.json'
+    hosted_ci = read(ci_path) if ci_path.exists() else {}
+    local_validation = []
+    for label, relative in [
+        ('Oscillators and Floor aliases publication', 'si-pr266-followons-20261021/status.json'),
+        ('Framework compatibility repair', 'si-Z-only-candidates-20261020/rollout-framework-compat-20261021/status.json')]:
+        path = work / relative
+        if path.exists():
+            receipt = read(path)
+            local_validation.append([label, receipt.get('status', 'unknown'), receipt.get('step', 'not started'), receipt.get('updated_utc', 'unknown')])
     navigation = read(work / 'si-unmapped-navigation-after-support-resistance-20261020.json')
     chain = read(work / 'si-pending-chain-static-reconciliation-v19-20261020.json')
     now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds')
@@ -156,7 +181,7 @@ def render(document, repo, work):
                 formula_counts=dict(counts), formulas=formulas, competitor_summary=summary,
                 baseline_pairs=len(old), baseline_comparisons=len(baseline['rows']), fresh=fresh,
                 unmatched_fresh=unmatched, mapped_api_pairs=operation_mapping.get('mapped_pairs', 0),
-                runner=status, publication_validation=validation, pending_publication=pending_publication, queue=queue, remaining_assessment=navigation['remaining'])
+                runner=status, hosted_ci=hosted_ci, local_validation=local_validation, publication_validation=validation, pending_publication=pending_publication, queue=queue, remaining_assessment=navigation['remaining'])
     content = f'''{START}<section id="rollout-status" class="section">
 <div class="kicker">Current status — updated {now}</div><h2>Where the work stands</h2>
 <p class="sub"><strong>Not finished. Current performance superiority is unproven.</strong>
@@ -166,10 +191,12 @@ contains the published integration checkpoint {head}. The timing candidate is {s
 {len(status['completed'])} / {len(fixtures)} fixture batches completed; {len(status['failed'])} failures recorded.
 Quiet window: {status.get('quiet_seconds', 0)} / 240 seconds, last runner update {html.escape(status['updated_utc'])}.
 {controllers}</p>
-<p>Publication checks: six inventory tests passed. Combined validation: <strong>{html.escape(validation['status'])}</strong>,
+<p>Earlier publication receipt: six inventory tests passed. Recorded validation: <strong>{html.escape(validation['status'])}</strong>,
 step {html.escape(validation.get('step', 'pending'))}. {gpu_status}
 <a href="https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/pull/266/checks">live GitHub checks</a>
-reported a commit-message lint failure on historical subjects. No current-head performance claim follows from earlier correctness receipts.</p>
+are linked here. Earlier correctness receipts do not establish current performance.</p>
+{ci_snapshot_html(hosted_ci, publication["published_head"])}
+{table(["Local validation", "Recorded status", "Step", "Updated UTC"], local_validation, "status-local-validation")}
 <p>General Filter batch validation: {html.escape(pending_publication.get('status', 'no receipt'))}; step {html.escape(pending_publication.get('step', 'unknown'))}; input {html.escape(pending_publication.get('input_head', 'unknown')[:8])}; last update {html.escape(pending_publication.get('updated_utc', 'unknown'))}. {('This batch is included in published coverage totals.' if pending_publication.get('published_head') else 'This batch is not included in published coverage totals.')}</p>
 <h3>Current competitor coverage</h3><p>Each library total counts API pairs × two sizes. Both Ooples history modes are shown separately.
 Each row reconciles: faster + slower + inconclusive + pending = expected. Blank timings mean unmeasured, never zero.</p>'''
