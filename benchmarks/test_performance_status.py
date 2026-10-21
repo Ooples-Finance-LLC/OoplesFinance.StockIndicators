@@ -2,12 +2,38 @@ import hashlib
 import json
 from pathlib import Path
 import tempfile
+import subprocess
 import unittest
 
-from update_performance_status import formula_rows, fresh_results, ci_snapshot_html, measurement_totals, reconcile_visible_sections
+from update_performance_status import formula_rows, fresh_results, ci_snapshot_html, measurement_totals, reconcile_visible_sections, published_inventory
 
 
 class PerformanceStatusTests(unittest.TestCase):
+    def test_published_inventory_ignores_newer_commits_and_dirty_inventory(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            def git(*args):
+                return subprocess.check_output(['git', '-c', 'user.name=Report Test', '-c',
+                    'user.email=report-test@example.invalid', *args], cwd=root, stderr=subprocess.PIPE).decode().strip()
+            git('init')
+            path = root / 'benchmarks/results/remaining-indicators/inventory.json'
+            path.parent.mkdir(parents=True)
+            path.write_text('{"counts":{"batch_formulas":1}}', encoding='utf-8')
+            git('add', '.'); git('commit', '-m', 'published inventory')
+            published = git('rev-parse', 'HEAD')
+            path.write_text('{"counts":{"batch_formulas":2}}', encoding='utf-8')
+            git('add', '.'); git('commit', '-m', 'unpublished inventory')
+            path.write_text('{"counts":{"batch_formulas":3}}', encoding='utf-8')
+            self.assertEqual(1, published_inventory(root, published)['counts']['batch_formulas'])
+            self.assertEqual(2, published_inventory(root, git('rev-parse', 'HEAD'))['counts']['batch_formulas'])
+            with self.assertRaisesRegex(ValueError, 'unavailable'):
+                published_inventory(root, '0' * 40)
+
+    def test_inventory_requires_exact_commit_instead_of_mutable_ref(self):
+        for head in ['HEAD', 'master', 'abc123', '-p', '0' * 40 + ':other']:
+            with self.assertRaisesRegex(ValueError, 'exact commit'):
+                published_inventory(Path('.'), head)
+
     def test_all_current_surfaces_use_same_ledger_and_archive_is_preserved(self):
         source = ('<section class="hero"><p class="lede">stale</p></section>'
                   '<section id="current-competitors"><p>stale wins</p></section>'
