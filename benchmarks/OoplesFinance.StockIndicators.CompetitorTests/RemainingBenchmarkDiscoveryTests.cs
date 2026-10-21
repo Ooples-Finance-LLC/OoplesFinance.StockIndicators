@@ -11,6 +11,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingRangeStatisticsBenchmarks), 16)]
     [Theory]
     [InlineData(typeof(RemainingVolumePositiveNegativeBenchmarks), 8)]
+    [InlineData(typeof(RemainingKalmanSmootherBenchmarks), 8)]
     [InlineData(typeof(RemainingFourOscillatorBenchmarks), 16)]
     [InlineData(typeof(RemainingStochasticMacdBenchmarks), 8)]
     [InlineData(typeof(RemainingPivotAverageBenchmarks), 8)]
