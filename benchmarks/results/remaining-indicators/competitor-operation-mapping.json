@@ -1,4 +1,5 @@
 {
+  "snapshot": "si-elastic-volume-3d8eb093-preserved",
   "archive_sha256": "ad99489a7ea0ea10b9063ad86d3852060f2df2725db39ece1b63b0032fff96a6",
   "status": "Static operation mapping only; measurements and wrapper reconciliation remain separate.",
   "mappings": [
@@ -155,6 +156,20 @@
       "pair": "TaLib.Functions.Bbands",
       "source": "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedClassicBandsBenchmarks.cs",
       "source_sha256": "cf674b12bd48e9fa47f94a97096f771d1ef20535135d938213fb6290fb7d7e39"
+    },
+    {
+      "fixture": "SharedCloseExtremeBenchmarks",
+      "operation": "Min",
+      "pair": "QuanTAlib.Min",
+      "source": "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedCloseExtremeBenchmarks.cs",
+      "source_sha256": "9eb7082cb73671e0b34922a2f06d25f14e82a2b133113e745b2021b146b5fd34"
+    },
+    {
+      "fixture": "SharedCloseExtremeBenchmarks",
+      "operation": "Max",
+      "pair": "QuanTAlib.Max",
+      "source": "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedCloseExtremeBenchmarks.cs",
+      "source_sha256": "9eb7082cb73671e0b34922a2f06d25f14e82a2b133113e745b2021b146b5fd34"
     },
     {
       "fixture": "SharedCmfBenchmarks",
@@ -449,6 +464,20 @@
       "pair": "QuanTAlib.Maaf",
       "source": "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedMedianAdaptiveBenchmarks.cs",
       "source_sha256": "2c4d7fbe3d7daf90ee37fd8ee1aab300279e33a18aa51dea75d1e7fa234ff507"
+    },
+    {
+      "fixture": "SharedMidpointBenchmarks",
+      "operation": "MidPoint",
+      "pair": "TaLib.Functions.MidPoint",
+      "source": "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedMidpointBenchmarks.cs",
+      "source_sha256": "37ab01226dce77bca48626dbe7214bc8d3d7e0b63459391a701f35a79a76ad01"
+    },
+    {
+      "fixture": "SharedMidpointBenchmarks",
+      "operation": "MidPrice",
+      "pair": "TaLib.Functions.MidPrice",
+      "source": "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedMidpointBenchmarks.cs",
+      "source_sha256": "37ab01226dce77bca48626dbe7214bc8d3d7e0b63459391a701f35a79a76ad01"
     },
     {
       "fixture": "SharedMoneyFlowIndexBenchmarks",
@@ -778,6 +807,20 @@
       "pair": "Skender.GetDynamic",
       "source": "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedQuarticDynamicBenchmarks.cs",
       "source_sha256": "90bda2318a33fd573e0b17ee3982f53724fc1a6fb595974601f4d8f13fa4aa9c"
+    },
+    {
+      "fixture": "SharedRecursiveStateBenchmarks",
+      "operation": "Ema",
+      "pair": "TaLib.Functions.Ema",
+      "source": "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedRecursiveStateBenchmarks.cs",
+      "source_sha256": "1be3dca0234b55800cb51a74cd1baa1dca81258972b2585940d161911293e978"
+    },
+    {
+      "fixture": "SharedRecursiveStateBenchmarks",
+      "operation": "Ad",
+      "pair": "TaLib.Functions.Ad",
+      "source": "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedRecursiveStateBenchmarks.cs",
+      "source_sha256": "1be3dca0234b55800cb51a74cd1baa1dca81258972b2585940d161911293e978"
     },
     {
       "fixture": "SharedRegressionBenchmarks",
@@ -1291,10 +1334,8 @@
       "source_sha256": "e99f2d3c5ddc42b04db5f96f938381f8a88f8ca12b72bb8c103a988fa244a236"
     }
   ],
-  "mapped_pairs": 182,
+  "mapped_pairs": 188,
   "unmapped_pairs": [
-    "QuanTAlib.Max",
-    "QuanTAlib.Min",
     "Skender.GetAdx",
     "Skender.GetAlligator",
     "Skender.GetAtrStop",
@@ -1394,10 +1435,8 @@
     "TaLib.Candles.UpDownSideGapThreeMethods",
     "TaLib.Candles.UpsideGapTwoCrows",
     "TaLib.Functions.Accbands",
-    "TaLib.Functions.Ad",
     "TaLib.Functions.Apo",
     "TaLib.Functions.AvgDev",
-    "TaLib.Functions.Ema",
     "TaLib.Functions.HtDcPhase",
     "TaLib.Functions.HtSine",
     "TaLib.Functions.HtTrendMode",
@@ -1409,8 +1448,6 @@
     "TaLib.Functions.MacdExt",
     "TaLib.Functions.MacdFix",
     "TaLib.Functions.Mavp",
-    "TaLib.Functions.MidPoint",
-    "TaLib.Functions.MidPrice",
     "TaLib.Functions.MinMaxIndex",
     "TaLib.Functions.Ppo",
     "TaLib.Functions.Sar",
@@ -1512,6 +1549,5 @@
     "Trady.Indicator.StochasticsRsiOscillator",
     "Trady.Indicator.UpMomentum",
     "Trady.Indicator.WeightedMovingAverage"
-  ],
-  "snapshot": "si-elastic-volume-3d8eb093-preserved"
+  ]
 }

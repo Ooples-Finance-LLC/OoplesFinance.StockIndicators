@@ -3,6 +3,24 @@ from performance_pair_mapping import reconcile, source_mappings
 
 
 class PairMappingTests(unittest.TestCase):
+    def test_two_direct_native_ternary_branches_are_scoped_to_operation(self):
+        source = '[Params("Min", "Max")] public string Operation; Operation == "Max" ? new QuanTAlib.Max(Period, 0) : new QuanTAlib.Min(Period, 0);'
+        rows = source_mappings(source, 'Extreme', {'QuanTAlib.Min', 'QuanTAlib.Max'})
+        self.assertEqual({'Min': 'QuanTAlib.Min', 'Max': 'QuanTAlib.Max'}, {r['operation']: r['pair'] for r in rows})
+
+    def test_native_ternary_allows_nested_arguments_but_no_output_transform(self):
+        source = '[Params("MidPoint", "MidPrice")] public string Operation; Operation == "MidPoint" ? Functions.MidPoint<double>(values.AsSpan(a,b), range) : Functions.MidPrice<double>(high.AsSpan(a,b), low.AsSpan(a,b), range);'
+        pairs = {'TaLib.Functions.MidPoint', 'TaLib.Functions.MidPrice'}
+        self.assertEqual(2, len(source_mappings(source, 'Mid', pairs)))
+        self.assertEqual([], source_mappings(source.replace(', range);', ', range).Select(x => x);'), 'Mid', pairs))
+
+    def test_ternary_does_not_guess_unrecognized_or_multiway_dispatch(self):
+        source = '[Params("Min", "Max")] public string Operation; Operation == "Max" ? new QuanTAlib.Max(Period) : new QuanTAlib.Min(Period);'
+        pairs = {'QuanTAlib.Min', 'QuanTAlib.Max'}
+        self.assertEqual([], source_mappings(source.replace('Operation ==', 'Other =='), 'F', pairs))
+        self.assertEqual([], source_mappings(source.replace('"Min", "Max"', '"Min", "Max", "Third"'), 'F', pairs))
+        self.assertEqual([], source_mappings(source.replace('QuanTAlib.', 'Unrelated.'), 'F', pairs))
+
     def test_short_operation_requires_native_switch_evidence(self):
         source = '[Params("Wma")] public string Operation {get;set;} "Wma" => Functions.Wma<double>()'
         rows = source_mappings(source, 'TaFixture', {'TaLib.Functions.Wma', 'QuanTAlib.Wma'})
