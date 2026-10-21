@@ -8735,7 +8735,13 @@
       "options": [
         "SmaSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "SmaSpecOptions": [
+          "benchmarks/results/remaining-indicators/inherited-sma-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "SimplePriceZone",
@@ -13280,6 +13286,7 @@
     "benchmarks/results/remaining-indicators/impulse-contracts.json": "dd3ac11ad33787e1847326a8f77b748edfff022c1e178383521f5c3c94230054",
     "benchmarks/results/remaining-indicators/impulse-pair-integrated-contracts.json": "f159d8346a80c70c338d3f5ee63785f485ce40a1567a9ed3f1ea7f2846264ce8",
     "benchmarks/results/remaining-indicators/inertiapair-cpu-contracts.json": "b7205bdaf4ae6f5abe2bdda6ba20b4cbcb2eb231f2f0bcd2da763175bb48837b",
+    "benchmarks/results/remaining-indicators/inherited-sma-integrated-contracts.json": "a883ef95e2181b21450378a6f786e8f17f46bb719adeac4b1083167d285c9d16",
     "benchmarks/results/remaining-indicators/inheritedaliases-contracts.json": "0780a8b140e4572e15e7ae1cd240fc25bde01307e07c7b441b554465b5985872",
     "benchmarks/results/remaining-indicators/inheritedcore-contracts.json": "0d0f57f7945c43a3a38fab512acbe93ebdf07fb79a3e990e6a310496e57072f5",
     "benchmarks/results/remaining-indicators/insync-cpu-contracts.json": "4a713d5f052e27c7d95ff8aedc26a4aa7b1d982a90a14807b4504be8f88913fd",

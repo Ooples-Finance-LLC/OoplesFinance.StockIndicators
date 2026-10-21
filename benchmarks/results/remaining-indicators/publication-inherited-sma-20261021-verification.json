@@ -1,0 +1,40 @@
+{
+  "input_head": "3c3c5f0575bc036bd2611d4858ccb14c61a33901",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "unit": "passed",
+    "parity": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reused_build_and_gpu_validation": "f378919e7477ec8d1a797cf8f44acf23fee47eec",
+  "gpu_passed": 100,
+  "step": "complete",
+  "updated_utc": "2026-10-21T19:01:26.127983+00:00",
+  "unit": {
+    "passed": 171,
+    "class_counts": {
+      "SmaCpuKernelTests": 121,
+      "CertifiedSmaBatchTests": 8,
+      "SmaExtremeRangeTests": 32,
+      "QmaSmaNumericalTests": 10
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\inherited-sma\\unit\\unit.trx",
+    "sha256": "0acb151b148fa217315a6518373dd929e4493cb5d0b7b7ed6db7b91c02593c56",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-inherited-sma-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 4,
+    "class_counts": {
+      "SharedSmaBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\inherited-sma\\parity\\parity.trx",
+    "sha256": "2dff2b7003995a7af26088d3a8026b44a79ec1df046dbd3b1461e8af5224797e",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-inherited-sma-20261021-parity.trx.gz"
+  },
+  "prior_head": "3c3c5f0575bc036bd2611d4858ccb14c61a33901",
+  "inventory_tests_passed": 6,
+  "upstream_master": "9e41a4617d8603d31f4ac57b1781e8d978e55947",
+  "dependency": "AiDotNet.Tensors 0.141.0",
+  "performance": "Pending; correctness does not establish competitor speed."
+}
