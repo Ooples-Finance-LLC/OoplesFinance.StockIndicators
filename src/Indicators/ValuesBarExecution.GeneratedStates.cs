@@ -64,6 +64,8 @@ internal static partial class ValuesBarExecution
         indicator is OnBalanceVolumeModified { MaType: null } or OnBalanceVolumeReflex { MaType: null } ||
         indicator is ConnorsRsi or ConnorsRelativeStrengthIndex { MaType: null } or StochasticConnorsRelativeStrengthIndex { MaType: null } ||
         indicator is SelfAdjustingRelativeStrengthIndex { MaType: null } selfRsi && double.IsFinite(selfRsi.Mult) ||
+        indicator is ThreeHMA or TripleHullMovingAverage
+            or ThreeHma { MaType: MovingAvgType.WeightedMovingAverage } or _3HMA { MaType: MovingAvgType.WeightedMovingAverage } ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
@@ -543,6 +545,10 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        ThreeHMA hull => new GeneratedThreeHullState(hull.Length, count),
+        ThreeHma hull => new GeneratedThreeHullState(hull.Length, count),
+        TripleHullMovingAverage hull => new GeneratedThreeHullState(hull.Length, count),
+        _3HMA hull => new GeneratedThreeHullState(hull.Length, count),
         SelfAdjustingRelativeStrengthIndex selfRsi => new GeneratedSelfAdjustingRsiState(selfRsi.Length, selfRsi.SmoothingLength, selfRsi.Mult, count),
         ConnorsRsi connors => new GeneratedConnorsFollowupState(2, connors.Length, 100, 3, 3, count, false),
         ConnorsRelativeStrengthIndex connors => new GeneratedConnorsFollowupState(connors.Length1, connors.Length2, connors.Length3, 3, 3, count, false),
