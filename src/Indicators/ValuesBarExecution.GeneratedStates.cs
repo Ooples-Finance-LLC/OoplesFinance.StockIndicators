@@ -40,6 +40,10 @@ internal static partial class ValuesBarExecution
         indicator is LinearWeightedMovingAverageCore or LeoMovingAverage or McGinleyDynamic ||
         indicator is GeoMa or GeometricMeanMovingAverage ||
         indicator is GeneralFilterEstimator ||
+        indicator is GOscillator or GannSwingOscillator ||
+        indicator is GatorOscillator ||
+        indicator is MarketMeannessIndex meanness && meanness.MaType is null && meanness.SecondAverage is null ||
+        indicator is FloorPivotPointS1 or FloorPivotPointR1 or PivotPoint ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
@@ -519,6 +523,13 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        FloorPivotPointS1 => new GeneratedFloorAliasScalarState(1),
+        FloorPivotPointR1 => new GeneratedFloorAliasScalarState(4),
+        PivotPoint => new GeneratedFloorAliasState(),
+        GatorOscillator gator => new GeneratedGatorMeannessState(gator.Length, false),
+        MarketMeannessIndex meanness => new GeneratedGatorMeannessState(meanness.Length, true),
+        GOscillator oscillator => new GeneratedGOscillatorState(oscillator.Length, count),
+        GannSwingOscillator swing => new GeneratedGannTrendState(Math.Max(1, Math.Min(swing.Length, count))),
         GeneralFilterEstimator estimator => new GeneratedGeneralFilterState(estimator.Length),
         ElasticVolumeWeightedMovingAverageV1 average => new GeneratedElasticVolumeState(average.Length, count, 0),
         ElasticVolumeWeightedMovingAverageV2 average => new GeneratedElasticVolumeState(average.Length, count, 1),
