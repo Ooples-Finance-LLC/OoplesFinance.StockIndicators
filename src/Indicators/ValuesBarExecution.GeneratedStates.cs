@@ -37,6 +37,9 @@ internal static partial class ValuesBarExecution
 
     private static bool IsGeneratedState(IIndicator indicator) =>
         indicator is VolatilityBasedMomentum { MaType: null } ||
+        indicator is SwamiStochastics or TradersDynamicIndex { MaType: null } ||
+        indicator is VolumePositiveNegativeIndicator { MaType: null } ||
+        indicator is KalmanSmoother ||
         indicator is _4MovingAverageConvergenceDivergence fourMacd && double.IsFinite(fourMacd.BlueMult) && double.IsFinite(fourMacd.YellowMult) ||
         indicator is _4PercentagePriceOscillator fourPpo && double.IsFinite(fourPpo.BlueMult) && double.IsFinite(fourPpo.YellowMult) ||
         indicator is StochasticMacdOscillator ||
@@ -564,6 +567,10 @@ internal static partial class ValuesBarExecution
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
         VolatilityBasedMomentum momentum => new GeneratedVolatilityMomentumState(momentum.Length1, momentum.Length2),
+        SwamiStochastics swami => new GeneratedSwamiState(swami.FastLength, swami.SlowLength),
+        TradersDynamicIndex tdi => new GeneratedTradersDynamicState(tdi.Length1, tdi.Length2, tdi.Length3, tdi.Length4),
+        VolumePositiveNegativeIndicator volume => new GeneratedVolumePositiveNegativeState(volume.Length, volume.SmoothLength),
+        KalmanSmoother smoother => new GeneratedKalmanSmootherState(smoother.Length),
         _4MovingAverageConvergenceDivergence four => new GeneratedFourOscillatorState(four.Length1, four.Length2, four.Length3, four.Length4, false),
         _4PercentagePriceOscillator four => new GeneratedFourOscillatorState(four.Length1, four.Length2, four.Length3, four.Length4, true),
         StochasticMacdOscillator oscillator => new GeneratedStochasticMacdState(oscillator.Length, count),
