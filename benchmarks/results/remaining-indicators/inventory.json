@@ -5247,7 +5247,13 @@
       "options": [
         "IchimokuChikouSpanSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "IchimokuChikouSpanSpecOptions": [
+          "benchmarks/results/remaining-indicators/ichimoku-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "IchimokuCloud",
@@ -5257,7 +5263,22 @@
         "IchimokuSenkouSpanBSpecOptions",
         "IchimokuTenkanSenSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "IchimokuKijunSenSpecOptions": [
+          "benchmarks/results/remaining-indicators/ichimoku-integrated-contracts.json"
+        ],
+        "IchimokuSenkouSpanASpecOptions": [
+          "benchmarks/results/remaining-indicators/ichimoku-integrated-contracts.json"
+        ],
+        "IchimokuSenkouSpanBSpecOptions": [
+          "benchmarks/results/remaining-indicators/ichimoku-integrated-contracts.json"
+        ],
+        "IchimokuTenkanSenSpecOptions": [
+          "benchmarks/results/remaining-indicators/ichimoku-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ImpulseMovingAverageConvergenceDivergence",
@@ -5558,7 +5579,13 @@
       "options": [
         "KaseSerialDependencyIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "KaseSerialDependencyIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/kase-serial-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "KaufmanAdaptiveBands",
@@ -12970,6 +12997,7 @@
     "benchmarks/results/remaining-indicators/historicalrank-contracts.json": "c874df6a282049160ea29f3343123c03c4a88177790c16f4222774b0a5168f7f",
     "benchmarks/results/remaining-indicators/hurstrank-contracts.json": "2869b3a6da3312f4759675630fada27a19633c92830052de5f026eb26f3ac02c",
     "benchmarks/results/remaining-indicators/hybrid-cpu-contracts.json": "473edde91896b6d68bc845d35383bff4d9f86cd82fe6cfe7056e8cb409d92a41",
+    "benchmarks/results/remaining-indicators/ichimoku-integrated-contracts.json": "0e381ae2b68dd56d95c19689786fc71536cb0b9bbf17f8b795792fa2a41ff1f9",
     "benchmarks/results/remaining-indicators/impulse-contracts.json": "dd3ac11ad33787e1847326a8f77b748edfff022c1e178383521f5c3c94230054",
     "benchmarks/results/remaining-indicators/inertiapair-cpu-contracts.json": "b7205bdaf4ae6f5abe2bdda6ba20b4cbcb2eb231f2f0bcd2da763175bb48837b",
     "benchmarks/results/remaining-indicators/inheritedaliases-contracts.json": "0780a8b140e4572e15e7ae1cd240fc25bde01307e07c7b441b554465b5985872",
@@ -12979,6 +13007,7 @@
     "benchmarks/results/remaining-indicators/japanese-cpu-contracts.json": "2564fe1b46627ffd37dba75b8db4de72154d0a59c1386828dc77efbc88124998",
     "benchmarks/results/remaining-indicators/kama-integrated-contracts.json": "21a520374516b522be02ed343922690ae5f14f6ed84e73f86620c0a1d264f890",
     "benchmarks/results/remaining-indicators/karobeinkwan-adaptive-contracts.json": "55070b46ac4b3d266330a3f87b484fe8014653dcddfc4e06e52fe6c4080c3086",
+    "benchmarks/results/remaining-indicators/kase-serial-integrated-contracts.json": "a0aa858651270d04785e38ac8e16520defd834e5bfd2b889f6a339b4233a76bd",
     "benchmarks/results/remaining-indicators/kasecore-cpu-contracts.json": "46e740b8229f01f2524c59b65c9e437f96374c98ffc28ad3ed7dbbbaf91bde2b",
     "benchmarks/results/remaining-indicators/kasepeak-cpu-contracts.json": "0fed45cfde0fa93f38ccd17d3ffd8c621645d46dfdb0731f0b8e6b60760aa863",
     "benchmarks/results/remaining-indicators/kasestops-cpu-contracts.json": "ff0a42c8c827de937e9e5b8bf9560d62f5dd755e5aff33cb5bbab38fdfd0323f",
@@ -13322,10 +13351,12 @@
     "src/Indicators/ValuesBarExecution.GOscillators.cs": "4a4b6c6d79f77b11a17788eeb49c882405866ba632948a0afdb4e5887108d3c5",
     "src/Indicators/ValuesBarExecution.GatorMeanness.cs": "56179f71b9f44a134b2400cf59572d12a30274cddcfde71874745ea0cf351ff3",
     "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "4f2393a9de2c208bdd5b9397eafaa63052d6465a683dc3fe480618a63d383b7f",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "fa598e3d22e6edc325cd3f2c05682cf29970145043f977637f02354fa98f504a",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
+    "src/Indicators/ValuesBarExecution.Ichimoku.cs": "459397c5a7db8d4e7705eee86fb78d66bcfbc55b279a915f5acd7870fcff0fd7",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Kama.cs": "d1bc729aa26955e46b55057f916b73b5d359fed7a803295ad2583168d25bd045",
+    "src/Indicators/ValuesBarExecution.KaseSerial.cs": "3c3ddefe36808ecd16ecea7f7631c6a7e336ef31c9f1f7e3d2168a62254e6700",
     "src/Indicators/ValuesBarExecution.LaggedReturns.cs": "86122ae31d6b8addab098c72675ba5cb4708a5bb13e63e4dace2598820e43154",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
