@@ -121,6 +121,7 @@ def render(document, repo, work):
     local_validation = []
     for label, relative in [
         ('Oscillators and Floor aliases publication', 'si-pr266-followons-20261021/status.json'),
+        ('Recursive aliases, KAMA, Liquid RSI and compatibility publication', 'si-pr266-recursive-kama-liquid-20261021/status.json'),
         ('Framework compatibility repair', 'si-Z-only-candidates-20261020/rollout-framework-compat-20261021/status.json')]:
         path = work / relative
         if path.exists():
