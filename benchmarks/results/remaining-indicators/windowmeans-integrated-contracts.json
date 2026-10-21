@@ -1,0 +1,33 @@
+{
+  "types": [
+    "NaturalMa",
+    "FareySequenceWeightedMovingAverage",
+    "OptimalWeightedMovingAverage"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "35bbd15bbe6d61e584ae45227fc79f5bfaa94950",
+  "combined_input_sha256": "7a77f1edb28deb5376dfde94eaa7b1d2eb1cccec81c6c665b36970330e91b394",
+  "benchmark_fixture": {
+    "type": "RemainingWindowMeansBenchmarks",
+    "operations": [
+      "NaturalMa",
+      "FareySequenceWeightedMovingAverage",
+      "OptimalWeightedMovingAverage"
+    ]
+  },
+  "checks": {
+    "unit": 85,
+    "parity": 12,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/windowmeans-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/windowmeans-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}
