@@ -7861,7 +7861,13 @@
       "options": [
         "QuantitativeQualitativeEstimationSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "QuantitativeQualitativeEstimationSpecOptions": [
+          "benchmarks/results/remaining-indicators/rmo-qqe-certified-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "QuasiWhiteNoise",
@@ -7932,7 +7938,13 @@
       "options": [
         "RahulMohindarOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "RahulMohindarOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/rmo-qqe-certified-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "RainbowOscillator",
@@ -13374,6 +13386,7 @@
     "benchmarks/results/remaining-indicators/returnvolatility-contracts.json": "b11878817729561f0d808443207d16da8e06aadd8b0fa7fcd62d26929a3b494c",
     "benchmarks/results/remaining-indicators/reversesine-contracts.json": "d555f204f0c945cd539d51afd3209f6037a1493d83628ad7b03053db337ecb39",
     "benchmarks/results/remaining-indicators/riskratios-integrated-contracts.json": "60ade3a26f48742a4450659625509fafec113b7d3c9ef8b30fa1110fef4b564e",
+    "benchmarks/results/remaining-indicators/rmo-qqe-certified-integrated-contracts.json": "5fcf0edaf13496f6a3f06fbcbf88b1239b7cdab84ccb3c6fa466a28ec9225fc9",
     "benchmarks/results/remaining-indicators/rollingextrema-contracts.json": "bbf84a577ead1b115713b27fa6df58a2ae57b4c20b51a48881d6ffb55f76ab4d",
     "benchmarks/results/remaining-indicators/roofing-contracts.json": "c24495d59beef30de42eaf09461f214ff89cf9fa7797d74bd9701fb181baebf1",
     "benchmarks/results/remaining-indicators/rsi-followups-integrated-contracts.json": "b8ae6a926fe40b3a0caae4e43039ede989b41394f0929c1b75c7166a56128bd6",
@@ -13672,7 +13685,7 @@
     "src/Indicators/ValuesBarExecution.GOscillators.cs": "4a4b6c6d79f77b11a17788eeb49c882405866ba632948a0afdb4e5887108d3c5",
     "src/Indicators/ValuesBarExecution.GatorMeanness.cs": "56179f71b9f44a134b2400cf59572d12a30274cddcfde71874745ea0cf351ff3",
     "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "efaed7ea3bb3ae89a78252e51ba15cda6dc8c110a3190c11bc6de951750bf08a",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "205b7d256672e22373fdb011bd149754a2b86ba00c5f7b92844d29591315d32a",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Ichimoku.cs": "459397c5a7db8d4e7705eee86fb78d66bcfbc55b279a915f5acd7870fcff0fd7",
     "src/Indicators/ValuesBarExecution.ImpulsePair.cs": "22eb567c61c55733702c849068aaa24497b122f1aeda3865e9b9f21442e3a611",
@@ -13716,6 +13729,7 @@
     "src/Indicators/ValuesBarExecution.RegressionStatistics.cs": "ba7f0f7faf929081e3584708991a12a4c7c819b8240483eb2761419e4f094b0e",
     "src/Indicators/ValuesBarExecution.Rickshaw.cs": "4aefbe7300928a69a40234a04325663c088d163ced52732fe48b78ec31222b0a",
     "src/Indicators/ValuesBarExecution.RiskRatios.cs": "0016d0315ae2350230e33ff97ceb0470d835cff88fdf4e3af76859431183ec90",
+    "src/Indicators/ValuesBarExecution.RmoQqe.cs": "726e77b44a63ba83b805f3acb04c6cb136ec787773b849621213a501da58974c",
     "src/Indicators/ValuesBarExecution.RollingDiagnostics.cs": "2be514e07a85c008516e28aa5aad86320ec50c8699829766d39cb0cbef3ed686",
     "src/Indicators/ValuesBarExecution.RollingExtrema.cs": "67324e6e91236bae1118e52a3022fd4b913989f580eb5de81ceec8115e586def",
     "src/Indicators/ValuesBarExecution.RsiFollowups.cs": "8de4f13dee5b7d1c98250a625ecb50af0f372b63acdb467812d724a543c6e25f",
