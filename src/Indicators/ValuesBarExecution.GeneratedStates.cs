@@ -36,6 +36,7 @@ internal static partial class ValuesBarExecution
     }
 
     private static bool IsGeneratedState(IIndicator indicator) =>
+        indicator is RahulMohindarOscillator or QuantitativeQualitativeEstimation { MaType: null, FastFactor: >= 0 and < double.PositiveInfinity, SlowFactor: >= 0 and < double.PositiveInfinity } ||
         indicator is KalmanSmoother ||
         indicator is _4MovingAverageConvergenceDivergence fourMacd && double.IsFinite(fourMacd.BlueMult) && double.IsFinite(fourMacd.YellowMult) ||
         indicator is _4PercentagePriceOscillator fourPpo && double.IsFinite(fourPpo.BlueMult) && double.IsFinite(fourPpo.YellowMult) ||
@@ -563,6 +564,8 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        RahulMohindarOscillator rmo => new GeneratedRmoState(rmo.Length1, rmo.Length2, rmo.Length3, rmo.Length4),
+        QuantitativeQualitativeEstimation qqe => new GeneratedQqeState(qqe.Length, qqe.SmoothLength, qqe.FastFactor, qqe.SlowFactor),
         KalmanSmoother smoother => new GeneratedKalmanSmootherState(smoother.Length),
         _4MovingAverageConvergenceDivergence four => new GeneratedFourOscillatorState(four.Length1, four.Length2, four.Length3, four.Length4, false),
         _4PercentagePriceOscillator four => new GeneratedFourOscillatorState(four.Length1, four.Length2, four.Length3, four.Length4, true),
