@@ -6096,7 +6096,13 @@
       "options": [
         "MartinRatioSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "MartinRatioSpecOptions": [
+          "benchmarks/results/remaining-indicators/martin-ratio-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "MassIndex",
@@ -6263,7 +6269,13 @@
       "options": [
         "MiddleHighLowMovingAverageSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "MiddleHighLowMovingAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/middle-mean-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "Midpoint",
@@ -7071,14 +7083,26 @@
       "options": [
         "OscarIndicatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "OscarIndicatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/oscar-phase-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "OvershootReductionMovingAverage",
       "options": [
         "OvershootReductionMovingAverageSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "OvershootReductionMovingAverageSpecOptions": [
+          "benchmarks/results/remaining-indicators/overshoot-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ParabolicSAR",
@@ -7308,7 +7332,13 @@
       "options": [
         "PhaseChangeIndexSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "PhaseChangeIndexSpecOptions": [
+          "benchmarks/results/remaining-indicators/oscar-phase-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "PivotDetectorOscillator",
@@ -13196,8 +13226,10 @@
     "benchmarks/results/remaining-indicators/leastsquares-contracts.json": "7e007c555d499b0bccb58e0205ae1d2d9a133a36b3e651d0160039a8c3d0337e",
     "benchmarks/results/remaining-indicators/mamaderived-cpu-contracts.json": "dfe77c3a152dc0576493ea18c277aa515c99d73fe0b82b5a63a7dad24760389b",
     "benchmarks/results/remaining-indicators/mamapair-cpu-contracts.json": "beec318260a676591935a61e16b762dd19d6f6281379eeae3223e1259a7bd88d",
+    "benchmarks/results/remaining-indicators/martin-ratio-integrated-contracts.json": "090bdcd20429304b8f7887b80cfe213fd4eb9a06a3d43046824a1e5f630c07b6",
     "benchmarks/results/remaining-indicators/mayerocean-cpu-contracts.json": "f2ebf301e13f01285c984a74fb8acf6d68fe9c73112f205ced49d4fd4e1a8f27",
     "benchmarks/results/remaining-indicators/median-contracts.json": "b18775b513e4c448d9c1873727276e24b1162a57aeaf82856d0596236c745af1",
+    "benchmarks/results/remaining-indicators/middle-mean-integrated-contracts.json": "530c422a5bfa23314923f1bbab6274b86513573ca2a61ad63ecb4da1ae76f4f8",
     "benchmarks/results/remaining-indicators/momentumcomposites-cpu-contracts.json": "457a8a90410ee628ccf123d5f089992a5e677b8b5f9aa3a3f0ead190c25ba723",
     "benchmarks/results/remaining-indicators/moneyflowpercent-contracts.json": "7fe650d2ef69da7a28d6f133eeda224b7701ba490cd24be0b9aca9bfba5a54e6",
     "benchmarks/results/remaining-indicators/natural-liquid-integrated-contracts.json": "ee8e2afe6cd4dda6be8fdccf9002a2b45004ea663ee7eed54b5208c06385a8f9",
@@ -13209,9 +13241,11 @@
     "benchmarks/results/remaining-indicators/onelc-contracts.json": "37585e178c05f37e7d3660483fe89469d00df864824585ca5c83955f9984571b",
     "benchmarks/results/remaining-indicators/openclose-contracts.json": "8f247f405099edc945ebf4a999600d70f8d288601d219434b212ba9dcda77d12",
     "benchmarks/results/remaining-indicators/orderedvol-contracts.json": "5bd5f63b1578750f7281b719af97bbb3bc33e5ee3bbb42128d7839d13588ad44",
+    "benchmarks/results/remaining-indicators/oscar-phase-integrated-contracts.json": "169c5cb79ea9bf3adc7cb261dfb93071c8c6ae8837e1b837325dbe1f047f15f7",
     "benchmarks/results/remaining-indicators/oscillator-contracts.json": "a0ecd34360e016bb6e502f553b181f91e17dede91b3028a1184ce78f102a4367",
     "benchmarks/results/remaining-indicators/oscillatoralias-contracts.json": "cf98dfcaf7b380585620d7c4debd7789055f96b87f6915b5ad5348bd7fd8f1db",
     "benchmarks/results/remaining-indicators/otherstops-cpu-contracts.json": "50b6e7c4295bdce66f89c8066c1f5509834fb795e514666a5b34e9dd57fc87fc",
+    "benchmarks/results/remaining-indicators/overshoot-integrated-contracts.json": "64be0ec663171abbbfb36bfda555ffe50589e34d37ff99492f4bc9e767c61ed4",
     "benchmarks/results/remaining-indicators/parabolic-sar-integrated-contracts.json": "97b892678287d4ea039b702f1340e0a8b14f949f384b7bbf4fdf9236dea8bc6b",
     "benchmarks/results/remaining-indicators/pivotfamilies-integrated-contracts.json": "cf593b467644abf480ad43c4c64e128d1a4ddab46bfc9e8fb6efa48fc988790e",
     "benchmarks/results/remaining-indicators/pmofamily-cpu-contracts.json": "16d76b00cc854bac1ba27e44f14ee6a767bc16460b9fdb64b5e4648809755a47",
@@ -13541,7 +13575,7 @@
     "src/Indicators/ValuesBarExecution.GOscillators.cs": "4a4b6c6d79f77b11a17788eeb49c882405866ba632948a0afdb4e5887108d3c5",
     "src/Indicators/ValuesBarExecution.GatorMeanness.cs": "56179f71b9f44a134b2400cf59572d12a30274cddcfde71874745ea0cf351ff3",
     "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "2500d3bbe25e8a542ffd776880214ed8f12e285561b20a3aca5497b434f4e081",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "8a6685f6ee8d791440feabfe42cb97d4ccb6d8cd284e2741b98b873692f32ef5",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Ichimoku.cs": "459397c5a7db8d4e7705eee86fb78d66bcfbc55b279a915f5acd7870fcff0fd7",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
@@ -13550,12 +13584,16 @@
     "src/Indicators/ValuesBarExecution.Kst.cs": "722ae7a66386e7869e5c1d4d6c272b3266cf4c2ec42b0aa1c8cad26852a03fe7",
     "src/Indicators/ValuesBarExecution.LaggedReturns.cs": "86122ae31d6b8addab098c72675ba5cb4708a5bb13e63e4dace2598820e43154",
     "src/Indicators/ValuesBarExecution.Macd.cs": "ddee5a2532978326e9ee8024a50b056d7f7f8fc899e6916b0c217f5aa00696da",
+    "src/Indicators/ValuesBarExecution.MartinRatio.cs": "34cd703db496a24e343380c13dc2bcc448296fb98c1189ffad5ac477a7c0710b",
+    "src/Indicators/ValuesBarExecution.MiddleMean.cs": "e493484921ee294e8064ab932acdfd4b8aae52866e2b9b6e3653923d239fef35",
     "src/Indicators/ValuesBarExecution.MoneyFlow.cs": "ce15b0b96255cf30dfe53502384177011f3c99b1f22b3b9a771d62f7b44d8f2a",
     "src/Indicators/ValuesBarExecution.NaturalLiquid.cs": "aaef1701de66854ca353ac6483c01233e537dab13cfcbcf17abb88314742f1b1",
     "src/Indicators/ValuesBarExecution.NullableBalanceOfPower.cs": "bade785e091a9687d4fe4bc7cba2fca53e304fc723dd343921fde6bb49d92f23",
     "src/Indicators/ValuesBarExecution.ObvFollowups.cs": "46ac88ef7da0faa8eaf1431090cbef8c2b15b1336d41754d637fede81c9c80c5",
     "src/Indicators/ValuesBarExecution.OldestHilbert.cs": "d6adeb033cb9857cd3a7fd84159fc7fc17f9201c79b6fce084cec9e514fd9b98",
     "src/Indicators/ValuesBarExecution.OnBalanceVolume.cs": "31f417d74484fc11cfb7ac419f0828cc17c8b66776bad717c37941ee80bd6077",
+    "src/Indicators/ValuesBarExecution.OscarPhase.cs": "d9d72813abd77aedbe9696729c6e6af8cffa38443e3747dbefc406c9dde0bfb3",
+    "src/Indicators/ValuesBarExecution.Overshoot.cs": "fcada6e7177d7c71701dc4cd187ad679e4f5143a35c4a336cc3ede4cb101ac22",
     "src/Indicators/ValuesBarExecution.PairStatistics.cs": "e6253a7b79f715de3afa2968ef8ca4027d82e1cdb880187ae9192b5f1f99176f",
     "src/Indicators/ValuesBarExecution.ParabolicSar.cs": "516cd2cf35b7c405c59c686422bddf8986ef6b8917e508b51898c5c2afab1708",
     "src/Indicators/ValuesBarExecution.PivotFamilies.cs": "90d659f3c1c61126cbd59861542d039781d69912670138619daacd088928741a",
