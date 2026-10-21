@@ -1,0 +1,37 @@
+{
+  "types": [
+    "SwamiStochastics",
+    "TradersDynamicIndex"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "2b3b5a0a6249ca564eee8a761b7ed4b20cac19b1",
+  "source_fingerprint_sha256": "7326a6d48e2e705f01b3b67ed9a9f93f62705c497a898726a11a1735821df543",
+  "benchmark_fixture": {
+    "type": "RemainingSwamiTdiBenchmarks",
+    "operations": [
+      "SwamiStochastics",
+      "TradersDynamicIndex"
+    ]
+  },
+  "checks": {
+    "unit": 199,
+    "parity": 8,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "unit_class_counts": {
+    "SwamiCertifiedTests": 7,
+    "SwamiNumericalTests": 74,
+    "TradersDynamicNumericalTests": 98,
+    "SharedGeneratedSwamiTdiTests": 20
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/publication-swami-certified-20261021-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-swami-certified-20261021-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}
