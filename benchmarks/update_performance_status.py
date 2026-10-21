@@ -1,7 +1,8 @@
 """Add a reconciled status ledger to an existing standalone performance report.
 
 Reads receipts without changing validators or benchmark inputs. Missing evidence
-is pending, never a speed win. Existing archived data remains byte-for-byte intact.
+is pending, never a speed win. Verified measurements replace the primary baseline;
+the previous dataset remains archived separately.
 """
 import argparse
 from collections import Counter, defaultdict
@@ -16,6 +17,7 @@ import time
 
 from performance_pair_mapping import reconcile
 from hosted_performance_results import load_results as load_hosted_results
+from primary_baseline_report import refresh as refresh_primary_baseline
 
 
 START = '<!-- rollout-status:start -->'
@@ -220,7 +222,7 @@ def local_validation_rows(work):
 
 
 def render(document, repo, work):
-    baseline = embedded(document, 'dataset')
+    baseline = embedded(document, 'archived-baseline-dataset' if 'id="archived-baseline-dataset"' in document else 'dataset')
     publication = read(work / 'si-pr266-publication-20261021/published.json')
     inventory = published_inventory(repo, publication['published_head'])
     formulas = formula_rows(inventory)
@@ -381,7 +383,7 @@ Each row reconciles: faster + slower + inconclusive + pending = expected. Blank 
         updated = re.sub(r'Status: [^.]+\.', 'Status: ' + html.escape(status['status']) + '.', section[0], count=1)
         result = result[:section.start()] + updated + result[section.end():]
     result = reconcile_visible_sections(result, totals, status['commit'][:8], len(status['completed']))
-    assert embedded(result, 'dataset') == baseline
+    result = refresh_primary_baseline(result, repo, work)
     assert result.count('id="rollout-status"') == 1
     return result, data
 
