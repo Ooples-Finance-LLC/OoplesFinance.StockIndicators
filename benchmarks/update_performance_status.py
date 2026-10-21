@@ -240,7 +240,7 @@ def render(document, repo, work):
 <div class="kicker">Current status — updated {now}</div><h2>Where the work stands</h2>
 <p class="sub"><strong>Not finished. Current performance superiority is unproven.</strong>
 <a href="https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/pull/266">Draft PR #266 → master</a>
-contains the published integration checkpoint {head}. The timing candidate is {status['commit'][:8]}; these are different builds.</p>
+contains the published integration checkpoint {head}. The timing candidate is {status['commit'][:8]}; {('it matches this published checkpoint' if status['commit'] == publication['published_head'] else 'it is a different build from this published checkpoint')}.</p>
 <div class="metrics">
 <div class="metric"><b>{totals['measured']} / {totals['expected']}</b><span>Matched API slots measured for the timing candidate</span></div>
 <div class="metric"><b>{totals['faster']}</b><span>Candidate slots faster than their matched competitor</span></div>
