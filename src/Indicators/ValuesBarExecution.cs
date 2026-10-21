@@ -74,11 +74,11 @@ internal static partial class ValuesBarExecution
             var owned = history is null ? null : new OwnedBarBuffer(source.Length);
             bool boundedBatch = indicators.Count > 1 && indicators.All(i => i.Outputs.Count == 1 && IsSharedState(i) && IsBoundedWindowIndicator(i));
             bool pointwiseBatch = indicators.Count > 1 && indicators.All(IsPointwise);
-            bool volumeFlowCustomRange = indicators.Any(i => i is VolumeFlowIndicator)
+            bool volumeFlowCustomRange = indicators.Any(i => i is VolumeFlowIndicator or VervoortSmoothedOscillator)
                 && UsesVolumeFlowCustomRange(source, cancellation);
             bool valueChartCustomRange = indicators.Any(i => i is ValueChartIndicator)
                 && UsesValueChartCustomRange(source, cancellation);
-            bool vervoortModifiedCustomRange = indicators.Any(i => i is VervoortModifiedBollingerBandIndicator)
+            bool vervoortModifiedCustomRange = indicators.Any(i => i is VervoortModifiedBollingerBandIndicator or VervoortHeikenAshiCandlestickOscillator or VervoortHeikenAshiLongTermCandlestickOscillator)
                 && UsesVervoortModifiedCustomRange(source, cancellation);
             if (indicators.Any(i => i is PrimeNumberOscillator or PrimeNumberBands or ClosedFormDistanceVolatility))
                 ValidatePrimeGraphInput(source, indicators, cancellation);

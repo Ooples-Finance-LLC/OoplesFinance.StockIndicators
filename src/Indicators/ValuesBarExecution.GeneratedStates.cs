@@ -36,6 +36,9 @@ internal static partial class ValuesBarExecution
     }
 
     private static bool IsGeneratedState(IIndicator indicator) =>
+        indicator is VervoortHeikenAshiCandlestickOscillator { MaType: null } ||
+        indicator is VervoortHeikenAshiLongTermCandlestickOscillator { MaType: null } longCandle && double.IsFinite(longCandle.Factor) ||
+        indicator is VervoortSmoothedOscillator smoothedVervoort && double.IsFinite(smoothedVervoort.StdDevMult) ||
         indicator is KalmanSmoother ||
         indicator is _4MovingAverageConvergenceDivergence fourMacd && double.IsFinite(fourMacd.BlueMult) && double.IsFinite(fourMacd.YellowMult) ||
         indicator is _4PercentagePriceOscillator fourPpo && double.IsFinite(fourPpo.BlueMult) && double.IsFinite(fourPpo.YellowMult) ||
@@ -563,6 +566,9 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        VervoortHeikenAshiCandlestickOscillator candle => new GeneratedVervoortCandleState(false, candle.Length, 1.1, vervoortModifiedCustomRange),
+        VervoortHeikenAshiLongTermCandlestickOscillator candle => new GeneratedVervoortCandleState(true, candle.Length, candle.Factor, vervoortModifiedCustomRange),
+        VervoortSmoothedOscillator smooth => new GeneratedVervoortSmoothedState(smooth.Length1, smooth.Length2, smooth.Length3, smooth.SmoothLength, smooth.StdDevMult, volumeFlowCustomRange),
         KalmanSmoother smoother => new GeneratedKalmanSmootherState(smoother.Length),
         _4MovingAverageConvergenceDivergence four => new GeneratedFourOscillatorState(four.Length1, four.Length2, four.Length3, four.Length4, false),
         _4PercentagePriceOscillator four => new GeneratedFourOscillatorState(four.Length1, four.Length2, four.Length3, four.Length4, true),
