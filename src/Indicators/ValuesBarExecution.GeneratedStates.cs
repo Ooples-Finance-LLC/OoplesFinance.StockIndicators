@@ -62,6 +62,7 @@ internal static partial class ValuesBarExecution
         indicator is T3 { MaType: null } ||
         indicator is TillsonT3MovingAverage { MaType: null } tillson && double.IsFinite(tillson.VFactor) ||
         indicator is OnBalanceVolumeModified { MaType: null } or OnBalanceVolumeReflex { MaType: null } ||
+        indicator is ConnorsRsi or ConnorsRelativeStrengthIndex { MaType: null } or StochasticConnorsRelativeStrengthIndex { MaType: null } ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
@@ -541,6 +542,9 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        ConnorsRsi connors => new GeneratedConnorsFollowupState(2, connors.Length, 100, 3, 3, count, false),
+        ConnorsRelativeStrengthIndex connors => new GeneratedConnorsFollowupState(connors.Length1, connors.Length2, connors.Length3, 3, 3, count, false),
+        StochasticConnorsRelativeStrengthIndex connors => new GeneratedConnorsFollowupState(connors.Length1, connors.Length2, connors.Length3, connors.SmoothLength1, connors.SmoothLength2, count, true),
         OnBalanceVolumeModified volume => new GeneratedObvFollowupState(volume.Length1, volume.Length2, false),
         OnBalanceVolumeReflex volume => new GeneratedObvFollowupState(volume.Length, volume.SignalLength, true),
         T3 tillson => new GeneratedTillsonAliasState(tillson.Length, .7),
