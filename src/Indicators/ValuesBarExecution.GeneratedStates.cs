@@ -55,6 +55,7 @@ internal static partial class ValuesBarExecution
             or StochasticOscillator { MaType: null } or StochasticFastOscillator { MaType: null } or StochasticRegular { MaType: null } ||
         indicator is ParabolicSar sar && double.IsFinite(sar.Start) && sar.Start >= 0
             && double.IsFinite(sar.Increment) && sar.Increment >= 0 && double.IsFinite(sar.Maximum) && sar.Maximum >= sar.Start ||
+        indicator is StochasticCustomOscillator { MaType: null } or StochasticMomentumIndex { MaType: null } ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
@@ -534,6 +535,8 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        StochasticCustomOscillator oscillator => new GeneratedStochasticComponentsState(oscillator.Length, 3, 1, 12, count, false),
+        StochasticMomentumIndex oscillator => new GeneratedStochasticComponentsState(oscillator.Length1, oscillator.Length2, oscillator.SmoothLength1, oscillator.SmoothLength2, count, true),
         ParabolicSar sar => new GeneratedParabolicSarState(sar.Start, sar.Increment, sar.Maximum),
         Stochastic oscillator => new GeneratedStochasticState(oscillator.KLength, oscillator.DLength, 3, MovingAvgType.SimpleMovingAverage, 0, count),
         StochasticK oscillator => new GeneratedStochasticState(oscillator.Length, oscillator.SmoothLength1, oscillator.SmoothLength2, MovingAvgType.SimpleMovingAverage, 0, count),

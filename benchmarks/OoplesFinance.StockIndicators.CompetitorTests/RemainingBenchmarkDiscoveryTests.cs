@@ -10,6 +10,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingAdaptiveV2Benchmarks), 40)]
     [InlineData(typeof(RemainingRangeStatisticsBenchmarks), 16)]
     [Theory]
+    [InlineData(typeof(RemainingStochasticComponentsBenchmarks), 16)]
     [InlineData(typeof(RemainingParabolicSarBenchmarks), 8)]
     [InlineData(typeof(RemainingStochasticBenchmarks), 56)]
     [InlineData(typeof(RemainingShinoharaBenchmarks), 16)]
