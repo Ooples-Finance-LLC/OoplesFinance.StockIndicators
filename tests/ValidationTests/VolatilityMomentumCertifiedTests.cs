@@ -60,9 +60,11 @@ public sealed class VolatilityMomentumCertifiedTests
     public void DefaultLongVaryingHistoryCertifiesEveryBar(MovingAvgType kind)
     {
         using var candidate = new VolatilityMomentumWindow(kind, 22, 65);
+        var certification = new CertifiedVolatilityMomentum(kind, 22, 65);
         for (var i = 0; i < 10000; i++)
         {
             var price = 10 + (i * 13 % 97) / 8d;
+            Assert.True(certification.TryNext(price + 2, price - 1, price, true, false, false, false, out _), $"Uncertified bar {i}");
             var point = candidate.Next(price + 2, price - 1, price, true);
             Assert.True(double.IsFinite(point.Line)); Assert.True(double.IsFinite(point.Signal));
         }

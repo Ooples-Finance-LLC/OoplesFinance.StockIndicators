@@ -42,9 +42,11 @@ public sealed class VervoortModifiedCertifiedTests
     public void LongVaryingHistoryCertifiesEveryBar(MovingAvgType kind)
     {
         using var candidate=new VervoortModifiedWindow(kind,18,200,8,1.6);
+        var certification=new CertifiedVervoortModified(kind,18,8);
         for(var i=0;i<10000;i++)
         {
             var price=10+(i*13%101)/8d;
+            Assert.True(certification.TryNext(price-0.25,price+1,price-2,true,out _), $"Uncertified bar {i}");
             var point=candidate.Next(price-0.25,price+1,price-2,true);
             Assert.True(double.IsFinite(point.Percent));Assert.True(double.IsFinite(point.Upper));Assert.True(double.IsFinite(point.Lower));
         }
