@@ -43,9 +43,19 @@ internal sealed class VervoortModifiedWindow : IDisposable
     private Number _previousInput,_previousOpen,_previousPercent,_previousSlope;
     private Number _previousVariance;private bool _hasPrevious;
     internal static bool Supports(MovingAvgType kind)=>StrengthWindow.Supports(kind)||kind is MovingAvgType.DoubleExponentialMovingAverage or MovingAvgType.TripleExponentialMovingAverage;
-    internal VervoortModifiedWindow(MovingAvgType kind,int band,int outer,int smooth,double multiplier)
+    private readonly MovingAvgType _kind;
+    private readonly int _band, _smooth;
+    private readonly bool _allowCertified;
+    private CertifiedVervoortModified? _certified;
+    private readonly List<(double Input, double High, double Low)> _replay = new();
+    internal long CertifiedCount { get; private set; }
+    internal int FallbackCount { get; private set; }
+    internal VervoortModifiedWindow(MovingAvgType kind,int band,int outer,int smooth,double multiplier,bool allowCertified=true)
     {
         StreamingInputValidation.Finite(multiplier,nameof(multiplier));_multiplier=multiplier;
+        _kind=kind; _band=band; _smooth=smooth;
+        _allowCertified=allowCertified && CertifiedVervoortModified.Supports(kind);
+        if(_allowCertified)_certified=new(kind,band,smooth);
         _first=new(kind,smooth);_second=new(kind,smooth);_third=new(kind,smooth);_center=new(MovingAvgType.WeightedMovingAverage,band);_inner=new(band);_outer=new(outer);
     }
     internal static double OffsetRoot(Number numerator,Number variance)
@@ -73,20 +83,48 @@ internal sealed class VervoortModifiedWindow : IDisposable
     internal (double Percent,double Upper,double Lower,Signal Trade) Next(double input,double high,double low,bool final)
     {
         StreamingInputValidation.Finite(input,nameof(input));StreamingInputValidation.Finite(high,nameof(high));StreamingInputValidation.Finite(low,nameof(low));
+        if(_certified is not null)
+        {
+            if(_certified.TryNext(input,high,low,final,out var percent))
+            {
+                var result=Finish(percent,final);
+                if(final){_replay.Add((input,high,low));CertifiedCount++;}
+                return result;
+            }
+            _certified=null;FallbackCount++;
+            ResetExact();
+            foreach(var bar in _replay)NextExact(bar.Input,bar.High,bar.Low,true);
+            _replay.Clear();
+        }
+        return NextExact(input,high,low,final);
+    }
+    private (double Percent,double Upper,double Lower,Signal Trade) NextExact(double input,double high,double low,bool final)
+    {
         var source=Number.Of(input);var open=(_previousInput+_previousOpen).Divide(2);var upperCandle=Number.Of(high);var lowerCandle=Number.Of(low);
         if((upperCandle-open).Sign<0)upperCandle=open;if((lowerCandle-open).Sign>0)lowerCandle=open;
         var close=(source+open+upperCandle+lowerCandle).Divide(4);var first=_first.Next(close,final);var second=_second.Next(first,final);var filtered=_third.Next(first.Times(2)-second,final);var center=_center.Next(filtered,final);
         var inner=_inner.Next(filtered,final);var threshold=inner.Maximum*Number.Of(1.4210854715202004e-14);double percent=0;
         if(inner.Full && (inner.Variance-threshold*threshold).Sign>0)percent=OffsetRoot((filtered-center).Times(25),inner.Variance);
+        var result=Finish(percent,final);
+        if(final){_previousInput=source;_previousOpen=open;}
+        return result;
+    }
+    private (double Percent,double Upper,double Lower,Signal Trade) Finish(double percent,bool final)
+    {
         var value=Number.Of(percent);var outer=_outer.Next(value,final);var variance=outer.Full?outer.Variance:default;
         var width=variance*Number.Of(_multiplier);var upper=OffsetRoot(width,variance);var lower=OffsetRoot(width.Times(-1),variance);
         var slope=value-Number.Integer(50);var trade=slope.Sign>0 && (slope-_previousSlope).Sign>0?Signal.StrongBuy:slope.Sign<0 && (slope-_previousSlope).Sign<0?Signal.StrongSell
             :slope.Sign>0 || (_hasPrevious?CompareBand(_previousVariance,_previousPercent,-1):-_previousPercent.Sign)>0 && CompareBand(variance,value,-1)<0?Signal.Buy
             :slope.Sign<0 || (_hasPrevious?CompareBand(_previousVariance,_previousPercent,1):-_previousPercent.Sign)<0 && CompareBand(variance,value,1)>0?Signal.Sell:Signal.None;
-        if(final){_previousInput=source;_previousOpen=open;_previousPercent=value;_previousSlope=slope;_previousVariance=variance;_hasPrevious=true;}
+        if(final){_previousPercent=value;_previousSlope=slope;_previousVariance=variance;_hasPrevious=true;}
         return(percent,upper,lower,trade);
     }
-    internal void Reset(){_first.Reset();_second.Reset();_third.Reset();_center.Reset();_inner.Reset();_outer.Reset();_previousInput=_previousOpen=_previousPercent=_previousSlope=default;_previousVariance=default;_hasPrevious=false;}
+    private void ResetExact(){_first.Reset();_second.Reset();_third.Reset();_center.Reset();_inner.Reset();_outer.Reset();_previousInput=_previousOpen=_previousPercent=_previousSlope=default;_previousVariance=default;_hasPrevious=false;}
+    internal void Reset()
+    {
+        ResetExact();_replay.Clear();CertifiedCount=0;FallbackCount=0;
+        _certified=_allowCertified?new(_kind,_band,_smooth):null;
+    }
     public void Dispose()=>Reset();
     internal static (Dictionary<string,List<double>> Outputs,List<Signal> Signals) Calculate(StockData data,MovingAvgType kind,int band,int outer,int smooth,double multiplier)
     {
