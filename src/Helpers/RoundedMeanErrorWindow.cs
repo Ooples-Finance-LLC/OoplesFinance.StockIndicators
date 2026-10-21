@@ -73,7 +73,9 @@ internal sealed class RoundedMeanErrorWindow(int period)
             var common = BigInteger.GreatestCommonDivisor(denominator, bottom);
             numerator = numerator * (bottom / common) + top * (denominator / common);
             denominator = denominator / common * bottom;
-            reduce = BigInteger.GreatestCommonDivisor(BigInteger.Abs(numerator), denominator);
+            // Both addends were reduced. Any factor left in the sum must
+            // divide the original denominator GCD, not the growing product.
+            reduce = BigInteger.GreatestCommonDivisor(BigInteger.Abs(numerator), common);
             numerator /= reduce;
             denominator /= reduce;
         }
