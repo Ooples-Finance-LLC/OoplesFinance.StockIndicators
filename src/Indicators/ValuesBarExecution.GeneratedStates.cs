@@ -47,6 +47,7 @@ internal static partial class ValuesBarExecution
         indicator is Jma ||
         indicator is Kama ||
         indicator is LiquidRelativeStrengthIndex ||
+        indicator is KaseSerialDependencyIndex ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
@@ -526,6 +527,7 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        KaseSerialDependencyIndex index => new GeneratedKaseSerialState(index.Length, count),
         LiquidRelativeStrengthIndex oscillator => new GeneratedNaturalLiquidState(oscillator.Length),
         Kama average => new GeneratedKamaState(average.Length, count),
         Jma average => new GeneratedRecursiveAliasState(average.Length),
