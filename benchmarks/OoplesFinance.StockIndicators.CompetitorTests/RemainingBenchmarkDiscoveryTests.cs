@@ -10,6 +10,7 @@ public sealed class RemainingBenchmarkDiscoveryTests
     [InlineData(typeof(RemainingAdaptiveV2Benchmarks), 40)]
     [InlineData(typeof(RemainingRangeStatisticsBenchmarks), 16)]
     [Theory]
+    [InlineData(typeof(RemainingKaseSerialBenchmarks), 8)]
     [InlineData(typeof(RemainingNaturalLiquidBenchmarks), 8)]
     [InlineData(typeof(RemainingKamaBenchmarks), 8)]
     [InlineData(typeof(RemainingRecursiveAliasesBenchmarks), 8)]
