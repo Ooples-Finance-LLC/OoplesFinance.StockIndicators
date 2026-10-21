@@ -30,15 +30,29 @@ class ContractShardsTests(unittest.TestCase):
                 contracts.assignment(bad, shard, total)
 
     def test_known_long_methods_stay_separate_when_inventory_grows(self):
-        heavy = set(contracts.HISTORICAL_SECONDS)
+        heavy = {name for name, seconds in contracts.HISTORICAL_SECONDS.items() if seconds >= 600}
         for count in (40, 123):
-            methods = sorted(heavy | {f"NewMethod{i:03}" for i in range(count)})
+            methods = sorted(set(contracts.HISTORICAL_SECONDS) | {f"NewMethod{i:03}" for i in range(count)})
             for total in (len(heavy), 20):
                 shards = [contracts.assignment(methods, i, total) for i in range(total)]
                 self.assertEqual(methods, sorted(name for shard in shards for name in shard))
                 self.assertTrue(all(shards))
                 self.assertTrue(all(len(heavy.intersection(shard)) <= 1 for shard in shards))
                 self.assertEqual(shards, [contracts.assignment(methods, i, total) for i in range(total)])
+
+    def test_split_long_cases_have_independent_scheduling_weights(self):
+        names = [
+            "RemainingSpreadCandleBenchmarkTests.RelativeSpreadFull10000",
+            "RemainingSpreadCandleBenchmarkTests.RelativeSpreadLatest10000",
+            "RemainingUltimateAveragesBenchmarkTests.UltimateFull10000",
+            "RemainingUltimateAveragesBenchmarkTests.UltimateLatest10000",
+            "RemainingUltimateAveragesBenchmarkTests.UltimateBandsFull10000",
+            "RemainingUltimateAveragesBenchmarkTests.UltimateBandsLatest10000",
+        ]
+        methods = sorted(contracts.HISTORICAL_SECONDS)
+        owners = {method: shard for shard in range(20) for method in contracts.assignment(methods, shard, 20)}
+        self.assertEqual(6, len({owners[contracts.PREFIX + name] for name in names}))
+        self.assertTrue(all(contracts.HISTORICAL_SECONDS[contracts.PREFIX + name] >= 500 for name in names))
 
     def test_unknown_methods_keep_even_deterministic_assignment(self):
         methods = [f"NewMethod{i:03}" for i in range(123)]
