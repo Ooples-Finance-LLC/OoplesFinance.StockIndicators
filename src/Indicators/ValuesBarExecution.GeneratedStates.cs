@@ -50,6 +50,7 @@ internal static partial class ValuesBarExecution
         indicator is KaseSerialDependencyIndex ||
         indicator is IchimokuTenkanSen or IchimokuKijunSen or IchimokuSenkouSpanA or IchimokuSenkouSpanB or IchimokuChikouSpan ||
         indicator is Kst or KnowSureThing { MaType: null, SecondAverage: null, ThirdAverage: null, FourthAverage: null, FifthAverage: null } ||
+        indicator is ShinoharaIntensityRatioA or ShinoharaIntensityRatioB ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
@@ -529,6 +530,8 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        ShinoharaIntensityRatioA ratio => new GeneratedShinoharaState(ratio.Length, count, false),
+        ShinoharaIntensityRatioB ratio => new GeneratedShinoharaState(ratio.Length, count, true),
         Kst bank => new GeneratedKstState([10, 15, 20, 30], [bank.Length, 10, 10, 15], 9, count),
         KnowSureThing bank => new GeneratedKstState([bank.RocLength1, bank.RocLength2, bank.RocLength3, bank.RocLength4],
             [bank.Length1, bank.Length2, bank.Length3, bank.Length4], bank.SignalLength, count),
