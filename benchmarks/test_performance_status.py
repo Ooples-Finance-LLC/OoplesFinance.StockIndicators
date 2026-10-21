@@ -4,10 +4,25 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from update_performance_status import formula_rows, fresh_results, ci_snapshot_html
+from update_performance_status import formula_rows, fresh_results, ci_snapshot_html, measurement_totals
 
 
 class PerformanceStatusTests(unittest.TestCase):
+    def test_measurement_totals_separate_pending_and_inconclusive(self):
+        totals = measurement_totals([
+            ['A', 'Full', 8, 3, 1, 1, 1, 5],
+            ['A', 'Latest', 8, 0, 0, 0, 0, 8]])
+        self.assertEqual(dict(expected=16, measured=3, faster=1, slower=1,
+                              inconclusive=1, pending=13), totals)
+
+    def test_inconsistent_or_duplicate_summary_is_rejected(self):
+        row = ['A', 'Full', 8, 3, 1, 1, 1, 5]
+        for rows in [[row, row], [['A', 'Full', 8, 4, 1, 1, 1, 4]],
+                     [['A', 'Full', 8, 3, 1, 1, 1, 4]],
+                     [['A', 'Full', 8, 0, 0, 0, 0, -1]]]:
+            with self.assertRaises(ValueError):
+                measurement_totals(rows)
+
     def test_hosted_ci_is_tied_to_exact_published_commit(self):
         receipt = {'head': 'current', 'checked_utc': 'today', 'checks': [
             {'name': 'net461', 'status': 'completed', 'conclusion': 'failure', 'url': 'evidence'},
