@@ -81,7 +81,7 @@ internal sealed class CertifiedRelativeSpread
         var input = Ball.Exact(price);
         var fastValue = Average(ref fast, input, _fastLength);
         var slowValue = Average(ref slow, input, _slowLength);
-        var constant = _count == 0 || _constant && price == _firstPrice;
+        var constant = _count == 0 || _constant && price == _firstPrice; // NOSONAR: S1244 - Exact constant input certifies correlated rounding; a tolerance would accept changing prices.
         // These averages are identically equal, including correlated rounding
         // uncertainty. Subtracting independent balls would lose that fact.
         var equal = _fastLength == _slowLength || _kind == MovingAvgType.ExponentialMovingAverage &&

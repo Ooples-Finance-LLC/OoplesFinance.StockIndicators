@@ -62,7 +62,7 @@ internal sealed class CertifiedTrueRangeAdjusted(int length, double multiplier)
         }
         gainLow = Min(gainLow, Number.Of(2)).Times(2).Divide(length + 1L);
         gainHigh = Min(gainHigh, Number.Of(2)).Times(2).Divide(length + 1L);
-        var constant = _count == 0 || _constant && price == _first;
+        var constant = _count == 0 || _constant && price == _first; // NOSONAR: S1244 - Exact constant input certifies the recurrence; a tolerance would change numerical behavior.
         Ball line;
         if (constant) line = Ball.Exact(current);
         else

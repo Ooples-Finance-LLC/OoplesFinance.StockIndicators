@@ -44,6 +44,9 @@ internal static partial class ValuesBarExecution
         indicator is GatorOscillator ||
         indicator is MarketMeannessIndex meanness && meanness.MaType is null && meanness.SecondAverage is null ||
         indicator is FloorPivotPointS1 or FloorPivotPointR1 or PivotPoint ||
+        indicator is Jma ||
+        indicator is Kama ||
+        indicator is LiquidRelativeStrengthIndex ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
@@ -523,6 +526,9 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        LiquidRelativeStrengthIndex oscillator => new GeneratedNaturalLiquidState(oscillator.Length),
+        Kama average => new GeneratedKamaState(average.Length, count),
+        Jma average => new GeneratedRecursiveAliasState(average.Length),
         FloorPivotPointS1 => new GeneratedFloorAliasScalarState(1),
         FloorPivotPointR1 => new GeneratedFloorAliasScalarState(4),
         PivotPoint => new GeneratedFloorAliasState(),
@@ -7903,8 +7909,8 @@ internal static partial class ValuesBarExecution
         {
             var a = bar.Close > _previousHigh ? 1d : 0d;
             var b = bar.Close < _previousLow ? 1d : 0d;
-            var c = a == 1d ? _c + 1 : b - _b == 1d ? 0 : _c;
-            var d = b == 1d ? _d + 1 : a - _a == 1d ? 0 : _d;
+            var c = a == 1d ? _c + 1 : b - _b == 1d ? 0 : _c; // NOSONAR: S1244 - These values are exact binary flags (0 or 1), not approximate measurements.
+            var d = b == 1d ? _d + 1 : a - _a == 1d ? 0 : _d; // NOSONAR: S1244 - These values are exact binary flags (0 or 1), not approximate measurements.
             var average = (c + d) / 2; _sum.Add(average);
             var result = average - _sum.Mean(_index + 1);
             _previousHigh = _high.Add(bar.Close, out _); _previousLow = _low.Add(bar.Close, out _);
