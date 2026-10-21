@@ -35,7 +35,7 @@ public sealed class SharedGeneratedImpulsePairTests
     {
         var bars = BarsOf([1, 3, 3, 1, 2]);
         var root = Create(kind, int.MaxValue);
-        var rules = OoplesFinance.StockIndicators.Validation.BuiltInFormulaReferences.For((IBuiltInIndicator)root).ToArray(); Assert.NotEmpty(rules);
+        var rules = OoplesFinance.StockIndicators.Validation.BuiltInFormulaReferences.For(root).ToArray(); Assert.NotEmpty(rules);
         var type = typeof(ValuesBarExecution).GetNestedType("GeneratedImpulsePairState", System.Reflection.BindingFlags.NonPublic)!;
         using var disposable = (IDisposable)Activator.CreateInstance(type, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic, null, [int.MaxValue, 9, bars.Length, kind == 1], null)!;
         var state = (IMultiOutputState)disposable;
