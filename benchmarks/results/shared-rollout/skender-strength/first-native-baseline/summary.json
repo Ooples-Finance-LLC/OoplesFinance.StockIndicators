@@ -1,0 +1,274 @@
+[
+  {
+    "operation": "Skender.GetRsi",
+    "bars": 1000,
+    "method": "BuilderFull",
+    "mean_ns": 243885.546875,
+    "confidence_interval": {
+      "N": 10,
+      "Mean": 243885.546875,
+      "StandardError": 4466.087306486809,
+      "Level": 12,
+      "Margin": 21351.973007582714,
+      "Lower": 222533.5738674173,
+      "Upper": 265237.5198825827
+    },
+    "allocated_bytes": 66401,
+    "fastest_native": {
+      "operation": "Skender.GetRsi",
+      "bars": 1000,
+      "method": "NativeSingle",
+      "mean_ns": 58781.54296875,
+      "confidence_interval": {
+        "N": 9,
+        "Mean": 58781.54296875,
+        "StandardError": 738.0771471451063,
+        "Level": 12,
+        "Margin": 3720.8723301268265,
+        "Lower": 55060.670638623174,
+        "Upper": 62502.415298876826
+      },
+      "allocated_bytes": 108452
+    },
+    "same_run_native_mean_ratio": 4.149015737893385,
+    "intervals_separated_in_builder_favor": false
+  },
+  {
+    "operation": "Skender.GetRsi",
+    "bars": 1000,
+    "method": "BuilderLatestOnly",
+    "mean_ns": 225025.52734375,
+    "confidence_interval": {
+      "N": 10,
+      "Mean": 225025.52734375,
+      "StandardError": 5953.005457542769,
+      "Level": 12,
+      "Margin": 28460.798708262155,
+      "Lower": 196564.72863548785,
+      "Upper": 253486.32605201215
+    },
+    "allocated_bytes": 17643,
+    "fastest_native": {
+      "operation": "Skender.GetRsi",
+      "bars": 1000,
+      "method": "NativeSingle",
+      "mean_ns": 58781.54296875,
+      "confidence_interval": {
+        "N": 9,
+        "Mean": 58781.54296875,
+        "StandardError": 738.0771471451063,
+        "Level": 12,
+        "Margin": 3720.8723301268265,
+        "Lower": 55060.670638623174,
+        "Upper": 62502.415298876826
+      },
+      "allocated_bytes": 108452
+    },
+    "same_run_native_mean_ratio": 3.8281663933758967,
+    "intervals_separated_in_builder_favor": false
+  },
+  {
+    "operation": "Skender.GetRsi",
+    "bars": 10000,
+    "method": "BuilderFull",
+    "mean_ns": 2403441.40625,
+    "confidence_interval": {
+      "N": 10,
+      "Mean": 2403441.40625,
+      "StandardError": 40809.26652930472,
+      "Level": 12,
+      "Margin": 195105.53591895764,
+      "Lower": 2208335.8703310424,
+      "Upper": 2598546.9421689576
+    },
+    "allocated_bytes": 642914,
+    "fastest_native": {
+      "operation": "Skender.GetRsi",
+      "bars": 10000,
+      "method": "NativeSingle",
+      "mean_ns": 906976.25,
+      "confidence_interval": {
+        "N": 10,
+        "Mean": 906976.25,
+        "StandardError": 11871.8887949691,
+        "Level": 12,
+        "Margin": 56758.4625430458,
+        "Lower": 850217.7874569542,
+        "Upper": 963734.7125430458
+      },
+      "allocated_bytes": 1081354
+    },
+    "same_run_native_mean_ratio": 2.649949661030264,
+    "intervals_separated_in_builder_favor": false
+  },
+  {
+    "operation": "Skender.GetRsi",
+    "bars": 10000,
+    "method": "BuilderLatestOnly",
+    "mean_ns": 2379979.1666666665,
+    "confidence_interval": {
+      "N": 9,
+      "Mean": 2379979.1666666665,
+      "StandardError": 40875.250113548675,
+      "Level": 12,
+      "Margin": 206064.62037580932,
+      "Lower": 2173914.5462908573,
+      "Upper": 2586043.787042476
+    },
+    "allocated_bytes": 161784,
+    "fastest_native": {
+      "operation": "Skender.GetRsi",
+      "bars": 10000,
+      "method": "NativeSingle",
+      "mean_ns": 906976.25,
+      "confidence_interval": {
+        "N": 10,
+        "Mean": 906976.25,
+        "StandardError": 11871.8887949691,
+        "Level": 12,
+        "Margin": 56758.4625430458,
+        "Lower": 850217.7874569542,
+        "Upper": 963734.7125430458
+      },
+      "allocated_bytes": 1081354
+    },
+    "same_run_native_mean_ratio": 2.6240810238048313,
+    "intervals_separated_in_builder_favor": false
+  },
+  {
+    "operation": "Skender.GetAdx",
+    "bars": 1000,
+    "method": "BuilderFull",
+    "mean_ns": 1475512.6984126985,
+    "confidence_interval": {
+      "N": 9,
+      "Mean": 1475512.6984126985,
+      "StandardError": 19760.45526015753,
+      "Level": 12,
+      "Margin": 99618.49041476146,
+      "Lower": 1375894.207997937,
+      "Upper": 1575131.18882746
+    },
+    "allocated_bytes": 116590,
+    "fastest_native": {
+      "operation": "Skender.GetAdx",
+      "bars": 1000,
+      "method": "NativeSingle",
+      "mean_ns": 118995.17578125,
+      "confidence_interval": {
+        "N": 10,
+        "Mean": 118995.17578125,
+        "StandardError": 1557.1155168948328,
+        "Level": 12,
+        "Margin": 7444.433170425499,
+        "Lower": 111550.7426108245,
+        "Upper": 126439.6089516755
+      },
+      "allocated_bytes": 204472
+    },
+    "same_run_native_mean_ratio": 12.399769055555227,
+    "intervals_separated_in_builder_favor": false
+  },
+  {
+    "operation": "Skender.GetAdx",
+    "bars": 1000,
+    "method": "BuilderLatestOnly",
+    "mean_ns": 1715316.25,
+    "confidence_interval": {
+      "N": 10,
+      "Mean": 1715316.25,
+      "StandardError": 38172.03614136434,
+      "Level": 12,
+      "Margin": 182497.16796871813,
+      "Lower": 1532819.082031282,
+      "Upper": 1897813.417968718
+    },
+    "allocated_bytes": 67834,
+    "fastest_native": {
+      "operation": "Skender.GetAdx",
+      "bars": 1000,
+      "method": "NativeSingle",
+      "mean_ns": 118995.17578125,
+      "confidence_interval": {
+        "N": 10,
+        "Mean": 118995.17578125,
+        "StandardError": 1557.1155168948328,
+        "Level": 12,
+        "Margin": 7444.433170425499,
+        "Lower": 111550.7426108245,
+        "Upper": 126439.6089516755
+      },
+      "allocated_bytes": 204472
+    },
+    "same_run_native_mean_ratio": 14.415006648280286,
+    "intervals_separated_in_builder_favor": false
+  },
+  {
+    "operation": "Skender.GetAdx",
+    "bars": 10000,
+    "method": "BuilderFull",
+    "mean_ns": 16911648.57142857,
+    "confidence_interval": {
+      "N": 10,
+      "Mean": 16911648.57142857,
+      "StandardError": 318984.80294340587,
+      "Level": 12,
+      "Margin": 1525038.4586938233,
+      "Lower": 15386610.112734748,
+      "Upper": 18436687.030122396
+    },
+    "allocated_bytes": 1126086,
+    "fastest_native": {
+      "operation": "Skender.GetAdx",
+      "bars": 10000,
+      "method": "NativeSingle",
+      "mean_ns": 1428566.40625,
+      "confidence_interval": {
+        "N": 10,
+        "Mean": 1428566.40625,
+        "StandardError": 19853.836722088454,
+        "Level": 12,
+        "Margin": 94919.45783757132,
+        "Lower": 1333646.9484124286,
+        "Upper": 1523485.8640875714
+      },
+      "allocated_bytes": 2040530
+    },
+    "same_run_native_mean_ratio": 11.83819561865647,
+    "intervals_separated_in_builder_favor": false
+  },
+  {
+    "operation": "Skender.GetAdx",
+    "bars": 10000,
+    "method": "BuilderLatestOnly",
+    "mean_ns": 16881285,
+    "confidence_interval": {
+      "N": 10,
+      "Mean": 16881285,
+      "StandardError": 493010.1259349373,
+      "Level": 12,
+      "Margin": 2357038.31542614,
+      "Lower": 14524246.684573859,
+      "Upper": 19238323.31542614
+    },
+    "allocated_bytes": 644989,
+    "fastest_native": {
+      "operation": "Skender.GetAdx",
+      "bars": 10000,
+      "method": "NativeSingle",
+      "mean_ns": 1428566.40625,
+      "confidence_interval": {
+        "N": 10,
+        "Mean": 1428566.40625,
+        "StandardError": 19853.836722088454,
+        "Level": 12,
+        "Margin": 94919.45783757132,
+        "Lower": 1333646.9484124286,
+        "Upper": 1523485.8640875714
+      },
+      "allocated_bytes": 2040530
+    },
+    "same_run_native_mean_ratio": 11.816941043933358,
+    "intervals_separated_in_builder_favor": false
+  }
+]

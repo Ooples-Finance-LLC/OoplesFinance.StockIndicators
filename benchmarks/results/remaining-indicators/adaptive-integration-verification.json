@@ -1,0 +1,50 @@
+{
+  "status": "focused-integration-and-current-source-gpu-verified-performance-pending",
+  "fresh_checks": {
+    "unit_passed": 3,
+    "discovery_passed": 170,
+    "gpu_passed": 100,
+    "inventory_passed": 4,
+    "contract_methods": 1511,
+    "hosted_methods": 1499
+  },
+  "reused_candidate_evidence": [
+    {
+      "commit": "0a721c8cf019a2796601aa9980b668df89928bde",
+      "receipt": "benchmarks/results/remaining-indicators/autocorrelationfamily-contracts.json",
+      "sha256": "ca2c1b0ca03a26e283d6358cc40a2e4b892dc3fc4a10c980aec653dc40b85fc7",
+      "committed_sha256": "94952e57c5438f4ceccc70c5dd0c55368ecf3fb538de61b5345f6fe924df70ac",
+      "unit_passed": 73,
+      "parity_passed": 16
+    },
+    {
+      "commit": "57721ec375cc71596625cb69ff4aab60bbce7105",
+      "receipt": "benchmarks/results/remaining-indicators/adaptivev1-contracts.json",
+      "sha256": "09f8ce4e1fdc1c0a9d1c7346b4e1df9f636a802784ce3788e1f93268affaad34",
+      "committed_sha256": "09f8ce4e1fdc1c0a9d1c7346b4e1df9f636a802784ce3788e1f93268affaad34",
+      "unit_passed": 35,
+      "parity_passed": 16
+    },
+    {
+      "commit": "8c594b3b1ef31650915d465f3440543fe504a619",
+      "receipt": "benchmarks/results/remaining-indicators/adaptivev2-contracts.json",
+      "sha256": "979e059e3338e1c0321cf4b96cbf0a631fe656f42b5df6121661f3cda6c2467a",
+      "committed_sha256": "979e059e3338e1c0321cf4b96cbf0a631fe656f42b5df6121661f3cda6c2467a",
+      "unit_passed": 95,
+      "parity_passed": 20
+    }
+  ],
+  "qualification": "Per-family exact numerical and parity checks are reused from the listed preserved commits. Fresh mixed-root tests cover all thirteen facades, full/latest history, output bits, warmup, ownership, reset/reuse, errors and cancellation. No performance measurements were rerun or claimed.",
+  "evidence": [
+    {
+      "file": "adaptive-integration-unit.trx.gz",
+      "passed_cases": 3,
+      "trx_sha256": "e9c95aaf886a4c97715369ad5b752904eda3897a7a4a83ca17b9d7a05fbe42b6"
+    },
+    {
+      "file": "adaptive-integration-discovery.trx.gz",
+      "passed_cases": 170,
+      "trx_sha256": "60be9ceed858d3c3ebaa5ef972cfb77e72b4447f569d0e1f811c2c26f16883b2"
+    }
+  ]
+}
