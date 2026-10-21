@@ -4335,3 +4335,85 @@ Four Ehlers adaptive V1 RSI, Fisher, stochastic and commodity facades now reuse 
 
 
 Adaptive cyber cycle, adaptive center of gravity and smoothed adaptive momentum now reuse exact kernels in shared execution. Validation: 51 unit cases, 12 parity cases, 169 discovery cases, 100 local GPU cases and four inventory checks passed. Twenty-four timing cases are prepared; quiet-window qualification remains pending.
+
+
+## Retained PR evidence checkpoints
+
+These dated measurements and checkpoints precede the integrated publication; they are not current-head qualification.
+
+### Preserved pivot columns against the cached baseline (2026-10-16)
+
+The preserved 033e31ab pivot-column candidate completed the four builder measurements with no detected interference. The saved native measurements were reused on matching recorded hardware/runtime. All four current builder confidence intervals are below the saved fastest-native interval. These are cross-run comparisons, not same-run qualification; the two interrupted attempts are excluded.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / previous builder | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 1,000 | Full | 127.602 | 139,236 | 0.269 | 0.817 |
+| 1,000 | LatestOnly | 119.624 | 90,487 | 0.259 | 0.766 |
+| 10,000 | Full | 1,088.500 | 1,219,718 | 0.228 | 0.606 |
+| 10,000 | LatestOnly | 1,061.522 | 738,594 | 0.225 | 0.591 |
+
+Evidence: `results/shared-rollout/rolling-pivot-shared-cpu/reused-baseline-columns/` contains raw timing, cached-baseline comparisons, immutable candidate hashes and quiet-process receipts. No native or competitor timing was repeated.
+
+### Preserved Rickshaw workers against the cached baseline (2026-10-16)
+
+The four builder measurements completed without detected interference. The current means are 0.202-0.428 times the saved builder means. Only 10k LatestOnly has a confidence interval below the saved fastest-native interval; 1k Full remains slower, and the other two cases do not establish a latency win. The native baseline was reused, so comparisons are cross-run.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: |
+| 1,000 | Full | 34.323 | 61,237 | 1.448 |
+| 1,000 | LatestOnly | 23.806 | 12,203 | 1.005 |
+| 10,000 | Full | 210.944 | 565,628 | 0.994 |
+| 10,000 | LatestOnly | 158.305 | 84,215 | 0.746 |
+
+Evidence: `results/shared-rollout/rickshaw-shared-cpu/reused-baseline-workers/`. Preserve the 1k Full gap and the two inconclusive cases for further optimization; this result does not qualify every Rickshaw workload as faster than native.
+
+### Preserved Asin workers against the cached baseline (2026-10-16)
+
+The four builder measurements completed without detected interference. All four remain slower than the cached fastest native mean; none establishes a performance win. Native measurements were reused on matching recorded hardware/runtime, so these are cross-run comparisons.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / previous builder | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 1,000 | Full | 17.160 | 66,567 | 1.009 | 3.327 |
+| 1,000 | LatestOnly | 11.957 | 17,971 | 0.913 | 2.318 |
+| 10,000 | Full | 89.567 | 642,974 | 0.913 | 3.041 |
+| 10,000 | LatestOnly | 45.931 | 161,988 | 1.192 | 1.559 |
+
+Evidence: `results/shared-rollout/asin-shared-cpu/reused-baseline-workers/`. Recording accepts a missing final process command line only after matching the previously proven PID, creation time and monotonic CPU total; changed identities, unexpected commands and background CPU limits remain enforced. The completed measurement was recorded without rerunning it.
+
+### Preserved SMA workers against the cached baseline (2026-10-16)
+
+Four builder measurements completed without detected interference. All four remain slower than the saved fastest TALib native mean and none establishes a latency win. Identical builder code and inputs are timed once under the TALib operation label; cached native results are reused on matching recorded hardware/runtime. Comparisons are cross-run.
+
+| Bars | Builder history | Mean (us) | Managed bytes | Current / previous builder | Current / saved fastest native |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 1,000 | Full | 9.615 | 57,741 | 1.134 | 3.884 |
+| 1,000 | LatestOnly | 6.746 | 9,035 | 1.019 | 2.725 |
+| 10,000 | Full | 66.570 | 562,618 | 0.890 | 5.757 |
+| 10,000 | LatestOnly | 20.302 | 81,631 | 1.035 | 1.756 |
+
+Evidence: `results/shared-rollout/sma-cpu/reused-baseline-workers/`. These gaps remain open; no competitor measurement was repeated.
+
+### Skender RSI/ADX first direct-native baseline (2026-10-16)
+
+All 16 native/builder cases completed in one run without detected interference. Native serial and full-prefix parallel results are now cached for reuse. Every builder case remains slower than the fastest native mean; no workload qualifies as a latency win. The interrupted first attempt is excluded.
+
+| Operation | Bars | Builder history | Mean (us) | Managed bytes | Builder / fastest native |
+| --- | ---: | --- | ---: | ---: | ---: |
+| Skender.GetRsi | 1,000 | Full | 243.886 | 66,401 | 4.149 |
+| Skender.GetRsi | 1,000 | LatestOnly | 225.026 | 17,643 | 3.828 |
+| Skender.GetRsi | 10,000 | Full | 2,403.441 | 642,914 | 2.650 |
+| Skender.GetRsi | 10,000 | LatestOnly | 2,379.979 | 161,784 | 2.624 |
+| Skender.GetAdx | 1,000 | Full | 1,475.513 | 116,590 | 12.400 |
+| Skender.GetAdx | 1,000 | LatestOnly | 1,715.316 | 67,834 | 14.415 |
+| Skender.GetAdx | 10,000 | Full | 16,911.649 | 1,126,086 | 11.838 |
+| Skender.GetAdx | 10,000 | LatestOnly | 16,881.285 | 644,989 | 11.817 |
+
+Evidence: `results/shared-rollout/skender-strength/first-native-baseline/`. Comparisons are from the same run on the preserved 2e533ff2 candidate. RSI and ADX latency gaps remain open; retain these native baselines when measuring later candidates.
+
+### Remaining-indicator evidence checkpoint (2026-10-17)
+
+The delivered [inventory](results/remaining-indicators/inventory.json) now records historical contract receipts for 399 of 830 batch formulas; 431 retain `pending-assessment`. These are formula-coverage counts, not performance wins or a count of distinct public facades. Pending rows still need reconciliation against inherited work, and local staged candidates are not counted as delivered verification.
+
+The latest [adaptive integration evidence](results/remaining-indicators/adaptive-integration-verification.json) combines autocorrelation and Adaptive V1/V2 execution: three fresh mixed-root tests, 170 discovery cases, 100 local GPU cases and four inventory checks passed. Its per-family numerical/parity results are reused from the preserved candidates named in that receipt. The subsequent base merge changed report/evidence files and the archived-verifier duplication exclusion, with no production or test changes.
+
+Earlier candidate counts and fixture-progress notes above describe their recorded checkpoints. They do not establish current whole-library readiness. Performance qualification remains pending; existing native competitor baselines are retained for reuse, and this update adds no timing measurements or speedup claims.

@@ -1,0 +1,43 @@
+{
+  "batch": "ehlers-autocorrelation-family-shared-execution",
+  "types": [
+    "EhlersAutoCorrelationIndicator",
+    "EhlersAutoCorrelationPeriodogram",
+    "EhlersAdaptiveBandPassFilter",
+    "EhlersZeroCrossingsDominantCycle"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact roofing autocorrelation, spectrum, adaptive band and zero-crossing kernels; publish adaptive outputs together while preserving lag clamps, bandwidth validation, sources and lifecycle.",
+  "verification": {
+    "unit_passed": 73,
+    "fixture_passed": 16,
+    "discovery_passed": 168,
+    "gpu_passed": 100,
+    "contract_methods": 1509,
+    "hosted_methods": 1497,
+    "evidence": [
+      {
+        "file": "autocorrelationfamily-unit.trx.gz",
+        "passed_cases": 73,
+        "trx_sha256": "4d6ba5a96a639f1aac625d978aff763992b71549c59fcce5003edb3b34128fe5"
+      },
+      {
+        "file": "autocorrelationfamily-fixture.trx.gz",
+        "passed_cases": 184,
+        "trx_sha256": "b77f7a5c8c6049b0cc59eaa4ef6862b926deef2a97fa0717b57064ba1d806b50"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAutocorrelationFamilyBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersAutoCorrelationIndicator",
+      "EhlersAutoCorrelationPeriodogram",
+      "EhlersAdaptiveBandPassFilter",
+      "EhlersZeroCrossingsDominantCycle"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}
