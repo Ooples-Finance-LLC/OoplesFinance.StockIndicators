@@ -648,6 +648,13 @@
       "source_sha256": "b788fb9a66d13c576742587d8d63772e5a37b8aec598d9117572add0f5511547"
     },
     {
+      "fixture": "SharedPivotBenchmarks",
+      "operation": "SharedPivotBenchmarks",
+      "pair": "Skender.GetRollingPivots",
+      "source": "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedPivotBenchmarks.cs",
+      "source_sha256": "2c3124002c8e3b8cf74beb18c3b372022c660fdb9f09a801e76a1016357430c3"
+    },
+    {
       "fixture": "SharedPointwiseBenchmarks",
       "operation": "Sin",
       "pair": "TaLib.Functions.Sin",
@@ -870,6 +877,13 @@
       "pair": "QuanTAlib.Rvi",
       "source": "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedRelativeVolatilityBenchmarks.cs",
       "source_sha256": "53d0c9f0fdba7bf0e77826b216099e3a13c160e3c9f82c95768289f29d7abf55"
+    },
+    {
+      "fixture": "SharedRetrospectiveBenchmarks",
+      "operation": "SharedRetrospectiveBenchmarks",
+      "pair": "Skender.GetFractal",
+      "source": "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedRetrospectiveBenchmarks.cs",
+      "source_sha256": "2d596b88583130e2c11ef198daaaf769981fa5f068f7e72311884e86e0f6d065"
     },
     {
       "fixture": "SharedReverseWilderBenchmarks",
@@ -1334,7 +1348,7 @@
       "source_sha256": "e99f2d3c5ddc42b04db5f96f938381f8a88f8ca12b72bb8c103a988fa244a236"
     }
   ],
-  "mapped_pairs": 188,
+  "mapped_pairs": 190,
   "unmapped_pairs": [
     "Skender.GetAdx",
     "Skender.GetAlligator",
@@ -1350,7 +1364,6 @@
     "Skender.GetElderRay",
     "Skender.GetEpma",
     "Skender.GetFcb",
-    "Skender.GetFractal",
     "Skender.GetGator",
     "Skender.GetHeikinAshi",
     "Skender.GetHurst",
@@ -1369,7 +1382,6 @@
     "Skender.GetRenkoAtr",
     "Skender.GetRoc",
     "Skender.GetRocWb",
-    "Skender.GetRollingPivots",
     "Skender.GetRsi",
     "Skender.GetSmaAnalysis",
     "Skender.GetSmi",

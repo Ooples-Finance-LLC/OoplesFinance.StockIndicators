@@ -8,6 +8,23 @@ import re
 import zipfile
 
 
+def direct_skender_mapping(source, pairs):
+    """Recognize an untransformed native result from a typed Quote array only."""
+    source = re.sub(r'/\*.*?\*/|//[^\n]*', '', source, flags=re.S)
+    if not re.search(r'^\s*using Skender\.Stock\.Indicators\s*;', source, re.M):
+        return set()
+    pattern = (r'public List<\w+> NativeSingle\(\)\s*=>\s*'
+               r'(?:\(List<\w+>\)\s*)?(\w+)\.(Get\w+)\(([^();"\']*)\)\s*;')
+    result = set()
+    for match in re.finditer(pattern, source):
+        receiver, method, _ = match.groups()
+        if re.search(r'\bprivate\s+Quote\[\]\s+' + re.escape(receiver) + r'\s*[=;]', source):
+            pair = 'Skender.' + method
+            if pair in pairs:
+                result.add(pair)
+    return result
+
+
 def ternary_native_mappings(source, operations, pairs):
     """Resolve only two-way dispatch whose complete branches are direct native calls."""
     if len(operations) != 2 or len(set(operations)) != 2:
@@ -81,6 +98,7 @@ def source_mappings(source, fixture, pairs):
         # A single-operation fixture can expose an exact comparison ID directly.
         if operation == fixture:
             candidates.update(re.findall(r'ComparisonPairs.Get\("([^"]+)"\)', source))
+            candidates.update(direct_skender_mapping(source, pairs))
         if len(candidates) == 1 and next(iter(candidates)) in pairs:
             rows.append({'fixture': fixture, 'operation': operation, 'pair': candidates.pop()})
     return rows

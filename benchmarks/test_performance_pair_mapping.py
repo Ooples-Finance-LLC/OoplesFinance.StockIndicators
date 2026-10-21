@@ -3,6 +3,27 @@ from performance_pair_mapping import reconcile, source_mappings
 
 
 class PairMappingTests(unittest.TestCase):
+    def test_direct_skender_result_requires_typed_receiver_and_full_native_body(self):
+        source = ('using Skender.Stock.Indicators;\nprivate Quote[] _quotes = null!;\n'
+                  'public List<FractalResult> NativeSingle() => '
+                  '(List<FractalResult>)_quotes.GetFractal(Wing, Wing, EndType.HighLow);')
+        pairs = {'Skender.GetFractal'}
+        self.assertEqual([dict(fixture='Fractal', operation='Fractal', pair='Skender.GetFractal')],
+                         source_mappings(source, 'Fractal', pairs))
+        for changed in [source.replace('Quote[]', 'Other[]'),
+                        source.replace('Skender.Stock.Indicators', 'Other'),
+                        source.replace(');', ').Select(x => x);'),
+                        source.replace('NativeSingle', 'Setup'),
+                        '/*' + source + '*/']:
+            self.assertEqual([], source_mappings(changed, 'Fractal', pairs))
+
+    def test_direct_skender_call_does_not_map_every_parameterized_operation(self):
+        source = ('using Skender.Stock.Indicators;\nprivate Quote[] _quotes;\n'
+                  '[Params("A", "B")] public string Operation;\n'
+                  'public List<FractalResult> NativeSingle() => '
+                  '(List<FractalResult>)_quotes.GetFractal(Wing);')
+        self.assertEqual([], source_mappings(source, 'F', {'Skender.GetFractal'}))
+
     def test_two_direct_native_ternary_branches_are_scoped_to_operation(self):
         source = '[Params("Min", "Max")] public string Operation; Operation == "Max" ? new QuanTAlib.Max(Period, 0) : new QuanTAlib.Min(Period, 0);'
         rows = source_mappings(source, 'Extreme', {'QuanTAlib.Min', 'QuanTAlib.Max'})
