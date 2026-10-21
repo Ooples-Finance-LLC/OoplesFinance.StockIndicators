@@ -36,6 +36,7 @@ internal static partial class ValuesBarExecution
     }
 
     private static bool IsGeneratedState(IIndicator indicator) =>
+        indicator is KalmanSmoother ||
         indicator is _4MovingAverageConvergenceDivergence fourMacd && double.IsFinite(fourMacd.BlueMult) && double.IsFinite(fourMacd.YellowMult) ||
         indicator is _4PercentagePriceOscillator fourPpo && double.IsFinite(fourPpo.BlueMult) && double.IsFinite(fourPpo.YellowMult) ||
         indicator is StochasticMacdOscillator ||
@@ -562,6 +563,7 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        KalmanSmoother smoother => new GeneratedKalmanSmootherState(smoother.Length),
         _4MovingAverageConvergenceDivergence four => new GeneratedFourOscillatorState(four.Length1, four.Length2, four.Length3, four.Length4, false),
         _4PercentagePriceOscillator four => new GeneratedFourOscillatorState(four.Length1, four.Length2, four.Length3, four.Length4, true),
         StochasticMacdOscillator oscillator => new GeneratedStochasticMacdState(oscillator.Length, count),
