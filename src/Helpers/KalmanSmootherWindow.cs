@@ -35,15 +35,28 @@ internal sealed class KalmanSmootherWindow
         }
     }
     private readonly F _q, _r;
+    private readonly F? _rationalRoot;
     private Value _level, _velocity, _margin;
     private bool _started;
-    internal KalmanSmootherWindow(int length) { _q = (F)Math.Max(1, length) / 10000; _r = 2 * _q; }
+    internal KalmanSmootherWindow(int length, bool allowRationalRoot = true)
+    {
+        _q = (F)Math.Max(1, length) / 10000; _r = 2 * _q;
+        if (allowRationalRoot)
+        {
+            var numerator = ExactPopulationDeviation.IntegerRoot(_r.Numerator);
+            var denominator = ExactPopulationDeviation.IntegerRoot(_r.Denominator);
+            if (numerator * numerator == _r.Numerator && denominator * denominator == _r.Denominator)
+                _rationalRoot = new F(numerator, denominator);
+        }
+    }
     internal (double Line, Signal Trade) Next(double price, bool final)
     {
         StreamingInputValidation.Finite(price, nameof(price));
         var x = new Value(F.Of(price), 0); var prior = _started ? _level : x;
         var delta = x - prior; var velocity = _velocity + delta.Scale(_q);
-        var level = prior + delta.RootTimes(_r) + velocity;
+        // A rational root keeps every B coefficient exactly zero, avoiding
+        // large cancelling conjugate terms and repeated root-bound refinement.
+        var level = prior + (_rationalRoot is { } root ? delta.Scale(root) : delta.RootTimes(_r)) + velocity;
         var margin = x - level; var sign = margin.Sign(_r); var change = (margin - _margin).Sign(_r);
         var trade = sign > 0 && change > 0 ? Signal.StrongBuy : sign < 0 && change < 0 ? Signal.StrongSell
             : sign > 0 ? Signal.Buy : sign < 0 ? Signal.Sell : Signal.None;
