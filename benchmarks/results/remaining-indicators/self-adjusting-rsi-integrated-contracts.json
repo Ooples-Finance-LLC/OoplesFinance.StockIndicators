@@ -1,0 +1,29 @@
+{
+  "types": [
+    "SelfAdjustingRelativeStrengthIndex"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "251f349d35236bd37aa2567ee2271ba6309d3163",
+  "combined_input_sha256": "545e7a9ac47ca54e2929fb561d454574f79321babe716d451442006c70105de7",
+  "benchmark_fixture": {
+    "type": "RemainingSelfAdjustingRsiBenchmarks",
+    "operations": [
+      "SelfAdjustingRelativeStrengthIndex"
+    ]
+  },
+  "checks": {
+    "unit": 95,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/self-adjusting-rsi-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/self-adjusting-rsi-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}
