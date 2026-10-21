@@ -15,6 +15,7 @@ import subprocess
 import time
 
 from performance_pair_mapping import reconcile
+from hosted_performance_results import load_results as load_hosted_results
 
 
 START = '<!-- rollout-status:start -->'
@@ -141,6 +142,41 @@ def hosted_measurement_html(receipt):
             'must be checked before results are imported.</p>')
 
 
+def hosted_results_html(results):
+    if not results:
+        return ('<div id="hosted-measurement-results"><p>Verified hosted LibraryPair results: '
+                'pending. No hosted timings have been imported.</p></div>')
+    rows = results['rows']
+    summaries = []
+    for library in sorted({row['pair'].split('.')[0] for row in rows}):
+        subset = [row for row in rows if row['pair'].split('.')[0] == library]
+        lower = sum(row['competitor_over_ooples'] > 1 for row in subset)
+        higher = sum(row['competitor_over_ooples'] < 1 for row in subset)
+        summaries.append([library, len(subset), lower, higher, len(subset) - lower - higher])
+    totals = [sum(row[i] for row in summaries) for i in range(1, 5)]
+    assert totals[0] == len(rows) == 2 * results['paired_apis']
+    source = html.escape(results['source_sha'])
+    content = (f'<div id="hosted-measurement-results"><h3>Verified hosted LibraryPair diagnostics</h3>'
+               f'<p>Source {source}; run {results["run_id"]}. {results["paired_apis"]} paired APIs, '
+               f'{len(rows)} size comparisons. Lower mean + higher mean + equal mean = measured comparisons. '
+               'These are observed means from shared runners, not confidence-qualified wins. '
+               'Each pair was measured together on one shard; compare within a pair. '
+               'All rows, including slower results, are shown. These counts are separate from builder-mode totals.</p>')
+    content += table(['Library', 'Measured comparisons', 'Ooples lower mean', 'Ooples higher mean', 'Equal mean'],
+                     [*summaries, ['All libraries', *totals]], 'status-hosted-summary')
+    content += '<p>Times are milliseconds, dispersion is standard deviation, allocations are bytes per operation. Ratio = competitor mean / Ooples mean.</p>'
+    content += table(['API pair', 'Ooples indicator', 'Bars', 'Ooples ms', 'Competitor ms', 'Ratio',
+                      'Ooples SD ms', 'Competitor SD ms', 'Ooples samples', 'Competitor samples',
+                      'Ooples bytes', 'Competitor bytes'],
+                     [[r['pair'], r['ooples_indicator'], r['bars'],
+                       f"{r['ooples_mean_ns']/1e6:.6f}", f"{r['competitor_mean_ns']/1e6:.6f}",
+                       f"{r['competitor_over_ooples']:.4f}", f"{r['ooples_stddev_ns']/1e6:.6f}",
+                       f"{r['competitor_stddev_ns']/1e6:.6f}", int(r['ooples_samples']),
+                       int(r['competitor_samples']), r['ooples_allocated_bytes'], r['competitor_allocated_bytes']]
+                      for r in rows], 'status-hosted-pairs')
+    return content + '</div>'
+
+
 def reconcile_visible_sections(document, totals, candidate, completed):
     """Keep legacy report surfaces tied to the same current measurement ledger."""
     current = ('<section id="current-competitors" class="section"><h2>Complete current competitor results</h2>'
@@ -148,7 +184,9 @@ def reconcile_visible_sections(document, totals, candidate, completed):
                'including pending slots for all four libraries and both history modes. '
                f"{totals['measured']} of {totals['expected']} slots measured: {totals['faster']} faster, "
                f"{totals['slower']} slower, {totals['inconclusive']} inconclusive, {totals['pending']} pending. "
-               'All current summaries use this same ledger. Dated results below are historical evidence.</p></section>')
+               'All builder summaries use this same ledger. '
+               '<a href="#hosted-measurement-results">Hosted LibraryPair diagnostics</a> use a separate execution path and totals. '
+               'Dated results below are historical evidence.</p></section>')
     document = re.sub(r'<section id="current-competitors".*?</section>', lambda _: current, document, flags=re.S)
     document = re.sub(r'(<section class="hero">.*?<p class="lede">).*?(</p>)',
                       lambda m: m[1] + f"Timing candidate {html.escape(candidate)}: {totals['measured']} / {totals['expected']} matched slots measured; {totals['pending']} pending. {completed} fixture batches completed. Full-library superiority remains unproven." + m[2],
@@ -195,6 +233,16 @@ def render(document, repo, work):
     hosted_ci = read(ci_path) if ci_path.exists() else {}
     hosted_path = work / 'si-hosted-competitor-refresh-20261021/status.json'
     hosted_measurement = read(hosted_path) if hosted_path.exists() else {}
+    hosted_results = None
+    hosted_folder = hosted_path.parent / 'summary'
+    if (hosted_folder / 'evidence.json').exists():
+        if hosted_measurement.get('status') != 'completed' or hosted_measurement.get('conclusion') != 'success':
+            raise ValueError('Hosted results require a successful source-matched workflow')
+        source = hosted_measurement.get('source_sha', '')
+        if not re.fullmatch(r'[0-9a-f]{40}', source):
+            raise ValueError('Hosted results require an exact source commit')
+        manifest = subprocess.check_output(['git', 'show', source + ':benchmarks/competitor-library-manifest.json'], cwd=repo)
+        hosted_results = load_hosted_results(hosted_folder, source, hosted_measurement['run_id'], manifest)
     local_validation = local_validation_rows(work)
     navigation = read(work / 'si-unmapped-navigation-after-support-resistance-20261020.json')
     chain = read(work / 'si-pending-chain-static-reconciliation-v19-20261020.json')
@@ -271,7 +319,7 @@ def render(document, repo, work):
                 formula_counts=dict(counts), formulas=formulas, competitor_summary=summary, measurement_totals=totals,
                 baseline_pairs=len(old), baseline_comparisons=len(baseline['rows']), fresh=fresh,
                 unmatched_fresh=unmatched, mapped_api_pairs=operation_mapping.get('mapped_pairs', 0),
-                runner=status, hosted_ci=hosted_ci, hosted_measurement=hosted_measurement, local_validation=local_validation, publication_validation=validation, pending_publication=pending_publication, queue=queue, remaining_assessment=navigation['remaining'])
+                runner=status, hosted_ci=hosted_ci, hosted_measurement=hosted_measurement, hosted_results=hosted_results, local_validation=local_validation, publication_validation=validation, pending_publication=pending_publication, queue=queue, remaining_assessment=navigation['remaining'])
     content = f'''{START}<section id="rollout-status" class="section">
 <div class="kicker">Current status — updated {now}</div><h2>Where the work stands</h2>
 <p class="sub"><strong>Not finished. Current performance superiority is unproven.</strong>
@@ -291,6 +339,7 @@ Formula correctness receipts and the dated archives below are separate evidence 
 Quiet window: {status.get('quiet_seconds', 0)} / 240 seconds, last runner update {html.escape(status['updated_utc'])}.
 {controllers}</p>
 {hosted_measurement_html(hosted_measurement)}
+{hosted_results_html(hosted_results)}
 <p>Earlier publication receipt: six inventory tests passed. Recorded validation: <strong>{html.escape(validation['status'])}</strong>,
 step {html.escape(validation.get('step', 'pending'))}. {gpu_status}
 <a href="https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/pull/266/checks">live GitHub checks</a>

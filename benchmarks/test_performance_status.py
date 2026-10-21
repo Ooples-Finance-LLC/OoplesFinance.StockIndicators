@@ -5,10 +5,24 @@ import tempfile
 import subprocess
 import unittest
 
-from update_performance_status import formula_rows, fresh_results, ci_snapshot_html, measurement_totals, reconcile_visible_sections, published_inventory, local_validation_rows, hosted_measurement_html
+from update_performance_status import formula_rows, fresh_results, ci_snapshot_html, measurement_totals, reconcile_visible_sections, published_inventory, local_validation_rows, hosted_measurement_html, hosted_results_html
 
 
 class PerformanceStatusTests(unittest.TestCase):
+    def test_hosted_results_keep_slower_rows_and_separate_totals(self):
+        rows = []
+        for bars, ratio in [(1000, 2), (10000, 0.5)]:
+            rows.append(dict(pair='Skender.Sma', ooples_indicator='Sma', bars=bars,
+                ooples_mean_ns=100, competitor_mean_ns=100 * ratio, competitor_over_ooples=ratio,
+                ooples_stddev_ns=1, competitor_stddev_ns=2, ooples_samples=3, competitor_samples=3,
+                ooples_allocated_bytes=32, competitor_allocated_bytes=64))
+        result = hosted_results_html(dict(source_sha='a' * 40, run_id=123, paired_apis=1, rows=rows))
+        self.assertIn('<td>All libraries</td><td>2</td><td>1</td><td>1</td><td>0</td>', result)
+        self.assertIn('0.5000', result)
+        self.assertIn('separate from builder-mode totals', result)
+        self.assertIn('not confidence-qualified wins', result)
+        self.assertIn('pending', hosted_results_html(None))
+
     def test_hosted_run_success_does_not_imply_verified_timings(self):
         result = hosted_measurement_html(dict(source_sha='a' * 40, run_id=123,
             status='completed', conclusion='success', updated_utc='2026-10-21'))
