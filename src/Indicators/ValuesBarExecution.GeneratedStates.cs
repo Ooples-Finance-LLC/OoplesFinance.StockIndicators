@@ -48,6 +48,7 @@ internal static partial class ValuesBarExecution
         indicator is Kama ||
         indicator is LiquidRelativeStrengthIndex ||
         indicator is KaseSerialDependencyIndex ||
+        indicator is IchimokuTenkanSen or IchimokuKijunSen or IchimokuSenkouSpanA or IchimokuSenkouSpanB or IchimokuChikouSpan ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
@@ -527,6 +528,11 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        IchimokuTenkanSen line => new GeneratedIchimokuState(line.Length, count, 0),
+        IchimokuKijunSen line => new GeneratedIchimokuState(line.Length, count, 1),
+        IchimokuSenkouSpanA line => new GeneratedIchimokuState(line.Length, count, 2),
+        IchimokuSenkouSpanB line => new GeneratedIchimokuState(line.Length, count, 3),
+        IchimokuChikouSpan line => new GeneratedIchimokuState(line.Length, count, 4),
         KaseSerialDependencyIndex index => new GeneratedKaseSerialState(index.Length, count),
         LiquidRelativeStrengthIndex oscillator => new GeneratedNaturalLiquidState(oscillator.Length),
         Kama average => new GeneratedKamaState(average.Length, count),
