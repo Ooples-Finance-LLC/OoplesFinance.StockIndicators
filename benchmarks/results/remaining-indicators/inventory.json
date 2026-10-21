@@ -4811,7 +4811,13 @@
       "options": [
         "GeneralFilterEstimatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "GeneralFilterEstimatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/generalfilter-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "GeneralizedDoubleExponentialMovingAverage",
@@ -12897,6 +12903,7 @@
     "benchmarks/results/remaining-indicators/gainlosspair-contracts.json": "994db10fa4d5f5fc84466930a73c1b97b60bf513a40a2a4cff36056518720fe0",
     "benchmarks/results/remaining-indicators/gap1-cpu-contracts.json": "e90d60e4614696763817766d86fdb1a1cecbf64d213f09e164e8711da4a4b9bb",
     "benchmarks/results/remaining-indicators/garmanklass-contracts.json": "0a16d96b49b43449d92b8b670b914e07ffa18fcfb5af56c7cd9da779df7ce105",
+    "benchmarks/results/remaining-indicators/generalfilter-integrated-contracts.json": "90f241fdc915c964b21525a4bc5036928020261e099eab40acd1940ad99ef9ce",
     "benchmarks/results/remaining-indicators/geometricmeans-integrated-contracts.json": "dbe4e6ab99fe4cef03b6fa97b2eb2879a5b15d3ecbe016dc558b08b5f4379b5e",
     "benchmarks/results/remaining-indicators/gopalgrand-cpu-contracts.json": "a1da631452691c3555aa131dee6c5186d9cfc72c0a83de79e4aff267adec4a86",
     "benchmarks/results/remaining-indicators/grover-cpu-contracts.json": "7876dc0c08c0728df592cac3704494435ca74c7bfc85fd7e10e07ff5deddc4e0",
@@ -13258,7 +13265,8 @@
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
     "src/Indicators/ValuesBarExecution.Envelopes.cs": "e2d0a0f70256a12977383afa13efadb06e8758a53953627c6889fdf990c7a7fe",
     "src/Indicators/ValuesBarExecution.FractalAverage.cs": "66acb1b8d227440ef3bc9279d56e918ae8deb8642bfdd3580432554313288a6c",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "86960dffcf149a679e86c5529c492af63623abebe0a956d3480b968a91b0b40b",
+    "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "2fc9e12c5d7d0febc8db2da389894470b19e5462fda8926fcacb521826e29717",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.LaggedReturns.cs": "86122ae31d6b8addab098c72675ba5cb4708a5bb13e63e4dace2598820e43154",

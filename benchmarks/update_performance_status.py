@@ -170,7 +170,7 @@ Quiet window: {status.get('quiet_seconds', 0)} / 240 seconds, last runner update
 step {html.escape(validation.get('step', 'pending'))}. {gpu_status}
 <a href="https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/pull/266/checks">live GitHub checks</a>
 reported a commit-message lint failure on historical subjects. No current-head performance claim follows from earlier correctness receipts.</p>
-<p>Next unpublished batch validation: {html.escape(pending_publication.get('status', 'no receipt'))}; step {html.escape(pending_publication.get('step', 'unknown'))}; input {html.escape(pending_publication.get('input_head', 'unknown')[:8])}; last update {html.escape(pending_publication.get('updated_utc', 'unknown'))}. This batch is not included in the published coverage totals.</p>
+<p>General Filter batch validation: {html.escape(pending_publication.get('status', 'no receipt'))}; step {html.escape(pending_publication.get('step', 'unknown'))}; input {html.escape(pending_publication.get('input_head', 'unknown')[:8])}; last update {html.escape(pending_publication.get('updated_utc', 'unknown'))}. {('This batch is included in published coverage totals.' if pending_publication.get('published_head') else 'This batch is not included in published coverage totals.')}</p>
 <h3>Current competitor coverage</h3><p>Each library total counts API pairs × two sizes. Both Ooples history modes are shown separately.
 Each row reconciles: faster + slower + inconclusive + pending = expected. Blank timings mean unmeasured, never zero.</p>'''
     content += table(['Library', 'Mode', 'Expected', 'Measured', 'Faster', 'Slower', 'Inconclusive', 'Pending'], summary, 'status-summary')
