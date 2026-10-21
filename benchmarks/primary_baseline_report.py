@@ -83,7 +83,10 @@ def replace_primary(document, dataset):
     }
     for old, new in replacements.items():
         document = document.replace(old, new)
-    document = re.sub(r'<h3>Fresh full-library timing run</h3><p>.*?</p>',
+    document = re.sub(r'(<section id="explorer"[^>]*>.*?<p class="sub">).*?(</p>)',
+        lambda m: m[1] + f'Measured source {source[:8]}. All {comparisons} comparisons below use refreshed matched timings. '
+        'Click an API for samples and runner details.' + m[2], document, count=1, flags=re.S)
+    document = re.sub(r'<h3>Fresh full-library timing run</h3><p>.*?</p>|<p>Refreshed baseline source:.*?</p>',
         lambda _: '<p>Refreshed baseline source: ' + html.escape(source[:8]) + '. '
         '<a href="' + html.escape(dataset['evidence']['runUrl'], quote=True) + '">Measurement run and raw evidence</a>. '
         'All primary baseline tables and charts use these verified results.</p>', document, flags=re.S)
@@ -119,6 +122,10 @@ def replace_primary(document, dataset):
 def refresh(document, repo, work):
     folder = Path(work) / 'si-primary-baseline-refresh-20261021'
     if not (folder / 'summary/evidence.json').exists():
+        # A later status refresh may run on another evidence root. Keep the
+        # already-imported baseline and its visible totals, not builder totals.
+        if 'id="archived-baseline-dataset"' in document:
+            return replace_primary(document, embedded(document, 'dataset'))
         return document
     receipt = json.loads((folder / 'status.json').read_text(encoding='utf-8'))
     if receipt['status'] != 'completed' or receipt['conclusion'] != 'success':
