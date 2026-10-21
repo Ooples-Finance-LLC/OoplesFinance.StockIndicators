@@ -36,6 +36,7 @@ internal static partial class ValuesBarExecution
     }
 
     private static bool IsGeneratedState(IIndicator indicator) =>
+        indicator is OptimizedTrendTracker { MaType: null } trend && double.IsFinite(trend.Percent) ||
         indicator is MartinRatio { MaType: null } martin && double.IsFinite(martin.Bmk) ||
         indicator is MiddleHighLowMovingAverage { MaType: null } ||
         indicator is OvershootReductionMovingAverage { MaType: null } ||
@@ -551,6 +552,7 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        OptimizedTrendTracker trend => new GeneratedOptimizedTrendState(trend.Length, trend.Percent),
         MartinRatio martin => new GeneratedMartinRatioState(martin.Length, martin.Bmk, count),
         MiddleHighLowMovingAverage average => new GeneratedMiddleMeanState(average.Length1, average.Length2, count),
         OvershootReductionMovingAverage average => new GeneratedOvershootState(average.Length, count),
