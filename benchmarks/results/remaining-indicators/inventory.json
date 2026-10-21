@@ -1499,7 +1499,13 @@
       "options": [
         "DecisionPointBreadthSwenlinTradingOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "DecisionPointBreadthSwenlinTradingOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/swenlin-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "DecisionPointPriceMomentumOscillator",
@@ -5300,14 +5306,26 @@
       "options": [
         "ImpulseMovingAverageConvergenceDivergenceSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ImpulseMovingAverageConvergenceDivergenceSpecOptions": [
+          "benchmarks/results/remaining-indicators/impulse-pair-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "ImpulsePercentagePriceOscillator",
       "options": [
         "ImpulsePercentagePriceOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "ImpulsePercentagePriceOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/impulse-pair-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "InertiaIndicator",
@@ -7357,7 +7375,13 @@
       "options": [
         "PivotDetectorOscillatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "PivotDetectorOscillatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/pivot-detector-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "PivotPointAverage",
@@ -9438,7 +9462,13 @@
       "options": [
         "TheRangeIndicatorSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "TheRangeIndicatorSpecOptions": [
+          "benchmarks/results/remaining-indicators/range-indicator-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "TickLineMomentumOscillator",
@@ -13223,6 +13253,7 @@
     "benchmarks/results/remaining-indicators/hybrid-cpu-contracts.json": "473edde91896b6d68bc845d35383bff4d9f86cd82fe6cfe7056e8cb409d92a41",
     "benchmarks/results/remaining-indicators/ichimoku-integrated-contracts.json": "0e381ae2b68dd56d95c19689786fc71536cb0b9bbf17f8b795792fa2a41ff1f9",
     "benchmarks/results/remaining-indicators/impulse-contracts.json": "dd3ac11ad33787e1847326a8f77b748edfff022c1e178383521f5c3c94230054",
+    "benchmarks/results/remaining-indicators/impulse-pair-integrated-contracts.json": "f159d8346a80c70c338d3f5ee63785f485ce40a1567a9ed3f1ea7f2846264ce8",
     "benchmarks/results/remaining-indicators/inertiapair-cpu-contracts.json": "b7205bdaf4ae6f5abe2bdda6ba20b4cbcb2eb231f2f0bcd2da763175bb48837b",
     "benchmarks/results/remaining-indicators/inheritedaliases-contracts.json": "0780a8b140e4572e15e7ae1cd240fc25bde01307e07c7b441b554465b5985872",
     "benchmarks/results/remaining-indicators/inheritedcore-contracts.json": "0d0f57f7945c43a3a38fab512acbe93ebdf07fb79a3e990e6a310496e57072f5",
@@ -13267,6 +13298,7 @@
     "benchmarks/results/remaining-indicators/otherstops-cpu-contracts.json": "50b6e7c4295bdce66f89c8066c1f5509834fb795e514666a5b34e9dd57fc87fc",
     "benchmarks/results/remaining-indicators/overshoot-integrated-contracts.json": "64be0ec663171abbbfb36bfda555ffe50589e34d37ff99492f4bc9e767c61ed4",
     "benchmarks/results/remaining-indicators/parabolic-sar-integrated-contracts.json": "97b892678287d4ea039b702f1340e0a8b14f949f384b7bbf4fdf9236dea8bc6b",
+    "benchmarks/results/remaining-indicators/pivot-detector-integrated-contracts.json": "68b0cdf896bef489adc010502e466234eebb8b36d0240d8b77d7425f8b31cc79",
     "benchmarks/results/remaining-indicators/pivotfamilies-integrated-contracts.json": "cf593b467644abf480ad43c4c64e128d1a4ddab46bfc9e8fb6efa48fc988790e",
     "benchmarks/results/remaining-indicators/pmofamily-cpu-contracts.json": "16d76b00cc854bac1ba27e44f14ee6a767bc16460b9fdb64b5e4648809755a47",
     "benchmarks/results/remaining-indicators/polarized-efficiency-integrated-contracts.json": "9a9f7a76c937a9000edf9ac0f36d908d83af83139edaa9cdf30efe87553feb69",
@@ -13281,6 +13313,7 @@
     "benchmarks/results/remaining-indicators/pricenormalizers-cpu-contracts.json": "615fb3eee10769a76e8b39c8f0402334089e98d609b4549bb9f16648ecbdf0f2",
     "benchmarks/results/remaining-indicators/primefamily-contracts.json": "cd56ac162262fcbe8c8e62729dc7b9eb2f71bc852ad59983fbf5c75f71a6f9da",
     "benchmarks/results/remaining-indicators/projectionfamily-contracts.json": "d8d0de66706b5afbbd426cc0611fe35e693fe5803d2e253d15c9e45f684761c4",
+    "benchmarks/results/remaining-indicators/range-indicator-integrated-contracts.json": "7ed19f6bd4411bae4191df91db4b93a8bae7e6a1fc5a10866f547e5068e869d9",
     "benchmarks/results/remaining-indicators/rangealias-contracts.json": "a7cb36562004917f5d80acdc87317428593b534e354b55e84e84543837210bb2",
     "benchmarks/results/remaining-indicators/rangechannels-contracts.json": "94b64b4ee7ec41c76f1353425d225d925f8db97cbe46d0362c565464fee988f1",
     "benchmarks/results/remaining-indicators/rangehealth-contracts.json": "4471e9a1fdde6b0b166b7c6b307a35b5a5a48c4984f6a53dc37de6fe1a7f9c31",
@@ -13324,6 +13357,7 @@
     "benchmarks/results/remaining-indicators/stochastic-integrated-contracts.json": "ff4a8b0a902e10e2451e8d083b583f36e9a07f87de215876db25364edacf6dc7",
     "benchmarks/results/remaining-indicators/stochcomposites-cpu-contracts.json": "ec367e3b95b044e3ead98d6fa78bff67b24c3b806f449ef8b8e276bae474f5b7",
     "benchmarks/results/remaining-indicators/strength-contracts.json": "c8388656a7749864f725a5e6fa22a27ff90b3ea0e2ced35c249f2b428607689a",
+    "benchmarks/results/remaining-indicators/swenlin-integrated-contracts.json": "89aef1ed984f6a349c17fb7bb1f0690d03aeb3e9d5a51e4f75aca9add9564bc5",
     "benchmarks/results/remaining-indicators/symmetric-contracts.json": "166810cfd981551049dc64f6c3037477b1bfce8487feb4e7fe8c00d718cb43a9",
     "benchmarks/results/remaining-indicators/syntheticprice-cpu-contracts.json": "0d81cb8d54c9583d58b508f5686527d007459b0389af2943ec2080e96313b768",
     "benchmarks/results/remaining-indicators/tenth-integrated-contracts.json": "4449600dc899e6b55e10f183b80d330f8ff9750af8358936db828e463299c322",
@@ -13596,9 +13630,10 @@
     "src/Indicators/ValuesBarExecution.GOscillators.cs": "4a4b6c6d79f77b11a17788eeb49c882405866ba632948a0afdb4e5887108d3c5",
     "src/Indicators/ValuesBarExecution.GatorMeanness.cs": "56179f71b9f44a134b2400cf59572d12a30274cddcfde71874745ea0cf351ff3",
     "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "5c61e252599a1ef2acd8edab27c06e756f4e1d1292ea4c41934a3c9788009ac0",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "0e81c10d63c4ad1fa41870fa958b7e38157de28f50c6720bbbb06e58c0a5abc4",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Ichimoku.cs": "459397c5a7db8d4e7705eee86fb78d66bcfbc55b279a915f5acd7870fcff0fd7",
+    "src/Indicators/ValuesBarExecution.ImpulsePair.cs": "22eb567c61c55733702c849068aaa24497b122f1aeda3865e9b9f21442e3a611",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.Kama.cs": "d1bc729aa26955e46b55057f916b73b5d359fed7a803295ad2583168d25bd045",
     "src/Indicators/ValuesBarExecution.KaseSerial.cs": "3c3ddefe36808ecd16ecea7f7631c6a7e336ef31c9f1f7e3d2168a62254e6700",
@@ -13619,6 +13654,7 @@
     "src/Indicators/ValuesBarExecution.Overshoot.cs": "fcada6e7177d7c71701dc4cd187ad679e4f5143a35c4a336cc3ede4cb101ac22",
     "src/Indicators/ValuesBarExecution.PairStatistics.cs": "e6253a7b79f715de3afa2968ef8ca4027d82e1cdb880187ae9192b5f1f99176f",
     "src/Indicators/ValuesBarExecution.ParabolicSar.cs": "516cd2cf35b7c405c59c686422bddf8986ef6b8917e508b51898c5c2afab1708",
+    "src/Indicators/ValuesBarExecution.PivotDetector.cs": "f8e1ac698675b64eee46d2b2044fafb02144565db1f51bc6cd907983d5dc9af1",
     "src/Indicators/ValuesBarExecution.PivotFamilies.cs": "90d659f3c1c61126cbd59861542d039781d69912670138619daacd088928741a",
     "src/Indicators/ValuesBarExecution.Pivots.cs": "64afefd7352681b0af32ee036659eeefedcb5922d2d0eb423aabe170091a7725",
     "src/Indicators/ValuesBarExecution.Pointwise.cs": "205402997bcf24bef42a4e9189c059de5e9e4df156d653a5a2c168c90c981832",
@@ -13628,6 +13664,7 @@
     "src/Indicators/ValuesBarExecution.PriceProjection.cs": "e1cb31a0795c59229160d0dac09307ed1af8067e75c95548c930610500f49438",
     "src/Indicators/ValuesBarExecution.PriceRelative.cs": "f68a481de1292230da92b18249a274bde10415648690b1a1ff837937ec22873c",
     "src/Indicators/ValuesBarExecution.QuarticAverage.cs": "bcd8f8053135e1ce2ff1d31549b36fe0650cf5c88cad740e871004fe8dc1951b",
+    "src/Indicators/ValuesBarExecution.RangeIndicator.cs": "3cfb64c077a1a226604de84978feb8e77c2cc899daf7c30763089148be1cc222",
     "src/Indicators/ValuesBarExecution.RangeStatistics.cs": "5750db5fc02a859066364fc4332c1f2cf73148243674fbf2f8bec2db628519d1",
     "src/Indicators/ValuesBarExecution.RateOfChange.cs": "3d7913c09b401e0b3537163d920e99b36b64b7d23003ad87111483eced78f707",
     "src/Indicators/ValuesBarExecution.RecursiveAliases.cs": "8b3e195cceacfa2e0877053319a6a20b344a7d8546e40dd96a2c80b820dac19f",
@@ -13648,6 +13685,7 @@
     "src/Indicators/ValuesBarExecution.SmoothedStochastic.cs": "e320f83a7332f8b060dad3355b62d4a5f65904b19c7536786b18dea3621d1b08",
     "src/Indicators/ValuesBarExecution.Stochastic.cs": "22f2f5673fc96f4293ff612e015b5e6a51a0a1e3d6dc90af38589a23a5cd0dc3",
     "src/Indicators/ValuesBarExecution.StochasticComponents.cs": "44842134b0eed05b0dd106fa2a8ef813882d914644b9537f5ea4e7549e64e6d3",
+    "src/Indicators/ValuesBarExecution.Swenlin.cs": "17371e81afd6f348077b1720d022b29ebe793b703a0ec98b4304ed4fc5d2e784",
     "src/Indicators/ValuesBarExecution.ThreeHull.cs": "05ad1e419f0f766814237facc2dab2355ad5eea03ca5a8adbe92b34f7d2c85a6",
     "src/Indicators/ValuesBarExecution.Tillson.cs": "711865b0ab717995a0bca2b6a407fa57b26482cbc08893d4eb6cb49f019ed139",
     "src/Indicators/ValuesBarExecution.TillsonAliases.cs": "a85a67197ff5bc5e979205ba0d4ca6d962dec3378443aa29fe79c8bb24a915db",
