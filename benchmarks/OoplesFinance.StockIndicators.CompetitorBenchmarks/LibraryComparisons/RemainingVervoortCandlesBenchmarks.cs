@@ -14,8 +14,8 @@ public class RemainingVervoortCandlesBenchmarks : RemainingIndicatorBenchmarkBas
     protected override IIndicator Create() => Operation switch
     {
         "VervoortHeikenAshiCandlestickOscillator" => new VervoortHeikenAshiCandlestickOscillator(34),
-        "VervoortHeikenAshiLongTermCandlestickOscillator" => new VervoortHeikenAshiLongTermCandlestickOscillator(55, 1.1),
-        "VervoortSmoothedOscillator" => new VervoortSmoothedOscillator(18, 30, 2, 3, 2),
+        "VervoortHeikenAshiLongTermCandlestickOscillator" => new VervoortHeikenAshiLongTermCandlestickOscillator(55),
+        "VervoortSmoothedOscillator" => new VervoortSmoothedOscillator(18, length1: 18, length2: 30, length3: 2, smoothLength: 3, stdDevMult: 2),
         _ => throw new InvalidOperationException($"Unknown benchmark operation: {Operation}.")
     };
 }

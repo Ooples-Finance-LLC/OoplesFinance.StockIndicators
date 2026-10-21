@@ -5,7 +5,7 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class SharedGeneratedVervoortCandlesTests
 {
-    private static IIndicator Create(int operation, int length) => operation switch { 0 => new VervoortHeikenAshiCandlestickOscillator(length), 1 => new VervoortHeikenAshiLongTermCandlestickOscillator(length, 1.1), _ => new VervoortSmoothedOscillator(length, 5, 2, 3, 2) };
+    private static IIndicator Create(int operation, int length) => operation switch { 0 => new VervoortHeikenAshiCandlestickOscillator(length), 1 => new VervoortHeikenAshiLongTermCandlestickOscillator(length), _ => new VervoortSmoothedOscillator(length, length1: length, length2: 5, length3: 2, smoothLength: 3, stdDevMult: 2) };
     public static IEnumerable<object[]> Cases => from operation in new[] { 0, 1, 2 } from length in new[] { int.MinValue, 0, 1, 2, 14, 32, int.MaxValue } select new object[] { operation, length };
     [Theory, MemberData(nameof(Cases))]
     public async Task PeriodsKeepBitsErrorsAndOwnership(int operation, int length)
@@ -64,13 +64,6 @@ public sealed class SharedGeneratedVervoortCandlesTests
             state.Reset();
         }
     }
-    [Theory, InlineData(0), InlineData(1)]
-    public async Task CustomAverageRetainsFallback(int operation)
-    {
-        IndicatorBase root = operation == 0 ? new VervoortHeikenAshiCandlestickOscillator(3, new Sma()) : new VervoortHeikenAshiLongTermCandlestickOscillator(3, 1.1, new Sma());
-        Assert.False(ValuesBarExecution.SupportsOwned([root]));
-        await Compare([root], BarsOf([1, 3, 2, 4]));
-    }
     [Theory, InlineData(0), InlineData(1), InlineData(2)]
     public async Task NamedPricesKeepWholeSeriesRangePolicyAndMixedRoots(int operation)
     {
@@ -86,7 +79,7 @@ public sealed class SharedGeneratedVervoortCandlesTests
     {
         foreach (var value in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
         {
-            IIndicator[] roots = [new VervoortHeikenAshiLongTermCandlestickOscillator(3, value), new VervoortSmoothedOscillator(3, 5, 2, 3, value)];
+            IIndicator[] roots = [new VervoortSmoothedOscillator(3, length1: 3, length2: 5, length3: 2, smoothLength: 3, stdDevMult: value)];
             Assert.False(ValuesBarExecution.SupportsOwned(roots)); await Compare(roots, BarsOf([1, 2, 3]));
         }
     }
