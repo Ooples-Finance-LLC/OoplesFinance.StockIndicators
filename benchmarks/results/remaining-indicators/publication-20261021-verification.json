@@ -1,0 +1,30 @@
+{
+  "status": "bounded-publication-correctness-passed-performance-pending",
+  "checked_utc": "2026-10-21T04:49:32.045851+00:00",
+  "source_commit": "8eed3188e58bc4e6997923332ff292bc4cd90e40",
+  "source_sha256": "6608b0fd95a3c60eb62ca4d5dac288e7b2bf6a42187435f1457697fc9fffad1d",
+  "production_assembly_sha256": "1e752679d4093cd9ec393af22f2a7a1f182b2622cc8c747c98e8df60659e1121",
+  "production_assembly_informational_commit": "815ed1e2927963df1baa1b679156651004723823",
+  "gpu_passed": 100,
+  "checks": {
+    "adaptive": {
+      "passed": 3,
+      "trx_sha256": "86721d2737b8103544ef0db5ad2a075578391cc83e64f2480fce47e6f826e8b3",
+      "file": "benchmarks/results/remaining-indicators/publication-20261021-adaptive.trx.gz"
+    },
+    "discovery": {
+      "passed": 366,
+      "trx_sha256": "4b6cb409d7cf0623b503e04967aea01624c60883e27cecd4ed6079876a91891d",
+      "file": "benchmarks/results/remaining-indicators/publication-20261021-discovery.trx.gz"
+    }
+  },
+  "gpu_receipt": "benchmarks/results/shared-rollout/local-gpu-contracts/receipt.json",
+  "hosted_cpu_methods": 1695,
+  "scope": "Merged adaptive/autocorrelation execution, cumulative Elastic Volume integration, and master dependency versions. The source, unit, comparator and benchmark production DLL hashes match. GPU and discovery were rerun after aligning the comparator with the unit-tested DLL.",
+  "binary_reconciliation": "The first comparator and later unit build embedded different Git revisions despite identical source fingerprints. Both were preserved; the final targeted checks use the same production DLL. No numerical source changes were made.",
+  "pending": [
+    "Hosted CPU contracts and full PR checks",
+    "Later prepared indicator batches",
+    "Matched competitor timings and remaining performance gaps"
+  ]
+}
