@@ -5,7 +5,7 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class SharedGeneratedRmoQqeTests
 {
-    private static MultiOutputIndicatorBase Create(int operation, int length) => operation == 0 ? new RahulMohindarOscillator(length, 10, 3, 7) : new QuantitativeQualitativeEstimation(length, 3, 2, 4);
+    private static MultiOutputIndicatorBase Create(int operation, int length) => operation == 0 ? new RahulMohindarOscillator(length) : new QuantitativeQualitativeEstimation(length, 3, 2, 4);
     public static IEnumerable<object[]> Cases => from operation in new[] { 0, 1 } from length in new[] { int.MinValue, 0, 1, 2, 14, 32, int.MaxValue } select new object[] { operation, length };
     [Theory, MemberData(nameof(Cases))]
     public async Task PeriodsKeepBitsErrorsAndOwnership(int operation, int length)
@@ -35,10 +35,10 @@ public sealed class SharedGeneratedRmoQqeTests
     public void RmoIndependentReferenceKeepsOutputOrderAndReset()
     {
         var bars = BarsOf([1, 4, 2, 5, 3, 2]);
-        var root = new RahulMohindarOscillator(2, 3, 2, 3);
+        var root = new RahulMohindarOscillator(3);
         var expected = BuiltInFormulaReferences.RmoOutputs(bars, (IBuiltInIndicator)root);
         var type = typeof(ValuesBarExecution).GetNestedType("GeneratedRmoState", System.Reflection.BindingFlags.NonPublic)!;
-        using var disposable = (IDisposable)Activator.CreateInstance(type, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic, null, [2, 3, 2, 3], null)!;
+        using var disposable = (IDisposable)Activator.CreateInstance(type, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic, null, [2, 3, 30, 81], null)!;
         var state = (IMultiOutputState)disposable;
         string[] keys = ["Rmo", "SwingTrade1", "SwingTrade2", "SwingTrade3"];
         for (var repeat = 0; repeat < 2; repeat++)
@@ -80,7 +80,7 @@ public sealed class SharedGeneratedRmoQqeTests
     [Fact]
     public async Task DistinctPeriodsPreserveOriginalCandlesAndVolumes()
     {
-        await Compare([new RahulMohindarOscillator(3, 7, 2, 4), new QuantitativeQualitativeEstimation(7, 3, 2, 4)],
+        await Compare([new RahulMohindarOscillator(3), new QuantitativeQualitativeEstimation(7, 3, 2, 4)],
             BarsOf(Enumerable.Range(0, 65).Select(i => 5 + Math.Sin(i * .7)).ToArray()));
     }
     private static Bar[] BarsOf(double[] prices) => prices.Select(v => new Bar(default, v / 2, Math.Abs(v) + 1, -Math.Abs(v) - 2, v, 1)).ToArray();

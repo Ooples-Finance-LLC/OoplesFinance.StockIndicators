@@ -564,7 +564,7 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
-        RahulMohindarOscillator rmo => new GeneratedRmoState(rmo.Length1, rmo.Length2, rmo.Length3, rmo.Length4),
+        RahulMohindarOscillator rmo => new GeneratedRmoState(2, rmo.Length, 30, 81),
         QuantitativeQualitativeEstimation qqe => new GeneratedQqeState(qqe.Length, qqe.SmoothLength, qqe.FastFactor, qqe.SlowFactor),
         KalmanSmoother smoother => new GeneratedKalmanSmootherState(smoother.Length),
         _4MovingAverageConvergenceDivergence four => new GeneratedFourOscillatorState(four.Length1, four.Length2, four.Length3, four.Length4, false),

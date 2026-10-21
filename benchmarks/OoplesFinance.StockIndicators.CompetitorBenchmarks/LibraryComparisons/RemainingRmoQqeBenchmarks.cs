@@ -13,7 +13,7 @@ public class RemainingRmoQqeBenchmarks : RemainingIndicatorBenchmarkBase
     [Benchmark] public double Shared() => Run(legacy: false);
     protected override IIndicator Create() => Operation switch
     {
-        "RahulMohindarOscillator" => new RahulMohindarOscillator(2, 10, 30, 81),
+        "RahulMohindarOscillator" => new RahulMohindarOscillator(10),
         "QuantitativeQualitativeEstimation" => new QuantitativeQualitativeEstimation(14, 5, 2.618, 4.236),
         _ => throw new InvalidOperationException($"Unknown benchmark operation: {Operation}.")
     };
