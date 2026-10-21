@@ -66,6 +66,7 @@ internal static partial class ValuesBarExecution
         indicator is SelfAdjustingRelativeStrengthIndex { MaType: null } selfRsi && double.IsFinite(selfRsi.Mult) ||
         indicator is ThreeHMA or TripleHullMovingAverage
             or ThreeHma { MaType: MovingAvgType.WeightedMovingAverage } or _3HMA { MaType: MovingAvgType.WeightedMovingAverage } ||
+        indicator is DominantCycleTunedRelativeStrengthIndex ||
         IsDemarkCountState(indicator) ||
         indicator is ModularFilter modular && double.IsFinite(modular.Beta) ||
         indicator is MovingAverageAdaptiveFilter adaptiveFilter && double.IsFinite(adaptiveFilter.Filter) && adaptiveFilter.Filter >= 0
@@ -545,6 +546,7 @@ internal static partial class ValuesBarExecution
 
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
+        DominantCycleTunedRelativeStrengthIndex cycle => new GeneratedCycleTunedRsiState(cycle.Length),
         ThreeHMA hull => new GeneratedThreeHullState(hull.Length, count),
         ThreeHma hull => new GeneratedThreeHullState(hull.Length, count),
         TripleHullMovingAverage hull => new GeneratedThreeHullState(hull.Length, count),
