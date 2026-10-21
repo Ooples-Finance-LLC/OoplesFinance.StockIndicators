@@ -41,11 +41,11 @@ public sealed class VervoortModifiedCertifiedTests
     [InlineData(MovingAvgType.TripleExponentialMovingAverage)]
     public void LongVaryingHistoryCertifiesEveryBar(MovingAvgType kind)
     {
-        using var candidate=new VervoortModifiedWindow(kind,18,200,3,1.6);
+        using var candidate=new VervoortModifiedWindow(kind,18,200,8,1.6);
         for(var i=0;i<10000;i++)
         {
-            var price=100+(i*13%97)/8d;
-            var point=candidate.Next(price,price+2,price-1,true);
+            var price=10+(i*13%101)/8d;
+            var point=candidate.Next(price-0.25,price+1,price-2,true);
             Assert.True(double.IsFinite(point.Percent));Assert.True(double.IsFinite(point.Upper));Assert.True(double.IsFinite(point.Lower));
         }
         Assert.Equal(10000,candidate.CertifiedCount);Assert.Equal(0,candidate.FallbackCount);
@@ -55,7 +55,7 @@ public sealed class VervoortModifiedCertifiedTests
     [InlineData(MovingAvgType.TripleExponentialMovingAverage)]
     public void LongZeroHistoryHasIndependentOutputs(MovingAvgType kind)
     {
-        using var candidate=new VervoortModifiedWindow(kind,18,200,3,1.6);
+        using var candidate=new VervoortModifiedWindow(kind,18,200,8,1.6);
         for(var i=0;i<10000;i++)Same((0,50,50,i==0?Signal.StrongSell:Signal.Sell),candidate.Next(0,0,0,true));
         Assert.Equal(10000,candidate.CertifiedCount);Assert.Equal(0,candidate.FallbackCount);
     }

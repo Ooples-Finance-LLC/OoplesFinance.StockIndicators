@@ -125,7 +125,7 @@ internal sealed class VervoortModifiedWindow : IDisposable
         ResetExact();_replay.Clear();CertifiedCount=0;FallbackCount=0;
         _certified=_allowCertified?new(_kind,_band,_smooth):null;
     }
-    public void Dispose()=>Reset();
+    public void Dispose(){ResetExact();_replay.Clear();_certified=null;}
     internal static (Dictionary<string,List<double>> Outputs,List<Signal> Signals) Calculate(StockData data,MovingAvgType kind,int band,int outer,int smooth,double multiplier)
     {
         var(input,high,low,open,close,_)=CalculationsHelper.GetInputValuesList(InputName.FullTypicalPrice,data);
