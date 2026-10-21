@@ -1,239 +1,64 @@
-name: Competitor library correctness
+name: Certified SMA competitor timing
 on:
-  pull_request:
-    paths:
-      - 'src/**'
-      - 'benchmarks/**'
-      - '.github/workflows/competitor-library.yml'
-      - 'scripts/*competitor*.py'
-      - 'scripts/competitor-gpu-methods.json'
-      - 'Directory.Build.*'
-      - 'Directory.Packages.props'
-      - 'global.json'
-      - '[Nn]u[Gg]et.[Cc]onfig'
-  push:
-    branches: [master, main]
-    paths:
-      - 'src/**'
-      - 'benchmarks/**'
-      - '.github/workflows/competitor-library.yml'
-      - 'scripts/*competitor*.py'
-      - 'scripts/competitor-gpu-methods.json'
-      - 'Directory.Build.*'
-      - 'Directory.Packages.props'
-      - 'global.json'
-      - '[Nn]u[Gg]et.[Cc]onfig'
   workflow_dispatch:
-    inputs:
-      measure_performance:
-        description: 'Run fresh library and competitor timings instead of reusing saved evidence'
-        type: boolean
-        required: false
-        default: false
 permissions:
   contents: read
+  actions: read
 concurrency:
-  group: competitor-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: sma-competitor-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
-  build:
+  timing:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    outputs:
-      shards: ${{ steps.shards.outputs.matrix }}
-      count: ${{ steps.shards.outputs.count }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: '10.0.x'
-      - run: python -m unittest discover -s scripts -p "test_verify_competitor*.py"
-      - name: Build comparison and contract binaries once
-        run: >-
-          dotnet build benchmarks/OoplesFinance.StockIndicators.CompetitorTests
-          -c Release -p:GeneratePackageOnBuild=false
-      - name: Discover compiled contract methods
-        run: >-
-          python scripts/run-competitor-contracts.py discover
-          benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorTests.dll
-          all-contract-methods.json
-      - name: Require source-matched local GPU contracts and partition hosted methods
-        run: >-
-          python scripts/verify-competitor-local-gpu.py verify
-          all-contract-methods.json contract-methods.json
-      - name: Check committed API inventory
-        run: |
-          dotnet benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --comparison-manifest actual-manifest.json
-          diff -u benchmarks/competitor-library-manifest.json actual-manifest.json
-      - name: Select up to 20 parallel shards
-        id: shards
-        run: |
-          python - <<'PY'
-          import json, os
-          rows = json.load(open('benchmarks/competitor-library-manifest.json', encoding='utf-8'))
-          count = min(20, sum(row['Status'] == 'paired' for row in rows))
-          if count < 1: raise ValueError('No implemented comparisons')
-          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
-              print('matrix=' + json.dumps(list(range(count))), file=output)
-              print('count=' + str(count), file=output)
-          PY
-      - uses: actions/upload-artifact@v7
-        with:
-          name: competitor-binaries
-          path: benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/
-          retention-days: 7
-      - uses: actions/upload-artifact@v7
-        with:
-          name: competitor-contract-binaries
-          path: |
-            benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/
-            contract-methods.json
-            all-contract-methods.json
-          retention-days: 7
-  contracts:
-    needs: build
-    runs-on: ubuntu-latest
-    # Exact adaptive contracts can exceed 30 minutes; retain the full assertions.
-    timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      max-parallel: 20
-      matrix:
-        shard: ${{ fromJSON(needs.build.outputs.shards) }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: '10.0.x'
-      - uses: actions/download-artifact@v8
-        with:
-          name: competitor-contract-binaries
-          path: contracts
-      - name: Verify assigned contracts and require complete execution
-        run: >-
-          python scripts/run-competitor-contracts.py run
-          contracts/benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorTests.dll
-          contracts/contract-methods.json
-          ${{ matrix.shard }} ${{ needs.build.outputs.count }}
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: competitor-contract-results-${{ matrix.shard }}
-          path: contract-results-${{ matrix.shard }}/
-          retention-days: 7
-  correctness:
-    needs: build
-    runs-on: ubuntu-latest
-    # A shard can contain multiple quadratic Trady APIs; retain all repeated-call checks.
-    timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      max-parallel: 20
-      matrix:
-        shard: ${{ fromJSON(needs.build.outputs.shards) }}
-    steps:
-      - uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: '10.0.x'
-      - uses: actions/download-artifact@v8
-        with:
-          name: competitor-binaries
-          path: binaries
-      - name: Verify complete trajectories
-        run: dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --verify-library-shard ${{ matrix.shard }} ${{ needs.build.outputs.count }} shard-${{ matrix.shard }}.json
-      - uses: actions/upload-artifact@v7
-        with:
-          name: competitor-shard-${{ matrix.shard }}
-          path: shard-${{ matrix.shard }}.json
-          retention-days: 7
-  complete-union:
-    needs: [build, contracts, correctness]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v8
-        with:
-          pattern: competitor-shard-*
-          path: results
-          merge-multiple: true
-      - run: python scripts/verify-competitor-shards.py benchmarks/competitor-library-manifest.json results ${{ needs.build.outputs.count }}
-  performance:
-    needs: [build, complete-union]
-    # Reuse saved competitor timings during normal PR validation. Fresh native
-    # baselines require an explicitly requested manual run.
-    if: github.event_name == 'workflow_dispatch' && inputs.measure_performance
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      max-parallel: 20
-      matrix:
-        shard: ${{ fromJSON(needs.build.outputs.shards) }}
+    timeout-minutes: 30
     env:
-      COMPARISON_SHARD: ${{ matrix.shard }}
-      COMPARISON_SHARDS: ${{ needs.build.outputs.count }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: '10.0.x'
-      - uses: actions/download-artifact@v8
-        with:
-          name: competitor-binaries
-          path: binaries
-      - name: Measure both arms using the verified binaries
-        run: >-
-          dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll
-          --filter '*LibraryPairBenchmarks*'
-          --exporters json --artifacts performance
-      - name: Require timings for every assigned arm and size
-        run: >-
-          python scripts/verify-competitor-performance.py benchmarks/competitor-library-manifest.json
-          performance ${{ matrix.shard }} ${{ needs.build.outputs.count }}
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: competitor-performance-${{ matrix.shard }}
-          path: performance/
-          retention-days: 14
-  performance-summary:
-    needs: [build, performance]
-    if: always() && github.event_name == 'workflow_dispatch' && inputs.measure_performance
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+      COMPARISON_PAIR: Skender.GetSmaAnalysis
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - name: Require all performance shards to pass
-        env:
-          BUILD_RESULT: ${{ needs.build.result }}
-          PERFORMANCE_RESULT: ${{ needs.performance.result }}
-        run: test "$BUILD_RESULT" = success && test "$PERFORMANCE_RESULT" = success
-      - uses: actions/download-artifact@v8
+      - uses: actions/setup-dotnet@v6
         with:
-          pattern: competitor-performance-[0-9]*
-          path: performance-shards
-      - name: Publish complete per-indicator comparisons
-        run: >-
-          python scripts/report-competitor-performance.py benchmarks/competitor-library-manifest.json
-          performance-shards ${{ needs.build.outputs.count }} performance-summary
-          --source-sha "$GITHUB_SHA"
-          --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-      - name: Link the consolidated report in the workflow summary
+          dotnet-version: '10.0.x'
+      - name: Verify source and wait for the existing CI build
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           python - <<'PY'
-          import json, os
+          import json, subprocess, time
           from pathlib import Path
-          evidence = json.loads(Path('performance-summary/evidence.json').read_text())
-          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
-              summary.write(f"## Full-library performance\n\n{evidence['pairedIndicators']} paired APIs; {evidence['measuredArms']} measured arms.\n\n")
-              summary.write("Download **competitor-performance-summary** from this run for every indicator's timing, dispersion, allocation, and ratio, plus raw evidence.\n\n")
-              summary.write("Both libraries are measured at 1,000 and 10,000 bars. Unavailable APIs are listed explicitly. Shared-runner ShortRun timings are diagnostic, not speed guarantees.\n")
+          repo='Ooples-Finance-LLC/OoplesFinance.StockIndicators'
+          for attempt in range(40):
+              run=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/39695981495']))
+              assert run['head_sha']=='67155620ddbfd8416e765af7d82f18083dfbe7e1'
+              jobs=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/39695981495/jobs?per_page=100']))
+              build=[j for j in jobs['jobs'] if j['name']=='build']
+              assert len(build)==1
+              if build[0]['status']=='completed':
+                  assert build[0]['conclusion']=='success',build[0]['conclusion']
+                  Path('binary-build-provenance.json').write_text(json.dumps({'run':run,'build':build[0]},indent=2))
+                  break
+              time.sleep(30)
+          else: raise TimeoutError('Source-matched CI build is not ready')
           PY
-      - uses: actions/upload-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
-          name: competitor-performance-summary
-          path: performance-summary/
-          if-no-files-found: error
-          retention-days: 90
+          name: competitor-binaries
+          path: binaries
+          run-id: 39695981495
+          github-token: ${{ github.token }}
+      - name: Measure both libraries and both sizes on the dedicated runner
+        run: >-
+          dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll
+          --filter '*LibraryPairBenchmarks.Ooples*' '*LibraryPairBenchmarks.Competitor*'
+          --warmupCount 10 --iterationCount 10 --exporters json csv --artifacts performance
+      - name: Verify complete samples and retain uncertainty
+        run: python scripts/verify-sma-hosted-timing.py
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: certified-sma-competitor-timing
+          path: |
+            performance/
+            binary-build-provenance.json
+          retention-days: 30
