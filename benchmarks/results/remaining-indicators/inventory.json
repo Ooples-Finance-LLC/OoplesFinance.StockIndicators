@@ -13661,7 +13661,7 @@
     "src/Indicators/ClassicPriceOscillator.cs": "0afa9ea391fe24f70b74934102e6f6697fdcfc6bd5bfa696b55d16369ab6161a",
     "src/Indicators/ClassicStochastic.cs": "2cd38f33d5a24086fb10f1df8d6456de6d2691debc69b814b215bf9313304577",
     "src/Indicators/ClassicStochasticRsi.cs": "addfd0745be1a8547599c71590f819dded39811b70f9dafde024a5a1af7923ce",
-    "src/Indicators/CompensatedExponentialAverage.cs": "0dd15f140733bbcd893cf790fc4a667652a4eda3c49b9ff29814756e873bcdbe",
+    "src/Indicators/CompensatedExponentialAverage.cs": "bdf1878f994326f1df6f2292864ea24285ce2724121b7616e18753841d5a5e12",
     "src/Indicators/ConnorsStrength.cs": "ec2976fa9a665e02a8d3df22acc587c5805bc02d86f3081e8ac6ea4667a9f554",
     "src/Indicators/ConnorsStrengthSnapshot.cs": "d8618034945e8a1e47d126f8e758da623a1e4e1443b5a3a193f04e90adc6ec6f",
     "src/Indicators/ContainmentCandles.cs": "31f8d962c95ad4cba31eead3337173ea46e510520ad2c647a1b5ca1f92e2a9b8",
