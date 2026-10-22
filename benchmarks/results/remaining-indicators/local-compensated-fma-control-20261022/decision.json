@@ -1,0 +1,279 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "0e62018ed67b73a18cd94c6320af6d0612a78af7",
+    "new": "eb9d6058b009f526ecd9c89c1b76eaee9e1fcadc"
+  },
+  "candidate_code_source": "1b71a3f065591b4cc649565f850b544cf34b2cff",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "SharedNativeEmaBenchmarks",
+      "pair": "QuanTAlib.Dema",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.2502534375,
+        0.33102640625
+      ],
+      "new_means_ms": [
+        0.21906788194444443,
+        0.22744671875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedNativeEmaBenchmarks",
+      "pair": "QuanTAlib.Dema",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.2478921484375,
+        0.24372619140625
+      ],
+      "new_means_ms": [
+        0.21971917317708334,
+        0.212231484375
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedNativeEmaBenchmarks",
+      "pair": "QuanTAlib.Dema",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        2.191741875,
+        2.1329734375
+      ],
+      "new_means_ms": [
+        1.9129550347222222,
+        1.7972765625
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedNativeEmaBenchmarks",
+      "pair": "QuanTAlib.Dema",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        2.0894634375,
+        2.084849375
+      ],
+      "new_means_ms": [
+        1.784272829861111,
+        1.782456875
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedNativeEmaBenchmarks",
+      "pair": "QuanTAlib.Tema",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.2927014453125,
+        0.29402554253472224
+      ],
+      "new_means_ms": [
+        0.18671648763020834,
+        0.193200126953125
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedNativeEmaBenchmarks",
+      "pair": "QuanTAlib.Tema",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.30481705078125,
+        0.29591056640625
+      ],
+      "new_means_ms": [
+        0.17884108072916666,
+        0.1896579535590278
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedNativeEmaBenchmarks",
+      "pair": "QuanTAlib.Tema",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        2.4215594618055554,
+        2.482290625
+      ],
+      "new_means_ms": [
+        1.3450357421875,
+        1.3493848524305556
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedNativeEmaBenchmarks",
+      "pair": "QuanTAlib.Tema",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        2.32219703125,
+        2.3629721875
+      ],
+      "new_means_ms": [
+        1.340662578125,
+        1.315333125
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Dema",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        1.80212,
+        1.7815222222222222
+      ],
+      "new_means_ms": [
+        1.416025,
+        1.4349777777777777
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Dema",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        2.9758166666666663,
+        3.368877777777778
+      ],
+      "new_means_ms": [
+        2.7517,
+        2.6386333333333334
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Tema",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        2.95541,
+        2.92312
+      ],
+      "new_means_ms": [
+        1.273125,
+        1.47579
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Tema",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        2.78525,
+        3.1727
+      ],
+      "new_means_ms": [
+        1.8099666666666667,
+        1.84995
+      ],
+      "verdict": "faster"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "6ad40be019704b262cb34c6e72f5dd90a7d5e7d79384dd4fe0d838c3337e6d3c",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "bd33142f6897087c891be1dafacc1ee82709f60242480463384a910064bbbf3e",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "f3aa87b96ad17ca140bddd4c6994b4bc738a5640e1c23f94a78a45e2855f31a6",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "8b2eddd4775009864b640f28ec9de6e7d754a319c1eefe5bf4037f3ca0237ef3",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/verified-summary.json.gz"
+    },
+    "round0-old-SharedNativeEmaBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedNativeEmaBenchmarks-report-full-compressed.json": {
+      "sha256": "cc86e104c0179d04116c505e5c27378ee688fc752acb08ee620f455adbad28b5",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round0-old-SharedNativeEmaBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedNativeEmaBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "00c899002187d2af80830340e0d9029d914f6650394a38ff58b6bfa9e3f2df56",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedNativeEmaBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedNativeEmaBenchmarks-report-full-compressed.json": {
+      "sha256": "b5e4a2767261f384f84da3fd2a34a02072c08590d1133b207abd314aa745a681",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round1-new-SharedNativeEmaBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedNativeEmaBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "f677348ba9db5b5decf01c31f55382c6f878623b49d0e2b018796c4096fc7ab4",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedNativeEmaBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedNativeEmaBenchmarks-report-full-compressed.json": {
+      "sha256": "6b7fc7ce29589054bdf6c0aaf085d8d444db926480b1b56b389a3d7b61c740ec",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round2-new-SharedNativeEmaBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedNativeEmaBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "44a11df4322876c0e957891fb021be73d765972e845d7ea1dbdbfbcf31803e54",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedNativeEmaBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedNativeEmaBenchmarks-report-full-compressed.json": {
+      "sha256": "795f6c0572447a28f245dd3ad9bb559f9a2772b0b3298fd4db8a7c1b485b46b3",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round3-old-SharedNativeEmaBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedNativeEmaBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "750d5e97115131fdbb6e4c69abe1a83b5e93697ae346c0ca7c043db4ac5143f4",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "56e254198ef49ca3ea93daa0491e19f259b33b5a247cda59526537e3286736af",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round0-old-SharedNativeEmaBenchmarks.log": {
+      "sha256": "7e8416279faf059867d1a188cabe788ab303fedacc043bfb6dad79d70a373e96",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round0-old-SharedNativeEmaBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "56a309f7bd452410b00a974e8a8014521ef6171967ccc526491efc76a11b2124",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-SharedNativeEmaBenchmarks.log": {
+      "sha256": "74b6610c67d015c8d19d748699ae7f699a953fec48f172a81b5daf83d8dec640",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round1-new-SharedNativeEmaBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "be73803582f1683afc220457511e38892c693bb937a0c91c1fda23088b308bd6",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-SharedNativeEmaBenchmarks.log": {
+      "sha256": "546991f05a636463fadb3326d3a9dd2d2c8e63efd0c18cf0968bf51f9b7dcff5",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round2-new-SharedNativeEmaBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "1c6adf955e05713bbb17fe6356d0738b405a37b7d05296da9c99f0790f358970",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-SharedNativeEmaBenchmarks.log": {
+      "sha256": "9b3a4920af0e55379b24b84559327c2f90c2e55743acbd73716c1a8858fa74d7",
+      "archive": "benchmarks/results/remaining-indicators/local-compensated-fma-control-20261022/round3-old-SharedNativeEmaBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-compensated-fma.py": "23cc5a0cc27224339cdb72545d40d020b9b441bb5b72a8df926efae20dbe10ad",
+    "verify-compensated-fma-control.py": "0875b528540d7e3fa610fbb8810c73ec44def27e4f6b5afb6f4eff2f03b9e9bb"
+  },
+  "report_imported": false,
+  "production_integrated": false
+}
