@@ -1,0 +1,55 @@
+{
+  "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+  "rows": [
+    {
+      "pair": "TaLib.Functions.Sar",
+      "bars": 1000,
+      "ooples": {
+        "mean_ns": 203170.5,
+        "lower_ns": 173474.1106123649,
+        "upper_ns": 232866.8893876351,
+        "allocated_bytes": 41912,
+        "samples": 10
+      },
+      "competitor": {
+        "mean_ns": 141563.75,
+        "lower_ns": 135700.78984633516,
+        "upper_ns": 147426.71015366484,
+        "allocated_bytes": 42528,
+        "samples": 8
+      },
+      "competitor_over_ooples": 0.6967731535828282,
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Functions.Sar",
+      "bars": 10000,
+      "ooples": {
+        "mean_ns": 950895.8,
+        "lower_ns": 929572.5908307044,
+        "upper_ns": 972219.0091692957,
+        "allocated_bytes": 419600,
+        "samples": 10
+      },
+      "competitor": {
+        "mean_ns": 267521,
+        "lower_ns": 252621.02022259572,
+        "upper_ns": 282420.9797774043,
+        "allocated_bytes": 339528,
+        "samples": 9
+      },
+      "competitor_over_ooples": 0.28133576780968006,
+      "verdict": "slower"
+    }
+  ],
+  "source_sha": "cfb6d342a5fe35c2c48df46937d2ab3ddaf25e06",
+  "binary_run": 39721035437,
+  "workflow_sha": "8b93566d0b198f8521ed638debf60fe91b26aebc",
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/39721061988",
+  "report_sha256": "eb2d6b72be5372e7de863ab6bbef01acf7ed948c77cc7c1adaada0baea645e70",
+  "benchmark_binary_sha256": "4a17244a21562ad915cfe1195fbbfd1453d1ac0d71c9a55b6043cd60d0abb8e9",
+  "production_binary_sha256": "837ed4455b99b38a301fb3051b2a85d3a1c2c9c6ae3e7b7acabfa276c6b9f631",
+  "note": "Source-pinned direct Parabolic comparison at both sizes. Retained confidence intervals determine the verdict; cross-run times are not controlled speedup evidence.",
+  "raw_evidence": "benchmarks/results/remaining-indicators/parabolic-array-rejected-candidate-20261022-sar-raw.json.gz",
+  "disposition": "Not imported: production follow-up rejected after controlled same-runner10k regression confirmation. Retained as measured evidence, not current-source performance."
+}
