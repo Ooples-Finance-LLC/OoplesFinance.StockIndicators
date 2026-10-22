@@ -8,7 +8,7 @@ public sealed class FibonacciRollingSnapshotTests
 {
     [Theory]
     [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(14)]
-    [InlineData(78)] [InlineData(79)] [InlineData(200)]
+    [InlineData(44)] [InlineData(45)] [InlineData(78)] [InlineData(79)] [InlineData(200)]
     public void RollingWindowsMatchIndependentRescansAcrossNumericalBoundaries(int period)
     {
         var random = new Random(8137);
@@ -36,6 +36,26 @@ public sealed class FibonacciRollingSnapshotTests
         Check([1, 2, 4, 8], 200);
         Assert.Empty(FibonacciWeightedSnapshot.Calculate(Array.Empty<Bar>(), 14));
         Assert.Throws<ArgumentOutOfRangeException>(() => FibonacciWeightedSnapshot.Calculate(Array.Empty<Bar>(), 0));
+    }
+
+    [Fact]
+    public void AlignedWindowsAndFallbackMatchExactRescansAtExponentBoundaries()
+    {
+        foreach (int period in new[] { 1, 2, 14, 44, 45 })
+        foreach (int exponent in new[] { -1022, -900, 0, 900, 1015 })
+        foreach (int span in new[] { 8, 9 })
+        {
+            // Keep every generated input finite, including the top normal binade.
+            var values = Enumerable.Range(0, 2 * period + 37).Select(i => i % 7 == 0 ? 0d
+                : (i % 2 == 0 ? 1 : -1) * Math.ScaleB(1 + (i % 13) / 32d,
+                    Math.Min(1023, exponent + i % (span + 1)))).ToArray();
+            Check(values, period);
+        }
+        foreach (int period in new[] { 14, 44 })
+        {
+            Check(Enumerable.Range(0, 130).Select(i => i % 3 == 0 ? -double.MaxValue : double.MaxValue).ToArray(), period);
+            Check(Enumerable.Range(0, 130).Select(i => i % 3 == 0 ? Math.ScaleB(1, -1022) : -Math.BitIncrement(Math.ScaleB(1, -1022))).ToArray(), period);
+        }
     }
 
     private static void Check(double[] prices, int period)

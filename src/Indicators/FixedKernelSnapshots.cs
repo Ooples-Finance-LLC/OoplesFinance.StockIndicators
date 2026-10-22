@@ -18,6 +18,7 @@ public static class FibonacciWeightedSnapshot
         if (bars.Count == 0)
             return Array.Empty<double>();
 #if !NETFRAMEWORK
+        if (TryCalculateAligned(bars, period, out var aligned)) return aligned;
         if (period <= 78) return CalculateCompact(bars, period);
 #endif
         BigInteger newest = 1, previous = 0;
@@ -47,6 +48,62 @@ public static class FibonacciWeightedSnapshot
     }
 
 #if !NETFRAMEWORK
+    private static bool TryCalculateAligned(IReadOnlyList<Bar> bars, int period, out double[] output)
+    {
+        output = Array.Empty<double>();
+        // Through period 44, the full coefficient mass is F(46)-1 < Int32.MaxValue.
+        // A common grid spanning eight binary exponents has at most 61 input bits.
+        // Weighted sums need fewer than 92 magnitude bits; recurrence intermediates
+        // need fewer than 94. Every operation below is exact inside Int128.
+        if (period > 44) return false;
+        int minimum = 2047, maximum = 0;
+        for (int i = 0; i < bars.Count; i++)
+        {
+            double value = bars[i].Close;
+            if (value == 0) continue;
+            int exponent = (int)((BitConverter.DoubleToInt64Bits(value) >> 52) & 2047);
+            if (exponent is 0 or 2047) return false;
+            minimum = Math.Min(minimum, exponent);
+            maximum = Math.Max(maximum, exponent);
+            if (maximum - minimum > 8) return false;
+        }
+        output = new double[bars.Count];
+        if (maximum == 0) return true;
+        long newest = 1, previous = 0;
+        for (int i = 1; i < period; i++)
+            (newest, previous) = (newest + previous, newest);
+        long nextWeight = newest, followingWeight = previous, mass = 0;
+        Int128 weighted = 0, shifted = 0;
+        int scale = minimum - 1075;
+        for (int i = 0; i < bars.Count; i++)
+        {
+            long value = AlignedUnits(bars[i].Close, minimum);
+            Int128 next = shifted + (Int128)newest * value;
+            Int128 nextShifted = weighted - shifted + (Int128)previous * value;
+            if (i >= period) nextShifted -= AlignedUnits(bars[i - period].Close, minimum);
+            else
+            {
+                mass += nextWeight;
+                (nextWeight, followingWeight) = (followingWeight, nextWeight - followingWeight);
+            }
+            weighted = next;
+            shifted = nextShifted;
+            // Publish the complete exact ratio once, including subnormal results
+            // caused by cancellation. No rounded quotient is scaled afterwards.
+            output[i] = JurikDyadic.FromBinaryProduct(weighted, scale).Mean((int)mass);
+        }
+        return true;
+    }
+
+    private static long AlignedUnits(double value, int minimum)
+    {
+        if (value == 0) return 0;
+        long bits = BitConverter.DoubleToInt64Bits(value);
+        int exponent = (int)((bits >> 52) & 2047);
+        long units = ((bits & 0xfffffffffffffL) | (1L << 52)) << (exponent - minimum);
+        return bits < 0 ? -units : units;
+    }
+
     private static double[] CalculateCompact(IReadOnlyList<Bar> bars, int period)
     {
         // F(78) is the last Fibonacci number below 2^53. These coefficient
