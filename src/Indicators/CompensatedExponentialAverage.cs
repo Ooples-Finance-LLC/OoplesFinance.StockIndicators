@@ -84,20 +84,22 @@ public sealed class CompensatedExponentialAverage
                     value.Multiply(compensation);
                     value = value.Rounded();
                 }
-                // Combine already-rounded stages exactly, keeping the single
-                // final rounding. TEMA's 3*a - 3*b + c is 3*(a - b) + c;
-                // factoring avoids a second exact multiplication by three.
-                if (stage == 0)
+                if (order == 2)
                 {
-                    total = value;
-                    if (order == 2)
-                        total.Multiply(2);
+                    // Retain DEMA's original accumulation; simplifying it
+                    // regressed controlled timing despite identical results.
+                    var weighted = value;
+                    weighted.Multiply(stage == 0 ? 2 : -1);
+                    total.AddExact(weighted);
                 }
+                // TEMA's exact 3*a - 3*b + c is 3*(a - b) + c.
+                // Stage rounding and the single final rounding are unchanged.
+                else if (stage == 0)
+                    total = value;
                 else if (stage == 1)
                 {
                     total.Subtract(value);
-                    if (order == 3)
-                        total.Multiply(3);
+                    total.Multiply(3);
                 }
                 else
                     total.AddExact(value);
