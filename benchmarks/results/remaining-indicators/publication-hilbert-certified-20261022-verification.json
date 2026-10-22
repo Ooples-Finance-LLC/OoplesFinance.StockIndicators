@@ -1,0 +1,60 @@
+{
+  "input_head": "29ac4399b3ff274ec5016c6b9a78f98b136379ca",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedHilbertProjection.cs",
+    "src/Indicators/HilbertCycleSignalState.cs",
+    "tests/ModelsTests/CertifiedHilbertProjectionTests.cs"
+  ],
+  "batch_note": "Approved Hilbert projection: directed fixed-grid product bounds, bit-identical rounded endpoints only, original exact fallback, phase decisions and NETFRAMEWORK preserved. Independent integer products, lifecycle, numerical boundaries and 10k parity required before controlled measurements.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T12:46:23.466427+00:00",
+  "unit": {
+    "passed": 18,
+    "class_counts": {
+      "CompactHilbertPhaseTests": 11,
+      "CertifiedHilbertProjectionTests": 3,
+      "HilbertRoundedKernelTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\hilbert-certified\\unit\\unit.trx",
+    "sha256": "923ec8bb732123ef983c24f16c4c6b80e768aa68bde1fd811f67a03649ec159a",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-hilbert-certified-20261022-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 43,
+    "class_counts": {
+      "SharedHilbertSignalBenchmarkTests": 32,
+      "HilbertCycleSignalComparisonTests": 11
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\hilbert-certified\\parity\\parity.trx",
+    "sha256": "529cc42d780b3b9dc1212854fee166f68aab2930d998b5c5b583197750e013f6",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-hilbert-certified-20261022-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-certified-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4f478df965ec664ca27bd4bb0dad26f927d6af22bea54d0e6fa575f66b7e705b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-certified-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4f478df965ec664ca27bd4bb0dad26f927d6af22bea54d0e6fa575f66b7e705b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-certified-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4f478df965ec664ca27bd4bb0dad26f927d6af22bea54d0e6fa575f66b7e705b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-certified-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4f478df965ec664ca27bd4bb0dad26f927d6af22bea54d0e6fa575f66b7e705b"
+  },
+  "source_fingerprint_sha256": "6627aaf310518b0167870cfeb089534a2484a7fa2d8b15fcb6c01b0ab431b8dc",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved Hilbert projection: directed fixed-grid product bounds, bit-identical rounded endpoints only, original exact fallback, phase decisions and NETFRAMEWORK preserved. Independent integer products, lifecycle, numerical boundaries and 10k parity required before controlled measurements. Correctness checks passed; controlled performance remains pending."
+}
