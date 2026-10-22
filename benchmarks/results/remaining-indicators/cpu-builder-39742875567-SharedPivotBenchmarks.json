@@ -1,0 +1,161 @@
+{
+  "fixture": "SharedPivotBenchmarks",
+  "source_sha": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+  "binary_run": 39719116665,
+  "run_id": "39742875567",
+  "workflow_sha": "f7580d11be70dc611bb728549071e7465f6facd6",
+  "report_sha256": "9e0159563892c4e9b37e7a2359c9202be6910c88819e40a440518bc947327f0c",
+  "report_file": "artifacts/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPivotBenchmarks-report-full-compressed.json",
+  "host": {
+    "BenchmarkDotNetCaption": "BenchmarkDotNet",
+    "BenchmarkDotNetVersion": "0.15.8",
+    "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+    "ProcessorName": "AMD EPYC 9V74",
+    "PhysicalProcessorCount": 1,
+    "PhysicalCoreCount": 2,
+    "LogicalCoreCount": 4,
+    "RuntimeVersion": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+    "Architecture": "X64",
+    "HasAttachedDebugger": false,
+    "HasRyuJit": true,
+    "Configuration": "RELEASE",
+    "DotNetCliVersion": "10.0.402",
+    "ChronometerFrequency": {
+      "Hertz": 1000000000
+    },
+    "HardwareTimerKind": "Unknown"
+  },
+  "comparisons": [
+    {
+      "pair": "Skender.GetRollingPivots",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 130536.95225694444,
+        "lower_ns": 118514.95551005483,
+        "upper_ns": 142558.94900383404,
+        "samples": 9,
+        "allocated_bytes": 131536
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 381504.93793402775,
+          "lower_ns": 380899.32828915666,
+          "upper_ns": 382110.54757889884,
+          "samples": 9,
+          "allocated_bytes": 511617
+        },
+        "NativeParallel": {
+          "mean_ns": 176066.65451388888,
+          "lower_ns": 175408.07036933265,
+          "upper_ns": 176725.2386584451,
+          "samples": 9,
+          "allocated_bytes": 537930
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Skender.GetRollingPivots",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 121995.66284179688,
+        "lower_ns": 121525.60467754886,
+        "upper_ns": 122465.72100604489,
+        "samples": 8,
+        "allocated_bytes": 82789
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 381504.93793402775,
+          "lower_ns": 380899.32828915666,
+          "upper_ns": 382110.54757889884,
+          "samples": 9,
+          "allocated_bytes": 511617
+        },
+        "NativeParallel": {
+          "mean_ns": 176066.65451388888,
+          "lower_ns": 175408.07036933265,
+          "upper_ns": 176725.2386584451,
+          "samples": 9,
+          "allocated_bytes": 537930
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Skender.GetRollingPivots",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 976258.9734375,
+        "lower_ns": 972370.0375156695,
+        "upper_ns": 980147.9093593304,
+        "samples": 10,
+        "allocated_bytes": 1211986
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 4010945.23828125,
+          "lower_ns": 3997415.8123592664,
+          "upper_ns": 4024474.6642032336,
+          "samples": 8,
+          "allocated_bytes": 5155944
+        },
+        "NativeParallel": {
+          "mean_ns": 1879708.7421875,
+          "lower_ns": 1858815.2170716168,
+          "upper_ns": 1900602.2673033832,
+          "samples": 10,
+          "allocated_bytes": 5254133
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Skender.GetRollingPivots",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 960174.6892361111,
+        "lower_ns": 945452.5977108238,
+        "upper_ns": 974896.7807613985,
+        "samples": 9,
+        "allocated_bytes": 730877
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 4010945.23828125,
+          "lower_ns": 3997415.8123592664,
+          "upper_ns": 4024474.6642032336,
+          "samples": 8,
+          "allocated_bytes": 5155944
+        },
+        "NativeParallel": {
+          "mean_ns": 1879708.7421875,
+          "lower_ns": 1858815.2170716168,
+          "upper_ns": 1900602.2673033832,
+          "samples": 10,
+          "allocated_bytes": 5254133
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    }
+  ],
+  "complete": true,
+  "raw_archive": "benchmarks/results/remaining-indicators/cpu-builder-39742875567-SharedPivotBenchmarks-raw.json.gz",
+  "provenance.json": {
+    "archive": "cpu-builder-39742875567-SharedPivotBenchmarks-provenance.json.gz",
+    "sha256": "e05c9ac3de809ebd2c67e124e286241be1fbe4cbe442b6fc55ed69c633a2b6d0"
+  },
+  "binary-manifest.json": {
+    "archive": "cpu-builder-39742875567-SharedPivotBenchmarks-binary-manifest.json.gz",
+    "sha256": "3db250a0c0f15ec643073c3408fab85828aa180fd569a460425fe015d50123c8"
+  },
+  "source_note": "Qualified baseline binaries reused; all selected fixtures are unchanged; the later SMA diagnostics and standalone compensated EMA changes do not participate in these fixtures."
+}
