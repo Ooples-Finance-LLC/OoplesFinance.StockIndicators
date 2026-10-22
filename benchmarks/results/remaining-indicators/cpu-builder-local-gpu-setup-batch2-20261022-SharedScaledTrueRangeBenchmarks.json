@@ -1,0 +1,157 @@
+{
+  "fixture": "SharedScaledTrueRangeBenchmarks",
+  "source_sha": "0e62018ed67b73a18cd94c6320af6d0612a78af7",
+  "run_id": "local-gpu-setup-batch2-20261022",
+  "measurement_location": "Local Windows host; CPU timed paths with required GPU setup validation.",
+  "host": {
+    "BenchmarkDotNetCaption": "BenchmarkDotNet",
+    "BenchmarkDotNetVersion": "0.15.8",
+    "OsVersion": "Windows 11 (10.0.26220.9739)",
+    "ProcessorName": "AMD Ryzen 9 3950X",
+    "PhysicalProcessorCount": 1,
+    "PhysicalCoreCount": 16,
+    "LogicalCoreCount": 32,
+    "RuntimeVersion": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+    "Architecture": "X64",
+    "HasAttachedDebugger": false,
+    "HasRyuJit": true,
+    "Configuration": "RELEASE",
+    "DotNetCliVersion": "10.0.402",
+    "ChronometerFrequency": {
+      "Hertz": 10000000
+    },
+    "HardwareTimerKind": "Unknown"
+  },
+  "report_sha256": "011c85f05786d2cc537876d0fd2dd8aab4abb4772836675ebf97f903fdf5f4dc",
+  "report_file": "SharedScaledTrueRangeBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedScaledTrueRangeBenchmarks-report-full-compressed.json",
+  "quiet_cpu_samples": [
+    3.8,
+    4.4,
+    5.2
+  ],
+  "complete": true,
+  "comparisons": [
+    {
+      "pair": "QuanTAlib.Atr",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 16930.189208984375,
+        "lower_ns": 16189.669329217919,
+        "upper_ns": 17670.70908875083,
+        "samples": 10,
+        "allocated_bytes": 58101
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 48549.51416015625,
+          "lower_ns": 47318.50451906473,
+          "upper_ns": 49780.52380124777,
+          "samples": 10,
+          "allocated_bytes": 88754
+        },
+        "NativeParallel": {
+          "mean_ns": 22396.01318359375,
+          "lower_ns": 22032.157133544464,
+          "upper_ns": 22759.869233643036,
+          "samples": 10,
+          "allocated_bytes": 94578
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Atr",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 11616.47705078125,
+        "lower_ns": 11099.490682048858,
+        "upper_ns": 12133.463419513642,
+        "samples": 10,
+        "allocated_bytes": 9066
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 48549.51416015625,
+          "lower_ns": 47318.50451906473,
+          "upper_ns": 49780.52380124777,
+          "samples": 10,
+          "allocated_bytes": 88754
+        },
+        "NativeParallel": {
+          "mean_ns": 22396.01318359375,
+          "lower_ns": 22032.157133544464,
+          "upper_ns": 22759.869233643036,
+          "samples": 10,
+          "allocated_bytes": 94578
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Atr",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 80680.888671875,
+        "lower_ns": 78986.40825624613,
+        "upper_ns": 82375.36908750387,
+        "samples": 10,
+        "allocated_bytes": 563520
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 477969.453125,
+          "lower_ns": 469916.13473248814,
+          "upper_ns": 486022.77151751186,
+          "samples": 10,
+          "allocated_bytes": 880786
+        },
+        "NativeParallel": {
+          "mean_ns": 135200.59678819444,
+          "lower_ns": 130784.26369767929,
+          "upper_ns": 139616.92987870958,
+          "samples": 9,
+          "allocated_bytes": 886584
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Atr",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 46487.8173828125,
+        "lower_ns": 42447.825774761244,
+        "upper_ns": 50527.808990863756,
+        "samples": 9,
+        "allocated_bytes": 82115
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 477969.453125,
+          "lower_ns": 469916.13473248814,
+          "upper_ns": 486022.77151751186,
+          "samples": 10,
+          "allocated_bytes": 880786
+        },
+        "NativeParallel": {
+          "mean_ns": 135200.59678819444,
+          "lower_ns": 130784.26369767929,
+          "upper_ns": 139616.92987870958,
+          "samples": 9,
+          "allocated_bytes": 886584
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    }
+  ],
+  "measurement_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/blob/c1cbecfa0e866f6a24432b31bb79e47edaacdb63/benchmarks/results/remaining-indicators/local-gpu-setup-batch2-20261022/manifest.json",
+  "raw_archive": "benchmarks/results/remaining-indicators/local-gpu-setup-batch2-20261022/SharedScaledTrueRangeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedScaledTrueRangeBenchmarks-report-full-compressed.json.gz"
+}
