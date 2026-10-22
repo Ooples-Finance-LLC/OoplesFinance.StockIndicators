@@ -1,0 +1,41 @@
+{
+  "status": "verified-data-staged-browser-validation-pending",
+  "source": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+  "run_id": 39719116665,
+  "qualification_status": {
+    "updated_utc": "2026-10-22T05:11:43.249417+00:00",
+    "published_head": "e737464459b0d98d594fcc0fb314179a80d0e4fd",
+    "inventory_commit": "e737464459b0d98d594fcc0fb314179a80d0e4fd",
+    "candidate": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+    "formula_counts": {
+      "total": 830,
+      "correctness_receipts": 830
+    },
+    "remaining_assessment": {
+      "handwritten_facades_pending": 232
+    },
+    "measurement_totals": {
+      "faster": 0,
+      "slower": 0,
+      "inconclusive": 0,
+      "expected": 1604,
+      "measured": 0,
+      "pending": 1604
+    },
+    "baseline_pairs": 401,
+    "baseline_comparisons": 802,
+    "measurement_run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/39719116665",
+    "source_matches_published_production": true,
+    "checks_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/pull/266/checks",
+    "inventory_sha256": "0e220200267d09a40946c5320e1381632e6d8748f9fa8a859564bb55d96fc3b9",
+    "changed_production_files": []
+  },
+  "comparisons": 802,
+  "candidate_sha256": "5f59c2a43dc769a5643d9f0fd50a7a080b8985257f6ec0e52f45a579879053ca",
+  "original_sha256": "037edc62c712e445793489fafc3443a1f0b1f26016713a50a98f6018f92a22fc",
+  "candidate": "C:\\Users\\cheat\\Documents\\OoplesFinance-Reports\\baseline-refresh-39719116665\\competitor-performance.candidate.html",
+  "wins": {
+    "1000": 217,
+    "10000": 180
+  }
+}
