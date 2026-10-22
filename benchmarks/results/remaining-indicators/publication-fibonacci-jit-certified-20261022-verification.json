@@ -1,0 +1,57 @@
+{
+  "input_head": "babee581a328d1950705c9495003c4bf9bbfbdfb",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/FixedKernelSnapshots.cs"
+  ],
+  "batch_note": "Fibonacci compiler-only refinement: request optimized compilation for the bounded exact rolling path on its first invocation. Arithmetic, input guards and fallback are unchanged. Reuse meaningful24unit/15parity boundary cases, fresh100GPU source receipt and unchanged-policy16-case controlled timing; reject any detected regression.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T17:54:09.617752+00:00",
+  "unit": {
+    "passed": 24,
+    "class_counts": {
+      "FibonacciWeightedAverageTests": 12,
+      "FibonacciRollingSnapshotTests": 12
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\fibonacci-jit\\unit\\unit.trx",
+    "sha256": "ec5e22a35aacefc011ad6da20837bf24792106a649ab49e0401acf137e5212b1",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-fibonacci-jit-certified-20261022-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 15,
+    "class_counts": {
+      "FibonacciBuilderComparisonTests": 7,
+      "FixedKernelSnapshotComparisonTests": 8
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\fibonacci-jit\\parity\\parity.trx",
+    "sha256": "48ae5ad6a3bd2a70d386eaa3078e9b1aea538296b72e50c2feb08f4dbccf1006",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-fibonacci-jit-certified-20261022-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fibonacci-jit-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0add08ad546b8b834fc7eac78ed72f4abf8f6a9b08245c8c1fa31cf74cd81c6e",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fibonacci-jit-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0add08ad546b8b834fc7eac78ed72f4abf8f6a9b08245c8c1fa31cf74cd81c6e",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fibonacci-jit-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0add08ad546b8b834fc7eac78ed72f4abf8f6a9b08245c8c1fa31cf74cd81c6e",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fibonacci-jit-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0add08ad546b8b834fc7eac78ed72f4abf8f6a9b08245c8c1fa31cf74cd81c6e"
+  },
+  "source_fingerprint_sha256": "1f468b0bce284ee574296e4cb917073da37d0ec1278efbd8287fdd73767e879f",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Fibonacci compiler-only refinement: request optimized compilation for the bounded exact rolling path on its first invocation. Arithmetic, input guards and fallback are unchanged. Reuse meaningful24unit/15parity boundary cases, fresh100GPU source receipt and unchanged-policy16-case controlled timing; reject any detected regression. Correctness checks passed; controlled performance remains pending."
+}
