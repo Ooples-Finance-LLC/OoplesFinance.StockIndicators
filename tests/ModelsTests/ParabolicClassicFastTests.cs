@@ -38,23 +38,31 @@ public sealed class ParabolicClassicFastTests
     }
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void OrdinaryClassicAndExtendedHistoryUseTheFiniteLoopAndRetainAllBits(bool signed)
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public void OrdinaryClassicAndExtendedHistoryUseTheFiniteLoopAndRetainAllBits(bool signed, bool useArray)
     {
         var bars = Enumerable.Range(0, 1000).Select(i =>
         {
             double middle = 100 + Math.Sin(i * .1) * 10;
             return new Bar(DateTime.UnixEpoch.AddMinutes(i), middle, middle + 2, middle - 2, middle, 1);
         }).ToArray();
+        IReadOnlyList<Bar> input = useArray ? bars : Array.AsReadOnly(bars);
         double start = signed ? -100 : 0, offset = signed ? .01 : 0;
-        Assert.True(CertifiedParabolicClassic.TryCalculate(bars, signed, start, offset, .02, .02, .2, .02, .02, .2, out var actual));
-        var expected = signed ? OriginalParabolicStopSnapshots.Extended(bars, start, offset) : OriginalParabolicStopSnapshots.Classic(bars);
+        Assert.True(CertifiedParabolicClassic.TryCalculate(input, signed, start, offset, .02, .02, .2, .02, .02, .2, out var actual));
+        var expected = signed ? OriginalParabolicStopSnapshots.Extended(input, start, offset) : OriginalParabolicStopSnapshots.Classic(input);
+        var published = signed ? ParabolicStopSnapshots.Extended(input, start, offset) : ParabolicStopSnapshots.Classic(input);
         for (int i = 0; i < bars.Length; i++)
         {
+            Assert.Equal(expected[i].HasValue, published[i].HasValue);
             Assert.Equal(expected[i].HasValue, actual[i].HasValue);
             if (expected[i].HasValue)
+            {
                 Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i]!.Value), BitConverter.DoubleToInt64Bits(actual[i]!.Value));
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i]!.Value), BitConverter.DoubleToInt64Bits(published[i]!.Value));
+            }
         }
     }
 
