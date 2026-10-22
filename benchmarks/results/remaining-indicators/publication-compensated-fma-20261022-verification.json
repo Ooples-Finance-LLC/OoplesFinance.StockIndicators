@@ -1,0 +1,59 @@
+{
+  "input_head": "1b71a3f065591b4cc649565f850b544cf34b2cff",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/CompensatedAverageComparisonTests.cs",
+    "src/Indicators/CompensatedExponentialAverage.cs"
+  ],
+  "batch_note": "Use existing once-rounded JurikDyadic.SumProduct for final modern-runtime DEMA/TEMA combination. Exact fallback and NETFRAMEWORK arithmetic remain; stage mutations and rounding unchanged. Adds mixed-exponent cancellation cases; retains independent cutoff,overflow,lifecycle and four long-history fixture checks. Controlled timing required before publication.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T09:03:17.870878+00:00",
+  "unit": {
+    "passed": 16,
+    "class_counts": {
+      "ExponentialStageExecutionTests": 12,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\compensated-fma\\unit\\unit.trx",
+    "sha256": "c3e5b1efed40c8e639b341d6a326a1cd1cc86cd7385cd09d3d33c4108a66bf82",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-compensated-fma-20261022-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 21,
+    "class_counts": {
+      "CompensatedAverageBenchmarkTests": 4,
+      "CompensatedAverageComparisonTests": 17
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\compensated-fma\\parity\\parity.trx",
+    "sha256": "d3a9cb13936f64cb61c0989ccdc193229237b3d385db5b2d89cf5a6055697eca",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-compensated-fma-20261022-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compensated-fma-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "5ba43927aace18afdbab83217d4332b578cb5b536f3580cf3abf648ba4939911",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compensated-fma-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "5ba43927aace18afdbab83217d4332b578cb5b536f3580cf3abf648ba4939911",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compensated-fma-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "5ba43927aace18afdbab83217d4332b578cb5b536f3580cf3abf648ba4939911",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compensated-fma-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "5ba43927aace18afdbab83217d4332b578cb5b536f3580cf3abf648ba4939911"
+  },
+  "source_fingerprint_sha256": "88934b2f1be637c6b1c504f674031bc94a93a98bff249a85573471d7988207b6",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Existing once-rounded helper replaces final modern-runtime combination; exact fallback and NETFRAMEWORK path retained. Mixed-exponent cancellation plus existing independent extreme,cutoff,lifecycle,allocation and four long-history checks. Controlled performance pending."
+}
