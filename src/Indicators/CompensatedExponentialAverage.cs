@@ -86,10 +86,15 @@ public sealed class CompensatedExponentialAverage
                 }
                 if (order == 2)
                 {
-                    // Retain DEMA's original accumulation; simplifying it
-                    // regressed controlled timing despite identical results.
                     var weighted = value;
                     weighted.Multiply(stage == 0 ? 2 : -1);
+#if !NETFRAMEWORK
+                    // The final sum rounds once. SumProduct uses FMA only for
+                    // exactly representable operands, retaining the wide fallback.
+                    if (stage == 1)
+                        total = JurikDyadic.SumProduct(total, weighted, 1);
+                    else
+#endif
                     total.AddExact(weighted);
                 }
                 // TEMA's exact 3*a - 3*b + c is 3*(a - b) + c.
@@ -99,10 +104,19 @@ public sealed class CompensatedExponentialAverage
                 else if (stage == 1)
                 {
                     total.Subtract(value);
+#if NETFRAMEWORK
                     total.Multiply(3);
+#endif
                 }
                 else
+                {
+#if NETFRAMEWORK
                     total.AddExact(value);
+#else
+                    // Fuse 3*(a-b)+c only when the exact difference fits binary64.
+                    total = JurikDyadic.SumProduct(value, total, 3);
+#endif
+                }
             }
             return total.Mean(1);
         }
