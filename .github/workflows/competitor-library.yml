@@ -1,16 +1,23 @@
-name: Fibonacci builder and native measurement
+name: CPU builder batch one measurements
 on:
   workflow_dispatch:
 permissions:
   contents: read
   actions: read
 concurrency:
-  group: fibonacci-builder-${{ github.ref }}
+  group: cpu-builder-batch1-${{ github.ref }}
   cancel-in-progress: false
 jobs:
   measure:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        fixture: [SharedAlmaWindowBenchmarks, SharedWindowedSincBenchmarks, SharedWilderAverageBenchmarks, SharedSeededEmaBenchmarks, SharedSmaBenchmarks, SharedNativeEmaBenchmarks]
+    env:
+      BUILDER_FIXTURE: ${{ matrix.fixture }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -18,10 +25,10 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-      - name: Verify qualified binary source and unchanged Fibonacci implementation
+      - name: Verify qualified binary source and unchanged mapped implementations
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python scripts/measure-fibonacci-builder.py verify
+        run: python scripts/measure-cpu-builder-batch1.py verify
       - uses: actions/download-artifact@v8
         with:
           name: competitor-binaries
@@ -29,10 +36,10 @@ jobs:
           run-id: 39719116665
           github-token: ${{ github.token }}
       - name: Measure both builder modes and both native arms
-        run: python scripts/measure-fibonacci-builder.py measure
+        run: python scripts/measure-cpu-builder-batch1.py measure
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: fibonacci-builder-measurement
+          name: builder-${{ matrix.fixture }}
           path: measurement/
           retention-days: 30
