@@ -1,0 +1,38 @@
+{
+  "source_sha": "7319ad98d57be51ad5e3d3ca04b13f0865f18b97",
+  "measurement_location": "Local Windows; unchanged correctness setup; CPU builder and native methods timed",
+  "cases": 8,
+  "comparisons": 4,
+  "partial": false,
+  "excluded_fixtures": [],
+  "archives": {
+    "verified-summary.json": {
+      "sha256": "0c804d5b55bba66ad1b273b12c5b585db4f493005175a0ad0828687f60c0631a",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch12-20261022/verified-summary.json.gz"
+    },
+    "status.json": {
+      "sha256": "7de3ffe69acda9b8f8d02818740c792554d685f14f1c8250d2c66cc9a39d09c1",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch12-20261022/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "f16d976f3b85e74c725f0bc953e611fe45b96afaba634c8a8329ca51b8dfef63",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch12-20261022/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "3e34e5c6ba6070829906cac44ec42b32d0eeb1c62f549b69674363fe99be76c9",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch12-20261022/binary-manifest.json.gz"
+    },
+    "SharedTaHilbertNativeBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaHilbertNativeBenchmarks-report-full-compressed.json": {
+      "sha256": "bac2ed022ad90dd3cdf9c803f474b425ca8de87fbee2abd1c48d7a11a33149e6",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch12-20261022/SharedTaHilbertNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaHilbertNativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedTaHilbertNativeBenchmarks.log": {
+      "sha256": "fcc2f423f72ce4a962b4e6d4b9cb73c5d6b90cad284dc856967f11bbc5f38812",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch12-20261022/SharedTaHilbertNativeBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-local-mapped-batch12.py": "63e14efa0b488a28ceac5c3f54aa0a25385215d1445f5c9b6213ea1a2181cbb5",
+    "verify-local-mapped-batch12.py": "8fea4d40b09e9125a0cee897c6599ad14b29f07ef13fea2dd26b3833ac49b7be"
+  }
+}
