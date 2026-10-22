@@ -71,9 +71,13 @@ internal static partial class BuiltInFormulaReferences
             var center = line.Components;
             var widthNumerator = i == 0 ? BigInteger.Zero : errorNumerator;
             var widthDenominator = i == 0 ? BigInteger.One : errorDenominator * i;
+            // All seven bands share these exact products. Compute them once;
+            // the independent quotient rounding below remains unchanged.
+            var bandCenter = center.Numerator * widthDenominator;
+            var bandWidth = widthNumerator * center.Denominator;
+            var bandDenominator = center.Denominator * widthDenominator;
             foreach (var (key, multiple) in new[] { ("K", 0), ("Ap", 1), ("Bp", 2), ("Cp", 3), ("Al", -1), ("Bl", -2), ("Cl", -3) })
-                outputs[key][i] = PeriodicPublish(center.Numerator * widthDenominator + multiple * widthNumerator * center.Denominator,
-                    center.Denominator * widthDenominator);
+                outputs[key][i] = PeriodicPublish(bandCenter + multiple * bandWidth, bandDenominator);
             outputs["Os"][i] = PeriodicPublish(widthNumerator, widthDenominator);
             signals[i] = margin.Sign > 0 && margin.CompareTo(previous) > 0 ? Signal.StrongBuy
                 : margin.Sign < 0 && margin.CompareTo(previous) < 0 ? Signal.StrongSell
