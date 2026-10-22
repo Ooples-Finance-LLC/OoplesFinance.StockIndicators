@@ -13727,7 +13727,7 @@
     "src/Indicators/MedianAdaptiveAverage.cs": "5a156053ce8e8ce42cbaebfadf507199125dff16c006c0b4ba8dc92fe0511d81",
     "src/Indicators/MedianAdaptiveSnapshot.cs": "802ad5f20ea2e186e7328f3b7c4b6ae602e037fcbabf8f374560f73d247049d3",
     "src/Indicators/MoneyFlowWithDetails.cs": "1c616e7c3d0df9e4bf1c8fe880cb25f849d946b94b2be09aa6c428397a145e90",
-    "src/Indicators/MovingAverageDiagnostics.cs": "3a5db8e5ae571123704e47c0e7cedcdee8d3736058cf930a5b84167a09823806",
+    "src/Indicators/MovingAverageDiagnostics.cs": "061bc35909492de76b07586ba68836bf4cd7ddf5134c0f19a12d0453087772a8",
     "src/Indicators/MovingAverageDifference.cs": "230095ee9a9c5c1b8bbaa92957f401b6f38b7d7f29ca84148512c6b199ef89b1",
     "src/Indicators/NeckCandles.cs": "7b1228bd38ff3095cf3dbde663fda60cf499c2bed10ea7d6b6ec534c3d743d08",
     "src/Indicators/NormalizedConvolution.cs": "a0efcbe2f342a5b89b8e57bebb4f46032b8f74ac0c9c1694afad9ff61cc3a679",

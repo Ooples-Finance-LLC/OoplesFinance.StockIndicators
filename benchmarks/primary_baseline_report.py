@@ -86,7 +86,7 @@ def replace_primary(document, dataset):
     document = re.sub(r'(<section id="explorer"[^>]*>.*?<p class="sub">).*?(</p>)',
         lambda m: m[1] + f'Measured source {source[:8]}. All {comparisons} comparisons below use refreshed matched timings. '
         'Click an API for samples and runner details.' + m[2], document, count=1, flags=re.S)
-    document = re.sub(r'<h3>Fresh full-library timing run</h3><p>.*?</p>|<p>Refreshed baseline source:.*?</p>',
+    document = re.sub(r'<h3>Fresh full-library timing run</h3><p>.*?</p>|<p>(?:Refreshed baseline source:|Base source:).*?</p>',
         lambda _: '<p>Refreshed baseline source: ' + html.escape(source[:8]) + '. '
         '<a href="' + html.escape(dataset['evidence']['runUrl'], quote=True) + '">Measurement run and raw evidence</a>. '
         'All primary baseline tables and charts use these verified results.</p>', document, flags=re.S)
