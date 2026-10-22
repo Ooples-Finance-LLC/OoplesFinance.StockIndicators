@@ -6,6 +6,63 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class MeanDiagnosticsCertifiedTests
 {
+    [Fact]
+    public void CachedReciprocalsCertifyBothExponentShiftBoundariesAndNegativeCenters()
+    {
+        foreach (double sign in new[] { 1d, -1d })
+        {
+            double[] values = [.125 * sign, 1 * sign, 8 * sign];
+            var samples = Samples(values);
+            Assert.True(CertifiedMeanRelativeError.TryCompute(samples, sign, out double actual));
+            Assert.Equal(BitConverter.DoubleToInt64Bits(Reference(values, sign)), BitConverter.DoubleToInt64Bits(actual));
+        }
+        double[] mixed = [.125, -1, 8];
+        Assert.True(CertifiedMeanRelativeError.TryCompute(Samples(mixed), -1, out double result));
+        Assert.Equal(BitConverter.DoubleToInt64Bits(Reference(mixed, -1)), BitConverter.DoubleToInt64Bits(result));
+    }
+
+    [Fact]
+    public void RetainedSamplesSupportChangingMeansWithoutRecomputingTheirValue()
+    {
+        double[] values = [-4.125, -2.25, -1.5, -.875, .625, 1.125, 2.75, 4.25];
+        var samples = Samples(values);
+        var window = new RoundedMeanErrorWindow(values.Length);
+        foreach (double value in values) window.Add(value);
+        int accepted = 0;
+        foreach (double mean in new[] { -2d, -1.25, -.75, 0, .75, 1.25, 2 })
+        {
+            long expected = BitConverter.DoubleToInt64Bits(Reference(values, mean));
+            if (CertifiedMeanRelativeError.TryCompute(samples, mean, out double actual))
+            {
+                accepted++;
+                Assert.Equal(expected, BitConverter.DoubleToInt64Bits(actual));
+            }
+            Assert.Equal(expected, BitConverter.DoubleToInt64Bits(window.SignedRelativeError(mean).Value));
+        }
+        Assert.True(accepted >= 4);
+    }
+
+    [Fact]
+    public void CachedErrorsRetainBitsThroughExactMaterializationEvictionAndReset()
+    {
+        var window = new RoundedMeanErrorWindow(3);
+        var retained = new Queue<double>();
+        double[] prices = [1.125, 1.25, 1.5, double.MaxValue, -double.MaxValue, 1.125, 2.25, 4.5, -.75, -1.25, -2.5];
+        for (int repeat = 0; repeat < 2; repeat++)
+        {
+            window.Reset(); retained.Clear();
+            foreach (double price in prices)
+            {
+                if (retained.Count == 3) retained.Dequeue();
+                retained.Enqueue(price); window.Add(price);
+                _ = window.SquaredError(0); // Materialize the preserved exact moments.
+                var result = window.SignedRelativeError(1);
+                Assert.True(result.Defined);
+                Assert.Equal(BitConverter.DoubleToInt64Bits(Reference(retained.ToArray(), 1)), BitConverter.DoubleToInt64Bits(result.Value));
+            }
+        }
+    }
+
     private static Queue<RoundedMeanErrorWindow.Sample> Samples(IEnumerable<double> values) =>
         new(values.Select(v => new RoundedMeanErrorWindow.Sample(v, ExactVarianceWindow.Units(v))));
 
