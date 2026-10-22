@@ -35,13 +35,17 @@ internal static class CertifiedParabolicClassic
         result = new double?[bars.Count];
         if (bars.Count < 2)
             return true;
-        var array = bars as Bar[];
-        initialShort = U(Math.Min(initialShort, maximumShort));
-        initialLong = U(Math.Min(initialLong, maximumLong));
-        stepShort = U(Math.Min(stepShort, maximumShort));
-        stepLong = U(Math.Min(stepLong, maximumLong));
-        maximumShort = U(maximumShort);
-        maximumLong = U(maximumLong);
+        var initial = new[]
+        {
+            U(Math.Min(initialShort, maximumShort)),
+            U(Math.Min(initialLong, maximumLong)),
+        };
+        var step = new[]
+        {
+            U(Math.Min(stepShort, maximumShort)),
+            U(Math.Min(stepLong, maximumLong)),
+        };
+        var maximum = new[] { U(maximumShort), U(maximumLong) };
         var offsetUnits = U(offset);
         var down = ParabolicStopValue.Of(bars[0].Low) - ParabolicStopValue.Of(bars[1].Low);
         var upMove = ParabolicStopValue.Of(bars[1].High) - ParabolicStopValue.Of(bars[0].High);
@@ -54,12 +58,12 @@ internal static class CertifiedParabolicClassic
                     : bars[0].High
                 : Math.Abs(start)
         );
-        var factor = rising ? initialLong : initialShort;
+        var factor = initial[rising ? 1 : 0];
         var priorHigh = U(bars[1].High);
         var priorLow = U(bars[1].Low);
-        for (var i = 1; i < (array is null ? bars.Count : array.Length); i++)
+        for (var i = 1; i < bars.Count; i++)
         {
-            var current = array is null ? bars[i] : array[i];
+            var current = bars[i];
             var high = U(current.High);
             var low = U(current.Low);
             var reversal = rising ? low <= stop : high >= stop;
@@ -71,14 +75,14 @@ internal static class CertifiedParabolicClassic
                     : Math.Max(extreme, Math.Max(priorHigh, high));
                 stop = Math.FusedMultiplyAdd(stop, rising ? -offsetUnits : offsetUnits, stop);
                 if (!double.IsFinite(stop)) return false;
-                factor = rising ? initialLong : initialShort;
+                factor = initial[rising ? 1 : 0];
                 extreme = rising ? high : low;
             }
             result[i] = U(signed && !rising ? -stop : stop);
             if (!reversal && (rising ? high > extreme : low < extreme))
             {
                 extreme = rising ? high : low;
-                factor = Math.Min(factor + (rising ? stepLong : stepShort), rising ? maximumLong : maximumShort);
+                factor = Math.Min(factor + step[rising ? 1 : 0], maximum[rising ? 1 : 0]);
                 if (!double.IsFinite(factor)) return false;
             }
             if (!TryAdvance(stop, extreme, factor, out stop)) return false;
