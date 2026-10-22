@@ -123,6 +123,82 @@ public sealed class MeanDiagnosticsCertifiedTests
     }
 
     [Fact]
+    public void ExactCompactErrorsMatchIndependentFractionsAcrossScales()
+    {
+        var random = new Random(7232027);
+        int accepted = 0;
+        for (int trial = 0; trial < 500; trial++)
+        {
+            double scale = Math.ScaleB(1, random.Next(-400, 401));
+            double mean = 1.25 * scale;
+            var values = Enumerable.Range(0, random.Next(1, 40))
+                .Select(_ => (1 + random.NextDouble()) * scale * (random.Next(2) == 0 ? -1 : 1)).ToArray();
+            foreach (bool squared in new[] { false, true })
+            {
+                var sum = new ReferenceFraction(0);
+                foreach (double value in values)
+                {
+                    var difference = (ReferenceFraction.FromDouble(value) - ReferenceFraction.FromDouble(mean)).Abs();
+                    sum += squared ? difference * difference : difference;
+                }
+                double expected = (sum / new ReferenceFraction(values.Length)).ToDouble();
+                var window = new RoundedMeanErrorWindow(values.Length);
+                foreach (double value in values) window.Add(value);
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected),
+                    BitConverter.DoubleToInt64Bits(squared ? window.SquaredError(mean) : window.AbsoluteError(mean)));
+                if (CertifiedMeanRelativeError.TryError(Samples(values), mean, squared, out double actual))
+                {
+                    accepted++;
+                    Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
+                }
+            }
+        }
+        Assert.True(accepted > 950, $"Only {accepted} compact errors certified");
+    }
+
+    [Fact]
+    public void CompactErrorBoundariesRetainFallbackAndExactZero()
+    {
+        foreach (bool squared in new[] { false, true })
+        {
+            Assert.True(CertifiedMeanRelativeError.TryError(Samples([5, 5]), 5, squared, out double zero));
+            Assert.Equal(0, BitConverter.DoubleToInt64Bits(zero));
+            Assert.False(CertifiedMeanRelativeError.TryError(Samples([0, 1]), 1, squared, out _));
+            Assert.False(CertifiedMeanRelativeError.TryError(Samples([double.Epsilon, 1]), 1, squared, out _));
+            Assert.False(CertifiedMeanRelativeError.TryError(Samples([1, Math.ScaleB(1, 40)]), 1, squared, out _));
+            Assert.False(CertifiedMeanRelativeError.TryError(Samples([1, -1]), 0, squared, out _));
+        }
+        var large = Samples(Enumerable.Repeat(15d, 4096));
+        Assert.False(CertifiedMeanRelativeError.TryError(large, 1, true, out _));
+        var window = new RoundedMeanErrorWindow(4096);
+        for (int i = 0; i < 4096; i++) window.Add(15);
+        Assert.Equal(196d, window.SquaredError(1));
+        Assert.False(CertifiedMeanRelativeError.TryError(Samples([Math.ScaleB(1, -600)]), Math.ScaleB(1.5, -600), true, out _));
+        Assert.False(CertifiedMeanRelativeError.TryError(Samples([Math.ScaleB(1, 600)]), Math.ScaleB(1.5, 600), true, out _));
+    }
+
+    [Fact]
+    public void CompactAbsoluteAndSquaredEvaluationAllocateNoManagedMemory()
+    {
+        var values = Samples(Enumerable.Range(0, 20).Select(i => 100 + i / 8d));
+        for (int i = 0; i < 32; i++)
+        {
+            Assert.True(CertifiedMeanRelativeError.TryError(values, 101.1875, false, out _));
+            Assert.True(CertifiedMeanRelativeError.TryError(values, 101.1875, true, out _));
+        }
+        int accepted = 0;
+        long start = GC.GetAllocatedBytesForCurrentThread();
+        for (int i = 0; i < 1000; i++)
+        {
+            if (CertifiedMeanRelativeError.TryError(values, 101.1875, false, out _)) accepted++;
+            if (CertifiedMeanRelativeError.TryError(values, 101.1875, true, out _)) accepted++;
+        }
+        long bytes = GC.GetAllocatedBytesForCurrentThread() - start;
+        Assert.Equal(2000, accepted);
+        Assert.Equal(0, bytes);
+    }
+
+    [Fact]
     public void OrdinaryCertificateEvaluationAllocatesNoManagedMemory()
     {
         var values = Samples(Enumerable.Range(0, 20).Select(i => 100 + i / 8d));

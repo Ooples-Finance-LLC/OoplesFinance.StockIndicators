@@ -39,6 +39,10 @@ internal sealed class RoundedMeanErrorWindow(int period)
 
     internal double AbsoluteError(double mean)
     {
+#if !NETFRAMEWORK
+        if (CertifiedMeanRelativeError.TryError(_values, mean, false, out var certified))
+            return certified;
+#endif
         var center = ExactVarianceWindow.Units(mean);
         var sum = BigInteger.Zero;
         foreach (var sample in _values)
@@ -48,6 +52,10 @@ internal sealed class RoundedMeanErrorWindow(int period)
 
     internal double SquaredError(double mean)
     {
+#if !NETFRAMEWORK
+        if (CertifiedMeanRelativeError.TryError(_values, mean, true, out var certified))
+            return certified;
+#endif
         var center = ExactVarianceWindow.Units(mean);
         return ExactMeanAccumulator.UnitRatio(
             _squares - 2 * center * _sum + Count * center * center,
