@@ -1,0 +1,156 @@
+{
+  "fixture": "SharedTaHilbertNativeBenchmarks",
+  "source_sha": "7319ad98d57be51ad5e3d3ca04b13f0865f18b97",
+  "run_id": "local-mapped-batch12-20261022",
+  "measurement_location": "Local Windows host; unchanged CPU setup and direct native methods.",
+  "host": {
+    "BenchmarkDotNetCaption": "BenchmarkDotNet",
+    "BenchmarkDotNetVersion": "0.15.8",
+    "OsVersion": "Windows 11 (10.0.26220.9739)",
+    "ProcessorName": "AMD Ryzen 9 3950X",
+    "PhysicalProcessorCount": 1,
+    "PhysicalCoreCount": 16,
+    "LogicalCoreCount": 32,
+    "RuntimeVersion": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+    "Architecture": "X64",
+    "HasAttachedDebugger": false,
+    "HasRyuJit": true,
+    "Configuration": "RELEASE",
+    "DotNetCliVersion": "10.0.402",
+    "ChronometerFrequency": {
+      "Hertz": 10000000
+    },
+    "HardwareTimerKind": "Unknown"
+  },
+  "report_sha256": "bac2ed022ad90dd3cdf9c803f474b425ca8de87fbee2abd1c48d7a11a33149e6",
+  "report_file": "SharedTaHilbertNativeBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaHilbertNativeBenchmarks-report-full-compressed.json",
+  "quiet_cpu_samples": [
+    9.5,
+    11.6,
+    13.0
+  ],
+  "complete": true,
+  "comparisons": [
+    {
+      "pair": "TaLib.Functions.HtTrendline",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 2355017.460317461,
+        "lower_ns": 2181386.6382940947,
+        "upper_ns": 2528648.282340827,
+        "samples": 9,
+        "allocated_bytes": 70934
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 114910.52734375,
+          "lower_ns": 113882.4210094703,
+          "upper_ns": 115938.6336780297,
+          "samples": 10,
+          "allocated_bytes": 8144
+        },
+        "NativeParallel": {
+          "mean_ns": 120298.291015625,
+          "lower_ns": 119260.34679666137,
+          "upper_ns": 121336.23523458863,
+          "samples": 9,
+          "allocated_bytes": 46736
+        }
+      },
+      "fastest_native": "NativeSingle",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Functions.HtTrendline",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 1961121.2890625,
+        "lower_ns": 1955252.8041145355,
+        "upper_ns": 1966989.7740104645,
+        "samples": 8,
+        "allocated_bytes": 22194
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 114910.52734375,
+          "lower_ns": 113882.4210094703,
+          "upper_ns": 115938.6336780297,
+          "samples": 10,
+          "allocated_bytes": 8144
+        },
+        "NativeParallel": {
+          "mean_ns": 120298.291015625,
+          "lower_ns": 119260.34679666137,
+          "upper_ns": 121336.23523458863,
+          "samples": 9,
+          "allocated_bytes": 46736
+        }
+      },
+      "fastest_native": "NativeSingle",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Functions.HtTrendline",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 20084438,
+        "lower_ns": 19589955.632287193,
+        "upper_ns": 20578920.367712807,
+        "samples": 10,
+        "allocated_bytes": 648915
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1213184.6354166667,
+          "lower_ns": 1207569.900792402,
+          "upper_ns": 1218799.3700409315,
+          "samples": 9,
+          "allocated_bytes": 80204
+        },
+        "NativeParallel": {
+          "mean_ns": 1248131.640625,
+          "lower_ns": 1238304.0654651148,
+          "upper_ns": 1257959.2157848852,
+          "samples": 8,
+          "allocated_bytes": 442780
+        }
+      },
+      "fastest_native": "NativeSingle",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Functions.HtTrendline",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 19669770,
+        "lower_ns": 19564845.935864855,
+        "upper_ns": 19774694.064135145,
+        "samples": 10,
+        "allocated_bytes": 167605
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1213184.6354166667,
+          "lower_ns": 1207569.900792402,
+          "upper_ns": 1218799.3700409315,
+          "samples": 9,
+          "allocated_bytes": 80204
+        },
+        "NativeParallel": {
+          "mean_ns": 1248131.640625,
+          "lower_ns": 1238304.0654651148,
+          "upper_ns": 1257959.2157848852,
+          "samples": 8,
+          "allocated_bytes": 442780
+        }
+      },
+      "fastest_native": "NativeSingle",
+      "verdict": "slower"
+    }
+  ],
+  "measurement_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/blob/a1d29dc0ee58b86c6f89a3592e4ac93e3a3d4bb3/benchmarks/results/remaining-indicators/local-mapped-batch12-20261022/manifest.json"
+}
