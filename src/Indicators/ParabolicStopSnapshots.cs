@@ -106,6 +106,11 @@ public static class ParabolicStopSnapshots
             }.Any(v => v < 0)
         )
             throw new ArgumentOutOfRangeException(nameof(initialLong));
+#if !NETFRAMEWORK
+        if (CertifiedParabolicClassic.TryCalculate(bars, signed, start, offset,
+            initialLong, stepLong, maximumLong, initialShort, stepShort, maximumShort, out var finiteResult))
+            return finiteResult;
+#endif
         var result = new double?[bars.Count];
         if (bars.Count < 2)
             return result;

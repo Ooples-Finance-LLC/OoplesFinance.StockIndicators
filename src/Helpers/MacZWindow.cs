@@ -33,7 +33,19 @@ internal sealed class MacZWindow : IDisposable
             _coefficient = coefficient / common; _denominator = denominator / common; _exponent = exponent;
         }
         internal int Sign => _coefficient.Sign;
-        internal static Number Of(double value) => new(ExactVarianceWindow.Units(value), -1074);
+        internal static Number Of(double value)
+        {
+            // Keep the exact binary64 significand and its scale separately.
+            // Expanding every ordinary input onto the subnormal grid adds over
+            // a thousand zero bits to arithmetic without changing its value.
+            long bits = BitConverter.DoubleToInt64Bits(value);
+            int exponent = (int)((bits >> 52) & 2047);
+            if (exponent == 2047) throw new ArgumentOutOfRangeException(nameof(value));
+            long coefficient = bits & ((1L << 52) - 1);
+            if (exponent != 0) coefficient |= 1L << 52;
+            if (bits < 0) coefficient = -coefficient;
+            return new(coefficient, exponent == 0 ? -1074 : exponent - 1075, reduced: true);
+        }
         internal static Number Integer(BigInteger value) => new(value, 0);
         private static int Bits(BigInteger value)
         { var bytes = BigInteger.Abs(value).ToByteArray(); var last = bytes.Length - 1; while (last > 0 && bytes[last] == 0) last--; var bits = last * 8; for (var b = bytes[last]; b != 0; b >>= 1) bits++; return bits; }
