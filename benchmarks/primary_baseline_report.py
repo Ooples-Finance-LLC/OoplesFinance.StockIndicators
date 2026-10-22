@@ -36,7 +36,8 @@ def measured_dataset(folder, source, run, manifest, versions):
                 host=report['HostEnvironmentInfo'], report=receipt['artifactPath'])
     rows = []
     for row in verified['rows']:
-        rows.append(dict(row, library=row['pair'].split('.')[0], raw={
+        rows.append(dict(row, library=row['pair'].split('.')[0], source_sha=source,
+            measurement_run_url=verified['evidence']['runUrl'], raw={
             arm: raw_arms[row['pair'], row['bars'], arm] for arm in ['Ooples', 'Competitor']}))
     return dict(rows=rows, inventory=json.loads(manifest), evidence=verified['evidence'], versions=versions)
 

@@ -19,6 +19,9 @@ class PrimaryBaselineTests(HostedResultsTests):
         self.assertEqual(old, embedded(result, 'archived-baseline-dataset'))
         self.assertEqual([99, 100, 101], embedded(result, 'dataset')['rows'][0]['raw']['Ooples']['samples'])
         self.assertEqual('Skender', dataset['rows'][0]['library'])
+        for row in dataset['rows']:
+            self.assertEqual(self.source, row['source_sha'])
+            self.assertEqual(dataset['evidence']['runUrl'], row['measurement_run_url'])
         self.assertIn('<b id="wins">1 / 1</b>', result)
         self.assertLess(result.index('id="explorer"'), result.index('id="rollout-status"'))
         again = replace_primary(result, dataset)
