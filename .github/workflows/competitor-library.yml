@@ -1,4 +1,4 @@
-name: Controlled TEMA factoring and restored DEMA comparison
+name: Refresh DEMA and TEMA actual library baseline
 on:
   workflow_dispatch:
     inputs:
@@ -10,7 +10,7 @@ permissions:
   contents: read
   actions: read
 concurrency:
-  group: tema-factored-control-${{ github.ref }}
+  group: tema-library-refresh-${{ github.ref }}
   cancel-in-progress: false
 jobs:
   paired:
@@ -31,7 +31,7 @@ jobs:
       - name: Verify pinned sources and existing qualification
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python scripts/compare-tema-factored.py verify
+        run: python scripts/measure-tema-library.py verify
       - uses: actions/download-artifact@v8
         with:
           name: competitor-binaries
@@ -40,11 +40,11 @@ jobs:
           github-token: ${{ github.token }}
       - name: Build candidate production DLL for hosted runtime
         run: dotnet build candidate/src/OoplesFinance.StockIndicators.csproj -c Release -f net10.0 -p:GeneratePackageOnBuild=false -m:1
-      - name: Measure old new new old with identical harness
-        run: python scripts/compare-tema-factored.py measure
+      - name: Measure actual library delegates with qualified candidate
+        run: python scripts/measure-tema-library.py measure
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: tema-factored-control
+          name: tema-library-refresh
           path: control/
           retention-days: 30
