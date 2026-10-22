@@ -1,0 +1,56 @@
+{
+  "input_head": "6086940d5e608f71650e2e41c1c049538f11ed66",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "parallel_batch_note": "Follow-up within approved SMA diagnostics redesign: exact bounded absolute and squared error sums with rational fallback, independent fractions, overflow boundaries, zero-allocation certificates, and full diagnostics parity.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T00:18:03.094026+00:00",
+  "unit": {
+    "passed": 37,
+    "class_counts": {
+      "MeanDiagnosticsCertifiedTests": 14,
+      "RollingStatisticsSharedExecutionTests": 17,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "MeanDiagnosticsScaleReductionTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-compact-errors\\unit\\unit.trx",
+    "sha256": "dc66c41a43beeca6747796452772fe5deda605636e374d45a1c6896b9b3f1ba1",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-compact-errors-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 2,
+    "class_counts": {
+      "SharedRollingStatisticsBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-compact-errors\\parity\\parity.trx",
+    "sha256": "5eddcfc5e4c65215a9502f9c6938666dfa99fd16796bad904a584da99273f82f",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-compact-errors-20261021-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-diagnostics-certified-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2b6c0c4716c3ff289f920f299bb7a9dc130e187d964803a336c922c18bf7f954",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-diagnostics-certified-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2b6c0c4716c3ff289f920f299bb7a9dc130e187d964803a336c922c18bf7f954",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-diagnostics-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2b6c0c4716c3ff289f920f299bb7a9dc130e187d964803a336c922c18bf7f954",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-diagnostics-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2b6c0c4716c3ff289f920f299bb7a9dc130e187d964803a336c922c18bf7f954"
+  },
+  "source_fingerprint_sha256": "ab11437065f5c2c9b23f8e948bb50462143f915ba5b593acf6e629ecc5b2a3e4",
+  "inventory_tests_passed": 6,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Exact compact absolute/squared sums preserve full diagnostics output bits, unsupported-value and overflow fallback, and zero-allocation certificate evaluation. Direct performance measurement is pending."
+}
