@@ -92,7 +92,8 @@
     "measure-fibonacci-aligned-control.py": "433df9a77beb1cf0bb05369336e367e94fc84099b69c7b2e089424433342e760",
     "verify-fibonacci-aligned-control.py": "a2c30b28195411801849e9d805c67937e1e2215271e7e323253adedb0d77c821"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/fibonacci-aligned-integration-source-proof-20261022.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/fibonacci-aligned-integration-source-proof-20261022.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/fibonacci-aligned-certified-local-fibonacci-aligned-control-20261022-report-import.json"
 }
