@@ -80,22 +80,64 @@ public sealed class WindowCommodityChannelIndex
         private readonly Queue<double> _prices = new(Math.Min(period, count));
         private readonly Queue<JurikDyadic> _deviations = new(rollingDeviations ? Math.Min(period, Math.Max(0, count - period + 1)) : 0);
         private JurikDyadic _sum, _deviationSum;
+        private Int128 _gridSum;
+        private int _sumGrid;
+        // 0: empty/zero, 1: bounded common grid, 2: existing exact accumulator.
+        private int _sumKind;
 
         public void Reset()
         {
             _prices.Clear(); _deviations.Clear();
             _sum = _deviationSum = default;
+            _gridSum = 0; _sumGrid = 0; _sumKind = 0;
+        }
+
+        private JurikDyadic PriceSum => _sumKind == 1
+            ? JurikDyadic.FromBinaryProduct(_gridSum, _sumGrid - 1075)
+            : _sum;
+
+        private void AccumulatePrice(double value, bool subtract = false)
+        {
+            if (_sumKind != 2 && period <= 256)
+            {
+                if (value == 0) return;
+                long bits = BitConverter.DoubleToInt64Bits(value);
+                int exponent = (int)((bits >> 52) & 2047);
+                if (_sumKind == 0 && exponent is > 0 and < 2047)
+                {
+                    _sumGrid = exponent - 4;
+                    _sumKind = 1;
+                }
+                int shift = exponent - _sumGrid;
+                if (exponent is > 0 and < 2047 && shift is >= 0 and <= 8)
+                {
+                    long aligned = ((bits & 0xfffffffffffffL) | (1L << 52)) << shift;
+                    if (bits < 0) aligned = -aligned;
+                    // Each term is below 2^61; 256 retained terms plus an
+                    // update intermediate are below 2^70, safely inside Int128.
+                    _gridSum += subtract ? -(Int128)aligned : aligned;
+                    return;
+                }
+            }
+            if (_sumKind != 2)
+            {
+                _sum = PriceSum;
+                _sumKind = 2;
+            }
+            if (subtract) _sum.Subtract(JurikDyadic.FromDouble(value));
+            else _sum.Add(value);
         }
 
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
             double value = ExactTypicalPrice.Calculate(bar.High, bar.Low, bar.Close);
-            if (_prices.Count == period) _sum.Subtract(JurikDyadic.FromDouble(_prices.Dequeue()));
+            if (_prices.Count == period) AccumulatePrice(_prices.Dequeue(), subtract: true);
             _prices.Enqueue(value);
-            _sum.Add(value);
+            AccumulatePrice(value);
             if (_prices.Count < period) return;
-            double meanValue = _sum.Mean(period);
+            var priceSum = PriceSum;
+            double meanValue = priceSum.Mean(period);
             if (!rollingDeviations && CertifiedCommodityChannel.TryCompute(_prices, meanValue, value,
                     out double certified, out bool defined))
             {
@@ -132,7 +174,7 @@ public sealed class WindowCommodityChannelIndex
                 // Keep the rounded mean from the contract, but evaluate this
                 // identity exactly instead of forming every dyadic distance.
                 below.Multiply(2);
-                deviation = _sum;
+                deviation = priceSum;
                 deviation.Subtract(below);
                 var center = mean;
                 center.Multiply(2L * belowCount - period);
