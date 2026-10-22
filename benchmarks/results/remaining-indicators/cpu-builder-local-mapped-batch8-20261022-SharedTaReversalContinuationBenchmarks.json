@@ -1,0 +1,996 @@
+{
+  "fixture": "SharedTaReversalContinuationBenchmarks",
+  "source_sha": "360301f50870745b171abe26e02c7cf5e217faa8",
+  "run_id": "local-mapped-batch8-20261022",
+  "measurement_location": "Local Windows host; unchanged CPU setup and direct native methods.",
+  "host": {
+    "BenchmarkDotNetCaption": "BenchmarkDotNet",
+    "BenchmarkDotNetVersion": "0.15.8",
+    "OsVersion": "Windows 11 (10.0.26220.9739)",
+    "ProcessorName": "AMD Ryzen 9 3950X",
+    "PhysicalProcessorCount": 1,
+    "PhysicalCoreCount": 16,
+    "LogicalCoreCount": 32,
+    "RuntimeVersion": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+    "Architecture": "X64",
+    "HasAttachedDebugger": false,
+    "HasRyuJit": true,
+    "Configuration": "RELEASE",
+    "DotNetCliVersion": "10.0.402",
+    "ChronometerFrequency": {
+      "Hertz": 10000000
+    },
+    "HardwareTimerKind": "Unknown"
+  },
+  "report_sha256": "4515500bac20fbb52a1b58a41261c74d2ca3791d370ec29fb35dd7e217042ee3",
+  "report_file": "SharedTaReversalContinuationBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaReversalContinuationBenchmarks-report-full-compressed.json",
+  "quiet_cpu_samples": [
+    11.8,
+    9.9,
+    8.2
+  ],
+  "complete": true,
+  "comparisons": [
+    {
+      "pair": "TaLib.Candles.AdvanceBlock",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 66807.314453125,
+        "lower_ns": 58889.88343910074,
+        "upper_ns": 74724.74546714926,
+        "samples": 10,
+        "allocated_bytes": 98256
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 202793.7890625,
+          "lower_ns": 201555.51156038692,
+          "upper_ns": 204032.06656461308,
+          "samples": 10,
+          "allocated_bytes": 4080
+        },
+        "NativeParallel": {
+          "mean_ns": 37866.1376953125,
+          "lower_ns": 33800.40866332109,
+          "upper_ns": 41931.86672730391,
+          "samples": 9,
+          "allocated_bytes": 9074
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.AdvanceBlock",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 62042.6220703125,
+        "lower_ns": 52130.96113464855,
+        "upper_ns": 71954.28300597645,
+        "samples": 10,
+        "allocated_bytes": 49224
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 202793.7890625,
+          "lower_ns": 201555.51156038692,
+          "upper_ns": 204032.06656461308,
+          "samples": 10,
+          "allocated_bytes": 4080
+        },
+        "NativeParallel": {
+          "mean_ns": 37866.1376953125,
+          "lower_ns": 33800.40866332109,
+          "upper_ns": 41931.86672730391,
+          "samples": 9,
+          "allocated_bytes": 9074
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.AdvanceBlock",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 519224.4140625,
+        "lower_ns": 439349.46209425374,
+        "upper_ns": 599099.3660307463,
+        "samples": 10,
+        "allocated_bytes": 602669
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 2059217.8125,
+          "lower_ns": 2046396.0627560965,
+          "upper_ns": 2072039.5622439035,
+          "samples": 10,
+          "allocated_bytes": 40206
+        },
+        "NativeParallel": {
+          "mean_ns": 367920.7421875,
+          "lower_ns": 326703.971845941,
+          "upper_ns": 409137.512529059,
+          "samples": 10,
+          "allocated_bytes": 81056
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.AdvanceBlock",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 498582.9296875,
+        "lower_ns": 476029.11504190246,
+        "upper_ns": 521136.74433309754,
+        "samples": 10,
+        "allocated_bytes": 121260
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 2059217.8125,
+          "lower_ns": 2046396.0627560965,
+          "upper_ns": 2072039.5622439035,
+          "samples": 10,
+          "allocated_bytes": 40206
+        },
+        "NativeParallel": {
+          "mean_ns": 367920.7421875,
+          "lower_ns": 326703.971845941,
+          "upper_ns": 409137.512529059,
+          "samples": 10,
+          "allocated_bytes": 81056
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.Stalled",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 56983.7109375,
+        "lower_ns": 51821.051318160506,
+        "upper_ns": 62146.370556839494,
+        "samples": 10,
+        "allocated_bytes": 104597
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 116401.220703125,
+          "lower_ns": 115325.39190639676,
+          "upper_ns": 117477.04949985324,
+          "samples": 10,
+          "allocated_bytes": 4073
+        },
+        "NativeParallel": {
+          "mean_ns": 19344.171142578125,
+          "lower_ns": 18795.542279806235,
+          "upper_ns": 19892.800005350015,
+          "samples": 9,
+          "allocated_bytes": 9073
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.Stalled",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 56391.8359375,
+        "lower_ns": 50430.086539257536,
+        "upper_ns": 62353.585335742464,
+        "samples": 10,
+        "allocated_bytes": 55561
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 116401.220703125,
+          "lower_ns": 115325.39190639676,
+          "upper_ns": 117477.04949985324,
+          "samples": 10,
+          "allocated_bytes": 4073
+        },
+        "NativeParallel": {
+          "mean_ns": 19344.171142578125,
+          "lower_ns": 18795.542279806235,
+          "upper_ns": 19892.800005350015,
+          "samples": 9,
+          "allocated_bytes": 9073
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.Stalled",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 476071.484375,
+        "lower_ns": 390505.8544997619,
+        "upper_ns": 561637.1142502382,
+        "samples": 10,
+        "allocated_bytes": 609005
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1180406.640625,
+          "lower_ns": 1169970.8593840082,
+          "upper_ns": 1190842.4218659918,
+          "samples": 8,
+          "allocated_bytes": 40135
+        },
+        "NativeParallel": {
+          "mean_ns": 224569.39453125,
+          "lower_ns": 192894.99179567982,
+          "upper_ns": 256243.79726682018,
+          "samples": 10,
+          "allocated_bytes": 81046
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.Stalled",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 381242.12890625,
+        "lower_ns": 297400.3010590159,
+        "upper_ns": 465083.9567534841,
+        "samples": 10,
+        "allocated_bytes": 127580
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1180406.640625,
+          "lower_ns": 1169970.8593840082,
+          "upper_ns": 1190842.4218659918,
+          "samples": 8,
+          "allocated_bytes": 40135
+        },
+        "NativeParallel": {
+          "mean_ns": 224569.39453125,
+          "lower_ns": 192894.99179567982,
+          "upper_ns": 256243.79726682018,
+          "samples": 10,
+          "allocated_bytes": 81046
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.ThreeStarsInSouth",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 48156.91189236111,
+        "lower_ns": 45019.51629876033,
+        "upper_ns": 51294.30748596189,
+        "samples": 9,
+        "allocated_bytes": 98260
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 96007.67144097222,
+          "lower_ns": 93827.42289355991,
+          "upper_ns": 98187.91998838453,
+          "samples": 9,
+          "allocated_bytes": 4073
+        },
+        "NativeParallel": {
+          "mean_ns": 20190.927734375,
+          "lower_ns": 17207.758008889192,
+          "upper_ns": 23174.097459860808,
+          "samples": 10,
+          "allocated_bytes": 9073
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.ThreeStarsInSouth",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 45508.6767578125,
+        "lower_ns": 37509.56446006416,
+        "upper_ns": 53507.78905556084,
+        "samples": 10,
+        "allocated_bytes": 49222
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 96007.67144097222,
+          "lower_ns": 93827.42289355991,
+          "upper_ns": 98187.91998838453,
+          "samples": 9,
+          "allocated_bytes": 4073
+        },
+        "NativeParallel": {
+          "mean_ns": 20190.927734375,
+          "lower_ns": 17207.758008889192,
+          "upper_ns": 23174.097459860808,
+          "samples": 10,
+          "allocated_bytes": 9073
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.ThreeStarsInSouth",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 313524.51171875,
+        "lower_ns": 272039.2719919165,
+        "upper_ns": 355009.7514455835,
+        "samples": 10,
+        "allocated_bytes": 602649
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 963927.734375,
+          "lower_ns": 962132.5112644478,
+          "upper_ns": 965722.9574855522,
+          "samples": 8,
+          "allocated_bytes": 40135
+        },
+        "NativeParallel": {
+          "mean_ns": 193732.8515625,
+          "lower_ns": 171778.84424250032,
+          "upper_ns": 215686.85888249968,
+          "samples": 10,
+          "allocated_bytes": 81047
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.ThreeStarsInSouth",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 324998.8671875,
+        "lower_ns": 284670.56794039253,
+        "upper_ns": 365327.16643460747,
+        "samples": 10,
+        "allocated_bytes": 121242
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 963927.734375,
+          "lower_ns": 962132.5112644478,
+          "upper_ns": 965722.9574855522,
+          "samples": 8,
+          "allocated_bytes": 40135
+        },
+        "NativeParallel": {
+          "mean_ns": 193732.8515625,
+          "lower_ns": 171778.84424250032,
+          "upper_ns": 215686.85888249968,
+          "samples": 10,
+          "allocated_bytes": 81047
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.ThreeBlackCrows",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 25559.52392578125,
+        "lower_ns": 24483.715136908584,
+        "upper_ns": 26635.332714653916,
+        "samples": 10,
+        "allocated_bytes": 76231
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 65408.32790798611,
+          "lower_ns": 65225.49132466633,
+          "upper_ns": 65591.16449130588,
+          "samples": 9,
+          "allocated_bytes": 4068
+        },
+        "NativeParallel": {
+          "mean_ns": 14082.046847873264,
+          "lower_ns": 12859.477598648165,
+          "upper_ns": 15304.616097098362,
+          "samples": 9,
+          "allocated_bytes": 9073
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.ThreeBlackCrows",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 19852.76123046875,
+        "lower_ns": 18530.52104379655,
+        "upper_ns": 21175.00141714095,
+        "samples": 10,
+        "allocated_bytes": 27195
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 65408.32790798611,
+          "lower_ns": 65225.49132466633,
+          "upper_ns": 65591.16449130588,
+          "samples": 9,
+          "allocated_bytes": 4068
+        },
+        "NativeParallel": {
+          "mean_ns": 14082.046847873264,
+          "lower_ns": 12859.477598648165,
+          "upper_ns": 15304.616097098362,
+          "samples": 9,
+          "allocated_bytes": 9073
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.ThreeBlackCrows",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 156749.6484375,
+        "lower_ns": 147361.54181350366,
+        "upper_ns": 166137.75506149634,
+        "samples": 10,
+        "allocated_bytes": 580613
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 659846.796875,
+          "lower_ns": 657138.3873716462,
+          "upper_ns": 662555.2063783538,
+          "samples": 10,
+          "allocated_bytes": 40101
+        },
+        "NativeParallel": {
+          "mean_ns": 138558.6328125,
+          "lower_ns": 128423.07425934306,
+          "upper_ns": 148694.19136565694,
+          "samples": 10,
+          "allocated_bytes": 81104
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "inconclusive"
+    },
+    {
+      "pair": "TaLib.Candles.ThreeBlackCrows",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 112234.580078125,
+        "lower_ns": 89763.31923057276,
+        "upper_ns": 134705.84092567724,
+        "samples": 10,
+        "allocated_bytes": 99209
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 659846.796875,
+          "lower_ns": 657138.3873716462,
+          "upper_ns": 662555.2063783538,
+          "samples": 10,
+          "allocated_bytes": 40101
+        },
+        "NativeParallel": {
+          "mean_ns": 138558.6328125,
+          "lower_ns": 128423.07425934306,
+          "upper_ns": 148694.19136565694,
+          "samples": 10,
+          "allocated_bytes": 81104
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "inconclusive"
+    },
+    {
+      "pair": "TaLib.Candles.IdenticalThreeCrows",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 28589.5947265625,
+        "lower_ns": 25824.29289943347,
+        "upper_ns": 31354.89655369153,
+        "samples": 10,
+        "allocated_bytes": 81224
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 104011.640625,
+          "lower_ns": 101748.21482138231,
+          "upper_ns": 106275.06642861769,
+          "samples": 10,
+          "allocated_bytes": 4073
+        },
+        "NativeParallel": {
+          "mean_ns": 20679.48269314236,
+          "lower_ns": 18470.154176366887,
+          "upper_ns": 22888.811209917832,
+          "samples": 9,
+          "allocated_bytes": 9073
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.IdenticalThreeCrows",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 24637.620849609375,
+        "lower_ns": 22981.364047940562,
+        "upper_ns": 26293.877651278188,
+        "samples": 10,
+        "allocated_bytes": 32188
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 104011.640625,
+          "lower_ns": 101748.21482138231,
+          "upper_ns": 106275.06642861769,
+          "samples": 10,
+          "allocated_bytes": 4073
+        },
+        "NativeParallel": {
+          "mean_ns": 20679.48269314236,
+          "lower_ns": 18470.154176366887,
+          "upper_ns": 22888.811209917832,
+          "samples": 9,
+          "allocated_bytes": 9073
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.IdenticalThreeCrows",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 183906.73828125,
+        "lower_ns": 155177.9504951738,
+        "upper_ns": 212635.5260673262,
+        "samples": 10,
+        "allocated_bytes": 585616
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1046317.28515625,
+          "lower_ns": 1041459.8985381128,
+          "upper_ns": 1051174.6717743871,
+          "samples": 8,
+          "allocated_bytes": 40137
+        },
+        "NativeParallel": {
+          "mean_ns": 180399.66796875,
+          "lower_ns": 136389.61530010845,
+          "upper_ns": 224409.72063739155,
+          "samples": 10,
+          "allocated_bytes": 81046
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "inconclusive"
+    },
+    {
+      "pair": "TaLib.Candles.IdenticalThreeCrows",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 136344.453125,
+        "lower_ns": 121114.8471905752,
+        "upper_ns": 151574.0590594248,
+        "samples": 10,
+        "allocated_bytes": 104198
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1046317.28515625,
+          "lower_ns": 1041459.8985381128,
+          "upper_ns": 1051174.6717743871,
+          "samples": 8,
+          "allocated_bytes": 40137
+        },
+        "NativeParallel": {
+          "mean_ns": 180399.66796875,
+          "lower_ns": 136389.61530010845,
+          "upper_ns": 224409.72063739155,
+          "samples": 10,
+          "allocated_bytes": 81046
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "inconclusive"
+    },
+    {
+      "pair": "TaLib.Candles.ThreeWhiteSoldiers",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 41789.6728515625,
+        "lower_ns": 37898.44910211329,
+        "upper_ns": 45680.89660101171,
+        "samples": 10,
+        "allocated_bytes": 97554
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 156979.35791015625,
+          "lower_ns": 154110.35206739002,
+          "upper_ns": 159848.36375292248,
+          "samples": 8,
+          "allocated_bytes": 4073
+        },
+        "NativeParallel": {
+          "mean_ns": 31491.07421875,
+          "lower_ns": 25727.602295066557,
+          "upper_ns": 37254.54614243344,
+          "samples": 10,
+          "allocated_bytes": 9074
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.ThreeWhiteSoldiers",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 35923.731825086805,
+        "lower_ns": 34144.600242610424,
+        "upper_ns": 37702.863407563185,
+        "samples": 9,
+        "allocated_bytes": 48518
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 156979.35791015625,
+          "lower_ns": 154110.35206739002,
+          "upper_ns": 159848.36375292248,
+          "samples": 8,
+          "allocated_bytes": 4073
+        },
+        "NativeParallel": {
+          "mean_ns": 31491.07421875,
+          "lower_ns": 25727.602295066557,
+          "upper_ns": 37254.54614243344,
+          "samples": 10,
+          "allocated_bytes": 9074
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "inconclusive"
+    },
+    {
+      "pair": "TaLib.Candles.ThreeWhiteSoldiers",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 349300.8984375,
+        "lower_ns": 306006.92549286986,
+        "upper_ns": 392594.87138213014,
+        "samples": 10,
+        "allocated_bytes": 601938
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1573200.607638889,
+          "lower_ns": 1562438.0570238724,
+          "upper_ns": 1583963.1582539056,
+          "samples": 9,
+          "allocated_bytes": 40210
+        },
+        "NativeParallel": {
+          "mean_ns": 266888.61328125,
+          "lower_ns": 203172.33447111555,
+          "upper_ns": 330604.89209138445,
+          "samples": 10,
+          "allocated_bytes": 81058
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "inconclusive"
+    },
+    {
+      "pair": "TaLib.Candles.ThreeWhiteSoldiers",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 259149.21875,
+        "lower_ns": 217686.40458214356,
+        "upper_ns": 300612.0329178565,
+        "samples": 10,
+        "allocated_bytes": 120541
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1573200.607638889,
+          "lower_ns": 1562438.0570238724,
+          "upper_ns": 1583963.1582539056,
+          "samples": 9,
+          "allocated_bytes": 40210
+        },
+        "NativeParallel": {
+          "mean_ns": 266888.61328125,
+          "lower_ns": 203172.33447111555,
+          "upper_ns": 330604.89209138445,
+          "samples": 10,
+          "allocated_bytes": 81058
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "inconclusive"
+    },
+    {
+      "pair": "TaLib.Candles.PiercingLine",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 27995.23193359375,
+        "lower_ns": 25473.265444185654,
+        "upper_ns": 30517.198423001846,
+        "samples": 10,
+        "allocated_bytes": 71816
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 48824.12109375,
+          "lower_ns": 48692.093853072125,
+          "upper_ns": 48956.148334427875,
+          "samples": 8,
+          "allocated_bytes": 4066
+        },
+        "NativeParallel": {
+          "mean_ns": 11447.066040039062,
+          "lower_ns": 10776.70405895599,
+          "upper_ns": 12117.428021122136,
+          "samples": 10,
+          "allocated_bytes": 9016
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.PiercingLine",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 16811.666531032984,
+        "lower_ns": 15370.127061035879,
+        "upper_ns": 18253.206001030092,
+        "samples": 9,
+        "allocated_bytes": 22779
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 48824.12109375,
+          "lower_ns": 48692.093853072125,
+          "upper_ns": 48956.148334427875,
+          "samples": 8,
+          "allocated_bytes": 4066
+        },
+        "NativeParallel": {
+          "mean_ns": 11447.066040039062,
+          "lower_ns": 10776.70405895599,
+          "upper_ns": 12117.428021122136,
+          "samples": 10,
+          "allocated_bytes": 9016
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.PiercingLine",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 160048.291015625,
+        "lower_ns": 153507.01613044404,
+        "upper_ns": 166589.56590080596,
+        "samples": 10,
+        "allocated_bytes": 576198
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 541087.4565972222,
+          "lower_ns": 539434.0201657896,
+          "upper_ns": 542740.8930286549,
+          "samples": 9,
+          "allocated_bytes": 40097
+        },
+        "NativeParallel": {
+          "mean_ns": 100674.1015625,
+          "lower_ns": 87197.40232806235,
+          "upper_ns": 114150.80079693765,
+          "samples": 10,
+          "allocated_bytes": 81044
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.PiercingLine",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 123853.41796875,
+        "lower_ns": 104503.51720623078,
+        "upper_ns": 143203.31873126922,
+        "samples": 10,
+        "allocated_bytes": 94793
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 541087.4565972222,
+          "lower_ns": 539434.0201657896,
+          "upper_ns": 542740.8930286549,
+          "samples": 9,
+          "allocated_bytes": 40097
+        },
+        "NativeParallel": {
+          "mean_ns": 100674.1015625,
+          "lower_ns": 87197.40232806235,
+          "upper_ns": 114150.80079693765,
+          "samples": 10,
+          "allocated_bytes": 81044
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "inconclusive"
+    },
+    {
+      "pair": "TaLib.Candles.DarkCloudCover",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 27403.709716796875,
+        "lower_ns": 24664.701989593108,
+        "upper_ns": 30142.717444000642,
+        "samples": 10,
+        "allocated_bytes": 71823
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 36765.25390625,
+          "lower_ns": 36587.16094825116,
+          "upper_ns": 36943.34686424884,
+          "samples": 10,
+          "allocated_bytes": 4066
+        },
+        "NativeParallel": {
+          "mean_ns": 9040.85456000434,
+          "lower_ns": 8389.358837609296,
+          "upper_ns": 9692.350282399384,
+          "samples": 9,
+          "allocated_bytes": 9016
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.DarkCloudCover",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 17911.51611328125,
+        "lower_ns": 15058.58772952099,
+        "upper_ns": 20764.44449704151,
+        "samples": 10,
+        "allocated_bytes": 22787
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 36765.25390625,
+          "lower_ns": 36587.16094825116,
+          "upper_ns": 36943.34686424884,
+          "samples": 10,
+          "allocated_bytes": 4066
+        },
+        "NativeParallel": {
+          "mean_ns": 9040.85456000434,
+          "lower_ns": 8389.358837609296,
+          "upper_ns": 9692.350282399384,
+          "samples": 9,
+          "allocated_bytes": 9016
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.DarkCloudCover",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 149998.6328125,
+        "lower_ns": 125810.96754290629,
+        "upper_ns": 174186.2980820937,
+        "samples": 10,
+        "allocated_bytes": 576206
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 408032.8515625,
+          "lower_ns": 406441.6434390946,
+          "upper_ns": 409624.0596859054,
+          "samples": 10,
+          "allocated_bytes": 40101
+        },
+        "NativeParallel": {
+          "mean_ns": 77852.34375,
+          "lower_ns": 73320.51021290613,
+          "upper_ns": 82384.17728709387,
+          "samples": 10,
+          "allocated_bytes": 81044
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.DarkCloudCover",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 114035.9521484375,
+        "lower_ns": 97547.6286040028,
+        "upper_ns": 130524.2756928722,
+        "samples": 10,
+        "allocated_bytes": 94795
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 408032.8515625,
+          "lower_ns": 406441.6434390946,
+          "upper_ns": 409624.0596859054,
+          "samples": 10,
+          "allocated_bytes": 40101
+        },
+        "NativeParallel": {
+          "mean_ns": 77852.34375,
+          "lower_ns": 73320.51021290613,
+          "upper_ns": 82384.17728709387,
+          "samples": 10,
+          "allocated_bytes": 81044
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    }
+  ],
+  "measurement_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/blob/cfd19a82129b0dae67f743f5c385cc0fb46df1b3/benchmarks/results/remaining-indicators/local-mapped-batch8-20261022/manifest.json"
+}
