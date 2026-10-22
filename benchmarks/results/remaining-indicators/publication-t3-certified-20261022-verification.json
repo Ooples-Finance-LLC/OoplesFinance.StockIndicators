@@ -1,0 +1,61 @@
+{
+  "input_head": "f2e1d75429289dc36ff9097c83aa435366c6eb0e",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed-reused",
+    "unit": "passed-reused",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedTillson.cs",
+    "src/Indicators/ValuesBarExecution.Tillson.cs",
+    "tests/ModelsTests/CertifiedTillsonTests.cs"
+  ],
+  "batch_note": "Approved T3 certified arithmetic. Exact fixed-width stage ratios and outward polynomial bounds; original exact fallback, startup, reset, overflow and framework behavior retained. Direct controlled competitor timing remains required before integration.",
+  "unit_build_log_sha256": "0adca7b02e1a5e22e717f6a680c4acacb698e5e8493b8771958ea9d97c58e40b",
+  "unit": {
+    "passed": 24,
+    "class_counts": {
+      "TillsonSharedExecutionTests": 12,
+      "CertifiedTillsonTests": 8,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-certified-attempt2\\unit\\unit.trx",
+    "sha256": "73002efbed9c700af1f655211724e851444ef015397a5ef7eec857860ba03bb0",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-certified-20261022-unit.trx.gz"
+  },
+  "step": "complete",
+  "updated_utc": "2026-10-22T11:05:13.217961+00:00",
+  "parity": {
+    "passed": 26,
+    "class_counts": {
+      "SharedTillsonBenchmarkTests": 16,
+      "TillsonComparisonTests": 10
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-certified-attempt2\\parity\\parity.trx",
+    "sha256": "810585b1af8f6fd74f30d87957305889d21df9471372d10f95c7592835a85cbc",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-certified-20261022-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-certified-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e66f906fb67bad919413d848cf56004ff96c696e05f3bfeb7b1563bed92ca552",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-certified-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e66f906fb67bad919413d848cf56004ff96c696e05f3bfeb7b1563bed92ca552",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-certified-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e66f906fb67bad919413d848cf56004ff96c696e05f3bfeb7b1563bed92ca552",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-certified-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e66f906fb67bad919413d848cf56004ff96c696e05f3bfeb7b1563bed92ca552"
+  },
+  "source_fingerprint_sha256": "710129ea810098104f4f5ab6cba43a341da75688c97528d46d88dd5fee5a87ac",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "T3 exact fixed-width stage ratios and outward polynomial intervals; exact fallback and NETFRAMEWORK paths retained. All24 unit and26 parity cases passed, including long histories;100 GPU and8 inventory cases passed. Unchanged production reused for test-only rebuild. Controlled performance pending."
+}
