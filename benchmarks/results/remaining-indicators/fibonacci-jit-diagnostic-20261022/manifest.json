@@ -1,0 +1,18 @@
+{
+  "scope": "Same-binary runtime diagnostic only. Not imported as implementation performance or report replacement.",
+  "source_sha": "e02890955fb6ff8ce4f562cfde46488cf5e78eda",
+  "verified_cases": 16,
+  "archives": {
+    "status.json": "4d61cf88d4549dc0a3b2fbf1d43722f56bebed655e0a1c500bcf911eca7e9084",
+    "binary-manifest.json": "3e34e5c6ba6070829906cac44ec42b32d0eeb1c62f549b69674363fe99be76c9",
+    "round0-default.log": "5999f1911d65ac69f609d2ef690207362316ec0642497bb654540e016fd54165",
+    "round1-optimized.log": "d25aede5557c75782b180de94bd67d7e56bf814e5ebe79be7e2f7a10358578cf",
+    "round2-optimized.log": "40e8dd5f54711546235fb3b4bfca7b961c13a7fcd84d83884c3b16777d96c601",
+    "round3-default.log": "e93b68fee8775770db0200bff4f9e46e53b478fc31efac7910a9af756541ef97",
+    "measure-fibonacci-jit-diagnostic.py": "7bbb4d97391458b18e1e980f956dbead39471f50054594b19c951d30fb2dae89",
+    "round0-default/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": "83ee82499903e86b6c86514c5ad0f33a8cc68cb9b1684bd6c445e81146dd1bd7",
+    "round1-optimized/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": "11bdf048e63b6d1ca654db35c01a36f2611d16cd36eceadb5c72153147c4b169",
+    "round2-optimized/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": "23e971139a36ae32c1e8a79739bf332523a1463d7379ffaa37f581fe326c7d43",
+    "round3-default/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": "36e81a3330a5b6d8b52dd58b85f91083903e57d0277c86d8bcd5e0a86bad0cde"
+  }
+}
