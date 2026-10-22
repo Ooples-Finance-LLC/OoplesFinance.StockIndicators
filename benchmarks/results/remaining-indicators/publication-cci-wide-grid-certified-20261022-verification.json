@@ -1,0 +1,59 @@
+{
+  "input_head": "22a874f21013d0fc5571e15adeedff57ecbd031e",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedCommodityChannel.cs",
+    "tests/ModelsTests/CertifiedCommodityChannelTests.cs"
+  ],
+  "batch_note": "Approved CCI exact-window-sum continuation: retain the original narrow fast path and certify wider normal windows with at most32 exponent bits using bounded128-bit deviations. Zero centers accepted; larger spans/subnormals retain exact fallback. Numerical boundary and zero-crossing tests, long-history parity, GPU and inventory checks; controlled80-case timing required before integration.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T18:54:14.398613+00:00",
+  "unit": {
+    "passed": 37,
+    "class_counts": {
+      "CertifiedCommodityChannelTests": 11,
+      "CompactCommodityChannelTests": 11,
+      "BoundedCommodityChannelExecutionTests": 15
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\cci-wide-grid\\unit\\unit.trx",
+    "sha256": "e63d07823313ff57e2d6d35e15dd788890884ba0bee51dc5ba2e9f3511504275",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-cci-wide-grid-certified-20261022-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 20,
+    "class_counts": {
+      "CommodityChannelComparisonTests": 16,
+      "SharedCommodityChannelBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\cci-wide-grid\\parity\\parity.trx",
+    "sha256": "a3dbac56ffdf511bf516596c14478b2a51f47d487ca326b9f14ceff6d8cacad5",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-cci-wide-grid-certified-20261022-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-wide-grid-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "727bb9c9736cef644f932003e200efe4a56e4884ca02552f3cee7a231dc656ce",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-wide-grid-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "727bb9c9736cef644f932003e200efe4a56e4884ca02552f3cee7a231dc656ce",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-wide-grid-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "727bb9c9736cef644f932003e200efe4a56e4884ca02552f3cee7a231dc656ce",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-wide-grid-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "727bb9c9736cef644f932003e200efe4a56e4884ca02552f3cee7a231dc656ce"
+  },
+  "source_fingerprint_sha256": "d199e4a77ae2ee8ade42985b127a05e5d11aed7d3b3a8344cd39b3177d214422",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved CCI exact-window-sum continuation: retain the original narrow fast path and certify wider normal windows with at most32 exponent bits using bounded128-bit deviations. Zero centers accepted; larger spans/subnormals retain exact fallback. Numerical boundary and zero-crossing tests, long-history parity, GPU and inventory checks; controlled80-case timing required before integration. Correctness checks passed; controlled performance remains pending."
+}
