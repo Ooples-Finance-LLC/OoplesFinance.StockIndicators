@@ -38,7 +38,7 @@
       "interpretation": "Initial completed run retained unchanged passing numerical tests; the corrected test class was rerun in full. Both raw runs are preserved, including the superseded failures. Production source and binaries were unchanged.",
       "production_dll_sha256": "62604700aa1b288ba8c99a8344039bd9e7d9de03c00e9bdf5851acabbb98a4d0",
       "verifier_file": "unipseudo-unit-rerun-verifier.py",
-      "verifier_sha256": "93081aaac0a62500ed3d4a7ef8fe70cc33248de80aaeedf8106bd70155cbe133"
+      "verifier_sha256": "31d7f2baad0135ce18a02ab607b91f94a42e32cce28112ed3334d36046079ff2"
     }
   },
   "benchmark_fixture": {

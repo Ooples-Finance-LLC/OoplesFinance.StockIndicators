@@ -37,7 +37,25 @@ internal static partial class ValuesBarExecution
 
     private static bool IsGeneratedState(IIndicator indicator) =>
         indicator is PeriodicChannel ||
+        indicator is VolatilityBasedMomentum { MaType: null } ||
+        indicator is VolumePositiveNegativeIndicator { MaType: null } ||
+        indicator is ZigZag { Deviation: >= 0 and < double.PositiveInfinity } ||
+        indicator is TechnicalRatings { MaType: null } ||
+        indicator is VanillaABCDPattern ||
+        indicator is TradingMadeMoreSimplerOscillator ||
+        indicator is VervoortHeikenAshiCandlestickOscillator ||
+        indicator is VervoortHeikenAshiLongTermCandlestickOscillator ||
+        indicator is VervoortSmoothedOscillator smoothedVervoort && double.IsFinite(smoothedVervoort.StdDevMult) ||
+        indicator is VixTradingSystem { MaType: null } ||
+        indicator is OnBalanceVolumeDisparityIndicator { MaType: MovingAvgType.SimpleMovingAverage } obvDisparity && double.IsFinite(obvDisparity.Top) && double.IsFinite(obvDisparity.Bottom) ||
+        indicator is RahulMohindarOscillator or QuantitativeQualitativeEstimation { MaType: null, FastFactor: >= 0 and < double.PositiveInfinity, SlowFactor: >= 0 and < double.PositiveInfinity } ||
+        indicator is SwamiStochastics or TradersDynamicIndex { MaType: null } ||
+        indicator is Svama or ProjectedSupportAndResistance ||
+        indicator is QuasiWhiteNoise { MaType: null } noise && double.IsFinite(noise.Divisor) && double.IsFinite(50 / noise.Divisor) ||
+        indicator is SpearmanIndicator { MaType: null } ||
         indicator is KalmanSmoother ||
+        indicator is SupportResistance { MaType: null, Length: > 0 } ||
+        indicator is TotalPowerIndicator { MaType: null, Length1: > 0 } ||
         indicator is _4MovingAverageConvergenceDivergence fourMacd && double.IsFinite(fourMacd.BlueMult) && double.IsFinite(fourMacd.YellowMult) ||
         indicator is _4PercentagePriceOscillator fourPpo && double.IsFinite(fourPpo.BlueMult) && double.IsFinite(fourPpo.YellowMult) ||
         indicator is StochasticMacdOscillator ||
@@ -565,7 +583,28 @@ internal static partial class ValuesBarExecution
     private static object CreateGeneratedState(IIndicator indicator, int count, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange) => indicator switch
     {
         PeriodicChannel channel => new GeneratedPeriodicChannelState(channel.Length1, channel.Length2),
+        ZigZag zigzag => new GeneratedZigZagWriter(count, zigzag.Deviation),
+        TechnicalRatings ratings => new GeneratedTechnicalRatingsState(ratings.AoLength1, ratings.AoLength2, ratings.RsiLength, ratings.StochLength1, ratings.StochLength2, ratings.StochLength3),
+        VanillaABCDPattern => new GeneratedVanillaAbcdState(),
+        TradingMadeMoreSimplerOscillator trading => new GeneratedTradingSimplerState(trading.Length, 8, 3, 50, 0, count),
+        VervoortHeikenAshiCandlestickOscillator candle => new GeneratedVervoortCandleState(false, candle.Length, 1.1, vervoortModifiedCustomRange),
+        VervoortHeikenAshiLongTermCandlestickOscillator candle => new GeneratedVervoortCandleState(true, candle.Length, 1.1, vervoortModifiedCustomRange),
+        VervoortSmoothedOscillator smooth => new GeneratedVervoortSmoothedState(smooth.Length1, smooth.Length2, smooth.Length3, smooth.SmoothLength, smooth.StdDevMult, volumeFlowCustomRange),
+        OnBalanceVolumeDisparityIndicator obv => new GeneratedObvDisparityState(obv.Length, obv.SignalLength, obv.Top, obv.Bottom),
+        VixTradingSystem vix => new GeneratedVixState(vix.Length, count),
+        RahulMohindarOscillator rmo => new GeneratedRmoState(2, rmo.Length, 30, 81),
+        QuantitativeQualitativeEstimation qqe => new GeneratedQqeState(qqe.Length, qqe.SmoothLength, qqe.FastFactor, qqe.SlowFactor),
+        SwamiStochastics swami => new GeneratedSwamiState(swami.FastLength, swami.SlowLength),
+        TradersDynamicIndex tdi => new GeneratedTradersDynamicState(tdi.Length1, tdi.Length2, tdi.Length3, tdi.Length4),
+        Svama => new GeneratedSvamaState(),
+        ProjectedSupportAndResistance levels => new GeneratedProjectedLevelsState(levels.Length),
+        QuasiWhiteNoise noise => new GeneratedQuasiNoiseState(noise.Length, noise.NoiseLength, noise.Divisor, count),
+        SpearmanIndicator rank => new GeneratedSpearmanState(rank.Length, rank.SignalLength, count),
+        VolatilityBasedMomentum momentum => new GeneratedVolatilityMomentumState(momentum.Length1, momentum.Length2),
+        VolumePositiveNegativeIndicator volume => new GeneratedVolumePositiveNegativeState(volume.Length, volume.SmoothLength),
         KalmanSmoother smoother => new GeneratedKalmanSmootherState(smoother.Length),
+        SupportResistance levels => new GeneratedSupportResistanceLevelsState(levels.Length, count),
+        TotalPowerIndicator power => new GeneratedTotalPowerState(power.Length1, power.Length2, count),
         _4MovingAverageConvergenceDivergence four => new GeneratedFourOscillatorState(four.Length1, four.Length2, four.Length3, four.Length4, false),
         _4PercentagePriceOscillator four => new GeneratedFourOscillatorState(four.Length1, four.Length2, four.Length3, four.Length4, true),
         StochasticMacdOscillator oscillator => new GeneratedStochasticMacdState(oscillator.Length, count),

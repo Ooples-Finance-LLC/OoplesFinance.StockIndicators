@@ -74,11 +74,11 @@ internal static partial class ValuesBarExecution
             var owned = history is null ? null : new OwnedBarBuffer(source.Length);
             bool boundedBatch = indicators.Count > 1 && indicators.All(i => i.Outputs.Count == 1 && IsSharedState(i) && IsBoundedWindowIndicator(i));
             bool pointwiseBatch = indicators.Count > 1 && indicators.All(IsPointwise);
-            bool volumeFlowCustomRange = indicators.Any(i => i is VolumeFlowIndicator)
+            bool volumeFlowCustomRange = indicators.Any(i => i is VolumeFlowIndicator or VervoortSmoothedOscillator)
                 && UsesVolumeFlowCustomRange(source, cancellation);
             bool valueChartCustomRange = indicators.Any(i => i is ValueChartIndicator)
                 && UsesValueChartCustomRange(source, cancellation);
-            bool vervoortModifiedCustomRange = indicators.Any(i => i is VervoortModifiedBollingerBandIndicator)
+            bool vervoortModifiedCustomRange = indicators.Any(i => i is VervoortModifiedBollingerBandIndicator or VervoortHeikenAshiCandlestickOscillator or VervoortHeikenAshiLongTermCandlestickOscillator)
                 && UsesVervoortModifiedCustomRange(source, cancellation);
             if (indicators.Any(i => i is PrimeNumberOscillator or PrimeNumberBands or ClosedFormDistanceVolatility))
                 ValidatePrimeGraphInput(source, indicators, cancellation);
@@ -767,7 +767,7 @@ internal static partial class ValuesBarExecution
                 _ => throw new InvalidOperationException("Unqualified values plan.")
             };
             // Scalar and fused kernels never use a per-node output scratch buffer.
-            _scratch = _state is null or IIndicatorState ? Array.Empty<double>()
+            _scratch = _state is null or IIndicatorState or GeneratedZigZagWriter ? Array.Empty<double>()
                 : new double[indicator is RegressionWithChannels ? 10 : indicator.Outputs.Count];
         }
         internal void Append(in Bar bar, int index, CancellationToken cancellation)
@@ -775,7 +775,8 @@ internal static partial class ValuesBarExecution
             if (Failure is not null || Indicator is Sma) return;
             try
             {
-                if (_state is RegressionWithFinalLine.Writer regression) regression.Append(in bar, index, Values, _scratch);
+                if (_state is GeneratedZigZagWriter zigzag) zigzag.Append(in bar, index);
+                else if (_state is RegressionWithFinalLine.Writer regression) regression.Append(in bar, index, Values, _scratch);
                 else if (_state is RegressionWithChannels.Writer channels) channels.Append(in bar, index, Values, _scratch, cancellation);
                 else if (Indicator is PriceCircularTransform)
                 {
@@ -1067,6 +1068,7 @@ internal static partial class ValuesBarExecution
         }
         internal void Complete(CancellationToken cancellation)
         {
+            if (_state is GeneratedZigZagWriter zigzag) zigzag.Complete(Values[0], cancellation);
             if (_state is RegressionWithFinalLine.Writer regression) regression.Complete(Values, cancellation);
             if (_state is RegressionWithChannels.Writer channels) channels.Complete();
         }

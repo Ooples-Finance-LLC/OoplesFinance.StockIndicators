@@ -2844,7 +2844,7 @@ public static partial class Calculations
         {
             var (prices, _, _, _, _) = GetInputValuesList(stockData);
             var (marketPrices, _, _, _, _) = GetInputValuesList(marketData);
-            var outputs = PairedBatch.Run(prices, marketPrices, (p,b) => new Streaming.SectorRotationModelState(p,b,maType,length1,length2));
+            var outputs = SectorRotationBatch.Run(prices, marketPrices, maType, length1, length2);
             var line=outputs["Signal"]; var signals=CreateSignalsList(stockData);
             for(var i=0;i<line.Count;i++) signals?.Add(GetCompareSignal(line[i]-(i==0?0:line[i-1]),(i==0?0:line[i-1])-(i<2?0:line[i-2])));
             stockData.SetOutputValues(() => outputs);

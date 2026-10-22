@@ -31,7 +31,7 @@ def enum_members(source):
     return sorted(set(members) - {'None'})
 
 
-def contract_receipts(root, targets, read):
+def contract_receipts(root, targets, read, batch_receipts=None, known_formulas=None):
     receipts = {}
     known_options = {option for option, _ in targets}
     for path in sorted((root / 'benchmarks/results/remaining-indicators').glob('*-contracts.json')):
@@ -40,6 +40,14 @@ def contract_receipts(root, targets, read):
             continue
         relative = path.relative_to(root).as_posix()
         record = json.loads(read(relative))
+        if record.get('receipt_scope') == 'batch-formulas':
+            if batch_receipts is None or known_formulas is None:
+                raise ValueError('Batch receipts require an explicit enum mapping')
+            for name in record['types']:
+                if name not in known_formulas:
+                    raise ValueError(f'Unknown batch formula in receipt: {name}')
+                batch_receipts.setdefault(name, []).append(relative)
+            continue
         for name in record['types']:
             option = name + 'SpecOptions'
             if option not in known_options:
@@ -83,7 +91,8 @@ def inventory(root):
         raise ValueError('No handwritten indicators found')
     # Receipts record completed batches, not a current-head performance verdict.
     # Keep unmapped options visible: reviewing one alias does not cover them all.
-    receipts = contract_receipts(root, targets, read)
+    batch_receipts = {}
+    receipts = contract_receipts(root, targets, read, batch_receipts, set(members))
     formulas = []
     for name in members:
         options = sorted(option for option, target in targets if target == name)
@@ -92,6 +101,10 @@ def inventory(root):
         if recorded:
             row.update(status='contract-receipts-recorded-performance-pending',
                        contract_receipts=recorded,
+                       options_without_receipts=[option for option in options if option not in receipts])
+        if name in batch_receipts:
+            row.update(status='contract-receipts-recorded-performance-pending',
+                       batch_contract_receipts=batch_receipts[name],
                        options_without_receipts=[option for option in options if option not in receipts])
         formulas.append(row)
     return {

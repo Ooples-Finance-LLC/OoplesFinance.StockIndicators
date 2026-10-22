@@ -86,4 +86,9 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="../benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PreservedKaufmanStressBatch.cs" Link="ModelsTests/PreservedKaufmanStressBatch.cs" />
+    <Compile Include="../benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PreservedRsmkBatch.cs" Link="ModelsTests/PreservedRsmkBatch.cs" />
+    <Compile Include="../benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PreservedSectorRotationBatch.cs" Link="ModelsTests/PreservedSectorRotationBatch.cs" />
+  </ItemGroup>
 </Project>
