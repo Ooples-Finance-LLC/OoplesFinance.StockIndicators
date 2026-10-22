@@ -20,9 +20,18 @@ public static class ParabolicStopSnapshots
         if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (parameters.Any(v => !FrameworkCompatibility.IsFinite(v)))
             throw new ArgumentOutOfRangeException(nameof(parameters));
-        foreach (var b in bars)
-            if (!FrameworkCompatibility.IsFinite(b.High) || !FrameworkCompatibility.IsFinite(b.Low))
-                throw new ArgumentOutOfRangeException(nameof(bars));
+        if (bars is Bar[] array)
+        {
+            foreach (var b in array)
+                if (!FrameworkCompatibility.IsFinite(b.High) || !FrameworkCompatibility.IsFinite(b.Low))
+                    throw new ArgumentOutOfRangeException(nameof(bars));
+        }
+        else
+        {
+            foreach (var b in bars)
+                if (!FrameworkCompatibility.IsFinite(b.High) || !FrameworkCompatibility.IsFinite(b.Low))
+                    throw new ArgumentOutOfRangeException(nameof(bars));
+        }
     }
 
     /// <summary>Unsigned stop with directional-movement initialization and nonnegative acceleration/maximum.</summary>
