@@ -1,0 +1,58 @@
+{
+  "input_head": "ed0701e926c63974c9059ac9358d7ba62689777d",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/FixedKernelSnapshots.cs",
+    "tests/ModelsTests/FibonacciRollingSnapshotTests.cs"
+  ],
+  "batch_note": "Approved Fibonacci snapshot redesign: two exact running sums, compact exact dyadics for periods through78 with arithmetic fallback, arbitrary integer coefficients above78, available-prefix normalization retained. Independent rescans, doubling identity reference, long-history and shared builder lifecycle checks required.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T13:02:21.850030+00:00",
+  "unit": {
+    "passed": 21,
+    "class_counts": {
+      "FibonacciWeightedAverageTests": 12,
+      "FibonacciRollingSnapshotTests": 9
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\fibonacci-certified\\unit\\unit.trx",
+    "sha256": "7d2bcedca606a198c228ebd3173ebfc9625f9d03f9cd9e5d44c16579e15a9e46",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-fibonacci-certified-20261022-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 15,
+    "class_counts": {
+      "FibonacciBuilderComparisonTests": 7,
+      "FixedKernelSnapshotComparisonTests": 8
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\fibonacci-certified\\parity\\parity.trx",
+    "sha256": "b47072c1919026a9649046f11580d07a30cd1e74f453ed4f12d9f14d7da4e5f8",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-fibonacci-certified-20261022-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fibonacci-certified-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "151641c9f810582a228424ae99aa770d67b64c1fba7ef8230eb3ab7f95023301",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fibonacci-certified-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "151641c9f810582a228424ae99aa770d67b64c1fba7ef8230eb3ab7f95023301",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fibonacci-certified-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "151641c9f810582a228424ae99aa770d67b64c1fba7ef8230eb3ab7f95023301",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fibonacci-certified-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "151641c9f810582a228424ae99aa770d67b64c1fba7ef8230eb3ab7f95023301"
+  },
+  "source_fingerprint_sha256": "d25b7ae1436a4a21ed3684feb938a0b36e283991e396d945a711ddf172028749",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved Fibonacci snapshot redesign: two exact running sums, compact exact dyadics for periods through78 with arithmetic fallback, arbitrary integer coefficients above78, available-prefix normalization retained. Independent rescans, doubling identity reference, long-history and shared builder lifecycle checks required. Correctness checks passed; controlled performance remains pending."
+}
