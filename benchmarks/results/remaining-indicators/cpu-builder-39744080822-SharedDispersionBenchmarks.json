@@ -1,0 +1,281 @@
+{
+  "fixture": "SharedDispersionBenchmarks",
+  "source_sha": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+  "binary_run": 39719116665,
+  "run_id": "39744080822",
+  "workflow_sha": "6b700cff22c35b07ba5edc61ff9c8e6a11dc5b2f",
+  "report_sha256": "978587a065649178a66d15d4d66da12a765911d8100ed908a034f901cc1feacd",
+  "report_file": "artifacts/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedDispersionBenchmarks-report-full-compressed.json",
+  "host": {
+    "BenchmarkDotNetCaption": "BenchmarkDotNet",
+    "BenchmarkDotNetVersion": "0.15.8",
+    "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+    "ProcessorName": "AMD EPYC 9V45",
+    "PhysicalProcessorCount": 1,
+    "PhysicalCoreCount": 2,
+    "LogicalCoreCount": 4,
+    "RuntimeVersion": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+    "Architecture": "X64",
+    "HasAttachedDebugger": false,
+    "HasRyuJit": true,
+    "Configuration": "RELEASE",
+    "DotNetCliVersion": "10.0.402",
+    "ChronometerFrequency": {
+      "Hertz": 1000000000
+    },
+    "HardwareTimerKind": "Unknown"
+  },
+  "comparisons": [
+    {
+      "pair": "TaLib.Functions.StdDev",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 23862.821166992188,
+        "lower_ns": 21278.51177654273,
+        "upper_ns": 26447.130557441644,
+        "samples": 8,
+        "allocated_bytes": 61484
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 3619.2533043755425,
+          "lower_ns": 3589.0347860168235,
+          "upper_ns": 3649.4718227342614,
+          "samples": 9,
+          "allocated_bytes": 7904
+        },
+        "NativeParallel": {
+          "mean_ns": 2886.0147338867187,
+          "lower_ns": 2799.58907456957,
+          "upper_ns": 2972.440393203867,
+          "samples": 10,
+          "allocated_bytes": 8176
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Functions.StdDev",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 18795.767041015624,
+        "lower_ns": 18469.418392471707,
+        "upper_ns": 19122.11568955954,
+        "samples": 10,
+        "allocated_bytes": 12449
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 3619.2533043755425,
+          "lower_ns": 3589.0347860168235,
+          "upper_ns": 3649.4718227342614,
+          "samples": 9,
+          "allocated_bytes": 7904
+        },
+        "NativeParallel": {
+          "mean_ns": 2886.0147338867187,
+          "lower_ns": 2799.58907456957,
+          "upper_ns": 2972.440393203867,
+          "samples": 10,
+          "allocated_bytes": 8176
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Functions.StdDev",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 172517.12829589844,
+        "lower_ns": 170842.74885527737,
+        "upper_ns": 174191.5077365195,
+        "samples": 8,
+        "allocated_bytes": 565853
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 36500.34577636719,
+          "lower_ns": 35548.88261288278,
+          "upper_ns": 37451.8089398516,
+          "samples": 10,
+          "allocated_bytes": 79906
+        },
+        "NativeParallel": {
+          "mean_ns": 19492.350512695313,
+          "lower_ns": 18854.97284941021,
+          "upper_ns": 20129.728175980417,
+          "samples": 10,
+          "allocated_bytes": 80176
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Functions.StdDev",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 163431.60264756944,
+        "lower_ns": 145267.4901112906,
+        "upper_ns": 181595.71518384828,
+        "samples": 9,
+        "allocated_bytes": 84469
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 36500.34577636719,
+          "lower_ns": 35548.88261288278,
+          "upper_ns": 37451.8089398516,
+          "samples": 10,
+          "allocated_bytes": 79906
+        },
+        "NativeParallel": {
+          "mean_ns": 19492.350512695313,
+          "lower_ns": 18854.97284941021,
+          "upper_ns": 20129.728175980417,
+          "samples": 10,
+          "allocated_bytes": 80176
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Functions.Var",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 14098.216049194336,
+        "lower_ns": 13694.883540438103,
+        "upper_ns": 14501.54855795057,
+        "samples": 8,
+        "allocated_bytes": 61484
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1926.2599533081054,
+          "lower_ns": 1891.9910202636315,
+          "upper_ns": 1960.5288863525793,
+          "samples": 10,
+          "allocated_bytes": 7904
+        },
+        "NativeParallel": {
+          "mean_ns": 1865.3060421413845,
+          "lower_ns": 1827.1769910333348,
+          "upper_ns": 1903.4350932494342,
+          "samples": 9,
+          "allocated_bytes": 8176
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Functions.Var",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 12545.19365234375,
+        "lower_ns": 11799.842564087363,
+        "upper_ns": 13290.544740600139,
+        "samples": 10,
+        "allocated_bytes": 12449
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1926.2599533081054,
+          "lower_ns": 1891.9910202636315,
+          "upper_ns": 1960.5288863525793,
+          "samples": 10,
+          "allocated_bytes": 7904
+        },
+        "NativeParallel": {
+          "mean_ns": 1865.3060421413845,
+          "lower_ns": 1827.1769910333348,
+          "upper_ns": 1903.4350932494342,
+          "samples": 9,
+          "allocated_bytes": 8176
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Functions.Var",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 107879.71050347222,
+        "lower_ns": 106418.23882220239,
+        "upper_ns": 109341.18218474205,
+        "samples": 9,
+        "allocated_bytes": 565856
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 18539.72258843316,
+          "lower_ns": 18174.004601063993,
+          "upper_ns": 18905.440575802328,
+          "samples": 9,
+          "allocated_bytes": 79905
+        },
+        "NativeParallel": {
+          "mean_ns": 10799.4837890625,
+          "lower_ns": 10296.820138700316,
+          "upper_ns": 11302.147439424685,
+          "samples": 10,
+          "allocated_bytes": 80176
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Functions.Var",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 102070.68642578126,
+        "lower_ns": 98671.72433317869,
+        "upper_ns": 105469.64851838382,
+        "samples": 10,
+        "allocated_bytes": 84457
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 18539.72258843316,
+          "lower_ns": 18174.004601063993,
+          "upper_ns": 18905.440575802328,
+          "samples": 9,
+          "allocated_bytes": 79905
+        },
+        "NativeParallel": {
+          "mean_ns": 10799.4837890625,
+          "lower_ns": 10296.820138700316,
+          "upper_ns": 11302.147439424685,
+          "samples": 10,
+          "allocated_bytes": 80176
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    }
+  ],
+  "complete": true,
+  "raw_archive": "benchmarks/results/remaining-indicators/cpu-builder-39744080822-SharedDispersionBenchmarks-raw.json.gz",
+  "provenance.json": {
+    "archive": "cpu-builder-39744080822-SharedDispersionBenchmarks-provenance.json.gz",
+    "sha256": "e05c9ac3de809ebd2c67e124e286241be1fbe4cbe442b6fc55ed69c633a2b6d0"
+  },
+  "binary-manifest.json": {
+    "archive": "cpu-builder-39744080822-SharedDispersionBenchmarks-binary-manifest.json.gz",
+    "sha256": "3db250a0c0f15ec643073c3408fab85828aa180fd569a460425fe015d50123c8"
+  },
+  "source_note": "Qualified baseline binaries reused; all selected fixtures are unchanged; the later SMA diagnostics and standalone compensated EMA changes do not participate in these fixtures."
+}
