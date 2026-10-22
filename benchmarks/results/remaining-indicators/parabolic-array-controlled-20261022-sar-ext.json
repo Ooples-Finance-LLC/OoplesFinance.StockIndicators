@@ -1,0 +1,241 @@
+{
+  "pair": "TaLib.Functions.SarExt",
+  "workflow_sha": "69a940716358c64a589e70913a308f53c8c0cdec",
+  "run_id": "39722176827",
+  "order": [
+    "old",
+    "new",
+    "new",
+    "old"
+  ],
+  "rounds": [
+    {
+      "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+      "rows": [
+        {
+          "pair": "TaLib.Functions.SarExt",
+          "bars": 1000,
+          "ooples": {
+            "mean_ns": 251118.2,
+            "lower_ns": 228632.97559054673,
+            "upper_ns": 273603.4244094533,
+            "allocated_bytes": 42064,
+            "samples": 10
+          },
+          "competitor": {
+            "mean_ns": 135603.7,
+            "lower_ns": 118063.36901771282,
+            "upper_ns": 153144.0309822872,
+            "allocated_bytes": 42528,
+            "samples": 10
+          },
+          "competitor_over_ooples": 0.5399994902798761,
+          "verdict": "slower"
+        },
+        {
+          "pair": "TaLib.Functions.SarExt",
+          "bars": 10000,
+          "ooples": {
+            "mean_ns": 552940.6,
+            "lower_ns": 534499.5855694343,
+            "upper_ns": 571381.6144305656,
+            "allocated_bytes": 419416,
+            "samples": 10
+          },
+          "competitor": {
+            "mean_ns": 295189.22222222225,
+            "lower_ns": 280131.54533072194,
+            "upper_ns": 310246.89911372255,
+            "allocated_bytes": 339528,
+            "samples": 9
+          },
+          "competitor_over_ooples": 0.5338534052703351,
+          "verdict": "slower"
+        }
+      ],
+      "order": 0,
+      "version": "old",
+      "source_sha": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+      "binary_run": 39719116665,
+      "report_sha256": "c2dbacf86cac1195637d64f3a400c2200a7df7c236c0190ca6c7b7c1f855e98c",
+      "report_file": "control/0-old/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "binary_hashes": {
+        "OoplesFinance.StockIndicators.dll": "7a0a5b6e68c7cbc983fd225e8eb379fffe88c8b3654b4f556fc2432e085b0ee6",
+        "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "510a4fefa59fc19ae213e60a5f55a52f8b549615eab65c1ab016e0db5e7f0c98"
+      },
+      "archived_report": "benchmarks/results/remaining-indicators/parabolic-array-controlled-20261022-sar-ext-0-old-raw.json.gz"
+    },
+    {
+      "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+      "rows": [
+        {
+          "pair": "TaLib.Functions.SarExt",
+          "bars": 1000,
+          "ooples": {
+            "mean_ns": 194267.9,
+            "lower_ns": 180402.5848807986,
+            "upper_ns": 208133.2151192014,
+            "allocated_bytes": 41912,
+            "samples": 10
+          },
+          "competitor": {
+            "mean_ns": 139507.2,
+            "lower_ns": 134636.15905154817,
+            "upper_ns": 144378.24094845186,
+            "allocated_bytes": 42528,
+            "samples": 10
+          },
+          "competitor_over_ooples": 0.718117609754365,
+          "verdict": "slower"
+        },
+        {
+          "pair": "TaLib.Functions.SarExt",
+          "bars": 10000,
+          "ooples": {
+            "mean_ns": 817842.3,
+            "lower_ns": 774418.415580719,
+            "upper_ns": 861266.1844192811,
+            "allocated_bytes": 419600,
+            "samples": 10
+          },
+          "competitor": {
+            "mean_ns": 271824.27777777775,
+            "lower_ns": 258870.4828165319,
+            "upper_ns": 284778.0727390236,
+            "allocated_bytes": 339240,
+            "samples": 9
+          },
+          "competitor_over_ooples": 0.3323675943122259,
+          "verdict": "slower"
+        }
+      ],
+      "order": 1,
+      "version": "new",
+      "source_sha": "cfb6d342a5fe35c2c48df46937d2ab3ddaf25e06",
+      "binary_run": 39721035437,
+      "report_sha256": "25dfb43b2bbce476da4b57f1232f6e1eedba98ead28f222a75abf124922b249e",
+      "report_file": "control/1-new/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "binary_hashes": {
+        "OoplesFinance.StockIndicators.dll": "837ed4455b99b38a301fb3051b2a85d3a1c2c9c6ae3e7b7acabfa276c6b9f631",
+        "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "4a17244a21562ad915cfe1195fbbfd1453d1ac0d71c9a55b6043cd60d0abb8e9"
+      },
+      "archived_report": "benchmarks/results/remaining-indicators/parabolic-array-controlled-20261022-sar-ext-1-new-raw.json.gz"
+    },
+    {
+      "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+      "rows": [
+        {
+          "pair": "TaLib.Functions.SarExt",
+          "bars": 1000,
+          "ooples": {
+            "mean_ns": 199362.2,
+            "lower_ns": 181015.37055470565,
+            "upper_ns": 217709.02944529438,
+            "allocated_bytes": 41912,
+            "samples": 10
+          },
+          "competitor": {
+            "mean_ns": 135886,
+            "lower_ns": 130557.8443228066,
+            "upper_ns": 141214.1556771934,
+            "allocated_bytes": 42528,
+            "samples": 8
+          },
+          "competitor_over_ooples": 0.6816036339887902,
+          "verdict": "slower"
+        },
+        {
+          "pair": "TaLib.Functions.SarExt",
+          "bars": 10000,
+          "ooples": {
+            "mean_ns": 814528.3,
+            "lower_ns": 771344.0619276258,
+            "upper_ns": 857712.5380723743,
+            "allocated_bytes": 419600,
+            "samples": 10
+          },
+          "competitor": {
+            "mean_ns": 274638.44444444444,
+            "lower_ns": 247761.94080626362,
+            "upper_ns": 301514.9480826252,
+            "allocated_bytes": 339528,
+            "samples": 9
+          },
+          "competitor_over_ooples": 0.33717483412724203,
+          "verdict": "slower"
+        }
+      ],
+      "order": 2,
+      "version": "new",
+      "source_sha": "cfb6d342a5fe35c2c48df46937d2ab3ddaf25e06",
+      "binary_run": 39721035437,
+      "report_sha256": "88c0f41384e17a427c34503cb16c5bdf5097712c609fa1db1c1cb61ef760d88b",
+      "report_file": "control/2-new/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "binary_hashes": {
+        "OoplesFinance.StockIndicators.dll": "837ed4455b99b38a301fb3051b2a85d3a1c2c9c6ae3e7b7acabfa276c6b9f631",
+        "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "4a17244a21562ad915cfe1195fbbfd1453d1ac0d71c9a55b6043cd60d0abb8e9"
+      },
+      "archived_report": "benchmarks/results/remaining-indicators/parabolic-array-controlled-20261022-sar-ext-2-new-raw.json.gz"
+    },
+    {
+      "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+      "rows": [
+        {
+          "pair": "TaLib.Functions.SarExt",
+          "bars": 1000,
+          "ooples": {
+            "mean_ns": 248001.72222222222,
+            "lower_ns": 231717.252760178,
+            "upper_ns": 264286.19168426644,
+            "allocated_bytes": 42064,
+            "samples": 9
+          },
+          "competitor": {
+            "mean_ns": 143326,
+            "lower_ns": 118198.38633357362,
+            "upper_ns": 168453.6136664264,
+            "allocated_bytes": 42192,
+            "samples": 9
+          },
+          "competitor_over_ooples": 0.5779234059978526,
+          "verdict": "slower"
+        },
+        {
+          "pair": "TaLib.Functions.SarExt",
+          "bars": 10000,
+          "ooples": {
+            "mean_ns": 514286.5,
+            "lower_ns": 429637.8362590167,
+            "upper_ns": 598935.1637409832,
+            "allocated_bytes": 419416,
+            "samples": 10
+          },
+          "competitor": {
+            "mean_ns": 288024.6666666667,
+            "lower_ns": 270871.60886719514,
+            "upper_ns": 305177.7244661382,
+            "allocated_bytes": 339528,
+            "samples": 9
+          },
+          "competitor_over_ooples": 0.5600471073354379,
+          "verdict": "slower"
+        }
+      ],
+      "order": 3,
+      "version": "old",
+      "source_sha": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+      "binary_run": 39719116665,
+      "report_sha256": "f89edb288f57cd0a2dd6580700c630a3223a38f549b3d50eaa340a01c0152057",
+      "report_file": "control/3-old/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "binary_hashes": {
+        "OoplesFinance.StockIndicators.dll": "7a0a5b6e68c7cbc983fd225e8eb379fffe88c8b3654b4f556fc2432e085b0ee6",
+        "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "510a4fefa59fc19ae213e60a5f55a52f8b549615eab65c1ab016e0db5e7f0c98"
+      },
+      "archived_report": "benchmarks/results/remaining-indicators/parabolic-array-controlled-20261022-sar-ext-3-old-raw.json.gz"
+    }
+  ],
+  "complete": true,
+  "decision": "Reject array-access/scalar-coefficient production follow-up: both new10k confidence intervals exceed both old intervals on the same runner in old/new/new/old order. Restore original production code and retain additional array/list parity regressions. Candidate timings were never imported into live report.",
+  "provenance_archive": "parabolic-array-controlled-20261022-sar-ext-provenance.json.gz",
+  "provenance_sha256": "ae7b2b21690ded1774a973c9f6ab98448e4ec01cc46c1c8073960f1def060136"
+}
