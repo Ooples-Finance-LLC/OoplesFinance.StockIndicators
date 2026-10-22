@@ -48,6 +48,9 @@ public static class FibonacciWeightedSnapshot
     }
 
 #if !NETFRAMEWORK
+    // Short batches can finish before tiered compilation optimizes this loop.
+    // Keep the exact arithmetic, but compile this bounded path optimized immediately.
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
     private static bool TryCalculateAligned(IReadOnlyList<Bar> bars, int period, out double[] output)
     {
         output = Array.Empty<double>();
