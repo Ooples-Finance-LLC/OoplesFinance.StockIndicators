@@ -1,11 +1,11 @@
-name: CPU builder batch nine measurements
+name: CPU builder batch ten measurements
 on:
   workflow_dispatch:
 permissions:
   contents: read
   actions: read
 concurrency:
-  group: cpu-builder-batch9-${{ github.ref }}
+  group: cpu-builder-batch10-${{ github.ref }}
   cancel-in-progress: false
 jobs:
   measure:
@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        fixture: [SharedExpandingRecurrenceBenchmarks, SharedMedianAdaptiveBenchmarks, SharedSampleShapeBenchmarks, SharedSchaffCycleBenchmarks, SharedSeededAdaptiveBenchmarks, SharedSeededPhaseBenchmarks, SharedSmoothedAccumulationBenchmarks, SharedZeroSeedLaguerreBenchmarks]
+        fixture: [SharedCurvatureBenchmarks, SharedDeviationAverageBenchmarks, SharedDeviationRatioBenchmarks, SharedFractalBenchmarks, SharedPivotBenchmarks, SharedDetailedDeviationBenchmarks, SharedTaDirectionalBenchmarks, SharedTradyReturnBenchmarks, SharedGeneratedStateBenchmarks]
     env:
       BUILDER_FIXTURE: ${{ matrix.fixture }}
     steps:
@@ -28,7 +28,7 @@ jobs:
       - name: Verify qualified binary source and unchanged mapped implementations
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python scripts/measure-cpu-builder-batch9.py verify
+        run: python scripts/measure-cpu-builder-batch10.py verify
       - uses: actions/download-artifact@v8
         with:
           name: competitor-binaries
@@ -36,7 +36,7 @@ jobs:
           run-id: 39719116665
           github-token: ${{ github.token }}
       - name: Measure both builder modes and both native arms
-        run: python scripts/measure-cpu-builder-batch9.py measure
+        run: python scripts/measure-cpu-builder-batch10.py measure
       - uses: actions/upload-artifact@v7
         if: always()
         with:
