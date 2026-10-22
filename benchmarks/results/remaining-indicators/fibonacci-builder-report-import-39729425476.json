@@ -1,0 +1,284 @@
+{
+  "imported.json": {
+    "before_sha256": "74cadddbe1de3b18f8fbd1d119f743054d235312e36813e87eec981669a4db83",
+    "candidate_sha256": "e2da8bb4d4bd5b5fdb76f5c96091f2c5ab2e582f67c1f6d5e2d3904227d2d0f4",
+    "builder_run_id": "39729425476",
+    "builder_comparisons": 4,
+    "unchanged_baseline_comparisons": 802,
+    "receipt": {
+      "source_sha": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+      "binary_run": 39719116665,
+      "run_id": "39729425476",
+      "workflow_sha": "a99efec8b38465f9c7cf6410ec8e0a90b1a8749a",
+      "report_sha256": "80e8e620c79529d5217d4950f383673383a2d701735381e3d720efcd69e75773",
+      "report_file": "artifacts/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedFibonacciWeightedBenchmarks-report-full-compressed.json",
+      "host": {
+        "BenchmarkDotNetCaption": "BenchmarkDotNet",
+        "BenchmarkDotNetVersion": "0.15.8",
+        "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+        "ProcessorName": "AMD EPYC 9V74",
+        "PhysicalProcessorCount": 1,
+        "PhysicalCoreCount": 2,
+        "LogicalCoreCount": 4,
+        "RuntimeVersion": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+        "Architecture": "X64",
+        "HasAttachedDebugger": false,
+        "HasRyuJit": true,
+        "Configuration": "RELEASE",
+        "DotNetCliVersion": "10.0.402",
+        "ChronometerFrequency": {
+          "Hertz": 1000000000
+        },
+        "HardwareTimerKind": "Unknown"
+      },
+      "comparisons": [
+        {
+          "pair": "QuanTAlib.Fwma",
+          "bars": 1000,
+          "mode": "BuilderFull",
+          "ooples": {
+            "mean_ns": 40903.82221137153,
+            "lower_ns": 36364.63202172203,
+            "upper_ns": 45443.012401021035,
+            "samples": 9,
+            "allocated_bytes": 61755
+          },
+          "native": {
+            "NativeSingle": {
+              "mean_ns": 140859.10546875,
+              "lower_ns": 140230.63088766858,
+              "upper_ns": 141487.58004983142,
+              "samples": 9,
+              "allocated_bytes": 260616
+            },
+            "NativeParallel": {
+              "mean_ns": 57402.98173828125,
+              "lower_ns": 56557.02204870398,
+              "upper_ns": 58248.94142785852,
+              "samples": 10,
+              "allocated_bytes": 269004
+            }
+          },
+          "fastest_native": "NativeParallel",
+          "verdict": "faster"
+        },
+        {
+          "pair": "QuanTAlib.Fwma",
+          "bars": 1000,
+          "mode": "BuilderLatestOnly",
+          "ooples": {
+            "mean_ns": 36621.269911024305,
+            "lower_ns": 35963.3260208309,
+            "upper_ns": 37279.21380121771,
+            "samples": 9,
+            "allocated_bytes": 12765
+          },
+          "native": {
+            "NativeSingle": {
+              "mean_ns": 140859.10546875,
+              "lower_ns": 140230.63088766858,
+              "upper_ns": 141487.58004983142,
+              "samples": 9,
+              "allocated_bytes": 260616
+            },
+            "NativeParallel": {
+              "mean_ns": 57402.98173828125,
+              "lower_ns": 56557.02204870398,
+              "upper_ns": 58248.94142785852,
+              "samples": 10,
+              "allocated_bytes": 269004
+            }
+          },
+          "fastest_native": "NativeParallel",
+          "verdict": "faster"
+        },
+        {
+          "pair": "QuanTAlib.Fwma",
+          "bars": 10000,
+          "mode": "BuilderFull",
+          "ooples": {
+            "mean_ns": 307821.9986328125,
+            "lower_ns": 304688.4770566447,
+            "upper_ns": 310955.52020898036,
+            "samples": 10,
+            "allocated_bytes": 566128
+          },
+          "native": {
+            "NativeSingle": {
+              "mean_ns": 1409443.0633680555,
+              "lower_ns": 1404080.0299233955,
+              "upper_ns": 1414806.0968127155,
+              "samples": 9,
+              "allocated_bytes": 2625876
+            },
+            "NativeParallel": {
+              "mean_ns": 509071.08984375,
+              "lower_ns": 506380.52010475565,
+              "upper_ns": 511761.65958274435,
+              "samples": 10,
+              "allocated_bytes": 2634384
+            }
+          },
+          "fastest_native": "NativeParallel",
+          "verdict": "faster"
+        },
+        {
+          "pair": "QuanTAlib.Fwma",
+          "bars": 10000,
+          "mode": "BuilderLatestOnly",
+          "ooples": {
+            "mean_ns": 291404.7805989583,
+            "lower_ns": 289854.53681513417,
+            "upper_ns": 292955.02438278246,
+            "samples": 9,
+            "allocated_bytes": 84764
+          },
+          "native": {
+            "NativeSingle": {
+              "mean_ns": 1409443.0633680555,
+              "lower_ns": 1404080.0299233955,
+              "upper_ns": 1414806.0968127155,
+              "samples": 9,
+              "allocated_bytes": 2625876
+            },
+            "NativeParallel": {
+              "mean_ns": 509071.08984375,
+              "lower_ns": 506380.52010475565,
+              "upper_ns": 511761.65958274435,
+              "samples": 10,
+              "allocated_bytes": 2634384
+            }
+          },
+          "fastest_native": "NativeParallel",
+          "verdict": "faster"
+        }
+      ],
+      "complete": true,
+      "raw_archive": "benchmarks/results/remaining-indicators/fibonacci-builder-39729425476-raw.json.gz",
+      "provenance.json": {
+        "archive": "fibonacci-builder-39729425476-provenance.json.gz",
+        "sha256": "a9eb55da1c0d986f1dfde7d2cd17d5a98a06d2b779af5698c67ff5f5d87dac29"
+      },
+      "binary-manifest.json": {
+        "archive": "fibonacci-builder-39729425476-binary-manifest.json.gz",
+        "sha256": "3db250a0c0f15ec643073c3408fab85828aa180fd569a460425fe015d50123c8"
+      },
+      "verified_current_component_paths": [
+        "src/Indicators/FibonacciWeightedAverage.cs",
+        "src/Helpers/ExactMeanAccumulator.cs",
+        "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks"
+      ],
+      "qualification": "Four matched default-period builder comparisons faster than both serial and parallel native arms. Separate batch snapshot performance remains slow; no universal superiority claim."
+    },
+    "browser_verified": true,
+    "imported_utc": "2026-10-22T05:47:58.571085+00:00"
+  },
+  "browser-verification.json": {
+    "source": null,
+    "run_id": "39727929133",
+    "report_sha256": "e2da8bb4d4bd5b5fdb76f5c96091f2c5ab2e582f67c1f6d5e2d3904227d2d0f4",
+    "changed_means": {
+      "ooples": 802,
+      "competitor": 802
+    },
+    "summary": [
+      {
+        "library": "QuanTAlib",
+        "bars": 1000,
+        "comparisons": 50,
+        "lower": 22,
+        "higher": 28,
+        "equal": 0
+      },
+      {
+        "library": "QuanTAlib",
+        "bars": 10000,
+        "comparisons": 50,
+        "lower": 27,
+        "higher": 23,
+        "equal": 0
+      },
+      {
+        "library": "Skender",
+        "bars": 1000,
+        "comparisons": 84,
+        "lower": 32,
+        "higher": 52,
+        "equal": 0
+      },
+      {
+        "library": "Skender",
+        "bars": 10000,
+        "comparisons": 84,
+        "lower": 31,
+        "higher": 53,
+        "equal": 0
+      },
+      {
+        "library": "TaLib",
+        "bars": 1000,
+        "comparisons": 160,
+        "lower": 57,
+        "higher": 103,
+        "equal": 0
+      },
+      {
+        "library": "TaLib",
+        "bars": 10000,
+        "comparisons": 160,
+        "lower": 15,
+        "higher": 145,
+        "equal": 0
+      },
+      {
+        "library": "Trady",
+        "bars": 1000,
+        "comparisons": 107,
+        "lower": 106,
+        "higher": 1,
+        "equal": 0
+      },
+      {
+        "library": "Trady",
+        "bars": 10000,
+        "comparisons": 107,
+        "lower": 107,
+        "higher": 0,
+        "equal": 0
+      }
+    ],
+    "comparisons": 802,
+    "displayed_table_comparisons": 802,
+    "exported_comparisons": 802,
+    "javascript_errors": []
+  },
+  "builder-verification.json": {
+    "run_id": "39729425476",
+    "builder_comparisons": 4,
+    "unchanged_baseline_comparisons": 802,
+    "report_sha256": "e2da8bb4d4bd5b5fdb76f5c96091f2c5ab2e582f67c1f6d5e2d3904227d2d0f4",
+    "javascript_errors": [],
+    "status_totals": {
+      "faster": 4,
+      "slower": 0,
+      "inconclusive": 0,
+      "expected": 1604,
+      "measured": 4,
+      "pending": 1600
+    }
+  },
+  "scripts": {
+    "stage-fibonacci-builder-report.py": {
+      "archive": "fibonacci-builder-39729425476-stage-fibonacci-builder-report.py.gz",
+      "sha256": "6a4ca198a5521a63f5c6a2fe178c65dbfa982e8531a18d2b5681aa170b834130"
+    },
+    "verify-fibonacci-builder-report.py": {
+      "archive": "fibonacci-builder-39729425476-verify-fibonacci-builder-report.py.gz",
+      "sha256": "5ce982d6d279687c4f51abca0d8ae3533a64438fad12a8bb73cc853a026df80c"
+    },
+    "import-fibonacci-builder-report.py": {
+      "archive": "fibonacci-builder-39729425476-import-fibonacci-builder-report.py.gz",
+      "sha256": "40b083c9e6cb0d1d02c654f563a6239e92f42eefb33d48e918e9a0c5925ef651"
+    }
+  }
+}
