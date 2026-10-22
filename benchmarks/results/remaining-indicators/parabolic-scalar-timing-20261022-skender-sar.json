@@ -1,0 +1,55 @@
+{
+  "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+  "rows": [
+    {
+      "pair": "Skender.GetParabolicSar",
+      "bars": 1000,
+      "ooples": {
+        "mean_ns": 537035,
+        "lower_ns": 512371.13745853555,
+        "upper_ns": 561698.8625414644,
+        "allocated_bytes": 132208,
+        "samples": 9
+      },
+      "competitor": {
+        "mean_ns": 557179.5,
+        "lower_ns": 529089.0118222772,
+        "upper_ns": 585269.9881777228,
+        "allocated_bytes": 216392,
+        "samples": 9
+      },
+      "competitor_over_ooples": 1.0375105905574125,
+      "verdict": "inconclusive"
+    },
+    {
+      "pair": "Skender.GetParabolicSar",
+      "bars": 10000,
+      "ooples": {
+        "mean_ns": 1766163.0555555555,
+        "lower_ns": 1742048.5473967132,
+        "upper_ns": 1790277.5637143978,
+        "allocated_bytes": 1319896,
+        "samples": 9
+      },
+      "competitor": {
+        "mean_ns": 3339378.2,
+        "lower_ns": 3052840.598555612,
+        "upper_ns": 3625915.8014443885,
+        "allocated_bytes": 2070392,
+        "samples": 10
+      },
+      "competitor_over_ooples": 1.8907530590088024,
+      "verdict": "faster"
+    }
+  ],
+  "source_sha": "67a1ab318edccd9e4d0b175425346df4385266de",
+  "binary_run": 39715346146,
+  "workflow_sha": "8b93566d0b198f8521ed638debf60fe91b26aebc",
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/39715382663",
+  "report_sha256": "735a769623b1a0bdfa4b303d6ac263c7fba6dbb4715567e42211abec42edfff9",
+  "benchmark_binary_sha256": "b5b4f9f2a19d21d41a75d62340418f56cb591c80119e64ae998fde1eadef549c",
+  "production_binary_sha256": "609354e36aa9ade79e8d47769fe65185ed998130879817260a16a005464f8729",
+  "note": "Source-pinned direct Parabolic comparison at both sizes. Retained confidence intervals determine the verdict; cross-run times are not controlled speedup evidence.",
+  "raw_evidence": "benchmarks/results/remaining-indicators/parabolic-scalar-timing-20261022-skender-sar-raw.json.gz",
+  "report_import": "Actual eight Parabolic rows replaced; all802table/CSV comparisons verified and794other rows preserved. Skender1000 comparison is inconclusive despite lower observed mean."
+}
