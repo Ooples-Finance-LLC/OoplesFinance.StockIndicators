@@ -7361,7 +7361,13 @@
       "options": [
         "PeriodicChannelSpecOptions"
       ],
-      "status": "pending-assessment"
+      "status": "contract-receipts-recorded-performance-pending",
+      "contract_receipts": {
+        "PeriodicChannelSpecOptions": [
+          "benchmarks/results/remaining-indicators/periodic-channel-certified-integrated-contracts.json"
+        ]
+      },
+      "options_without_receipts": []
     },
     {
       "indicator": "PhaseChangeIndex",
@@ -13337,6 +13343,7 @@
     "benchmarks/results/remaining-indicators/otherstops-cpu-contracts.json": "50b6e7c4295bdce66f89c8066c1f5509834fb795e514666a5b34e9dd57fc87fc",
     "benchmarks/results/remaining-indicators/overshoot-integrated-contracts.json": "64be0ec663171abbbfb36bfda555ffe50589e34d37ff99492f4bc9e767c61ed4",
     "benchmarks/results/remaining-indicators/parabolic-sar-integrated-contracts.json": "97b892678287d4ea039b702f1340e0a8b14f949f384b7bbf4fdf9236dea8bc6b",
+    "benchmarks/results/remaining-indicators/periodic-channel-certified-integrated-contracts.json": "c0eb8fa8517e50a3606ed58d27f62b01b85fd7cefeb2ffaff8f7a5bf08fa50d4",
     "benchmarks/results/remaining-indicators/pivot-average-integrated-contracts.json": "5d4d5244d0fbfa0bffd52ee1d567b8e8966549e24e2f8801b66f0bfa031a1c56",
     "benchmarks/results/remaining-indicators/pivot-detector-integrated-contracts.json": "68b0cdf896bef489adc010502e466234eebb8b36d0240d8b77d7425f8b31cc79",
     "benchmarks/results/remaining-indicators/pivotfamilies-integrated-contracts.json": "cf593b467644abf480ad43c4c64e128d1a4ddab46bfc9e8fb6efa48fc988790e",
@@ -13672,7 +13679,7 @@
     "src/Indicators/ValuesBarExecution.GOscillators.cs": "4a4b6c6d79f77b11a17788eeb49c882405866ba632948a0afdb4e5887108d3c5",
     "src/Indicators/ValuesBarExecution.GatorMeanness.cs": "56179f71b9f44a134b2400cf59572d12a30274cddcfde71874745ea0cf351ff3",
     "src/Indicators/ValuesBarExecution.GeneralFilter.cs": "899b70ad9709e6907a2e886e1edebcd7c9d11ca89af1ed80bd1762dc0aae33c8",
-    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "efaed7ea3bb3ae89a78252e51ba15cda6dc8c110a3190c11bc6de951750bf08a",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "76009f9f49010a4f278edb4180f28d4d5834871290e187daf64d55053d934b13",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Ichimoku.cs": "459397c5a7db8d4e7705eee86fb78d66bcfbc55b279a915f5acd7870fcff0fd7",
     "src/Indicators/ValuesBarExecution.ImpulsePair.cs": "22eb567c61c55733702c849068aaa24497b122f1aeda3865e9b9f21442e3a611",
@@ -13697,6 +13704,7 @@
     "src/Indicators/ValuesBarExecution.Overshoot.cs": "fcada6e7177d7c71701dc4cd187ad679e4f5143a35c4a336cc3ede4cb101ac22",
     "src/Indicators/ValuesBarExecution.PairStatistics.cs": "e6253a7b79f715de3afa2968ef8ca4027d82e1cdb880187ae9192b5f1f99176f",
     "src/Indicators/ValuesBarExecution.ParabolicSar.cs": "516cd2cf35b7c405c59c686422bddf8986ef6b8917e508b51898c5c2afab1708",
+    "src/Indicators/ValuesBarExecution.PeriodicChannel.cs": "0e6fe16d10596f72693722c4d752e3a66a167608ea99ece4087f8b4187cf6e64",
     "src/Indicators/ValuesBarExecution.PivotAverage.cs": "e0147aacb5b39b5d71279144626a93a91c4ac7a6097005b797c205194c6aa9d4",
     "src/Indicators/ValuesBarExecution.PivotDetector.cs": "f8e1ac698675b64eee46d2b2044fafb02144565db1f51bc6cd907983d5dc9af1",
     "src/Indicators/ValuesBarExecution.PivotFamilies.cs": "90d659f3c1c61126cbd59861542d039781d69912670138619daacd088928741a",
