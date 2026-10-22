@@ -1,0 +1,102 @@
+{
+  "input_head": "9cfef74a68dd5c0c4582fecf89ebe3b49ad90db9",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reused_qualifications": {
+    "vervoort-smoothed-integration": {
+      "source": "6bbcf3419b3d351736ed151c6bb319d17cf2b9cd",
+      "parity": {
+        "passed": 429,
+        "class_counts": {
+          "RemainingBenchmarkDiscoveryTests": 409,
+          "RemainingVervoortCandlesBenchmarkTests": 12,
+          "RemainingRmoQqeBenchmarkTests": 8
+        },
+        "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\vervoort-smoothed-integration\\parity\\parity.trx",
+        "sha256": "3e34766e1e81ca970b8dbc9c95b30573ec055fc3909d63d335f8026cb96e2843"
+      },
+      "note": "Unchanged family source and previously reviewed integration; combined dispatch tests repeat, expensive unchanged family parity reuses complete raw evidence."
+    },
+    "volatility-integration": {
+      "source": "c596070561a7b44cad4618095029251595a35058",
+      "parity": {
+        "passed": 431,
+        "class_counts": {
+          "RemainingBenchmarkDiscoveryTests": 407,
+          "RemainingVolatilityMomentumBenchmarkTests": 4,
+          "RemainingVervoortModifiedBenchmarkTests": 4,
+          "RemainingSwamiTdiBenchmarkTests": 8,
+          "RemainingKalmanSmootherBenchmarkTests": 4,
+          "RemainingVolumePositiveNegativeBenchmarkTests": 4
+        },
+        "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\volatility-integration\\parity\\parity.trx",
+        "sha256": "b3ba1330b897d37ad58d1c4e5a97a29f616edad7eeac01ccf4031c6a4c71f73d"
+      },
+      "note": "Unchanged family source and previously reviewed integration; combined dispatch tests repeat, expensive unchanged family parity reuses complete raw evidence."
+    }
+  },
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedMeanRelativeError.cs",
+    "src/Helpers/RoundedMeanErrorWindow.cs"
+  ],
+  "parallel_batch_note": "Publish independently qualified RMO/QQE and Vervoort candles with current compact SMA:209 combined unit cases, SMA parity/discovery, source-matchedGPU; preserve unchanged family numerical and parity evidence.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T00:35:31.024014+00:00",
+  "unit": {
+    "passed": 209,
+    "class_counts": {
+      "SharedGeneratedVolumeFlowTests": 54,
+      "SharedGeneratedVervoortCandlesTests": 31,
+      "SharedGeneratedRmoQqeTests": 20,
+      "MeanDiagnosticsCertifiedTests": 14,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "SharedGeneratedVolumePositiveNegativeTests": 13,
+      "SharedGeneratedSwamiTdiTests": 20,
+      "SharedGeneratedVolatilityMomentumTests": 13,
+      "RollingStatisticsSharedExecutionTests": 17,
+      "SharedGeneratedKalmanSmootherTests": 10,
+      "SharedGeneratedVervoortModifiedTests": 11,
+      "MeanDiagnosticsScaleReductionTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\candle-sma-integration\\unit\\unit.trx",
+    "sha256": "1c5248dd9c33b6f8757c3f65fcfa4b7ee57798e8fea22e2f81f654c6c782862a",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-candle-sma-integration-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 411,
+    "class_counts": {
+      "RemainingBenchmarkDiscoveryTests": 409,
+      "SharedRollingStatisticsBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\candle-sma-integration\\parity\\parity.trx",
+    "sha256": "263147345005dc19a2eafc6df25e79debf3c3fed5c5b721489fe43e5e3f5828d",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-candle-sma-integration-20261021-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vervoort-smoothed-certified-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f21330c3401eb47993576378674b249dab05407043023c640341dc55135922a1",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vervoort-smoothed-certified-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f21330c3401eb47993576378674b249dab05407043023c640341dc55135922a1",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vervoort-smoothed-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f21330c3401eb47993576378674b249dab05407043023c640341dc55135922a1",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vervoort-smoothed-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f21330c3401eb47993576378674b249dab05407043023c640341dc55135922a1"
+  },
+  "source_fingerprint_sha256": "8daba98426bf98b2118c3b3c404c45b9d9d50e19e11ac8f2f20a372c6c90fdb0",
+  "inventory_tests_passed": 6,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Combined RMO/QQE and Vervoort candle source with compact SMA:209 integration units, two SMA parity cases and discovery, fresh source-matched GPU. Unchanged 44 family parity cases retain complete source-pinned raw evidence. Numerical qualifications remain preserved."
+}

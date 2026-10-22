@@ -4,7 +4,7 @@ Raw TRX files are never rewritten. Any uncovered failure or incomplete run fails
 """
 import xml.etree.ElementTree as ET
 
-NS = {'t': 'http://microsoft.com/schemas/VisualStudio/TeamTest/2010'}
+NS = {'t': 'http://microsoft.com/schemas/VisualStudio/TeamTest/2010'}  # NOSONAR: XML namespace identifier, not a network connection.
 
 
 def read_run(raw, outcome):

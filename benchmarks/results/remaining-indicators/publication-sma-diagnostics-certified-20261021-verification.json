@@ -1,0 +1,76 @@
+{
+  "input_head": "c559d6c3ffa9ca6501a28fba635d07746aded295",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "parallel_batch_note": "Approved SMA diagnostics certified UInt128 quotient intervals with exact rational fallback; shared absolute-error history storage covered by rolling statistics tests.",
+  "production_build_reuse": {
+    "state": {
+      "input_head": "c559d6c3ffa9ca6501a28fba635d07746aded295",
+      "source": "C-drive recovery; committed source and compressed evidence retained",
+      "checks": {
+        "build-net461": "passed",
+        "build-net10": "passed"
+      },
+      "drive": "C:",
+      "status": "waiting-build-capacity",
+      "parallel_batch_note": "Approved SMA diagnostics certified UInt128 quotient intervals with exact rational fallback; shared absolute-error history storage covered by rolling statistics tests.",
+      "step": "build",
+      "updated_utc": "2026-10-21T23:45:36.448476+00:00"
+    },
+    "dlls": {
+      "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-diagnostics-certified-20261021\\src\\bin\\Release\\net461\\OoplesFinance.StockIndicators.dll": "4754f5e06807868c07e90f28fc67422d0ae2a214b459a135c0acfa64b465611f",
+      "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-diagnostics-certified-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c603a789076a42358db8bc0023ad11a23a1e69782e1699eabcfd20f115bd962b"
+    },
+    "reason": "Prioritize test-only compilation after completed production builds; allow one own build with >=16 GiB available alongside at most two other builds."
+  },
+  "step": "complete",
+  "updated_utc": "2026-10-21T23:49:25.376484+00:00",
+  "unit": {
+    "passed": 34,
+    "class_counts": {
+      "RollingStatisticsSharedExecutionTests": 17,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "MeanDiagnosticsCertifiedTests": 11,
+      "MeanDiagnosticsScaleReductionTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-diagnostics-certified\\unit\\unit.trx",
+    "sha256": "e58e45aecd284e6a6d586399598ffcc56aeab67a0d02a29089060cadca1cfee0",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-diagnostics-certified-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 2,
+    "class_counts": {
+      "SharedRollingStatisticsBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-diagnostics-certified\\parity\\parity.trx",
+    "sha256": "be79c50ba7f39e0ebbf6301b7d564c4adb44cb48248bf0aaca6210f56c4d3d58",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-diagnostics-certified-20261021-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-diagnostics-certified-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c603a789076a42358db8bc0023ad11a23a1e69782e1699eabcfd20f115bd962b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-diagnostics-certified-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c603a789076a42358db8bc0023ad11a23a1e69782e1699eabcfd20f115bd962b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-diagnostics-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c603a789076a42358db8bc0023ad11a23a1e69782e1699eabcfd20f115bd962b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-diagnostics-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c603a789076a42358db8bc0023ad11a23a1e69782e1699eabcfd20f115bd962b"
+  },
+  "source_fingerprint_sha256": "0eb442b39a2daf0bbf290cbcf6972e535e723ed6c310606359fe0a9dd60ae473",
+  "inventory_tests_passed": 6,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Certified relative-error quotients retain exact fallback and shared window storage behavior. Focused independent rational, presence/reset, allocation, and long-history comparisons are recorded; controlled timing remains pending."
+}

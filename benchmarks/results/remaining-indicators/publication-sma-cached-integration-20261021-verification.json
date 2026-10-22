@@ -1,0 +1,79 @@
+{
+  "input_head": "3efec043f91e4a9962a049fab7f9ad77784445c4",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedMeanRelativeError.cs",
+    "src/Helpers/RoundedMeanErrorWindow.cs",
+    "tests/ModelsTests/MeanDiagnosticsCertifiedTests.cs"
+  ],
+  "reused_qualification_sources": {
+    "qualified-eighteen-integration": {
+      "source": "876702915e51123dd9da97e45f491a5c6e63e1cd",
+      "note": "Published family sources unchanged; current run checks only the changed SMA boundary and current GPU/inventory contracts."
+    },
+    "eighteen-parabolic-integration": {
+      "source": "7715ede0a6cc7a1f898570f13fa7f267283e6740",
+      "note": "Published family sources unchanged; current run checks only the changed SMA boundary and current GPU/inventory contracts."
+    }
+  },
+  "parallel_batch_note": "Approved SMA helper follow-up: per-sample exact reciprocal bounds, exact fixed-width partial products with outward truncation, original fallback on ambiguous output; negative-center, exponent-edge, eviction/materialization/reset regressions and long-history parity.",
+  "hosted_build": {
+    "run_id": 39712349051,
+    "workflow_sha": "f413c791d11ab901c669f107e60ca2f27bbd7811",
+    "source_sha": "3efec043f91e4a9962a049fab7f9ad77784445c4",
+    "provenance_file": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-cached-integration\\hosted-build-provenance.json",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-cached-integration-20261021-hosted-build-provenance.json.gz",
+    "sha256": "fd225170c1b896c28e6e2ccfc8e5f065cb5125815a91f041ec7bd93eb29c7b31"
+  },
+  "step": "complete",
+  "updated_utc": "2026-10-22T02:49:25.575694+00:00",
+  "unit": {
+    "passed": 44,
+    "class_counts": {
+      "MeanDiagnosticsCertifiedTests": 21,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "MeanDiagnosticsScaleReductionTests": 2,
+      "RollingStatisticsSharedExecutionTests": 17
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-cached-integration\\unit\\unit.trx",
+    "sha256": "267abab01c4f21d0c487ff28cad0dff1a9b225a205f0274c092a3bb2e6d13e78",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-cached-integration-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 2,
+    "class_counts": {
+      "SharedRollingStatisticsBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-cached-integration\\parity\\parity.trx",
+    "sha256": "837dbfcfd30597cbedc33a2ca7aa1ae85e684ba0579af569969ef0b81c52af53",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-cached-integration-20261021-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-remaining-qualified-eighteen-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1bd557a330aba4ad760d1f386a241523ce2eb21a040f0998b41c86a23029eed9",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-remaining-qualified-eighteen-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1bd557a330aba4ad760d1f386a241523ce2eb21a040f0998b41c86a23029eed9",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-remaining-qualified-eighteen-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1bd557a330aba4ad760d1f386a241523ce2eb21a040f0998b41c86a23029eed9",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-remaining-qualified-eighteen-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1bd557a330aba4ad760d1f386a241523ce2eb21a040f0998b41c86a23029eed9"
+  },
+  "source_fingerprint_sha256": "2b7b41ebc15d27017a04b4f6a2c1f1f1caf6f4819b073534a92d2f32b88f8bba",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Exact cached reciprocal bounds replace repeated per-window division. Fixed-width products round outwards; ambiguous results retain original rational fallback. Focused numerical and long-history checks are recorded; controlled performance remains pending."
+}

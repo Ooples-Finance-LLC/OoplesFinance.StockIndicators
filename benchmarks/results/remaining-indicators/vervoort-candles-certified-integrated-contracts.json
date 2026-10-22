@@ -1,0 +1,39 @@
+{
+  "types": [
+    "VervoortHeikenAshiCandlestickOscillator",
+    "VervoortHeikenAshiLongTermCandlestickOscillator",
+    "VervoortSmoothedOscillator"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "3700798cfd417935133a2ab8ee0f4bd4eef440a5",
+  "source_fingerprint_sha256": "0a6fae16d9c61059a9046f4f290fa502325a9e35974bfeacf8e75459bbb45a33",
+  "benchmark_fixture": {
+    "type": "RemainingVervoortCandlesBenchmarks",
+    "operations": [
+      "VervoortHeikenAshiCandlestickOscillator",
+      "VervoortHeikenAshiLongTermCandlestickOscillator",
+      "VervoortSmoothedOscillator"
+    ]
+  },
+  "checks": {
+    "unit": 208,
+    "parity": 12,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "unit_class_counts": {
+    "VervoortSmoothedCertifiedTests": 11,
+    "VervoortSmoothedNumericalTests": 103,
+    "VervoortCandleNumericalTests": 63,
+    "SharedGeneratedVervoortCandlesTests": 31
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/publication-vervoort-smoothed-certified-20261021-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-vervoort-smoothed-certified-20261021-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

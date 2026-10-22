@@ -78,13 +78,30 @@ internal static class PairedBatch
         using var lifetime = state as IDisposable;
         var context = new MultiSeriesContext(new SeriesStore());
         var result = new Dictionary<string, List<double>>();
+        // These sealed states have exactly one output, identical to Value.
+        // Keep unknown and multi-output states on the dictionary route.
+        var singleKey = state switch
+        {
+            ComparePriceMomentumOscillatorState => "Cpmo",
+            RelativeNormalizedVolatilityState => "Rnv",
+            RelativeStrength3DIndicatorState => "Rs3d",
+            _ => null
+        };
+        List<double>? singleValues = null;
         for (var i = 0; i < primary.Count; i++)
         {
             var time = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMinutes(i);
             OhlcvBar Bar(SeriesKey key, double value) => new(key.Symbol, key.Timeframe, time, time, value, value, value, value, 0, true);
             state.Update(context, b, Bar(b, benchmark[i]), true, false);
-            var point = state.Update(context, p, Bar(p, primary[i]), true, true);
-            if (!point.HasValue || point.Outputs is null) throw new InvalidOperationException("An aligned pair did not publish outputs.");
+            var point = state.Update(context, p, Bar(p, primary[i]), true, singleKey is null);
+            if (!point.HasValue) throw new InvalidOperationException("An aligned pair did not publish outputs.");
+            if (singleKey is not null)
+            {
+                if (singleValues is null) result[singleKey] = singleValues = new List<double>(primary.Count);
+                singleValues.Add(point.Value);
+                continue;
+            }
+            if (point.Outputs is null) throw new InvalidOperationException("An aligned pair did not publish outputs.");
             foreach (var output in point.Outputs)
             {
                 if (!result.TryGetValue(output.Key, out var values)) result[output.Key] = values = new List<double>(primary.Count);
