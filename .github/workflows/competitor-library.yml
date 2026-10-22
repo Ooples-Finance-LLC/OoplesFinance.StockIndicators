@@ -1,48 +1,45 @@
-name: Controlled SAR array comparison
+name: Controlled SMA bounded accumulation comparison
 on:
   workflow_dispatch:
 permissions:
   contents: read
   actions: read
 concurrency:
-  group: sar-array-control-${{ github.ref }}
+  group: sma-bounded-control-${{ github.ref }}
   cancel-in-progress: false
 jobs:
   paired:
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        pair: [TaLib.Functions.Sar, TaLib.Functions.SarExt]
     env:
-      COMPARISON_PAIR: ${{ matrix.pair }}
+      COMPARISON_PAIR: Skender.GetSmaAnalysis
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          ref: e4c3cbf1771d87c39ff05b28d7b7891b66e68b12
+          path: candidate
+          fetch-depth: 2
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-      - name: Verify both immutable binary runs
+      - name: Verify pinned sources and existing qualification
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python scripts/compare-sar-array.py verify
+        run: python scripts/compare-sma-bounded.py verify
       - uses: actions/download-artifact@v8
         with:
           name: competitor-binaries
           path: old-binaries
           run-id: 39719116665
           github-token: ${{ github.token }}
-      - uses: actions/download-artifact@v8
-        with:
-          name: competitor-binaries
-          path: new-binaries
-          run-id: 39721035437
-          github-token: ${{ github.token }}
-      - name: Measure old new new old on the same runner
-        run: python scripts/compare-sar-array.py measure
+      - name: Build candidate production DLL for hosted runtime
+        run: dotnet build candidate/src/OoplesFinance.StockIndicators.csproj -c Release -f net10.0 -p:GeneratePackageOnBuild=false -m:1
+      - name: Measure old new new old with identical harness
+        run: python scripts/compare-sma-bounded.py measure
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: sar-array-control-${{ matrix.pair }}
+          name: sma-bounded-control
           path: control/
           retention-days: 30
