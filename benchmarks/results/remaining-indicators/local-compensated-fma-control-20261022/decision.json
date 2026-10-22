@@ -274,6 +274,8 @@
     "measure-compensated-fma.py": "23cc5a0cc27224339cdb72545d40d020b9b441bb5b72a8df926efae20dbe10ad",
     "verify-compensated-fma-control.py": "0875b528540d7e3fa610fbb8810c73ec44def27e4f6b5afb6f4eff2f03b9e9bb"
   },
-  "report_imported": false,
-  "production_integrated": false
+  "report_imported": true,
+  "production_integrated": true,
+  "integration_commit": "1b3131775",
+  "report_sha256": "950e67aaa81c0536fb3a7ca25b4de868d5a2894ec35172180db3d86c23dea720"
 }
