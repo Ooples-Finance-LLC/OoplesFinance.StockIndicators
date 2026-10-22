@@ -10,10 +10,21 @@ internal sealed class RoundedMeanErrorWindow(int period)
     {
         private readonly BigInteger _units;
         private readonly bool _hasUnits;
-        internal Sample(double value) { Value = value; _units = default; _hasUnits = false; }
-        internal Sample(double value, BigInteger units) { Value = value; _units = units; _hasUnits = true; }
+        internal Sample(double value)
+        {
+            Value = value; _units = default; _hasUnits = false;
+#if !NETFRAMEWORK
+            CertifiedMeanRelativeError.Reciprocal(value, out var floor, out var exact);
+            ReciprocalFloor = floor; ReciprocalExact = exact;
+#endif
+        }
+        internal Sample(double value, BigInteger units) : this(value) { _units = units; _hasUnits = true; }
         internal double Value { get; }
         internal BigInteger Units => _hasUnits ? _units : ExactVarianceWindow.Units(Value);
+#if !NETFRAMEWORK
+        internal UInt128 ReciprocalFloor { get; }
+        internal bool ReciprocalExact { get; }
+#endif
     }
     private readonly Queue<Sample> _values = new();
     private BigInteger _sum, _squares;
