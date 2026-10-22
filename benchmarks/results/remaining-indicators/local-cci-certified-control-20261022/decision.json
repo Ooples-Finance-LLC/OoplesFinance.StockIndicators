@@ -245,5 +245,6 @@
     "verify-cci-certified-control.py": "868bb35069ac0770165daf9b62c77fc38244ecba55c5d06bcda16829f3fd0382"
   },
   "report_imported": false,
-  "production_integrated": false
+  "production_integrated": true,
+  "integration_proof": "benchmarks/results/remaining-indicators/cci-certified-integration-source-proof-20261022.json"
 }
