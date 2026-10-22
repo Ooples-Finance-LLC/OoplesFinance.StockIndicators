@@ -61,6 +61,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: recovery-binaries
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
           path: |
