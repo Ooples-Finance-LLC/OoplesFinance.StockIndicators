@@ -46,11 +46,19 @@ internal static class CertifiedMeanRelativeError
             if (price < 0) (reciprocalLow, reciprocalHigh) = (-reciprocalHigh, -reciprocalLow);
             // |price - mean| / price is mean/price - 1 below the mean,
             // and 1 - mean/price above it, including negative prices.
+            // Each signed bound is smaller than 2^82 in magnitude. A Queue
+            // holds at most Int32.MaxValue samples, so every partial sum is
+            // smaller than 2^113: these additions cannot overflow Int128.
             if (sample.Value < mean)
             {
-                lower += reciprocalLow; upper += reciprocalHigh; balance--;
+                lower = unchecked(lower + reciprocalLow);
+                upper = unchecked(upper + reciprocalHigh); balance--;
             }
-            else { lower -= reciprocalHigh; upper -= reciprocalLow; balance++; }
+            else
+            {
+                lower = unchecked(lower - reciprocalHigh);
+                upper = unchecked(upper - reciprocalLow); balance++;
+            }
         }
         if (zeroMean) return Publish((Int128)balance << Precision, values.Count, out result);
         if (center < 0) (lower, upper) = (upper, lower);
