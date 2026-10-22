@@ -35,7 +35,7 @@ if __name__=='__main__':
     assert len(reports)==1,reports
     data=json.loads(reports[0].read_text())
     result=collect(data,'LibraryPairBenchmarks',{'pair':'Skender.GetSmaAnalysis'})
-    result.update(source_sha='83a6a5e5949f8a07218b6edfb7fd3fa2a02929b3',binary_run=39698944971,
+    result.update(source_sha='37c8bd54b6a9861338bd7b2f21dd65cab02f9326',binary_run=39703203214,
         workflow_sha=os.environ['GITHUB_SHA'],run_url=os.environ['GITHUB_SERVER_URL']+'/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/'+os.environ['GITHUB_RUN_ID'],
         report_sha256=hashlib.sha256(reports[0].read_bytes()).hexdigest(),
         benchmark_binary_sha256=hashlib.sha256(Path('binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll').read_bytes()).hexdigest(),
