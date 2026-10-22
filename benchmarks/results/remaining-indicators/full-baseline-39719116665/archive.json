@@ -32,7 +32,8 @@
     "summary/raw/17-report.json.gz": "2ac10265e1a7a21d2580d6ca68ef22593ce7c945c8ee1ce598f513638b4e7d44",
     "summary/raw/18-report.json.gz": "be0ac3ca32efca6621c4ee6b46bba932b4ce971e9247012cef518c5b96e80ab7",
     "summary/raw/19-report.json.gz": "de4c55972d68e56647cd96fc3886d0124f51a472534b92b770b6abe40a5862e6",
-    "summary/README.md": "bf01b9fe37170675b526764d1ca73cf322db003bab5736348f629c4011d96c98"
+    "summary/README.md": "bf01b9fe37170675b526764d1ca73cf322db003bab5736348f629c4011d96c98",
+    ".gitattributes": "bbdcc8def937b9aa7e94613bb1b632dcfb8d177e29af844d5274c54e7d03c8bb"
   },
   "note": "All actual baseline rows replaced and verified in the table and CSV. Lower means do not establish statistically significant superiority; correctness receipts and builder timing remain separate."
 }
