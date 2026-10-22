@@ -8,6 +8,32 @@ from build_remaining_indicator_inventory import contract_receipts, enum_members,
 
 
 class RemainingInventoryTests(unittest.TestCase):
+    def test_explicit_batch_receipt_does_not_claim_builder_option_coverage(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            receipts = root / 'benchmarks/results/remaining-indicators'
+            receipts.mkdir(parents=True)
+            (receipts / 'batch-contracts.json').write_text(json.dumps(
+                {'types': ['Example'], 'receipt_scope': 'batch-formulas'}))
+            batch = {}
+            result = contract_receipts(root, [('ExampleSpecOptions', 'Example')],
+                lambda relative: (root / relative).read_text(), batch, {'Example'})
+            self.assertEqual({}, result)
+            self.assertEqual({'Example': ['benchmarks/results/remaining-indicators/batch-contracts.json']}, batch)
+
+    def test_batch_receipt_requires_a_known_enum_formula(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            receipts = root / 'benchmarks/results/remaining-indicators'
+            receipts.mkdir(parents=True)
+            (receipts / 'batch-contracts.json').write_text(json.dumps(
+                {'types': ['Unknown'], 'receipt_scope': 'batch-formulas'}))
+            read = lambda relative: (root / relative).read_text()
+            with self.assertRaises(ValueError):
+                contract_receipts(root, [], read)
+            with self.assertRaises(ValueError):
+                contract_receipts(root, [], read, {}, {'Example'})
+
     def test_shared_gpu_receipts_do_not_claim_facade_coverage(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
