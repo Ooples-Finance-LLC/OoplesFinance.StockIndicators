@@ -53,8 +53,59 @@ public sealed class CertifiedCommodityChannelTests
         Assert.False(CertifiedCommodityChannel.TryCompute(new Queue<double>(), 1, 1, out _, out _));
         Assert.False(CertifiedCommodityChannel.TryCompute(new Queue<double>(Enumerable.Repeat(1d, 257)), 1, 1, out _, out _));
         Assert.False(CertifiedCommodityChannel.TryCompute(new Queue<double>([1d, double.Epsilon]), 1, 1, out _, out _));
-        Assert.False(CertifiedCommodityChannel.TryCompute(new Queue<double>([1d, 1024]), 2, 1, out _, out _));
-        Assert.False(CertifiedCommodityChannel.TryCompute(new Queue<double>([-1d, 1]), 0, 1, out _, out _));
+        Assert.False(CertifiedCommodityChannel.TryCompute(new Queue<double>([1d, Math.ScaleB(1d, 33)]), 2, 1, out _, out _));
+        Assert.True(CertifiedCommodityChannel.TryCompute(new Queue<double>([-1d, 1]), 0, 1, out value, out defined));
+        Assert.True(defined);
+        Equal(ExactRatio(new Queue<double>([-1d, 1]), 0, 1)!.Value, value);
+    }
+
+    [Fact]
+    public void NearZeroCentersAndWideNormalSpansMatchExactRatios()
+    {
+        foreach (int exponent in new[] { -1000, 0, 900 })
+        foreach (int span in new[] { 0, 2, 16, 32 })
+        {
+            double small = Math.ScaleB(1d, exponent);
+            double large = Math.ScaleB(1.9999999999999998, exponent + span);
+            var prices = new Queue<double>(Enumerable.Range(0, 256)
+                .Select(i => (i % 4) switch { 0 => small, 1 => -small, 2 => large, _ => -large }));
+            foreach (double mean in new[] { 0d, small, -small })
+            {
+                Assert.True(CertifiedCommodityChannel.TryCompute(prices, mean, prices.Last(), out double actual, out bool defined));
+                Assert.True(defined);
+                Equal(ExactRatio(prices, mean, prices.Last())!.Value, actual);
+            }
+        }
+        Assert.True(CertifiedCommodityChannel.TryCompute(new Queue<double>([0d, -0d]), 0, 0, out double flat, out bool present));
+        Equal(0, flat); Assert.False(present);
+    }
+
+    [Fact]
+    public void ZeroCrossingFixtureCertifiesSupportedWindowsAndRetainsWideFallback()
+    {
+        const int period = 20;
+        var prices = new Queue<double>();
+        for (int i = 0; i < 400; i++)
+        {
+            double close = (i * 13 % 101 - 50) / 8d;
+            double value = ExactTypicalPrice.Calculate(close + 1 + i % 5 / 16d, close - 1 - i % 7 / 16d, close);
+            if (prices.Count == period) prices.Dequeue();
+            prices.Enqueue(value);
+            if (prices.Count != period) continue;
+            var sum = new ExactMeanAccumulator();
+            foreach (double price in prices) sum.Add(price);
+            double mean = sum.Mean(period);
+            if (i == 389)
+            {
+                // Rounded typical prices leave a tiny nonzero center here;
+                // the 56-bit span deliberately retains the dyadic fallback.
+                Assert.False(CertifiedCommodityChannel.TryCompute(prices, mean, value, out _, out _));
+                continue;
+            }
+            Assert.True(CertifiedCommodityChannel.TryCompute(prices, mean, value, out double actual, out bool defined));
+            Assert.True(defined);
+            Equal(ExactRatio(prices, mean, value)!.Value, actual);
+        }
     }
 
     [Theory]
