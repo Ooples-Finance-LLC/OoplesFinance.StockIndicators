@@ -199,6 +199,100 @@ public sealed class MeanDiagnosticsCertifiedTests
     }
 
     [Fact]
+    public void CompactWindowMeanPreservesBitsAcrossEvictionResetAndExactFallback()
+    {
+        var random = new Random(7232028);
+        double[][] cases =
+        [
+            Enumerable.Range(0, 160).Select(i => 100 + (i * 17 % 73) / 8d).ToArray(),
+            [0, -0d, 2, -2, 8, -8, Math.BitIncrement(1), 1, 0, -4, 4],
+            [double.Epsilon, -double.Epsilon, 2 * double.Epsilon, Math.ScaleB(1, -1022),
+                Math.ScaleB(-1, -1022), 1, 2, 0, double.MaxValue, -double.MaxValue,
+                Math.ScaleB(1, -900), Math.ScaleB(1, 900)],
+            Enumerable.Range(0, 128).Select(_ =>
+            {
+                double value = BitConverter.Int64BitsToDouble(random.NextInt64(long.MinValue, long.MaxValue));
+                return double.IsFinite(value) ? value : 0;
+            }).ToArray()
+        ];
+        foreach (double[] prices in cases)
+        foreach (int period in new[] { 1, 2, 20, int.MaxValue })
+        {
+            var window = new RoundedMeanErrorWindow(period);
+            var history = new Queue<double>();
+            for (int repeat = 0; repeat < 2; repeat++)
+            {
+                window.Reset(); history.Clear();
+                foreach (double price in prices)
+                {
+                    if (history.Count == period) history.Dequeue();
+                    history.Enqueue(price); window.Add(price);
+                    var sum = new ReferenceFraction(0);
+                    foreach (double value in history) sum += ReferenceFraction.FromDouble(value);
+                    double expected = (sum / new ReferenceFraction(history.Count)).ToDouble();
+                    Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(window.Mean));
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void SquaredFallbackMaterializesTheCurrentWindowAndKeepsEvictionExact()
+    {
+        var window = new RoundedMeanErrorWindow(3);
+        var history = new Queue<double>();
+        foreach (double price in new[] { 1d, 2, 3, 4, -8, 16, -32, 64, 0, 1 })
+        {
+            if (history.Count == 3) history.Dequeue();
+            history.Enqueue(price); window.Add(price);
+            var sum = new ReferenceFraction(0); var squares = new ReferenceFraction(0);
+            foreach (double value in history)
+            {
+                var exact = ReferenceFraction.FromDouble(value);
+                sum += exact; squares += exact * exact;
+            }
+            // Zero center deliberately uses the preserved exact moment path.
+            Assert.Equal(BitConverter.DoubleToInt64Bits((squares / new ReferenceFraction(history.Count)).ToDouble()),
+                BitConverter.DoubleToInt64Bits(window.SquaredError(0)));
+            Assert.Equal(BitConverter.DoubleToInt64Bits((sum / new ReferenceFraction(history.Count)).ToDouble()),
+                BitConverter.DoubleToInt64Bits(window.Mean));
+        }
+    }
+
+    [Fact]
+    public void InvalidInputLeavesCompactHistoryUnchanged()
+    {
+        var window = new RoundedMeanErrorWindow(3);
+        window.Add(1); window.Add(2); window.Add(3);
+        foreach (double invalid in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => window.Add(invalid));
+            Assert.Equal(3, window.Count);
+            Assert.Equal(2d, window.Mean);
+        }
+        window.Add(4);
+        Assert.Equal(3d, window.Mean);
+    }
+
+    [Fact]
+    public void OrdinaryWindowUpdatesAndMeanAllocateNoManagedMemoryAfterReset()
+    {
+        var window = new RoundedMeanErrorWindow(20);
+        window.Add(0); window.SquaredError(0); window.Reset();
+        for (int i = 0; i < 64; i++) { window.Add(100 + i % 7 / 8d); _ = window.Mean; }
+        double total = 0;
+        long start = GC.GetAllocatedBytesForCurrentThread();
+        for (int i = 0; i < 1000; i++)
+        {
+            window.Add(100 + i % 7 / 8d);
+            total += window.Mean;
+        }
+        long bytes = GC.GetAllocatedBytesForCurrentThread() - start;
+        Assert.True(total > 100_000);
+        Assert.Equal(0, bytes);
+    }
+
+    [Fact]
     public void OrdinaryCertificateEvaluationAllocatesNoManagedMemory()
     {
         var values = Samples(Enumerable.Range(0, 20).Select(i => 100 + i / 8d));
