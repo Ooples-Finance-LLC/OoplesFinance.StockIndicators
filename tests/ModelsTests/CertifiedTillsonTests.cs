@@ -32,7 +32,7 @@ public sealed class CertifiedTillsonTests
     {
         var random = new Random(9931);
         int accepted = 0;
-        foreach (int exponent in new[] { -1022, -500, 0, 500, 1000 })
+        foreach (int exponent in new[] { -1022, -1000, -500, 0, 500, 1000 })
         for (int i = 0; i < 200; i++)
         {
             double a = Math.ScaleB(random.NextDouble() * 2 - 1, exponent);
