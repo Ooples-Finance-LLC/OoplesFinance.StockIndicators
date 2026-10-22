@@ -1,0 +1,60 @@
+{
+  "input_head": "8cffbf7c460ccea51a626ff7fde2b4d4e52ad9ad",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/WindowCommodityChannelIndex.cs",
+    "tests/ModelsTests/CommodityRollingGridTests.cs"
+  ],
+  "batch_note": "Approved CCI rolling-window sum continuation: exact common-grid Int128 accumulation for periods1..256 and nearby normal prices; existing dyadic fallback retains unusual inputs and larger periods. Focused transition/reset tests, original CCI boundaries, long-history parity, GPU and inventory validation. Controlled performance qualification remains separate and mandatory before integration.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T18:23:52.223569+00:00",
+  "unit": {
+    "passed": 43,
+    "class_counts": {
+      "CompactCommodityChannelTests": 11,
+      "CommodityRollingGridTests": 8,
+      "BoundedCommodityChannelExecutionTests": 15,
+      "CertifiedCommodityChannelTests": 9
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\cci-rolling-grid\\unit\\unit.trx",
+    "sha256": "0d143fba4e7c27633e5ba2398f9cdc6d751e3c19c5a46e4134342749a3845942",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-cci-rolling-grid-certified-20261022-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 20,
+    "class_counts": {
+      "CommodityChannelComparisonTests": 16,
+      "SharedCommodityChannelBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\cci-rolling-grid\\parity\\parity.trx",
+    "sha256": "bf9d6c33c02c1f2273658b7a3bf9e5b4e7f1686a29858ef29ac6e49b27f484f4",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-cci-rolling-grid-certified-20261022-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-rolling-grid-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "8f4e727e9dc8038a50f826733a0ab7603c08721c67ad7056c2309848ed3426c2",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-rolling-grid-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "8f4e727e9dc8038a50f826733a0ab7603c08721c67ad7056c2309848ed3426c2",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-rolling-grid-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "8f4e727e9dc8038a50f826733a0ab7603c08721c67ad7056c2309848ed3426c2",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-rolling-grid-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "8f4e727e9dc8038a50f826733a0ab7603c08721c67ad7056c2309848ed3426c2"
+  },
+  "source_fingerprint_sha256": "db0e234842105cc29a5bea6331b74d8417f57c501df308f4a3cee211ff1b5b1d",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved CCI rolling-window sum continuation: exact common-grid Int128 accumulation for periods1..256 and nearby normal prices; existing dyadic fallback retains unusual inputs and larger periods. Focused transition/reset tests, original CCI boundaries, long-history parity, GPU and inventory validation. Controlled performance qualification remains separate and mandatory before integration. Correctness checks passed; controlled performance remains pending."
+}
