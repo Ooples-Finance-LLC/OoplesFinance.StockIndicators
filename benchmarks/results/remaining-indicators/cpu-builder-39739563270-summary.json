@@ -1,0 +1,26 @@
+{
+  "run_id": "39739563270",
+  "workflow_sha": "ba2a5e41e2d82363f5b75a4943b5e5ef276ba122",
+  "source_sha": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+  "apis": 25,
+  "comparisons": 100,
+  "excluded_failed_fixtures": [
+    "SharedDynamicMomentumBenchmarks"
+  ],
+  "verdicts": {
+    "slower": 100
+  },
+  "receipt_files": [
+    "cpu-builder-39739563270-SharedPointwiseBenchmarks.json",
+    "cpu-builder-39739563270-SharedPairInputBenchmarks.json",
+    "cpu-builder-39739563270-SharedAsinBenchmarks.json",
+    "cpu-builder-39739563270-SharedLogVolatilityBenchmarks.json",
+    "cpu-builder-39739563270-SharedRelativeVolatilityBenchmarks.json",
+    "cpu-builder-39739563270-SharedUlcerBenchmarks.json"
+  ],
+  "changed_production_files_since_baseline": [
+    "src/Helpers/CertifiedMeanRelativeError.cs",
+    "src/Indicators/CompensatedExponentialAverage.cs"
+  ],
+  "note": "Matched same-runner native serial/parallel comparison for each default-period fixture; no universal superiority claim."
+}
