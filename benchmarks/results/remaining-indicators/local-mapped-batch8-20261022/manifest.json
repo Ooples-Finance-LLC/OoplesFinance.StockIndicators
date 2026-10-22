@@ -1,0 +1,46 @@
+{
+  "source_sha": "360301f50870745b171abe26e02c7cf5e217faa8",
+  "measurement_location": "Local Windows; unchanged correctness setup; CPU builder and native methods timed",
+  "cases": 104,
+  "comparisons": 52,
+  "partial": false,
+  "excluded_fixtures": [],
+  "archives": {
+    "verified-summary.json": {
+      "sha256": "bbbe7922c26aee4ed3cd9f6da02d5944fa938f3d1f2aa06f397f83903ad3de3d",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch8-20261022/verified-summary.json.gz"
+    },
+    "status.json": {
+      "sha256": "cf3d760c29d65a039ffaf4457d01d048037955abbcd505529cadd056acf9c166",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch8-20261022/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "52beb6152acf4ba90f42b19ad6a959feeae9e9d892ee5008f2a317f447d0f303",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch8-20261022/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "3e34e5c6ba6070829906cac44ec42b32d0eeb1c62f549b69674363fe99be76c9",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch8-20261022/binary-manifest.json.gz"
+    },
+    "SharedTaStarReversalBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaStarReversalBenchmarks-report-full-compressed.json": {
+      "sha256": "f806e1ddbed6162ffb5ac73a69247edde46883928622f6f951b8451e3404d711",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch8-20261022/SharedTaStarReversalBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaStarReversalBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedTaReversalContinuationBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaReversalContinuationBenchmarks-report-full-compressed.json": {
+      "sha256": "4515500bac20fbb52a1b58a41261c74d2ca3791d370ec29fb35dd7e217042ee3",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch8-20261022/SharedTaReversalContinuationBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaReversalContinuationBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedTaReversalContinuationBenchmarks.log": {
+      "sha256": "8cbf38573130c58db07fae580b15fa7edfcd202f1de36523b23fb27971785754",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch8-20261022/SharedTaReversalContinuationBenchmarks.log.gz"
+    },
+    "SharedTaStarReversalBenchmarks.log": {
+      "sha256": "1909032bc5b465260fcd232beff8b067738204d553de06ca5ee8608a4038efcd",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch8-20261022/SharedTaStarReversalBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-local-mapped-batch8.py": "f9f0e3cb5589716c7c2da5f1c25fd81bfbb448e9c80f396869cdb33a667908c3",
+    "verify-local-mapped-batch8.py": "7d0fda77b9f6e5390f60938ea56bef5837f165e64a6de1f331f665a8a69b5883"
+  }
+}
