@@ -1,0 +1,31 @@
+{
+  "before_sha256": "4eee9aaba59c67ba23c340e2ffba2299a1b9880ab33844a6f6a89c3642005d35",
+  "candidate_sha256": "eb79dbd797907cf82bd0e57c7e7df375bf0a13fdf1fdf125ea34a699e6ae82fd",
+  "measurement_tables_changed": false,
+  "embedded_datasets_changed": false,
+  "status": "browser-verified-and-imported",
+  "utc": "2026-10-22T18:09:11.507503+00:00",
+  "measurement_note": "All measured data, tables, source identities and verdicts unchanged. Clarifies 60 snapshot-only fixture slots and12 long-native pending slots; no performance qualification claimed.",
+  "archives": {
+    "staged.json": {
+      "sha256": "ea86031afa96efb43ac8528b31241650ca5d12bee6b1c347c137759f4048e246",
+      "archive": "staged.json.gz"
+    },
+    "imported.json": {
+      "sha256": "51e660908c3001a3200278c8fcff2afe9bc18c82fa574f0c33fdf0a4bd5b5e74",
+      "archive": "imported.json.gz"
+    },
+    "proposed-paragraph.txt": {
+      "sha256": "5517f273c2f7b03c988bbf067b8a70498ca361bbf88b55baf7dbe3c6b8ba84f6",
+      "archive": "proposed-paragraph.txt.gz"
+    },
+    "source-assessment.json": {
+      "sha256": "de85d4893919c5041e5f9dc4476f682a26439d86534ee7a7ec80e7024c80c97e",
+      "archive": "source-assessment.json.gz"
+    },
+    "verification/browser-verification.json": {
+      "sha256": "f1b53c17060577f35cb8ff87cfcb166f3160500d39eabac1a6408c4a494de1dd",
+      "archive": "verification-browser-verification.json.gz"
+    }
+  }
+}
