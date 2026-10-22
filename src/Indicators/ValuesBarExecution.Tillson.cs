@@ -70,6 +70,8 @@ internal static partial class ValuesBarExecution
 
         internal static double Combine(double third, double fourth, double fifth, double sixth, double factor)
         {
+            if (CertifiedTillson.TryCombine(third, fourth, fifth, sixth, factor, out double certified))
+                return certified;
             // Exact finite differences give E3 + a*(3*d1 + a*(3*d2 + a*d3)).
             // Form the differences with small integer weights before the three
             // factor products. Wide factors/cancellation retain arbitrary precision.
@@ -91,6 +93,8 @@ internal static partial class ValuesBarExecution
 
         private double Smooth(double prior, double input)
         {
+            if (CertifiedTillson.TrySmooth(prior, input, _period, out double certified))
+                return certified;
             var numerator = JurikDyadic.FromDouble(prior);
             numerator.Multiply(_period - 1d);
             var incoming = JurikDyadic.FromDouble(input);
