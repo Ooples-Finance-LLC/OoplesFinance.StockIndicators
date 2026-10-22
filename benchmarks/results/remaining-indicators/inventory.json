@@ -13619,7 +13619,7 @@
     "src/Indicators/OldestFirstHilbertTrendline.cs": "4a533462eae7ae763b2c8106afd7056692dca8fe693562c87e8056597cb79425",
     "src/Indicators/OwnedBarBuffer.cs": "bf140ae07d7ad37a606ecc628193c83c98857dc525d911d8417df89b01a4cfb6",
     "src/Indicators/OwnedBarHistory.cs": "59f51305559897c3c39947e8d44f03d874a55812e0ccd0883a27790f9b1a02db",
-    "src/Indicators/ParabolicStopSnapshots.cs": "3cae26535bd899d025cf10d1399797ea86b2a906955c7de1db914f9ea5b30a5e",
+    "src/Indicators/ParabolicStopSnapshots.cs": "32fa597d2c2dfae1a37aba3451ae62cafcc7628c10abb511f79db8643f46d8c1",
     "src/Indicators/PenetrationCandles.cs": "523f2a5825a6aea5da11b585c6bd4e3077a5d15cd3258b70609819d1ec436e3e",
     "src/Indicators/PercentileCandles.cs": "c76697ff135099ca15246e1b5686d0565ec626f998e74d0439a439991781b6e3",
     "src/Indicators/PivotLevelSnapshots.cs": "850601aa090c537f815730b607bdb4f3fcbc492bd0a91dbdfcd39f0cd68e7db3",
