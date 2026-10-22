@@ -6,7 +6,12 @@ namespace OoplesFinance.StockIndicators.Helpers;
 // errors remain rational until the final average, so opposite large terms cancel.
 internal sealed class RoundedMeanErrorWindow(int period)
 {
-    private readonly Queue<BigInteger> _values = new();
+    internal readonly struct Sample(double value, BigInteger units)
+    {
+        internal double Value { get; } = value;
+        internal BigInteger Units { get; } = units;
+    }
+    private readonly Queue<Sample> _values = new();
     private BigInteger _sum,
         _squares;
     internal int Count => _values.Count;
@@ -23,26 +28,34 @@ internal sealed class RoundedMeanErrorWindow(int period)
         var units = ExactVarianceWindow.Units(value);
         if (Count == period)
         {
-            var old = _values.Dequeue();
+            var old = _values.Dequeue().Units;
             _sum -= old;
             _squares -= old * old;
         }
-        _values.Enqueue(units);
+        _values.Enqueue(new Sample(value, units));
         _sum += units;
         _squares += units * units;
     }
 
     internal double AbsoluteError(double mean)
     {
+#if !NETFRAMEWORK
+        if (CertifiedMeanRelativeError.TryError(_values, mean, false, out var certified))
+            return certified;
+#endif
         var center = ExactVarianceWindow.Units(mean);
         var sum = BigInteger.Zero;
-        foreach (var value in _values)
-            sum += BigInteger.Abs(value - center);
+        foreach (var sample in _values)
+            sum += BigInteger.Abs(sample.Units - center);
         return ExactMeanAccumulator.UnitRatio(sum, Count);
     }
 
     internal double SquaredError(double mean)
     {
+#if !NETFRAMEWORK
+        if (CertifiedMeanRelativeError.TryError(_values, mean, true, out var certified))
+            return certified;
+#endif
         var center = ExactVarianceWindow.Units(mean);
         return ExactMeanAccumulator.UnitRatio(
             _squares - 2 * center * _sum + Count * center * center,
@@ -52,12 +65,17 @@ internal sealed class RoundedMeanErrorWindow(int period)
 
     internal (bool Defined, double Value) SignedRelativeError(double mean)
     {
+#if !NETFRAMEWORK
+        if (CertifiedMeanRelativeError.TryCompute(_values, mean, out var certified))
+            return (true, certified);
+#endif
         var center = ExactVarianceWindow.Units(mean);
         var centerZeros = center.IsZero ? int.MaxValue : ExactMeanAccumulator.TrailingBinaryZeros(center);
         var numerator = BigInteger.Zero;
         var denominator = BigInteger.One;
-        foreach (var value in _values)
+        foreach (var sample in _values)
         {
+            var value = sample.Units;
             if (value.IsZero)
                 return (false, 0);
             // Cancel the shared binary scale before constructing/reducing the

@@ -1,0 +1,55 @@
+{
+  "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+  "rows": [
+    {
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 1000,
+      "ooples": {
+        "mean_ns": 9894733.875,
+        "lower_ns": 9648377.624080768,
+        "upper_ns": 10141090.125919232,
+        "allocated_bytes": 10660976,
+        "samples": 8
+      },
+      "competitor": {
+        "mean_ns": 559381.75,
+        "lower_ns": 534541.293255797,
+        "upper_ns": 584222.206744203,
+        "allocated_bytes": 299192,
+        "samples": 8
+      },
+      "competitor_over_ooples": 0.05653327892055106,
+      "verdict": "slower"
+    },
+    {
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 10000,
+      "ooples": {
+        "mean_ns": 40031685.5,
+        "lower_ns": 36586576.58477074,
+        "upper_ns": 43476794.41522926,
+        "allocated_bytes": 107887800,
+        "samples": 10
+      },
+      "competitor": {
+        "mean_ns": 1284635.8333333333,
+        "lower_ns": 878087.2806217202,
+        "upper_ns": 1691184.3860449463,
+        "allocated_bytes": 2891528,
+        "samples": 9
+      },
+      "competitor_over_ooples": 0.03209047576408776,
+      "verdict": "slower"
+    }
+  ],
+  "source_sha": "67155620ddbfd8416e765af7d82f18083dfbe7e1",
+  "binary_run": 39695981495,
+  "workflow_sha": "f1416737335f055a36c26c93ae3a9340eb53a49f",
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/39696685461",
+  "report_sha256": "437b8459678dc196523412a6038151e0cb28d7e319bd5fc9ef064d9a6f9c6fa0",
+  "benchmark_binary_sha256": "35d0e4ffda22fa256167ad3a1316d366813d9a797edbfc055b2257967356efea",
+  "production_binary_sha256": "925a8679526c3502113f69c5e2110e3eef2e239aeecd62efb0122c1cf265eccf",
+  "note": "Dedicated hosted SMA comparison only; confidence intervals are retained; this does not establish performance for other indicators.",
+  "raw_evidence": "benchmarks/results/remaining-indicators/sma-diagnostics-certified-timing-20261021-raw.json.gz",
+  "report_import": "Live competitor report SMA rows updated;800 other row measurements unchanged; all802 displayed/exported rows verified."
+}
