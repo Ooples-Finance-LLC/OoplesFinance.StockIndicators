@@ -17,6 +17,8 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 45
     steps:
+      - name: Enable long Git paths on the hosted Windows runner
+        run: git config --global core.longpaths true
       - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.source_sha }}
