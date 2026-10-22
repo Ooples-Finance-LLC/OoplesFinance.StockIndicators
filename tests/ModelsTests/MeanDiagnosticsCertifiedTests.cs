@@ -203,6 +203,9 @@ public sealed class MeanDiagnosticsCertifiedTests
                 foreach (double value in values) window.Add(value);
                 Assert.Equal(BitConverter.DoubleToInt64Bits(expected),
                     BitConverter.DoubleToInt64Bits(squared ? window.SquaredError(mean) : window.AbsoluteError(mean)));
+                var combined = window.AbsoluteAndSquaredError(mean);
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected),
+                    BitConverter.DoubleToInt64Bits(squared ? combined.Squared : combined.Absolute));
                 if (CertifiedMeanRelativeError.TryError(Samples(values), mean, squared, out double actual))
                 {
                     accepted++;
@@ -230,6 +233,8 @@ public sealed class MeanDiagnosticsCertifiedTests
         var window = new RoundedMeanErrorWindow(4096);
         for (int i = 0; i < 4096; i++) window.Add(15);
         Assert.Equal(196d, window.SquaredError(1));
+        Assert.False(CertifiedMeanRelativeError.TryErrors(large, 1, out _, out _));
+        Assert.Equal((14d, 196d), window.AbsoluteAndSquaredError(1));
         Assert.False(CertifiedMeanRelativeError.TryError(Samples([Math.ScaleB(1, -600)]), Math.ScaleB(1.5, -600), true, out _));
         Assert.False(CertifiedMeanRelativeError.TryError(Samples([Math.ScaleB(1, 600)]), Math.ScaleB(1.5, 600), true, out _));
     }
@@ -242,6 +247,7 @@ public sealed class MeanDiagnosticsCertifiedTests
         {
             Assert.True(CertifiedMeanRelativeError.TryError(values, 101.1875, false, out _));
             Assert.True(CertifiedMeanRelativeError.TryError(values, 101.1875, true, out _));
+            Assert.True(CertifiedMeanRelativeError.TryErrors(values, 101.1875, out _, out _));
         }
         int accepted = 0;
         long start = GC.GetAllocatedBytesForCurrentThread();
@@ -249,9 +255,10 @@ public sealed class MeanDiagnosticsCertifiedTests
         {
             if (CertifiedMeanRelativeError.TryError(values, 101.1875, false, out _)) accepted++;
             if (CertifiedMeanRelativeError.TryError(values, 101.1875, true, out _)) accepted++;
+            if (CertifiedMeanRelativeError.TryErrors(values, 101.1875, out _, out _)) accepted++;
         }
         long bytes = GC.GetAllocatedBytesForCurrentThread() - start;
-        Assert.Equal(2000, accepted);
+        Assert.Equal(3000, accepted);
         Assert.Equal(0, bytes);
     }
 
