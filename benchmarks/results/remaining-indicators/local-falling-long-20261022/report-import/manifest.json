@@ -1,0 +1,22 @@
+{
+  "files": {
+    "imported.json": "458ca0651d7618cfb28245ff4be564bed3fb5ffcb8a4925393df97fbb1f2c3a3",
+    "browser-verification.json": "8f950250a33f4374f4f39dc876b4df75ed852b9c98677dc4ee57e2eec58802e0",
+    "builder-verification.json": "aa4d5a5d953e44757f13811837806291419dad85bd62a313ed42904b4290500d",
+    "candidate.html": "a96649244e76f7ac7f9e4adb86690869c0053fdfbc76d3146bcbafc55f2b7312",
+    "stage-builder-report.py": "bea8a47b2200d26533a065ad4ac4e06d96dc95d2316caca43d864702af34a187",
+    "finish-falling-report-stage.py": "78bf32937564ed3e9788ab3c800e479cd986ea5200a8ae336c69f63961fefdc2",
+    "verify-builder-report.py": "822b4f2bf68251a40fa1456d3f61036225730c29f8316b07ea4d36d33fd33ad6",
+    "verify-mixed-baseline-report.py": "bc538cdcde680f5235d643a439c14d6c9fbbefe360a99da8eb40242675a993d6",
+    "import-builder-report.py": "4bf4812acdd137503a04d17ff95d7308d1f9e691dbd2591100b77f30fc112fac"
+  },
+  "builder_comparisons": 1536,
+  "new_builder_comparisons": 4,
+  "unchanged_batch_rows": 802,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "pending": 68
+}

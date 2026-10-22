@@ -1,0 +1,67 @@
+{
+  "source_sha": "5d1ead6f23e872c6ada463a8e6692fef54c34fd7",
+  "measurement_location": "Local Windows; approved bounded longer native measurement",
+  "cases": 8,
+  "comparisons": 4,
+  "partial": false,
+  "unchanged_setup_and_method_descriptors": true,
+  "sampling_policy": "Original benchmark descriptors, parameters and correctness setup. Ten warmups and ten requested measured iterations. Only 10,000-bar NativeSingle/NativeParallel use one invocation; other cases retain adaptive invocation counts. Toolchain timeout 90 minutes, whole-fixture process limit 90 minutes.",
+  "archives": {
+    "verified-summary.json": {
+      "sha256": "83ea3d7361ad46cc5a861725b9d9428ffd192b2e31e723a818d4728b180761d6",
+      "archive": "benchmarks/results/remaining-indicators/local-falling-long-20261022/verified-summary.json.gz"
+    },
+    "status.json": {
+      "sha256": "bca570544775185850ff96e160371aa4100fabfe450b04e9497a2f2c77b50bcb",
+      "archive": "benchmarks/results/remaining-indicators/local-falling-long-20261022/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "f164d2e1f917d44a0f0863a4d78ebde3e2eb7e30087711b3fd82223049f86c71",
+      "archive": "benchmarks/results/remaining-indicators/local-falling-long-20261022/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "c426b96d2dcd7e658390e6b60d98dbdd3199550f60c9c9938adee904351c0573",
+      "archive": "benchmarks/results/remaining-indicators/local-falling-long-20261022/binary-manifest.json.gz"
+    },
+    "host-manifest.json": {
+      "sha256": "94d03b73ff1a2f96c2107790418098243b267d2dc65c407bab46f9fb8875c043",
+      "archive": "benchmarks/results/remaining-indicators/local-falling-long-20261022/host-manifest.json.gz"
+    },
+    "planned-cases.txt": {
+      "sha256": "546762c4828adcd173b57e6a91e2b63c32ca719b6c10ab714505a0f69e9daa83",
+      "archive": "benchmarks/results/remaining-indicators/local-falling-long-20261022/planned-cases.txt.gz"
+    },
+    "SharedTradyNativeCandleBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyNativeCandleBenchmarks-report-full-compressed.json": {
+      "sha256": "729540a84e136b620e99e4cccd8ab74104aa66e54269d4775a3b5d0100f96324",
+      "archive": "benchmarks/results/remaining-indicators/local-falling-long-20261022/SharedTradyNativeCandleBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyNativeCandleBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedTradyNativeCandleBenchmarks.log": {
+      "sha256": "2eb758af7f97f412e33c4ea634c011e07e976f92ec81dbf599f6c8bab2f13c29",
+      "archive": "benchmarks/results/remaining-indicators/local-falling-long-20261022/SharedTradyNativeCandleBenchmarks.log.gz"
+    },
+    "host/Program.cs": {
+      "sha256": "07f1c9b9c2edd6d7eee156f02216b5bbbd49d6271fc44b812a35eb3bcc681c43",
+      "archive": "benchmarks/results/remaining-indicators/local-falling-long-20261022/host/Program.cs.gz"
+    },
+    "host/LongNativeRunner.csproj": {
+      "sha256": "30a2f7466f3cde62c229fa18e86927660bb220aedcc547a08be6b3a2120b4dc1",
+      "archive": "benchmarks/results/remaining-indicators/local-falling-long-20261022/host/LongNativeRunner.csproj.gz"
+    },
+    "host/build.log": {
+      "sha256": "55ecd08576c68444f1ede6a7389802ad613986a20d604370ef0de96635537656",
+      "archive": "benchmarks/results/remaining-indicators/local-falling-long-20261022/host/build.log.gz"
+    },
+    "measure-approved-long-native-wide-current.py": {
+      "sha256": "2e00b2ae4dcb29c8e247b70f316d774993b8acb263cc23c8697d494586e0b716",
+      "archive": "benchmarks/results/remaining-indicators/local-falling-long-20261022/measure-approved-long-native-wide-current.py.gz"
+    },
+    "verify-approved-long-native-wide-current.py": {
+      "sha256": "98bd2e32d00837b70ba08cc8b14a8554f5c69f862aeeb4bb3d9b77f3da882382",
+      "archive": "benchmarks/results/remaining-indicators/local-falling-long-20261022/verify-approved-long-native-wide-current.py.gz"
+    },
+    "archive-approved-long-native-wide-current.py": {
+      "sha256": "8bde1994847cb836430a88ae9c15b8a59be9ead514ab2a71e7105002d3cff394",
+      "archive": "benchmarks/results/remaining-indicators/local-falling-long-20261022/archive-approved-long-native-wide-current.py.gz"
+    }
+  }
+}

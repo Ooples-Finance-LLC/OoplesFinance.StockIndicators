@@ -1,0 +1,14 @@
+{
+  "run_id": "local-falling-long-20261022",
+  "source_sha": "5d1ead6f23e872c6ada463a8e6692fef54c34fd7",
+  "comparisons": 4,
+  "apis": 1,
+  "receipt_files": [
+    "cpu-builder-local-falling-long-20261022-receipt.json"
+  ],
+  "verdicts": {
+    "faster": 4
+  },
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/tree/perf/remaining-indicator-rollout/benchmarks/results/remaining-indicators/local-falling-long-20261022",
+  "changed_production_files_since_baseline": []
+}
