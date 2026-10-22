@@ -71856,7 +71856,7 @@
     "id": "periodic-wide-preview",
     "module": "numerical",
     "file": "src/Helpers/PeriodicChannelWindow.cs",
-    "scope": "internal sealed class PeriodicChannelWindow",
+    "scope": "private (double[] Values, Signal Trade) NextExact(double price, bool final)",
     "before": "if (final)",
     "after": "if (final || price != 0)",
     "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.ExpiryFlatWindowsAndExtremePeriodsRemainLazy"
@@ -71865,7 +71865,7 @@
     "id": "periodic-wide-reset-count",
     "module": "numerical",
     "file": "src/Helpers/PeriodicChannelWindow.cs",
-    "scope": "internal sealed class PeriodicChannelWindow",
+    "scope": "internal void Reset()",
     "before": "_direction.Reset(); _count = 0;",
     "after": "_direction.Reset();",
     "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.ExpiryFlatWindowsAndExtremePeriodsRemainLazy"
@@ -71874,7 +71874,7 @@
     "id": "periodic-wide-reset-direction",
     "module": "numerical",
     "file": "src/Helpers/PeriodicChannelWindow.cs",
-    "scope": "internal sealed class PeriodicChannelWindow",
+    "scope": "internal void Reset()",
     "before": "_direction.Reset(); _count = 0;",
     "after": "_count = 0;",
     "filter": "FullyQualifiedName~PeriodicChannelNumericalTests.OppositeRadicalsCancelExactlyAndSubnormalPerturbationsChooseBothDirections"
@@ -77700,7 +77700,7 @@
     "id": "swami-wide-reset-highs",
     "module": "numerical",
     "file": "src/Helpers/SwamiWindow.cs",
-    "scope": "internal sealed class SwamiWindow",
+    "scope": "internal void Reset()",
     "before": "_highs.Clear();",
     "after": "_ = _highs.Count;",
     "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
@@ -77709,7 +77709,7 @@
     "id": "swami-wide-reset-lows",
     "module": "numerical",
     "file": "src/Helpers/SwamiWindow.cs",
-    "scope": "internal sealed class SwamiWindow",
+    "scope": "internal void Reset()",
     "before": "_lows.Clear();",
     "after": "_ = _lows.Count;",
     "filter": "FullyQualifiedName~SwamiNumericalTests.IndependentHandsCoverBothRecurrencesAndExpiry"
@@ -85117,9 +85117,9 @@
     "id": "volume-positive-negative-wide-length-floor",
     "module": "numerical",
     "file": "src/Helpers/VolumePositiveNegativeWindow.cs",
-    "scope": "internal sealed class VolumePositiveNegativeWindow",
-    "before": "{ _length = Math.Max(1, length);",
-    "after": "{ _length = Math.Max(2, length);",
+    "scope": "internal VolumePositiveNegativeWindow(MovingAvgType kind, int length, int smooth, bool allowCertified = true)",
+    "before": "_length = Math.Max(1, length);",
+    "after": "_length = Math.Max(2, length);",
     "filter": "FullyQualifiedName~VolumePositiveNegativeNumericalTests.ExtremePeriodsUseOnlyObservedSamples"
   },
   {
@@ -86413,9 +86413,9 @@
     "id": "kalman-smoother-wide-reset",
     "module": "numerical",
     "file": "src/Helpers/KalmanSmootherWindow.cs",
-    "scope": "internal sealed class KalmanSmootherWindow",
-    "before": "_started = false; }",
-    "after": "_started = true; }",
+    "scope": "internal void Reset()",
+    "before": "_started = false;",
+    "after": "_started = true;",
     "filter": "FullyQualifiedName~KalmanSmootherNumericalTests.PreviewResetAndPrefixInvariance"
   },
   {
