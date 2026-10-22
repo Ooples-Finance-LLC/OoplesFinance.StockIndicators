@@ -29,12 +29,12 @@ jobs:
           from pathlib import Path
           repo='Ooples-Finance-LLC/OoplesFinance.StockIndicators'
           for attempt in range(40):
-              run=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/39695981495']))
-              assert run['head_sha']=='67155620ddbfd8416e765af7d82f18083dfbe7e1'
-              jobs=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/39695981495/jobs?per_page=100']))
+              run=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/39698944971']))
+              assert run['head_sha']=='83a6a5e5949f8a07218b6edfb7fd3fa2a02929b3'
+              jobs=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/39698944971/jobs?per_page=100']))
               build=[j for j in jobs['jobs'] if j['name']=='build']
-              assert len(build)==1
-              if build[0]['status']=='completed':
+              assert len(build)<=1
+              if build and build[0]['status']=='completed':
                   assert build[0]['conclusion']=='success',build[0]['conclusion']
                   Path('binary-build-provenance.json').write_text(json.dumps({'run':run,'build':build[0]},indent=2))
                   break
@@ -45,7 +45,7 @@ jobs:
         with:
           name: competitor-binaries
           path: binaries
-          run-id: 39695981495
+          run-id: 39698944971
           github-token: ${{ github.token }}
       - name: Measure both libraries and both sizes on the dedicated runner
         run: >-
