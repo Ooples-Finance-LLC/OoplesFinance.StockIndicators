@@ -1,0 +1,17 @@
+{
+  "build-benchmark.log": "c8a1519344528980e28623635b1dd2e2d7e898764e963bf07510d69228bbdada",
+  "build-comparator.log": "8992bb4a4b3233a5ff365cd2c25752039f70c2cb3701f11f69070e098ba49f2f",
+  "build-unit.log": "b5d530063ec71fe2fa82bbda33000b81fac116f93f706bedc40f0a0e6e322f27",
+  "diff-check.log": "01a83a0ffe1ed2c4bdac811dc5d42eb2045b7e9ac2c1901d8e7d51a16ad4644a",
+  "discover-contracts.log": "c6756f6a9c8fbc4112c866f19013db22cf44427f1ce4e25104bb9df6f04ef3ea",
+  "gpu-source-verification.log": "ca742dfdc8b42fdfa1bb300c53daf2c60e0340a52941e0ab8ed04a61e75836e1",
+  "gpu.log": "791aa26a50102fdd05c94301908be485d7307b962fcaf15a8bbad811f80d9842",
+  "inventory-check.log": "9ecd64cdd669f78c32f313d22cd60e9661fa1e079ce9e3bf19ee49257933902b",
+  "inventory-tests.log": "911000983394dd38a9a341384c5bb8f729a8fecc27bf9652f5d9853365b5f043",
+  "inventory.log": "9ecd64cdd669f78c32f313d22cd60e9661fa1e079ce9e3bf19ee49257933902b",
+  "parity.log": "f68c6c9998cbb48338fbe193eaa1235ad51e0bb04a0000f14b4f8696cab02536",
+  "unit.log": "44858f27d8f81163608a9bf61827571f0716101d8c9db19ea376a9e7642b56a2",
+  "validate-combined-certified-integration.py": "df3ccd6c8ec9e4712013a16b6cb91393e8ed1936fed54ad325d2e16f562182c4",
+  "archive-combined-certified-integration.py": "b2f8abfeeb66fe6b693edae3b78dfae6a637548c04b5568d70eee0d350e4908b",
+  "finalize-combined-certified-integration.py": "c151cae6c42e0504d5ac00dabcef761abcdffbc808887d2a441a877f7ccf3858"
+}
