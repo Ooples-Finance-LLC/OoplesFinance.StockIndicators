@@ -1,0 +1,62 @@
+{
+  "source_sha": "afbdcd68f8dbea7404bba5f45bc7766561ee3a3c",
+  "measurement_location": "Local Windows; unchanged correctness setup; CPU builder and native methods timed",
+  "cases": 104,
+  "comparisons": 52,
+  "partial": false,
+  "excluded_fixtures": [],
+  "archives": {
+    "verified-summary.json": {
+      "sha256": "56d0fd5d4199b280260a0c79ab55e85b350c48829e85fa698ec7997d3f38c1d5",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch10-20261022/verified-summary.json.gz"
+    },
+    "status.json": {
+      "sha256": "3407886d514cc5aaeb0b436607c1c6143107dd0cf6308958d2a0976a47a06bac",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch10-20261022/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "d89a9608ddd4ff324ba0c201b9336f6cf65f7f18221f5fdb82139433bdc7c66a",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch10-20261022/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "3e34e5c6ba6070829906cac44ec42b32d0eeb1c62f549b69674363fe99be76c9",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch10-20261022/binary-manifest.json.gz"
+    },
+    "SharedContainmentCandleBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedContainmentCandleBenchmarks-report-full-compressed.json": {
+      "sha256": "62843d9df6f7bde9740bfad1f580665dbb89c1cf5cdcb0de9567766f4ee258f4",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch10-20261022/SharedContainmentCandleBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedContainmentCandleBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedContextReversalBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedContextReversalBenchmarks-report-full-compressed.json": {
+      "sha256": "a5e4261e7b64aa154481d2a112e03ef06b11dbe8e5679bbb42ea081d59f621bd",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch10-20261022/SharedContextReversalBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedContextReversalBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedKickingCandleBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedKickingCandleBenchmarks-report-full-compressed.json": {
+      "sha256": "5eda3eaadf95218df7fbca4c73107008a91dcd87db8c397fba04f8011c00aab4",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch10-20261022/SharedKickingCandleBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedKickingCandleBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedNeckCandleBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedNeckCandleBenchmarks-report-full-compressed.json": {
+      "sha256": "2e1410f561e85d8b616e906b364cb7626589b7661e9d2e068bef9c4f84b2c9bc",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch10-20261022/SharedNeckCandleBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedNeckCandleBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedContainmentCandleBenchmarks.log": {
+      "sha256": "1f8d78cd761c00f00f6007221a416e0ea0fd6046d81bbe3549555cf9bd0803b3",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch10-20261022/SharedContainmentCandleBenchmarks.log.gz"
+    },
+    "SharedContextReversalBenchmarks.log": {
+      "sha256": "d0f40a7f45c569b40fb77018bf4eb34598d9c612d3e29c0cd39929f3930c8802",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch10-20261022/SharedContextReversalBenchmarks.log.gz"
+    },
+    "SharedKickingCandleBenchmarks.log": {
+      "sha256": "ec8196414b00515875f32d93f19d2bf129d146dd5482794db01119b5d6a58e61",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch10-20261022/SharedKickingCandleBenchmarks.log.gz"
+    },
+    "SharedNeckCandleBenchmarks.log": {
+      "sha256": "cb0a5a7ea1cf4a9189a79835bb3a9bd9c2c1c389d746dd5a0a1cfbd55e692867",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch10-20261022/SharedNeckCandleBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-local-mapped-batch10.py": "6e2b404b4d1c803c14c03e5efcb51668dfaa8f5f45ff30b460d30d6493363bdc",
+    "verify-local-mapped-batch10.py": "41ea865dd85b4118221881c8fff7970c17d5819d325da3b7cebf989e99f25d66"
+  }
+}
