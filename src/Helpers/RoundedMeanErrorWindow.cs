@@ -14,7 +14,8 @@ internal sealed class RoundedMeanErrorWindow(int period)
         {
             Value = value; _units = default; _hasUnits = false;
 #if !NETFRAMEWORK
-            CertifiedMeanRelativeError.Reciprocal(value, out var floor, out var exact);
+            CertifiedMeanRelativeError.Reciprocal(value, out var floor, out var exact, out var significand, out var exponent);
+            NormalSignificand = significand; NormalExponent = exponent;
             ReciprocalFloor = floor; ReciprocalExact = exact;
 #endif
         }
@@ -22,6 +23,8 @@ internal sealed class RoundedMeanErrorWindow(int period)
         internal double Value { get; }
         internal BigInteger Units => _hasUnits ? _units : ExactVarianceWindow.Units(Value);
 #if !NETFRAMEWORK
+        internal long NormalSignificand { get; }
+        internal int NormalExponent { get; }
         internal UInt128 ReciprocalFloor { get; }
         internal bool ReciprocalExact { get; }
 #endif
@@ -135,6 +138,16 @@ internal sealed class RoundedMeanErrorWindow(int period)
         _compact = false;
     }
 #endif
+
+    internal (double Absolute, double Squared) AbsoluteAndSquaredError(double mean)
+    {
+#if !NETFRAMEWORK
+        if (CertifiedMeanRelativeError.TryErrors(_values, mean, out double absolute, out double squared))
+            return (absolute, squared);
+#endif
+        // Preserve the original independent fallbacks and their evaluation order.
+        return (AbsoluteError(mean), SquaredError(mean));
+    }
 
     internal double AbsoluteError(double mean)
     {

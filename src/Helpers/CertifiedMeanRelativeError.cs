@@ -10,10 +10,10 @@ internal static class CertifiedMeanRelativeError
 {
     private const int Precision = 66;
 
-    internal static void Reciprocal(double value, out UInt128 floor, out bool exact)
+    internal static void Reciprocal(double value, out UInt128 floor, out bool exact, out long significand, out int exponent)
     {
         floor = 0; exact = false;
-        if (!Parts(value, out long significand, out _)) return;
+        if (!Parts(value, out significand, out exponent)) return;
         var divided = UInt128.DivRem((UInt128)1 << 127, (UInt128)Math.Abs(significand));
         floor = divided.Quotient; exact = divided.Remainder == 0;
     }
@@ -28,7 +28,8 @@ internal static class CertifiedMeanRelativeError
         int balance = 0;
         foreach (var sample in values)
         {
-            if (!Parts(sample.Value, out long price, out int exponent)) return false;
+            long price = sample.NormalSignificand; int exponent = sample.NormalExponent;
+            if (exponent is <= 0 or >= 2047) return false;
             if (zeroMean)
             {
                 balance += price > 0 ? 1 : -1;
@@ -93,7 +94,8 @@ internal static class CertifiedMeanRelativeError
         UInt128 sum = 0;
         foreach (var sample in values)
         {
-            if (!Parts(sample.Value, out long price, out int exponent) || Math.Abs(exponent - centerExponent) > 3) return false;
+            long price = sample.NormalSignificand; int exponent = sample.NormalExponent;
+            if (exponent is <= 0 or >= 2047 || Math.Abs(exponent - centerExponent) > 3) return false;
             // A 53-bit significand shifted by at most six bits and the
             // 56-bit center have a difference strictly inside Int64.
             long difference = (price << (exponent - common)) - alignedCenter;
@@ -108,6 +110,35 @@ internal static class CertifiedMeanRelativeError
         // unscaled exponent remains inside the midpoint certifier's bounds.
         return CertifiedCompactRatio.TryDivide(sum, (UInt128)values.Count << 64,
             (squared ? 2 * scale : scale) + 64, out result);
+    }
+
+    // Full diagnostics need both moments of the same deviations. Decode and
+    // align each retained sample once, keeping both sums exact in fixed width.
+    internal static bool TryErrors(Queue<RoundedMeanErrorWindow.Sample> values, double mean,
+        out double absolute, out double squared)
+    {
+        absolute = squared = 0;
+        if (values.Count == 0 || !Parts(mean, out long center, out int centerExponent)) return false;
+        int common = centerExponent - 3;
+        long alignedCenter = center << 3;
+        UInt128 absoluteSum = 0, squaredSum = 0;
+        foreach (var sample in values)
+        {
+            int exponent = sample.NormalExponent;
+            if (exponent is <= 0 or >= 2047 || Math.Abs(exponent - centerExponent) > 3) return false;
+            long difference = (sample.NormalSignificand << (exponent - common)) - alignedCenter;
+            UInt128 distance = (UInt128)Math.Abs(difference);
+            UInt128 square = distance * distance;
+            if (square > UInt128.MaxValue - squaredSum) return false;
+            // At most Int32.MaxValue terms, each strictly below 2^60.
+            absoluteSum += distance;
+            squaredSum += square;
+        }
+        if (absoluteSum == 0) return true;
+        int scale = common - 1075;
+        UInt128 denominator = (UInt128)values.Count << 64;
+        return CertifiedCompactRatio.TryDivide(absoluteSum, denominator, scale + 64, out absolute)
+            && CertifiedCompactRatio.TryDivide(squaredSum, denominator, 2 * scale + 64, out squared);
     }
 
     private static bool Parts(double value, out long significand, out int exponent)
