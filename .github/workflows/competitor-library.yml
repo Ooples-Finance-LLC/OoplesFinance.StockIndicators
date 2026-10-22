@@ -1,89 +1,48 @@
-name: Certified Parabolic competitor timing
+name: Controlled SAR array comparison
 on:
   workflow_dispatch:
-    inputs:
-      source_sha:
-        description: 'Qualified published source commit'
-        required: true
-        type: string
-      binary_run:
-        description: 'Source-matched competitor CI build run'
-        required: true
-        type: string
 permissions:
   contents: read
   actions: read
 concurrency:
-  group: parabolic-competitor-${{ github.ref }}
+  group: sar-array-control-${{ github.ref }}
   cancel-in-progress: false
 jobs:
-  timing:
+  paired:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - id: talib-sar
-            pair: TaLib.Functions.Sar
-          - id: talib-sar-ext
-            pair: TaLib.Functions.SarExt
-          - id: skender-sar
-            pair: Skender.GetParabolicSar
-          - id: trady-sar
-            pair: Trady.Indicator.ParabolicStopAndReverse
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+        pair: [TaLib.Functions.Sar, TaLib.Functions.SarExt]
     env:
       COMPARISON_PAIR: ${{ matrix.pair }}
-      MEASURED_SOURCE_SHA: ${{ inputs.source_sha }}
-      BINARY_RUN_ID: ${{ inputs.binary_run }}
     steps:
       - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-      - name: Verify source and wait for the existing CI build
+      - name: Verify both immutable binary runs
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          python - <<'PY'
-          import json, os, subprocess, time
-          from pathlib import Path
-          repo='Ooples-Finance-LLC/OoplesFinance.StockIndicators'
-          source=os.environ['MEASURED_SOURCE_SHA']; binary=os.environ['BINARY_RUN_ID']
-          assert len(source)==40 and all(c in '0123456789abcdef' for c in source) and binary.isdigit()
-          for attempt in range(40):
-              run=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/{binary}']))
-              assert run['head_sha']==source
-              jobs=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/actions/runs/{binary}/jobs?per_page=100']))
-              build=[j for j in jobs['jobs'] if j['name']=='build']
-              assert len(build)<=1
-              if build and build[0]['status']=='completed':
-                  assert build[0]['conclusion']=='success',build[0]['conclusion']
-                  Path('binary-build-provenance.json').write_text(json.dumps({'run':run,'build':build[0]},indent=2))
-                  break
-              time.sleep(30)
-          else: raise TimeoutError('Source-matched CI build is not ready')
-          PY
+        run: python scripts/compare-sar-array.py verify
       - uses: actions/download-artifact@v8
         with:
           name: competitor-binaries
-          path: binaries
-          run-id: ${{ inputs.binary_run }}
+          path: old-binaries
+          run-id: 39719116665
           github-token: ${{ github.token }}
-      - name: Measure both libraries and both sizes on the dedicated runner
-        run: >-
-          dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll
-          --filter '*LibraryPairBenchmarks.Ooples*' '*LibraryPairBenchmarks.Competitor*'
-          --warmupCount 10 --iterationCount 10 --exporters json csv --artifacts performance
-      - name: Verify complete samples and retain uncertainty
-        run: python scripts/verify-parabolic-hosted-timing.py
+      - uses: actions/download-artifact@v8
+        with:
+          name: competitor-binaries
+          path: new-binaries
+          run-id: 39721035437
+          github-token: ${{ github.token }}
+      - name: Measure old new new old on the same runner
+        run: python scripts/compare-sar-array.py measure
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: certified-parabolic-${{ matrix.id }}
-          path: |
-            performance/
-            binary-build-provenance.json
+          name: sar-array-control-${{ matrix.pair }}
+          path: control/
           retention-days: 30
