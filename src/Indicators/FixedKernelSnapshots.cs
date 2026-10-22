@@ -6,7 +6,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 /// <summary>Exact Fibonacci weighting, newest first, normalized over available observations.</summary>
 /// <remarks>Weights are F(period), F(period-1), ... with F(1)=F(2)=1.
 /// Integer coefficients avoid floating Fibonacci overflow. The complete weighted
-/// ratio rounds once. Coefficient storage grows with the requested period.</remarks>
+/// ratio rounds once. Two exact rolling sums avoid rescanning the window.</remarks>
 public static class FibonacciWeightedSnapshot
 {
     /// <summary>Calculates positive-period Fibonacci weights; period one is the identity.</summary>
@@ -17,27 +17,69 @@ public static class FibonacciWeightedSnapshot
             throw new ArgumentOutOfRangeException(nameof(period));
         if (bars.Count == 0)
             return Array.Empty<double>();
-        var weights = new BigInteger[period];
-        weights[0] = 1;
-        if (period > 1)
-            weights[1] = 1;
-        for (var i = 2; i < period; i++)
-            weights[i] = weights[i - 1] + weights[i - 2];
+#if !NETFRAMEWORK
+        if (period <= 78) return CalculateCompact(bars, period);
+#endif
+        BigInteger newest = 1, previous = 0;
+        for (int i = 1; i < period; i++)
+            (newest, previous) = (newest + previous, newest);
+        BigInteger weighted = 0, shifted = 0, mass = 0;
+        var nextWeight = newest;
+        var followingWeight = previous;
         var output = new double[bars.Count];
-        for (var i = 0; i < bars.Count; i++)
+        for (int i = 0; i < bars.Count; i++)
         {
-            var total = BigInteger.Zero;
-            var mass = BigInteger.Zero;
-            for (var lag = 0; lag < Math.Min(i + 1, period); lag++)
+            var value = ExactVarianceWindow.Units(bars[i].Close);
+            var next = shifted + newest * value;
+            var nextShifted = weighted - shifted + previous * value;
+            if (i >= period)
+                nextShifted -= ExactVarianceWindow.Units(bars[i - period].Close);
+            else
             {
-                var weight = weights[period - 1 - lag];
-                total += weight * ExactVarianceWindow.Units(bars[i - lag].Close);
-                mass += weight;
+                mass += nextWeight;
+                (nextWeight, followingWeight) = (followingWeight, nextWeight - followingWeight);
             }
-            output[i] = ExactMeanAccumulator.UnitRatio(total, mass);
+            weighted = next;
+            shifted = nextShifted;
+            output[i] = ExactMeanAccumulator.UnitRatio(weighted, mass);
         }
         return output;
     }
+
+#if !NETFRAMEWORK
+    private static double[] CalculateCompact(IReadOnlyList<Bar> bars, int period)
+    {
+        // F(78) is the last Fibonacci number below 2^53. These coefficient
+        // conversions are exact; dyadic sums retain every bit and widen on demand.
+        long newest = 1, previous = 0;
+        for (int i = 1; i < period; i++)
+            (newest, previous) = (newest + previous, newest);
+        long nextWeight = newest, followingWeight = previous;
+        JurikDyadic weighted = default, shifted = default, mass = default;
+        var output = new double[bars.Count];
+        for (int i = 0; i < bars.Count; i++)
+        {
+            var value = JurikDyadic.FromDouble(bars[i].Close);
+            var next = value;
+            next.Multiply(newest);
+            next.AddExact(shifted);
+            var nextShifted = weighted;
+            nextShifted.Subtract(shifted);
+            if (i >= period) nextShifted.Subtract(JurikDyadic.FromDouble(bars[i - period].Close));
+            else
+            {
+                mass.Add(nextWeight);
+                (nextWeight, followingWeight) = (followingWeight, nextWeight - followingWeight);
+            }
+            value.Multiply(previous);
+            nextShifted.AddExact(value);
+            weighted = next;
+            shifted = nextShifted;
+            output[i] = weighted.Ratio(mass);
+        }
+        return output;
+    }
+#endif
 }
 
 /// <summary>Window functions for the oldest-first sinc filter.</summary>
