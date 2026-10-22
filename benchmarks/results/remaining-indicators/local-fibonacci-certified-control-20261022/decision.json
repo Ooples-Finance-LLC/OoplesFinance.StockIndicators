@@ -93,5 +93,7 @@
     "verify-fibonacci-certified-control.py": "d7281fe813846a015e90fe7e9f9db76dbb03db4e7ae0b5cdf4f68e708131bb8d"
   },
   "report_imported": false,
-  "production_integrated": false
+  "production_integrated": true,
+  "integration_source": "e02890955fb6ff8ce4f562cfde46488cf5e78eda",
+  "integration_verification": "benchmarks/results/remaining-indicators/publication-combined-integration-certified-20261022-verification.json"
 }

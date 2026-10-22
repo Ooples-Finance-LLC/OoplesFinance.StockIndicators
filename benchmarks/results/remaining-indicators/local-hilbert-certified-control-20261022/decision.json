@@ -397,5 +397,7 @@
     "verify-hilbert-certified-control.py": "5bbd1c804d4bbe62bb9d9c89a696625fb4ce604465d962c8957e264e6b8efada"
   },
   "report_imported": false,
-  "production_integrated": false
+  "production_integrated": true,
+  "integration_source": "e02890955fb6ff8ce4f562cfde46488cf5e78eda",
+  "integration_verification": "benchmarks/results/remaining-indicators/publication-combined-integration-certified-20261022-verification.json"
 }
