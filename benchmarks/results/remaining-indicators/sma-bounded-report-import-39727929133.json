@@ -1,0 +1,190 @@
+{
+  "imported.json": {
+    "before_sha256": "5f59c2a43dc769a5643d9f0fd50a7a080b8985257f6ec0e52f45a579879053ca",
+    "candidate_sha256": "74cadddbe1de3b18f8fbd1d119f743054d235312e36813e87eec981669a4db83",
+    "changed_rows": 2,
+    "unchanged_rows": 800,
+    "qualification_status": {
+      "updated_utc": "2026-10-22T05:35:35.209945+00:00",
+      "published_head": "e83ce498104e9445147bcfc89451a9425425ef57",
+      "inventory_commit": "e83ce498104e9445147bcfc89451a9425425ef57",
+      "candidate": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+      "formula_counts": {
+        "total": 830,
+        "correctness_receipts": 830
+      },
+      "remaining_assessment": {
+        "handwritten_facades_pending": 232
+      },
+      "measurement_totals": {
+        "faster": 0,
+        "slower": 0,
+        "inconclusive": 0,
+        "expected": 1604,
+        "measured": 0,
+        "pending": 1604
+      },
+      "baseline_pairs": 401,
+      "baseline_comparisons": 802,
+      "measurement_run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/39719116665",
+      "source_matches_published_production": false,
+      "checks_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/pull/266/checks",
+      "inventory_sha256": "0e220200267d09a40946c5320e1381632e6d8748f9fa8a859564bb55d96fc3b9",
+      "changed_production_files": [
+        "src/Helpers/CertifiedMeanRelativeError.cs"
+      ],
+      "row_overrides": [
+        {
+          "pair": "Skender.GetSmaAnalysis",
+          "sourceSha": "e4c3cbf1771d87c39ff05b28d7b7891b66e68b12",
+          "runUrl": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/39727929133",
+          "reportSha256": "e0cf4c1325ec4f61119b9e3b1a0ef847210bc0402186aa8851307048b226cb41",
+          "round": 2,
+          "selection": "Latest candidate round in chronological ABBA order, not fastest round."
+        }
+      ]
+    },
+    "selection": "Latest candidate round in chronological ABBA order, not fastest round.",
+    "run_id": "39727929133",
+    "imported_utc": "2026-10-22T05:36:50.041147+00:00",
+    "browser_verified": true
+  },
+  "browser-verification.json": {
+    "source": null,
+    "run_id": "39727929133",
+    "report_sha256": "74cadddbe1de3b18f8fbd1d119f743054d235312e36813e87eec981669a4db83",
+    "changed_means": {
+      "ooples": 802,
+      "competitor": 802
+    },
+    "summary": [
+      {
+        "library": "QuanTAlib",
+        "bars": 1000,
+        "comparisons": 50,
+        "lower": 22,
+        "higher": 28,
+        "equal": 0
+      },
+      {
+        "library": "QuanTAlib",
+        "bars": 10000,
+        "comparisons": 50,
+        "lower": 27,
+        "higher": 23,
+        "equal": 0
+      },
+      {
+        "library": "Skender",
+        "bars": 1000,
+        "comparisons": 84,
+        "lower": 32,
+        "higher": 52,
+        "equal": 0
+      },
+      {
+        "library": "Skender",
+        "bars": 10000,
+        "comparisons": 84,
+        "lower": 31,
+        "higher": 53,
+        "equal": 0
+      },
+      {
+        "library": "TaLib",
+        "bars": 1000,
+        "comparisons": 160,
+        "lower": 57,
+        "higher": 103,
+        "equal": 0
+      },
+      {
+        "library": "TaLib",
+        "bars": 10000,
+        "comparisons": 160,
+        "lower": 15,
+        "higher": 145,
+        "equal": 0
+      },
+      {
+        "library": "Trady",
+        "bars": 1000,
+        "comparisons": 107,
+        "lower": 106,
+        "higher": 1,
+        "equal": 0
+      },
+      {
+        "library": "Trady",
+        "bars": 10000,
+        "comparisons": 107,
+        "lower": 107,
+        "higher": 0,
+        "equal": 0
+      }
+    ],
+    "comparisons": 802,
+    "displayed_table_comparisons": 802,
+    "exported_comparisons": 802,
+    "javascript_errors": []
+  },
+  "measurement.json": {
+    "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+    "rows": [
+      {
+        "pair": "Skender.GetSmaAnalysis",
+        "bars": 1000,
+        "ooples": {
+          "mean_ns": 2947445.9444444445,
+          "lower_ns": 2906320.991411584,
+          "upper_ns": 2988570.897477305,
+          "allocated_bytes": 306024,
+          "samples": 9
+        },
+        "competitor": {
+          "mean_ns": 529916.2222222222,
+          "lower_ns": 514203.55585636443,
+          "upper_ns": 545628.8885880801,
+          "allocated_bytes": 299528,
+          "samples": 9
+        },
+        "competitor_over_ooples": 0.17978827507287995,
+        "verdict": "slower"
+      },
+      {
+        "pair": "Skender.GetSmaAnalysis",
+        "bars": 10000,
+        "ooples": {
+          "mean_ns": 3988411.6,
+          "lower_ns": 3915521.151163065,
+          "upper_ns": 4061302.0488369353,
+          "allocated_bytes": 2946424,
+          "samples": 10
+        },
+        "competitor": {
+          "mean_ns": 971080.4444444445,
+          "lower_ns": 952415.5839096694,
+          "upper_ns": 989745.3049792196,
+          "allocated_bytes": 2888504,
+          "samples": 9
+        },
+        "competitor_over_ooples": 0.24347548393562102,
+        "verdict": "slower"
+      }
+    ],
+    "order": 2,
+    "version": "new",
+    "source_sha": "e4c3cbf1771d87c39ff05b28d7b7891b66e68b12",
+    "report_sha256": "e0cf4c1325ec4f61119b9e3b1a0ef847210bc0402186aa8851307048b226cb41",
+    "report_file": "control/2-new/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+    "binary_hashes": {
+      "OoplesFinance.StockIndicators.dll": "c49404cbd456398ab6cc2e45a8a090028a2a4d4086e46a6fca4b35d676e60b65",
+      "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "510a4fefa59fc19ae213e60a5f55a52f8b549615eab65c1ab016e0db5e7f0c98"
+    },
+    "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/39727929133",
+    "selection": "Latest candidate round in chronological ABBA order, not fastest round."
+  },
+  "raw_archive": "benchmarks/results/remaining-indicators/sma-bounded-control-39727929133-2-new-raw.json.gz",
+  "selection": "Final candidate round in chronological ABBA order, not the fastest. All four raw rounds retained.",
+  "staging_script_sha256": "785a4cc2ca7a9d5f6be63a559da0da20bcef20905d967bc2811ee5944f0471d6"
+}
