@@ -1,0 +1,58 @@
+{
+  "input_head": "e8eb656066fc4c50876253fb41a3214ee178df7e",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "parallel_batch_note": "Approved Parabolic snapshot redesign: exact-difference FMA certificate, compact comparisons and clamping, original wide integer fallback; bitwise four-variant regression and controlled competitor timing required.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T01:29:11.922060+00:00",
+  "unit": {
+    "passed": 72,
+    "class_counts": {
+      "ParabolicSarNumericalTests": 38,
+      "ParabolicSnapshotSharedExecutionTests": 9,
+      "SharedGeneratedParabolicSarTests": 17,
+      "ParabolicCertifiedArithmeticTests": 4,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\parabolic-certified\\unit\\unit.trx",
+    "sha256": "0d2007b633cabba02956ade309ceca3780d3fd67003098c98ab46cb4d263a991",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-parabolic-certified-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 41,
+    "class_counts": {
+      "ParabolicComparisonTests": 13,
+      "SharedParabolicSnapshotBenchmarkTests": 28
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\parabolic-certified\\parity\\parity.trx",
+    "sha256": "e2b0f9b82e281bdd1bdc3b30c9171e5a0fded2aaf3b297f0e2bb62e09e6a384d",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-parabolic-certified-20261021-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-certified-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "fcbaa53bfa8050a640caf5beca46491b4b202c17a46fd14172e819ff690e3464",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-certified-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "fcbaa53bfa8050a640caf5beca46491b4b202c17a46fd14172e819ff690e3464",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-certified-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "fcbaa53bfa8050a640caf5beca46491b4b202c17a46fd14172e819ff690e3464",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-certified-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "fcbaa53bfa8050a640caf5beca46491b4b202c17a46fd14172e819ff690e3464"
+  },
+  "source_fingerprint_sha256": "a4b4f4326ea7cb40141a18329c9935bd70ed52312122bb617550d530a72171ed",
+  "inventory_tests_passed": 6,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Parabolic snapshot recurrences retain exact comparisons, once-rounded updates, reversal rules, and wide overflow behavior. Direct exact-oracle arithmetic, preserved four-variant baseline and long-history checks are archived. Direct competitor timing remains pending."
+}
