@@ -1,0 +1,58 @@
+{
+  "before_sha256": "73f4d2d0d146b85020eb5f06e3caef0fbd7ebd9098d991fe3cb017b756f7fe45",
+  "candidate_sha256": "974e7080381bac20dd6bb1291f3cbe5514a17eecd354dab0a4f640a7c1198e32",
+  "changed_baseline_rows": 6,
+  "unchanged_baseline_rows": 796,
+  "changed_builder_slots": 4,
+  "verdicts": {
+    "faster": 534,
+    "slower": 643,
+    "inconclusive": 19
+  },
+  "unchanged_rows": 796,
+  "run_id": "local-cci-certified-control-20261022",
+  "imported_utc": "2026-10-22T15:39:34.155580+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "666e72ad2061f30aa43a0bd0a2aad46fd6ba0738bbf8253ac6386f9cf25e516a",
+      "archive": "benchmarks/results/remaining-indicators/cci-certified-local-cci-certified-control-20261022-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "a493e74dda1d64e466dd77aca4a7c893a511f787fe473f65bbb46e134d9206dc",
+      "archive": "benchmarks/results/remaining-indicators/cci-certified-local-cci-certified-control-20261022-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "5a97e3f22a6f15d1d69af189e27288744e82cd37d9d88042a3926669f7e9d86b",
+      "archive": "benchmarks/results/remaining-indicators/cci-certified-local-cci-certified-control-20261022-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "87f43670b91b7cbcc5dc022df4f02e53d7d817dc399bdf61795e45388fe7bc44",
+      "archive": "benchmarks/results/remaining-indicators/cci-certified-local-cci-certified-control-20261022-measurement.json.gz"
+    },
+    "stage-approved-certified-report.py": {
+      "sha256": "391295bc95553241bd8e9939836e6ac1f314c9a54a902252e6b8daf8d9ad368c",
+      "archive": "benchmarks/results/remaining-indicators/cci-certified-local-cci-certified-control-20261022-stage-approved-certified-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "80d014dd5af7d9c9ac1e4a2b01ff711267b962cef72f360b4af4e30e1a010b24",
+      "archive": "benchmarks/results/remaining-indicators/cci-certified-local-cci-certified-control-20261022-verify-approved-certified-report.py.gz"
+    },
+    "import-approved-certified-report.py": {
+      "sha256": "b8e8b693fc4b853472f0b7b071bde656465c1c6e983ae608ee749c891b029b36",
+      "archive": "benchmarks/results/remaining-indicators/cci-certified-local-cci-certified-control-20261022-import-approved-certified-report.py.gz"
+    },
+    "archive-approved-certified-control.py": {
+      "sha256": "95c0331d1d5f3b095c1a6b9c547abc1a69362229ae95afe20f4ba43004ea5cfa",
+      "archive": "benchmarks/results/remaining-indicators/cci-certified-local-cci-certified-control-20261022-archive-approved-certified-control.py.gz"
+    },
+    "prove-cci-integration.py": {
+      "sha256": "1770317abac91fc2fb8c4ab581a1a00a93e3fccfaedcd063a3352b0884960f6d",
+      "archive": "benchmarks/results/remaining-indicators/cci-certified-local-cci-certified-control-20261022-prove-cci-integration.py.gz"
+    },
+    "archive-approved-certified-report.py": {
+      "sha256": "45fb65e3bb79c3b85a16d8d4a39c21bf04b5c4662eb0324e14e41e722d1d7af9",
+      "archive": "benchmarks/results/remaining-indicators/cci-certified-local-cci-certified-control-20261022-archive-approved-certified-report.py.gz"
+    }
+  }
+}
