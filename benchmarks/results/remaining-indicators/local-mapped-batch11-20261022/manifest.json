@@ -1,0 +1,62 @@
+{
+  "source_sha": "4595174e22683ecd8986811aab919395470c4b67",
+  "measurement_location": "Local Windows; unchanged correctness setup; CPU builder and native methods timed",
+  "cases": 128,
+  "comparisons": 64,
+  "partial": false,
+  "excluded_fixtures": [],
+  "archives": {
+    "verified-summary.json": {
+      "sha256": "1d62f44ac08815b7df14ace593c5caa3904ad98250c4cd4d94ea29f40a60f25e",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch11-20261022/verified-summary.json.gz"
+    },
+    "status.json": {
+      "sha256": "180ba748d62cd675515b02bd096f30bfcea82513441c17c78fe1586130e9dcfa",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch11-20261022/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "cd0865952ded2dd851e9b1d6b90e158a1a9790268c7112f1bca4ea4a69a959aa",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch11-20261022/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "3e34e5c6ba6070829906cac44ec42b32d0eeb1c62f549b69674363fe99be76c9",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch11-20261022/binary-manifest.json.gz"
+    },
+    "SharedSequenceCandleBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSequenceCandleBenchmarks-report-full-compressed.json": {
+      "sha256": "e92fd85c308e4c8745036f21f29c9f8b26ad1d5b975dc1cb0b4d37da041daa91",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch11-20261022/SharedSequenceCandleBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSequenceCandleBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedTripleBodyBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json": {
+      "sha256": "ac73996cf6c923546e089ed7241917f35b8972b3a777ae30a700781de8b932e6",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch11-20261022/SharedTripleBodyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedRangeDojiBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRangeDojiBenchmarks-report-full-compressed.json": {
+      "sha256": "c13563e2c74f7594c2b64588a898ebda038a8e6f48bb6e0b23733e3b946618f4",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch11-20261022/SharedRangeDojiBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRangeDojiBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedMatchedLinesBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMatchedLinesBenchmarks-report-full-compressed.json": {
+      "sha256": "ead7cfc4dead291ad95860728388962ac5f8e9352ae7b9b76c9c115c93537750",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch11-20261022/SharedMatchedLinesBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMatchedLinesBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedMatchedLinesBenchmarks.log": {
+      "sha256": "36220aac564fefe577dabcce2aebbd1ea4d513311ae30b616b6c2dc82a18f26e",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch11-20261022/SharedMatchedLinesBenchmarks.log.gz"
+    },
+    "SharedRangeDojiBenchmarks.log": {
+      "sha256": "f018194423a046ffaf50a099ac44bb0126ee554f6f4aaa956579fc0c787aefa6",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch11-20261022/SharedRangeDojiBenchmarks.log.gz"
+    },
+    "SharedSequenceCandleBenchmarks.log": {
+      "sha256": "012c65f1328a85e998bc3782d909bb67a3b6d9df9d9cd2bce3a0f40484d59942",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch11-20261022/SharedSequenceCandleBenchmarks.log.gz"
+    },
+    "SharedTripleBodyBenchmarks.log": {
+      "sha256": "93426e28e76335b6e899e50515bf5e8a8afa0bfa891db7bf1b2794d35ade03e9",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch11-20261022/SharedTripleBodyBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-local-mapped-batch11.py": "29d0064546b5c9cf420cf2881541c630d64dc1e891f2c5f152fb534962d29e07",
+    "verify-local-mapped-batch11.py": "758dbe7848c230b3a5d8f122baf571b7f1184357d751a327fab741acd2f20e80"
+  }
+}
