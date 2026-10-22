@@ -1,4 +1,3 @@
-using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Indicators;
@@ -9,23 +8,12 @@ public sealed record ConfirmedParabolicValue(double? Sar, bool? IsReversal);
 /// <summary>Parabolic stop conventions with exact comparisons and wide once-rounded updates.</summary>
 public static class ParabolicStopSnapshots
 {
-    private static readonly BigInteger Grid = BigInteger.One << 1074;
-
-    private static BigInteger U(double v) => ExactVarianceWindow.Units(v);
-
-    private static BigInteger Advance(BigInteger stop, BigInteger extreme, BigInteger factor) =>
-        RocBankValue.RoundUnits(stop * Grid + factor * (extreme - stop), Grid);
-
-    private static BigInteger Increase(BigInteger factor, BigInteger step, BigInteger maximum) =>
-        RocBankValue.RoundUnits(BigInteger.Min(factor + step, maximum), 1);
-
-    private static double Publish(BigInteger value)
-    {
-        var result = ExactMeanAccumulator.UnitRatio(value, 1);
-        return FrameworkCompatibility.IsFinite(result)
-            ? result
-            : throw new OverflowException("Parabolic stop is not representable.");
-    }
+    private static ParabolicStopValue U(double value) => ParabolicStopValue.Of(value);
+    private static ParabolicStopValue Advance(ParabolicStopValue stop, ParabolicStopValue extreme, ParabolicStopValue factor) =>
+        ParabolicStopValue.Advance(stop, extreme, factor);
+    private static ParabolicStopValue Increase(ParabolicStopValue factor, ParabolicStopValue step, ParabolicStopValue maximum) =>
+        ParabolicStopValue.Increase(factor, step, maximum);
+    private static double Publish(ParabolicStopValue value) => value.Publish();
 
     private static void Validate(IReadOnlyList<Bar> bars, params double[] parameters)
     {
@@ -135,7 +123,7 @@ public static class ParabolicStopSnapshots
         var offsetUnits = U(offset);
         var down = U(bars[0].Low) - U(bars[1].Low);
         var upMove = U(bars[1].High) - U(bars[0].High);
-        var rising = start == 0 ? !(down > 0 && down > upMove) : start > 0;
+        var rising = start == 0 ? !(down.Sign > 0 && down > upMove) : start > 0;
         var extreme = U(rising ? bars[1].High : bars[1].Low);
         var stop = U(
             start == 0
@@ -156,12 +144,9 @@ public static class ParabolicStopSnapshots
             {
                 rising = !rising;
                 stop = rising
-                    ? BigInteger.Min(extreme, BigInteger.Min(priorLow, low))
-                    : BigInteger.Max(extreme, BigInteger.Max(priorHigh, high));
-                stop = RocBankValue.RoundUnits(
-                    stop * (Grid + (rising ? -offsetUnits : offsetUnits)),
-                    Grid
-                );
+                    ? ParabolicStopValue.Min(extreme, ParabolicStopValue.Min(priorLow, low))
+                    : ParabolicStopValue.Max(extreme, ParabolicStopValue.Max(priorHigh, high));
+                stop = ParabolicStopValue.Offset(stop, offsetUnits, rising);
                 factor = initial[rising ? 1 : 0];
                 extreme = rising ? high : low;
             }
@@ -173,8 +158,8 @@ public static class ParabolicStopSnapshots
             }
             stop = Advance(stop, extreme, factor);
             stop = rising
-                ? BigInteger.Min(stop, BigInteger.Min(priorLow, low))
-                : BigInteger.Max(stop, BigInteger.Max(priorHigh, high));
+                ? ParabolicStopValue.Min(stop, ParabolicStopValue.Min(priorLow, low))
+                : ParabolicStopValue.Max(stop, ParabolicStopValue.Max(priorHigh, high));
             priorHigh = high;
             priorLow = low;
         }
@@ -196,7 +181,7 @@ public static class ParabolicStopSnapshots
         var result = new ConfirmedParabolicValue[bars.Count];
         if (bars.Count == 0)
             return result;
-        var stops = new BigInteger[bars.Count];
+        var stops = new ParabolicStopValue[bars.Count];
         var reversals = new bool[bars.Count];
         var rising = true;
         var extreme = U(bars[0].High);
@@ -217,8 +202,8 @@ public static class ParabolicStopSnapshots
             stop = Advance(stop, extreme, factor);
             if (i >= 2)
                 stop = rising
-                    ? BigInteger.Min(stop, BigInteger.Min(priorLow, olderLow))
-                    : BigInteger.Max(stop, BigInteger.Max(priorHigh, olderHigh));
+                    ? ParabolicStopValue.Min(stop, ParabolicStopValue.Min(priorLow, olderLow))
+                    : ParabolicStopValue.Max(stop, ParabolicStopValue.Max(priorHigh, olderHigh));
             var reversal = rising ? low < stop : high > stop;
             if (reversal)
             {
@@ -288,19 +273,19 @@ public static class ParabolicStopSnapshots
                 stop = extreme;
                 rising = !rising;
                 extreme = rising
-                    ? BigInteger.Max(extreme, currentHigh)
-                    : BigInteger.Min(extreme, currentLow);
+                    ? ParabolicStopValue.Max(extreme, currentHigh)
+                    : ParabolicStopValue.Min(extreme, currentLow);
                 factor = stepUnits;
             }
             else
             {
                 stop = Advance(stop, extreme, factor);
                 stop = rising
-                    ? BigInteger.Min(stop, BigInteger.Min(priorLow, olderLow))
-                    : BigInteger.Max(stop, BigInteger.Max(priorHigh, olderHigh));
+                    ? ParabolicStopValue.Min(stop, ParabolicStopValue.Min(priorLow, olderLow))
+                    : ParabolicStopValue.Max(stop, ParabolicStopValue.Max(priorHigh, olderHigh));
                 var next = rising ? currentHigh : currentLow;
                 var fresh = rising ? next > extreme : next < extreme;
-                extreme = rising ? BigInteger.Max(extreme, next) : BigInteger.Min(extreme, next);
+                extreme = rising ? ParabolicStopValue.Max(extreme, next) : ParabolicStopValue.Min(extreme, next);
                 if (fresh && (rising ? currentLow > stop : currentHigh < stop))
                     factor = Increase(factor, stepUnits, maximumUnits);
             }
