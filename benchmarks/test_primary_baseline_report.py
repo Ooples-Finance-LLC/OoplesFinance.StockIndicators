@@ -56,3 +56,17 @@ class PrimaryBaselineTests(HostedResultsTests):
         self.assertIn('Refreshed baseline source: bbbbbbbb.', updated)
         self.assertNotIn('Measured source aaaaaaaa.', updated)
         self.assertNotIn('Refreshed baseline source: aaaaaaaa.', updated)
+
+    def test_full_refresh_replaces_mixed_source_methodology(self):
+        dataset = measured_dataset(self.folder, self.source, self.run, self.manifest, {})
+        document = ('<body><section class="hero"><p class="lede">old</p></section>'
+            '<p>Base source: oldbase (792 comparisons); SMA Analysis source: oldsma '
+            '(two comparisons); Parabolic SAR source: oldsar (eight comparisons). '
+            '<a href="https://example.test/old-run">Old evidence</a>.</p>'
+            + script('dataset', {'rows': []}) + '</body>')
+        updated = replace_primary(document, dataset)
+        self.assertIn('Refreshed baseline source: ' + self.source[:8] + '.', updated)
+        self.assertIn(dataset['evidence']['runUrl'], updated)
+        for stale in ['Base source:', 'oldbase', 'oldsma', 'oldsar', 'https://example.test/old-run']:
+            self.assertNotIn(stale, updated)
+        self.assertEqual(updated, replace_primary(updated, dataset))
