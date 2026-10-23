@@ -1,0 +1,59 @@
+{
+  "input_head": "cd9179d9afec1671ce76fd5944e9c42f0bf38bce",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedTillson.cs",
+    "tests/ModelsTests/CertifiedTillsonTests.cs"
+  ],
+  "batch_note": "Approved T3 continuation: exact machine-word division for supported rounding-grid operands; existing certificate/fallback retained. No recurrence/state changes. Numerical boundary, independent reference/parity, GPU and inventory checks; performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-23T04:40:54.447300+00:00",
+  "unit": {
+    "passed": 33,
+    "class_counts": {
+      "CertifiedTillsonTests": 17,
+      "TillsonSharedExecutionTests": 12,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-compact-division\\unit\\unit.trx",
+    "sha256": "6cefdc9d6a6d6ba91c9edc35b61f9333797bdce23f4081773f1dd61b0014a9d2",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-compact-division-certified-20261022-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 26,
+    "class_counts": {
+      "SharedTillsonBenchmarkTests": 16,
+      "TillsonComparisonTests": 10
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-compact-division\\parity\\parity.trx",
+    "sha256": "bb11dc9ba84ae49a63dcf5b8887bdb3123dac9d3f433cb86db3957205e7d4d6e",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-compact-division-certified-20261022-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-compact-division-20261023\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "3023dcc4e7eb23a3716fd68c3aa815367df1f30856a6fb5b4c85f599a3ea560f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-compact-division-20261023\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "3023dcc4e7eb23a3716fd68c3aa815367df1f30856a6fb5b4c85f599a3ea560f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-compact-division-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "3023dcc4e7eb23a3716fd68c3aa815367df1f30856a6fb5b4c85f599a3ea560f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-compact-division-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "3023dcc4e7eb23a3716fd68c3aa815367df1f30856a6fb5b4c85f599a3ea560f"
+  },
+  "source_fingerprint_sha256": "15e36311875f3d7727414413eb708f41653238764968ba253dfddc8b1159dd46",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved T3 continuation: exact machine-word division for supported rounding-grid operands; existing certificate/fallback retained. No recurrence/state changes. Numerical boundary, independent reference/parity, GPU and inventory checks; performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
