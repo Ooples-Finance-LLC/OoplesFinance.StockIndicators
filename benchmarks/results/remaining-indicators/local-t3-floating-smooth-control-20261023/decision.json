@@ -364,7 +364,8 @@
     "measure-t3-floating-smooth-control.py": "957b64139d3860bc812c37ff9bc9fccd3d0fd5a3c5f90a71ec9e6704785402bf",
     "verify-t3-floating-smooth-control.py": "2b9d59c154160a64972e20a0025e1b379a2c2fd4fc41b47cc554690e4e633997"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/t3-floating-smooth-integration-source-proof-20261023.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/t3-floating-smooth-integration-source-proof-20261023.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/t3-floating-smooth-certified-local-t3-floating-smooth-control-20261023-report-import.json"
 }
