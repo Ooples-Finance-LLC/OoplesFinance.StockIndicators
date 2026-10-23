@@ -1,0 +1,58 @@
+{
+  "input_head": "16ba9f1f11bc85b8fc7c5da68a28d7eb24699a06",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/FixedKernelSnapshots.cs",
+    "tests/ModelsTests/FibonacciRollingSnapshotTests.cs"
+  ],
+  "batch_note": "Approved Fibonacci refinement: reuse exact midpoint certification for aligned output ratios only at4096+bars, retaining unchanged short-history routine and existing dyadic fallback for unsupported ranges and subnormal results. Adjacent-value/cancellation regressions, existing numerical cases, long-history parity, GPU and controlled performance required.",
+  "step": "complete",
+  "updated_utc": "2026-10-23T05:50:17.033159+00:00",
+  "unit": {
+    "passed": 30,
+    "class_counts": {
+      "FibonacciRollingSnapshotTests": 18,
+      "FibonacciWeightedAverageTests": 12
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\fibonacci-long-publish\\unit\\unit.trx",
+    "sha256": "cd7b5757a013de3b3a57c2905c5a21c0b05026e10a0f89ebc550db6baff790b2",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-fibonacci-long-publish-certified-20261023-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 15,
+    "class_counts": {
+      "FixedKernelSnapshotComparisonTests": 8,
+      "FibonacciBuilderComparisonTests": 7
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\fibonacci-long-publish\\parity\\parity.trx",
+    "sha256": "306796a6d8988e76d222aeb459f5cce79b4790dbdf5eb09ff0a4f275e60a05d5",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-fibonacci-long-publish-certified-20261023-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fibonacci-long-publish-20261023\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f6d36835accf0c8b3c9ee7468233fea9b89af8f65089c4fd7d8c249cb0b9f9a6",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fibonacci-long-publish-20261023\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f6d36835accf0c8b3c9ee7468233fea9b89af8f65089c4fd7d8c249cb0b9f9a6",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fibonacci-long-publish-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f6d36835accf0c8b3c9ee7468233fea9b89af8f65089c4fd7d8c249cb0b9f9a6",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fibonacci-long-publish-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f6d36835accf0c8b3c9ee7468233fea9b89af8f65089c4fd7d8c249cb0b9f9a6"
+  },
+  "source_fingerprint_sha256": "b587db56bb8e3eedc020226a3fbe6564624c0d164fde629c5457d9e985576ecb",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved Fibonacci refinement: reuse exact midpoint certification for aligned output ratios only at4096+bars, retaining unchanged short-history routine and existing dyadic fallback for unsupported ranges and subnormal results. Adjacent-value/cancellation regressions, existing numerical cases, long-history parity, GPU and controlled performance required. Correctness checks passed; controlled performance remains pending."
+}
