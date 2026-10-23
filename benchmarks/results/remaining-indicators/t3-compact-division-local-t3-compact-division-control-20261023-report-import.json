@@ -1,0 +1,58 @@
+{
+  "before_sha256": "a96649244e76f7ac7f9e4adb86690869c0053fdfbc76d3146bcbafc55f2b7312",
+  "candidate_sha256": "7e5ef2899b05c9c212941236d1da2ee7355975241af055839039b3726300410c",
+  "changed_baseline_rows": 6,
+  "unchanged_baseline_rows": 796,
+  "changed_builder_slots": 12,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 796,
+  "run_id": "local-t3-compact-division-control-20261023",
+  "imported_utc": "2026-10-23T05:04:57.304463+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "cd8cfd4db18c01599e4b3c33a706c4318f00c5d89d36fde7554c8163cfcebcbe",
+      "archive": "benchmarks/results/remaining-indicators/t3-compact-division-local-t3-compact-division-control-20261023-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "2ce8ec8dc7f67ed3a387ddc961ad5e2e8569dd086ed26f09927d4e07ed6b1ccd",
+      "archive": "benchmarks/results/remaining-indicators/t3-compact-division-local-t3-compact-division-control-20261023-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "d7126c7a800c84a438716eca17b3d0a650ac38c5ba28169a657d020f5402c076",
+      "archive": "benchmarks/results/remaining-indicators/t3-compact-division-local-t3-compact-division-control-20261023-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "b2a72a883600e31f498ac786cb158c0bbb6e3d790d3334b990d50b357b8e921c",
+      "archive": "benchmarks/results/remaining-indicators/t3-compact-division-local-t3-compact-division-control-20261023-measurement.json.gz"
+    },
+    "stage-t3-compact-division-report.py": {
+      "sha256": "4fce49c93b2788d2551091ab9071c2a45649eb69800d0f1793b97dff335b0497",
+      "archive": "benchmarks/results/remaining-indicators/t3-compact-division-local-t3-compact-division-control-20261023-stage-t3-compact-division-report.py.gz"
+    },
+    "verify-t3-certified-report.py": {
+      "sha256": "83331b8164d8142f0ab71f83c262171261b3acd48ec78b59683f76ff8ee59af8",
+      "archive": "benchmarks/results/remaining-indicators/t3-compact-division-local-t3-compact-division-control-20261023-verify-t3-certified-report.py.gz"
+    },
+    "import-t3-certified-report.py": {
+      "sha256": "eb5f1ba333cea4e1b9d3788f8edc697b4bf2bc58fbba1c3f91e034110b3b6636",
+      "archive": "benchmarks/results/remaining-indicators/t3-compact-division-local-t3-compact-division-control-20261023-import-t3-certified-report.py.gz"
+    },
+    "archive-t3-compact-division-control.py": {
+      "sha256": "16efdd5ebeb2574b580215104b944a0cde8f3b1d213d6494e69cb94de4e8f8a8",
+      "archive": "benchmarks/results/remaining-indicators/t3-compact-division-local-t3-compact-division-control-20261023-archive-t3-compact-division-control.py.gz"
+    },
+    "prove-t3-compact-division-integration.py": {
+      "sha256": "44be49058c34df32d35cc6aa0fe2709daf21b0574cb77a384138b9feefea5627",
+      "archive": "benchmarks/results/remaining-indicators/t3-compact-division-local-t3-compact-division-control-20261023-prove-t3-compact-division-integration.py.gz"
+    },
+    "archive-t3-compact-division-report.py": {
+      "sha256": "b7352f56eee4e5f18feb8addf5fdc3f07ebecdc1fd514eaf695c9f54f572c291",
+      "archive": "benchmarks/results/remaining-indicators/t3-compact-division-local-t3-compact-division-control-20261023-archive-t3-compact-division-report.py.gz"
+    }
+  }
+}
