@@ -1,0 +1,58 @@
+{
+  "input_head": "1dfff1074fbdfe79537ff1626e3d39caa1f79fb2",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/DetrendedPriceSnapshot.cs",
+    "tests/ModelsTests/DetrendedDirectDifferenceTests.cs"
+  ],
+  "batch_note": "Replace DPO final single-subtraction accumulator on modern runtimes; preserve canonicalpositivezero,retrospectivealignment,presence,overflowrejection,andNETFRAMEWORKarithmetic.196extremepairoracle plus existing snapshot/reference/long-history/GPU/inventory checks. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-23T06:36:13.547286+00:00",
+  "unit": {
+    "passed": 14,
+    "class_counts": {
+      "RetrospectiveSnapshotExecutionTests": 13,
+      "DetrendedDirectDifferenceTests": 1
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\dpo-direct-difference\\unit\\unit.trx",
+    "sha256": "15150c46ec7e2071b1059fca7b0ee15ebe91cc10b5ae643608ade58eb9c58fa2",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-dpo-direct-difference-certified-20261023-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 31,
+    "class_counts": {
+      "RetrospectivePriceComparisonTests": 21,
+      "SharedRetrospectiveSnapshotBenchmarkTests": 10
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\dpo-direct-difference\\parity\\parity.trx",
+    "sha256": "9df99f2ae2add0453f02fa6823e7afcbeca9e401d30fd69d1b1d43a825397ee7",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-dpo-direct-difference-certified-20261023-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-dpo-direct-difference-20261023\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "6015ab9a26f3846892eaeb1e51c6402123bf46729be4782ab4a627d47d06daf5",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-dpo-direct-difference-20261023\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "6015ab9a26f3846892eaeb1e51c6402123bf46729be4782ab4a627d47d06daf5",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-dpo-direct-difference-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "6015ab9a26f3846892eaeb1e51c6402123bf46729be4782ab4a627d47d06daf5",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-dpo-direct-difference-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "6015ab9a26f3846892eaeb1e51c6402123bf46729be4782ab4a627d47d06daf5"
+  },
+  "source_fingerprint_sha256": "947f063ac9046a0d7f5f9b8fa5875b52168cdded8a8fbcfbb4c8d9d65f6df248",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Replace DPO final single-subtraction accumulator on modern runtimes; preserve canonicalpositivezero,retrospectivealignment,presence,overflowrejection,andNETFRAMEWORKarithmetic.196extremepairoracle plus existing snapshot/reference/long-history/GPU/inventory checks. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

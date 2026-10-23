@@ -13676,7 +13676,7 @@
     "src/Indicators/DelayedHilbertTrendMode.cs": "398ae754f70d6f7cb697ea9f25706f370b63869d015f85c643fb5c8226636a2e",
     "src/Indicators/DelayedHilbertTrendline.cs": "a243732f71589dd6dc3c76d4f74e27b5c2f1262934813f71aa76dc3459561c68",
     "src/Indicators/DelayedPhaseAdaptiveAverage.cs": "17e7da10e20f2cc73189db3953bdcba3bbca092e47104b7ff252930f53e4a7b5",
-    "src/Indicators/DetrendedPriceSnapshot.cs": "d62e7046cd833feef6a8d1bddebc64f417677e5473d75560ae75f50eb997e4d9",
+    "src/Indicators/DetrendedPriceSnapshot.cs": "cc150784046f8617936191341c4239c5dabfa26bfabaedc7c1f2f821165af862",
     "src/Indicators/DeviationRatioAdaptiveAverage.cs": "8d73987e76741a67b8aff1825946ed221b599dd71b8607e5af9afd069ffda849",
     "src/Indicators/DojiCandle.cs": "653a33ac19dcc473ca2dfd5d0be353f3aabe0771e7ded8b476bad13c4ef7f36e",
     "src/Indicators/DynamicMomentumSnapshot.cs": "127a73db413c24d32cfd50b9a5d0cf060c65352a9eb7332cde2e08472dba5aa8",
