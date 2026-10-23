@@ -1,0 +1,97 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "ef13e8501481b65806e4cfb856c230c202850624",
+    "new": "f6050480f7f386398ed9a65558dcb7a2cc4c1a9d"
+  },
+  "candidate_code_source": "1dfff1074fbdfe79537ff1626e3d39caa1f79fb2",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetDpo",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.2738777777777778,
+        0.2774333333333333
+      ],
+      "new_means_ms": [
+        0.25293,
+        0.2329
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetDpo",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.7661,
+        0.80786
+      ],
+      "new_means_ms": [
+        0.5075,
+        0.5535555555555555
+      ],
+      "verdict": "faster"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "9d9d33e21d941fd36a02e0f6a2a11ccc267ef443ea352b9182bc69f60ae6114d",
+      "archive": "benchmarks/results/remaining-indicators/local-dpo-direct-difference-control-20261023/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "7647d2ce9f977878c16f4a18781e36ffe07f8dbe176a4def9d363ca43570cd6b",
+      "archive": "benchmarks/results/remaining-indicators/local-dpo-direct-difference-control-20261023/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "9f355211bce5e541a07839e02cd1c447f6608e3c076362ea830ee73b25af0763",
+      "archive": "benchmarks/results/remaining-indicators/local-dpo-direct-difference-control-20261023/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "0413b8eb080cc93023fae57503936124403505f15321be3b9cae783b72a7bcdc",
+      "archive": "benchmarks/results/remaining-indicators/local-dpo-direct-difference-control-20261023/verified-summary.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "92728d9ec96c7d7aff4d7a1b4c7a9b42fee1c0cea465597b50e2dfc1d7ea2d32",
+      "archive": "benchmarks/results/remaining-indicators/local-dpo-direct-difference-control-20261023/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "aa0cbbb849cadc4af6a84c997dce39a0c23b3efbc0b6e2bb8a748b4f9dd0beff",
+      "archive": "benchmarks/results/remaining-indicators/local-dpo-direct-difference-control-20261023/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "6f396df2a33e64063cef27b5584a0048daf17d0ec39b5966d6fc67f937055963",
+      "archive": "benchmarks/results/remaining-indicators/local-dpo-direct-difference-control-20261023/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "205809374dabe6868379b1d2abeba189c3cb2559795cf99932fddd1e0c344eea",
+      "archive": "benchmarks/results/remaining-indicators/local-dpo-direct-difference-control-20261023/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "2eec665e0b0b245e14fb8a1d74f8d432e181a90457165dea66341ec06f069e1c",
+      "archive": "benchmarks/results/remaining-indicators/local-dpo-direct-difference-control-20261023/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "f937e0210fd6d80318a85015164e9877e7076b868c926da7af1e3166f5eb75bc",
+      "archive": "benchmarks/results/remaining-indicators/local-dpo-direct-difference-control-20261023/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "f9dfce4b346947a4e77128a4dc837dae44eb9b6a1778f98a5d6ef687a59de28f",
+      "archive": "benchmarks/results/remaining-indicators/local-dpo-direct-difference-control-20261023/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "b04d7feecdb0663a47a12a1c7c1231c9fd335ddaf3d2f9ccabb1029decf8e9a7",
+      "archive": "benchmarks/results/remaining-indicators/local-dpo-direct-difference-control-20261023/round3-old-LibraryPairBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-dpo-direct-difference-control.py": "1f2ef7f56f0c6764c58f519f1f7bb65ff74c5c1752ba1335c5f1a8b3b61b1188",
+    "verify-dpo-direct-difference-control.py": "240e8802aee3d509d848e02b9bca37837a70ae06ef6a79afc515be8c519f14b9"
+  },
+  "report_imported": false,
+  "production_integrated": true
+}
