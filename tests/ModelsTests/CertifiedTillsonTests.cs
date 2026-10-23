@@ -26,6 +26,30 @@ public sealed class CertifiedTillsonTests
     }
 
     [Theory]
+    [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(20)]
+    [InlineData(1023)] [InlineData(1024)] [InlineData(2047)] [InlineData(2048)]
+    [InlineData(int.MaxValue)]
+    public void StageRoundingAcrossMachineWordBoundariesMatchesExactArithmetic(int period)
+    {
+        (double Prior, double Input)[] pairs =
+        [
+            (1, Math.BitIncrement(1)), (Math.BitDecrement(1), 1),
+            (-1, 1), (1, -1), (1, Math.ScaleB(1, -12)),
+            (Math.ScaleB(1, -12), 1), (-1, -Math.BitIncrement(1))
+        ];
+        foreach (int exponent in new[] { -1000, -1, 0, 900 })
+        foreach (var pair in pairs)
+        {
+            double prior = Math.ScaleB(pair.Prior, exponent);
+            double input = Math.ScaleB(pair.Input, exponent);
+            Assert.True(CertifiedTillson.TrySmooth(prior, input, period, out double actual));
+            var exact = new ExactMeanAccumulator();
+            exact.Add(prior, period - 1L); exact.Add(input, 2);
+            Equal(exact.Mean((long)period + 1), actual);
+        }
+    }
+
+    [Theory]
     [InlineData(.25)] [InlineData(.7)] [InlineData(2)]
     [InlineData(-.25)] [InlineData(-.7)] [InlineData(-2)]
     public void PolynomialBoundsMatchIndependentExactCoefficients(double factor)

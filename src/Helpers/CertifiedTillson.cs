@@ -1,4 +1,6 @@
 #if !NETFRAMEWORK
+using System.Numerics;
+
 namespace OoplesFinance.StockIndicators.Helpers;
 
 // The stage recurrence is an exact fixed-width ratio. The final polynomial
@@ -31,10 +33,45 @@ internal static class CertifiedTillson
         if (numerator == 0) return true;
         bool negative = numerator < 0;
         UInt128 magnitude = (UInt128)(negative ? -numerator : numerator);
+        if (magnitude <= ulong.MaxValue && TrySmooth64((ulong)magnitude, (ulong)period + 1, scale, out result))
+        {
+            if (negative) result = -result;
+            return true;
+        }
         if (!CertifiedCompactRatio.TryDivide(magnitude, (UInt128)((long)period + 1) << 64,
                 scale + 64, out result)) return false;
         if (negative) result = -result;
         return true;
+    }
+
+    // Use one exact machine-word division when the rounding-grid operands fit.
+    // Wider operands and subnormal/overflow boundaries retain the existing path.
+    private static bool TrySmooth64(ulong top, ulong bottom, int scale, out double result)
+    {
+        result = 0;
+        int topBits = 64 - BitOperations.LeadingZeroCount(top);
+        int bottomBits = 64 - BitOperations.LeadingZeroCount(bottom);
+        int power = topBits - bottomBits;
+        if (power >= 0 ? top < (bottom << power) : (top << -power) < bottom) power--;
+        if ((long)power + scale is < -1022 or > 1023) return false;
+        int shift = 52 - power;
+        if (shift >= 0)
+        {
+            if (shift >= 64 || topBits + shift > 64) return false;
+            top <<= shift;
+        }
+        else
+        {
+            if (-shift >= 64 || bottomBits - shift > 64) return false;
+            bottom <<= -shift;
+        }
+        (ulong quotient, ulong remainder) = Math.DivRem(top, bottom);
+        ulong complement = bottom - remainder;
+        if (remainder > complement || remainder == complement && (quotient & 1) != 0) quotient++;
+        // The rounded significand has at most 53 bits (or is exactly 2^53).
+        // Scaling a normal result is exact, so there is no second rounding.
+        result = Math.ScaleB((double)quotient, scale - shift);
+        return double.IsFinite(result);
     }
 
     internal static bool TryCombine(double third, double fourth, double fifth, double sixth,
