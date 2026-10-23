@@ -13697,7 +13697,7 @@
     "src/Indicators/FractalSnapshot.cs": "ce14602b642b725cef43501dba8789c5f0ce9dcf6607165de838d03b070e826a",
     "src/Indicators/FusedBarExecution.cs": "813bfba73a4093c7665dde81322dfc8c5aa63ab176ae7f74c6da827d99f8a859",
     "src/Indicators/GapContinuationCandles.cs": "5e5b182d653513a721b8fc8e6fac5fc1503d7bfd6c30c3bfae3c1125b244c52b",
-    "src/Indicators/GatorWithDetails.cs": "e5e385c95498130f1e79a7c8f70bd3f0189d53e2a67c84a71040d39ac50d027c",
+    "src/Indicators/GatorWithDetails.cs": "76a1dc7837658f02edc01d94ee98909ff6adc62dc45907e2f3fa22da5860ebff",
     "src/Indicators/HeikinAshiCandles.cs": "7178933f0cd7b4a111ac6e7c6c9428cf268249cae42e1e3446423f31a36401ac",
     "src/Indicators/HikkakeCandles.cs": "b3cbcd8b1582907d0b616a20e9f12930a90b6a81ab0ef6ad5438b7f1eac0876d",
     "src/Indicators/HilbertCycle.cs": "3dedaf49af143ee38d74efb25582827e90258bf581304a55c3060aa11898b16f",

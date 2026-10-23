@@ -1,0 +1,58 @@
+{
+  "input_head": "4b058ef229baa15c15323349861d03db78dec998",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/GatorWithDetails.cs",
+    "tests/ModelsTests/GatorDirectDifferenceTests.cs"
+  ],
+  "batch_note": "Replace Gator single-subtraction exact accumulators with correctly rounded binary64 subtraction on modern runtimes; preserve NETFRAMEWORK arithmetic. Preserve abs/sign, missing/presence/expansion, reset and overflow rejection. Exact oracle over196extremepairs plus missing values, existing reference/long-history fixtures,GPU/inventory. Performance remains unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-23T06:17:14.528415+00:00",
+  "unit": {
+    "passed": 11,
+    "class_counts": {
+      "GatorDirectDifferenceTests": 1,
+      "AlligatorSharedExecutionTests": 10
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\gator-direct-modern\\unit\\unit.trx",
+    "sha256": "271f7baaf68e4ec338d31c6c043ac92312d8396d1fcf4a507a00b3918874e739",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-gator-direct-modern-certified-20261023-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 20,
+    "class_counts": {
+      "AlligatorComparisonTests": 16,
+      "SharedAlligatorBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\gator-direct-modern\\parity\\parity.trx",
+    "sha256": "8a2038f88a4297b6abcd39578167cb9b03170d8fd516006a900d9372c0748390",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-gator-direct-modern-certified-20261023-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-gator-direct-modern-20261023\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "37489bdf8c19489c9d96dfa1d0bca6023561f3f1353c59a05d99f17f8315853e",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-gator-direct-modern-20261023\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "37489bdf8c19489c9d96dfa1d0bca6023561f3f1353c59a05d99f17f8315853e",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-gator-direct-modern-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "37489bdf8c19489c9d96dfa1d0bca6023561f3f1353c59a05d99f17f8315853e",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-gator-direct-modern-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "37489bdf8c19489c9d96dfa1d0bca6023561f3f1353c59a05d99f17f8315853e"
+  },
+  "source_fingerprint_sha256": "1dc9eaeb5dbd93491fca56e44bdf44b46fe029a10880edbd0be2be7e9d1c8af7",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Replace Gator single-subtraction exact accumulators with correctly rounded binary64 subtraction on modern runtimes; preserve NETFRAMEWORK arithmetic. Preserve abs/sign, missing/presence/expansion, reset and overflow rejection. Exact oracle over196extremepairs plus missing values, existing reference/long-history fixtures,GPU/inventory. Performance remains unqualified. Correctness checks passed; controlled performance remains pending."
+}
