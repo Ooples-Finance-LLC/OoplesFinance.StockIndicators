@@ -160,10 +160,16 @@ public sealed class GatorWithDetails : MultiOutputIndicatorBase, IIndicatorValid
             {
                 if (!a.HasValue || !b.HasValue)
                     return null;
+#if !NETFRAMEWORK
+                // One binary64 subtraction already rounds the exact difference
+                // once. Abs canonicalizes zero; the sign preserves lower -0.
+                return sign * Math.Abs(a.Value - b.Value);
+#else
                 var difference = new ExactMeanAccumulator();
                 difference.Add(a.Value);
                 difference.Add(b.Value, -1);
                 return sign * Math.Abs(difference.Mean(1));
+#endif
             }
             var upper = Distance(row.Jaw, row.Teeth, 1);
             var lower = Distance(row.Teeth, row.Lips, -1);
