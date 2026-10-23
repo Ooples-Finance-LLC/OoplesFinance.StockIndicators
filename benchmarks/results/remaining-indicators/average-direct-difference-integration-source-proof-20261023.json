@@ -1,0 +1,34 @@
+{
+  "qualified_commit": "bf8ebe7dacd44a572b44cdb2a674793c3b7cc28d",
+  "qualified_code": "b23a83989092bd64685fb3c2dd726aab7b4a58b8",
+  "matched_paths": [
+    "src",
+    "tests",
+    "examples",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "01c790a79bdae3e28ef6b8ba1f084f157abfddb23858ac5cf56eae5d2258c66f",
+  "qualification_reused": {
+    "unit": 14,
+    "parity": 36,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-average-direct-difference-20261023\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "723293d5dd35585c776dd6c373c0298e6127ce41bb9a5b850650535d7f6f2ba0",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-average-direct-difference-20261023\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "723293d5dd35585c776dd6c373c0298e6127ce41bb9a5b850650535d7f6f2ba0",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-average-direct-difference-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "723293d5dd35585c776dd6c373c0298e6127ce41bb9a5b850650535d7f6f2ba0",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-average-direct-difference-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "723293d5dd35585c776dd6c373c0298e6127ce41bb9a5b850650535d7f6f2ba0"
+  },
+  "control": "local-average-direct-difference-control-20261023",
+  "note": "Integrated executable sources and build inputs exactly match qualified candidate. Publishing checkout binaries remain older; preserved candidate DLL supplied the new measurement arm. No redundant production rebuild."
+}
