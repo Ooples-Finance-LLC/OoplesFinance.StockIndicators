@@ -19,8 +19,42 @@ internal static class CertifiedTillson
         return raw is > 0 and < 2047;
     }
 
+    // Exact product and TwoSum residuals are normal within this bounded range.
+    // Every subsequent addition/FMA is enclosed by adjacent representable values.
+    // Strict containment inside the quotient rounding cell excludes midpoint ties.
+    internal static bool TrySmoothFloating(double prior, double input, int period, out double result)
+    {
+        result = 0;
+        const double minimum = 3.4395525670743494E-136; // 2^-450
+        const double maximum = 2.9073548971824276E+135; // 2^450
+        double a = Math.Abs(prior), b = Math.Abs(input);
+        if (period < 1 || !double.IsFinite(a) || !double.IsFinite(b)
+            || a > maximum || b > maximum
+            || a != 0 && a < minimum || b != 0 && b < minimum) return false;
+        double weight = period - 1d, denominator = period + 1d;
+        double product = prior * weight, twice = input * 2;
+        double productError = Math.FusedMultiplyAdd(prior, weight, -product);
+        double sum = product + twice;
+        double virtualTwice = sum - product;
+        double sumError = (product - (sum - virtualTwice)) + (twice - virtualTwice);
+        double quotient = sum / denominator;
+        if (Math.Abs(quotient) < minimum || !double.IsFinite(quotient)) return false;
+        double tail = productError + sumError;
+        double residual = Math.FusedMultiplyAdd(-quotient, denominator, sum);
+        double lower = Math.BitDecrement(Math.BitDecrement(residual) + Math.BitDecrement(tail));
+        double upper = Math.BitIncrement(Math.BitIncrement(residual) + Math.BitIncrement(tail));
+        double below = (quotient - Math.BitDecrement(quotient)) * .5;
+        double above = (Math.BitIncrement(quotient) - quotient) * .5;
+        double lowerBoundary = Math.BitIncrement(-below * denominator);
+        double upperBoundary = Math.BitDecrement(above * denominator);
+        if (!(lower > lowerBoundary && upper < upperBoundary)) return false;
+        result = quotient;
+        return true;
+    }
+
     internal static bool TrySmooth(double prior, double input, int period, out double result)
     {
+        if (TrySmoothFloating(prior, input, period, out result)) return true;
         result = 0;
         if (!Parts(prior, out long a, out int ae) || !Parts(input, out long b, out int be)) return false;
         if (a == 0) ae = be;
