@@ -35,6 +35,36 @@ internal sealed class FibonacciWindowMean : IDisposable
     {
         if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
         if (input.Length == 0) return;
+        // Retain the historical read/write ordering for overlapping spans.
+        if (input.Overlaps(output)) { ComputeHistorical(input, output, length); return; }
+        length = Math.Max(1, length);
+        var pair = Pair(length);
+        var newest = pair.Current;
+        var previous = pair.Next - pair.Current;
+        var denominator = new ExactMeanAccumulator();
+        denominator.Add(1, pair.Current + pair.Next - 1);
+        var weighted = new ExactMeanAccumulator();
+        var previousWeighted = new ExactMeanAccumulator();
+        // The same exact recurrence as Next can read expired batch values
+        // directly; it needs neither a ring buffer nor another input copy.
+        for (int i = 0; i < input.Length; i++)
+        {
+            var next = previousWeighted;
+            next.Add(input[i], newest);
+            var shifted = weighted;
+            shifted.Subtract(previousWeighted);
+            shifted.Add(input[i], previous);
+            if (i >= length) shifted.Add(input[i - length], -1);
+            output[i] = next.Ratio(denominator);
+            weighted = next;
+            previousWeighted = shifted;
+        }
+    }
+
+    internal static void ComputeHistorical(ReadOnlySpan<double> input, Span<double> output, int length)
+    {
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (input.Length == 0) return;
         length = Math.Max(1, length);
         var pair = Pair(length);
         var denominator = new ExactMeanAccumulator();

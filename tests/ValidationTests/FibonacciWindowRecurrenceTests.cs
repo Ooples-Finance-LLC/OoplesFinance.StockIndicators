@@ -19,9 +19,12 @@ public sealed class FibonacciWindowRecurrenceTests
             Enumerable.Range(0, 65).Select(i => Math.ScaleB(i % 13 - 6d, i % 2 == 0 ? -1022 : 900)).ToArray()
         })
         {
-            // Compute retains the historical full weighted-tap loop unchanged.
+            // The original full weighted-tap loop remains an independent oracle.
             var expected = new double[values.Length];
-            FibonacciWindowMean.Compute(values, expected, period);
+            FibonacciWindowMean.ComputeHistorical(values, expected, period);
+            var batch = new double[values.Length];
+            FibonacciWindowMean.Compute(values, batch, period);
+            for (int i = 0; i < batch.Length; i++) Bits(expected[i], batch[i]);
             using var actual = new FibonacciWindowMean(period, values.Length);
             for (int replay = 0; replay < 2; replay++)
             {
@@ -52,6 +55,19 @@ public sealed class FibonacciWindowRecurrenceTests
         Bits(expected[3], actual.Next(8, true));
         actual.Reset();
         Bits(expected[0], actual.Next(1, true));
+    }
+
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(-1)]
+    public void OverlappingSpansRetainHistoricalReadWriteOrdering(int offset)
+    {
+        double[] expected = [1, 3, -2, 7, 5, -11, 13, 2];
+        var actual = expected.ToArray();
+        int inputStart = offset < 0 ? 1 : 0;
+        int outputStart = offset > 0 ? 1 : 0;
+        FibonacciWindowMean.ComputeHistorical(expected.AsSpan(inputStart, 7), expected.AsSpan(outputStart, 7), 3);
+        FibonacciWindowMean.Compute(actual.AsSpan(inputStart, 7), actual.AsSpan(outputStart, 7), 3);
+        for (int i = 0; i < expected.Length; i++) Bits(expected[i], actual[i]);
     }
 
     private static void Bits(double expected, double actual) =>
