@@ -92,7 +92,8 @@
     "measure-zigzag-rolling-interpolation-control.py": "c9fe7da788c0d07c5117764d07db57bb469ebc5589e1409cab8f0b036712b93d",
     "verify-zigzag-rolling-interpolation-control.py": "8db659280cde6403648c3c97b9fc488194903d21bb085b75bbed63486ff742ea"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/zigzag-rolling-interpolation-integration-source-proof-20261024.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/zigzag-rolling-interpolation-integration-source-proof-20261024.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/zigzag-rolling-interpolation-certified-local-zigzag-rolling-interpolation-control-20261024-report-import.json"
 }
