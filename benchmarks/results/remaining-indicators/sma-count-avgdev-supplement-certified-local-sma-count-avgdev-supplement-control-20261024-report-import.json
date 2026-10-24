@@ -1,0 +1,60 @@
+{
+  "before_sha256": "288dd6c01315b6e3f0a1c27e95eb7a15780dfda32cd508910f9fa41bfafccd33",
+  "candidate_sha256": "a9e6300e1aff239e18488b3ed81df9ab0908e272089d75e54870ca2063f3ede4",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 4,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 4,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-sma-count-avgdev-supplement-control-20261024",
+  "imported_utc": "2026-10-24T21:44:39.206846+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "b0b477c1aaa65d7c04e578e5df35e96c151e914a06bb612b38aea74f9003af2a",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-avgdev-supplement-certified-local-sma-count-avgdev-supplement-control-20261024-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "1b7b7bdafa79655901a349a02f4d23708817706ed074f70ea18c3d5fdc7b3c80",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-avgdev-supplement-certified-local-sma-count-avgdev-supplement-control-20261024-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "ad2d6ecafed7e653e8d0ad90ecea388cb6a6fa58e91b69337e5b43e49675d5ea",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-avgdev-supplement-certified-local-sma-count-avgdev-supplement-control-20261024-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "46747daca7ac25282910ffaac4456be361e7c530b8e2ed3c351497b633887552",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-avgdev-supplement-certified-local-sma-count-avgdev-supplement-control-20261024-measurement.json.gz"
+    },
+    "stage-sma-count-avgdev-supplement-report.py": {
+      "sha256": "a99da2a44927e2aeea184d22a9989ae2ba348776aa60661ea243a889fd07a9ca",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-avgdev-supplement-certified-local-sma-count-avgdev-supplement-control-20261024-stage-sma-count-avgdev-supplement-report.py.gz"
+    },
+    "verify-avgdev-supplement-report.py": {
+      "sha256": "0698782d268eb8dfbc257870de86a1228a2022ae76a9a4e31ce83516bcc3f92e",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-avgdev-supplement-certified-local-sma-count-avgdev-supplement-control-20261024-verify-avgdev-supplement-report.py.gz"
+    },
+    "import-sma-count-avgdev-supplement-report.py": {
+      "sha256": "5a91017cf4db2f9c5ace15973d4116afa63e08a21fc62685baabf8fcd25449b1",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-avgdev-supplement-certified-local-sma-count-avgdev-supplement-control-20261024-import-sma-count-avgdev-supplement-report.py.gz"
+    },
+    "archive-sma-count-avgdev-supplement-control.py": {
+      "sha256": "2a5ca0a36af32c7acb3846e728a00a35059014263c61df86d348e0e250964a7c",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-avgdev-supplement-certified-local-sma-count-avgdev-supplement-control-20261024-archive-sma-count-avgdev-supplement-control.py.gz"
+    },
+    "prove-sma-count-avgdev-supplement-integration.py": {
+      "sha256": "f817fd8347256260f92fcc70b53fcb95ca847f5629291b484f4800cb7330078a",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-avgdev-supplement-certified-local-sma-count-avgdev-supplement-control-20261024-prove-sma-count-avgdev-supplement-integration.py.gz"
+    },
+    "archive-sma-count-avgdev-supplement-report.py": {
+      "sha256": "b9d06a8da5876dc604b6e3615569e9198a124b3fd0db7d767139a61a310d8d1e",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-avgdev-supplement-certified-local-sma-count-avgdev-supplement-control-20261024-archive-sma-count-avgdev-supplement-report.py.gz"
+    }
+  }
+}
