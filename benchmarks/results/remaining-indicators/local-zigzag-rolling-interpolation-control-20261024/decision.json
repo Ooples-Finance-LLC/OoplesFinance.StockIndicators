@@ -1,0 +1,98 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "596eee6cbf8e7f20fa11c89cc8772a4d7f3115c2",
+    "new": "09ef7ae89e74b45609f6f2c1baf4a8d1225c0155"
+  },
+  "candidate_code_source": "1ce088263bede77f4bc15062b40f80fb08a8659b",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetZigZag",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        7.316455555555556,
+        8.85601
+      ],
+      "new_means_ms": [
+        6.7181444444444445,
+        6.77345
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetZigZag",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        53.361275,
+        49.88486666666667
+      ],
+      "new_means_ms": [
+        48.468016666666664,
+        43.135755555555555
+      ],
+      "verdict": "inconclusive"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "c552c37cb07ab68618d594ff7360e023e840f5606f2d5ac7cf9bf14d05304f5a",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-rolling-interpolation-control-20261024/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "63d17ee3ab3684ae29f7b13820b0d99ed263f67bd53f72c8b27f1f2c4b96c8a1",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-rolling-interpolation-control-20261024/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "3c84a348dab6c67a9a9171d067257889a15eaa176e7defde8472d470582d48e1",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-rolling-interpolation-control-20261024/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "8602cb1b19dbfad6d41ee48b5e17f4b1ea933f51590a8e49b6211fca9b7189ba",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-rolling-interpolation-control-20261024/verified-summary.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "61fac773460a4c04a764fa7773830bf20fcb46ad16ef5f9da99ba1d5650d47bb",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-rolling-interpolation-control-20261024/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "3bd929f25db990cc1686e493df416865dcf132328ecac66d2fca7c68b456c64c",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-rolling-interpolation-control-20261024/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "cb65968bcc92bf268d3b70acc5db666298bf2a5d638b8bff8f82d57ce9683a51",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-rolling-interpolation-control-20261024/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "390feea793a396ddb793cde750b544c013b09be358621fef3d3819c4586548ba",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-rolling-interpolation-control-20261024/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "1e044ab339c75133841f1fdacb4200991d809c263927a1aca46b5b950afbe3f5",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-rolling-interpolation-control-20261024/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "cdd55715fb81769b6ae140d8d71df7069ceb84bce973c8521b52e51cefbc843f",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-rolling-interpolation-control-20261024/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "537c9d6336defc65e800934671d8fb819ffe06acf45eb4d55f8ac6d2edc337e1",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-rolling-interpolation-control-20261024/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "82ce330695bcfd77739062d6d41cd73ff6e4aa51dfe2af7aa44eb76fb3dc6bd9",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-rolling-interpolation-control-20261024/round3-old-LibraryPairBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-zigzag-rolling-interpolation-control.py": "c9fe7da788c0d07c5117764d07db57bb469ebc5589e1409cab8f0b036712b93d",
+    "verify-zigzag-rolling-interpolation-control.py": "8db659280cde6403648c3c97b9fc488194903d21bb085b75bbed63486ff742ea"
+  },
+  "report_imported": false,
+  "production_integrated": true,
+  "integration_source_proof": "benchmarks/results/remaining-indicators/zigzag-rolling-interpolation-integration-source-proof-20261024.json"
+}
