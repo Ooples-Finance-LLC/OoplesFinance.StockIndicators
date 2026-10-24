@@ -396,7 +396,8 @@
     "measure-hilbert-compensated-projection-control.py": "f9e436fc53fb43f895298066544fa6ebd3fb66eb07d7cfdd595e79e0b548cbcd",
     "verify-hilbert-compensated-projection-control.py": "6e0b7dc168e069f7dee065ddba628c0375cafbd7216697f26feae775f841fdac"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/hilbert-compensated-projection-integration-source-proof-20261024.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/hilbert-compensated-projection-integration-source-proof-20261024.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/hilbert-compensated-projection-certified-local-hilbert-compensated-projection-control-20261024-report-import.json"
 }
