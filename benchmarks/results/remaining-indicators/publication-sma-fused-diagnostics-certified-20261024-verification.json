@@ -1,0 +1,61 @@
+{
+  "input_head": "ba33091deee2ae546b59b702ff9b0c725f3ddccf",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedMeanRelativeError.cs",
+    "src/Helpers/RoundedMeanErrorWindow.cs",
+    "src/Indicators/MovingAverageDiagnostics.cs",
+    "tests/ModelsTests/MeanDiagnosticsCertifiedTests.cs"
+  ],
+  "batch_note": "Approved SMA diagnostics refinement: share exact alignment and one traversal for absolute, squared and signed-relative errors. Preserve original independent fallback order and presence flags. Independent signed-rational regressions, boundary cases, lifecycle and long-history checks required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-24T19:41:29.803686+00:00",
+  "unit": {
+    "passed": 46,
+    "class_counts": {
+      "RollingStatisticsSharedExecutionTests": 17,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "MeanDiagnosticsCertifiedTests": 23,
+      "MeanDiagnosticsScaleReductionTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-fused-diagnostics\\unit\\unit.trx",
+    "sha256": "92dcd75b7da9f8c633c6d9e5e571c47b8c35fb5f5feeae61fab4cbb8da50c98f",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-fused-diagnostics-certified-20261024-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 2,
+    "class_counts": {
+      "SharedRollingStatisticsBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-fused-diagnostics\\parity\\parity.trx",
+    "sha256": "16e81aee3957de9489637beaf5eb76be1d03541d0af9f7a15adbfc3ccfa19a35",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-fused-diagnostics-certified-20261024-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-fused-diagnostics-20261024\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a4fc74ac9d42fa3a2e12676fcaf4c6dd63fdc70295c51ff6423425621ae9f073",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-fused-diagnostics-20261024\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a4fc74ac9d42fa3a2e12676fcaf4c6dd63fdc70295c51ff6423425621ae9f073",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-fused-diagnostics-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a4fc74ac9d42fa3a2e12676fcaf4c6dd63fdc70295c51ff6423425621ae9f073",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-fused-diagnostics-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a4fc74ac9d42fa3a2e12676fcaf4c6dd63fdc70295c51ff6423425621ae9f073"
+  },
+  "source_fingerprint_sha256": "7934a613aca2e46a89e34a4aa51930986ec3836c06b007979b1be7466ae4fa42",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved SMA diagnostics refinement: share exact alignment and one traversal for absolute, squared and signed-relative errors. Preserve original independent fallback order and presence flags. Independent signed-rational regressions, boundary cases, lifecycle and long-history checks required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
