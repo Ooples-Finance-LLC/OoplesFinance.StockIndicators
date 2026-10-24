@@ -1,0 +1,34 @@
+{
+  "qualified_commit": "1130ba768cdf30ebc692e75c38ca6eba3fae6402",
+  "qualified_code": "e4db35df9c0d761a69c6a0594b7de3f1689a516a",
+  "matched_paths": [
+    "src",
+    "tests",
+    "examples",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "d0a0130798bfe759f3b9e2bf30e3f0d7ba7d8873d6f671101ff69ab5525e0343",
+  "qualification_reused": {
+    "unit": 49,
+    "parity": 2,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-count-publication-20261024\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "80ec0202f1d25b6ab93f58464f5015437262d806c2618be61199ebedd5bc97c3",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-count-publication-20261024\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "80ec0202f1d25b6ab93f58464f5015437262d806c2618be61199ebedd5bc97c3",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-count-publication-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "80ec0202f1d25b6ab93f58464f5015437262d806c2618be61199ebedd5bc97c3",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-count-publication-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "80ec0202f1d25b6ab93f58464f5015437262d806c2618be61199ebedd5bc97c3"
+  },
+  "control": "local-sma-count-publication-control-20261024",
+  "note": "Integrated executable sources and build inputs exactly match qualified candidate. Publishing checkout binaries remain older; preserved candidate DLL supplied the new measurement arm. No redundant production rebuild."
+}
