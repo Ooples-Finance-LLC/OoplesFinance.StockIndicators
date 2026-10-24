@@ -184,7 +184,8 @@
     "measure-acceleration-reduced-operands-control.py": "6a84585b4b1fc0455f7d0003eb0040bad6ad336725e72680ad61b155b1cf9c75",
     "verify-acceleration-reduced-operands-control.py": "5406550a7459f172b91bd7d435cfc6f16b4060107de0163b5cfa79dc83405174"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/acceleration-reduced-operands-integration-source-proof-20261024.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/acceleration-reduced-operands-integration-source-proof-20261024.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/acceleration-reduced-operands-certified-local-acceleration-reduced-operands-control-20261024-report-import.json"
 }
