@@ -1,0 +1,34 @@
+{
+  "qualified_commit": "95e8052f3886e58beeef0f2eb3ef94d91db6d012",
+  "qualified_code": "5a5820897c7af6694fe2ecd071cb79d9d29a6a61",
+  "matched_paths": [
+    "src",
+    "tests",
+    "examples",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "7f29b15d8662ee080d221c01564111baaaece3a43ec71b6bd577297e507ff7fd",
+  "qualification_reused": {
+    "unit": 10,
+    "parity": 21,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-volatility-stop-reduced-width-20261024\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "37c8975ba0556947f439e91dc0c46f653f7fed80d43b34bc6906241a15028480",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-volatility-stop-reduced-width-20261024\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "37c8975ba0556947f439e91dc0c46f653f7fed80d43b34bc6906241a15028480",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-volatility-stop-reduced-width-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "37c8975ba0556947f439e91dc0c46f653f7fed80d43b34bc6906241a15028480",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-volatility-stop-reduced-width-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "37c8975ba0556947f439e91dc0c46f653f7fed80d43b34bc6906241a15028480"
+  },
+  "control": "local-volatility-stop-reduced-width-control-20261024",
+  "note": "Integrated executable sources and build inputs exactly match qualified candidate. Publishing checkout binaries remain older; preserved candidate DLL supplied the new measurement arm. No redundant production rebuild."
+}

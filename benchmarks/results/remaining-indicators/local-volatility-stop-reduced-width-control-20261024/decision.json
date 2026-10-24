@@ -1,0 +1,98 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "09ef7ae89e74b45609f6f2c1baf4a8d1225c0155",
+    "new": "95e8052f3886e58beeef0f2eb3ef94d91db6d012"
+  },
+  "candidate_code_source": "5a5820897c7af6694fe2ecd071cb79d9d29a6a61",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetVolatilityStop",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        5.36044,
+        5.325777777777778
+      ],
+      "new_means_ms": [
+        3.4782,
+        3.8099
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetVolatilityStop",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        34.1761625,
+        29.57987
+      ],
+      "new_means_ms": [
+        17.301466666666666,
+        18.92931111111111
+      ],
+      "verdict": "faster"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "bd4b334031523e5d5d65156f5288b61b9715d27acfdcecbba79ef0a75d981002",
+      "archive": "benchmarks/results/remaining-indicators/local-volatility-stop-reduced-width-control-20261024/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "b9f4e632de36380ab8ecd318edaeaa7e46fd20d5e9b0bb5d923c3429c07675d2",
+      "archive": "benchmarks/results/remaining-indicators/local-volatility-stop-reduced-width-control-20261024/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "9761d7a8a414e35c3a1cb420c22dda55df55d7b3390fccfcd71d9b721b33d849",
+      "archive": "benchmarks/results/remaining-indicators/local-volatility-stop-reduced-width-control-20261024/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "c26ef3063cb61ca930708c72afcc98acceba7a1dc55739ea23c51c2d453d129d",
+      "archive": "benchmarks/results/remaining-indicators/local-volatility-stop-reduced-width-control-20261024/verified-summary.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "280acf07f422e416f4a27a9cfb632782ef9f43e7c60c347063d758ee456ebbfe",
+      "archive": "benchmarks/results/remaining-indicators/local-volatility-stop-reduced-width-control-20261024/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "53da718fb798a7cac756bdbf886694b9e70bcb2e49d813c1eddae8ebafa4af12",
+      "archive": "benchmarks/results/remaining-indicators/local-volatility-stop-reduced-width-control-20261024/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "fea910f3be34d852f0eb7c4b04de62d8a5a6539c3c50ccac47b0dcb50b928d92",
+      "archive": "benchmarks/results/remaining-indicators/local-volatility-stop-reduced-width-control-20261024/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "bbb7539e74e768e70cab3742bdcb7e44b339ca80069d7af6a1fcb99d5758fa25",
+      "archive": "benchmarks/results/remaining-indicators/local-volatility-stop-reduced-width-control-20261024/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "acccd1c15a4a5ab0e6284bc98554e59b539e9ad63d5da7930aac625fe1b16c59",
+      "archive": "benchmarks/results/remaining-indicators/local-volatility-stop-reduced-width-control-20261024/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "cd4dbaff70304f1264c308ddb2eedb8e9f10f2d9b4a0d2c27bee9cadb3356c07",
+      "archive": "benchmarks/results/remaining-indicators/local-volatility-stop-reduced-width-control-20261024/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "6d6460f6f399f38d436ea4aa9de3cf6da8521ed0f0afc4025551dfefaf509557",
+      "archive": "benchmarks/results/remaining-indicators/local-volatility-stop-reduced-width-control-20261024/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "5d64b04906c5896c98b4d73e1adfb7d027dfbd2a26a3cca41d42a82605f5e98a",
+      "archive": "benchmarks/results/remaining-indicators/local-volatility-stop-reduced-width-control-20261024/round3-old-LibraryPairBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-volatility-stop-reduced-width-control.py": "c880aede852fb58b7562a613978f025d52ca16de1c06fdc98a53d8279af4c992",
+    "verify-volatility-stop-reduced-width-control.py": "8b84741f7ee35c336a1354cb2a7e66336e1f273541917a06ff07261b751d20a9"
+  },
+  "report_imported": false,
+  "production_integrated": true,
+  "integration_source_proof": "benchmarks/results/remaining-indicators/volatility-stop-reduced-width-integration-source-proof-20261024.json"
+}
