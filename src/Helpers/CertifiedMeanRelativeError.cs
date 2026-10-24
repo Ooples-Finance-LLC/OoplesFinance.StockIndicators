@@ -151,6 +151,65 @@ internal static class CertifiedMeanRelativeError
             && CertifiedCompactRatio.TryDivide(squaredSum, denominator, 2 * scale + 64, out squared);
     }
 
+    // Full diagnostics share one exact alignment and one traversal. Failure
+    // leaves the caller's original independent fallbacks and order unchanged.
+    internal static bool TryDiagnostics(Queue<RoundedMeanErrorWindow.Sample> values, double mean,
+        out double absolute, out double squared, out double relative)
+    {
+        absolute = squared = relative = 0;
+        if (values.Count == 0 || !Parts(mean, out long center, out int centerExponent)) return false;
+        int common = centerExponent - 3;
+        long alignedCenter = center << 3;
+        UInt128 absoluteSum = 0, squaredSum = 0;
+        Int128 lower = 0, upper = 0;
+        int balance = 0;
+        foreach (var sample in values)
+        {
+            int exponent = sample.NormalExponent;
+            if (exponent is <= 0 or >= 2047 || Math.Abs(exponent - centerExponent) > 3) return false;
+            long difference = (sample.NormalSignificand << (exponent - common)) - alignedCenter;
+            UInt128 distance = (UInt128)Math.Abs(difference);
+            UInt128 square = unchecked(distance * distance); // Distance is below 2^60.
+            if (square > UInt128.MaxValue - squaredSum) return false;
+            absoluteSum = unchecked(absoluteSum + distance); // At most Int32.MaxValue terms below 2^60.
+            squaredSum = unchecked(squaredSum + square);
+            if (difference == 0) continue; // Exact aligned equality contributes zero relative error.
+
+            int shift = centerExponent + 3 - exponent;
+            Int128 reciprocalLow = unchecked((Int128)(sample.ReciprocalFloor << shift));
+            Int128 reciprocalHigh = unchecked(reciprocalLow + (sample.ReciprocalExact ? 0 : (Int128)1 << shift));
+            if (sample.NormalSignificand < 0) (reciprocalLow, reciprocalHigh) = (-reciprocalHigh, -reciprocalLow);
+            // The same outward reciprocal bounds as TryCompute: each term is
+            // below 2^82 and every Int32-sized partial sum is below 2^113.
+            if (difference < 0)
+            {
+                lower = unchecked(lower + reciprocalLow);
+                upper = unchecked(upper + reciprocalHigh); balance--;
+            }
+            else
+            {
+                lower = unchecked(lower - reciprocalHigh);
+                upper = unchecked(upper - reciprocalLow); balance++;
+            }
+        }
+        // Every retained value equals the nonzero normal mean, so all three
+        // errors are exactly zero and the relative output is defined.
+        if (absoluteSum == 0) return true;
+        int scale = common - 1075;
+        UInt128 denominator = (UInt128)values.Count << 64;
+        if (!CertifiedCompactRatio.TryDivide(absoluteSum, denominator, scale + 64, out absolute)
+            || !CertifiedCompactRatio.TryDivide(squaredSum, denominator, 2 * scale + 64, out squared)) return false;
+        if (center < 0) (lower, upper) = (upper, lower);
+        ProductBounds(center, lower, out var floor, out _);
+        ProductBounds(center, upper, out _, out var ceiling);
+        lower = ((Int128)balance << Precision) + floor;
+        upper = ((Int128)balance << Precision) + ceiling;
+        if (!Publish(lower, values.Count, out double low) || !Publish(upper, values.Count, out double high)) return false;
+        if (BitConverter.DoubleToInt64Bits(low) != BitConverter.DoubleToInt64Bits(high)) return false;
+        relative = low;
+        return true;
+    }
+
     private static bool Parts(double value, out long significand, out int exponent)
     {
         ulong bits = unchecked((ulong)BitConverter.DoubleToInt64Bits(value));
