@@ -1,0 +1,58 @@
+{
+  "input_head": "ea079b8a7211aca039f5994ddc2696fe618dfc15",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedMeanRelativeError.cs"
+  ],
+  "batch_note": "Approved SMA diagnostics refinement: remove redundant fixed-width overflow checks where reciprocal, limb-product, distance and sum bounds or explicit guards prove safety. Preserve exact outputs, square-sum overflow fallback, eviction/reset and allocation behavior. Existing independent tests plus shared long-history parity required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-24T02:14:20.529855+00:00",
+  "unit": {
+    "passed": 44,
+    "class_counts": {
+      "MeanDiagnosticsCertifiedTests": 21,
+      "RollingStatisticsSharedExecutionTests": 17,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "MeanDiagnosticsScaleReductionTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-bounded-moments\\unit\\unit.trx",
+    "sha256": "f0b9d2f6c83e2bddb77382fbb2caa94b54eab63adaab2f77130440e0c386aa35",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-bounded-moments-certified-20261023-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 2,
+    "class_counts": {
+      "SharedRollingStatisticsBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-bounded-moments\\parity\\parity.trx",
+    "sha256": "2ad709eccbcef9f8e071dffd2ed6861ccb5537f4ba672e2c162cdaa552bca094",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-bounded-moments-certified-20261023-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-bounded-moments-20261023\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "42a6c5c7076284d079fca5dd40005be468e412285566d714968fc5a4c52a2f8f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-bounded-moments-20261023\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "42a6c5c7076284d079fca5dd40005be468e412285566d714968fc5a4c52a2f8f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-bounded-moments-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "42a6c5c7076284d079fca5dd40005be468e412285566d714968fc5a4c52a2f8f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-bounded-moments-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "42a6c5c7076284d079fca5dd40005be468e412285566d714968fc5a4c52a2f8f"
+  },
+  "source_fingerprint_sha256": "c17a455c0710890a672b2637c8a84809173bc351ef2eaa9cf0c1b6748ae93dba",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved SMA diagnostics refinement: remove redundant fixed-width overflow checks where reciprocal, limb-product, distance and sum bounds or explicit guards prove safety. Preserve exact outputs, square-sum overflow fallback, eviction/reset and allocation behavior. Existing independent tests plus shared long-history parity required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
