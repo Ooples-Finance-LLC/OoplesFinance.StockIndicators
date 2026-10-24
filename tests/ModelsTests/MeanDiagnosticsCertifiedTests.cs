@@ -1,3 +1,4 @@
+using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
@@ -6,6 +7,63 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class MeanDiagnosticsCertifiedTests
 {
+    [Fact]
+    public void CountPublicationMatchesIndependentFractionsAcrossWidthsAndScales()
+    {
+        var random = new Random(472051);
+        int accepted = 0;
+        foreach (int width in new[] { 1, 31, 52, 53, 64, 84, 110, 128 })
+        foreach (int count in new[] { 1, 2, 3, 14, 255, 65537, int.MaxValue })
+        foreach (int scale in new[] { -1000, -500, 0, 500, 900 })
+        {
+            UInt128 mask = width == 128 ? UInt128.MaxValue : ((UInt128)1 << width) - 1;
+            UInt128 numerator = (((UInt128)(ulong)random.NextInt64() << 64)
+                | (ulong)random.NextInt64()) & mask;
+            numerator |= (UInt128)1 << (width - 1);
+            if (!CertifiedMeanRelativeError.TryDivideCount(numerator, count, scale, out double actual)) continue;
+            accepted++;
+            Assert.Equal(BitConverter.DoubleToInt64Bits(CountReference(numerator, count, scale)),
+                BitConverter.DoubleToInt64Bits(actual));
+        }
+        Assert.True(accepted > 250, $"Only {accepted} count divisions certified");
+    }
+
+    [Fact]
+    public void CountPublicationRetainsDiscardedBitsAndEvenMidpointTies()
+    {
+        foreach (int shift in new[] { 1, 2, 20, 64 })
+        foreach (int count in new[] { 1, 3, 17 })
+        foreach (long significand in new[] { 1L << 52, (1L << 52) + 1, (1L << 53) - 1 })
+        foreach (int offset in new[] { -1, 0, 1 })
+        {
+            UInt128 numerator = (((UInt128)(ulong)significand << shift) + ((UInt128)1 << (shift - 1))) * (uint)count;
+            numerator = offset < 0 ? numerator - 1 : numerator + (uint)offset;
+            Assert.True(CertifiedMeanRelativeError.TryDivideCount(numerator, count, -shift, out double actual));
+            Assert.Equal(BitConverter.DoubleToInt64Bits(CountReference(numerator, count, -shift)),
+                BitConverter.DoubleToInt64Bits(actual));
+        }
+    }
+
+    [Fact]
+    public void CountPublicationKeepsUnsupportedBoundariesOnFallback()
+    {
+        Assert.False(CertifiedMeanRelativeError.TryDivideCount(1, 0, 0, out _));
+        Assert.False(CertifiedMeanRelativeError.TryDivideCount(1, -1, 0, out _));
+        Assert.True(CertifiedMeanRelativeError.TryDivideCount(0, 1, int.MinValue, out double zero));
+        Assert.Equal(0, BitConverter.DoubleToInt64Bits(zero));
+        Assert.False(CertifiedMeanRelativeError.TryDivideCount(1, 1, -1074, out _));
+        Assert.False(CertifiedMeanRelativeError.TryDivideCount(1, 1, int.MaxValue, out _));
+        Assert.False(CertifiedMeanRelativeError.TryDivideCount(1, 1, int.MinValue, out _));
+        Assert.False(CertifiedMeanRelativeError.TryDivideCount(((UInt128)1 << 54) - 1, 1, 970, out _));
+    }
+
+    private static double CountReference(UInt128 numerator, int count, int scale)
+    {
+        var exact = new ReferenceFraction((BigInteger)numerator) / new ReferenceFraction(count);
+        var factor = new ReferenceFraction(BigInteger.One << Math.Abs(scale));
+        return (scale < 0 ? exact / factor : exact * factor).ToDouble();
+    }
+
     [Fact]
     public void CachedReciprocalsCertifyBothExponentShiftBoundariesAndNegativeCenters()
     {

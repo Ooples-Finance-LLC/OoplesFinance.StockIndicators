@@ -1,4 +1,6 @@
 #if !NETFRAMEWORK
+using System.Numerics;
+
 namespace OoplesFinance.StockIndicators.Helpers;
 
 // Cache exact reciprocal bounds once per retained input. Window sums and
@@ -116,10 +118,8 @@ internal static class CertifiedMeanRelativeError
         }
         if (sum == 0) return true;
         int scale = common - 1075;
-        // Transfer a fixed binary factor to the denominator so the ratio's
-        // unscaled exponent remains inside the midpoint certifier's bounds.
-        return CertifiedCompactRatio.TryDivide(sum, (UInt128)values.Count << 64,
-            (squared ? 2 * scale : scale) + 64, out result);
+        // Publish the exact integer sum divided by the window count.
+        return TryDivideCount(sum, values.Count, squared ? 2 * scale : scale, out result);
     }
 
     // Full diagnostics need both moments of the same deviations. Decode and
@@ -146,9 +146,8 @@ internal static class CertifiedMeanRelativeError
         }
         if (absoluteSum == 0) return true;
         int scale = common - 1075;
-        UInt128 denominator = (UInt128)values.Count << 64;
-        return CertifiedCompactRatio.TryDivide(absoluteSum, denominator, scale + 64, out absolute)
-            && CertifiedCompactRatio.TryDivide(squaredSum, denominator, 2 * scale + 64, out squared);
+        return TryDivideCount(absoluteSum, values.Count, scale, out absolute)
+            && TryDivideCount(squaredSum, values.Count, 2 * scale, out squared);
     }
 
     // Full diagnostics share one exact alignment and one traversal. Failure
@@ -196,9 +195,8 @@ internal static class CertifiedMeanRelativeError
         // errors are exactly zero and the relative output is defined.
         if (absoluteSum == 0) return true;
         int scale = common - 1075;
-        UInt128 denominator = (UInt128)values.Count << 64;
-        if (!CertifiedCompactRatio.TryDivide(absoluteSum, denominator, scale + 64, out absolute)
-            || !CertifiedCompactRatio.TryDivide(squaredSum, denominator, 2 * scale + 64, out squared)) return false;
+        if (!TryDivideCount(absoluteSum, values.Count, scale, out absolute)
+            || !TryDivideCount(squaredSum, values.Count, 2 * scale, out squared)) return false;
         if (center < 0) (lower, upper) = (upper, lower);
         ProductBounds(center, lower, out var floor, out _);
         ProductBounds(center, upper, out _, out var ceiling);
@@ -219,12 +217,46 @@ internal static class CertifiedMeanRelativeError
         return exponent is > 0 and < 2047;
     }
 
+    // A count is a positive 31-bit integer. Align the numerator directly to
+    // the binary64 significand grid, divide once, then use the exact remainder
+    // (including discarded low bits) for ties-to-even rounding.
+    internal static bool TryDivideCount(UInt128 numerator, int count, int scale, out double result)
+    {
+        result = 0;
+        if (count <= 0) return false;
+        if (numerator == 0) return true;
+        ulong high = (ulong)(numerator >> 64);
+        int width = high == 0 ? 64 - BitOperations.LeadingZeroCount((ulong)numerator)
+            : 128 - BitOperations.LeadingZeroCount(high);
+        int power = width - (32 - BitOperations.LeadingZeroCount((uint)count));
+        if (power >= 0 ? numerator < ((UInt128)(uint)count << power)
+            : (numerator << -power) < (uint)count) power--;
+        if ((long)power + scale is < -1022 or > 1023) return false;
+        int shift = 52 - power;
+        // The aligned dividend has at most 84 bits: 53 quotient bits plus
+        // the count's 31 bits. Every shift is in 0..83 and loses no high bits.
+        UInt128 dividend = shift >= 0 ? numerator << shift : numerator >> -shift;
+        var divided = UInt128.DivRem(dividend, (UInt128)(uint)count);
+        UInt128 quotient = divided.Quotient, remainder = divided.Remainder;
+        UInt128 denominator = (uint)count;
+        if (shift < 0)
+        {
+            int discarded = -shift;
+            remainder = (remainder << discarded) | (numerator & (((UInt128)1 << discarded) - 1));
+            denominator <<= discarded;
+        }
+        UInt128 complement = denominator - remainder;
+        if (remainder > complement || remainder == complement && (quotient & 1) != 0) quotient++;
+        result = Math.ScaleB((double)(ulong)quotient, scale - shift);
+        return double.IsFinite(result);
+    }
+
     private static bool Publish(Int128 value, int count, out double result)
     {
         result = 0;
         if (value == 0) return true;
         UInt128 magnitude = (UInt128)(value < 0 ? -value : value);
-        if (!CertifiedCompactRatio.TryDivide(magnitude, (UInt128)count << Precision, 0, out result)) return false;
+        if (!TryDivideCount(magnitude, count, -Precision, out result)) return false;
         if (value < 0) result = -result;
         return true;
     }
