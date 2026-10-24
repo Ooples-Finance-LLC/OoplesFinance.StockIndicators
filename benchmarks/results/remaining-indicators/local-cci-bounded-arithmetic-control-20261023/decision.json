@@ -244,7 +244,8 @@
     "measure-cci-bounded-arithmetic-control.py": "4e3a8871fe2d598c492dabcf8404b17c4ad4f9f5fc8a9dbe2482012bb297c79e",
     "verify-cci-bounded-arithmetic-control.py": "cdc2da2c964fbaaef09dab5ec15e61e580251e5b4c8770fda04e59551e14b8be"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/cci-bounded-arithmetic-integration-source-proof-20261023.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/cci-bounded-arithmetic-integration-source-proof-20261023.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/cci-bounded-arithmetic-certified-local-cci-bounded-arithmetic-control-20261023-report-import.json"
 }
