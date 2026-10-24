@@ -184,7 +184,8 @@
     "measure-sma-count-publication-control.py": "ea26506d30da48b92516918d1d5fd7c9717dff687c188a2ba9e292b6f1286a64",
     "verify-sma-count-publication-control.py": "a07d13f933bb56832ac3e620418f3f034f7c62ed7bb615759a0df041607a3491"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/sma-count-publication-integration-source-proof-20261024.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/sma-count-publication-integration-source-proof-20261024.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/sma-count-publication-certified-local-sma-count-publication-control-20261024-report-import.json"
 }
