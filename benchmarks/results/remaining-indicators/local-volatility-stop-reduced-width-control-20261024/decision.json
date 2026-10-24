@@ -92,7 +92,8 @@
     "measure-volatility-stop-reduced-width-control.py": "c880aede852fb58b7562a613978f025d52ca16de1c06fdc98a53d8279af4c992",
     "verify-volatility-stop-reduced-width-control.py": "8b84741f7ee35c336a1354cb2a7e66336e1f273541917a06ff07261b751d20a9"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/volatility-stop-reduced-width-integration-source-proof-20261024.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/volatility-stop-reduced-width-integration-source-proof-20261024.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/volatility-stop-reduced-width-certified-local-volatility-stop-reduced-width-control-20261024-report-import.json"
 }

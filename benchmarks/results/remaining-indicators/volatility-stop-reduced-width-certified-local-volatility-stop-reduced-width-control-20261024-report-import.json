@@ -1,0 +1,60 @@
+{
+  "before_sha256": "293b6238402804d0d8cb9317ddb7f6b4ff39b0600e00c4bb7c8c0e7b0e4ab5c8",
+  "candidate_sha256": "c0ee2cdd9704dc0ef26339f6d52c1c10ab98c0b8f6cad6913baafa5a386d26dc",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 0,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 0,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-volatility-stop-reduced-width-control-20261024",
+  "imported_utc": "2026-10-24T18:25:52.906832+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "1c836b62daa0ffdcef8d96f954c63779ac96657a2318afb60b84dc56b0d02a3b",
+      "archive": "benchmarks/results/remaining-indicators/volatility-stop-reduced-width-certified-local-volatility-stop-reduced-width-control-20261024-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "d520ddb7f346e4626e4aa67df203798171529356cddc053a11875d3a17bcbd8e",
+      "archive": "benchmarks/results/remaining-indicators/volatility-stop-reduced-width-certified-local-volatility-stop-reduced-width-control-20261024-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "707107c66e6006b9d7e890f78523dc03c7fe75ce527a476508f4f08d24ef48d5",
+      "archive": "benchmarks/results/remaining-indicators/volatility-stop-reduced-width-certified-local-volatility-stop-reduced-width-control-20261024-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "4ab5cb82fa841b091fac0b53d90f047d9c0c3c0aa64233d9d00ae2908b7b69c6",
+      "archive": "benchmarks/results/remaining-indicators/volatility-stop-reduced-width-certified-local-volatility-stop-reduced-width-control-20261024-measurement.json.gz"
+    },
+    "stage-volatility-stop-reduced-width-report.py": {
+      "sha256": "c3229bf34972437d179ee9f128fc022f09de571659d4630653ece0723a7335fe",
+      "archive": "benchmarks/results/remaining-indicators/volatility-stop-reduced-width-certified-local-volatility-stop-reduced-width-control-20261024-stage-volatility-stop-reduced-width-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/volatility-stop-reduced-width-certified-local-volatility-stop-reduced-width-control-20261024-verify-approved-certified-report.py.gz"
+    },
+    "import-volatility-stop-reduced-width-report.py": {
+      "sha256": "59c50f2f74af5ac80ed70a88da3eb80fb8c00b763572fe4428de7dcb9e3011c5",
+      "archive": "benchmarks/results/remaining-indicators/volatility-stop-reduced-width-certified-local-volatility-stop-reduced-width-control-20261024-import-volatility-stop-reduced-width-report.py.gz"
+    },
+    "archive-volatility-stop-reduced-width-control.py": {
+      "sha256": "3e22fe988a2b4ce406e75ec0215cc4b520d88ba752dbafc4c47b825fb682862c",
+      "archive": "benchmarks/results/remaining-indicators/volatility-stop-reduced-width-certified-local-volatility-stop-reduced-width-control-20261024-archive-volatility-stop-reduced-width-control.py.gz"
+    },
+    "prove-volatility-stop-reduced-width-integration.py": {
+      "sha256": "77d082cc11ad0e03ee0b9cffdfe020b137fb174f4b9394c2ec4101d18314b5d6",
+      "archive": "benchmarks/results/remaining-indicators/volatility-stop-reduced-width-certified-local-volatility-stop-reduced-width-control-20261024-prove-volatility-stop-reduced-width-integration.py.gz"
+    },
+    "archive-volatility-stop-reduced-width-report.py": {
+      "sha256": "3d25778c6b4a136b8a5f7e3d1f420f018261b7bfaf4d53dcdcf53fd726010c65",
+      "archive": "benchmarks/results/remaining-indicators/volatility-stop-reduced-width-certified-local-volatility-stop-reduced-width-control-20261024-archive-volatility-stop-reduced-width-report.py.gz"
+    }
+  }
+}
