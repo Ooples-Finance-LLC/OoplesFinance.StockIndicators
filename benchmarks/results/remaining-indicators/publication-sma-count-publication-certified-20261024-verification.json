@@ -1,0 +1,59 @@
+{
+  "input_head": "e4db35df9c0d761a69c6a0594b7de3f1689a516a",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedMeanRelativeError.cs",
+    "tests/ModelsTests/MeanDiagnosticsCertifiedTests.cs"
+  ],
+  "batch_note": "Approved SMA diagnostics refinement: divide exact sums by the positive integer window count with exact discarded-bit and midpoint rounding. Preserve subnormal/overflow fallback, signs, presence flags and original fallback order. Independent rational width, scale and tie regressions plus lifecycle and long-history checks required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-24T20:39:37.241206+00:00",
+  "unit": {
+    "passed": 49,
+    "class_counts": {
+      "RollingStatisticsSharedExecutionTests": 17,
+      "MeanDiagnosticsCertifiedTests": 26,
+      "MeanDiagnosticsScaleReductionTests": 2,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-count-publication\\unit\\unit.trx",
+    "sha256": "18cf520fc1344043fe77fdf48eda144cee9b3be23b20a7ebd571696689713d52",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-count-publication-certified-20261024-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 2,
+    "class_counts": {
+      "SharedRollingStatisticsBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-count-publication\\parity\\parity.trx",
+    "sha256": "1f0e56bca32e18be6d4771916d298a79d9ba0828804443a154cbd5dc837060de",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-count-publication-certified-20261024-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-count-publication-20261024\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "80ec0202f1d25b6ab93f58464f5015437262d806c2618be61199ebedd5bc97c3",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-count-publication-20261024\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "80ec0202f1d25b6ab93f58464f5015437262d806c2618be61199ebedd5bc97c3",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-count-publication-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "80ec0202f1d25b6ab93f58464f5015437262d806c2618be61199ebedd5bc97c3",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-count-publication-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "80ec0202f1d25b6ab93f58464f5015437262d806c2618be61199ebedd5bc97c3"
+  },
+  "source_fingerprint_sha256": "d0a0130798bfe759f3b9e2bf30e3f0d7ba7d8873d6f671101ff69ab5525e0343",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved SMA diagnostics refinement: divide exact sums by the positive integer window count with exact discarded-bit and midpoint rounding. Preserve subnormal/overflow fallback, signs, presence flags and original fallback order. Independent rational width, scale and tie regressions plus lifecycle and long-history checks required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
