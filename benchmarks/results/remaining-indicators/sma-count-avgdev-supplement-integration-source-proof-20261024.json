@@ -1,0 +1,45 @@
+{
+  "measurement_source": "1130ba768cdf30ebc692e75c38ca6eba3fae6402",
+  "publication_head": "405aae24a14d082d08291580c59f01acd3d7b71e",
+  "checks": {
+    "passed": 25,
+    "classes": {
+      "SharedTaWindowNativeBenchmarkTests": 14,
+      "MeanErrorComparisonTests": 9,
+      "SharedRollingStatisticsBenchmarkTests": 2
+    },
+    "source": "1130ba768cdf30ebc692e75c38ca6eba3fae6402",
+    "publication_head": "405aae24a14d082d08291580c59f01acd3d7b71e",
+    "unrelated_source_differences": [
+      "src/Helpers/CertifiedHilbertProjection.cs",
+      "tests/ModelsTests/CertifiedHilbertProjectionTests.cs"
+    ],
+    "production_dll_sha256": "80ec0202f1d25b6ab93f58464f5015437262d806c2618be61199ebedd5bc97c3",
+    "test_dll_sha256": "744b0e44873231d2821258535090b502ea213612d736b89e198ae81fc51956a2",
+    "trx_sha256": "309169e2689a98190c5cd8adb98e0e60b8a9fc993e376b9c9c00e4e393cdf5f0",
+    "note": "Preserved source-qualified SMA count binaries reused. Publishing source differs only in unrelated Hilbert projection implementation and tests. No build or new production change."
+  },
+  "unchanged_input_scope": [
+    "src",
+    "tests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json"
+  ],
+  "unrelated_differences": [
+    "src/Helpers/CertifiedHilbertProjection.cs",
+    "tests/ModelsTests/CertifiedHilbertProjectionTests.cs"
+  ],
+  "qualified_code": "e4db35df9c0d761a69c6a0594b7de3f1689a516a",
+  "qualification_reused": {
+    "unit": 49,
+    "parity": 2,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "additional_affected_consumer_checks": 25,
+  "note": "Existing published SMA count implementation measured for its AvgDev consumer. All executable/build inputs match the preserved qualified binary except the later unrelated Hilbert projection helper/tests. Mean-error calculation does not call the Hilbert projection helper. No new production integration or build."
+}
