@@ -1,0 +1,190 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "95e8052f3886e58beeef0f2eb3ef94d91db6d012",
+    "new": "504c19afa5c8a8796f390d4f672d501ae213776a"
+  },
+  "candidate_code_source": "e5bcbba569c460b4d77f74c2a1481730373be3c1",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "SharedTaWindowNativeBenchmarks",
+      "pair": "TaLib.Functions.Accbands",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        6.7872453125,
+        6.683195138888889
+      ],
+      "new_means_ms": [
+        4.604436666666667,
+        4.471960493827161
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTaWindowNativeBenchmarks",
+      "pair": "TaLib.Functions.Accbands",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        6.523454166666667,
+        6.667799333333333
+      ],
+      "new_means_ms": [
+        4.8208909375,
+        4.5502734375
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTaWindowNativeBenchmarks",
+      "pair": "TaLib.Functions.Accbands",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        14.855867142857143,
+        15.00664857142857
+      ],
+      "new_means_ms": [
+        10.897401388888888,
+        10.930233333333334
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTaWindowNativeBenchmarks",
+      "pair": "TaLib.Functions.Accbands",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        14.792722222222222,
+        14.502288571428572
+      ],
+      "new_means_ms": [
+        10.780502222222221,
+        10.7007
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.Accbands",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        18.16336,
+        18.6134
+      ],
+      "new_means_ms": [
+        14.678005555555556,
+        14.3564375
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.Accbands",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        17.81501111111111,
+        16.37746
+      ],
+      "new_means_ms": [
+        13.40672,
+        12.52486
+      ],
+      "verdict": "faster"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "9afe1069188498fcf65a61899e401b576706a9cc24e5af0b411602a796ac18c9",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "fe01fb1fafff41ed1074e7d640d8da5323a598710f60651041f7562addef4f84",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "c53c4ca38f808ddea80e59501df628ad7dd54c0b63092b0fed1657ace20c7858",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "cd2645947e7ff2e575db263fbe1ca2a2765914998506a2588e55e910ade5b1ac",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/verified-summary.json.gz"
+    },
+    "round0-old-SharedTaWindowNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaWindowNativeBenchmarks-report-full-compressed.json": {
+      "sha256": "60fce5e2966b8995dcf4bc1a0ea64e48ad2b1196677ade1e192f2e458bfccb15",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round0-old-SharedTaWindowNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaWindowNativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "4c71b97539d4616ff3d2dd64e219092c9f3e9aa70de0f3ff4ece89782bb8b6a5",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedTaWindowNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaWindowNativeBenchmarks-report-full-compressed.json": {
+      "sha256": "a09d905ceed59ce1e52f3d856f9bbda145f98f91b56f6f6ee985cb40272bdda3",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round1-new-SharedTaWindowNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaWindowNativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "8815031ce5d700f9ae6318a82ce28586cc41347a8ed66e033dbcede056cb840e",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedTaWindowNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaWindowNativeBenchmarks-report-full-compressed.json": {
+      "sha256": "73d36b792d6f87a505fa8c0a4d60dd58a00ca5716a36f0455a3004046a2d966d",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round2-new-SharedTaWindowNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaWindowNativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "a6b6e3b34d46409b1ef9d0a10ceda73a5ec5195ac8bc7a2b90f0ae034cf4db25",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedTaWindowNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaWindowNativeBenchmarks-report-full-compressed.json": {
+      "sha256": "fc7d32ebb9ae5a1ad1960b446193a864b1019b391d5cfca5dddcea04bd7ab648",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round3-old-SharedTaWindowNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaWindowNativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "a07c6975bb678ac2a1677826230a1b5f997788f1b9db10b34d8848e7aad8f37c",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "23b305c4d72d279a5d2466e0b2e2262b86638ada21d379318171bf25500d6a36",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round0-old-SharedTaWindowNativeBenchmarks.log": {
+      "sha256": "3956f158f2230776196d487285c491cce5a68fd868e9b73894258f9fea35631f",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round0-old-SharedTaWindowNativeBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "3013e9e2ba17d521624dc2250f148ca0055a10e8922441d6d4e54ca524c44b5c",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-SharedTaWindowNativeBenchmarks.log": {
+      "sha256": "d2467521e80cad23611163807249960344d2dbc8c21003c81150daa4cd6d7e34",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round1-new-SharedTaWindowNativeBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "e8d13451bc1c61f385c88eee6ab2f827bbcf8ed6d7d2c1be938bf0f1b842da8e",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-SharedTaWindowNativeBenchmarks.log": {
+      "sha256": "a9c0c81ee3e3057e1bbe48a7d724cd1da1b11a8c1d0d905225c4a5be5b2a3bd9",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round2-new-SharedTaWindowNativeBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "777d86538c5a9ebebc3951f27221f7cf8eb7bc9c14c8d25059b83fe160c3bcc4",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-SharedTaWindowNativeBenchmarks.log": {
+      "sha256": "d831ac009ff28510cea0fa2b83157ece3bcd9a5dd0384d96f5f20c7024a50028",
+      "archive": "benchmarks/results/remaining-indicators/local-acceleration-reduced-operands-control-20261024/round3-old-SharedTaWindowNativeBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-acceleration-reduced-operands-control.py": "6a84585b4b1fc0455f7d0003eb0040bad6ad336725e72680ad61b155b1cf9c75",
+    "verify-acceleration-reduced-operands-control.py": "5406550a7459f172b91bd7d435cfc6f16b4060107de0163b5cfa79dc83405174"
+  },
+  "report_imported": false,
+  "production_integrated": true,
+  "integration_source_proof": "benchmarks/results/remaining-indicators/acceleration-reduced-operands-integration-source-proof-20261024.json"
+}
