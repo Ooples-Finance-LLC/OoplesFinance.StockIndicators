@@ -364,7 +364,7 @@
     "measure-t3-word-smoothing-control.py": "31cb807210f6a48709193fd28ba63535f767b5db455bb116d4d8f16b59059cc1",
     "verify-t3-word-smoothing-control.py": "f62195445c22fc98a7d4cbd2751838fb3962e9c2b109e3c3d4590dd30a85d287"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
   "profile_evidence": {
     "kind": "Qualified-baseline sampled-thread diagnostic; not benchmark timing",
@@ -405,5 +405,6 @@
       "archive": "benchmarks/results/remaining-indicators/local-t3-word-smoothing-control-20261024/t3-word-smoothing-model-review-20261024.json.gz"
     }
   },
-  "integration_source_proof": "benchmarks/results/remaining-indicators/t3-word-smoothing-integration-source-proof-20261024.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/t3-word-smoothing-integration-source-proof-20261024.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/t3-word-smoothing-certified-local-t3-word-smoothing-control-20261024-report-import.json"
 }
