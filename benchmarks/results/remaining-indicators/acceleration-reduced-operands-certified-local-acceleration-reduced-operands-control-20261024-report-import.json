@@ -1,0 +1,60 @@
+{
+  "before_sha256": "c0ee2cdd9704dc0ef26339f6d52c1c10ab98c0b8f6cad6913baafa5a386d26dc",
+  "candidate_sha256": "08c5dc91b718e4f75f879927482b91a20c378152c4e362b33cd9e02da016cf1f",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 4,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 4,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-acceleration-reduced-operands-control-20261024",
+  "imported_utc": "2026-10-24T19:30:05.485843+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "d445fc72ab7357d0e9393181513cedd078a085dccdbfd293a88906711722ae6c",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-reduced-operands-certified-local-acceleration-reduced-operands-control-20261024-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "7c08124a21b0c3e5da3cfdd50f5e2fb7497a4f1d39c60d1878c38b7199f91ce7",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-reduced-operands-certified-local-acceleration-reduced-operands-control-20261024-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "bab0353eb1c1baceed6c40f847425bfad7f24685d477ec89de1eb56b50f50eb3",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-reduced-operands-certified-local-acceleration-reduced-operands-control-20261024-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "436f57a1a2f32b3daf2dbafde80a8156f864dc96a494767244255214a4a95a94",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-reduced-operands-certified-local-acceleration-reduced-operands-control-20261024-measurement.json.gz"
+    },
+    "stage-acceleration-reduced-operands-report.py": {
+      "sha256": "43254a233f1bb6fc9ccf2696c0949040db70613c3f102808faf19c960fa4f90b",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-reduced-operands-certified-local-acceleration-reduced-operands-control-20261024-stage-acceleration-reduced-operands-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-reduced-operands-certified-local-acceleration-reduced-operands-control-20261024-verify-approved-certified-report.py.gz"
+    },
+    "import-acceleration-reduced-operands-report.py": {
+      "sha256": "9fbbbea0dbbb69c00f4dc6ff6b4e33c208d1f70ed7a596246e316f6e27dee04b",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-reduced-operands-certified-local-acceleration-reduced-operands-control-20261024-import-acceleration-reduced-operands-report.py.gz"
+    },
+    "archive-acceleration-reduced-operands-control.py": {
+      "sha256": "f6b78d5b5ff99631503bad0fcd2bf819e54a4f521c390a77fe4b747412964385",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-reduced-operands-certified-local-acceleration-reduced-operands-control-20261024-archive-acceleration-reduced-operands-control.py.gz"
+    },
+    "prove-acceleration-reduced-operands-integration.py": {
+      "sha256": "fe0201b2c0a87357f1d7ffc1d559b9b7851561e6cdb818283603970b58bc51d2",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-reduced-operands-certified-local-acceleration-reduced-operands-control-20261024-prove-acceleration-reduced-operands-integration.py.gz"
+    },
+    "archive-acceleration-reduced-operands-report.py": {
+      "sha256": "5848f332a1d55eb101861d11b26ade8ecd8169110c8e256ac8ec85eaaaea4ece",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-reduced-operands-certified-local-acceleration-reduced-operands-control-20261024-archive-acceleration-reduced-operands-report.py.gz"
+    }
+  }
+}
