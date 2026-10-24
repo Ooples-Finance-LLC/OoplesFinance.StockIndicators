@@ -1,0 +1,60 @@
+{
+  "before_sha256": "a9e6300e1aff239e18488b3ed81df9ab0908e272089d75e54870ca2063f3ede4",
+  "candidate_sha256": "40b82cc1637c1a7b028042362a9e4696378bda211a6584ee30351efc28236d86",
+  "changed_baseline_rows": 6,
+  "unchanged_baseline_rows": 796,
+  "changed_builder_slots": 12,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 12,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 796,
+  "run_id": "local-t3-word-smoothing-control-20261024",
+  "imported_utc": "2026-10-24T23:55:32.181818+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "fc2fb608440948853f3583be978f01a4eb40f8340264c3accaafaef8703647e9",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-smoothing-certified-local-t3-word-smoothing-control-20261024-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "f1a4252676197017baac664cc1d68471c36e806ec2bb7297ccd6b287b0edab93",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-smoothing-certified-local-t3-word-smoothing-control-20261024-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "5e68bccd8d61ead9d4ba5e6dfaaae0b836efd7d134f03f256dd971e83df3eeb1",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-smoothing-certified-local-t3-word-smoothing-control-20261024-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "4644033790c0802fb95877fa5f7e7475994af0c7d2576f6227459768535c8657",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-smoothing-certified-local-t3-word-smoothing-control-20261024-measurement.json.gz"
+    },
+    "stage-t3-word-smoothing-report.py": {
+      "sha256": "e1b87ad552b1e02fb17936c02d4a6a77286b6ee651eaba2e88721f8a78250633",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-smoothing-certified-local-t3-word-smoothing-control-20261024-stage-t3-word-smoothing-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-smoothing-certified-local-t3-word-smoothing-control-20261024-verify-approved-certified-report.py.gz"
+    },
+    "import-t3-word-smoothing-report.py": {
+      "sha256": "55ed046ec7b31b8dabf989ee7af67d6819b8098d8c7f2a3027e6e0187c38802f",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-smoothing-certified-local-t3-word-smoothing-control-20261024-import-t3-word-smoothing-report.py.gz"
+    },
+    "archive-t3-word-smoothing-control.py": {
+      "sha256": "de9858ca649bab12b0e8d858470dc49d8c58bb454385c53faf37e068617fc31b",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-smoothing-certified-local-t3-word-smoothing-control-20261024-archive-t3-word-smoothing-control.py.gz"
+    },
+    "prove-t3-word-smoothing-integration.py": {
+      "sha256": "77ca6d6f74174ced9a1795ddba346acdb77bc4e04897d952e103b6f9f42b44e0",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-smoothing-certified-local-t3-word-smoothing-control-20261024-prove-t3-word-smoothing-integration.py.gz"
+    },
+    "archive-t3-word-smoothing-report.py": {
+      "sha256": "3835f6ae61e207f120ad29c19e73aeebdabd96ca26850856dd3048b189a08b5b",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-smoothing-certified-local-t3-word-smoothing-control-20261024-archive-t3-word-smoothing-report.py.gz"
+    }
+  }
+}
