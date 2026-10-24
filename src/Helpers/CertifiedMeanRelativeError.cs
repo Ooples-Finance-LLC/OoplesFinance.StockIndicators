@@ -41,8 +41,8 @@ internal static class CertifiedMeanRelativeError
             // The shift is 0..6; each bound has at most 82 bits, and even an
             // Int32-sized signed sum fits in Int128.
             int shift = centerExponent + 3 - exponent;
-            Int128 reciprocalLow = (Int128)(sample.ReciprocalFloor << shift);
-            Int128 reciprocalHigh = reciprocalLow + (sample.ReciprocalExact ? 0 : (Int128)1 << shift);
+            Int128 reciprocalLow = unchecked((Int128)(sample.ReciprocalFloor << shift));
+            Int128 reciprocalHigh = unchecked(reciprocalLow + (sample.ReciprocalExact ? 0 : (Int128)1 << shift));
             if (price < 0) (reciprocalLow, reciprocalHigh) = (-reciprocalHigh, -reciprocalLow);
             // |price - mean| / price is mean/price - 1 below the mean,
             // and 1 - mean/price above it, including negative prices.
@@ -83,8 +83,9 @@ internal static class CertifiedMeanRelativeError
         // Exact 192-bit product represented by its two partial products.
         // Only the low 64 bits are dropped, with directed rounding. The upper
         // product is below 2^103 for every accepted Int32-sized window.
-        UInt128 low = (UInt128)unchecked((ulong)magnitude) * factor;
-        UInt128 high = (magnitude >> 64) * factor + (low >> 64);
+        // A 64-bit limb times a 53-bit factor fits in 117 bits.
+        UInt128 low = unchecked((UInt128)(ulong)magnitude * factor);
+        UInt128 high = unchecked((magnitude >> 64) * factor + (low >> 64));
         bool inexact = unchecked((ulong)low) != 0;
         if (negative) { ceiling = -(Int128)high; floor = ceiling - (inexact ? 1 : 0); }
         else { floor = (Int128)high; ceiling = floor + (inexact ? 1 : 0); }
@@ -108,9 +109,10 @@ internal static class CertifiedMeanRelativeError
             // 56-bit center have a difference strictly inside Int64.
             long difference = (price << (exponent - common)) - alignedCenter;
             UInt128 term = (UInt128)Math.Abs(difference);
-            if (squared) term *= term;
+            // The aligned distance is below 2^60, so its square fits UInt128.
+            if (squared) term = unchecked(term * term);
             if (term > UInt128.MaxValue - sum) return false;
-            sum += term;
+            sum = unchecked(sum + term); // The explicit bound above proves this fits.
         }
         if (sum == 0) return true;
         int scale = common - 1075;
@@ -136,11 +138,11 @@ internal static class CertifiedMeanRelativeError
             if (exponent is <= 0 or >= 2047 || Math.Abs(exponent - centerExponent) > 3) return false;
             long difference = (sample.NormalSignificand << (exponent - common)) - alignedCenter;
             UInt128 distance = (UInt128)Math.Abs(difference);
-            UInt128 square = distance * distance;
+            UInt128 square = unchecked(distance * distance); // Distance is below 2^60.
             if (square > UInt128.MaxValue - squaredSum) return false;
             // At most Int32.MaxValue terms, each strictly below 2^60.
-            absoluteSum += distance;
-            squaredSum += square;
+            absoluteSum = unchecked(absoluteSum + distance);
+            squaredSum = unchecked(squaredSum + square); // The explicit bound above proves this fits.
         }
         if (absoluteSum == 0) return true;
         int scale = common - 1075;
