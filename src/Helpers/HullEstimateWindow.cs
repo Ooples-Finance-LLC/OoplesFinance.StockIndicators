@@ -3,11 +3,11 @@ namespace OoplesFinance.StockIndicators.Helpers;
 internal sealed class HullEstimateWindow : IDisposable
 {
     private readonly RocBankAverage _weighted, _exponential;
-    internal HullEstimateWindow(int length)
+    internal HullEstimateWindow(int length, int capacityHint = int.MaxValue)
     {
         var period = Math.Max(2, Math.Min(530, (int)Math.Ceiling(length / 2d)));
-        _weighted = new(MovingAvgType.WeightedMovingAverage, period, period);
-        _exponential = new(MovingAvgType.ExponentialMovingAverage, period, period);
+        _weighted = new(MovingAvgType.WeightedMovingAverage, period, capacityHint);
+        _exponential = new(MovingAvgType.ExponentialMovingAverage, period, capacityHint);
     }
     internal double Next(double price, bool commit)
     {

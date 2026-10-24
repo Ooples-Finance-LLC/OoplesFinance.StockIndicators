@@ -1,0 +1,39 @@
+{
+  "batch": "regression-pair-shared-execution",
+  "types": [
+    "TrigonometricOscillator",
+    "TimeSeriesForecast"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share unchanged exact TrigonometricWindow and TimeSeriesForecastWindow over original closes; compute forecast upper, middle and lower together while preserving primary middle output, startup, source fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 87,
+    "fixture_passed": 8,
+    "discovery_passed": 79,
+    "gpu_passed": 100,
+    "contract_methods": 1414,
+    "hosted_methods": 1402,
+    "evidence": [
+      {
+        "file": "regressionpair-unit.trx.gz",
+        "passed_cases": 87,
+        "trx_sha256": "d061aa5ce754645aaf0140f71671408d0b6ebb41325cd85ae49b3e842e9ffa06"
+      },
+      {
+        "file": "regressionpair-fixture.trx.gz",
+        "passed_cases": 87,
+        "trx_sha256": "0b29d19ee9e958a742ef17751854fb2e1d997572c8d9dd1c462e43f8cf696787"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingRegressionPairBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "TrigonometricOscillator",
+      "TimeSeriesForecast"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

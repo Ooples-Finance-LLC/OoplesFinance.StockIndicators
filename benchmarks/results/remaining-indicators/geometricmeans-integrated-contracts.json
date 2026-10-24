@@ -1,0 +1,31 @@
+{
+  "types": [
+    "GeoMa",
+    "GeometricMeanMovingAverage"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "f4ee9586c30ad28d9a8c886b64354333c3b7caf4",
+  "combined_input_sha256": "9c60fac7945cfe5719c8a3a8d0a3a25564336cfd7312ab970b3abe7c0ba1245d",
+  "benchmark_fixture": {
+    "type": "RemainingGeometricMeansBenchmarks",
+    "operations": [
+      "GeoMa",
+      "GeometricMeanMovingAverage"
+    ]
+  },
+  "checks": {
+    "unit": 44,
+    "parity": 8,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/geometricmeans-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/geometricmeans-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

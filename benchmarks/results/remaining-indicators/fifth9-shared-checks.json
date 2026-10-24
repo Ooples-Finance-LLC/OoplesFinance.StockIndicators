@@ -1,0 +1,68 @@
+{
+  "status": "fifth-stage-checks-passed-inherited-macd-failures-and-performance-pending",
+  "context": "Four new families in the combined working candidate; the isolated committed tree was not separately built or tested. Common GPU fixtures do not establish per-indicator GPU performance.",
+  "input_sha256": "69b813a74e4ac37a8aba106d6c14848816525342e496eeff5f5ed8da16e63343",
+  "validation_base_head": "fc0e396cc6f1d5c805f524bd25c994da7e48c5ec",
+  "family_check_counts": {
+    "unit": 173,
+    "parity": 36
+  },
+  "family_cpu_receipts": [
+    "fallingrising-cpu-contracts.json",
+    "fxsniper-cpu-contracts.json",
+    "fastslow-cpu-contracts.json",
+    "fearfire-cpu-contracts.json"
+  ],
+  "checks": {
+    "discovery": {
+      "status": "passed",
+      "verified_count": 232,
+      "log_sha256": "8481a09997fb8492b9d5cf0350b98ff47ea6b3d47edb6c4ee07c2bc5bde1c6f0"
+    },
+    "gpu": {
+      "status": "passed",
+      "verified_count": 100,
+      "log_sha256": "53b3d610459879a85ffba341cda4f01186fcd813c573ddf7ff7f43e752d29e4c"
+    },
+    "verify-gpu-partition": {
+      "status": "passed",
+      "verified_count": null,
+      "log_sha256": "81b80a4bd4539063b6559de232f0a78f160ca4694fabd9c19b10183d4a26779c",
+      "result": "Verified 100 local GPU cases; 1561 methods remain assigned to hosted CI"
+    },
+    "inventory": {
+      "status": "passed",
+      "verified_count": 6,
+      "log_sha256": "ff9aa90969e38ca4f4e39b96c33005c1d8026ea478d7c937fc929e374b950851",
+      "result": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.391s\n\nOK"
+    }
+  },
+  "discovery_evidence": "fifth9-discovery.trx.gz",
+  "gpu_evidence": "fifth9-gpu-contracts.json",
+  "gpu_trx_evidence": "fifth9-gpu.trx.gz",
+  "inherited_failed_unit_cases": 3,
+  "inherited_failure_evidence": "combined113-known-macd-failures.trx.gz",
+  "pending": [
+    "inherited MACD unit-contract failures",
+    "raw timing and performance comparison",
+    "required hosted checks"
+  ],
+  "family_execution_inputs_sha256": {
+    "fallingrising": {
+      "unit": "69b813a74e4ac37a8aba106d6c14848816525342e496eeff5f5ed8da16e63343",
+      "parity": "69b813a74e4ac37a8aba106d6c14848816525342e496eeff5f5ed8da16e63343"
+    },
+    "fxsniper": {
+      "unit": "69b813a74e4ac37a8aba106d6c14848816525342e496eeff5f5ed8da16e63343",
+      "parity": "69b813a74e4ac37a8aba106d6c14848816525342e496eeff5f5ed8da16e63343"
+    },
+    "fastslow": {
+      "unit": "69b813a74e4ac37a8aba106d6c14848816525342e496eeff5f5ed8da16e63343",
+      "parity": "69b813a74e4ac37a8aba106d6c14848816525342e496eeff5f5ed8da16e63343"
+    },
+    "fearfire": {
+      "unit": "69b813a74e4ac37a8aba106d6c14848816525342e496eeff5f5ed8da16e63343",
+      "parity": "69b813a74e4ac37a8aba106d6c14848816525342e496eeff5f5ed8da16e63343"
+    }
+  }
+}

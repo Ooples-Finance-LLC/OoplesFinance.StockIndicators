@@ -1,0 +1,36 @@
+{
+  "batch": "generated-autonomous-averages-and-trailing-stop",
+  "types": [
+    "AutonomousRecursiveMa",
+    "AdaptiveAutonomousRecursiveMovingAverage",
+    "AdaptiveAutonomousRecursiveTrailingStop"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Use existing exact autonomous kernels. Calculate adaptive deviation and average together in facade output order D/Value instead of duplicate legacy passes and intermediate arrays. Preserve fixed alias momentum7/gamma3, actual adaptive Lambda, finite/nonfinite fallback, source selection, ownership, validation priority, reset and disposal.",
+  "verification": {
+    "unit_passed": 140,
+    "fixture_passed": 12,
+    "discovery_passed": 57,
+    "gpu_passed": 100,
+    "contract_methods": 1392,
+    "hosted_methods": 1380,
+    "evidence": [
+      {
+        "file": "autonomous-unit.trx.gz",
+        "passed_cases": 140,
+        "trx_sha256": "917bcad47586c2732d2d0b25855ad5a830240d3674f042098bdfd82f29b8d6e0"
+      },
+      {
+        "file": "autonomous-fixture.trx.gz",
+        "passed_cases": 69,
+        "trx_sha256": "ea38647c30e206f0101a7565170025dab90efa5c90bbb9e7950b2dbcc0e0944b"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAutonomousBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

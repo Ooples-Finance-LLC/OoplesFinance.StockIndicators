@@ -1,0 +1,39 @@
+{
+  "batch": "headley-rmse-bands-shared-execution",
+  "types": [
+    "PriceHeadleyAccelerationBands",
+    "RootMovingAverageSquaredErrorBands"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact Headley and scaled-square RMSE kernels with input-bounded history, publishing all three bands together. Preserve extended hidden stages, startup, finite factors, original fields, clamps, component/source fallback and ownership.",
+  "verification": {
+    "unit_passed": 115,
+    "fixture_passed": 8,
+    "discovery_passed": 122,
+    "gpu_passed": 100,
+    "contract_methods": 1461,
+    "hosted_methods": 1449,
+    "evidence": [
+      {
+        "file": "headleyrmse-unit.trx.gz",
+        "passed_cases": 115,
+        "trx_sha256": "d4ab861b09e8815242fcf6460ab5cda2cfafa2aab1e0b9299691fd70bb993792"
+      },
+      {
+        "file": "headleyrmse-fixture.trx.gz",
+        "passed_cases": 130,
+        "trx_sha256": "11432dc9eb9e8ea2232e0867db262953adc591ae0050ced612cefd9b5112556c"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingHeadleyRmseBandBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "PriceHeadleyAccelerationBands",
+      "RootMovingAverageSquaredErrorBands"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

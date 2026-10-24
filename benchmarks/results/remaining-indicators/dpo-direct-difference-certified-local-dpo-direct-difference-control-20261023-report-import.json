@@ -1,0 +1,60 @@
+{
+  "before_sha256": "008031c7a34c926c11a88328c27afae968cbfd6ee09f6e2854a20f06c8444926",
+  "candidate_sha256": "2e935d2e2770e68d608e597a09aaddb9f7d8e648fdbe585777eb7b62026a857e",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 0,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 0,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-dpo-direct-difference-control-20261023",
+  "imported_utc": "2026-10-23T06:40:57.500061+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "fa399e0d1a2046e48a2c03513869a2035e755e13103c8966e0067cab753ca874",
+      "archive": "benchmarks/results/remaining-indicators/dpo-direct-difference-certified-local-dpo-direct-difference-control-20261023-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "9864d648018efdc64794a74ed1caa416dbba2e37c2c55677072a4bb893af17b7",
+      "archive": "benchmarks/results/remaining-indicators/dpo-direct-difference-certified-local-dpo-direct-difference-control-20261023-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "c5a49d0b6f396db58b75d29d229a44b46a3835f764c94bb576750d3b3836477b",
+      "archive": "benchmarks/results/remaining-indicators/dpo-direct-difference-certified-local-dpo-direct-difference-control-20261023-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "b8c7346dccd66ea9387d2cf153361ba2d3d0b4cfb10778eaa25c9208a22c1553",
+      "archive": "benchmarks/results/remaining-indicators/dpo-direct-difference-certified-local-dpo-direct-difference-control-20261023-measurement.json.gz"
+    },
+    "stage-dpo-direct-difference-report.py": {
+      "sha256": "52b37cd12c9e1481541b2bd8656d7df9cc8c6fa32caa7e53d1f7ebe6f41a91ae",
+      "archive": "benchmarks/results/remaining-indicators/dpo-direct-difference-certified-local-dpo-direct-difference-control-20261023-stage-dpo-direct-difference-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/dpo-direct-difference-certified-local-dpo-direct-difference-control-20261023-verify-approved-certified-report.py.gz"
+    },
+    "import-dpo-direct-difference-report.py": {
+      "sha256": "ea9ae77014e4371fc18a94e2309c5679cc1abd9d12d6dedcfe5c5ed1c5042e28",
+      "archive": "benchmarks/results/remaining-indicators/dpo-direct-difference-certified-local-dpo-direct-difference-control-20261023-import-dpo-direct-difference-report.py.gz"
+    },
+    "archive-dpo-direct-difference-control.py": {
+      "sha256": "e0ebec400040575667e65ec7ff254a0631ba709cf0ca0ff8633ee3cf62672f5d",
+      "archive": "benchmarks/results/remaining-indicators/dpo-direct-difference-certified-local-dpo-direct-difference-control-20261023-archive-dpo-direct-difference-control.py.gz"
+    },
+    "prove-dpo-direct-difference-integration.py": {
+      "sha256": "10e60ec903f6b3164ce892b23e170dd88ce33a99b3792bdefdc741987de6551f",
+      "archive": "benchmarks/results/remaining-indicators/dpo-direct-difference-certified-local-dpo-direct-difference-control-20261023-prove-dpo-direct-difference-integration.py.gz"
+    },
+    "archive-dpo-direct-difference-report.py": {
+      "sha256": "256b289389258ad81773bdc9b90520de125900a5059de24267aedb2f51f155bc",
+      "archive": "benchmarks/results/remaining-indicators/dpo-direct-difference-certified-local-dpo-direct-difference-control-20261023-archive-dpo-direct-difference-report.py.gz"
+    }
+  }
+}

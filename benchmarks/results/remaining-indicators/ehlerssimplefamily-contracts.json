@@ -1,0 +1,43 @@
+{
+  "batch": "ehlers-simple-family-shared-execution",
+  "types": [
+    "EhlersSimpleDerivIndicator",
+    "EhlersSimpleClipIndicator",
+    "EhlersSimpleWindowIndicator",
+    "EhlersTripleDelayLineDetrender"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact derivative, clipped RMS, triple average and delay kernels; publish related outputs together while preserving independent periods, ignored Clip Length2, original open, wide arithmetic, source/component fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 73,
+    "fixture_passed": 16,
+    "discovery_passed": 158,
+    "gpu_passed": 100,
+    "contract_methods": 1499,
+    "hosted_methods": 1487,
+    "evidence": [
+      {
+        "file": "ehlerssimplefamily-unit.trx.gz",
+        "passed_cases": 73,
+        "trx_sha256": "223449386a92d204108a456ed4a29a095847b1daece1feb9a22009dbb4b630ad"
+      },
+      {
+        "file": "ehlerssimplefamily-fixture.trx.gz",
+        "passed_cases": 174,
+        "trx_sha256": "1ae25dd7b665fda6c7708b93ba9e11716d087b97a13cca5438f3d1ee6d915521"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingEhlersSimpleFamilyBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersSimpleDerivIndicator",
+      "EhlersSimpleClipIndicator",
+      "EhlersSimpleWindowIndicator",
+      "EhlersTripleDelayLineDetrender"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

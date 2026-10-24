@@ -1,0 +1,50 @@
+{
+  "batch": "bollinger-family-shared-execution",
+  "types": [
+    "BollingerBands",
+    "BollingerBandsWidth",
+    "BollingerBandsPercentB",
+    "NarrowSidewaysChannel"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact rounded SMA and full-window population deviation for four facades. Preserve default-only Bollinger component qualification, explicit-average fallback, ignored NarrowSideways Pct, startup, output bits and ownership; skip unfillable windows.",
+  "verification": {
+    "unit_passed": 199,
+    "fixture_passed": 16,
+    "discovery_passed": 125,
+    "gpu_passed": 100,
+    "contract_methods": 1464,
+    "hosted_methods": 1452,
+    "evidence": [
+      {
+        "file": "bollingerfamily-unit.trx.gz",
+        "passed_cases": 199,
+        "trx_sha256": "77b5294d6cc9881af768614b41e2baafdc5019b5d4d68f6ac339823fce70cc1a"
+      },
+      {
+        "file": "bollingerfamily-fixture.trx.gz",
+        "passed_cases": 141,
+        "trx_sha256": "b6cc50b2926caca42a95f0888fb225c80b23f642d90c56325b986cbcdd54c006"
+      }
+    ],
+    "initial_unit_run": {
+      "file": "bollingerfamily-unit-initial.trx.gz",
+      "passed_cases": 196,
+      "failed_cases": 3,
+      "trx_sha256": "c9b233799ed4a75b9eca1eb1c7baf37924fb611bec384991718bdf682c3acf1f",
+      "interpretation": "Initial shared state omitted the Bollinger options minimum multiplier .001. Corrected production and fully reran all 199 unit cases plus parity and GPU checks. Initial results are historical and do not qualify final production."
+    }
+  },
+  "benchmark_fixture": {
+    "type": "RemainingBollingerFamilyBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured",
+    "operations": [
+      "BollingerBands",
+      "BollingerBandsWidth",
+      "BollingerBandsPercentB",
+      "NarrowSidewaysChannel"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

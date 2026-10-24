@@ -1,0 +1,36 @@
+{
+  "input_head": "cff2be8e9ff69f11027b6980402091ab614148d2",
+  "status": "checks-passed-review-and-publication-pending",
+  "step": "complete",
+  "updated_utc": "2026-10-21T05:50:06.576636+00:00",
+  "unit": {
+    "passed": 49,
+    "class_counts": {
+      "SharedGeneratedGeneralFilterTests": 9,
+      "GeneralFilterNumericalTests": 37,
+      "SharedGeneratedAdaptiveIntegrationTests": 3
+    },
+    "trx": "Z:\\StockIndicators-work\\si-pr266-general-filter-20261021\\unit\\unit.trx",
+    "sha256": "bda21981ffb96d595d4bee8b7a8b4940a251b587db2ce5f976b55ec001f6482c",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-general-filter-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 371,
+    "class_counts": {
+      "RemainingGeneralFilterBenchmarkTests": 4,
+      "RemainingBenchmarkDiscoveryTests": 367
+    },
+    "trx": "Z:\\StockIndicators-work\\si-pr266-general-filter-20261021\\parity\\parity.trx",
+    "sha256": "10cec38a8b4c9d01f7d4b68cff0a95e9a09a3f386cefd4044a9e9c18ae977176",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-general-filter-20261021-parity.trx.gz"
+  },
+  "production_assembly_hashes": {
+    "src/bin/Release/net10.0": "397561940586a8c05cce431c32958547cb3dca13998b9efd84c6324d580aa4f0",
+    "tests/bin/Release/net10.0": "397561940586a8c05cce431c32958547cb3dca13998b9efd84c6324d580aa4f0",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0": "397561940586a8c05cce431c32958547cb3dca13998b9efd84c6324d580aa4f0",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0": "397561940586a8c05cce431c32958547cb3dca13998b9efd84c6324d580aa4f0"
+  },
+  "gpu_passed": 100,
+  "inventory_tests_passed": 6,
+  "performance": "Pending; correctness checks do not establish competitor performance"
+}

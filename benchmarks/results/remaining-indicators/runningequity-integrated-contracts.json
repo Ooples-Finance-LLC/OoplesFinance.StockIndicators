@@ -1,0 +1,29 @@
+{
+  "types": [
+    "RunningEquity"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "ceaee19c49d4c1a464d2574d7e70be882e037e55",
+  "combined_input_sha256": "be1313e96d727833831c72ad0ad3c9af66f4991d5efc5ed8729596d035aabac2",
+  "benchmark_fixture": {
+    "type": "RemainingRunningEquityBenchmarks",
+    "operations": [
+      "RunningEquity"
+    ]
+  },
+  "checks": {
+    "unit": 56,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/runningequity-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/runningequity-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

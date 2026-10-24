@@ -1,0 +1,60 @@
+{
+  "before_sha256": "2e935d2e2770e68d608e597a09aaddb9f7d8e648fdbe585777eb7b62026a857e",
+  "candidate_sha256": "b1f182a490f6c11b97eb5feba515ed031e8c6281524f8c94ccadef8764a06960",
+  "changed_baseline_rows": 6,
+  "unchanged_baseline_rows": 796,
+  "changed_builder_slots": 0,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 0,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 796,
+  "run_id": "local-average-direct-difference-control-20261023",
+  "imported_utc": "2026-10-23T07:04:26.157657+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "058f388d54724f75f24308f99221680853ce53133443ecdfaaef16bb8a3ab7d6",
+      "archive": "benchmarks/results/remaining-indicators/average-direct-difference-certified-local-average-direct-difference-control-20261023-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "a853a179951a97daa387c6cdc1fcd3c1f84c41b91c1ad99a7919dad7d1db5d90",
+      "archive": "benchmarks/results/remaining-indicators/average-direct-difference-certified-local-average-direct-difference-control-20261023-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "2dfe3373a5a40faeadc098e99eb121928c3beccaa54fd7ee03e99d3344b3201a",
+      "archive": "benchmarks/results/remaining-indicators/average-direct-difference-certified-local-average-direct-difference-control-20261023-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "3b45efd911557b770874889e881e9f9c699bdb5ba2e5174d8c8310ee0eb7840d",
+      "archive": "benchmarks/results/remaining-indicators/average-direct-difference-certified-local-average-direct-difference-control-20261023-measurement.json.gz"
+    },
+    "stage-average-direct-difference-report.py": {
+      "sha256": "be448391b0ea12721de3123d35079db5abd4b4fcf0ceaa98cd01e23c3420a96e",
+      "archive": "benchmarks/results/remaining-indicators/average-direct-difference-certified-local-average-direct-difference-control-20261023-stage-average-direct-difference-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/average-direct-difference-certified-local-average-direct-difference-control-20261023-verify-approved-certified-report.py.gz"
+    },
+    "import-average-direct-difference-report.py": {
+      "sha256": "9319d488461aa3801510d8550ad4c87d5273084a47d50443828ce4bcce32b639",
+      "archive": "benchmarks/results/remaining-indicators/average-direct-difference-certified-local-average-direct-difference-control-20261023-import-average-direct-difference-report.py.gz"
+    },
+    "archive-average-direct-difference-control.py": {
+      "sha256": "f81948c3af1257b3d1999779b311eb072a7d701330045c6ddec4269f484eafe8",
+      "archive": "benchmarks/results/remaining-indicators/average-direct-difference-certified-local-average-direct-difference-control-20261023-archive-average-direct-difference-control.py.gz"
+    },
+    "prove-average-direct-difference-integration.py": {
+      "sha256": "10310cf221d224456808065a7e14eab877f0224648091f9f01e633443b4962ae",
+      "archive": "benchmarks/results/remaining-indicators/average-direct-difference-certified-local-average-direct-difference-control-20261023-prove-average-direct-difference-integration.py.gz"
+    },
+    "archive-average-direct-difference-report.py": {
+      "sha256": "f401130e86ce9d11ba8ae5348c9eeaa7763943c06eac344c758b76e07258e73e",
+      "archive": "benchmarks/results/remaining-indicators/average-direct-difference-certified-local-average-direct-difference-control-20261023-archive-average-direct-difference-report.py.gz"
+    }
+  }
+}

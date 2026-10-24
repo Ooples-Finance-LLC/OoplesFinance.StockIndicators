@@ -1,0 +1,35 @@
+{
+  "batch": "generated-adaptive-least-squares",
+  "types": [
+    "FisherLeastSquaresMovingAverage",
+    "TStepLeastSquaresMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Shared execution reuses existing Fisher residual and T-Step regression kernels with default simple averages. Compute each line incrementally without legacy full-series intermediate arrays; retain exact arithmetic, startup, observed history, original error priority and custom-average graph fallback.",
+  "verification": {
+    "unit_passed": 111,
+    "fixture_passed": 8,
+    "discovery_passed": 50,
+    "gpu_passed": 100,
+    "contract_methods": 1385,
+    "hosted_methods": 1373,
+    "evidence": [
+      {
+        "file": "adaptivefit-unit.trx.gz",
+        "passed_cases": 111,
+        "trx_sha256": "cf22801920880106db32eff06f9f83231c669c882760560b1e381126657826a6"
+      },
+      {
+        "file": "adaptivefit-fixture.trx.gz",
+        "passed_cases": 58,
+        "trx_sha256": "eae397f4e68b42085cbfee58c83d5d3c9a445beac21e9fffed5280d83c740148"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAdaptiveFitBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

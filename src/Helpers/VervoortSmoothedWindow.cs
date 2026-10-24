@@ -19,13 +19,20 @@ internal sealed class VervoortSmoothedWindow : IDisposable
     private Number _sum,_squares;
     private ExactMeanAccumulator _oscillatorSum;
     private double _previousLine,_previousSk;
-    internal VervoortSmoothedWindow(int band,int range,int cascade,int smooth,double multiplier)
+    private readonly bool _allowCertified;
+    private readonly List<Number>? _replay;
+    private CertifiedVervoortSmoothed? _certified;
+    internal long CertifiedCount { get; private set; }
+    internal int FallbackCount { get; private set; }
+    internal VervoortSmoothedWindow(int band,int range,int cascade,int smooth,double multiplier,bool allowCertified=true)
     {
         StreamingInputValidation.Finite(multiplier,nameof(multiplier));_band=Math.Max(1,band);_range=Math.Max(1,range);_smooth=Math.Max(1,smooth);_multiplier=multiplier;
         _layers=Enumerable.Range(0,10).Select(_=>new Average(MovingAvgType.SimpleMovingAverage,cascade)).ToArray();
         _rounded=Enumerable.Range(0,10).Select(_=>new RocBankAverage(MovingAvgType.SimpleMovingAverage,cascade,1,true)).ToArray();
         _emas=Enumerable.Range(0,5).Select(_=>new Average(MovingAvgType.ExponentialMovingAverage,smooth)).ToArray();
         _center=new(MovingAvgType.WeightedMovingAverage,band);
+        _allowCertified=allowCertified;
+        if(allowCertified){_replay=new();_certified=new(_band,_smooth,_multiplier);}
     }
     private static Number Next(Average average,Number value,bool final)=>average.Next(Radical.Of(value),final).Rational();
     private double Band(Number value,Number center,bool final)
@@ -49,9 +56,7 @@ internal sealed class VervoortSmoothedWindow : IDisposable
         var exact=Number.Of(close);Number rainbow=default;var rounded=new RocBankValue(close);var roundedSum=new ExactMeanAccumulator();
         for(var i=0;i<10;i++)
         {exact=Next(_layers[i],exact,final);rainbow+=exact.Times(Math.Max(1,5-i));rounded=_rounded[i].Next(rounded,final);rounded.AddTo(ref roundedSum,Math.Max(1,5-i));}
-        rainbow=rainbow.Divide(20);var first=Next(_emas[0],rainbow,final);var second=Next(_emas[1],first,final);
-        var dema=first.Times(2)-second;var a=Next(_emas[2],dema,final);var b=Next(_emas[3],a,final);var c=Next(_emas[4],b,final);
-        var filtered=a.Times(3)-b.Times(3)+c;var center=Next(_center,filtered,final);var line=Band(filtered,center,final);
+        rainbow=rainbow.Divide(20);var line=Smooth(rainbow,final);
         var roundedRainbow=RocBankValue.Round(roundedSum,count:20);var blendSum=new ExactMeanAccumulator();roundedRainbow.AddTo(ref blendSum);blendSum.Add(typical);
         var blend=RocBankValue.Round(blendSum,count:2);var blendUnits=ExactVarianceWindow.Units(blend.Mantissa)<<blend.UpperShift;
         var highest=high;var lowest=low;var minimum=blendUnits;
@@ -65,8 +70,29 @@ internal sealed class VervoortSmoothedWindow : IDisposable
         {if(_candles.Count==_range)_candles.Dequeue();_candles.Enqueue((high,low,blendUnits));if(_oscillator.Count==_smooth)_oscillator.Dequeue();_oscillator.Enqueue(fast);_oscillatorSum=sum;_previousLine=line;_previousSk=stochastic;}
         return(line,stochastic,trade);
     }
+    private double Smooth(Number rainbow,bool final)
+    {
+        if(_certified is not null)
+        {
+            if(_certified.TryNext(rainbow,final,out var line))
+            {
+                if(final){_replay!.Add(rainbow);CertifiedCount++;}
+                return line;
+            }
+            _certified=null;FallbackCount++;
+            foreach(var previous in _replay!)SmoothExact(previous,true);
+            _replay.Clear();
+        }
+        return SmoothExact(rainbow,final);
+    }
+    private double SmoothExact(Number rainbow,bool final)
+    {
+        var first=Next(_emas[0],rainbow,final);var second=Next(_emas[1],first,final);
+        var dema=first.Times(2)-second;var a=Next(_emas[2],dema,final);var b=Next(_emas[3],a,final);var c=Next(_emas[4],b,final);
+        var filtered=a.Times(3)-b.Times(3)+c;var center=Next(_center,filtered,final);return Band(filtered,center,final);
+    }
     internal void Reset()
-    {foreach(var layer in _layers)layer.Reset();foreach(var layer in _rounded)layer.Reset();foreach(var stage in _emas)stage.Reset();_center.Reset();_filtered.Clear();_candles.Clear();_oscillator.Clear();_sum=_squares=default;_oscillatorSum=default;_previousLine=_previousSk=0;}
+    {foreach(var layer in _layers)layer.Reset();foreach(var layer in _rounded)layer.Reset();foreach(var stage in _emas)stage.Reset();_center.Reset();_filtered.Clear();_candles.Clear();_oscillator.Clear();_sum=_squares=default;_oscillatorSum=default;_previousLine=_previousSk=0;_replay?.Clear();CertifiedCount=0;FallbackCount=0;_certified=_allowCertified?new(_band,_smooth,_multiplier):null;}
     public void Dispose(){Reset();foreach(var layer in _rounded)layer.Dispose();}
     internal static (Dictionary<string,List<double>> Outputs,List<Signal> Signals) Calculate(StockData data,int band,int range,int cascade,int smooth,double multiplier)
     {

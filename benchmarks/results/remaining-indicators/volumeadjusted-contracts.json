@@ -1,0 +1,35 @@
+{
+  "batch": "generated-volume-adjusted-averages-and-conditional-mean-storage",
+  "types": [
+    "VolumeAdjustedMa",
+    "VolumeAdjustedMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share the existing exact relative-volume weighted kernel for both default-SMA facades. Rent the raw fast-path mean buffer only for external/custom averaging. Preserve zero/extreme factors, original volume, invalid-factor legacy routing, output bits, custom components, ownership and lifecycle.",
+  "verification": {
+    "unit_passed": 99,
+    "fixture_passed": 8,
+    "discovery_passed": 60,
+    "gpu_passed": 100,
+    "contract_methods": 1395,
+    "hosted_methods": 1383,
+    "evidence": [
+      {
+        "file": "volumeadjusted-unit.trx.gz",
+        "passed_cases": 99,
+        "trx_sha256": "e18fb1ad2a674c162b61b13c0b56d55f7913cd71c9d292cdf79fbc0ab356ad26"
+      },
+      {
+        "file": "volumeadjusted-fixture.trx.gz",
+        "passed_cases": 68,
+        "trx_sha256": "dac54285a51bff1bdfbac0c6745398dfa17fbb7c7c5b059d283ff5263bfca6f0"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVolumeAdjustedBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

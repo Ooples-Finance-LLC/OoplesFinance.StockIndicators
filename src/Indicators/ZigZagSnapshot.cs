@@ -113,20 +113,26 @@ public static class ZigZagSnapshot
             }
             points.Add(candidate);
         }
-        double Line(Point a, Point b, int i) =>
-            ExactMeanAccumulator.UnitRatio(
-                a.Price * (b.Index - i) + b.Price * (i - a.Index),
-                b.Index - a.Index
-            );
         var previousHigh = new Point(0, highs[0], ZigZagPointKind.High);
         var previousLow = new Point(0, lows[0], ZigZagPointKind.Low);
         for (var k = 1; k < points.Count; k++)
         {
             var a = points[k - 1];
             var b = points[k];
+            int width = b.Index - a.Index;
+            var step = a.Index > 0 ? b.Price - a.Price : BigInteger.Zero;
+            var numerator = a.Index > 0 ? a.Price * width : BigInteger.Zero;
+            // Advance the exact interpolation numerator; round only at publication.
             for (var i = a.Index + 1; i <= b.Index; i++)
             {
-                result[i].ZigZag = a.Index > 0 || i == b.Index ? Line(a, b, i) : null;
+                if (a.Index > 0)
+                {
+                    numerator += step;
+                    result[i].ZigZag = ExactMeanAccumulator.UnitRatio(numerator, width);
+                }
+                else
+                    result[i].ZigZag = i == b.Index
+                        ? ExactMeanAccumulator.UnitRatio(b.Price, 1) : null;
                 result[i].PointType = i == b.Index ? b.Kind : null;
             }
             if (!a.Kind.HasValue)
@@ -138,11 +144,18 @@ public static class ZigZagSnapshot
                 previousLow = b;
             if (prior.Index == 0 || prior.Index == b.Index)
                 continue;
+            int retraceWidth = b.Index - prior.Index;
+            var retraceStep = b.Price - prior.Price;
+            var retraceNumerator = prior.Price * retraceWidth;
             for (var i = prior.Index; i <= b.Index; i++)
+            {
+                double value = ExactMeanAccumulator.UnitRatio(retraceNumerator, retraceWidth);
                 if (a.Kind == ZigZagPointKind.Low)
-                    result[i].RetraceHigh = Line(prior, b, i);
+                    result[i].RetraceHigh = value;
                 else
-                    result[i].RetraceLow = Line(prior, b, i);
+                    result[i].RetraceLow = value;
+                retraceNumerator += retraceStep;
+            }
         }
         var rows = new ZigZagValue[result.Length];
         for (var i = 0; i < rows.Length; i++)

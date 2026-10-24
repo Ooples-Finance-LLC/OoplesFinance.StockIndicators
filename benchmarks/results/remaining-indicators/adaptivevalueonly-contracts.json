@@ -1,0 +1,38 @@
+{
+  "batch": "variable-adaptive-value-only-shared-execution",
+  "types": [
+    "VariableAdaptiveMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Skip unused signal-margin arithmetic only in shared value-only execution. Preserve exact value recurrence and every committed state field; streaming and batch callers retain signal calculation by default. Frozen 03b11759 kernel tests cover mixed signal/value updates, previews, resets and extreme values. Existing adaptivepair timing stage will be replaced by this verified candidate, not duplicated.",
+  "verification": {
+    "unit_passed": 40,
+    "fixture_passed": 8,
+    "discovery_passed": 60,
+    "gpu_passed": 100,
+    "contract_methods": 1395,
+    "hosted_methods": 1383,
+    "evidence": [
+      {
+        "file": "adaptivevalueonly-unit.trx.gz",
+        "passed_cases": 40,
+        "trx_sha256": "b74720bcfd6b325eda833c9edad9d678768e70d0e3361ecf82ce80ab6a72c04a"
+      },
+      {
+        "file": "adaptivevalueonly-fixture.trx.gz",
+        "passed_cases": 68,
+        "trx_sha256": "7f4081708a7c6fbf48654ed5dbe7b424e8519fb771390d4c209e11711016b38c"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAdaptivePairBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "BryantAdaptiveMovingAverage",
+      "VariableAdaptiveMovingAverage"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

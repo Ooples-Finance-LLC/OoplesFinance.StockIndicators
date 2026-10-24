@@ -1,0 +1,50 @@
+{
+  "batch": "wami-price-volume-difference-shared-execution",
+  "types": [
+    "WamiOscillator",
+    "PriceMomentum",
+    "VolumeMomentum"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse WamiWindow with fixed weighted length4 and default EMA stages; share price and volume lag differences with storage bounded by input count. Preserve spec period clamp, zero prefix, binary subtraction, source/custom-average fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 162,
+    "fixture_passed": 12,
+    "discovery_passed": 87,
+    "gpu_passed": 100,
+    "contract_methods": 1422,
+    "hosted_methods": 1410,
+    "evidence": [
+      {
+        "file": "wamidifference-unit.trx.gz",
+        "passed_cases": 162,
+        "trx_sha256": "291e7c43b296e90bbad57746173e640cb5d84cf62ba228e568252c366a12cf03"
+      },
+      {
+        "file": "wamidifference-fixture.trx.gz",
+        "passed_cases": 99,
+        "trx_sha256": "b2d225c404df6286e5a6e0a0573ee6788caec2dfb73f6bac77d7ea8b529c45a8"
+      }
+    ],
+    "unit_targeted_passed": 88,
+    "unit_incidental_passed": 74,
+    "unit_class_counts": {
+      "LaggedDifferenceNumericalTests": 15,
+      "SharedGeneratedWamiDifferenceTests": 29,
+      "SwamiNumericalTests": 74,
+      "WamiNumericalTests": 44
+    },
+    "unit_selection_note": "The case-insensitive Wami class substring also selected SwamiNumericalTests. All 162 cases completed successfully; 88 cover this batch and 74 are incidental. The raw TRX preserves both groups. Future class filters use fully qualified class boundaries."
+  },
+  "benchmark_fixture": {
+    "type": "RemainingWamiDifferenceBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "WamiOscillator",
+      "PriceMomentum",
+      "VolumeMomentum"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

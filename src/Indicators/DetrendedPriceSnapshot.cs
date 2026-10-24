@@ -36,10 +36,16 @@ public static class DetrendedPriceSnapshot
             if (end < period - 1 || end < offset)
                 continue;
             var mean = sum.Mean(period);
+#if !NETFRAMEWORK
+            var price = bars[end - offset].Close;
+            // A single subtraction rounds once; retain the exact zero convention.
+            var value = price == mean ? 0 : price - mean; // NOSONAR: S1244 - Exact equality defines canonical zero.
+#else
             var difference = new ExactMeanAccumulator();
             difference.Add(bars[end - offset].Close);
             difference.Add(mean, -1);
             var value = difference.Mean(1);
+#endif
             if (!FrameworkCompatibility.IsFinite(value))
                 throw new OverflowException("Detrended price is not representable.");
             result[end - offset] = new(value, mean);

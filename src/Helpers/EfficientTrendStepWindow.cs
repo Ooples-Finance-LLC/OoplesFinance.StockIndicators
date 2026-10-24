@@ -2,15 +2,20 @@ using System.Numerics;
 namespace OoplesFinance.StockIndicators.Helpers;
 internal sealed class EfficientTrendStepWindow : IDisposable
 {
-    private readonly RoundedKaufmanWindow _efficiency;
-    private readonly DoubledPopulationWindow _fast, _slow;
+    private readonly RoundedKaufmanWindow? _efficiency;
+    private readonly DoubledPopulationWindow? _fast, _slow;
     private double _previous;
     private bool _hasPrevious;
-    internal EfficientTrendStepWindow(int length, int fastLength, int slowLength)
-    { _efficiency = new(Math.Max(1, length)); _fast = new(fastLength); _slow = new(slowLength); }
+    internal EfficientTrendStepWindow(int length, int fastLength, int slowLength, int maxInputCount = int.MaxValue)
+    {
+        _efficiency = Math.Max(1, length) <= maxInputCount ? new(Math.Max(1, length)) : null;
+        _fast = Math.Max(1, fastLength) <= maxInputCount ? new(fastLength) : null;
+        _slow = Math.Max(1, slowLength) <= maxInputCount ? new(slowLength) : null;
+    }
     internal (double Upper, double Middle, double Lower) Next(double close, bool commit)
     {
-        var efficiency = ExactVarianceWindow.Units(_efficiency.Next(close, commit).Efficiency); var fast = _fast.Next(close, commit); var slow = _slow.Next(close, commit);
+        var efficiency = ExactVarianceWindow.Units(_efficiency?.Next(close, commit).Efficiency ?? 0);
+        var fast = _fast?.Next(close, commit) ?? BigInteger.Zero; var slow = _slow?.Next(close, commit) ?? BigInteger.Zero;
         var deviation = RocBankValue.RoundUnits((slow << 1074) + efficiency * (fast - slow), BigInteger.One << 1074);
         var price = ExactVarianceWindow.Units(close); var previous = ExactVarianceWindow.Units(_hasPrevious ? _previous : close);
         var center = price > previous + deviation || price < previous - deviation ? price : previous;
@@ -18,8 +23,8 @@ internal sealed class EfficientTrendStepWindow : IDisposable
         if (commit) { _previous = middle; _hasPrevious = true; }
         return (ExactMeanAccumulator.UnitRatio(center + deviation, BigInteger.One), middle, ExactMeanAccumulator.UnitRatio(center - deviation, BigInteger.One));
     }
-    internal void Reset() { _efficiency.Reset(); _fast.Reset(); _slow.Reset(); _previous = 0; _hasPrevious = false; }
-    public void Dispose() { _efficiency.Dispose(); _fast.Dispose(); _slow.Dispose(); }
+    internal void Reset() { _efficiency?.Reset(); _fast?.Reset(); _slow?.Reset(); _previous = 0; _hasPrevious = false; }
+    public void Dispose() { _efficiency?.Dispose(); _fast?.Dispose(); _slow?.Dispose(); }
     // Population deviation of twice the price: scale exact moments before rounding
     // the root, so both overflowing doubled prices and subnormal widths survive.
     private sealed class DoubledPopulationWindow : IDisposable

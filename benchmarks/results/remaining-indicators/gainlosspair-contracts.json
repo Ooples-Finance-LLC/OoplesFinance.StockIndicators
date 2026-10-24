@@ -1,0 +1,48 @@
+{
+  "batch": "intraday-relative-momentum-shared-execution",
+  "types": [
+    "IntradayMomentumIndex",
+    "ChandeIntradayMomentumIndex",
+    "RelativeMomentumIndex"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact intraday gain/loss share and share default Wilder relative momentum stages across Value, Signal and Histogram. Preserve original open/close, separate clamped lookback and lag, zero-loss convention and component/source fallback. The new fixture alternates opening gaps so IMI measures both gains and losses; the base GetOpen hook retains the existing default/offset behavior.",
+  "verification": {
+    "unit_passed": 187,
+    "fixture_passed": 12,
+    "discovery_passed": 103,
+    "gpu_passed": 100,
+    "contract_methods": 1442,
+    "hosted_methods": 1430,
+    "evidence": [
+      {
+        "file": "gainlosspair-unit.trx.gz",
+        "passed_cases": 187,
+        "trx_sha256": "c845c94fd2e43b6cd7f8c49ef8eb30cbd0d0a6e5a6918d7ee763c1c1ed3ed3ed"
+      },
+      {
+        "file": "gainlosspair-fixture.trx.gz",
+        "passed_cases": 115,
+        "trx_sha256": "0bf06483303006a23ad091c3a9ef2bd2fedab76992e4e4ab4b8f885b97239b95"
+      },
+      {
+        "file": "gainlosspair-base-compatibility.trx.gz",
+        "passed_cases": 24,
+        "trx_sha256": "8403c7beb656dbee04bbdb798733d4c2ce6f23dc758dac9a67d56de74e709c2f",
+        "purpose": "Existing DayRange default opening and CandlePower OpenOffset override retain every output bit after adding the GetOpen hook."
+      }
+    ],
+    "base_compatibility_passed": 24
+  },
+  "benchmark_fixture": {
+    "type": "RemainingGainLossPairBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "IntradayMomentumIndex",
+      "ChandeIntradayMomentumIndex",
+      "RelativeMomentumIndex"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

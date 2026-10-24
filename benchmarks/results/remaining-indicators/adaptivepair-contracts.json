@@ -1,0 +1,50 @@
+{
+  "batch": "generated-bryant-and-variable-adaptive-averages",
+  "types": [
+    "BryantAdaptiveMovingAverage",
+    "VariableAdaptiveMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share existing exact adaptive kernels. Variable Adaptive accepts already validated bar fields without per-bar streaming objects and avoids full-series mean/signal intermediates. Preserve Bryant warmup-overflow legacy routing and its execution metadata, exact outputs, source/custom-average fallback, reset and disposal.",
+  "verification": {
+    "unit_passed": 108,
+    "fixture_passed": 8,
+    "discovery_passed": 60,
+    "gpu_passed": 100,
+    "contract_methods": 1395,
+    "hosted_methods": 1383,
+    "evidence": [
+      {
+        "file": "adaptivepair-unit-initial.trx.gz",
+        "passed_cases": 106,
+        "failed_cases": 2,
+        "retained_passed_cases": 88,
+        "superseded_class": "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedGeneratedAdaptivePairTests",
+        "trx_sha256": "11f2f2a9bbe1d10cf91f5e5d0746bfcf5c238ae58b074794368de276bcda5669"
+      },
+      {
+        "file": "adaptivepair-unit.trx.gz",
+        "passed_cases": 20,
+        "trx_sha256": "b1b140f9da7e8a7605652268d80c9e0ccd2dc5e3ba20ac25d44b4dac3fd4792f"
+      },
+      {
+        "file": "adaptivepair-fixture.trx.gz",
+        "passed_cases": 68,
+        "trx_sha256": "d1aed341543014ef65842583d0bc75d8bc987e8654e99a949732bd2b622e0c8b"
+      }
+    ],
+    "unit_rerun": {
+      "corrected_class": "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedGeneratedAdaptivePairTests",
+      "interpretation": "Initial completed run retained unchanged passing numerical tests; the corrected test class was rerun in full. Both raw runs are preserved, including the superseded failures. Production source and binaries were unchanged.",
+      "production_dll_sha256": "d06b15df88d1137ea19671bb23e5920b98ed9a0b441e57293e94e452c2215e80",
+      "verifier_file": "adaptivepair-unit-rerun-verifier.py",
+      "verifier_sha256": "31d7f2baad0135ce18a02ab607b91f94a42e32cce28112ed3334d36046079ff2"
+    }
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAdaptivePairBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

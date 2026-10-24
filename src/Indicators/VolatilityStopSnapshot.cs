@@ -57,6 +57,11 @@ public static class VolatilityStopSnapshot
         // These exact operands are invariant across every width calculation.
         var multiplierUnits = ExactVarianceWindow.Units(multiplier);
         var grid = BigInteger.One << 1074;
+        // Cancel the invariant common factor once. This preserves the exact
+        // width ratio while avoiding a wide multiply and divide on every bar.
+        var common = BigInteger.GreatestCommonDivisor(multiplierUnits, grid);
+        multiplierUnits /= common;
+        grid /= common;
         for (var i = period; i < bars.Count; i++)
         {
             var price = ExactVarianceWindow.Units(bars[i].Close);

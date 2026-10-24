@@ -1,0 +1,48 @@
+{"types":["DirectionalTrendIndex","CoralTrendIndicator","CorrectedMovingAverage"],
+  "status": "numerical-and-parity-verified-performance-pending",
+  "changes": [
+    "DirectionalTrend finite-difference fast path with original exact overflow fallback",
+    "Coral immutable exact blend coefficient cache",
+    "CorrectedMovingAverage omits unused weighted recurrence for simple mean"
+  ],
+  "input_sha256": "bb5d7db956bbaf81dfa86132b2136634626b534b33b3999d50a2d6361f6348dc",
+  "validation_base_head": "9496ba19b445f0ae35e4a650f6ada45e1677901c",
+  "context": "Checks executed on combined working candidate with inherited uncommitted MACD work; committed tree alone was not separately tested.",
+  "verification": {
+    "CoralTrendNumericalTests": {
+      "passed_cases": 41,
+      "file": "gap1-CoralTrendNumericalTests.trx.gz",
+      "trx_sha256": "24374c0af48a3855260e4265fce4f25449d17091017f94281ec59c25330f4b96"
+    },
+    "CorrectedAverageNumericalTests": {
+      "passed_cases": 46,
+      "file": "gap1-CorrectedAverageNumericalTests.trx.gz",
+      "trx_sha256": "188ce6e4a0d276405974bcb2df630ffbdf3f0b37c79f21d90b0fe4936c0d9141"
+    },
+    "directionaltrend-unit": {
+      "passed_cases": 26,
+      "file": "gap1-directionaltrend-unit.trx.gz",
+      "trx_sha256": "00005337ff49b9521208298c4acef41b88be90b073c29bccf309158890892589"
+    },
+    "directionaltrend-parity": {
+      "passed_cases": 4,
+      "file": "gap1-directionaltrend-parity.trx.gz",
+      "trx_sha256": "4c0e369a6ce3e69bcaebc28187a1c32e3160b3ae3defac382f8add7398aa97d1"
+    },
+    "coralcorrected-unit": {
+      "passed_cases": 27,
+      "file": "gap1-coralcorrected-unit.trx.gz",
+      "trx_sha256": "516e7e5d985d40be8f8f913e10b07c9eebc9a37f08b17c4a57fb25d68b96e08f"
+    },
+    "coralcorrected-parity": {
+      "passed_cases": 8,
+      "file": "gap1-coralcorrected-parity.trx.gz",
+      "trx_sha256": "9689e4fba2b27bf6b130fbde5de0aba1de3982f07315dcd9b5af2152185cf40a"
+    }
+  },
+  "pending": [
+    "candidate-only timing against saved baseline",
+    "inherited MACD failures",
+    "required hosted checks"
+  ]
+}

@@ -8,9 +8,13 @@ internal sealed class DistanceMassWindowMean : IDisposable
 {
     private readonly PooledRingBuffer<double> _values;
     private readonly bool _reciprocal;
-    internal DistanceMassWindowMean(int length, bool reciprocal = false)
+    private readonly int _length;
+    internal DistanceMassWindowMean(int length, bool reciprocal = false, int maximumObservations = int.MaxValue)
     {
-        _values = new PooledRingBuffer<double>(Math.Max(1, length));
+        _length = Math.Max(1, length);
+        // Finite owned executions retain at most their total observation count.
+        // The mathematical period still determines startup zero-padding.
+        _values = new PooledRingBuffer<double>(Math.Min(_length, Math.Max(1, maximumObservations)));
         _reciprocal = reciprocal;
     }
 
@@ -81,8 +85,8 @@ internal sealed class DistanceMassWindowMean : IDisposable
     internal double Next(double value, bool commit)
     {
         var present = new List<double> { value };
-        for (var lag = 1; lag < _values.Capacity && lag <= _values.Count; lag++) present.Add(_values[_values.Count - lag]);
-        var result = Evaluate(present, _values.Capacity, value, _reciprocal);
+        for (var lag = 1; lag < _length && lag <= _values.Count; lag++) present.Add(_values[_values.Count - lag]);
+        var result = Evaluate(present, _length, value, _reciprocal);
         if (commit) _values.TryAdd(value, out _);
         return result;
     }

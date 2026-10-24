@@ -1,0 +1,55 @@
+{
+  "types": [
+    "PeriodicChannel"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "14dab541523d44999c33b131b4c14fa5e5cf7f48",
+  "source_fingerprint_sha256": "b8bddc2cdf2679023fc5ebee4822fa2d4e4282738be6f625e1057ec4a4ef43ad",
+  "benchmark_fixture": {
+    "type": "RemainingPeriodicChannelBenchmarks",
+    "operations": [
+      "PeriodicChannel"
+    ]
+  },
+  "checks": {
+    "unit": 82,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "unit_class_counts": {
+    "PeriodicChannelCertifiedTests": 7,
+    "PeriodicChannelNumericalTests": 65,
+    "SharedGeneratedPeriodicChannelTests": 10
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-manifest.json",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-parity.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-original-aborted.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-01.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-02.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-03.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-04.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-05.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-06.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-07.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-08.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-09.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-10.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-11.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-12.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-13.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-14.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-15.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-16.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-direct-route-17.json.gz",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-run-periodic-route.ps1",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-list-periodic-cases.ps1",
+    "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-validate-periodic-resume-cases.py"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

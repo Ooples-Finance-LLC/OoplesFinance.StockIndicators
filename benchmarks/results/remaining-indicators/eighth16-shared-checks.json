@@ -1,0 +1,104 @@
+{
+  "status": "ten-eighth-families-verified-guppy-and-macd-failures-remain",
+  "context": "Ten families verified in the combined working candidate; Guppy is excluded from qualification; the isolated committed tree was not separately built or tested. Common GPU fixtures do not establish per-indicator GPU performance.",
+  "input_sha256": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7",
+  "validation_base_head": "d28318c046bb0c9b8717ab5203d047d262659e2f",
+  "family_check_counts": {
+    "unit": 377,
+    "parity": 56
+  },
+  "family_cpu_receipts": [
+    "grover-cpu-contracts.json",
+    "hampelharmonic-cpu-contracts.json",
+    "halfhawkeye-cpu-contracts.json",
+    "countback-cpu-contracts.json",
+    "hirashima-cpu-contracts.json",
+    "herrick-cpu-contracts.json",
+    "highlowindex-cpu-contracts.json",
+    "internalbar-cpu-contracts.json",
+    "inertiapair-cpu-contracts.json",
+    "hybrid-cpu-contracts.json"
+  ],
+  "checks": {
+    "discovery": {
+      "status": "passed",
+      "verified_count": 248,
+      "log_sha256": "bcd0df6f715482b49c1a19200c82a4dd7ce6b83bfc8db2e503983c4761c79140"
+    },
+    "gpu": {
+      "status": "passed",
+      "verified_count": 100,
+      "log_sha256": "4ec5451564e22026004dee45caa6d892a323c091851f30ff16a86fd65140f3a5"
+    },
+    "verify-gpu-partition": {
+      "status": "passed",
+      "verified_count": null,
+      "log_sha256": "17334a138ec2d2f425e9c91fdd0d9f9963f890b2fcb399d0422b17e9a32bb716",
+      "result": "Verified 100 local GPU cases; 1577 methods remain assigned to hosted CI"
+    },
+    "inventory": {
+      "status": "passed",
+      "verified_count": 6,
+      "log_sha256": "bbf6fd70a163874a31e5f5acb684ef83ce70b5fe1363a4173414f750f53d360d",
+      "result": "......\n----------------------------------------------------------------------\nRan 6 tests in 2.245s\n\nOK"
+    }
+  },
+  "discovery_evidence": "eighth16-discovery.trx.gz",
+  "gpu_evidence": "eighth16-gpu-contracts.json",
+  "gpu_trx_evidence": "eighth16-gpu.trx.gz",
+  "inherited_failed_unit_cases": 3,
+  "inherited_failure_evidence": "combined113-known-macd-failures.trx.gz",
+  "guppy_failed_cases": 48,
+  "guppy_passed_cases": 179,
+  "guppy_parity_cases": 8,
+  "guppy_failure_evidence": "eighth16-known-guppy-failures.trx.gz",
+  "guppy_predecessor_evidence": "eighth16-guppy-predecessor-default.json",
+  "pending": [
+    "48 Guppy numerical failures; only the default case replayed against predecessor",
+    "inherited MACD unit-contract failures",
+    "raw timing and performance comparison",
+    "required hosted checks"
+  ],
+  "family_execution_inputs_sha256": {
+    "grover": {
+      "unit": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7",
+      "parity": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7"
+    },
+    "hampelharmonic": {
+      "unit": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7",
+      "parity": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7"
+    },
+    "halfhawkeye": {
+      "unit": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7",
+      "parity": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7"
+    },
+    "countback": {
+      "unit": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7",
+      "parity": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7"
+    },
+    "hirashima": {
+      "unit": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7",
+      "parity": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7"
+    },
+    "herrick": {
+      "unit": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7",
+      "parity": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7"
+    },
+    "highlowindex": {
+      "unit": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7",
+      "parity": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7"
+    },
+    "internalbar": {
+      "unit": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7",
+      "parity": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7"
+    },
+    "inertiapair": {
+      "unit": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7",
+      "parity": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7"
+    },
+    "hybrid": {
+      "unit": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7",
+      "parity": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7"
+    }
+  }
+}

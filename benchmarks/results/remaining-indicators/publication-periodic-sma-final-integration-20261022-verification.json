@@ -1,0 +1,116 @@
+{
+  "input_head": "eda226f109a522d2c3f82c5afbbfe5190faefda0",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "integration_note": "Only four fused SMA files differ from qualified Periodic integration; each is identical to qualified SMA source76200956. All Periodic helpers and compact arithmetic remain unchanged. Both focused families, six long-history cases,419discovery and currentGPU repeat on final binaries.",
+  "qualified_integration_inputs": {
+    "periodic-current-integration": {
+      "source": "feaf2a1b5ca0c4a1b752ceca6c3ffab6d1850e20",
+      "checks": {
+        "build-net461": "passed",
+        "build-net10": "passed",
+        "build-unit": "passed",
+        "build-comparator": "passed",
+        "unit": "passed",
+        "parity": "passed",
+        "gpu": "passed",
+        "discover-contracts": "passed",
+        "gpu-source-verification": "passed",
+        "inventory": "passed",
+        "inventory-check": "passed",
+        "inventory-tests": "passed",
+        "diff-check": "passed"
+      }
+    },
+    "sma-fused-current-integration": {
+      "source": "1d6ee0d4d5007ba9e11bdd12b05ed6c76fb2ddb7",
+      "checks": {
+        "build-net461": "passed",
+        "build-net10": "passed",
+        "build-unit": "passed",
+        "build-comparator": "passed",
+        "unit": "passed",
+        "parity": "passed",
+        "gpu": "passed",
+        "discover-contracts": "passed",
+        "gpu-source-verification": "passed",
+        "inventory": "passed",
+        "inventory-check": "passed",
+        "inventory-tests": "passed",
+        "diff-check": "passed"
+      }
+    }
+  },
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedMeanRelativeError.cs",
+    "src/Helpers/RoundedMeanErrorWindow.cs",
+    "src/Indicators/MovingAverageDiagnostics.cs",
+    "tests/ModelsTests/MeanDiagnosticsCertifiedTests.cs"
+  ],
+  "reused_qualification_sources": {
+    "qualified-eighteen-integration": {
+      "source": "876702915e51123dd9da97e45f491a5c6e63e1cd",
+      "note": "Published family sources unchanged; current run checks only the changed SMA boundary and current GPU/inventory contracts."
+    },
+    "eighteen-parabolic-integration": {
+      "source": "7715ede0a6cc7a1f898570f13fa7f267283e6740",
+      "note": "Published family sources unchanged; current run checks only the changed SMA boundary and current GPU/inventory contracts."
+    }
+  },
+  "parallel_batch_note": "Approved SMA follow-up: cache exact decoded samples and share aligned absolute/squared deviations in one pass. Original publication certificates and independent fallback order retained. Existing independent-fraction, overflow fallback, allocation, reset and long-history checks include fused evaluation.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T03:50:50.024365+00:00",
+  "unit": {
+    "passed": 67,
+    "class_counts": {
+      "MacZInputNormalizationTests": 6,
+      "PeriodicChannelCertifiedTests": 7,
+      "SharedGeneratedPeriodicChannelTests": 10,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "MeanDiagnosticsCertifiedTests": 21,
+      "RollingStatisticsSharedExecutionTests": 17,
+      "MeanDiagnosticsScaleReductionTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\periodic-sma-final-integration\\unit\\unit.trx",
+    "sha256": "74686921f54cfa9f2c3760699337fad65a19762292e72be8aef1c8a25e4f8ae7",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-periodic-sma-final-integration-20261022-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 425,
+    "class_counts": {
+      "RemainingBenchmarkDiscoveryTests": 419,
+      "RemainingPeriodicChannelBenchmarkTests": 4,
+      "SharedRollingStatisticsBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\periodic-sma-final-integration\\parity\\parity.trx",
+    "sha256": "a6e68b116c7a556003d41282b51d75778a4feaced24bf485f9c0a0140bf4588d",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-periodic-sma-final-integration-20261022-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-periodic-certified-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b144d89a47b27fe49d1e01cb42329752a4e2e0f97263474905807f9e2b3c77c2",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-periodic-certified-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b144d89a47b27fe49d1e01cb42329752a4e2e0f97263474905807f9e2b3c77c2",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-periodic-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b144d89a47b27fe49d1e01cb42329752a4e2e0f97263474905807f9e2b3c77c2",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-periodic-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b144d89a47b27fe49d1e01cb42329752a4e2e0f97263474905807f9e2b3c77c2"
+  },
+  "source_fingerprint_sha256": "b4ff3960bf6c3767796fcef32a7844b5edc1a0a03d1ab9a94933ff0e09b8b312",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Only four fused SMA files differ from qualified Periodic integration; each is identical to qualified SMA source76200956. All Periodic helpers and compact arithmetic remain unchanged. Both focused families, six long-history cases,419discovery and currentGPU repeat on final binaries."
+}

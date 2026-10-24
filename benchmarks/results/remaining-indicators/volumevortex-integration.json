@@ -1,0 +1,23 @@
+{
+  "parents": [
+    "b45c5ffa",
+    "b7acac6a"
+  ],
+  "verification": [
+    {
+      "file": "volumevortex-integrated-unit.trx.gz",
+      "passed": 115,
+      "trx_sha256": "c933bc7613218c3e5b06b07897129144f7bfe9a19a4fe5bc901e26499a1a3c4e"
+    },
+    {
+      "file": "volumevortex-integrated-discovery.trx.gz",
+      "passed": 91,
+      "trx_sha256": "0570a8ef52054712ec55bb39e38c6bd875a0475c6fa8e4fc94202ff1d275b682"
+    }
+  ],
+  "gpu_passed": 100,
+  "contract_methods": 1426,
+  "hosted_methods": 1414,
+  "parity": "Completed per-batch parity receipts retained. Merge preserves the exact volume/vortex state bodies and newer kernels; no long parity fixture rerun.",
+  "performance": "Pending quiet-window qualification."
+}

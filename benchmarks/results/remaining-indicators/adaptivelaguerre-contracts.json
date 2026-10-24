@@ -1,0 +1,35 @@
+{
+  "batch": "generated-adaptive-laguerre",
+  "types": [
+    "EhlersAdaptiveLaguerreFilter",
+    "EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing adaptive and self-adjusting Laguerre kernels in shared owned-bar execution. Preserve fixed median period five for adaptive filter and original OHLC fields for self-adjusting RSI, including exact startup, gain and staged rounding.",
+  "verification": {
+    "unit_passed": 96,
+    "fixture_passed": 8,
+    "discovery_passed": 30,
+    "gpu_passed": 100,
+    "contract_methods": 1365,
+    "hosted_methods": 1353,
+    "evidence": [
+      {
+        "file": "adaptivelaguerre-unit.trx.gz",
+        "passed_cases": 96,
+        "trx_sha256": "15df1ac4d51da018fb80c49af2305b4698a6aabbc843eca10e1429a82dcabe07"
+      },
+      {
+        "file": "adaptivelaguerre-fixture.trx.gz",
+        "passed_cases": 38,
+        "trx_sha256": "0e5d539c23beea6a3f5163bfcf7c8230d20e0995039ea76a86d656ed91aa95f3"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAdaptiveLaguerreBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

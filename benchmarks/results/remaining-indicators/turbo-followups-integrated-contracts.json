@@ -1,0 +1,33 @@
+{
+  "types": [
+    "TurboTrigger",
+    "TurboStochasticsFast",
+    "TurboStochasticsSlow"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "0d1238dbd0ae98cf12ad69ee48e2a38e51365476",
+  "combined_input_sha256": "15621fc7402ce477237eca0813fcc9b7ca19ac20c0e957ede6d76c76c12b563a",
+  "benchmark_fixture": {
+    "type": "RemainingTurboFollowupsBenchmarks",
+    "operations": [
+      "TurboTrigger",
+      "TurboStochasticsFast",
+      "TurboStochasticsSlow"
+    ]
+  },
+  "checks": {
+    "unit": 260,
+    "parity": 12,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/turbo-followups-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/turbo-followups-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

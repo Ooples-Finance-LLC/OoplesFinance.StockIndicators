@@ -1,0 +1,45 @@
+{
+  "input_head": "5b65806fe776e66ca2a0ee7c48c2cdcdb9eebfe0",
+  "status": "checks-passed-review-and-publication-pending",
+  "step": "complete",
+  "updated_utc": "2026-10-21T11:00:48.544031+00:00",
+  "prior_head": "e6743f7dae1d3de67bb991eb784ad7301c9c0a86",
+  "integrations": {
+    "parabolic-sar": "2f87a911aa24352e16098eefbfbd3882b69063e6",
+    "stochastic-components": "1d4d05616ae869b9641620b2f4534fba30154687"
+  },
+  "unit": {
+    "passed": 229,
+    "class_counts": {
+      "SharedGeneratedParabolicSarTests": 17,
+      "ParabolicSarNumericalTests": 38,
+      "SharedGeneratedStochasticComponentsTests": 21,
+      "StochasticCustomNumericalTests": 43,
+      "StochasticMomentumNumericalTests": 107,
+      "SharedGeneratedAdaptiveIntegrationTests": 3
+    },
+    "trx": "Z:\\StockIndicators-work\\si-pr266-parabolic-stochastic-components-20261021\\unit\\unit.trx",
+    "sha256": "2cba6b731a9ab8d3fb98e5b009afaefd2c0717c85062cd3ed601fa8c9f15f435",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-parabolic-stochastic-components-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 392,
+    "class_counts": {
+      "RemainingParabolicSarBenchmarkTests": 4,
+      "RemainingStochasticComponentsBenchmarkTests": 8,
+      "RemainingBenchmarkDiscoveryTests": 380
+    },
+    "trx": "Z:\\StockIndicators-work\\si-pr266-parabolic-stochastic-components-20261021\\parity\\parity.trx",
+    "sha256": "8645a546870b73b2b90f595dea1c9bf2bfd3e92d40b76706309d77c7b7851f1a",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-parabolic-stochastic-components-20261021-parity.trx.gz"
+  },
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-publish-remaining-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "87788b3be53ebc9de8dcfaa328ff62de0ff676da077913950118e81f62e93ffe",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-publish-remaining-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "87788b3be53ebc9de8dcfaa328ff62de0ff676da077913950118e81f62e93ffe",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-publish-remaining-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "87788b3be53ebc9de8dcfaa328ff62de0ff676da077913950118e81f62e93ffe",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-publish-remaining-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "87788b3be53ebc9de8dcfaa328ff62de0ff676da077913950118e81f62e93ffe"
+  },
+  "gpu_passed": 100,
+  "inventory_tests_passed": 6,
+  "performance": "Pending; correctness does not establish competitor speed"
+}

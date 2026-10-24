@@ -1,0 +1,37 @@
+{
+  "batch": "conditional-accumulator-shared-execution",
+  "types": [
+    "ConditionalAccumulator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share gap-count accumulation and exact EMA signal state. Preserve first-bar seed, high/low branch precedence, clamped signal period, original fields, ownership and component/source fallback.",
+  "verification": {
+    "unit_passed": 16,
+    "fixture_passed": 4,
+    "discovery_passed": 106,
+    "gpu_passed": 100,
+    "contract_methods": 1445,
+    "hosted_methods": 1433,
+    "evidence": [
+      {
+        "file": "conditional-unit.trx.gz",
+        "passed_cases": 16,
+        "trx_sha256": "710acdc3b68c0f4c03f2dd6086c6fb08f00e8a40cf8117d6aaf71dab0cfd9234"
+      },
+      {
+        "file": "conditional-fixture.trx.gz",
+        "passed_cases": 110,
+        "trx_sha256": "1cd0e7a81a56154cd135cc8b5ced7533ca426424079920048c3154c3daa840b9"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingConditionalBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "ConditionalAccumulator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

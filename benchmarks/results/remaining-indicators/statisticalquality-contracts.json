@@ -1,0 +1,54 @@
+{
+  "batch": "statistical-quality-shared-execution",
+  "types": [
+    "StatisticalVolatility",
+    "VolatilityQualityIndex"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Compute related statistical volatility and quality-index outputs together through existing exact kernels, preserving default EMA/SMA, raw OHLC fields, cumulative rational signals, clamps, source/component fallback, ownership and validation priority.",
+  "verification": {
+    "unit_passed": 178,
+    "fixture_passed": 8,
+    "discovery_passed": 138,
+    "gpu_passed": 100,
+    "contract_methods": 1477,
+    "hosted_methods": 1465,
+    "evidence": [
+      {
+        "file": "statisticalquality-unit-initial.trx.gz",
+        "passed_cases": 177,
+        "failed_cases": 1,
+        "retained_passed_cases": 161,
+        "superseded_class": "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedGeneratedStatisticalQualityTests",
+        "trx_sha256": "46877c06b85cb28e48cb87152390be76694812e85a1762e9acbd9b64d8592f5a"
+      },
+      {
+        "file": "statisticalquality-unit.trx.gz",
+        "passed_cases": 17,
+        "trx_sha256": "7dc59d623aa0f38532259baa0d608c235933159eec48f70a08c5c23f1413a580"
+      },
+      {
+        "file": "statisticalquality-fixture.trx.gz",
+        "passed_cases": 146,
+        "trx_sha256": "5df049bd2417c38eda9cae13b9228b97232e3245ceadea1ee31af9344a4f67fa"
+      }
+    ],
+    "unit_rerun": {
+      "corrected_class": "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedGeneratedStatisticalQualityTests",
+      "interpretation": "Initial completed run retained unchanged passing numerical tests; the corrected test class was rerun in full. Both raw runs are preserved, including the superseded failures. Production source and binaries were unchanged.",
+      "production_dll_sha256": "62604700aa1b288ba8c99a8344039bd9e7d9de03c00e9bdf5851acabbb98a4d0",
+      "verifier_file": "unipseudo-unit-rerun-verifier.py",
+      "verifier_sha256": "31d7f2baad0135ce18a02ab607b91f94a42e32cce28112ed3334d36046079ff2"
+    }
+  },
+  "benchmark_fixture": {
+    "type": "RemainingStatisticalQualityBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "StatisticalVolatility",
+      "VolatilityQualityIndex"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

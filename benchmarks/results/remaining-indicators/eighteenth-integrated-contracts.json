@@ -1,0 +1,160 @@
+{
+  "types": [
+    "VaradiOscillator",
+    "UhlMaCrossoverSystem",
+    "UltimateMovingAverage",
+    "UltimateMovingAverageBands",
+    "VariableIndexDynamicAverage",
+    "Vidya",
+    "Vma",
+    "VariableMovingAverageBands",
+    "WaddahAttarExplosion",
+    "WaveTrendOscillator",
+    "VolatilityMovingAverage",
+    "ZweigMarketBreadthIndicator",
+    "ZeroLagSmoothedCycle",
+    "VostroIndicator",
+    "WilliamsFractalUp",
+    "WilliamsFractalDown",
+    "WilliamsFractalsUp",
+    "WilliamsFractalsDown",
+    "WilliamsFractals"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "base_head": "85150c9f7e4c0a6f874ae1b387f6bf9208b7cd6b",
+  "combined_input_sha256": "90e834b019d65348a0367f94a8ebea5ce45c628d2a286e3a3d77b764b9791ecc",
+  "manifest_sha256": "50541371d6c3c0be4fa7b56201030d4b027b52ef9c9de5b5ec46f916bc7eb1bd",
+  "unit_class_counts": {
+    "SharedGeneratedVaradiTests": 18,
+    "SharedGeneratedUhlTests": 18,
+    "SharedGeneratedUltimateAveragesTests": 39,
+    "SharedGeneratedVidyaAliasesTests": 35,
+    "SharedGeneratedVariableAveragesTests": 35,
+    "SharedGeneratedWaddahTests": 31,
+    "SharedGeneratedWaveTrendTests": 18,
+    "SharedGeneratedVolatilityAverageTests": 18,
+    "SharedGeneratedZweigTests": 19,
+    "SharedGeneratedZeroLagCycleTests": 17,
+    "SharedGeneratedVostroTests": 26,
+    "SharedGeneratedWilliamsFractalsTests": 70
+  },
+  "parity_class_counts": {
+    "RemainingVaradiBenchmarkTests": 4,
+    "RemainingUhlBenchmarkTests": 4,
+    "RemainingUltimateAveragesBenchmarkTests": 8,
+    "RemainingVidyaAliasesBenchmarkTests": 8,
+    "RemainingVariableAveragesBenchmarkTests": 8,
+    "RemainingWaddahBenchmarkTests": 4,
+    "RemainingWaveTrendBenchmarkTests": 4,
+    "RemainingVolatilityAverageBenchmarkTests": 4,
+    "RemainingZweigBenchmarkTests": 4,
+    "RemainingZeroLagCycleBenchmarkTests": 4,
+    "RemainingVostroBenchmarkTests": 4,
+    "RemainingWilliamsFractalsBenchmarkTests": 20
+  },
+  "unique_check_counts": {
+    "unit": 344,
+    "finite_smoothing": 0,
+    "parity": 76,
+    "discovery": 348,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/eighteenth-integrated-unit-evidence-0.trx.gz",
+    "benchmarks/results/remaining-indicators/eighteenth-integrated-unit-evidence-1.trx.gz",
+    "benchmarks/results/remaining-indicators/eighteenth-integrated-unit-evidence-2.trx.gz",
+    "benchmarks/results/remaining-indicators/eighteenth-integrated-unit-evidence-3.trx.gz",
+    "benchmarks/results/remaining-indicators/eighteenth-integrated-parity-evidence-0.trx.gz",
+    "benchmarks/results/remaining-indicators/eighteenth-integrated-parity-evidence-1.trx.gz",
+    "benchmarks/results/remaining-indicators/eighteenth-integrated-parity-evidence-2.trx.gz",
+    "benchmarks/results/remaining-indicators/eighteenth-integrated-discovery.trx.gz"
+  ],
+  "production_sha256": "814b2662748a064a34d4320a52204f8e3ff412dee8c4b39a4f5560aa65a05f4b",
+  "fixture_sha256": "7a54af7698b76f7327dd4adfaef5f8c48f10b9e1e49da78100267195c5128a7b",
+  "input_repairs": [
+    {
+      "receipt": "Z:\\StockIndicators-work\\si-eighteenth-adapter-contract-repair-20261020\\receipt.json",
+      "receipt_sha256": "9a8d76c1c1998c22d6e9232d91235be5a8949046e7969f08a571b1bf4bbf7c40",
+      "before_inputs_sha256": "b8e6b7f00000deae546a67d9bb06cd994a970a31204a9c3d58b248a1b06cd5ee",
+      "after_inputs_sha256": "4d3c876396e65d65895e28b900167a97216e3fc0defa6cf5bce5105fb392c212",
+      "retained_passing_cases": 315,
+      "rerun_cases": 28,
+      "added_cases": 4,
+      "scope": "Only private Vostro state and three test files; all other source inputs unchanged."
+    },
+    {
+      "receipt": "Z:\\StockIndicators-work\\si-early-wave-and-cache-integration-20261020\\receipt.json",
+      "receipt_sha256": "358b95ec0ce7fbfed5be5a554fbe3045d7a98cf747aaca02154d4d2f443e9df4",
+      "before_inputs_sha256": "4d3c876396e65d65895e28b900167a97216e3fc0defa6cf5bce5105fb392c212",
+      "after_inputs_sha256": "1e66cc1a6945892c529309894048484f67ba51f1f123ace7b8212e080f2f08cb",
+      "retained_passing_cases": 326,
+      "rerun_cases": 17,
+      "additional_numerical_cases": 50,
+      "scope": "Certified WaveTrend and exact-interval Ultimate cache; only five declared source/test files changed. All unrelated inputs reconstructed unchanged."
+    },
+    {
+      "receipt": "Z:\\StockIndicators-work\\si-wave-adapter-repair-20261020\\status.json",
+      "before_inputs_sha256": "1e66cc1a6945892c529309894048484f67ba51f1f123ace7b8212e080f2f08cb",
+      "after_inputs_sha256": "90e834b019d65348a0367f94a8ebea5ce45c628d2a286e3a3d77b764b9791ecc",
+      "retained_passing_cases": 326,
+      "rerun_cases": 18,
+      "retained_parity_passes": 64,
+      "fresh_parity_passes": 12,
+      "scope": "Retain56 original passes and8 Ultimate passes from the storage-interrupted run (overall Failed, internal CLR error in Vostro). Run12 unfinished cases against hash-identical local binaries; no source changes or arithmetic test repeats.",
+      "changed_files": {
+        "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "a060a1562f86b7fc6a828c9af33998d80edef737f690d60f78d3fe83c9644f3d",
+        "tests/ModelsTests/SharedGeneratedWaveTrendTests.cs": "b33f0dde77aa0838823cf3954565840adba6081eed12fe3090707dcabccb554b"
+      }
+    }
+  ],
+  "context": "Combined candidate validated using preserved original evidence and explicit replacement runs. Original failures remain in their TRX; later passing replacements supersede them by test identity. See input repair metadata for the bounded changes and evidence reuse. Performance remains unmeasured.",
+  "pending": [
+    "controlled raw timing",
+    "remaining rollout"
+  ],
+  "unit_evidence_sets": [
+    {
+      "path": "Z:\\StockIndicators-work\\si-eighteenth-adapter-contract-repair-20261020\\unit-before.trx",
+      "sha256": "71c5dc91257f464a58c5121fd7e5663b721cc542106954a3c8c516d41cb39aa8"
+    },
+    {
+      "path": "Z:\\StockIndicators-work\\si-eighteenth-adapter-repair-validation-20261020\\unit\\affected.trx",
+      "sha256": "0e122484de3004e3a4c27a305410733ba5cc23033b2da0845ef04a5f49c61ddc"
+    },
+    {
+      "path": "Z:\\StockIndicators-work\\si-early-wave-and-cache-integration-20261020\\tests\\affected.trx",
+      "sha256": "649193b077e185805ae9b057de2047eb69c37c736f76409df3944e2cb9147bc1"
+    },
+    {
+      "path": "Z:\\StockIndicators-work\\si-wave-adapter-repair-20261020\\unit\\unit.trx",
+      "sha256": "3ec626429efccbf371a1353985af64ce97d6c2f7bcb713b41f591964560bced0"
+    }
+  ],
+  "validation_repair": {
+    "proof": "Z:\\StockIndicators-work\\si-early-wave-and-cache-integration-20261020\\status.json",
+    "affected_trx": "Z:\\StockIndicators-work\\si-early-wave-and-cache-integration-20261020\\tests\\affected.trx",
+    "source_receipt": "Z:\\StockIndicators-work\\si-early-wave-and-cache-integration-20261020\\receipt.json"
+  },
+  "additional_reference_checks": 0,
+  "parity_reuse": {
+    "scope": "56 prior passes plus8 Ultimate passes retained from separately failed raw runs.12 unfinished cases passed against identical local binaries after network storage failure.",
+    "retained_passes": 64,
+    "fresh_passes": 12,
+    "evidence": [
+      {
+        "path": "Z:\\StockIndicators-work\\si-wave-adapter-repair-20261020\\prior-parity-aborted.trx",
+        "sha256": "408507f94662f9a312ccb4f83e631239b09cbed96c653c1fd4d9b62c2d7fbc1b"
+      },
+      {
+        "path": "C:\\Users\\cheat\\temp\\si-local-recovery-20261020\\stage18-storage-recovery\\interrupted-parity.trx",
+        "sha256": "1e77b80304db9576ccadb24f4db1023c5b68510f108fae91f499cf6f47bf4062"
+      },
+      {
+        "path": "C:\\Users\\cheat\\temp\\si-local-recovery-20261020\\stage18-storage-recovery\\parity\\parity.trx",
+        "sha256": "aab682872646694224f59aeb0951b9891ce1d4931fea7ff3e5c8a48ebecea65a"
+      }
+    ]
+  }
+}

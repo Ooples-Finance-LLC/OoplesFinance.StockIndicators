@@ -1,0 +1,48 @@
+{
+  "batch": "scalper-hurst-shared-execution",
+  "types": [
+    "ScalpersChannel",
+    "HurstCycleChannel",
+    "HurstBands"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact scalper and Hurst kernels, computing four/eight/seven outputs together with input-bounded storage while preserving capped delays, partial means, average defaults, output ordering, fallback and ownership.",
+  "verification": {
+    "unit_passed": 234,
+    "fixture_passed": 12,
+    "discovery_passed": 129,
+    "gpu_passed": 100,
+    "contract_methods": 1468,
+    "hosted_methods": 1456,
+    "evidence": [
+      {
+        "file": "scalperhurst-unit.trx.gz",
+        "passed_cases": 234,
+        "trx_sha256": "03a8caf702a118ef5975ebbde134edbdae479e00fd160c8b982112e8c01fd3d6"
+      },
+      {
+        "file": "scalperhurst-fixture.trx.gz",
+        "passed_cases": 141,
+        "trx_sha256": "bad29344aa3f87f4394fb301644db40013f02dd686f0c020853d01e3c8c41156"
+      }
+    ],
+    "initial_unit_run": {
+      "file": "scalperhurst-unit-initial.trx.gz",
+      "passed_cases": 221,
+      "failed_cases": 4,
+      "trx_sha256": "bc799d4478da529cf42b53011025dfec46eb1713b46f8883197c9e1ac12af59b",
+      "interpretation": "Three signed-zero cases exposed the batch extrema tie policy; one huge-window expectation incorrectly assumed SMA seeded startup. Reused legacy RollingMinMax, corrected the expectation, and added threshold/wraparound signed-zero coverage. All 234 focused cases, parity and GPU checks rerun after production correction."
+    }
+  },
+  "benchmark_fixture": {
+    "type": "RemainingScalperHurstBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "ScalpersChannel",
+      "HurstCycleChannel",
+      "HurstBands"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

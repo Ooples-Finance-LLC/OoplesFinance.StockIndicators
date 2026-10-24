@@ -1,0 +1,55 @@
+{
+  "input_head": "aa2ea8765a860d97220b1bdf70c54093a9dc1420",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "parallel_batch_note": "Independent mean-diagnostics one-file optimization on published PR head; broader remaining queues are not prerequisites.",
+  "step": "complete",
+  "updated_utc": "2026-10-21T21:03:00.051076+00:00",
+  "unit": {
+    "passed": 6,
+    "class_counts": {
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "MeanDiagnosticsScaleReductionTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\mean-diagnostics-publish\\unit\\unit.trx",
+    "sha256": "142a3d857d0e79b6bbcd8e1a32b1f27dbea76fdf091baf28fc07892f555b5e31",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-mean-diagnostics-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 2,
+    "class_counts": {
+      "SharedRollingStatisticsBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\mean-diagnostics-publish\\parity\\parity.trx",
+    "sha256": "4298a110666d9176b6da8ee81dbff92026acac7429a5a3168f454ec189897662",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-mean-diagnostics-20261021-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mean-diagnostics-publish-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "581f17da43c4e34d77783230b1bb7e6cd0da115b6a0a02557953129a3d96aeec",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mean-diagnostics-publish-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "581f17da43c4e34d77783230b1bb7e6cd0da115b6a0a02557953129a3d96aeec",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mean-diagnostics-publish-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "581f17da43c4e34d77783230b1bb7e6cd0da115b6a0a02557953129a3d96aeec",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mean-diagnostics-publish-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "581f17da43c4e34d77783230b1bb7e6cd0da115b6a0a02557953129a3d96aeec"
+  },
+  "prior_head": "d0384bc91505d8365612745314c3951e4f1f4726",
+  "inventory_tests_passed": 6,
+  "upstream_master": "9e41a4617d8603d31f4ac57b1781e8d978e55947",
+  "dependency": "AiDotNet.Tensors 0.141.0",
+  "performance": "Pending; correctness does not establish competitor speed."
+}

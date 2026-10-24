@@ -1,0 +1,36 @@
+{
+  "batch": "generated-impulse-filters",
+  "types": [
+    "EhlersEarlyOnsetTrendIndicator",
+    "EhlersImpulseReaction",
+    "EhlersImpulseResponse"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Shared owned execution reuses existing early-onset and impulse kernels. Impulse Response uses a ring index in existing history storage, eliminating full-window list shifts with unchanged tap order and arithmetic. Frozen prior-helper checks cover wraps, previews, resets and extended outputs; custom-component and nonfinite-factor fallback retain legacy behavior.",
+  "verification": {
+    "unit_passed": 263,
+    "fixture_passed": 12,
+    "discovery_passed": 44,
+    "gpu_passed": 100,
+    "contract_methods": 1379,
+    "hosted_methods": 1367,
+    "evidence": [
+      {
+        "file": "impulse-unit.trx.gz",
+        "passed_cases": 263,
+        "trx_sha256": "ad3b09111ec451101140fd2bfe40ef8a6ab28ecd078f3d5530e486a47fcf94a3"
+      },
+      {
+        "file": "impulse-fixture.trx.gz",
+        "passed_cases": 56,
+        "trx_sha256": "bb051d493ef66563935a5f26eb49335239eb87cf78cdee0816bf89947453e979"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingImpulseBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

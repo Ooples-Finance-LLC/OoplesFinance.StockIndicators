@@ -1,0 +1,74 @@
+{
+  "batch": "vervoort-modified-bands-shared-execution",
+  "types": [
+    "VervoortModifiedBollingerBandIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact Vervoort modified kernel once for four outputs. Preserve rounded exact OHLC input, TEMA stages, population deviations, fixed50middle, percent threshold, huge periods, original fields, warmup, ownership and explicit average/source fallback. Preserve whole-series derived OHLC equality routing, per-bar range replacement and recomputed exact mean using adjusted bounds.",
+  "verification": {
+    "unit_passed": 99,
+    "fixture_passed": 4,
+    "discovery_passed": 135,
+    "gpu_passed": 100,
+    "contract_methods": 1476,
+    "hosted_methods": 1464,
+    "evidence": [
+      {
+        "file": "vervoortmodified-unit.trx.gz",
+        "passed_cases": 99,
+        "trx_sha256": "77816f162ac3b1afe66410fc29cc5da2afbdb8df756d7b8add1b6455644e967a"
+      },
+      {
+        "file": "vervoortmodified-fixture.trx.gz",
+        "passed_cases": 139,
+        "trx_sha256": "7f53cfa11ce27aef88f2349610d2fe86025dbef7f67853dc8e42f6c7f7968441"
+      },
+      {
+        "file": "vervoortmodified-unit-initial.trx.gz",
+        "outcome": "Failed",
+        "superseded": true,
+        "deliberately_stopped": true,
+        "passed_cases": 34,
+        "failed_cases": 3,
+        "trx_sha256": "2563eaff7a0b6a52b06e5df6834e7ec29da9c18c444631c998f3e3d85d776528"
+      },
+      {
+        "file": "vervoortmodified-fixture-initial.trx.gz",
+        "outcome": "Failed",
+        "superseded": true,
+        "deliberately_stopped": true,
+        "passed_cases": 137,
+        "failed_cases": 0,
+        "trx_sha256": "35205e23c42ee760a3aefbe5fc9b21b64514b9b038105e4ce4795f87ab56a062"
+      }
+    ],
+    "initial_candidate": "Three initial unit failures exposed missing whole-series named-OHLC range routing. Obsolete unit and parity runs were stopped after the correctness defect was established. Both superseded raw runs report Failed overall and are preserved, not counted as corrected-build verification. The unit run contains 34 passing and 3 failing cases; the stopped parity run contains 137 passing cases and no completed failing case. Corrected production reran the full affected unit batch, parity and GPU checks.",
+    "integration": {
+      "base": "b1e63f31",
+      "integrated_candidate": "122d226f",
+      "evidence": [
+        {
+          "file": "vervoort-integration-unit.trx.gz",
+          "passed_cases": 13,
+          "trx_sha256": "6d39bf3a8e2200426f84b755910d7ba7d1a331f6c60394cbeb02ae9063c377c2"
+        },
+        {
+          "file": "vervoort-integration-fixture.trx.gz",
+          "passed_cases": 153,
+          "trx_sha256": "2718da3b7fad07adc52669d8b2fda48070c9465e63594e4614f0b310c5670d39"
+        }
+      ],
+      "gpu_source_sha256": "08d10bb01c348246bb4e4910127d29a3b02405a80439c006e233e1cf901a1b09",
+      "interpretation": "The Vervoort state, whole-series range prepass and underlying helpers match the preserved candidate. Reverse-diff comparison retains all prior generated states and graph-domain validation; only the new range flag is threaded through shared node creation. Thirteen focused unit cases include newer mixed roots and finite-first/domain-order checks. All 153 discovery cases, 100 GPU cases and four inventory checks passed. The independently completed 99 unit cases and four parity cases retain their archived evidence; the expensive numerical and parity suites were not replayed."
+    }
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVervoortModifiedBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "VervoortModifiedBollingerBandIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

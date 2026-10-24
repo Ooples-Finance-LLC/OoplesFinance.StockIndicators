@@ -7,17 +7,19 @@ internal static partial class ValuesBarExecution
 {
     internal static bool IsPointwise(IIndicator indicator) => indicator.Source is null && indicator.Components.Count == 0
         && indicator is PriceCircularTransform or PriceTranscendentalTransform or PriceRoundingTransform or CandleArithmetic
-            or MedianPrice or TypicalPrice or WeightedClose or FullTypicalPrice or DojiCandle or BullishCandle or BearishCandle
+            or MedianPrice or TypicalPrice or WeightedClose or FullTypicalPrice or AveragePrice or MidRange or HlcAverage or OhlcAverage
+            or DojiCandle or BullishCandle or BearishCandle
         || IsShadowDojiGraph(indicator);
 
     private static Bar FillPointwise(Bar[] source, double[][] output, IIndicator indicator,
         CancellationToken cancellation, OwnedBarBuffer? owned) => indicator switch
     {
         CandleArithmetic arithmetic => FillArithmetic(source, output, arithmetic, cancellation, owned),
-        MedianPrice => FillPointwiseKernel(source, output, indicator, new MedianPriceKernel(), cancellation, owned),
-        TypicalPrice => FillPointwiseKernel(source, output, indicator, new TypicalPriceKernel(), cancellation, owned),
+        MedianPrice or MidRange => FillPointwiseKernel(source, output, indicator, new MedianPriceKernel(), cancellation, owned),
+        TypicalPrice or HlcAverage => FillPointwiseKernel(source, output, indicator, new TypicalPriceKernel(), cancellation, owned),
         WeightedClose => FillPointwiseKernel(source, output, indicator, new WeightedCloseKernel(), cancellation, owned),
-        FullTypicalPrice => FillPointwiseKernel(source, output, indicator, new FullTypicalPriceKernel(), cancellation, owned),
+        FullTypicalPrice or OhlcAverage => FillPointwiseKernel(source, output, indicator, new FullTypicalPriceKernel(), cancellation, owned),
+        AveragePrice => FillPointwiseKernel(source, output, indicator, new AveragePriceKernel(), cancellation, owned),
         DojiCandle candle => FillPointwiseKernel(source, output, indicator, new DojiKernel(candle.BodyFraction), cancellation, owned),
         BullishCandle => FillPointwiseKernel(source, output, indicator, new CandlePolarityKernel(true), cancellation, owned),
         BearishCandle => FillPointwiseKernel(source, output, indicator, new CandlePolarityKernel(false), cancellation, owned),

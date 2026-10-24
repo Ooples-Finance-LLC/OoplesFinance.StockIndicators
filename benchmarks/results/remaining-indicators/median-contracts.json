@@ -1,0 +1,41 @@
+{
+  "batch": "ehlers-median-shared-execution",
+  "types": [
+    "EhlersRecursiveMedianFilter",
+    "EhlersRecursiveMedianOscillator",
+    "EhlersMedianAverageAdaptiveFilter"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Stream three Ehlers median facades through existing ordered-window and adaptive-search kernels; preserve minimum/clamped periods, signed and tied input values, independent oscillator periods, fixed smoothing12 and ignored Alpha of the legacy recursive facade, thresholds, original fields, source fallback and ownership.",
+  "verification": {
+    "unit_passed": 42,
+    "fixture_passed": 12,
+    "discovery_passed": 143,
+    "gpu_passed": 100,
+    "contract_methods": 1482,
+    "hosted_methods": 1470,
+    "evidence": [
+      {
+        "file": "median-unit.trx.gz",
+        "passed_cases": 42,
+        "trx_sha256": "7552b5b0d088023abbc4ccf4588e4d05017ccdabbfd7b2ef1992d7856faefc58"
+      },
+      {
+        "file": "median-fixture.trx.gz",
+        "passed_cases": 155,
+        "trx_sha256": "46c1badd6bf82db0ba55fe1cb030cc919305e96305e87922087edc6a34ca9ef6"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingMedianBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersRecursiveMedianFilter",
+      "EhlersRecursiveMedianOscillator",
+      "EhlersMedianAverageAdaptiveFilter"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -1,0 +1,48 @@
+{
+  "batch": "generated-pressure-flow",
+  "implementation_commit": "79cb43b484323866cebc10a3db84e0ccde7fb46b",
+  "types": [
+    "Kvo",
+    "KlingerVolumeOscillator",
+    "UltimateOscillator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "verification": {
+    "unit_passed": 38,
+    "fixture_passed": 12,
+    "discovery_passed": 18,
+    "gpu_passed": 100,
+    "contract_methods": 1349,
+    "hosted_methods": 1337,
+    "distinct_selected_cases": 30,
+    "evidence": [
+      {
+        "file": "pressureflow-partial.trx.gz",
+        "trx_sha256": "f3e33adc5fcb447bff6786a8aa4d5cf20ce748579f6d1bcd9751f30a70d0c831",
+        "passed_cases": 23
+      },
+      {
+        "file": "pressureflow-resume-fast.trx.gz",
+        "trx_sha256": "e33cc287328f323cc012266c14ac4ce04ca0ae9bfb7b5e108ea253c0ece95b51",
+        "passed_cases": 5
+      },
+      {
+        "file": "pressureflow-resume-Kvo.trx.gz",
+        "trx_sha256": "8573b5d74a642bd8582f593fb4a572d7d7fb83901b962477593fa6e4413084b7",
+        "passed_cases": 1
+      },
+      {
+        "file": "pressureflow-resume-KlingerVolumeOscillator.trx.gz",
+        "trx_sha256": "c7d66e66f08c38985b7c5f4e51f34943b573eb518fe51971f93154e91b06c832",
+        "passed_cases": 1
+      }
+    ]
+  },
+  "provenance": "Historical implementation 79cb43b4 and its preserved comparator. Original run aborted after 23 passes; seven missing cases passed in three isolated resumptions. No saved passing cases repeated. Crash cause unproven. GPU evidence is the source-matched receipt committed with 79cb43b4.",
+  "benchmark_fixture": {
+    "type": "RemainingPressureFlowBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

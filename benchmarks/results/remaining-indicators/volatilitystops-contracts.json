@@ -1,0 +1,39 @@
+{
+  "batch": "volatility-stops-shared-execution",
+  "types": [
+    "VolatilityStop",
+    "WellesWilderVolatilitySystem"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact volatility trailing-stop and Wilder volatility kernels preserving seeded stops, trend/extrema decisions, extended ATR, finite factors, original fields, clamps and component/source fallback. Integrate independently verified StatisticalQuality and RatioSwitch states unchanged, with fresh mixed-family tests and GPU validation.",
+  "verification": {
+    "unit_passed": 174,
+    "fixture_passed": 8,
+    "discovery_passed": 140,
+    "gpu_passed": 100,
+    "contract_methods": 1479,
+    "hosted_methods": 1467,
+    "evidence": [
+      {
+        "file": "volatilitystops-unit.trx.gz",
+        "passed_cases": 174,
+        "trx_sha256": "c513bf4492d82e06fdd11396061598260bf04a519d06b1cc6dcf59cc38344bf5"
+      },
+      {
+        "file": "volatilitystops-fixture.trx.gz",
+        "passed_cases": 148,
+        "trx_sha256": "773596be27519d3ffb52874d74f694c0a7197e42cedb5dac73e5ddbf41bb0444"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVolatilityStopBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "VolatilityStop",
+      "WellesWilderVolatilitySystem"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

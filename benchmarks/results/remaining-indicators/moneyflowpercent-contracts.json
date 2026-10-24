@@ -1,0 +1,39 @@
+{
+  "batch": "money-flow-percent-shared-execution",
+  "types": [
+    "VolumeAccumulationPercent",
+    "TwiggsMoneyFlow"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share the exact MoneyFlowPercentWindow over original OHLCV, using default EMA for Twiggs. Avoid two unused raw Twiggs mean buffers unless custom or unsupported averages require them; retain callback order and legacy fallback.",
+  "verification": {
+    "unit_passed": 91,
+    "fixture_passed": 8,
+    "discovery_passed": 74,
+    "gpu_passed": 100,
+    "contract_methods": 1409,
+    "hosted_methods": 1397,
+    "evidence": [
+      {
+        "file": "moneyflowpercent-unit.trx.gz",
+        "passed_cases": 91,
+        "trx_sha256": "e4a74fa8f1d1c95c5f45c3bec4c143ec8a58d92efd4ece071235eadfa9a60e39"
+      },
+      {
+        "file": "moneyflowpercent-fixture.trx.gz",
+        "passed_cases": 82,
+        "trx_sha256": "7eb47e36ffa6134e2b19306cc497f235cf50a9999a76dc882b7fcb42d45c5e5f"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingMoneyFlowPercentBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "VolumeAccumulationPercent",
+      "TwiggsMoneyFlow"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

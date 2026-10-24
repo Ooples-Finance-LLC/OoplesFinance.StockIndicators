@@ -72,13 +72,38 @@ internal sealed class PeriodicChannelWindow : IDisposable
     private long _count;
     private Number _prices, _sines, _sineErrors, _priceErrors, _lineErrors, _previousMargin;
     internal static readonly string[] Keys = { "K", "Os", "Ap", "Bp", "Cp", "Al", "Bl", "Cl" };
-    internal PeriodicChannelWindow(int period, int lookback)
-    { _period = Math.Max(1, period); _direction = new(lookback); }
+    private readonly bool _allowCertified;
+    private readonly List<double>? _replay;
+    private CertifiedPeriodicChannel? _certified;
+    internal long CertifiedCount { get; private set; }
+    internal int FallbackCount { get; private set; }
+    internal PeriodicChannelWindow(int period, int lookback, bool allowCertified = true)
+    {
+        _period = Math.Max(1, period); _direction = new(lookback); _allowCertified = allowCertified;
+        if (allowCertified) { _replay = new(); _certified = new(); }
+    }
     private static Number Abs(Number value) => value.Sign < 0 ? default(Number) - value : value;
 
     internal (double[] Values, Signal Trade) Next(double price, bool final)
     {
         StreamingInputValidation.Finite(price, nameof(price));
+        if (_certified is not null)
+        {
+            var sign = _direction.Next(price, false);
+            var sineValue = Math.Sin((double)_count * sign / _period);
+            if (_certified.TryNext(price, sineValue, _count, final, out var result))
+            {
+                if (final) { _direction.Next(price, true); _count++; _replay!.Add(price); CertifiedCount++; }
+                return result;
+            }
+            _certified = null; FallbackCount++; _direction.Reset(); _count = 0;
+            foreach (var previous in _replay!) NextExact(previous, true);
+            _replay.Clear();
+        }
+        return NextExact(price, final);
+    }
+    private (double[] Values, Signal Trade) NextExact(double price, bool final)
+    {
         var direction = _direction.Next(price, final);
         var current = Number.Of(price);
         // Math.Sin supplies the binary64 transcendental sample; all subsequent
@@ -109,6 +134,7 @@ internal sealed class PeriodicChannelWindow : IDisposable
     {
         _direction.Reset(); _count = 0;
         _prices = _sines = _sineErrors = _priceErrors = _lineErrors = _previousMargin = default;
+        _replay?.Clear(); CertifiedCount = 0; FallbackCount = 0; _certified = _allowCertified ? new() : null;
     }
     public void Dispose() => Reset();
 }

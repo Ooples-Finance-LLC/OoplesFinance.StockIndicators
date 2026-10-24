@@ -1,0 +1,52 @@
+{
+  "source_sha": "eb9d6058b009f526ecd9c89c1b76eaee9e1fcadc",
+  "measurement_location": "Local Windows; unchanged correctness setup; CPU builder and native methods timed",
+  "cases": 88,
+  "comparisons": 44,
+  "archives": {
+    "verified-summary.json": {
+      "sha256": "2e831af0214d70d659605a0c162baa97e4bbb8516490a4f5474b49a549c7d246",
+      "archive": "benchmarks/results/remaining-indicators/local-skender-batch3-20261022/verified-summary.json.gz"
+    },
+    "status.json": {
+      "sha256": "dcf498b01e012e0a16a612e55f52294fd677602bba692554bdb1b2cf3cc15ff1",
+      "archive": "benchmarks/results/remaining-indicators/local-skender-batch3-20261022/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "b85e8887bad21e0415720bd6e78ca111bb860e05d3a70895efa7ef3618428125",
+      "archive": "benchmarks/results/remaining-indicators/local-skender-batch3-20261022/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "a20a1647ad4f01ccae6a76522fffc7337df7481cc86d7714dfd77d029ff70e10",
+      "archive": "benchmarks/results/remaining-indicators/local-skender-batch3-20261022/binary-manifest.json.gz"
+    },
+    "SharedSkenderAtrFamilyBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderAtrFamilyBenchmarks-report-full-compressed.json": {
+      "sha256": "e28e45ffd8e0ef0b7256502d5e6caa17f9750e1bee938baed1a0952ee5173494",
+      "archive": "benchmarks/results/remaining-indicators/local-skender-batch3-20261022/SharedSkenderAtrFamilyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderAtrFamilyBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedSkenderSmoothingBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderSmoothingBenchmarks-report-full-compressed.json": {
+      "sha256": "c4789865727bccbb8e637ce4964f3e2acb49e2d32977d5f52eaf709ee2e60601",
+      "archive": "benchmarks/results/remaining-indicators/local-skender-batch3-20261022/SharedSkenderSmoothingBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderSmoothingBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedSkenderStatisticsBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderStatisticsBenchmarks-report-full-compressed.json": {
+      "sha256": "3788d5c8f37b566038501d9593545cc0a9ac0378c0e9970965595c887d56fe45",
+      "archive": "benchmarks/results/remaining-indicators/local-skender-batch3-20261022/SharedSkenderStatisticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderStatisticsBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedSkenderAtrFamilyBenchmarks.log": {
+      "sha256": "1d88a33022f7715cb7446d3a818826dd08b9f40513fca65abbcc3c9fc3dc5eb8",
+      "archive": "benchmarks/results/remaining-indicators/local-skender-batch3-20261022/SharedSkenderAtrFamilyBenchmarks.log.gz"
+    },
+    "SharedSkenderSmoothingBenchmarks.log": {
+      "sha256": "3ecfe15baee2b215fa958d085e726bf03c4830943ac7ac84fad58d5240503e68",
+      "archive": "benchmarks/results/remaining-indicators/local-skender-batch3-20261022/SharedSkenderSmoothingBenchmarks.log.gz"
+    },
+    "SharedSkenderStatisticsBenchmarks.log": {
+      "sha256": "9658cf8419fcd5abb8da15e35887f0920cc528bfbeaa08db7c0aab5a770e7d0c",
+      "archive": "benchmarks/results/remaining-indicators/local-skender-batch3-20261022/SharedSkenderStatisticsBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-local-skender-batch3.py": "44594095dcf94624cdf08aef9ace338a5102403d8084be3b2654b507cebc9d53",
+    "verify-local-skender-batch3.py": "35b86fe773861a0c13b474350423a4a2886db34ea95b5b602cbc67536dbc9258"
+  }
+}
