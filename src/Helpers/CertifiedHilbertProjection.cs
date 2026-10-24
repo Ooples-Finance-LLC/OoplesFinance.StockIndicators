@@ -82,7 +82,7 @@ internal static class CertifiedHilbertProjection
     private static void AddProduct(Int128 value, Factor factor, ref Int128 lower, ref Int128 upper)
     {
         if (factor.Mantissa == 0) return;
-        Int128 product = value * factor.Mantissa;
+        Int128 product = unchecked(value * factor.Mantissa);
         if (factor.Shift >= 127)
         {
             // Any such nonzero product lies strictly between -1 and 1 on
@@ -92,8 +92,8 @@ internal static class CertifiedHilbertProjection
             return;
         }
         Int128 floor = product >> factor.Shift;
-        lower += floor;
-        upper += floor;
+        lower = unchecked(lower + floor);
+        upper = unchecked(upper + floor);
         if ((product & (((Int128)1 << factor.Shift) - 1)) != 0) upper++;
     }
 
