@@ -13751,7 +13751,7 @@
     "src/Indicators/PriceWindowChannels.cs": "96a20e0e07c6e1fac7dce3faf86c600a32532bee96344f71ce35ba5fac33b60a",
     "src/Indicators/PriorSeededDirectionalMeasure.cs": "56d647814172ac3a4ae2394bb1fd8fdd72ae7b35d43e856e872088c345598d3b",
     "src/Indicators/QuarticDynamicAverage.cs": "cafd9383412e878c2cd0bf14db2b23c73a4bda1230c8e5b0f58d152e9b49d703",
-    "src/Indicators/RangeAccelerationBands.cs": "6e8315ba0e74911a8319a69ab2f2af518c50ce05ed8ec19baa596d55f8003cfc",
+    "src/Indicators/RangeAccelerationBands.cs": "88871b75ebdeeafe571a460e27b2ca349f42c4684dbe9e9f8ff33fcaef56e2fb",
     "src/Indicators/RangeFractalAverage.cs": "f6b7761ae731edcb9a48e3160c5358bdea8aac98911cc78227788d256474b480",
     "src/Indicators/RateOfChangeRmsBands.cs": "64108af537cc95efc7a0f5d33815f5e14c0354b51ff5139fbc90a5f7bcd89354",
     "src/Indicators/RateOfChangeWithAverage.cs": "1a68f55b402b37b3abf1dcc53c7893fbd7945f8e6ef0727b023cd6cd0ab06791",
