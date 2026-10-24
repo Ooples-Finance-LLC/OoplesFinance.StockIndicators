@@ -184,7 +184,8 @@
     "measure-sma-fused-diagnostics-control.py": "140253cd773c4565a407ae3251d7b504c6c22a08efe8f241dd99b94f916ba2e8",
     "verify-sma-fused-diagnostics-control.py": "ed9cd70ccad2668336428f84ed2f61d807ab49b08729c8c24c97417ddfe4ba49"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/sma-fused-diagnostics-integration-source-proof-20261024.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/sma-fused-diagnostics-integration-source-proof-20261024.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/sma-fused-diagnostics-certified-local-sma-fused-diagnostics-control-20261024-report-import.json"
 }
