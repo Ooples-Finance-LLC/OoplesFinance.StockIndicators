@@ -13978,6 +13978,6 @@
     "src/Indicators/WindowVortex.cs": "53b281190ab0ab8b184d890b061488efb7d12304f8575e1a6facd05966c1b723",
     "src/Indicators/WindowedSinc.cs": "c7cb8f8b65c173e08a98f430cb24a2a514421b578d13ec7db71945187f1c3216",
     "src/Indicators/ZeroSeedLaguerreFilter.cs": "22cedebf855f3680e65630d251754d329ae2975bad8a823147f45d99ec0c2698",
-    "src/Indicators/ZigZagSnapshot.cs": "7e46e214d7aed6221c12440bfa70ca9c64f260849827380a0239f839bc8ec70b"
+    "src/Indicators/ZigZagSnapshot.cs": "083d91331ad16e0543c138755fc78cfb8440ced3dfcf151d41ae68a464d5aa50"
   }
 }
