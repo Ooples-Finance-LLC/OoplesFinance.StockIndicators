@@ -8,6 +8,7 @@ internal static partial class ValuesBarExecution
     internal sealed class TillsonValueState : IMultiOutputState
     {
         private readonly int _period;
+        private readonly CertifiedTillson.WordSmoother _wordSmoother;
         private readonly TillsonSeed _seed;
         private readonly long _first;
         private readonly double _factor;
@@ -19,6 +20,7 @@ internal static partial class ValuesBarExecution
         internal TillsonValueState(int period, double factor, TillsonSeed seed, int suppression)
         {
             _period = period;
+            _wordSmoother = new CertifiedTillson.WordSmoother(period);
             _seed = seed;
             _first = (seed == TillsonSeed.CascadedMeans ? 6L * (period - 1) : 0) + suppression;
             _smoothingDivisor = JurikDyadic.FromDouble((long)period + 1);
@@ -93,6 +95,7 @@ internal static partial class ValuesBarExecution
 
         private double Smooth(double prior, double input)
         {
+            if (_wordSmoother.TrySmooth(prior, input, out double wordResult)) return wordResult;
             if (CertifiedTillson.TrySmooth(prior, input, _period, out double certified))
                 return certified;
             var numerator = JurikDyadic.FromDouble(prior);
