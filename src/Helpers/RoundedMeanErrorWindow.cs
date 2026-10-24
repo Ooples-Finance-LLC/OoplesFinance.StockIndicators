@@ -139,6 +139,16 @@ internal sealed class RoundedMeanErrorWindow(int period)
     }
 #endif
 
+    internal bool TryCertifiedDiagnostics(double mean, out double absolute, out double squared, out double relative)
+    {
+#if !NETFRAMEWORK
+        return CertifiedMeanRelativeError.TryDiagnostics(_values, mean, out absolute, out squared, out relative);
+#else
+        absolute = squared = relative = 0;
+        return false;
+#endif
+    }
+
     internal (double Absolute, double Squared) AbsoluteAndSquaredError(double mean)
     {
 #if !NETFRAMEWORK

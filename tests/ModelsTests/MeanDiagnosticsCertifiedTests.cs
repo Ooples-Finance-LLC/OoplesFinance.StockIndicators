@@ -180,6 +180,61 @@ public sealed class MeanDiagnosticsCertifiedTests
     }
 
     [Fact]
+    public void FusedDiagnosticsMatchIndependentFractionsForSignedInputsAndCenters()
+    {
+        var random = new Random(24102026);
+        int accepted = 0;
+        for (int trial = 0; trial < 500; trial++)
+        {
+            double scale = Math.ScaleB(1, random.Next(-400, 401));
+            double mean = (trial % 2 == 0 ? 1.25 : -1.25) * scale;
+            var values = Enumerable.Range(0, random.Next(1, 40))
+                .Select(_ => (1 + random.NextDouble()) * scale * (random.Next(2) == 0 ? -1 : 1)).ToArray();
+            if (!CertifiedMeanRelativeError.TryDiagnostics(Samples(values), mean,
+                    out double absolute, out double squared, out double relative)) continue;
+            accepted++;
+            var absSum = new ReferenceFraction(0);
+            var squaredSum = new ReferenceFraction(0);
+            var relativeSum = new ReferenceFraction(0);
+            foreach (double value in values)
+            {
+                var input = ReferenceFraction.FromDouble(value);
+                var distance = (input - ReferenceFraction.FromDouble(mean)).Abs();
+                absSum += distance;
+                squaredSum += distance * distance;
+                relativeSum += distance / input;
+            }
+            var count = new ReferenceFraction(values.Length);
+            Assert.Equal(BitConverter.DoubleToInt64Bits((absSum / count).ToDouble()), BitConverter.DoubleToInt64Bits(absolute));
+            Assert.Equal(BitConverter.DoubleToInt64Bits((squaredSum / count).ToDouble()), BitConverter.DoubleToInt64Bits(squared));
+            Assert.Equal(BitConverter.DoubleToInt64Bits((relativeSum / count).ToDouble()), BitConverter.DoubleToInt64Bits(relative));
+        }
+        Assert.True(accepted > 450, $"Only {accepted} fused diagnostics certified");
+    }
+
+    [Fact]
+    public void FusedDiagnosticsRetainZeroFlagsAndUnsupportedBoundaries()
+    {
+        foreach (double value in new[] { -5d, 5d })
+        {
+            Assert.True(CertifiedMeanRelativeError.TryDiagnostics(Samples([value, value]), value,
+                out double absolute, out double squared, out double relative));
+            Assert.Equal(0, BitConverter.DoubleToInt64Bits(absolute));
+            Assert.Equal(0, BitConverter.DoubleToInt64Bits(squared));
+            Assert.Equal(0, BitConverter.DoubleToInt64Bits(relative));
+        }
+        Assert.False(CertifiedMeanRelativeError.TryDiagnostics(Samples([]), 1, out _, out _, out _));
+        Assert.False(CertifiedMeanRelativeError.TryDiagnostics(Samples([0, 1]), 1, out _, out _, out _));
+        Assert.False(CertifiedMeanRelativeError.TryDiagnostics(Samples([1, -1]), 0, out _, out _, out _));
+        Assert.False(CertifiedMeanRelativeError.TryDiagnostics(Samples([double.Epsilon, 1]), 1, out _, out _, out _));
+        Assert.False(CertifiedMeanRelativeError.TryDiagnostics(Samples([1, Math.ScaleB(1, 40)]), 1, out _, out _, out _));
+        Assert.False(CertifiedMeanRelativeError.TryDiagnostics(Samples(Enumerable.Repeat(15d, 4096)), 1, out _, out _, out _));
+        foreach (int exponent in new[] { -600, 600 })
+            Assert.False(CertifiedMeanRelativeError.TryDiagnostics(Samples([Math.ScaleB(1, exponent)]),
+                Math.ScaleB(1.5, exponent), out _, out _, out _));
+    }
+
+    [Fact]
     public void ExactCompactErrorsMatchIndependentFractionsAcrossScales()
     {
         var random = new Random(7232027);
