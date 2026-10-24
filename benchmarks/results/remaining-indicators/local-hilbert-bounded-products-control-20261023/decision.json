@@ -396,7 +396,8 @@
     "measure-hilbert-bounded-products-control.py": "91a0e3ecd3fc44235945f8e299ae3f63c6243e3c4c0cf12186a2352d4ae9a5e7",
     "verify-hilbert-bounded-products-control.py": "89638dad71bff3d5df77218da8fc50b3630c703eadb589f9894ff25058eb5ff0"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/hilbert-bounded-products-integration-source-proof-20261023.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/hilbert-bounded-products-integration-source-proof-20261023.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/hilbert-bounded-products-certified-local-hilbert-bounded-products-control-20261023-report-import.json"
 }
