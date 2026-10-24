@@ -184,7 +184,8 @@
     "measure-sma-bounded-moments-control.py": "bf7a4ba7831ce5f02a71117ddf652f345411c86830589f8d2bbe3e103f205eba",
     "verify-sma-bounded-moments-control.py": "fcacc0c20f7e007fac18d8cc98a680ec9244a85aeac13c4b6241eeaf5e7666e6"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/sma-bounded-moments-integration-source-proof-20261023.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/sma-bounded-moments-integration-source-proof-20261023.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/sma-bounded-moments-certified-local-sma-bounded-moments-control-20261023-report-import.json"
 }
