@@ -184,9 +184,10 @@
     "measure-sma-count-avgdev-supplement-control.py": "8888be4efc69f90af964e91e85675b1d0d860864942dca6f56987c2422d81c7d",
     "verify-sma-count-avgdev-supplement-control.py": "e742361570982a9fddd50d4a5f00abfa5aa101c174c1112c3dfed751d6234225"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
   "affected_consumer_supplement": true,
   "integration_source_proof": "benchmarks/results/remaining-indicators/sma-count-avgdev-supplement-integration-source-proof-20261024.json",
-  "note": "Supplemental measurement of the already-published SMA count helper for AvgDev. No new production integration. Inconclusive controls remain inconclusive and are not claimed as an optimization win."
+  "note": "Supplemental measurement of the already-published SMA count helper for AvgDev. No new production integration. Inconclusive controls remain inconclusive and are not claimed as an optimization win.",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/sma-count-avgdev-supplement-certified-local-sma-count-avgdev-supplement-control-20261024-report-import.json"
 }
