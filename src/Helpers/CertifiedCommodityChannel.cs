@@ -37,8 +37,8 @@ internal static class CertifiedCommodityChannel
         if (distance == 0) { defined = true; return true; }
         // The common binary exponent cancels. These exact products need at
         // most 72 and 66 bits, respectively; the midpoint certifier rounds once.
-        UInt128 numerator = (UInt128)Math.Abs(distance) * (uint)(200 * count);
-        UInt128 denominator = (UInt128)sum * 3;
+        UInt128 numerator = unchecked((UInt128)Math.Abs(distance) * (uint)(200 * count));
+        UInt128 denominator = unchecked((UInt128)sum * 3);
         if (!CertifiedCompactRatio.TryDivide(numerator, denominator, 0, out result)) return false;
         if (distance < 0) result = -result;
         defined = true;
@@ -72,19 +72,20 @@ internal static class CertifiedCommodityChannel
         if (maximum == 0) return true;
         Int128 center = Align(mean, grid), latest = Align(current, grid);
         UInt128 sum = 0;
+        // The exponent span is at most 32: distances stay below 2^86 and the sum below 2^94.
         foreach (double price in prices)
         {
-            Int128 distance = Align(price, grid) - center;
-            sum += (UInt128)(distance < 0 ? -distance : distance);
+            Int128 distance = unchecked(Align(price, grid) - center);
+            sum = unchecked(sum + (UInt128)(distance < 0 ? -distance : distance));
         }
         if (sum == 0) return true;
-        Int128 difference = latest - center;
+        Int128 difference = unchecked(latest - center);
         if (difference == 0) { defined = true; return true; }
         // A term has at most 85 magnitude bits (53+32). A distance is below
         // 2^86, the sum of 256 distances below 2^94, and these final products
         // below 2^102 and 2^96. All signed and unsigned operations fit exactly.
-        UInt128 numerator = (UInt128)(difference < 0 ? -difference : difference) * (uint)(200 * count);
-        UInt128 denominator = sum * 3;
+        UInt128 numerator = unchecked((UInt128)(difference < 0 ? -difference : difference) * (uint)(200 * count));
+        UInt128 denominator = unchecked(sum * 3);
         if (!CertifiedCompactRatio.TryDivide(numerator, denominator, 0, out result)) return false;
         if (difference < 0) result = -result;
         defined = true;
@@ -107,7 +108,7 @@ internal static class CertifiedCommodityChannel
         long bits = BitConverter.DoubleToInt64Bits(value);
         int exponent = (int)((bits >> 52) & 2047);
         Int128 aligned = (Int128)((bits & 0xfffffffffffffL) | (1L << 52)) << (exponent - grid);
-        return bits < 0 ? -aligned : aligned;
+        return bits < 0 ? unchecked(-aligned) : aligned;
     }
 }
 #endif
