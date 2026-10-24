@@ -445,7 +445,9 @@
       "sha256": "f13607d7090a930d019a35968ec517521b8321edca18b12d6d675841f63e89d1"
     },
     "publication-hilbert-shift-remainder-certified-20261023-verification.json": {
-      "sha256": "620308c51ecdb537d41a52547ff67fbe9ae1c025484ee216aa238fbc05e902be"
+      "sha256": "4c562b8193900e5c5b0e3803b02d6231af35934913636dfc830bb0ca44fd4fdf",
+      "original_sha256": "620308c51ecdb537d41a52547ff67fbe9ae1c025484ee216aa238fbc05e902be",
+      "original_archive": "publication-hilbert-shift-remainder-certified-20261023-verification.json.original.gz"
     }
   },
   "reason": "Shift-remainder trial: 0 faster, 18 inconclusive, 0 slower. Existing 18 unit/43 parity/100 GPU/8 inventory checks passed; all 144 controls verified. Candidate source not integrated and no report row imported."
