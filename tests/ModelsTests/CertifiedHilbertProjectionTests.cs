@@ -6,6 +6,42 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class CertifiedHilbertProjectionTests
 {
     [Fact]
+    public void FloatingProjectionCertificatesMatchIndependentIntegerProducts()
+    {
+        var random = new Random(904215);
+        int accepted = 0;
+        foreach (int exponent in new[] { -400, -100, 0, 100, 400 })
+        for (int count = 1; count <= 50; count++)
+        for (int replay = 0; replay < 4; replay++)
+        {
+            var prices = Enumerable.Range(0, 50).Select(_ =>
+                Math.ScaleB((1 + random.NextDouble()) * (random.Next(2) == 0 ? -1 : 1), exponent)).ToArray();
+            if (Check(prices, (count + 13 * replay) % 50, count, floating: true)) accepted++;
+        }
+        Assert.True(accepted > 900, $"Only {accepted} floating projections certified");
+    }
+
+    [Fact]
+    public void FloatingProjectionPreservesAxesZerosAndBoundedFallback()
+    {
+        foreach (int count in new[] { 1, 2, 4, 25, 49, 50 })
+        foreach (int cursor in new[] { 0, 17, 49 })
+        {
+            Check(Enumerable.Repeat(1d, 50).ToArray(), cursor, count, floating: true);
+            Check(Enumerable.Range(0, 50).Select(i => i % 2 == 0 ? 1d : -1d).ToArray(), cursor, count, floating: true);
+            Check(Enumerable.Range(0, 50).Select(i => i == cursor ? 1d : 0d).ToArray(), cursor, count, floating: true);
+        }
+        Assert.True(CertifiedHilbertProjection.TryProjectFloating(new JurikDyadic[50], 0, 50, out var real, out var imaginary));
+        Equal(0, real.Mean(1)); Equal(0, imaginary.Mean(1));
+        foreach (double value in new[] { double.Epsilon, 1e-200, 1e200, double.MaxValue })
+            Assert.False(CertifiedHilbertProjection.TryProjectFloating(
+                Enumerable.Repeat(JurikDyadic.FromDouble(value), 50).ToArray(), 0, 50, out _, out _));
+        Assert.False(CertifiedHilbertProjection.TryProjectFloating(new JurikDyadic[49], 0, 1, out _, out _));
+        Assert.False(CertifiedHilbertProjection.TryProjectFloating(new JurikDyadic[50], -1, 1, out _, out _));
+        Assert.False(CertifiedHilbertProjection.TryProjectFloating(new JurikDyadic[50], 0, 51, out _, out _));
+    }
+
+    [Fact]
     public void CertifiedProjectionsMatchIndependentIntegerProducts()
     {
         var random = new Random(731249);
@@ -60,10 +96,14 @@ public sealed class CertifiedHilbertProjectionTests
         Assert.False(CertifiedHilbertProjection.TryProject(new JurikDyadic[50], 0, 51, out _, out _));
     }
 
-    private static bool Check(double[] prices, int cursor, int count)
+    private static bool Check(double[] prices, int cursor, int count, bool floating = false)
     {
         var values = prices.Select(JurikDyadic.FromDouble).ToArray();
-        if (!CertifiedHilbertProjection.TryProject(values, cursor, count, out var real, out var imaginary)) return false;
+        JurikDyadic real, imaginary;
+        bool accepted = floating
+            ? CertifiedHilbertProjection.TryProjectFloating(values, cursor, count, out real, out imaginary)
+            : CertifiedHilbertProjection.TryProject(values, cursor, count, out real, out imaginary);
+        if (!accepted) return false;
         BigInteger sineSum = 0, cosineSum = 0;
         for (int lag = 0; lag < count; lag++)
         {
