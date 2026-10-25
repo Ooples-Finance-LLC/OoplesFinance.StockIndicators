@@ -1,0 +1,61 @@
+{
+  "input_head": "ce70d9924a33be966bf8a08830a31d41c425cb33",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedCommodityChannel.cs",
+    "src/Indicators/WindowCommodityChannelIndex.cs",
+    "tests/ModelsTests/AlignedCommodityChannelTests.cs"
+  ],
+  "batch_note": "Approved CCI deviation-scan refinement: cache exact signed aligned prices for nonrolling periods up to256, retaining the original dyadic rolling sum. Unsupported price exponents disable the cache until reset; unsupported means retain fallback without disabling it. At most256 distances below2^56 sum below2^64. Independent exact boundary ratios, grid transitions, presence flags and reset required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-25T01:30:19.120985+00:00",
+  "unit": {
+    "passed": 40,
+    "class_counts": {
+      "BoundedCommodityChannelExecutionTests": 15,
+      "CertifiedCommodityChannelTests": 11,
+      "AlignedCommodityChannelTests": 3,
+      "CompactCommodityChannelTests": 11
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\cci-aligned-window\\unit\\unit.trx",
+    "sha256": "eecbbb7631229a6cbaff4d68b8f62f5747fd3255d82514a89c9857800ab1f32a",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-cci-aligned-window-certified-20261024-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 20,
+    "class_counts": {
+      "CommodityChannelComparisonTests": 16,
+      "SharedCommodityChannelBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\cci-aligned-window\\parity\\parity.trx",
+    "sha256": "c3f47c498ede2457893b601f591a1b9189b9a8426415fed2d26aec18f17be4bc",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-cci-aligned-window-certified-20261024-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-aligned-window-20261024\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1781ede8435ad23431548c55f89012230527d83e76467b95b834f410b3735a95",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-aligned-window-20261024\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1781ede8435ad23431548c55f89012230527d83e76467b95b834f410b3735a95",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-aligned-window-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1781ede8435ad23431548c55f89012230527d83e76467b95b834f410b3735a95",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-aligned-window-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1781ede8435ad23431548c55f89012230527d83e76467b95b834f410b3735a95"
+  },
+  "source_fingerprint_sha256": "6f823677d6286ed308e23e83fa992b35704ada2a48af2f401548f300f376ccec",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved CCI deviation-scan refinement: cache exact signed aligned prices for nonrolling periods up to256, retaining the original dyadic rolling sum. Unsupported price exponents disable the cache until reset; unsupported means retain fallback without disabling it. At most256 distances below2^56 sum below2^64. Independent exact boundary ratios, grid transitions, presence flags and reset required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
