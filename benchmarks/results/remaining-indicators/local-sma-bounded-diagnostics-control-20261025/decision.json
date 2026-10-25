@@ -1,0 +1,237 @@
+{
+  "status": "candidate-rejected-or-inconclusive",
+  "sources": {
+    "old": "c02f77369bf5d98d53f431efef70a78bcb033da0",
+    "new": "65d19439915580ae831e40c378267b4f81461cbc"
+  },
+  "candidate_code_source": "caef3e38b62acd1a0116ef08242da0d3b38c820d",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "SharedSkenderDiagnosticsBenchmarks",
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.146835283203125,
+        0.150567265625
+      ],
+      "new_means_ms": [
+        0.140485419921875,
+        0.1402563671875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedSkenderDiagnosticsBenchmarks",
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.149933408203125,
+        0.1504958984375
+      ],
+      "new_means_ms": [
+        0.147662060546875,
+        0.14392454427083334
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedSkenderDiagnosticsBenchmarks",
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        1.528499765625,
+        1.4836778125
+      ],
+      "new_means_ms": [
+        1.475064453125,
+        1.428426015625
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedSkenderDiagnosticsBenchmarks",
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        1.474167109375,
+        1.46597046875
+      ],
+      "new_means_ms": [
+        1.437648125,
+        1.415202890625
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        2.309772222222222,
+        2.279061111111111
+      ],
+      "new_means_ms": [
+        2.40363,
+        2.29224
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        2.452775,
+        2.4179375
+      ],
+      "new_means_ms": [
+        2.3687625,
+        2.395222222222222
+      ],
+      "verdict": "inconclusive"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "9abe5177b9b9e9e7a7862778ec082751c5220048f056679668a0de7d83d45932",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "f93556c1471225878b98c93765cc9785d82128043e435833dbd6c769504d47c0",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "f31cbe28d80b20b482f377756802e871fb1cbadedea4f0301e038a5e6a1ced9d",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "487b71eb2fe57ccc4cc7bf4ac7d55f9bdbedc302609ff254c2609e32f6570070",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/verified-summary.json.gz"
+    },
+    "round0-old-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json": {
+      "sha256": "8fcd52f13d687ec6c35eec970c4597a99ad938d2c0dbe1165b8cb2e5bc16bb0d",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round0-old-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "fff890dea1b635cb1ced792ea2c754d8fd07f78bd57c7bbb5ee2dc27a463cc1c",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json": {
+      "sha256": "cc1eef7585167b1ddebd4495f11d9e471131d5b5409a222b38c3d2726a847036",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round1-new-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "fe11068e60853bcb389a2c0064d233d944b50b64a16d79ebd7b1cc58684f90f5",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json": {
+      "sha256": "80fed61edfc106aa84e4f3736fb0034c69ded68602552f2aae3839f9799c0733",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round2-new-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "f87b294f04a276f45ccd02200d49a6ab921396e90219af4eb0bbb0e6f2de4bdc",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json": {
+      "sha256": "979cc6cedd169efd713eecc0e15fcbace13d7782130cb15db8ff791c9c6bef5d",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round3-old-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "c78755982ff45193a4e8d8240ab53b8549a0693011ce6d9a97e828a9b1cc5637",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "65a042c3df6b4ab54f537db7af3e394a01d739d78ff1bcf72bd0c40540202017",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round0-old-SharedSkenderDiagnosticsBenchmarks.log": {
+      "sha256": "9456b4f1cfa9f0e667b0ffd7f9a77be2f8c05e9f5bec7faa3648698cce93a1d1",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round0-old-SharedSkenderDiagnosticsBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "5dfa55e8da1ba7533ee76459f62cbcb211ee3966b61c7f482583b6e267572ba5",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-SharedSkenderDiagnosticsBenchmarks.log": {
+      "sha256": "1e07f69e2072bc7c9928d5080edc42bcfd2b92ebb3bf6973651fc7509f1c393c",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round1-new-SharedSkenderDiagnosticsBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "03b9aa9ddad45ea951163fa57d830ed1348883c293e6d8998b328e8032a7a138",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-SharedSkenderDiagnosticsBenchmarks.log": {
+      "sha256": "e9ca6f31f21802ccc7a6d296a91aa878df6183d2776b08b2a2502c68004c349c",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round2-new-SharedSkenderDiagnosticsBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "f09f711d9ec2400ab3274245398d80ad651932a7f698fd548b74123fdbe227fc",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-SharedSkenderDiagnosticsBenchmarks.log": {
+      "sha256": "ad2860e7a10939970c555ec0f8760ab8cc5634c2ff689b3e4332f8b27ff43473",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/round3-old-SharedSkenderDiagnosticsBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-sma-bounded-diagnostics-control.py": "c18798d07b4f5d889321900dd1164fee39ec603799eec07f1fafead417f43ef7",
+    "verify-sma-bounded-diagnostics-control.py": "5c90544afeaae5e65071cf2481625d8f10572d6631ea4fad20049f6a4d0227f9"
+  },
+  "report_imported": false,
+  "production_integrated": false,
+  "diagnostic_and_proof": {
+    "note": "Published qualified-source SMA profile during concurrent CCI compilation; sampled-thread attribution only, not timing qualification. Structural proof records unchanged arithmetic body.",
+    "archives": {
+      "sma-bounded-diagnostics-draft-20261025/arithmetic-source-proof.json": {
+        "sha256": "b0b101c5c3676c1011b78759a899784801e27669936b2d5e925062e779388487",
+        "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/diagnostic/sma-bounded-diagnostics-draft-20261025/arithmetic-source-proof.json.gz"
+      },
+      "sma-published-profile-20261025/status.json": {
+        "sha256": "5762741ba2a01fc997f6b7b9c61d4f92ad860d4070cd98e60bb1dec1daa2eb7c",
+        "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/diagnostic/sma-published-profile-20261025/status.json.gz"
+      },
+      "sma-published-profile-20261025/ready.json": {
+        "sha256": "901abc9cea12aa46c36ec4c5401e0e73b4fa9177a370b9d2d8d410d1e56247dc",
+        "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/diagnostic/sma-published-profile-20261025/ready.json.gz"
+      },
+      "sma-published-profile-20261025/completed.json": {
+        "sha256": "66f2a4aa579254ee265b8b3906ab26f3df77068519d632f3fe71c802bffdd528",
+        "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/diagnostic/sma-published-profile-20261025/completed.json.gz"
+      },
+      "sma-published-profile-20261025/profile-summary.json": {
+        "sha256": "bff97c52c63da4ba465219f38e89bdc7f2b544c6cf867c9c5edff95df1e87733",
+        "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/diagnostic/sma-published-profile-20261025/profile-summary.json.gz"
+      },
+      "sma-published-profile-20261025/sma.speedscope.json": {
+        "sha256": "7526ab766641cba275ea4075ce9541edff41a8d6b5c8213e185bce6155647de7",
+        "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/diagnostic/sma-published-profile-20261025/sma.speedscope.json.gz"
+      },
+      "sma-published-profile-20261025/worker.ps1": {
+        "sha256": "b35e098e9d74a387493e78f654f6abff0f9777331c40d9daeb983c5e445989e7",
+        "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-diagnostics-control-20261025/diagnostic/sma-published-profile-20261025/worker.ps1.gz"
+      }
+    }
+  },
+  "candidate_evidence": {
+    "rejected-candidate.patch": {
+      "sha256": "bd659a572cec5f21ca3fb7acbf44360b557e7066a6d558857f3a5e8bc8d91be2"
+    },
+    "publication-sma-bounded-diagnostics-certified-20261025-parity.trx.gz": {
+      "sha256": "f26eea4b44c982b196fb446fb5e0db96413386b58bc291a43442441bd2408e62"
+    },
+    "publication-sma-bounded-diagnostics-certified-20261025-unit.trx.gz": {
+      "sha256": "11514fb87e59390c4ede1b8ce66a671fc1727bd717dd03294897bbc40f91d2cf"
+    },
+    "publication-sma-bounded-diagnostics-certified-20261025-verification.json": {
+      "sha256": "76a0ffc02d52fa9c75d7596f6d614f11f5fd3b69fb3dce2676c5c2a0c2af9075"
+    }
+  },
+  "reason": "Bounded SMA diagnostics trial: 0 faster, 6 inconclusive, 0 slower. Existing 49 unit/2 parity/100 GPU/8 inventory checks passed; all 48 controls verified. Candidate source not integrated and no report row imported."
+}
