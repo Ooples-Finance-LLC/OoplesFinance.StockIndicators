@@ -1,0 +1,58 @@
+{
+  "input_head": "7fb905d023b59eef749b335d27bddbcce9f49e5b",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedHilbertProjection.cs"
+  ],
+  "batch_note": "Approved Hilbert projection refinement: cache the original residual-domain checks for immutable coefficients once per projection count at static initialization. The same condition and constant, projection arithmetic, per-input checks and exact fallback remain unchanged. All current five projection Facts, including compensated projection tests across all50counts, plus lifecycle and43parity cases required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-25T02:49:06.061359+00:00",
+  "unit": {
+    "passed": 20,
+    "class_counts": {
+      "CertifiedHilbertProjectionTests": 5,
+      "HilbertRoundedKernelTests": 4,
+      "CompactHilbertPhaseTests": 11
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\hilbert-coefficient-domain\\unit\\unit.trx",
+    "sha256": "ee65e4b58229e36d0039695d5ba228d48f7235fee104c2972fbb88a0fcf025ab",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-hilbert-coefficient-domain-certified-20261025-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 43,
+    "class_counts": {
+      "SharedHilbertSignalBenchmarkTests": 32,
+      "HilbertCycleSignalComparisonTests": 11
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\hilbert-coefficient-domain\\parity\\parity.trx",
+    "sha256": "3005f6ac5b4208de8dae09182fa23503b414f1aa96a7ce5214ee5548a3db1c0e",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-hilbert-coefficient-domain-certified-20261025-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-coefficient-domain-20261025\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "318f0bb06f9a9a7f13bb85f8722b6e83bfabb247ff3ccd843eb2fcd71ba19f69",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-coefficient-domain-20261025\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "318f0bb06f9a9a7f13bb85f8722b6e83bfabb247ff3ccd843eb2fcd71ba19f69",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-coefficient-domain-20261025\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "318f0bb06f9a9a7f13bb85f8722b6e83bfabb247ff3ccd843eb2fcd71ba19f69",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-coefficient-domain-20261025\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "318f0bb06f9a9a7f13bb85f8722b6e83bfabb247ff3ccd843eb2fcd71ba19f69"
+  },
+  "source_fingerprint_sha256": "3ab6830cbefbb3fb0cab865cd4b7f68599015aab1eb6fb5a538a4c7c1302f55c",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved Hilbert projection refinement: cache the original residual-domain checks for immutable coefficients once per projection count at static initialization. The same condition and constant, projection arithmetic, per-input checks and exact fallback remain unchanged. All current five projection Facts, including compensated projection tests across all50counts, plus lifecycle and43parity cases required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
