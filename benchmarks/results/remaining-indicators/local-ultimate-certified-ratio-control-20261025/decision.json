@@ -274,8 +274,9 @@
     "measure-ultimate-certified-ratio-control.py": "9717715bca58109185391773b116622d4c4176c43ff00a76c6df0b6ab4d06ffe",
     "verify-ultimate-certified-ratio-control.py": "bd9ce78e9a991c81ea79f0043302ed4de6efb87683526dbb62efc3bd54312cad"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
   "qualified_source_ref": "refs/heads/perf/qualified-ultimate-certified-ratio-20261025",
-  "integration_source_proof": "benchmarks/results/remaining-indicators/ultimate-certified-ratio-integration-source-proof-20261025.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/ultimate-certified-ratio-integration-source-proof-20261025.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/ultimate-certified-ratio-certified-local-ultimate-certified-ratio-control-20261025-report-import.json"
 }
