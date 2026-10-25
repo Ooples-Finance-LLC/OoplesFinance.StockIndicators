@@ -1,0 +1,60 @@
+{
+  "input_head": "401b5090b9d0f98aaea3335a739771c323174d3e",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/WindowCommodityChannelIndex.cs",
+    "tests/ModelsTests/CachedCommodityPriceSumTests.cs"
+  ],
+  "batch_note": "Approved CCI window-sum refinement: cache an exact integer scale for retained prices, with a signed sum below 2^90. Unsupported exponents materialize the existing dyadic sum before continuing; deviation arithmetic, presence flags and exact rounding remain unchanged. Focused scale-boundary, cancellation, subnormal and reset regressions. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-25T00:06:35.867595+00:00",
+  "unit": {
+    "passed": 39,
+    "class_counts": {
+      "BoundedCommodityChannelExecutionTests": 15,
+      "CompactCommodityChannelTests": 11,
+      "CertifiedCommodityChannelTests": 11,
+      "CachedCommodityPriceSumTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\cci-cached-price-sum\\unit\\unit.trx",
+    "sha256": "1a3dc3ab5a01a668ec0dbaa7b3dc655303379c5f119f096bfdb8425de5ae5707",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-cci-cached-price-sum-certified-20261024-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 20,
+    "class_counts": {
+      "CommodityChannelComparisonTests": 16,
+      "SharedCommodityChannelBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\cci-cached-price-sum\\parity\\parity.trx",
+    "sha256": "0eb7e5aa3ba6315229d89df954cbac7a31a13d913e972f2af72f6be5401dd584",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-cci-cached-price-sum-certified-20261024-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-cached-price-sum-20261024\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "3fe69278a84b51f3736c94dde41788de069f9b7d6457c18adacae26381e59e56",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-cached-price-sum-20261024\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "3fe69278a84b51f3736c94dde41788de069f9b7d6457c18adacae26381e59e56",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-cached-price-sum-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "3fe69278a84b51f3736c94dde41788de069f9b7d6457c18adacae26381e59e56",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-cached-price-sum-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "3fe69278a84b51f3736c94dde41788de069f9b7d6457c18adacae26381e59e56"
+  },
+  "source_fingerprint_sha256": "57b7d8d5edb5b84253119ee700ccef5d537e78aa8b15705d351d901515ec91bb",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved CCI window-sum refinement: cache an exact integer scale for retained prices, with a signed sum below 2^90. Unsupported exponents materialize the existing dyadic sum before continuing; deviation arithmetic, presence flags and exact rounding remain unchanged. Focused scale-boundary, cancellation, subnormal and reset regressions. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
