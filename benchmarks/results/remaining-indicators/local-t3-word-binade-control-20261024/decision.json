@@ -364,7 +364,7 @@
     "measure-t3-word-binade-control.py": "9b8c19178c32ba2763746d6c70e4a4e6fe8b8ef91228e09e48e93a9bfa72dc96",
     "verify-t3-word-binade-control.py": "f9efc9e2f5084bae13498b55c5a8190980c52ff46cab6518f944f379d12654fe"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
   "diagnostic_and_arithmetic_proof": {
     "note": "Profile from the qualified published word-smoothing source before the polynomial trial; concurrent compilation; sampled-thread attribution only, not timing qualification. Arithmetic proof checks unchanged extracted core text.",
@@ -404,5 +404,6 @@
     }
   },
   "qualified_source_ref": "refs/heads/perf/qualified-t3-word-binade-20261024",
-  "integration_source_proof": "benchmarks/results/remaining-indicators/t3-word-binade-integration-source-proof-20261024.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/t3-word-binade-integration-source-proof-20261024.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/t3-word-binade-certified-local-t3-word-binade-control-20261024-report-import.json"
 }

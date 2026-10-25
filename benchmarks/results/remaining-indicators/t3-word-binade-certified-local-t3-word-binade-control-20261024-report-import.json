@@ -1,0 +1,60 @@
+{
+  "before_sha256": "40b82cc1637c1a7b028042362a9e4696378bda211a6584ee30351efc28236d86",
+  "candidate_sha256": "c004cf59099d6ab0dacc63520ca6d50acb01abaa46c924159926b99f40bd5851",
+  "changed_baseline_rows": 6,
+  "unchanged_baseline_rows": 796,
+  "changed_builder_slots": 12,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 12,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 796,
+  "run_id": "local-t3-word-binade-control-20261024",
+  "imported_utc": "2026-10-25T01:19:43.734401+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "d39de5499d5a5771d1ed576025ac73770eb63099d59fda71d1849a888b9c44c5",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-binade-certified-local-t3-word-binade-control-20261024-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "0d4c715a00bb523903a15b5b7448e11294548b6a04dd1575a2d13360631ec175",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-binade-certified-local-t3-word-binade-control-20261024-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "ce3dd3c9f2276b37b7be8b6d638e35547c81e23c851299154d43a144868dc05b",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-binade-certified-local-t3-word-binade-control-20261024-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "2535e5ff43788d024b5d252b340d7136eef6a3423c9be2f2971bd7a80460fcfd",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-binade-certified-local-t3-word-binade-control-20261024-measurement.json.gz"
+    },
+    "stage-t3-word-binade-report.py": {
+      "sha256": "62a3ccfb37941c20ae1fb6b15078d2ac7a1509b1b460bdf19d2c61e9f74f5539",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-binade-certified-local-t3-word-binade-control-20261024-stage-t3-word-binade-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-binade-certified-local-t3-word-binade-control-20261024-verify-approved-certified-report.py.gz"
+    },
+    "import-t3-word-binade-report.py": {
+      "sha256": "89421671b190bbdd4de5aa096877ae07211fdac9f7df0e019737002d7ff162d4",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-binade-certified-local-t3-word-binade-control-20261024-import-t3-word-binade-report.py.gz"
+    },
+    "archive-t3-word-binade-control.py": {
+      "sha256": "3fc6ed76861593c20007a9a39fb10b86b81c14ab0f65114e74d0f6a05863ea55",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-binade-certified-local-t3-word-binade-control-20261024-archive-t3-word-binade-control.py.gz"
+    },
+    "prove-t3-word-binade-integration.py": {
+      "sha256": "d5a509156110bb47a9de76e10a7b9178b8808df159188668fa7021be2ef226dc",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-binade-certified-local-t3-word-binade-control-20261024-prove-t3-word-binade-integration.py.gz"
+    },
+    "archive-t3-word-binade-report.py": {
+      "sha256": "ca62a615320d2241d7425d13612d9b7919351be954f2e27476cb67b60ac96b0f",
+      "archive": "benchmarks/results/remaining-indicators/t3-word-binade-certified-local-t3-word-binade-control-20261024-archive-t3-word-binade-report.py.gz"
+    }
+  }
+}
