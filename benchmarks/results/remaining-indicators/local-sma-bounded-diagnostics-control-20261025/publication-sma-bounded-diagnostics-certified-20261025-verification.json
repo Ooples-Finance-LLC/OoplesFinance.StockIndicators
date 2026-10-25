@@ -1,0 +1,58 @@
+{
+  "input_head": "caef3e38b62acd1a0116ef08242da0d3b38c820d",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedMeanRelativeError.cs"
+  ],
+  "batch_note": "Approved SMA diagnostics refinement: local unchecked context in the existing fused loop, retaining every operation, range guard, exact publisher, and explicit squared-sum overflow guard. Distances below2^60, reciprocal terms below2^82, Int32 partial sums below2^113 and publication terms below2^103 prove bounded arithmetic. Existing independent fraction,4096-term overflow, unsupported exponent, zero, signed-center and reset tests required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-25T01:54:12.717173+00:00",
+  "unit": {
+    "passed": 49,
+    "class_counts": {
+      "RollingStatisticsSharedExecutionTests": 17,
+      "MeanDiagnosticsCertifiedTests": 26,
+      "MeanDiagnosticsScaleReductionTests": 2,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-bounded-diagnostics\\unit\\unit.trx",
+    "sha256": "950019c74e2e6018a465eefe2128257f3e3db5c55da35b942154dc583929f3ef",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-bounded-diagnostics-certified-20261025-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 2,
+    "class_counts": {
+      "SharedRollingStatisticsBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-bounded-diagnostics\\parity\\parity.trx",
+    "sha256": "e01271f8ee069588e2e6d4bf0bbf6a5974850fbd3a17d7d3fd599302fb96720e",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-bounded-diagnostics-certified-20261025-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-bounded-diagnostics-20261025\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1cff458b62b5482cb3945bb5ba60f29fd71b85a00ab7648b3d1e4582711a867a",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-bounded-diagnostics-20261025\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1cff458b62b5482cb3945bb5ba60f29fd71b85a00ab7648b3d1e4582711a867a",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-bounded-diagnostics-20261025\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1cff458b62b5482cb3945bb5ba60f29fd71b85a00ab7648b3d1e4582711a867a",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-bounded-diagnostics-20261025\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1cff458b62b5482cb3945bb5ba60f29fd71b85a00ab7648b3d1e4582711a867a"
+  },
+  "source_fingerprint_sha256": "4a5b12e09e39bc3a499f631a584923d6146be52d95adf81d67b068959ea71723",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved SMA diagnostics refinement: local unchecked context in the existing fused loop, retaining every operation, range guard, exact publisher, and explicit squared-sum overflow guard. Distances below2^60, reciprocal terms below2^82, Int32 partial sums below2^113 and publication terms below2^103 prove bounded arithmetic. Existing independent fraction,4096-term overflow, unsupported exponent, zero, signed-center and reset tests required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
