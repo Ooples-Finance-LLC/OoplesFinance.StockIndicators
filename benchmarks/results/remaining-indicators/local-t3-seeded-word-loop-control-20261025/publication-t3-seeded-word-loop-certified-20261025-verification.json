@@ -1,0 +1,61 @@
+{
+  "input_head": "e91af7e4dc5f762f428d593129188f0bf9834ce2",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/ValuesBarExecution.Tillson.cs"
+  ],
+  "batch_note": "Approved T3 state-loop refinement: the existing cached common binade proves all seed windows ended. Run six exact word smoothing updates directly for this state; retain the original seed and fallback loop verbatim otherwise. Cache establishment/invalidation, exact kernel, polynomial, suppression and reset unchanged. Existing independent original-state lifecycle and extreme-range tests required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-25T02:18:37.610703+00:00",
+  "unit": {
+    "passed": 46,
+    "class_counts": {
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "TillsonSharedExecutionTests": 12,
+      "TillsonFloatingSmoothingTests": 7,
+      "CertifiedTillsonTests": 17,
+      "TillsonWordSmoothingTests": 4,
+      "TillsonWordBinadeTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-seeded-word-loop\\unit\\unit.trx",
+    "sha256": "58089403b7b139252eb1bc2f8d717b57830025995af0498b93aa7ce0e115578e",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-seeded-word-loop-certified-20261025-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 26,
+    "class_counts": {
+      "SharedTillsonBenchmarkTests": 16,
+      "TillsonComparisonTests": 10
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-seeded-word-loop\\parity\\parity.trx",
+    "sha256": "051f4e35063094ba672bb365f081ef72130c40b9979d7c9e429a65c00e51ebd5",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-seeded-word-loop-certified-20261025-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-seeded-word-loop-20261025\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "92b4e4d86403634fd74007e3eae1399a59453d6b1d7dbc03f604f7185387c07f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-seeded-word-loop-20261025\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "92b4e4d86403634fd74007e3eae1399a59453d6b1d7dbc03f604f7185387c07f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-seeded-word-loop-20261025\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "92b4e4d86403634fd74007e3eae1399a59453d6b1d7dbc03f604f7185387c07f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-seeded-word-loop-20261025\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "92b4e4d86403634fd74007e3eae1399a59453d6b1d7dbc03f604f7185387c07f"
+  },
+  "source_fingerprint_sha256": "9389f37160882447500968161ea7a1b317df3cef1173b1c237d46049655c3601",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved T3 state-loop refinement: the existing cached common binade proves all seed windows ended. Run six exact word smoothing updates directly for this state; retain the original seed and fallback loop verbatim otherwise. Cache establishment/invalidation, exact kernel, polynomial, suppression and reset unchanged. Existing independent original-state lifecycle and extreme-range tests required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
