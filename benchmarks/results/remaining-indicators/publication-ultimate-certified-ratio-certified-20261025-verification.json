@@ -1,0 +1,58 @@
+{
+  "input_head": "e85c4d34465304956886ae0d98b9bcca1b2671f5",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/JurikDyadic.cs",
+    "src/Indicators/WindowUltimateOscillator.cs",
+    "tests/ModelsTests/CertifiedUltimateRatioTests.cs"
+  ],
+  "batch_note": "Approved Ultimate Oscillator redesign: exact rolling sums retained; bounded final weighted-ratio publication with original exact fallback. Four new numerical Facts, fourteen existing compact/lifecycle cases, fifteen comparison cases and GPU/inventory contracts required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-25T13:47:55.383987+00:00",
+  "unit": {
+    "passed": 18,
+    "class_counts": {
+      "CompactUltimateOscillatorTests": 14,
+      "CertifiedUltimateRatioTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\ultimate-certified-ratio\\unit\\unit.trx",
+    "sha256": "6fb5e01fd6118721db9b244c05cb8e8b8dc4f874106e8921b343d33e76c880c0",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-ultimate-certified-ratio-certified-20261025-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 15,
+    "class_counts": {
+      "TrueRangeRatioComparisonTests": 15
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\ultimate-certified-ratio\\parity\\parity.trx",
+    "sha256": "f4984bda86760ac24868d73a53e24a897400ea28bfba695d1bbbbdd09a798742",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-ultimate-certified-ratio-certified-20261025-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-ultimate-certified-ratio-20261025\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "176ad50051011af1c6ced8dd12c4ae17dddff97c85e47be29dcb1664040fcdfe",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-ultimate-certified-ratio-20261025\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "176ad50051011af1c6ced8dd12c4ae17dddff97c85e47be29dcb1664040fcdfe",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-ultimate-certified-ratio-20261025\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "176ad50051011af1c6ced8dd12c4ae17dddff97c85e47be29dcb1664040fcdfe",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-ultimate-certified-ratio-20261025\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "176ad50051011af1c6ced8dd12c4ae17dddff97c85e47be29dcb1664040fcdfe"
+  },
+  "source_fingerprint_sha256": "475cb66291ba0811c9cb94319538aca6efc525e5ce430b9e6b5d9f77afde6c7b",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved Ultimate Oscillator redesign: exact rolling sums retained; bounded final weighted-ratio publication with original exact fallback. Four new numerical Facts, fourteen existing compact/lifecycle cases, fifteen comparison cases and GPU/inventory contracts required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

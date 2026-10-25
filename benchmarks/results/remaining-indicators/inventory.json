@@ -13974,7 +13974,7 @@
     "src/Indicators/WindowStochasticKdj.cs": "2386739da2a084a219fcc7bac70d049cd68a689e8c8e00fbd1a542c85c32609b",
     "src/Indicators/WindowStochasticMomentum.cs": "9030c11da13f095890fda4ca42b31356a865ad444257a6b90ebb352c0b047b5e",
     "src/Indicators/WindowUlcerIndex.cs": "f2a077e0a0882506e6e22556cfe69a40ff78024071a47babea515951e2be8693",
-    "src/Indicators/WindowUltimateOscillator.cs": "b3678356e1efeae36017519a5ab3b64bd975b463128dab8a285bcb059aea2989",
+    "src/Indicators/WindowUltimateOscillator.cs": "868836c11aa6e2a6f71e99aca1ddea3da9de4a321b138bdf80f8aab5046e3f90",
     "src/Indicators/WindowVortex.cs": "53b281190ab0ab8b184d890b061488efb7d12304f8575e1a6facd05966c1b723",
     "src/Indicators/WindowedSinc.cs": "c7cb8f8b65c173e08a98f430cb24a2a514421b578d13ec7db71945187f1c3216",
     "src/Indicators/ZeroSeedLaguerreFilter.cs": "22cedebf855f3680e65630d251754d329ae2975bad8a823147f45d99ec0c2698",
