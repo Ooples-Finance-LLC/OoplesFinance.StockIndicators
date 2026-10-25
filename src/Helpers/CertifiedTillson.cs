@@ -15,6 +15,8 @@ internal static class CertifiedTillson
     {
         private readonly ulong _denominator, _reciprocal;
 
+        internal bool IsSupported => _denominator != 0;
+
         internal WordSmoother(int period)
         {
             _denominator = 0;
@@ -32,19 +34,32 @@ internal static class CertifiedTillson
             ulong inputBits = unchecked((ulong)BitConverter.DoubleToInt64Bits(input));
             ulong exponent = priorBits >> 52;
             if (exponent is < 1 or > 2046 || inputBits >> 52 != exponent) return false;
-            const ulong fractionMask = (1UL << 52) - 1;
-            ulong a = (priorBits & fractionMask) | (1UL << 52);
-            ulong b = (inputBits & fractionMask) | (1UL << 52);
-            // d <= 2048 bounds n by 2^64 - 2048, including period 2047.
-            ulong numerator = a * (_denominator - 2) + 2 * b;
-            ulong quotient = Math.BigMul(numerator, _reciprocal, out _);
-            ulong remainder = numerator - quotient * _denominator;
-            if (remainder >= _denominator) { quotient++; remainder -= _denominator; }
-            ulong complement = _denominator - remainder;
-            if (remainder > complement || remainder == complement && (quotient & 1) != 0) quotient++;
-            // Convex same-binade inputs keep the rounded significand in range.
-            result = BitConverter.Int64BitsToDouble((long)((exponent << 52) | (quotient & fractionMask)));
+            result = SmoothSameBinade(priorBits, inputBits, exponent);
             return true;
+        }
+
+        // Caller establishes a supported period and positive normal operands
+        // with this same exponent. Convex means preserve the binade.
+        internal double SmoothSameBinade(ulong priorBits, ulong inputBits, ulong exponent)
+        {
+            // n <= 2^64-2048, q*d <= n, and the corrected remainder < d.
+            // The rounded significand remains below 2^53. These proven bounds
+            // make arithmetic overflow checks redundant inside this kernel.
+            unchecked
+            {
+                const ulong fractionMask = (1UL << 52) - 1;
+                ulong a = (priorBits & fractionMask) | (1UL << 52);
+                ulong b = (inputBits & fractionMask) | (1UL << 52);
+                // d <= 2048 bounds n by 2^64 - 2048, including period 2047.
+                ulong numerator = a * (_denominator - 2) + 2 * b;
+                ulong quotient = Math.BigMul(numerator, _reciprocal, out _);
+                ulong remainder = numerator - quotient * _denominator;
+                if (remainder >= _denominator) { quotient++; remainder -= _denominator; }
+                ulong complement = _denominator - remainder;
+                if (remainder > complement || remainder == complement && (quotient & 1) != 0) quotient++;
+                // Convex same-binade inputs keep the rounded significand in range.
+                return BitConverter.Int64BitsToDouble((long)((exponent << 52) | (quotient & fractionMask)));
+            }
         }
     }
 
@@ -164,19 +179,23 @@ internal static class CertifiedTillson
         if (!Align(a, ae, scale, out Int128 av) || !Align(b, be, scale, out Int128 bv)
             || !Align(c, ce, scale, out Int128 cv) || !Align(d, de, scale, out Int128 dv)) return false;
         Parts(factor, out long weight, out int power);
-        Int128 first = 3 * (av - bv), second = 3 * (av - 2 * bv + cv);
-        Int128 low = av - 3 * bv + 3 * cv - dv, high = low;
-        Multiply(ref low, ref high, weight, -power);
-        low += second; high += second;
-        Multiply(ref low, ref high, weight, -power);
-        low += first; high += first;
-        Multiply(ref low, ref high, weight, -power);
-        low += av; high += av;
-        double lower = JurikDyadic.FromBinaryProduct(low, scale).Mean(1);
-        double upper = JurikDyadic.FromBinaryProduct(high, scale).Mean(1);
-        if (!double.IsFinite(lower) || BitConverter.DoubleToInt64Bits(lower) != BitConverter.DoubleToInt64Bits(upper)) return false;
-        result = lower;
-        return true;
+        // Alignment and factor guards bound every product below 2^125.
+        unchecked
+        {
+            Int128 first = 3 * (av - bv), second = 3 * (av - 2 * bv + cv);
+            Int128 low = av - 3 * bv + 3 * cv - dv, high = low;
+            Multiply(ref low, ref high, weight, -power);
+            low += second; high += second;
+            Multiply(ref low, ref high, weight, -power);
+            low += first; high += first;
+            Multiply(ref low, ref high, weight, -power);
+            low += av; high += av;
+            double lower = JurikDyadic.FromBinaryProduct(low, scale).Mean(1);
+            double upper = JurikDyadic.FromBinaryProduct(high, scale).Mean(1);
+            if (!double.IsFinite(lower) || BitConverter.DoubleToInt64Bits(lower) != BitConverter.DoubleToInt64Bits(upper)) return false;
+            result = lower;
+            return true;
+        }
     }
 
     private static bool Align(long value, int exponent, int scale, out Int128 aligned)
@@ -194,11 +213,14 @@ internal static class CertifiedTillson
         // Each stage input has magnitude <2^65. For |factor|<=2, the
         // largest pre-product magnitude is <62*2^65 plus rounding units;
         // multiplying by a 53-bit significand stays below 2^125.
-        if (weight < 0) (low, high) = (high, low);
-        Int128 lowerProduct = low * weight, upperProduct = high * weight;
-        low = lowerProduct >> shift;
-        high = upperProduct >> shift;
-        if ((upperProduct & (((Int128)1 << shift) - 1)) != 0) high++;
+        unchecked
+        {
+            if (weight < 0) (low, high) = (high, low);
+            Int128 lowerProduct = low * weight, upperProduct = high * weight;
+            low = lowerProduct >> shift;
+            high = upperProduct >> shift;
+            if ((upperProduct & (((Int128)1 << shift) - 1)) != 0) high++;
+        }
     }
 }
 #endif
