@@ -1,0 +1,60 @@
+{
+  "before_sha256": "d21aeb39617ae7d55fe07469a32c472fe3a416a1e098a7f0b03f40569660fc9c",
+  "candidate_sha256": "d1bac6bc31dea90c14d87c8415efb1ace8fadbe0025e085f41f0523eba6183c4",
+  "changed_baseline_rows": 12,
+  "unchanged_baseline_rows": 790,
+  "changed_builder_slots": 24,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 24,
+  "verdicts": {
+    "faster": 591,
+    "slower": 890,
+    "inconclusive": 55
+  },
+  "unchanged_rows": 790,
+  "run_id": "local-adl-direct-dispatch-control-20261026",
+  "imported_utc": "2026-10-26T22:24:16.984547+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "3225e0241d0720a2a86b7069819432bf9086a9591069994bafb78f3b312f882d",
+      "archive": "benchmarks/results/remaining-indicators/adl-direct-dispatch-certified-local-adl-direct-dispatch-control-20261026-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "daeb887013324731d17c15c222bbb19ff9d4449ff87ac872ac413bc1769de1cb",
+      "archive": "benchmarks/results/remaining-indicators/adl-direct-dispatch-certified-local-adl-direct-dispatch-control-20261026-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "0aff237451529a1041a3d3483bcaa14f9e3439e2690d3a22002ff3d299f7e201",
+      "archive": "benchmarks/results/remaining-indicators/adl-direct-dispatch-certified-local-adl-direct-dispatch-control-20261026-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "0805092df0dd84c60dc62c38b2af56f97149b14242f52aea8a8d2c1bbcc2fcc6",
+      "archive": "benchmarks/results/remaining-indicators/adl-direct-dispatch-certified-local-adl-direct-dispatch-control-20261026-measurement.json.gz"
+    },
+    "stage-adl-direct-dispatch-report.py": {
+      "sha256": "9478cb7be6394f0b83a6a7d08cdfdd5e1cb62c7350937a99f5412f987dae5713",
+      "archive": "benchmarks/results/remaining-indicators/adl-direct-dispatch-certified-local-adl-direct-dispatch-control-20261026-stage-adl-direct-dispatch-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/adl-direct-dispatch-certified-local-adl-direct-dispatch-control-20261026-verify-approved-certified-report.py.gz"
+    },
+    "import-adl-direct-dispatch-report.py": {
+      "sha256": "29c739835d5df3297fdaf278e55675525ab7379125ab4c1bdf5b27b1c3edcd1f",
+      "archive": "benchmarks/results/remaining-indicators/adl-direct-dispatch-certified-local-adl-direct-dispatch-control-20261026-import-adl-direct-dispatch-report.py.gz"
+    },
+    "archive-adl-direct-dispatch-control.py": {
+      "sha256": "07ccc03d93e82aae01fea286746f949d627630b758a4b8943e9805e0b034d27a",
+      "archive": "benchmarks/results/remaining-indicators/adl-direct-dispatch-certified-local-adl-direct-dispatch-control-20261026-archive-adl-direct-dispatch-control.py.gz"
+    },
+    "prove-adl-direct-dispatch-integration.py": {
+      "sha256": "777d92b4000ac6e08f28a289c435dc5fcb009975f2e4f11a352c502fc587f559",
+      "archive": "benchmarks/results/remaining-indicators/adl-direct-dispatch-certified-local-adl-direct-dispatch-control-20261026-prove-adl-direct-dispatch-integration.py.gz"
+    },
+    "archive-adl-direct-dispatch-report.py": {
+      "sha256": "fb049c00b099d14e079e32a3e36c47db9c5b6c9d347adef353f9551c368322d0",
+      "archive": "benchmarks/results/remaining-indicators/adl-direct-dispatch-certified-local-adl-direct-dispatch-control-20261026-archive-adl-direct-dispatch-report.py.gz"
+    }
+  }
+}

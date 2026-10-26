@@ -770,8 +770,9 @@
     "measure-adl-direct-dispatch-control.py": "23ed437144dee7d1e5e9c28588af9dca8015ca67e83a3f65af22e607857b8897",
     "verify-adl-direct-dispatch-control.py": "2b831478e8edf1e6dde9993e5b28f245974a288abcfb24dba23aa42d8b372ac4"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
   "qualified_source_ref": "refs/heads/perf/qualified-adl-direct-dispatch-20261026",
-  "integration_source_proof": "benchmarks/results/remaining-indicators/adl-direct-dispatch-integration-source-proof-20261026.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/adl-direct-dispatch-integration-source-proof-20261026.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/adl-direct-dispatch-certified-local-adl-direct-dispatch-control-20261026-report-import.json"
 }
