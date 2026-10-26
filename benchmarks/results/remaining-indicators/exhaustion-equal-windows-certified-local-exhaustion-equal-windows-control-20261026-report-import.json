@@ -1,0 +1,60 @@
+{
+  "before_sha256": "35f967e259abb51465e5f72d88394cd7a308163870ac8720503965acd14b5490",
+  "candidate_sha256": "d21aeb39617ae7d55fe07469a32c472fe3a416a1e098a7f0b03f40569660fc9c",
+  "changed_baseline_rows": 6,
+  "unchanged_baseline_rows": 796,
+  "changed_builder_slots": 12,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 12,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 796,
+  "run_id": "local-exhaustion-equal-windows-control-20261026",
+  "imported_utc": "2026-10-26T21:14:46.104294+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "f5cd47c55795315d728c78b370bb8058387283038498308fa5ddd4e7f790aa49",
+      "archive": "benchmarks/results/remaining-indicators/exhaustion-equal-windows-certified-local-exhaustion-equal-windows-control-20261026-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "dc238af0b28d0c805a3b2f2f09739af34a97d59f7979e6f30429dfbf1c63aec2",
+      "archive": "benchmarks/results/remaining-indicators/exhaustion-equal-windows-certified-local-exhaustion-equal-windows-control-20261026-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "cbe64ac6f3384a6680706e7ca658e63513810da83b6c90e1642d5cf80dd2a0d6",
+      "archive": "benchmarks/results/remaining-indicators/exhaustion-equal-windows-certified-local-exhaustion-equal-windows-control-20261026-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "dcb81310ad03e8bd818b8a1f820b4f4af447d78a46c1a2d2c7cc2823586c195d",
+      "archive": "benchmarks/results/remaining-indicators/exhaustion-equal-windows-certified-local-exhaustion-equal-windows-control-20261026-measurement.json.gz"
+    },
+    "stage-exhaustion-equal-windows-report.py": {
+      "sha256": "c953bf2be5f4dcc8b2cbeec0101002761e509c879b1e0792bbe6ad656ea856b9",
+      "archive": "benchmarks/results/remaining-indicators/exhaustion-equal-windows-certified-local-exhaustion-equal-windows-control-20261026-stage-exhaustion-equal-windows-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/exhaustion-equal-windows-certified-local-exhaustion-equal-windows-control-20261026-verify-approved-certified-report.py.gz"
+    },
+    "import-exhaustion-equal-windows-report.py": {
+      "sha256": "b07ad4d32d8d730d29f8ba8e8cf41d2574e4affff5457e2565047078798f0c8e",
+      "archive": "benchmarks/results/remaining-indicators/exhaustion-equal-windows-certified-local-exhaustion-equal-windows-control-20261026-import-exhaustion-equal-windows-report.py.gz"
+    },
+    "archive-exhaustion-equal-windows-control.py": {
+      "sha256": "c8fdddd8795e25f915ddacb4892a3c8b1c35214796251897f5b4b296b8ddd8c2",
+      "archive": "benchmarks/results/remaining-indicators/exhaustion-equal-windows-certified-local-exhaustion-equal-windows-control-20261026-archive-exhaustion-equal-windows-control.py.gz"
+    },
+    "prove-exhaustion-equal-windows-integration.py": {
+      "sha256": "9224558fcde27a5bc39510e30fbbb04c1a76c6133b702a34d54e584b1619b259",
+      "archive": "benchmarks/results/remaining-indicators/exhaustion-equal-windows-certified-local-exhaustion-equal-windows-control-20261026-prove-exhaustion-equal-windows-integration.py.gz"
+    },
+    "archive-exhaustion-equal-windows-report.py": {
+      "sha256": "2ad947878de164bf3d8198a1c74ed4bb40c2a844ccb1c0739ee9e9831d683fee",
+      "archive": "benchmarks/results/remaining-indicators/exhaustion-equal-windows-certified-local-exhaustion-equal-windows-control-20261026-archive-exhaustion-equal-windows-report.py.gz"
+    }
+  }
+}

@@ -376,8 +376,9 @@
     "measure-exhaustion-equal-windows-control.py": "1ce86a2092888fd81dbd6e8f02c25f012d0df3ad92decf302638d897353e8f91",
     "verify-exhaustion-equal-windows-control.py": "d913bb806c853aba103ae53ce6a8936325f337c3126ddf0c1e8101e84010dc44"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
   "qualified_source_ref": "refs/heads/perf/qualified-exhaustion-equal-windows-20261026",
-  "integration_source_proof": "benchmarks/results/remaining-indicators/exhaustion-equal-windows-integration-source-proof-20261026.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/exhaustion-equal-windows-integration-source-proof-20261026.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/exhaustion-equal-windows-certified-local-exhaustion-equal-windows-control-20261026-report-import.json"
 }
