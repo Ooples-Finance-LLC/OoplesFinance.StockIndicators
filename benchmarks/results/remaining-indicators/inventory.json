@@ -13684,7 +13684,7 @@
     "src/Indicators/ElderRayWithDetails.cs": "897eb7a7cf12f6e39cc4164b6820b5dd6682412f5e084a316fd13e92fcd09072",
     "src/Indicators/EmaDifferenceSignal.cs": "a2b70dd038cdac746b038d53e6ee7c7362683dddd2d8245e45281c82d15f98f2",
     "src/Indicators/EngulfingPattern.cs": "23244f99c219def07a0a7ae048758119c6cd9b3a4034499c048256258a4f5413",
-    "src/Indicators/ExhaustionCandles.cs": "2169795b2c78c067e1ebc4255b5cc0540c6808ee8cd6f24d2296c10dcc27be9a",
+    "src/Indicators/ExhaustionCandles.cs": "bde7f0302572ca4b39805ce8a61b9151c64ed7c805760e7fac31e7b493ba6e99",
     "src/Indicators/ExpandingRegularizedEma.cs": "e221d0cf38199e5a947eecd4a4a5ac564ba2115b8c74cee021bc209f30299a59",
     "src/Indicators/ExpandingZeroLagEma.cs": "1c2e374e2502c730463a22da039e2128468b10f6d407def7b9c4d5f40feb6f5a",
     "src/Indicators/ExtendedReversalCandles.cs": "a0223f96781ff183dfc4b63698b9fc86788ae23aee156e4e4cda9ad61f859512",
