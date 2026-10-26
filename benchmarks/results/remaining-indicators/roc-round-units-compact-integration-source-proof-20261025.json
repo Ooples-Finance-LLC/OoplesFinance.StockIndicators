@@ -1,0 +1,34 @@
+{
+  "qualified_commit": "6481a4f7d29005bedde9aea75470e55a429a2caf",
+  "qualified_code": "4a1ba349579d1927657281b7d4e1e83274e69704",
+  "matched_paths": [
+    "src",
+    "tests",
+    "examples",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "b54efc7a9404f66d53db598f54d19ff27933a0c528afdb5678c81a249fe59479",
+  "qualification_reused": {
+    "unit": 785,
+    "parity": 130,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-round-units-compact-20261025\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "15b3a3758629f9cc6eea990c43694314df0c009f216a12df885648f922515f80",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-round-units-compact-20261025\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "15b3a3758629f9cc6eea990c43694314df0c009f216a12df885648f922515f80",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-round-units-compact-20261025\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "15b3a3758629f9cc6eea990c43694314df0c009f216a12df885648f922515f80",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-round-units-compact-20261025\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "15b3a3758629f9cc6eea990c43694314df0c009f216a12df885648f922515f80"
+  },
+  "control": "local-roc-round-units-compact-control-20261025",
+  "note": "Integrated executable sources and build inputs exactly match qualified candidate. Publishing checkout binaries remain older; preserved candidate DLL supplied the new measurement arm. No redundant production rebuild."
+}
