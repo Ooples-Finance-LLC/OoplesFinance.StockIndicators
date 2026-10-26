@@ -361,7 +361,11 @@ internal sealed class StarReversalState(
         _short1 = _short;
         _doji1 = _doji;
         Accumulate(_longs, ref _long, bar, longPeriod, false);
-        Accumulate(_shorts, ref _short, bar, shortPeriod, false);
+        // Equal body windows have identical exact sums and eviction order.
+        if (shortPeriod == longPeriod)
+            _short = _long;
+        else
+            Accumulate(_shorts, ref _short, bar, shortPeriod, false);
         if (dojiPeriod > 0)
             Accumulate(_dojis, ref _doji, bar, dojiPeriod, true);
         _first = _second;
