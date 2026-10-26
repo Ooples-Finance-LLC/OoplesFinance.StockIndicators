@@ -184,8 +184,9 @@
     "measure-adl-identity-signal-control.py": "c0c6f48a472c9fc6cb743907c1dde728198dd9ae670732c33a1369486660c5ae",
     "verify-adl-identity-signal-control.py": "381a6f7d65832918231a5cbd9976ae6180e197b9f066e978bc5cdef7b4f01c87"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
   "qualified_source_ref": "refs/heads/perf/qualified-adl-identity-signal-20261026",
-  "integration_source_proof": "benchmarks/results/remaining-indicators/adl-identity-signal-integration-source-proof-20261026.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/adl-identity-signal-integration-source-proof-20261026.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/adl-identity-signal-certified-local-adl-identity-signal-control-20261026-report-import.json"
 }
