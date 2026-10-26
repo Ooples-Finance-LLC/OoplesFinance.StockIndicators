@@ -775,7 +775,13 @@ internal static partial class ValuesBarExecution
             if (Failure is not null || Indicator is Sma) return;
             try
             {
-                if (_state is AdlValueState adl)
+                if (_state is TillsonValueState tillson)
+                {
+                    // Tillson clears the entire scratch span before updating its stages.
+                    tillson.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
+                }
+                else if (_state is AdlValueState adl)
                 {
                     Array.Clear(_scratch);
                     adl.Update(in bar, _scratch);
