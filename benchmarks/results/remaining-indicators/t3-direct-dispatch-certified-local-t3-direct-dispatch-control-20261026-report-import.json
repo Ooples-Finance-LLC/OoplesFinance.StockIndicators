@@ -1,0 +1,60 @@
+{
+  "before_sha256": "05aacdcf8b4cffd5a0c786494168fee6291c4c42d24fcc8ab13e006cfd1f5ac5",
+  "candidate_sha256": "311a4d2923c24e7fb4f571dc574a6c14ff0655de54c5f871c9a13acdcd34b67f",
+  "changed_baseline_rows": 8,
+  "unchanged_baseline_rows": 794,
+  "changed_builder_slots": 16,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 16,
+  "verdicts": {
+    "faster": 591,
+    "slower": 890,
+    "inconclusive": 55
+  },
+  "unchanged_rows": 794,
+  "run_id": "local-t3-direct-dispatch-control-20261026",
+  "imported_utc": "2026-10-26T23:51:32.868290+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "97c92b2acaac23a2889374d9da701f652d48682cc18e2b29656f0f099aafe35a",
+      "archive": "benchmarks/results/remaining-indicators/t3-direct-dispatch-certified-local-t3-direct-dispatch-control-20261026-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "6101754efb384ad8e25d8af44f2040e17a432d1759b951ff7250f1dab0c67c39",
+      "archive": "benchmarks/results/remaining-indicators/t3-direct-dispatch-certified-local-t3-direct-dispatch-control-20261026-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "3b2427b612518f7e2ad22bb2752bf6d4d3ae519d1e620f3b23d46f58041c7d34",
+      "archive": "benchmarks/results/remaining-indicators/t3-direct-dispatch-certified-local-t3-direct-dispatch-control-20261026-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "979da3221381d11d9db80139ba0cef05b46f415ea972f2b12ba51f674147ca3d",
+      "archive": "benchmarks/results/remaining-indicators/t3-direct-dispatch-certified-local-t3-direct-dispatch-control-20261026-measurement.json.gz"
+    },
+    "stage-t3-direct-dispatch-report.py": {
+      "sha256": "1570fdd16c00b3ed8d3547235088491bf9838b28b42336f0c1cf267d6d570898",
+      "archive": "benchmarks/results/remaining-indicators/t3-direct-dispatch-certified-local-t3-direct-dispatch-control-20261026-stage-t3-direct-dispatch-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/t3-direct-dispatch-certified-local-t3-direct-dispatch-control-20261026-verify-approved-certified-report.py.gz"
+    },
+    "import-t3-direct-dispatch-report.py": {
+      "sha256": "21a745a8c13cc4a2cbeeeef8f9becbb064e1ea5b6dec8dac137f4f8ebeecba36",
+      "archive": "benchmarks/results/remaining-indicators/t3-direct-dispatch-certified-local-t3-direct-dispatch-control-20261026-import-t3-direct-dispatch-report.py.gz"
+    },
+    "archive-t3-direct-dispatch-control.py": {
+      "sha256": "6bea1cb81fb8ce4521076cb086cd519110a12c7655a070a99443c7423f58259c",
+      "archive": "benchmarks/results/remaining-indicators/t3-direct-dispatch-certified-local-t3-direct-dispatch-control-20261026-archive-t3-direct-dispatch-control.py.gz"
+    },
+    "prove-t3-direct-dispatch-integration.py": {
+      "sha256": "fcf4a8a3e723582bbc0492524148e1aca1eff857d452b868e679bf215cb19a2c",
+      "archive": "benchmarks/results/remaining-indicators/t3-direct-dispatch-certified-local-t3-direct-dispatch-control-20261026-prove-t3-direct-dispatch-integration.py.gz"
+    },
+    "archive-t3-direct-dispatch-report.py": {
+      "sha256": "b214df6dd83525a23cb96c58b2b11ae4efa4729878d23dd293f97ccc2d9e1483",
+      "archive": "benchmarks/results/remaining-indicators/t3-direct-dispatch-certified-local-t3-direct-dispatch-control-20261026-archive-t3-direct-dispatch-report.py.gz"
+    }
+  }
+}
