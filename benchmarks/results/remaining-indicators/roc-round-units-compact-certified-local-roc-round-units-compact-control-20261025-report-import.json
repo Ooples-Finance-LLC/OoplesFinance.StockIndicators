@@ -1,0 +1,60 @@
+{
+  "before_sha256": "75e913962993c707123cdae642c7fd83876fc0fb95d0df22466b1e4b439302f4",
+  "candidate_sha256": "ed905f068715ca79afacd8a8b092511e70c103bbac9c2ec9afd743e7dd47a3e9",
+  "changed_baseline_rows": 20,
+  "unchanged_baseline_rows": 782,
+  "changed_builder_slots": 40,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 40,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 782,
+  "run_id": "local-roc-round-units-compact-control-20261025",
+  "imported_utc": "2026-10-26T07:36:46.589832+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "81c0bb6eb537f77ccd6da2bb985d524c0bd2b2c5a444c4f2d93c47c62bb8b90c",
+      "archive": "benchmarks/results/remaining-indicators/roc-round-units-compact-certified-local-roc-round-units-compact-control-20261025-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "06dec40bc2e32b44adbd9bb99820b26fc5dde432fe8b94aaf01adce8435ebe1d",
+      "archive": "benchmarks/results/remaining-indicators/roc-round-units-compact-certified-local-roc-round-units-compact-control-20261025-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "22b943149ffb2113e71acf420dfe98d652e9f758ff0a9dcc8357803b3cbfcb0e",
+      "archive": "benchmarks/results/remaining-indicators/roc-round-units-compact-certified-local-roc-round-units-compact-control-20261025-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "36baba2ee9626a7229304a3ea47635ff933cb72c84143cf66c90e28c2aca30ee",
+      "archive": "benchmarks/results/remaining-indicators/roc-round-units-compact-certified-local-roc-round-units-compact-control-20261025-measurement.json.gz"
+    },
+    "stage-roc-round-units-compact-report.py": {
+      "sha256": "2fc945cdf137f76fe81e4ed477ad776a9cd1ab86659e5d999513b0bf6f6b4417",
+      "archive": "benchmarks/results/remaining-indicators/roc-round-units-compact-certified-local-roc-round-units-compact-control-20261025-stage-roc-round-units-compact-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/roc-round-units-compact-certified-local-roc-round-units-compact-control-20261025-verify-approved-certified-report.py.gz"
+    },
+    "import-roc-round-units-compact-report.py": {
+      "sha256": "804a4d4e72ba878a8d11b452cdea6f7767490ecd3aab7461ae6f05acb1e8111b",
+      "archive": "benchmarks/results/remaining-indicators/roc-round-units-compact-certified-local-roc-round-units-compact-control-20261025-import-roc-round-units-compact-report.py.gz"
+    },
+    "archive-roc-round-units-compact-control.py": {
+      "sha256": "290c3185a6b6766e74604cdc626e73fe383b92576539d87d2a0fb55712b95eb7",
+      "archive": "benchmarks/results/remaining-indicators/roc-round-units-compact-certified-local-roc-round-units-compact-control-20261025-archive-roc-round-units-compact-control.py.gz"
+    },
+    "prove-roc-round-units-compact-integration.py": {
+      "sha256": "0b3000e719a25ca5a54bfe02a1da30b6ca3d7102b8b89592f426297b9715614a",
+      "archive": "benchmarks/results/remaining-indicators/roc-round-units-compact-certified-local-roc-round-units-compact-control-20261025-prove-roc-round-units-compact-integration.py.gz"
+    },
+    "archive-roc-round-units-compact-report.py": {
+      "sha256": "50e107f765aec0d8837c582da310aaefd94795038c665beaca26a9f35458bc36",
+      "archive": "benchmarks/results/remaining-indicators/roc-round-units-compact-certified-local-roc-round-units-compact-control-20261025-archive-roc-round-units-compact-report.py.gz"
+    }
+  }
+}
