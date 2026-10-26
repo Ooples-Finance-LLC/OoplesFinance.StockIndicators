@@ -1122,8 +1122,9 @@
     "measure-roc-round-units-compact-control.py": "0cbd21ed6853950ea57f92e35c70ca3ed64778b823aac3e6707647a2c4a23ea0",
     "verify-roc-round-units-compact-control.py": "836af3e55f8b3e3c2f5a62e6513ffc530f5a6f12d541e82c4963c4a33bd5e554"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
   "qualified_source_ref": "refs/heads/perf/qualified-roc-round-units-compact-20261025",
-  "integration_source_proof": "benchmarks/results/remaining-indicators/roc-round-units-compact-integration-source-proof-20261025.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/roc-round-units-compact-integration-source-proof-20261025.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/roc-round-units-compact-certified-local-roc-round-units-compact-control-20261025-report-import.json"
 }
