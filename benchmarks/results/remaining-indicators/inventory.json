@@ -13788,7 +13788,7 @@
     "src/Indicators/SmoothedAccumulationOscillator.cs": "40bd2030a121667190587c2ee8908b6aabf0ca2df0f33c513fb57859626f5215",
     "src/Indicators/SpecimenIndicators.cs": "bf57b1fdd8f71e2a85f78540e544f80031db8883d8f57064aa6b746bc240acd0",
     "src/Indicators/StandardDeviationWithDetails.cs": "4d1041702d3a4148e67dc6bc83e7a492e44402f64a8772d34b499390d2220b0f",
-    "src/Indicators/StarReversalCandles.cs": "6f288724bc54706571195f33c3a49a3b655b5b6c543972711cacc9eea245328d",
+    "src/Indicators/StarReversalCandles.cs": "73606694a8f021ba6c13841887aa3437ec8babe4568b997f499800d1f2ddb747",
     "src/Indicators/StochasticRsiConventions.cs": "56288090aa2c7f0aed488f1e2a9d8433b2a56a08269587339a050101f8f4ae34",
     "src/Indicators/StrictHaramiCandles.cs": "a2af7c59b6959aaf19bf6d731373a0b57bf5c5503efcf59f2e69b71f1c7cc2aa",
     "src/Indicators/SumSeededDirectionalIndex.cs": "3b5e600294dc1d2f0e4dc8ffda7c0096eb01b23faadaa26e2d830db3a16e32d6",
