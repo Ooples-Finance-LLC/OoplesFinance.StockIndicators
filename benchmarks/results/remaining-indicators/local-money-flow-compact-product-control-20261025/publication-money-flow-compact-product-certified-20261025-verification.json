@@ -1,0 +1,66 @@
+{
+  "input_head": "612e984c6584936d73bd647ece983e82d415e260",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "tests/ModelsTests/SharedMoneyFlowCertificateTests.cs"
+  ],
+  "batch_note": "Approved A/D shared-helper redesign: retain exact compact products when double multiplication is inexact, keeping existing overflow fallback. Direct helper, accumulation/Chaikin/percentage consumers, preview/reset, comparison and GPU/inventory contracts required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-26T01:02:56.686781+00:00",
+  "unit": {
+    "passed": 289,
+    "class_counts": {
+      "MoneyFlowPercentNumericalTests": 75,
+      "CompactSmoothedAccumulationTests": 15,
+      "PriceVolumeDetailsSharedExecutionTests": 12,
+      "MoneyFlowAccumulationNumericalTests": 147,
+      "ChaikinFlowNumericalTests": 35,
+      "SharedMoneyFlowCertificateTests": 2,
+      "CompactAccumulationDistributionExecutionTests": 3
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\money-flow-compact-product\\unit\\unit.trx",
+    "sha256": "a384ddb0f3e0253706d8ea67874191763fffb9d56647f48ee8e5d269fd48027a",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-money-flow-compact-product-certified-20261025-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 54,
+    "class_counts": {
+      "SharedAdlDetailsFixtureTests": 8,
+      "AccumulationDistributionComparisonTests": 17,
+      "SharedSmoothedAccumulationFixtureTests": 12,
+      "MoneyFlowDetailComparisonTests": 9,
+      "SmoothedAccumulationComparisonTests": 8
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\money-flow-compact-product\\parity\\parity.trx",
+    "sha256": "1824d6ef56b8745d0165c1d11688ac45db03b58ef098b1165da91a54c7c45214",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-money-flow-compact-product-certified-20261025-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-money-flow-compact-product-20261025\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4a2af68d505406da09a5904db87025797d872b219c4462e1503c7143721e15cc",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-money-flow-compact-product-20261025\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4a2af68d505406da09a5904db87025797d872b219c4462e1503c7143721e15cc",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-money-flow-compact-product-20261025\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4a2af68d505406da09a5904db87025797d872b219c4462e1503c7143721e15cc",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-money-flow-compact-product-20261025\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4a2af68d505406da09a5904db87025797d872b219c4462e1503c7143721e15cc"
+  },
+  "source_fingerprint_sha256": "7ca8666faec68d511fb0d72f8addfdc042788254eb5a644c603d9d3ed9b34e39",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved A/D shared-helper redesign: retain exact compact products when double multiplication is inexact, keeping existing overflow fallback. Direct helper, accumulation/Chaikin/percentage consumers, preview/reset, comparison and GPU/inventory contracts required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
