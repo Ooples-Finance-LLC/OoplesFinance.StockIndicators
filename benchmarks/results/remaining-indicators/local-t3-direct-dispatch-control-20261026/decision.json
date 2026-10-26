@@ -487,8 +487,9 @@
     "verify-t3-direct-dispatch-control.py": "53999925ed9dcf4a8994bebb8104a9755a9519e6fc1b46e9317a799956e49a06",
     "benchmark_process_cleanup.py": "fa2c088e49c3cc04c2e5a99bbe875080b95253f5e156f2983e4691420b8d8fc3"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
   "qualified_source_ref": "refs/heads/perf/qualified-t3-direct-dispatch-20261026",
-  "integration_source_proof": "benchmarks/results/remaining-indicators/t3-direct-dispatch-integration-source-proof-20261026.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/t3-direct-dispatch-integration-source-proof-20261026.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/t3-direct-dispatch-certified-local-t3-direct-dispatch-control-20261026-report-import.json"
 }
