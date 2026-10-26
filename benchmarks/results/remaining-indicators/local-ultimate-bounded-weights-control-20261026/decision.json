@@ -1,0 +1,310 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "6481a4f7d29005bedde9aea75470e55a429a2caf",
+    "new": "ed02f3ebad242ec78199fd0a647e8568c5c85453"
+  },
+  "candidate_code_source": "9cfc05237cc40e69c91ab47df54371d66d64a4b1",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "SharedUltimateBenchmarks",
+      "pair": "Skender.GetUltimate",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.025712391493055556,
+        0.025917274305555554
+      ],
+      "new_means_ms": [
+        0.02502166015625,
+        0.02526005859375
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedUltimateBenchmarks",
+      "pair": "Skender.GetUltimate",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.021344600830078126,
+        0.021381910400390624
+      ],
+      "new_means_ms": [
+        0.02108177001953125,
+        0.02070621826171875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedUltimateBenchmarks",
+      "pair": "Skender.GetUltimate",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.15260513671875,
+        0.158689228515625
+      ],
+      "new_means_ms": [
+        0.147777890625,
+        0.152254638671875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedUltimateBenchmarks",
+      "pair": "Skender.GetUltimate",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.120446357421875,
+        0.13211141493055556
+      ],
+      "new_means_ms": [
+        0.12553019748263888,
+        0.126304384765625
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedUltimateBenchmarks",
+      "pair": "TaLib.Functions.UltOsc",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.023961659071180554,
+        0.025081787109375
+      ],
+      "new_means_ms": [
+        0.025298749457465276,
+        0.0249259375
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedUltimateBenchmarks",
+      "pair": "TaLib.Functions.UltOsc",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.021176243896484374,
+        0.020922706298828125
+      ],
+      "new_means_ms": [
+        0.020764698486328125,
+        0.0209629736328125
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedUltimateBenchmarks",
+      "pair": "TaLib.Functions.UltOsc",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.162345341796875,
+        0.14997544921875
+      ],
+      "new_means_ms": [
+        0.152085107421875,
+        0.144839384765625
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedUltimateBenchmarks",
+      "pair": "TaLib.Functions.UltOsc",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.1186788671875,
+        0.130894150390625
+      ],
+      "new_means_ms": [
+        0.115944345703125,
+        0.132266435546875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetUltimate",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        1.4016875,
+        1.48512
+      ],
+      "new_means_ms": [
+        1.14925,
+        1.1319
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetUltimate",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        1.3759,
+        1.309511111111111
+      ],
+      "new_means_ms": [
+        1.2185,
+        1.1932375
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.UltOsc",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        2.64107,
+        1.83459
+      ],
+      "new_means_ms": [
+        1.6711777777777777,
+        1.53496
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.UltOsc",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        1.34061,
+        1.36984
+      ],
+      "new_means_ms": [
+        1.26331,
+        1.1898555555555554
+      ],
+      "verdict": "inconclusive"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "c6ff6b287bf4de6021fcbec09265eb43cf9fa184e426301dd536d26ec8e79fa9",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "b8d8bbb5103df6497422ca06fafe1be27d093438802100c370dda1440de4100b",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "712d8043fb24a4ea1c7bd3b9e9a7bdd693a96bb5b2583529781953c87a30c934",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "41e97305b3da2aaf638bf87ccb9e0d0a6b0bf1a73cecf46e9a8965272796f28a",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/verified-summary.json.gz"
+    },
+    "round0-old-SharedUltimateBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedUltimateBenchmarks-report-full-compressed.json": {
+      "sha256": "6302eaa0a1b9b141ad313c450153d45bdb78a146ed8087a71048b82328568422",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round0-old-SharedUltimateBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedUltimateBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "5021d24bf380e091827b00b9c4c0e17215a55af6867fd2a72a8d55d29f578070",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedUltimateBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedUltimateBenchmarks-report-full-compressed.json": {
+      "sha256": "f135a130a77989fd2545b7f42328b45d8a57a739fbf248993757659cd0f21ac2",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round1-new-SharedUltimateBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedUltimateBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "09ec42c96799c482eaa23019fc58e834c6c0fb88f6232fc73c8513aab8493e0f",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedUltimateBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedUltimateBenchmarks-report-full-compressed.json": {
+      "sha256": "242e7b8acc89765dc8dbbd91bcc83aa9a0af2fa0fad3101142d92fd6e6e0651f",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round2-new-SharedUltimateBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedUltimateBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "b70826dc42165068eb38b729c06618c72603519888745905eb2641422f02426f",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedUltimateBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedUltimateBenchmarks-report-full-compressed.json": {
+      "sha256": "ffa313ec8f4ee862dfb0bd1270652bef5e12c3e21d23398e8fb4a09708c62420",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round3-old-SharedUltimateBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedUltimateBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "3bc66893358799c30bc4c8fe59bf17e8d6e00c03aba15eb0a948ae9533df7594",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "b1659e043d495900ed6f686c60e0f6924b8da949115dfd5bb13b281f4aa96ecc",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round0-old-SharedUltimateBenchmarks.log": {
+      "sha256": "29a7cd8b2f9831a70a697e6ff560ff49c0654c6c0f5271004454e715023e49ae",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round0-old-SharedUltimateBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "c7b5d2fe925b2a7768af53cd2df2a721bfab7c58fd4c66950064a802f37af906",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-SharedUltimateBenchmarks.log": {
+      "sha256": "8d20b7e3bf76fa10441139a5edab0bb91d11ee688cbf690794d738c92969e373",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round1-new-SharedUltimateBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "ba4d5d4ea39959732e8e77291b530ea66dd9f907b50b9e5a1c5c046768a58e05",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-SharedUltimateBenchmarks.log": {
+      "sha256": "c561dd7ab9fba06e995815b5125685f45a8dc850349880927d51b16d99b6c8e2",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round2-new-SharedUltimateBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "98b17977ce215936ac889de9f729a6973b995f5ab3b6a19f91ff0cb15548799f",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-SharedUltimateBenchmarks.log": {
+      "sha256": "06c5e876dabe5ddfc7d6461f3603f2c6fd08f9cc9809f8ae779342f6e7f2e445",
+      "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/round3-old-SharedUltimateBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-ultimate-bounded-weights-control.py": "281c4d204173fd76b3da628bba957b3772889d20b86c238083309355e1ef2175",
+    "verify-ultimate-bounded-weights-control.py": "05fb56dcecc7e3bb0e32c5f71f94d7ef3aa42030b44c28e938458e44b6b21c6d"
+  },
+  "report_imported": false,
+  "production_integrated": true,
+  "diagnostic": {
+    "note": "Published qualified Ultimate binary;500calls10k during separate A/D compilation; sampled-thread attribution only, not timing qualification.",
+    "archives": {
+      "status.json": {
+        "sha256": "79dd61b9b7dad8b954410335de4e026ff69e8d7221b6cb95306f8a2a44f64f3c",
+        "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/diagnostic/status.json.gz"
+      },
+      "ready.json": {
+        "sha256": "979ee4ff34d0d5db3bd7185473e5b85e432c9b31d904e54b4a6e862e05127abe",
+        "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/diagnostic/ready.json.gz"
+      },
+      "completed.json": {
+        "sha256": "19fdac7c0be89eec2da318315f36a3ffc39c65d7dbc55fb9115d7cda378a0ef3",
+        "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/diagnostic/completed.json.gz"
+      },
+      "profile-summary.json": {
+        "sha256": "aca9de466135046ac005a6ff613d94e8ecad4566fc7e7c29ef406ad86b3d4c96",
+        "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/diagnostic/profile-summary.json.gz"
+      },
+      "ultimate.speedscope.json": {
+        "sha256": "9b2832eee340334251c2cf3ee19695498bf63a30678c0f40199a075af8ee29c3",
+        "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/diagnostic/ultimate.speedscope.json.gz"
+      },
+      "worker.ps1": {
+        "sha256": "c626c70fb7fef7f15bc4c891d3b58567576a52035351cd28da09ca060f3515c5",
+        "archive": "benchmarks/results/remaining-indicators/local-ultimate-bounded-weights-control-20261026/diagnostic/worker.ps1.gz"
+      }
+    }
+  },
+  "qualified_source_ref": "refs/heads/perf/qualified-ultimate-bounded-weights-20261026",
+  "integration_source_proof": "benchmarks/results/remaining-indicators/ultimate-bounded-weights-integration-source-proof-20261026.json"
+}
