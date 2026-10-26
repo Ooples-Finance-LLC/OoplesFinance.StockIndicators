@@ -120,12 +120,14 @@ public sealed class WindowUltimateOscillator
             // Each term is at most 2^64. Weights sum to seven, so scaling
             // either bound by 100 fits comfortably within signed Int128.
             uint weight = (uint)(4 >> k);
-            lower += divided.Quotient * weight;
-            upper += ceiling * weight;
+            lower = unchecked(lower + divided.Quotient * weight);
+            upper = unchecked(upper + ceiling * weight);
         }
         Int128 denominator = (Int128)7 << 64;
-        double low = JurikDyadic.IntegerRatio((Int128)(lower * 100), denominator);
-        double high = JurikDyadic.IntegerRatio((Int128)(upper * 100), denominator);
+        // The accepted weighted bounds are at most 7 * 2^64; scaling by
+        // 100 stays below 2^74, including the conversion to signed Int128.
+        double low = JurikDyadic.IntegerRatio(unchecked((Int128)(lower * 100)), denominator);
+        double high = JurikDyadic.IntegerRatio(unchecked((Int128)(upper * 100)), denominator);
         if (BitConverter.DoubleToInt64Bits(low) != BitConverter.DoubleToInt64Bits(high)) return false;
         result = low;
         return true;
