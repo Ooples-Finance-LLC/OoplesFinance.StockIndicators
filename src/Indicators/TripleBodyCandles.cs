@@ -238,10 +238,15 @@ internal sealed class TripleBodyCandleState(
         Add(ref _longSum, bar, 1);
         if (kind != TripleBodyCandleKind.TwoCrows)
         {
-            if (_shortHistory.Count == shortPeriod)
-                Add(ref _shortSum, _shortHistory.Dequeue(), -1);
-            _shortHistory.Enqueue(bar);
-            Add(ref _shortSum, bar, 1);
+            if (shortPeriod == longPeriod)
+                _shortSum = _longSum;
+            else
+            {
+                if (_shortHistory.Count == shortPeriod)
+                    Add(ref _shortSum, _shortHistory.Dequeue(), -1);
+                _shortHistory.Enqueue(bar);
+                Add(ref _shortSum, bar, 1);
+            }
         }
         _first = _second;
         _second = bar;
