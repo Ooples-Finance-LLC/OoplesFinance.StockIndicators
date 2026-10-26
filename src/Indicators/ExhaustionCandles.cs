@@ -275,11 +275,11 @@ internal sealed class ExhaustionCandleState(
                     ? ExhaustionMeasure.Shadows
                     : ExhaustionMeasure.Range
             );
-    private readonly ExhaustionWindow? _short = shortPeriod > 0
+    private readonly ExhaustionWindow? _short = shortPeriod > 0 && shortPeriod != longPeriod
             ? new(shortPeriod, ExhaustionMeasure.Body)
             : null,
         _near = nearPeriod > 0 ? new(nearPeriod, ExhaustionMeasure.Range) : null,
-        _far = farPeriod > 0 ? new(farPeriod, ExhaustionMeasure.Range) : null;
+        _far = farPeriod > 0 && farPeriod != nearPeriod ? new(farPeriod, ExhaustionMeasure.Range) : null;
     private readonly int _warmup =
         Math.Max(
             Math.Max(longPeriod, shortPeriod),
@@ -404,7 +404,7 @@ internal sealed class ExhaustionCandleState(
                 && b.Low < a.Close
                 && b.Low >= a.Low
                 && Margin(_shadow, 1, b.Close, b.Low, 10) < 0
-                && BodyMargin(_short!, 0, c) > 0
+                && BodyMargin(_short ?? _long, 0, c) > 0
                 && Margin(_shadow, 0, c.Close, c.Low, 10) > 0
                 && Margin(_shadow, 0, c.High, c.Open, 10) > 0
                 && c.Low > b.Low
@@ -424,7 +424,7 @@ internal sealed class ExhaustionCandleState(
             // For a white final body, open + body equals close exactly.
             return BodyMargin(_long, 1, b) < 0
                 && Margin(_shadow, 1, b.High, b.Close, 10) > 0
-                && BodyMargin(_short!, 0, c) > 0
+                && BodyMargin(_short ?? _long, 0, c) > 0
                 && Margin(_near!, 1, b.Close, c.Close, 5) >= 0;
         if (
             c.Open <= b.Open
@@ -432,8 +432,8 @@ internal sealed class ExhaustionCandleState(
             || Margin(_shadow, 2, a.High, a.Close, 2) <= 0
         )
             return false;
-        return DeltaMargin(_far!, 2, a, b, 5, 3) < 0 && DeltaMargin(_near!, 1, c, b, 5) > 0
-            || DeltaMargin(_far!, 1, b, c, 5, 3) < 0
+        return DeltaMargin(_far ?? _near!, 2, a, b, 5, 3) < 0 && DeltaMargin(_near!, 1, c, b, 5) > 0
+            || DeltaMargin(_far ?? _near!, 1, b, c, 5, 3) < 0
             || BodyDifference(c, b) < 0
                 && BodyDifference(b, a) < 0
                 && (
