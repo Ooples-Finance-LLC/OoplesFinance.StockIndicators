@@ -498,8 +498,9 @@
     "measure-triple-body-equal-sums-control.py": "ec50283a841f1db0e962d2c8ec04897106efa0e6f2fef18a766f5d2223c974de",
     "verify-triple-body-equal-sums-control.py": "fe4ce1967ee15136036251e60c933a08eb811a05129178516a0c020e32d316bb"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
   "qualified_source_ref": "refs/heads/perf/qualified-triple-body-equal-sums-20261026",
-  "integration_source_proof": "benchmarks/results/remaining-indicators/triple-body-equal-sums-integration-source-proof-20261026.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/triple-body-equal-sums-integration-source-proof-20261026.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/triple-body-equal-sums-certified-local-triple-body-equal-sums-control-20261026-report-import.json"
 }
