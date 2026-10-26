@@ -1,0 +1,57 @@
+{
+  "input_head": "4b479a6759bf123185c64b44c1aabf2ee980c77a",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/TripleBodyCandles.cs"
+  ],
+  "batch_note": "Bounded triple-body optimization: reuse the exact long body sum for equal short periods inside the existing non-TwoCrows branch. Unequal-period updates, delayed snapshots and reference formulas remain. Validate all four shared consumers, independent numerical/lifecycle contracts, long-history parity, GPU and inventory. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-26T14:54:47.088985+00:00",
+  "unit": {
+    "passed": 14,
+    "class_counts": {
+      "TripleBodySharedExecutionTests": 9,
+      "TripleBodyParallelExecutionTests": 5
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\triple-body-equal-sums\\unit\\unit.trx",
+    "sha256": "d38ec5ef7f744cbe1ef899d3f04c47c4ef9dddea3c85980a01cd37f75a0de34c",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-triple-body-equal-sums-certified-20261026-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 85,
+    "class_counts": {
+      "SharedTripleBodyBenchmarkTests": 32,
+      "TripleBodyTests": 53
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\triple-body-equal-sums\\parity\\parity.trx",
+    "sha256": "aaf3d0d9c6f4bbd4f482684846221c253ca72a1acc473821bd87d29d8bfaca1d",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-triple-body-equal-sums-certified-20261026-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-triple-body-equal-sums-20261026\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c77464d67882df8e661442b6b2bfe18626f989e9a409d6edadcad6671cb9e0df",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-triple-body-equal-sums-20261026\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c77464d67882df8e661442b6b2bfe18626f989e9a409d6edadcad6671cb9e0df",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-triple-body-equal-sums-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c77464d67882df8e661442b6b2bfe18626f989e9a409d6edadcad6671cb9e0df",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-triple-body-equal-sums-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c77464d67882df8e661442b6b2bfe18626f989e9a409d6edadcad6671cb9e0df"
+  },
+  "source_fingerprint_sha256": "8a4ab42155b9e32e2dd6a3cef201a89514059b74314084dba0c82efd21ad5fc2",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Bounded triple-body optimization: reuse the exact long body sum for equal short periods inside the existing non-TwoCrows branch. Unequal-period updates, delayed snapshots and reference formulas remain. Validate all four shared consumers, independent numerical/lifecycle contracts, long-history parity, GPU and inventory. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
