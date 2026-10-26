@@ -13819,7 +13819,7 @@
     "src/Indicators/TrendTasukiPatterns.cs": "75bdae1b0e1c58bb6503c265e8600a48e244d5a41449991293e00f4b7a4275c7",
     "src/Indicators/TrendThreeMethodsPatterns.cs": "e184860f293d7e17ed5e0ee38ae797a8d7d627bcc9111d58cb7663c4a8d4db64",
     "src/Indicators/TriangularWindowAverage.cs": "bf8003f3414d7fc2bd79e8889e3c5c58571fbf1c93c90686f35c72091d70e06c",
-    "src/Indicators/TripleBodyCandles.cs": "a69a84006c9c2fb172fe6354135a5bf3c2ecec773b616a525eb64053871328c8",
+    "src/Indicators/TripleBodyCandles.cs": "2467a3d1c80c1107c501520e5a46225dbe3795bbb26c9a8f25d33b3239b3f986",
     "src/Indicators/TripleExponentialRate.cs": "e63a61448029f6b9d8fda2655901ac159e68cd4eadca4cf16f4f27d1e5157310",
     "src/Indicators/ValuesBarExecution.Acceleration.cs": "af5df86a0354bfc2df0cb6ad7954842195a3bbaf85393abe876522ad654a3dd6",
     "src/Indicators/ValuesBarExecution.AccumulationDistribution.cs": "23956a6337c78a17921ef9bc3b7f65609fccebf6bc73128f3fc44910208f82b1",
