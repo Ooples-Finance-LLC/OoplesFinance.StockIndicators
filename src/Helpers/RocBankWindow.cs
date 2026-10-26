@@ -33,12 +33,41 @@ internal readonly struct RocBankValue
     }
     internal static BigInteger RoundUnits(BigInteger numerator, BigInteger denominator)
     {
+#if !NETFRAMEWORK
+        if (TryCompactUnits(numerator, denominator, out var compact)) return compact;
+#endif
         for (var shift = 0; ; shift += 32)
         {
             var value = ExactMeanAccumulator.UnitRatio(numerator, denominator << shift);
             if (!double.IsInfinity(value)) return ExactVarianceWindow.Units(value) << shift;
         }
     }
+#if !NETFRAMEWORK
+    private static bool TryCompactUnits(BigInteger numerator, BigInteger denominator, out BigInteger result)
+    {
+        result = default;
+        // Keep the original denominator validation and extended-overflow loop.
+        if (denominator.Sign <= 0 || numerator.IsZero) return false;
+        var magnitude = BigInteger.Abs(numerator);
+        var topTrailing = BigInteger.TrailingZeroCount(magnitude);
+        var bottomTrailing = BigInteger.TrailingZeroCount(denominator);
+        if (topTrailing > int.MaxValue || bottomTrailing > int.MaxValue) return false;
+        int topZeros = (int)topTrailing;
+        int bottomZeros = (int)bottomTrailing;
+        if (magnitude.GetBitLength() - topZeros > 128
+            || denominator.GetBitLength() - bottomZeros > 128) return false;
+        long scale = (long)topZeros - bottomZeros - 1074;
+        if (scale < int.MinValue || scale > int.MaxValue) return false;
+        var top = (UInt128)(magnitude >> topZeros);
+        var bottom = (UInt128)(denominator >> bottomZeros);
+        // Exact midpoint checks certify the rounded normal result; underflow,
+        // overflow and unsupported midpoint products retain the original path.
+        if (!CertifiedCompactRatio.TryDivide(top, bottom, (int)scale, out double rounded)) return false;
+        result = ExactVarianceWindow.Units(numerator.Sign < 0 ? -rounded : rounded);
+        return true;
+    }
+#endif
+
     internal static RocBankValue Round(ExactMeanAccumulator sum, double unit = 1, long count = 1)
     {
         if (sum.IsExactlyZero) return default;
