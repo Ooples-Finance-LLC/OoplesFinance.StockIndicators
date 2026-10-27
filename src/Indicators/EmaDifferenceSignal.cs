@@ -162,9 +162,38 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
         }
     }
 
+    private sealed class CompactAverage(int period, bool first)
+    {
+        private long _count;
+        private CompactMacdValue _sum,
+            _value;
+
+        public void Reset()
+        {
+            _count = 0;
+            _sum = _value = default;
+        }
+
+        public CompactMacdValue? Add(CompactMacdValue input)
+        {
+            if (_count < (first ? 1 : period))
+            {
+                _sum += input;
+                _count++;
+                if (_count < (first ? 1 : period))
+                    return null;
+                _value = _sum.Round(first ? 1 : period);
+                _sum = default;
+            }
+            else
+                _value = (_value.Times(period - 1) + input.Times(2)).Round((long)period + 1);
+            return _value;
+        }
+    }
+
     internal sealed class State(EmaDifferenceSignal owner) : IMultiOutputState
     {
-        private readonly Average _fast = new(owner.FastPeriod, owner.FirstPrice),
+        private readonly CompactAverage _fast = new(owner.FastPeriod, owner.FirstPrice),
             _slow = new(owner.SlowPeriod, owner.FirstPrice),
             _signal = new(owner.SignalPeriod, owner.FirstPrice);
 
@@ -175,11 +204,11 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
             _signal.Reset();
         }
 
-        private void Publish(BigInteger? value, int slot, Span<double> output)
+        private void Publish(CompactMacdValue? value, int slot, Span<double> output)
         {
             if (value.HasValue && ((int)owner.Selection & (1 << slot)) != 0)
             {
-                output[slot] = ExactMeanAccumulator.UnitRatio(value.Value, 1);
+                output[slot] = value.Value.Publish();
                 output[slot + 5] = 1;
             }
         }
@@ -187,28 +216,25 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            var value = ExactVarianceWindow.Units(owner.Volume ? bar.Volume : bar.Close);
+            var value = CompactMacdValue.Of(owner.Volume ? bar.Volume : bar.Close);
             var fast = _fast.Add(value);
             var slow = _slow.Add(value);
             Publish(fast, 3, output);
             Publish(slow, 4, output);
             if (!fast.HasValue || !slow.HasValue)
                 return;
-            BigInteger? oscillator = owner.Percentage
+            CompactMacdValue? oscillator = owner.Percentage
                 ? (
                     slow.Value.IsZero
                         ? null
-                        : RocBankValue.RoundUnits(
-                            (100 * (fast.Value - slow.Value) * slow.Value.Sign) << 1074,
-                            BigInteger.Abs(slow.Value)
-                        )
+                        : (fast.Value - slow.Value).Percentage(slow.Value)
                 )
-                : RocBankValue.RoundUnits(fast.Value - slow.Value, 1);
+                : (fast.Value - slow.Value).Round(1);
             Publish(oscillator, 0, output);
-            var signal = _signal.Add(oscillator ?? BigInteger.Zero);
+            var signal = _signal.Add(oscillator ?? default(CompactMacdValue));
             Publish(signal, 1, output);
             if (oscillator.HasValue && signal.HasValue)
-                Publish(RocBankValue.RoundUnits(oscillator.Value - signal.Value, 1), 2, output);
+                Publish((oscillator.Value - signal.Value).Round(1), 2, output);
         }
     }
 }

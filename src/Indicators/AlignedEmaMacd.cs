@@ -120,8 +120,8 @@ public sealed class AlignedEmaMacd : MultiOutputIndicatorBase, IIndicatorValidat
     private sealed class Average(int period, bool first, double? coefficient)
     {
         private long _count;
-        private BigInteger _sum;
-        internal BigInteger Value { get; private set; }
+        private CompactMacdValue _sum;
+        internal CompactMacdValue Value { get; private set; }
         private readonly (BigInteger Alpha, BigInteger Complement, BigInteger Denominator) _weights =
             FixedWeights(coefficient);
 
@@ -138,10 +138,10 @@ public sealed class AlignedEmaMacd : MultiOutputIndicatorBase, IIndicatorValidat
         public void Reset()
         {
             _count = 0;
-            _sum = Value = 0;
+            _sum = Value = default;
         }
 
-        internal void Add(BigInteger input)
+        internal void Add(CompactMacdValue input)
         {
             if (_count < (first ? 1 : period))
             {
@@ -149,17 +149,14 @@ public sealed class AlignedEmaMacd : MultiOutputIndicatorBase, IIndicatorValidat
                 _sum += input;
                 if (_count == (first ? 1 : period))
                 {
-                    Value = RocBankValue.RoundUnits(_sum, first ? 1 : period);
-                    _sum = 0;
+                    Value = _sum.Round(first ? 1 : period);
+                    _sum = default;
                 }
                 return;
             }
             Value = coefficient.HasValue
-                ? RocBankValue.RoundUnits(
-                    Value * _weights.Complement + input * _weights.Alpha,
-                    _weights.Denominator
-                )
-                : RocBankValue.RoundUnits(Value * (period - 1) + 2 * input, (long)period + 1);
+                ? (Value.Times(_weights.Complement) + input.Times(_weights.Alpha)).Round(_weights.Denominator)
+                : (Value.Times(period - 1) + input.Times(2)).Round((long)period + 1);
         }
     }
 
@@ -179,11 +176,11 @@ public sealed class AlignedEmaMacd : MultiOutputIndicatorBase, IIndicatorValidat
             _signal.Reset();
         }
 
-        private void Publish(BigInteger value, int slot, Span<double> output)
+        private void Publish(CompactMacdValue value, int slot, Span<double> output)
         {
             if (((int)owner.Selection & (1 << slot)) != 0)
             {
-                output[slot] = ExactMeanAccumulator.UnitRatio(value, 1);
+                output[slot] = value.Publish();
                 output[slot + 3] = 1;
             }
         }
@@ -192,20 +189,20 @@ public sealed class AlignedEmaMacd : MultiOutputIndicatorBase, IIndicatorValidat
         {
             output.Clear();
             _index++;
-            var input = ExactVarianceWindow.Units(bar.Close);
+            var input = CompactMacdValue.Of(bar.Close);
             _slow.Add(input);
             if (owner.FirstPrice || _index >= owner.SlowPeriod - owner.FastPeriod)
                 _fast.Add(input);
             var start = (long)owner.SlowPeriod - 1 + owner.Suppression;
             if (_index < start)
                 return;
-            var difference = RocBankValue.RoundUnits(_fast.Value - _slow.Value, 1);
+            var difference = (_fast.Value - _slow.Value).Round(1);
             _signal.Add(difference);
             if (_index < start + owner.SignalPeriod - 1L + owner.Suppression)
                 return;
             Publish(difference, 0, output);
             Publish(_signal.Value, 1, output);
-            Publish(RocBankValue.RoundUnits(difference - _signal.Value, 1), 2, output);
+            Publish((difference - _signal.Value).Round(1), 2, output);
         }
     }
 }
