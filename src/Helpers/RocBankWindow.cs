@@ -37,6 +37,7 @@ internal readonly struct RocBankValue
         if (denominator.IsOne && TryRoundIntegerUnits(numerator, out var integer)) return integer;
         if (!denominator.IsOne && denominator.IsPowerOfTwo
             && TryRoundPowerOfTwoUnits(numerator, denominator, out var binary)) return binary;
+        if (TryRoundSmallDivisorUnits(numerator, denominator, out var small)) return small;
         if (TryCompactUnits(numerator, denominator, out var compact)) return compact;
 #endif
         for (var shift = 0; ; shift += 32)
@@ -85,6 +86,33 @@ internal readonly struct RocBankValue
         ulong rounded = guarded >> 1;
         if ((guarded & 1) != 0 && ((rounded & 1) != 0
             || BigInteger.TrailingZeroCount(magnitude) < discard - 1))
+            rounded++;
+        result = new BigInteger(rounded) << grid;
+        if (numerator.Sign < 0) result = -result;
+        return true;
+    }
+
+    private static bool TryRoundSmallDivisorUnits(BigInteger numerator, BigInteger denominator, out BigInteger result)
+    {
+        result = default;
+        if (denominator.Sign <= 0 || numerator.IsZero || denominator.GetBitLength() > 64)
+            return false;
+        var magnitude = BigInteger.Abs(numerator);
+        long exponent = magnitude.GetBitLength() - denominator.GetBitLength();
+        // Only normal results below the highest finite binade take this path.
+        // Subnormals, large divisors and extended overflow retain the fallback.
+        if (exponent < 53 || exponent > 2097) return false;
+        ulong divisor = (ulong)denominator;
+        int bits = (int)exponent + ((ulong)(magnitude >> (int)exponent) >= divisor ? 1 : 0);
+        if (bits <= 53 || bits > 2097) return false;
+        int grid = bits - 53;
+        // Retain the quotient's 53 significant bits and one guard bit.
+        // The shifted numerator occupies at most 118 bits for a 64-bit divisor.
+        UInt128 leading = (UInt128)(magnitude >> (grid - 1));
+        UInt128 guarded = leading / divisor;
+        ulong rounded = (ulong)(guarded >> 1);
+        if ((guarded & 1) != 0 && ((rounded & 1) != 0
+            || leading % divisor != 0 || BigInteger.TrailingZeroCount(magnitude) < grid - 1))
             rounded++;
         result = new BigInteger(rounded) << grid;
         if (numerator.Sign < 0) result = -result;
