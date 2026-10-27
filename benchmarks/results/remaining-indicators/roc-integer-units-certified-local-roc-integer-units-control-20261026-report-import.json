@@ -1,0 +1,60 @@
+{
+  "before_sha256": "c9fe31ab7429224e0be287dcbc056b5492ad463bda9e40ca296c44605a03e540",
+  "candidate_sha256": "f8f1065bb1d31594dcc4d77e58ae8fc9b1553593813ffba1919133abfcb768a6",
+  "changed_baseline_rows": 20,
+  "unchanged_baseline_rows": 782,
+  "changed_builder_slots": 40,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 40,
+  "verdicts": {
+    "faster": 595,
+    "slower": 890,
+    "inconclusive": 51
+  },
+  "unchanged_rows": 782,
+  "run_id": "local-roc-integer-units-control-20261026",
+  "imported_utc": "2026-10-27T01:47:54.522986+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "be6f10cb3d2a84ef9abc23be82d09ee3c82e7ccde83af223c1f44d9b1103f860",
+      "archive": "benchmarks/results/remaining-indicators/roc-integer-units-certified-local-roc-integer-units-control-20261026-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "a622baa1b16aee60d46862ec8266f1bb39880b7d079410fc8c3fd91346d3c89b",
+      "archive": "benchmarks/results/remaining-indicators/roc-integer-units-certified-local-roc-integer-units-control-20261026-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "f22d4d3e00503af333da788b9a4592ab3e8ea1eca2675f60fc03550055023227",
+      "archive": "benchmarks/results/remaining-indicators/roc-integer-units-certified-local-roc-integer-units-control-20261026-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "8b2c2e52b148525072028dbc67fe1a000756117cae76fa9e66ad963509999a5c",
+      "archive": "benchmarks/results/remaining-indicators/roc-integer-units-certified-local-roc-integer-units-control-20261026-measurement.json.gz"
+    },
+    "stage-roc-integer-units-report.py": {
+      "sha256": "2c9cdb748ea80227e6f991b088ed62c3db676c4843928b43d2bff06b61b5dbf0",
+      "archive": "benchmarks/results/remaining-indicators/roc-integer-units-certified-local-roc-integer-units-control-20261026-stage-roc-integer-units-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/roc-integer-units-certified-local-roc-integer-units-control-20261026-verify-approved-certified-report.py.gz"
+    },
+    "import-roc-integer-units-report.py": {
+      "sha256": "4bc21bb73acf8063394d8074e4c0b6f44e9f8f5a88496bfa1852708472c67a1f",
+      "archive": "benchmarks/results/remaining-indicators/roc-integer-units-certified-local-roc-integer-units-control-20261026-import-roc-integer-units-report.py.gz"
+    },
+    "archive-roc-integer-units-control.py": {
+      "sha256": "87700881ec9ec72098c6337a9c29ce1253e0a831b483e6b8783779f9947ee7e6",
+      "archive": "benchmarks/results/remaining-indicators/roc-integer-units-certified-local-roc-integer-units-control-20261026-archive-roc-integer-units-control.py.gz"
+    },
+    "prove-roc-integer-units-integration.py": {
+      "sha256": "939e2f1e7d5e00f1d41f6a162e35b9c6b3596c92eb4c995cf2d18726ba4e9918",
+      "archive": "benchmarks/results/remaining-indicators/roc-integer-units-certified-local-roc-integer-units-control-20261026-prove-roc-integer-units-integration.py.gz"
+    },
+    "archive-roc-integer-units-report.py": {
+      "sha256": "a356b48ea7eee951e1862a8e213ba9ce96190270cd05a4172dc3f0ec77d96a1f",
+      "archive": "benchmarks/results/remaining-indicators/roc-integer-units-certified-local-roc-integer-units-control-20261026-archive-roc-integer-units-report.py.gz"
+    }
+  }
+}
