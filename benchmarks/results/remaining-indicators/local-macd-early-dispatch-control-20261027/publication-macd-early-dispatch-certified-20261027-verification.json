@@ -1,0 +1,69 @@
+{
+  "input_head": "901e466d5b434b2389a1c4afdffaddd4bdd72b54",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/ValuesBarExecution.cs"
+  ],
+  "batch_note": "Move-only MACD per-bar dispatch reorder. Sealed handlers and their arithmetic, output clearing/copies, cancellation, input priority, and failure capture remain unchanged. Existing mixed-root, numerical, long-history, GPU, and inventory regressions required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-27T11:18:36.157738+00:00",
+  "unit": {
+    "passed": 245,
+    "class_counts": {
+      "PvoNumericalTests": 46,
+      "PpoNumericalTests": 71,
+      "TillsonSharedExecutionTests": 12,
+      "MacdNumericalTests": 81,
+      "MacdSharedExecutionTests": 18,
+      "MacdFixedCoefficientReductionTests": 2,
+      "SharedRecursiveStateTests": 8,
+      "CompactAccumulationDistributionExecutionTests": 3,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\macd-early-dispatch\\unit\\unit.trx",
+    "sha256": "8571a16aed1263a565ff9bcbe1ea62648f438ecf4a74713306051ff09644f197",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-macd-early-dispatch-certified-20261027-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 167,
+    "class_counts": {
+      "SharedTaMacdNativeBenchmarkTests": 46,
+      "AlignedMacdComparisonTests": 10,
+      "SharedHilbertSignalBenchmarkTests": 32,
+      "ClassicMacdComparisonTests": 16,
+      "SharedTradyMacdBenchmarkTests": 33,
+      "SharedTillsonBenchmarkTests": 16,
+      "SharedMacdBenchmarkTests": 14
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\macd-early-dispatch\\parity\\parity.trx",
+    "sha256": "562f2b4feb4d6be0f905327879e36ba730cce66ed7785db12e43dae42a7cbf94",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-macd-early-dispatch-certified-20261027-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-macd-early-dispatch-20261027\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "72eab8ab3a2c7a2a89636ab76ce9f19c6f78c6c3938d6c9dba76bc1aa70f6096",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-macd-early-dispatch-20261027\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "72eab8ab3a2c7a2a89636ab76ce9f19c6f78c6c3938d6c9dba76bc1aa70f6096",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-macd-early-dispatch-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "72eab8ab3a2c7a2a89636ab76ce9f19c6f78c6c3938d6c9dba76bc1aa70f6096",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-macd-early-dispatch-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "72eab8ab3a2c7a2a89636ab76ce9f19c6f78c6c3938d6c9dba76bc1aa70f6096"
+  },
+  "source_fingerprint_sha256": "536842cf263279ac2aa7bdf92376bbefd5a380ec023013ee9532c3bf10eb2a01",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Move-only MACD per-bar dispatch reorder. Sealed handlers and their arithmetic, output clearing/copies, cancellation, input priority, and failure capture remain unchanged. Existing mixed-root, numerical, long-history, GPU, and inventory regressions required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
