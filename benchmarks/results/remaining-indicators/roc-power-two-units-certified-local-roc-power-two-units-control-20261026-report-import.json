@@ -1,0 +1,60 @@
+{
+  "before_sha256": "f8f1065bb1d31594dcc4d77e58ae8fc9b1553593813ffba1919133abfcb768a6",
+  "candidate_sha256": "b7e551b1cb4b43c2dbeffea47bd670e38771f35407e2e1f6143b29daa639546b",
+  "changed_baseline_rows": 20,
+  "unchanged_baseline_rows": 782,
+  "changed_builder_slots": 40,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 40,
+  "verdicts": {
+    "faster": 596,
+    "slower": 889,
+    "inconclusive": 51
+  },
+  "unchanged_rows": 782,
+  "run_id": "local-roc-power-two-units-control-20261026",
+  "imported_utc": "2026-10-27T03:18:55.653756+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "fa93c140e122579f00ad8c4d1fb97bdd504f8d9e84769b0e18931843214a91fa",
+      "archive": "benchmarks/results/remaining-indicators/roc-power-two-units-certified-local-roc-power-two-units-control-20261026-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "e8a5dd681f2ac791dc7d3529100628f4bbf8af72fb747e46250884ba95726ce8",
+      "archive": "benchmarks/results/remaining-indicators/roc-power-two-units-certified-local-roc-power-two-units-control-20261026-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "0cf9aa118792f77e42663a2d22052e4e30d391db60edf521a05dee6d1c69f736",
+      "archive": "benchmarks/results/remaining-indicators/roc-power-two-units-certified-local-roc-power-two-units-control-20261026-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "b04ecf887c4c84d843b567ccd5ebee0d0c09213f0b5bee3eba318a121e4fb0bf",
+      "archive": "benchmarks/results/remaining-indicators/roc-power-two-units-certified-local-roc-power-two-units-control-20261026-measurement.json.gz"
+    },
+    "stage-roc-power-two-units-report.py": {
+      "sha256": "530eaea8c1b451a46a8a00549e16124a89b22705c11fe6ab5b959cfefcbe0f4f",
+      "archive": "benchmarks/results/remaining-indicators/roc-power-two-units-certified-local-roc-power-two-units-control-20261026-stage-roc-power-two-units-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/roc-power-two-units-certified-local-roc-power-two-units-control-20261026-verify-approved-certified-report.py.gz"
+    },
+    "import-roc-power-two-units-report.py": {
+      "sha256": "3339a556cb725e77b84b125acbde3e72628eed3a28d4e184f0a7a37c12d9ac21",
+      "archive": "benchmarks/results/remaining-indicators/roc-power-two-units-certified-local-roc-power-two-units-control-20261026-import-roc-power-two-units-report.py.gz"
+    },
+    "archive-roc-power-two-units-control.py": {
+      "sha256": "088df4c7c32ec8eb1ab98ab7520fef978eeba1473728c7e96d7d98904579f233",
+      "archive": "benchmarks/results/remaining-indicators/roc-power-two-units-certified-local-roc-power-two-units-control-20261026-archive-roc-power-two-units-control.py.gz"
+    },
+    "prove-roc-power-two-units-integration.py": {
+      "sha256": "3e9a5afada7fde7fff61894d8538b93f9039b524fa274bace4b26be76593008d",
+      "archive": "benchmarks/results/remaining-indicators/roc-power-two-units-certified-local-roc-power-two-units-control-20261026-prove-roc-power-two-units-integration.py.gz"
+    },
+    "archive-roc-power-two-units-report.py": {
+      "sha256": "3534a236b6aa8e5226246fff9db4caa802d5837905451a58d4df0c581dbc973e",
+      "archive": "benchmarks/results/remaining-indicators/roc-power-two-units-certified-local-roc-power-two-units-control-20261026-archive-roc-power-two-units-report.py.gz"
+    }
+  }
+}
