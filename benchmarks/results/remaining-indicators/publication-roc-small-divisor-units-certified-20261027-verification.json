@@ -1,0 +1,71 @@
+{
+  "input_head": "b685944ce5a9276b1ddbad34c09a4c2726830248",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/RocBankWindow.cs",
+    "tests/ModelsTests/CompactRocUnitsTests.cs"
+  ],
+  "arithmetic_cases": 5,
+  "batch_note": "Approved shared RoundUnits follow-up: exact small-integer divisor rounding using a bounded UInt128 quotient, guard/sticky/ties-even and original subnormal/highest-binade/overflow fallback. Existing integer/power-of-two shortcuts unchanged. Shared arithmetic and MACD/PPO/PVO/Acceleration regressions required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-27T12:31:03.339877+00:00",
+  "unit": {
+    "passed": 788,
+    "class_counts": {
+      "MacdNumericalTests": 81,
+      "RocBankNumericalTests": 548,
+      "PvoNumericalTests": 46,
+      "PpoNumericalTests": 71,
+      "CompactRocUnitsTests": 5,
+      "AccelerationSharedExecutionTests": 11,
+      "MacdSharedExecutionTests": 18,
+      "CompactRatioArithmeticTests": 6,
+      "MacdFixedCoefficientReductionTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\roc-small-divisor-units\\unit\\unit.trx",
+    "sha256": "a15cdb3a00aa68c9ac6bd305ff604631e1ac0398e547c09bb996f234d1813c9d",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-roc-small-divisor-units-certified-20261027-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 130,
+    "class_counts": {
+      "ClassicMacdComparisonTests": 16,
+      "SharedTaMacdNativeBenchmarkTests": 46,
+      "SharedMacdBenchmarkTests": 14,
+      "AlignedMacdComparisonTests": 10,
+      "SharedTradyMacdBenchmarkTests": 33,
+      "RangeAccelerationComparisonTests": 9,
+      "SharedAccelerationBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\roc-small-divisor-units\\parity\\parity.trx",
+    "sha256": "9cf718d77426a99996f24032a3be7709d1021baf7ba9cbbc07800eab800a2761",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-roc-small-divisor-units-certified-20261027-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-small-divisor-units-20261027\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4302c48a8e382a1c53aff807365a700d2fc6711e7f049cad954bdee49677e664",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-small-divisor-units-20261027\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4302c48a8e382a1c53aff807365a700d2fc6711e7f049cad954bdee49677e664",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-small-divisor-units-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4302c48a8e382a1c53aff807365a700d2fc6711e7f049cad954bdee49677e664",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-small-divisor-units-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4302c48a8e382a1c53aff807365a700d2fc6711e7f049cad954bdee49677e664"
+  },
+  "source_fingerprint_sha256": "00c8c3304a848a08bfea88792518ede538713639c76d5a847eac0ca35ca96438",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved shared RoundUnits follow-up: exact small-integer divisor rounding using a bounded UInt128 quotient, guard/sticky/ties-even and original subnormal/highest-binade/overflow fallback. Existing integer/power-of-two shortcuts unchanged. Shared arithmetic and MACD/PPO/PVO/Acceleration regressions required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
