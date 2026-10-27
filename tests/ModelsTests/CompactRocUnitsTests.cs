@@ -79,6 +79,34 @@ public sealed class CompactRocUnitsTests
         }
     }
 
+    [Fact]
+    public void SmallDivisorsPreserveQuotientMidpointsStickyBitsAndRangeFallbacks()
+    {
+        BigInteger[] divisors = [3, 10, 13, 27, uint.MaxValue, (BigInteger.One << 63) + 1,
+            ulong.MaxValue, (BigInteger.One << 64) + 1];
+        foreach (var divisor in divisors)
+        foreach (int grid in new[] { 0, 1, 2, 52, 1022, 2043, 2044, 2045, 2077 })
+        foreach (long mantissa in new[] { 1L << 52, (1L << 52) + 1, (1L << 53) - 1 })
+        {
+            BigInteger exact = ((BigInteger)mantissa << grid) * divisor;
+            BigInteger half = grid == 0 ? divisor / 2 : divisor << (grid - 1);
+            foreach (var value in new[] { exact - 1, exact, exact + half - 1, exact + half, exact + half + 1 })
+            {
+                Check(value, divisor);
+                Check(-value, divisor);
+            }
+        }
+        // Dividing across the binade boundary changes the required quotient grid.
+        foreach (var divisor in divisors)
+        foreach (int exponent in new[] { 53, 54, 1074, 2096, 2097 })
+        {
+            BigInteger boundary = divisor << exponent;
+            Check(boundary - 1, divisor);
+            Check(boundary, divisor);
+            Check(boundary + 1, divisor);
+        }
+    }
+
     private static void Check(BigInteger numerator, BigInteger denominator)
     {
         BigInteger expected;
