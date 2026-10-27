@@ -60,6 +60,25 @@ public sealed class CompactRocUnitsTests
         }
     }
 
+    [Fact]
+    public void BinaryDivisorsPreserveUnderflowTiesCarryAndFallbackBoundaries()
+    {
+        foreach (int divisorShift in new[] { 1, 2, 55, 56, 1074, 4096, 4097 })
+        foreach (int grid in new[] { 0, 1, 52, 1022, 2044, 2045 })
+        foreach (long mantissa in new[] { 0L, 1L, 3L, 1L << 52, (1L << 52) + 1, (1L << 53) - 1 })
+        {
+            BigInteger divisor = BigInteger.One << divisorShift;
+            int discard = divisorShift + grid;
+            BigInteger exact = (BigInteger)mantissa << discard;
+            BigInteger half = BigInteger.One << (discard - 1);
+            foreach (var value in new[] { exact, exact + half - 1, exact + half, exact + half + 1 })
+            {
+                Check(value, divisor);
+                Check(-value, divisor);
+            }
+        }
+    }
+
     private static void Check(BigInteger numerator, BigInteger denominator)
     {
         BigInteger expected;

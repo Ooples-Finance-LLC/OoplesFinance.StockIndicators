@@ -35,6 +35,8 @@ internal readonly struct RocBankValue
     {
 #if !NETFRAMEWORK
         if (denominator.IsOne && TryRoundIntegerUnits(numerator, out var integer)) return integer;
+        if (!denominator.IsOne && denominator.IsPowerOfTwo
+            && TryRoundPowerOfTwoUnits(numerator, denominator, out var binary)) return binary;
         if (TryCompactUnits(numerator, denominator, out var compact)) return compact;
 #endif
         for (var shift = 0; ; shift += 32)
@@ -61,6 +63,30 @@ internal readonly struct RocBankValue
         if ((guarded & 1) != 0 && ((rounded & 1) != 0 || trailing < shift - 1))
             rounded++;
         result = new BigInteger(rounded) << shift;
+        if (numerator.Sign < 0) result = -result;
+        return true;
+    }
+
+    private static bool TryRoundPowerOfTwoUnits(BigInteger numerator, BigInteger denominator, out BigInteger result)
+    {
+        result = default;
+        long denominatorBits = denominator.GetBitLength();
+        // Bound shifts; unsupported denominators retain the existing ratio path.
+        if (denominatorBits > 4097) return false;
+        if (numerator.IsZero) return true;
+        int divisorShift = (int)denominatorBits - 1;
+        var magnitude = BigInteger.Abs(numerator);
+        long bits = magnitude.GetBitLength();
+        // Preserve the existing highest-binade and extended-overflow handling.
+        if (bits - divisorShift > 2097) return false;
+        int grid = (int)Math.Max(0L, bits - divisorShift - 53);
+        int discard = divisorShift + grid;
+        ulong guarded = (ulong)(magnitude >> (discard - 1));
+        ulong rounded = guarded >> 1;
+        if ((guarded & 1) != 0 && ((rounded & 1) != 0
+            || BigInteger.TrailingZeroCount(magnitude) < discard - 1))
+            rounded++;
+        result = new BigInteger(rounded) << grid;
         if (numerator.Sign < 0) result = -result;
         return true;
     }
