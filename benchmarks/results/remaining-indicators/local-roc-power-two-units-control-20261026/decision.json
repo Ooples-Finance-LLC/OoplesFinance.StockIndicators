@@ -1123,8 +1123,9 @@
     "verify-roc-power-two-units-control.py": "199170ef70a4144f21be8e7924b96252b3d297be91d6f1f2021fc9579d742b1c",
     "benchmark_process_cleanup.py": "fa2c088e49c3cc04c2e5a99bbe875080b95253f5e156f2983e4691420b8d8fc3"
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
   "qualified_source_ref": "refs/heads/perf/qualified-roc-power-two-units-20261026",
-  "integration_source_proof": "benchmarks/results/remaining-indicators/roc-power-two-units-integration-source-proof-20261026.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/roc-power-two-units-integration-source-proof-20261026.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/roc-power-two-units-certified-local-roc-power-two-units-control-20261026-report-import.json"
 }
