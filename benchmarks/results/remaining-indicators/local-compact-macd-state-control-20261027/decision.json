@@ -1,0 +1,918 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "d7a10a6859624b2fcb03685c3d6a766b1d8c6bce",
+    "new": "964638c6c1421845e9550d49eafc1f6e337d8c48"
+  },
+  "candidate_code_source": "6d4953d224c2de80e00b028d9ff982f19cf15ba2",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "SharedTaMacdNativeBenchmarks",
+      "pair": "TaLib.Functions.Macd",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        2.7182984615384616,
+        2.3209414285714285
+      ],
+      "new_means_ms": [
+        0.79883203125,
+        1.2075412698412695
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTaMacdNativeBenchmarks",
+      "pair": "TaLib.Functions.Macd",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        2.5214853125,
+        2.0085484375
+      ],
+      "new_means_ms": [
+        0.8459642361111112,
+        0.80255703125
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTaMacdNativeBenchmarks",
+      "pair": "TaLib.Functions.Macd",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        28.637152,
+        21.735998888888886
+      ],
+      "new_means_ms": [
+        10.738618181818184,
+        8.185482291666666
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTaMacdNativeBenchmarks",
+      "pair": "TaLib.Functions.Macd",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        26.082554,
+        20.332982222222224
+      ],
+      "new_means_ms": [
+        8.506454615384616,
+        8.706053846153846
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTaMacdNativeBenchmarks",
+      "pair": "TaLib.Functions.MacdFix",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        2.4003310546875,
+        2.3100212890625
+      ],
+      "new_means_ms": [
+        1.00368859375,
+        0.8123768229166666
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTaMacdNativeBenchmarks",
+      "pair": "TaLib.Functions.MacdFix",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        2.508739375,
+        2.2622685546875
+      ],
+      "new_means_ms": [
+        0.81365078125,
+        0.7940078125
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTaMacdNativeBenchmarks",
+      "pair": "TaLib.Functions.MacdFix",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        24.3041875,
+        28.376036
+      ],
+      "new_means_ms": [
+        8.9120325,
+        8.360488333333333
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTaMacdNativeBenchmarks",
+      "pair": "TaLib.Functions.MacdFix",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        24.093975,
+        27.07146
+      ],
+      "new_means_ms": [
+        8.317712777777778,
+        8.032767307692309
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTradyMacdBenchmarks",
+      "pair": "Trady.Indicator.MovingAverageConvergenceDivergence",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        3.039067592592593,
+        3.0463999999999993
+      ],
+      "new_means_ms": [
+        0.9235376068376069,
+        0.963999375
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTradyMacdBenchmarks",
+      "pair": "Trady.Indicator.MovingAverageConvergenceDivergence",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        3.180219704861111,
+        2.3377958984375
+      ],
+      "new_means_ms": [
+        0.9373459375,
+        0.9205761284722223
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTradyMacdBenchmarks",
+      "pair": "Trady.Indicator.MovingAverageConvergenceDivergence",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        28.058336,
+        24.930182
+      ],
+      "new_means_ms": [
+        9.062144444444444,
+        9.192675555555557
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTradyMacdBenchmarks",
+      "pair": "Trady.Indicator.MovingAverageConvergenceDivergence",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        26.074195,
+        24.418306
+      ],
+      "new_means_ms": [
+        9.074188333333334,
+        9.08467840909091
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTradyMacdBenchmarks",
+      "pair": "Trady.Indicator.MovingAverageConvergenceDivergenceHistogram",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        2.23663203125,
+        1.82677125
+      ],
+      "new_means_ms": [
+        0.9041841145833334,
+        0.90766671875
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTradyMacdBenchmarks",
+      "pair": "Trady.Indicator.MovingAverageConvergenceDivergenceHistogram",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        2.33750921875,
+        1.8110071875
+      ],
+      "new_means_ms": [
+        0.8871193359375,
+        0.87979169921875
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTradyMacdBenchmarks",
+      "pair": "Trady.Indicator.MovingAverageConvergenceDivergenceHistogram",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        23.954404,
+        18.328183333333335
+      ],
+      "new_means_ms": [
+        8.922703636363636,
+        10.729202727272728
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTradyMacdBenchmarks",
+      "pair": "Trady.Indicator.MovingAverageConvergenceDivergenceHistogram",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        21.3943,
+        20.826528333333332
+      ],
+      "new_means_ms": [
+        8.945317592592591,
+        8.798441666666665
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedSkenderEmaFamilyBenchmarks",
+      "pair": "Skender.GetMacd",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        2.581496153846154,
+        2.361893846153846
+      ],
+      "new_means_ms": [
+        0.9244073333333334,
+        0.8987448148148148
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedSkenderEmaFamilyBenchmarks",
+      "pair": "Skender.GetMacd",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        2.53396578125,
+        2.264526909722222
+      ],
+      "new_means_ms": [
+        0.9077826171875,
+        0.8922201388888888
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedSkenderEmaFamilyBenchmarks",
+      "pair": "Skender.GetMacd",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        29.197044444444444,
+        23.436414
+      ],
+      "new_means_ms": [
+        11.290111,
+        9.260044444444445
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedSkenderEmaFamilyBenchmarks",
+      "pair": "Skender.GetMacd",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        26.56744861111111,
+        22.4746525
+      ],
+      "new_means_ms": [
+        9.694591,
+        9.076440740740741
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedSkenderEmaFamilyBenchmarks",
+      "pair": "Skender.GetPvo",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        2.85722140625,
+        2.9418428819444444
+      ],
+      "new_means_ms": [
+        1.197590078125,
+        1.1591181640625
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedSkenderEmaFamilyBenchmarks",
+      "pair": "Skender.GetPvo",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        2.846070486111111,
+        2.7375685546875
+      ],
+      "new_means_ms": [
+        1.171821701388889,
+        1.16147515625
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedSkenderEmaFamilyBenchmarks",
+      "pair": "Skender.GetPvo",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        31.66102,
+        28.437145
+      ],
+      "new_means_ms": [
+        11.65412888888889,
+        11.897496666666665
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedSkenderEmaFamilyBenchmarks",
+      "pair": "Skender.GetPvo",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        30.95276666666667,
+        27.575861111111113
+      ],
+      "new_means_ms": [
+        12.127226666666663,
+        11.991153086419754
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTaAverageNativeBenchmarks",
+      "pair": "TaLib.Functions.Apo",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.44068390625,
+        0.4530723958333333
+      ],
+      "new_means_ms": [
+        0.45036875,
+        0.48172934027777775
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaAverageNativeBenchmarks",
+      "pair": "TaLib.Functions.Apo",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.43109149305555555,
+        0.4576359765625
+      ],
+      "new_means_ms": [
+        0.431196953125,
+        0.4331863671875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaAverageNativeBenchmarks",
+      "pair": "TaLib.Functions.Apo",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        4.624140625,
+        5.14668717948718
+      ],
+      "new_means_ms": [
+        4.654190798611111,
+        4.68281375
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaAverageNativeBenchmarks",
+      "pair": "TaLib.Functions.Apo",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        4.249517708333333,
+        4.627897569444444
+      ],
+      "new_means_ms": [
+        4.04079453125,
+        4.028725
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaAverageNativeBenchmarks",
+      "pair": "TaLib.Functions.Ppo",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.5107537326388889,
+        0.5379966145833334
+      ],
+      "new_means_ms": [
+        0.5199939236111111,
+        0.5111670138888889
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaAverageNativeBenchmarks",
+      "pair": "TaLib.Functions.Ppo",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.517796953125,
+        0.545737421875
+      ],
+      "new_means_ms": [
+        0.5098148003472223,
+        0.5109985546875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaAverageNativeBenchmarks",
+      "pair": "TaLib.Functions.Ppo",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        5.275129375,
+        5.756748958333333
+      ],
+      "new_means_ms": [
+        5.3860996875,
+        5.2784303125
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaAverageNativeBenchmarks",
+      "pair": "TaLib.Functions.Ppo",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        4.926298125,
+        5.307450868055556
+      ],
+      "new_means_ms": [
+        4.941888888888889,
+        5.1751015625
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetMacd",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        8.0541,
+        9.21638
+      ],
+      "new_means_ms": [
+        6.942611111111111,
+        7.094455555555556
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetMacd",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        26.260044444444443,
+        27.28455
+      ],
+      "new_means_ms": [
+        11.96224,
+        10.73684
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetPvo",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        4.1172,
+        9.45943
+      ],
+      "new_means_ms": [
+        3.91315,
+        3.45203
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetPvo",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        30.44269,
+        33.74302
+      ],
+      "new_means_ms": [
+        12.300277777777778,
+        17.78804
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.Apo",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.5114555555555556,
+        0.5549444444444445
+      ],
+      "new_means_ms": [
+        0.6639333333333334,
+        0.6338777777777778
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.Apo",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        4.95211,
+        4.917411111111111
+      ],
+      "new_means_ms": [
+        4.759483333333333,
+        5.32923
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.Macd",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        3.1860555555555554,
+        3.0696666666666665
+      ],
+      "new_means_ms": [
+        1.39078,
+        1.1082222222222222
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.Macd",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        31.2506,
+        22.9167125
+      ],
+      "new_means_ms": [
+        8.74229,
+        9.403477777777779
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.MacdFix",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        2.85935,
+        3.33554
+      ],
+      "new_means_ms": [
+        0.821875,
+        1.22762
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.MacdFix",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        24.985572222222224,
+        26.63052
+      ],
+      "new_means_ms": [
+        8.4807,
+        11.60391
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.Ppo",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.39651111111111115,
+        0.4888444444444444
+      ],
+      "new_means_ms": [
+        1.092888888888889,
+        0.59084
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.Ppo",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        5.425461111111111,
+        5.313844444444444
+      ],
+      "new_means_ms": [
+        5.609394444444444,
+        5.81425
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Trady.Indicator.MovingAverageConvergenceDivergence",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        2.892488888888889,
+        2.845411111111111
+      ],
+      "new_means_ms": [
+        1.361188888888889,
+        1.42197
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Trady.Indicator.MovingAverageConvergenceDivergence",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        22.54432,
+        25.23343
+      ],
+      "new_means_ms": [
+        9.677516666666666,
+        10.27638
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Trady.Indicator.MovingAverageConvergenceDivergenceHistogram",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        2.42269,
+        2.709275
+      ],
+      "new_means_ms": [
+        1.307811111111111,
+        1.37929
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Trady.Indicator.MovingAverageConvergenceDivergenceHistogram",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        20.406066666666668,
+        22.79713
+      ],
+      "new_means_ms": [
+        9.3267,
+        12.04446
+      ],
+      "verdict": "faster"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "8287f779b0b0c78c4e8e6804c094222cc57ef6b62f835bc308835d656dfa1c5f",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "6a36fc8f950cf932da54e97496658d04fc16ef95c5e3c9e07370352250b0a98c",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "227809b20cf2770fee2ccd0cbec662ead676afc976c43ea9d91e97439b5f873b",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "d9c9b959566eb2af54633bf861275fa1ee1a8ba0a11254c28f15e24081a1073c",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/verified-summary.json.gz"
+    },
+    "round0-old-SharedTaMacdNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaMacdNativeBenchmarks-report-full-compressed.json": {
+      "sha256": "f88d647da34b3fd71b55ff6d8661b7bf04ae864f3236214018f471a19e67e66e",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round0-old-SharedTaMacdNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaMacdNativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-SharedTradyMacdBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyMacdBenchmarks-report-full-compressed.json": {
+      "sha256": "a12f62651ba877422412f3985bc03811510ed2433206166cb9e120f6fb6d0860",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round0-old-SharedTradyMacdBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyMacdBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-SharedSkenderEmaFamilyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderEmaFamilyBenchmarks-report-full-compressed.json": {
+      "sha256": "b21313a527db0bbd722201e3ef4367fbfe46fa94b909ac57ceba96a406b2026a",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round0-old-SharedSkenderEmaFamilyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderEmaFamilyBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-SharedTaAverageNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaAverageNativeBenchmarks-report-full-compressed.json": {
+      "sha256": "b9a0ee84500959c6620065adf0d70605d58fe039ed8de61d5003caa8be4f10f3",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round0-old-SharedTaAverageNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaAverageNativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "82c585ab22db95899f3e74da3eb32bd07c1208f85687897f3c9841fad7d4a4e0",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedTaMacdNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaMacdNativeBenchmarks-report-full-compressed.json": {
+      "sha256": "e20d83f0edf2b2025ba9c21fa46f1ff090ee713fe7234876bce9b215460ce560",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round1-new-SharedTaMacdNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaMacdNativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedTradyMacdBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyMacdBenchmarks-report-full-compressed.json": {
+      "sha256": "177511568173bd6e5166ef4399378f4e5286a06f33b515fe551bcef847017b6e",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round1-new-SharedTradyMacdBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyMacdBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedSkenderEmaFamilyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderEmaFamilyBenchmarks-report-full-compressed.json": {
+      "sha256": "bf1c32d89625e6b9edd9b27609d2ac714d89be4ac2e39d1b1f65766e6e3fca2a",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round1-new-SharedSkenderEmaFamilyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderEmaFamilyBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedTaAverageNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaAverageNativeBenchmarks-report-full-compressed.json": {
+      "sha256": "640cc5feed6f14b15e3b973c0180c2b56083b43074d5d9432ef6100ecd37e4e3",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round1-new-SharedTaAverageNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaAverageNativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "48d38023872f562d6515e8a3b2915556ad2a56a310fe178cedd52be08cb4a55b",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedTaMacdNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaMacdNativeBenchmarks-report-full-compressed.json": {
+      "sha256": "d7256c661fadbf852b798968abeadf5898db65646876114162772e09bfe65d8b",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round2-new-SharedTaMacdNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaMacdNativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedTradyMacdBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyMacdBenchmarks-report-full-compressed.json": {
+      "sha256": "876ae959765c79420f945dfacae4644be326a129128d5823aa3942a25f09a6c2",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round2-new-SharedTradyMacdBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyMacdBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedSkenderEmaFamilyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderEmaFamilyBenchmarks-report-full-compressed.json": {
+      "sha256": "ec1d4a7ab4e7363516f6cafa7f0cbeeb2cb8bdd88e89a99c59739e0f2245a665",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round2-new-SharedSkenderEmaFamilyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderEmaFamilyBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedTaAverageNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaAverageNativeBenchmarks-report-full-compressed.json": {
+      "sha256": "52541efe05c1166f6b22ea9159b42df8fe6a0322843739a332045920e2cd5d39",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round2-new-SharedTaAverageNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaAverageNativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "63901ae3632e01481721a496aa652ead2ef513261ff0bac52d4afafd25ebbfa4",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedTaMacdNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaMacdNativeBenchmarks-report-full-compressed.json": {
+      "sha256": "dda71ea0457be68515108bc6020109a8b48fd689e0fd51c2099662774c5e7598",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round3-old-SharedTaMacdNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaMacdNativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedTradyMacdBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyMacdBenchmarks-report-full-compressed.json": {
+      "sha256": "78e547646033fbaa6b9d8be149479a98d51ef2e6eed178c51159c8ee35b2c3ae",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round3-old-SharedTradyMacdBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyMacdBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedSkenderEmaFamilyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderEmaFamilyBenchmarks-report-full-compressed.json": {
+      "sha256": "58029f5517d4ab777388df6db3ec58e155a9ab2dc18e956858a1a216c93487cc",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round3-old-SharedSkenderEmaFamilyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderEmaFamilyBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedTaAverageNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaAverageNativeBenchmarks-report-full-compressed.json": {
+      "sha256": "1bbab45992068afeaa86eb504153c5cea7a08028af6d882039656ac64e2e9bb6",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round3-old-SharedTaAverageNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaAverageNativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "0a6c6f5227c827ee159f7ea0d93a16b32294270bf71f2beb90903f15f7af0f09",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "b25d9cb06b8c0098e185fc1e0e54599b702159d97b2ed9441e3dfc6b4bfc1915",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round0-old-SharedSkenderEmaFamilyBenchmarks.log": {
+      "sha256": "b5cab92e97c957f7dd7e72ce56881b29a0acce45068f1e6e6f3a270565829398",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round0-old-SharedSkenderEmaFamilyBenchmarks.log.gz"
+    },
+    "round0-old-SharedTaAverageNativeBenchmarks.log": {
+      "sha256": "c575e3a0ba1fe58b8eb831b9725777a130a71ec464d5e0ae0ecb9aacb0a76013",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round0-old-SharedTaAverageNativeBenchmarks.log.gz"
+    },
+    "round0-old-SharedTaMacdNativeBenchmarks.log": {
+      "sha256": "c3aebe70956852a19c183e61e9ac6a0ffa290669a1f4e760f266aed164ad64a1",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round0-old-SharedTaMacdNativeBenchmarks.log.gz"
+    },
+    "round0-old-SharedTradyMacdBenchmarks.log": {
+      "sha256": "6b3c6c8df80c182c7ad602f2d2587a8aff14fd270356584b024deddd6ae2919f",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round0-old-SharedTradyMacdBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "2a7f51abf94d40d56f287054f4acc56bc871810f04513d96bf4868ee7a910ffc",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-SharedSkenderEmaFamilyBenchmarks.log": {
+      "sha256": "cc0bc3d5df8952a896898f4b83f5f6eda5c64c46c7ebdc7f3ded3194ed32b83e",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round1-new-SharedSkenderEmaFamilyBenchmarks.log.gz"
+    },
+    "round1-new-SharedTaAverageNativeBenchmarks.log": {
+      "sha256": "2aae650a1442924376ed4e5edd3c64026e17aa5744f80146398fdafa9c2df79f",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round1-new-SharedTaAverageNativeBenchmarks.log.gz"
+    },
+    "round1-new-SharedTaMacdNativeBenchmarks.log": {
+      "sha256": "3859ba2383c0a1db767f8c4a902240409f65a3b87a53c53053bb6633862d7f84",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round1-new-SharedTaMacdNativeBenchmarks.log.gz"
+    },
+    "round1-new-SharedTradyMacdBenchmarks.log": {
+      "sha256": "7979afad9452d7d50748714d7b62a9666ee82e91daba45aad3b3e5cb4e0a69b8",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round1-new-SharedTradyMacdBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "ea795e581061a1330178c15dc8811fd622a57d9435480e5668fd6e999bed69e7",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-SharedSkenderEmaFamilyBenchmarks.log": {
+      "sha256": "5c24ef265d4f1362ba14bac10329df739c53648722013f7106359ef7d9452c81",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round2-new-SharedSkenderEmaFamilyBenchmarks.log.gz"
+    },
+    "round2-new-SharedTaAverageNativeBenchmarks.log": {
+      "sha256": "6cf2f76e591367e4752dbc0399414b2c95617e6779734925107d7ae30e8c9373",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round2-new-SharedTaAverageNativeBenchmarks.log.gz"
+    },
+    "round2-new-SharedTaMacdNativeBenchmarks.log": {
+      "sha256": "986744b153067318a5f5225270fbbdf4f07d0be10addb8c269bcb88f82afb164",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round2-new-SharedTaMacdNativeBenchmarks.log.gz"
+    },
+    "round2-new-SharedTradyMacdBenchmarks.log": {
+      "sha256": "417e411d558356f569d0d01f52a634fd33e7dacef47c81904ca26fc0b7d47f2b",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round2-new-SharedTradyMacdBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "146ba8b27b0edc214537c62b0b446bf2eff86e90f7c5a55389a358073b2a8b64",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-SharedSkenderEmaFamilyBenchmarks.log": {
+      "sha256": "e7a0f5a572e51bbfdd15ebdf843c7829e403d52a24dc8df45fe40626facccc6b",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round3-old-SharedSkenderEmaFamilyBenchmarks.log.gz"
+    },
+    "round3-old-SharedTaAverageNativeBenchmarks.log": {
+      "sha256": "c13bc5a8b86f8a838e08630076a660a79892ca010b202aed387e6465e00dfd9e",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round3-old-SharedTaAverageNativeBenchmarks.log.gz"
+    },
+    "round3-old-SharedTaMacdNativeBenchmarks.log": {
+      "sha256": "4aad0509fe31a2ef742563e902b30a6236700c865bbe0ab8c774d78e900eb98c",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round3-old-SharedTaMacdNativeBenchmarks.log.gz"
+    },
+    "round3-old-SharedTradyMacdBenchmarks.log": {
+      "sha256": "4bcf28041bb4b4f343702cdc7f3edc85382dd87add2a9926f83d9c662db8d8db",
+      "archive": "benchmarks/results/remaining-indicators/local-compact-macd-state-control-20261027/round3-old-SharedTradyMacdBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-compact-macd-state-control.py": "f5fa8eb749d14ce5bfafa67c57edc43a6c4722e94c5119d922fd96b628888793",
+    "verify-compact-macd-state-control.py": "00c4c617d76e16a08ffc32f1b42c56a2f944df96c043f3ef2403b484ed737cef",
+    "benchmark_process_cleanup.py": "fa2c088e49c3cc04c2e5a99bbe875080b95253f5e156f2983e4691420b8d8fc3"
+  },
+  "report_imported": false,
+  "production_integrated": true,
+  "qualified_source_ref": "refs/heads/perf/qualified-compact-macd-state-20261027",
+  "integration_source_proof": "benchmarks/results/remaining-indicators/compact-macd-state-integration-source-proof-20261027.json"
+}
