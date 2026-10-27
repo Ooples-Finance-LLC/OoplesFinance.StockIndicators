@@ -1,0 +1,60 @@
+{
+  "before_sha256": "f79aafd1d3296572ed83f527c2221fd8d7af3a800a731bd7383c9f7dd8473f6d",
+  "candidate_sha256": "78cc4509dce9cfce05021c297f6ffdf0e299072bfd70c29b78253f26ff2d5054",
+  "changed_baseline_rows": 20,
+  "unchanged_baseline_rows": 782,
+  "changed_builder_slots": 40,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 40,
+  "verdicts": {
+    "faster": 597,
+    "slower": 887,
+    "inconclusive": 52
+  },
+  "unchanged_rows": 782,
+  "run_id": "local-roc-small-divisor-units-control-20261027",
+  "imported_utc": "2026-10-27T14:20:08.269857+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "3a74aec94277b0b9f8b8955a41a473425e2effba5b242fb3caff0b3481508124",
+      "archive": "benchmarks/results/remaining-indicators/roc-small-divisor-units-certified-local-roc-small-divisor-units-control-20261027-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "f4ac4f516d3c9bb578d42cf1d87b605fce6ebb26a65331942b388b9bf249ce52",
+      "archive": "benchmarks/results/remaining-indicators/roc-small-divisor-units-certified-local-roc-small-divisor-units-control-20261027-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "bc6a74bf2021be501ff9112d367a1d9eaecb2d367e608fd122cfb56353778c33",
+      "archive": "benchmarks/results/remaining-indicators/roc-small-divisor-units-certified-local-roc-small-divisor-units-control-20261027-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "b454bbb3ff873535faff1226647ac88ef14dd817ad736499d83454430306aa77",
+      "archive": "benchmarks/results/remaining-indicators/roc-small-divisor-units-certified-local-roc-small-divisor-units-control-20261027-measurement.json.gz"
+    },
+    "stage-roc-small-divisor-units-report.py": {
+      "sha256": "b6dc06ae4b63e842d93e860a16022aa2d59a4138c0985cd271be0ad2419df646",
+      "archive": "benchmarks/results/remaining-indicators/roc-small-divisor-units-certified-local-roc-small-divisor-units-control-20261027-stage-roc-small-divisor-units-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/roc-small-divisor-units-certified-local-roc-small-divisor-units-control-20261027-verify-approved-certified-report.py.gz"
+    },
+    "import-roc-small-divisor-units-report.py": {
+      "sha256": "99bfe0ce1dc9c0748750c33db0864fbd4132d136e14ad3fba6e60b64a2ab4fcf",
+      "archive": "benchmarks/results/remaining-indicators/roc-small-divisor-units-certified-local-roc-small-divisor-units-control-20261027-import-roc-small-divisor-units-report.py.gz"
+    },
+    "archive-roc-small-divisor-units-control.py": {
+      "sha256": "d1e94be315deea32d0753a9c7846810ba7f2348a6453dcae2da3f080ef9991a7",
+      "archive": "benchmarks/results/remaining-indicators/roc-small-divisor-units-certified-local-roc-small-divisor-units-control-20261027-archive-roc-small-divisor-units-control.py.gz"
+    },
+    "prove-roc-small-divisor-units-integration.py": {
+      "sha256": "fd2890c42b3680fd90bb705a7d1d4d4d4ef8272bd4ef6c59f952a9f4a69e4bb9",
+      "archive": "benchmarks/results/remaining-indicators/roc-small-divisor-units-certified-local-roc-small-divisor-units-control-20261027-prove-roc-small-divisor-units-integration.py.gz"
+    },
+    "archive-roc-small-divisor-units-report.py": {
+      "sha256": "b3b5bcef9992675e7370392561a01fb5a0bed80f26a46abf60996560493a8c55",
+      "archive": "benchmarks/results/remaining-indicators/roc-small-divisor-units-certified-local-roc-small-divisor-units-control-20261027-archive-roc-small-divisor-units-report.py.gz"
+    }
+  }
+}
