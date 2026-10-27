@@ -38,6 +38,28 @@ public sealed class CompactRocUnitsTests
         }
     }
 
+    [Fact]
+    public void IntegerUnitsPreserveGuardStickyCarryAndOverflowBoundaries()
+    {
+        foreach (int shift in new[] { 1, 2, 52, 700, 1022, 2043, 2044, 2045, 2077 })
+        foreach (long mantissa in new[] { 1L << 52, (1L << 52) + 1, (1L << 53) - 2, (1L << 53) - 1 })
+        {
+            BigInteger exact = (BigInteger)mantissa << shift;
+            BigInteger half = BigInteger.One << (shift - 1);
+            foreach (var value in new[] { exact, exact + half - 1, exact + half, exact + half + 1 })
+            {
+                Check(value, 1);
+                Check(-value, 1);
+            }
+        }
+        foreach (var value in new BigInteger[] { 0, 1, (BigInteger.One << 52) - 1,
+                     BigInteger.One << 52, (BigInteger.One << 53) - 1 })
+        {
+            Check(value, 1);
+            Check(-value, 1);
+        }
+    }
+
     private static void Check(BigInteger numerator, BigInteger denominator)
     {
         BigInteger expected;
