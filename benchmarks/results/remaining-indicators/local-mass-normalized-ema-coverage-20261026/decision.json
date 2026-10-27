@@ -5,7 +5,7 @@
   "additional_constructor_comparisons": 8,
   "qualification_type": "New constructor coverage; not a candidate-versus-prior-Ooples speedup trial.",
   "production_integrated": true,
-  "report_imported": false,
+  "report_imported": true,
   "archives": {
     "status.json": {
       "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/status.json.gz",
@@ -77,5 +77,20 @@
     }
   },
   "integration_source_proof": "benchmarks/results/remaining-indicators/mass-normalized-ema-coverage-integration-source-proof-20261026.json",
-  "qualified_source_commit": "ca2c307eb9322b911b92f018f5422d5fac9ccff0"
+  "qualified_source_commit": "ca2c307eb9322b911b92f018f5422d5fac9ccff0",
+  "report_archives": {
+    "staged.json": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/report-staged.json.gz",
+      "sha256": "81d2349ef0e54aef072bc646a290746e532a419936c28897a646fef0852670c5"
+    },
+    "browser-verification.json": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/report-browser-verification.json.gz",
+      "sha256": "f66ea72453e2dc49ca19b088bbd9c6af23aea5e576037eec6a5f11ba68c94b3b"
+    },
+    "imported.json": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/report-imported.json.gz",
+      "sha256": "89c4fd40301af504a46cb8173c1965d6999ae990fe7e6d570aad8eead35b2446"
+    }
+  },
+  "report_sha256": "eeda21897d069dd3a40a5efd8e5eb4c0ba8b23764078da37a0c8598c9a8c35f8"
 }
