@@ -13667,7 +13667,7 @@
     "src/Indicators/ContainmentCandles.cs": "31f8d962c95ad4cba31eead3337173ea46e510520ad2c647a1b5ca1f92e2a9b8",
     "src/Indicators/ContextReversalCandles.cs": "f30abbc01db41f70bfec3f7d25d570bf5e6a0330dd143a4fc83cac39dd76b5f0",
     "src/Indicators/ConventionalCandles.cs": "fae989afa3ef29302006cfdca5736e710b7ebd5ad05c1b56fe4c1e30a1a47da2",
-    "src/Indicators/CrowSoldierCandles.cs": "37ec98505c912513bfa41afc4ec2513d4b49005c99f52c1fad44ad7f2ca4af24",
+    "src/Indicators/CrowSoldierCandles.cs": "58c4088ab6414d5a3dc40abd039e4a29f22ca39d708457a50828671737c44620",
     "src/Indicators/CustomIndicatorEngine.cs": "d0f4c35a381f27ccb8c3ff9f0339c9603f282b472a57f0cc2dd239f06484fe3a",
     "src/Indicators/DecayingWindowExtreme.cs": "981fbcb7eec82786ed96df9df7e1d4242b6378fac9473be1586c96b1a750d2b0",
     "src/Indicators/DelayedDarkCloudCoverPattern.cs": "6051f8889a8091255ed20a596b9dc62af657a2e5c98be17e3c057fb1a8f917b1",
