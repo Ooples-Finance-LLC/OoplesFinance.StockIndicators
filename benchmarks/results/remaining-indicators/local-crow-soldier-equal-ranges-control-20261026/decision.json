@@ -1,0 +1,372 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "2cd66aac060030c0a84cbc71a39fcdc8be29f9e9",
+    "new": "44575985ee4d95456bc77d839c832074357412e8"
+  },
+  "candidate_code_source": "a30ab5de3de27cbc98b53d6671e3fc040f163970",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "SharedTaReversalContinuationBenchmarks",
+      "pair": "TaLib.Candles.IdenticalThreeCrows",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.030973356119791667,
+        0.030474736328125
+      ],
+      "new_means_ms": [
+        0.031601748046875,
+        0.032406572265625
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaReversalContinuationBenchmarks",
+      "pair": "TaLib.Candles.IdenticalThreeCrows",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.027723345947265624,
+        0.02762324490017361
+      ],
+      "new_means_ms": [
+        0.028467803276909724,
+        0.0274222119140625
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaReversalContinuationBenchmarks",
+      "pair": "TaLib.Candles.IdenticalThreeCrows",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.24268248046875,
+        0.223993203125
+      ],
+      "new_means_ms": [
+        0.23406267578125,
+        0.215641484375
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaReversalContinuationBenchmarks",
+      "pair": "TaLib.Candles.IdenticalThreeCrows",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.18394197265625,
+        0.18693330078125
+      ],
+      "new_means_ms": [
+        0.1842047265625,
+        0.1864690185546875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaReversalContinuationBenchmarks",
+      "pair": "TaLib.Candles.ThreeBlackCrows",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.026083441840277777,
+        0.02668282470703125
+      ],
+      "new_means_ms": [
+        0.02587809814453125,
+        0.0249349365234375
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaReversalContinuationBenchmarks",
+      "pair": "TaLib.Candles.ThreeBlackCrows",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.022192235107421875,
+        0.022433048095703127
+      ],
+      "new_means_ms": [
+        0.0219353955078125,
+        0.0219134765625
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaReversalContinuationBenchmarks",
+      "pair": "TaLib.Candles.ThreeBlackCrows",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.171240234375,
+        0.1710189453125
+      ],
+      "new_means_ms": [
+        0.1725128125,
+        0.18304703776041667
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaReversalContinuationBenchmarks",
+      "pair": "TaLib.Candles.ThreeBlackCrows",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.14896359375,
+        0.14483724609375
+      ],
+      "new_means_ms": [
+        0.131223173828125,
+        0.13822451171875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaReversalContinuationBenchmarks",
+      "pair": "TaLib.Candles.ThreeWhiteSoldiers",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.0455309716796875,
+        0.04887304443359375
+      ],
+      "new_means_ms": [
+        0.040770859375,
+        0.04352549560546875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTaReversalContinuationBenchmarks",
+      "pair": "TaLib.Candles.ThreeWhiteSoldiers",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.04465644287109375,
+        0.04430630126953125
+      ],
+      "new_means_ms": [
+        0.036829970703125,
+        0.03678539360894097
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTaReversalContinuationBenchmarks",
+      "pair": "TaLib.Candles.ThreeWhiteSoldiers",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.3609258463541667,
+        0.36164105902777777
+      ],
+      "new_means_ms": [
+        0.297157890625,
+        0.30516662109375
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTaReversalContinuationBenchmarks",
+      "pair": "TaLib.Candles.ThreeWhiteSoldiers",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.32132332899305555,
+        0.32990107421875
+      ],
+      "new_means_ms": [
+        0.282868125,
+        0.25581333984375
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.IdenticalThreeCrows",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.5414944444444445,
+        0.5301666666666667
+      ],
+      "new_means_ms": [
+        0.5396277777777777,
+        0.60466
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.IdenticalThreeCrows",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.24668333333333334,
+        0.29623
+      ],
+      "new_means_ms": [
+        0.2313625,
+        0.37814
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.ThreeBlackCrows",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.7459555555555555,
+        0.71025
+      ],
+      "new_means_ms": [
+        0.71643,
+        0.75124
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.ThreeBlackCrows",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.1692,
+        0.1577222222222222
+      ],
+      "new_means_ms": [
+        0.16607777777777777,
+        0.25918
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.ThreeWhiteSoldiers",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.0918375,
+        0.0847875
+      ],
+      "new_means_ms": [
+        0.10497,
+        0.08630555555555557
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.ThreeWhiteSoldiers",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.3395375,
+        0.3502
+      ],
+      "new_means_ms": [
+        0.3266875,
+        0.2906375
+      ],
+      "verdict": "inconclusive"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "a7d60e8dcc277ce8edfb13cefcdaab040834c801ff82a58b2f29065e002fba43",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "9aaa9f3d45a60f8e448f8b6977afa8acfebc0f18ade36e86d6762ef06881dfba",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "d878bfaab0710e60833c6f393514d4e68568720db43b4c7d49e5594960428d01",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "b8914e072b9500816921b084cedffc3258fb862182372a0d6606aa34a0ba1ede",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/verified-summary.json.gz"
+    },
+    "round0-old-SharedTaReversalContinuationBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaReversalContinuationBenchmarks-report-full-compressed.json": {
+      "sha256": "52be3b03af675994a181ef0d4f7867d8f804a628903251ece492cc31ddc33dc7",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round0-old-SharedTaReversalContinuationBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaReversalContinuationBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "d43aecb72580f045584c32f2ac9c0e0f562b6f64db2462c61dda1f292522fa1d",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedTaReversalContinuationBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaReversalContinuationBenchmarks-report-full-compressed.json": {
+      "sha256": "fe21fa0e848d91ce3ff661bbeb5dcba9cb701a28bfd9b87901e5f0bbfe329b6c",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round1-new-SharedTaReversalContinuationBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaReversalContinuationBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "1edd3a5611b483d358148cb677eaf5c43d0f3cf63f7fc54930a20643d3f5e817",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedTaReversalContinuationBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaReversalContinuationBenchmarks-report-full-compressed.json": {
+      "sha256": "2f2106223038efb77083b15c496a45947e7d056596719bc9b25b2367718ed6f8",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round2-new-SharedTaReversalContinuationBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaReversalContinuationBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "e26bd27bb95f77b5c0fd3abb3f3cc1bf200982013097be1b653074eb644261f1",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedTaReversalContinuationBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaReversalContinuationBenchmarks-report-full-compressed.json": {
+      "sha256": "73c7214784ddfd19136bdf0185808d7c2adebe6e45bb7ac85760d3135b005133",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round3-old-SharedTaReversalContinuationBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaReversalContinuationBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "3f0aee272d49297562340332f621a549f4052fb3355ace294773d65809e74026",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "1f113b7d86dcf838905106c82d859916c76f437051f52fb68afa7b27c5577219",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round0-old-SharedTaReversalContinuationBenchmarks.log": {
+      "sha256": "0b7f5636a50b7f4347e1b06589c89d1c6aa966c14f1f6acf862ba773894e96a8",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round0-old-SharedTaReversalContinuationBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "3e96dcca1641d62958ed8993405270e620fa06a89fd4a0d9e896675de92cf38d",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-SharedTaReversalContinuationBenchmarks.log": {
+      "sha256": "0b34caf1a3df6a61c571dd93b03d02d2eb885126cb24cbbd538fa1473bbd357a",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round1-new-SharedTaReversalContinuationBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "c74839e4369e07730c4744c0c425f122c3ab715d1bb3da507b103d7d97fe65be",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-SharedTaReversalContinuationBenchmarks.log": {
+      "sha256": "f7e8b5d8f05b7076de7ee597a98220405ac00b9ad5f1f5cfcd6a9688b7a8b79e",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round2-new-SharedTaReversalContinuationBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "c987b23d681879ee546bdf24f1485146be86f5cac149cbfb17b07f4e07142480",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-SharedTaReversalContinuationBenchmarks.log": {
+      "sha256": "b08f7f4dbfc786b42d6e0a56b4d5f47370a25b544ccac388d322314872705f01",
+      "archive": "benchmarks/results/remaining-indicators/local-crow-soldier-equal-ranges-control-20261026/round3-old-SharedTaReversalContinuationBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-crow-soldier-equal-ranges-control.py": "c88f3d0ff134bdce0c3c5c5d75e374d602d4d5e685a087ba34cbd0a611bdd308",
+    "verify-crow-soldier-equal-ranges-control.py": "bca5dcdbadd9c3f2fc50a73bb47c192228e4f4ea3147f855fe7a206ab5588b8f",
+    "benchmark_process_cleanup.py": "fa2c088e49c3cc04c2e5a99bbe875080b95253f5e156f2983e4691420b8d8fc3"
+  },
+  "report_imported": false,
+  "production_integrated": true,
+  "qualified_source_ref": "refs/heads/perf/qualified-crow-soldier-equal-ranges-20261026",
+  "integration_source_proof": "benchmarks/results/remaining-indicators/crow-soldier-equal-ranges-integration-source-proof-20261026.json"
+}
