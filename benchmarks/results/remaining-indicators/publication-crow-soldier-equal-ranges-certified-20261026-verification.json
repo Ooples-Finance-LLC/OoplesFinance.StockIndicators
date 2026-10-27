@@ -1,0 +1,58 @@
+{
+  "input_head": "a30ab5de3de27cbc98b53d6671e3fc040f163970",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/CrowSoldierCandles.cs",
+    "tests/ModelsTests/CrowSoldierSharedExecutionTests.cs"
+  ],
+  "batch_note": "Bounded CrowSoldier equal far/near range sum reuse. Preserve lag snapshots, unequal periods, thresholds and original independent formulas. Validate eight unit cases including reset replay, CrowSoldier parity, six saved-input cases, 58 selected TA fixture cases, GPU100 and inventory8. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-27T00:10:59.264503+00:00",
+  "unit": {
+    "passed": 8,
+    "class_counts": {
+      "CrowSoldierSharedExecutionTests": 8
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\crow-soldier-equal-ranges\\unit\\unit.trx",
+    "sha256": "b08f18c1229ae2bdcc86b8c383ef2f4ce8ce1992ea87d8fbf2e7c785275d45b1",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-crow-soldier-equal-ranges-certified-20261026-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 116,
+    "class_counts": {
+      "SharedTaReversalContinuationBenchmarkTests": 58,
+      "CrowSoldierTests": 52,
+      "SharedCrowSoldierBenchmarkTests": 6
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\crow-soldier-equal-ranges\\parity\\parity.trx",
+    "sha256": "2b896b2bd5f01b0b4b17f1e47f7b07a43d2b70142824f7b15d66a5d0aff0d860",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-crow-soldier-equal-ranges-certified-20261026-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-crow-soldier-equal-ranges-20261026\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c0a8c4c3de170d687699105a4386f91e0ab395c1c588711a464ed657b5467205",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-crow-soldier-equal-ranges-20261026\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c0a8c4c3de170d687699105a4386f91e0ab395c1c588711a464ed657b5467205",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-crow-soldier-equal-ranges-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c0a8c4c3de170d687699105a4386f91e0ab395c1c588711a464ed657b5467205",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-crow-soldier-equal-ranges-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c0a8c4c3de170d687699105a4386f91e0ab395c1c588711a464ed657b5467205"
+  },
+  "source_fingerprint_sha256": "41f242a92b3e2a2f39b638292928851f8b79de558d79b0e4770ba2bdc4fa32a0",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Bounded CrowSoldier equal far/near range sum reuse. Preserve lag snapshots, unequal periods, thresholds and original independent formulas. Validate eight unit cases including reset replay, CrowSoldier parity, six saved-input cases, 58 selected TA fixture cases, GPU100 and inventory8. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
