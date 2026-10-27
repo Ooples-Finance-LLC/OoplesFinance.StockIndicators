@@ -34,6 +34,7 @@ internal readonly struct RocBankValue
     internal static BigInteger RoundUnits(BigInteger numerator, BigInteger denominator)
     {
 #if !NETFRAMEWORK
+        if (denominator.IsOne && TryRoundIntegerUnits(numerator, out var integer)) return integer;
         if (TryCompactUnits(numerator, denominator, out var compact)) return compact;
 #endif
         for (var shift = 0; ; shift += 32)
@@ -43,6 +44,27 @@ internal readonly struct RocBankValue
         }
     }
 #if !NETFRAMEWORK
+    private static bool TryRoundIntegerUnits(BigInteger numerator, out BigInteger result)
+    {
+        result = numerator;
+        var magnitude = BigInteger.Abs(numerator);
+        long bits = magnitude.GetBitLength();
+        // Leave the highest finite binade and extended overflow rounding unchanged.
+        if (bits > 2097) return false;
+        if (bits <= 53) return true;
+        int shift = (int)bits - 53;
+        var trailing = BigInteger.TrailingZeroCount(magnitude);
+        if (trailing >= shift) return true;
+        // A guard bit and a sticky-bit check give exact nearest-even rounding.
+        ulong guarded = (ulong)(magnitude >> (shift - 1));
+        ulong rounded = guarded >> 1;
+        if ((guarded & 1) != 0 && ((rounded & 1) != 0 || trailing < shift - 1))
+            rounded++;
+        result = new BigInteger(rounded) << shift;
+        if (numerator.Sign < 0) result = -result;
+        return true;
+    }
+
     private static bool TryCompactUnits(BigInteger numerator, BigInteger denominator, out BigInteger result)
     {
         result = default;
