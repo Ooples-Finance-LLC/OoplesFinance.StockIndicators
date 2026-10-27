@@ -1,0 +1,60 @@
+{
+  "before_sha256": "311a4d2923c24e7fb4f571dc574a6c14ff0655de54c5f871c9a13acdcd34b67f",
+  "candidate_sha256": "c9fe31ab7429224e0be287dcbc056b5492ad463bda9e40ca296c44605a03e540",
+  "changed_baseline_rows": 6,
+  "unchanged_baseline_rows": 796,
+  "changed_builder_slots": 12,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 12,
+  "verdicts": {
+    "faster": 594,
+    "slower": 890,
+    "inconclusive": 52
+  },
+  "unchanged_rows": 796,
+  "run_id": "local-crow-soldier-equal-ranges-control-20261026",
+  "imported_utc": "2026-10-27T00:29:45.592580+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "7c4a0243f77ffeaf92e227eae0ad501292e29caa6e1842d51549e244dd3ca70b",
+      "archive": "benchmarks/results/remaining-indicators/crow-soldier-equal-ranges-certified-local-crow-soldier-equal-ranges-control-20261026-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "f265a0f766d11dded5b21d307531f64cd4590c6f00e557618b54fd96c8786f96",
+      "archive": "benchmarks/results/remaining-indicators/crow-soldier-equal-ranges-certified-local-crow-soldier-equal-ranges-control-20261026-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "048acd17365d5a619f4d2b4838e428a0829ef975d00fe8db2b7c8ef96c354190",
+      "archive": "benchmarks/results/remaining-indicators/crow-soldier-equal-ranges-certified-local-crow-soldier-equal-ranges-control-20261026-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "11daa0ee5e29ca09ca7c667502d214b3e0f7ff6053b108ede560b5cc949b4e57",
+      "archive": "benchmarks/results/remaining-indicators/crow-soldier-equal-ranges-certified-local-crow-soldier-equal-ranges-control-20261026-measurement.json.gz"
+    },
+    "stage-crow-soldier-equal-ranges-report.py": {
+      "sha256": "a9f784096ef07d2f925f085a12b1529ab428d7a4fa96006333494f97ca9610f8",
+      "archive": "benchmarks/results/remaining-indicators/crow-soldier-equal-ranges-certified-local-crow-soldier-equal-ranges-control-20261026-stage-crow-soldier-equal-ranges-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/crow-soldier-equal-ranges-certified-local-crow-soldier-equal-ranges-control-20261026-verify-approved-certified-report.py.gz"
+    },
+    "import-crow-soldier-equal-ranges-report.py": {
+      "sha256": "024a8177dd039d20a290d781d07b161a324cc97fbb4bf1060036e867e01b5d88",
+      "archive": "benchmarks/results/remaining-indicators/crow-soldier-equal-ranges-certified-local-crow-soldier-equal-ranges-control-20261026-import-crow-soldier-equal-ranges-report.py.gz"
+    },
+    "archive-crow-soldier-equal-ranges-control.py": {
+      "sha256": "5a2c802c575c8b2d923c5063f284b410ebca0d94ea0e83546cf36065f768e573",
+      "archive": "benchmarks/results/remaining-indicators/crow-soldier-equal-ranges-certified-local-crow-soldier-equal-ranges-control-20261026-archive-crow-soldier-equal-ranges-control.py.gz"
+    },
+    "prove-crow-soldier-equal-ranges-integration.py": {
+      "sha256": "764be649cd4d1a2a783dbb3a246814f735f23fd2d3db258531c784fc4b210726",
+      "archive": "benchmarks/results/remaining-indicators/crow-soldier-equal-ranges-certified-local-crow-soldier-equal-ranges-control-20261026-prove-crow-soldier-equal-ranges-integration.py.gz"
+    },
+    "archive-crow-soldier-equal-ranges-report.py": {
+      "sha256": "4635fba9e85bdf2dec7671c53537fe0adc843970ffeec324036a37fbb6496be7",
+      "archive": "benchmarks/results/remaining-indicators/crow-soldier-equal-ranges-certified-local-crow-soldier-equal-ranges-control-20261026-archive-crow-soldier-equal-ranges-report.py.gz"
+    }
+  }
+}
