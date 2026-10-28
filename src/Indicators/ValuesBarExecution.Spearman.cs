@@ -60,10 +60,12 @@ internal static partial class ValuesBarExecution
             {
                 var value = sorted[i];
                 var j = i + 1;
+#pragma warning disable S1244 // Spearman ties require exact equality; nearby unequal values retain distinct ranks.
                 while (j < count && sorted[j] == value)
                 {
                     j++;
                 }
+#pragma warning restore S1244
 
                 var span = j - i;
                 var avgRank = (rank + (rank + span - 1)) / 2.0;
