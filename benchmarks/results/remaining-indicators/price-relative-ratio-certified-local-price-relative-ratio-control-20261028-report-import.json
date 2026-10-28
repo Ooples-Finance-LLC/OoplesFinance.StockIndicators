@@ -1,0 +1,60 @@
+{
+  "before_sha256": "aee582f4cc787067d2ae4351fe46e24abf52bc827a221688bed2db75839d8d70",
+  "candidate_sha256": "0838ff4e9bd33a9de96447f6a9fcd9df3742c32814b1a980f928a444470a9523",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 0,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 0,
+  "verdicts": {
+    "faster": 602,
+    "slower": 886,
+    "inconclusive": 48
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-price-relative-ratio-control-20261028",
+  "imported_utc": "2026-10-28T12:46:27.811581+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "9288a8a7232199f86ad6a638cf4d0e8eae66d3ffccc9a76f7ae63dadf018f3fb",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-ratio-certified-local-price-relative-ratio-control-20261028-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "6e0b28ea9407c92aef2ad41d14c82e7b5b652c3875541a9d00456be732482f03",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-ratio-certified-local-price-relative-ratio-control-20261028-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "3654ad87337bf0ae151b4b2fc6f833f04f3e232b320530adbb08eb6663b622c1",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-ratio-certified-local-price-relative-ratio-control-20261028-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "9635bc5fb653d643bec9b76bd8473707e9ba08c28415ed5bb189f280563909d2",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-ratio-certified-local-price-relative-ratio-control-20261028-measurement.json.gz"
+    },
+    "stage-price-relative-ratio-report-20261028.py": {
+      "sha256": "b70f9a29bd62a7915fcf68d69350bf54006b7b5e324ff8f6197d4579eecce948",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-ratio-certified-local-price-relative-ratio-control-20261028-stage-price-relative-ratio-report-20261028.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-ratio-certified-local-price-relative-ratio-control-20261028-verify-approved-certified-report.py.gz"
+    },
+    "import-price-relative-ratio-report-20261028.py": {
+      "sha256": "02cc5be12acfc9561d0f51508acf6a6bddf347c245e9ef397b17046663430a08",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-ratio-certified-local-price-relative-ratio-control-20261028-import-price-relative-ratio-report-20261028.py.gz"
+    },
+    "archive-price-relative-ratio-control-20261028.py": {
+      "sha256": "c3f654cb2049698fd7277929b2c723955e9944d2497e55dd71d90c3e61dc9f3e",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-ratio-certified-local-price-relative-ratio-control-20261028-archive-price-relative-ratio-control-20261028.py.gz"
+    },
+    "prove-price-relative-ratio-integration-20261028.py": {
+      "sha256": "0fac50a50bcc70d755e855c8d8d43e2d336e6989ee2bbb61f412fc105bd0a95e",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-ratio-certified-local-price-relative-ratio-control-20261028-prove-price-relative-ratio-integration-20261028.py.gz"
+    },
+    "archive-price-relative-ratio-report-20261028.py": {
+      "sha256": "bbd64b5525a6aaa3bf5403401c9798b2c32701804616cc9aad4275a9cfe23d93",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-ratio-certified-local-price-relative-ratio-control-20261028-archive-price-relative-ratio-report-20261028.py.gz"
+    }
+  }
+}
