@@ -913,7 +913,8 @@
     "compact_macd_acceptance.py": "01c134b5cb84b7ad5c38b37e1ae62b5da0c44b5a7ede09dfc80ea8a766d800b5"
   },
   "source_companion_inputs": {},
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/compact-macd-fixed-recurrence-integration-source-proof-20261028.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/compact-macd-fixed-recurrence-integration-source-proof-20261028.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/compact-macd-fixed-recurrence-certified-local-compact-macd-fixed-recurrence-control-20261028-report-import.json"
 }

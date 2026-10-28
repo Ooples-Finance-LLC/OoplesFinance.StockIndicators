@@ -1,0 +1,64 @@
+{
+  "before_sha256": "bd06898215ef860cdd0eec06ce60cc273a14f6815b86fbd37020f4fb064193b9",
+  "candidate_sha256": "a7415430a904666d36d9d280460f43b49f0a8cd4c67e623014f03aac3da0a0d2",
+  "changed_baseline_rows": 16,
+  "unchanged_baseline_rows": 786,
+  "changed_builder_slots": 32,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 32,
+  "verdicts": {
+    "faster": 602,
+    "slower": 886,
+    "inconclusive": 48
+  },
+  "unchanged_rows": 786,
+  "run_id": "local-compact-macd-fixed-recurrence-control-20261028",
+  "imported_utc": "2026-10-28T22:33:38.078897+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "7cf59868ddabd1cbb0555360020dc215d0ddceb26ed66726bf7abb7f03efe6ea",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-fixed-recurrence-certified-local-compact-macd-fixed-recurrence-control-20261028-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "4076ac6a39f462b6e4379f96a265422d41f84b56537ee90666ccb35b8f108911",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-fixed-recurrence-certified-local-compact-macd-fixed-recurrence-control-20261028-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "1df8df73fa1f3078e662a891eb19d0d548ba74f228bee4abac813078c15294b3",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-fixed-recurrence-certified-local-compact-macd-fixed-recurrence-control-20261028-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "7019b11b37d3413439c37a1aaa289313341e63772a160f0deafbd39cb4e7705a",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-fixed-recurrence-certified-local-compact-macd-fixed-recurrence-control-20261028-measurement.json.gz"
+    },
+    "compact_macd_acceptance.py": {
+      "sha256": "01c134b5cb84b7ad5c38b37e1ae62b5da0c44b5a7ede09dfc80ea8a766d800b5",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-fixed-recurrence-certified-local-compact-macd-fixed-recurrence-control-20261028-compact_macd_acceptance.py.gz"
+    },
+    "stage-compact-macd-fixed-recurrence-report-20261028.py": {
+      "sha256": "92f654eb25494eac8580112a254ac0b8e68966d8985bd1596afe64da5d26f838",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-fixed-recurrence-certified-local-compact-macd-fixed-recurrence-control-20261028-stage-compact-macd-fixed-recurrence-report-20261028.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-fixed-recurrence-certified-local-compact-macd-fixed-recurrence-control-20261028-verify-approved-certified-report.py.gz"
+    },
+    "import-compact-macd-fixed-recurrence-report-20261028.py": {
+      "sha256": "f85e90a9044ad25d7e1f061b0945eee06e1ad636e9a0ed1b6346cf71bc6b7800",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-fixed-recurrence-certified-local-compact-macd-fixed-recurrence-control-20261028-import-compact-macd-fixed-recurrence-report-20261028.py.gz"
+    },
+    "archive-compact-macd-fixed-recurrence-control-20261028.py": {
+      "sha256": "51d296dca542a3ab3adaa83e5833dc98bfce9507dc7bb8124daaad9480854e09",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-fixed-recurrence-certified-local-compact-macd-fixed-recurrence-control-20261028-archive-compact-macd-fixed-recurrence-control-20261028.py.gz"
+    },
+    "prove-compact-macd-fixed-recurrence-integration-20261028.py": {
+      "sha256": "39bf7a17bea4e4b1bb409a9957037084a884ef72aa6edca99257900c02af5afe",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-fixed-recurrence-certified-local-compact-macd-fixed-recurrence-control-20261028-prove-compact-macd-fixed-recurrence-integration-20261028.py.gz"
+    },
+    "archive-compact-macd-fixed-recurrence-report-20261028.py": {
+      "sha256": "28e5e3f2c4b9fb5e522fc096a6d80e208fc62eb3093f693e73342a7f1cb8ca54",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-fixed-recurrence-certified-local-compact-macd-fixed-recurrence-control-20261028-archive-compact-macd-fixed-recurrence-report-20261028.py.gz"
+    }
+  }
+}
