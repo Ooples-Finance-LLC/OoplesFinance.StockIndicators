@@ -1,5 +1,6 @@
 """Replace the report's primary comparison dataset using verified raw measurements."""
 import gzip
+from collections import Counter
 import hashlib
 import html
 import json
@@ -52,6 +53,14 @@ def replace_primary(document, dataset):
     if count != 1:
         raise ValueError('Expected exactly one primary dataset')
     source = dataset['evidence']['sourceSha']
+    sources = Counter(r.get('source_sha') or source for r in dataset['rows'])
+    if source is None:
+        if not sources or any(not value for value in sources):
+            raise ValueError('Mixed baseline requires a source for every row')
+        source_label = 'Measured builds: ' + ', '.join(
+            f'{value[:8]} ({count} comparisons)' for value, count in sorted(sources.items())) + '.'
+    else:
+        source_label = f'Measured source {source[:8]}.'
     comparisons = len(dataset['rows'])
     pairs = len({r['pair'] for r in dataset['rows']})
     wins = sum(r['bars'] == 10000 and r['competitor_over_ooples'] > 1 for r in dataset['rows'])
@@ -67,7 +76,7 @@ def replace_primary(document, dataset):
         '02 / Archived competitor results — October 8, 2026': '02 / Complete competitor results',
         'Explore the October 8 baseline': 'Complete competitor results',
         'Historical results from commit 848a5ec8. These values do not measure the optimized candidate. Click an API for the original samples and runner details.':
-            f'Measured source {source[:8]}. All {comparisons} comparisons below use refreshed matched timings. Click an API for samples and runner details.',
+            f'{source_label} All {comparisons} comparisons below use refreshed matched timings. Click an API for samples and runner details.',
         'Export historical CSV': 'Export results CSV',
         'October 8 baseline gaps': 'Measured performance gaps',
         'October 8 methodology and evidence': 'Measurement methodology and evidence',
@@ -80,16 +89,16 @@ def replace_primary(document, dataset):
         'Report PR #249': 'Optimization PR #266',
         '/pull/249"': '/pull/266"',
         'The 401-pair explorer below retains the October 8 full-library baseline.':
-            f'The {pairs}-pair explorer below uses refreshed measurements from {source[:8]}.',
+            f'The {pairs}-pair explorer below uses refreshed measurements. {source_label}',
     }
     for old, new in replacements.items():
         document = document.replace(old, new)
     document = re.sub(r'(<section id="explorer"[^>]*>.*?<p class="sub">).*?(</p>)',
-        lambda m: m[1] + f'Measured source {source[:8]}. All {comparisons} comparisons below use refreshed matched timings. '
+        lambda m: m[1] + f'{source_label} All {comparisons} comparisons below use refreshed matched timings. '
         'Click an API for samples and runner details.' + m[2], document, count=1, flags=re.S)
-    document = re.sub(r'<h3>Fresh full-library timing run</h3><p>.*?</p>|<p>(?:Refreshed baseline source:|Base source:).*?</p>',
-        lambda _: '<p>Refreshed baseline source: ' + html.escape(source[:8]) + '. '
-        '<a href="' + html.escape(dataset['evidence']['runUrl'], quote=True) + '">Measurement run and raw evidence</a>. '
+    document = re.sub(r'<h3>Fresh full-library timing run</h3><p>.*?</p>|<p>(?:Refreshed baseline source:|Base source:|Measured builds:).*?</p>',
+        lambda _: '<p>' + ('Refreshed baseline source: ' + html.escape(source[:8]) + '. ' if source else html.escape(source_label) + ' ')
+        + '<a href="' + html.escape(dataset['evidence']['runUrl'], quote=True) + '">Measurement run and raw evidence</a>. '
         'All primary baseline tables and charts use these verified results.</p>', document, flags=re.S)
     document = re.sub(r'<div id="hosted-measurement-results">.*?</div>',
         '<p>Refreshed LibraryPair measurements are shown in the <a href="#explorer">complete results table</a>.</p>', document, flags=re.S)
@@ -102,9 +111,20 @@ def replace_primary(document, dataset):
         f'<h1>Competitor performance:<br>complete measured results.</h1><p class="lede">'
         f'{pairs} APIs, {comparisons} size comparisons and {comparisons * 2} measured arms. '
         f'Ooples has a lower observed mean for {wins} / {pairs} APIs at 10,000 bars. '
-        f'Measured build: {html.escape(source[:8])}. These baseline batch timings are separate from '
+        f'{html.escape(source_label)} These baseline batch timings are separate from '
         'builder-mode qualification below; they do not establish universal superiority.</p></section>')
     document = re.sub(r'<section class="hero">.*?</section>', lambda _: hero, document, count=1, flags=re.S)
+    sample_counts = Counter(len(arm['samples']) for row in dataset['rows']
+        for arm in row.get('raw', {}).values() if 'samples' in arm)
+    if sample_counts:
+        sampling = 'Retained measured samples per arm: ' + ', '.join(
+            f'{count} samples ({arms} arms)' for count, arms in sorted(sample_counts.items())) + '. '
+        sampling += 'Each row retains its measurement source and raw samples; builder timings are separate.'
+        document = re.sub(r'(<div class="fact"><b>Sampling</b><span>).*?(</span>)',
+            lambda m: m[1] + sampling + m[2], document, count=1, flags=re.S)
+        document = document.replace(
+            'The baseline has three samples per arm; these can be noisy, and observed wins are not confidence-qualified. The SMA and DEMA/TEMA overrides retain its longer-run samples and confidence intervals.',
+            'Retained sample counts vary by measurement source and are listed above. Observed wins are not confidence-qualified.')
     # Put the requested numbers first; retain detailed rollout evidence afterward.
     sections = []
     for name in ['overview', 'explorer', 'priorities', 'method', 'unavailable']:

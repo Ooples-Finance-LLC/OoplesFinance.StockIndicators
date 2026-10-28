@@ -73,3 +73,27 @@ class PrimaryBaselineTests(HostedResultsTests):
         for stale in ['Base source:', 'oldbase', 'oldsma', 'oldsar', 'https://example.test/old-run']:
             self.assertNotIn(stale, updated)
         self.assertEqual(updated, replace_primary(updated, dataset))
+
+    def test_mixed_sources_and_sampling_survive_refresh(self):
+        dataset = measured_dataset(self.folder, self.source, self.run, self.manifest, {})
+        dataset['evidence']['sourceSha'] = None
+        dataset['rows'][0]['source_sha'] = 'b' * 40
+        dataset['rows'][0]['raw']['Ooples']['samples'] = [100] * 10
+        document = ('<body><section class="hero"><p class="lede">old</p></section>'
+            '<section id="explorer"><p class="sub">old</p></section>'
+            '<div class="fact"><b>Sampling</b><span>stale overrides</span></div>'
+            + script('dataset', dataset) + '</body>')
+        updated = replace_primary(document, dataset)
+        self.assertEqual(dataset, embedded(updated, 'dataset'))
+        self.assertIn('bbbbbbbb (1 comparisons)', updated)
+        self.assertIn('10 samples (1 arms)', updated)
+        self.assertNotIn('stale overrides', updated)
+        self.assertEqual(updated, replace_primary(updated, dataset))
+        self.assertEqual(updated, refresh(updated, self.root, self.root / 'absent'))
+
+    def test_mixed_baseline_rejects_missing_row_source(self):
+        dataset = measured_dataset(self.folder, self.source, self.run, self.manifest, {})
+        dataset['evidence']['sourceSha'] = None
+        del dataset['rows'][0]['source_sha']
+        with self.assertRaisesRegex(ValueError, 'source for every row'):
+            replace_primary('<body>' + script('dataset', dataset) + '</body>', dataset)
