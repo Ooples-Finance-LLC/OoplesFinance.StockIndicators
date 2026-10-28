@@ -216,8 +216,9 @@
       "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/source-companions/exact-equality-review.json.gz"
     }
   },
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
   "integration_source_proof": "benchmarks/results/remaining-indicators/price-relative-ratio-integration-source-proof-20261028.json",
-  "qualified_source_ref": "refs/heads/perf/qualified-price-relative-ratio-20261028"
+  "qualified_source_ref": "refs/heads/perf/qualified-price-relative-ratio-20261028",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/price-relative-ratio-certified-local-price-relative-ratio-control-20261028-report-import.json"
 }
