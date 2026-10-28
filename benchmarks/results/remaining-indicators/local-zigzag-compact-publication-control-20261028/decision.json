@@ -125,5 +125,32 @@
     }
   },
   "report_imported": false,
-  "production_integrated": false
+  "production_integrated": false,
+  "candidate_evidence": {
+    "rejected-candidate.patch.gz": {
+      "sha256": "76c0dbffbfa2d189ee6ad088961f46e4659559738715c7db19a503136019023c",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/rejected-candidate.patch.gz"
+    },
+    "publication-zigzag-compact-publication-certified-20261028-parity.trx.gz": {
+      "sha256": "615b4916fd3fb2c3dfa4dba5bcefa36e668119f9407ec8db9c73b4c612f3e75e",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/publication-zigzag-compact-publication-certified-20261028-parity.trx.gz"
+    },
+    "publication-zigzag-compact-publication-certified-20261028-unit.trx.gz": {
+      "sha256": "ea460bb526ae8272e07ea35ed0a47f80816be34e9fb722c3f82c7d868d37e5ff",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/publication-zigzag-compact-publication-certified-20261028-unit.trx.gz"
+    },
+    "publication-zigzag-compact-publication-certified-20261028-verification.json": {
+      "sha256": "bd73ed98b1fb7109bdc86a3caeb1f3438dd4e1de3c10fe0b628a38923a857273",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/publication-zigzag-compact-publication-certified-20261028-verification.json"
+    },
+    "rejected-candidate-gpu.trx.gz": {
+      "sha256": "e0f6b982de7ec18e42d071c35bb2c03e69b41909b0449548bdeeb414efb60d1f",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/rejected-candidate-gpu.trx.gz"
+    },
+    "rejected-candidate-gpu-receipt.json.gz": {
+      "sha256": "bd03865b3eab3a4c8c34822752011e00760a47a2b2ab8ecea53f239ed28d0493",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/rejected-candidate-gpu-receipt.json.gz"
+    }
+  },
+  "reason": "Both controlled sizes were inconclusive; no qualified performance improvement. All16timing cases verified and candidate correctness passed13unit/13parity/100GPU/8inventory cases. Preserve its exact patch and qualification for review; production source and report rows remain unchanged by this trial."
 }
