@@ -1,7 +1,8 @@
 {
-  "input_head": "0f67e79d5dfce9ef2766bf2438cb6baf92ab8ec8",
+  "input_head": "700a6886bdd598722a0e52817cba879812f21ef2",
   "source": "C-drive recovery; committed source and compressed evidence retained",
   "checks": {
+    "build-example": "passed",
     "build-unit": "passed",
     "unit": "passed",
     "build-benchmark": "passed",
@@ -21,38 +22,39 @@
     "src/Indicators/FixedKernelSnapshots.cs",
     "tests/ModelsTests/WindowedSincCompactTests.cs"
   ],
-  "batch_note": "Approved Afirma compact arithmetic: exact bounded Int128 convolution with certified rounding and unchanged exact fallback; preserve coefficient bits, oldest-first startup, overflow and lifecycle.",
+  "batch_note": "Approved Afirma compact arithmetic: exact bounded Int128 convolution with certified rounding and unchanged exact fallback; preserve coefficient bits, oldest-first startup, overflow and lifecycle. Requalified after active build outputs were removed and binary identity could not be restored.",
   "step": "complete",
-  "updated_utc": "2026-10-28T13:11:06.658201+00:00",
+  "updated_utc": "2026-10-28T17:44:11.620143+00:00",
   "unit": {
     "passed": 18,
     "class_counts": {
       "WindowedSincTests": 15,
       "WindowedSincCompactTests": 3
     },
-    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\afirma-compact\\unit\\unit.trx",
-    "sha256": "958a04aa812444fbf28503b9e537698b0da9831fd1c5f1865c5cf4945ae54bf8",
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\afirma-compact-restored\\unit\\unit.trx",
+    "sha256": "25077e5da99bac8762dbceb0ada0eeffa99373a6555cd08620cdfc06b74f65ab",
     "archived_file": "benchmarks/results/remaining-indicators/publication-afirma-compact-certified-20261028-unit.trx.gz"
   },
+  "benchmark_reuse": "Unchanged harness restored from source-matching qualified baseline; replaced only production DLL. No benchmark rebuild.",
   "parity": {
     "passed": 15,
     "class_counts": {
       "SincBuilderComparisonTests": 7,
       "FixedKernelSnapshotComparisonTests": 8
     },
-    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\afirma-compact\\parity\\parity.trx",
-    "sha256": "e549e22e72f8e7b5d0aa4f15ac5c00817a0b97a563c58c3bd362c74d76814904",
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\afirma-compact-restored\\parity\\parity.trx",
+    "sha256": "debbd90446fae7ce9d8a5407180eb70514587bd071a3434a4884d8299ae16ab5",
     "archived_file": "benchmarks/results/remaining-indicators/publication-afirma-compact-certified-20261028-parity.trx.gz"
   },
   "gpu_passed": 100,
   "production_dll_sha256": {
-    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-compact-20261028\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9e2d5bae6d33ea46b08ceeb85761f33ad014f9854190890e2e4b0e052b449cef",
-    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-compact-20261028\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9e2d5bae6d33ea46b08ceeb85761f33ad014f9854190890e2e4b0e052b449cef",
-    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-compact-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9e2d5bae6d33ea46b08ceeb85761f33ad014f9854190890e2e4b0e052b449cef",
-    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-compact-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9e2d5bae6d33ea46b08ceeb85761f33ad014f9854190890e2e4b0e052b449cef"
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-compact-20261028\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4587e9da251991109b87468c4a108527a7d6ccc6fa9b8b9defb8cbd3a304a154",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-compact-20261028\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4587e9da251991109b87468c4a108527a7d6ccc6fa9b8b9defb8cbd3a304a154",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-compact-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4587e9da251991109b87468c4a108527a7d6ccc6fa9b8b9defb8cbd3a304a154",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-compact-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4587e9da251991109b87468c4a108527a7d6ccc6fa9b8b9defb8cbd3a304a154"
   },
   "source_fingerprint_sha256": "8ebe69af50f1443654903dc1871d8cd8cb6af38a54f6ed31b8ca0d90288d03ae",
   "inventory_tests_passed": 8,
   "performance": "Pending; correctness does not establish competitor speed.",
-  "evidence_note": "Approved Afirma compact arithmetic: exact bounded Int128 convolution with certified rounding and unchanged exact fallback; preserve coefficient bits, oldest-first startup, overflow and lifecycle. Correctness checks passed; controlled performance remains pending."
+  "evidence_note": "Approved Afirma compact arithmetic: exact bounded Int128 convolution with certified rounding and unchanged exact fallback; preserve coefficient bits, oldest-first startup, overflow and lifecycle. Requalified after active build outputs were removed and binary identity could not be restored. Correctness checks passed; controlled performance remains pending."
 }
