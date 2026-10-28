@@ -1,0 +1,223 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "964638c6c1421845e9550d49eafc1f6e337d8c48",
+    "new": "58a4db090b0758e64bcaad40d92e3b6b13ff3c76"
+  },
+  "candidate_code_source": "58a4db090b0758e64bcaad40d92e3b6b13ff3c76",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "SharedPriceRelativeBenchmarks",
+      "pair": "Skender.GetPrs",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        1.5290789930555555,
+        1.48674546875
+      ],
+      "new_means_ms": [
+        1.2251640625,
+        1.3746958984375
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedPriceRelativeBenchmarks",
+      "pair": "Skender.GetPrs",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        1.552056640625,
+        1.4691972222222223
+      ],
+      "new_means_ms": [
+        1.29567984375,
+        1.33660203125
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedPriceRelativeBenchmarks",
+      "pair": "Skender.GetPrs",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        14.684294642857141,
+        14.607644444444444
+      ],
+      "new_means_ms": [
+        11.58285375,
+        13.4653475
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedPriceRelativeBenchmarks",
+      "pair": "Skender.GetPrs",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        14.743446031746036,
+        14.446823809523812
+      ],
+      "new_means_ms": [
+        13.4841075,
+        13.3807828125
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetPrs",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        6.003311111111111,
+        6.149744444444444
+      ],
+      "new_means_ms": [
+        5.50859,
+        5.49337
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetPrs",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        16.53471,
+        16.476655555555556
+      ],
+      "new_means_ms": [
+        14.97042,
+        14.6954375
+      ],
+      "verdict": "inconclusive"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "edf85c5284ec5bb922fba22229ef9b3151bcf0d78b156d70cf41dfdfa58541f5",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "248ee72783382671786cf0d2ce82a242c78f985e1304ce828d9c0d703738412a",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "50b99305a546af5ad3214722431b00bc7b4bf5cbc3ed2bca6075724da3d604f9",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "6525ac29ea4052fa584897dd5d5ae6b96420744dff4b5ae569aaedf3d76942e6",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/verified-summary.json.gz"
+    },
+    "round0-old-SharedPriceRelativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceRelativeBenchmarks-report-full-compressed.json": {
+      "sha256": "aac18812ef4905f15cb7ba8e630ead39e6675fb297677d277d48b1758909a4a5",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round0-old-SharedPriceRelativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceRelativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "6a835333b0749e7c0a5c3a8aeaf4b6cabae8aabbd900699b4e9861e84a9e40ea",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedPriceRelativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceRelativeBenchmarks-report-full-compressed.json": {
+      "sha256": "0998712bf2b7a55c52f976893c3242185599a6151e671338f25d6312b2f4820c",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round1-new-SharedPriceRelativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceRelativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "923ce2802b8525d26432fa4238b03e998736d421f0504c181054ac438c91e47e",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedPriceRelativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceRelativeBenchmarks-report-full-compressed.json": {
+      "sha256": "bd0c165ce024824ebc83f2d95b2bdfd39bc028cc1f6977b15b6b1853c5ba8a41",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round2-new-SharedPriceRelativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceRelativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "1c46615301107ff15372e0352d485c2f950edfa98c40686a0aa483afe9291170",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedPriceRelativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceRelativeBenchmarks-report-full-compressed.json": {
+      "sha256": "6cf34eee039d0ee88a7fc0a3f7af71e6135cf23285777ff07e340aed2a2a0c89",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round3-old-SharedPriceRelativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceRelativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "e0081bd454854cef0f777404a6adb7cbab97ecf96b74827ffad659f046f3dd75",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "e37a774926866217405e0085296e25f13b7daaf190735cdcdafd32246db6d570",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round0-old-SharedPriceRelativeBenchmarks.log": {
+      "sha256": "3fbd98a4aea16d34e59884ec33f39ad888a2da990a11153ca1704fc2abf3dee4",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round0-old-SharedPriceRelativeBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "6bd0cee2fd499e67e08acf253ba83d652ec540e5aa6c6c95a7b91ac43901eb0c",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-SharedPriceRelativeBenchmarks.log": {
+      "sha256": "55d7ea590c04c432ab0cc822b7e25bba07e6daf63e5b21f229585eddd53f9193",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round1-new-SharedPriceRelativeBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "01493a49033b9d36eba21ad064adbb0ad010e6735a5031a3edf024dfdb52b04f",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-SharedPriceRelativeBenchmarks.log": {
+      "sha256": "f66faf01c751e0eb60502a75a685b529b1e0b56fa7f956b00c3b3fdf6c59b911",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round2-new-SharedPriceRelativeBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "fa405c8bcde39fda47145b5fedb0cb07bc720c7019e9e6cd4cbef3d2f5760855",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-SharedPriceRelativeBenchmarks.log": {
+      "sha256": "35bbf0e308e9cf7e8c792594891e5596ed91651f8c35c5a90cf833654a71c1c8",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/round3-old-SharedPriceRelativeBenchmarks.log.gz"
+    },
+    "invalidated-attempts/20261028T123113329349/interruption.json": {
+      "sha256": "879708edf8c3fea4180d3460b4cbc94a5025457ddf4dc08e89685ebcd5525fd8",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/invalidated-attempts/20261028T123113329349/interruption.json.gz"
+    },
+    "invalidated-attempts/20261028T123113329349/round1-new-SharedPriceRelativeBenchmarks.log": {
+      "sha256": "71eeb563b3079d02b9d15b7e1dc30ada573da5629060ac494be04f4cce219f0d",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/invalidated-attempts/20261028T123113329349/round1-new-SharedPriceRelativeBenchmarks.log.gz"
+    },
+    "invalidated-attempts/20261028T123113329349/round1-new-SharedPriceRelativeBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceRelativeBenchmarks-20261028-083054.log": {
+      "sha256": "01cfb6a384e8f213df45d38d63f5a0fe53df963fa371ac6f125a1315fd093bfb",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/invalidated-attempts/20261028T123113329349/round1-new-SharedPriceRelativeBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceRelativeBenchmarks-20261028-083054.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-price-relative-ratio-control-20261028.py": "5009380e118497e7f94c39a5f5b69b83566655cfac44c572e419195a1741ac1a",
+    "verify-price-relative-ratio-control-20261028.py": "fb82ebef1d72f6c1e29d18dfb392fe314cbe68a03799444ee42efd891df08b5b",
+    "benchmark_process_cleanup.py": "fa2c088e49c3cc04c2e5a99bbe875080b95253f5e156f2983e4691420b8d8fc3",
+    "verify_compact_long_sonar_companions.py": "a515ef2717bbc66631971eceeca4e5ebd47c6e3f28a4e5b0d2d27029bbbae26d"
+  },
+  "source_companion_inputs": {
+    "compact-macd-long-operands-draft-20261027/measurement-review.json": {
+      "sha256": "aaadcf586d8fa407a21d3afbd24e40bd2f8170509c4fb4c14c2f0705d2940e0e",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/source-companions/measurement-review.json.gz"
+    },
+    "compact-macd-long-operands-draft-20261027/source-companion-checks.json": {
+      "sha256": "4ee1f991816433f2760d6fb18e112b4d2921a298f67b28e33d79d6644bbb8159",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/source-companions/source-companion-checks.json.gz"
+    },
+    "sonar-five-followups-draft-20261027/review.json": {
+      "sha256": "0a39da9bb8df7131fbd6edb9ac0e249f95ebd0c9caa33a47fa438c9de632514a",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/source-companions/review.json.gz"
+    },
+    "sonar-five-followups-draft-20261027/exact-equality-review.json": {
+      "sha256": "a4d1cccb4d2f69a0b86b94c7e357d621a9af356d323fca3744f334120329cd84",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-ratio-control-20261028/source-companions/exact-equality-review.json.gz"
+    }
+  },
+  "report_imported": false,
+  "production_integrated": true,
+  "integration_source_proof": "benchmarks/results/remaining-indicators/price-relative-ratio-integration-source-proof-20261028.json",
+  "qualified_source_ref": "refs/heads/perf/qualified-price-relative-ratio-20261028"
+}
