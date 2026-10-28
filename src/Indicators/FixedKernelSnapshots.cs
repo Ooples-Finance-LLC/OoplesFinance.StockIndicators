@@ -177,6 +177,9 @@ public static class WindowedSincSnapshot
         ValidateParameters(period, taps, window);
         if (bars.Count == 0) return Array.Empty<double>();
         var weights = CreateWeights(period, taps, window, out var mass);
+#if !NETFRAMEWORK
+        if (TryCalculateCompact(bars, weights, mass, out var compact)) return compact;
+#endif
         var output = new double[bars.Count];
         for (var i = 0; i < bars.Count; i++)
         {
@@ -190,6 +193,85 @@ public static class WindowedSincSnapshot
         }
         return output;
     }
+
+#if !NETFRAMEWORK
+    private static bool TryCalculateCompact(IReadOnlyList<Bar> bars, double[] weights,
+        ExactMeanAccumulator exactMass, out double[] output)
+    {
+        output = Array.Empty<double>();
+        int priceMinimum = 2047, priceMaximum = 0;
+        int weightMinimum = 2047, weightMaximum = 0;
+        foreach (var bar in bars)
+            if (!IncludeGrid(bar.Close, ref priceMinimum, ref priceMaximum)) return false;
+        foreach (double weight in weights)
+            if (!IncludeGrid(weight, ref weightMinimum, ref weightMaximum)) return false;
+        int countBits = 0;
+        for (int remaining = weights.Length - 1; remaining > 0; remaining >>= 1) countBits++;
+        int priceSpan = priceMaximum == 0 ? 0 : priceMaximum - priceMinimum;
+        int weightSpan = weightMaximum - weightMinimum;
+        // Each aligned operand has at most 53+span magnitude bits. The sum
+        // of taps products is strictly below 2^(106+spans+ceil(log2(taps))).
+        // A bound <=127 fits signed Int128, even before cancellation.
+        if (weightMaximum == 0 || 106 + priceSpan + weightSpan + countBits > 127) return false;
+        output = new double[bars.Count];
+        if (priceMaximum == 0) return true;
+        var prices = new long[bars.Count];
+        for (int i = 0; i < prices.Length; i++) prices[i] = GridUnits(bars[i].Close, priceMinimum);
+        var coefficients = new long[weights.Length];
+        Int128 mass = 0;
+        for (int k = 0; k < coefficients.Length; k++)
+        {
+            coefficients[k] = GridUnits(weights[k], weightMinimum);
+            mass = unchecked(mass + coefficients[k]);
+        }
+        if (mass == 0) return false; // Retain the original nonzero-kernel contract.
+        UInt128 denominator = (UInt128)(mass < 0 ? -mass : mass);
+        for (int i = 0; i < prices.Length; i++)
+        {
+            int start = Math.Max(0, i - weights.Length + 1);
+            Int128 numerator = 0;
+            for (int k = 0; k < coefficients.Length; k++)
+                numerator = unchecked(numerator + (Int128)prices[Math.Min(i, start + k)] * coefficients[k]);
+            if (numerator == 0) continue;
+            UInt128 magnitude = (UInt128)(numerator < 0 ? -numerator : numerator);
+            if (CertifiedCompactRatio.TryDivide(magnitude, denominator, priceMinimum - 1075, out double value))
+                output[i] = (numerator < 0) != (mass < 0) ? -value : value;
+            else
+            {
+                // Ambiguous midpoint, subnormal, and overflow cases use the
+                // unchanged exact product accumulator and final ratio.
+                var sum = new ExactMeanAccumulator();
+                for (int k = 0; k < weights.Length; k++)
+                    sum.AddProduct(bars[Math.Min(i, start + k)].Close, weights[k]);
+                output[i] = sum.Ratio(exactMass);
+            }
+            if (!FrameworkCompatibility.IsFinite(output[i]))
+                throw new OverflowException("Sinc output is not representable.");
+        }
+        return true;
+    }
+
+    private static bool IncludeGrid(double value, ref int minimum, ref int maximum)
+    {
+        long bits = BitConverter.DoubleToInt64Bits(value);
+        if ((bits & long.MaxValue) == 0) return true;
+        int exponent = (int)((bits >> 52) & 2047);
+        if (exponent is 0 or 2047) return false;
+        minimum = Math.Min(minimum, exponent);
+        maximum = Math.Max(maximum, exponent);
+        // This separately proves that each signed operand fits Int64.
+        return maximum - minimum <= 10;
+    }
+
+    private static long GridUnits(double value, int minimum)
+    {
+        long bits = BitConverter.DoubleToInt64Bits(value);
+        if ((bits & long.MaxValue) == 0) return 0;
+        int exponent = (int)((bits >> 52) & 2047);
+        long magnitude = ((bits & 0xfffffffffffffL) | (1L << 52)) << (exponent - minimum);
+        return bits < 0 ? -magnitude : magnitude;
+    }
+#endif
 
     internal static void ValidateParameters(int period, int taps, SincWindow window)
     {
