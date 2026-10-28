@@ -121,9 +121,18 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            var e = ExactVarianceWindow.Units(PairStatisticsWindow.Select(bar, evaluation));
-            var b = ExactVarianceWindow.Units(PairStatisticsWindow.Select(bar, basis));
+            double evaluationPrice = PairStatisticsWindow.Select(bar, evaluation);
+            double basePrice = PairStatisticsWindow.Select(bar, basis);
+#if !NETFRAMEWORK
+            // Both operands are already binary64 values: one hardware division
+            // rounds the exact ratio once, including subnormals and overflow.
+            // Exact zero numerators historically publish positive zero.
+            double? ratio = basePrice == 0 ? null : evaluationPrice == 0 ? 0 : evaluationPrice / basePrice;
+#else
+            var e = ExactVarianceWindow.Units(evaluationPrice);
+            var b = ExactVarianceWindow.Units(basePrice);
             double? ratio = b.IsZero ? null : Divide(e, b);
+#endif
             Put(ratio, 0, output);
             if (ratio.HasValue && !FrameworkCompatibility.IsFinite(ratio.Value))
                 return;
@@ -147,6 +156,11 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
             }
             if (!period.HasValue)
                 return;
+#if !NETFRAMEWORK
+            // Only the compound return expression requires exact wide operands.
+            var e = ExactVarianceWindow.Units(evaluationPrice);
+            var b = ExactVarianceWindow.Units(basePrice);
+#endif
             if (_history.Count == period.Value)
             {
                 var old = _history.Dequeue();
