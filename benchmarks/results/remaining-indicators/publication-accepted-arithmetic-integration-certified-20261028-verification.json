@@ -1,0 +1,87 @@
+{
+  "input_head": "4db57c6842167f9f58f7d8e19ad210dfa23f6aba",
+  "source": "Fresh combined-tree validation of accepted arithmetic candidates",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "macd_variant": "fixed",
+  "zigzag_variant": "published",
+  "qualified_batches": [
+    "afirma-compact",
+    "zigzag-exact-scale",
+    "compact-macd-fixed-recurrence"
+  ],
+  "reviewed_source_changes": [
+    "src/Helpers/CompactMacdValue.cs",
+    "src/Indicators/AlignedEmaMacd.cs",
+    "src/Indicators/EmaDifferenceSignal.cs",
+    "tests/ModelsTests/CompactMacdFixedRecurrenceTests.cs",
+    "tests/ModelsTests/CompactMacdFusedRecurrenceTests.cs"
+  ],
+  "batch_note": "Fresh combined-tree validation of accepted MACD/ZigZag candidates with published Afirma; affected numerical, parity, GPU, and inventory checks. Individual timing sources remain explicit.",
+  "step": "complete",
+  "updated_utc": "2026-10-28T22:32:28.808287+00:00",
+  "unit": {
+    "passed": 266,
+    "class_counts": {
+      "PpoNumericalTests": 71,
+      "WindowedSincCompactTests": 3,
+      "MacdNumericalTests": 81,
+      "CompactRatioArithmeticTests": 6,
+      "CompactMacdValueTests": 4,
+      "CompactMacdFusedRecurrenceTests": 2,
+      "CompactRocUnitsTests": 5,
+      "PvoNumericalTests": 46,
+      "ZigZagExactScaleTests": 3,
+      "MacdFixedCoefficientReductionTests": 2,
+      "ZigZagSnapshotSharedExecutionTests": 8,
+      "MacdSharedExecutionTests": 18,
+      "WindowedSincTests": 15,
+      "CompactMacdFixedRecurrenceTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\accepted-arithmetic-integration-20261028\\unit\\unit.trx",
+    "sha256": "53598fa3df52968333f8c44e6db187239a16e6fd0516fcad5b7fc2ff2ad30c60",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-accepted-arithmetic-integration-certified-20261028-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 147,
+    "class_counts": {
+      "SharedTaMacdNativeBenchmarkTests": 46,
+      "AlignedMacdComparisonTests": 10,
+      "ClassicMacdComparisonTests": 16,
+      "SharedTradyMacdBenchmarkTests": 33,
+      "FixedKernelSnapshotComparisonTests": 8,
+      "SincBuilderComparisonTests": 7,
+      "SharedZigZagSnapshotBenchmarkTests": 6,
+      "ZigZagComparisonTests": 7,
+      "SharedMacdBenchmarkTests": 14
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\accepted-arithmetic-integration-20261028\\parity\\parity.trx",
+    "sha256": "9f9027e6cce4af4b5853eb349392f305b97fd0c29fc01389af8aad8d7cba2759",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-accepted-arithmetic-integration-certified-20261028-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "add8ca2989b7b1c20b8faa87594047a50d96751aefabca7771c21557ae559332",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "add8ca2989b7b1c20b8faa87594047a50d96751aefabca7771c21557ae559332",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "add8ca2989b7b1c20b8faa87594047a50d96751aefabca7771c21557ae559332",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "add8ca2989b7b1c20b8faa87594047a50d96751aefabca7771c21557ae559332"
+  },
+  "source_fingerprint_sha256": "4a5978f75a89b26d349d166f593f48fba577c2e88a11cb99f190d03399fda0fd",
+  "inventory_tests_passed": 8,
+  "performance": "Selected candidates passed their independent acceptance criteria; combined-tree correctness is separate from their controlled measurements.",
+  "evidence_note": "Fresh combined-tree validation of accepted MACD/ZigZag candidates with published Afirma; affected numerical, parity, GPU, and inventory checks. Individual timing sources remain explicit. Combined-tree correctness passed; performance rows retain their individually measured source commits."
+}

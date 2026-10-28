@@ -1,0 +1,129 @@
+{
+  "status": "candidate-rejected-or-inconclusive",
+  "sources": {
+    "old": "1d964b3bf9a1bc9451838d090ee11dba439d4962",
+    "new": "2c827ed951e6812de5a9a76c5728cd8bf479993b"
+  },
+  "candidate_code_source": "79b24507beddf6aa02347538251bd4b4fd6e1e7b",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetZigZag",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        1.3746222222222222,
+        1.358261111111111
+      ],
+      "new_means_ms": [
+        1.439811111111111,
+        1.4301625
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetZigZag",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        5.57063,
+        5.42975
+      ],
+      "new_means_ms": [
+        5.72166,
+        5.93568
+      ],
+      "verdict": "inconclusive"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "2e5ba60af16521f207e54587fbff322f1e967fa559fe3119e2c2da1392cc0b4c",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "b3f4bfbf40d50999f81885a3a351e982cab3188ce915047f20ee1a29bb388e04",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "075ea500d727be32bb706e06f34b639877ec49cf65bab9f0b4b88b0f60ec5f58",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "e3b2dd1f6f3638da2efaadd3dd85646a4f0fe0732def8e35a0521e1e66be35c5",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/verified-summary.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "8c34fb786e77f1a8f49404ea2895c8fe94b96010a2b82365e6e660f370d0b64c",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "2be7a9155d5e13d668f18b72a9a01d09be8546e3e32c0f7e8fec1440e0201806",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "852a40a74ec005afce9621a4dcdebcb5448fe491cb5b8b24a8e68a280030e338",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "b5b7ab9cb260986b8e21af547ce1aec70a9dfe33b1552b3581aeab85bd328a6e",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "639e6a986f60154e00c3e207fe31d5b6bd7aff9a7283a4445f545bd1504bbc9d",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "0dd5a0a827ba12e8cccbcc5f8d527a1257bf094e267c0bbda66ff4b1197e5ea1",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "99294986890bb136af30cc8970dfc8b1dca501c994e788762ddde537eb615ed0",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "354b74df0cdea9c918f845cec9b72d3e77a2de0c43ca5e878bb4e81584d897dc",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/round3-old-LibraryPairBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-zigzag-compact-publication-control-20261028.py": "f48d0ddee27b48ab5d3b77ebb0b2598965d200b3e4afc3b58fd47117c5071047",
+    "verify-zigzag-compact-publication-control-20261028.py": "2b8e279b5ba49e06b33e893f8c5bb84f83db4d3235af6c984df0a94e60a80b79",
+    "benchmark_process_cleanup.py": "fa2c088e49c3cc04c2e5a99bbe875080b95253f5e156f2983e4691420b8d8fc3"
+  },
+  "source_companion_inputs": {},
+  "runtime_recovery": {
+    "receipt.json": {
+      "sha256": "9d11e8f0135c5297c5333302b3bd28cb33e6c5254291bfbe9746cb9470dbfcd3",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/runtime-recovery/receipt.json.gz"
+    },
+    "failed-zero-case-attempt/status.json": {
+      "sha256": "fd1ae3e4db66e3f6831eb5c4d090be2ec4c078958ba5dafd936f845632b72a6b",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/runtime-recovery/failed-zero-case-attempt/status.json.gz"
+    },
+    "failed-zero-case-attempt/provenance.json": {
+      "sha256": "b3f4bfbf40d50999f81885a3a351e982cab3188ce915047f20ee1a29bb388e04",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/runtime-recovery/failed-zero-case-attempt/provenance.json.gz"
+    },
+    "failed-zero-case-attempt/binary-manifest.json": {
+      "sha256": "efba1fbc12e72a71f93caa31471aea54b3e8ee51da766f1e36f00c19bec9cd3d",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/runtime-recovery/failed-zero-case-attempt/binary-manifest.json.gz"
+    },
+    "failed-zero-case-attempt/round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "65c0b18be412827ace6e40f1b9aae04cab756c2bb03acb1ae6258968c9d6bcf5",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/runtime-recovery/failed-zero-case-attempt/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "restore-missing-zigzag-runner-20261028.py": {
+      "sha256": "472da004caed69ba67f15be2d3b95a8f1a9679a39a4cac7400776a0691ea8cb4",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/runtime-recovery/restore-missing-zigzag-runner-20261028.py.gz"
+    },
+    "resume-zigzag-controls-20261028.py": {
+      "sha256": "1cc651bb685c00cfe69bb67c1d3f34beef36124c66d9591351d41f237080eb11",
+      "archive": "benchmarks/results/remaining-indicators/local-zigzag-compact-publication-control-20261028/runtime-recovery/resume-zigzag-controls-20261028.py.gz"
+    }
+  },
+  "report_imported": false,
+  "production_integrated": false
+}
