@@ -122,17 +122,19 @@ public sealed class AlignedEmaMacd : MultiOutputIndicatorBase, IIndicatorValidat
         private long _count;
         private CompactMacdValue _sum;
         internal CompactMacdValue Value { get; private set; }
-        private readonly (BigInteger Alpha, BigInteger Complement, BigInteger Denominator) _weights =
+        private readonly (long Alpha, long Denominator) _weights =
             FixedWeights(coefficient);
 
-        private static (BigInteger, BigInteger, BigInteger) FixedWeights(double? coefficient)
+        private static (long, long) FixedWeights(double? coefficient)
         {
             if (!coefficient.HasValue) return default;
             // The private fixed coefficients are in (0, 1). Cancel their exact
             // binary scale once, preserving the complete recurrence fraction.
             var factor = new ExactMeanAccumulator.ProductFactor(coefficient.Value);
             var denominator = BigInteger.One << (1074 - factor.Scale);
-            return (factor.Mantissa, denominator - factor.Mantissa, denominator);
+            // Only 0.15 and 0.075 reach this private helper; their denominators
+            // are 2^55 and 2^56, respectively, so both weights fit signed Int64.
+            return (checked((long)factor.Mantissa), checked((long)denominator));
         }
 
         public void Reset()
@@ -155,7 +157,7 @@ public sealed class AlignedEmaMacd : MultiOutputIndicatorBase, IIndicatorValidat
                 return;
             }
             Value = coefficient.HasValue
-                ? (Value.Times(_weights.Complement) + input.Times(_weights.Alpha)).Round(_weights.Denominator)
+                ? Value.AdvanceFixedEma(input, _weights.Alpha, _weights.Denominator)
                 : Value.AdvanceEma(input, period);
         }
     }
