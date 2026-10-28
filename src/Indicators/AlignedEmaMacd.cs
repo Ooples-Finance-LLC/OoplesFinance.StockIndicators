@@ -156,7 +156,7 @@ public sealed class AlignedEmaMacd : MultiOutputIndicatorBase, IIndicatorValidat
             }
             Value = coefficient.HasValue
                 ? (Value.Times(_weights.Complement) + input.Times(_weights.Alpha)).Round(_weights.Denominator)
-                : (Value.Times(period - 1) + input.Times(2)).Round((long)period + 1);
+                : Value.AdvanceEma(input, period);
         }
     }
 

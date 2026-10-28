@@ -186,7 +186,7 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
                 _sum = default;
             }
             else
-                _value = (_value.Times(period - 1) + input.Times(2)).Round((long)period + 1);
+                _value = _value.AdvanceEma(input, period);
             return _value;
         }
     }
