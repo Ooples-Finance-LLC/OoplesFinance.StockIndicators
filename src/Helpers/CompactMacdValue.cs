@@ -136,6 +136,33 @@ internal readonly struct CompactMacdValue
 #endif
         return (Times(period - 1) + input.Times(2)).Round((long)period + 1);
     }
+    // The fixed 0.15/0.075 coefficients are exact binary fractions. Keep their
+    // integer weights compact through the complete recurrence and round once.
+    internal CompactMacdValue AdvanceFixedEma(CompactMacdValue input, long alpha, long denominator)
+    {
+        if (alpha <= 0 || alpha >= denominator) throw new ArgumentOutOfRangeException(nameof(alpha));
+        long complement = denominator - alpha;
+#if !NETFRAMEWORK
+        if (!_wide && !input._wide)
+        {
+            int scale = Math.Min(_scale, input._scale);
+            int leftShift = _scale - scale, rightShift = input._scale - scale;
+            if (Width(Magnitude(_compact)) + leftShift <= 127
+                && Width(Magnitude(input._compact)) + rightShift <= 127)
+            {
+                try
+                {
+                    Int128 numerator = checked((_compact << leftShift) * complement
+                        + (input._compact << rightShift) * alpha);
+                    if (TryRatio(numerator, (UInt128)denominator, scale, out var result))
+                        return result;
+                }
+                catch (OverflowException) { } // Preserve the exact wide recurrence below.
+            }
+        }
+#endif
+        return (Times(complement) + input.Times(alpha)).Round(denominator);
+    }
     internal CompactMacdValue Times(BigInteger weight)
     {
 #if !NETFRAMEWORK
