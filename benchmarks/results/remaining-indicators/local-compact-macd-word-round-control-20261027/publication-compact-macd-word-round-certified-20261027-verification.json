@@ -1,0 +1,68 @@
+{
+  "input_head": "966c2988355ff48b658d462142ab822f98c8097f",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CompactMacdValue.cs",
+    "tests/ModelsTests/CompactMacdValueTests.cs"
+  ],
+  "arithmetic_cases": 5,
+  "batch_note": "Approved compact MACD private-state follow-up: exact word ratio rounding before existing certified and wide fallbacks. Preserve nearest-even ties, carries, signed values, seeds, selected overflow, preview/reset and long-history output bits. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-28T00:17:49.150158+00:00",
+  "unit": {
+    "passed": 234,
+    "class_counts": {
+      "PpoNumericalTests": 71,
+      "MacdSharedExecutionTests": 18,
+      "MacdNumericalTests": 81,
+      "CompactRocUnitsTests": 5,
+      "PvoNumericalTests": 46,
+      "MacdFixedCoefficientReductionTests": 2,
+      "CompactRatioArithmeticTests": 6,
+      "CompactMacdValueTests": 5
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\compact-macd-word-round\\unit\\unit.trx",
+    "sha256": "cb5a9b9ad9226a4f927d9962d9c156cbc93744d03112d6dc8751a13356a13b2b",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-compact-macd-word-round-certified-20261027-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 119,
+    "class_counts": {
+      "SharedTaMacdNativeBenchmarkTests": 46,
+      "SharedTradyMacdBenchmarkTests": 33,
+      "ClassicMacdComparisonTests": 16,
+      "SharedMacdBenchmarkTests": 14,
+      "AlignedMacdComparisonTests": 10
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\compact-macd-word-round\\parity\\parity.trx",
+    "sha256": "c904398a501a3885496c06b88aee3e96f4ef82cf5fd518efde0b0ac2efb95119",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-compact-macd-word-round-certified-20261027-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-word-round-20261027\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f0c11a840483062efdc199e3f492d219bd8350b169501d35e0d6d106ac11e7b8",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-word-round-20261027\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f0c11a840483062efdc199e3f492d219bd8350b169501d35e0d6d106ac11e7b8",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-word-round-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f0c11a840483062efdc199e3f492d219bd8350b169501d35e0d6d106ac11e7b8",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-word-round-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f0c11a840483062efdc199e3f492d219bd8350b169501d35e0d6d106ac11e7b8"
+  },
+  "source_fingerprint_sha256": "dea62f92cd882f6c8635ff822f3c5ba366c142d967eb767d20ed2a2a4210f8f1",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved compact MACD private-state follow-up: exact word ratio rounding before existing certified and wide fallbacks. Preserve nearest-even ties, carries, signed values, seeds, selected overflow, preview/reset and long-history output bits. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
