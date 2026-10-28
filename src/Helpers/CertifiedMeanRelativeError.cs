@@ -37,7 +37,9 @@ internal static class CertifiedMeanRelativeError
                 balance += price > 0 ? 1 : -1;
                 continue;
             }
+#pragma warning disable S1244 // Exact binary64 equality identifies zero relative error; tolerance would change the result.
             if (sample.Value == mean) continue; // Equal binary64 inputs have an exactly zero error.
+#pragma warning restore S1244
             if (Math.Abs(exponent - centerExponent) > 3) return false;
             // All reciprocals share scale 2^(-127 - (meanExponent + 3 - 1075)).
             // The shift is 0..6; each bound has at most 82 bits, and even an

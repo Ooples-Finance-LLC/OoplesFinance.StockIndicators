@@ -7,7 +7,7 @@ using static OoplesFinance.StockIndicators.Helpers.SignalHelper;
 
 namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
-// Preserved from 71c31b97: only method/class names and access are changed.
+// Preserved from 71c31b97: method/class names, access, and equivalent infinity predicates are changed.
 // The original RollingWindowSettings.SmallWindowThreshold constant is 32.
 internal static class PreservedKaufmanStressBatch
 {
@@ -187,7 +187,7 @@ internal sealed class PreservedKaufmanRollingMinMax
             }
         }
 
-        _linearMin = min == double.PositiveInfinity ? 0 : min;
-        _linearMax = max == double.NegativeInfinity ? 0 : max;
+        _linearMin = double.IsPositiveInfinity(min) ? 0 : min;
+        _linearMax = double.IsNegativeInfinity(max) ? 0 : max;
     }
 }
