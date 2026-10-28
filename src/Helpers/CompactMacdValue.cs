@@ -177,6 +177,14 @@ internal readonly struct CompactMacdValue
     internal CompactMacdValue Round(BigInteger divisor)
     {
 #if !NETFRAMEWORK
+        // A unit divisor needs only binary rounding, not quotient certification.
+        // Reuse the established publisher within its 106-bit input contract;
+        // extended unpublished results retain the exact wide fallback below.
+        if (!_wide && divisor.IsOne && Width(Magnitude(_compact)) <= 106)
+        {
+            double rounded = JurikDyadic.FromBinaryProduct(_compact, _scale - 1074).Mean(1);
+            if (double.IsFinite(rounded)) return Of(rounded);
+        }
         if (!_wide && divisor.Sign > 0 && divisor.GetBitLength() <= 128
             && TryRatio(_compact, (UInt128)divisor, _scale, out var compact)) return compact;
 #endif
