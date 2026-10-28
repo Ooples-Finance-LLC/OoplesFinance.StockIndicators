@@ -110,6 +110,32 @@ internal readonly struct CompactMacdValue
 #endif
         return left + new CompactMacdValue(-right.Coefficient, right._scale);
     }
+    // Keep the unrounded recurrence in one compact expression. The fallback
+    // preserves extended exponents and all exact subnormal rounding boundaries.
+    internal CompactMacdValue AdvanceEma(CompactMacdValue input, int period)
+    {
+        if (period < 1) throw new ArgumentOutOfRangeException(nameof(period));
+#if !NETFRAMEWORK
+        if (!_wide && !input._wide)
+        {
+            int scale = Math.Min(_scale, input._scale);
+            int leftShift = _scale - scale, rightShift = input._scale - scale;
+            if (Width(Magnitude(_compact)) + leftShift <= 127
+                && Width(Magnitude(input._compact)) + rightShift <= 127)
+            {
+                try
+                {
+                    Int128 numerator = checked((_compact << leftShift) * (period - 1)
+                        + (input._compact << rightShift) * 2);
+                    if (TryRatio(numerator, (UInt128)((long)period + 1), scale, out var result))
+                        return result;
+                }
+                catch (OverflowException) { } // Exact wide fallback below.
+            }
+        }
+#endif
+        return (Times(period - 1) + input.Times(2)).Round((long)period + 1);
+    }
     internal CompactMacdValue Times(BigInteger weight)
     {
 #if !NETFRAMEWORK
