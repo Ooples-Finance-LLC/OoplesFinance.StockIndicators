@@ -13642,7 +13642,7 @@
     "src/Builder/Compute/BuilderArmTargets.cs": "86f2cd1f1e2c5cd064bd301a72efcd0b536267d09a611dfdca1480c20cb8e419",
     "src/Enums/IndicatorName.cs": "cad2063df998a7723103c8deb4843d0e07b8c5dcfe26fbcc6bf89212dbb569b4",
     "src/Indicators/AccumulationDistributionWithAverage.cs": "7a7ddf3ef6be394d6016e383fccc281e0a791c0b546695a844d9691b98cccfd8",
-    "src/Indicators/AlignedEmaMacd.cs": "276b23dddeaaaa84b8eff7588e58e78a8b80722951f7f8ec86f309025c512aae",
+    "src/Indicators/AlignedEmaMacd.cs": "3bdd9fe41daa77002373eb2082ebb12d54b502a981a886f4c0069a58995e2263",
     "src/Indicators/AlligatorWithDetails.cs": "fa45dffe8369b5e4d696322cb1405e6a0177f8f3058b232a2bdbe2a5172d15d0",
     "src/Indicators/AnalyticWeightedAverages.cs": "20840c3ed4b8d2b289285f6706a8020179ab8e12a2fd5b504104e390a5b3f749",
     "src/Indicators/ArnaudLegouxWindow.cs": "b5a4d8a85d5b22609e72baf15f9a856301a2bcb5bd042071581fdab177a95872",

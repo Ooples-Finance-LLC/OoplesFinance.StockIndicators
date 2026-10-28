@@ -1,0 +1,70 @@
+{
+  "input_head": "164cbfa28074432dc6480fbf794528e420931686",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CompactMacdValue.cs",
+    "src/Indicators/AlignedEmaMacd.cs",
+    "tests/ModelsTests/CompactMacdFixedRecurrenceTests.cs"
+  ],
+  "batch_note": "Approved compact MACD follow-up: fuse the fixed-coefficient recurrence before its single rounding; exact binary64 weights are cached in Int64, checked compact arithmetic retains exact wide fallback, seeds and selected overflow. Two boundary/state regressions plus affected-consumer qualification.",
+  "step": "complete",
+  "updated_utc": "2026-10-28T18:17:30.314163+00:00",
+  "unit": {
+    "passed": 237,
+    "class_counts": {
+      "MacdNumericalTests": 81,
+      "CompactMacdValueTests": 4,
+      "PvoNumericalTests": 46,
+      "MacdFixedCoefficientReductionTests": 2,
+      "PpoNumericalTests": 71,
+      "CompactMacdFixedRecurrenceTests": 2,
+      "CompactRatioArithmeticTests": 6,
+      "MacdSharedExecutionTests": 18,
+      "CompactMacdFusedRecurrenceTests": 2,
+      "CompactRocUnitsTests": 5
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\compact-macd-fixed-recurrence\\unit\\unit.trx",
+    "sha256": "26c162a8eb44936c2abd99f50f6300173dce644dacbe598d9086f3af7586f4e2",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-compact-macd-fixed-recurrence-certified-20261028-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 119,
+    "class_counts": {
+      "SharedTaMacdNativeBenchmarkTests": 46,
+      "ClassicMacdComparisonTests": 16,
+      "SharedTradyMacdBenchmarkTests": 33,
+      "AlignedMacdComparisonTests": 10,
+      "SharedMacdBenchmarkTests": 14
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\compact-macd-fixed-recurrence\\parity\\parity.trx",
+    "sha256": "f8a6ff43995648c66779beb6a0b1b85e50134cf21cc8236d12375ba24b0983f5",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-compact-macd-fixed-recurrence-certified-20261028-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-fixed-recurrence-20261028\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7fae93af8a9d9fd4b2285df7efea8f06f675cc1993828d7a40b6eceb9f49226b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-fixed-recurrence-20261028\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7fae93af8a9d9fd4b2285df7efea8f06f675cc1993828d7a40b6eceb9f49226b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-fixed-recurrence-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7fae93af8a9d9fd4b2285df7efea8f06f675cc1993828d7a40b6eceb9f49226b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-fixed-recurrence-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7fae93af8a9d9fd4b2285df7efea8f06f675cc1993828d7a40b6eceb9f49226b"
+  },
+  "source_fingerprint_sha256": "1cdb8016f25890952aba249a3ccd5fd40b390e018e0ba30d0f33dff4b3eb9929",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved compact MACD follow-up: fuse the fixed-coefficient recurrence before its single rounding; exact binary64 weights are cached in Int64, checked compact arithmetic retains exact wide fallback, seeds and selected overflow. Two boundary/state regressions plus affected-consumer qualification. Correctness checks passed; controlled performance remains pending."
+}
