@@ -1,0 +1,18 @@
+{
+  "combined_code_source": "40f70b6e0103cc0d81be4d7eadde1918a27da1c6",
+  "individual_afirma_qualified_source": "e94ddf44139decb7b298d6ef06527e4beb74f5ee",
+  "source_fingerprint_sha256": "02d4627889a0174b5a86e390c3fa8319b63e2c873bed99df17d79a486a13935e",
+  "fresh_combined_tree_checks": {
+    "unit": 29,
+    "parity": 28,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bbce032f7e97765aaeb8dbfb6dd8fd4686eeff9bab3c9e43eda2d65133ed7531",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bbce032f7e97765aaeb8dbfb6dd8fd4686eeff9bab3c9e43eda2d65133ed7531",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bbce032f7e97765aaeb8dbfb6dd8fd4686eeff9bab3c9e43eda2d65133ed7531",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bbce032f7e97765aaeb8dbfb6dd8fd4686eeff9bab3c9e43eda2d65133ed7531"
+  },
+  "note": "Fresh combined ZigZag/Afirma correctness evidence. Controlled timing rows retain their individually measured source commits; no individual GPU receipt is relabeled as combined-tree evidence."
+}
