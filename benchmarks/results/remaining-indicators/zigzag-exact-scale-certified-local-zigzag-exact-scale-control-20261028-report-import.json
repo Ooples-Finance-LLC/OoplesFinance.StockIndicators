@@ -1,0 +1,60 @@
+{
+  "before_sha256": "0838ff4e9bd33a9de96447f6a9fcd9df3742c32814b1a980f928a444470a9523",
+  "candidate_sha256": "dc747044dbbca4461276a2788dfc28d4cee5dd1f030f713ff175bd3c663f6e57",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 0,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 0,
+  "verdicts": {
+    "faster": 602,
+    "slower": 886,
+    "inconclusive": 48
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-zigzag-exact-scale-control-20261028",
+  "imported_utc": "2026-10-28T18:59:30.740412+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "cbeae4d0912bd7ae5d9fdb7b7cf702f08ae54d627579829f03f6cd1aeae51ea8",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-exact-scale-certified-local-zigzag-exact-scale-control-20261028-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "83e38616a048ea199752a581c90887687be3ad380aa993729b6b1046affc12a0",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-exact-scale-certified-local-zigzag-exact-scale-control-20261028-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "8baba5d75e261cc05131c2487fa637afa14ba2f24a8f7c16e3670809758e8cf0",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-exact-scale-certified-local-zigzag-exact-scale-control-20261028-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "014d25bb08a3c6135d1e5e2fe70627c88e3bd009b22c63a991319ea32390dadb",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-exact-scale-certified-local-zigzag-exact-scale-control-20261028-measurement.json.gz"
+    },
+    "stage-zigzag-exact-scale-report-20261028.py": {
+      "sha256": "be578773cf0741ad12934e8263f4e54e01986334395afdb879d8423cded63e85",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-exact-scale-certified-local-zigzag-exact-scale-control-20261028-stage-zigzag-exact-scale-report-20261028.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-exact-scale-certified-local-zigzag-exact-scale-control-20261028-verify-approved-certified-report.py.gz"
+    },
+    "import-zigzag-exact-scale-report-20261028.py": {
+      "sha256": "76db47a339996915f769668a982a7d2aa8fed00c5b59c3a1d8bbdee1536076e4",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-exact-scale-certified-local-zigzag-exact-scale-control-20261028-import-zigzag-exact-scale-report-20261028.py.gz"
+    },
+    "archive-zigzag-exact-scale-control-20261028.py": {
+      "sha256": "aca2892db4959aa8e1abb7ae9db33f81813f0956733904b46aad18ba371ef5f9",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-exact-scale-certified-local-zigzag-exact-scale-control-20261028-archive-zigzag-exact-scale-control-20261028.py.gz"
+    },
+    "prove-zigzag-exact-scale-integration-20261028.py": {
+      "sha256": "a885de145dce80f57ecf9ea87dcc6a552d835ab92def8985f10fc18e07fdf349",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-exact-scale-certified-local-zigzag-exact-scale-control-20261028-prove-zigzag-exact-scale-integration-20261028.py.gz"
+    },
+    "archive-zigzag-exact-scale-report-20261028.py": {
+      "sha256": "6640985c12f91d2b7f90c21bb189e59edb93a0b55b71df007b765b6de32823bf",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-exact-scale-certified-local-zigzag-exact-scale-control-20261028-archive-zigzag-exact-scale-report-20261028.py.gz"
+    }
+  }
+}
