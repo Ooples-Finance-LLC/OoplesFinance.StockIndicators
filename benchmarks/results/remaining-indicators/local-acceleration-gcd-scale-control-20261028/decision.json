@@ -187,7 +187,8 @@
     "acceleration_gcd_acceptance.py": "8af989ff2d7340770fee7c84373297dd0589f016696387877d7d1b9a32a99880"
   },
   "source_companion_inputs": {},
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/acceleration-gcd-scale-integration-source-proof-20261028.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/acceleration-gcd-scale-integration-source-proof-20261028.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/acceleration-gcd-scale-certified-local-acceleration-gcd-scale-control-20261028-report-import.json"
 }
