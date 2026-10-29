@@ -357,7 +357,8 @@
     "sma_word_acceptance.py": "bd6a3fb5eb0570764aa6052bcce084c981237ffe97bdfe87ac492501eb67d36a"
   },
   "source_companion_inputs": {},
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/sma-word-count-integration-source-proof-20261028.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/sma-word-count-integration-source-proof-20261028.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/sma-word-count-certified-local-sma-word-count-control-20261028-report-import.json"
 }
