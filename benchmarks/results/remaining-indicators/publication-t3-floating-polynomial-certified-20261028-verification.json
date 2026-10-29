@@ -1,0 +1,63 @@
+{
+  "input_head": "4c6df2b05512563857d2c3b4ec0e1a8c76b3bea7",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedTillson.cs",
+    "tests/ModelsTests/TillsonFloatingPolynomialTests.cs"
+  ],
+  "batch_note": "Approved T3 final-polynomial follow-up: bounded same-binade inputs give exact finite differences; error-free FMA/TwoSum expansions carry an outward radius, with strict rounding-cell certification and original integer fallback. Three independent rational, midpoint-fallback and boundary regressions plus existing numerical/lifecycle, long-history parity, GPU and inventory qualification. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-29T07:53:44.328649+00:00",
+  "unit": {
+    "passed": 49,
+    "class_counts": {
+      "CertifiedTillsonTests": 17,
+      "TillsonSharedExecutionTests": 12,
+      "TillsonFloatingPolynomialTests": 3,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "TillsonFloatingSmoothingTests": 7,
+      "TillsonWordSmoothingTests": 4,
+      "TillsonWordBinadeTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-floating-polynomial\\unit\\unit.trx",
+    "sha256": "489912c5b3dfecbe64e7d73e5c60d48521fe2f4543e6964454b68556ffce5942",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-floating-polynomial-certified-20261028-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 26,
+    "class_counts": {
+      "SharedTillsonBenchmarkTests": 16,
+      "TillsonComparisonTests": 10
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-floating-polynomial\\parity\\parity.trx",
+    "sha256": "626c07274e9a314ca5d787089a018d2a5fdfc1c94d707f347b5d0a02cf8e08de",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-floating-polynomial-certified-20261028-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-floating-polynomial-20261028\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bda2c10f78829c345cbbcc61db5ed83a4edeb105af53f0ed97ea6a24e168ae55",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-floating-polynomial-20261028\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bda2c10f78829c345cbbcc61db5ed83a4edeb105af53f0ed97ea6a24e168ae55",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-floating-polynomial-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bda2c10f78829c345cbbcc61db5ed83a4edeb105af53f0ed97ea6a24e168ae55",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-floating-polynomial-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bda2c10f78829c345cbbcc61db5ed83a4edeb105af53f0ed97ea6a24e168ae55"
+  },
+  "source_fingerprint_sha256": "3245f3870c7ff13ad1fec5fea1057d63ed3b7a75ff81d872207ebba07a5974e6",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved T3 final-polynomial follow-up: bounded same-binade inputs give exact finite differences; error-free FMA/TwoSum expansions carry an outward radius, with strict rounding-cell certification and original integer fallback. Three independent rational, midpoint-fallback and boundary regressions plus existing numerical/lifecycle, long-history parity, GPU and inventory qualification. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
