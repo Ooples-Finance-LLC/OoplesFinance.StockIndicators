@@ -238,6 +238,33 @@ internal static class CertifiedMeanRelativeError
         // The aligned dividend has at most 84 bits: 53 quotient bits plus
         // the count's 31 bits. Every shift is in 0..83 and loses no high bits.
         UInt128 dividend = shift >= 0 ? numerator << shift : numerator >> -shift;
+        // For counts <= 2^11 the aligned dividend is strictly below
+        // 2^53 * count <= 2^64. Divide in one machine word and compare the
+        // exact fractional remainder without rebuilding a wide denominator.
+        if (count <= 2048)
+        {
+            ulong word = (ulong)dividend;
+            ulong quotientWord = word / (uint)count;
+            ulong twiceRemainder = (word - quotientWord * (uint)count) * 2;
+            bool roundUp = twiceRemainder > (uint)count;
+            if (shift >= 0)
+                roundUp |= twiceRemainder == (uint)count && (quotientWord & 1) != 0;
+            else
+            {
+                int discarded = -shift;
+                UInt128 tail = numerator & (((UInt128)1 << discarded) - 1);
+                if (twiceRemainder == (uint)count)
+                    roundUp = tail != 0 || (quotientWord & 1) != 0;
+                else if (twiceRemainder + 1 == (uint)count)
+                {
+                    UInt128 half = (UInt128)1 << (discarded - 1);
+                    roundUp = tail > half || tail == half && (quotientWord & 1) != 0;
+                }
+            }
+            if (roundUp) quotientWord++;
+            result = Math.ScaleB((double)quotientWord, scale - shift);
+            return double.IsFinite(result);
+        }
         var divided = UInt128.DivRem(dividend, (UInt128)(uint)count);
         UInt128 quotient = divided.Quotient, remainder = divided.Remainder;
         UInt128 denominator = (uint)count;
