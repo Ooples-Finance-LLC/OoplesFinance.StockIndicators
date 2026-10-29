@@ -167,6 +167,7 @@ internal static class CertifiedTillson
     internal static bool TryCombine(double third, double fourth, double fifth, double sixth,
         double factor, out double result)
     {
+        if (TryCombineFloating(third, fourth, fifth, sixth, factor, out result)) return true;
         result = 0;
         // Restrict the factor so all three signed 53-bit products fit Int128.
         if (Math.Abs(factor) is < .25 or > 2 || !double.IsFinite(factor)) return false;
@@ -222,5 +223,88 @@ internal static class CertifiedTillson
             if ((upperProduct & (((Int128)1 << shift) - 1)) != 0) high++;
         }
     }
+    // On a common positive binade with spread <= 2^50 grid units, the
+    // finite differences and their integer weights are exact binary64 values.
+    // Exponents [-350,349] and |factor| in [.25,2] keep all exact product
+    // residuals on grids no finer than 2^-564, with no overflow/underflow.
+    internal static bool TryCombineFloating(double third, double fourth, double fifth,
+        double sixth, double factor, out double result)
+    {
+        result = 0;
+        if (!double.IsFinite(factor) || Math.Abs(factor) is < .25 or > 2) return false;
+        ulong a = unchecked((ulong)BitConverter.DoubleToInt64Bits(third));
+        ulong b = unchecked((ulong)BitConverter.DoubleToInt64Bits(fourth));
+        ulong c = unchecked((ulong)BitConverter.DoubleToInt64Bits(fifth));
+        ulong d = unchecked((ulong)BitConverter.DoubleToInt64Bits(sixth));
+        ulong exponent = a >> 52;
+        if (exponent is < 673 or > 1372 || b >> 52 != exponent
+            || c >> 52 != exponent || d >> 52 != exponent) return false;
+        ulong minimum = Math.Min(Math.Min(a, b), Math.Min(c, d));
+        ulong maximum = Math.Max(Math.Max(a, b), Math.Max(c, d));
+        if (maximum - minimum > 1UL << 50) return false;
+        double first = third - fourth, next = fourth - fifth, last = fifth - sixth;
+        double second = first - next;
+        var polynomial = new PolynomialExpansion(second - (next - last));
+        polynomial.Multiply(factor);
+        polynomial.Add(3 * second);
+        polynomial.Multiply(factor);
+        polynomial.Add(3 * first);
+        polynomial.Multiply(factor);
+        polynomial.Add(third);
+        return polynomial.TryRound(out result);
+    }
+
+    // Exact value lies in High + Low +/- Radius. TwoSum and FMA expose
+    // each discarded residual; every positive radius operation rounds outward.
+    private struct PolynomialExpansion(double value)
+    {
+        private double _high = value, _low = 0, _radius = 0;
+
+        private static double SumError(double a, double b, double sum)
+        {
+            double virtualB = sum - a;
+            return (a - (sum - virtualB)) + (b - virtualB);
+        }
+
+        internal void Add(double value)
+        {
+            double sum = _high + value;
+            double error = SumError(_high, value, sum);
+            double low = _low + error;
+            double tail = SumError(_low, error, low);
+            _high = sum; _low = low;
+            _radius = Math.BitIncrement(_radius + Math.Abs(tail));
+        }
+
+        internal void Multiply(double factor)
+        {
+            double product = _high * factor;
+            double productError = Math.FusedMultiplyAdd(_high, factor, -product);
+            double lowProduct = _low * factor;
+            double lowError = Math.FusedMultiplyAdd(_low, factor, -lowProduct);
+            double sum = product + lowProduct;
+            double sumError = SumError(product, lowProduct, sum);
+            double low = productError + sumError;
+            double tail = SumError(productError, sumError, low);
+            _high = sum; _low = low;
+            double propagated = Math.BitIncrement(Math.Abs(factor) * _radius);
+            _radius = Math.BitIncrement(Math.BitIncrement(propagated + Math.Abs(lowError)) + Math.Abs(tail));
+        }
+
+        internal readonly bool TryRound(out double result)
+        {
+            result = _high + _low;
+            ulong magnitude = unchecked((ulong)BitConverter.DoubleToInt64Bits(result)) & 0x7fffffffffffffffUL;
+            if (magnitude >> 52 is < 673 or >= 2047) return false;
+            double tail = SumError(_high, _low, result);
+            double lower = Math.BitDecrement(tail - _radius);
+            double upper = Math.BitIncrement(tail + _radius);
+            double below = (result - Math.BitDecrement(result)) * .5;
+            double above = (Math.BitIncrement(result) - result) * .5;
+            // Strict containment rejects midpoint ties and uncertain boundaries.
+            return lower > -below && upper < above;
+        }
+    }
+
 }
 #endif
