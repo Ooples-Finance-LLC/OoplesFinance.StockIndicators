@@ -83,7 +83,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
-    <PackageReference Include="AiDotNet.Tensors" Version="0.144.0" />
+    <PackageReference Include="AiDotNet.Tensors" Version="0.144.2" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <!-- Exclude OpenCL source strings: inactive C# regions still parse their #if directives. -->
