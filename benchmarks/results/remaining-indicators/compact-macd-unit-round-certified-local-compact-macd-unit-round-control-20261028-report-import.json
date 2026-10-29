@@ -1,0 +1,64 @@
+{
+  "before_sha256": "a7415430a904666d36d9d280460f43b49f0a8cd4c67e623014f03aac3da0a0d2",
+  "candidate_sha256": "8a1c4fa30821d30ae9c8a4d18a5ed584905392b9bd251fee085f09f0cffe7666",
+  "changed_baseline_rows": 16,
+  "unchanged_baseline_rows": 786,
+  "changed_builder_slots": 32,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 32,
+  "verdicts": {
+    "faster": 602,
+    "slower": 886,
+    "inconclusive": 48
+  },
+  "unchanged_rows": 786,
+  "run_id": "local-compact-macd-unit-round-control-20261028",
+  "imported_utc": "2026-10-29T00:52:54.634615+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "e1e4fa32007edcb4aa357367581c9662872fee58618de3792c0ebf62ea3d3244",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-unit-round-certified-local-compact-macd-unit-round-control-20261028-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "d11f8460e5db40c8cf3290c828dbc52429e8630497351db23d77beab897dd7ca",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-unit-round-certified-local-compact-macd-unit-round-control-20261028-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "0c697b1c3886cfb903d9920cf1134c97a768f8c9bee2771006e4443451399d3a",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-unit-round-certified-local-compact-macd-unit-round-control-20261028-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "d37972db4f8da6449ad55d401ac9a1cf2b086195db4891983cd2d69ac18aa5a5",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-unit-round-certified-local-compact-macd-unit-round-control-20261028-measurement.json.gz"
+    },
+    "compact_macd_acceptance.py": {
+      "sha256": "01c134b5cb84b7ad5c38b37e1ae62b5da0c44b5a7ede09dfc80ea8a766d800b5",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-unit-round-certified-local-compact-macd-unit-round-control-20261028-compact_macd_acceptance.py.gz"
+    },
+    "stage-compact-macd-unit-round-report-20261028.py": {
+      "sha256": "071ac4be0c76c16a96d20b57ee1e25d78a48bebd2a92ee3ab273d0a7a0ded3d1",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-unit-round-certified-local-compact-macd-unit-round-control-20261028-stage-compact-macd-unit-round-report-20261028.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-unit-round-certified-local-compact-macd-unit-round-control-20261028-verify-approved-certified-report.py.gz"
+    },
+    "import-compact-macd-unit-round-report-20261028.py": {
+      "sha256": "3b66828b8937c1d26aecb5f27ae6c26807aa7ffff8dca8f97d32866a21717569",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-unit-round-certified-local-compact-macd-unit-round-control-20261028-import-compact-macd-unit-round-report-20261028.py.gz"
+    },
+    "archive-compact-macd-unit-round-control-20261028.py": {
+      "sha256": "98b4aa08a5278593e203c5eff2068c873038c2ace8709c19874bd6e5843cc97f",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-unit-round-certified-local-compact-macd-unit-round-control-20261028-archive-compact-macd-unit-round-control-20261028.py.gz"
+    },
+    "prove-compact-macd-unit-round-integration-20261028.py": {
+      "sha256": "4d52edd87b2c1155731fcc95b57ee4e003ade41abc6de1d1ed329ff3b2e44ee6",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-unit-round-certified-local-compact-macd-unit-round-control-20261028-prove-compact-macd-unit-round-integration-20261028.py.gz"
+    },
+    "archive-compact-macd-unit-round-report-20261028.py": {
+      "sha256": "292e5311f48e6c992623a5b685ad3403feef5d0acd3b30b34ab57be1f682a87d",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-unit-round-certified-local-compact-macd-unit-round-control-20261028-archive-compact-macd-unit-round-report-20261028.py.gz"
+    }
+  }
+}
