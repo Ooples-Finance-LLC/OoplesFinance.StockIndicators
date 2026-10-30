@@ -229,9 +229,14 @@ public static class WindowedSincSnapshot
         for (int i = 0; i < prices.Length; i++)
         {
             int start = Math.Max(0, i - weights.Length + 1);
+            int available = Math.Min(i + 1, coefficients.Length);
             Int128 numerator = 0;
-            for (int k = 0; k < coefficients.Length; k++)
-                numerator = unchecked(numerator + (Int128)prices[Math.Min(i, start + k)] * coefficients[k]);
+            // Only startup extends the newest observation. Full windows use
+            // consecutive prices, preserving the original oldest-first sum.
+            for (int k = 0; k < available; k++)
+                numerator = unchecked(numerator + (Int128)prices[start + k] * coefficients[k]);
+            for (int k = available; k < coefficients.Length; k++)
+                numerator = unchecked(numerator + (Int128)prices[i] * coefficients[k]);
             if (numerator == 0) continue;
             UInt128 magnitude = (UInt128)(numerator < 0 ? -numerator : numerator);
             if (CertifiedCompactRatio.TryDivide(magnitude, denominator, priceMinimum - 1075, out double value))
