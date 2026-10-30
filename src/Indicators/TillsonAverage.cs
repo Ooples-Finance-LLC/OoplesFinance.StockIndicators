@@ -138,11 +138,13 @@ public sealed class TillsonAverage : MultiOutputIndicatorBase, IIndicatorValidat
         }
 
         public void Update(in Bar bar, Span<double> output) =>
-            UpdateUnits(ExactVarianceWindow.Units(bar.Close), output);
+            UpdateCompact(CompactMacdValue.Of(bar.Close), output);
 
-        public void UpdateUnits(BigInteger value, Span<double> output)
+        public void UpdateUnits(BigInteger value, Span<double> output) =>
+            UpdateCompact(CompactMacdValue.FromUnits(value), output);
+
+        private void UpdateCompact(CompactMacdValue compact, Span<double> output)
         {
-            var compact = CompactMacdValue.FromUnits(value);
             output.Clear();
             _index++;
             for (var j = 0; j < 6; j++)
