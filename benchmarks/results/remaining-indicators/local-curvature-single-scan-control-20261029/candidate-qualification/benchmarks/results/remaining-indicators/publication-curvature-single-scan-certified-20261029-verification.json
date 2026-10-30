@@ -1,0 +1,57 @@
+{
+  "input_head": "cf49541659d0d8350eb730f977b00305215ebd4a",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/ValuesBarExecution.Curvature.cs"
+  ],
+  "batch_note": "Curvature private normalization reuses the same grid scan for the existing narrow and wide certificates. Bounds, scaling, moments, rounding and fallback remain unchanged. Existing boundary, numerical, cancellation, history and long-history fixture tests retained; performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-30T05:02:08.176414+00:00",
+  "unit": {
+    "passed": 25,
+    "class_counts": {
+      "CurvatureSharedExecutionTests": 21,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\curvature-single-scan\\unit\\unit.trx",
+    "sha256": "de0868d56f772db46249fa1c0d809d13a4fe41493d361d59e7f1c126ddd09a0a",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-curvature-single-scan-certified-20261029-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 22,
+    "class_counts": {
+      "SharedCurvatureBenchmarkTests": 14,
+      "CurvatureComparisonTests": 8
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\curvature-single-scan\\parity\\parity.trx",
+    "sha256": "02413cd46ae3b037ac14c2658bb76e65e56801bd11805258271a0273b0ccd14e",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-curvature-single-scan-certified-20261029-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-curvature-single-scan-20261029\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ccc12d76b483022ff33c0db441ef9608d0e051e30726204eb04c31da5e439e74",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-curvature-single-scan-20261029\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ccc12d76b483022ff33c0db441ef9608d0e051e30726204eb04c31da5e439e74",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-curvature-single-scan-20261029\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ccc12d76b483022ff33c0db441ef9608d0e051e30726204eb04c31da5e439e74",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-curvature-single-scan-20261029\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ccc12d76b483022ff33c0db441ef9608d0e051e30726204eb04c31da5e439e74"
+  },
+  "source_fingerprint_sha256": "608a371a023d34ca8dcb5944a80e98d80d4998a9524df2cfa08f6fbdc4b72460",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Curvature private normalization reuses the same grid scan for the existing narrow and wide certificates. Bounds, scaling, moments, rounding and fallback remain unchanged. Existing boundary, numerical, cancellation, history and long-history fixture tests retained; performance unqualified. Correctness checks passed; controlled performance remains pending."
+}
