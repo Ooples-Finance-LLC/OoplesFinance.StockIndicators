@@ -44,10 +44,12 @@ internal sealed class WideClassicalWindowState : IWideAverageState
         _published = 0;
     }
 
-    public void UpdateUnits(BigInteger input, Span<double> outputs)
+    public void UpdateUnits(BigInteger input, Span<double> outputs) =>
+        UpdateCompact(CompactMacdValue.FromUnits(input), outputs);
+
+    internal void UpdateCompact(CompactMacdValue value, Span<double> outputs)
     {
         outputs.Clear();
-        var value = CompactMacdValue.FromUnits(input);
         if (_method == ClassicAverageMethod.Wma)
             _weighted -= _sum;
         if (_prices.Count == _firstLength)
