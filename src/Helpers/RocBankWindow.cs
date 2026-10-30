@@ -47,6 +47,22 @@ internal readonly struct RocBankValue
         }
     }
 #if !NETFRAMEWORK
+    // Retain an already-separated binary scale through ratio certification.
+    // The fallback reconstructs the exact original unit numerator, including
+    // subnormal and extended-overflow rounding semantics.
+    internal static BigInteger RoundScaledUnits(BigInteger numerator, BigInteger denominator, int binaryShift)
+    {
+        if (binaryShift < 0) throw new ArgumentOutOfRangeException(nameof(binaryShift));
+        if (denominator.Sign <= 0) throw new ArgumentOutOfRangeException(nameof(denominator));
+        if (numerator.IsZero) return BigInteger.Zero;
+        var magnitude = BigInteger.Abs(numerator);
+        if (magnitude.GetBitLength() <= 128 && denominator.GetBitLength() <= 128
+            && CertifiedCompactRatio.TryDivide((UInt128)magnitude, (UInt128)denominator,
+                binaryShift - 1074, out double rounded))
+            return ExactVarianceWindow.Units(numerator.Sign < 0 ? -rounded : rounded);
+        return RoundUnits(numerator << binaryShift, denominator);
+    }
+
     private static bool TryRoundIntegerUnits(BigInteger numerator, out BigInteger result)
     {
         result = numerator;
