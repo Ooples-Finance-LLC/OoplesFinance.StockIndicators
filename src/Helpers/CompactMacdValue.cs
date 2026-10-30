@@ -163,6 +163,37 @@ internal readonly struct CompactMacdValue
 #endif
         return (Times(complement) + input.Times(alpha)).Round(denominator);
     }
+    // Integer periods and recurrence weights need no BigInteger conversion on
+    // the compact path. Overflow still uses the same exact wide multiplication.
+    internal CompactMacdValue Times(long weight)
+    {
+#if !NETFRAMEWORK
+        if (!_wide)
+        {
+            try { return new(checked(_compact * weight), _scale); }
+            catch (OverflowException) { } // Exact wide fallback below.
+        }
+#endif
+        return new(Coefficient * weight, _scale);
+    }
+
+    internal CompactMacdValue Round(long divisor)
+    {
+#if !NETFRAMEWORK
+        if (!_wide)
+        {
+            if (divisor == 1 && Width(Magnitude(_compact)) <= 106)
+            {
+                double rounded = JurikDyadic.FromBinaryProduct(_compact, _scale - 1074).Mean(1);
+                if (double.IsFinite(rounded)) return Of(rounded);
+            }
+            if (divisor > 0 && TryRatio(_compact, (UInt128)divisor, _scale, out var compact))
+                return compact;
+        }
+#endif
+        return Ratio(Coefficient, divisor, _scale);
+    }
+
     internal CompactMacdValue Times(BigInteger weight)
     {
 #if !NETFRAMEWORK
