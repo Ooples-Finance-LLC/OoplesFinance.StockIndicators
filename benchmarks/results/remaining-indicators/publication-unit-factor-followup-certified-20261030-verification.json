@@ -1,0 +1,59 @@
+{
+  "input_head": "10ab9974e1f9b449945a7f3c35aa3903cc04dbcc",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/ExactMeanAccumulator.cs",
+    "tests/ValidationTests/ExactMeanUnitWeightTests.cs"
+  ],
+  "batch_note": "Approved shared exact unit-weight addition paths; one combined affected-consumer qualification; performance pending.",
+  "step": "complete",
+  "updated_utc": "2026-10-30T21:26:00.765688+00:00",
+  "unit": {
+    "passed": 25,
+    "class_counts": {
+      "SelectedDirectionalStateTests": 14,
+      "ExactMeanUnitWeightTests": 4,
+      "ExactMeanDivisionCertificateTests": 7
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\unit-factor-followup\\unit\\unit.trx",
+    "sha256": "678db22f767b6a980c0064f4a5b7d3a006181d297c99569205cc207d0341c97d",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-unit-factor-followup-certified-20261030-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 21,
+    "class_counts": {
+      "TaDirectionalComparisonTests": 16,
+      "PivotLevelComparisonTests": 5
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\unit-factor-followup\\parity\\parity.trx",
+    "sha256": "01499cbfd912cf32c6660fee9440991bc5106e1c0e59f17128e2ce4804b5f657",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-unit-factor-followup-certified-20261030-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-next-approved-batch-20261030\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0143c78b2b65df22eb7393ddc7aa5c5f2fc2ae236887b51c4e035cbacfcb8ae6",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-next-approved-batch-20261030\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0143c78b2b65df22eb7393ddc7aa5c5f2fc2ae236887b51c4e035cbacfcb8ae6",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-next-approved-batch-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0143c78b2b65df22eb7393ddc7aa5c5f2fc2ae236887b51c4e035cbacfcb8ae6",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-next-approved-batch-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0143c78b2b65df22eb7393ddc7aa5c5f2fc2ae236887b51c4e035cbacfcb8ae6"
+  },
+  "source_fingerprint_sha256": "c3934de8aca0131321a545d33d1b47c0373eabfdb1dd7bdcba1a61f8fd4460bd",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved shared exact unit-weight addition paths; one combined affected-consumer qualification; performance pending. Correctness checks passed; controlled performance remains pending."
+}
