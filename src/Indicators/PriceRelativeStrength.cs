@@ -166,17 +166,25 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
                 var old = _history.Dequeue();
                 if (old.Eval != 0 && old.Base != 0)
                 {
-                    var oldEvaluation = JurikDyadic.FromDouble(old.Eval);
-                    var oldBase = JurikDyadic.FromDouble(old.Base);
-                    var numerator = JurikDyadic.FromDouble(evaluationPrice);
-                    numerator.Multiply(oldBase);
-                    var term = JurikDyadic.FromDouble(basePrice);
-                    term.Multiply(oldEvaluation);
+                    var oldEvaluation = ExactMeanAccumulator.DecomposeFinite(old.Eval);
+                    var oldBase = ExactMeanAccumulator.DecomposeFinite(old.Base);
+                    var currentEvaluation = ExactMeanAccumulator.DecomposeFinite(evaluationPrice);
+                    var currentBase = ExactMeanAccumulator.DecomposeFinite(basePrice);
+                    // Each normalized binary64 factor has at most 53 bits. Its exact
+                    // product fits Int128; reuse the prior factors for the denominator.
+                    var numerator = JurikDyadic.FromBinaryProduct(
+                        (Int128)currentEvaluation.Integer * oldBase.Integer,
+                        currentEvaluation.Exponent + oldBase.Exponent);
+                    var term = JurikDyadic.FromBinaryProduct(
+                        (Int128)currentBase.Integer * oldEvaluation.Integer,
+                        currentBase.Exponent + oldEvaluation.Exponent);
                     numerator.Subtract(term);
-                    oldEvaluation.Multiply(oldBase);
+                    var denominator = JurikDyadic.FromBinaryProduct(
+                        (Int128)oldEvaluation.Integer * oldBase.Integer,
+                        oldEvaluation.Exponent + oldBase.Exponent);
                     // Round the complete exact expression once. Exact cancellation
                     // retains positive zero even when the denominator is negative.
-                    Put(numerator.Sign == 0 ? 0 : numerator.Ratio(oldEvaluation), 2, output);
+                    Put(numerator.Sign == 0 ? 0 : numerator.Ratio(denominator), 2, output);
                 }
             }
             _history.Enqueue((evaluationPrice, basePrice));
