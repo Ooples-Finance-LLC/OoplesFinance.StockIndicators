@@ -187,7 +187,8 @@
     "price_relative_compact_acceptance.py": "7122a874d1dd548ef3b98285fd3fdaeba4ac618ad7ef2a22d91093ae9462f599"
   },
   "source_companion_inputs": {},
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/price-relative-compact-return-integration-source-proof-20261029.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/price-relative-compact-return-integration-source-proof-20261029.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/price-relative-compact-return-certified-local-price-relative-compact-return-control-20261029-report-import.json"
 }
