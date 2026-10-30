@@ -93,7 +93,11 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
         CandlePriceField basis
     ) : IMultiOutputState
     {
+#if !NETFRAMEWORK
+        private readonly Queue<(double Eval, double Base)> _history = new();
+#else
         private readonly Queue<(BigInteger Eval, BigInteger Base)> _history = new();
+#endif
         private readonly Queue<double?> _ratios = new();
         private BigInteger _sum;
         private int _missing;
@@ -157,10 +161,26 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
             if (!period.HasValue)
                 return;
 #if !NETFRAMEWORK
-            // Only the compound return expression requires exact wide operands.
-            var e = ExactVarianceWindow.Units(evaluationPrice);
-            var b = ExactVarianceWindow.Units(basePrice);
-#endif
+            if (_history.Count == period.Value)
+            {
+                var old = _history.Dequeue();
+                if (old.Eval != 0 && old.Base != 0)
+                {
+                    var oldEvaluation = JurikDyadic.FromDouble(old.Eval);
+                    var oldBase = JurikDyadic.FromDouble(old.Base);
+                    var numerator = JurikDyadic.FromDouble(evaluationPrice);
+                    numerator.Multiply(oldBase);
+                    var term = JurikDyadic.FromDouble(basePrice);
+                    term.Multiply(oldEvaluation);
+                    numerator.Subtract(term);
+                    oldEvaluation.Multiply(oldBase);
+                    // Round the complete exact expression once. Exact cancellation
+                    // retains positive zero even when the denominator is negative.
+                    Put(numerator.Sign == 0 ? 0 : numerator.Ratio(oldEvaluation), 2, output);
+                }
+            }
+            _history.Enqueue((evaluationPrice, basePrice));
+#else
             if (_history.Count == period.Value)
             {
                 var old = _history.Dequeue();
@@ -168,6 +188,7 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
                     Put(Divide(e * old.Base - b * old.Eval, old.Eval * old.Base), 2, output);
             }
             _history.Enqueue((e, b));
+#endif
         }
     }
 }
