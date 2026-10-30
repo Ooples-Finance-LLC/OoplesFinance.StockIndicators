@@ -13692,7 +13692,7 @@
     "src/Indicators/FilteredDeviationAverage.cs": "b35c070da38e65291afe1692d22e0605d9a7297c0ed9cd6c7378e17040748392",
     "src/Indicators/FirstValueEma.cs": "ac69174363822d1890d70e605a3946c61c132c014b50b0f697c467013382cdca",
     "src/Indicators/FiveCandleContinuationPatterns.cs": "097944f03b3e4086e1e068d36c5df67dd97e2e49902a59b3f616ddc0b999f9a7",
-    "src/Indicators/FixedKernelSnapshots.cs": "d77080261ad1e06dc572adfc5965c057f430ec28b620f1b4b893eb0c7d383e47",
+    "src/Indicators/FixedKernelSnapshots.cs": "4bdc5f316809fd82508ee2486e37d66bb97370a6d9715f2b0e4572bf10f7f331",
     "src/Indicators/FixedPeriodWma.cs": "bdfd1c002b73ffa5ff6a16c0bea5048d71c93eecf8e1c556ce79465802cab5e3",
     "src/Indicators/FractalSnapshot.cs": "ce14602b642b725cef43501dba8789c5f0ce9dcf6607165de838d03b070e826a",
     "src/Indicators/FusedBarExecution.cs": "813bfba73a4093c7665dde81322dfc8c5aa63ab176ae7f74c6da827d99f8a859",
