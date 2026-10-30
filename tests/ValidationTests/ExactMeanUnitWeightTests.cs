@@ -1,3 +1,4 @@
+using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -46,6 +47,27 @@ public sealed class ExactMeanUnitWeightTests
     }
 
     [Fact]
+    public void ShiftedUnitFactorsPreserveExactSumsAndWideCancellation()
+    {
+        foreach (int shift in new[] { -1100, -1, 0, 1, 1100 })
+        {
+            var sum = new ExactMeanAccumulator();
+            var exact = new ReferenceFraction(0);
+            var power = new ReferenceFraction(BigInteger.One << Math.Abs(shift));
+            var scale = shift < 0 ? new ReferenceFraction(1) / power : power;
+            foreach (double value in new[] { double.Epsilon, -Math.BitIncrement(1), double.MaxValue })
+            foreach (int weight in new[] { 1, -1, -1, 1 })
+            {
+                sum.AddFactor(new ExactMeanAccumulator.ProductFactor(value, shift), weight);
+                exact += ReferenceFraction.FromDouble(value) * scale * new ReferenceFraction(weight);
+                foreach (long divisor in new[] { 1L, 2, 3, int.MaxValue })
+                    Assert.Equal(BitConverter.DoubleToInt64Bits((exact / new ReferenceFraction(divisor)).ToDouble()),
+                        BitConverter.DoubleToInt64Bits(sum.Mean(divisor)));
+            }
+        }
+    }
+
+    [Fact]
     public void NonfiniteInputsRemainRejectedEvenWithZeroWeight()
     {
         foreach (double value in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
@@ -59,10 +81,12 @@ public sealed class ExactMeanUnitWeightTests
     private static void Check(IEnumerable<(double Value, int Weight)> terms)
     {
         var sum = new ExactMeanAccumulator();
+        var factors = new ExactMeanAccumulator();
         var exact = new ReferenceFraction(0);
         foreach (var (value, weight) in terms)
         {
             sum.Add(value, weight);
+            factors.AddFactor(new ExactMeanAccumulator.ProductFactor(value), weight);
             exact += ReferenceFraction.FromDouble(value) * new ReferenceFraction(weight);
             Assert.Equal(exact.Sign, sum.Sign);
             Assert.Equal(exact.Sign == 0, sum.IsExactlyZero);
@@ -71,6 +95,8 @@ public sealed class ExactMeanUnitWeightTests
                 double expected = (exact / new ReferenceFraction(divisor)).ToDouble();
                 Assert.Equal(BitConverter.DoubleToInt64Bits(expected),
                     BitConverter.DoubleToInt64Bits(sum.Mean(divisor)));
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected),
+                    BitConverter.DoubleToInt64Bits(factors.Mean(divisor)));
             }
         }
     }

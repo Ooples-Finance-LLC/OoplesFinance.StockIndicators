@@ -117,6 +117,10 @@ internal struct ExactMeanAccumulator
     internal void AddFactor(ProductFactor value, int weight)
     {
         if (value.Mantissa == 0 || weight == 0) return;
+        // ProductFactor retains at most 53 significand bits, including when
+        // its binary scale is shifted. Both unit-weight products fit exactly.
+        if (weight == 1) { AddSmall(value.Mantissa, value.Scale); return; }
+        if (weight == -1) { AddSmall(-value.Mantissa, value.Scale); return; }
         if (Math.Abs(value.Mantissa) <= long.MaxValue / Math.Abs((long)weight))
             AddSmall(value.Mantissa * weight, value.Scale);
         else AddLarge(new BigInteger(value.Mantissa) * weight, value.Scale);
