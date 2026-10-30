@@ -4,6 +4,8 @@ using OoplesFinance.StockIndicators.Helpers;
 namespace OoplesFinance.StockIndicators.Indicators;
 
 // Rolling integer moments accept both finite closes and wide unpublished stages.
+// Compact coefficients retain exact rolling arithmetic with a wide fallback.
+// Uncertified publication keeps the original ratio, including negative underflow zero.
 // Triangular weights are the convolution of two unrounded box sums.
 internal sealed class WideClassicalWindowState : IWideAverageState
 {
@@ -11,14 +13,19 @@ internal sealed class WideClassicalWindowState : IWideAverageState
         _firstLength,
         _secondLength;
     private readonly ClassicAverageMethod _method;
-    private readonly Queue<BigInteger> _prices = new(),
+    private readonly Queue<CompactMacdValue> _prices = new(),
         _sums = new();
-    private BigInteger _sum,
+    private CompactMacdValue _sum,
         _weighted,
         _second,
         _numerator;
     private long _denominator = 1;
-    public BigInteger RoundedUnits => RocBankValue.RoundUnits(_numerator, _denominator);
+    private double _published;
+    // Finite publication already has exactly the rounding required by consumers.
+    // Extended unpublished overflow still needs the original wide-capable round.
+    public BigInteger RoundedUnits => Math.Abs(_published) <= double.MaxValue
+        ? ExactVarianceWindow.Units(_published)
+        : _numerator.Round(_denominator).Units;
 
     internal WideClassicalWindowState(int period, ClassicAverageMethod method)
     {
@@ -32,21 +39,23 @@ internal sealed class WideClassicalWindowState : IWideAverageState
     {
         _prices.Clear();
         _sums.Clear();
-        _sum = _weighted = _second = _numerator = 0;
+        _sum = _weighted = _second = _numerator = default;
         _denominator = 1;
+        _published = 0;
     }
 
     public void UpdateUnits(BigInteger input, Span<double> outputs)
     {
         outputs.Clear();
+        var value = CompactMacdValue.FromUnits(input);
         if (_method == ClassicAverageMethod.Wma)
             _weighted -= _sum;
         if (_prices.Count == _firstLength)
             _sum -= _prices.Dequeue();
-        _prices.Enqueue(input);
-        _sum += input;
+        _prices.Enqueue(value);
+        _sum += value;
         if (_method == ClassicAverageMethod.Wma)
-            _weighted += _period * input;
+            _weighted += value.Times(_period);
         var count = _prices.Count;
         if (_method == ClassicAverageMethod.Trima)
         {
@@ -69,7 +78,8 @@ internal sealed class WideClassicalWindowState : IWideAverageState
                     ? (long)count * (2L * _period - count + 1) / 2
                     : count;
         }
-        outputs[0] = ExactMeanAccumulator.UnitRatio(_numerator, _denominator);
+        _published = _numerator.PublishRatio(_denominator);
+        outputs[0] = _published;
         outputs[1] = 1;
     }
 }

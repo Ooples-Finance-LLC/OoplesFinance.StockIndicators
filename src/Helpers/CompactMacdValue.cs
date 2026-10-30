@@ -234,6 +234,19 @@ internal readonly struct CompactMacdValue
             ? RocBankValue.RoundUnits(numerator << scale, denominator)
             : RocBankValue.RoundUnits(numerator, denominator << -scale));
     }
+    // Publish the ratio directly: rounded integer zero cannot retain the sign
+    // of an underflowing negative quotient. Those cases use the original path.
+    internal double PublishRatio(long divisor)
+    {
+        if (divisor <= 0) throw new ArgumentOutOfRangeException(nameof(divisor));
+#if !NETFRAMEWORK
+        if (!_wide && CertifiedCompactRatio.TryDivide(Magnitude(_compact),
+            (UInt128)divisor, checked(_scale - 1074), out double result))
+            return _compact < 0 ? -result : result;
+#endif
+        return ExactMeanAccumulator.UnitRatio(Units, divisor);
+    }
+
     internal double Publish()
     {
 #if !NETFRAMEWORK
