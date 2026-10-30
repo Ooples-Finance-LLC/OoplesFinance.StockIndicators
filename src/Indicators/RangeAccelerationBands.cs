@@ -101,6 +101,18 @@ public sealed class RangeAccelerationBands : MultiOutputIndicatorBase, IIndicato
                 var common = BigInteger.GreatestCommonDivisor(reducedHigh, reducedLow);
                 sum = (reducedHigh + reducedLow) / common;
                 var spread = 4 * ((reducedHigh - reducedLow) / common);
+#if !NETFRAMEWORK
+                row[0] = RocBankValue.RoundScaledUnits(
+                    reducedHigh * (sum + spread) * sum.Sign,
+                    BigInteger.Abs(sum),
+                    sharedShift
+                );
+                row[2] = RocBankValue.RoundScaledUnits(
+                    reducedLow * (sum - spread) * sum.Sign,
+                    BigInteger.Abs(sum),
+                    sharedShift
+                );
+#else
                 row[0] = RocBankValue.RoundUnits(
                     h * (sum + spread) * sum.Sign,
                     BigInteger.Abs(sum)
@@ -109,6 +121,7 @@ public sealed class RangeAccelerationBands : MultiOutputIndicatorBase, IIndicato
                     l * (sum - spread) * sum.Sign,
                     BigInteger.Abs(sum)
                 );
+#endif
             }
             if (_window.Count == period)
             {
