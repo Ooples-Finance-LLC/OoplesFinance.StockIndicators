@@ -1,0 +1,144 @@
+{
+  "prior_head": "e4e2e2af4d0de80cb6c55d125f9321bd224519d3",
+  "source_commit": "fde958f884af3f898211d954273b29c05af6736e",
+  "reused_production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-publish-remaining-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a205df18abb1d6ae2c41155b39f11e085ebfcf4931d4f39cd02b9611f7a517fd",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-publish-remaining-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a205df18abb1d6ae2c41155b39f11e085ebfcf4931d4f39cd02b9611f7a517fd",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-publish-remaining-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a205df18abb1d6ae2c41155b39f11e085ebfcf4931d4f39cd02b9611f7a517fd",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-publish-remaining-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a205df18abb1d6ae2c41155b39f11e085ebfcf4931d4f39cd02b9611f7a517fd"
+  },
+  "prior_comparator_sha256": "07f55580b85942a5ea2d460820ceea32e560d5e36fdd22198c3e7e26be47fde9",
+  "status": "running",
+  "step": "verify-gpu-reuse",
+  "updated_utc": "2026-10-21T12:32:35.800706+00:00",
+  "input_head": "28a0b5f30e922a94a66e37e0fa3f8e6f7ec69bd6",
+  "preserved_cases": [
+    [
+      "RemainingSpreadCandleBenchmarkTests",
+      "RelativeSpreadStrength",
+      1000,
+      "Full"
+    ],
+    [
+      "RemainingSpreadCandleBenchmarkTests",
+      "RelativeSpreadStrength",
+      1000,
+      "LatestOnly"
+    ],
+    [
+      "RemainingSpreadCandleBenchmarkTests",
+      "RelativeSpreadStrength",
+      10000,
+      "Full"
+    ],
+    [
+      "RemainingSpreadCandleBenchmarkTests",
+      "RelativeSpreadStrength",
+      10000,
+      "LatestOnly"
+    ],
+    [
+      "RemainingSpreadCandleBenchmarkTests",
+      "RetrospectiveCandlestickChart",
+      1000,
+      "Full"
+    ],
+    [
+      "RemainingSpreadCandleBenchmarkTests",
+      "RetrospectiveCandlestickChart",
+      1000,
+      "LatestOnly"
+    ],
+    [
+      "RemainingSpreadCandleBenchmarkTests",
+      "RetrospectiveCandlestickChart",
+      10000,
+      "Full"
+    ],
+    [
+      "RemainingSpreadCandleBenchmarkTests",
+      "RetrospectiveCandlestickChart",
+      10000,
+      "LatestOnly"
+    ],
+    [
+      "RemainingUltimateAveragesBenchmarkTests",
+      "UltimateMovingAverage",
+      1000,
+      "Full"
+    ],
+    [
+      "RemainingUltimateAveragesBenchmarkTests",
+      "UltimateMovingAverage",
+      1000,
+      "LatestOnly"
+    ],
+    [
+      "RemainingUltimateAveragesBenchmarkTests",
+      "UltimateMovingAverage",
+      10000,
+      "Full"
+    ],
+    [
+      "RemainingUltimateAveragesBenchmarkTests",
+      "UltimateMovingAverage",
+      10000,
+      "LatestOnly"
+    ],
+    [
+      "RemainingUltimateAveragesBenchmarkTests",
+      "UltimateMovingAverageBands",
+      1000,
+      "Full"
+    ],
+    [
+      "RemainingUltimateAveragesBenchmarkTests",
+      "UltimateMovingAverageBands",
+      1000,
+      "LatestOnly"
+    ],
+    [
+      "RemainingUltimateAveragesBenchmarkTests",
+      "UltimateMovingAverageBands",
+      10000,
+      "Full"
+    ],
+    [
+      "RemainingUltimateAveragesBenchmarkTests",
+      "UltimateMovingAverageBands",
+      10000,
+      "LatestOnly"
+    ]
+  ],
+  "small_cases": {
+    "passed": 10,
+    "sha256": "fd5241013171fe3cca8e647e71944a781f78a552eb4e8d39e15765d2d85c6c30"
+  },
+  "method_count": 1717,
+  "estimated_shard_seconds": [
+    2578,
+    2555,
+    1933,
+    1313,
+    1271,
+    1217,
+    1104,
+    937,
+    839,
+    839,
+    839,
+    839,
+    839,
+    839,
+    839,
+    839,
+    839,
+    839,
+    839,
+    839
+  ],
+  "production": "Unchanged; all four DLL hashes match the validated e4e2e2af build",
+  "gpu": "Fresh GPU100 execution recorded and verified against the new compiled method inventory",
+  "long_cases": "All six retained in compiled discovery; full hosted replay pending",
+  "python_tests": 7
+}

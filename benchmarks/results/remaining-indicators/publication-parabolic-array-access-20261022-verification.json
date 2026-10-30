@@ -1,0 +1,64 @@
+{
+  "input_head": "d3a640b3aad41af57ef87d750dae2e2a728e92be",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedParabolicClassic.cs",
+    "src/Indicators/ParabolicStopSnapshots.cs",
+    "tests/ModelsTests/ParabolicClassicFastTests.cs"
+  ],
+  "parallel_batch_note": "Bounded SAR follow-up: direct array access for validation and scalar loop, scalar coefficients replace three arrays. Arithmetic certificates/fallback unchanged. Existing exact oracle checks now cover arrays and read-only list wrappers, including published API bits. Four-variant numerical/parity and currentGPU checks repeated.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T04:11:48.766540+00:00",
+  "unit": {
+    "passed": 78,
+    "class_counts": {
+      "ParabolicSnapshotSharedExecutionTests": 9,
+      "SharedGeneratedParabolicSarTests": 17,
+      "ParabolicSarNumericalTests": 38,
+      "ParabolicCertifiedArithmeticTests": 4,
+      "ParabolicClassicFastTests": 6,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\parabolic-array-access\\unit\\unit.trx",
+    "sha256": "29d8e2f08283195446518e05b69ad6294a42a67c6e8482d94385753b7b412124",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-parabolic-array-access-20261022-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 41,
+    "class_counts": {
+      "ParabolicComparisonTests": 13,
+      "SharedParabolicSnapshotBenchmarkTests": 28
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\parabolic-array-access\\parity\\parity.trx",
+    "sha256": "9e67e3c61ae4f01a00b4a3e0e6dfcecfc2aef0c2359cab1395def6c41c22796e",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-parabolic-array-access-20261022-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-access-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e88e7b0c967117470ba7791d9a742efa47d3bcc5301fd17f54644145421554fa",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-access-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e88e7b0c967117470ba7791d9a742efa47d3bcc5301fd17f54644145421554fa",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-access-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e88e7b0c967117470ba7791d9a742efa47d3bcc5301fd17f54644145421554fa",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-access-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e88e7b0c967117470ba7791d9a742efa47d3bcc5301fd17f54644145421554fa"
+  },
+  "source_fingerprint_sha256": "be4a18f636ddb7938ed811cc5934e9f13449e42c5fccb47c1092632091a29b12",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Bounded SAR follow-up: direct array access for validation and scalar loop, scalar coefficients replace three arrays. Arithmetic certificates/fallback unchanged. Existing exact oracle checks now cover arrays and read-only list wrappers, including published API bits. Four-variant numerical/parity and currentGPU checks repeated."
+}

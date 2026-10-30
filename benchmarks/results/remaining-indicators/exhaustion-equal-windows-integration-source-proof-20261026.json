@@ -1,0 +1,34 @@
+{
+  "qualified_commit": "7dfc7d61082d5e82413e70fc0d61f035138a66f9",
+  "qualified_code": "e38ed2198011cdeba9cd557d65556100e7fd7070",
+  "matched_paths": [
+    "src",
+    "tests",
+    "examples",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "3e05fb20a3d4ec21f221a30f64cdb5c65042376ce7bb83279b0cd03defb6a66d",
+  "qualification_reused": {
+    "unit": 7,
+    "parity": 197,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-exhaustion-equal-windows-20261026\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c8b4448201d99f3d8ba2c133c5d2dab8d6411830852866e0b437ca6996e11a23",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-exhaustion-equal-windows-20261026\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c8b4448201d99f3d8ba2c133c5d2dab8d6411830852866e0b437ca6996e11a23",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-exhaustion-equal-windows-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c8b4448201d99f3d8ba2c133c5d2dab8d6411830852866e0b437ca6996e11a23",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-exhaustion-equal-windows-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c8b4448201d99f3d8ba2c133c5d2dab8d6411830852866e0b437ca6996e11a23"
+  },
+  "control": "local-exhaustion-equal-windows-control-20261026",
+  "note": "Integrated executable sources and build inputs exactly match qualified candidate. Publishing checkout binaries remain older; preserved candidate DLL supplied the new measurement arm. No redundant production rebuild."
+}

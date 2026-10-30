@@ -1,0 +1,29 @@
+{
+  "types": [
+    "LiquidRelativeStrengthIndex"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "d169cb533b85581f47a38af9a3096c9676ab4fe1",
+  "combined_input_sha256": "220aa81d416a985cbb316baea7c46008a89ebd5785f74baf2cddbca00b138e6e",
+  "benchmark_fixture": {
+    "type": "RemainingNaturalLiquidBenchmarks",
+    "operations": [
+      "LiquidRelativeStrengthIndex"
+    ]
+  },
+  "checks": {
+    "unit": 49,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/natural-liquid-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/natural-liquid-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

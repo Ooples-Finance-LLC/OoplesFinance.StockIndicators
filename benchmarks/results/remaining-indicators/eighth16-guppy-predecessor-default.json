@@ -1,0 +1,13 @@
+{
+  "Runtime": "10.0.13",
+  "TestAssemblySha256": "d4abdc190d66aecd277d028c16d8b547ce2c3816db28ed5fed84c8ccb21c7bee",
+  "Status": "one-case-direct-invocation-completed",
+  "ProductionSha256": "493cdbca64aacd1ee784ab5bb1050661f84e8dfb12449eef3ba94c15b718e76c",
+  "Result": {
+    "Case": "OoplesFinance.StockIndicators.Indicators.GuppyMultipleMovingAverage/default",
+    "Outcome": "Failed",
+    "Message": "OoplesFinance.StockIndicators.Validation.IndicatorValidationException: OoplesFinance.StockIndicators.Indicators.GuppyMultipleMovingAverage/default\r\nordinal/signed-extreme-ties/Execution: An exact finite mean requires finite inputs.\r\n   at OoplesFinance.StockIndicators.Validation.IndicatorValidationReport.ThrowIfInvalid()\r\n   at OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.OrdinalFamilyNumericalTests.PublicConfigurationsPassEveryNumericalClass(IndicatorValidationCase testCase) in C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-adaptive-v1-rollout-work\\tests\\ValidationTests\\OrdinalFamilyNumericalTests.cs:line 131\r\n   at GuppyPredecessorProbe.Run(String path)",
+    "ProductionPath": "Z:\\StockIndicators-work\\si-guppy-predecessor-default-reproduction\\bin\\OoplesFinance.StockIndicators.dll"
+  },
+  "Note": "Invokes the existing test method and existing independent validation directly; no production or test project rebuilt. Prior VSTest filter selected zero cases."
+}

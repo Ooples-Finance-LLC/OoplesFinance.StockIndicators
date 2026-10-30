@@ -1,0 +1,384 @@
+{
+  "status": "candidate-rejected-or-inconclusive",
+  "sources": {
+    "old": "09ef7ae89e74b45609f6f2c1baf4a8d1225c0155",
+    "new": "644e7b9fb9fa334c9f9492c77034e1fc8ba6b9d4"
+  },
+  "candidate_code_source": "d254ebdef3451c456cd15971ebae05cb7e271da1",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "SharedTillsonBenchmarks",
+      "pair": "QuanTAlib.T3",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.95163703125,
+        0.898852578125
+      ],
+      "new_means_ms": [
+        0.948150546875,
+        0.9243249999999997
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTillsonBenchmarks",
+      "pair": "QuanTAlib.T3",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.87684421875,
+        0.8400725
+      ],
+      "new_means_ms": [
+        0.902704609375,
+        0.9198303125
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTillsonBenchmarks",
+      "pair": "QuanTAlib.T3",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        7.75734191919192,
+        8.824600769230772
+      ],
+      "new_means_ms": [
+        8.850165454545454,
+        8.811705454545457
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTillsonBenchmarks",
+      "pair": "QuanTAlib.T3",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        8.918437857142859,
+        7.568268333333333
+      ],
+      "new_means_ms": [
+        8.749176153846154,
+        8.891653240740741
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTillsonBenchmarks",
+      "pair": "Skender.GetT3",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.95522890625,
+        0.8964665798611111
+      ],
+      "new_means_ms": [
+        0.95694046875,
+        0.94118890625
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTillsonBenchmarks",
+      "pair": "Skender.GetT3",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.847763125,
+        0.84423390625
+      ],
+      "new_means_ms": [
+        0.87798546875,
+        0.85916578125
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTillsonBenchmarks",
+      "pair": "Skender.GetT3",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        9.219160606060607,
+        8.295108461538462
+      ],
+      "new_means_ms": [
+        9.181926666666667,
+        9.31449909090909
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTillsonBenchmarks",
+      "pair": "Skender.GetT3",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        8.401146363636363,
+        8.414697500000003
+      ],
+      "new_means_ms": [
+        9.051839090909091,
+        8.28977076923077
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTillsonBenchmarks",
+      "pair": "TaLib.Functions.T3",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.988456171875,
+        0.863451484375
+      ],
+      "new_means_ms": [
+        0.958096953125,
+        0.984252421875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTillsonBenchmarks",
+      "pair": "TaLib.Functions.T3",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.9061940625,
+        0.866309921875
+      ],
+      "new_means_ms": [
+        0.914359765625,
+        0.899524921875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTillsonBenchmarks",
+      "pair": "TaLib.Functions.T3",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        10.173165454545455,
+        8.743354166666668
+      ],
+      "new_means_ms": [
+        10.44626,
+        9.660713
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTillsonBenchmarks",
+      "pair": "TaLib.Functions.T3",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        9.739898181818184,
+        9.367761666666668
+      ],
+      "new_means_ms": [
+        8.985835454545455,
+        9.469539
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.T3",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        6.13203,
+        6.48332
+      ],
+      "new_means_ms": [
+        6.57111,
+        7.06672
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.T3",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        8.95706,
+        8.93665
+      ],
+      "new_means_ms": [
+        9.890194444444443,
+        9.957575
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetT3",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        4.70333,
+        4.28424
+      ],
+      "new_means_ms": [
+        8.1313625,
+        5.34598
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetT3",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        8.47557,
+        8.6603
+      ],
+      "new_means_ms": [
+        8.33307,
+        9.82326
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.T3",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        1.05187,
+        1.1281
+      ],
+      "new_means_ms": [
+        1.13858,
+        1.0132
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.T3",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        9.29143,
+        9.61491
+      ],
+      "new_means_ms": [
+        9.83192,
+        9.9178
+      ],
+      "verdict": "inconclusive"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "aba884fcea66cc240111b7cb5adf1a784f444fb776aab25bbc04cab56fd7118c",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "7ba3c674db19bdb6124f8f16fdca6ccdae1f63928612e0be7e4046b604de1ca8",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "31b84ae29537877fa82cb601a2e54632961e221a5b66dd1e4f129481a218b025",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "0a926f9def34e86b15d79c0bad5c1d02371555cba62a15845226e12e51c34080",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/verified-summary.json.gz"
+    },
+    "round0-old-SharedTillsonBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTillsonBenchmarks-report-full-compressed.json": {
+      "sha256": "ae40529548cebaaefec9e35facd0b6c020f6a460207e2536f7f381bb0babb992",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round0-old-SharedTillsonBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTillsonBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "d06db85fa0169143fa85a4acd8b4d3f2a086cbe2c1ca001bf075fb593914e068",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedTillsonBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTillsonBenchmarks-report-full-compressed.json": {
+      "sha256": "fc1e1ea9fa4321fefea0a0a6ab15c569a3b679a6e472023eed01fbd294d55bd5",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round1-new-SharedTillsonBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTillsonBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "24c556cdf83a56d3bb050d4ad66346b199bf0e554203162540babebdb7bc93c9",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedTillsonBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTillsonBenchmarks-report-full-compressed.json": {
+      "sha256": "8dbbfe31860bd3981cff9cd828acbb9c9ed9b536ba5f1157d4d97ab60b2281e3",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round2-new-SharedTillsonBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTillsonBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "c4bcbff91443b7c866335e83ebe4e03998f24fb5b3e280eb300722055d952370",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedTillsonBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTillsonBenchmarks-report-full-compressed.json": {
+      "sha256": "196786c038890693a547784f34fd0a30950539ac6f43dde873000b4b7416ba77",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round3-old-SharedTillsonBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTillsonBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "2688881f35224ec377d231343d1251ae7e95dd4d31cf2821e47feb70ef4a1ac4",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "34485c1f337f795bc6f726407978b8853f91962b4fc0e00fcb05bdf234a021ab",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round0-old-SharedTillsonBenchmarks.log": {
+      "sha256": "21aa465119ed8f4cb23e428a67fadc8a7cde2ac83d694e35ebd6647dda4a074b",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round0-old-SharedTillsonBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "642898de5cfd6116fd4d0698483fba5293b51394d668157939bf8f842107df47",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-SharedTillsonBenchmarks.log": {
+      "sha256": "52737248f16dbfd90e74ca9efbfdb954d37b06e12e5fbd5542dea6b8e21816fb",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round1-new-SharedTillsonBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "192a4460af4e44f6e852451173d29c1ba9a3c165751e905c3a16b0a0757de038",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-SharedTillsonBenchmarks.log": {
+      "sha256": "3baf070b8706062d625172bc1d73773b0fc2b8e47a77a103311bc8b084ff0956",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round2-new-SharedTillsonBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "68c213438d25586c0e22ea63f4e5fba6c69b7ef1ac52a0ac9690ad5d7fa6cfdc",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-SharedTillsonBenchmarks.log": {
+      "sha256": "6e16662825ff40e931cdfbbbd163333494745d27bd9764eb3e02268ca687fc3a",
+      "archive": "benchmarks/results/remaining-indicators/local-t3-compact-publication-control-20261024/round3-old-SharedTillsonBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-t3-compact-publication-control.py": "f0aeb4f525b3e748a5b85a6edaea0b29e08a74897513e99d936fa16c558a46fc",
+    "verify-t3-compact-publication-control.py": "7e31649f868efe219c49fe72c885294d9767c51d670fc45958e70d934402fdef"
+  },
+  "report_imported": false,
+  "production_integrated": false,
+  "candidate_evidence": {
+    "rejected-candidate.patch": {
+      "sha256": "ac3fa85c941a979ad4fa047946bf5b6e68226cc8d7ddf18863cace45d781a3db"
+    },
+    "publication-t3-compact-publication-certified-20261024-parity.trx.gz": {
+      "sha256": "e082f5bb3932d6ebd28c4c677f8c6a5dd48763eb01b1ea738cd7122081f3d5db"
+    },
+    "publication-t3-compact-publication-certified-20261024-unit.trx.gz": {
+      "sha256": "7d649c875fcd964ea4b81eba42b3e552b588f1eb41cef8700529bcaf4f9bbaa1"
+    },
+    "publication-t3-compact-publication-certified-20261024-verification.json": {
+      "sha256": "aa81d18c30e12f1da526e58ef61c77e70edd8179684f19253399a1f36a0fcd3e"
+    }
+  },
+  "reason": "Compact T3 publication trial: 0 faster, 18 inconclusive, 0 slower. Existing 40 unit/26 parity/100 GPU/8 inventory checks passed; all 144 controls verified. Candidate source not integrated and no report row imported."
+}

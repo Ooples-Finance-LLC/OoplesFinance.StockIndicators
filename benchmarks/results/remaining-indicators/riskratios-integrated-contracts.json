@@ -1,0 +1,33 @@
+{
+  "types": [
+    "InformationRatio",
+    "SharpeRatio",
+    "SortinoRatio"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "0e77c4d3778faf175de16e4193cd1379e72a4fe2",
+  "combined_input_sha256": "35bfbc9e13bd61ae6a30f1215ec080185125401229dc534b7bf9e5440ed48496",
+  "benchmark_fixture": {
+    "type": "RemainingRiskRatiosBenchmarks",
+    "operations": [
+      "InformationRatio",
+      "SharpeRatio",
+      "SortinoRatio"
+    ]
+  },
+  "checks": {
+    "unit": 181,
+    "parity": 12,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/riskratios-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/riskratios-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

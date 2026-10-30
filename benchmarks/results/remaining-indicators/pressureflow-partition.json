@@ -1,0 +1,17 @@
+{
+  "change": "Separate four expensive 10000-bar cases into methods so existing method-based CI sharding distributes them. Same Verify body, inputs, output-bit checks and 30-minute job timeout.",
+  "cause": "Hosted job116828470054 annotation: maximum execution time of30minutes exceeded.",
+  "short_cases_passed": 8,
+  "gpu_passed": 100,
+  "contract_methods": 1356,
+  "hosted_methods": 1344,
+  "shards_of_20": {
+    "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit": 2,
+    "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.KlingerFull10000": 3,
+    "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.KlingerLatest10000": 4,
+    "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.KvoFull10000": 5,
+    "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.KvoLatest10000": 6
+  },
+  "trx_sha256": "2a6ae67c046e9b5655928cf1d205632269ac0733cd4f49537ef50a7189f3c866",
+  "heavy_case_evidence": "Reuse completed pressureflow-contracts.json results. No repeat of expensive local runs for method-only repartitioning; hosted execution pending."
+}

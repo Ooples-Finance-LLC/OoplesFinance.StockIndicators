@@ -1,0 +1,38 @@
+{
+  "source_sha": "58fbe38429046ebed1b68983bc4cb8fbd6599a8b",
+  "measurement_location": "Local Windows; unchanged correctness setup; CPU builder and native methods timed",
+  "cases": 80,
+  "comparisons": 40,
+  "partial": false,
+  "excluded_fixtures": [],
+  "archives": {
+    "verified-summary.json": {
+      "sha256": "695d7a21d4d7c878733102c370fe6901d215c9b0efac64f1c3e87b7d0d9b1c42",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch9-20261022/verified-summary.json.gz"
+    },
+    "status.json": {
+      "sha256": "55e8474a340aa64cf0fc5157abc9bfe0566b18da3026a66b4c62f3c10f6cad91",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch9-20261022/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "4ad34b5757a8fd323009acf4831548853810226194c720af4601453c2fc22130",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch9-20261022/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "3e34e5c6ba6070829906cac44ec42b32d0eeb1c62f549b69674363fe99be76c9",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch9-20261022/binary-manifest.json.gz"
+    },
+    "SharedTaMultiBarNativeBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaMultiBarNativeBenchmarks-report-full-compressed.json": {
+      "sha256": "62b908ff782704e43f4351845adc6e54a400073cbc2a4fabf4d67089c8ac270b",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch9-20261022/SharedTaMultiBarNativeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTaMultiBarNativeBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedTaMultiBarNativeBenchmarks.log": {
+      "sha256": "40a24b4ce9d2c72d075cb719d92b7a117ff33d634e108695ab51e71b0cf2b468",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch9-20261022/SharedTaMultiBarNativeBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-local-mapped-batch9.py": "eee7874aa5587679f44860257a8219729a2c2e2da581261b7524f9dc4037c83e",
+    "verify-local-mapped-batch9.py": "a2d568cd594d4b97953c245ff0382de57445b35e0c6aa7a8f3711083187fdbc2"
+  }
+}

@@ -5,10 +5,20 @@ namespace OoplesFinance.StockIndicators.Helpers;
 internal sealed class MultiDepthWindow
 {
     private readonly Pole[] _poles;
+    private readonly int _length;
+    private readonly bool _allowCertified;
+    private CertifiedMultiDepth? _certified;
+    private List<double>? _pendingPrices;
+    private int _startup;
+    private bool _exactOnly;
     private Number _previousMargin;
-    internal MultiDepthWindow(int length)
+    internal bool UsingCertifiedPath => _certified is not null;
+    internal int ExactFallbacks { get; private set; }
+    internal MultiDepthWindow(int length) : this(length, true) { }
+    internal MultiDepthWindow(int length, bool allowCertified)
     {
         length = Math.Max(1, length);
+        _length = length; _allowCertified = allowCertified;
         var one = Number.Of(1).Round(1);
         var gain1 = Number.Of(2).Round(1).Divide(length + 1L);
         var angle2 = Math.Sqrt(2) * Math.PI / length;
@@ -35,6 +45,30 @@ internal sealed class MultiDepthWindow
     internal (double One, double Two, double Three, Signal Trade) Next(double price, bool final)
     {
         StreamingInputValidation.Finite(price, nameof(price));
+        if (_certified is not null)
+        {
+            if (_certified.TryNext(price, final, out var certified))
+            {
+                if (final) _pendingPrices!.Add(price);
+                return certified;
+            }
+            // Recreate only committed state. A rejected preview must never enter
+            // the replay log or alter the subsequent committed calculation.
+            foreach (var prior in _pendingPrices!) NextExact(prior, true);
+            _pendingPrices = null; _certified = null; _exactOnly = true; ExactFallbacks++;
+        }
+        var result = NextExact(price, final);
+        if (final && _startup < 3 && ++_startup == 3 && _allowCertified && !_exactOnly)
+        {
+            var seeds = new CertifiedMultiDepth.Seed[3];
+            for (var i = 0; i < 3; i++) seeds[i] = _poles[i].Seed();
+            _certified = CertifiedMultiDepth.Create(_length, seeds, _previousMargin);
+            if (_certified is not null) _pendingPrices = new List<double>();
+        }
+        return result;
+    }
+    private (double One, double Two, double Three, Signal Trade) NextExact(double price, bool final)
+    {
         var current = Number.Of(price).Round(53);
         var first = _poles[0].Next(current, final);
         var second = _poles[1].Next(current, final);
@@ -45,7 +79,11 @@ internal sealed class MultiDepthWindow
         if (final) _previousMargin = margin;
         return (first.Publish(), second.Publish(), third.Publish(), trade);
     }
-    internal void Reset() { foreach (var pole in _poles) pole.Reset(); _previousMargin = default; }
+    internal void Reset()
+    {
+        foreach (var pole in _poles) pole.Reset(); _previousMargin = default;
+        _certified = null; _pendingPrices = null; _startup = 0; _exactOnly = false; ExactFallbacks = 0;
+    }
     private sealed class Pole
     {
         private readonly Number _gain;
@@ -57,6 +95,13 @@ internal sealed class MultiDepthWindow
             _anchors = new Number[feedback.Length]; _alpha = new Number[feedback.Length]; _beta = new Number[feedback.Length];
         }
         private static Number Abs(Number value) => value.Sign < 0 ? default(Number) - value : value;
+        internal CertifiedMultiDepth.Seed Seed()
+        {
+            var values = new Number[2 * _feedback.Length];
+            for (var i = 0; i < _feedback.Length; i++)
+            { values[i] = _anchors[i] + _alpha[i]; values[_feedback.Length + i] = _beta[i]; }
+            return new(_gain, _feedback, values);
+        }
         internal Number Next(Number current, bool final)
         {
             // Missing alpha lags equal the current price, so their centered

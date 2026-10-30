@@ -1,0 +1,39 @@
+{
+  "batch": "generated-nvi-pvi-vroc-pvt",
+  "types": [
+    "Nvi",
+    "Pvi",
+    "Vroc",
+    "Pvt"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse VolumeIndexWindow and PriceVolumeTrendWindow to publish lines and signals together, retaining extended arithmetic and the initial index1000. VROC reuses bounded exact lagged ratios over volume. Custom averages retain graph execution.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 44,
+    "fixture_passed": 16,
+    "gpu_passed": 100,
+    "contract_methods": 1341,
+    "hosted_methods": 1329,
+    "unit_trx_sha256": "57d8589137d5ab819ce2b53564be6eeb21d117a7ea1511f6533449ef9979ea2a",
+    "fixture_trx_sha256": "da43c6e964a10486ee2b6a9ff96f9f61a06bcd457a367f6988cca2e78bb6c809"
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVolumeTrendBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -23,6 +23,34 @@ public sealed class CorrectedAverageNumericalTests
     [Theory, MemberData(nameof(Cases))]
     public Task NumericalClassesAreEnrolled(IndicatorValidationCase c) => new OrdinalFamilyNumericalTests().PublicConfigurationsPassEveryNumericalClass(c);
     private static readonly (MovingAvgType Kind, int Reference)[] Kinds = { (MovingAvgType.SimpleMovingAverage, 1), (MovingAvgType.WeightedMovingAverage, 2), (MovingAvgType.ExponentialMovingAverage, 3), (MovingAvgType.WildersSmoothingMethod, 6) };
+    public static IEnumerable<object[]> MomentTransitions => from kind in Kinds from length in new[] { 2, 14 }
+        select new object[] { kind.Kind, kind.Reference, length };
+
+    [Theory, MemberData(nameof(MomentTransitions))]
+    public void WideExactMomentsRetainPreviewAndResetBits(MovingAvgType kind, int referenceKind, int length)
+    {
+        var ordinary = Enumerable.Range(0, 48).Select(i => 1 + Math.Sin(i * .7)).ToArray();
+        var prices = ordinary.Concat(new[] { double.MaxValue, -double.MaxValue, 0d, 1 })
+            .Concat(ordinary).Concat(new[] { double.Epsilon, -double.Epsilon, 0, double.Epsilon * 3 })
+            .Concat(ordinary).ToArray();
+        var expected = BuiltInFormulaReferences.CorrectedAverageValues(Bars(prices), length, referenceKind);
+        using var window = new CorrectedAverageWindow(kind, length);
+        for (var replay = 0; replay < 2; replay++)
+        {
+            window.Reset();
+            for (var i = 0; i < prices.Length; i++)
+            {
+                window.Next(-97, false);
+                foreach (var final in new[] { false, false, true })
+                {
+                    var point = window.Next(prices[i], final);
+                    Assert.Equal(BitConverter.DoubleToInt64Bits(expected.Outputs["Cma"][i]), BitConverter.DoubleToInt64Bits(point.Value));
+                    Assert.Equal(expected.Signals[i], point.Signal);
+                }
+            }
+        }
+    }
+
     private static double[] Check(Bar[] bars, int length = 3, MovingAvgType kind = MovingAvgType.SimpleMovingAverage, int referenceKind = 1)
     {
         var expected = BuiltInFormulaReferences.CorrectedAverageValues(bars, length, referenceKind); var batch = Data(bars).CalculateCorrectedMovingAverage(kind, length);

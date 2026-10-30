@@ -1,0 +1,39 @@
+{
+  "batch": "absolute-strength-shared-execution",
+  "types": [
+    "AbsoluteStrengthIndex",
+    "AbsoluteStrengthMTFIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact Absolute Strength kernels; preserve fixed mean21/signal34 stages and the typed builder positive-close domain, including raw finite input priority and domain-before-calculation ordering. MTF shares default SMA Bulls/Bears with bounded history and component/source fallback.",
+  "verification": {
+    "unit_passed": 190,
+    "fixture_passed": 8,
+    "discovery_passed": 93,
+    "gpu_passed": 100,
+    "contract_methods": 1428,
+    "hosted_methods": 1416,
+    "evidence": [
+      {
+        "file": "absolutestrength-unit.trx.gz",
+        "passed_cases": 190,
+        "trx_sha256": "89f3c7170d34ed1647ac342eb14009b524244ee10a99aeb421704992d702a70b"
+      },
+      {
+        "file": "absolutestrength-fixture.trx.gz",
+        "passed_cases": 101,
+        "trx_sha256": "4e6be4c6df19040ae5e8adef7011d943f4226e2ff71ec99294f4f6e7b45604d3"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAbsoluteStrengthBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "AbsoluteStrengthIndex",
+      "AbsoluteStrengthMTFIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -1,0 +1,36 @@
+{
+  "batch": "generated-weighted-means-and-fibonacci-recurrence",
+  "types": [
+    "FibonacciWeightedMovingAverage",
+    "SquareRootWeightedMovingAverage",
+    "SineWma"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Fibonacci Next replaces weighted-tap rescans with two exact rolling accumulators: Anew=Bold+F(L)*new; Bnew=Aold-Bold+F(L-1)*new-expired. Round only the published quotient. Historical static Compute is unchanged. Recurrence tests cover 14 periods, preview/reset, nonfinite rejection and large Fibonacci weights. Shared Fibonacci, square-root and sine states bound rolling history by owned count while retaining original-period weights and denominators. Arithmetic operation count no longer scales with Fibonacci tap count; BigInteger cost and runtime remain unmeasured.",
+  "verification": {
+    "unit_passed": 75,
+    "fixture_passed": 12,
+    "discovery_passed": 36,
+    "gpu_passed": 100,
+    "contract_methods": 1371,
+    "hosted_methods": 1359,
+    "evidence": [
+      {
+        "file": "weightedmean-unit.trx.gz",
+        "passed_cases": 75,
+        "trx_sha256": "bf257304b5edf7e5c2c5842147157f931798e96f4115c9e9d715d008b4682984"
+      },
+      {
+        "file": "weightedmean-fixture.trx.gz",
+        "passed_cases": 48,
+        "trx_sha256": "e95a36966c43dc7b249add4d7b8e28e91a176b92a86da36e2baf08c980a5879f"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingWeightedMeanBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

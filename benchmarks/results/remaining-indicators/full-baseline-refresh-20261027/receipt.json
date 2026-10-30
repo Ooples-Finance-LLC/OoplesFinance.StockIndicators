@@ -1,0 +1,217 @@
+{
+  "source_sha": "fe9618e5e1b06371b07ba0c460019814bf08833d",
+  "run_id": 40501506655,
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/40501506655",
+  "baseline_rows_replaced": 802,
+  "measured_arms": 1604,
+  "report_sha256": "f79aafd1d3296572ed83f527c2221fd8d7af3a800a731bd7383c9f7dd8473f6d",
+  "before_sha256": "eeda21897d069dd3a40a5efd8e5eb4c0ba8b23764078da37a0c8598c9a8c35f8",
+  "browser_verification": {
+    "source": "fe9618e5e1b06371b07ba0c460019814bf08833d",
+    "run_id": "40501506655",
+    "report_sha256": "f79aafd1d3296572ed83f527c2221fd8d7af3a800a731bd7383c9f7dd8473f6d",
+    "changed_means": {
+      "ooples": 802,
+      "competitor": 802
+    },
+    "summary": [
+      {
+        "library": "QuanTAlib",
+        "bars": 1000,
+        "comparisons": 50,
+        "lower": 24,
+        "higher": 26,
+        "equal": 0
+      },
+      {
+        "library": "QuanTAlib",
+        "bars": 10000,
+        "comparisons": 50,
+        "lower": 26,
+        "higher": 24,
+        "equal": 0
+      },
+      {
+        "library": "Skender",
+        "bars": 1000,
+        "comparisons": 84,
+        "lower": 33,
+        "higher": 51,
+        "equal": 0
+      },
+      {
+        "library": "Skender",
+        "bars": 10000,
+        "comparisons": 84,
+        "lower": 33,
+        "higher": 51,
+        "equal": 0
+      },
+      {
+        "library": "TaLib",
+        "bars": 1000,
+        "comparisons": 160,
+        "lower": 56,
+        "higher": 104,
+        "equal": 0
+      },
+      {
+        "library": "TaLib",
+        "bars": 10000,
+        "comparisons": 160,
+        "lower": 19,
+        "higher": 141,
+        "equal": 0
+      },
+      {
+        "library": "Trady",
+        "bars": 1000,
+        "comparisons": 107,
+        "lower": 107,
+        "higher": 0,
+        "equal": 0
+      },
+      {
+        "library": "Trady",
+        "bars": 10000,
+        "comparisons": 107,
+        "lower": 106,
+        "higher": 1,
+        "equal": 0
+      }
+    ],
+    "comparisons": 802,
+    "displayed_table_comparisons": 802,
+    "exported_comparisons": 802,
+    "javascript_errors": []
+  },
+  "archives": {
+    "summary/comparisons.csv": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/comparisons.csv.gz",
+      "sha256": "13af4519629cb6fdaf387e30f2e53d52e632a9894481b9f2b5812ecf8a470b85"
+    },
+    "summary/evidence.json": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/evidence.json.gz",
+      "sha256": "3bf9db2bd3dc1894ccd3cf265cd892d88390a5c283a09d7ec5b3538c87985f34"
+    },
+    "summary/inventory.json": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/inventory.json.gz",
+      "sha256": "a55ef0e199c0251d6684741d5f8079267108ffbe15f96ae023d692bc5ef7856e"
+    },
+    "summary/raw/00-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/00-report.json.gz.gz",
+      "sha256": "2d303361b452d3a77bbcb6ef532c65a25f851911082f196d32e8e1849710fb0c"
+    },
+    "summary/raw/01-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/01-report.json.gz.gz",
+      "sha256": "63a0b562f3e5293b2a807921eb37a03794ed2784da6f656960ff5abb5112118d"
+    },
+    "summary/raw/02-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/02-report.json.gz.gz",
+      "sha256": "5163914aaa90113ebfc054f5d7b26f5d8bcabd3f489e970259a9b7b24ea9c35f"
+    },
+    "summary/raw/03-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/03-report.json.gz.gz",
+      "sha256": "ffb93faa1fb681dad7bc3ac59a7cedac43c251cafe4405a784a58d0c908a8ac2"
+    },
+    "summary/raw/04-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/04-report.json.gz.gz",
+      "sha256": "7d01f37021a6945922ed1548741902888e92e9d3a118a7dc466fcd026afd31c0"
+    },
+    "summary/raw/05-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/05-report.json.gz.gz",
+      "sha256": "81102eceb940887f497b44e46958db27b06c3a88f466ccb5b09ae3a284506c30"
+    },
+    "summary/raw/06-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/06-report.json.gz.gz",
+      "sha256": "24e37e8798a054192268121742cc54f2b239bd55b6bc15a7519dd87a84ac7267"
+    },
+    "summary/raw/07-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/07-report.json.gz.gz",
+      "sha256": "3f1bf6ec8ba75de3dc68e0d5bbe7c7ee678890e39c4f2e4be32464f9448e385e"
+    },
+    "summary/raw/08-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/08-report.json.gz.gz",
+      "sha256": "b57f23373e6d20a8059b79153687c568b7c2be1f8b4fb7a39ce1cd41134ace84"
+    },
+    "summary/raw/09-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/09-report.json.gz.gz",
+      "sha256": "692f3d3dc4b3f0fd5bccad3b90d37251ab4ef69469766e7b62a30bc6984a7879"
+    },
+    "summary/raw/10-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/10-report.json.gz.gz",
+      "sha256": "fa16012b605aacf255c04103853430cecc65c01f79da3e808daafa1ae3008554"
+    },
+    "summary/raw/11-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/11-report.json.gz.gz",
+      "sha256": "1fa3cf29df35d84f2fc3cd5bd2d0463b63765ed0f959eb562ddba22f582ff560"
+    },
+    "summary/raw/12-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/12-report.json.gz.gz",
+      "sha256": "5895140f6258f1e9b4893190bf8016653566a3d23b75b0e8d2c38377bbf35b5e"
+    },
+    "summary/raw/13-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/13-report.json.gz.gz",
+      "sha256": "8a97765c65c9b829eb689d70878ee8ad337c6ecd0c4b053e760f41fde99a927f"
+    },
+    "summary/raw/14-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/14-report.json.gz.gz",
+      "sha256": "8e0696b9e3d2642b7874d1bbf060d0841e6b8137da95700bf81bb2ada84c6657"
+    },
+    "summary/raw/15-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/15-report.json.gz.gz",
+      "sha256": "f97aca2e6aafef167f36829b977807b45436437f2fa5ca4e59912aa0536beb39"
+    },
+    "summary/raw/16-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/16-report.json.gz.gz",
+      "sha256": "c36a11e2a8fbbdb714b35fa3cbbf9592e467e70d834d0e82ff0f72aabf52b98b"
+    },
+    "summary/raw/17-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/17-report.json.gz.gz",
+      "sha256": "a223221da624e5c278085d5bbf28b434a0deb3110a93cc1fbe54b2d576b55a47"
+    },
+    "summary/raw/18-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/18-report.json.gz.gz",
+      "sha256": "6a185b38ecef24e224fc34c03f870f47886c49d87a239e89819e7c406e996b48"
+    },
+    "summary/raw/19-report.json.gz": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/raw/19-report.json.gz.gz",
+      "sha256": "7cbe9972d64f4d9db88d31e489db97b1e075f8c94cb53e6b1a545c7c76c736fd"
+    },
+    "summary/README.md": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/summary/README.md.gz",
+      "sha256": "46f65a51aa3617a9755e8c6e38e8ccf33a27e4dfda39e376c0a6e67adcba37d4"
+    },
+    "report/before.html": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/report/before.html.gz",
+      "sha256": "eeda21897d069dd3a40a5efd8e5eb4c0ba8b23764078da37a0c8598c9a8c35f8"
+    },
+    "report/browser-verification.json": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/report/browser-verification.json.gz",
+      "sha256": "c2ee36f0b9b8da3db757ec4bfa9872b3dcd35227dd6c61ee140f694aa6734f7f"
+    },
+    "report/candidate.html": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/report/candidate.html.gz",
+      "sha256": "f79aafd1d3296572ed83f527c2221fd8d7af3a800a731bd7383c9f7dd8473f6d"
+    },
+    "report/refreshed-baseline.png": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/report/refreshed-baseline.png.gz",
+      "sha256": "56c53f8c618cdd3e188ceea6d096f47c38c4d4b8e2d853a26c8d49bca4c28029"
+    },
+    "report/stage-receipt.json": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/report/stage-receipt.json.gz",
+      "sha256": "5f48781cc4b602b81213481a408242ee09331c5da271663103277a53930e29c3"
+    },
+    "report/updated-pair-details.png": {
+      "archive": "benchmarks/results/remaining-indicators/full-baseline-refresh-20261027/report/updated-pair-details.png.gz",
+      "sha256": "5aa4f42383e14fc1bcc301d953e8c70525e09b1a37cd5d937c96ba54aa5b7387"
+    }
+  },
+  "scripts": {
+    "stage-full-baseline-refresh-20261027.py": "445a557476416517441e06720b5caa23ca31ad0baf44e473387f7113c805789a",
+    "verify-full-baseline-refresh-20261027.py": "4043e7f1528360a7ab8c5b2df528fa97e8f87f28e6e55d5569ffb5a6b3ad3b3f",
+    "prepare-pr266-macd-early-current.py": "c5204749618189cb3c2dd787835d0e4a8919be906d532f934dff10e50697e6a4",
+    "refresh-pr266-current.py": "782d495285c274253fd8d6a5d868a1707819f13744b3933490cc6109a99b7e5a"
+  },
+  "full_goal_complete": false
+}

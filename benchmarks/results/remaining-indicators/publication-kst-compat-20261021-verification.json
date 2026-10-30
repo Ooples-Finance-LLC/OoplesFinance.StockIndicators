@@ -1,0 +1,39 @@
+{
+  "input_head": "a089037e7848c009f47ec35e2e5d2752b3612cbc",
+  "kst_integration": "0d283404",
+  "compatibility_fix": "fa0bed83",
+  "status": "checks-passed-review-and-publication-pending",
+  "step": "complete",
+  "updated_utc": "2026-10-21T09:15:42.510241+00:00",
+  "unit": {
+    "passed": 575,
+    "class_counts": {
+      "SharedGeneratedKstTests": 20,
+      "RocBankNumericalTests": 548,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "SharedGeneratedAdaptiveIntegrationTests": 3
+    },
+    "trx": "Z:\\StockIndicators-work\\si-pr266-kst-compat-20261021\\unit\\unit.trx",
+    "sha256": "bae939a3fd6959792e7f0b05e8ee90f53525f3d7d511bbceedca8da557d2d736",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-kst-compat-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 384,
+    "class_counts": {
+      "RemainingKstBenchmarkTests": 8,
+      "RemainingBenchmarkDiscoveryTests": 376
+    },
+    "trx": "Z:\\StockIndicators-work\\si-pr266-kst-compat-20261021\\parity\\parity.trx",
+    "sha256": "5346316ff67f87b58a433fae512a5bb2374dcd5bbd4750607193bfa2d1a592f0",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-kst-compat-20261021-parity.trx.gz"
+  },
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-publish-remaining-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2776100ef0a315a0a15ea7e1067194f2d6b0bb693f6865e0ea6aba1bc1db599c",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-publish-remaining-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2776100ef0a315a0a15ea7e1067194f2d6b0bb693f6865e0ea6aba1bc1db599c",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-publish-remaining-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2776100ef0a315a0a15ea7e1067194f2d6b0bb693f6865e0ea6aba1bc1db599c",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-publish-remaining-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2776100ef0a315a0a15ea7e1067194f2d6b0bb693f6865e0ea6aba1bc1db599c"
+  },
+  "gpu_passed": 100,
+  "inventory_tests_passed": 6,
+  "performance": "Pending; correctness does not establish competitor speed"
+}

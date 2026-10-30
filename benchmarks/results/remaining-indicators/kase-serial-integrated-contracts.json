@@ -1,0 +1,29 @@
+{
+  "types": [
+    "KaseSerialDependencyIndex"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "6648e0f59fb6146a83c4f644cafa86e30d2821fd",
+  "combined_input_sha256": "ed4e4e9bf4c1d48de2491b5bfb7c0834d9f0f82ee23c0a712fa7ff2d6af995e4",
+  "benchmark_fixture": {
+    "type": "RemainingKaseSerialBenchmarks",
+    "operations": [
+      "KaseSerialDependencyIndex"
+    ]
+  },
+  "checks": {
+    "unit": 89,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/kase-serial-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/kase-serial-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

@@ -27,6 +27,7 @@ public sealed class VolatilityStopSnapshotSharedExecutionTests(Xunit.Abstraction
     [Theory]
     [InlineData(2, .5)] [InlineData(7, 3)] [InlineData(20, double.MaxValue)]
     [InlineData(int.MaxValue, 3)] [InlineData(3, double.Epsilon)]
+    [InlineData(3, .1)] [InlineData(3, .75)] [InlineData(3, 1.0000000000000002)]
     public void FieldsReversalRemovalAndFailuresMatchOriginal(int period, double multiplier)
     {
         foreach (int count in new[] { 0, 1, 2, 3, 8, 21, 129 })

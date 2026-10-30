@@ -1,0 +1,60 @@
+{
+  "input_head": "b9bd17af103ae1b9f338a40fdec55e16d34c00ec",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedCommodityChannel.cs",
+    "tests/ModelsTests/CommodityExactOperandRatioTests.cs"
+  ],
+  "batch_note": "Approved CCI local exact-operand division shortcut. Positive UInt128 operands with <=53 significant bits convert exactly and yield a normal ratio, allowing one hardware division. Existing compact midpoint certifier and dyadic fallback retained. New independent ratios and existing exact-window/lifecycle/long-history checks required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-27T05:03:49.074614+00:00",
+  "unit": {
+    "passed": 39,
+    "class_counts": {
+      "CertifiedCommodityChannelTests": 11,
+      "CompactCommodityChannelTests": 11,
+      "BoundedCommodityChannelExecutionTests": 15,
+      "CommodityExactOperandRatioTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\cci-exact-operands\\unit\\unit.trx",
+    "sha256": "1d334c38b1c87af8cce011f3623adbfe074e1f8ed590a8dd0f1ff7a0d6c8cccd",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-cci-exact-operands-certified-20261027-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 20,
+    "class_counts": {
+      "CommodityChannelComparisonTests": 16,
+      "SharedCommodityChannelBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\cci-exact-operands\\parity\\parity.trx",
+    "sha256": "2969edee7466c1a63603e8e95155216d220ef0bcdc2e308bc9750931addfc943",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-cci-exact-operands-certified-20261027-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-exact-operands-20261027\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "91f688fe339a1cb050475f2791c30c45a6c60ce9136dcc6ad0dd17090111ef5a",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-exact-operands-20261027\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "91f688fe339a1cb050475f2791c30c45a6c60ce9136dcc6ad0dd17090111ef5a",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-exact-operands-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "91f688fe339a1cb050475f2791c30c45a6c60ce9136dcc6ad0dd17090111ef5a",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-exact-operands-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "91f688fe339a1cb050475f2791c30c45a6c60ce9136dcc6ad0dd17090111ef5a"
+  },
+  "source_fingerprint_sha256": "a020f46ee05d29969a25514063cecddf00f750b0ec8050e9967034db1ff0fc12",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved CCI local exact-operand division shortcut. Positive UInt128 operands with <=53 significant bits convert exactly and yield a normal ratio, allowing one hardware division. Existing compact midpoint certifier and dyadic fallback retained. New independent ratios and existing exact-window/lifecycle/long-history checks required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

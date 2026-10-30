@@ -1,0 +1,31 @@
+{
+  "types": [
+    "Midpoint",
+    "Midprice"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "16bded9201319afa38020b4fd02408566e204060",
+  "combined_input_sha256": "5af8e042b75424a0cae1e9497a30e2fc19275845dc1b2b2a5ffaf483fcd3433f",
+  "benchmark_fixture": {
+    "type": "RemainingRangeStatisticsBenchmarks",
+    "operations": [
+      "Midpoint",
+      "Midprice"
+    ]
+  },
+  "checks": {
+    "unit": 31,
+    "parity": 8,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/rangestatistics-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/rangestatistics-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

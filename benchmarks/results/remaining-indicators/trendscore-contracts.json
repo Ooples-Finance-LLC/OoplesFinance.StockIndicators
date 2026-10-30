@@ -1,0 +1,50 @@
+{
+  "batch": "trend-score-ranked-window-shared-execution",
+  "types": [
+    "ChandeTrendScore",
+    "TrendScore"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Maintain the delayed comparison window with an order-statistic tree and bounded history instead of rescanning each lookback. Preserve inclusive ties, missing-history zero comparisons, zero output below length11, facade clamps, source fallback and legacy intMax loop fallback.",
+  "verification": {
+    "unit_passed": 30,
+    "fixture_passed": 8,
+    "discovery_passed": 114,
+    "gpu_passed": 100,
+    "contract_methods": 1453,
+    "hosted_methods": 1441,
+    "evidence": [
+      {
+        "file": "trendscore-unit.trx.gz",
+        "passed_cases": 30,
+        "trx_sha256": "a8d5f68b050f14c9b269c95d43357e28ea6e02933df9ef246d9d852b9da31edb"
+      },
+      {
+        "file": "trendscore-fixture.trx.gz",
+        "passed_cases": 122,
+        "trx_sha256": "0a72a3ce46e1b7b2defb388a6eb96d2649312f1e376739f10aa9a0d68df420cc"
+      },
+      {
+        "file": "trendscore-unit-initial.trx.gz",
+        "passed_cases": 22,
+        "failed_cases": 8,
+        "trx_sha256": "a45c1e8ab96a7d146faeaf607fd44ea747bb4750e2e9d5b911ba72a782315fb6",
+        "status": "superseded-by-complete-30-case-rerun"
+      }
+    ],
+    "unit_rerun": {
+      "reason": "The selected-source helper assumed these facades support Of(source). The legacy route rejects it. The corrected tests retain independent numerical validation and explicitly compare legacy/shared error type and message in both history modes. All 30 cases rerun; production binaries unchanged.",
+      "production_dll_sha256": "47d303dee639162c45da2a9b55da74f7d533e2e577264c2e7e1485815a6df18d"
+    }
+  },
+  "benchmark_fixture": {
+    "type": "RemainingTrendScoreBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "ChandeTrendScore",
+      "TrendScore"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -1,0 +1,61 @@
+{
+  "before_sha256": "950e67aaa81c0536fb3a7ca25b4de868d5a2894ec35172180db3d86c23dea720",
+  "candidate_sha256": "9fc97451db935104eae3f89d19d156264d00f3f86004cc2ac25796c3e0686637",
+  "builder_run_id": "local-skender-batch1-20261022",
+  "builder_runs": [
+    "local-skender-batch1-20261022"
+  ],
+  "builder_comparisons": 1012,
+  "new_builder_comparisons": 40,
+  "prior_receipts": 95,
+  "unchanged_baseline_comparisons": 802,
+  "verdicts": {
+    "faster": 442,
+    "slower": 558,
+    "inconclusive": 12
+  },
+  "browser_verified": true,
+  "imported_utc": "2026-10-22T09:28:06.279678+00:00",
+  "archives": {
+    "imported.json": {
+      "sha256": "9966d3c2b8b144ca4cb2108f2c5e61fbfb6680d9f637194b645e96fd315a4a9f",
+      "archive": "benchmarks/results/remaining-indicators/cpu-builder-local-skender-batch1-20261022-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "9a5f70feff9ffe8a0e60f7519f15326100045c7cf37ac5a7071193ad8512ed25",
+      "archive": "benchmarks/results/remaining-indicators/cpu-builder-local-skender-batch1-20261022-browser-verification.json.gz"
+    },
+    "builder-verification.json": {
+      "sha256": "e10137dfba80b7b17505d669a99e6571437fe1f61a3571adf760e558e334535c",
+      "archive": "benchmarks/results/remaining-indicators/cpu-builder-local-skender-batch1-20261022-builder-verification.json.gz"
+    },
+    "stage-builder-report.py": {
+      "sha256": "88292f2c85b174e64c9a29bf521dc810f9aa3a08c3f62bc854b2ab2f0c80eb06",
+      "archive": "benchmarks/results/remaining-indicators/cpu-builder-local-skender-batch1-20261022-stage-builder-report.py.gz"
+    },
+    "verify-builder-report.py": {
+      "sha256": "822b4f2bf68251a40fa1456d3f61036225730c29f8316b07ea4d36d33fd33ad6",
+      "archive": "benchmarks/results/remaining-indicators/cpu-builder-local-skender-batch1-20261022-verify-builder-report.py.gz"
+    },
+    "verify-mixed-baseline-report.py": {
+      "sha256": "ff61595e5387622670906e77e3c092b13072644b9c6be120280400a0e8708000",
+      "archive": "benchmarks/results/remaining-indicators/cpu-builder-local-skender-batch1-20261022-verify-mixed-baseline-report.py.gz"
+    },
+    "import-builder-report.py": {
+      "sha256": "4bf4812acdd137503a04d17ff95d7308d1f9e691dbd2591100b77f30fc112fac",
+      "archive": "benchmarks/results/remaining-indicators/cpu-builder-local-skender-batch1-20261022-import-builder-report.py.gz"
+    },
+    "archive-local-builder-measurements.py": {
+      "sha256": "26e36075c2b0601f842f9746a15ffeb8a647d4b673b830210ddf4010f7b05c0f",
+      "archive": "benchmarks/results/remaining-indicators/cpu-builder-local-skender-batch1-20261022-archive-local-builder-measurements.py.gz"
+    },
+    "create-local-builder-receipts.py": {
+      "sha256": "1677a3f4fbabc5879aaca2b1d2a219394b16d00ab54591d76633a6962b33f148",
+      "archive": "benchmarks/results/remaining-indicators/cpu-builder-local-skender-batch1-20261022-create-local-builder-receipts.py.gz"
+    },
+    "archive-builder-report-import.py": {
+      "sha256": "edf97457f880e2a157a832e59d2f6443de26b7c2688e0417ba9c09f01114de36",
+      "archive": "benchmarks/results/remaining-indicators/cpu-builder-local-skender-batch1-20261022-archive-builder-report-import.py.gz"
+    }
+  }
+}

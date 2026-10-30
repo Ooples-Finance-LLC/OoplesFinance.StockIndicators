@@ -1,0 +1,29 @@
+{
+  "run_id": "local-mapped-batch7-20261022",
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/blob/a1b87fafdfdc2ac85f06a1bbd114d61d46fe0fb7/benchmarks/results/remaining-indicators/local-mapped-batch7-20261022/manifest.json",
+  "source_sha": "a47b15b06445cef07f181ac773ad7e5acc1760ff",
+  "receipt_files": [
+    "cpu-builder-local-mapped-batch7-20261022-SharedTaMacdNativeBenchmarks.json",
+    "cpu-builder-local-mapped-batch7-20261022-SharedTaStochasticNativeBenchmarks.json"
+  ],
+  "comparisons": 24,
+  "verdicts": {
+    "slower": 24
+  },
+  "changed_production_files_since_baseline": [
+    "src/Helpers/CertifiedCommodityChannel.cs",
+    "src/Helpers/CertifiedHilbertProjection.cs",
+    "src/Helpers/CertifiedMeanRelativeError.cs",
+    "src/Helpers/CertifiedTillson.cs",
+    "src/Indicators/CompensatedExponentialAverage.cs",
+    "src/Indicators/FixedKernelSnapshots.cs",
+    "src/Indicators/HilbertCycleSignalState.cs",
+    "src/Indicators/ValuesBarExecution.Tillson.cs",
+    "src/Indicators/WindowCommodityChannelIndex.cs"
+  ],
+  "baseline_source_sha": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+  "measurement_location": "Local Windows; CPU builder and native paths; unchanged setup checks",
+  "raw_archive_commit": "a1b87fafdfdc2ac85f06a1bbd114d61d46fe0fb7",
+  "partial": false,
+  "excluded_fixtures": []
+}

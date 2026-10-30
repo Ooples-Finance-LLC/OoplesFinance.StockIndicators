@@ -1,0 +1,60 @@
+{
+  "before_sha256": "eb79dbd797907cf82bd0e57c7e7df375bf0a13fdf1fdf125ea34a699e6ae82fd",
+  "candidate_sha256": "7117f2b96d49794a6401a888f6b394728e14e33fb2a317aeb97da4357a35fde3",
+  "changed_baseline_rows": 6,
+  "unchanged_baseline_rows": 796,
+  "changed_builder_slots": 4,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 4,
+  "verdicts": {
+    "faster": 589,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 796,
+  "run_id": "local-cci-wide-grid-control-20261022",
+  "imported_utc": "2026-10-22T19:06:14.427895+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "f961427473cddefb20a96430f5cf06ae5ec249d496a6f0bc53439e328f4aae06",
+      "archive": "benchmarks/results/remaining-indicators/cci-wide-grid-certified-local-cci-wide-grid-control-20261022-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "d0afbd37f2f340b7e07bc9119c73de1c99cadbc723963f4b2ddb1fe9c7a0a682",
+      "archive": "benchmarks/results/remaining-indicators/cci-wide-grid-certified-local-cci-wide-grid-control-20261022-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "4903bdc1ec9f16d769848cd448e9294254463ee3b720f344df254c25e24ff6c5",
+      "archive": "benchmarks/results/remaining-indicators/cci-wide-grid-certified-local-cci-wide-grid-control-20261022-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "c220b2ee64e060cc31ad58ecb36cce8c03076b195cc7b6407b7754ba7f04e2a1",
+      "archive": "benchmarks/results/remaining-indicators/cci-wide-grid-certified-local-cci-wide-grid-control-20261022-measurement.json.gz"
+    },
+    "stage-cci-wide-grid-report.py": {
+      "sha256": "e7c2fd6c0b6f6f449d8b1e1dea9ff81bec1331e7ebfe581585b063b2c7f310db",
+      "archive": "benchmarks/results/remaining-indicators/cci-wide-grid-certified-local-cci-wide-grid-control-20261022-stage-cci-wide-grid-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/cci-wide-grid-certified-local-cci-wide-grid-control-20261022-verify-approved-certified-report.py.gz"
+    },
+    "import-cci-wide-grid-report.py": {
+      "sha256": "8d3c49a85b8aab02db18ad22c2fa3d4fffe9bd47b7c15cf50f8be3ce099f4936",
+      "archive": "benchmarks/results/remaining-indicators/cci-wide-grid-certified-local-cci-wide-grid-control-20261022-import-cci-wide-grid-report.py.gz"
+    },
+    "archive-cci-wide-grid-control.py": {
+      "sha256": "286c6e9c4b5e1d7b4863a9c4bfc75c3e49a40fd45e9debd98ffdd9977e8df65c",
+      "archive": "benchmarks/results/remaining-indicators/cci-wide-grid-certified-local-cci-wide-grid-control-20261022-archive-cci-wide-grid-control.py.gz"
+    },
+    "prove-cci-wide-grid-integration.py": {
+      "sha256": "e0a79110cf36af057c044a40e07a38a75e69f93331f61478957239a80f764779",
+      "archive": "benchmarks/results/remaining-indicators/cci-wide-grid-certified-local-cci-wide-grid-control-20261022-prove-cci-wide-grid-integration.py.gz"
+    },
+    "archive-cci-wide-grid-report.py": {
+      "sha256": "b7674ce1cbcde1dd99b48421b74a26ef5b4a90a957727fe5838de953c944ccef",
+      "archive": "benchmarks/results/remaining-indicators/cci-wide-grid-certified-local-cci-wide-grid-control-20261022-archive-cci-wide-grid-report.py.gz"
+    }
+  }
+}

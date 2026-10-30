@@ -1,0 +1,34 @@
+{
+  "qualified_commit": "a167a31d5486f3a27717cd1a6c17e7c98346cae5",
+  "qualified_code": "e2cc8e837e344a78c3045ce6e6038c9feed4f049",
+  "matched_paths": [
+    "src",
+    "tests",
+    "examples",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "3dd71776a92437923b1c4597fa0ccda9a9db06a8c9ef584f45bfd46a07a1b485",
+  "qualification_reused": {
+    "unit": 40,
+    "parity": 26,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-floating-smooth-20261023\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "236249b2d5b3970ab96feb701971328614d5089d4d3bb1cb88b00288a8574807",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-floating-smooth-20261023\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "236249b2d5b3970ab96feb701971328614d5089d4d3bb1cb88b00288a8574807",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-floating-smooth-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "236249b2d5b3970ab96feb701971328614d5089d4d3bb1cb88b00288a8574807",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-floating-smooth-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "236249b2d5b3970ab96feb701971328614d5089d4d3bb1cb88b00288a8574807"
+  },
+  "control": "local-t3-floating-smooth-control-20261023",
+  "note": "Integrated executable sources and build inputs exactly match qualified candidate. Publishing checkout binaries remain older; preserved candidate DLL supplied the new measurement arm. No redundant production rebuild."
+}

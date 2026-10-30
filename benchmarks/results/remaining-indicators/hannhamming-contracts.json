@@ -1,0 +1,38 @@
+{
+  "batch": "generated-hann-hamming-filters",
+  "types": [
+    "EhlersHannMovingAverage",
+    "EhlersHammingMovingAverage",
+    "HammingMa",
+    "EhlersHannWindowIndicator",
+    "EhlersHammingWindowIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Shared execution reuses exact Hann/Hamming mean and indicator kernels. Bound mean history by owned input count while retaining original-period coefficients and denominator; skip mean construction for empty inputs. Compute window line/ROC together from original open/close, preserving ignored pedestal and custom-component behavior.",
+  "verification": {
+    "unit_passed": 163,
+    "fixture_passed": 20,
+    "discovery_passed": 45,
+    "gpu_passed": 100,
+    "contract_methods": 1380,
+    "hosted_methods": 1368,
+    "evidence": [
+      {
+        "file": "hannhamming-unit.trx.gz",
+        "passed_cases": 163,
+        "trx_sha256": "7546742cbc8af763684edb5375604fc107b2518b4f83b4606d7e6802494a7843"
+      },
+      {
+        "file": "hannhamming-fixture.trx.gz",
+        "passed_cases": 65,
+        "trx_sha256": "42bf25f93509599a44ac6297e316cd8edce4fd390fd621eb3c4da6b5fa846a31"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingHannHammingBenchmarks",
+    "cases": 40,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

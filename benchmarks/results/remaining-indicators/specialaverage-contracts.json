@@ -1,0 +1,45 @@
+{
+  "batch": "generated-special-averages-and-quick-recurrence",
+  "types": [
+    "EhlersBetterExponentialMovingAverage",
+    "HoltExponentialMovingAverage",
+    "RegularizedEma",
+    "QuickMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact BetterEma, Holt and Regularized helpers. QuickWindowMean replaces per-bar weighted-tap rescans with exact rolling total/recent/weighted accumulators and rounds only the final quotient. Preserve the historical two taps at periods1and2, preview updates and reset; compare against unchanged static tap calculation across peak/clamp boundaries, extreme exponents and huge periods. Shared Quick storage is bounded by owned input count.",
+  "verification": {
+    "unit_passed": 67,
+    "fixture_passed": 16,
+    "discovery_passed": 28,
+    "gpu_passed": 100,
+    "contract_methods": 1363,
+    "hosted_methods": 1351,
+    "evidence": [
+      {
+        "file": "specialaverage-unit.trx.gz",
+        "passed_cases": 63,
+        "trx_sha256": "bfb9ccd9e81a68929e9498694aa56a2ee7c1f838cb3825c9bae0c9a84f5dc4e7"
+      },
+      {
+        "file": "specialaverage-fixture.trx.gz",
+        "passed_cases": 44,
+        "trx_sha256": "3ce6025af845d26dbebbea4bb5f81d6f2c2e6572da14f87a6264a44b3b5eec11"
+      },
+      {
+        "file": "specialaverage-composed.trx.gz",
+        "passed_cases": 4,
+        "trx_sha256": "48afb7d0c4547f5853dfb2ae25cf3cfaa452616058181f79bdd6310f4205f2cc"
+      }
+    ],
+    "primary_unit_passed": 63,
+    "composition_unit_passed": 4,
+    "unchanged_tap_reference": "QuickWindowMean.Compute is byte-identical after newline normalization to761b5660. Direct recurrence tests compare full trajectories including preview/reset against it. Four existing Chande composition cases validate the helper through batch/builder/streaming routes."
+  },
+  "benchmark_fixture": {
+    "type": "RemainingSpecialAverageBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

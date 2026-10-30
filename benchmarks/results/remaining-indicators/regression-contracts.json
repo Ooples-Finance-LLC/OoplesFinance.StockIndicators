@@ -1,0 +1,41 @@
+{
+  "batch": "generated-regression",
+  "types": [
+    "Lsma",
+    "LinRegSlope",
+    "LinearRegressionSlope",
+    "LinRegIntercept",
+    "LinearRegressionIntercept",
+    "LinearRegressionLine",
+    "LinReg",
+    "LinearChannelMiddle"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse compact exact rolling fit moments and bound unfillable history by observed input. LinReg and LinearChannelMiddle compute all four outputs from one fit. Preserve global intercept, partial fits, unfilled LinearRegressionLine zeros, and LSMA separately rounded WMA/SMA combination; custom components retain graph execution.",
+  "verification": {
+    "unit_passed": 142,
+    "fixture_passed": 32,
+    "discovery_passed": 48,
+    "gpu_passed": 100,
+    "contract_methods": 1383,
+    "hosted_methods": 1371,
+    "evidence": [
+      {
+        "file": "regression-unit.trx.gz",
+        "passed_cases": 142,
+        "trx_sha256": "5249b375aaf7cf147d9fa8890110de5e5484f7e495fb86bcf0137fcea8b5126a"
+      },
+      {
+        "file": "regression-fixture.trx.gz",
+        "passed_cases": 80,
+        "trx_sha256": "030ffc5991a008fc5d7547d79629499e9eddf2f15e353aab0741196da251d7ad"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingRegressionBenchmarks",
+    "cases": 64,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

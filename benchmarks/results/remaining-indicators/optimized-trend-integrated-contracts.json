@@ -1,0 +1,33 @@
+{
+  "types": [
+    "OptimizedTrendTracker"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "52bfadc3603502c0b3f6977d09158b15b4495d92",
+  "source_fingerprint_sha256": "d78aad699cce2a99cd1aa387f47d4c8699f88553bd52185e97e877be25ade4bf",
+  "benchmark_fixture": {
+    "type": "RemainingOptimizedTrendBenchmarks",
+    "operations": [
+      "OptimizedTrendTracker"
+    ]
+  },
+  "checks": {
+    "unit": 68,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "unit_class_counts": {
+    "SharedGeneratedOptimizedTrendTests": 20,
+    "OptimizedTrendNumericalTests": 48
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/publication-trend-utbot-osc-20261021-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-trend-utbot-osc-20261021-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

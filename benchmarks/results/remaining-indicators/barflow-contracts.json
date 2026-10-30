@@ -1,0 +1,41 @@
+{
+  "batch": "generated-emv-vwap-aroon-legs",
+  "types": [
+    "Emv",
+    "Vwap",
+    "AroonUp",
+    "AroonDown"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse EaseWindow and ExactVolumeMean. Separate Aroon legs use bounded newest-tie extrema with inclusive length+1 windows, startup zeros, and multiplication-before-division arithmetic; distinct from Aroon oscillator.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 42,
+    "fixture_passed": 16,
+    "gpu_passed": 100,
+    "contract_methods": 1344,
+    "hosted_methods": 1332,
+    "unit_trx_sha256": "e941cf7f6f5cbb8461828558a77280086e8cc4453142e02468f9a41d410be754",
+    "fixture_trx_sha256": "07e5d93074436531ca985ac521deef6f73d8960d716f598d0db7e2c98bf9825e",
+    "discovery_passed": 13,
+    "selected_comparator_passed": 29
+  },
+  "benchmark_fixture": {
+    "type": "RemainingBarFlowBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

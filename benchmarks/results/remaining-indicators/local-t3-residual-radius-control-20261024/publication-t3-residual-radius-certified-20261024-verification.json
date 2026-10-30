@@ -1,0 +1,59 @@
+{
+  "input_head": "5ff5117451f40bfbe65b6d624a39bbc6106f0534",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedTillson.cs"
+  ],
+  "batch_note": "Approved T3 certified-smoothing refinement: a conservative 32u residual radius replaces repeated outward residual sums; original strict rounding-cell boundaries, fixed-width and exact fallbacks remain. Existing exact-rational tests, range and cancellation boundaries, lifecycle, long-history parity and controlled measurements remain required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-24T22:27:48.375728+00:00",
+  "unit": {
+    "passed": 40,
+    "class_counts": {
+      "TillsonFloatingSmoothingTests": 7,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "TillsonSharedExecutionTests": 12,
+      "CertifiedTillsonTests": 17
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-residual-radius\\unit\\unit.trx",
+    "sha256": "1e3fae213a7c9a99befc04087b251bf3399aa139793e7b1ccc9f0ad8984744c4",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-residual-radius-certified-20261024-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 26,
+    "class_counts": {
+      "SharedTillsonBenchmarkTests": 16,
+      "TillsonComparisonTests": 10
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-residual-radius\\parity\\parity.trx",
+    "sha256": "96a4298f8989efdf718b7b441b7f25924285b9867280165c1e87e6f83d2ae5e8",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-residual-radius-certified-20261024-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-residual-radius-20261024\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2640ec239acf4b7f78ad20ad1c696bc487225bb69d357c4c54ce6a2022be4086",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-residual-radius-20261024\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2640ec239acf4b7f78ad20ad1c696bc487225bb69d357c4c54ce6a2022be4086",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-residual-radius-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2640ec239acf4b7f78ad20ad1c696bc487225bb69d357c4c54ce6a2022be4086",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-residual-radius-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2640ec239acf4b7f78ad20ad1c696bc487225bb69d357c4c54ce6a2022be4086"
+  },
+  "source_fingerprint_sha256": "e2da955be022b166cdaa050dcfb8388e089ab88cb4a35fc87ac091d45e00e523",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved T3 certified-smoothing refinement: a conservative 32u residual radius replaces repeated outward residual sums; original strict rounding-cell boundaries, fixed-width and exact fallbacks remain. Existing exact-rational tests, range and cancellation boundaries, lifecycle, long-history parity and controlled measurements remain required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

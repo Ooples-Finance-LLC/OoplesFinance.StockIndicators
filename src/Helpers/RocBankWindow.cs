@@ -33,12 +33,117 @@ internal readonly struct RocBankValue
     }
     internal static BigInteger RoundUnits(BigInteger numerator, BigInteger denominator)
     {
+#if !NETFRAMEWORK
+        if (denominator.IsOne && TryRoundIntegerUnits(numerator, out var integer)) return integer;
+        if (!denominator.IsOne && denominator.IsPowerOfTwo
+            && TryRoundPowerOfTwoUnits(numerator, denominator, out var binary)) return binary;
+        if (TryRoundSmallDivisorUnits(numerator, denominator, out var small)) return small;
+        if (TryCompactUnits(numerator, denominator, out var compact)) return compact;
+#endif
         for (var shift = 0; ; shift += 32)
         {
             var value = ExactMeanAccumulator.UnitRatio(numerator, denominator << shift);
             if (!double.IsInfinity(value)) return ExactVarianceWindow.Units(value) << shift;
         }
     }
+#if !NETFRAMEWORK
+    private static bool TryRoundIntegerUnits(BigInteger numerator, out BigInteger result)
+    {
+        result = numerator;
+        var magnitude = BigInteger.Abs(numerator);
+        long bits = magnitude.GetBitLength();
+        // Leave the highest finite binade and extended overflow rounding unchanged.
+        if (bits > 2097) return false;
+        if (bits <= 53) return true;
+        int shift = (int)bits - 53;
+        var trailing = BigInteger.TrailingZeroCount(magnitude);
+        if (trailing >= shift) return true;
+        // A guard bit and a sticky-bit check give exact nearest-even rounding.
+        ulong guarded = (ulong)(magnitude >> (shift - 1));
+        ulong rounded = guarded >> 1;
+        if ((guarded & 1) != 0 && ((rounded & 1) != 0 || trailing < shift - 1))
+            rounded++;
+        result = new BigInteger(rounded) << shift;
+        if (numerator.Sign < 0) result = -result;
+        return true;
+    }
+
+    private static bool TryRoundPowerOfTwoUnits(BigInteger numerator, BigInteger denominator, out BigInteger result)
+    {
+        result = default;
+        long denominatorBits = denominator.GetBitLength();
+        // Bound shifts; unsupported denominators retain the existing ratio path.
+        if (denominatorBits > 4097) return false;
+        if (numerator.IsZero) return true;
+        int divisorShift = (int)denominatorBits - 1;
+        var magnitude = BigInteger.Abs(numerator);
+        long bits = magnitude.GetBitLength();
+        // Preserve the existing highest-binade and extended-overflow handling.
+        if (bits - divisorShift > 2097) return false;
+        int grid = (int)Math.Max(0L, bits - divisorShift - 53);
+        int discard = divisorShift + grid;
+        ulong guarded = (ulong)(magnitude >> (discard - 1));
+        ulong rounded = guarded >> 1;
+        if ((guarded & 1) != 0 && ((rounded & 1) != 0
+            || BigInteger.TrailingZeroCount(magnitude) < discard - 1))
+            rounded++;
+        result = new BigInteger(rounded) << grid;
+        if (numerator.Sign < 0) result = -result;
+        return true;
+    }
+
+    private static bool TryRoundSmallDivisorUnits(BigInteger numerator, BigInteger denominator, out BigInteger result)
+    {
+        result = default;
+        if (denominator.Sign <= 0 || numerator.IsZero || denominator.GetBitLength() > 64)
+            return false;
+        var magnitude = BigInteger.Abs(numerator);
+        long exponent = magnitude.GetBitLength() - denominator.GetBitLength();
+        // Only normal results below the highest finite binade take this path.
+        // Subnormals, large divisors and extended overflow retain the fallback.
+        if (exponent < 53 || exponent > 2097) return false;
+        ulong divisor = (ulong)denominator;
+        int bits = (int)exponent + ((ulong)(magnitude >> (int)exponent) >= divisor ? 1 : 0);
+        if (bits <= 53 || bits > 2097) return false;
+        int grid = bits - 53;
+        // Retain the quotient's 53 significant bits and one guard bit.
+        // The shifted numerator occupies at most 118 bits for a 64-bit divisor.
+        UInt128 leading = (UInt128)(magnitude >> (grid - 1));
+        UInt128 guarded = leading / divisor;
+        ulong rounded = (ulong)(guarded >> 1);
+        if ((guarded & 1) != 0 && ((rounded & 1) != 0
+            || leading % divisor != 0 || BigInteger.TrailingZeroCount(magnitude) < grid - 1))
+            rounded++;
+        result = new BigInteger(rounded) << grid;
+        if (numerator.Sign < 0) result = -result;
+        return true;
+    }
+
+    private static bool TryCompactUnits(BigInteger numerator, BigInteger denominator, out BigInteger result)
+    {
+        result = default;
+        // Keep the original denominator validation and extended-overflow loop.
+        if (denominator.Sign <= 0 || numerator.IsZero) return false;
+        var magnitude = BigInteger.Abs(numerator);
+        var topTrailing = BigInteger.TrailingZeroCount(magnitude);
+        var bottomTrailing = BigInteger.TrailingZeroCount(denominator);
+        if (topTrailing > int.MaxValue || bottomTrailing > int.MaxValue) return false;
+        int topZeros = (int)topTrailing;
+        int bottomZeros = (int)bottomTrailing;
+        if (magnitude.GetBitLength() - topZeros > 128
+            || denominator.GetBitLength() - bottomZeros > 128) return false;
+        long scale = (long)topZeros - bottomZeros - 1074;
+        if (scale < int.MinValue || scale > int.MaxValue) return false;
+        var top = (UInt128)(magnitude >> topZeros);
+        var bottom = (UInt128)(denominator >> bottomZeros);
+        // Exact midpoint checks certify the rounded normal result; underflow,
+        // overflow and unsupported midpoint products retain the original path.
+        if (!CertifiedCompactRatio.TryDivide(top, bottom, (int)scale, out double rounded)) return false;
+        result = ExactVarianceWindow.Units(numerator.Sign < 0 ? -rounded : rounded);
+        return true;
+    }
+#endif
+
     internal static RocBankValue Round(ExactMeanAccumulator sum, double unit = 1, long count = 1)
     {
         if (sum.IsExactlyZero) return default;

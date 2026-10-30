@@ -1,0 +1,37 @@
+{
+  "batch": "calmar-shared-execution",
+  "types": [
+    "CalmarRatio"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 17,
+    "parity_passed": 4,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "calmar-unit-verified.trx.gz",
+        "passed_cases": 17,
+        "trx_sha256": "ffbe7026cada97b5860fff25dee2e711c14f564589a4826ccb849314a0c07b23"
+      },
+      {
+        "file": "calmar-parity-verified.trx.gz",
+        "passed_cases": 4,
+        "trx_sha256": "20ac51afbf9efefab0ca5b6fa40821d444fd53487474cf595bab946404db202f"
+      }
+    ],
+    "context": "Executed in the combined 113-facade working candidate; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+    "test_execution_input_sha256": {
+      "unit": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+      "parity": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "b7e13308b78c1e23f9f21cbbd9323a7d9d6548ee"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

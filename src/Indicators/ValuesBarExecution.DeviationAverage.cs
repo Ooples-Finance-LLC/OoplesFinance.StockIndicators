@@ -9,7 +9,8 @@ internal static partial class ValuesBarExecution
     private sealed class DeviationAverageValueState : IIndicatorState
     {
         private readonly int _period;
-        private readonly double _scale, _c1, _c2, _c3;
+        private readonly double _scale;
+        private readonly JurikDyadic _c1, _c2, _c3;
         private readonly Square[] _window;
         private JurikDyadic _average, _zero, _filter, _olderFilter;
         private UInt128 _sum;
@@ -26,7 +27,14 @@ internal static partial class ValuesBarExecution
             double a = Math.Exp(-1.414 * Math.PI / (.5 * period));
             double b = 2 * a * Math.Cos(1.414 * Math.PI / (.5 * period));
             double c = -a * a;
-            _c1 = 1 - b - c; _c2 = b; _c3 = c;
+            // Decode the unchanged binary64 coefficients once per state. The existing
+            // exact multiply overload consumes these immutable compact operands.
+            static JurikDyadic Coefficient(double value)
+            {
+                var (integer, exponent) = ExactMeanAccumulator.DecomposeFinite(value);
+                return JurikDyadic.FromBinaryProduct(integer, exponent);
+            }
+            _c1 = Coefficient(1 - b - c); _c2 = Coefficient(b); _c3 = Coefficient(c);
         }
 
         public void Reset()

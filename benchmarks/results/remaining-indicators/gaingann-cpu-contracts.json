@@ -1,0 +1,39 @@
+{
+  "batch": "gaingann-shared-execution",
+  "types": [
+    "GainLossMovingAverage",
+    "GannHiLoActivator",
+    "GannTrendOscillator"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 60,
+    "parity_passed": 12,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "gaingann-unit-verified.trx.gz",
+        "passed_cases": 60,
+        "trx_sha256": "bb83d72624d13644a702e79abac171b23c0161321e6d011c705dc8c938fd8a33"
+      },
+      {
+        "file": "gaingann-parity-verified.trx.gz",
+        "passed_cases": 12,
+        "trx_sha256": "192097a98018d8785975ae660f01089d041a832dbe8034e290d22479168ec157"
+      }
+    ],
+    "context": "Executed in the 5-facade seventh-stage working candidate with inherited unresolved MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "3e818eab198c574b5385ac66d9c8914dca137721d45bc90a3bb56faa1e113d72",
+    "test_execution_input_sha256": {
+      "unit": "3e818eab198c574b5385ac66d9c8914dca137721d45bc90a3bb56faa1e113d72",
+      "parity": "3e818eab198c574b5385ac66d9c8914dca137721d45bc90a3bb56faa1e113d72"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "f318139ee841a8ce9cfd7b6c9291f698ea39aea1"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "batch": "alligator-lines-shared-execution",
+  "types": [
+    "AlligatorJaw",
+    "AlligatorTeeth",
+    "AlligatorLips"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse the existing AlligatorLineWindow over exact median price with default Wilder smoothing and fixed Jaw8/Teeth5/Lips3 displacement. Preserve clamped periods, startup, warmup, source fallback and bounded delayed history.",
+  "verification": {
+    "unit_passed": 128,
+    "fixture_passed": 12,
+    "discovery_passed": 99,
+    "gpu_passed": 100,
+    "contract_methods": 1436,
+    "hosted_methods": 1424,
+    "evidence": [
+      {
+        "file": "alligator-unit.trx.gz",
+        "passed_cases": 128,
+        "trx_sha256": "c92a03f1c2685ddd40f6bf0db33a292ba1333cbbd11c793ecc68ae45413f4d21"
+      },
+      {
+        "file": "alligator-fixture.trx.gz",
+        "passed_cases": 111,
+        "trx_sha256": "548fb97a76a72be25a959c78c2d42e313e800e1afc8139ac64a92f721e883665"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAlligatorBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "AlligatorJaw",
+      "AlligatorTeeth",
+      "AlligatorLips"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

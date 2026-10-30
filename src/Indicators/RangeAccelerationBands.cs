@@ -83,10 +83,24 @@ public sealed class RangeAccelerationBands : MultiOutputIndicatorBase, IIndicato
             var h = ExactVarianceWindow.Units(bar.High);
             var l = ExactVarianceWindow.Units(bar.Low);
             var sum = h + l;
-            var spread = 4 * (h - l);
             BigInteger[] row = [h, ExactVarianceWindow.Units(bar.Close), l];
             if (!sum.IsZero)
             {
+                // Cancel a shared exact factor before the wide products. A
+                // nonzero sum guarantees a positive gcd, preserving both ratios.
+                var reducedHigh = h;
+                var reducedLow = l;
+#if !NETFRAMEWORK
+                // Remove the shared binary scale before GCD and exact division.
+                // The nonzero sum guarantees that h|l is nonzero. This shift
+                // divides both operands exactly, including signed inputs.
+                int sharedShift = (int)BigInteger.TrailingZeroCount(h | l);
+                reducedHigh >>= sharedShift;
+                reducedLow >>= sharedShift;
+#endif
+                var common = BigInteger.GreatestCommonDivisor(reducedHigh, reducedLow);
+                sum = (reducedHigh + reducedLow) / common;
+                var spread = 4 * ((reducedHigh - reducedLow) / common);
                 row[0] = RocBankValue.RoundUnits(
                     h * (sum + spread) * sum.Sign,
                     BigInteger.Abs(sum)

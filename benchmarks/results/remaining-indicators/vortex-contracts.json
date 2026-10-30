@@ -1,0 +1,47 @@
+{
+  "batch": "vortex-alias-shared-execution",
+  "types": [
+    "VortexPositive",
+    "VortexNegative",
+    "VortexPlus",
+    "VortexMinus",
+    "VortexIndicatorPlus",
+    "VortexIndicatorMinus"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Route all six Vortex aliases through the existing exact VortexWindow using original high/low/close and the matching plus/minus output. Preserve legacy startup, source fallback, ownership, cancellation and lifecycle.",
+  "verification": {
+    "unit_passed": 237,
+    "fixture_passed": 24,
+    "discovery_passed": 75,
+    "gpu_passed": 100,
+    "contract_methods": 1410,
+    "hosted_methods": 1398,
+    "evidence": [
+      {
+        "file": "vortex-unit.trx.gz",
+        "passed_cases": 237,
+        "trx_sha256": "6bf38bba613579f9ce177cb0d33b6dcf9d0a9647ec6831270df35baea2f4a54e"
+      },
+      {
+        "file": "vortex-fixture.trx.gz",
+        "passed_cases": 99,
+        "trx_sha256": "2b45aaeb59dcd1387c3084daffa597202453b909dc3ba2252c575efbe32c7ac1"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVortexBenchmarks",
+    "cases": 48,
+    "status": "prepared-not-measured",
+    "operations": [
+      "VortexPositive",
+      "VortexNegative",
+      "VortexPlus",
+      "VortexMinus",
+      "VortexIndicatorPlus",
+      "VortexIndicatorMinus"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

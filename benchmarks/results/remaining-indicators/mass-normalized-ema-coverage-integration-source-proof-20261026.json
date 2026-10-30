@@ -1,0 +1,35 @@
+{
+  "qualified_commit": "ca2c307eb9322b911b92f018f5422d5fac9ccff0",
+  "qualified_code": "b8a0cd963bbc2f7dc8366ec1295c290a1634fb37",
+  "matched_paths": [
+    "src",
+    "tests",
+    "examples",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "42bc48391afe24995c1d29565d10a3f1276bd07c212c54fc1d798132c1be0ddd",
+  "qualification_reused": {
+    "unit": 6,
+    "parity": 20,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mass-normalized-ema-coverage-20261026\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0d029a30ef1524f55ef39b55ba3005cc2c2781ae4ff9bc9bd991545b6c1d548b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mass-normalized-ema-coverage-20261026\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0d029a30ef1524f55ef39b55ba3005cc2c2781ae4ff9bc9bd991545b6c1d548b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mass-normalized-ema-coverage-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0d029a30ef1524f55ef39b55ba3005cc2c2781ae4ff9bc9bd991545b6c1d548b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mass-normalized-ema-coverage-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0d029a30ef1524f55ef39b55ba3005cc2c2781ae4ff9bc9bd991545b6c1d548b"
+  },
+  "control": "local-mass-normalized-ema-coverage-20261026",
+  "qualification_kind": "Additional compensated EMA constructor coverage and exact master dependency alignment",
+  "note": "Integrated executable sources and build inputs exactly match qualified candidate. Publishing checkout binaries remain older; preserved candidate DLL supplied the constructor measurements. No redundant production rebuild."
+}

@@ -1,0 +1,72 @@
+{
+  "input_head": "80566bf68c9d1c69fc98ced90bfa55eb9b84a461",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/RocBankWindow.cs",
+    "tests/ModelsTests/CompactRocUnitsTests.cs"
+  ],
+  "arithmetic_cases": 6,
+  "batch_note": "Approved RoundUnits word DivRem follow-up; exact quotient/remainder semantics and original guard, sticky, ties-even and wide fallback retained. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-27T22:10:15.791401+00:00",
+  "unit": {
+    "passed": 793,
+    "class_counts": {
+      "RocBankNumericalTests": 548,
+      "MacdNumericalTests": 81,
+      "MacdSharedExecutionTests": 18,
+      "PpoNumericalTests": 71,
+      "PvoNumericalTests": 46,
+      "MacdFixedCoefficientReductionTests": 2,
+      "CompactRatioArithmeticTests": 6,
+      "AccelerationSharedExecutionTests": 11,
+      "CompactMacdValueTests": 4,
+      "CompactRocUnitsTests": 6
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\roc-word-divrem\\unit\\unit.trx",
+    "sha256": "af6c675fabb1d6fc023fbb447a3b4c81de0dc9e04e1505da7d6e5e90a3b705fe",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-roc-word-divrem-certified-20261027-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 130,
+    "class_counts": {
+      "SharedTaMacdNativeBenchmarkTests": 46,
+      "SharedTradyMacdBenchmarkTests": 33,
+      "SharedMacdBenchmarkTests": 14,
+      "ClassicMacdComparisonTests": 16,
+      "RangeAccelerationComparisonTests": 9,
+      "AlignedMacdComparisonTests": 10,
+      "SharedAccelerationBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\roc-word-divrem\\parity\\parity.trx",
+    "sha256": "eb44afdd23daaefbee8f1242caf6f5aadccc0252277d47cd6672e03e4f6e7e05",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-roc-word-divrem-certified-20261027-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-word-divrem-20261027\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "43990e8cff38f5abcb3f9077851c62291b9893c9cd860b2cc98d083422ba7dc3",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-word-divrem-20261027\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "43990e8cff38f5abcb3f9077851c62291b9893c9cd860b2cc98d083422ba7dc3",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-word-divrem-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "43990e8cff38f5abcb3f9077851c62291b9893c9cd860b2cc98d083422ba7dc3",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-word-divrem-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "43990e8cff38f5abcb3f9077851c62291b9893c9cd860b2cc98d083422ba7dc3"
+  },
+  "source_fingerprint_sha256": "0243f552a05ff2908c35856d6cc05d324f19f9a33232bd20d348c628ad9c295c",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved RoundUnits word DivRem follow-up; exact quotient/remainder semantics and original guard, sticky, ties-even and wide fallback retained. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

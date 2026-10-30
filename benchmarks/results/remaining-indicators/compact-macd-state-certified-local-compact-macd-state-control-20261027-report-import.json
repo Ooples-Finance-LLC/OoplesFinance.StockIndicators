@@ -1,0 +1,60 @@
+{
+  "before_sha256": "78cc4509dce9cfce05021c297f6ffdf0e299072bfd70c29b78253f26ff2d5054",
+  "candidate_sha256": "a256d7190ba77952cc3c0f2da48e4f22c3020dbfbaacb5e237df7f63527040ce",
+  "changed_baseline_rows": 16,
+  "unchanged_baseline_rows": 786,
+  "changed_builder_slots": 32,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 32,
+  "verdicts": {
+    "faster": 602,
+    "slower": 886,
+    "inconclusive": 48
+  },
+  "unchanged_rows": 786,
+  "run_id": "local-compact-macd-state-control-20261027",
+  "imported_utc": "2026-10-27T19:11:12.096086+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "69ded20f9386ba0775806492812c3c14f9bc8f85bdf75a479f915a82f14e780b",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-state-certified-local-compact-macd-state-control-20261027-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "a77df82823f78e34f312f1585ef53fa815f5a1aec307a3198ae83dea52c57ea6",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-state-certified-local-compact-macd-state-control-20261027-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "42b034efb11a01a3197d703283f2472601863084d517436fe2eaaba07b0733ef",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-state-certified-local-compact-macd-state-control-20261027-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "320a7cd0287be79d808384bc0cb2b8cff9823d95437ada72a08552ac27b50a5f",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-state-certified-local-compact-macd-state-control-20261027-measurement.json.gz"
+    },
+    "stage-compact-macd-state-report.py": {
+      "sha256": "b8d83e7637eef5305165417e98fc51d3acde15c2b0fb85f809547a28fb8f7f13",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-state-certified-local-compact-macd-state-control-20261027-stage-compact-macd-state-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-state-certified-local-compact-macd-state-control-20261027-verify-approved-certified-report.py.gz"
+    },
+    "import-compact-macd-state-report.py": {
+      "sha256": "15bd1e1afef0bd23f6c2e30fd4c2288e9f499e6d5c03aa0371df35eb9580c0c3",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-state-certified-local-compact-macd-state-control-20261027-import-compact-macd-state-report.py.gz"
+    },
+    "archive-compact-macd-state-control.py": {
+      "sha256": "ef49cb9d68766edf06314bd8383524945e02cfa54f7be0df4a0d1c7113fe8980",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-state-certified-local-compact-macd-state-control-20261027-archive-compact-macd-state-control.py.gz"
+    },
+    "prove-compact-macd-state-integration.py": {
+      "sha256": "2be0abf9db90174bc04d560ba8ad42011b9dca84a1453a18e38da23df6961724",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-state-certified-local-compact-macd-state-control-20261027-prove-compact-macd-state-integration.py.gz"
+    },
+    "archive-compact-macd-state-report.py": {
+      "sha256": "0c032690ff6322e95c3c052b5e1700d2b29b0881575cb12705e482e2a026a23b",
+      "archive": "benchmarks/results/remaining-indicators/compact-macd-state-certified-local-compact-macd-state-control-20261027-archive-compact-macd-state-report.py.gz"
+    }
+  }
+}

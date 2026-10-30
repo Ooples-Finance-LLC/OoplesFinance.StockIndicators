@@ -1,0 +1,35 @@
+{
+  "run_id": "39746134672",
+  "workflow_sha": "2e8a6a4f123964edd96a700cd918d0b0fc28bb20",
+  "source_sha": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+  "apis": 31,
+  "comparisons": 124,
+  "excluded_failed_fixtures": [
+    "SharedPriceRangeBenchmarks"
+  ],
+  "verdicts": {
+    "faster": 77,
+    "slower": 44,
+    "inconclusive": 3
+  },
+  "receipt_files": [
+    "cpu-builder-39746134672-SharedAdlDetailsBenchmarks.json",
+    "cpu-builder-39746134672-SharedAroonBenchmarks.json",
+    "cpu-builder-39746134672-SharedCmfBenchmarks.json",
+    "cpu-builder-39746134672-SharedForceIndexBenchmarks.json",
+    "cpu-builder-39746134672-SharedMoneyFlowIndexBenchmarks.json",
+    "cpu-builder-39746134672-SharedObvBenchmarks.json",
+    "cpu-builder-39746134672-SharedPathRatioBenchmarks.json",
+    "cpu-builder-39746134672-SharedRegressionStatisticsBenchmarks.json",
+    "cpu-builder-39746134672-SharedRollingPercentileBenchmarks.json",
+    "cpu-builder-39746134672-SharedSeededAtrBenchmarks.json",
+    "cpu-builder-39746134672-SharedUltimateBenchmarks.json",
+    "cpu-builder-39746134672-SharedVolumeWeightedPriceBenchmarks.json",
+    "cpu-builder-39746134672-SharedVortexBenchmarks.json"
+  ],
+  "changed_production_files_since_baseline": [
+    "src/Helpers/CertifiedMeanRelativeError.cs",
+    "src/Indicators/CompensatedExponentialAverage.cs"
+  ],
+  "note": "Matched same-runner native serial/parallel comparison for each default-period fixture; no universal superiority claim."
+}

@@ -1,0 +1,31 @@
+{
+  "types": [
+    "GatorOscillator",
+    "MarketMeannessIndex"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "0380bf8ec88e7fdc77ecc26b276d08c02b471bfd",
+  "combined_input_sha256": "bee6fe87ee54b2b6af58557d677ae3ba7a953f43d40bc4253e8b58c9626d2dd3",
+  "benchmark_fixture": {
+    "type": "RemainingGatorMeannessBenchmarks",
+    "operations": [
+      "GatorOscillator",
+      "MarketMeannessIndex"
+    ]
+  },
+  "checks": {
+    "unit": 201,
+    "parity": 8,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/gatormeanness-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/gatormeanness-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

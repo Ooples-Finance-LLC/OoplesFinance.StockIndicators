@@ -1,0 +1,14 @@
+{
+  "code": "969872020f1086b45e821e926c64f9561cf45369",
+  "qualification": "44dba4a181c8ef1cff2fd9d299e5a9705f7caaf1",
+  "source_patch_sha256": "92e82beff29ac84a1dde09a8ac7b2cbc4f28677babe524c70340785d60e39cce",
+  "qualification_files": {
+    "benchmarks/results/remaining-indicators/inventory.json": "f2b2d30738d0c49a2daf886774aeaf3303c4f42cf6ee0925f532420eda442530",
+    "benchmarks/results/remaining-indicators/publication-beta-retained-products-certified-20261029-parity.trx.gz": "c6cc15d250d8f90315a222ee16958c5312d85d1cc6c3951f9f85ba7fed63061d",
+    "benchmarks/results/remaining-indicators/publication-beta-retained-products-certified-20261029-unit.trx.gz": "e8eb3ac31e2fde04506a25320a304d5d4320388521c33aea4f963c6bd500c11f",
+    "benchmarks/results/remaining-indicators/publication-beta-retained-products-certified-20261029-verification.json": "627a37850288d49f7c8ab1114a2c0fa218fa5100ddd9f91c08b83967eac589b8",
+    "benchmarks/results/shared-rollout/local-gpu-contracts/gpu.trx.gz": "a36de62de772400b2c8dc92764fff29f9bff89a5f8d8093f8471b01a1df31afe",
+    "benchmarks/results/shared-rollout/local-gpu-contracts/receipt.json": "008e4a69ed2292e613ddb8ef9fe1075796dc06962f246bf250596692e5b4bc63"
+  },
+  "reason": "No affected-code gain without regression under the established acceptance policy."
+}

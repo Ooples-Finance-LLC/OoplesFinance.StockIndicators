@@ -1,0 +1,191 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "a167a31d5486f3a27717cd1a6c17e7c98346cae5",
+    "new": "f883988476b017b2bb32a933fe85e90afbd4a12b"
+  },
+  "candidate_code_source": "ea079b8a7211aca039f5994ddc2696fe618dfc15",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "SharedRollingStatisticsBenchmarks",
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.2274004340277778,
+        0.22333619791666665
+      ],
+      "new_means_ms": [
+        0.1906636284722222,
+        0.1764685546875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedRollingStatisticsBenchmarks",
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.2155139453125,
+        0.211529140625
+      ],
+      "new_means_ms": [
+        0.16549791666666666,
+        0.165353369140625
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedRollingStatisticsBenchmarks",
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        2.2031774305555554,
+        2.15537953125
+      ],
+      "new_means_ms": [
+        1.72022921875,
+        1.67118484375
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedRollingStatisticsBenchmarks",
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        2.1366115625,
+        2.141201736111111
+      ],
+      "new_means_ms": [
+        1.6651153125,
+        1.6598671875
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        4.11645,
+        3.9277
+      ],
+      "new_means_ms": [
+        2.90883,
+        2.87623
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        3.99578,
+        3.78601
+      ],
+      "new_means_ms": [
+        2.9761,
+        2.5440625
+      ],
+      "verdict": "inconclusive"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "b28d8df64212da099728abb1ab959142d019e6945860e2f079d5e0a66c9ebce0",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "bd9b29f23e32d04b2046547545769194d395eefbbc56e0e40189fc1842505f8e",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "8184a07901e084542bb82055886dce6c09114c848dccd8261fa81addd40e90cb",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "9c014c4d6190111179c4d19e57a1870c58fe5c13d3d2e78b9e1dd9db9e89da7d",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/verified-summary.json.gz"
+    },
+    "round0-old-SharedRollingStatisticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRollingStatisticsBenchmarks-report-full-compressed.json": {
+      "sha256": "513e7a3259906ddc01cbc168f7ef4a5b31c4c1e2c42e3f95313f7572ee19ec6c",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round0-old-SharedRollingStatisticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRollingStatisticsBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "df9c6fa1889584c0551e85b2a8cc6562dfc00ba89cb7b62c11de39833d1196a8",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedRollingStatisticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRollingStatisticsBenchmarks-report-full-compressed.json": {
+      "sha256": "81ae6bd4ba85aa1b196741934d8d28e0e5278780c43acbdd178b867bc67548d5",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round1-new-SharedRollingStatisticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRollingStatisticsBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "861029f408035bcc8431c630fb854a95a0f8a8748c32ea9679419e59a09e4ac5",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedRollingStatisticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRollingStatisticsBenchmarks-report-full-compressed.json": {
+      "sha256": "af1840b515424509fc980a65a3c6972affc68d6ea71b1acf7e0aba915f97fa21",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round2-new-SharedRollingStatisticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRollingStatisticsBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "3931f2d8b2311c3fb89d250cbc7c008d39742791823bf44dcf87e1bb46e2a7e5",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedRollingStatisticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRollingStatisticsBenchmarks-report-full-compressed.json": {
+      "sha256": "1c45e518d4fe61e56ccfebf3951e68c19b5f43ff696376dd1bf6ccdd2e6231ed",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round3-old-SharedRollingStatisticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRollingStatisticsBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "5a2718b8c768d2e21fe59a5d8b0eb0fb1e73ce3d2decf9495314ca8f70c6afb0",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "ebe42070993f60ece53a689e3ffacaedd84cbdb0b8bb829db5856d7e0c191770",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round0-old-SharedRollingStatisticsBenchmarks.log": {
+      "sha256": "570528df36db09bddba99ca157f7241c93fda8cc1b161fba64ce16af770b6d2f",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round0-old-SharedRollingStatisticsBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "f9a49b509ba7c003f68ec58de4dea02ea4f982eae72bef93f544f91ce5d78c89",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-SharedRollingStatisticsBenchmarks.log": {
+      "sha256": "4dd3c9d4fa4db35dce40f50d0fca586fc8f338621581385a472913bb5f6d6dce",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round1-new-SharedRollingStatisticsBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "b123cd3cb8491e9b42accdf3cd67c525c5ca367ebb63d98c5bac48b2047ae816",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-SharedRollingStatisticsBenchmarks.log": {
+      "sha256": "1854a74a869db24f1e5e97aa47caaf3e7e4f8a51e9024413b22b1dbff28be348",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round2-new-SharedRollingStatisticsBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "7517f54d453b00260c724c4dd5f9d0217d6b365e8294184dc178c400f27175d2",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-SharedRollingStatisticsBenchmarks.log": {
+      "sha256": "f2feee14b4fc149e016c63a77564b8a17b6a4105e6e17308ee5bc0d68b899d6d",
+      "archive": "benchmarks/results/remaining-indicators/local-sma-bounded-moments-control-20261023/round3-old-SharedRollingStatisticsBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-sma-bounded-moments-control.py": "bf7a4ba7831ce5f02a71117ddf652f345411c86830589f8d2bbe3e103f205eba",
+    "verify-sma-bounded-moments-control.py": "fcacc0c20f7e007fac18d8cc98a680ec9244a85aeac13c4b6241eeaf5e7666e6"
+  },
+  "report_imported": true,
+  "production_integrated": true,
+  "integration_source_proof": "benchmarks/results/remaining-indicators/sma-bounded-moments-integration-source-proof-20261023.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/sma-bounded-moments-certified-local-sma-bounded-moments-control-20261023-report-import.json"
+}

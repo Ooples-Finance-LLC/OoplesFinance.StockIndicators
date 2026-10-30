@@ -1,0 +1,41 @@
+{
+  "types": [
+    "WoodiePivotPoint",
+    "StandardPivotPoints",
+    "DynamicPivotPoints"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "base_head": "bb2dbc24070e437e32a1c7d473614f550a70fff5",
+  "combined_input_sha256": "ff10435a1f7a56c18e4b840ddc2f626c72fe621e804e5b856245254727984564",
+  "manifest_sha256": "bc3aaa8cb29d3d778ce19784904dc553b6f92a37329696e76ffd7cd720650819",
+  "unit_class_counts": {
+    "SharedGeneratedWoodiePivotTests": 8,
+    "SharedGeneratedDailyPivotsTests": 10
+  },
+  "parity_class_counts": {
+    "RemainingWoodiePivotBenchmarkTests": 4,
+    "RemainingDailyPivotsBenchmarkTests": 8
+  },
+  "unique_check_counts": {
+    "unit": 18,
+    "finite_smoothing": 0,
+    "parity": 12,
+    "discovery": 350,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/nineteenth-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/nineteenth-integrated-parity.trx.gz",
+    "benchmarks/results/remaining-indicators/nineteenth-integrated-discovery.trx.gz"
+  ],
+  "production_sha256": "4d55e9ff2c5d10feb94e7a7252f0f5bc317ea633d2b9ee1ee6811c90c8aa4cef",
+  "fixture_sha256": "a2032e1b823a98e37b48b26f29b05289cdf218ac0e3f01799af487a4766d45bf",
+  "input_repairs": [],
+  "context": "Fresh scoped checks on combined working candidate. Selective commits are not separately rebuilt; source fingerprint identifies tested composition. Earlier numerical repairs retained.",
+  "pending": [
+    "controlled raw timing",
+    "remaining rollout"
+  ]
+}

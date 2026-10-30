@@ -13,10 +13,11 @@ internal sealed class SimplifiedLeastSquaresWindow : IDisposable
     private ExactMeanAccumulator _sixSum;
     private ExactMeanAccumulator _numerator;
 
-    internal SimplifiedLeastSquaresWindow(int length)
+    // Owned callers may cap storage at the maximum number of updates before reset.
+    internal SimplifiedLeastSquaresWindow(int length, int capacityHint = int.MaxValue)
     {
         var period = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(period);
+        _window = new PooledRingBuffer<double>(Math.Min(period, Math.Max(1, capacityHint)));
         _denominator = (long)period * (period + 1L);
         _newWeight = 4L * period - 2;
         _expiredWeight = 2L * period + 2;

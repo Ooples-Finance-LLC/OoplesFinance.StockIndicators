@@ -1,0 +1,34 @@
+{
+  "qualified_commit": "1d964b3bf9a1bc9451838d090ee11dba439d4962",
+  "qualified_code": "acf0b8030cf897135576c5f672e9ff23d559bce6",
+  "matched_paths": [
+    "src",
+    "tests",
+    "examples",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "b6ea5cbb7454b3daf6852ce57aa73b00e1a7ba9e1a14d470ba56848ad12fc3a6",
+  "qualification_reused": {
+    "unit": 11,
+    "parity": 13,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-zigzag-exact-scale-20261028\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b633882f41bae27856a7bcfa18fdb7dd9a2877b854acc093c145568f8d4acf01",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-zigzag-exact-scale-20261028\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b633882f41bae27856a7bcfa18fdb7dd9a2877b854acc093c145568f8d4acf01",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-zigzag-exact-scale-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b633882f41bae27856a7bcfa18fdb7dd9a2877b854acc093c145568f8d4acf01",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-zigzag-exact-scale-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b633882f41bae27856a7bcfa18fdb7dd9a2877b854acc093c145568f8d4acf01"
+  },
+  "control": "local-zigzag-exact-scale-control-20261028",
+  "note": "Integrated executable sources and build inputs exactly match qualified candidate. Publishing checkout binaries remain older; preserved candidate DLL supplied the new measurement arm. No redundant production rebuild."
+}

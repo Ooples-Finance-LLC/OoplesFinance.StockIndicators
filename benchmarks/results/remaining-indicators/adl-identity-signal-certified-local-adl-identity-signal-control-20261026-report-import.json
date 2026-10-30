@@ -1,0 +1,60 @@
+{
+  "before_sha256": "d1bac6bc31dea90c14d87c8415efb1ace8fadbe0025e085f41f0523eba6183c4",
+  "candidate_sha256": "05aacdcf8b4cffd5a0c786494168fee6291c4c42d24fcc8ab13e006cfd1f5ac5",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 4,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 4,
+  "verdicts": {
+    "faster": 591,
+    "slower": 890,
+    "inconclusive": 55
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-adl-identity-signal-control-20261026",
+  "imported_utc": "2026-10-26T23:01:15.295347+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "85b3ed91ce0ce1afd331c26b7ef22d71b70f726d24187cee884e19748ac9d200",
+      "archive": "benchmarks/results/remaining-indicators/adl-identity-signal-certified-local-adl-identity-signal-control-20261026-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "c2020b9348abb7161d01f2b40e9f89a18406d51d0d4cec3ac542fb7df8f14eaa",
+      "archive": "benchmarks/results/remaining-indicators/adl-identity-signal-certified-local-adl-identity-signal-control-20261026-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "29511bd3df91633aba77192b642922d3ecc4df15d9a98475c71d3e13bd37969a",
+      "archive": "benchmarks/results/remaining-indicators/adl-identity-signal-certified-local-adl-identity-signal-control-20261026-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "15ea2fc7683bcc0bd831ce033695e5437a91dcac2d947c21c00644a65e2785aa",
+      "archive": "benchmarks/results/remaining-indicators/adl-identity-signal-certified-local-adl-identity-signal-control-20261026-measurement.json.gz"
+    },
+    "stage-adl-identity-signal-report.py": {
+      "sha256": "81026d1d14d378f3b444726151ad9511c4a651e2e15c44ef64bcd0b5ccb24f67",
+      "archive": "benchmarks/results/remaining-indicators/adl-identity-signal-certified-local-adl-identity-signal-control-20261026-stage-adl-identity-signal-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/adl-identity-signal-certified-local-adl-identity-signal-control-20261026-verify-approved-certified-report.py.gz"
+    },
+    "import-adl-identity-signal-report.py": {
+      "sha256": "436683e5a951b9a9ee5146b497828adb9cb34460ca2b3af1d5012aa3b4801e57",
+      "archive": "benchmarks/results/remaining-indicators/adl-identity-signal-certified-local-adl-identity-signal-control-20261026-import-adl-identity-signal-report.py.gz"
+    },
+    "archive-adl-identity-signal-control.py": {
+      "sha256": "4f5b36a1eea1a061ab5db8b49206544893df084fc19feac36ed619a7b4e686f0",
+      "archive": "benchmarks/results/remaining-indicators/adl-identity-signal-certified-local-adl-identity-signal-control-20261026-archive-adl-identity-signal-control.py.gz"
+    },
+    "prove-adl-identity-signal-integration.py": {
+      "sha256": "e5c1e785ff76fbcc202328f387fc57895e4da1aa5d45111f447f87a95a08bcc3",
+      "archive": "benchmarks/results/remaining-indicators/adl-identity-signal-certified-local-adl-identity-signal-control-20261026-prove-adl-identity-signal-integration.py.gz"
+    },
+    "archive-adl-identity-signal-report.py": {
+      "sha256": "15aef738e31a080a2ca55193dbfee86ce69e871b67bad99b3d939477ef979bcf",
+      "archive": "benchmarks/results/remaining-indicators/adl-identity-signal-certified-local-adl-identity-signal-control-20261026-archive-adl-identity-signal-report.py.gz"
+    }
+  }
+}

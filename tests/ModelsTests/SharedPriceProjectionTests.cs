@@ -5,7 +5,7 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class SharedPriceProjectionTests
 {
-    public static IEnumerable<object[]> Configurations => from operation in Enumerable.Range(0, 4)
+    public static IEnumerable<object[]> Configurations => from operation in Enumerable.Range(0, 8)
         from length in new[] { 0, 1, 20, int.MaxValue } select new object[] { operation, length };
 
     private static IndicatorBase Create(int operation, int length) => operation switch
@@ -13,7 +13,11 @@ public sealed class SharedPriceProjectionTests
         0 => new MedianPrice(length),
         1 => new TypicalPrice(length),
         2 => new WeightedClose(length),
-        _ => new FullTypicalPrice(length)
+        3 => new FullTypicalPrice(length),
+        4 => new AveragePrice(length),
+        5 => new MidRange(),
+        6 => new HlcAverage(),
+        _ => new OhlcAverage()
     };
 
     [Theory, MemberData(nameof(Configurations))]
@@ -46,6 +50,7 @@ public sealed class SharedPriceProjectionTests
 
     [Theory]
     [InlineData(0)] [InlineData(1)] [InlineData(2)] [InlineData(3)]
+    [InlineData(4)] [InlineData(5)] [InlineData(6)] [InlineData(7)]
     public async Task ExceptionalFiniteValuesInputErrorsAndComposedFallbackKeepEvaluatorContracts(int operation)
     {
         double[] inputs = [double.MaxValue, -double.MaxValue, double.Epsilon, -double.Epsilon, -0d, 0d, 1, Math.BitIncrement(1d)];
@@ -78,20 +83,34 @@ public sealed class SharedPriceProjectionTests
         Assert.False(ValuesBarExecution.IsPointwise(indicator));
         var composed = Builder(bars, indicator, IndicatorHistoryMode.Full);
         var ordinary = Builder(bars, indicator, IndicatorHistoryMode.Full).ConfigureBehavior(_ => { });
-        var expectedCompositionError = await Assert.ThrowsAsync<InvalidOperationException>(() => ordinary.BuildAsync());
-        var actualCompositionError = await Assert.ThrowsAsync<InvalidOperationException>(() => composed.BuildAsync());
-        Assert.Equal(expectedCompositionError.Message, actualCompositionError.Message);
-        Assert.Null(composed.LastExecution);
+        double[]? expectedValues = null, actualValues = null;
+        var expectedCompositionError = await Record.ExceptionAsync(async () =>
+        {
+            using var run = await ordinary.BuildAsync();
+            expectedValues = run[indicator].ToArray();
+        });
+        var actualCompositionError = await Record.ExceptionAsync(async () =>
+        {
+            using var run = await composed.BuildAsync();
+            actualValues = run[indicator].ToArray();
+        });
+        if (operation < 4) Assert.IsType<InvalidOperationException>(expectedCompositionError);
+        Assert.Equal(expectedCompositionError?.GetType(), actualCompositionError?.GetType());
+        Assert.Equal(expectedCompositionError?.Message, actualCompositionError?.Message);
+        if (expectedCompositionError is null) Bits(expectedValues!, actualValues!);
+        else Assert.Null(composed.LastExecution);
     }
 
     [Fact]
     public async Task MixedRequestsAndLaterLegacyBuildPreserveOwnedData()
     {
         var bars = Enumerable.Range(0, 40).Select(i => new Bar(default, i, i + 2, i - 1, i + 1, 1)).ToArray();
-        var indicators = new IIndicator[] { new MedianPrice(3), new TypicalPrice(3), new CandleArithmetic(CandleArithmeticOperation.Add) };
+        var indicators = new IIndicator[] { new MedianPrice(3), new TypicalPrice(3), new CandleArithmetic(CandleArithmeticOperation.Add),
+            new AveragePrice(3), new MidRange(), new HlcAverage(), new OhlcAverage() };
         using var expected = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicators)
             .ConfigureBehavior(_ => { }).BuildAsync();
         using var actual = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicators).BuildAsync();
+        Assert.False(((IndicatorRun)actual).HasLegacyRuntime);
         foreach (var indicator in indicators) Bits(expected[indicator].ToArray(), actual[indicator].ToArray());
         var builder = Builder(bars, new WeightedClose(3), IndicatorHistoryMode.Full);
         using var saved = await builder.BuildAsync();

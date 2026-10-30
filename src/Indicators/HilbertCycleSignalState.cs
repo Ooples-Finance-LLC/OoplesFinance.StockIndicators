@@ -97,28 +97,31 @@ internal sealed class HilbertCycleSignalState(HilbertCycleSignal kind, int suppr
         _period = .33 * _filter.Period + .67 * _period;
         var count = (int)(_period + .5);
         _smooth[_cursor] = _filter.SmoothPrice;
-        JurikDyadic real = default,
-            imaginary = default,
-            smallReal = default,
-            smallImaginary = default;
-        var coefficients = ProjectionCoefficients[count];
-        for (var lag = 0; lag < count; lag++)
+        JurikDyadic real = default, imaginary = default;
+#if !NETFRAMEWORK
+        if (!CertifiedHilbertProjection.TryProject(_smooth, _cursor, count, out real, out imaginary))
+#endif
         {
-            var value = _smooth[(_cursor - lag + 50) % 50];
-            var coefficient = coefficients[lag];
-            var term = value; term.Multiply(coefficient.Sine);
-            if (coefficient.SmallSine) smallReal.AddExact(term); else real.AddExact(term);
-            term = value; term.Multiply(coefficient.Cosine);
-            if (coefficient.SmallCosine) smallImaginary.AddExact(term); else imaginary.AddExact(term);
+            JurikDyadic smallReal = default, smallImaginary = default;
+            var coefficients = ProjectionCoefficients[count];
+            for (var lag = 0; lag < count; lag++)
+            {
+                var value = _smooth[(_cursor - lag + 50) % 50];
+                var coefficient = coefficients[lag];
+                var term = value; term.Multiply(coefficient.Sine);
+                if (coefficient.SmallSine) smallReal.AddExact(term); else real.AddExact(term);
+                term = value; term.Multiply(coefficient.Cosine);
+                if (coefficient.SmallCosine) smallImaginary.AddExact(term); else imaginary.AddExact(term);
+            }
+            // Near-axis Math.Sin/Cos values are small but nonzero. Keep every bit,
+            // combining their exact sums last so they do not force all subsequent
+            // ordinary products onto the wide path. This partition never rounds or
+            // discards a term; only the complete projections round below.
+            real.AddExact(smallReal);
+            imaginary.AddExact(smallImaginary);
+            real = real.Rounded();
+            imaginary = imaginary.Rounded();
         }
-        // Near-axis Math.Sin/Cos values are small but nonzero. Keep every bit,
-        // combining their exact sums last so they do not force all subsequent
-        // ordinary products onto the wide path. This partition never rounds or
-        // discards a term; only the complete projections round below.
-        real.AddExact(smallReal);
-        imaginary.AddExact(smallImaginary);
-        real = real.Rounded();
-        imaginary = imaginary.Rounded();
         var oldPhase = _phase;
         var phase = imaginary.Sign != 0
             ? Math.Atan(real.Ratio(imaginary)) * 180 / Math.PI

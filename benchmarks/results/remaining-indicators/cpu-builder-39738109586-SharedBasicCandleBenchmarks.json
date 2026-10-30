@@ -1,0 +1,401 @@
+{
+  "fixture": "SharedBasicCandleBenchmarks",
+  "source_sha": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+  "binary_run": 39719116665,
+  "run_id": "39738109586",
+  "workflow_sha": "2a4d3ddea1b9a9c8b4c2f38b3a0bccf06fef7c82",
+  "report_sha256": "86b3308f842cf5140a72057913491e86d6d6764891fa5857b189bf4af3f1ffa5",
+  "report_file": "artifacts/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedBasicCandleBenchmarks-report-full-compressed.json",
+  "host": {
+    "BenchmarkDotNetCaption": "BenchmarkDotNet",
+    "BenchmarkDotNetVersion": "0.15.8",
+    "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+    "ProcessorName": "Intel Xeon Platinum 8370C CPU 2.80GHz",
+    "PhysicalProcessorCount": 1,
+    "PhysicalCoreCount": 2,
+    "LogicalCoreCount": 4,
+    "RuntimeVersion": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+    "Architecture": "X64",
+    "HasAttachedDebugger": false,
+    "HasRyuJit": true,
+    "Configuration": "RELEASE",
+    "DotNetCliVersion": "10.0.402",
+    "ChronometerFrequency": {
+      "Hertz": 1000000000
+    },
+    "HardwareTimerKind": "Unknown"
+  },
+  "comparisons": [
+    {
+      "pair": "Trady.Candlestick.Doji",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 17263.507214355468,
+        "lower_ns": 17080.373180791354,
+        "upper_ns": 17446.641247919582,
+        "samples": 10,
+        "allocated_bytes": 58259
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 65107.44189453125,
+          "lower_ns": 64780.271824613235,
+          "upper_ns": 65434.611964449265,
+          "samples": 8,
+          "allocated_bytes": 162605
+        },
+        "NativeParallel": {
+          "mean_ns": 38506.37788085938,
+          "lower_ns": 38079.16532786235,
+          "upper_ns": 38933.59043385641,
+          "samples": 10,
+          "allocated_bytes": 155234
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Candlestick.Doji",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 12366.448715209961,
+        "lower_ns": 12313.4399056141,
+        "upper_ns": 12419.457524805823,
+        "samples": 8,
+        "allocated_bytes": 9265
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 65107.44189453125,
+          "lower_ns": 64780.271824613235,
+          "upper_ns": 65434.611964449265,
+          "samples": 8,
+          "allocated_bytes": 162605
+        },
+        "NativeParallel": {
+          "mean_ns": 38506.37788085938,
+          "lower_ns": 38079.16532786235,
+          "upper_ns": 38933.59043385641,
+          "samples": 10,
+          "allocated_bytes": 155234
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Candlestick.Doji",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 95826.731640625,
+        "lower_ns": 93674.1118733099,
+        "upper_ns": 97979.3514079401,
+        "samples": 10,
+        "allocated_bytes": 563064
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 807935.0989583334,
+          "lower_ns": 797911.2084347525,
+          "upper_ns": 817958.9894819142,
+          "samples": 9,
+          "allocated_bytes": 1565851
+        },
+        "NativeParallel": {
+          "mean_ns": 653106.03125,
+          "lower_ns": 601791.0751857968,
+          "upper_ns": 704420.9873142032,
+          "samples": 10,
+          "allocated_bytes": 1511139
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Candlestick.Doji",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 62087.114990234375,
+        "lower_ns": 61529.520709490804,
+        "upper_ns": 62644.709270977946,
+        "samples": 10,
+        "allocated_bytes": 81719
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 807935.0989583334,
+          "lower_ns": 797911.2084347525,
+          "upper_ns": 817958.9894819142,
+          "samples": 9,
+          "allocated_bytes": 1565851
+        },
+        "NativeParallel": {
+          "mean_ns": 653106.03125,
+          "lower_ns": 601791.0751857968,
+          "upper_ns": 704420.9873142032,
+          "samples": 10,
+          "allocated_bytes": 1511139
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Candlestick.Bullish",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 9451.090954589843,
+        "lower_ns": 9279.822131222625,
+        "upper_ns": 9622.359777957061,
+        "samples": 10,
+        "allocated_bytes": 58010
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 76462.09248046875,
+          "lower_ns": 74719.37209286966,
+          "upper_ns": 78204.81286806785,
+          "samples": 10,
+          "allocated_bytes": 258557
+        },
+        "NativeParallel": {
+          "mean_ns": 39724.273193359375,
+          "lower_ns": 39077.3105866473,
+          "upper_ns": 40371.23580007145,
+          "samples": 10,
+          "allocated_bytes": 251040
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Candlestick.Bullish",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 4639.0687255859375,
+        "lower_ns": 4604.813441917484,
+        "upper_ns": 4673.324009254391,
+        "samples": 10,
+        "allocated_bytes": 9017
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 76462.09248046875,
+          "lower_ns": 74719.37209286966,
+          "upper_ns": 78204.81286806785,
+          "samples": 10,
+          "allocated_bytes": 258557
+        },
+        "NativeParallel": {
+          "mean_ns": 39724.273193359375,
+          "lower_ns": 39077.3105866473,
+          "upper_ns": 40371.23580007145,
+          "samples": 10,
+          "allocated_bytes": 251040
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Candlestick.Bullish",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 49497.79924316406,
+        "lower_ns": 44602.14349172041,
+        "upper_ns": 54393.45499460771,
+        "samples": 10,
+        "allocated_bytes": 562809
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1302271.380859375,
+          "lower_ns": 1287994.3562580536,
+          "upper_ns": 1316548.4054606964,
+          "samples": 8,
+          "allocated_bytes": 2525409
+        },
+        "NativeParallel": {
+          "mean_ns": 362381.2454427083,
+          "lower_ns": 353968.9430763184,
+          "upper_ns": 370793.5478090982,
+          "samples": 9,
+          "allocated_bytes": 2468594
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Candlestick.Bullish",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 23111.159966362848,
+        "lower_ns": 22954.240078343977,
+        "upper_ns": 23268.079854381718,
+        "samples": 9,
+        "allocated_bytes": 81467
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1302271.380859375,
+          "lower_ns": 1287994.3562580536,
+          "upper_ns": 1316548.4054606964,
+          "samples": 8,
+          "allocated_bytes": 2525409
+        },
+        "NativeParallel": {
+          "mean_ns": 362381.2454427083,
+          "lower_ns": 353968.9430763184,
+          "upper_ns": 370793.5478090982,
+          "samples": 9,
+          "allocated_bytes": 2468594
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Candlestick.Bearish",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 9794.065478515626,
+        "lower_ns": 9340.009165919892,
+        "upper_ns": 10248.12179111136,
+        "samples": 10,
+        "allocated_bytes": 58010
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 65763.803125,
+          "lower_ns": 64613.481706403916,
+          "upper_ns": 66914.12454359609,
+          "samples": 10,
+          "allocated_bytes": 258557
+        },
+        "NativeParallel": {
+          "mean_ns": 35208.44365234375,
+          "lower_ns": 34434.81627583756,
+          "upper_ns": 35982.07102884993,
+          "samples": 10,
+          "allocated_bytes": 251042
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Candlestick.Bearish",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 4354.874896240234,
+        "lower_ns": 4318.529919084939,
+        "upper_ns": 4391.219873395529,
+        "samples": 10,
+        "allocated_bytes": 9017
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 65763.803125,
+          "lower_ns": 64613.481706403916,
+          "upper_ns": 66914.12454359609,
+          "samples": 10,
+          "allocated_bytes": 258557
+        },
+        "NativeParallel": {
+          "mean_ns": 35208.44365234375,
+          "lower_ns": 34434.81627583756,
+          "upper_ns": 35982.07102884993,
+          "samples": 10,
+          "allocated_bytes": 251042
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Candlestick.Bearish",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 51779.803466796875,
+        "lower_ns": 46975.64009691808,
+        "upper_ns": 56583.96683667567,
+        "samples": 10,
+        "allocated_bytes": 562811
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1192842.4203125,
+          "lower_ns": 1150928.4211708186,
+          "upper_ns": 1234756.4194541816,
+          "samples": 10,
+          "allocated_bytes": 2525224
+        },
+        "NativeParallel": {
+          "mean_ns": 322110.3833984375,
+          "lower_ns": 306509.58772955573,
+          "upper_ns": 337711.1790673193,
+          "samples": 10,
+          "allocated_bytes": 2468576
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Candlestick.Bearish",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 21614.366821289062,
+        "lower_ns": 21337.081893612918,
+        "upper_ns": 21891.651748965207,
+        "samples": 9,
+        "allocated_bytes": 81469
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1192842.4203125,
+          "lower_ns": 1150928.4211708186,
+          "upper_ns": 1234756.4194541816,
+          "samples": 10,
+          "allocated_bytes": 2525224
+        },
+        "NativeParallel": {
+          "mean_ns": 322110.3833984375,
+          "lower_ns": 306509.58772955573,
+          "upper_ns": 337711.1790673193,
+          "samples": 10,
+          "allocated_bytes": 2468576
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    }
+  ],
+  "complete": true,
+  "raw_archive": "benchmarks/results/remaining-indicators/cpu-builder-39738109586-SharedBasicCandleBenchmarks-raw.json.gz",
+  "provenance.json": {
+    "archive": "cpu-builder-39738109586-SharedBasicCandleBenchmarks-provenance.json.gz",
+    "sha256": "e05c9ac3de809ebd2c67e124e286241be1fbe4cbe442b6fc55ed69c633a2b6d0"
+  },
+  "binary-manifest.json": {
+    "archive": "cpu-builder-39738109586-SharedBasicCandleBenchmarks-binary-manifest.json.gz",
+    "sha256": "881d89b69dffcef6c8be04e6434b619607b53cf6b3472c85ce125fd3495bdcaa"
+  },
+  "source_note": "Qualified baseline binaries reused; all production/benchmark code matches current publication except the specialized SMA error helper, which these fixtures do not use."
+}

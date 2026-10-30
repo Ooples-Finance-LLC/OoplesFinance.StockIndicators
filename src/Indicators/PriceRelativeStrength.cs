@@ -93,7 +93,11 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
         CandlePriceField basis
     ) : IMultiOutputState
     {
+#if !NETFRAMEWORK
+        private readonly Queue<(double Eval, double Base)> _history = new();
+#else
         private readonly Queue<(BigInteger Eval, BigInteger Base)> _history = new();
+#endif
         private readonly Queue<double?> _ratios = new();
         private BigInteger _sum;
         private int _missing;
@@ -121,9 +125,18 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            var e = ExactVarianceWindow.Units(PairStatisticsWindow.Select(bar, evaluation));
-            var b = ExactVarianceWindow.Units(PairStatisticsWindow.Select(bar, basis));
+            double evaluationPrice = PairStatisticsWindow.Select(bar, evaluation);
+            double basePrice = PairStatisticsWindow.Select(bar, basis);
+#if !NETFRAMEWORK
+            // Both operands are already binary64 values: one hardware division
+            // rounds the exact ratio once, including subnormals and overflow.
+            // Exact zero numerators historically publish positive zero.
+            double? ratio = basePrice == 0 ? null : evaluationPrice == 0 ? 0 : evaluationPrice / basePrice;
+#else
+            var e = ExactVarianceWindow.Units(evaluationPrice);
+            var b = ExactVarianceWindow.Units(basePrice);
             double? ratio = b.IsZero ? null : Divide(e, b);
+#endif
             Put(ratio, 0, output);
             if (ratio.HasValue && !FrameworkCompatibility.IsFinite(ratio.Value))
                 return;
@@ -147,6 +160,27 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
             }
             if (!period.HasValue)
                 return;
+#if !NETFRAMEWORK
+            if (_history.Count == period.Value)
+            {
+                var old = _history.Dequeue();
+                if (old.Eval != 0 && old.Base != 0)
+                {
+                    var oldEvaluation = JurikDyadic.FromDouble(old.Eval);
+                    var oldBase = JurikDyadic.FromDouble(old.Base);
+                    var numerator = JurikDyadic.FromDouble(evaluationPrice);
+                    numerator.Multiply(oldBase);
+                    var term = JurikDyadic.FromDouble(basePrice);
+                    term.Multiply(oldEvaluation);
+                    numerator.Subtract(term);
+                    oldEvaluation.Multiply(oldBase);
+                    // Round the complete exact expression once. Exact cancellation
+                    // retains positive zero even when the denominator is negative.
+                    Put(numerator.Sign == 0 ? 0 : numerator.Ratio(oldEvaluation), 2, output);
+                }
+            }
+            _history.Enqueue((evaluationPrice, basePrice));
+#else
             if (_history.Count == period.Value)
             {
                 var old = _history.Dequeue();
@@ -154,6 +188,7 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
                     Put(Divide(e * old.Base - b * old.Eval, old.Eval * old.Base), 2, output);
             }
             _history.Enqueue((e, b));
+#endif
         }
     }
 }

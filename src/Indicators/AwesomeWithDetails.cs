@@ -139,10 +139,14 @@ public sealed class AwesomeWithDetails : MultiOutputIndicatorBase, IIndicatorVal
             var slowMean = _slow.Add(price);
             if (_slow.Count < slow)
                 return;
+#if !NETFRAMEWORK
+            var oscillator = fastMean == slowMean ? 0 : fastMean - slowMean; // NOSONAR: S1244 - Exact equality defines canonical zero.
+#else
             var difference = new ExactMeanAccumulator();
             difference.Add(fastMean);
             difference.Add(slowMean, -1);
             var oscillator = difference.Mean(1);
+#endif
             output[0] = oscillator;
             output[2] = 1;
             if (!FrameworkCompatibility.IsFinite(oscillator) || price == 0)

@@ -1,0 +1,80 @@
+{
+  "types": [
+    "MultiLevelIndicator",
+    "MomentaRelativeStrengthIndex",
+    "MultiVoteOnBalanceVolume",
+    "NormalizedRelativeVigorIndex",
+    "NthOrderDifferencingOscillator",
+    "NegativeVolumeDisparityIndicator",
+    "NarrowBandpassFilter",
+    "NaturalMarketSlope",
+    "NaturalDirectionalIndex",
+    "NaturalStochasticIndicator",
+    "NaturalDirectionalCombo",
+    "NaturalMarketMirror",
+    "NaturalMarketRiver",
+    "NaturalMarketCombo",
+    "MirroredMovingAverageConvergenceDivergence",
+    "MirroredPercentagePriceOscillator"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "base_head": "d0353b4efd9972fe0cc63b22815fbfd6f5f401fc",
+  "combined_input_sha256": "55b9f70e2f597b01eaefe363ae9cbb9c8509d53ef893f7ec1098a858cdfb6e57",
+  "manifest_sha256": "252b756d6f4778cc524e7d349e185ee5cc815c9ae09358e29f956c93ec2e1ad2",
+  "unit_class_counts": {
+    "SharedGeneratedLevelMomentaTests": 44,
+    "SharedGeneratedMultiVoteTests": 20,
+    "SharedGeneratedVigorDifferenceTests": 36,
+    "SharedGeneratedNegativeDisparityTests": 33,
+    "SharedGeneratedNarrowBandpassTests": 23,
+    "SharedGeneratedNaturalSlopeTests": 21,
+    "SharedGeneratedNaturalDirectionalTests": 55,
+    "SharedGeneratedNaturalComboTests": 29,
+    "SharedGeneratedNaturalMarketTests": 60,
+    "SharedGeneratedMirroredPairTests": 61
+  },
+  "parity_class_counts": {
+    "RemainingLevelMomentaBenchmarkTests": 8,
+    "RemainingMultiVoteBenchmarkTests": 4,
+    "RemainingVigorDifferenceBenchmarkTests": 8,
+    "RemainingNegativeDisparityBenchmarkTests": 4,
+    "RemainingNarrowBandpassBenchmarkTests": 4,
+    "RemainingNaturalSlopeBenchmarkTests": 4,
+    "RemainingNaturalDirectionalBenchmarkTests": 8,
+    "RemainingNaturalComboBenchmarkTests": 4,
+    "RemainingNaturalMarketBenchmarkTests": 12,
+    "RemainingMirroredPairBenchmarkTests": 8
+  },
+  "unique_check_counts": {
+    "unit": 382,
+    "finite_smoothing": 0,
+    "parity": 64,
+    "discovery": 276,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/eleventh-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/eleventh-integrated-parity.trx.gz",
+    "benchmarks/results/remaining-indicators/eleventh-integrated-discovery.trx.gz"
+  ],
+  "production_sha256": "5fd8c4b0c8d94548f7390c71b65513f9613db3899c2481929b85a3403e956901",
+  "fixture_sha256": "27d2aadaa0e27be62db58c25d3923ffc296b89f327212b2d355fa490c583f9cf",
+  "input_repairs": [
+    {
+      "reason": "Fix invalid single-output-base cast and preserve public finite-output rejection while checking signal invalidation on raw generated state. Production unchanged.",
+      "file": "tests/ModelsTests/SharedGeneratedMirroredPairTests.cs",
+      "before_sha256": "4f2a379fc0675eb31809420d9382bf3f80d00a4f3dc0de34362d982d7bf90ce1",
+      "after_sha256": "bf8b2223e9219d0ab5cf81f015b3159d56a209a1fe2e702c14f3f791795dd135",
+      "original_file": "Z:\\StockIndicators-work\\si-eleventh-integrated-validation-20261019\\test-source-repair\\SharedGeneratedMirroredPairTests.cs",
+      "before_input_sha256": "94d0412c64e6093ff406d13a6abd2d99a8cc74210eb83b79df8a959882918928",
+      "after_input_sha256": "55b9f70e2f597b01eaefe363ae9cbb9c8509d53ef893f7ec1098a858cdfb6e57"
+    }
+  ],
+  "context": "Fresh scoped checks on combined working candidate. Selective commits are not separately rebuilt; source fingerprint identifies tested composition. Earlier numerical repairs retained.",
+  "pending": [
+    "controlled raw timing",
+    "remaining rollout"
+  ]
+}
