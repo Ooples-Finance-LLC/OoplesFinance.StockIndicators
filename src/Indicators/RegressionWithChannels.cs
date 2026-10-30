@@ -68,8 +68,12 @@ public sealed class RegressionWithChannels : MultiOutputIndicatorBase, IHistoric
         internal void Append(in Bar bar, int index, double[][] values, Span<double> scratch, CancellationToken cancellation)
         {
             if (_window is null || index < _leading) return;
+            if ((index - _leading + 1) % _length != 0)
+            {
+                _window.Accumulate(bar);
+                return;
+            }
             _window.Update(bar, scratch);
-            if ((index - _leading + 1) % _length != 0) return;
             var width = JurikDyadic.FromDouble(scratch[2]);
             width.Multiply(_deviations);
             width = width.Rounded();
