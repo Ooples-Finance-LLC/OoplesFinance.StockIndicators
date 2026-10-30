@@ -10,7 +10,7 @@ public sealed class CertifiedHilbertProjectionTests
     {
         var random = new Random(904215);
         int accepted = 0;
-        foreach (int exponent in new[] { -400, -100, 0, 100, 400 })
+        foreach (int exponent in new[] { -450, -400, -100, 0, 100, 400, 449 })
         for (int count = 1; count <= 50; count++)
         for (int replay = 0; replay < 4; replay++)
         {
