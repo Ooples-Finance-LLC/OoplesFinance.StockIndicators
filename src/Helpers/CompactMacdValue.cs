@@ -356,6 +356,12 @@ internal readonly struct CompactMacdValue
     {
         if (divisor <= 0) throw new ArgumentOutOfRangeException(nameof(divisor));
 #if !NETFRAMEWORK
+        // Classical windows usually divide by a small integer. Reuse exact
+        // count rounding instead of certifying a general rational quotient.
+        if (!_wide && divisor <= int.MaxValue
+            && CertifiedMeanRelativeError.TryDivideCount(Magnitude(_compact), (int)divisor,
+                checked(_scale - 1074), out double counted))
+            return _compact < 0 ? -counted : counted;
         if (!_wide && CertifiedCompactRatio.TryDivide(Magnitude(_compact),
             (UInt128)divisor, checked(_scale - 1074), out double result))
             return _compact < 0 ? -result : result;
