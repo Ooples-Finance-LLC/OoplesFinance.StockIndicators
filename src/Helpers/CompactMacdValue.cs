@@ -253,8 +253,20 @@ internal readonly struct CompactMacdValue
         if (!_wide)
         {
             UInt128 magnitude = Magnitude(_compact);
-            if (Width(magnitude) <= 53)
+            int width = Width(magnitude);
+            if (width <= 53)
             {
+                // This integer already fits a binary64 significand. For a normal
+                // result, compose its exact bits without floating-point scaling.
+                int exponent = _scale + width - 52;
+                if (width != 0 && exponent > 0 && exponent < 2047)
+                {
+                    ulong significand = (ulong)magnitude << (53 - width);
+                    ulong bits = ((ulong)exponent << 52)
+                        | (significand & ((1UL << 52) - 1));
+                    if (_compact < 0) bits |= 1UL << 63;
+                    return BitConverter.Int64BitsToDouble(unchecked((long)bits));
+                }
                 double value = Math.ScaleB((double)(ulong)magnitude, _scale - 1074);
                 if (!double.IsInfinity(value)) return _compact < 0 ? -value : value;
             }
