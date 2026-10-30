@@ -1,0 +1,75 @@
+{
+  "input_head": "f95ccfdd3374a989eb779e975813d9963d8c461c",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/ExactMeanAccumulator.cs",
+    "tests/ValidationTests/ExactMeanUnitWeightTests.cs"
+  ],
+  "batch_note": "Approved shared exact unit-weight addition paths; one combined affected-consumer qualification; performance pending.",
+  "step": "complete",
+  "updated_utc": "2026-10-30T20:50:20.869365+00:00",
+  "unit": {
+    "passed": 160,
+    "class_counts": {
+      "RollingStatisticsSharedExecutionTests": 17,
+      "SelectedDirectionalStateTests": 14,
+      "AverageDirectDifferenceTests": 3,
+      "CompactCmfTests": 21,
+      "CertifiedCommodityChannelTests": 12,
+      "CompactSmoothedAccumulationTests": 15,
+      "RocSharedExecutionTests": 13,
+      "MeanDiagnosticsCertifiedTests": 26,
+      "EnvelopeSharedExecutionTests": 16,
+      "ExactMeanDivisionCertificateTests": 7,
+      "PriceVolumeDetailsSharedExecutionTests": 12,
+      "SharedMoneyFlowCertificateTests": 1,
+      "ExactMeanUnitWeightTests": 3
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\unit-weight-accumulator\\unit\\unit.trx",
+    "sha256": "c8cbf2c5f0f90be877488673b91383838fc4456361e41efefb81b7414b909d89",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-unit-weight-accumulator-certified-20261030-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 99,
+    "class_counts": {
+      "HilbertCycleSignalComparisonTests": 11,
+      "ReturnBetaComparisonTests": 13,
+      "CommodityChannelComparisonTests": 16,
+      "TaDirectionalComparisonTests": 16,
+      "AccumulationDistributionComparisonTests": 17,
+      "MoneyFlowDetailComparisonTests": 9,
+      "FixedWeightedComparisonTests": 9,
+      "SmoothedAccumulationComparisonTests": 8
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\unit-weight-accumulator\\parity\\parity.trx",
+    "sha256": "34e77ef1c262861c25f56138cedbe93c15058b6c1681e6a9647d21558918777e",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-unit-weight-accumulator-certified-20261030-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-next-approved-batch-20261030\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f8c69e298737658b61249e4d78a6dbf71527e4ff05267490c295c6a099d0252c",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-next-approved-batch-20261030\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f8c69e298737658b61249e4d78a6dbf71527e4ff05267490c295c6a099d0252c",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-next-approved-batch-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f8c69e298737658b61249e4d78a6dbf71527e4ff05267490c295c6a099d0252c",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-next-approved-batch-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "f8c69e298737658b61249e4d78a6dbf71527e4ff05267490c295c6a099d0252c"
+  },
+  "source_fingerprint_sha256": "65bdea52190e44078cb2f9770c81be8e8657d8c0379e37791cd045c64dedcfaf",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved shared exact unit-weight addition paths; one combined affected-consumer qualification; performance pending. Correctness checks passed; controlled performance remains pending."
+}
