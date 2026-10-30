@@ -50,6 +50,23 @@ public sealed class CompactClassicalWindowTests
     }
 
     [Fact]
+    public void CountRatioPublicationPreservesBoundaryRoundingAndSignedUnderflow()
+    {
+        foreach (long coefficient in new[] { -((1L << 53) + 1), -3L, -1L, 0L, 1L, 3L, (1L << 53) + 1 })
+        foreach (int shift in new[] { 0, 1, 52, 1022, 1074, 1994, 2097 })
+        foreach (long divisor in new[] { 1L, 3L, 20L, 2048L, 2049L, int.MaxValue, (long)int.MaxValue + 1 })
+        {
+            BigInteger units = new BigInteger(coefficient) << shift;
+            double expected = 0, actual = 0;
+            var expectedError = Record.Exception(() => expected = ExactMeanAccumulator.UnitRatio(units, divisor));
+            var actualError = Record.Exception(() => actual = CompactMacdValue.FromUnits(units).PublishRatio(divisor));
+            Assert.Equal(expectedError?.GetType(), actualError?.GetType());
+            if (expectedError is null)
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
+        }
+    }
+
+    [Fact]
     public void RatioPublicationPreservesWideReferenceBitsAndExceptions()
     {
         var random = new Random(301027);
