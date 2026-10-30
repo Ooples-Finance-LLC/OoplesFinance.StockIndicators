@@ -13812,7 +13812,7 @@
     "src/Indicators/TensorsGpuExecution.Vortex.cs": "46c7e22739adc22cff24e5dc08c0faf1694fe11ae40c198c467dc61a85280aca",
     "src/Indicators/TensorsGpuExecution.WeightedAverage.cs": "9516c8f0a78f0c8734b0f881e99086fcff832a239a4a18666cf113d07ca86be6",
     "src/Indicators/TensorsGpuExecution.cs": "3ea7160afef55f5c76fb11596e1a17fb22a50006f8461a6fccd0b75ccb08dbc7",
-    "src/Indicators/TillsonAverage.cs": "35e1da67222cd0bd63d30e66e5f60bd4eb698a9bc7133f6827143c07ea786493",
+    "src/Indicators/TillsonAverage.cs": "1411eee0ed6b1c3a4167f6b6f171f053e6a3cb716563dab5d8bb808df7d50461",
     "src/Indicators/TradyStochastic.cs": "482120b0320768a2d08d617ab019d6b710f2c1ec01900c6f993973b46547853d",
     "src/Indicators/TrendAbandonedBabyPatterns.cs": "259214aa659b5ee3777b0039b24c40546c93adf1bebc374acd29e5f41b86ca10",
     "src/Indicators/TrendStarPattern.cs": "bdf1e54021d5162ce864757e139e96c0503ce350cfbab232f757e6d0677ad5b8",
