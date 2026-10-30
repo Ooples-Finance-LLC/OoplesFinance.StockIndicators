@@ -1,0 +1,60 @@
+{
+  "input_head": "93384af05bea1738e2769567566c1593b7b75ecc",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/TillsonAverage.cs",
+    "tests/ModelsTests/TillsonCompactInputTests.cs"
+  ],
+  "batch_note": "Approved T3 compact state follow-up: feed finite prices directly to the existing compact representation; retain wide entry path. Verify entry equivalence, independent rational histories and affected T3 consumers. No separate timing run added.",
+  "step": "complete",
+  "updated_utc": "2026-10-30T17:09:40.461076+00:00",
+  "unit": {
+    "passed": 147,
+    "class_counts": {
+      "TillsonSharedExecutionTests": 12,
+      "TillsonNumericalTests": 84,
+      "TillsonCompactSnapshotTests": 48,
+      "TillsonCompactInputTests": 3
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\tillson-input\\unit\\unit.trx",
+    "sha256": "13c7cc03d54c5cc739a4e2a4e0f130a90369f32e85127ca21069edbbcb6dad27",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-tillson-direct-compact-input-certified-20261030-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 26,
+    "class_counts": {
+      "SharedTillsonBenchmarkTests": 16,
+      "TillsonComparisonTests": 10
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\tillson-input\\parity\\parity.trx",
+    "sha256": "cbe1f5b7425360304fcb5cfee1d8b8d488fafab668206c622ea150836b668c6c",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-tillson-direct-compact-input-certified-20261030-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tillson-direct-compact-input-20261030\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "14198bd023407768d134e972c2482f9ac9d59a244c9cc64c39553a41d17f045f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tillson-direct-compact-input-20261030\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "14198bd023407768d134e972c2482f9ac9d59a244c9cc64c39553a41d17f045f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tillson-direct-compact-input-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "14198bd023407768d134e972c2482f9ac9d59a244c9cc64c39553a41d17f045f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tillson-direct-compact-input-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "14198bd023407768d134e972c2482f9ac9d59a244c9cc64c39553a41d17f045f"
+  },
+  "source_fingerprint_sha256": "3df601c31d33def8274363fd32e8fa1b847b5917da8e394d2bbb33327a704156",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved T3 compact state follow-up: feed finite prices directly to the existing compact representation; retain wide entry path. Verify entry equivalence, independent rational histories and affected T3 consumers. No separate timing run added. Correctness checks passed; controlled performance remains pending."
+}
