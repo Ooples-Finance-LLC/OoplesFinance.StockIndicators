@@ -15,7 +15,7 @@ public sealed class CompactMacdFusedRecurrenceTests
             -(BigInteger.One << 127)];
         foreach (var left in values)
         foreach (var right in values)
-        foreach (int period in new[] { 1, 2, 9, 12, 26, int.MaxValue })
+        foreach (int period in new[] { 1, 2, 9, 12, 26, 2047, 2048, int.MaxValue - 1, int.MaxValue })
         {
             var previous = CompactMacdValue.FromUnits(left);
             var input = CompactMacdValue.FromUnits(right);
@@ -28,7 +28,7 @@ public sealed class CompactMacdFusedRecurrenceTests
     public void RepeatedRoundedRecurrencesPreserveStateForNormalAndSubnormalPrices()
     {
         foreach (int exponent in new[] { -1074, -1022, -450, 0, 450, 1020 })
-        foreach (int period in new[] { 1, 9, 26, int.MaxValue })
+        foreach (int period in new[] { 1, 9, 26, 2047, 2048, int.MaxValue - 1, int.MaxValue })
         {
             var state = default(CompactMacdValue);
             var expected = BigInteger.Zero;

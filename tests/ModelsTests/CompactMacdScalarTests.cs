@@ -27,7 +27,11 @@ public sealed class CompactMacdScalarTests
     [InlineData(2)]
     [InlineData(3)]
     [InlineData(17)]
+    [InlineData(2047)]
+    [InlineData(2048)]
+    [InlineData(2049)]
     [InlineData(int.MaxValue)]
+    [InlineData((long)int.MaxValue + 1)]
     [InlineData(long.MaxValue)]
     public void ScalarRoundingMatchesWideRoundingIncludingExtendedValues(long divisor)
     {

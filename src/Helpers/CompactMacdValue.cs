@@ -327,6 +327,16 @@ internal readonly struct CompactMacdValue
     {
         result = default;
         if (numerator == 0) return denominator != 0;
+        // Periods and seeding counts use the existing exact integer-count
+        // publisher. Subnormal, extended and larger-divisor cases retain
+        // general certification and the caller's original wide fallback.
+        if (denominator <= int.MaxValue
+            && CertifiedMeanRelativeError.TryDivideCount(Magnitude(numerator), (int)denominator,
+                checked(scale - 1074), out double counted))
+        {
+            result = Of(numerator < 0 ? -counted : counted);
+            return true;
+        }
         if (!CertifiedCompactRatio.TryDivide(Magnitude(numerator), denominator,
             checked(scale - 1074), out double rounded)) return false;
         result = Of(numerator < 0 ? -rounded : rounded);
