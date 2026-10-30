@@ -103,12 +103,31 @@ public sealed class TillsonAverage : MultiOutputIndicatorBase, IIndicatorValidat
             _sums = new CompactMacdValue[6];
         private long _index = -1;
         private BigInteger _lastNumerator;
-        public BigInteger RoundedUnits => RocBankValue.RoundUnits(_lastNumerator, _denominator);
+#if !NETFRAMEWORK
+        private readonly double _factor;
+        private readonly bool _canCertify;
+        private bool _hasCertifiedValue;
+        private double _certifiedValue;
+#endif
+        public BigInteger RoundedUnits
+        {
+            get
+            {
+#if !NETFRAMEWORK
+                if (_hasCertifiedValue) return ExactVarianceWindow.Units(_certifiedValue);
+#endif
+                return RocBankValue.RoundUnits(_lastNumerator, _denominator);
+            }
+        }
 
         internal State(int period, double factor, TillsonSeed seed, int suppression)
         {
             _period = period;
             _seed = seed;
+#if !NETFRAMEWORK
+            _factor = factor;
+            _canCertify = Math.Abs(factor) is >= .25 and <= 2;
+#endif
             _first = (seed == TillsonSeed.CascadedMeans ? 6L * (period - 1) : 0) + suppression;
             var units = ExactVarianceWindow.Units(factor);
             var grid = BigInteger.One << 1074;
@@ -135,6 +154,10 @@ public sealed class TillsonAverage : MultiOutputIndicatorBase, IIndicatorValidat
             Array.Clear(_sums, 0, 6);
             _index = -1;
             _lastNumerator = 0;
+#if !NETFRAMEWORK
+            _hasCertifiedValue = false;
+            _certifiedValue = 0;
+#endif
         }
 
         public void Update(in Bar bar, Span<double> output) =>
@@ -178,6 +201,23 @@ public sealed class TillsonAverage : MultiOutputIndicatorBase, IIndicatorValidat
             }
             if (_index < _first)
                 return;
+#if !NETFRAMEWORK
+            // Prefix means and EMA steps round every stage. The initial direct
+            // seed may instead contain an arbitrary wide unpublished input.
+            // Certify only rounded stages; unsupported ranges use the exact
+            // polynomial below. RoundedUnits can reuse a certified finite value.
+            if (_canCertify && (_index > 0 || _seed == TillsonSeed.CascadedMeans)
+                && CertifiedTillson.TryCombine(_stages[2].Publish(), _stages[3].Publish(),
+                    _stages[4].Publish(), _stages[5].Publish(), _factor, out double certified))
+            {
+                _certifiedValue = certified;
+                _hasCertifiedValue = true;
+                output[0] = certified;
+                output[1] = 1;
+                return;
+            }
+            _hasCertifiedValue = false;
+#endif
             // Retain the common binary scale through the exact polynomial.
             // Publication still uses the original wide ratio, including signed
             // underflow and cancellation of coefficients larger than binary64.
