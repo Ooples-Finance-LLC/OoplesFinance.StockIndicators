@@ -1,0 +1,334 @@
+{
+  "status": "candidate-rejected-or-inconclusive",
+  "sources": {
+    "old": "be032d9ac6113d737f19457954d7b1413175929d",
+    "new": "7626ae029e2dca30690b521054aa0475ec8535a4"
+  },
+  "candidate_code_source": "1c9d9ef6b052092916ddd8c31cd2ae117b6123e0",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "SharedLogVolatilityBenchmarks",
+      "pair": "QuanTAlib.Historical",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        2.887316,
+        2.50682
+      ],
+      "new_means_ms": [
+        2.6219866666666665,
+        2.5731244444444443
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedLogVolatilityBenchmarks",
+      "pair": "QuanTAlib.Historical",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        2.90866828125,
+        2.60772265625
+      ],
+      "new_means_ms": [
+        2.489158203125,
+        2.48761984375
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedLogVolatilityBenchmarks",
+      "pair": "QuanTAlib.Historical",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        27.25185,
+        24.710078125
+      ],
+      "new_means_ms": [
+        26.35712,
+        25.052828125
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedLogVolatilityBenchmarks",
+      "pair": "QuanTAlib.Historical",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        28.760174,
+        24.201635555555555
+      ],
+      "new_means_ms": [
+        28.44539,
+        25.5499275
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedLogVolatilityBenchmarks",
+      "pair": "QuanTAlib.Realized",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        2.6628521875,
+        2.2684209375
+      ],
+      "new_means_ms": [
+        2.3928240625,
+        2.26783296875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedLogVolatilityBenchmarks",
+      "pair": "QuanTAlib.Realized",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        2.688343125,
+        2.239233203125
+      ],
+      "new_means_ms": [
+        2.365939409722222,
+        2.291876875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedLogVolatilityBenchmarks",
+      "pair": "QuanTAlib.Realized",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        25.13222,
+        23.261314
+      ],
+      "new_means_ms": [
+        23.926126,
+        23.1084225
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedLogVolatilityBenchmarks",
+      "pair": "QuanTAlib.Realized",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        25.35114,
+        24.999334
+      ],
+      "new_means_ms": [
+        23.326003333333333,
+        22.70712
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Historical",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        14.8166,
+        14.20001
+      ],
+      "new_means_ms": [
+        14.086777777777778,
+        13.887533333333334
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Historical",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        19.6773375,
+        16.4756375
+      ],
+      "new_means_ms": [
+        16.5794,
+        17.45103
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Realized",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        3.3834,
+        1.5900444444444446
+      ],
+      "new_means_ms": [
+        2.34855,
+        1.63684
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Realized",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        16.241766666666667,
+        14.776733333333334
+      ],
+      "new_means_ms": [
+        15.70769,
+        15.01782
+      ],
+      "verdict": "inconclusive"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "b80a1efbe1a2c270b5ea641deb1dea004882227a472f850172ffc55cc4672f59",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "e4499f9b3ffe846d3ed6df1d053a1f95dcc6dd4ebb585ff6d6fa9a5801895be1",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "afd7fc1f66b23dfc7b4c8863a52833b238051209a9b8e75822b3d8ed702c9fa0",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "32bab2d823b349e281b3e5dd4b8a5d47acd9b29c0d2acc1d91820054808b846e",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/verified-summary.json.gz"
+    },
+    "round0-old-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report-full-compressed.json": {
+      "sha256": "d83132af01a05fb0cf33e663792d067a57bf8e325c06d80a42fa3370312d6f78",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round0-old-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "1747917ceb91e226f7976e5c803fa4cd2921be43450f98e117fc8328dc9bfe8d",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report-full-compressed.json": {
+      "sha256": "b4a8f8f148664036c00452b1425d75fe75dddcd02d62c4c8a83790baacc3266a",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round1-new-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "05449fd39ffba4494428489ded895c4109e5fb3f7f48ada515bcba1aa86074cb",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report-full-compressed.json": {
+      "sha256": "b52ff0d14b1bed33729c0914edf9b6a72fc75fed6a3f53a52272b970063d01df",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round2-new-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "27931c4cbb37aa5a21e3fb608095b89e677f4e91ebb7b281a30020edcb754336",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report-full-compressed.json": {
+      "sha256": "3ef2688c8f42ca86e2a70198a11cf3517e9337c1500692d6f48ac5f2e7340ef4",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round3-old-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "6fd52f9c124bad46c3b2ac983f7a014dd18a50c4122a6059aa3353fcd1ed10f3",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "62edbfed5e9b924c0b35e50b62e2ead9a99ae74156afa2277d94741a71bd7fb4",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round0-old-SharedLogVolatilityBenchmarks.log": {
+      "sha256": "d187460db041060856edd2a3fbfc9ec7b90df9b31342b7d166dc5c41f2cb2960",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round0-old-SharedLogVolatilityBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "6c5f3baba80913ec5bd2fa1aa1e8ecbc246361aba0f9a71abf714c2baddb03c8",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-SharedLogVolatilityBenchmarks.log": {
+      "sha256": "0d9405102da1f36c3318f6dbf8237aecf0fe6d418a17daecadb0d90b28b4d28a",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round1-new-SharedLogVolatilityBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "c0bb8fb43168bd5734461e8afb8884bdbe3d83bd32423c8bd38bff0f48ed2489",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-SharedLogVolatilityBenchmarks.log": {
+      "sha256": "fe522d412221f3d2c204b3cd2d030ace19e43efa365c9b6483c560edaf2f744c",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round2-new-SharedLogVolatilityBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "18936008d287fc79699af5424605bb8b25711e6085ac6937ced44cacf233936c",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-SharedLogVolatilityBenchmarks.log": {
+      "sha256": "be05aab4f8fbba65a0274a45aa291acf32a8960fa0912f5ff018794bb6a291d1",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/round3-old-SharedLogVolatilityBenchmarks.log.gz"
+    },
+    "invalidated-attempts/20261030T072513561311/interruption.json": {
+      "sha256": "cb694760a288a2b2fcfe30fcc66e07324cef46c6be919f6b0886a31c890d1d65",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/invalidated-attempts/20261030T072513561311/interruption.json.gz"
+    },
+    "invalidated-attempts/20261030T072513561311/round0-old-SharedLogVolatilityBenchmarks.log": {
+      "sha256": "3b97a2b215f4c9932e6794651867053aeec889868198dca4d825c637f2fd83f9",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/invalidated-attempts/20261030T072513561311/round0-old-SharedLogVolatilityBenchmarks.log.gz"
+    },
+    "invalidated-attempts/20261030T075313423862/interruption.json": {
+      "sha256": "a85650249c48e369407f26e6bb462af90ee000b0c7970aba84f51ffac13999e4",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/invalidated-attempts/20261030T075313423862/interruption.json.gz"
+    },
+    "invalidated-attempts/20261030T075313423862/round0-old-SharedLogVolatilityBenchmarks.log": {
+      "sha256": "7e7282aafe9b9359ede31aaa449979fac4cf4ab003f6ad5c7aceb1111dcae392",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/invalidated-attempts/20261030T075313423862/round0-old-SharedLogVolatilityBenchmarks.log.gz"
+    },
+    "invalidated-attempts/20261030T082544662507/interruption.json": {
+      "sha256": "d13838bfe51cb930d1f1cd1463ac3ca568230dfad19c9f8b7ee3c88f7f3d6741",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/invalidated-attempts/20261030T082544662507/interruption.json.gz"
+    },
+    "invalidated-attempts/20261030T082544662507/round2-new-SharedLogVolatilityBenchmarks.log": {
+      "sha256": "e8b8069f6954f3ab0d52d888d99961d2a82ef36ea98278343d717eb9095546cd",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/invalidated-attempts/20261030T082544662507/round2-new-SharedLogVolatilityBenchmarks.log.gz"
+    },
+    "invalidated-attempts/20261030T082544662507/round2-new-SharedLogVolatilityBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-20261030-042503.log": {
+      "sha256": "8a4f10b49b1c0919037a7f2d4aeb9b42e7354326eb7e815ced8d240520ebeb92",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/invalidated-attempts/20261030T082544662507/round2-new-SharedLogVolatilityBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-20261030-042503.log.gz"
+    },
+    "invalidated-attempts/20261030T075313423862/round0-old-SharedLogVolatilityBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-20261030-035300.log": {
+      "sha256": "ae09cc3e40b008254799d1930cc459c32b55b0dc0901e9ddbfec302d76b32f5d",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/invalidated-attempts/20261030T075313423862/round0-old-SharedLogVolatilityBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-20261030-035300.log.gz"
+    },
+    "invalidated-attempts/20261030T072513561311/round0-old-SharedLogVolatilityBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-20261030-032348.log": {
+      "sha256": "67cfc3fe69008e7a279ba41e8da760b93b578b9f79a89144cf641889be0d67a2",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/invalidated-attempts/20261030T072513561311/round0-old-SharedLogVolatilityBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-20261030-032348.log.gz"
+    },
+    "invalidated-attempts/20261030T072513561311/round0-old-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report-full-compressed.json": {
+      "sha256": "7465f8cc873633ba89346f714ed052789828796597ac3224dbc4775a4b007ce5",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/invalidated-attempts/20261030T072513561311/round0-old-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report-full-compressed.json.gz"
+    },
+    "invalidated-attempts/20261030T072513561311/round0-old-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report-github.md": {
+      "sha256": "b7e8d1a3beb7de0ee164a167d982f7d11d68ce520d9284ea9304ff9e65738493",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/invalidated-attempts/20261030T072513561311/round0-old-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report-github.md.gz"
+    },
+    "invalidated-attempts/20261030T072513561311/round0-old-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report.csv": {
+      "sha256": "09a8b00bdffd2384984f2ff9454eec6e0e739de365fcdda559aab554da87455d",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/invalidated-attempts/20261030T072513561311/round0-old-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report.csv.gz"
+    },
+    "invalidated-attempts/20261030T072513561311/round0-old-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report.html": {
+      "sha256": "aa149c44117a2928945402b897f3c50068435f0f67fb5714a819b7f39c9dd1b6",
+      "archive": "benchmarks/results/remaining-indicators/local-log-volatility-retained-squares-control-20261029/invalidated-attempts/20261030T072513561311/round0-old-SharedLogVolatilityBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedLogVolatilityBenchmarks-report.html.gz"
+    }
+  },
+  "scripts": {
+    "measure-log-volatility-retained-squares-control-20261029.py": "655645a76923ad4e76115987fe7bee2ab8e71eaf2864cd900319479d84256fa3",
+    "verify-log-volatility-retained-squares-control-20261029.py": "c1215388c9b04356481f62b819d636e8c8e788f938b3da801961799cd57b9f3f",
+    "benchmark_process_cleanup.py": "fa2c088e49c3cc04c2e5a99bbe875080b95253f5e156f2983e4691420b8d8fc3",
+    "log_volatility_retained_acceptance.py": "ea1cc1aa083253554c25ec7f81b19f285695558e6ae048ab1d9d42add02218ce"
+  },
+  "source_companion_inputs": {},
+  "report_imported": false,
+  "production_integrated": false
+}
