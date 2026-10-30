@@ -187,7 +187,8 @@
     "regression_channel_final_acceptance.py": "7689b763fed8e14d7dc7d651f4929d5b474f8887a1b73020af13b019ce3ec5f9"
   },
   "source_companion_inputs": {},
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/regression-channel-final-statistics-integration-source-proof-20261029.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/regression-channel-final-statistics-integration-source-proof-20261029.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/regression-channel-final-statistics-certified-local-regression-channel-final-statistics-control-20261029-report-import.json"
 }
