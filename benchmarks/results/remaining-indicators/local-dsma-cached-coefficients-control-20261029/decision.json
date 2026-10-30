@@ -199,7 +199,8 @@
     "dsma_cached_acceptance.py": "1b05df46fabdcb32c053cc494a746092a6c2ce9431fe741877bf62435ef134cb"
   },
   "source_companion_inputs": {},
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/dsma-cached-coefficients-integration-source-proof-20261029.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/dsma-cached-coefficients-integration-source-proof-20261029.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/dsma-cached-coefficients-certified-local-dsma-cached-coefficients-control-20261029-report-import.json"
 }
