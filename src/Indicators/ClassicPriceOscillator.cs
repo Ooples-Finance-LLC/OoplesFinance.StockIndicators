@@ -145,6 +145,17 @@ public sealed class ClassicPriceOscillator : MultiOutputIndicatorBase, IIndicato
             _slow.UpdateUnits(input, _s);
             if (_f[1] == 0 || _s[1] == 0)
                 return;
+#if !NETFRAMEWORK
+            if (!_percentage && double.IsFinite(_f[0]) && double.IsFinite(_s[0]))
+            {
+                // The averages are already rounded binary64 values. Subtraction
+                // rounds their exact difference once, just like the unit ratio.
+                double difference = _f[0] - _s[0];
+                output[0] = difference == 0 ? 0 : difference; // NOSONAR: canonical exact zero.
+                output[1] = 1;
+                return;
+            }
+#endif
             var f = _fast.RoundedUnits;
             var s = _slow.RoundedUnits;
             if (_percentage)
