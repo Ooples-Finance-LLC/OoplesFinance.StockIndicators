@@ -13642,7 +13642,7 @@
     "src/Builder/Compute/BuilderArmTargets.cs": "86f2cd1f1e2c5cd064bd301a72efcd0b536267d09a611dfdca1480c20cb8e419",
     "src/Enums/IndicatorName.cs": "cad2063df998a7723103c8deb4843d0e07b8c5dcfe26fbcc6bf89212dbb569b4",
     "src/Indicators/AccumulationDistributionWithAverage.cs": "7a7ddf3ef6be394d6016e383fccc281e0a791c0b546695a844d9691b98cccfd8",
-    "src/Indicators/AlignedEmaMacd.cs": "3bdd9fe41daa77002373eb2082ebb12d54b502a981a886f4c0069a58995e2263",
+    "src/Indicators/AlignedEmaMacd.cs": "c4c71a5a6f0a0031ebe52b4b7b5c8053ad9ae595553ab78da5adfdda589a57a1",
     "src/Indicators/AlligatorWithDetails.cs": "fa45dffe8369b5e4d696322cb1405e6a0177f8f3058b232a2bdbe2a5172d15d0",
     "src/Indicators/AnalyticWeightedAverages.cs": "20840c3ed4b8d2b289285f6706a8020179ab8e12a2fd5b504104e390a5b3f749",
     "src/Indicators/ArnaudLegouxWindow.cs": "b5a4d8a85d5b22609e72baf15f9a856301a2bcb5bd042071581fdab177a95872",
@@ -13682,7 +13682,7 @@
     "src/Indicators/DynamicMomentumSnapshot.cs": "127a73db413c24d32cfd50b9a5d0cf060c65352a9eb7332cde2e08472dba5aa8",
     "src/Indicators/DynamicMomentumStrength.cs": "9c9f4ee509b621ec583a0d18e4c639fc57d48e472fe71c22625ed3f773bdc0c7",
     "src/Indicators/ElderRayWithDetails.cs": "897eb7a7cf12f6e39cc4164b6820b5dd6682412f5e084a316fd13e92fcd09072",
-    "src/Indicators/EmaDifferenceSignal.cs": "27632649d873e200ee425df4afdba8daaa12ac54c341cdabafcbd10ca3011992",
+    "src/Indicators/EmaDifferenceSignal.cs": "014550d8aaf7fa9d88d49fb395f04a481949dbc870a449026fb41b6624aa1d67",
     "src/Indicators/EngulfingPattern.cs": "23244f99c219def07a0a7ae048758119c6cd9b3a4034499c048256258a4f5413",
     "src/Indicators/ExhaustionCandles.cs": "bde7f0302572ca4b39805ce8a61b9151c64ed7c805760e7fac31e7b493ba6e99",
     "src/Indicators/ExpandingRegularizedEma.cs": "e221d0cf38199e5a947eecd4a4a5ac564ba2115b8c74cee021bc209f30299a59",
@@ -13692,7 +13692,7 @@
     "src/Indicators/FilteredDeviationAverage.cs": "b35c070da38e65291afe1692d22e0605d9a7297c0ed9cd6c7378e17040748392",
     "src/Indicators/FirstValueEma.cs": "ac69174363822d1890d70e605a3946c61c132c014b50b0f697c467013382cdca",
     "src/Indicators/FiveCandleContinuationPatterns.cs": "097944f03b3e4086e1e068d36c5df67dd97e2e49902a59b3f616ddc0b999f9a7",
-    "src/Indicators/FixedKernelSnapshots.cs": "b46f2414cfccc16cb11cc6edf1e9dd317a9d3a469c833a5a483038dac12c28f5",
+    "src/Indicators/FixedKernelSnapshots.cs": "09c2f5724b5493ec18bcee66db877d4fc5c9d8c8e1c275dc924c2da9802adead",
     "src/Indicators/FixedPeriodWma.cs": "bdfd1c002b73ffa5ff6a16c0bea5048d71c93eecf8e1c556ce79465802cab5e3",
     "src/Indicators/FractalSnapshot.cs": "ce14602b642b725cef43501dba8789c5f0ce9dcf6607165de838d03b070e826a",
     "src/Indicators/FusedBarExecution.cs": "813bfba73a4093c7665dde81322dfc8c5aa63ab176ae7f74c6da827d99f8a859",
@@ -13812,7 +13812,7 @@
     "src/Indicators/TensorsGpuExecution.Vortex.cs": "46c7e22739adc22cff24e5dc08c0faf1694fe11ae40c198c467dc61a85280aca",
     "src/Indicators/TensorsGpuExecution.WeightedAverage.cs": "9516c8f0a78f0c8734b0f881e99086fcff832a239a4a18666cf113d07ca86be6",
     "src/Indicators/TensorsGpuExecution.cs": "3ea7160afef55f5c76fb11596e1a17fb22a50006f8461a6fccd0b75ccb08dbc7",
-    "src/Indicators/TillsonAverage.cs": "e041e7305c0a7ba91e4e7586454c00bde3ad8d012741b17f28d97c6089c18e32",
+    "src/Indicators/TillsonAverage.cs": "28fd6580caf2f5ef0b788ab6b96f97d297b03b4a19be6768445821ed8b9b16ca",
     "src/Indicators/TradyStochastic.cs": "482120b0320768a2d08d617ab019d6b710f2c1ec01900c6f993973b46547853d",
     "src/Indicators/TrendAbandonedBabyPatterns.cs": "259214aa659b5ee3777b0039b24c40546c93adf1bebc374acd29e5f41b86ca10",
     "src/Indicators/TrendStarPattern.cs": "bdf1e54021d5162ce864757e139e96c0503ce350cfbab232f757e6d0677ad5b8",
@@ -13955,7 +13955,7 @@
     "src/Indicators/WindowAverageEnvelope.cs": "7d350d04c94cadb0d256bc4f20553b63a15ca0849719dde098a1bfcab5d25ec6",
     "src/Indicators/WindowChandelierExit.cs": "e87bec50e6c6d4bd7c1f0befa0a045b265c097bd502115111a3d058fb1bf9eab",
     "src/Indicators/WindowChoppinessIndex.cs": "74313363d7755510049b441711f511d4a2d1a65db303bfd56dac2342f39d0055",
-    "src/Indicators/WindowCommodityChannelIndex.cs": "fdcadc5292aa2b387fe9dad2799865d5e5d1b0d4c4e8c0ade157c7868cef0c60",
+    "src/Indicators/WindowCommodityChannelIndex.cs": "20aef10b5c11b5616bbf57b5b441f56f553e9cca980025adc5875930089f2ede",
     "src/Indicators/WindowCpuKernels.cs": "eacc328aa605a2e3e2e61c25b43d8bdf6e27317fcb408b01fbab292950f437aa",
     "src/Indicators/WindowDeviationBands.cs": "123a48b2adbe613bb82f38676aec26d27ed2965a120f81b8d226734757f6a545",
     "src/Indicators/WindowDirectionalMeasure.cs": "80b1e591d9369df469ccd5b70e934b9062271c276bb9d2f3c7e07bd8f03481e5",
@@ -13978,6 +13978,6 @@
     "src/Indicators/WindowVortex.cs": "53b281190ab0ab8b184d890b061488efb7d12304f8575e1a6facd05966c1b723",
     "src/Indicators/WindowedSinc.cs": "c7cb8f8b65c173e08a98f430cb24a2a514421b578d13ec7db71945187f1c3216",
     "src/Indicators/ZeroSeedLaguerreFilter.cs": "22cedebf855f3680e65630d251754d329ae2975bad8a823147f45d99ec0c2698",
-    "src/Indicators/ZigZagSnapshot.cs": "689ef45910d195af5f82625ea383e0cdc8542d653d521ab81ce9eb0c730ae431"
+    "src/Indicators/ZigZagSnapshot.cs": "a5c99cda70b6e67e042f978797b45db31f4cfdb306b9ceeed57837d4d3bcfe7d"
   }
 }
