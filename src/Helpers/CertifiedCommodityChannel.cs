@@ -5,6 +5,23 @@ namespace OoplesFinance.StockIndicators.Helpers;
 // including means near zero, use a bounded 128-bit grid before dyadic fallback.
 internal static class CertifiedCommodityChannel
 {
+    internal static double Mean(in JurikDyadic sum, int count)
+    {
+        if (count > 0)
+        {
+            if (sum.TryDouble(out double scalar) && double.IsFinite(scalar))
+                return scalar == 0 ? 0 : scalar / count;
+            if (sum.TryBinaryParts(out Int128 integer, out int exponent))
+            {
+                // Unsigned magnitude also covers Int128.MinValue exactly.
+                UInt128 magnitude = unchecked((UInt128)(integer < 0 ? -integer : integer));
+                if (CertifiedMeanRelativeError.TryDivideCount(magnitude, count, exponent, out double value))
+                    return integer < 0 ? -value : value;
+            }
+        }
+        return sum.Mean(count);
+    }
+
     internal static bool TryCompute(Queue<double> prices, double mean, double current,
         out double result, out bool defined) =>
         TryComputeNarrow(prices, mean, current, out result, out defined)

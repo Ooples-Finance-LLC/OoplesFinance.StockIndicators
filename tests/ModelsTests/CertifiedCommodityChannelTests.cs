@@ -7,6 +7,31 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class CertifiedCommodityChannelTests
 {
     [Fact]
+    public void CountMeanMatchesIndependentFractionsAtCompactAndWideBoundaries()
+    {
+        Int128[] coefficients = [0, 1, -1, ((Int128)1 << 53) + 1,
+            -(((Int128)1 << 53) + 1), ((Int128)1 << 105) - 1, -(((Int128)1 << 105) - 1)];
+        foreach (Int128 coefficient in coefficients)
+        foreach (int exponent in new[] { -1178, -1074, -1022, -64, 0, 900, 1023 })
+        foreach (int count in new[] { 1, 3, 20, 256, 2048, 2049, int.MaxValue })
+        {
+            var sum = JurikDyadic.FromBinaryProduct(coefficient, exponent);
+            var exact = new ReferenceFraction((System.Numerics.BigInteger)coefficient);
+            var scale = new ReferenceFraction(System.Numerics.BigInteger.One << Math.Abs(exponent));
+            exact = exponent < 0 ? exact / scale : exact * scale;
+            Equal((exact / new ReferenceFraction(count)).ToDouble(), CertifiedCommodityChannel.Mean(sum, count));
+        }
+        foreach (double sign in new[] { 1d, -1d })
+        {
+            var sum = JurikDyadic.FromDouble(sign * double.MaxValue);
+            sum.Add(sign * double.Epsilon);
+            var exact = ReferenceFraction.FromDouble(sign * double.MaxValue)
+                + ReferenceFraction.FromDouble(sign * double.Epsilon);
+            Equal((exact / new ReferenceFraction(3)).ToDouble(), CertifiedCommodityChannel.Mean(sum, 3));
+        }
+    }
+
+    [Fact]
     public void AcceptedWindowSumsMatchIndependentExactRatios()
     {
         var random = new Random(829731);
