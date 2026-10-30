@@ -1,0 +1,57 @@
+{
+  "input_head": "8c4678d937f07e70dbdfcc0a0638fa24ecc5ecaa",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/SumSeededDirectionalIndex.cs"
+  ],
+  "batch_note": "Cache exact period and period-minus-one dyadic factors in private SumSeededDirectionalIndex state. Existing exact multiplication, wide fallback, division and rounding unchanged; identity factor remains a no-op and legacy path unchanged. Existing boundary/reset/allocation and long-history/native fixture regressions; controlled performance pending.",
+  "step": "complete",
+  "updated_utc": "2026-10-30T11:13:05.007221+00:00",
+  "unit": {
+    "passed": 9,
+    "class_counts": {
+      "SumDirectionalExecutionTests": 5,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sum-directional-cached-coefficients\\unit\\unit.trx",
+    "sha256": "f98fb36ad7d9fd641af3e1ab82bb987b3ddb24f6e6476cacb33c5e8f7fae388a",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sum-directional-cached-coefficients-certified-20261029-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 29,
+    "class_counts": {
+      "SumDirectionalComparisonTests": 10,
+      "SharedSkenderStrengthBenchmarkTests": 19
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sum-directional-cached-coefficients\\parity\\parity.trx",
+    "sha256": "af92f29e6486432021e42994836d0e0bce7ee550864d0f3e710ed1e692e88217",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sum-directional-cached-coefficients-certified-20261029-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sum-directional-cached-coefficients-20261029\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0f986160e2e586f500fda8ed48ce6293950e04e88d771acd461c07807d634219",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sum-directional-cached-coefficients-20261029\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0f986160e2e586f500fda8ed48ce6293950e04e88d771acd461c07807d634219",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sum-directional-cached-coefficients-20261029\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0f986160e2e586f500fda8ed48ce6293950e04e88d771acd461c07807d634219",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sum-directional-cached-coefficients-20261029\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0f986160e2e586f500fda8ed48ce6293950e04e88d771acd461c07807d634219"
+  },
+  "source_fingerprint_sha256": "8bcf6b30d8a27160a6ce26b1402f1b491af33d528759078d86db277419e384fd",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Cache exact period and period-minus-one dyadic factors in private SumSeededDirectionalIndex state. Existing exact multiplication, wide fallback, division and rounding unchanged; identity factor remains a no-op and legacy path unchanged. Existing boundary/reset/allocation and long-history/native fixture regressions; controlled performance pending. Correctness checks passed; controlled performance remains pending."
+}
