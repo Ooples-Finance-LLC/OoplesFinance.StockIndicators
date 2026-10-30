@@ -110,9 +110,33 @@ internal readonly struct CompactMacdValue
 #endif
         return left + new CompactMacdValue(-right.Coefficient, right._scale);
     }
+    // Reuse the proven word-smoother quotient estimate for fixed periods.
+    // The zero reciprocal retains general division outside the bounded domain.
+    internal readonly struct EmaRecurrence
+    {
+        private readonly int _period;
+        private readonly ulong _reciprocal;
+
+        internal EmaRecurrence(int period)
+        {
+            _period = period;
+#if !NETFRAMEWORK
+            _reciprocal = period is >= 1 and <= 2047
+                ? (ulong)(((UInt128)1 << 64) / (ulong)(period + 1)) : 0;
+#else
+            _reciprocal = 0;
+#endif
+        }
+
+        internal CompactMacdValue Advance(in CompactMacdValue prior, in CompactMacdValue input) =>
+            prior.AdvanceEma(input, _period, _reciprocal);
+    }
+
     // Keep the unrounded recurrence in one compact expression. The fallback
     // preserves extended exponents and all exact subnormal rounding boundaries.
-    internal CompactMacdValue AdvanceEma(CompactMacdValue input, int period)
+    internal CompactMacdValue AdvanceEma(CompactMacdValue input, int period) => AdvanceEma(input, period, 0);
+
+    private CompactMacdValue AdvanceEma(CompactMacdValue input, int period, ulong reciprocal)
     {
         if (period < 1) throw new ArgumentOutOfRangeException(nameof(period));
 #if !NETFRAMEWORK
@@ -129,8 +153,20 @@ internal readonly struct CompactMacdValue
             ulong denominator = (ulong)(period + 1);
             ulong numerator = checked((ulong)_compact * (ulong)(period - 1)
                 + 2 * (ulong)input._compact);
-            ulong quotient = numerator / denominator;
-            ulong remainder = numerator % denominator;
+            ulong quotient, remainder;
+            if (reciprocal != 0)
+            {
+                // floor(2^64/d) underestimates n/d by less than one for
+                // n < 2^64. One correction recovers the exact quotient.
+                quotient = Math.BigMul(numerator, reciprocal, out _);
+                remainder = numerator - quotient * denominator;
+                if (remainder >= denominator) { quotient++; remainder -= denominator; }
+            }
+            else
+            {
+                quotient = numerator / denominator;
+                remainder = numerator % denominator;
+            }
             ulong complement = denominator - remainder;
             if (remainder > complement || remainder == complement && (quotient & 1) != 0)
                 quotient++;
