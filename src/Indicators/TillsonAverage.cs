@@ -99,8 +99,8 @@ public sealed class TillsonAverage : MultiOutputIndicatorBase, IIndicatorValidat
         private readonly long _first;
         private readonly BigInteger[] _coefficients;
         private readonly BigInteger _denominator;
-        private readonly BigInteger[] _stages = new BigInteger[6],
-            _sums = new BigInteger[6];
+        private readonly CompactMacdValue[] _stages = new CompactMacdValue[6],
+            _sums = new CompactMacdValue[6];
         private long _index = -1;
         private BigInteger _lastNumerator;
         public BigInteger RoundedUnits => RocBankValue.RoundUnits(_lastNumerator, _denominator);
@@ -142,6 +142,7 @@ public sealed class TillsonAverage : MultiOutputIndicatorBase, IIndicatorValidat
 
         public void UpdateUnits(BigInteger value, Span<double> output)
         {
+            var compact = CompactMacdValue.FromUnits(value);
             output.Clear();
             _index++;
             for (var j = 0; j < 6; j++)
@@ -153,37 +154,37 @@ public sealed class TillsonAverage : MultiOutputIndicatorBase, IIndicatorValidat
                         return;
                     if (_index < start + _period)
                     {
-                        _sums[j] += value;
+                        _sums[j] += compact;
                         if (_index != start + _period - 1)
                             return;
-                        _stages[j] = RocBankValue.RoundUnits(_sums[j], _period);
-                        _sums[j] = 0;
+                        _stages[j] = _sums[j].Round(_period);
+                        _sums[j] = default;
                     }
                     else
-                        _stages[j] = Smooth(_stages[j], value);
+                        _stages[j] = _stages[j].AdvanceEma(compact, _period);
                 }
                 else if (_index == 0)
-                    _stages[j] = value;
+                    _stages[j] = compact;
                 else if (_seed == TillsonSeed.FollowingPrefix && _index < _period)
                 {
-                    _sums[j] += value;
-                    _stages[j] = RocBankValue.RoundUnits(_sums[j], _index);
+                    _sums[j] += compact;
+                    _stages[j] = _sums[j].Round(_index);
                 }
                 else
-                    _stages[j] = Smooth(_stages[j], value);
-                value = _stages[j];
+                    _stages[j] = _stages[j].AdvanceEma(compact, _period);
+                compact = _stages[j];
             }
             if (_index < _first)
                 return;
-            _lastNumerator = _coefficients[0] * _stages[2]
-                + _coefficients[1] * _stages[3]
-                + _coefficients[2] * _stages[4]
-                + _coefficients[3] * _stages[5];
+            // Retain the common binary scale through the exact polynomial.
+            // Publication still uses the original wide ratio, including signed
+            // underflow and cancellation of coefficients larger than binary64.
+            _lastNumerator = (_stages[2].Times(_coefficients[0])
+                + _stages[3].Times(_coefficients[1])
+                + _stages[4].Times(_coefficients[2])
+                + _stages[5].Times(_coefficients[3])).Units;
             output[0] = ExactMeanAccumulator.UnitRatio(_lastNumerator, _denominator);
             output[1] = 1;
         }
-
-        private BigInteger Smooth(BigInteger prior, BigInteger input) =>
-            RocBankValue.RoundUnits(prior * (_period - 1) + 2 * input, (long)_period + 1);
     }
 }
