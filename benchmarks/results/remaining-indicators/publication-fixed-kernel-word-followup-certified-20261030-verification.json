@@ -1,0 +1,66 @@
+{
+  "input_head": "e1d05eb2d94330579011c47ce757a48a28804123",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/FixedKernelSnapshots.cs",
+    "src/Indicators/PriorSeededDirectionalMeasure.cs",
+    "tests/ModelsTests/FibonacciRollingSnapshotTests.cs",
+    "tests/ModelsTests/WindowedSincCompactTests.cs"
+  ],
+  "batch_note": "Bounded Afirma/Fibonacci exact arithmetic reuse and TA directional temporary-accumulator removal; one combined affected-consumer qualification; performance pending.",
+  "step": "complete",
+  "updated_utc": "2026-10-30T19:44:18.320831+00:00",
+  "unit": {
+    "passed": 64,
+    "class_counts": {
+      "FibonacciWeightedAverageTests": 12,
+      "FibonacciRollingSnapshotTests": 15,
+      "WindowedSincTests": 15,
+      "WindowedSincCompactTests": 8,
+      "SelectedDirectionalStateTests": 14
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\fixed-kernel-word-followup\\unit\\unit.trx",
+    "sha256": "abb7fe0e1d76f29eef503fa2c21a574e8447d0cf504cd6396dbc57615713bada",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-fixed-kernel-word-followup-certified-20261030-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 45,
+    "class_counts": {
+      "FixedKernelSnapshotComparisonTests": 8,
+      "TaDirectionalComparisonTests": 16,
+      "SharedTaDirectionalBenchmarkTests": 7,
+      "FibonacciBuilderComparisonTests": 7,
+      "SincBuilderComparisonTests": 7
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\fixed-kernel-word-followup\\parity\\parity.trx",
+    "sha256": "118e8acf995cf76ab9390f3b505798e1e98f855ecb50b20d13b202cd272d25d5",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-fixed-kernel-word-followup-certified-20261030-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-word-products-20261030\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "dbe8fe8af25dd880fd75a9c550583e7e8ac9835d93d65e596beafe6bf055c6ce",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-word-products-20261030\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "dbe8fe8af25dd880fd75a9c550583e7e8ac9835d93d65e596beafe6bf055c6ce",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-word-products-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "dbe8fe8af25dd880fd75a9c550583e7e8ac9835d93d65e596beafe6bf055c6ce",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-word-products-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "dbe8fe8af25dd880fd75a9c550583e7e8ac9835d93d65e596beafe6bf055c6ce"
+  },
+  "source_fingerprint_sha256": "41d286650e073a0a88a460dc137c6323ed97cbd33c5aa5966ba8ebe36b4aef6e",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Bounded Afirma/Fibonacci exact arithmetic reuse and TA directional temporary-accumulator removal; one combined affected-consumer qualification; performance pending. Correctness checks passed; controlled performance remains pending."
+}
