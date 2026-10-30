@@ -234,9 +234,9 @@ public static class WindowedSincSnapshot
             // Only startup extends the newest observation. Full windows use
             // consecutive prices, preserving the original oldest-first sum.
             for (int k = 0; k < available; k++)
-                numerator = unchecked(numerator + (Int128)prices[start + k] * coefficients[k]);
+                numerator = unchecked(numerator + WordProduct(prices[start + k], coefficients[k]));
             for (int k = available; k < coefficients.Length; k++)
-                numerator = unchecked(numerator + (Int128)prices[i] * coefficients[k]);
+                numerator = unchecked(numerator + WordProduct(prices[i], coefficients[k]));
             if (numerator == 0) continue;
             UInt128 magnitude = (UInt128)(numerator < 0 ? -numerator : numerator);
             if (CertifiedCompactRatio.TryDivide(magnitude, denominator, priceMinimum - 1075, out double value))
@@ -254,6 +254,14 @@ public static class WindowedSincSnapshot
                 throw new OverflowException("Sinc output is not representable.");
         }
         return true;
+    }
+
+    private static Int128 WordProduct(long left, long right)
+    {
+        // Both operands already fit signed Int64. One full-width product
+        // preserves all 128 result bits, including mixed-sign low-word carries.
+        long high = Math.BigMul(left, right, out long low);
+        return ((Int128)high << 64) | unchecked((ulong)low);
     }
 
     private static bool IncludeGrid(double value, ref int minimum, ref int maximum)

@@ -5,6 +5,27 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class WindowedSincCompactTests
 {
+    [Theory]
+    [InlineData(SincWindow.Rectangular)]
+    [InlineData(SincWindow.Hann)]
+    [InlineData(SincWindow.Hamming)]
+    [InlineData(SincWindow.Blackman)]
+    [InlineData(SincWindow.BlackmanHarris)]
+    public void SignedWordProductsPreserveExactConvolutionAcrossLowWordCarries(SincWindow window)
+    {
+        var random = new Random(301030);
+        var prices = Enumerable.Range(0, 97).Select(i =>
+        {
+            long fraction = i % 3 == 0 ? (1L << 52) - 1 : random.NextInt64(1L << 52);
+            long sign = i % 2 == 0 ? 0 : long.MinValue;
+            return BitConverter.Int64BitsToDouble(sign | (1023L << 52) | fraction);
+        }).ToArray();
+        // Even taps avoid sampled sinc zeros and exercise negative compact
+        // coefficients; the long-period kernel covers full positive windows.
+        foreach (var (period, taps) in new[] { (3, 3), (3, 8), (20, 21) })
+            Check(prices, period, taps, window);
+    }
+
     [Fact]
     public void EveryWindowPreservesIndependentExactConvolutionAndStartup()
     {
