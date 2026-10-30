@@ -90,7 +90,11 @@ public static class FibonacciWeightedSnapshot
             shifted = nextShifted;
             // Publish the complete exact ratio once, including subnormal results
             // caused by cancellation. No rounded quotient is scaled afterwards.
-            output[i] = JurikDyadic.FromBinaryProduct(weighted, scale).Mean((int)mass);
+            UInt128 magnitude = (UInt128)(weighted < 0 ? -weighted : weighted);
+            if (CertifiedMeanRelativeError.TryDivideCount(magnitude, (int)mass, scale, out double counted))
+                output[i] = weighted < 0 ? -counted : counted;
+            else
+                output[i] = JurikDyadic.FromBinaryProduct(weighted, scale).Mean((int)mass);
         }
         return true;
     }
