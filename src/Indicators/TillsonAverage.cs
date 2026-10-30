@@ -95,6 +95,7 @@ public sealed class TillsonAverage : MultiOutputIndicatorBase, IIndicatorValidat
     private sealed class State : IMultiOutputState, IWideAverageState
     {
         private readonly int _period;
+        private readonly CompactMacdValue.EmaRecurrence _recurrence;
         private readonly TillsonSeed _seed;
         private readonly long _first;
         private readonly BigInteger[] _coefficients;
@@ -123,6 +124,7 @@ public sealed class TillsonAverage : MultiOutputIndicatorBase, IIndicatorValidat
         internal State(int period, double factor, TillsonSeed seed, int suppression)
         {
             _period = period;
+            _recurrence = new(period);
             _seed = seed;
 #if !NETFRAMEWORK
             _factor = factor;
@@ -186,7 +188,7 @@ public sealed class TillsonAverage : MultiOutputIndicatorBase, IIndicatorValidat
                         _sums[j] = default;
                     }
                     else
-                        _stages[j] = _stages[j].AdvanceEma(compact, _period);
+                        _stages[j] = _recurrence.Advance(_stages[j], compact);
                 }
                 else if (_index == 0)
                     _stages[j] = compact;
@@ -196,7 +198,7 @@ public sealed class TillsonAverage : MultiOutputIndicatorBase, IIndicatorValidat
                     _stages[j] = _sums[j].Round(_index);
                 }
                 else
-                    _stages[j] = _stages[j].AdvanceEma(compact, _period);
+                    _stages[j] = _recurrence.Advance(_stages[j], compact);
                 compact = _stages[j];
             }
             if (_index < _first)

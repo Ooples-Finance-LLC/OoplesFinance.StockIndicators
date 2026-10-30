@@ -7,16 +7,26 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class CompactMacdWordEmaTests
 {
     [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    [InlineData(3)]
-    [InlineData(9)]
-    [InlineData(19)]
-    [InlineData(26)]
-    [InlineData(2047)]
-    public void SameBinadeRecurrencesMatchIndependentRationalRounding(int period)
+    [InlineData(1, false)]
+    [InlineData(2, false)]
+    [InlineData(3, false)]
+    [InlineData(9, false)]
+    [InlineData(19, false)]
+    [InlineData(26, false)]
+    [InlineData(2047, false)]
+    [InlineData(1, true)]
+    [InlineData(2, true)]
+    [InlineData(3, true)]
+    [InlineData(9, true)]
+    [InlineData(19, true)]
+    [InlineData(26, true)]
+    [InlineData(2047, true)]
+    [InlineData(2048, true)]
+    [InlineData(int.MaxValue, true)]
+    public void SameBinadeRecurrencesMatchIndependentRationalRounding(int period, bool cached)
     {
-        var random = new Random(301031 + period);
+        var random = new Random(unchecked(301031 + period));
+        var recurrence = new CompactMacdValue.EmaRecurrence(period);
         for (int i = 0; i < 1024; i++)
         {
             int exponent = random.Next(1, 2047);
@@ -27,7 +37,9 @@ public sealed class CompactMacdWordEmaTests
             double expected = ((ReferenceFraction.FromDouble(left) * new ReferenceFraction(period - 1)
                 + ReferenceFraction.FromDouble(right) * new ReferenceFraction(2))
                 / new ReferenceFraction((long)period + 1)).ToDouble();
-            var actual = CompactMacdValue.Of(left).AdvanceEma(CompactMacdValue.Of(right), period);
+            var actual = cached
+                ? recurrence.Advance(CompactMacdValue.Of(left), CompactMacdValue.Of(right))
+                : CompactMacdValue.Of(left).AdvanceEma(CompactMacdValue.Of(right), period);
             Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual.Publish()));
             Assert.Equal(ExactVarianceWindow.Units(expected), actual.Units);
         }
@@ -59,9 +71,29 @@ public sealed class CompactMacdWordEmaTests
     }
 
     [Fact]
+    public void CachedRecurrenceCoversEveryDenominatorAtSignificandEndpoints()
+    {
+        double[] values = [1, Math.BitIncrement(1), Math.BitDecrement(2)];
+        for (int period = 1; period <= 2047; period++)
+        {
+            var recurrence = new CompactMacdValue.EmaRecurrence(period);
+            foreach (double prior in values)
+            foreach (double input in values)
+            {
+                double expected = ((ReferenceFraction.FromDouble(prior) * new ReferenceFraction(period - 1)
+                    + ReferenceFraction.FromDouble(input) * new ReferenceFraction(2))
+                    / new ReferenceFraction(period + 1)).ToDouble();
+                var actual = recurrence.Advance(CompactMacdValue.Of(prior), CompactMacdValue.Of(input));
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual.Publish()));
+            }
+        }
+    }
+
+    [Fact]
     public void MidpointTiesAndBinadeEndpointsRoundToEven()
     {
         const long mask = (1L << 52) - 1;
+        var recurrence = new CompactMacdValue.EmaRecurrence(3);
         foreach (int exponent in new[] { 1, 2, 511, 1023, 1535, 2045, 2046 })
         foreach (long fraction in new[] { 0L, 1L, 2L, mask - 2, mask - 1 })
         foreach (bool reverse in new[] { false, true })
@@ -72,6 +104,8 @@ public sealed class CompactMacdWordEmaTests
             var actual = CompactMacdValue.Of(left).AdvanceEma(CompactMacdValue.Of(right), 3);
             long expectedBits = (low & 1) == 0 ? low : low + 1;
             Assert.Equal(expectedBits, BitConverter.DoubleToInt64Bits(actual.Publish()));
+            var cached = recurrence.Advance(CompactMacdValue.Of(left), CompactMacdValue.Of(right));
+            Assert.Equal(expectedBits, BitConverter.DoubleToInt64Bits(cached.Publish()));
             var fixedActual = CompactMacdValue.Of(left).AdvanceFixedEma(CompactMacdValue.Of(right), 1, 2);
             Assert.Equal(expectedBits, BitConverter.DoubleToInt64Bits(fixedActual.Publish()));
         }
@@ -91,6 +125,9 @@ public sealed class CompactMacdWordEmaTests
             BigInteger expected = RocBankValue.RoundUnits(prior * (period - 1) + input * 2, (long)period + 1);
             var actual = CompactMacdValue.FromUnits(prior).AdvanceEma(CompactMacdValue.FromUnits(input), period);
             Assert.Equal(expected, actual.Units);
+            var cached = new CompactMacdValue.EmaRecurrence(period).Advance(
+                CompactMacdValue.FromUnits(prior), CompactMacdValue.FromUnits(input));
+            Assert.Equal(expected, cached.Units);
         }
         foreach (var prior in inputs)
         foreach (var input in inputs)

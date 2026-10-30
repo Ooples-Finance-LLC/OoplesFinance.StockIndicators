@@ -164,6 +164,7 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
 
     private sealed class CompactAverage(int period, bool first)
     {
+        private readonly CompactMacdValue.EmaRecurrence _recurrence = new(period);
         private long _count;
         private CompactMacdValue _sum,
             _value;
@@ -186,7 +187,7 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
                 _sum = default;
             }
             else
-                _value = _value.AdvanceEma(input, period);
+                _value = _recurrence.Advance(_value, input);
             return _value;
         }
     }
