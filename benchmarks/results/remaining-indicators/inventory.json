@@ -13840,7 +13840,7 @@
     "src/Indicators/ValuesBarExecution.Curvature.cs": "83d1662a42c387fbd37b40e23bddb2d237987c8a5a99c85c1bb0538a100d3b7d",
     "src/Indicators/ValuesBarExecution.CurvatureWide.cs": "27f1a6c4057985667d8388065fb48117b3a5a65308e87ac05f5a058842b068c6",
     "src/Indicators/ValuesBarExecution.CycleTunedRsi.cs": "c502f8334291158ab6a38247683ee8b654e2cac481453f60ec5f62b9d1f76acd",
-    "src/Indicators/ValuesBarExecution.DeviationAverage.cs": "e5d2fb18a1c1f8cb45514a4acaf7a837c19a94ddb739eead7c51f32f3f4c96df",
+    "src/Indicators/ValuesBarExecution.DeviationAverage.cs": "30cd497b5b92698d9643df867dd57f8c18493fe65fad66f12698ca8bc9ce35e9",
     "src/Indicators/ValuesBarExecution.DeviationRatio.cs": "c5e93d6742ef428af5f4e5238454cb6d74b2741f093822056538727f7dbc1b99",
     "src/Indicators/ValuesBarExecution.ElasticVolume.cs": "59e0b971e7f66eb57d1f4b45e91dbd65265024e7ddddb50d4afa6e42c5f522b8",
     "src/Indicators/ValuesBarExecution.Entropy.cs": "e856c64d5a4c5a010609a526f4c1177a88c720e33e832b0c2b22f04eca972936",
