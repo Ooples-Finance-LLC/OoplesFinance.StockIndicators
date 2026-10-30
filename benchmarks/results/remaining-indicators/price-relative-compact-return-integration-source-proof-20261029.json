@@ -1,0 +1,34 @@
+{
+  "combined_code_source": "002429bc71f8a44c889e2186caef06f0d49ce02a",
+  "individual_qualified_source": "137971bb99ede907afa22f7e6802f69897720dbd",
+  "qualification_code_source": "3f074e2b5bc29ce81195e739663a8c4b000f750d",
+  "source_fingerprint_sha256": "4c9fc96b96c2c2ca62adc72bea8810dfbdbb76a41c0208c3c70a49010a91cd0b",
+  "fresh_combined_tree_checks": {
+    "unit": 24,
+    "parity": 13,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-price-relative-compact-return-20261029\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ccf74acdbe0bb21ff6743a1096dd5caf53a05ecea2007836d39f11d541d3431b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-price-relative-compact-return-20261029\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ccf74acdbe0bb21ff6743a1096dd5caf53a05ecea2007836d39f11d541d3431b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-price-relative-compact-return-20261029\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ccf74acdbe0bb21ff6743a1096dd5caf53a05ecea2007836d39f11d541d3431b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-price-relative-compact-return-20261029\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ccf74acdbe0bb21ff6743a1096dd5caf53a05ecea2007836d39f11d541d3431b"
+  },
+  "matched_source_files": [
+    "src",
+    "tests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config",
+    "scripts/run-competitor-contracts.py",
+    "scripts/verify-competitor-local-gpu.py",
+    "scripts/competitor-gpu-methods.json"
+  ],
+  "note": "Reused actual candidate qualification: every executable/build input matches the integration tree. Original GPU receipt and binary provenance are preserved; no new run is claimed."
+}
