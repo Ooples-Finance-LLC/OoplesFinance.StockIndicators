@@ -78,8 +78,8 @@ public static class FibonacciWeightedSnapshot
         for (int i = 0; i < bars.Count; i++)
         {
             long value = AlignedUnits(bars[i].Close, minimum);
-            Int128 next = shifted + (Int128)newest * value;
-            Int128 nextShifted = weighted - shifted + (Int128)previous * value;
+            Int128 next = shifted + WordProduct(newest, value);
+            Int128 nextShifted = weighted - shifted + WordProduct(previous, value);
             if (i >= period) nextShifted -= AlignedUnits(bars[i - period].Close, minimum);
             else
             {
@@ -97,6 +97,14 @@ public static class FibonacciWeightedSnapshot
                 output[i] = JurikDyadic.FromBinaryProduct(weighted, scale).Mean((int)mass);
         }
         return true;
+    }
+
+    private static Int128 WordProduct(long left, long right)
+    {
+        // The aligned recurrence operands fit signed Int64. Retain their full
+        // exact product without promoting both operands to general Int128 math.
+        long high = Math.BigMul(left, right, out long low);
+        return ((Int128)high << 64) | unchecked((ulong)low);
     }
 
     private static long AlignedUnits(double value, int minimum)
