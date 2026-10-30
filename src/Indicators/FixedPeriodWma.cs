@@ -55,6 +55,7 @@ public sealed class FixedPeriodWma : IndicatorBase, IMovingAverage, IIndicatorVa
 
     private sealed class State(int period) : IIndicatorState
     {
+        private readonly ExactMeanAccumulator.ProductCoefficient _weight = new(period);
         private readonly Queue<double> _window = new();
         private ExactMeanAccumulator _sum,
             _weighted;
@@ -72,7 +73,7 @@ public sealed class FixedPeriodWma : IndicatorBase, IMovingAverage, IIndicatorVa
                 _sum.Add(_window.Dequeue(), -1);
             _window.Enqueue(bar.Close);
             _sum.Add(bar.Close);
-            _weighted.Add(bar.Close, period);
+            _weighted.AddProduct(new ExactMeanAccumulator.ProductFactor(bar.Close), _weight);
             var count = _window.Count;
             var mass = (long)count * (2L * period - count + 1) / 2;
             return _weighted.Mean(mass);

@@ -124,6 +124,8 @@ public sealed class WindowAtrBands : MultiOutputIndicatorBase, IIndicatorValidat
         bool width
     ) : IMultiOutputState
     {
+        private readonly ExactMeanAccumulator.ProductCoefficient _priorWeight = new(centerPeriod - 1);
+        private readonly ExactMeanAccumulator.ProductCoefficient _multiplier = new(multiplier);
         private readonly SeededAtrWindow _atr = new(atrPeriod);
         private readonly Queue<double> _window = new();
         private ExactMeanAccumulator _sum;
@@ -175,7 +177,7 @@ public sealed class WindowAtrBands : MultiOutputIndicatorBase, IIndicatorValidat
             {
                 var sum = new ExactMeanAccumulator();
                 sum.Add(bar.Close, 2);
-                sum.Add(_center, centerPeriod - 1);
+                sum.AddProduct(new ExactMeanAccumulator.ProductFactor(_center), _priorWeight);
                 _center = sum.Mean((long)centerPeriod + 1);
             }
             if (mode != AtrBandCenterMode.Simple && _count < Math.Max(centerPeriod, atrPeriod))
@@ -185,7 +187,7 @@ public sealed class WindowAtrBands : MultiOutputIndicatorBase, IIndicatorValidat
             if (!_atr.HasAverage)
                 return;
             var offset = new ExactMeanAccumulator();
-            offset.AddProduct(_atr.Average.Mantissa, multiplier);
+            offset.AddProduct(new ExactMeanAccumulator.ProductFactor(_atr.Average.Mantissa), _multiplier);
             offset.ScaleByPowerOfTwo(_atr.Average.UpperShift);
             var upper = offset;
             upper.Add(_center);

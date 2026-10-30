@@ -103,6 +103,7 @@ public sealed class MovingAverageDifference : MultiOutputIndicatorBase, IIndicat
 
     private sealed class Average(int period, bool exponential)
     {
+        private readonly ExactMeanAccumulator.ProductCoefficient _priorWeight = new(period - 1);
         private readonly Queue<double> _history = new();
         private ExactMeanAccumulator _sum;
         private double _previous;
@@ -128,7 +129,7 @@ public sealed class MovingAverageDifference : MultiOutputIndicatorBase, IIndicat
                 }
                 var next = new ExactMeanAccumulator();
                 next.Add(price, 2);
-                next.Add(_previous, period - 1);
+                next.AddProduct(new ExactMeanAccumulator.ProductFactor(_previous), _priorWeight);
                 return _previous = next.Mean((long)period + 1);
             }
             if (_count == period)

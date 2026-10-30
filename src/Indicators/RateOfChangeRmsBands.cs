@@ -154,6 +154,7 @@ public sealed class RateOfChangeRmsBands
     {
         private readonly Queue<double> _prices = new();
         private readonly Queue<(JurikDyadic Square, bool Present)> _returns = new();
+        private readonly ExactMeanAccumulator.ProductCoefficient _priorWeight = new(emaPeriod - 1);
         private ExactMeanAccumulator _seed;
         private JurikDyadic _squares;
         private double _ema;
@@ -229,7 +230,7 @@ public sealed class RateOfChangeRmsBands
             {
                 var sum = new ExactMeanAccumulator();
                 sum.Add(roc, 2);
-                sum.Add(_ema, emaPeriod - 1);
+                sum.AddProduct(new ExactMeanAccumulator.ProductFactor(_ema), _priorWeight);
                 _ema = sum.Mean((long)emaPeriod + 1);
             }
             outputs[2] = _ema;

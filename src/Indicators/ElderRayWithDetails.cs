@@ -81,6 +81,7 @@ public sealed class ElderRayWithDetails : MultiOutputIndicatorBase, IIndicatorVa
 
     internal sealed class State(int period) : IMultiOutputState
     {
+        private readonly ExactMeanAccumulator.ProductCoefficient _priorWeight = new(period - 1);
         private ExactMeanAccumulator _seed;
         private int _count;
         private double _ema;
@@ -106,7 +107,7 @@ public sealed class ElderRayWithDetails : MultiOutputIndicatorBase, IIndicatorVa
             {
                 var update = new ExactMeanAccumulator();
                 update.Add(bar.Close, 2);
-                update.Add(_ema, period - 1);
+                update.AddProduct(new ExactMeanAccumulator.ProductFactor(_ema), _priorWeight);
                 _ema = update.Mean((long)period + 1);
             }
             var bull = new ExactMeanAccumulator();

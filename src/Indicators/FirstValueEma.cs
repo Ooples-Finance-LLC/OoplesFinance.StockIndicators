@@ -47,6 +47,7 @@ public sealed class FirstValueEma : IndicatorBase, IMovingAverage, IIndicatorVal
 
     internal sealed class State(int period) : IIndicatorState
     {
+        private readonly ExactMeanAccumulator.ProductCoefficient _priorWeight = new(period - 1);
         private bool _initialized;
         private double _previous;
 
@@ -64,7 +65,7 @@ public sealed class FirstValueEma : IndicatorBase, IMovingAverage, IIndicatorVal
             {
                 var sum = new ExactMeanAccumulator();
                 sum.Add(bar.Close, 2);
-                sum.Add(_previous, period - 1);
+                sum.AddProduct(new ExactMeanAccumulator.ProductFactor(_previous), _priorWeight);
                 _previous = sum.Mean((long)period + 1);
             }
             _initialized = true;

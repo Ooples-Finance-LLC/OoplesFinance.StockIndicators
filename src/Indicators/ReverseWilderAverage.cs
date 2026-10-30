@@ -62,6 +62,7 @@ public sealed class ReverseWilderAverage : IndicatorBase, IIndicatorValidationCo
 
     private sealed class State(int period) : IIndicatorState
     {
+        private readonly ExactMeanAccumulator.ProductCoefficient _priorWeight = new(period);
         private int _seedCount;
         private double _previous;
 
@@ -89,7 +90,7 @@ public sealed class ReverseWilderAverage : IndicatorBase, IIndicatorValidationCo
             else
             {
                 // Split period+1 to avoid overflowing its integer representation.
-                sum.Add(_previous, period);
+                sum.AddProduct(new ExactMeanAccumulator.ProductFactor(_previous), _priorWeight);
                 sum.Add(_previous);
                 sum.Add(bar.Close, -1);
                 _previous = sum.Mean(period);

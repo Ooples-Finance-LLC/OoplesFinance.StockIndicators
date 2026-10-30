@@ -103,6 +103,7 @@ public sealed class WindowChandelierExit : MultiOutputIndicatorBase, IIndicatorV
         bool zeroFloorHigh
     ) : IMultiOutputState
     {
+        private readonly ExactMeanAccumulator.ProductCoefficient _multiplier = new(multiplier);
         private readonly SeededAtrWindow _atr = new(period);
         private readonly Queue<(double High, double Low)> _window = new();
 
@@ -122,7 +123,7 @@ public sealed class WindowChandelierExit : MultiOutputIndicatorBase, IIndicatorV
             if (!_atr.HasAverage)
                 return;
             var product = new ExactMeanAccumulator();
-            product.AddProduct(_atr.Average.Mantissa, multiplier);
+            product.AddProduct(new ExactMeanAccumulator.ProductFactor(_atr.Average.Mantissa), _multiplier);
             product.ScaleByPowerOfTwo(_atr.Average.UpperShift);
             if (selection != ChandelierExitSelection.Short)
             {
