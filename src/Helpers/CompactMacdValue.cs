@@ -116,6 +116,26 @@ internal readonly struct CompactMacdValue
     {
         if (period < 1) throw new ArgumentOutOfRangeException(nameof(period));
 #if !NETFRAMEWORK
+        // Positive normal operands in the same binade form a convex mean.
+        // With period+1 <= 2048, the exact weighted 53-bit significands fit
+        // UInt64. Integer quotient/remainder gives the final ties-to-even
+        // rounding directly, without constructing a general ratio certificate.
+        const long hiddenBit = 1L << 52, largestSignificand = (1L << 53) - 1;
+        if (!_wide && !input._wide && period <= 2047 && _scale == input._scale
+            && _scale >= 0 && _scale <= 2045
+            && _compact >= hiddenBit && _compact <= largestSignificand
+            && input._compact >= hiddenBit && input._compact <= largestSignificand)
+        {
+            ulong denominator = (ulong)(period + 1);
+            ulong numerator = checked((ulong)_compact * (ulong)(period - 1)
+                + 2 * (ulong)input._compact);
+            ulong quotient = numerator / denominator;
+            ulong remainder = numerator % denominator;
+            ulong complement = denominator - remainder;
+            if (remainder > complement || remainder == complement && (quotient & 1) != 0)
+                quotient++;
+            return new((Int128)quotient, _scale);
+        }
         if (!_wide && !input._wide)
         {
             int scale = Math.Min(_scale, input._scale);
@@ -143,6 +163,25 @@ internal readonly struct CompactMacdValue
         if (alpha <= 0 || alpha >= denominator) throw new ArgumentOutOfRangeException(nameof(alpha));
         long complement = denominator - alpha;
 #if !NETFRAMEWORK
+        const long hiddenBit = 1L << 52, largestSignificand = (1L << 53) - 1;
+        if (!_wide && !input._wide && _scale == input._scale
+            && _scale >= 0 && _scale <= 2045 && (denominator & (denominator - 1)) == 0
+            && _compact >= hiddenBit && _compact <= largestSignificand
+            && input._compact >= hiddenBit && input._compact <= largestSignificand)
+        {
+            // Fixed EMA weights are binary fractions. A positive Int64 power
+            // of two is at most 2^62, so its convex 53-bit weighted numerator
+            // fits 115 bits. Shifts retain the exact quotient and remainder.
+            UInt128 numerator = checked((UInt128)_compact * (ulong)complement
+                + (UInt128)input._compact * (ulong)alpha);
+            int shift = BitOperations.TrailingZeroCount((ulong)denominator);
+            ulong quotient = (ulong)(numerator >> shift);
+            ulong remainder = (ulong)(numerator & (ulong)(denominator - 1));
+            ulong residualComplement = (ulong)denominator - remainder;
+            if (remainder > residualComplement || remainder == residualComplement && (quotient & 1) != 0)
+                quotient++;
+            return new((Int128)quotient, _scale);
+        }
         if (!_wide && !input._wide)
         {
             int scale = Math.Min(_scale, input._scale);
