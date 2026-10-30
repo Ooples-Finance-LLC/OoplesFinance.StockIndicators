@@ -77,7 +77,7 @@ public sealed class TillsonCompactSnapshotTests
     // Independent rational stage histories, evaluated stage-first. Keep the
     // final expression unrounded until ToDouble so negative underflow zero is
     // checked too; the validation library's extended rational zero has no sign.
-    private static double?[] Reference(IReadOnlyList<ReferenceFraction> prices,
+    internal static double?[] Reference(IReadOnlyList<ReferenceFraction> prices,
         int period, double factor, TillsonSeed seed, int suppression)
     {
         var levels = Enumerable.Range(0, 6).Select(_ => new ReferenceFraction?[prices.Count]).ToArray();
