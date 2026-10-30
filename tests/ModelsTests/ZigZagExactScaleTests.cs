@@ -29,6 +29,21 @@ public sealed class ZigZagExactScaleTests
     }
 
     [Fact]
+    public void RepeatedRetracementsAndLatestTieExtremesPreservePivotThresholds()
+    {
+        double[] prices = [100, 110, 108, 107, 110, 109, 108, 111, 109, 107,
+            105, 100, 102, 103, 100, 101, 102, 99, 101, 103, 106, 110];
+        foreach (double sign in new[] { 1d, -1d })
+        foreach (bool highLow in new[] { false, true })
+        {
+            var bars = prices.Select(p => new Bar(default, sign * p,
+                sign * p + 1, sign * p - 1, sign * p, 1)).ToArray();
+            foreach (double percent in new[] { Math.BitDecrement(5), 5d, Math.BitIncrement(5), 10d })
+                Check(bars, percent, highLow);
+        }
+    }
+
+    [Fact]
     public void InitialCloseConstrainsTheGridInHighLowMode()
     {
         var bars = Enumerable.Range(0, 31).Select(i =>
