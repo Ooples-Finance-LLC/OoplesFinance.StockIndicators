@@ -90,7 +90,14 @@ internal readonly struct CompactMacdValue
         int scale = Math.Min(left._scale, right._scale);
 #if !NETFRAMEWORK
         int leftShift = left._scale - scale, rightShift = right._scale - scale;
-        if (!left._wide && !right._wide
+        if (!left._wide && !right._wide && leftShift == 0 && rightShift == 0)
+        {
+            // Aligned coefficients need no shift-width certificates. Checked
+            // addition still sends an overflowing result to exact wide math.
+            try { return new(checked(left._compact + right._compact), scale); }
+            catch (OverflowException) { }
+        }
+        else if (!left._wide && !right._wide
             && Width(Magnitude(left._compact)) + leftShift <= 127
             && Width(Magnitude(right._compact)) + rightShift <= 127)
         {
@@ -105,6 +112,16 @@ internal readonly struct CompactMacdValue
     public static CompactMacdValue operator -(CompactMacdValue left, CompactMacdValue right)
     {
 #if !NETFRAMEWORK
+        if (!left._wide && !right._wide && left._scale == right._scale)
+        {
+            // Subtract directly, including Int128.MinValue: negating the right
+            // operand first would require promotion even for a small result.
+            try { return new(checked(left._compact - right._compact), left._scale); }
+            catch (OverflowException)
+            {
+                return new(left.Coefficient - right.Coefficient, left._scale);
+            }
+        }
         if (!right._wide && right._compact != Int128.MinValue)
             return left + new CompactMacdValue(-right._compact, right._scale);
 #endif
