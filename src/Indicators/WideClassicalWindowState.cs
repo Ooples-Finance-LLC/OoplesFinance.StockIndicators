@@ -13,6 +13,7 @@ internal sealed class WideClassicalWindowState : IWideAverageState
         _firstLength,
         _secondLength;
     private readonly ClassicAverageMethod _method;
+    private readonly long _fullDenominator;
     private readonly Queue<CompactMacdValue> _prices = new(),
         _sums = new();
     private CompactMacdValue _sum,
@@ -33,6 +34,9 @@ internal sealed class WideClassicalWindowState : IWideAverageState
         _method = method;
         _firstLength = method == ClassicAverageMethod.Trima ? (int)((period + 1L) / 2) : period;
         _secondLength = period - _firstLength + 1;
+        _fullDenominator = method == ClassicAverageMethod.Wma
+            ? (long)period * (period + 1L) / 2
+            : (long)_firstLength * _secondLength;
     }
 
     public void Reset()
@@ -70,14 +74,14 @@ internal sealed class WideClassicalWindowState : IWideAverageState
             if (_sums.Count < _secondLength)
                 return;
             _numerator = _second;
-            _denominator = (long)_firstLength * _secondLength;
+            _denominator = _fullDenominator;
         }
         else
         {
             _numerator = _method == ClassicAverageMethod.Wma ? _weighted : _sum;
             _denominator =
                 _method == ClassicAverageMethod.Wma
-                    ? (long)count * (2L * _period - count + 1) / 2
+                    ? count == _period ? _fullDenominator : (long)count * (2L * _period - count + 1) / 2
                     : count;
         }
         _published = _numerator.PublishRatio(_denominator);
