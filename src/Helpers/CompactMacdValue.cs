@@ -255,6 +255,14 @@ internal readonly struct CompactMacdValue
 #if !NETFRAMEWORK
         if (!_wide)
         {
+            long word = unchecked((long)_compact);
+            if (_compact == word)
+            {
+                // Two signed 64-bit factors always fit in signed 128 bits.
+                // Preserve both product words without a general overflow check.
+                long high = Math.BigMul(word, weight, out long low);
+                return new(unchecked(((Int128)high << 64) | (ulong)low), _scale);
+            }
             try { return new(checked(_compact * weight), _scale); }
             catch (OverflowException) { } // Exact wide fallback below.
         }

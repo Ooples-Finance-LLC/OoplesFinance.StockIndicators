@@ -5,6 +5,35 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class CompactMacdScalarTests
 {
+    [Fact]
+    public void SignedWordProductsPreserveBothWordsAndBinaryScale()
+    {
+        long[] boundaries = [long.MinValue, long.MinValue + 1, -(1L << 53) - 1,
+            -1, 0, 1, (1L << 53) + 1, long.MaxValue - 1, long.MaxValue];
+        var random = new Random(719231);
+        foreach (int scale in new[] { 0, 970, 1074, 2200 })
+        {
+            var unit = CompactMacdValue.FromUnits(BigInteger.One << scale);
+            foreach (long coefficient in boundaries)
+            foreach (long weight in boundaries)
+                Check(coefficient, weight);
+            for (int i = 0; i < 256; i++)
+                Check(random.NextInt64(long.MinValue, long.MaxValue),
+                    random.NextInt64(long.MinValue, long.MaxValue));
+
+            void Check(long coefficient, long weight)
+            {
+                // The first product deliberately retains an unnormalized word,
+                // including long.MinValue, for the second multiplication.
+                var actual = unit.Times(coefficient).Times(weight);
+                var expected = (new BigInteger(coefficient) * weight) << scale;
+                Assert.Equal(expected, actual.Units);
+                // Also exercise products that promote beyond signed 128 bits.
+                Assert.Equal(expected * long.MaxValue, actual.Times(long.MaxValue).Units);
+            }
+        }
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(1)]
