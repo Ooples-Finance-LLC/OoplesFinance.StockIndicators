@@ -13947,7 +13947,7 @@
     "src/Indicators/VolatilityStopSnapshot.cs": "7bc3f720a7c99f1d8bfce31219c00f0d568873d389bf57f48de982f314be4942",
     "src/Indicators/VolumeConditionedIndex.cs": "beb2d61788972ea12c3d691c9de87ec39ceb1d3b01cb2e5c61f9b3621e63bf60",
     "src/Indicators/VolumeWeightedPrice.cs": "78629349d434075980b7aca15a1ae5cb8557006f8d3fb224da98190e90f6c34d",
-    "src/Indicators/WideClassicalWindowState.cs": "100d6c4c04da6de000081cda2b682a188bed8f37c9328e5edbd49660e5adf336",
+    "src/Indicators/WideClassicalWindowState.cs": "7cd847e3f410ae11754f7c33a76ce2ce1d371637509437e3b108645a833d8985",
     "src/Indicators/WilderMovingAverage.cs": "896b3c4c08f13b0691885866a7e7501202fddcd623bd9a006523c909650659dc",
     "src/Indicators/WilderStrengthOscillator.cs": "238613b4738941e5a0ec261bd8adc527c116dc53dd02bf2d31fb007a83973a85",
     "src/Indicators/WindowAroon.cs": "c809a11869d59a2f19c8e802ce9eeb33e6fbcbf32f6b242c6ad1d04e285fa3cc",

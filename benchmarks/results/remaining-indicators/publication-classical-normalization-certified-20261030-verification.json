@@ -1,0 +1,60 @@
+{
+  "input_head": "0ac55ae18ef0c798e3fa52c326c17fb056559aa7",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/WideClassicalWindowState.cs"
+  ],
+  "batch_note": "Cache fixed WMA/TRIMA normalization denominators; preserve WMA startup formula and every numerical operation on prices.",
+  "step": "complete",
+  "updated_utc": "2026-10-31T21:12:32.320219+00:00",
+  "unit": {
+    "passed": 59,
+    "class_counts": {
+      "CompactClassicalWindowTests": 23,
+      "ClassicalFiniteDifferenceTests": 18,
+      "ClassicAverageSharedExecutionTests": 14,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\classical-normalization\\unit\\unit.trx",
+    "sha256": "f6c07500941d21e6c5864abc3d52d5a312a4c4fad6e94bc37eb7749f79f2736e",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-classical-normalization-certified-20261030-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 61,
+    "class_counts": {
+      "SharedTaAverageNativeBenchmarkTests": 40,
+      "SharedClassicAverageBenchmarkTests": 6,
+      "ClassicAverageComparisonTests": 15
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\classical-normalization\\parity\\parity.trx",
+    "sha256": "f76b75a6a050c1a7b8b8e2e5fbd3579a7963f9c40b89a0aa39c88d99dc94900f",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-classical-normalization-certified-20261030-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-unit-factor-followup-20261030\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "84b998afee9595dee2a5e74d4a66c143a2fa05039d8785c29defde1ac04003f1",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-unit-factor-followup-20261030\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "84b998afee9595dee2a5e74d4a66c143a2fa05039d8785c29defde1ac04003f1",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-unit-factor-followup-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "84b998afee9595dee2a5e74d4a66c143a2fa05039d8785c29defde1ac04003f1",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-unit-factor-followup-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "84b998afee9595dee2a5e74d4a66c143a2fa05039d8785c29defde1ac04003f1"
+  },
+  "source_fingerprint_sha256": "bb8b3da0aa177f9b155f890fd43228ccbf5ed679214488aa381328fdc61f1aa4",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Cache fixed WMA/TRIMA normalization denominators; preserve WMA startup formula and every numerical operation on prices. Correctness checks passed; controlled performance remains pending."
+}
