@@ -6,6 +6,40 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class CompactMacdScalarTests
 {
     [Fact]
+    public void AlignedSumsAndDifferencesPreserveExactUnitsAndPromotion()
+    {
+        foreach (int scale in new[] { 0, 970, 1074, 2200 })
+        {
+            var unit = CompactMacdValue.FromUnits(BigInteger.One << scale);
+            // Products retain their binary scale, so even powers of two here
+            // exercise aligned coefficients rather than normalized inputs.
+            var minimum = unit.Times(long.MinValue).Times(long.MinValue).Times(-2);
+            var maximum = (minimum + unit).Times(-1);
+            Assert.Equal(-(BigInteger.One << (127 + scale)), minimum.Units);
+            Assert.Equal(((BigInteger.One << 127) - 1) << scale, maximum.Units);
+            CompactMacdValue[] values = [unit, unit.Times(-1), unit.Times(long.MinValue),
+                unit.Times(long.MaxValue), minimum, minimum + unit, maximum,
+                maximum - unit, maximum.Times(2), default];
+            foreach (var left in values)
+            foreach (var right in values)
+            {
+                BigInteger a = left.Units, b = right.Units;
+                var sum = left + right;
+                var difference = left - right;
+                Assert.Equal(a + b, sum.Units);
+                Assert.Equal(a - b, difference.Units);
+                Assert.Equal(a, (sum - right).Units);
+                Assert.Equal(a, (difference + right).Units);
+                Assert.Equal((a + b) * long.MaxValue, sum.Times(long.MaxValue).Units);
+            }
+            // Differing scales must continue through the existing shift path.
+            var shifted = CompactMacdValue.FromUnits(BigInteger.One << (scale + 140));
+            Assert.Equal(shifted.Units + minimum.Units, (shifted + minimum).Units);
+            Assert.Equal(shifted.Units - minimum.Units, (shifted - minimum).Units);
+        }
+    }
+
+    [Fact]
     public void SignedWordProductsPreserveBothWordsAndBinaryScale()
     {
         long[] boundaries = [long.MinValue, long.MinValue + 1, -(1L << 53) - 1,
