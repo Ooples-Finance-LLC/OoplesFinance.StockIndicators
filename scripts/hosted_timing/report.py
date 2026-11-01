@@ -144,8 +144,9 @@ def stage(live, raw, repo, out):
     document=document.replace(f'{oldwins} / 401 APIs at 10,000 bars',f'{wins} / 401 APIs at 10,000 bars').replace('published <code>'+oldhead[:8]+'</code>','published <code>'+head[:8]+'</code>')
     refreshed=sum(r['source_sha']!=data['evidence']['baseSourceSha'] for r in data['rows'])
     intro=f"The table contains {len(data['rows'])} measured comparisons across {len({r['pair'] for r in data['rows']})} API pairs. {refreshed} comparison rows use separately qualified updates."+disclosure
-    document=re.sub(r'(<section id="rollout-status".*?<p class="sub">.*?published <code>[^<]+</code>\. ).*?(</p>)',
+    document,n=re.subn(r'(<section id="rollout-status".*?<p class="sub">.*?published <code>[^<]+</code>\. ).*?(</p>)',
                     lambda m:m[1]+intro+m[2],document,count=1,flags=re.S)
+    assert n==1
     document=re.sub(r'(<b id="wins">).*?(</b>)',lambda m:m[1]+f'{wins} / 401'+m[2],document)
     for prefix in ('Builder-mode timing: ',': '):
         def totals(c): return prefix+f"{c['faster']} faster, {c['slower']} slower, {c['inconclusive']} inconclusive, "+('and ' if prefix.startswith('Builder') else '')+f"{c['pending']} pending."
@@ -175,6 +176,9 @@ def stage(live, raw, repo, out):
     sys.path.insert(0,str(repo/'benchmarks'))
     from primary_baseline_report import replace_primary
     document=replace_primary(document,data)
+    constructor=re.search(r'<section\b[^>]*id="ema-constructor-results"[^>]*>.*?</section>',original.decode('utf-8'),re.S)
+    if constructor:
+        assert constructor[0] in document
     out.mkdir(parents=True,exist_ok=True)
     assert not (out/'before.html').exists() or (out/'before.html').read_bytes()==original
     (out/'before.html').write_bytes(original)

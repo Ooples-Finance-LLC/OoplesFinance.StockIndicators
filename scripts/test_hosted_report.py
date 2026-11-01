@@ -56,6 +56,8 @@ class HostedReportTests(unittest.TestCase):
             document=''.join(f'<script id="{key}" type="application/json">{json.dumps(value)}</script>'
                              for key,value in [('dataset',data),('current-competitor-data',builder),('rollout-status-data',status)])
             document+='''<section id="explorer"><p class="sub">old</p></section>
+<section id="rollout-status"><p class="sub">Rollout published <code>old</code>. Previous summary</p></section>
+<section id="ema-constructor-results"><p>Independent constructor measurements</p></section>
 <table id="builder-current-results"><tbody></tbody></table>
 <script>
 $('source').innerHTML='old';
@@ -83,6 +85,8 @@ const detail=`${esc(r.raw.Ooples.host.ProcessorName)}`;
             self.assertTrue(all(c['measurement_machine']=='runner' for r in receipts[1:] for c in r['comparisons']))
             self.assertIn('D.rows.flatMap',result)
             self.assertIn('absolute timings are compared only within the same runner',result)
+            self.assertIn('<section id="ema-constructor-results"><p>Independent constructor measurements</p></section>',result)
+            self.assertNotIn('Previous summary',result)
             self.assertEqual(live.read_text(encoding='utf-8'),document)
 
 
