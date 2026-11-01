@@ -8115,7 +8115,8 @@
     "consolidated_acceptance.py": "d77c42abc37f3859bf3b7d2dbdd64d2bab0435678e36b2ff7ed16e18a78b2753"
   },
   "source_companion_inputs": {},
-  "report_imported": false,
+  "report_imported": true,
   "production_integrated": true,
-  "integration_source_proof": "benchmarks/results/remaining-indicators/consolidated-integration-source-proof-20261030.json"
+  "integration_source_proof": "benchmarks/results/remaining-indicators/consolidated-integration-source-proof-20261030.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/consolidated-certified-local-consolidated-followups-control-20261030-report-import.json"
 }
