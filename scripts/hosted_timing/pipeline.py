@@ -120,6 +120,10 @@ def verify_inputs(folder):
 def prepare(out):
     plan = read(PLAN)
     assert subprocess.check_output(['dotnet', '--version'], text=True).strip() == plan['proposed_dotnet_sdk']
+    # rev-parse of a bare 40-character SHA echoes even a missing object.
+    # Resolve the commit type for every input before spending time on builds.
+    for source in {*plan['sources'].values(), '6bc51bec06a49e2fa2e86e634ec6e2163ee4faaa'}:
+        assert git('rev-parse', '--verify', source + '^{commit}') == source
     assert not out.exists(), 'Use a fresh preparation output directory'
     out.mkdir(parents=True)
     evidence = out / 'evidence'
