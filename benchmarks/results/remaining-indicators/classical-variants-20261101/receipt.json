@@ -1,0 +1,19 @@
+{
+  "checks": {
+    "build-benchmark": "passed",
+    "build-tests": "passed",
+    "variant-tests": "passed",
+    "diff-check": "passed"
+  },
+  "step": "passed",
+  "updated_utc": "2026-11-01T04:44:50.397800+00:00",
+  "production_dll_sha256": "84b998afee9595dee2a5e74d4a66c143a2fa05039d8785c29defde1ac04003f1",
+  "passed": 13,
+  "trx_sha256": "e6c6d47fac589a11b9f59235b27e2f0693581cedd18cd3cecd29e279bd5aa31a",
+  "source_head": "6bc51bec06a49e2fa2e86e634ec6e2163ee4faaa",
+  "changed_source_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedClassicalWindowVariantBenchmarks.cs": "3f1816f23830ac9f14711282fc45eabcde9d9d9ea4c1cf1bb5a617813e6afda0",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedClassicalWindowVariantBenchmarkTests.cs": "cbe2ef358e432f4365f06d896e6cc2622660fbad896ef4675e33f45447599707"
+  },
+  "scope": "WMA/TRIMA variant benchmark coverage; no production changes or new performance claim."
+}
