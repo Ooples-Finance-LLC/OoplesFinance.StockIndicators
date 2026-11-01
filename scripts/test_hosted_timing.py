@@ -43,8 +43,8 @@ def make_evidence(folder, phase, new_mean=50):
                             name = f'{fixture}.{method}(Count: {bars}, {parameter})'
                             mean = 100 if arm == 'old' else new_mean
                             cases.append(dict(FullName=name, Method=method, Statistics=dict(N=10, OriginalValues=[mean]*10,
-                                Mean=mean, ConfidenceInterval=dict(Lower=mean-1,Upper=mean+1)), Memory=dict(BytesAllocatedPerOperation=8)))
-                    report = dict(Benchmarks=cases)
+                                Mean=mean, StandardDeviation=0, ConfidenceInterval=dict(Lower=mean-1,Upper=mean+1)), Memory=dict(BytesAllocatedPerOperation=8)))
+                    report = dict(Benchmarks=cases, HostEnvironmentInfo=dict(ProcessorName='test CPU', RuntimeVersion='test runtime'))
                     log = ''.join('// Benchmark: test: IterationCount=10 WarmupCount=10\n' +
                         ''.join(f'Workload{kind} {i}: sample\n' for kind in ('Warmup','Actual') for i in range(1,11)) for _ in cases)
                     relative = Path('operation-checkpoints')/fixture/f'round{index}-{arm}'/f'operation{position}'
