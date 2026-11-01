@@ -7,7 +7,7 @@ on:
       suite:
         description: Public builder comparisons, diagnostic kernels, or both
         type: choice
-        options: [builder, kernel, all]
+        options: [builder, kernel, all, qualified-rollout]
         default: builder
 permissions:
   contents: read
@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
-    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'run-builder-benchmarks'
+    if: (github.event_name == 'workflow_dispatch' && inputs.suite != 'qualified-rollout') || github.event.label.name == 'run-builder-benchmarks'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -33,7 +33,7 @@ jobs:
           path: benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/
           retention-days: 7
   performance:
-    if: github.event_name == 'workflow_dispatch' && inputs.suite != 'builder'
+    if: github.event_name == 'workflow_dispatch' && inputs.suite != 'builder' && inputs.suite != 'qualified-rollout'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -62,7 +62,7 @@ jobs:
           path: performance/
           retention-days: 14
   builder-performance:
-    if: inputs.suite != 'kernel'
+    if: inputs.suite != 'kernel' && inputs.suite != 'qualified-rollout'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -89,4 +89,134 @@ jobs:
         with:
           name: cpu-builder-${{ matrix.pair }}
           path: performance/
+          retention-days: 14
+  hosted-prepare:
+    if: github.event_name == 'workflow_dispatch' && inputs.suite == 'qualified-rollout'
+    runs-on: windows-2025
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m unittest discover -s scripts -p test_hosted_timing.py
+      - run: python scripts/run-hosted-timing.py prepare --out hosted-inputs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: hosted-inputs
+          path: hosted-inputs/
+          retention-days: 14
+          if-no-files-found: error
+  hosted-measure:
+    needs: hosted-prepare
+    runs-on: windows-2025
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install psutil==7.2.2
+      - uses: actions/download-artifact@v8
+        with:
+          name: hosted-inputs
+          path: hosted-inputs
+      - run: python scripts/run-hosted-timing.py measure --inputs hosted-inputs --out hosted-successor-${{ matrix.shard }} --phase successor --shard ${{ matrix.shard }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: hosted-successor-${{ matrix.shard }}
+          path: hosted-successor-${{ matrix.shard }}/
+          retention-days: 14
+          if-no-files-found: error
+  hosted-collect:
+    needs: hosted-measure
+    if: always() && needs.hosted-measure.result != 'skipped'
+    runs-on: windows-2025
+    timeout-minutes: 15
+    outputs:
+      accepted: ${{ steps.verify.outputs.accepted }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: hosted-successor-*
+          path: evidence
+      - uses: actions/download-artifact@v8
+        with:
+          name: hosted-inputs
+          path: hosted-inputs
+      - id: verify
+        run: python scripts/run-hosted-timing.py collect --inputs evidence --out verified-successor.json --phase successor
+      - uses: actions/upload-artifact@v7
+        with:
+          name: hosted-verified-successor
+          path: verified-successor.json
+          retention-days: 14
+  hosted-variants:
+    needs: hosted-collect
+    if: needs.hosted-collect.outputs.accepted == 'true'
+    runs-on: windows-2025
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install psutil==7.2.2
+      - uses: actions/download-artifact@v8
+        with:
+          name: hosted-inputs
+          path: hosted-inputs
+      - run: python scripts/run-hosted-timing.py measure --inputs hosted-inputs --out hosted-variants-0 --phase variants --shard 0
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: hosted-variants-0
+          path: hosted-variants-0/
+          retention-days: 14
+          if-no-files-found: error
+  hosted-collect-variants:
+    needs: hosted-variants
+    if: always() && needs.hosted-variants.result != 'skipped'
+    runs-on: windows-2025
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: hosted-variants-0
+          path: evidence
+      - uses: actions/download-artifact@v8
+        with:
+          name: hosted-inputs
+          path: hosted-inputs
+      - run: python scripts/run-hosted-timing.py collect --inputs evidence --out verified-variants.json --phase variants
+      - uses: actions/upload-artifact@v7
+        with:
+          name: hosted-verified-variants
+          path: verified-variants.json
           retention-days: 14
