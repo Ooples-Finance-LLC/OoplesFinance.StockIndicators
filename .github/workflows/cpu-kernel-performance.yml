@@ -98,6 +98,9 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.403'
@@ -124,6 +127,10 @@ jobs:
         shard: [0, 1, 2, 3, 4, 5, 6, 7]
     steps:
       - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.403'
@@ -152,6 +159,10 @@ jobs:
       accepted: ${{ steps.verify.outputs.accepted }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
       - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
@@ -177,6 +188,10 @@ jobs:
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.403'
@@ -203,6 +218,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
       - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
