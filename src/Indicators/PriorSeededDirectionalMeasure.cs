@@ -138,8 +138,7 @@ public sealed class PriorSeededDirectionalMeasure
         private static ExactMeanAccumulator Difference(ExactMeanAccumulator.ProductFactor left, ExactMeanAccumulator.ProductFactor right)
         {
             var result = new ExactMeanAccumulator(); result.AddFactor(left);
-            var subtract = new ExactMeanAccumulator(); subtract.AddFactor(right);
-            result.Subtract(subtract);
+            result.AddFactor(right, -1);
             return result;
         }
 

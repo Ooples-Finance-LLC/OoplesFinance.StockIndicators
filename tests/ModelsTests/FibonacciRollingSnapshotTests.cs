@@ -7,6 +7,23 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class FibonacciRollingSnapshotTests
 {
     [Theory]
+    [InlineData(14)] [InlineData(43)] [InlineData(44)]
+    public void CountPublicationPreservesSignedFractionalCarriesAndCancellation(int period)
+    {
+        var random = new Random(301031);
+        foreach (int exponent in new[] { -1022, 0, 1015 })
+        {
+            var prices = Enumerable.Range(0, 2 * period + 37).Select(i =>
+            {
+                long fraction = i % 3 == 0 ? (1L << 52) - 1 : random.NextInt64(1L << 52);
+                double value = BitConverter.Int64BitsToDouble((1023L << 52) | fraction);
+                return Math.ScaleB(i % 2 == 0 ? value : -value, exponent);
+            }).ToArray();
+            Check(prices, period);
+        }
+    }
+
+    [Theory]
     [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(14)]
     [InlineData(44)] [InlineData(45)] [InlineData(78)] [InlineData(79)] [InlineData(200)]
     public void RollingWindowsMatchIndependentRescansAcrossNumericalBoundaries(int period)

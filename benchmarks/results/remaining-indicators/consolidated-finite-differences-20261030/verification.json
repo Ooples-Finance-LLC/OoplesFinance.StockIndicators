@@ -1,0 +1,58 @@
+{
+  "input_head": "ed460a11b3061a31c9cb8f31447becb1736dbe76",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/ClassicMacd.cs",
+    "src/Indicators/ClassicPriceOscillator.cs",
+    "tests/ModelsTests/ClassicalFiniteDifferenceTests.cs"
+  ],
+  "batch_note": "Finite APO and classical MACD subtraction reuses already-rounded binary64 operands. Extended overflow uses the original wide path. Targeted boundary/reset regressions and affected consumers; prior combined qualification retained. Performance pending.",
+  "step": "complete",
+  "updated_utc": "2026-10-30T15:16:49.444657+00:00",
+  "unit": {
+    "passed": 54,
+    "class_counts": {
+      "ClassicalFiniteDifferenceTests": 18,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "ClassicAverageSharedExecutionTests": 14,
+      "MacdSharedExecutionTests": 18
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\stage2\\unit\\unit.trx",
+    "sha256": "d30057fb75794c1879022e81f54df534dc82f7cc7a1b057af4e840e86e431a68"
+  },
+  "parity": {
+    "passed": 72,
+    "class_counts": {
+      "SharedTaMacdNativeBenchmarkTests": 15,
+      "ClassicMacdComparisonTests": 16,
+      "SharedTaAverageNativeBenchmarkTests": 26,
+      "ClassicOscillatorComparisonTests": 11,
+      "SharedClassicAverageBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\stage2\\parity\\parity.trx",
+    "sha256": "19f9347dfb6fea986d5a3e00c5b0e71bdd217eee627c89cf347262e9b642133d"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-consolidated-exact-arithmetic-20261030\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "581156ea27f4ad7766f540574024525e836175956be791a7b1ee650d9a300012",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-consolidated-exact-arithmetic-20261030\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "581156ea27f4ad7766f540574024525e836175956be791a7b1ee650d9a300012",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-consolidated-exact-arithmetic-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "581156ea27f4ad7766f540574024525e836175956be791a7b1ee650d9a300012",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-consolidated-exact-arithmetic-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "581156ea27f4ad7766f540574024525e836175956be791a7b1ee650d9a300012"
+  }
+}

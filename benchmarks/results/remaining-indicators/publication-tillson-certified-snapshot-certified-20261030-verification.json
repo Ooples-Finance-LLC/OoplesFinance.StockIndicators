@@ -1,0 +1,76 @@
+{
+  "input_head": "ffb7e2b91766894b0679eb05f6bd081490fd41f9",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/TillsonAverage.cs",
+    "tests/ModelsTests/TillsonCertifiedSnapshotTests.cs",
+    "tests/ModelsTests/TillsonCompactSnapshotTests.cs"
+  ],
+  "batch_note": "Approved T3 snapshot certified polynomial reuse: rounded finite stages use existing CertifiedTillson.TryCombine, exact fallback and rounded state semantics retained. Independent rational transitions and affected consumers. No separate timing run added.",
+  "step": "complete",
+  "updated_utc": "2026-10-30T17:51:15.471212+00:00",
+  "unit": {
+    "passed": 235,
+    "class_counts": {
+      "TillsonNumericalTests": 84,
+      "MacdSharedExecutionTests": 18,
+      "TillsonSharedExecutionTests": 12,
+      "TillsonCertifiedSnapshotTests": 6,
+      "ClassicAverageSharedExecutionTests": 14,
+      "ClassicStochasticSharedExecutionTests": 16,
+      "TillsonCompactSnapshotTests": 48,
+      "ClassicalFiniteDifferenceTests": 18,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "VariableAverageSharedExecutionTests": 12,
+      "TillsonCompactInputTests": 3
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\tillson-certified\\unit\\unit.trx",
+    "sha256": "61727108659d5567212e93e8f9bb435df28a7bd280e86cc9f0dc5dddb003c200",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-tillson-certified-snapshot-certified-20261030-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 145,
+    "class_counts": {
+      "ClassicStochasticRsiComparisonTests": 15,
+      "ClassicOscillatorComparisonTests": 11,
+      "SharedTaAverageNativeBenchmarkTests": 26,
+      "SharedTaMacdNativeBenchmarkTests": 15,
+      "TillsonComparisonTests": 10,
+      "VariablePeriodComparisonTests": 16,
+      "ClassicStochasticComparisonTests": 16,
+      "SharedTillsonBenchmarkTests": 16,
+      "SharedClassicAverageBenchmarkTests": 4,
+      "ClassicMacdComparisonTests": 16
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\tillson-certified\\parity\\parity.trx",
+    "sha256": "8f54744cf6543e67a98b25619478c24149fba0469545da2245952a1e3034bdbb",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-tillson-certified-snapshot-certified-20261030-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tillson-certified-snapshot-20261030\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7c127efc31637c8fc01334826507709ecdb983d5c86d9b9d37a4aa44522cc527",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tillson-certified-snapshot-20261030\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7c127efc31637c8fc01334826507709ecdb983d5c86d9b9d37a4aa44522cc527",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tillson-certified-snapshot-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7c127efc31637c8fc01334826507709ecdb983d5c86d9b9d37a4aa44522cc527",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tillson-certified-snapshot-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7c127efc31637c8fc01334826507709ecdb983d5c86d9b9d37a4aa44522cc527"
+  },
+  "source_fingerprint_sha256": "5edb5595ad891599307fe1570515d11161910f60e8a465ba511653372a376a30",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved T3 snapshot certified polynomial reuse: rounded finite stages use existing CertifiedTillson.TryCombine, exact fallback and rounded state semantics retained. Independent rational transitions and affected consumers. No separate timing run added. Correctness checks passed; controlled performance remains pending."
+}

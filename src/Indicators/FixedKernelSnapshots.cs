@@ -90,7 +90,11 @@ public static class FibonacciWeightedSnapshot
             shifted = nextShifted;
             // Publish the complete exact ratio once, including subnormal results
             // caused by cancellation. No rounded quotient is scaled afterwards.
-            output[i] = JurikDyadic.FromBinaryProduct(weighted, scale).Mean((int)mass);
+            UInt128 magnitude = (UInt128)(weighted < 0 ? -weighted : weighted);
+            if (CertifiedMeanRelativeError.TryDivideCount(magnitude, (int)mass, scale, out double counted))
+                output[i] = weighted < 0 ? -counted : counted;
+            else
+                output[i] = JurikDyadic.FromBinaryProduct(weighted, scale).Mean((int)mass);
         }
         return true;
     }
@@ -229,9 +233,14 @@ public static class WindowedSincSnapshot
         for (int i = 0; i < prices.Length; i++)
         {
             int start = Math.Max(0, i - weights.Length + 1);
+            int available = Math.Min(i + 1, coefficients.Length);
             Int128 numerator = 0;
-            for (int k = 0; k < coefficients.Length; k++)
-                numerator = unchecked(numerator + (Int128)prices[Math.Min(i, start + k)] * coefficients[k]);
+            // Only startup extends the newest observation. Full windows use
+            // consecutive prices, preserving the original oldest-first sum.
+            for (int k = 0; k < available; k++)
+                numerator = unchecked(numerator + WordProduct(prices[start + k], coefficients[k]));
+            for (int k = available; k < coefficients.Length; k++)
+                numerator = unchecked(numerator + WordProduct(prices[i], coefficients[k]));
             if (numerator == 0) continue;
             UInt128 magnitude = (UInt128)(numerator < 0 ? -numerator : numerator);
             if (CertifiedCompactRatio.TryDivide(magnitude, denominator, priceMinimum - 1075, out double value))
@@ -249,6 +258,14 @@ public static class WindowedSincSnapshot
                 throw new OverflowException("Sinc output is not representable.");
         }
         return true;
+    }
+
+    private static Int128 WordProduct(long left, long right)
+    {
+        // Both operands already fit signed Int64. One full-width product
+        // preserves all 128 result bits, including mixed-sign low-word carries.
+        long high = Math.BigMul(left, right, out long low);
+        return ((Int128)high << 64) | unchecked((ulong)low);
     }
 
     private static bool IncludeGrid(double value, ref int minimum, ref int maximum)

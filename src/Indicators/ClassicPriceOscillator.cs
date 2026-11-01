@@ -109,7 +109,7 @@ public sealed class ClassicPriceOscillator : MultiOutputIndicatorBase, IIndicato
 
     internal sealed class State : IMultiOutputState, IDisposable
     {
-        private readonly IMultiOutputState _fast,
+        private readonly ClassicMovingAverage.State _fast,
             _slow;
         private readonly bool _percentage;
         private readonly double[] _f = new double[2],
@@ -117,8 +117,8 @@ public sealed class ClassicPriceOscillator : MultiOutputIndicatorBase, IIndicato
 
         internal State(ClassicPriceOscillator owner)
         {
-            _fast = (IMultiOutputState)owner.Fast.CreateState();
-            _slow = (IMultiOutputState)owner.Slow.CreateState();
+            _fast = (ClassicMovingAverage.State)owner.Fast.CreateState();
+            _slow = (ClassicMovingAverage.State)owner.Slow.CreateState();
             _percentage = owner.Percentage;
         }
 
@@ -132,21 +132,32 @@ public sealed class ClassicPriceOscillator : MultiOutputIndicatorBase, IIndicato
 
         public void Dispose()
         {
-            if (_fast is IDisposable f)
-                f.Dispose();
-            if (_slow is IDisposable s)
-                s.Dispose();
+            _fast.Dispose();
+            _slow.Dispose();
         }
 
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            _fast.Update(bar, _f);
-            _slow.Update(bar, _s);
+            // Both averages consume the same exact price representation.
+            var input = ExactVarianceWindow.Units(bar.Close);
+            _fast.UpdateUnits(input, _f);
+            _slow.UpdateUnits(input, _s);
             if (_f[1] == 0 || _s[1] == 0)
                 return;
-            var f = ((IRoundedAverageUnits)_fast).RoundedUnits;
-            var s = ((IRoundedAverageUnits)_slow).RoundedUnits;
+#if !NETFRAMEWORK
+            if (!_percentage && double.IsFinite(_f[0]) && double.IsFinite(_s[0]))
+            {
+                // The averages are already rounded binary64 values. Subtraction
+                // rounds their exact difference once, just like the unit ratio.
+                double difference = _f[0] - _s[0];
+                output[0] = difference == 0 ? 0 : difference; // NOSONAR: canonical exact zero.
+                output[1] = 1;
+                return;
+            }
+#endif
+            var f = _fast.RoundedUnits;
+            var s = _slow.RoundedUnits;
             if (_percentage)
             {
                 var numerator = 100 * (f - s) << 1074;

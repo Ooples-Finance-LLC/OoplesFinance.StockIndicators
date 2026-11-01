@@ -11,6 +11,13 @@ internal static partial class ValuesBarExecution
         : IMultiOutputState
     {
         private readonly JurikDyadic[] _values = new JurikDyadic[3], _sums = new JurikDyadic[3];
+        // Decode invariant operands once; retain the same exact arithmetic.
+        private readonly JurikDyadic _periodDivisor = JurikDyadic.FromDouble(period);
+        private readonly JurikDyadic _smoothDivisor = JurikDyadic.FromDouble((long)period + 1);
+        private readonly JurikDyadic _priorMultiplier = JurikDyadic.FromFactor(
+            new ExactMeanAccumulator.ProductFactor(period - 1));
+        private static readonly JurikDyadic PercentMultiplier = JurikDyadic.FromFactor(
+            new ExactMeanAccumulator.ProductFactor(100));
         private readonly Queue<double?> _signal = new();
         private JurikDyadic _signalSum, _previousThird;
         private int _missing;
@@ -24,9 +31,8 @@ internal static partial class ValuesBarExecution
             _missing = 0; _index = -1; _hasThird = false;
         }
 
-        private static JurikDyadic Round(JurikDyadic numerator, long divisor)
+        private static JurikDyadic Round(JurikDyadic numerator, JurikDyadic denominator)
         {
-            var denominator = JurikDyadic.FromDouble(divisor);
             for (int shift = 0; ; shift += 1024)
             {
                 double value = numerator.Ratio(denominator);
@@ -42,8 +48,10 @@ internal static partial class ValuesBarExecution
 
         private JurikDyadic Smooth(JurikDyadic prior, JurikDyadic input)
         {
-            prior.Multiply(period - 1); input.ScaleByPowerOfTwo(1); prior.AddExact(input);
-            return Round(prior, (long)period + 1);
+            // Retain Multiply(double)'s identity no-op for period two.
+            if (period != 2) prior.Multiply(_priorMultiplier);
+            input.ScaleByPowerOfTwo(1); prior.AddExact(input);
+            return Round(prior, _smoothDivisor);
         }
 
         private static void Publish(double? value, int slot, Span<double> output)
@@ -61,7 +69,7 @@ internal static partial class ValuesBarExecution
                 _sums[0].AddExact(input);
                 if (_index == period - 1)
                 {
-                    var initial = Round(_sums[0], period);
+                    var initial = Round(_sums[0], _periodDivisor);
                     for (int j = 0; j < 3; j++) _values[j] = initial;
                     _previousThird = initial; _hasThird = true; _sums[0] = default;
                 }
@@ -81,7 +89,7 @@ internal static partial class ValuesBarExecution
                     {
                         _sums[j].AddExact(input);
                         if (_index != start + period - 1) return;
-                        _values[j] = Round(_sums[j], period); _sums[j] = default;
+                        _values[j] = Round(_sums[j], _periodDivisor); _sums[j] = default;
                     }
                     else _values[j] = Smooth(_values[j], input);
                     if (_index < start + lookback) return;
@@ -96,7 +104,7 @@ internal static partial class ValuesBarExecution
                     : input.Sign > 0 ? double.PositiveInfinity : double.NegativeInfinity;
             else
             {
-                var difference = input; difference.Subtract(_previousThird); difference.Multiply(100);
+                var difference = input; difference.Subtract(_previousThird); difference.Multiply(PercentMultiplier);
                 rate = difference.Sign == 0 ? 0 : difference.Ratio(_previousThird);
             }
             _previousThird = input;
