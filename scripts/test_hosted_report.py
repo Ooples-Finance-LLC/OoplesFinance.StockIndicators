@@ -67,7 +67,9 @@ const detail=`${esc(r.raw.Ooples.host.ProcessorName)}`;
             primary=types.ModuleType('primary_baseline_report'); primary.replace_primary=lambda s,d:s
             with patch('hosted_timing.report.subprocess.check_output',return_value='head'), \
                  patch('hosted_timing.report.subprocess.run'),patch.dict('sys.modules',{'primary_baseline_report':primary}):
-                candidate=stage(live,raw,repo,root/'staged')
+                # Equivalent paths must work even when archived() canonicalizes
+                # short Windows names or parent-directory components.
+                candidate=stage(live,raw/'..'/'raw',repo,root/'staged')
             result=candidate.read_text(encoding='utf-8')
             def embedded(key): return json.loads(re.search(r'<script[^>]*id="'+key+r'"[^>]*>(.*?)</script>',result,re.S)[1])
             after=embedded('dataset')
