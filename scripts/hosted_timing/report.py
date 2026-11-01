@@ -16,6 +16,7 @@ from .verify import archived, collect
 
 
 def stage(live, raw, repo, out):
+    live, raw, repo, out = (Path(p).resolve() for p in (live, raw, repo, out))
     summary = collect(raw, 'successor')
     assert summary['accepted'], 'Only the complete accepted successor can replace report rows'
     source = summary['sources']['new']
