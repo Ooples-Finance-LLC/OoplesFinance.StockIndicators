@@ -85,12 +85,15 @@ public static class ZigZagSnapshot
         int thresholdScale = Math.Min(1074, PriceGrid(percentChange));
         var threshold = GridUnits(percentChange, thresholdScale);
         var grid = BigInteger.One << (1074 - thresholdScale);
+        var percentageScale = 100 * grid;
         var highs = bars.Select(b => U(highLow ? b.High : b.Close)).ToArray();
         var lows = highLow ? bars.Select(b => U(b.Low)).ToArray() : highs;
-        bool Reversal(BigInteger change, BigInteger price) =>
-            price.Sign > 0
-                ? change * 100 * grid >= threshold * price
-                : price.Sign < 0 && change * 100 * grid <= threshold * price;
+        bool Reversal(BigInteger change, int sign, BigInteger required) =>
+            sign > 0
+                ? change * percentageScale >= required
+                : sign < 0 && change * percentageScale <= required;
+        var initialLowThreshold = threshold * lows[0];
+        var initialHighThreshold = threshold * highs[0];
         var firstKind = (ZigZagPointKind?)null;
         for (var i = 0; i < bars.Count; i++)
         {
@@ -100,12 +103,12 @@ public static class ZigZagSnapshot
             var down = highs[0] - lows[i];
             var comparison =
                 (up * highs[0]).CompareTo(down * lows[0]) * lows[0].Sign * highs[0].Sign;
-            if (Reversal(up, lows[0]) && comparison > 0)
+            if (Reversal(up, lows[0].Sign, initialLowThreshold) && comparison > 0)
             {
                 firstKind = ZigZagPointKind.Low;
                 break;
             }
-            if (Reversal(down, highs[0]) && comparison < 0)
+            if (Reversal(down, highs[0].Sign, initialHighThreshold) && comparison < 0)
             {
                 firstKind = ZigZagPointKind.High;
                 break;
@@ -128,19 +131,31 @@ public static class ZigZagSnapshot
                 last.Price,
                 rising ? ZigZagPointKind.High : ZigZagPointKind.Low
             );
+            BigInteger candidateThreshold = default;
+            bool thresholdReady = false;
             for (var i = last.Index + 1; i < bars.Count; i++)
             {
                 var price = rising ? highs[i] : lows[i];
                 var newer = rising ? price >= candidate.Price : price <= candidate.Price;
                 if (newer)
+                {
                     candidate = new(i, price, candidate.Kind);
-                else if (
-                    Reversal(
+                    thresholdReady = false;
+                }
+                else
+                {
+                    // Compute only when tested, then retain it until a new
+                    // extreme (including the latest tie) replaces the pivot.
+                    if (!thresholdReady)
+                    {
+                        candidateThreshold = threshold * candidate.Price;
+                        thresholdReady = true;
+                    }
+                    if (Reversal(
                         rising ? candidate.Price - lows[i] : highs[i] - candidate.Price,
-                        candidate.Price
-                    )
-                )
-                    break;
+                        candidate.Price.Sign, candidateThreshold))
+                        break;
+                }
                 if (i == bars.Count - 1)
                     candidate = new(i, price, null);
             }

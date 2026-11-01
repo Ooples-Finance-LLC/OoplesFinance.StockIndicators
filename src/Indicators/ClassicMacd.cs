@@ -149,12 +149,36 @@ public sealed class ClassicMacd : MultiOutputIndicatorBase, IIndicatorValidation
             _slow.UpdateUnits(price, _b);
             if (_a[1] == 0 || _b[1] == 0)
                 return;
+#if !NETFRAMEWORK
+            // A finite difference implies finite operands. Keep extended values
+            // on the original path so later stages can cancel unpublished overflow.
+            double difference = _a[0] - _b[0];
+            bool finiteDifference = double.IsFinite(difference);
+            var oscillator = finiteDifference
+                ? ExactVarianceWindow.Units(difference)
+                : RocBankValue.RoundUnits(_fast.RoundedUnits - _slow.RoundedUnits, 1);
+#else
             var oscillator = RocBankValue.RoundUnits(_fast.RoundedUnits - _slow.RoundedUnits, 1);
+#endif
             _signal.UpdateUnits(oscillator, _s);
             if (_s[1] == 0)
                 return;
+#if !NETFRAMEWORK
+            outputs[0] = finiteDifference
+                ? (difference == 0 ? 0 : difference) // NOSONAR: canonical exact zero.
+                : ExactMeanAccumulator.UnitRatio(oscillator, 1);
+#else
             outputs[0] = ExactMeanAccumulator.UnitRatio(oscillator, 1);
+#endif
             outputs[1] = _s[0];
+#if !NETFRAMEWORK
+            if (double.IsFinite(outputs[0]) && double.IsFinite(_s[0]))
+            {
+                double histogram = outputs[0] - _s[0];
+                outputs[2] = histogram == 0 ? 0 : histogram; // NOSONAR: canonical exact zero.
+            }
+            else
+#endif
             outputs[2] = ExactMeanAccumulator.UnitRatio(oscillator - _signal.RoundedUnits, 1);
             outputs[3] = outputs[4] = outputs[5] = 1;
         }

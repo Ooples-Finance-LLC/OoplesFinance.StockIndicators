@@ -12,9 +12,17 @@ internal sealed class TillsonWindow : IDisposable
     {
         private readonly BigInteger _third, _fourth, _fifth, _sixth;
         private readonly int _scale;
+#if !NETFRAMEWORK
+        private readonly double _factor;
+        private readonly bool _canCertify;
+#endif
         internal Coefficients(double factor)
         {
             if (double.IsNaN(factor) || double.IsInfinity(factor)) throw new ArgumentOutOfRangeException(nameof(factor));
+#if !NETFRAMEWORK
+            _factor = factor;
+            _canCertify = Math.Abs(factor) is >= .25 and <= 2;
+#endif
             var bits = BitConverter.DoubleToInt64Bits(factor); var exponent = (int)((bits >> 52) & 2047);
             var significand = (bits & ((1L << 52) - 1)) + (exponent == 0 ? 0 : 1L << 52);
             var numerator = new BigInteger(bits < 0 ? -significand : significand);
@@ -29,6 +37,10 @@ internal sealed class TillsonWindow : IDisposable
         }
         internal double Combine(double third, double fourth, double fifth, double sixth)
         {
+#if !NETFRAMEWORK
+            if (_canCertify && CertifiedTillson.TryCombine(third, fourth, fifth, sixth, _factor, out double certified))
+                return certified;
+#endif
             var total = new ExactMeanAccumulator(); total.Add(third, _third); total.Add(fourth, _fourth);
             total.Add(fifth, _fifth); total.Add(sixth, _sixth); total.ScaleByPowerOfTwo(_scale);
             return total.Mean(1);

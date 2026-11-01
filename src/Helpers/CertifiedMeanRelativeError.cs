@@ -1,5 +1,6 @@
 #if !NETFRAMEWORK
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace OoplesFinance.StockIndicators.Helpers;
 
@@ -11,6 +12,13 @@ namespace OoplesFinance.StockIndicators.Helpers;
 internal static class CertifiedMeanRelativeError
 {
     private const int Precision = 66;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static UInt128 Square(ulong value)
+    {
+        ulong high = Math.BigMul(value, value, out ulong low);
+        return ((UInt128)high << 64) | low;
+    }
 
     internal static void Reciprocal(double value, out UInt128 floor, out bool exact, out long significand, out int exponent)
     {
@@ -112,9 +120,9 @@ internal static class CertifiedMeanRelativeError
             // A 53-bit significand shifted by at most six bits and the
             // 56-bit center have a difference strictly inside Int64.
             long difference = (price << (exponent - common)) - alignedCenter;
-            UInt128 term = (UInt128)Math.Abs(difference);
+            ulong distance = (ulong)Math.Abs(difference);
             // The aligned distance is below 2^60, so its square fits UInt128.
-            if (squared) term = unchecked(term * term);
+            UInt128 term = squared ? Square(distance) : distance;
             if (term > UInt128.MaxValue - sum) return false;
             sum = unchecked(sum + term); // The explicit bound above proves this fits.
         }
@@ -139,8 +147,8 @@ internal static class CertifiedMeanRelativeError
             int exponent = sample.NormalExponent;
             if (exponent is <= 0 or >= 2047 || Math.Abs(exponent - centerExponent) > 3) return false;
             long difference = (sample.NormalSignificand << (exponent - common)) - alignedCenter;
-            UInt128 distance = (UInt128)Math.Abs(difference);
-            UInt128 square = unchecked(distance * distance); // Distance is below 2^60.
+            ulong distance = (ulong)Math.Abs(difference);
+            UInt128 square = Square(distance); // Distance is below 2^60.
             if (square > UInt128.MaxValue - squaredSum) return false;
             // At most Int32.MaxValue terms, each strictly below 2^60.
             absoluteSum = unchecked(absoluteSum + distance);
@@ -169,8 +177,8 @@ internal static class CertifiedMeanRelativeError
             int exponent = sample.NormalExponent;
             if (exponent is <= 0 or >= 2047 || Math.Abs(exponent - centerExponent) > 3) return false;
             long difference = (sample.NormalSignificand << (exponent - common)) - alignedCenter;
-            UInt128 distance = (UInt128)Math.Abs(difference);
-            UInt128 square = unchecked(distance * distance); // Distance is below 2^60.
+            ulong distance = (ulong)Math.Abs(difference);
+            UInt128 square = Square(distance); // Distance is below 2^60.
             if (square > UInt128.MaxValue - squaredSum) return false;
             absoluteSum = unchecked(absoluteSum + distance); // At most Int32.MaxValue terms below 2^60.
             squaredSum = unchecked(squaredSum + square);

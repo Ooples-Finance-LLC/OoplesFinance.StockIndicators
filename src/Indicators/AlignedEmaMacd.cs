@@ -119,6 +119,7 @@ public sealed class AlignedEmaMacd : MultiOutputIndicatorBase, IIndicatorValidat
 
     private sealed class Average(int period, bool first, double? coefficient)
     {
+        private readonly CompactMacdValue.EmaRecurrence _recurrence = new(period);
         private long _count;
         private CompactMacdValue _sum;
         internal CompactMacdValue Value { get; private set; }
@@ -158,7 +159,7 @@ public sealed class AlignedEmaMacd : MultiOutputIndicatorBase, IIndicatorValidat
             }
             Value = coefficient.HasValue
                 ? Value.AdvanceFixedEma(input, _weights.Alpha, _weights.Denominator)
-                : Value.AdvanceEma(input, period);
+                : _recurrence.Advance(Value, input);
         }
     }
 
