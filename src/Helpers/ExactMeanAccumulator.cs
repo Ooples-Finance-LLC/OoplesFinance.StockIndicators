@@ -34,10 +34,6 @@ internal struct ExactMeanAccumulator
         magnitude >>= zeros;
         var signed = (bits >> 63) == 0 ? magnitude : -magnitude;
         var scale = Math.Max(0, exponent - 1) + zeros;
-        // A decoded binary64 significand has at most 53 bits. Unit weights
-        // therefore need neither an overflow division nor wide multiplication.
-        if (weight == 1) { AddSmall(signed, scale); return; }
-        if (weight == -1) { AddSmall(-signed, scale); return; }
         var absoluteWeight = Math.Abs((long)weight);
         if (magnitude <= long.MaxValue / absoluteWeight)
             AddSmall(signed * weight, scale);
@@ -117,10 +113,6 @@ internal struct ExactMeanAccumulator
     internal void AddFactor(ProductFactor value, int weight)
     {
         if (value.Mantissa == 0 || weight == 0) return;
-        // ProductFactor retains at most 53 significand bits, including when
-        // its binary scale is shifted. Both unit-weight products fit exactly.
-        if (weight == 1) { AddSmall(value.Mantissa, value.Scale); return; }
-        if (weight == -1) { AddSmall(-value.Mantissa, value.Scale); return; }
         if (Math.Abs(value.Mantissa) <= long.MaxValue / Math.Abs((long)weight))
             AddSmall(value.Mantissa * weight, value.Scale);
         else AddLarge(new BigInteger(value.Mantissa) * weight, value.Scale);
