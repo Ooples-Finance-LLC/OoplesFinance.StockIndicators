@@ -149,7 +149,7 @@ jobs:
       matrix:
         profile: [trix-library-jit, trix-library-no-tiering]
     env:
-      HOSTED_TIMING_PLAN: benchmarks/plans/hosted-trix-20261102.json
+      HOSTED_TIMING_PLAN: benchmarks/plans/hosted-trix-eager-20261102.json
     steps:
       - uses: actions/checkout@v7
         with:
@@ -167,7 +167,7 @@ jobs:
         with:
           name: hosted-inputs
           path: hosted-inputs
-          run-id: 41382401216
+          run-id: 41395684953
           github-token: ${{ github.token }}
       - run: python scripts/run-hosted-timing.py measure --inputs hosted-inputs --out diagnostic-${{ matrix.profile }} --phase successor --shard 1 --diagnostic ${{ matrix.profile }}
       - uses: actions/upload-artifact@v7

@@ -264,7 +264,7 @@ def measure(inputs, out, phase, shard, diagnostic=None):
         assert diagnostic in ('trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering')
         assert phase == 'successor' and shard == (1 if library else 6)
         tasks = trix_diagnostic_tasks(plan, library)
-        diagnostic_env = dict(DOTNET_JitDisasm='Smooth Round Ratio TryRatio Update TrySmooth SmoothSameBinade',
+        diagnostic_env = dict(DOTNET_JitDisasm='Smooth Round Ratio TryRatio Update TrySmooth SmoothSameBinade FromDouble TryDouble Mean',
             DOTNET_JitDisasmAssemblies='OoplesFinance.StockIndicators',
             DOTNET_JitPrintInlinedMethods='1', DOTNET_TieredPGO='0' if diagnostic == 'trix-no-pgo' else '1')
         if diagnostic == 'trix-library-no-tiering':
