@@ -12,7 +12,7 @@ on:
       qualification_plan:
         description: Immutable source and measurement plan for qualified-rollout
         type: choice
-        options: [benchmarks/plans/hosted-rollout-20261101.json, benchmarks/plans/hosted-repair-20261101.json, benchmarks/plans/hosted-trix-20261102.json, benchmarks/plans/hosted-trix-eager-20261102.json, benchmarks/plans/hosted-trix-shared-jit-20261102.json, benchmarks/plans/hosted-trix-direct-fill-20261102.json]
+        options: [benchmarks/plans/hosted-rollout-20261101.json, benchmarks/plans/hosted-repair-20261101.json, benchmarks/plans/hosted-trix-20261102.json, benchmarks/plans/hosted-trix-eager-20261102.json, benchmarks/plans/hosted-trix-shared-jit-20261102.json, benchmarks/plans/hosted-trix-direct-fill-20261102.json, benchmarks/plans/hosted-trix-settled-20261102.json]
         default: benchmarks/plans/hosted-rollout-20261101.json
 env:
   HOSTED_TIMING_PLAN: ${{ inputs.qualification_plan || 'benchmarks/plans/hosted-rollout-20261101.json' }}
@@ -147,9 +147,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        profile: [trix-library-jit, trix-library-no-tiering]
+        profile: [trix-library-jit, trix-library-no-tiering, trix-library-warmup]
     env:
-      HOSTED_TIMING_PLAN: benchmarks/plans/hosted-trix-shared-jit-20261102.json
+      HOSTED_TIMING_PLAN: benchmarks/plans/hosted-trix-direct-fill-20261102.json
     steps:
       - uses: actions/checkout@v7
         with:
@@ -167,7 +167,7 @@ jobs:
         with:
           name: hosted-inputs
           path: hosted-inputs
-          run-id: 41449840590
+          run-id: 41462623234
           github-token: ${{ github.token }}
       - run: python scripts/run-hosted-timing.py measure --inputs hosted-inputs --out diagnostic-${{ matrix.profile }} --phase successor --shard 1 --diagnostic ${{ matrix.profile }}
       - uses: actions/upload-artifact@v7
@@ -179,6 +179,9 @@ jobs:
           if-no-files-found: error
   hosted-prepare:
     if: github.event_name == 'workflow_dispatch' && inputs.suite == 'qualified-rollout'
+    permissions:
+      contents: read
+      actions: read
     runs-on: windows-2025
     timeout-minutes: 60
     outputs:
@@ -197,8 +200,24 @@ jobs:
         with:
           python-version: '3.13'
       - run: python -m unittest discover -s scripts -p "test_hosted*.py"
+      - id: input-source
+        run: |
+          $timingPlan = Get-Content -Raw -LiteralPath $env:HOSTED_TIMING_PLAN | ConvertFrom-Json
+          "run_id=$($timingPlan.reuse_inputs.run_id)" >> $env:GITHUB_OUTPUT
+      - uses: actions/download-artifact@v8
+        if: steps.input-source.outputs.run_id != ''
+        with:
+          name: hosted-inputs
+          path: reused-inputs
+          run-id: ${{ steps.input-source.outputs.run_id }}
+          github-token: ${{ github.token }}
       - id: prepare
-        run: python scripts/run-hosted-timing.py prepare --out hosted-inputs
+        run: |
+          if (Test-Path -LiteralPath reused-inputs) {
+            python scripts/run-hosted-timing.py prepare --out hosted-inputs --reuse-from reused-inputs
+          } else {
+            python scripts/run-hosted-timing.py prepare --out hosted-inputs
+          }
       - uses: actions/upload-artifact@v7
         if: always()
         with:
