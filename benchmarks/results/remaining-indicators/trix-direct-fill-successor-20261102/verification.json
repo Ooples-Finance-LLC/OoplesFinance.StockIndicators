@@ -1,0 +1,81 @@
+{
+  "status": "passed",
+  "unit_classes": [
+    "BoundedUltimateExecutionTests",
+    "CertifiedCommodityChannelTests",
+    "CertifiedHilbertProjectionTests",
+    "CertifiedTillsonTests",
+    "CertifiedUltimateRatioTests",
+    "CompactChoppinessTests",
+    "CompactHilbertPhaseTests",
+    "CompactUltimateOscillatorTests",
+    "JurikSharedExecutionTests",
+    "SeededMomentumSharedExecutionTests",
+    "TillsonFloatingSmoothingTests",
+    "TillsonSharedExecutionTests",
+    "TillsonWordBinadeTests",
+    "TillsonWordSmoothingTests",
+    "TrixNumericalTests"
+  ],
+  "parity_classes": [
+    "JurikComparisonTests",
+    "SharedJurikBenchmarkTests",
+    "SharedSeededMomentumBenchmarkTests",
+    "SharedSkenderEmaFamilyBenchmarkTests",
+    "SharedTaAdaptiveRateNativeBenchmarkTests",
+    "SharedTillsonBenchmarkTests",
+    "TillsonComparisonTests",
+    "TripleRateComparisonTests"
+  ],
+  "step": "parity",
+  "unit": {
+    "passed": 185,
+    "class_counts": {
+      "CertifiedHilbertProjectionTests": 5,
+      "BoundedUltimateExecutionTests": 18,
+      "CertifiedTillsonTests": 17,
+      "CompactChoppinessTests": 12,
+      "TillsonWordBinadeTests": 2,
+      "CompactHilbertPhaseTests": 11,
+      "CompactUltimateOscillatorTests": 14,
+      "TillsonWordSmoothingTests": 4,
+      "JurikSharedExecutionTests": 9,
+      "TrixNumericalTests": 43,
+      "CertifiedCommodityChannelTests": 12,
+      "SeededMomentumSharedExecutionTests": 15,
+      "CertifiedUltimateRatioTests": 4,
+      "TillsonFloatingSmoothingTests": 7,
+      "TillsonSharedExecutionTests": 12
+    },
+    "sha256": "3eb14305201e3dba73c65a0402415a3818bbb85b83a9a9d646ad95b0547578f3"
+  },
+  "parity": {
+    "passed": 176,
+    "class_counts": {
+      "SharedSeededMomentumBenchmarkTests": 8,
+      "JurikComparisonTests": 6,
+      "SharedTaAdaptiveRateNativeBenchmarkTests": 40,
+      "TillsonComparisonTests": 10,
+      "SharedJurikBenchmarkTests": 5,
+      "SharedTillsonBenchmarkTests": 16,
+      "TripleRateComparisonTests": 10,
+      "SharedSkenderEmaFamilyBenchmarkTests": 81
+    },
+    "sha256": "03c2ca0a86647060ecd6d55f4fcef424f46a4cb10d9d95cb699b106c5f2ce7eb"
+  },
+  "gpu": {
+    "passed_cases": 100,
+    "source_sha256": "6049c3d02c95f3d0930fbb32f8d9f09f7e5fc68d27a5d9f28eb1e0da95b781be",
+    "trx_sha256": "1bcc49836853b2a1f95a7437eb99c208f4055c9966849d1e7bd4d1d13850f5f8"
+  },
+  "production_dll_sha256": {
+    "src": "dd216bd71a7de251598da210fbd88fa623cca92e82b8a9efd3cae4dc1eb542fe",
+    "tests": "dd216bd71a7de251598da210fbd88fa623cca92e82b8a9efd3cae4dc1eb542fe",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks": "dd216bd71a7de251598da210fbd88fa623cca92e82b8a9efd3cae4dc1eb542fe",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests": "dd216bd71a7de251598da210fbd88fa623cca92e82b8a9efd3cae4dc1eb542fe"
+  },
+  "source_commit": "244976ae23599dd036b7109dfd6296db1319ce2f",
+  "source_fingerprint": "6049c3d02c95f3d0930fbb32f8d9f09f7e5fc68d27a5d9f28eb1e0da95b781be",
+  "performance": "Pending fresh hosted qualification; correctness is not performance acceptance.",
+  "repair": "TRIX direct-fill correction: run single-root TRIX through an eagerly optimized concrete loop, retaining approved compact arithmetic annotations and all validation, cancellation, history and failure semantics."
+}
