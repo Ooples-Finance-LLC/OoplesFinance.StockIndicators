@@ -114,6 +114,11 @@ class HostedTimingTests(unittest.TestCase):
         self.assertEqual([op['pair'] for op in task['operations']], ['Skender.GetTrix'])
         self.assertEqual(task['cases'], 16)
         self.assertEqual(task['methods'], ['BuilderFull', 'BuilderLatestOnly'])
+        task, = trix_diagnostic_tasks(plan, library=True)
+        self.assertEqual(plan, before)
+        self.assertEqual([op['pair'] for op in task['operations']], ['TaLib.Functions.Trix'])
+        self.assertEqual(task['cases'], 8)
+        self.assertEqual(task['methods'], ['Ooples'])
 
     def test_plan_pins_cpu_checks_without_changing_historical_defaults(self):
         self.assertEqual(len(cpu_test_classes({}, 'old')), 2)
