@@ -8,8 +8,20 @@ import sys
 os.environ['HOSTED_TIMING_PLAN'] = sys.argv[4]
 sys.path.insert(0, r'C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-hosted-20261101\scripts')
 from hosted_timing.pipeline import PLAN, read, digest, phase_sources, write
-from hosted_timing.verify import archived, check_log, sample
+from hosted_timing.verify import archived, sample
 from hosted_timing.checkpoints import case_key
+
+def check_warmup_log(text, count):
+    # This archived diagnostic has a different contract from qualification.
+    sections = re.split(r'^// Benchmark: ', text, flags=re.M)[1:]
+    assert len(sections) == count
+    for section in sections:
+        header = section.splitlines()[0]
+        assert re.search(r'\bIterationCount=10\b', header)
+        assert re.search(r'\bWarmupCount=1000\b', header)
+        for kind, expected in (('Warmup', 1000), ('Actual', 10)):
+            numbers = re.findall(r'^Workload' + kind + r'\s+(\d+):', section, re.M)
+            assert list(map(int, numbers)) == list(range(1, expected + 1))
 
 run, profile, input_run = sys.argv[1:4]
 root = Path(__file__).parent/'hosted-runs'/run/('diagnostic-'+profile)
@@ -39,7 +51,7 @@ for record in state['rounds']:
     # JIT writes can interleave with console lines. BDN's own log retains the
     # complete iteration stream; keep its digest alongside the raw console hash.
     bdn_log, = report.parent.parent.glob('*.log')
-    check_log(bdn_log.read_text(encoding='utf-8-sig'), 2, warmups=1000)
+    check_warmup_log(bdn_log.read_text(encoding='utf-8-sig'), 2)
     logs.append(dict(round=index, console_sha256=digest(log), bdn_sha256=digest(bdn_log)))
     cases = read(report)['Benchmarks']
     keys = [case_key(c) for c in cases]
