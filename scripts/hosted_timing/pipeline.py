@@ -108,9 +108,32 @@ def cpu_test_classes(plan, label):
     return selected
 
 
+def warmups_for(plan, fixture):
+    assert plan['measurement_policy']['warmups'] == 10
+    assert plan['measurement_policy']['iterations'] == 10
+    # LibraryPair is the fixed-invocation batch fixture in this qualification matrix.
+    count = plan['measurement_policy'].get('fixed_invocation_warmups', 10)
+    assert count in (10, 1000)
+    return count if fixture == 'LibraryPairBenchmarks' else 10
+
+
+def warmup_context(plan, fixture):
+    return {'warmup_count': warmups_for(plan, fixture)} if 'fixed_invocation_warmups' in plan['measurement_policy'] else {}
+
+
 def verify_inputs(folder):
     proof, plan = read(folder/'provenance.json'), read(PLAN)
-    assert proof['plan_sha256'] == digest(PLAN) and proof['sources'] == plan['sources']
+    _verify_input_contents(folder, plan, proof, digest(PLAN))
+    if plan.get('reuse_inputs'):
+        from .reuse import verify_reused
+        verify_reused(folder, plan, proof)
+    else:
+        assert proof.get('preparation_mode') != 'reused'
+    return proof
+
+
+def _verify_input_contents(folder, plan, proof, plan_sha256):
+    assert proof['plan_sha256'] == plan_sha256 and proof['sources'] == plan['sources']
     assert proof['sdk'] == plan['proposed_dotnet_sdk']
     assert manifest(folder/'common') == proof['common_manifest']
     assert manifest(folder/'evidence') == proof['evidence_manifest']
@@ -131,13 +154,19 @@ def verify_inputs(folder):
     return proof
 
 
-def prepare(out):
+def prepare(out, reuse_from=None):
     plan = read(PLAN)
     assert subprocess.check_output(['dotnet', '--version'], text=True).strip() == plan['proposed_dotnet_sdk']
     # rev-parse of a bare 40-character SHA echoes even a missing object.
     # Resolve the commit type for every input before spending time on builds.
     for source in {*plan['sources'].values(), *(original_gpu_source(plan, label) for label in ('old', 'successor', 'variants'))}:
         assert git('rev-parse', '--verify', source + '^{commit}') == source
+    if plan.get('reuse_inputs'):
+        assert reuse_from is not None, 'Download the pinned preparation first'
+        from .reuse import prepare_reused
+        prepare_reused(reuse_from, out)
+        return
+    assert reuse_from is None
     assert not out.exists(), 'Use a fresh preparation output directory'
     out.mkdir(parents=True)
     evidence = out / 'evidence'
@@ -261,14 +290,15 @@ def measure(inputs, out, phase, shard, diagnostic=None):
         tasks = trix_preflight_tasks(plan)
     elif diagnostic:
         library = diagnostic.startswith('trix-library-')
-        assert diagnostic in ('trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering')
+        assert diagnostic in ('trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering', 'trix-library-warmup')
         assert phase == 'successor' and shard == (1 if library else 6)
         tasks = trix_diagnostic_tasks(plan, library)
-        diagnostic_env = dict(DOTNET_JitDisasm='Smooth Round Ratio TryRatio Update TrySmooth SmoothSameBinade FromDouble TryDouble Mean Append Fill AddExact Multiply Promote Normalize RoundedDouble CompactDivRem Bits',
-            DOTNET_JitDisasmAssemblies='OoplesFinance.StockIndicators',
-            DOTNET_JitPrintInlinedMethods='1', DOTNET_TieredPGO='0' if diagnostic == 'trix-no-pgo' else '1')
-        if diagnostic == 'trix-library-no-tiering':
-            diagnostic_env['DOTNET_TieredCompilation'] = '0'
+        if diagnostic != 'trix-library-warmup':
+            diagnostic_env = dict(DOTNET_JitDisasm='Smooth Round Ratio TryRatio Update TrySmooth SmoothSameBinade FromDouble TryDouble Mean Append Fill AddExact Multiply Promote Normalize RoundedDouble CompactDivRem Bits',
+                DOTNET_JitDisasmAssemblies='OoplesFinance.StockIndicators',
+                DOTNET_JitPrintInlinedMethods='1', DOTNET_TieredPGO='0' if diagnostic == 'trix-no-pgo' else '1')
+            if diagnostic == 'trix-library-no-tiering':
+                diagnostic_env['DOTNET_TieredCompilation'] = '0'
     labels = ('old', 'successor') if phase == 'successor' else ('successor', 'variants')
     assert not out.exists(), 'Every shard attempt must start fresh on one VM'
     out.mkdir(parents=True)
@@ -334,7 +364,10 @@ def measure(inputs, out, phase, shard, diagnostic=None):
                     pairs=[op['raw'] for op in task['operations']],methods=methods_for(task,index),
                     runtime=runtimes[arm],env=env,state=state,save=save,builds=builds,
                     assert_binaries=assert_binaries,implicit=task.get('implicit_pair',False),variant=task.get('variant',False),
-                    context=dict(host_nonce=identity['instance_nonce'],production_sha256=manifests[arm][DLL],phase=phase,shard=shard))
+                    context=dict(host_nonce=identity['instance_nonce'],production_sha256=manifests[arm][DLL],phase=phase,shard=shard,
+                        **warmup_context(plan, task['fixture']),
+                        **({'diagnostic_warmups':1000} if diagnostic == 'trix-library-warmup' else {})),
+                    warmups=1000 if diagnostic == 'trix-library-warmup' else warmups_for(plan, task['fixture']))
                 state['rounds'].append(record)
                 state['status'] = 'round-complete'
                 save()
@@ -352,14 +385,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('mode',choices=['prepare','measure','collect','collect-preflight'])
     parser.add_argument('--inputs',type=Path,default=Path('hosted-inputs'))
+    parser.add_argument('--reuse-from',type=Path)
     parser.add_argument('--prepared',type=Path,default=Path('hosted-inputs'))
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--phase',choices=['successor','variants'],default='successor')
     parser.add_argument('--shard',type=int,default=0)
-    parser.add_argument('--diagnostic', choices=['trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering', 'trix-preflight'])
+    parser.add_argument('--diagnostic', choices=['trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering', 'trix-library-warmup', 'trix-preflight'])
     args = parser.parse_args()
     if args.mode == 'prepare':
-        prepare(args.out.resolve())
+        prepare(args.out.resolve(), args.reuse_from)
         if os.environ.get('GITHUB_OUTPUT'):
             with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as output:
                 output.write('trix_preflight=' + str(read(PLAN).get('trix_preflight', False)).lower() + '\n')
