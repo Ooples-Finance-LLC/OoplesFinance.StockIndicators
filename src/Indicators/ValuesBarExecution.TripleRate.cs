@@ -1,4 +1,5 @@
 #if !NETFRAMEWORK
+using System.Runtime.CompilerServices;
 using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Indicators;
@@ -47,6 +48,7 @@ internal static partial class ValuesBarExecution
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private JurikDyadic Smooth(JurikDyadic prior, JurikDyadic input)
         {
             // The existing certificate rounds the same exact weighted ratio.
@@ -66,6 +68,7 @@ internal static partial class ValuesBarExecution
             output[slot] = value.Value; output[slot + 3] = 1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear(); _index++;
