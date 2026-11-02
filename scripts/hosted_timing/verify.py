@@ -21,15 +21,17 @@ def archived(root, raw_root, raw_path):
     return target
 
 
-def check_log(log, count):
+def check_log(log, count, *, warmups=10):
     sections = re.split(r'^// Benchmark: ', log, flags=re.M)[1:]
     assert len(sections) == count
     for section in sections:
         header = section.splitlines()[0]
-        assert 'IterationCount=10' in header and 'WarmupCount=10' in header
+        assert re.search(r'\bIterationCount=10\b', header)
+        assert re.search(r'\bWarmupCount=' + str(warmups) + r'\b', header)
         for kind in ('Warmup', 'Actual'):
             numbers = re.findall(r'^Workload' + kind + r'\s+(\d+):', section, re.M)
-            assert list(map(int, numbers)) == list(range(1, 11))
+            expected = warmups if kind == 'Warmup' else 10
+            assert list(map(int, numbers)) == list(range(1, expected + 1))
 
 
 def sample(case):

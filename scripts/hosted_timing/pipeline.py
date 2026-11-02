@@ -261,14 +261,15 @@ def measure(inputs, out, phase, shard, diagnostic=None):
         tasks = trix_preflight_tasks(plan)
     elif diagnostic:
         library = diagnostic.startswith('trix-library-')
-        assert diagnostic in ('trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering')
+        assert diagnostic in ('trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering', 'trix-library-warmup')
         assert phase == 'successor' and shard == (1 if library else 6)
         tasks = trix_diagnostic_tasks(plan, library)
-        diagnostic_env = dict(DOTNET_JitDisasm='Smooth Round Ratio TryRatio Update TrySmooth SmoothSameBinade FromDouble TryDouble Mean Append Fill AddExact Multiply Promote Normalize RoundedDouble CompactDivRem Bits *Owned* ToArray',
-            DOTNET_JitDisasmAssemblies='OoplesFinance.StockIndicators',
-            DOTNET_JitPrintInlinedMethods='1', DOTNET_TieredPGO='0' if diagnostic == 'trix-no-pgo' else '1')
-        if diagnostic == 'trix-library-no-tiering':
-            diagnostic_env['DOTNET_TieredCompilation'] = '0'
+        if diagnostic != 'trix-library-warmup':
+            diagnostic_env = dict(DOTNET_JitDisasm='Smooth Round Ratio TryRatio Update TrySmooth SmoothSameBinade FromDouble TryDouble Mean Append Fill AddExact Multiply Promote Normalize RoundedDouble CompactDivRem Bits *Owned* ToArray',
+                DOTNET_JitDisasmAssemblies='OoplesFinance.StockIndicators',
+                DOTNET_JitPrintInlinedMethods='1', DOTNET_TieredPGO='0' if diagnostic == 'trix-no-pgo' else '1')
+            if diagnostic == 'trix-library-no-tiering':
+                diagnostic_env['DOTNET_TieredCompilation'] = '0'
     labels = ('old', 'successor') if phase == 'successor' else ('successor', 'variants')
     assert not out.exists(), 'Every shard attempt must start fresh on one VM'
     out.mkdir(parents=True)
@@ -334,7 +335,9 @@ def measure(inputs, out, phase, shard, diagnostic=None):
                     pairs=[op['raw'] for op in task['operations']],methods=methods_for(task,index),
                     runtime=runtimes[arm],env=env,state=state,save=save,builds=builds,
                     assert_binaries=assert_binaries,implicit=task.get('implicit_pair',False),variant=task.get('variant',False),
-                    context=dict(host_nonce=identity['instance_nonce'],production_sha256=manifests[arm][DLL],phase=phase,shard=shard))
+                    context=dict(host_nonce=identity['instance_nonce'],production_sha256=manifests[arm][DLL],phase=phase,shard=shard,
+                        **({'diagnostic_warmups':1000} if diagnostic == 'trix-library-warmup' else {})),
+                    warmups=1000 if diagnostic == 'trix-library-warmup' else 10)
                 state['rounds'].append(record)
                 state['status'] = 'round-complete'
                 save()
@@ -356,7 +359,7 @@ def main():
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--phase',choices=['successor','variants'],default='successor')
     parser.add_argument('--shard',type=int,default=0)
-    parser.add_argument('--diagnostic', choices=['trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering', 'trix-preflight'])
+    parser.add_argument('--diagnostic', choices=['trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering', 'trix-library-warmup', 'trix-preflight'])
     args = parser.parse_args()
     if args.mode == 'prepare':
         prepare(args.out.resolve())

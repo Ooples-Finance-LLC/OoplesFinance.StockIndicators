@@ -25,7 +25,8 @@ def combine_reports(reports, pairs, methods, implicit_pair=None):
     return merged
 
 def run_checkpointed(*, out, index, arm, fixture, pairs, methods, runtime, env,
-                    state, save, builds, assert_binaries, implicit=False, variant=False, context=None):
+                    state, save, builds, assert_binaries, implicit=False, variant=False, context=None, warmups=10):
+    assert warmups in (10, 1000)
     from .cleanup import capture_children, stop_owned_benchmark, archive_with_retry
     root = out / 'operation-checkpoints' / fixture / f'round{index}-{arm}'
     root.mkdir(parents=True, exist_ok=True)
@@ -82,7 +83,7 @@ def run_checkpointed(*, out, index, arm, fixture, pairs, methods, runtime, env,
                     '--filter', *[(f'*{fixture}.{method}*' if implicit else
                                    f'*{fixture}.{method}*Method: {pair}*' if variant else
                                    f'*{fixture}.{method}*"{pair}"*') for method in methods],
-                    '--warmupCount', '10', '--iterationCount', '10', '--exporters', 'json',
+                    '--warmupCount', str(warmups), '--iterationCount', '10', '--exporters', 'json',
                     '--artifacts', str(folder)]
             interrupted = []
             observations = 0

@@ -147,9 +147,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        profile: [trix-library-jit]
+        profile: [trix-library-warmup]
     env:
-      HOSTED_TIMING_PLAN: benchmarks/plans/hosted-trix-shared-jit-20261102.json
+      HOSTED_TIMING_PLAN: benchmarks/plans/hosted-trix-direct-fill-20261102.json
     steps:
       - uses: actions/checkout@v7
         with:
@@ -167,7 +167,7 @@ jobs:
         with:
           name: hosted-inputs
           path: hosted-inputs
-          run-id: 41449840590
+          run-id: 41462623234
           github-token: ${{ github.token }}
       - run: python scripts/run-hosted-timing.py measure --inputs hosted-inputs --out diagnostic-${{ matrix.profile }} --phase successor --shard 1 --diagnostic ${{ matrix.profile }}
       - uses: actions/upload-artifact@v7

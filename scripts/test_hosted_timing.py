@@ -189,6 +189,15 @@ class HostedTimingTests(unittest.TestCase):
         check_log(log,1)
         with self.assertRaises(AssertionError): check_log(log.replace('WorkloadActual 10:','WorkloadActual 9:'),1)
 
+    def test_extended_diagnostic_warmup_cannot_pass_default_log_check(self):
+        log = '// Benchmark: x IterationCount=10 WarmupCount=1000\n' + ''.join(
+            f'Workload{kind} {i}: x\n' for kind, count in (('Warmup', 1000), ('Actual', 10))
+            for i in range(1, count + 1))
+        with self.assertRaises(AssertionError): check_log(log, 1)
+        check_log(log, 1, warmups=1000)
+        with self.assertRaises(AssertionError):
+            check_log(log.replace('WorkloadWarmup 1000:', 'WorkloadWarmup 99:'), 1, warmups=1000)
+
     def test_nonfinite_and_wrong_mean_rejected(self):
         case=dict(Statistics=dict(N=7,OriginalValues=[2]*7,Mean=2,ConfidenceInterval=dict(Lower=1,Upper=3)),
                   Memory=dict(BytesAllocatedPerOperation=0))
