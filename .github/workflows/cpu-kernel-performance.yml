@@ -9,6 +9,13 @@ on:
         type: choice
         options: [builder, kernel, all, qualified-rollout]
         default: builder
+      qualification_plan:
+        description: Immutable source and measurement plan for qualified-rollout
+        type: choice
+        options: [benchmarks/plans/hosted-rollout-20261101.json, benchmarks/plans/hosted-repair-20261101.json]
+        default: benchmarks/plans/hosted-rollout-20261101.json
+env:
+  HOSTED_TIMING_PLAN: ${{ inputs.qualification_plan || 'benchmarks/plans/hosted-rollout-20261101.json' }}
 permissions:
   contents: read
 concurrency:
