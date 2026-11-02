@@ -1,0 +1,81 @@
+{
+  "status": "passed",
+  "unit_classes": [
+    "BoundedUltimateExecutionTests",
+    "CertifiedCommodityChannelTests",
+    "CertifiedHilbertProjectionTests",
+    "CertifiedTillsonTests",
+    "CertifiedUltimateRatioTests",
+    "CompactChoppinessTests",
+    "CompactHilbertPhaseTests",
+    "CompactUltimateOscillatorTests",
+    "JurikSharedExecutionTests",
+    "SeededMomentumSharedExecutionTests",
+    "TillsonFloatingSmoothingTests",
+    "TillsonSharedExecutionTests",
+    "TillsonWordBinadeTests",
+    "TillsonWordSmoothingTests",
+    "TrixNumericalTests"
+  ],
+  "parity_classes": [
+    "JurikComparisonTests",
+    "SharedJurikBenchmarkTests",
+    "SharedSeededMomentumBenchmarkTests",
+    "SharedSkenderEmaFamilyBenchmarkTests",
+    "SharedTaAdaptiveRateNativeBenchmarkTests",
+    "SharedTillsonBenchmarkTests",
+    "TillsonComparisonTests",
+    "TripleRateComparisonTests"
+  ],
+  "step": "parity",
+  "unit": {
+    "passed": 185,
+    "class_counts": {
+      "CompactChoppinessTests": 12,
+      "TillsonSharedExecutionTests": 12,
+      "TillsonWordSmoothingTests": 4,
+      "TillsonFloatingSmoothingTests": 7,
+      "CertifiedTillsonTests": 17,
+      "TillsonWordBinadeTests": 2,
+      "JurikSharedExecutionTests": 9,
+      "SeededMomentumSharedExecutionTests": 15,
+      "CertifiedUltimateRatioTests": 4,
+      "CompactUltimateOscillatorTests": 14,
+      "TrixNumericalTests": 43,
+      "BoundedUltimateExecutionTests": 18,
+      "CompactHilbertPhaseTests": 11,
+      "CertifiedCommodityChannelTests": 12,
+      "CertifiedHilbertProjectionTests": 5
+    },
+    "sha256": "cdead13cba61b772f443e36c00b4c370f60fdac496a83c07cd7d8d6d4eb32048"
+  },
+  "parity": {
+    "passed": 176,
+    "class_counts": {
+      "SharedTillsonBenchmarkTests": 16,
+      "TripleRateComparisonTests": 10,
+      "JurikComparisonTests": 6,
+      "TillsonComparisonTests": 10,
+      "SharedSeededMomentumBenchmarkTests": 8,
+      "SharedJurikBenchmarkTests": 5,
+      "SharedSkenderEmaFamilyBenchmarkTests": 81,
+      "SharedTaAdaptiveRateNativeBenchmarkTests": 40
+    },
+    "sha256": "d392543831e555014bedb846e3acdac5f17bdf3a32c48ffe5a0c51d80f9768e3"
+  },
+  "gpu": {
+    "passed_cases": 100,
+    "source_sha256": "7b4922c0c0e49b3a2433989fbe530c4f656998beab461207314c2f510f3fb45e",
+    "trx_sha256": "104d2a3da0962165633846d9fd7342bc7d955e8a498e47d846b3e661abc227b0"
+  },
+  "production_dll_sha256": {
+    "src": "88f330364a5418670f2452ec183c7b1263d2d42b853a2e280855a6f65435fcaf",
+    "tests": "88f330364a5418670f2452ec183c7b1263d2d42b853a2e280855a6f65435fcaf",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks": "88f330364a5418670f2452ec183c7b1263d2d42b853a2e280855a6f65435fcaf",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests": "88f330364a5418670f2452ec183c7b1263d2d42b853a2e280855a6f65435fcaf"
+  },
+  "source_commit": "92a0f90dddd60fa1728e7ad7a4ed59334b8fb78b",
+  "source_fingerprint": "7b4922c0c0e49b3a2433989fbe530c4f656998beab461207314c2f510f3fb45e",
+  "performance": "Pending fresh hosted qualification; correctness is not performance acceptance.",
+  "repair": "Approved shared-helper correction: eagerly optimize compact dyadic kernels and inline certified word smoothing and compact division; arithmetic and exact fallback unchanged."
+}
