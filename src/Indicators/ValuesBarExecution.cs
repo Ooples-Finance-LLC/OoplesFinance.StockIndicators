@@ -160,6 +160,8 @@ internal static partial class ValuesBarExecution
                 latest = FillBoundedBatch(source, nodes, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].HasScalarState)
                 latest = nodes[0].FillScalar(source, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].HasTripleRateState)
+                latest = nodes[0].FillTripleRate(source, cancellation, owned);
             else
             {
                 // Only the row-wise mixed/state route needs this filtered list.
@@ -635,6 +637,7 @@ internal static partial class ValuesBarExecution
         private readonly object? _state;
         private readonly double[] _scratch;
         internal bool HasScalarState => _state is IIndicatorState;
+        internal bool HasTripleRateState => _state is TripleRateState;
         internal Node(IIndicator indicator, int count, bool singleRoot, bool boundedBatch, bool pointwiseBatch, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange)
         {
             Indicator = indicator;
@@ -1002,6 +1005,30 @@ internal static partial class ValuesBarExecution
                 // matching the finite builder's input-before-output validation order.
                 Failure = ExceptionDispatchInfo.Capture(error);
             }
+        }
+        // A short TRIX run can finish before the large Append dispatcher is optimized.
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization)]
+        internal Bar FillTripleRate(Bar[] source, CancellationToken cancellation, OwnedBarBuffer? owned)
+        {
+            var state = (TripleRateState)_state!;
+            Bar latest = default;
+            for (int i = 0; i < source.Length; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                var bar = source[i];
+                latest = bar;
+                if (owned is not null) owned[i] = bar;
+                if (!AllFieldsFinite(in bar))
+                    IndicatorInputDomain.Finite.Validate(in bar);
+                if (Failure is not null) continue;
+                try
+                {
+                    state.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][i] = _scratch[slot];
+                }
+                catch (Exception error) { Failure = ExceptionDispatchInfo.Capture(error); }
+            }
+            return latest;
         }
         internal Bar FillScalar(Bar[] source, CancellationToken cancellation, OwnedBarBuffer? owned)
         {
