@@ -14,6 +14,7 @@ internal static partial class ValuesBarExecution
         // Decode invariant operands once; retain the same exact arithmetic.
         private readonly JurikDyadic _periodDivisor = JurikDyadic.FromDouble(period);
         private readonly JurikDyadic _smoothDivisor = JurikDyadic.FromDouble((long)period + 1);
+        private readonly CertifiedTillson.WordSmoother _wordSmoother = new(period);
         private readonly JurikDyadic _priorMultiplier = JurikDyadic.FromFactor(
             new ExactMeanAccumulator.ProductFactor(period - 1));
         private static readonly JurikDyadic PercentMultiplier = JurikDyadic.FromFactor(
@@ -48,6 +49,11 @@ internal static partial class ValuesBarExecution
 
         private JurikDyadic Smooth(JurikDyadic prior, JurikDyadic input)
         {
+            // The existing certificate rounds the same exact weighted ratio.
+            // Unsupported periods, signs, exponents, or wide values fall through.
+            if (prior.TryDouble(out double a) && input.TryDouble(out double b)
+                && _wordSmoother.TrySmooth(a, b, out double rounded))
+                return JurikDyadic.FromDouble(rounded);
             // Retain Multiply(double)'s identity no-op for period two.
             if (period != 2) prior.Multiply(_priorMultiplier);
             input.ScaleByPowerOfTwo(1); prior.AddExact(input);

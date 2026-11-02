@@ -69,6 +69,35 @@ public sealed class SeededMomentumSharedExecutionTests(ITestOutputHelper log)
     }
 
     [Theory]
+    [InlineData(TripleRateSeed.SharedMean)]
+    [InlineData(TripleRateSeed.CascadedMeans)]
+    [InlineData(TripleRateSeed.CascadedFirstPrice)]
+    public void TripleWordSmoothingRetainsBitsAcrossCertificateBoundaries(TripleRateSeed seed)
+    {
+        // Reach all three seeded stages even at the supported-period boundary,
+        // then cross exponent/sign/subnormal boundaries and return to normal data.
+        var prices = Enumerable.Range(0, 6200).Select(i => i % 2 == 0 ? 100d : Math.BitIncrement(100d))
+            .Concat(new[] { 128d, Math.BitDecrement(128d), 0d, -100d, double.Epsilon,
+                Math.ScaleB(1d, -1022), double.MaxValue, -double.MaxValue })
+            .Concat(Enumerable.Range(0, 128).Select(i => 100 + i % 7d)).ToArray();
+        foreach (int period in new[] { 3, 20, 2047, 2048 })
+        {
+            var original = (IMultiOutputState)new TripleExponentialRate(period, seed, 3).CreateState();
+            var candidate = new ValuesBarExecution.TripleRateState(period, seed, 3, 0);
+            var expected = new double[6]; var actual = new double[6];
+            for (int repeat = 0; repeat < 2; repeat++)
+            {
+                original.Reset(); candidate.Reset();
+                foreach (var bar in BarsOf(prices))
+                {
+                    original.Update(in bar, expected); candidate.Update(in bar, actual);
+                    Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits), actual.Select(BitConverter.DoubleToInt64Bits));
+                }
+            }
+        }
+    }
+
+    [Theory]
     [InlineData(0)]
     [InlineData(1)]
     [InlineData(2)]
