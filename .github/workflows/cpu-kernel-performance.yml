@@ -147,7 +147,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        profile: [trix-library-jit, trix-library-no-tiering]
+        profile: [trix-library-jit]
     env:
       HOSTED_TIMING_PLAN: benchmarks/plans/hosted-trix-shared-jit-20261102.json
     steps:
