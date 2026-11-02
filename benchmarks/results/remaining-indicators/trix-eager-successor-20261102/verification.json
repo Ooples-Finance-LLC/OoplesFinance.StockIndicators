@@ -1,0 +1,49 @@
+{
+  "status": "passed",
+  "unit_classes": [
+    "SeededMomentumSharedExecutionTests",
+    "TillsonWordSmoothingTests",
+    "TrixNumericalTests"
+  ],
+  "parity_classes": [
+    "SharedSeededMomentumBenchmarkTests",
+    "SharedSkenderEmaFamilyBenchmarkTests",
+    "SharedTaAdaptiveRateNativeBenchmarkTests",
+    "TripleRateComparisonTests"
+  ],
+  "step": "parity",
+  "unit": {
+    "passed": 62,
+    "class_counts": {
+      "TrixNumericalTests": 43,
+      "TillsonWordSmoothingTests": 4,
+      "SeededMomentumSharedExecutionTests": 15
+    },
+    "sha256": "f10e0ccc12ccdcbd495329d88f9b874923e81693f851f7db1d5db1c82cb636e0"
+  },
+  "parity": {
+    "passed": 139,
+    "class_counts": {
+      "SharedSkenderEmaFamilyBenchmarkTests": 81,
+      "SharedTaAdaptiveRateNativeBenchmarkTests": 40,
+      "SharedSeededMomentumBenchmarkTests": 8,
+      "TripleRateComparisonTests": 10
+    },
+    "sha256": "57fdb9041b60e73a90d8bbdc9088959fada624ecaddc8fa55d414679146dc010"
+  },
+  "gpu": {
+    "passed_cases": 100,
+    "source_sha256": "1c87790faceab19e69e2e29b952d7f738927c86eee985a7f4a9ab857c38d7fd6",
+    "trx_sha256": "6a704a99855ed3c9d000788ccb359b037ef1cd273951a0464d80afb3b7b7cd8c"
+  },
+  "production_dll_sha256": {
+    "src": "0b6fe9e5b4b7feebbb946b9cd26451278acc80d682472aaa23364a4a9cbf5aa5",
+    "tests": "0b6fe9e5b4b7feebbb946b9cd26451278acc80d682472aaa23364a4a9cbf5aa5",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks": "0b6fe9e5b4b7feebbb946b9cd26451278acc80d682472aaa23364a4a9cbf5aa5",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests": "0b6fe9e5b4b7feebbb946b9cd26451278acc80d682472aaa23364a4a9cbf5aa5"
+  },
+  "source_commit": "78ec04e9973f207f856b53f446900a328acefda0",
+  "source_fingerprint": "1c87790faceab19e69e2e29b952d7f738927c86eee985a7f4a9ab857c38d7fd6",
+  "performance": "Pending fresh hosted qualification; correctness is not performance acceptance.",
+  "repair": "TRIX-only candidate: eagerly optimize Update and Smooth while retaining certified word smoothing and the exact dyadic fallback."
+}
