@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 
-from hosted_timing.pipeline import PLAN, DLL, read, write, digest, phase_tasks, methods_for, phase_sources, original_gpu_source, trix_diagnostic_tasks, cpu_test_classes, trix_preflight_tasks, warmups_for, warmup_context
+from hosted_timing.pipeline import PLAN, DLL, read, write, digest, phase_tasks, phase_labels, methods_for, phase_sources, original_gpu_source, trix_diagnostic_tasks, cpu_test_classes, trix_preflight_tasks, warmups_for, warmup_context
 from hosted_timing.checkpoints import case_key, combine_reports
 from hosted_timing.verify import collect, collect_preflight, archived, check_log, sample
 
@@ -25,7 +25,7 @@ def make_evidence(folder, phase, new_mean=50, preflight=False):
         root = folder/f'shard{shard}'
         raw_root = PureWindowsPath('D:/runner/raw')
         host = dict(run_id='100', run_attempt='1', machine='runner', runner_image='20261101', instance_nonce=f'vm{shard}')
-        labels = ('old', 'successor') if phase == 'successor' else ('successor', 'variants')
+        labels = phase_labels(phase)
         manifests = {arm: {**inputs['common_manifest'], DLL: inputs['production_sha256'][label]}
                      for arm, label in zip(('old', 'new'), labels)}
         proof = dict(shard=shard, phase=phase, raw_root=str(raw_root), host=host, sources=phase_sources(plan, phase),

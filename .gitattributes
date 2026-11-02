@@ -71,3 +71,4 @@ benchmarks/plans/hosted-trix-word-settled-20261102.json text eol=lf
 #*.RTF   diff=astextplain
 
 benchmarks/plans/hosted-classical-final-20261102.json text eol=lf
+benchmarks/plans/hosted-builder-coverage-20261102.json text eol=lf

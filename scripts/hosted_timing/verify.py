@@ -7,7 +7,7 @@ import math
 import re
 
 from .checkpoints import case_key, combine_reports
-from .pipeline import PLAN, DLL, read, digest, phase_tasks, methods_for, phase_sources, trix_preflight_tasks, warmups_for, warmup_context
+from .pipeline import PLAN, DLL, read, digest, phase_tasks, phase_labels, methods_for, phase_sources, trix_preflight_tasks, warmups_for, warmup_context
 
 
 def archived(root, raw_root, raw_path):
@@ -58,6 +58,10 @@ def collect_preflight(folder):
 
 def _collect(folder, phase, *, preflight):
     plan = read(PLAN)
+    if phase == 'coverage':
+        from .coverage import verify_reference
+        assert plan.get('coverage_reference') and not preflight
+        verify_reference(plan)
     roots = sorted(p.parent for p in folder.glob('*/provenance.json'))
     expected_shards = {0} if preflight else set(range(8)) if phase == 'successor' else {0}
     assert len(roots) == len(expected_shards)
@@ -89,7 +93,7 @@ def _collect(folder, phase, *, preflight):
         input_hashes.add(proof['input_provenance_sha256'])
         run_ids.add((host['run_id'], host['run_attempt'], inputs['workflow_head']))
         manifests = proof['binary_manifest']
-        labels = ('old', 'successor') if phase == 'successor' else ('successor', 'variants')
+        labels = phase_labels(phase)
         for arm, label in zip(('old', 'new'), labels):
             expected = dict(inputs['common_manifest'])
             expected[DLL] = inputs['production_sha256'][label]
@@ -161,12 +165,14 @@ def _collect(folder, phase, *, preflight):
                     verdict=verdict, provenance=provenance))
             candidates[fixture].extend(dict(**row, provenance=provenance) for row in rounds[fixture, 2].values())
     assert shards == expected_shards and len(input_hashes) == len(run_ids) == 1
-    expected_cases, expected_decisions = (48, 12) if preflight else (1860, 372) if phase == 'successor' else (32, 8)
+    expected_cases, expected_decisions = ((48, 12) if preflight else (1860, 372) if phase == 'successor'
+                                          else (40, 8) if phase == 'coverage' else (32, 8))
     assert case_count == expected_cases and len(decisions) == expected_decisions
     assert len({(d['pair'], d['bars'], d['method']) for d in decisions}) == expected_decisions
     counts = Counter(d['verdict'] for d in decisions)
     return dict(all_cases_verified=True, phase='trix-preflight' if preflight else phase, case_count=case_count, decision_count=len(decisions),
         input_provenance_sha256=next(iter(input_hashes)),
         sources=phase_sources(plan, phase), decisions=decisions, verdicts=dict(counts),
-        accepted=counts['faster'] > 0 and counts['slower'] == 0, final_candidate_round=2,
-        final_candidate_rows=dict(candidates))
+        accepted=phase != 'coverage' and counts['faster'] > 0 and counts['slower'] == 0,
+        final_candidate_round=2, final_candidate_rows=dict(candidates),
+        **({'coverage_complete': True} if phase == 'coverage' else {}))

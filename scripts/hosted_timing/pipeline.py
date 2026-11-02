@@ -63,6 +63,10 @@ def verify_trx(path, classes):
 
 
 def phase_tasks(plan, phase, shard):
+    if phase == 'coverage':
+        assert shard == 0 and plan.get('coverage_reference')
+        from .coverage import tasks
+        return tasks()
     if phase == 'successor':
         assert shard in range(8)
         merged = {}
@@ -88,8 +92,15 @@ def methods_for(task, index):
     return [m for m in task['methods'] if index == 2 or m in OWNED]
 
 
+def phase_labels(phase):
+    assert phase in ('successor', 'variants', 'coverage')
+    if phase == 'coverage':
+        return ('successor', 'successor')
+    return ('old', 'successor') if phase == 'successor' else ('successor', 'variants')
+
+
 def phase_sources(plan, phase):
-    keys = ('old', 'successor') if phase == 'successor' else ('successor', 'variants')
+    keys = phase_labels(phase)
     return dict(zip(('old', 'new'), (plan['sources'][k] for k in keys)))
 
 
@@ -135,6 +146,8 @@ def verify_inputs(folder):
 def _verify_input_contents(folder, plan, proof, plan_sha256):
     from .variants import verify_baseline
     verify_baseline(plan)
+    from .coverage import verify_reference
+    verify_reference(plan)
     assert proof['plan_sha256'] == plan_sha256 and proof['sources'] == plan['sources']
     assert proof['sdk'] == plan['proposed_dotnet_sdk']
     assert manifest(folder/'common') == proof['common_manifest']
@@ -165,9 +178,13 @@ def prepare(out, reuse_from=None):
         assert git('rev-parse', '--verify', source + '^{commit}') == source
     from .variants import verify_baseline
     verify_baseline(plan)
+    from .coverage import verify_reference
+    verify_reference(plan)
     suite = os.environ.get('HOSTED_TIMING_SUITE')
     if suite:
-        assert (suite == 'qualified-variants') == bool(plan.get('standalone_variants'))
+        expected = ('qualified-coverage' if plan.get('coverage_reference') else
+                    'qualified-variants' if plan.get('standalone_variants') else 'qualified-rollout')
+        assert suite == expected
     if plan.get('reuse_inputs'):
         assert reuse_from is not None, 'Download the pinned preparation first'
         from .reuse import prepare_reused
@@ -306,7 +323,7 @@ def measure(inputs, out, phase, shard, diagnostic=None):
                 DOTNET_JitPrintInlinedMethods='1', DOTNET_TieredPGO='0' if diagnostic == 'trix-no-pgo' else '1')
             if diagnostic == 'trix-library-no-tiering':
                 diagnostic_env['DOTNET_TieredCompilation'] = '0'
-    labels = ('old', 'successor') if phase == 'successor' else ('successor', 'variants')
+    labels = phase_labels(phase)
     assert not out.exists(), 'Every shard attempt must start fresh on one VM'
     out.mkdir(parents=True)
     runtimes = {}
@@ -395,7 +412,7 @@ def main():
     parser.add_argument('--reuse-from',type=Path)
     parser.add_argument('--prepared',type=Path,default=Path('hosted-inputs'))
     parser.add_argument('--out',type=Path,required=True)
-    parser.add_argument('--phase',choices=['successor','variants'],default='successor')
+    parser.add_argument('--phase',choices=['successor','variants','coverage'],default='successor')
     parser.add_argument('--shard',type=int,default=0)
     parser.add_argument('--diagnostic', choices=['trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering', 'trix-library-warmup', 'trix-preflight'])
     args = parser.parse_args()
@@ -405,6 +422,7 @@ def main():
             with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as output:
                 output.write('trix_preflight=' + str(read(PLAN).get('trix_preflight', False)).lower() + '\n')
                 output.write('standalone_variants=' + str(bool(read(PLAN).get('standalone_variants'))).lower() + '\n')
+                output.write('coverage_only=' + str(bool(read(PLAN).get('coverage_reference'))).lower() + '\n')
     elif args.mode == 'measure':
         measure(args.inputs.resolve(),args.out.resolve(),args.phase,args.shard,args.diagnostic)
     else:
@@ -413,7 +431,10 @@ def main():
         summary = collect_preflight(args.inputs.resolve()) if args.mode == 'collect-preflight' else collect(args.inputs.resolve(),args.phase)
         assert summary['input_provenance_sha256'] == digest(args.prepared/'provenance.json')
         write(args.out.resolve(),summary)
-        print(json.dumps({k:summary[k] for k in ('case_count','decision_count','accepted','verdicts')}))
+        fields = ['case_count', 'decision_count', 'accepted', 'verdicts']
+        if args.phase == 'coverage':
+            fields.append('coverage_complete')
+        print(json.dumps({k:summary[k] for k in fields}))
         if os.environ.get('GITHUB_OUTPUT'):
             with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as output:
                 output.write('accepted=' + str(summary['accepted']).lower() + '\n')
