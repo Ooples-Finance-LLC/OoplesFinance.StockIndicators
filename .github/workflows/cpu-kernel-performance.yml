@@ -7,7 +7,7 @@ on:
       suite:
         description: Public builder comparisons, diagnostic kernels, or both
         type: choice
-        options: [builder, kernel, all, qualified-rollout, trix-diagnostic]
+        options: [builder, kernel, all, qualified-rollout, trix-diagnostic, trix-library-diagnostic]
         default: builder
       qualification_plan:
         description: Immutable source and measurement plan for qualified-rollout
@@ -130,6 +130,46 @@ jobs:
           run-id: 41367778664
           github-token: ${{ github.token }}
       - run: python scripts/run-hosted-timing.py measure --inputs hosted-inputs --out diagnostic-${{ matrix.profile }} --phase successor --shard 6 --diagnostic ${{ matrix.profile }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: diagnostic-${{ matrix.profile }}
+          path: diagnostic-${{ matrix.profile }}/
+          retention-days: 14
+          if-no-files-found: error
+  trix-library-diagnostic:
+    if: github.event_name == 'workflow_dispatch' && inputs.suite == 'trix-library-diagnostic'
+    permissions:
+      contents: read
+      actions: read
+    runs-on: windows-2025
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [trix-library-jit, trix-library-no-tiering]
+    env:
+      HOSTED_TIMING_PLAN: benchmarks/plans/hosted-trix-20261102.json
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install psutil==7.2.2
+      - uses: actions/download-artifact@v8
+        with:
+          name: hosted-inputs
+          path: hosted-inputs
+          run-id: 41382401216
+          github-token: ${{ github.token }}
+      - run: python scripts/run-hosted-timing.py measure --inputs hosted-inputs --out diagnostic-${{ matrix.profile }} --phase successor --shard 1 --diagnostic ${{ matrix.profile }}
       - uses: actions/upload-artifact@v7
         if: always()
         with:

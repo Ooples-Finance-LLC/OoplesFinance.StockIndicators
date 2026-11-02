@@ -215,12 +215,15 @@ def prepare(out):
     print('Prepared immutable source-qualified hosted inputs.', flush=True)
 
 
-def trix_diagnostic_tasks(plan):
-    tasks = phase_tasks(plan, 'successor', 6)
-    task = next(t for t in tasks if t['fixture'] == 'SharedSkenderEmaFamilyBenchmarks')
-    task['operations'] = [op for op in task['operations'] if op['pair'] == 'Skender.GetTrix']
+def trix_diagnostic_tasks(plan, library=False):
+    tasks = phase_tasks(plan, 'successor', 1 if library else 6)
+    fixture = 'LibraryPairBenchmarks' if library else 'SharedSkenderEmaFamilyBenchmarks'
+    pair = 'TaLib.Functions.Trix' if library else 'Skender.GetTrix'
+    task = next(t for t in tasks if t['fixture'] == fixture)
+    task['operations'] = [op for op in task['operations'] if op['pair'] == pair]
     assert len(task['operations']) == 1
-    task.update(methods=['BuilderFull', 'BuilderLatestOnly'], cases=16, decisions=4)
+    task.update(methods=['Ooples'] if library else ['BuilderFull', 'BuilderLatestOnly'],
+        cases=8 if library else 16, decisions=2 if library else 4)
     return [task]
 
 
@@ -235,11 +238,15 @@ def measure(inputs, out, phase, shard, diagnostic=None):
     tasks = phase_tasks(plan, phase, shard)
     diagnostic_env = {}
     if diagnostic:
-        assert diagnostic in ('trix-jit', 'trix-no-pgo') and phase == 'successor' and shard == 6
-        tasks = trix_diagnostic_tasks(plan)
-        diagnostic_env = dict(DOTNET_JitDisasm='Smooth Round Ratio TryRatio Update',
+        library = diagnostic.startswith('trix-library-')
+        assert diagnostic in ('trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering')
+        assert phase == 'successor' and shard == (1 if library else 6)
+        tasks = trix_diagnostic_tasks(plan, library)
+        diagnostic_env = dict(DOTNET_JitDisasm='Smooth Round Ratio TryRatio Update TrySmooth SmoothSameBinade',
             DOTNET_JitDisasmAssemblies='OoplesFinance.StockIndicators',
             DOTNET_JitPrintInlinedMethods='1', DOTNET_TieredPGO='0' if diagnostic == 'trix-no-pgo' else '1')
+        if diagnostic == 'trix-library-no-tiering':
+            diagnostic_env['DOTNET_TieredCompilation'] = '0'
     labels = ('old', 'successor') if phase == 'successor' else ('successor', 'variants')
     assert not out.exists(), 'Every shard attempt must start fresh on one VM'
     out.mkdir(parents=True)
@@ -327,7 +334,7 @@ def main():
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--phase',choices=['successor','variants'],default='successor')
     parser.add_argument('--shard',type=int,default=0)
-    parser.add_argument('--diagnostic', choices=['trix-jit', 'trix-no-pgo'])
+    parser.add_argument('--diagnostic', choices=['trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering'])
     args = parser.parse_args()
     if args.mode == 'prepare':
         prepare(args.out.resolve())
