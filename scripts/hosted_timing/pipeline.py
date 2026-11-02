@@ -227,6 +227,25 @@ def trix_diagnostic_tasks(plan, library=False):
     return [task]
 
 
+def trix_preflight_tasks(plan):
+    selected = {}
+    for shard in range(8):
+        for task in phase_tasks(plan, 'successor', shard):
+            operations = [op for op in task['operations'] if op['pair'] in ('Skender.GetTrix', 'TaLib.Functions.Trix')]
+            if not operations:
+                continue
+            fixture = task['fixture']
+            if fixture not in selected:
+                task.update(operations=[], methods=[m for m in task['methods'] if m in OWNED])
+                selected[fixture] = task
+            selected[fixture]['operations'].extend(operations)
+    for task in selected.values():
+        task['decisions'] = len(task['operations']) * len(task['methods']) * 2
+        task['cases'] = task['decisions'] * 4
+    assert sum(t['cases'] for t in selected.values()) == 48
+    return list(selected.values())
+
+
 def measure(inputs, out, phase, shard, diagnostic=None):
     import psutil
     plan = read(PLAN)
@@ -237,7 +256,10 @@ def measure(inputs, out, phase, shard, diagnostic=None):
     assert proof['sdk'] == subprocess.check_output(['dotnet','--version'],text=True).strip()
     tasks = phase_tasks(plan, phase, shard)
     diagnostic_env = {}
-    if diagnostic:
+    if diagnostic == 'trix-preflight':
+        assert phase == 'successor' and shard == 0
+        tasks = trix_preflight_tasks(plan)
+    elif diagnostic:
         library = diagnostic.startswith('trix-library-')
         assert diagnostic in ('trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering')
         assert phase == 'successor' and shard == (1 if library else 6)
@@ -328,26 +350,29 @@ def measure(inputs, out, phase, shard, diagnostic=None):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('mode',choices=['prepare','measure','collect'])
+    parser.add_argument('mode',choices=['prepare','measure','collect','collect-preflight'])
     parser.add_argument('--inputs',type=Path,default=Path('hosted-inputs'))
     parser.add_argument('--prepared',type=Path,default=Path('hosted-inputs'))
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--phase',choices=['successor','variants'],default='successor')
     parser.add_argument('--shard',type=int,default=0)
-    parser.add_argument('--diagnostic', choices=['trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering'])
+    parser.add_argument('--diagnostic', choices=['trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering', 'trix-preflight'])
     args = parser.parse_args()
     if args.mode == 'prepare':
         prepare(args.out.resolve())
+        if os.environ.get('GITHUB_OUTPUT'):
+            with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as output:
+                output.write('trix_preflight=' + str(read(PLAN).get('trix_preflight', False)).lower() + '\n')
     elif args.mode == 'measure':
         measure(args.inputs.resolve(),args.out.resolve(),args.phase,args.shard,args.diagnostic)
     else:
-        from .verify import collect
+        from .verify import collect, collect_preflight
         verify_inputs(args.prepared.resolve())
-        summary = collect(args.inputs.resolve(),args.phase)
+        summary = collect_preflight(args.inputs.resolve()) if args.mode == 'collect-preflight' else collect(args.inputs.resolve(),args.phase)
         assert summary['input_provenance_sha256'] == digest(args.prepared/'provenance.json')
         write(args.out.resolve(),summary)
         print(json.dumps({k:summary[k] for k in ('case_count','decision_count','accepted','verdicts')}))
         if os.environ.get('GITHUB_OUTPUT'):
             with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as output:
                 output.write('accepted=' + str(summary['accepted']).lower() + '\n')
-                output.write('run_variants=' + str(summary['accepted'] and read(PLAN).get('qualify_variants', True)).lower() + '\n')
+                output.write('run_variants=' + str(args.mode == 'collect' and summary['accepted'] and read(PLAN).get('qualify_variants', True)).lower() + '\n')

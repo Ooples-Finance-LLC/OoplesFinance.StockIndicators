@@ -7,7 +7,7 @@ import math
 import re
 
 from .checkpoints import case_key, combine_reports
-from .pipeline import PLAN, DLL, read, digest, phase_tasks, methods_for, phase_sources
+from .pipeline import PLAN, DLL, read, digest, phase_tasks, methods_for, phase_sources, trix_preflight_tasks
 
 
 def archived(root, raw_root, raw_path):
@@ -47,16 +47,28 @@ def sample(case):
 
 
 def collect(folder, phase):
+    return _collect(folder, phase, preflight=False)
+
+
+def collect_preflight(folder):
+    return _collect(folder, 'successor', preflight=True)
+
+
+def _collect(folder, phase, *, preflight):
     plan = read(PLAN)
     roots = sorted(p.parent for p in folder.glob('*/provenance.json'))
-    expected_shards = set(range(8)) if phase == 'successor' else {0}
+    expected_shards = {0} if preflight else set(range(8)) if phase == 'successor' else {0}
     assert len(roots) == len(expected_shards)
     shards, nonces, input_hashes, run_ids = set(), set(), set(), set()
     decisions, candidates = [], defaultdict(list)
     case_count = 0
     for root in roots:
         proof, state = read(root/'provenance.json'), read(root/'status.json')
-        assert not proof.get('diagnostic'), 'Diagnostic measurements cannot qualify production'
+        if preflight:
+            assert proof.get('diagnostic') == 'trix-preflight'
+            assert proof.get('diagnostic_environment') == {}, 'Preflight must use the qualification runtime settings'
+        else:
+            assert not proof.get('diagnostic'), 'Diagnostic measurements cannot qualify production'
         shard = proof['shard']
         assert shard in expected_shards and shard not in shards
         shards.add(shard)
@@ -83,7 +95,7 @@ def collect(folder, phase):
         assert state['status'] == 'raw-measurements-complete'
         assert state['phase'] == phase and state['shard'] == shard
         assert state['order'] == ['old', 'new', 'new', 'old']
-        tasks = {t['fixture']: t for t in phase_tasks(plan, phase, shard)}
+        tasks = {t['fixture']: t for t in (trix_preflight_tasks(plan) if preflight else phase_tasks(plan, phase, shard))}
         assert len(state['rounds']) == 4 * len(tasks)
         rounds = {}
         for record in state['rounds']:
@@ -147,11 +159,11 @@ def collect(folder, phase):
                     verdict=verdict, provenance=provenance))
             candidates[fixture].extend(dict(**row, provenance=provenance) for row in rounds[fixture, 2].values())
     assert shards == expected_shards and len(input_hashes) == len(run_ids) == 1
-    expected_cases, expected_decisions = (1860, 372) if phase == 'successor' else (32, 8)
+    expected_cases, expected_decisions = (48, 12) if preflight else (1860, 372) if phase == 'successor' else (32, 8)
     assert case_count == expected_cases and len(decisions) == expected_decisions
     assert len({(d['pair'], d['bars'], d['method']) for d in decisions}) == expected_decisions
     counts = Counter(d['verdict'] for d in decisions)
-    return dict(all_cases_verified=True, phase=phase, case_count=case_count, decision_count=len(decisions),
+    return dict(all_cases_verified=True, phase='trix-preflight' if preflight else phase, case_count=case_count, decision_count=len(decisions),
         input_provenance_sha256=next(iter(input_hashes)),
         sources=phase_sources(plan, phase), decisions=decisions, verdicts=dict(counts),
         accepted=counts['faster'] > 0 and counts['slower'] == 0, final_candidate_round=2,
