@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 
-from hosted_timing.pipeline import PLAN, DLL, read, write, digest, phase_tasks, methods_for, phase_sources, original_gpu_source, trix_diagnostic_tasks
+from hosted_timing.pipeline import PLAN, DLL, read, write, digest, phase_tasks, methods_for, phase_sources, original_gpu_source, trix_diagnostic_tasks, cpu_test_classes
 from hosted_timing.checkpoints import case_key, combine_reports
 from hosted_timing.verify import collect, archived, check_log, sample
 
@@ -114,6 +114,15 @@ class HostedTimingTests(unittest.TestCase):
         self.assertEqual([op['pair'] for op in task['operations']], ['Skender.GetTrix'])
         self.assertEqual(task['cases'], 16)
         self.assertEqual(task['methods'], ['BuilderFull', 'BuilderLatestOnly'])
+
+    def test_plan_pins_cpu_checks_without_changing_historical_defaults(self):
+        self.assertEqual(len(cpu_test_classes({}, 'old')), 2)
+        self.assertIn('ExactMeanUnitWeightTests', cpu_test_classes({}, 'successor'))
+        plan = {'cpu_test_classes': {'successor': ['SeededMomentumSharedExecutionTests']}}
+        self.assertEqual(cpu_test_classes(plan, 'successor'), ['SeededMomentumSharedExecutionTests'])
+        for invalid in ([], ['A', 'A'], ['A|B']):
+            plan['cpu_test_classes']['successor'] = invalid
+            with self.assertRaises(AssertionError): cpu_test_classes(plan, 'successor')
 
     def test_variants_and_corruption(self):
         with tempfile.TemporaryDirectory() as temp:
