@@ -17,7 +17,7 @@ import xml.etree.ElementTree as ET
 from .checkpoints import run_checkpointed
 
 REPO = Path(__file__).resolve().parents[2]
-PLAN = REPO / 'benchmarks/plans/hosted-rollout-20261101.json'
+PLAN = REPO / os.environ.get('HOSTED_TIMING_PLAN', 'benchmarks/plans/hosted-rollout-20261101.json')
 DLL = 'OoplesFinance.StockIndicators.dll'
 BENCH = 'benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks'
 TESTS = 'benchmarks/OoplesFinance.StockIndicators.CompetitorTests'
@@ -93,6 +93,11 @@ def phase_sources(plan, phase):
     return dict(zip(('old', 'new'), (plan['sources'][k] for k in keys)))
 
 
+def original_gpu_source(plan, label):
+    legacy = '6bc51bec06a49e2fa2e86e634ec6e2163ee4faaa' if label == 'variants' else plan['sources'][label]
+    return plan.get('gpu_sources', {}).get(label, legacy)
+
+
 def verify_inputs(folder):
     proof, plan = read(folder/'provenance.json'), read(PLAN)
     assert proof['plan_sha256'] == digest(PLAN) and proof['sources'] == plan['sources']
@@ -106,6 +111,7 @@ def verify_inputs(folder):
             expected.append('ExactMeanUnitWeightTests')
         actual = verify_trx(folder/'evidence'/(label+'.trx'), expected)
         assert all(proof['checks'][label][k] == v for k,v in actual.items())
+        assert proof['checks'][label]['original_gpu_source'] == original_gpu_source(plan, label)
         receipt = read(folder/'evidence'/(label+'-original-gpu-receipt.json'))
         raw = gzip.decompress((folder/'evidence'/(label+'-original-gpu-gpu.trx.gz')).read_bytes())
         assert hashlib.sha256(raw).hexdigest() == receipt['trx_sha256']
@@ -122,7 +128,7 @@ def prepare(out):
     assert subprocess.check_output(['dotnet', '--version'], text=True).strip() == plan['proposed_dotnet_sdk']
     # rev-parse of a bare 40-character SHA echoes even a missing object.
     # Resolve the commit type for every input before spending time on builds.
-    for source in {*plan['sources'].values(), '6bc51bec06a49e2fa2e86e634ec6e2163ee4faaa'}:
+    for source in {*plan['sources'].values(), *(original_gpu_source(plan, label) for label in ('old', 'successor', 'variants'))}:
         assert git('rev-parse', '--verify', source + '^{commit}') == source
     assert not out.exists(), 'Use a fresh preparation output directory'
     out.mkdir(parents=True)
@@ -178,9 +184,9 @@ def prepare(out):
         source_trees[label] = git('rev-parse', plan['sources'][label] + ':src')
         assert not git('status', '--porcelain', cwd=tree)
         # Original GPU evidence is retained with its source identity, never
-        # represented as a hosted GPU run. The variant fixture was added after
-        # normalization's GPU qualification and does not change production.
-        gpu_source = '6bc51bec06a49e2fa2e86e634ec6e2163ee4faaa' if label == 'variants' else plan['sources'][label]
+        # represented as a hosted GPU run. The original plan predates its variant
+        # fixture; repaired plans pin fresh evidence for their complete source.
+        gpu_source = original_gpu_source(plan, label)
         assert git('rev-parse', gpu_source + ':src') == source_trees[label]
         for name in ('receipt.json', 'gpu.trx.gz'):
             raw = subprocess.check_output(['git', 'show', gpu_source + ':benchmarks/results/shared-rollout/local-gpu-contracts/' + name], cwd=REPO)

@@ -3,6 +3,7 @@
 ###############################################################################
 * text=auto
 benchmarks/plans/hosted-rollout-20261101.json text eol=lf
+benchmarks/plans/hosted-repair-20261101.json text eol=lf
 
 ###############################################################################
 # Set default behavior for command prompt diff.
