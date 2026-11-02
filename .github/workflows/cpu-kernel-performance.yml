@@ -12,7 +12,7 @@ on:
       qualification_plan:
         description: Immutable source and measurement plan for qualified-rollout
         type: choice
-        options: [benchmarks/plans/hosted-rollout-20261101.json, benchmarks/plans/hosted-repair-20261101.json]
+        options: [benchmarks/plans/hosted-rollout-20261101.json, benchmarks/plans/hosted-repair-20261101.json, benchmarks/plans/hosted-trix-20261102.json]
         default: benchmarks/plans/hosted-rollout-20261101.json
 env:
   HOSTED_TIMING_PLAN: ${{ inputs.qualification_plan || 'benchmarks/plans/hosted-rollout-20261101.json' }}
@@ -204,6 +204,7 @@ jobs:
     timeout-minutes: 15
     outputs:
       accepted: ${{ steps.verify.outputs.accepted }}
+      run_variants: ${{ steps.verify.outputs.run_variants }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -230,7 +231,7 @@ jobs:
           retention-days: 14
   hosted-variants:
     needs: hosted-collect
-    if: needs.hosted-collect.outputs.accepted == 'true'
+    if: needs.hosted-collect.outputs.run_variants == 'true'
     runs-on: windows-2025
     timeout-minutes: 180
     steps:

@@ -98,6 +98,16 @@ def original_gpu_source(plan, label):
     return plan.get('gpu_sources', {}).get(label, legacy)
 
 
+def cpu_test_classes(plan, label):
+    defaults = ['CompactMacdWordEmaTests', 'CompactClassicalWindowTests']
+    if label != 'old':
+        defaults.append('ExactMeanUnitWeightTests')
+    selected = plan.get('cpu_test_classes', {}).get(label, defaults)
+    assert selected and len(selected) == len(set(selected))
+    assert all(isinstance(c, str) and c.isidentifier() for c in selected)
+    return selected
+
+
 def verify_inputs(folder):
     proof, plan = read(folder/'provenance.json'), read(PLAN)
     assert proof['plan_sha256'] == digest(PLAN) and proof['sources'] == plan['sources']
@@ -106,9 +116,7 @@ def verify_inputs(folder):
     assert manifest(folder/'evidence') == proof['evidence_manifest']
     for label in ('old', 'successor', 'variants'):
         assert digest(folder/'production'/(label+'.dll')) == proof['production_sha256'][label]
-        expected = ['CompactMacdWordEmaTests', 'CompactClassicalWindowTests']
-        if label != 'old':
-            expected.append('ExactMeanUnitWeightTests')
+        expected = cpu_test_classes(plan, label)
         actual = verify_trx(folder/'evidence'/(label+'.trx'), expected)
         assert all(proof['checks'][label][k] == v for k,v in actual.items())
         assert proof['checks'][label]['original_gpu_source'] == original_gpu_source(plan, label)
@@ -138,7 +146,6 @@ def prepare(out):
     checks = {}
     source_root = Path(os.environ.get('RUNNER_TEMP', str(out.parent))) / ('si-sources-' + uuid.uuid4().hex)
     source_root.mkdir()
-    classes = ['CompactMacdWordEmaTests', 'CompactClassicalWindowTests']
     for label in ('old', 'successor', 'variants'):
         source = plan['sources'][label]
         assert git('rev-parse', source) == source
@@ -147,7 +154,7 @@ def prepare(out):
         git('sparse-checkout', 'set', 'src', 'tests', 'examples', 'scripts', BENCH, TESTS, cwd=tree)
         git('checkout', cwd=tree)
         assert git('rev-parse', 'HEAD', cwd=tree) == source
-        selected = classes + (['ExactMeanUnitWeightTests'] if label != 'old' else [])
+        selected = cpu_test_classes(plan, label)
         command(['dotnet', 'build', 'tests/OoplesFinance.StockIndicators.Tests.Unit.csproj',
                  '-c', 'Release', '-p:GeneratePackageOnBuild=false', '-m:2'], tree, evidence / (label + '-build.log'))
         unit = tree / 'tests/bin/Release/net10.0/OoplesFinance.StockIndicators.Tests.Unit.dll'
@@ -336,3 +343,4 @@ def main():
         if os.environ.get('GITHUB_OUTPUT'):
             with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as output:
                 output.write('accepted=' + str(summary['accepted']).lower() + '\n')
+                output.write('run_variants=' + str(summary['accepted'] and read(PLAN).get('qualify_variants', True)).lower() + '\n')
