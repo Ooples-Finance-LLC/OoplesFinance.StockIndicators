@@ -208,7 +208,16 @@ def prepare(out):
     print('Prepared immutable source-qualified hosted inputs.', flush=True)
 
 
-def measure(inputs, out, phase, shard):
+def trix_diagnostic_tasks(plan):
+    tasks = phase_tasks(plan, 'successor', 6)
+    task = next(t for t in tasks if t['fixture'] == 'SharedSkenderEmaFamilyBenchmarks')
+    task['operations'] = [op for op in task['operations'] if op['pair'] == 'Skender.GetTrix']
+    assert len(task['operations']) == 1
+    task.update(methods=['BuilderFull', 'BuilderLatestOnly'], cases=16, decisions=4)
+    return [task]
+
+
+def measure(inputs, out, phase, shard, diagnostic=None):
     import psutil
     plan = read(PLAN)
     proof = read(inputs/'provenance.json')
@@ -217,6 +226,13 @@ def measure(inputs, out, phase, shard):
     assert manifest(inputs/'evidence') == proof['evidence_manifest']
     assert proof['sdk'] == subprocess.check_output(['dotnet','--version'],text=True).strip()
     tasks = phase_tasks(plan, phase, shard)
+    diagnostic_env = {}
+    if diagnostic:
+        assert diagnostic in ('trix-jit', 'trix-no-pgo') and phase == 'successor' and shard == 6
+        tasks = trix_diagnostic_tasks(plan)
+        diagnostic_env = dict(DOTNET_JitDisasm='Smooth Round Ratio TryRatio Update',
+            DOTNET_JitDisasmAssemblies='OoplesFinance.StockIndicators',
+            DOTNET_JitPrintInlinedMethods='1', DOTNET_TieredPGO='0' if diagnostic == 'trix-no-pgo' else '1')
     labels = ('old', 'successor') if phase == 'successor' else ('successor', 'variants')
     assert not out.exists(), 'Every shard attempt must start fresh on one VM'
     out.mkdir(parents=True)
@@ -238,7 +254,8 @@ def measure(inputs, out, phase, shard):
                     job=os.environ.get('GITHUB_JOB'), instance_nonce=uuid.uuid4().hex)
     write(out/'provenance.json', dict(phase=phase, shard=shard, raw_root=str(out), host=identity,
         sources=phase_sources(plan, phase), input_provenance=proof, input_provenance_sha256=digest(inputs/'provenance.json'),
-        plan_sha256=digest(PLAN), binary_manifest=manifests, started_utc=datetime.datetime.now(datetime.timezone.utc).isoformat()))
+        plan_sha256=digest(PLAN), binary_manifest=manifests, diagnostic=diagnostic,
+        diagnostic_environment=diagnostic_env, started_utc=datetime.datetime.now(datetime.timezone.utc).isoformat()))
     state = dict(status='starting', phase=phase, shard=shard, order=['old','new','new','old'], rounds=[])
     last_print = [0.0]
     waiting_since = [None]
@@ -271,6 +288,7 @@ def measure(inputs, out, phase, shard):
         assert all(manifest(runtimes[a]) == manifests[a] for a in runtimes)
 
     env = os.environ.copy()
+    env.update(diagnostic_env)
     for key in ('COMPARISON_PAIR','COMPARISON_SHARD','COMPARISON_SHARDS','COMPARISON_FAMILY'):
         env.pop(key,None)
     try:
@@ -302,11 +320,12 @@ def main():
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--phase',choices=['successor','variants'],default='successor')
     parser.add_argument('--shard',type=int,default=0)
+    parser.add_argument('--diagnostic', choices=['trix-jit', 'trix-no-pgo'])
     args = parser.parse_args()
     if args.mode == 'prepare':
         prepare(args.out.resolve())
     elif args.mode == 'measure':
-        measure(args.inputs.resolve(),args.out.resolve(),args.phase,args.shard)
+        measure(args.inputs.resolve(),args.out.resolve(),args.phase,args.shard,args.diagnostic)
     else:
         from .verify import collect
         verify_inputs(args.prepared.resolve())
