@@ -10,7 +10,7 @@ import re
 import subprocess
 import sys
 
-from .pipeline import PLAN, read, digest, phase_tasks
+from .pipeline import PLAN, read, digest, phase_tasks, warmup_context
 from .checkpoints import case_key
 from .verify import archived, collect
 
@@ -52,6 +52,7 @@ def stage(live, raw, repo, out):
         for record in state['rounds']:
             if record['index'] != 2: continue
             fixture=record['fixture']; task=tasks[fixture]
+            record_provenance = {**provenance, **warmup_context(read(PLAN), fixture)}
             mapping={op['raw']:op['pair'] for op in task['operations']}
             implicit=next(iter(mapping)) if task.get('implicit_pair') else None
             path=archived(root,proof['raw_root'],record['report'])
@@ -62,7 +63,7 @@ def stage(live, raw, repo, out):
                     pair,bars,method=case_key(case,implicit)
                     key=mapping[pair],bars,method
                     assert key not in baseline
-                    baseline[key]=(case,report['HostEnvironmentInfo'],report_file,record['sha256'],provenance,url)
+                    baseline[key]=(case,report['HostEnvironmentInfo'],report_file,record['sha256'],record_provenance,url)
                 continue
             cases={(r['pair'],r['bars'],r['method']):r for r in summary['final_candidate_rows'][fixture]
                    if r['provenance']['shard']==shard}
@@ -80,10 +81,10 @@ def stage(live, raw, repo, out):
                         verdict=('faster' if ours['upper_ns']<min(n['lower_ns'] for n in native.values()) else
                                  'slower' if ours['lower_ns']>min(n['upper_ns'] for n in native.values()) else 'inconclusive')
                         comparisons.append(dict(pair=pair,bars=bars,mode=mode,ooples=ours,native=native,
-                            fastest_native=min(native,key=lambda m:native[m]['mean_ns']),verdict=verdict,**provenance))
+                            fastest_native=min(native,key=lambda m:native[m]['mean_ns']),verdict=verdict,**record_provenance))
             builder_receipts.append(dict(fixture=fixture,source_sha=source,run_id=host['run_id'],measurement_url=url,
                 round=2,report_file=report_file,report_sha256=record['sha256'],complete=True,
-                selection='Chronologically final candidate round.',comparisons=comparisons,**provenance))
+                selection='Chronologically final candidate round.',comparisons=comparisons,**record_provenance))
     assert len(run_ids)==1
     run=next(iter(run_ids))
     url=f'https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/{run}'
@@ -137,6 +138,8 @@ def stage(live, raw, repo, out):
     for row in data['rows']: groups[row['source_sha'],row['measurement_run_url']]+=1
     caption='Measured builds: '+', '.join(f'{sha[:8]} ({n} comparisons)' for (sha,_),n in groups.items())+'.'
     disclosure=' Each row identifies its measured source and run. Results combine earlier measurements and GitHub-hosted Windows measurements; absolute timings are compared only within the same runner.'
+    if read(PLAN)['measurement_policy'].get('fixed_invocation_warmups') == 1000:
+        disclosure += ' Latest fixed-invocation batch timings use 1,000 unmeasured warmups; builder timings retain ten warmups. Both use ten measured iterations.'
     document=re.sub(r'Measured builds: [^<]*?\.',lambda _:caption,document)
     document=re.sub(r'(<section id="explorer"[^>]*>.*?<p class="sub">).*?(</p>)',lambda m:m[1]+caption+disclosure+m[2],document,count=1,flags=re.S)
     oldwins=sum(r['competitor_over_ooples']>1 for r in before['rows'] if r['bars']==10000)

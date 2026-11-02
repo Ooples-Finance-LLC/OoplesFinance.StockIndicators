@@ -20,6 +20,10 @@ def archive(raw, prepared, repo, phase):
     blobs.update({('prepared/'+p.relative_to(prepared).as_posix()):p.read_bytes()
                   for p in (prepared/'evidence').rglob('*') if p.is_file()})
     blobs['prepared/provenance.json'] = (prepared/'provenance.json').read_bytes()
+    original = prepared/'original-preparation.json'
+    if original.exists():
+        blobs['prepared/original-preparation.json'] = original.read_bytes()
+        blobs['original-plan.json'] = (repo/read(PLAN)['reuse_inputs']['plan']).read_bytes()
     blobs['plan.json'] = PLAN.read_bytes()
     blobs.update({'scripts/'+p.name:p.read_bytes() for p in Path(__file__).parent.glob('*.py')})
     blobs['candidate-source.patch'] = subprocess.check_output(['git','diff','--binary',

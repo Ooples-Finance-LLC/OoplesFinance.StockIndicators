@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 
-from hosted_timing.pipeline import PLAN, DLL, read, write, digest, phase_tasks, methods_for, phase_sources, original_gpu_source, trix_diagnostic_tasks, cpu_test_classes, trix_preflight_tasks
+from hosted_timing.pipeline import PLAN, DLL, read, write, digest, phase_tasks, methods_for, phase_sources, original_gpu_source, trix_diagnostic_tasks, cpu_test_classes, trix_preflight_tasks, warmups_for, warmup_context
 from hosted_timing.checkpoints import case_key, combine_reports
 from hosted_timing.verify import collect, collect_preflight, archived, check_log, sample
 
@@ -51,8 +51,9 @@ def make_evidence(folder, phase, new_mean=50, preflight=False):
                             cases.append(dict(FullName=name, Method=method, Statistics=dict(N=10, OriginalValues=[mean]*10,
                                 Mean=mean, StandardDeviation=0, ConfidenceInterval=dict(Lower=mean-1,Upper=mean+1)), Memory=dict(BytesAllocatedPerOperation=8)))
                     report = dict(Benchmarks=cases, HostEnvironmentInfo=dict(ProcessorName='test CPU', RuntimeVersion='test runtime'))
-                    log = ''.join('// Benchmark: test: IterationCount=10 WarmupCount=10\n' +
-                        ''.join(f'Workload{kind} {i}: sample\n' for kind in ('Warmup','Actual') for i in range(1,11)) for _ in cases)
+                    warmups = warmups_for(plan, fixture)
+                    log = ''.join(f'// Benchmark: test: IterationCount=10 WarmupCount={warmups}\n' +
+                        ''.join(f'Workload{kind} {i}: sample\n' for kind, count in (('Warmup',warmups),('Actual',10)) for i in range(1,count+1)) for _ in cases)
                     relative = Path('operation-checkpoints')/fixture/f'round{index}-{arm}'/f'operation{position}'
                     report_path = root/relative/'results'/'report.json'
                     log_path = (root/relative).with_suffix('.log')
@@ -62,7 +63,7 @@ def make_evidence(folder, phase, new_mean=50, preflight=False):
                         log=str(raw_root/str(relative.with_suffix('.log'))), sha256=digest(report_path), log_sha256=digest(log_path),
                         quiet_cpu_samples=[5]*12, quiet_build_free_samples=12, quiet_sequence_started_utc='2026-11-01T00:00:00Z',
                         build_monitor_observations=2, cases=len(cases), execution_context=dict(host_nonce=host['instance_nonce'],
-                            production_sha256=manifests[arm][DLL], phase=phase, shard=shard))
+                            production_sha256=manifests[arm][DLL], phase=phase, shard=shard, **warmup_context(plan, fixture)))
                     write((root/relative).with_suffix('.json'),receipt)
                     receipts.append(receipt); reports.append(report); logs.append(log)
                 merged = combine_reports(reports,[o['raw'] for o in task['operations']],methods)
@@ -76,6 +77,21 @@ def make_evidence(folder, phase, new_mean=50, preflight=False):
 
 
 class HostedTimingTests(unittest.TestCase):
+    def test_fixed_batch_warmups_preserve_builder_and_legacy_contracts(self):
+        plan = copy.deepcopy(read(PLAN))
+        plan['measurement_policy'].pop('fixed_invocation_warmups', None)
+        self.assertEqual(warmups_for(plan, 'LibraryPairBenchmarks'), 10)
+        self.assertEqual(warmup_context(plan, 'LibraryPairBenchmarks'), {})
+        plan['measurement_policy']['fixed_invocation_warmups'] = 1000
+        self.assertEqual(warmups_for(plan, 'LibraryPairBenchmarks'), 1000)
+        self.assertEqual(warmups_for(plan, 'SharedSeededMomentumBenchmarks'), 10)
+        self.assertEqual(warmup_context(plan, 'LibraryPairBenchmarks'), {'warmup_count':1000})
+        plan['measurement_policy']['fixed_invocation_warmups'] = 1001
+        with self.assertRaises(AssertionError): warmups_for(plan, 'SharedSeededMomentumBenchmarks')
+        plan['measurement_policy']['fixed_invocation_warmups'] = 1000
+        plan['measurement_policy']['iterations'] = 5
+        with self.assertRaises(AssertionError): warmups_for(plan, 'LibraryPairBenchmarks')
+
     def test_preflight_covers_all_trix_modes_and_cannot_qualify_production(self):
         for mean, accepted in ((50, True), (100, False), (150, False)):
             with tempfile.TemporaryDirectory() as temp:

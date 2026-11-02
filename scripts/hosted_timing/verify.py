@@ -7,7 +7,7 @@ import math
 import re
 
 from .checkpoints import case_key, combine_reports
-from .pipeline import PLAN, DLL, read, digest, phase_tasks, methods_for, phase_sources, trix_preflight_tasks
+from .pipeline import PLAN, DLL, read, digest, phase_tasks, methods_for, phase_sources, trix_preflight_tasks, warmups_for, warmup_context
 
 
 def archived(root, raw_root, raw_path):
@@ -114,7 +114,7 @@ def _collect(folder, phase, *, preflight):
             originals, logs = [], []
             for position, chunk in enumerate(chunks):
                 assert chunk['execution_context'] == dict(host_nonce=host['instance_nonce'],
-                    production_sha256=manifests[arm][DLL], phase=phase, shard=shard)
+                    production_sha256=manifests[arm][DLL], phase=phase, shard=shard, **warmup_context(plan, fixture))
                 assert len(chunk['quiet_cpu_samples']) == 12
                 assert all(math.isfinite(v) and 0 <= v <= 15 for v in chunk['quiet_cpu_samples'])
                 assert chunk['quiet_build_free_samples'] == 12 and chunk['build_monitor_observations'] >= 1
@@ -129,7 +129,7 @@ def _collect(folder, phase, *, preflight):
                 original = read(paths['report'])
                 combine_reports([original], [chunk['pair']], methods, implicit)
                 log = paths['log'].read_text(encoding='utf-8-sig')
-                check_log(log, chunk['cases'])
+                check_log(log, chunk['cases'], warmups=warmups_for(plan, fixture))
                 originals.append(original)
                 logs.append(log)
             merged_path = archived(root, proof['raw_root'], record['report'])
@@ -150,7 +150,7 @@ def _collect(folder, phase, *, preflight):
             case_count += len(cases)
         for fixture in tasks:
             provenance = dict(host=host, shard=shard, phase=phase, sources=proof['sources'],
-                workflow_head=inputs['workflow_head'], input_provenance_sha256=proof['input_provenance_sha256'])
+                workflow_head=inputs['workflow_head'], input_provenance_sha256=proof['input_provenance_sha256'], **warmup_context(plan, fixture))
             for key in sorted(rounds[fixture, 0]):
                 old = [rounds[fixture, i][key] for i in (0, 3)]
                 new = [rounds[fixture, i][key] for i in (1, 2)]
