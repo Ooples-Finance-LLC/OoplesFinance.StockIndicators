@@ -7,19 +7,32 @@ on:
       suite:
         description: Public builder comparisons, diagnostic kernels, or both
         type: choice
-        options: [builder, kernel, all, qualified-rollout, qualified-variants, qualified-coverage, trix-diagnostic, trix-library-diagnostic]
+        options: [builder, kernel, all, qualified-rollout, qualified-variants, qualified-coverage, verify-evidence, trix-diagnostic, trix-library-diagnostic]
         default: builder
       qualification_plan:
         description: Immutable source and measurement plan for qualified-rollout
         type: choice
         options: [benchmarks/plans/hosted-rollout-20261101.json, benchmarks/plans/hosted-repair-20261101.json, benchmarks/plans/hosted-trix-20261102.json, benchmarks/plans/hosted-trix-eager-20261102.json, benchmarks/plans/hosted-trix-shared-jit-20261102.json, benchmarks/plans/hosted-trix-direct-fill-20261102.json, benchmarks/plans/hosted-trix-settled-20261102.json, benchmarks/plans/hosted-trix-word-settled-20261102.json, benchmarks/plans/hosted-classical-final-20261102.json, benchmarks/plans/hosted-builder-coverage-20261102.json]
         default: benchmarks/plans/hosted-rollout-20261101.json
+      evidence_run:
+        description: Original measurement run for verification-only recovery
+        type: string
+        default: ''
+      collector_ref:
+        description: Exact original collector commit for verification-only recovery
+        type: string
+        default: ''
+      evidence_phase:
+        description: Original evidence phase for verification-only recovery
+        type: choice
+        options: [variants, coverage]
+        default: variants
 env:
   HOSTED_TIMING_PLAN: ${{ inputs.qualification_plan || 'benchmarks/plans/hosted-rollout-20261101.json' }}
 permissions:
   contents: read
 concurrency:
-  group: cpu-kernels-${{ github.ref }}-${{ github.event.label.name || 'dispatch' }}
+  group: cpu-kernels-${{ github.ref }}-${{ inputs.suite == 'verify-evidence' && format('verify-{0}', inputs.evidence_run) || github.event.label.name || 'dispatch' }}
   cancel-in-progress: true
 jobs:
   build:
@@ -400,6 +413,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          fetch-depth: 0
           sparse-checkout: |
             scripts
             benchmarks/plans
@@ -408,8 +422,8 @@ jobs:
           python-version: '3.13'
       - uses: actions/download-artifact@v8
         with:
-          pattern: hosted-coverage-0
-          path: evidence
+          name: hosted-coverage-0
+          path: evidence/hosted-coverage-0
       - uses: actions/download-artifact@v8
         with:
           name: hosted-inputs
@@ -428,6 +442,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          fetch-depth: 0
           sparse-checkout: |
             scripts
             benchmarks/plans
@@ -436,8 +451,8 @@ jobs:
           python-version: '3.13'
       - uses: actions/download-artifact@v8
         with:
-          pattern: hosted-variants-0
-          path: evidence
+          name: hosted-variants-0
+          path: evidence/hosted-variants-0
       - uses: actions/download-artifact@v8
         with:
           name: hosted-inputs
@@ -447,4 +462,68 @@ jobs:
         with:
           name: hosted-verified-variants
           path: verified-variants.json
+          retention-days: 14
+  hosted-verify-evidence:
+    if: github.event_name == 'workflow_dispatch' && inputs.suite == 'verify-evidence'
+    permissions:
+      contents: read
+      actions: read
+    runs-on: windows-2025
+    timeout-minutes: 15
+    env:
+      MEASUREMENT_RUN: ${{ inputs.evidence_run }}
+      COLLECTOR_REF: ${{ inputs.collector_ref }}
+      EVIDENCE_PHASE: ${{ inputs.evidence_phase }}
+    steps:
+      - name: Validate evidence identity
+        run: |
+          if ($env:MEASUREMENT_RUN -notmatch '^[1-9][0-9]+$') { throw 'An original measurement run is required' }
+          if ($env:COLLECTOR_REF -notmatch '^[0-9a-f]{40}$') { throw 'An exact collector commit is required' }
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.collector_ref }}
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v8
+        with:
+          name: hosted-inputs
+          path: hosted-inputs
+          run-id: ${{ inputs.evidence_run }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v8
+        with:
+          name: hosted-${{ inputs.evidence_phase }}-0
+          path: evidence/hosted-${{ inputs.evidence_phase }}-0
+          run-id: ${{ inputs.evidence_run }}
+          github-token: ${{ github.token }}
+      - name: Bind original run, collector, and frozen plan
+        run: |
+          @'
+          import json, os, subprocess, sys
+          from pathlib import Path
+          sys.path.insert(0, 'scripts')
+          from hosted_timing.pipeline import PLAN, digest, read
+          proof = read(Path('hosted-inputs/provenance.json'))
+          assert proof['run_id'] == os.environ['MEASUREMENT_RUN']
+          assert proof['workflow_head'] == os.environ['COLLECTOR_REF']
+          assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == proof['workflow_head']
+          assert proof['plan_sha256'] == digest(PLAN)
+          note = dict(measurement_run_id=proof['run_id'], collector_ref=proof['workflow_head'],
+                      verification_run_id=os.environ['GITHUB_RUN_ID'], phase=os.environ['EVIDENCE_PHASE'],
+                      plan_sha256=proof['plan_sha256'], timings_rerun=False)
+          Path('collection-recovery.json').write_bytes((json.dumps(note, indent=2)+'\n').encode())
+          '@ | python -
+      - name: Verify original complete evidence
+        run: python scripts/run-hosted-timing.py collect --inputs evidence --prepared hosted-inputs --out verified-evidence.json --phase $env:EVIDENCE_PHASE
+      - uses: actions/upload-artifact@v7
+        with:
+          name: hosted-recovered-${{ inputs.evidence_phase }}
+          path: |
+            verified-evidence.json
+            collection-recovery.json
           retention-days: 14

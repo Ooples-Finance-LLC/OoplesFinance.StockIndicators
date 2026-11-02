@@ -4,11 +4,12 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import test_hosted_timing
 from hosted_timing.coverage import tasks, verify_reference
-from hosted_timing.pipeline import PLAN, read, write
+from hosted_timing.pipeline import DLL, PLAN, digest, manifest, measure, read, write
 from hosted_timing.verify import collect
 
 
@@ -59,6 +60,35 @@ class CoverageEvidenceTests(unittest.TestCase):
         self.assertEqual({'Trady.Indicator.DynamicMomentumIndex', 'Trady.Candlestick.RisingThreeMethods'},
                          {op['pair'] for task in selected for op in task['operations']})
         self.assertEqual(40, sum(task['cases'] for task in selected))
+
+    def test_runtime_accepts_identical_coverage_arms_but_rejects_identical_optimization_arms(self):
+        inputs = self.root/'inputs'
+        for directory in ('common', 'production', 'evidence'):
+            (inputs/directory).mkdir(parents=True)
+        (inputs/'common'/DLL).write_bytes(b'harness-production')
+        for label in ('successor', 'variants'):
+            (inputs/'production'/(label+'.dll')).write_bytes(b'qualified-production')
+        proof = dict(sources=self.plan['sources'], plan_sha256=digest(self.path),
+                     sdk=self.plan['proposed_dotnet_sdk'], common_manifest=manifest(inputs/'common'),
+                     evidence_manifest={}, production_sha256={
+                         label:digest(inputs/'production'/(label+'.dll')) for label in ('successor', 'variants')})
+        write(inputs/'provenance.json', proof)
+
+        def checkpoint(**arguments):
+            arguments['assert_binaries']()
+            self.assertEqual('coverage', arguments['context']['phase'])
+            return dict(cases=2*len(arguments['pairs'])*len(arguments['methods']))
+
+        with patch.dict('sys.modules', {'psutil': SimpleNamespace(cpu_count=lambda:2)}), \
+                patch('hosted_timing.pipeline.subprocess.check_output', return_value=proof['sdk']), \
+                patch('hosted_timing.pipeline.shutil.disk_usage', return_value=SimpleNamespace(free=3*1024**3)), \
+                patch('hosted_timing.pipeline.run_checkpointed', side_effect=checkpoint) as run:
+            out = self.root/'coverage-runtime-check'
+            measure(inputs, out, 'coverage', 0)
+            self.assertEqual(8, run.call_count)
+            self.assertEqual('raw-measurements-complete', read(out/'status.json')['status'])
+            with self.assertRaises(AssertionError):
+                measure(inputs, self.root/'variants-runtime-check', 'variants', 0)
 
 
 class CoverageReferenceTests(unittest.TestCase):

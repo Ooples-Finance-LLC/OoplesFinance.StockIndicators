@@ -337,7 +337,8 @@ def measure(inputs, out, phase, shard, diagnostic=None):
         runtimes[arm] = runtime
         manifests[arm] = manifest(runtime)
     assert manifests['old'].keys() == manifests['new'].keys()
-    assert [p for p in manifests['old'] if manifests['old'][p] != manifests['new'][p]] == [DLL]
+    expected_changes = [] if phase == 'coverage' else [DLL]
+    assert [p for p in manifests['old'] if manifests['old'][p] != manifests['new'][p]] == expected_changes
     identity = dict(machine=platform.node(), platform=platform.platform(), cpu=platform.processor(),
                     logical_cpus=psutil.cpu_count(), runner_image=os.environ.get('ImageVersion'),
                     run_id=os.environ.get('GITHUB_RUN_ID'), run_attempt=os.environ.get('GITHUB_RUN_ATTEMPT'),
