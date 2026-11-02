@@ -7,12 +7,12 @@ on:
       suite:
         description: Public builder comparisons, diagnostic kernels, or both
         type: choice
-        options: [builder, kernel, all, qualified-rollout, trix-diagnostic, trix-library-diagnostic]
+        options: [builder, kernel, all, qualified-rollout, qualified-variants, trix-diagnostic, trix-library-diagnostic]
         default: builder
       qualification_plan:
         description: Immutable source and measurement plan for qualified-rollout
         type: choice
-        options: [benchmarks/plans/hosted-rollout-20261101.json, benchmarks/plans/hosted-repair-20261101.json, benchmarks/plans/hosted-trix-20261102.json, benchmarks/plans/hosted-trix-eager-20261102.json, benchmarks/plans/hosted-trix-shared-jit-20261102.json, benchmarks/plans/hosted-trix-direct-fill-20261102.json, benchmarks/plans/hosted-trix-settled-20261102.json, benchmarks/plans/hosted-trix-word-settled-20261102.json]
+        options: [benchmarks/plans/hosted-rollout-20261101.json, benchmarks/plans/hosted-repair-20261101.json, benchmarks/plans/hosted-trix-20261102.json, benchmarks/plans/hosted-trix-eager-20261102.json, benchmarks/plans/hosted-trix-shared-jit-20261102.json, benchmarks/plans/hosted-trix-direct-fill-20261102.json, benchmarks/plans/hosted-trix-settled-20261102.json, benchmarks/plans/hosted-trix-word-settled-20261102.json, benchmarks/plans/hosted-classical-final-20261102.json]
         default: benchmarks/plans/hosted-rollout-20261101.json
 env:
   HOSTED_TIMING_PLAN: ${{ inputs.qualification_plan || 'benchmarks/plans/hosted-rollout-20261101.json' }}
@@ -178,7 +178,9 @@ jobs:
           retention-days: 14
           if-no-files-found: error
   hosted-prepare:
-    if: github.event_name == 'workflow_dispatch' && inputs.suite == 'qualified-rollout'
+    if: github.event_name == 'workflow_dispatch' && contains(fromJSON('["qualified-rollout", "qualified-variants"]'), inputs.suite)
+    env:
+      HOSTED_TIMING_SUITE: ${{ inputs.suite }}
     permissions:
       contents: read
       actions: read
@@ -186,6 +188,7 @@ jobs:
     timeout-minutes: 60
     outputs:
       trix_preflight: ${{ steps.prepare.outputs.trix_preflight }}
+      standalone_variants: ${{ steps.prepare.outputs.standalone_variants }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -263,7 +266,7 @@ jobs:
           if-no-files-found: error
   hosted-measure:
     needs: [hosted-prepare, hosted-trix-preflight]
-    if: always() && needs.hosted-prepare.result == 'success' && (needs.hosted-trix-preflight.result == 'skipped' || needs.hosted-trix-preflight.outputs.accepted == 'true')
+    if: always() && inputs.suite == 'qualified-rollout' && needs.hosted-prepare.result == 'success' && (needs.hosted-trix-preflight.result == 'skipped' || needs.hosted-trix-preflight.outputs.accepted == 'true')
     runs-on: windows-2025
     timeout-minutes: 180
     strategy:
@@ -329,8 +332,8 @@ jobs:
           path: verified-successor.json
           retention-days: 14
   hosted-variants:
-    needs: hosted-collect
-    if: needs.hosted-collect.outputs.run_variants == 'true'
+    needs: [hosted-prepare, hosted-collect]
+    if: always() && needs.hosted-prepare.result == 'success' && (needs.hosted-collect.outputs.run_variants == 'true' || (inputs.suite == 'qualified-variants' && needs.hosted-prepare.outputs.standalone_variants == 'true'))
     runs-on: windows-2025
     timeout-minutes: 180
     steps:

@@ -133,6 +133,8 @@ def verify_inputs(folder):
 
 
 def _verify_input_contents(folder, plan, proof, plan_sha256):
+    from .variants import verify_baseline
+    verify_baseline(plan)
     assert proof['plan_sha256'] == plan_sha256 and proof['sources'] == plan['sources']
     assert proof['sdk'] == plan['proposed_dotnet_sdk']
     assert manifest(folder/'common') == proof['common_manifest']
@@ -161,6 +163,11 @@ def prepare(out, reuse_from=None):
     # Resolve the commit type for every input before spending time on builds.
     for source in {*plan['sources'].values(), *(original_gpu_source(plan, label) for label in ('old', 'successor', 'variants'))}:
         assert git('rev-parse', '--verify', source + '^{commit}') == source
+    from .variants import verify_baseline
+    verify_baseline(plan)
+    suite = os.environ.get('HOSTED_TIMING_SUITE')
+    if suite:
+        assert (suite == 'qualified-variants') == bool(plan.get('standalone_variants'))
     if plan.get('reuse_inputs'):
         assert reuse_from is not None, 'Download the pinned preparation first'
         from .reuse import prepare_reused
@@ -397,6 +404,7 @@ def main():
         if os.environ.get('GITHUB_OUTPUT'):
             with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as output:
                 output.write('trix_preflight=' + str(read(PLAN).get('trix_preflight', False)).lower() + '\n')
+                output.write('standalone_variants=' + str(bool(read(PLAN).get('standalone_variants'))).lower() + '\n')
     elif args.mode == 'measure':
         measure(args.inputs.resolve(),args.out.resolve(),args.phase,args.shard,args.diagnostic)
     else:
