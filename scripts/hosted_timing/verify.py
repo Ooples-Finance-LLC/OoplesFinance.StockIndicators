@@ -56,6 +56,7 @@ def collect(folder, phase):
     case_count = 0
     for root in roots:
         proof, state = read(root/'provenance.json'), read(root/'status.json')
+        assert not proof.get('diagnostic'), 'Diagnostic measurements cannot qualify production'
         shard = proof['shard']
         assert shard in expected_shards and shard not in shards
         shards.add(shard)

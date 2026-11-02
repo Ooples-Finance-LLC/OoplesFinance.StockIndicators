@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 
-from hosted_timing.pipeline import PLAN, DLL, read, write, digest, phase_tasks, methods_for, phase_sources, original_gpu_source
+from hosted_timing.pipeline import PLAN, DLL, read, write, digest, phase_tasks, methods_for, phase_sources, original_gpu_source, trix_diagnostic_tasks
 from hosted_timing.checkpoints import case_key, combine_reports
 from hosted_timing.verify import collect, archived, check_log, sample
 
@@ -97,9 +97,23 @@ class HostedTimingTests(unittest.TestCase):
             self.assertEqual((result['case_count'],result['decision_count']),(1860,372))
             self.assertTrue(result['accepted'])
             self.assertEqual(result['verdicts'],{'faster':372})
+            proof_path = root/'shard6/provenance.json'
+            proof = read(proof_path); proof['diagnostic'] = 'trix-jit'; write(proof_path, proof)
+            with self.assertRaisesRegex(AssertionError, 'Diagnostic measurements'):
+                collect(root, 'successor')
+            proof.pop('diagnostic'); write(proof_path, proof)
             proof_path = root/'shard1/provenance.json'
             proof = read(proof_path); proof['host']['run_attempt']='2'; write(proof_path,proof)
             with self.assertRaises(AssertionError): collect(root,'successor')
+
+    def test_trix_diagnostic_is_bounded_and_does_not_mutate_plan(self):
+        plan = read(PLAN)
+        before = copy.deepcopy(plan)
+        task, = trix_diagnostic_tasks(plan)
+        self.assertEqual(plan, before)
+        self.assertEqual([op['pair'] for op in task['operations']], ['Skender.GetTrix'])
+        self.assertEqual(task['cases'], 16)
+        self.assertEqual(task['methods'], ['BuilderFull', 'BuilderLatestOnly'])
 
     def test_variants_and_corruption(self):
         with tempfile.TemporaryDirectory() as temp:
