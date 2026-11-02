@@ -69,3 +69,5 @@ benchmarks/plans/hosted-trix-word-settled-20261102.json text eol=lf
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+
+benchmarks/plans/hosted-classical-final-20261102.json text eol=lf
