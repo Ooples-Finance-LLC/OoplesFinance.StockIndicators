@@ -2,10 +2,13 @@
 from pathlib import Path, PureWindowsPath
 import copy
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 
-from hosted_timing.pipeline import PLAN, DLL, read, write, digest, phase_tasks, methods_for, phase_sources
+from hosted_timing.pipeline import PLAN, DLL, read, write, digest, phase_tasks, methods_for, phase_sources, original_gpu_source
 from hosted_timing.checkpoints import case_key, combine_reports
 from hosted_timing.verify import collect, archived, check_log, sample
 
@@ -70,6 +73,22 @@ def make_evidence(folder, phase, new_mean=50):
 
 
 class HostedTimingTests(unittest.TestCase):
+    def test_selected_plan_is_shared_by_collector(self):
+        env = {**os.environ, 'HOSTED_TIMING_PLAN': 'benchmarks/plans/hosted-repair-20261101.json',
+               'PYTHONPATH': str(Path(__file__).resolve().parent)}
+        selected = subprocess.check_output([sys.executable, '-c',
+            'from hosted_timing.pipeline import PLAN; from hosted_timing.verify import PLAN as V; '
+            'assert PLAN == V; print(PLAN.name)'], env=env, text=True).strip()
+        self.assertEqual(selected, 'hosted-repair-20261101.json')
+
+    def test_repaired_sources_keep_their_own_gpu_identity(self):
+        plan = dict(sources=dict(old='old', successor='repaired', variants='repaired-variants'))
+        self.assertEqual(original_gpu_source(plan, 'successor'), 'repaired')
+        self.assertEqual(original_gpu_source(plan, 'variants'), '6bc51bec06a49e2fa2e86e634ec6e2163ee4faaa')
+        plan['gpu_sources'] = dict(variants='repaired-variants')
+        self.assertEqual(original_gpu_source(plan, 'variants'), 'repaired-variants')
+        self.assertEqual(original_gpu_source(plan, 'old'), 'old')
+
     def test_full_successor_coverage_and_aliases(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
