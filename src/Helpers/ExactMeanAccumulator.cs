@@ -464,6 +464,7 @@ internal struct ExactMeanAccumulator
     }
 
 #if !NETFRAMEWORK
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     internal static (UInt128 Quotient, UInt128 Remainder) CompactDivRem(UInt128 numerator, UInt128 denominator)
     {
 #if NET10_0_OR_GREATER

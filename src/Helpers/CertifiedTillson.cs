@@ -1,5 +1,6 @@
 #if !NETFRAMEWORK
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace OoplesFinance.StockIndicators.Helpers;
 
@@ -26,6 +27,7 @@ internal static class CertifiedTillson
             _reciprocal = (ulong)(((UInt128)1 << 64) / _denominator);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal bool TrySmooth(double prior, double input, out double result)
         {
             result = 0;
@@ -40,6 +42,7 @@ internal static class CertifiedTillson
 
         // Caller establishes a supported period and positive normal operands
         // with this same exponent. Convex means preserve the binade.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal double SmoothSameBinade(ulong priorBits, ulong inputBits, ulong exponent)
         {
             // n <= 2^64-2048, q*d <= n, and the corrected remainder < d.

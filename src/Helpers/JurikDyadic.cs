@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace OoplesFinance.StockIndicators.Helpers;
 
@@ -6,6 +7,7 @@ namespace OoplesFinance.StockIndicators.Helpers;
 // weighted differences fit 127 magnitude bits. No rounded floating-point proxy
 // is used to decide whether a fast result is correct. Larger exponent spans fall
 // back to the established arbitrary-precision accumulator.
+// Short series must reach the optimized compact kernels without waiting for tier promotion.
 internal struct JurikDyadic
 {
 #if NETFRAMEWORK
@@ -22,6 +24,9 @@ internal struct JurikDyadic
     internal int Sign => _wide ? _fallback!.Value.Sign : _fixed ? _integer.CompareTo(0) : _simple.CompareTo(0);
 #endif
 
+#if !NETFRAMEWORK
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
     internal static JurikDyadic FromDouble(double value)
     {
 #if !NETFRAMEWORK
@@ -134,6 +139,9 @@ internal struct JurikDyadic
 #endif
         var sum = Accumulator(); sum.Subtract(other.Accumulator()); SetFallback(sum);
     }
+#if !NETFRAMEWORK
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
     internal void AddExact(JurikDyadic other)
     {
 #if !NETFRAMEWORK
@@ -185,6 +193,9 @@ internal struct JurikDyadic
 #endif
         var product = Accumulator(); product.Multiply(factor); SetFallback(product);
     }
+#if !NETFRAMEWORK
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
     internal void Multiply(JurikDyadic other)
     {
 #if !NETFRAMEWORK
@@ -238,6 +249,9 @@ internal struct JurikDyadic
         return Accumulator().SqrtMean(count);
     }
 
+#if !NETFRAMEWORK
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
     internal double Mean(int count)
     {
 #if !NETFRAMEWORK
@@ -250,6 +264,9 @@ internal struct JurikDyadic
 #endif
         return Accumulator().Mean(count);
     }
+#if !NETFRAMEWORK
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
     internal double Ratio(JurikDyadic denominator)
     {
 #if !NETFRAMEWORK
@@ -342,6 +359,7 @@ internal struct JurikDyadic
 #endif
     }
 #if !NETFRAMEWORK
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private void Promote()
     {
         if (_fixed) return;
@@ -364,6 +382,7 @@ internal struct JurikDyadic
         return true;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal readonly bool TryDouble(out double value)
     {
         value = 0;
@@ -373,6 +392,7 @@ internal struct JurikDyadic
         if (bits > 53 || _exponent + bits - 1 > 1023) return false;
         value = RoundedDouble(); return true;
     }
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private readonly double RoundedDouble()
     {
         if (_integer == 0) return 0;
@@ -398,6 +418,7 @@ internal struct JurikDyadic
         return BitConverter.Int64BitsToDouble(unchecked((long)payload));
     }
     private static UInt128 Magnitude(Int128 value) => (UInt128)(value < 0 ? -value : value);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Normalize()
     {
         if (_integer == 0) { _exponent = 0; return; }
@@ -407,6 +428,7 @@ internal struct JurikDyadic
             : 64 + BitOperations.TrailingZeroCount((ulong)(magnitude >> 64));
         _integer >>= zeros; _exponent += zeros;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int Bits(UInt128 value)
     {
         var upper = (ulong)(value >> 64);
@@ -418,6 +440,7 @@ internal struct JurikDyadic
         if (shift >= 127 || Bits(Magnitude(value)) + shift > 127) { result = 0; return false; }
         result = value << shift; return true;
     }
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private static bool TryRatio(Int128 numerator, int numeratorExponent, Int128 denominator,
         int denominatorExponent, out double result)
     {
