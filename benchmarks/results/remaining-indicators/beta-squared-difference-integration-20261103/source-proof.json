@@ -15,5 +15,10 @@
   "actual_gpu": 100,
   "source_fingerprint": "143897ab32a6230654bb5ebef539d4ce173e746580393fd6fd30427c50fb3dba",
   "production_sha256": "a2bb95abaab54d9b87c2f97dfceebc5f6e712746842e7b9017dea1cce25e8b8d",
-  "inconclusive_cache_source_excluded": true
+  "inconclusive_cache_source_excluded": true,
+  "source_integration": "90196219e376592c213eaa23f4a263f8183f9b73",
+  "inventory_commit": "5dff537b556001c8e37ac824ceff3e8f178f85b9",
+  "inventory_tests": 8,
+  "report_sha256": "1942998768a055255dcbb0e67ef44e6a23ee2ee055dc9afef7a4dac540be01cc",
+  "remaining_slower_10000": 216
 }
