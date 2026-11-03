@@ -1,0 +1,19 @@
+{
+  "measured_source": "297abe2b4693e1662658255d2c492664b7f4f42d",
+  "integration_source_commit": "1b7ed8ced3adf4f9f5186a8365d978ee244ae583",
+  "measurement_run": "41553196532",
+  "plan_sha256": "17dd9e125e80646135cafd00c247f4cbb0886b6d1644c61d0e50ae3a8a13aac3",
+  "source_and_tests_exactly_match": true,
+  "accepted": true,
+  "cases": 300,
+  "decisions": 60,
+  "verdicts": {
+    "faster": 58,
+    "inconclusive": 2
+  },
+  "local_summary_matches_hosted": true,
+  "inventory_regenerated": true,
+  "inventory_check_passed": true,
+  "inventory_tests_passed": 8,
+  "report_imported": false
+}

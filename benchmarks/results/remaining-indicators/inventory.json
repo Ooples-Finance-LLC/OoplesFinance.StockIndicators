@@ -13702,7 +13702,7 @@
     "src/Indicators/HikkakeCandles.cs": "b3cbcd8b1582907d0b616a20e9f12930a90b6a81ab0ef6ad5438b7f1eac0876d",
     "src/Indicators/HilbertCycle.cs": "3dedaf49af143ee38d74efb25582827e90258bf581304a55c3060aa11898b16f",
     "src/Indicators/HilbertCycleSignalState.cs": "34c08361263d638209864c3400d011ccb22f5df31e96f5b78e20456e6da2f419",
-    "src/Indicators/HilbertPhaseState.cs": "5a5c0ea4977556a23ebda9f0e2b23f120a5c1533496b03644ad073062de5a316",
+    "src/Indicators/HilbertPhaseState.cs": "7bcc38cf3b34e1d2c71000a83906733d815bc22d1def467aa23b19ee53c39726",
     "src/Indicators/HilbertTrendMeanState.cs": "311aa9877d9bcb1e8b95bb42e86400bcbd57b83711b71c0f40a222e3989d8528",
     "src/Indicators/HoltWinterForecast.cs": "902e85cf29f019fba017d2f79051ab8b425cbe1aa0d6a76c78dfdf92e6abbd77",
     "src/Indicators/HullWindow.cs": "b9628655d2544bac9642b33c010db31758541a1bfa880993c1d858b5c850f6d1",
