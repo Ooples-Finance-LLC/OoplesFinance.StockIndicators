@@ -7,6 +7,40 @@ public sealed class SeededPriceMomentumExecutionTests
 {
     [Theory]
     [InlineData(2, 1, 1)]
+    [InlineData(3, 1, 2)]
+    [InlineData(7, 3, 5)]
+    [InlineData(2047, 2, 3)]
+    [InlineData(2048, 3, 2048)]
+    public void FixedAndSignalRecurrenceBoundariesPreserveReferenceBits(int period, int smooth, int signal)
+    {
+        int count = period + smooth + signal + 81;
+        var random = new Random(71104);
+        var ordinary = Enumerable.Range(0, count).Select(i => 100 + (i * 37 % 193) / 32d);
+        var mixed = Enumerable.Range(0, count).Select(i => i % 13 == 0 ? double.Epsilon
+            : i % 11 == 0 ? double.MaxValue
+            : Math.ScaleB((i % 2 == 0 ? 1 : -1) * (.5 + random.NextDouble() * .5), random.Next(-900, 901)));
+        var state = (IMultiOutputState)new SeededPriceMomentum(period, smooth, signal).CreateState();
+        var output = new double[4];
+        foreach (var prices in new[] { ordinary, mixed })
+        {
+            var bars = prices.Select(v => new Bar(default, v, v, v, v, 0)).ToArray();
+            var expected = SeededMomentumReference.Pmo(bars, period, smooth, signal);
+            state.Reset();
+            for (int i = 0; i < bars.Length; i++)
+            {
+                state.Update(in bars[i], output);
+                for (int slot = 0; slot < 2; slot++)
+                {
+                    Assert.Equal(expected[slot][i].HasValue ? 1d : 0d, output[slot + 2]);
+                    Assert.Equal(BitConverter.DoubleToInt64Bits(expected[slot][i] ?? 0),
+                        BitConverter.DoubleToInt64Bits(output[slot]));
+                }
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(2, 1, 1)]
     [InlineData(2, 2, 2)]
     [InlineData(7, 3, 5)]
     [InlineData(int.MaxValue, 1, 2)]
