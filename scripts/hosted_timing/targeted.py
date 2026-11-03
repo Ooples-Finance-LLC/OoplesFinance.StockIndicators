@@ -56,6 +56,11 @@ SCOPES['combined-hilbert-klinger'] = dict(
     paths=SCOPES['hilbert-fir']['paths'] | SCOPES['klinger-schaff']['paths'],
     totals=(360,72), shards=6)
 
+SCOPES['tsi-compact-ema'] = dict(
+    fixtures={'SharedSkenderEmaFamilyBenchmarks': {'Skender.GetTsi':'Skender.GetTsi'}},
+    paths={'src/Indicators/SeededTrueStrength.cs', 'tests/ModelsTests/SeededTrueStrengthExecutionTests.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(360,72))
+
 
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
@@ -72,8 +77,10 @@ def verify_reference(plan):
     raw = subprocess.check_output(['git', 'show', plan['sources']['published'] + ':' + reference['decision']], cwd=REPO)
     assert hashlib.sha256(raw).hexdigest() == reference['sha256']
     decision = json.loads(raw)
-    assert decision['accepted'] and decision['phase'] == 'successor'
-    assert (decision['case_count'], decision['decision_count']) == (1860, 372)
+    assert decision['accepted'] and decision['phase'] == scope.get('baseline_phase','successor')
+    assert (decision['case_count'], decision['decision_count']) == scope.get('baseline_totals',(1860,372))
+    if decision['phase'] == 'targeted':
+        assert decision['production_integrated'] and decision['report_imported']
     assert decision['verdicts'].get('faster', 0) > 0
     assert not decision['verdicts'].get('slower', 0)
     assert str(decision['run_id']) == str(reference['run_id'])
