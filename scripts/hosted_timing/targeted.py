@@ -122,6 +122,18 @@ SCOPES['trend-star-certified-bodies'] = {
     **SCOPES['trend-star-compact-ranks'], 'baseline_totals': (30,6)}
 
 
+for name, members, shards in (
+    ('combined-local-directional', ('sum-directional-range',), 2),
+    ('combined-local-directional-body', ('sum-directional-range','trend-star-certified-bodies'), 6),
+):
+    SCOPES[name] = dict(
+        fixtures={fixture:mapping for member in members for fixture,mapping in SCOPES[member]['fixtures'].items()},
+        implicit_fixtures=set(),
+        paths=set().union(*(SCOPES[member]['paths'] for member in members)),
+        totals=tuple(sum(SCOPES[member]['totals'][i] for member in members) for i in (0,1)),
+        shards=shards, baseline_phase='targeted', baseline_totals=(30,6))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 

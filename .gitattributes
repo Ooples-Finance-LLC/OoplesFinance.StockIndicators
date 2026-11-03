@@ -90,3 +90,4 @@ benchmarks/plans/hosted-sum-directional-range-20261103.json text eol=lf
 benchmarks/plans/hosted-trend-star-compact-ranks-20261103.json text eol=lf
 benchmarks/plans/hosted-stoch-raw-certificate-20261103.json text eol=lf
 benchmarks/plans/hosted-trend-star-certified-bodies-20261103.json text eol=lf
+benchmarks/plans/hosted-combined-local-certificates-20261103.json text eol=lf
