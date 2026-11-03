@@ -15,6 +15,7 @@ from hosted_timing.verify import collect
 PLAN = REPO/'benchmarks/plans/hosted-stoch-compact-smoothing-20261103.json'
 
 class StochCompactTests(unittest.TestCase):
+    expected_totals = (30,6)
     def test_real_baseline_and_source_scope(self):
         verify_reference(read(PLAN))
 
@@ -36,13 +37,13 @@ class StochCompactTests(unittest.TestCase):
             with patch('hosted_timing.targeted.subprocess.check_output',return_value=raw):
                 with self.assertRaises(AssertionError): verify_reference(changed)
 
-    def test_complete_thirty_cases_and_both_shards_required(self):
+    def test_complete_scope_and_both_shards_required(self):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)
             with patch('hosted_timing.pipeline.PLAN',PLAN),patch('hosted_timing.verify.PLAN',PLAN),patch('test_hosted_timing.PLAN',PLAN):
                 test_hosted_timing.make_evidence(root,'targeted')
                 result=collect(root,'targeted')
-                self.assertEqual((30,6),(result['case_count'],result['decision_count']))
+                self.assertEqual(self.expected_totals,(result['case_count'],result['decision_count']))
                 self.assertTrue(result['accepted'])
                 (root/'shard1/provenance.json').unlink()
                 with self.assertRaises(AssertionError): collect(root,'targeted')

@@ -100,6 +100,16 @@ SCOPES['sum-directional-range'] = dict(
     totals=(30,6), baseline_phase='targeted', baseline_totals=(60,12))
 
 
+SCOPES['trend-star-compact-ranks'] = dict(
+    fixtures={'SharedTrendReversalBenchmarks': {
+        'Trady.Candlestick.'+name:name for name in ('MorningStar','EveningStar',
+            'MorningDojiStar','EveningDojiStar','MoringinDojiStar')}},
+    implicit_fixtures=set(),
+    paths={'src/Indicators/TrendStarPattern.cs',
+           'tests/ModelsTests/SharedTrendReversalTests.cs'},
+    totals=(150,30), baseline_phase='targeted', baseline_totals=(60,12))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
