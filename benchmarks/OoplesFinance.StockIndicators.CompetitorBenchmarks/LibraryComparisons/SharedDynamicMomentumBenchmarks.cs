@@ -6,7 +6,7 @@ using Trady.Analysis.Indicator;
 
 namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
-[MemoryDiagnoser, Config(typeof(TensorsGpuTimingConfig))]
+[MemoryDiagnoser, Config(typeof(SlowNativeTimingConfig))]
 public class SharedDynamicMomentumBenchmarks
 {
     [Params("Trady.Indicator.DynamicMomentumIndex")]

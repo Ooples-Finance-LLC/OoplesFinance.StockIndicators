@@ -5,7 +5,7 @@ using Trady.Analysis.Candlestick;
 
 namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
-[MemoryDiagnoser, Config(typeof(TensorsGpuTimingConfig))]
+[MemoryDiagnoser, Config(typeof(SlowNativeTimingConfig))]
 public class SharedTradyNativeCandleBenchmarks : SharedMappedBenchmarkBase
 {
     [Params("DarkCloudCover", "DragonifyDoji", "RisingThreeMethods", "FallingThreeMethods")]
