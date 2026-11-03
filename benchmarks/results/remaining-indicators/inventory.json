@@ -13779,7 +13779,7 @@
     "src/Indicators/SeededHilbertTrendline.cs": "e1b2a230aa66ac60d7d95a241eedd14aa0b375579e5865f973198f5e938b1e58",
     "src/Indicators/SeededOnBalanceVolume.cs": "34c58606afac1695ac32bdbe34e4cdb95dc21b6fce64065bce1685ec26c555fe",
     "src/Indicators/SeededPhaseAdaptiveAverage.cs": "f57fa3facc70ff5bd644ce1f8214396f73ef02c24aeb3979f872f5244bf2b7b5",
-    "src/Indicators/SeededPriceMomentum.cs": "2b5e4a3bca489d0ee9c816d246088bca884f3e4c5a37bb55b853955347e2d332",
+    "src/Indicators/SeededPriceMomentum.cs": "c0da20d2839faf83a5158d1b73499e24f1b266e6d37631a514577a7ba78261d8",
     "src/Indicators/SeededTrueStrength.cs": "4c20af8cee446bdd8f86c97833a1376e8de4f5f78ba33a701de40527ff641416",
     "src/Indicators/SequenceCandles.cs": "51d11329d068eba1cc5b02d815d15d2ec439be8a6192d76f503ed297c0453223",
     "src/Indicators/ShadowDojiCandles.cs": "1adc6a2049409623f9d0c5e69d03f47405343fd8414c14e36b3f841a34b43fe5",
