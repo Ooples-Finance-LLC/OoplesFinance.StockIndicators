@@ -13888,7 +13888,7 @@
     "src/Indicators/ValuesBarExecution.PriceCandle.cs": "2f8d3c781c605cb5928bb4cbdb916ed99d0fdd66b715612e79f8e1659f89a977",
     "src/Indicators/ValuesBarExecution.PriceProjection.cs": "e1cb31a0795c59229160d0dac09307ed1af8067e75c95548c930610500f49438",
     "src/Indicators/ValuesBarExecution.PriceRelative.cs": "f68a481de1292230da92b18249a274bde10415648690b1a1ff837937ec22873c",
-    "src/Indicators/ValuesBarExecution.QuarticAverage.cs": "bcd8f8053135e1ce2ff1d31549b36fe0650cf5c88cad740e871004fe8dc1951b",
+    "src/Indicators/ValuesBarExecution.QuarticAverage.cs": "1a506b4a099653cec6130ea1d7ad028f237d1e921a7cd79cf54e1c1da3480f89",
     "src/Indicators/ValuesBarExecution.QuasiNoise.cs": "8e8063dd954385dcb45246d9e5d9929a54ae78986471cce7920f1a52d2c73fd7",
     "src/Indicators/ValuesBarExecution.RangeIndicator.cs": "3cfb64c077a1a226604de84978feb8e77c2cc899daf7c30763089148be1cc222",
     "src/Indicators/ValuesBarExecution.RangeStatistics.cs": "5750db5fc02a859066364fc4332c1f2cf73148243674fbf2f8bec2db628519d1",
