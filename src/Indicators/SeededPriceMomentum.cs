@@ -76,10 +76,11 @@ public sealed class SeededPriceMomentum : MultiOutputIndicatorBase, IIndicatorVa
     {
         private long _index = -1;
         private double _previous;
-        private JurikDyadic _first,
+        private readonly CompactMacdValue.EmaRecurrence _signalRecurrence = new(signal);
+        private CompactMacdValue _first,
             _second,
-            _signal,
-            _firstSum,
+            _signal;
+        private JurikDyadic _firstSum,
             _secondSum,
             _signalSum;
         private bool _missing;
@@ -111,11 +112,21 @@ public sealed class SeededPriceMomentum : MultiOutputIndicatorBase, IIndicatorVa
             return R(previous, divisor);
         }
 
+        private static CompactMacdValue Advance(CompactMacdValue previous, CompactMacdValue current, int length)
+        {
+            if (length > 2) return previous.AdvanceFixedEma(current, 2, length);
+            // Smoothing one is nonconvex; smoothing two replaces the prior.
+            // Retain the existing exact expression for both boundary cases.
+            return CompactMacdValue.FromRounded(Smooth(previous.ToRoundedDyadic(),
+                current.ToRoundedDyadic(), length - 2, length));
+        }
+
         public void Reset()
         {
             _index = -1;
             _previous = 0;
-            _first = _second = _signal = _firstSum = _secondSum = _signalSum = default;
+            _first = _second = _signal = default;
+            _firstSum = _secondSum = _signalSum = default;
             _missing = false;
         }
 
@@ -143,12 +154,12 @@ public sealed class SeededPriceMomentum : MultiOutputIndicatorBase, IIndicatorVa
                 _firstSum.AddExact(roc);
                 if (_index < period)
                     return;
-                _first = R(_firstSum, period);
+                _first = CompactMacdValue.FromRounded(R(_firstSum, period));
                 _firstSum = default;
             }
             else
-                _first = Smooth(_first, roc, period - 2, period);
-            var scaled = _first;
+                _first = Advance(_first, CompactMacdValue.FromRounded(roc), period);
+            var scaled = _first.ToRoundedDyadic();
             scaled.Multiply(10);
             scaled = scaled.Rounded();
             var secondStart = (long)period + smooth - 1;
@@ -157,25 +168,25 @@ public sealed class SeededPriceMomentum : MultiOutputIndicatorBase, IIndicatorVa
                 _secondSum.AddExact(scaled);
                 if (_index < secondStart)
                     return;
-                _second = R(_secondSum, smooth);
+                _second = CompactMacdValue.FromRounded(R(_secondSum, smooth));
                 _secondSum = default;
             }
             else
-                _second = Smooth(_second, scaled, smooth - 2, smooth);
-            output[0] = _second.Mean(1);
+                _second = Advance(_second, CompactMacdValue.FromRounded(scaled), smooth);
+            output[0] = _second.Publish();
             output[2] = 1;
             var signalStart = secondStart + signal - 1;
             if (_index <= signalStart)
             {
-                _signalSum.AddExact(_second);
+                _signalSum.AddExact(_second.ToRoundedDyadic());
                 if (_index < signalStart)
                     return;
-                _signal = R(_signalSum, signal);
+                _signal = CompactMacdValue.FromRounded(R(_signalSum, signal));
                 _signalSum = default;
             }
             else
-                _signal = Smooth(_signal, _second, signal - 1, (long)signal + 1);
-            output[1] = _signal.Mean(1);
+                _signal = _signalRecurrence.Advance(_signal, _second);
+            output[1] = _signal.Publish();
             output[3] = 1;
         }
     }
