@@ -13,7 +13,9 @@ public sealed class SharedTrendReversalTests : IDisposable
     [Fact]
     public async Task EachPatternPreservesExactWindowsAndResetAcrossWideAndSubnormalBars()
     {
-        double[] points = [-double.MaxValue, -10, -1, -double.Epsilon, -0d, 0d, double.Epsilon, 1, 10, double.MaxValue];
+        double[] points = [-double.MaxValue, -10, -1, -double.Epsilon, -0d, 0d, double.Epsilon,
+            Math.ScaleB(1, -1022), Math.BitDecrement(1), 1, Math.BitIncrement(1),
+            Math.ScaleB(1, 53), 10, double.MaxValue];
         var bars = (from open in points from close in points select new Bar(default, open, double.MaxValue, -double.MaxValue, close, 1))
             .Concat(points.Select(v => new Bar(default, 0, double.Epsilon, 0, v, 1)))
             .Concat(Fixture(257)).ToArray();

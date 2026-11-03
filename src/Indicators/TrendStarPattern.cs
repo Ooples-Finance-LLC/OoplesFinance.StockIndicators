@@ -120,20 +120,18 @@ internal sealed class TrendStarState : IIndicatorState
             _morning ? CandleTrendKind.DownTrend : CandleTrendKind.UpTrend,
             options.TrendPeriod
         );
-        _bull = new PercentileCandleState(
+        _bull = new CompactBodyPercentileState(
             options.Period,
             options.LongPercentile,
-            CandleLengthKind.Body,
             true,
             1
         );
-        _bear = new PercentileCandleState(20, .75m, CandleLengthKind.Body, true, -1);
+        _bear = new CompactBodyPercentileState(20, .75m, true, -1);
         _small = _dojiKind
             ? (IIndicatorState)new DojiCandle(options.DojiFraction).CreateState()
-            : new PercentileCandleState(
+            : new CompactBodyPercentileState(
                 options.Period,
                 options.ShortPercentile,
-                CandleLengthKind.Body,
                 false,
                 0
             );
@@ -143,6 +141,54 @@ internal sealed class TrendStarState : IIndicatorState
             + (new BigInteger(unchecked((uint)bits[1])) << 32)
             + (new BigInteger(unchecked((uint)bits[2])) << 64);
         _toleranceDenominator = BigInteger.Pow(10, (bits[3] >> 16) & 255);
+    }
+
+    // These consumers only need exact body ordering, never a published body
+    // length. Preserve the original rank/eviction rules without wide grid sums.
+    private sealed class CompactBodyPercentileState : IIndicatorState
+    {
+        private readonly Queue<JurikDyadic> _window = new();
+        private readonly int _period, _rank, _direction;
+        private readonly bool _above;
+
+        internal CompactBodyPercentileState(int period, decimal percentile, bool above, int direction)
+        {
+            _period = period; _above = above; _direction = direction;
+            var bits = decimal.GetBits(percentile);
+            var numerator = new BigInteger(unchecked((uint)bits[0]))
+                + (new BigInteger(unchecked((uint)bits[1])) << 32)
+                + (new BigInteger(unchecked((uint)bits[2])) << 64);
+            var denominator = BigInteger.Pow(10, (bits[3] >> 16) & 255);
+            _rank = (int)((numerator * (period - 1) + denominator - 1) / denominator);
+        }
+
+        public void Reset() => _window.Clear();
+
+        public double Update(in Bar bar)
+        {
+            var current = JurikDyadic.FromDouble(Math.Max(bar.Open, bar.Close));
+            current.Subtract(JurikDyadic.FromDouble(Math.Min(bar.Open, bar.Close)));
+            bool ready = _window.Count >= _period - 1;
+            bool direction = !(_direction > 0 && bar.Close <= bar.Open || _direction < 0 && bar.Close >= bar.Open);
+            int atMost = 1;
+            if (ready && direction && _rank != 0)
+            {
+                bool skip = _window.Count == _period;
+                int remaining = _period - 1;
+                foreach (var previous in _window)
+                {
+                    if (skip) { skip = false; continue; }
+                    var difference = current; difference.Subtract(previous);
+                    if (difference.Sign >= 0) atMost++;
+                    remaining--;
+                    if (atMost > _rank || atMost + remaining <= _rank) break;
+                }
+            }
+            double result = ready && direction && (atMost > _rank) == _above ? 1 : 0;
+            if (_window.Count == _period) _window.Dequeue();
+            _window.Enqueue(current);
+            return result;
+        }
     }
 
     public void Reset()
