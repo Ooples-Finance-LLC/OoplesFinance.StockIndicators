@@ -61,6 +61,11 @@ SCOPES['tsi-compact-ema'] = dict(
     paths={'src/Indicators/SeededTrueStrength.cs', 'tests/ModelsTests/SeededTrueStrengthExecutionTests.cs'},
     totals=(30,6), baseline_phase='targeted', baseline_totals=(360,72))
 
+SCOPES['pmo-compact-ema'] = dict(
+    fixtures={'SharedSkenderEmaFamilyBenchmarks': {'Skender.GetPmo':'Skender.GetPmo'}},
+    paths={'src/Indicators/SeededPriceMomentum.cs', 'tests/ModelsTests/SeededPriceMomentumExecutionTests.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(30,6))
+
 
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
