@@ -51,12 +51,12 @@ internal static partial class ValuesBarExecution
         }
         else
         {
-            var total = new ExactMeanAccumulator();
+            var total = new CompactAccumulationSum();
             for (int i = 0; i < source.Length; i++)
             {
                 cancellation.ThrowIfCancellationRequested();
                 total.Add(output[1][i]);
-                output[2][i] = total.Mean(1);
+                output[2][i] = total.Publish();
             }
         }
         if (indicator.AveragePeriod is int period && period <= source.Length)

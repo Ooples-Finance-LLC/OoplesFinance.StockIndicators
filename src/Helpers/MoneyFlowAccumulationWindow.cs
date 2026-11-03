@@ -5,13 +5,13 @@ namespace OoplesFinance.StockIndicators.Helpers;
 
 internal sealed class MoneyFlowAccumulationWindow
 {
-    private ExactMeanAccumulator _total;
+    private CompactAccumulationSum _total;
     internal RocBankValue Next(double high, double low, double close, double volume, bool commit)
     {
         var flow = Flow(high, low, close, volume);
-        var total = _total; flow.AddTo(ref total);
+        var total = _total; total.Add(flow);
         if (commit) _total = total;
-        return RocBankValue.Round(total);
+        return total.Rounded();
     }
     internal static RocBankValue Flow(double high, double low, double close, double volume)
     {

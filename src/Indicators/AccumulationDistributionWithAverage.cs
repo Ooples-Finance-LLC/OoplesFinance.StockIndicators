@@ -100,13 +100,14 @@ public sealed class AccumulationDistributionWithAverage
     private sealed class State(int? averagePeriod) : IMultiOutputState
     {
         private readonly Queue<double> _window = new();
-        private ExactMeanAccumulator _total,
-            _sum;
+        private CompactAccumulationSum _total;
+        private ExactMeanAccumulator _sum;
 
         public void Reset()
         {
             _window.Clear();
-            _total = _sum = default;
+            _total = default;
+            _sum = default;
         }
 
         public void Update(in Bar bar, Span<double> output)
@@ -122,8 +123,8 @@ public sealed class AccumulationDistributionWithAverage
             output[0] = numerator.Ratio(denominator);
             var flow = MoneyFlowAccumulationWindow.Flow(bar.High, bar.Low, bar.Close, bar.Volume);
             output[1] = flow.Publish();
-            flow.AddTo(ref _total);
-            output[2] = _total.Mean(1);
+            _total.Add(flow);
+            output[2] = _total.Publish();
             if (averagePeriod is not int period || double.IsInfinity(output[2]))
                 return;
             if (_window.Count == period)

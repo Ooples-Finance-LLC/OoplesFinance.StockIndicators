@@ -66,7 +66,7 @@ public sealed class PriceAdjustedAccumulationDistribution
 
     internal sealed class State : IMultiOutputState
     {
-        private ExactMeanAccumulator _total;
+        private CompactAccumulationSum _total;
         private double _previous;
         private bool _started,
             _defined = true;
@@ -102,7 +102,7 @@ public sealed class PriceAdjustedAccumulationDistribution
                 numerator.AddProduct(bar.Close, bar.Volume);
                 numerator.AddProduct(_previous, bar.Volume, -1);
                 var flow = RocBankValue.Round(numerator, _previous);
-                flow.AddTo(ref _total);
+                _total.Add(flow);
             }
             else
             {
@@ -112,10 +112,10 @@ public sealed class PriceAdjustedAccumulationDistribution
                     bar.Close,
                     bar.Volume
                 );
-                flow.AddTo(ref _total);
+                _total.Add(flow);
             }
             _previous = bar.Close;
-            output[0] = _total.Mean(1);
+            output[0] = _total.Publish();
             output[1] = 1;
         }
     }
