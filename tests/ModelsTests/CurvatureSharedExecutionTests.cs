@@ -45,6 +45,16 @@ public sealed class CurvatureSharedExecutionTests
         await Check(bars, 20, period);
     }
 
+    [Theory]
+    [InlineData(20, 0)] [InlineData(20, -1000)] [InlineData(4096, 900)]
+    public async Task FullSignificandFirstSlopesRetainRoundingAcrossWideWindows(int period, int scale)
+    {
+        var random = new Random(8452);
+        var bars = Enumerable.Range(0, Math.Max(513, period * 2 + 1)).Select(i =>
+            new Bar(default, 0, 0, 0, Math.ScaleB(100 + random.NextDouble(), scale), 0)).ToArray();
+        await Check(bars, period, 20);
+    }
+
     [Fact]
     public async Task WideFallbackAndSubnormalRoundingSurviveWorkerReplay()
     {

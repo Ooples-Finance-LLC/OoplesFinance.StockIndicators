@@ -43,6 +43,8 @@ internal static partial class ValuesBarExecution
             if (chunks >= 2 && CanParallelize(count, 512)) locked = Monitor.TryEnter(ParallelBarGate);
             if (!locked) chunks = 1;
             bool compactFirst = TryNormalizeCurvatureInput(close, count, first.Period, cancellation, out int firstGrid);
+            bool wideFirst = !compactFirst && TryNormalizeCurvatureInput(close, count, first.Period,
+                cancellation, out firstGrid, wide: true);
             void First(int chunk)
             {
                 int start = (int)((long)count * chunk / chunks), end = (int)((long)count * (chunk + 1) / chunks);
@@ -60,6 +62,29 @@ internal static partial class ValuesBarExecution
                         }
                         int n = Math.Min(first.Period, i - origin + 1);
                         long value = (long)close[i];
+                        weighted += (n - 1L) * value;
+                        sum += value;
+                        if (i >= start) slopes[i] = n < 2 ? 0
+                            : RegressionGridRatio(6 * (2 * weighted - (n - 1L) * sum),
+                                (long)n * ((long)n * n - 1), firstGrid);
+                    }
+                }
+                else if (wideFirst)
+                {
+                    // The existing guard gives |input|<2^63 and P<=4096.
+                    // Sum, weighted sum and the final numerator stay below
+                    // 2^75, 2^87 and 2^92 respectively; no moments can overflow.
+                    Int128 sum = 0, weighted = 0;
+                    for (int i = origin; i < end; i++)
+                    {
+                        if (cancellation.IsCancellationRequested) return;
+                        if (i - origin >= first.Period)
+                        {
+                            sum -= (long)close[i - first.Period];
+                            weighted -= sum;
+                        }
+                        int n = Math.Min(first.Period, i - origin + 1);
+                        Int128 value = (long)close[i];
                         weighted += (n - 1L) * value;
                         sum += value;
                         if (i >= start) slopes[i] = n < 2 ? 0
