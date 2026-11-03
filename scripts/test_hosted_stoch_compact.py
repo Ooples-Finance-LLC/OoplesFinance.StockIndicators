@@ -21,7 +21,7 @@ class StochCompactTests(unittest.TestCase):
 
     def test_wrong_fixture_methods_or_pair_rejected(self):
         for key,value in [('fixture','SharedSmoothedStochasticBenchmarks'),
-                          ('implicit_pair',True),('methods',['BuilderFull','BuilderLatestOnly']),
+                          ('implicit_pair',not read(PLAN)['targeted_shards'][1]['tasks'][0].get('implicit_pair',False)),('methods',['BuilderFull','BuilderLatestOnly']),
                           ('operations',[dict(raw='Skender.GetSmi',pair='Skender.GetSmi')])]:
             plan=copy.deepcopy(read(PLAN))
             plan['targeted_shards'][1]['tasks'][0][key]=value
