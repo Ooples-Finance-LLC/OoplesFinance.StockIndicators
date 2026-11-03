@@ -34,10 +34,16 @@ public sealed class SumDirectionalExecutionTests
             double Value() => Math.ScaleB(random.NextDouble() - .5, random.Next(-1070, 1024));
             return new Bar(default, 0, Value(), Value(), Value(), 1);
         }).ToArray();
+        double[] boundaries = [0, -0d, double.Epsilon, -double.Epsilon,
+            Math.ScaleB(1, -1022), Math.BitDecrement(1), 1, Math.BitIncrement(1),
+            Math.ScaleB(1, 53), -Math.ScaleB(1, 53), double.MaxValue, -double.MaxValue];
+        var rangeBoundaries = Enumerable.Range(0, 12 * 12 * 12).Select(i =>
+            new Bar(default, 0, boundaries[i % 12], boundaries[i / 12 % 12],
+                boundaries[i / 144], 1)).ToArray();
         var state = (IMultiOutputState)new SumSeededDirectionalIndex(period).CreateState();
         var output = new double[10];
         foreach (var bars in new[] { ordinary, extreme.Concat(ordinary).ToArray(),
-            extreme.Reverse().Concat(ordinary).ToArray(), missedSeed, ties, varied, ordinary })
+            extreme.Reverse().Concat(ordinary).ToArray(), missedSeed, ties, varied, rangeBoundaries, ordinary })
         {
             var expected = SumDirectionalReference.Calculate(bars, period);
             state.Reset();
