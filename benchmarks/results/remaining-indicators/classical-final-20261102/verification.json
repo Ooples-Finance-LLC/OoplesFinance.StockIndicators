@@ -1,0 +1,33 @@
+{
+  "source": "714ade1cede9f8b35184505b57095431406b2c56",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0
+    },
+    "restore-comparator": {
+      "exit_code": 0
+    },
+    "build-and-gpu": {
+      "exit_code": 0
+    },
+    "unit": {
+      "exit_code": 0
+    },
+    "parity": {
+      "exit_code": 0
+    }
+  },
+  "active": null,
+  "unit_passed": 61,
+  "parity_passed": 61,
+  "status": "correctness-complete",
+  "gpu_passed": 100,
+  "source_fingerprint": "668205ef1ee58cc64b2788c09e52d119574f1a664f49ad21a1818d960a390d51",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "73e741f2ba5745979fcc4ac8a36801a21ce57f76ebc852325de9915ab38d9717",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "73e741f2ba5745979fcc4ac8a36801a21ce57f76ebc852325de9915ab38d9717",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "73e741f2ba5745979fcc4ac8a36801a21ce57f76ebc852325de9915ab38d9717",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "73e741f2ba5745979fcc4ac8a36801a21ce57f76ebc852325de9915ab38d9717"
+  },
+  "note": "Fresh focused correctness for current qualified source plus cached WMA/TRIMA normalization and dedicated fixture. Performance qualification pending."
+}
