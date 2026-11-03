@@ -6,11 +6,54 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 internal static partial class ValuesBarExecution
 {
+    internal static bool TryDeviationFilterSum(double a, double b, double c, double d,
+        double e, double f, out double result)
+    {
+        result = 0;
+        double p = a * b, q = c * d, r = e * f;
+        static bool Safe(double x, double y, double product)
+        {
+            double magnitude = Math.Abs(product);
+            return magnitude == 0 ? x == 0 || y == 0
+                : magnitude >= 3.4395525670743494E-136 && magnitude <= 2.9073548971824276E+135;
+        }
+        if (!Safe(a, b, p) || !Safe(c, d, q) || !Safe(e, f, r)) return false;
+        static double Error(double x, double y, double sum)
+        {
+            double virtualY = sum - x;
+            return (x - (sum - virtualY)) + (y - virtualY);
+        }
+        static void Add(double value, ref double tail, ref double bound)
+        {
+            double next = tail + value;
+            bound = Math.BitIncrement(bound + Math.Abs(Error(tail, value, next)));
+            tail = next;
+        }
+        // Product bounds 2^-450..2^450 keep FMA and TwoSum residuals normal
+        // or zero. Enclose every residual omitted by the tail additions.
+        double first = p + q, sum = first + r;
+        double tail = Math.FusedMultiplyAdd(a, b, -p), bound = 0;
+        Add(Math.FusedMultiplyAdd(c, d, -q), ref tail, ref bound);
+        Add(Math.FusedMultiplyAdd(e, f, -r), ref tail, ref bound);
+        Add(Error(p, q, first), ref tail, ref bound);
+        Add(Error(first, r, sum), ref tail, ref bound);
+        double rounded = sum + tail;
+        if (!double.IsFinite(rounded) || rounded == 0) return false;
+        double error = Error(sum, tail, rounded);
+        double lower = Math.BitDecrement(error - bound), upper = Math.BitIncrement(error + bound);
+        double below = (rounded - Math.BitDecrement(rounded)) * .5;
+        double above = (Math.BitIncrement(rounded) - rounded) * .5;
+        if (!(lower > -below && upper < above)) return false;
+        result = rounded;
+        return true;
+    }
+
     private sealed class DeviationAverageValueState : IIndicatorState
     {
         private readonly int _period;
         private readonly double _scale;
         private readonly JurikDyadic _c1, _c2, _c3;
+        private readonly double _halfGain, _feedback1, _feedback2;
         private readonly Square[] _window;
         private JurikDyadic _average, _zero, _filter, _olderFilter;
         private UInt128 _sum;
@@ -35,6 +78,7 @@ internal static partial class ValuesBarExecution
                 return JurikDyadic.FromBinaryProduct(integer, exponent);
             }
             _c1 = Coefficient(1 - b - c); _c2 = Coefficient(b); _c3 = Coefficient(c);
+            _halfGain = (1 - b - c) * .5; _feedback1 = b; _feedback2 = c;
         }
 
         public void Reset()
@@ -53,11 +97,20 @@ internal static partial class ValuesBarExecution
                 return bar.Close; // Preserve the original seed's signed zero.
             }
             var zero = price; zero.Subtract(_average); zero = zero.Rounded();
-            var filter = zero; filter.AddExact(_zero); filter.Multiply(_c1);
-            filter.ScaleByPowerOfTwo(-1);
-            var term = _filter; term.Multiply(_c2); filter.AddExact(term);
-            term = _olderFilter; term.Multiply(_c3); filter.AddExact(term);
-            filter = filter.Rounded(); // One rounding after all three terms.
+            JurikDyadic filter;
+            if (zero.TryDouble(out double current) && _zero.TryDouble(out double prior)
+                && HilbertRoundedKernel.TryExactSum(current, prior, out double drive)
+                && _filter.TryDouble(out double first) && _olderFilter.TryDouble(out double second)
+                && TryDeviationFilterSum(drive, _halfGain, first, _feedback1, second, _feedback2, out double certified))
+                filter = JurikDyadic.FromDouble(certified);
+            else
+            {
+                filter = zero; filter.AddExact(_zero); filter.Multiply(_c1);
+                filter.ScaleByPowerOfTwo(-1);
+                var term = _filter; term.Multiply(_c2); filter.AddExact(term);
+                term = _olderFilter; term.Multiply(_c3); filter.AddExact(term);
+                filter = filter.Rounded(); // One rounding after all three terms.
+            }
 
             Square square = FilterSquare(in filter);
             if (_seen == _window.Length)
