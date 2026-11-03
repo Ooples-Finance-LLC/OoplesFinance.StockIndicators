@@ -62,7 +62,19 @@ def verify_trx(path, classes):
     return dict(passed=len(results), classes=counts, sha256=digest(path))
 
 
+def phase_shards(plan, phase):
+    if phase == 'successor':
+        return range(8)
+    if phase == 'targeted':
+        return range(len(plan['targeted_shards']))
+    assert phase in ('variants', 'coverage')
+    return range(1)
+
+
 def phase_tasks(plan, phase, shard):
+    if phase == 'targeted':
+        assert plan.get('targeted_reference') and shard in phase_shards(plan, phase)
+        return copy.deepcopy(plan['targeted_shards'][shard]['tasks'])
     if phase == 'coverage':
         assert shard == 0 and plan.get('coverage_reference')
         from .coverage import tasks
@@ -93,10 +105,10 @@ def methods_for(task, index):
 
 
 def phase_labels(phase):
-    assert phase in ('successor', 'variants', 'coverage')
+    assert phase in ('successor', 'variants', 'coverage', 'targeted')
     if phase == 'coverage':
         return ('successor', 'successor')
-    return ('old', 'successor') if phase == 'successor' else ('successor', 'variants')
+    return ('old', 'successor') if phase in ('successor', 'targeted') else ('successor', 'variants')
 
 
 def phase_sources(plan, phase):
@@ -148,6 +160,8 @@ def _verify_input_contents(folder, plan, proof, plan_sha256):
     verify_baseline(plan)
     from .coverage import verify_reference
     verify_reference(plan)
+    from .targeted import verify_reference as verify_targeted_reference
+    verify_targeted_reference(plan)
     assert proof['plan_sha256'] == plan_sha256 and proof['sources'] == plan['sources']
     assert proof['sdk'] == plan['proposed_dotnet_sdk']
     assert manifest(folder/'common') == proof['common_manifest']
@@ -180,10 +194,17 @@ def prepare(out, reuse_from=None):
     verify_baseline(plan)
     from .coverage import verify_reference
     verify_reference(plan)
+    from .targeted import verify_reference as verify_targeted_reference
+    verify_targeted_reference(plan)
     suite = os.environ.get('HOSTED_TIMING_SUITE')
     if suite:
-        expected = ('qualified-coverage' if plan.get('coverage_reference') else
-                    'qualified-variants' if plan.get('standalone_variants') else 'qualified-rollout')
+        expected = 'qualified-rollout'
+        if plan.get('targeted_reference'):
+            expected = 'qualified-targeted'
+        elif plan.get('coverage_reference'):
+            expected = 'qualified-coverage'
+        elif plan.get('standalone_variants'):
+            expected = 'qualified-variants'
         assert suite == expected
     if plan.get('reuse_inputs'):
         assert reuse_from is not None, 'Download the pinned preparation first'
@@ -413,7 +434,7 @@ def main():
     parser.add_argument('--reuse-from',type=Path)
     parser.add_argument('--prepared',type=Path,default=Path('hosted-inputs'))
     parser.add_argument('--out',type=Path,required=True)
-    parser.add_argument('--phase',choices=['successor','variants','coverage'],default='successor')
+    parser.add_argument('--phase',choices=['successor','variants','coverage','targeted'],default='successor')
     parser.add_argument('--shard',type=int,default=0)
     parser.add_argument('--diagnostic', choices=['trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering', 'trix-library-warmup', 'trix-preflight'])
     args = parser.parse_args()
@@ -424,6 +445,8 @@ def main():
                 output.write('trix_preflight=' + str(read(PLAN).get('trix_preflight', False)).lower() + '\n')
                 output.write('standalone_variants=' + str(bool(read(PLAN).get('standalone_variants'))).lower() + '\n')
                 output.write('coverage_only=' + str(bool(read(PLAN).get('coverage_reference'))).lower() + '\n')
+                output.write('targeted_only=' + str(bool(read(PLAN).get('targeted_reference'))).lower() + '\n')
+                output.write('targeted_matrix=' + json.dumps(list(phase_shards(read(PLAN), 'targeted')) if read(PLAN).get('targeted_reference') else []) + '\n')
     elif args.mode == 'measure':
         measure(args.inputs.resolve(),args.out.resolve(),args.phase,args.shard,args.diagnostic)
     else:

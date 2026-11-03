@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 
-from hosted_timing.pipeline import PLAN, DLL, read, write, digest, phase_tasks, phase_labels, methods_for, phase_sources, original_gpu_source, trix_diagnostic_tasks, cpu_test_classes, trix_preflight_tasks, warmups_for, warmup_context
+from hosted_timing.pipeline import PLAN, DLL, read, write, digest, phase_shards, phase_tasks, phase_labels, methods_for, phase_sources, original_gpu_source, trix_diagnostic_tasks, cpu_test_classes, trix_preflight_tasks, warmups_for, warmup_context
 from hosted_timing.checkpoints import case_key, combine_reports
 from hosted_timing.verify import collect, collect_preflight, archived, check_log, sample
 
@@ -21,7 +21,7 @@ def make_evidence(folder, phase, new_mean=50, preflight=False):
         run_id='100', run_attempt='1', workflow_head='workflow')
     input_path = folder/'input.json'
     write(input_path, inputs)
-    for shard in range(1 if preflight else 8 if phase == 'successor' else 1):
+    for shard in ([0] if preflight else phase_shards(plan, phase)):
         root = folder/f'shard{shard}'
         raw_root = PureWindowsPath('D:/runner/raw')
         host = dict(run_id='100', run_attempt='1', machine='runner', runner_image='20261101', instance_nonce=f'vm{shard}')
