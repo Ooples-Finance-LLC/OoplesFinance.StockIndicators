@@ -46,6 +46,12 @@ SCOPES = {
 }
 
 
+SCOPES['ad-small-first'] = dict(
+    fixtures=SCOPES['ad-cumulative']['fixtures'],
+    paths=SCOPES['ad-cumulative']['paths'] | {'src/Helpers/ExactMeanAccumulator.cs'},
+    totals=(90,18))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
