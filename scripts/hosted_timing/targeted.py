@@ -27,6 +27,22 @@ SCOPES = {
                'src/Indicators/PriceAdjustedAccumulationDistribution.cs',
                'src/Indicators/ValuesBarExecution.AccumulationDistribution.cs',
                'tests/ModelsTests/CompactAccumulationSumTests.cs'}, totals=(90,18)),
+    'klinger-schaff': dict(fixtures={
+        'SharedKlingerBenchmarks': {'Skender.GetKvo':'Skender.GetKvo'},
+        'SharedSchaffCycleBenchmarks': {'Skender.GetStc':'Skender.GetStc'}},
+        paths={'src/Helpers/CompactMacdValue.cs', 'src/Indicators/EmaDifferenceSignal.cs',
+               'src/Indicators/KlingerVolumeWithSignal.cs', 'src/Indicators/SingleStochasticCycle.cs',
+               'tests/ModelsTests/CompactKlingerSchaffEmaTests.cs'}, totals=(60,12)),
+    'rolling-dispersion': dict(fixtures={
+        'SharedNativeDispersionBenchmarks': {p:p for p in ('QuanTAlib.Variance','QuanTAlib.Stddev',
+            'QuanTAlib.Zscore','Trady.Indicator.StandardDeviation')},
+        'SharedDispersionBenchmarks': {'TaLib.Functions.Var':'True','TaLib.Functions.StdDev':'False'},
+        'SharedDetailedDeviationBenchmarks': {'Skender.GetStdDev':'Skender.GetStdDev'},
+        'SharedClassicBandsBenchmarks': {'TaLib.Functions.Bbands':'TaLib.Functions.Bbands'},
+        'SharedDeviationBandsBenchmarks': {'Skender.GetBollingerBands':'Skender.GetBollingerBands'},
+        'SharedTradyBandsBenchmarks': {p:p for p in ('Trady.Indicator.BollingerBands','Trady.Indicator.BollingerBandWidth')}},
+        paths={'src/Indicators/WindowDispersion.cs','tests/ModelsTests/CompactDispersionMomentsTests.cs'},
+        totals=(330,66)),
 }
 
 
@@ -71,6 +87,7 @@ def verify_reference(plan):
                 'BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']
             assert task['methods'] == expected_methods
             assert bool(task.get('implicit_pair')) == (task['fixture'] == 'SharedTaHilbertTrendModeBenchmarks')
+            assert bool(task.get('variance_parameter')) == (task['fixture'] == 'SharedDispersionBenchmarks')
             category = 'batch' if batch else 'builder'
             for operation in task['operations']:
                 pair = operation['pair']

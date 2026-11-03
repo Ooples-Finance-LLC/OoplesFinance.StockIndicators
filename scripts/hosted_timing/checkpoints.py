@@ -9,7 +9,8 @@ def case_key(case, implicit_pair=None):
     name = case['FullName']
     operation = re.search(r'(?:Operation|PairId): "([^"]+)"', name)
     variant = re.search(r'Method: (Wma|Trima)(?:,|\))', name)
-    pair = operation[1] if operation else variant[1] if variant else implicit_pair
+    variance = re.search(r'Variance: (True|False)(?:,|\))', name)
+    pair = operation[1] if operation else variant[1] if variant else variance[1] if variance else implicit_pair
     assert pair is not None, name
     return (pair, int(re.search(r'(?:Count|Bars): (\d+)', name)[1]), case['Method'])
 
@@ -24,8 +25,17 @@ def combine_reports(reports, pairs, methods, implicit_pair=None):
     merged['Benchmarks'] = cases
     return merged
 
+
+def filters(fixture, pair, methods, *, implicit=False, variant=False, variance=False):
+    assert sum(map(bool, (implicit, variant, variance))) <= 1
+    if variance: assert fixture == 'SharedDispersionBenchmarks' and pair in ('True','False')
+    return [(f'*{fixture}.{method}*' if implicit else
+             f'*{fixture}.{method}*Method: {pair}*' if variant else
+             f'*{fixture}.{method}*Variance: {pair}*' if variance else
+             f'*{fixture}.{method}*"{pair}"*') for method in methods]
+
 def run_checkpointed(*, out, index, arm, fixture, pairs, methods, runtime, env,
-                    state, save, builds, assert_binaries, implicit=False, variant=False, context=None, warmups=10):
+                    state, save, builds, assert_binaries, implicit=False, variant=False, variance=False, context=None, warmups=10):
     assert warmups in (10, 1000)
     from .cleanup import capture_children, stop_owned_benchmark, archive_with_retry
     root = out / 'operation-checkpoints' / fixture / f'round{index}-{arm}'
@@ -80,9 +90,7 @@ def run_checkpointed(*, out, index, arm, fixture, pairs, methods, runtime, env,
             state.update(status='measuring', waiting_build_pids=[])
             save()
             args = ['dotnet', str(runtime / 'OoplesFinance.StockIndicators.CompetitorBenchmarks.dll'),
-                    '--filter', *[(f'*{fixture}.{method}*' if implicit else
-                                   f'*{fixture}.{method}*Method: {pair}*' if variant else
-                                   f'*{fixture}.{method}*"{pair}"*') for method in methods],
+                    '--filter', *filters(fixture,pair,methods,implicit=implicit,variant=variant,variance=variance),
                     '--warmupCount', str(warmups), '--iterationCount', '10', '--exporters', 'json',
                     '--artifacts', str(folder)]
             interrupted = []

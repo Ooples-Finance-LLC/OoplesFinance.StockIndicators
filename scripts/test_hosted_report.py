@@ -10,7 +10,7 @@ import unittest
 from unittest.mock import patch
 
 from test_hosted_timing import make_evidence
-from hosted_timing.pipeline import PLAN, read, write, phase_tasks
+from hosted_timing.pipeline import PLAN, REPO, read, write, phase_shards, phase_tasks
 from hosted_timing.report import stage
 from hosted_timing.archive import archive
 
@@ -36,10 +36,22 @@ class HostedReportTests(unittest.TestCase):
             self.assertEqual(gzip.decompress(archived_status.read_bytes()),(raw/'shard0/status.json').read_bytes())
 
     def test_sharded_provenance_and_unchanged_rows(self):
+        self.check_report('successor')
+
+    def test_targeted_report_preserves_other_pairs_and_supports_subsequent_updates(self):
+        self.check_report('targeted')
+
+    def check_report(self,phase):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp); raw=root/'raw'; raw.mkdir()
-            make_evidence(raw,'successor')
-            pairs={op['pair'] for shard in range(8) for t in phase_tasks(read(PLAN),'successor',shard)
+            selected=PLAN
+            if phase=='targeted':
+                selected=root/'plan.json';write(selected,read(REPO/'benchmarks/plans/hosted-hilbert-fir-20261102.json'))
+                for module in ('hosted_timing.pipeline','hosted_timing.verify','hosted_timing.report','test_hosted_timing'):
+                    self.enterContext(patch(module+'.PLAN',selected))
+                self.enterContext(patch('hosted_timing.targeted.verify_reference'))
+            make_evidence(raw,phase)
+            pairs={op['pair'] for shard in phase_shards(read(selected),phase) for t in phase_tasks(read(selected),phase,shard)
                    if t['fixture']=='LibraryPairBenchmarks' for op in t['operations']}
             data=dict(evidence=dict(sourceSha='old'),rows=[dict(pair=p,bars=n,source_sha='old',measurement_run_url='old-url',
                 competitor_over_ooples=1,raw={}) for p in sorted(pairs|{'unchanged'}) for n in (1000,10000)])
@@ -71,18 +83,23 @@ const detail=`${esc(r.raw.Ooples.host.ProcessorName)}`;
                  patch('hosted_timing.report.subprocess.run'),patch.dict('sys.modules',{'primary_baseline_report':primary}):
                 # Equivalent paths must work even when archived() canonicalizes
                 # short Windows names or parent-directory components.
-                candidate=stage(live,raw/'..'/'raw',repo,root/'staged')
+                candidate=stage(live,raw/'..'/'raw',repo,root/'staged',phase=phase)
+                if phase=='targeted':
+                    refreshed=root/'refreshed.html';refreshed.write_bytes(candidate.read_bytes())
+                    repeated=stage(refreshed,raw,repo,root/'repeated',phase=phase)
+                    self.assertEqual(repeated.read_text(encoding='utf-8').count("r.measurement_machine ? esc"),1)
             result=candidate.read_text(encoding='utf-8')
             def embedded(key): return json.loads(re.search(r'<script[^>]*id="'+key+r'"[^>]*>(.*?)</script>',result,re.S)[1])
             after=embedded('dataset')
             self.assertEqual([r for r in after['rows'] if r['pair']=='unchanged'],original)
             changed=[r for r in after['rows'] if r['pair']!='unchanged']
             self.assertEqual(len(changed),2*len(pairs))
-            self.assertGreater(len({r['measurement_shard'] for r in changed}),1)
+            self.assertGreater(len({r['measurement_shard'] for r in changed}),1 if phase=='successor' else 0)
             self.assertTrue(all(r['measurement_run_id']=='100' and r['measurement_host_nonce'] for r in changed))
             receipts=embedded('current-competitor-data')['receipts']
             self.assertEqual(receipts[0]['comparisons'],[untouched])
             self.assertTrue(all(c['measurement_machine']=='runner' for r in receipts[1:] for c in r['comparisons']))
+            self.assertGreater(len({c['measurement_shard'] for r in receipts[1:] for c in r['comparisons']}),1)
             self.assertIn('D.rows.flatMap',result)
             self.assertIn('absolute timings are compared only within the same runner',result)
             self.assertIn('<section id="ema-constructor-results"><p>Independent constructor measurements</p></section>',result)

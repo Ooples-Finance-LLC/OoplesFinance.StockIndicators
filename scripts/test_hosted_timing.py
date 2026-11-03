@@ -45,7 +45,8 @@ def make_evidence(folder, phase, new_mean=50, preflight=False):
                     cases = []
                     for bars in (1000, 10000):
                         for method in methods:
-                            parameter = f'Method: {pair}' if task.get('variant') else f'Operation: "{pair}"'
+                            parameter = (f'Method: {pair}' if task.get('variant') else
+                                f'Variance: {pair}' if task.get('variance_parameter') else f'Operation: "{pair}"')
                             name = f'{fixture}.{method}(Count: {bars}, {parameter})'
                             mean = 100 if arm == 'old' else new_mean
                             cases.append(dict(FullName=name, Method=method, Statistics=dict(N=10, OriginalValues=[mean]*10,

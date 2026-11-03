@@ -15,9 +15,10 @@ from .checkpoints import case_key
 from .verify import archived, collect
 
 
-def stage(live, raw, repo, out):
+def stage(live, raw, repo, out, phase='successor'):
+    assert phase in ('successor','targeted')
     live, raw, repo, out = (Path(p).resolve() for p in (live, raw, repo, out))
-    summary = collect(raw, 'successor')
+    summary = collect(raw, phase)
     assert summary['accepted'], 'Only the complete accepted successor can replace report rows'
     source = summary['sources']['new']
     head = subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip()
@@ -48,7 +49,7 @@ def stage(live, raw, repo, out):
         provenance = dict(measurement_location='GitHub-hosted Windows',measurement_machine=host['machine'],
             measurement_run_id=host['run_id'],measurement_run_attempt=host['run_attempt'],measurement_shard=shard,
             measurement_host_nonce=host['instance_nonce'],measurement_runner_image=host['runner_image'])
-        tasks = {t['fixture']:t for t in phase_tasks(read(PLAN),'successor',shard)}
+        tasks = {t['fixture']:t for t in phase_tasks(read(PLAN),phase,shard)}
         for record in state['rounds']:
             if record['index'] != 2: continue
             fixture=record['fixture']; task=tasks[fixture]
@@ -103,7 +104,7 @@ def stage(live, raw, repo, out):
         if row['bars']==1000:
             overrides.append(dict(pair=row['pair'],sourceSha=source,runUrl=link,reportSha256=sha,
                 round=2,selection='Chronologically final candidate round.',measurementLocation='GitHub-hosted Windows',**provenance))
-    unchanged=sum(a==b for a,b in zip(before['rows'],data['rows'],strict=True))
+    unchanged=sum(a['pair'] not in pairs and a==b for a,b in zip(before['rows'],data['rows'],strict=True))
     assert unchanged==len(data['rows'])-2*len(pairs)
     data['evidence'].setdefault('baseSourceSha',data['evidence']['sourceSha'])
     data['evidence']['sourceSha']=None
@@ -171,11 +172,13 @@ def stage(live, raw, repo, out):
     assert n==1
     # CSV uses the union because unchanged rows intentionally retain their original fields.
     old="Object.keys(D.rows[0]).filter(k=>k!=='raw')"
-    assert old in document
-    document=document.replace(old,"[...new Set(D.rows.flatMap(r=>Object.keys(r)))].filter(k=>k!=='raw')")
+    replacement="[...new Set(D.rows.flatMap(r=>Object.keys(r)))].filter(k=>k!=='raw')"
+    assert old in document or replacement in document
+    document=document.replace(old,replacement)
     old="${esc(r.raw.Ooples.host.ProcessorName)}"
     assert old in document
-    document=document.replace(old,"${r.measurement_machine ? esc(r.measurement_location+' / '+r.measurement_machine+' / shard '+r.measurement_shard+' / attempt '+r.measurement_run_attempt)+' · ' : ''}"+old)
+    replacement="${r.measurement_machine ? esc(r.measurement_location+' / '+r.measurement_machine+' / shard '+r.measurement_shard+' / attempt '+r.measurement_run_attempt)+' · ' : ''}"+old
+    if replacement not in document:document=document.replace(old,replacement)
     sys.path.insert(0,str(repo/'benchmarks'))
     from primary_baseline_report import replace_primary
     document=replace_primary(document,data)
