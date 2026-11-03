@@ -66,6 +66,12 @@ SCOPES['pmo-compact-ema'] = dict(
     paths={'src/Indicators/SeededPriceMomentum.cs', 'tests/ModelsTests/SeededPriceMomentumExecutionTests.cs'},
     totals=(30,6), baseline_phase='targeted', baseline_totals=(30,6))
 
+SCOPES['accbands-compact'] = dict(
+    fixtures={'SharedAccelerationBenchmarks': {'TaLib.Functions.Accbands':'TaLib.Functions.Accbands'}},
+    paths={'src/Indicators/ValuesBarExecution.Acceleration.cs',
+           'tests/ModelsTests/AccelerationSharedExecutionTests.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(30,6))
+
 
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
