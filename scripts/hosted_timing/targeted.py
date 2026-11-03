@@ -72,6 +72,9 @@ SCOPES['accbands-compact'] = dict(
            'tests/ModelsTests/AccelerationSharedExecutionTests.cs'},
     totals=(30,6), baseline_phase='targeted', baseline_totals=(30,6))
 
+SCOPES['accbands-packed'] = dict(SCOPES['accbands-compact'], fixtures={
+    'SharedTaWindowNativeBenchmarks': {'TaLib.Functions.Accbands':'TaLib.Functions.Accbands'}})
+
 
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
