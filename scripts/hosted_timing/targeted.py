@@ -1,4 +1,4 @@
-"""Bound Hilbert timing to its complete mapped consumers and an accepted baseline."""
+"""Bound each arithmetic batch to complete mapped consumers and an accepted baseline."""
 import hashlib
 import json
 import subprocess
@@ -14,12 +14,32 @@ FIXTURES = {
     'SharedHilbertTrendlineBenchmarks': {'Skender.GetHtTrendline'},
 }
 
+SCOPES = {
+    'hilbert-fir': dict(fixtures={f:{p:p for p in pairs} for f,pairs in FIXTURES.items()},
+        paths={'src/Helpers/HilbertRoundedKernel.cs', 'src/Indicators/HilbertPhaseState.cs',
+               'tests/ModelsTests/HilbertRoundedKernelTests.cs'}, totals=(300,60)),
+    'ad-cumulative': dict(fixtures={
+        'SharedRecursiveStateBenchmarks': {'TaLib.Functions.Ad':'Ad'},
+        'SharedAdlDetailsBenchmarks': {'Skender.GetAdl':'Skender.GetAdl'},
+        'SharedTradyNativeVolumeBenchmarks': {'Trady.Indicator.AccumulationDistributionLine':'AccumulationDistributionLine'}},
+        paths={'src/Helpers/CompactAccumulationSum.cs', 'src/Helpers/MoneyFlowAccumulationWindow.cs',
+               'src/Indicators/AccumulationDistributionWithAverage.cs',
+               'src/Indicators/PriceAdjustedAccumulationDistribution.cs',
+               'src/Indicators/ValuesBarExecution.AccumulationDistribution.cs',
+               'tests/ModelsTests/CompactAccumulationSumTests.cs'}, totals=(90,18)),
+}
+
+
+def expected_totals(plan):
+    return SCOPES[plan['targeted_reference']['scope']]['totals']
+
 
 def verify_reference(plan):
     reference = plan.get('targeted_reference')
     if reference is None:
         return
-    assert reference['scope'] == 'hilbert-fir'
+    scope = SCOPES[reference['scope']]
+    fixtures = scope['fixtures']
     assert not any(plan.get(k) for k in ('qualify_variants', 'standalone_variants', 'coverage_reference', 'trix_preflight'))
     assert plan['sources']['published'] == plan['sources']['old']
     raw = subprocess.check_output(['git', 'show', plan['sources']['published'] + ':' + reference['decision']], cwd=REPO)
@@ -35,19 +55,18 @@ def verify_reference(plan):
                    '--', 'src', 'tests', BENCH, TESTS)
     changed = set(git('diff', '--name-only', plan['sources']['old'], plan['sources']['successor'],
                       '--', 'src', 'tests').splitlines())
-    assert changed == {'src/Helpers/HilbertRoundedKernel.cs', 'src/Indicators/HilbertPhaseState.cs',
-                       'tests/ModelsTests/HilbertRoundedKernelTests.cs'}, changed
-    pairs = set().union(*FIXTURES.values())
+    assert changed == scope['paths'], changed
+    pairs = set().union(*(set(mapping) for mapping in fixtures.values()))
     seen = {'batch': set(), 'builder': set()}
     cases = decisions = 0
     assert len(plan['targeted_shards']) == 2
     for index, shard in enumerate(plan['targeted_shards']):
         assert shard['index'] == index
-        fixtures = [task['fixture'] for task in shard['tasks']]
-        assert fixtures and len(fixtures) == len(set(fixtures))
+        shard_fixtures = [task['fixture'] for task in shard['tasks']]
+        assert shard_fixtures and len(shard_fixtures) == len(set(shard_fixtures))
         for task in shard['tasks']:
             batch = task['fixture'] == 'LibraryPairBenchmarks'
-            allowed = pairs if batch else FIXTURES[task['fixture']]
+            allowed = {p:p for p in pairs} if batch else fixtures[task['fixture']]
             expected_methods = ['Ooples', 'Competitor'] if batch else [
                 'BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']
             assert task['methods'] == expected_methods
@@ -55,7 +74,7 @@ def verify_reference(plan):
             category = 'batch' if batch else 'builder'
             for operation in task['operations']:
                 pair = operation['pair']
-                assert operation['raw'] == pair and pair in allowed and pair not in seen[category]
+                assert pair in allowed and operation['raw'] == allowed[pair] and pair not in seen[category]
                 seen[category].add(pair)
             owned = len(set(task['methods']) & OWNED)
             expected_decisions = len(task['operations']) * 2 * owned
@@ -64,4 +83,4 @@ def verify_reference(plan):
             cases += expected_cases
             decisions += expected_decisions
     assert seen['batch'] == seen['builder'] == pairs
-    assert (cases, decisions) == (300, 60)
+    assert (cases, decisions) == scope['totals']

@@ -64,9 +64,10 @@ def _collect(folder, phase, *, preflight):
         verify_reference(plan)
     roots = sorted(p.parent for p in folder.glob('*/provenance.json'))
     if phase == 'targeted':
-        from .targeted import verify_reference
+        from .targeted import expected_totals, verify_reference
         assert plan.get('targeted_reference') and not preflight
         verify_reference(plan)
+        targeted_totals = expected_totals(plan)
     expected_shards = {0} if preflight else set(phase_shards(plan, phase))
     assert len(roots) == len(expected_shards)
     shards, nonces, input_hashes, run_ids = set(), set(), set(), set()
@@ -170,7 +171,7 @@ def _collect(folder, phase, *, preflight):
             candidates[fixture].extend(dict(**row, provenance=provenance) for row in rounds[fixture, 2].values())
     assert shards == expected_shards and len(input_hashes) == len(run_ids) == 1
     expected_cases, expected_decisions = ((48, 12) if preflight else (1860, 372) if phase == 'successor'
-                                          else (300, 60) if phase == 'targeted'
+                                          else targeted_totals if phase == 'targeted'
                                           else (40, 8) if phase == 'coverage' else (32, 8))
     assert case_count == expected_cases and len(decisions) == expected_decisions
     assert len({(d['pair'], d['bars'], d['method']) for d in decisions}) == expected_decisions

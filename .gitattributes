@@ -74,3 +74,4 @@ benchmarks/plans/hosted-classical-final-20261102.json text eol=lf
 benchmarks/plans/hosted-builder-coverage-20261102.json text eol=lf
 benchmarks/plans/hosted-hilbert-fir-20261102.json text eol=lf
 benchmarks/plans/hosted-builder-coverage-repair-20261103.json text eol=lf
+benchmarks/plans/hosted-ad-cumulative-20261103.json text eol=lf
