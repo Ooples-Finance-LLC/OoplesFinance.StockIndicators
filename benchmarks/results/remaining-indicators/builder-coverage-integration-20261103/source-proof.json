@@ -1,0 +1,72 @@
+{
+  "run_id": "41570664146",
+  "tooling_head": "0a3eaf6db2059912c40b081162b935f3f8ff6554",
+  "plan_sha256": "a04bc7f8dce3df23c691b2a497a21a9d9dd7138c5b39360b566d1e533c80aeee",
+  "coverage_complete": true,
+  "source_qualification_claimed": false,
+  "production_source_changed_by_coverage": false,
+  "cases": 40,
+  "control_decisions": 8,
+  "control_verdicts": {
+    "inconclusive": 8
+  },
+  "local_summary_matches_hosted": true,
+  "native_invocation_count": 1,
+  "builder_invocations": "adaptive",
+  "warmups": 10,
+  "measured_iterations": 10,
+  "outer_operation_watchdog_seconds": 10800,
+  "native_execution_deadline_minutes": 120,
+  "baseline_rows_preserved": 802,
+  "builder_slots_preserved": 1536,
+  "builder_slots_added": 8,
+  "applicable_slots": 1544,
+  "pending_slots": 0,
+  "not_applicable_slots": 60,
+  "report_sha256": "4d38b2d12928fe5f6be53c012f5ca499352c71ec5edf9e1f5d655f50ba145cb5",
+  "report_imported": true,
+  "browser_all_values_csv_provenance_and_policy_verified": true,
+  "javascript_errors": [],
+  "report_archives": {
+    "added-builder-comparisons.png": {
+      "sha256": "f2d3883f4ab9f91be82900ae5f570b94d518d0d598ba3cab2cb129cdc07e2e08",
+      "archive": "benchmarks/results/remaining-indicators/builder-coverage-integration-20261103/added-builder-comparisons.png"
+    },
+    "before.html": {
+      "sha256": "7f241df516aad001571aed1279760f271f2209f5cb551b307c7a591b7caf3f53",
+      "archive": "benchmarks/results/remaining-indicators/builder-coverage-integration-20261103/before.html.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "224dc048090ea4ab76d94516b66d204bb1d77a3a00442e184a48ba15e83cf9a2",
+      "archive": "benchmarks/results/remaining-indicators/builder-coverage-integration-20261103/browser-verification.json.gz"
+    },
+    "candidate.html": {
+      "sha256": "4d38b2d12928fe5f6be53c012f5ca499352c71ec5edf9e1f5d655f50ba145cb5",
+      "archive": "benchmarks/results/remaining-indicators/builder-coverage-integration-20261103/candidate.html.gz"
+    },
+    "integration.json": {
+      "sha256": "81bee4e1401950d1e0fad34608e584ef9036b22e42fbdd71c8462e7b998c6c46",
+      "archive": "benchmarks/results/remaining-indicators/builder-coverage-integration-20261103/integration.json.gz"
+    },
+    "staged.json": {
+      "sha256": "2c3487c2060153423f5f32066c53ee46f48617c1ba5ef18aa0fa137222fe3182",
+      "archive": "benchmarks/results/remaining-indicators/builder-coverage-integration-20261103/staged.json.gz"
+    },
+    "verified-baseline.csv": {
+      "sha256": "8f28938775ca7f43f9887ca96a90ce438e88eee68f15c2d76468fe7024fe8f02",
+      "archive": "benchmarks/results/remaining-indicators/builder-coverage-integration-20261103/verified-baseline.csv.gz"
+    },
+    "stage-builder-coverage-report-20261102.py": {
+      "sha256": "c34c1acbb4eb45173e9d03483440b60714386a917fdc7b1b892ea095d1ff36c5",
+      "archive": "benchmarks/results/remaining-indicators/builder-coverage-integration-20261103/stage-builder-coverage-report-20261102.py.gz"
+    },
+    "verify-builder-coverage-report-20261102.py": {
+      "sha256": "840e60d399cba8f8056243f0ff250f287e80fe8e70f13fb168e863fe82ca552e",
+      "archive": "benchmarks/results/remaining-indicators/builder-coverage-integration-20261103/verify-builder-coverage-report-20261102.py.gz"
+    },
+    "import-builder-coverage-report-20261103.py": {
+      "sha256": "7d6917861b465ce3c7c536216f6aeb64483b038d497fa685139cf38f098eaf06",
+      "archive": "benchmarks/results/remaining-indicators/builder-coverage-integration-20261103/import-builder-coverage-report-20261103.py.gz"
+    }
+  }
+}
