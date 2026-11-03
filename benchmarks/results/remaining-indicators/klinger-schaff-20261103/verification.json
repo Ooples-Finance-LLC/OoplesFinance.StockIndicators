@@ -1,0 +1,53 @@
+{
+  "source": "c8d70aa049ea4d028384d2968a45e2617c6183b0",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-klinger-schaff-20261103",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0
+    },
+    "restore-comparator": {
+      "exit_code": 0
+    },
+    "build-and-gpu": {
+      "exit_code": 0
+    },
+    "unit": {
+      "exit_code": 0
+    },
+    "parity": {
+      "exit_code": 0
+    }
+  },
+  "compiler_process_isolation": true,
+  "active": null,
+  "unit": {
+    "passed": 20,
+    "classes": {
+      "CompactKlingerSchaffEmaTests": 2,
+      "KlingerVolumeWithSignalBuilderTests": 8,
+      "SingleStochasticCycleBuilderTests": 10
+    },
+    "sha256": "579944e0e3212d31275a02c3ce3e2bf11887c213079dd7c1b0f65ebc722e6905"
+  },
+  "parity": {
+    "passed": 39,
+    "classes": {
+      "KlingerComparisonTests": 5,
+      "SchaffCycleComparisonTests": 5,
+      "SharedKlingerBenchmarkTests": 10,
+      "SharedSchaffCycleBenchmarkTests": 11,
+      "RemainingSchaffPairBenchmarkTests": 8
+    },
+    "sha256": "ed24ca45e12c8fa816f3df87d74915a16a51a64ccc68a66021ddd123605f663d"
+  },
+  "status": "correctness-complete",
+  "gpu_passed": 100,
+  "source_fingerprint": "a51f26eb5469e5e493a855743990f280c5fdc355c7a7ef92026256636f004da2",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "806fa6ff2755ed2f7775889792a06d95636f235d778f96a02dee7c2995da48c5",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "806fa6ff2755ed2f7775889792a06d95636f235d778f96a02dee7c2995da48c5",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "806fa6ff2755ed2f7775889792a06d95636f235d778f96a02dee7c2995da48c5",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "806fa6ff2755ed2f7775889792a06d95636f235d778f96a02dee7c2995da48c5"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}
