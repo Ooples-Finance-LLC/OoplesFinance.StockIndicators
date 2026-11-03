@@ -66,6 +66,13 @@ SCOPES['pmo-compact-ema'] = dict(
     paths={'src/Indicators/SeededPriceMomentum.cs', 'tests/ModelsTests/SeededPriceMomentumExecutionTests.cs'},
     totals=(30,6), baseline_phase='targeted', baseline_totals=(30,6))
 
+SCOPES['dsma-filter-interval'] = dict(
+    fixtures={'SharedDeviationAverageBenchmarks': {'QuanTAlib.Dsma':'QuanTAlib.Dsma'}},
+    implicit_fixtures={'SharedDeviationAverageBenchmarks'},
+    paths={'src/Indicators/ValuesBarExecution.DeviationAverage.cs',
+           'tests/ModelsTests/DeviationAverageSharedExecutionTests.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(30,6))
+
 
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
@@ -109,7 +116,8 @@ def verify_reference(plan):
             expected_methods = ['Ooples', 'Competitor'] if batch else [
                 'BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']
             assert task['methods'] == expected_methods
-            assert bool(task.get('implicit_pair')) == (task['fixture'] == 'SharedTaHilbertTrendModeBenchmarks')
+            assert bool(task.get('implicit_pair')) == (task['fixture'] in scope.get(
+                'implicit_fixtures', {'SharedTaHilbertTrendModeBenchmarks'}))
             assert bool(task.get('variance_parameter')) == (task['fixture'] == 'SharedDispersionBenchmarks')
             category = 'batch' if batch else 'builder'
             for operation in task['operations']:
