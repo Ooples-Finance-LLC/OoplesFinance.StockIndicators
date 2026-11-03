@@ -147,7 +147,7 @@ internal sealed class AverageRangeDojiState(int period, int warmup, AverageRange
 #if !NETFRAMEWORK
         // Store one exact range when certified; otherwise retain both original
         // addends, including overflow and differences below the rounding grid.
-        if (Binary64ArithmeticCertificate.TryDifference(rangeUpper, rangeLower, out double range))
+        if (rangeLower != 0 && Binary64ArithmeticCertificate.TryDifference(rangeUpper, rangeLower, out double range))
         { rangeUpper = range; rangeLower = 0; }
 #endif
         _ranges.Enqueue((rangeUpper, rangeLower));
