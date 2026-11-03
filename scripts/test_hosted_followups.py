@@ -24,14 +24,14 @@ def plan_for(scope):
     fixtures = SCOPES[scope]['fixtures']
     pairs = set().union(*(set(mapping) for mapping in fixtures.values()))
     selected = [('LibraryPairBenchmarks',{p:p for p in sorted(pairs)}),*fixtures.items()]
-    shards = [dict(index=i,tasks=[]) for i in range(2)]
+    shards = [dict(index=i,tasks=[]) for i in range(SCOPES[scope].get('shards',2))]
     for index,(fixture,mapping) in enumerate(selected):
         batch = fixture == 'LibraryPairBenchmarks';owned = 1 if batch else 2
         methods = ['Ooples','Competitor'] if batch else ['BuilderFull','BuilderLatestOnly','NativeSingle','NativeParallel']
         task = dict(fixture=fixture,operations=[dict(pair=p,raw=r) for p,r in mapping.items()],
-            methods=methods,implicit_pair=False,cases=len(mapping)*2*(3*owned+len(methods)),decisions=len(mapping)*2*owned)
+            methods=methods,implicit_pair=fixture == 'SharedTaHilbertTrendModeBenchmarks',cases=len(mapping)*2*(3*owned+len(methods)),decisions=len(mapping)*2*owned)
         if fixture == 'SharedDispersionBenchmarks':task['variance_parameter']=True
-        shards[index%2]['tasks'].append(task)
+        shards[index%len(shards)]['tasks'].append(task)
     plan['targeted_shards']=shards
     return plan
 
@@ -49,7 +49,7 @@ class FollowupScopeTests(unittest.TestCase):
             verify_reference(plan)
 
     def test_complete_scopes_and_evidence(self):
-        for scope in ('klinger-schaff','rolling-dispersion'):
+        for scope in ('klinger-schaff','rolling-dispersion','combined-hilbert-klinger'):
             with self.subTest(scope=scope), tempfile.TemporaryDirectory() as temp:
                 plan = plan_for(scope);self.verify(plan)
                 root=Path(temp);path=root/'plan.json';write(path,plan)

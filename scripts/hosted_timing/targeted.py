@@ -51,6 +51,11 @@ SCOPES['ad-small-first'] = dict(
     paths=SCOPES['ad-cumulative']['paths'] | {'src/Helpers/ExactMeanAccumulator.cs'},
     totals=(90,18))
 
+SCOPES['combined-hilbert-klinger'] = dict(
+    fixtures={**SCOPES['hilbert-fir']['fixtures'], **SCOPES['klinger-schaff']['fixtures']},
+    paths=SCOPES['hilbert-fir']['paths'] | SCOPES['klinger-schaff']['paths'],
+    totals=(360,72), shards=6)
+
 
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
@@ -81,7 +86,7 @@ def verify_reference(plan):
     pairs = set().union(*(set(mapping) for mapping in fixtures.values()))
     seen = {'batch': set(), 'builder': set()}
     cases = decisions = 0
-    assert len(plan['targeted_shards']) == 2
+    assert len(plan['targeted_shards']) == scope.get('shards',2)
     for index, shard in enumerate(plan['targeted_shards']):
         assert shard['index'] == index
         shard_fixtures = [task['fixture'] for task in shard['tasks']]
