@@ -7,6 +7,40 @@ public sealed class SeededTrueStrengthExecutionTests
 {
     [Theory]
     [InlineData(1, 1, 0)]
+    [InlineData(2, 1, 3)]
+    [InlineData(7, 3, 5)]
+    [InlineData(2047, 2, 3)]
+    [InlineData(2048, 2, 3)]
+    public void RecurrenceBoundariesAndMixedExponentsPreserveIndependentReferenceBits(int period, int smooth, int signal)
+    {
+        int count = period + smooth + signal + 81;
+        var random = new Random(71103);
+        var ordinary = Enumerable.Range(0, count).Select(i => 100 + (i * 37 % 193) / 32d);
+        var mixed = Enumerable.Range(0, count).Select(i => i % 17 == 0
+            ? (i % 2 == 0 ? double.MaxValue : -double.MaxValue)
+            : Math.ScaleB(random.NextDouble() * 2 - 1, random.Next(-1074, 1024)));
+        var state = (IMultiOutputState)new SeededTrueStrength(period, smooth, signal).CreateState();
+        var output = new double[4];
+        foreach (var prices in new[] { ordinary, mixed })
+        {
+            var bars = prices.Select(v => new Bar(default, v, v, v, v, 0)).ToArray();
+            var expected = SeededMomentumReference.Tsi(bars, period, smooth, signal);
+            state.Reset();
+            for (int i = 0; i < bars.Length; i++)
+            {
+                state.Update(in bars[i], output);
+                for (int slot = 0; slot < 2; slot++)
+                {
+                    Assert.Equal(expected[slot][i].HasValue ? 1d : 0d, output[slot + 2]);
+                    Assert.Equal(BitConverter.DoubleToInt64Bits(expected[slot][i] ?? 0),
+                        BitConverter.DoubleToInt64Bits(output[slot]));
+                }
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(1, 1, 0)]
     [InlineData(1, 1, 1)]
     [InlineData(2, 1, 3)]
     [InlineData(2, 2, 2)]
