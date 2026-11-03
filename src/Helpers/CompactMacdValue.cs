@@ -59,6 +59,18 @@ internal readonly struct CompactMacdValue
         }
     }
     internal BigInteger Units => Coefficient << _scale;
+    // These adapters receive already-rounded stages. Ordinary stages remain
+    // binary64; extended exponents retain their exact integer-grid units.
+    internal static CompactMacdValue FromRounded(JurikDyadic value)
+    {
+        double ordinary = value.Mean(1);
+        return FrameworkCompatibility.IsFinite(ordinary) ? Of(ordinary) : FromUnits(value.RoundedUnits());
+    }
+    internal JurikDyadic ToRoundedDyadic()
+    {
+        double ordinary = Publish();
+        return FrameworkCompatibility.IsFinite(ordinary) ? JurikDyadic.FromDouble(ordinary) : JurikDyadic.FromUnits(Units);
+    }
     internal static CompactMacdValue Of(double value)
     {
         long bits = BitConverter.DoubleToInt64Bits(value);
