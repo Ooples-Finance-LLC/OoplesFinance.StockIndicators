@@ -15,5 +15,59 @@
   "inventory_regenerated": true,
   "inventory_check_passed": true,
   "inventory_tests_passed": 8,
-  "report_imported": false
+  "report_imported": true,
+  "report_sha256": "3fe43a871b194fe1267e7f4cfc63b14e5694d22723d4fd19d5e6f30c19ae4537",
+  "report_tooling_commit": "ab1151aeedd096f2b4e19904054c7fee9dec2877",
+  "baseline_rows_updated": 20,
+  "baseline_rows_preserved": 782,
+  "builder_slots_updated": 40,
+  "builder_slots_preserved": 1496,
+  "browser_all802_and_csv_verified": true,
+  "javascript_errors": [],
+  "report_archives": {
+    "before.html": {
+      "sha256": "613c05fa8708aada1e43e6ae32eeedc933e8080a2824d58c8421de8eaa6dd7c2",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-fir-integration-20261103/before.html.gz"
+    },
+    "candidate.html": {
+      "sha256": "3fe43a871b194fe1267e7f4cfc63b14e5694d22723d4fd19d5e6f30c19ae4537",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-fir-integration-20261103/candidate.html.gz"
+    },
+    "measurement.json": {
+      "sha256": "94577a7ea2733031711256fb4d9dedf8490007bf8c167eec64b96205965c2172",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-fir-integration-20261103/measurement.json.gz"
+    },
+    "staged.json": {
+      "sha256": "9616fe69bb12e61cbf7ece5fde5a46f7eb2bd4871b65ff8916031c973c79630e",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-fir-integration-20261103/staged.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "81aa7c576757a4ca6a68c41a841a8995c45344fe011f4e68ccd6f9494086265c",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-fir-integration-20261103/browser-verification.json.gz"
+    },
+    "imported.json": {
+      "sha256": "85cf11856b864010a764f0172797d9d10ec796017608e05ab750f4206b978607",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-fir-integration-20261103/imported.json.gz"
+    },
+    "verify-hosted-certified-report-20261101.py": {
+      "sha256": "f1112bb2e981aa1fa68e0a41e917e423bcd8fd0856a40df97ccd6567986a7cda",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-fir-integration-20261103/verify-hosted-certified-report-20261101.py.gz"
+    },
+    "import-hosted-certified-report-20261101.py": {
+      "sha256": "380745f04a0b07f71a33dd049bdf1f3392ff9a388f5cda9849c0ae3bda66be75",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-fir-integration-20261103/import-hosted-certified-report-20261101.py.gz"
+    },
+    "report.py": {
+      "sha256": "ec5151d32284558921f0d3aee547f9b18e5599acd5e506f1348946adf7a29853",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-fir-integration-20261103/report.py.gz"
+    },
+    "refreshed-baseline.png": {
+      "sha256": "7dc2156d9ee9ad580c6c7e4951a5340238f1734df1baeabca18cc23ed345230f",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-fir-integration-20261103/refreshed-baseline.png"
+    },
+    "updated-pair-details.png": {
+      "sha256": "24f9eb9f7f8a9fc25bae30566c53cb081aab33236c54f613fd2c0a5caabec4b3",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-fir-integration-20261103/updated-pair-details.png"
+    }
+  }
 }
