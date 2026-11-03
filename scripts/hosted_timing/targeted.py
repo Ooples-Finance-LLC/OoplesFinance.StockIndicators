@@ -134,6 +134,12 @@ for name, members, shards in (
         shards=shards, baseline_phase='targeted', baseline_totals=(30,6))
 
 
+SCOPES['stoch-cached-dyadics'] = dict(
+    fixtures={'SharedSkenderStochasticBenchmarks': {'Skender.GetStoch':'Skender.GetStoch'}},
+    paths={'src/Indicators/ValuesBarExecution.SmoothedStochastic.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(180,36))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
