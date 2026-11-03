@@ -84,6 +84,14 @@ SCOPES['combined-compact-kernels'] = dict(
     totals=(60,12), baseline_phase='targeted', baseline_totals=(60,12))
 
 
+SCOPES['stoch-compact-smoothing'] = dict(
+    fixtures={'SharedSkenderStochasticBenchmarks': {'Skender.GetStoch':'Skender.GetStoch'}},
+    implicit_fixtures=set(),
+    paths={'src/Indicators/ValuesBarExecution.SmoothedStochastic.cs',
+           'tests/ModelsTests/SmoothedStochasticSharedExecutionTests.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(60,12))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
