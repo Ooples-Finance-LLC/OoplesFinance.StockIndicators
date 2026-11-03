@@ -3236,6 +3236,7 @@
     }
   },
   "production_integrated": true,
-  "report_imported": false,
-  "note": "Final combined Hilbert FIR and Klinger/Schaff qualification accepted:70 faster,2 inconclusive,zero slower. Published source/tests exactly match measured f556860be. Rejected A/D and dispersion source excluded."
+  "report_imported": true,
+  "note": "Final combined Hilbert FIR and Klinger/Schaff qualification accepted:70 faster,2 inconclusive,zero slower. Published source/tests exactly match measured f556860be. Rejected A/D and dispersion source excluded.",
+  "integration_source_commit": "37347c8b7b32a523eb904a4e29578fbb9c1475f3"
 }
