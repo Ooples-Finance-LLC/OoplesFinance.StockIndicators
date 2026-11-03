@@ -13969,7 +13969,7 @@
     "src/Indicators/WindowPairStatistics.cs": "58cbd466a7a2ec2100ffabf884069a1fc7c81449f83c7ad7675b890374babded",
     "src/Indicators/WindowPathRatio.cs": "79c779c04baa8ccb8c7eeef5f003b5c630e8a183dccb82330ee3bd6bf561bf85",
     "src/Indicators/WindowRegressionStatistics.cs": "6d7de932dfe9bb1dad3a2aecd57eabbfdb608dbef43de199cb8bbf2bcdfb1abd",
-    "src/Indicators/WindowReturnBeta.cs": "a313dd66181c9f9c4fc583241d0292951d6f3f916d699833b15d63a31c0c0e7d",
+    "src/Indicators/WindowReturnBeta.cs": "95930101d1b6190040d398fcf902eac41713613742fc14be5da1a3560d0013ac",
     "src/Indicators/WindowSampleShape.cs": "cd1d7748b036b3bc5a2fcbec566a062866af9e0dc4ad4c5604be0362f9cdf246",
     "src/Indicators/WindowStochasticKdj.cs": "2386739da2a084a219fcc7bac70d049cd68a689e8c8e00fbd1a542c85c32609b",
     "src/Indicators/WindowStochasticMomentum.cs": "9030c11da13f095890fda4ca42b31356a865ad444257a6b90ebb352c0b047b5e",
