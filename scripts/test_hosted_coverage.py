@@ -19,6 +19,8 @@ class CoverageEvidenceTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         self.plan = read(PLAN)
+        self.plan.pop('coverage_shards', None)
+        self.plan.pop('coverage_harness', None)
         self.plan.pop('standalone_variants', None)
         self.plan['coverage_reference'] = {'published': 'baseline'}
         self.plan['qualify_variants'] = self.plan['trix_preflight'] = False

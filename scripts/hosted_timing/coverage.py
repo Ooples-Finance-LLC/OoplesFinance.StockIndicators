@@ -6,6 +6,15 @@ import subprocess
 from .pipeline import BENCH, REPO, TESTS, git
 
 
+def harness_additions(plan):
+    additions = {BENCH + '/LibraryComparisons/SharedClassicalWindowVariantBenchmarks.cs',
+                 TESTS + '/SharedClassicalWindowVariantBenchmarkTests.cs'}
+    if plan.get('coverage_harness'):
+        additions.update(BENCH + '/LibraryComparisons/' + name for name in (
+            'SlowNativeTimingConfig.cs', 'SharedDynamicMomentumBenchmarks.cs', 'SharedTradyNativeCandleBenchmarks.cs'))
+    return additions
+
+
 def tasks():
     methods = ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']
     return [dict(fixture=fixture, group=0, operations=[dict(raw=raw, pair=pair)],
@@ -20,9 +29,11 @@ def tasks():
 def verify_reference(plan):
     reference = plan.get('coverage_reference')
     if reference is None:
+        assert not plan.get('coverage_harness')
         return
     assert not plan.get('qualify_variants') and not plan.get('standalone_variants')
     assert not plan.get('trix_preflight')
+    assert plan.get('coverage_shards', 1) in (1, 2)
     raw = subprocess.check_output(['git', 'show', reference['published'] + ':' + reference['decision']], cwd=REPO)
     assert hashlib.sha256(raw).hexdigest() == reference['sha256']
     decision = json.loads(raw)
@@ -33,3 +44,20 @@ def verify_reference(plan):
     assert decision['sources']['new'] == plan['sources']['successor']
     assert not git('diff', '--name-only', plan['sources']['successor'],
                    reference['published'], '--', 'src', 'tests', BENCH, TESTS)
+    harness = plan.get('coverage_harness')
+    if harness:
+        assert not plan.get('reuse_inputs')
+        assert plan['coverage_shards'] == 2
+        assert plan['matrix'] == dict(shards=2, max_parallel=2, timeout_minutes_per_shard=240)
+        assert harness['execution_timeout_minutes'] == 120
+        assert not git('diff', '--name-only', harness['baseline'], plan['sources']['variants'], '--', 'src', 'tests', TESTS)
+        names = ('SharedDynamicMomentumBenchmarks.cs', 'SharedTradyNativeCandleBenchmarks.cs')
+        expected = {BENCH + '/LibraryComparisons/' + name for name in (*names, 'SlowNativeTimingConfig.cs')}
+        assert set(git('diff', '--name-only', harness['baseline'], plan['sources']['variants'], '--', BENCH).splitlines()) == expected
+        for name in names:
+            path = BENCH + '/LibraryComparisons/' + name
+            before = git('show', harness['baseline'] + ':' + path)
+            after = git('show', plan['sources']['variants'] + ':' + path)
+            assert before.replace('Config(typeof(TensorsGpuTimingConfig))', 'Config(typeof(SlowNativeTimingConfig))') == after
+        config = subprocess.check_output(['git','show',plan['sources']['variants'] + ':' + BENCH + '/LibraryComparisons/SlowNativeTimingConfig.cs'],cwd=REPO)
+        assert hashlib.sha256(config).hexdigest() == harness['config_sha256']

@@ -28,7 +28,7 @@ def archive(raw, prepared, repo, phase):
     blobs.update({'scripts/'+p.name:p.read_bytes() for p in Path(__file__).parent.glob('*.py')})
     blobs['candidate-source.patch'] = subprocess.check_output(['git','diff','--binary',
         summary['sources']['old'],summary['sources']['new'],'--','src','tests'],cwd=repo)
-    assert blobs['candidate-source.patch']
+    assert bool(blobs['candidate-source.patch']) == (phase != 'coverage')
     manifest = {}
     for relative, content in sorted(blobs.items()):
         target = destination/(relative+'.gz')
@@ -37,12 +37,15 @@ def archive(raw, prepared, repo, phase):
         assert gzip.decompress(target.read_bytes()) == content
         manifest[relative] = dict(sha256=hashlib.sha256(content).hexdigest(),archive=target.relative_to(repo).as_posix())
     write(destination/'verified-summary.json',summary)
-    write(destination/'decision.json',dict(status='qualified-for-integration' if summary['accepted'] else 'rejected-or-inconclusive',
+    write(destination/'decision.json',dict(status='coverage-complete' if phase == 'coverage' else 'qualified-for-integration' if summary['accepted'] else 'rejected-or-inconclusive',
         accepted=summary['accepted'],phase=phase,case_count=summary['case_count'],decision_count=summary['decision_count'],
         verdicts=summary['verdicts'],sources=summary['sources'],run_id=run_id,run_attempt=attempt,
         workflow_head=inputs['workflow_head'],input_provenance_sha256=summary['input_provenance_sha256'],
         measurement_url=f'https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/{run_id}',
         archives=manifest,production_integrated=False,report_imported=False,
-        note='Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.'))
+        **({'coverage_complete': True, 'source_qualification_claimed': False} if phase == 'coverage' else {}),
+        note='Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity.' +
+             (' Unchanged qualified production; no source qualification claimed.' if phase == 'coverage' else
+              ' WMA/TRIMA results do not replace default SMA rows.')))
     (destination/'.gitattributes').write_bytes(b'* -text\n')
     return destination

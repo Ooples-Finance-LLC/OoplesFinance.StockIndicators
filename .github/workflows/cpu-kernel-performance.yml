@@ -12,7 +12,7 @@ on:
       qualification_plan:
         description: Immutable source and measurement plan for qualified-rollout
         type: choice
-        options: [benchmarks/plans/hosted-rollout-20261101.json, benchmarks/plans/hosted-repair-20261101.json, benchmarks/plans/hosted-trix-20261102.json, benchmarks/plans/hosted-trix-eager-20261102.json, benchmarks/plans/hosted-trix-shared-jit-20261102.json, benchmarks/plans/hosted-trix-direct-fill-20261102.json, benchmarks/plans/hosted-trix-settled-20261102.json, benchmarks/plans/hosted-trix-word-settled-20261102.json, benchmarks/plans/hosted-classical-final-20261102.json, benchmarks/plans/hosted-builder-coverage-20261102.json, benchmarks/plans/hosted-hilbert-fir-20261102.json]
+        options: [benchmarks/plans/hosted-rollout-20261101.json, benchmarks/plans/hosted-repair-20261101.json, benchmarks/plans/hosted-trix-20261102.json, benchmarks/plans/hosted-trix-eager-20261102.json, benchmarks/plans/hosted-trix-shared-jit-20261102.json, benchmarks/plans/hosted-trix-direct-fill-20261102.json, benchmarks/plans/hosted-trix-settled-20261102.json, benchmarks/plans/hosted-trix-word-settled-20261102.json, benchmarks/plans/hosted-classical-final-20261102.json, benchmarks/plans/hosted-builder-coverage-20261102.json, benchmarks/plans/hosted-builder-coverage-repair-20261103.json, benchmarks/plans/hosted-hilbert-fir-20261102.json]
         default: benchmarks/plans/hosted-rollout-20261101.json
       evidence_run:
         description: Original measurement run for verification-only recovery
@@ -203,6 +203,8 @@ jobs:
       trix_preflight: ${{ steps.prepare.outputs.trix_preflight }}
       standalone_variants: ${{ steps.prepare.outputs.standalone_variants }}
       coverage_only: ${{ steps.prepare.outputs.coverage_only }}
+      coverage_matrix: ${{ steps.prepare.outputs.coverage_matrix }}
+      coverage_timeout: ${{ steps.prepare.outputs.coverage_timeout }}
       targeted_only: ${{ steps.prepare.outputs.targeted_only }}
       targeted_matrix: ${{ steps.prepare.outputs.targeted_matrix }}
     steps:
@@ -444,7 +446,12 @@ jobs:
     needs: hosted-prepare
     if: inputs.suite == 'qualified-coverage' && needs.hosted-prepare.outputs.coverage_only == 'true'
     runs-on: windows-2025
-    timeout-minutes: 180
+    timeout-minutes: ${{ fromJSON(needs.hosted-prepare.outputs.coverage_timeout) }}
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        shard: ${{ fromJSON(needs.hosted-prepare.outputs.coverage_matrix) }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -462,12 +469,12 @@ jobs:
         with:
           name: hosted-inputs
           path: hosted-inputs
-      - run: python scripts/run-hosted-timing.py measure --inputs hosted-inputs --out hosted-coverage-0 --phase coverage --shard 0
+      - run: python scripts/run-hosted-timing.py measure --inputs hosted-inputs --out hosted-coverage-${{ matrix.shard }} --phase coverage --shard ${{ matrix.shard }}
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: hosted-coverage-0
-          path: hosted-coverage-0/
+          name: hosted-coverage-${{ matrix.shard }}
+          path: hosted-coverage-${{ matrix.shard }}/
           retention-days: 14
           if-no-files-found: error
   hosted-collect-coverage:
@@ -487,8 +494,8 @@ jobs:
           python-version: '3.13'
       - uses: actions/download-artifact@v8
         with:
-          name: hosted-coverage-0
-          path: evidence/hosted-coverage-0
+          pattern: hosted-coverage-*
+          path: evidence
       - uses: actions/download-artifact@v8
         with:
           name: hosted-inputs

@@ -67,6 +67,8 @@ def phase_shards(plan, phase):
         return range(8)
     if phase == 'targeted':
         return range(len(plan['targeted_shards']))
+    if phase == 'coverage':
+        return range(plan.get('coverage_shards', 1))
     assert phase in ('variants', 'coverage')
     return range(1)
 
@@ -76,9 +78,9 @@ def phase_tasks(plan, phase, shard):
         assert plan.get('targeted_reference') and shard in phase_shards(plan, phase)
         return copy.deepcopy(plan['targeted_shards'][shard]['tasks'])
     if phase == 'coverage':
-        assert shard == 0 and plan.get('coverage_reference')
+        assert shard in phase_shards(plan, phase) and plan.get('coverage_reference')
         from .coverage import tasks
-        return tasks()
+        return tasks() if plan.get('coverage_shards', 1) == 1 else [tasks()[shard]]
     if phase == 'successor':
         assert shard in range(8)
         merged = {}
@@ -242,8 +244,8 @@ def prepare(out, reuse_from=None):
     paths = [BENCH, TESTS, 'Directory.Build.props', 'Directory.Build.targets', 'Directory.Packages.props', 'global.json']
     assert not git('diff', '--name-only', plan['sources']['old'], plan['sources']['successor'], '--', *paths)
     additions = set(git('diff', '--name-only', plan['sources']['successor'], plan['sources']['variants'], '--', *paths).splitlines())
-    assert additions == {BENCH + '/LibraryComparisons/SharedClassicalWindowVariantBenchmarks.cs',
-                         TESTS + '/SharedClassicalWindowVariantBenchmarkTests.cs'}, additions
+    from .coverage import harness_additions
+    assert additions == harness_additions(plan), additions
     variant_tree = sources['variants']
     command(['dotnet', 'build', TESTS, '-c', 'Release', '-p:GeneratePackageOnBuild=false', '-m:2'],
             variant_tree, evidence / 'variant-harness-build.log')
@@ -445,6 +447,8 @@ def main():
                 output.write('trix_preflight=' + str(read(PLAN).get('trix_preflight', False)).lower() + '\n')
                 output.write('standalone_variants=' + str(bool(read(PLAN).get('standalone_variants'))).lower() + '\n')
                 output.write('coverage_only=' + str(bool(read(PLAN).get('coverage_reference'))).lower() + '\n')
+                output.write('coverage_timeout=' + str(read(PLAN).get('matrix', {}).get('timeout_minutes_per_shard', 180)) + '\n')
+                output.write('coverage_matrix=' + json.dumps(list(phase_shards(read(PLAN), 'coverage'))) + '\n')
                 output.write('targeted_only=' + str(bool(read(PLAN).get('targeted_reference'))).lower() + '\n')
                 output.write('targeted_matrix=' + json.dumps(list(phase_shards(read(PLAN), 'targeted')) if read(PLAN).get('targeted_reference') else []) + '\n')
     elif args.mode == 'measure':
