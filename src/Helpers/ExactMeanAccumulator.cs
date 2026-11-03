@@ -13,6 +13,8 @@ internal struct ExactMeanAccumulator
     private bool IsZero => _wide ? _large.IsZero : _small == 0;
     internal bool IsExactlyZero => IsZero;
     internal int Sign => _wide ? _large.Sign : Math.Sign(_small);
+    internal bool UsesWideInteger => _wide;
+    internal (BigInteger Coefficient, int Scale) ExactParts => (_wide ? _large : new BigInteger(_small), _scale);
 
     internal void ScaleByPowerOfTwo(int exponent)
     {

@@ -5,6 +5,20 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class CompactAccumulationSumTests
 {
     [Fact]
+    public void PromotionRetainsTheUnroundedResidualBeyondSignedWordPrecision()
+    {
+        var sum = new CompactAccumulationSum();
+        double boundary = Math.ScaleB(1d, 63);
+        (double Input, double Expected)[] steps = [(1d, 1d), (boundary, boundary),
+            (-boundary, 1d), (-1d, 0d)];
+        foreach (var step in steps)
+        {
+            sum.Add(step.Input);
+            AssertBits(step.Expected, sum.Publish());
+        }
+    }
+
+    [Fact]
     public void ExactPrefixesRetainTinyResidualsAndExtendedCancellation()
     {
         RocBankValue[] extremes = [new(double.MaxValue), new(double.MaxValue),

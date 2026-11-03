@@ -9,8 +9,12 @@ internal sealed class MoneyFlowAccumulationWindow
     internal RocBankValue Next(double high, double low, double close, double volume, bool commit)
     {
         var flow = Flow(high, low, close, volume);
+        if (commit)
+        {
+            _total.Add(flow);
+            return _total.Rounded();
+        }
         var total = _total; total.Add(flow);
-        if (commit) _total = total;
         return total.Rounded();
     }
     internal static RocBankValue Flow(double high, double low, double close, double volume)
