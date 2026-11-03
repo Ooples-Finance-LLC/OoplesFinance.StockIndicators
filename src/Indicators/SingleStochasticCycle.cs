@@ -67,7 +67,7 @@ public sealed class SingleStochasticCycle : MultiOutputIndicatorBase, IIndicator
 
     internal sealed class State(int cycle, int fast, int slow) : IMultiOutputState
     {
-        private readonly SeededDyadicEma.State _fast = new(fast), _slow = new(slow);
+        private readonly EmaDifferenceSignal.CompactAverage _fast = new(fast, false), _slow = new(slow, false);
         private readonly Extrema _low = new(cycle, false), _high = new(cycle, true);
         private readonly double[] _smoothing = new double[3];
         private JurikDyadic _sum;
@@ -82,10 +82,10 @@ public sealed class SingleStochasticCycle : MultiOutputIndicatorBase, IIndicator
         {
             if (!FrameworkCompatibility.IsFinite(bar.Close)) throw new ArgumentOutOfRangeException(nameof(bar));
             output.Clear();
-            var input = JurikDyadic.FromDouble(bar.Close);
-            bool fastReady = _fast.Add(input, out var f), slowReady = _slow.Add(input, out var s);
-            if (!fastReady || !slowReady) return;
-            f.Subtract(s); var macd = f.Rounded();
+            var input = CompactMacdValue.Of(bar.Close);
+            var f = _fast.Add(input); var s = _slow.Add(input);
+            if (!f.HasValue || !s.HasValue) return;
+            var macd = (f.Value - s.Value).Round(1L).ToRoundedDyadic();
             _low.Add(_index, macd); _high.Add(_index, macd);
             if (++_index < cycle) return;
             var range = _high.Value; range.Subtract(_low.Value);
