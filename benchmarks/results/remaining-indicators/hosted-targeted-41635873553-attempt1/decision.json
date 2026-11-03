@@ -451,6 +451,7 @@
     }
   },
   "production_integrated": true,
-  "report_imported": false,
-  "note": "Seeded TSI compact EMA stages accepted:all6 decisions faster;30complete cases. Full published source/tests match measured9be29920c. Overarching performancegap work continues."
+  "report_imported": true,
+  "note": "Seeded TSI compact EMA stages accepted:all6 decisions faster;30complete cases. Full published source/tests match measured9be29920c. Overarching performancegap work continues.",
+  "integration_source_commit": "738627aec8bc6abbb6a201d1c7588883aeb2bf11"
 }
