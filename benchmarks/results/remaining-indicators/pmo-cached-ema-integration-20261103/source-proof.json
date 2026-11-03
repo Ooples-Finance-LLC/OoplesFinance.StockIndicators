@@ -1,0 +1,75 @@
+{
+  "measured_source": "b0093419da5b6dbad6edd61c61f88ccb89555d8b",
+  "integration_source_commit": "93225c6eec047334ffb18cbab91024a16614f4e8",
+  "inventory_commit": "f2bc53f82cebd39a115aa2d502d5f5d7f1db9cc9",
+  "run_id": "41653742842",
+  "plan_sha256": "1cca006eef9be5d306475e1882c5edcc5d959dc00c728842618d8381bc6eab3d",
+  "source_and_tests_exactly_match": true,
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "faster": 6
+  },
+  "correctness": {
+    "unit": 85,
+    "comparator": 98,
+    "actual_gpu": 100
+  },
+  "gpu_source_sha256": "03bc740e28ff2e93bf78f71424e5cb73996aa96b587b923b1f6219b30e82f249",
+  "inventory_tests": 8,
+  "report_imported": true,
+  "report_sha256": "ea750b4ac3e3fc631764b343da0ed4c4d0f387cded121b2c5e2c52ff4562cb8f",
+  "baseline_rows_updated": 2,
+  "baseline_rows_preserved": 800,
+  "builder_slots_updated": 4,
+  "builder_slots_preserved": 1540,
+  "browser_all802_csv_and_builder_values_verified": true,
+  "javascript_errors": [],
+  "report_archives": {
+    "before.html": {
+      "sha256": "630591eadeed99d35e4d98c9d3eeb909e1889489557fef5d05327b16c03fd5c4",
+      "archive": "benchmarks/results/remaining-indicators/pmo-cached-ema-integration-20261103/before.html.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "3c3821f391c0c7e14bb6c664f882582b9d50a98b06a858399b3b7c57acb02179",
+      "archive": "benchmarks/results/remaining-indicators/pmo-cached-ema-integration-20261103/browser-verification.json.gz"
+    },
+    "candidate.html": {
+      "sha256": "ea750b4ac3e3fc631764b343da0ed4c4d0f387cded121b2c5e2c52ff4562cb8f",
+      "archive": "benchmarks/results/remaining-indicators/pmo-cached-ema-integration-20261103/candidate.html.gz"
+    },
+    "imported.json": {
+      "sha256": "e335f18989a95bf66d921899595f2714250ea61363c4f46b04cbde921aa9f460",
+      "archive": "benchmarks/results/remaining-indicators/pmo-cached-ema-integration-20261103/imported.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "47daad956728d02d2e2de6f64325b6ca28760c27f5bf7ba7c0a9aa51430cec91",
+      "archive": "benchmarks/results/remaining-indicators/pmo-cached-ema-integration-20261103/measurement.json.gz"
+    },
+    "refreshed-baseline.png": {
+      "sha256": "b0d74987a7e8a73e11267ea7da7701b966c45de29b683c97e0c53a665e7df597",
+      "archive": "benchmarks/results/remaining-indicators/pmo-cached-ema-integration-20261103/refreshed-baseline.png"
+    },
+    "staged.json": {
+      "sha256": "3708a4dd118de7a6cdbc865c9fe1c16bde031b9b9b586869e108175d5aa5639e",
+      "archive": "benchmarks/results/remaining-indicators/pmo-cached-ema-integration-20261103/staged.json.gz"
+    },
+    "updated-pair-details.png": {
+      "sha256": "4dd618f6190445bdb7a7c6dbf574f84506da0a417bfbaac6991dd3d355ae13f5",
+      "archive": "benchmarks/results/remaining-indicators/pmo-cached-ema-integration-20261103/updated-pair-details.png"
+    },
+    "verify-hosted-certified-report-20261101.py": {
+      "sha256": "f1112bb2e981aa1fa68e0a41e917e423bcd8fd0856a40df97ccd6567986a7cda",
+      "archive": "benchmarks/results/remaining-indicators/pmo-cached-ema-integration-20261103/verify-hosted-certified-report-20261101.py.gz"
+    },
+    "import-hosted-certified-report-20261101.py": {
+      "sha256": "380745f04a0b07f71a33dd049bdf1f3392ff9a388f5cda9849c0ae3bda66be75",
+      "archive": "benchmarks/results/remaining-indicators/pmo-cached-ema-integration-20261103/import-hosted-certified-report-20261101.py.gz"
+    },
+    "report.py": {
+      "sha256": "ec5151d32284558921f0d3aee547f9b18e5599acd5e506f1348946adf7a29853",
+      "archive": "benchmarks/results/remaining-indicators/pmo-cached-ema-integration-20261103/report.py.gz"
+    }
+  },
+  "overall_goal_complete": false
+}
