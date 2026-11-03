@@ -56,5 +56,55 @@
     "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "55371c5e08ff9c623cd4cecb77291ff92e95cc3ee6b4b042631d48007d9714ec",
     "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "55371c5e08ff9c623cd4cecb77291ff92e95cc3ee6b4b042631d48007d9714ec"
   },
-  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending.",
+  "ci_archives": {
+    "ci-manifest.json": {
+      "sha256": "66df82cd6e92d2d61bbdb3c933b852a0363942ad19807c485b1ddb58c298f359",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-20261103/ci-manifest.json.gz"
+    },
+    "ci-input-consumer.py": {
+      "sha256": "6e482f44df98557123b48e3597325b4cc14230ed6a23bcea9491eaade27a9331",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-20261103/ci-input-consumer.py.gz"
+    },
+    "ci-tooling/build-candidate-correctness.py": {
+      "sha256": "2dd49c79712901b2f8e329e7f910e94bbab9f48b69658dbfd4b1033cd5a0dbd5",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-20261103/ci-tooling/build-candidate-correctness.py.gz"
+    },
+    "ci-tooling/test_candidate_correctness_inputs.py": {
+      "sha256": "25e14aff266ce2df95c2f720baee2feafc7a5bc2c490753075b52e5b51e65e72",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-20261103/ci-tooling/test_candidate_correctness_inputs.py.gz"
+    },
+    "ci-tooling/cpu-kernel-performance.yml": {
+      "sha256": "573634e06f5c90a29060117fb91fba89d818f861c07384370ee9115d40f1150d",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-20261103/ci-tooling/cpu-kernel-performance.yml.gz"
+    },
+    "ci-evidence/comparator-build.log": {
+      "sha256": "b1e6c71e5b8ea3b7018140022f4cdf67debf4ea95f81c283350840a09f6e9eef",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-20261103/ci-evidence/comparator-build.log.gz"
+    },
+    "ci-evidence/dotnet-info.txt": {
+      "sha256": "7c77a8135ec015ec5b5c689d807d94bb51f6407cdf9ff21c27f76d3e32725d5a",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-20261103/ci-evidence/dotnet-info.txt.gz"
+    },
+    "ci-evidence/parity-tests.log": {
+      "sha256": "7db4594412a016934382acce5af0e772b33035a4bbf8555cb141a62acdc9acc8",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-20261103/ci-evidence/parity-tests.log.gz"
+    },
+    "ci-evidence/parity.trx": {
+      "sha256": "7017851dafaaf875394b62bc0911502388680f3be9c6e5202ac18728e6590fcd",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-20261103/ci-evidence/parity.trx.gz"
+    },
+    "ci-evidence/unit-build.log": {
+      "sha256": "4cd0a14338c6f5594ebc17ffa80b3bbc522c9aee9fd71bab8a2a4408c02b90f4",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-20261103/ci-evidence/unit-build.log.gz"
+    },
+    "ci-evidence/unit-tests.log": {
+      "sha256": "d6f8447807e8df8de0243c8c0950c595e2b07acc71d0046706104eb3f5b063bb",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-20261103/ci-evidence/unit-tests.log.gz"
+    },
+    "ci-evidence/unit.trx": {
+      "sha256": "147776adff08795fb9e94a420b1b45cd6ddacf48691a1ffed2b3011c33c901cb",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-20261103/ci-evidence/unit.trx.gz"
+    }
+  }
 }
