@@ -1,6 +1,7 @@
 """Measure missing comparisons of qualified source without qualifying new code."""
 import hashlib
 import json
+import re
 import subprocess
 
 from .pipeline import BENCH, REPO, TESTS, git
@@ -50,6 +51,10 @@ def verify_reference(plan):
         assert plan['coverage_shards'] == 2
         assert plan['matrix'] == dict(shards=2, max_parallel=2, timeout_minutes_per_shard=240)
         assert harness['execution_timeout_minutes'] == 120
+        native_count = harness.get('native_invocation_count')
+        if native_count is not None:
+            assert native_count == 1
+            assert plan['measurement_policy']['operation_timeout_seconds'] == 10800
         assert not git('diff', '--name-only', harness['baseline'], plan['sources']['variants'], '--', 'src', 'tests', TESTS)
         names = ('SharedDynamicMomentumBenchmarks.cs', 'SharedTradyNativeCandleBenchmarks.cs')
         expected = {BENCH + '/LibraryComparisons/' + name for name in (*names, 'SlowNativeTimingConfig.cs')}
@@ -58,6 +63,10 @@ def verify_reference(plan):
             path = BENCH + '/LibraryComparisons/' + name
             before = git('show', harness['baseline'] + ':' + path)
             after = git('show', plan['sources']['variants'] + ':' + path)
+            if native_count is not None:
+                assert after.count('[InvocationCount(1)]') == 2
+                assert len(re.findall(r'\[InvocationCount\(1\)\]\s+\[Benchmark(?:\(Baseline = true\))?\]\s+public[^\r\n]*\bNative(?:Single|Parallel)\(', after)) == 2
+                after = after.replace('    [InvocationCount(1)]\n', '')
             assert before.replace('Config(typeof(TensorsGpuTimingConfig))', 'Config(typeof(SlowNativeTimingConfig))') == after
         config = subprocess.check_output(['git','show',plan['sources']['variants'] + ':' + BENCH + '/LibraryComparisons/SlowNativeTimingConfig.cs'],cwd=REPO)
         assert hashlib.sha256(config).hexdigest() == harness['config_sha256']

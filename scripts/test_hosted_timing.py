@@ -53,8 +53,11 @@ def make_evidence(folder, phase, new_mean=50, preflight=False):
                                 Mean=mean, StandardDeviation=0, ConfidenceInterval=dict(Lower=mean-1,Upper=mean+1)), Memory=dict(BytesAllocatedPerOperation=8)))
                     report = dict(Benchmarks=cases, HostEnvironmentInfo=dict(ProcessorName='test CPU', RuntimeVersion='test runtime'))
                     warmups = warmups_for(plan, fixture)
-                    log = ''.join(f'// Benchmark: test: IterationCount=10 WarmupCount={warmups}\n' +
-                        ''.join(f'Workload{kind} {i}: sample\n' for kind, count in (('Warmup',warmups),('Actual',10)) for i in range(1,count+1)) for _ in cases)
+                    native_one = phase == 'coverage' and plan.get('coverage_harness',{}).get('native_invocation_count') == 1
+                    log = ''.join(f'// Benchmark: {fixture}.{case["Method"]}: IterationCount=10 WarmupCount={warmups}' +
+                        (' InvocationCount=1' if native_one and case['Method'].startswith('Native') else '') + '\n' +
+                        ''.join(f'Workload{kind} {i}: ' + ('1 op, sample' if native_one and case['Method'].startswith('Native') else '4 op, sample') + '\n'
+                            for kind, count in (('Warmup',warmups),('Actual',10)) for i in range(1,count+1)) for case in cases)
                     relative = Path('operation-checkpoints')/fixture/f'round{index}-{arm}'/f'operation{position}'
                     report_path = root/relative/'results'/'report.json'
                     log_path = (root/relative).with_suffix('.log')

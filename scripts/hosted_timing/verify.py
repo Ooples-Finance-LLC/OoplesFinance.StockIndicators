@@ -21,7 +21,8 @@ def archived(root, raw_root, raw_path):
     return target
 
 
-def check_log(log, count, *, warmups=10):
+def check_log(log, count, *, warmups=10, native_invocations=None):
+    assert native_invocations in (None,1)
     sections = re.split(r'^// Benchmark: ', log, flags=re.M)[1:]
     assert len(sections) == count
     for section in sections:
@@ -32,6 +33,10 @@ def check_log(log, count, *, warmups=10):
             numbers = re.findall(r'^Workload' + kind + r'\s+(\d+):', section, re.M)
             expected = warmups if kind == 'Warmup' else 10
             assert list(map(int, numbers)) == list(range(1, expected + 1))
+            if native_invocations is not None and re.search(r'\.Native(?:Single|Parallel)\b',header):
+                assert re.search(r'\bInvocationCount=1\b',header)
+                counts = re.findall(r'^Workload' + kind + r'\s+\d+:\s+(\d+) op,',section,re.M)
+                assert len(counts) == expected and all(int(n) == native_invocations for n in counts)
 
 
 def sample(case):
@@ -138,7 +143,8 @@ def _collect(folder, phase, *, preflight):
                 original = read(paths['report'])
                 combine_reports([original], [chunk['pair']], methods, implicit)
                 log = paths['log'].read_text(encoding='utf-8-sig')
-                check_log(log, chunk['cases'], warmups=warmups_for(plan, fixture))
+                check_log(log, chunk['cases'], warmups=warmups_for(plan, fixture),
+                    native_invocations=plan.get('coverage_harness',{}).get('native_invocation_count') if phase == 'coverage' else None)
                 originals.append(original)
                 logs.append(log)
             merged_path = archived(root, proof['raw_root'], record['report'])

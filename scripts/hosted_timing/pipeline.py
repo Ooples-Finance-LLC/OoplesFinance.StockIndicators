@@ -62,6 +62,15 @@ def verify_trx(path, classes):
     return dict(passed=len(results), classes=counts, sha256=digest(path))
 
 
+def operation_timeout_for(plan, phase):
+    timeout = plan['measurement_policy'].get('operation_timeout_seconds', 3600)
+    assert timeout in (3600, 10800)
+    if timeout == 10800:
+        assert plan.get('coverage_harness', {}).get('native_invocation_count') == 1
+        assert plan.get('coverage_reference')
+    return timeout if phase == 'coverage' else 3600
+
+
 def phase_shards(plan, phase):
     if phase == 'successor':
         return range(8)
@@ -413,6 +422,7 @@ def measure(inputs, out, phase, shard, diagnostic=None):
                     runtime=runtimes[arm],env=env,state=state,save=save,builds=builds,
                     assert_binaries=assert_binaries,implicit=task.get('implicit_pair',False),variant=task.get('variant',False),
                     variance=task.get('variance_parameter',False),
+                    operation_timeout_seconds=operation_timeout_for(plan,phase),
                     context=dict(host_nonce=identity['instance_nonce'],production_sha256=manifests[arm][DLL],phase=phase,shard=shard,
                         **warmup_context(plan, task['fixture']),
                         **({'diagnostic_warmups':1000} if diagnostic == 'trix-library-warmup' else {})),

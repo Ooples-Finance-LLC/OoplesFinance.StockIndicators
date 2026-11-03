@@ -35,8 +35,11 @@ def filters(fixture, pair, methods, *, implicit=False, variant=False, variance=F
              f'*{fixture}.{method}*"{pair}"*') for method in methods]
 
 def run_checkpointed(*, out, index, arm, fixture, pairs, methods, runtime, env,
-                    state, save, builds, assert_binaries, implicit=False, variant=False, variance=False, context=None, warmups=10):
+                    state, save, builds, assert_binaries, implicit=False, variant=False, variance=False, context=None, warmups=10,
+                    operation_timeout_seconds=3600):
     assert warmups in (10, 1000)
+    assert operation_timeout_seconds in (3600,10800)
+    assert operation_timeout_seconds == 3600 or context and context.get('phase') == 'coverage'
     from .cleanup import capture_children, stop_owned_benchmark, archive_with_retry
     root = out / 'operation-checkpoints' / fixture / f'round{index}-{arm}'
     root.mkdir(parents=True, exist_ok=True)
@@ -111,9 +114,9 @@ def run_checkpointed(*, out, index, arm, fixture, pairs, methods, runtime, env,
                         if code:
                             raise subprocess.CalledProcessError(code, args)
                         break
-                    if time.monotonic() - started > 3600:
+                    if time.monotonic() - started > operation_timeout_seconds:
                         stop_owned_benchmark(process, children)
-                        raise subprocess.TimeoutExpired(args, 3600)
+                        raise subprocess.TimeoutExpired(args, operation_timeout_seconds)
                     time.sleep(1)
             if interrupted:
                 rejected = out / 'invalidated-attempts' / datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%f')
