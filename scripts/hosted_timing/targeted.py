@@ -110,6 +110,14 @@ SCOPES['trend-star-compact-ranks'] = dict(
     totals=(150,30), baseline_phase='targeted', baseline_totals=(60,12))
 
 
+SCOPES['stoch-raw-certificate'] = dict(
+    fixtures={'SharedSkenderStochasticBenchmarks': {'Skender.GetStoch':'Skender.GetStoch'}},
+    implicit_fixtures=set(),
+    paths={'src/Indicators/ValuesBarExecution.SmoothedStochastic.cs',
+           'tests/ModelsTests/StochasticRawRatioCertificateTests.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(30,6))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
