@@ -123,10 +123,46 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
         private BigInteger _sum,
             _squares,
             _current;
+#if !NETFRAMEWORK
+        private Int128 _compactSum, _compactSquares, _compactCurrent;
+        private bool _wide;
+        private BigInteger Sum => _wide ? _sum : (BigInteger)_compactSum;
+        private BigInteger Squares => _wide ? _squares : (BigInteger)_compactSquares;
+        private BigInteger Current => _wide ? _current : (BigInteger)_compactCurrent;
+#else
+        private BigInteger Sum => _sum;
+        private BigInteger Squares => _squares;
+        private BigInteger Current => _current;
+#endif
 
         internal int Count => _history.Count;
-        internal double Mean => Count == 0 ? 0 : ExactMeanAccumulator.ScaledRatio(_sum, Count, _grid);
-        internal bool HasVariance => Count > 1 && Count * _squares > _sum * _sum;
+        internal double Mean
+        {
+            get
+            {
+                if (Count == 0) return 0;
+#if !NETFRAMEWORK
+                if (!_wide && CertifiedCompactRatio.TryDivide(Magnitude(_compactSum),
+                    (UInt128)Count, _grid, out double value)) return _compactSum < 0 ? -value : value;
+#endif
+                return ExactMeanAccumulator.ScaledRatio(Sum, Count, _grid);
+            }
+        }
+        internal bool HasVariance
+        {
+            get
+            {
+                if (Count < 2) return false;
+#if !NETFRAMEWORK
+                if (!_wide)
+                {
+                    try { return checked(Count * _compactSquares - _compactSum * _compactSum) > 0; }
+                    catch (OverflowException) { }
+                }
+#endif
+                return Count * Squares > Sum * Sum;
+            }
+        }
 
         public void Reset()
         {
@@ -134,6 +170,10 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
             _sum = _squares = _current = 0;
             _grid = 0;
             _hasGrid = false;
+#if !NETFRAMEWORK
+            _compactSum = _compactSquares = _compactCurrent = 0;
+            _wide = false;
+#endif
         }
 
         public double Update(in Bar bar)
@@ -144,14 +184,24 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
                 if (_hasGrid)
                 {
                     var shift = _grid - parts.Exponent;
+#if !NETFRAMEWORK
+                    if (_wide || !TryRescale(shift))
+                    {
+                        Promote();
+                        _sum <<= shift;
+                        _squares <<= 2 * shift;
+                    }
+#else
                     _sum <<= shift;
                     _squares <<= 2 * shift;
+#endif
                 }
                 _grid = parts.Exponent;
                 _hasGrid = true;
             }
 #if !NETFRAMEWORK
-            if (TrySmallUpdate(parts, bar.Close)) return Reading(output);
+            if (!_wide && TryCompactUpdate(parts, bar.Close)) return Reading(output);
+            Promote();
 #endif
             var value = OnGrid(parts);
             if (_history.Count == period)
@@ -173,9 +223,11 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
                 return 0;
 #if !NETFRAMEWORK
             if (TrySmallReading(selected, out var compact)) return compact;
+            if (TryCompactReading(selected, out compact)) return compact;
 #endif
             var n = new BigInteger(_history.Count);
-            var variance = n * _squares - _sum * _sum;
+            var sum = Sum;
+            var variance = n * Squares - sum * sum;
             var denominator = n * (sample ? n - 1 : n);
             if (selected == WindowDispersionOutput.Variance)
                 return ExactMeanAccumulator.ScaledRatio(variance * _scale.Integer, denominator,
@@ -188,7 +240,7 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
                     );
             if (variance.IsZero)
                 return 0;
-            var deviation = (n * _current - _sum) * _scale.Integer;
+            var deviation = (n * Current - sum) * _scale.Integer;
             return deviation.Sign
                 * ExactPopulationDeviation.ScaledRootRatio(
                     deviation * deviation * denominator,
@@ -197,34 +249,98 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
         }
 
 #if !NETFRAMEWORK
-        private bool TrySmallUpdate((long Integer, int Exponent) parts, double close)
+        private void Promote()
         {
-            if (_sum.GetBitLength() > 31 || _squares.GetBitLength() > 31
-                || !TrySmallGrid(parts, out long current)) return false;
-            bool full = _history.Count == period;
-            long expired = 0;
-            if (full && !TrySmallGrid(Decompose(_history.Peek()), out expired)) return false;
-            // Each price magnitude is at most 2^26 and retained moments fit
-            // signed 32-bit values. All intermediate updates fit signed 64 bits.
-            long sum = (long)_sum + current - expired;
-            long squares = (long)_squares + current * current - expired * expired;
-            if (full) _history.Dequeue();
-            _history.Enqueue(close);
-            _sum = sum;
-            _squares = squares;
-            _current = current;
+            if (_wide) return;
+            _sum = (BigInteger)_compactSum;
+            _squares = (BigInteger)_compactSquares;
+            _current = (BigInteger)_compactCurrent;
+            _wide = true;
+        }
+
+        private static UInt128 Magnitude(Int128 value) => value < 0
+            ? (UInt128)(-(value + 1)) + 1 : (UInt128)value;
+
+        private static bool TryShift(Int128 value, int shift, out Int128 shifted)
+        {
+            shifted = 0;
+            if (value == 0) return true;
+            if (shift is < 0 or >= 128 || value < (Int128.MinValue >> shift)
+                || value > (Int128.MaxValue >> shift)) return false;
+            shifted = value << shift;
             return true;
         }
 
-        private bool TrySmallGrid((long Integer, int Exponent) parts, out long value)
+        private bool TryRescale(int shift)
         {
-            value = 0;
-            if (parts.Integer == 0) return true;
-            int shift = parts.Exponent - _grid;
-            const long maximum = 1L << 26;
-            if (shift is < 0 or > 26 || Math.Abs(parts.Integer) > (maximum >> shift)) return false;
-            value = parts.Integer << shift;
+            if (!TryShift(_compactSum, shift, out var sum)
+                || !TryShift(_compactSquares, 2 * shift, out var squares)
+                || !TryShift(_compactCurrent, shift, out var current)) return false;
+            _compactSum = sum; _compactSquares = squares; _compactCurrent = current;
             return true;
+        }
+
+        private bool TryCompactGrid((long Integer, int Exponent) parts, out Int128 value) =>
+            TryShift(parts.Integer, parts.Integer == 0 ? 0 : parts.Exponent - _grid, out value);
+
+        private bool TryCompactUpdate((long Integer, int Exponent) parts, double close)
+        {
+            if (!TryCompactGrid(parts, out var current)) return false;
+            bool full = _history.Count == period;
+            Int128 expired = 0;
+            if (full && !TryCompactGrid(Decompose(_history.Peek()), out expired)) return false;
+            try
+            {
+                // Do not mutate history or moments until every operation fits.
+                Int128 sum = checked(_compactSum - expired + current);
+                Int128 squares = checked(_compactSquares - expired * expired + current * current);
+                if (full) _history.Dequeue();
+                _history.Enqueue(close);
+                _compactSum = sum; _compactSquares = squares; _compactCurrent = current;
+                return true;
+            }
+            catch (OverflowException) { return false; }
+        }
+
+        private bool TryCompactReading(WindowDispersionOutput selected, out double result)
+        {
+            result = 0;
+            if (_wide) return false;
+            try
+            {
+                int n = Count;
+                Int128 variance = checked(n * _compactSquares - _compactSum * _compactSum);
+                ulong denominator = (ulong)n * (uint)(sample ? n - 1 : n);
+                if (selected == WindowDispersionOutput.Variance)
+                {
+                    Int128 numerator = checked(variance * _scale.Integer);
+                    if (!CertifiedCompactRatio.TryDivide(Magnitude(numerator), denominator,
+                        2 * _grid + _scale.Exponent, out result)) return false;
+                    if (numerator < 0) result = -result;
+                    return true;
+                }
+                if (selected == WindowDispersionOutput.StandardDeviation)
+                {
+                    UInt128 numerator = checked((UInt128)variance * Magnitude(_scale.Integer) * Magnitude(_scale.Integer));
+                    if (!ExactPopulationDeviation.TryCompactScaledRoot(numerator, denominator,
+                        2 * (_grid + _scale.Exponent), out result)) return false;
+                    result *= Math.Sign(_scale.Integer);
+                    return true;
+                }
+                if (variance == 0) return true;
+                Int128 deviation = checked(n * _compactCurrent - _compactSum);
+                UInt128 magnitude = Magnitude(deviation);
+                UInt128 top = checked(magnitude * magnitude);
+                UInt128 bottom = (UInt128)variance;
+                if (sample) { top = checked(top * (uint)(n - 1)); bottom = checked(bottom * (uint)n); }
+                UInt128 scale = Magnitude(_scale.Integer);
+                top = checked(top * scale * scale);
+                if (bottom > ulong.MaxValue || !ExactPopulationDeviation.TryCompactScaledRoot(top,
+                    (ulong)bottom, 2 * _scale.Exponent, out result)) return false;
+                result *= deviation.CompareTo(0) * Math.Sign(_scale.Integer);
+                return true;
+            }
+            catch (OverflowException) { return false; }
         }
 
         private bool TrySmallReading(WindowDispersionOutput selected, out double result)
@@ -233,10 +349,10 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
             // These bounds make n*squares, sum*sum and n*current-sum exact Int64
             // operations. A power-of-two multiplier changes only the binary grid.
             int n = _history.Count;
-            if (n > 4096 || _scale.Integer is not (1 or -1)
-                || _sum.GetBitLength() > 31 || _squares.GetBitLength() > 31) return false;
-            long sum = (long)_sum;
-            long variance = n * (long)_squares - sum * sum;
+            if (_wide || n > 4096 || _scale.Integer is not (1 or -1)
+                || _compactSum < int.MinValue || _compactSum > int.MaxValue || _compactSquares > int.MaxValue) return false;
+            long sum = (long)_compactSum;
+            long variance = n * (long)_compactSquares - sum * sum;
             long denominator = (long)n * (sample ? n - 1 : n);
             if (selected == WindowDispersionOutput.Variance)
             {
@@ -267,8 +383,8 @@ public sealed class WindowDispersion : IndicatorBase, IIndicatorValidationContra
                 return true;
             }
             if (variance == 0) return true;
-            if (_current.GetBitLength() > 31) return false;
-            long deviation = n * (long)_current - sum;
+            if (_compactCurrent < int.MinValue || _compactCurrent > int.MaxValue) return false;
+            long deviation = n * (long)_compactCurrent - sum;
             ulong magnitude = (ulong)Math.Abs(deviation);
             if (magnitude == 0) return true;
             if (magnitude > ulong.MaxValue / magnitude) return false;
