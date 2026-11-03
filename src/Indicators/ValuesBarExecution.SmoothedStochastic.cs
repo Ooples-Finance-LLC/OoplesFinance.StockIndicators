@@ -64,6 +64,10 @@ internal static partial class ValuesBarExecution
 
         internal JurikDyadic? Next(JurikDyadic value)
         {
+            // Retain each rounded sample's exact compact parts for insertion
+            // and later eviction; wide values keep their existing fallback.
+            if (period > 1 && value.TryBinaryParts(out var integer, out var exponent))
+                value = JurikDyadic.FromBinaryProduct(integer, exponent);
             if (_seen == _window.Length) _sum.Subtract(_window[_position]);
             else _seen++;
             _window[_position] = value;
