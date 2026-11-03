@@ -134,6 +134,12 @@ for name, members, shards in (
         shards=shards, baseline_phase='targeted', baseline_totals=(30,6))
 
 
+SCOPES['beta-squared-difference'] = dict(
+    fixtures={'SharedSkenderStatisticsBenchmarks': {'Skender.GetBeta':'Skender.GetBeta'}},
+    paths={'src/Indicators/WindowReturnBeta.cs', 'tests/ModelsTests/BetaSquaredDifferenceTests.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(180,36))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
