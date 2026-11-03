@@ -2596,7 +2596,9 @@
     }
   },
   "production_integrated": true,
-  "report_imported": false,
+  "report_imported": true,
   "note": "Complete mapped Hilbert FIR consumer qualification;58 faster,two inconclusive,zero slower. Independent local collection exactly matches hosted summary. Fresh hosted CPU checks and historical source-matched actual local GPU receipts retain their identities.",
-  "integration_source_commit": "1b7ed8ced3adf4f9f5186a8365d978ee244ae583"
+  "integration_source_commit": "1b7ed8ced3adf4f9f5186a8365d978ee244ae583",
+  "report_sha256": "3fe43a871b194fe1267e7f4cfc63b14e5694d22723d4fd19d5e6f30c19ae4537",
+  "report_receipt": "benchmarks/results/remaining-indicators/hilbert-fir-integration-20261103/source-proof.json"
 }
