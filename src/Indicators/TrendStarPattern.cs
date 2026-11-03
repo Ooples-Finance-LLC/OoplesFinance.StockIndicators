@@ -120,20 +120,18 @@ internal sealed class TrendStarState : IIndicatorState
             _morning ? CandleTrendKind.DownTrend : CandleTrendKind.UpTrend,
             options.TrendPeriod
         );
-        _bull = new PercentileCandleState(
+        _bull = CreateBodyPercentile(
             options.Period,
             options.LongPercentile,
-            CandleLengthKind.Body,
             true,
             1
         );
-        _bear = new PercentileCandleState(20, .75m, CandleLengthKind.Body, true, -1);
+        _bear = CreateBodyPercentile(20, .75m, true, -1);
         _small = _dojiKind
             ? (IIndicatorState)new DojiCandle(options.DojiFraction).CreateState()
-            : new PercentileCandleState(
+            : CreateBodyPercentile(
                 options.Period,
                 options.ShortPercentile,
-                CandleLengthKind.Body,
                 false,
                 0
             );
@@ -144,6 +142,94 @@ internal sealed class TrendStarState : IIndicatorState
             + (new BigInteger(unchecked((uint)bits[2])) << 64);
         _toleranceDenominator = BigInteger.Pow(10, (bits[3] >> 16) & 255);
     }
+
+    private static IIndicatorState CreateBodyPercentile(int period, decimal percentile, bool above, int direction)
+    {
+#if !NETFRAMEWORK
+        return new CertifiedBodyPercentileState(period, percentile, above, direction);
+#else
+        return new PercentileCandleState(period, percentile, CandleLengthKind.Body, above, direction);
+#endif
+    }
+
+#if !NETFRAMEWORK
+    internal readonly struct CertifiedBody
+    {
+        private readonly double _upper, _lower, _rounded;
+        private readonly bool _exact;
+
+        internal CertifiedBody(double open, double close)
+        {
+            _upper = Math.Max(open, close); _lower = Math.Min(open, close);
+            if (!double.IsFinite(_upper) || !double.IsFinite(_lower))
+            {
+                // Preserve the original accumulator's rejection before warmup.
+                var invalid = new ExactMeanAccumulator(); invalid.Add(_upper); invalid.Add(_lower, -1);
+            }
+            _exact = HilbertRoundedKernel.TryExactSum(_upper, -_lower, out double rounded);
+            _rounded = rounded;
+        }
+
+        internal bool AtLeast(in CertifiedBody other)
+        {
+            if (_exact && other._exact) return _rounded >= other._rounded;
+            // Rounding is monotone, so unequal rounded lengths prove ordering,
+            // including a finite value versus an overflowed positive length.
+            if (_rounded > other._rounded) return true;
+            if (_rounded < other._rounded) return false;
+            // Equal rounded lengths can hide distinct exact bodies. Reconstruct
+            // their original dyadic difference rather than treating them as tied.
+            var difference = new ExactMeanAccumulator();
+            difference.Add(_upper); difference.Add(_lower, -1);
+            difference.Add(other._upper, -1); difference.Add(other._lower);
+            return difference.Sign >= 0;
+        }
+    }
+
+    private sealed class CertifiedBodyPercentileState : IIndicatorState
+    {
+        private readonly Queue<CertifiedBody> _window = new();
+        private readonly int _period, _rank, _direction;
+        private readonly bool _above;
+
+        internal CertifiedBodyPercentileState(int period, decimal percentile, bool above, int direction)
+        {
+            _period = period; _above = above; _direction = direction;
+            var bits = decimal.GetBits(percentile);
+            var numerator = new BigInteger(unchecked((uint)bits[0]))
+                + (new BigInteger(unchecked((uint)bits[1])) << 32)
+                + (new BigInteger(unchecked((uint)bits[2])) << 64);
+            var denominator = BigInteger.Pow(10, (bits[3] >> 16) & 255);
+            _rank = (int)((numerator * (period - 1) + denominator - 1) / denominator);
+        }
+
+        public void Reset() => _window.Clear();
+
+        public double Update(in Bar bar)
+        {
+            var current = new CertifiedBody(bar.Open, bar.Close);
+            bool ready = _window.Count >= _period - 1;
+            bool direction = !(_direction > 0 && bar.Close <= bar.Open || _direction < 0 && bar.Close >= bar.Open);
+            int atMost = 1;
+            if (ready && direction && _rank != 0)
+            {
+                bool skip = _window.Count == _period;
+                int remaining = _period - 1;
+                foreach (var previous in _window)
+                {
+                    if (skip) { skip = false; continue; }
+                    if (current.AtLeast(previous)) atMost++;
+                    remaining--;
+                    if (atMost > _rank || atMost + remaining <= _rank) break;
+                }
+            }
+            double result = ready && direction && (atMost > _rank) == _above ? 1 : 0;
+            if (_window.Count == _period) _window.Dequeue();
+            _window.Enqueue(current);
+            return result;
+        }
+    }
+#endif
 
     public void Reset()
     {
