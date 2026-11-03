@@ -92,6 +92,14 @@ SCOPES['stoch-compact-smoothing'] = dict(
     totals=(30,6), baseline_phase='targeted', baseline_totals=(60,12))
 
 
+SCOPES['sum-directional-range'] = dict(
+    fixtures={'SharedSkenderStrengthBenchmarks': {'Skender.GetAdx':'Skender.GetAdx'}},
+    implicit_fixtures=set(),
+    paths={'src/Indicators/SumSeededDirectionalIndex.cs',
+           'tests/ModelsTests/SumDirectionalExecutionTests.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(60,12))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 

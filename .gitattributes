@@ -86,3 +86,4 @@ benchmarks/plans/hosted-pmo-compact-ema-20261103.json text eol=lf
 benchmarks/plans/hosted-quartic-interval-20261103.json text eol=lf
 benchmarks/plans/hosted-combined-compact-kernels-20261103.json text eol=lf
 benchmarks/plans/hosted-stoch-compact-smoothing-20261103.json text eol=lf
+benchmarks/plans/hosted-sum-directional-range-20261103.json text eol=lf
