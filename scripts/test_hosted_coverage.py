@@ -21,6 +21,7 @@ class CoverageEvidenceTests(unittest.TestCase):
         self.plan = read(PLAN)
         self.plan.pop('coverage_shards', None)
         self.plan.pop('coverage_harness', None)
+        self.plan['measurement_policy'].pop('operation_timeout_seconds', None)
         self.plan.pop('standalone_variants', None)
         self.plan['coverage_reference'] = {'published': 'baseline'}
         self.plan['qualify_variants'] = self.plan['trix_preflight'] = False
