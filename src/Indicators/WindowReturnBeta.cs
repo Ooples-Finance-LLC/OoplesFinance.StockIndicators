@@ -210,6 +210,16 @@ public sealed class WindowBetaStatistics : MultiOutputIndicatorBase, IIndicatorV
                 )
             );
 
+    internal static double SquaredDifference(double up, double down)
+    {
+        // Keep the exact difference and square in their compact dyadic domain;
+        // expand only when needed, and retain the original single final rounding.
+        var difference = JurikDyadic.FromDouble(up);
+        difference.Subtract(JurikDyadic.FromDouble(down));
+        difference.Square();
+        return difference.Mean(1);
+    }
+
     internal sealed class State(
         int period,
         ReturnBetaSelection selection,
@@ -255,12 +265,7 @@ public sealed class WindowBetaStatistics : MultiOutputIndicatorBase, IIndicatorV
                 output[3] = up.Ratio(down);
                 output[10] = 1;
             }
-            var difference =
-                ExactVarianceWindow.Units(output[1]) - ExactVarianceWindow.Units(output[2]);
-            output[4] = ExactMeanAccumulator.UnitRatio(
-                difference * difference,
-                BigInteger.One << 1074
-            );
+            output[4] = SquaredDifference(output[1], output[2]);
             output[11] = 1;
         }
     }
