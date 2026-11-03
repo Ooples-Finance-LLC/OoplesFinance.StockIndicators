@@ -66,6 +66,12 @@ SCOPES['pmo-compact-ema'] = dict(
     paths={'src/Indicators/SeededPriceMomentum.cs', 'tests/ModelsTests/SeededPriceMomentumExecutionTests.cs'},
     totals=(30,6), baseline_phase='targeted', baseline_totals=(30,6))
 
+SCOPES['quartic-interval'] = dict(
+    fixtures={'SharedQuarticDynamicBenchmarks': {p:p for p in ('QuanTAlib.Mgdi','Skender.GetDynamic')}},
+    paths={'src/Indicators/ValuesBarExecution.QuarticAverage.cs',
+           'tests/ModelsTests/QuarticSharedExecutionTests.cs'},
+    totals=(60,12), baseline_phase='targeted', baseline_totals=(30,6))
+
 
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
