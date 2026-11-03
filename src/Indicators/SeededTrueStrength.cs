@@ -78,11 +78,13 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
     {
         private long _index = -1;
         private double _previous;
-        private JurikDyadic _signed,
+        private readonly CompactMacdValue.EmaRecurrence _firstRecurrence = new(period),
+            _secondRecurrence = new(smooth);
+        private CompactMacdValue _signed,
             _absolute,
             _secondSigned,
-            _secondAbsolute,
-            _sumSigned,
+            _secondAbsolute;
+        private JurikDyadic _sumSigned,
             _sumAbsolute,
             _seedSignal;
         private double? _signal;
@@ -119,8 +121,8 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
             _signed =
                 _absolute =
                 _secondSigned =
-                _secondAbsolute =
-                _sumSigned =
+                _secondAbsolute = default;
+            _sumSigned =
                 _sumAbsolute =
                 _seedSignal = default;
             _signal = null;
@@ -153,34 +155,35 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
                 _sumAbsolute.AddExact(absoluteChange);
                 if (_index == period)
                 {
-                    _signed = R(_sumSigned, period);
-                    _absolute = R(_sumAbsolute, period);
-                    _sumSigned = _signed;
-                    _sumAbsolute = _absolute;
+                    _signed = CompactMacdValue.FromRounded(R(_sumSigned, period));
+                    _absolute = CompactMacdValue.FromRounded(R(_sumAbsolute, period));
+                    _sumSigned = _signed.ToRoundedDyadic();
+                    _sumAbsolute = _absolute.ToRoundedDyadic();
                 }
                 return;
             }
-            _signed = R(Numerator(_signed, change, period), (long)period + 1);
-            _absolute = R(Numerator(_absolute, absoluteChange, period), (long)period + 1);
+            _signed = _firstRecurrence.Advance(_signed, CompactMacdValue.FromRounded(change));
+            _absolute = _firstRecurrence.Advance(_absolute, CompactMacdValue.FromRounded(absoluteChange));
             var secondStart = (long)period + smooth - 1;
             if (_index <= secondStart)
             {
-                _sumSigned.AddExact(_signed);
-                _sumAbsolute.AddExact(_absolute);
+                _sumSigned.AddExact(_signed.ToRoundedDyadic());
+                _sumAbsolute.AddExact(_absolute.ToRoundedDyadic());
                 if (_index < secondStart)
                     return;
-                _secondSigned = R(_sumSigned, smooth);
-                _secondAbsolute = R(_sumAbsolute, smooth);
+                _secondSigned = CompactMacdValue.FromRounded(R(_sumSigned, smooth));
+                _secondAbsolute = CompactMacdValue.FromRounded(R(_sumAbsolute, smooth));
                 _sumSigned = _sumAbsolute = default;
             }
             else
             {
-                _secondSigned = R(Numerator(_secondSigned, _signed, smooth), (long)smooth + 1);
-                _secondAbsolute = R(Numerator(_secondAbsolute, _absolute, smooth), (long)smooth + 1);
+                _secondSigned = _secondRecurrence.Advance(_secondSigned, _signed);
+                _secondAbsolute = _secondRecurrence.Advance(_secondAbsolute, _absolute);
             }
-            var percent = _secondSigned;
+            var percent = _secondSigned.ToRoundedDyadic();
             percent.Multiply(100);
-            double? tsi = _secondAbsolute.Sign == 0 ? null : percent.Ratio(_secondAbsolute);
+            var absolute = _secondAbsolute.ToRoundedDyadic();
+            double? tsi = absolute.Sign == 0 ? null : percent.Ratio(absolute);
             Publish(tsi, 0, output);
             if (_index == secondStart)
             {
