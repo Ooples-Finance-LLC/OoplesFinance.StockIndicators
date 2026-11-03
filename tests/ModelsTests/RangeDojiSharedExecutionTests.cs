@@ -34,6 +34,24 @@ public sealed class RangeDojiSharedExecutionTests(ITestOutputHelper log)
     }
     [Theory]
     [InlineData(0)] [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(4)]
+    public async Task UnrepresentableRangeDifferenceDoesNotRoundThresholdEquality(int kind)
+    {
+        foreach (double low in new[] { Math.ScaleB(1d, -1000), 0d })
+        {
+            // Rounding 10-tiny to 10 would turn a strict rejection into the
+            // inclusive body-equality match. Every pattern shares this gate.
+            var current = kind == 2 ? new Bar(default, 0, 5, 0, 1, 1)
+                : new Bar(default, 4, 5, 0, 5, 1);
+            Bar[] bars = [new(default, 0, 10, low, 0, 1), new(default, 0, 10, low, 0, 1), current];
+            var owner = Create(kind, 1);
+            var state = (IIndicatorState)owner.CreateState();
+            Assert.Equal(low == 0 ? 100d : 0d, bars.Select(b => state.Update(b)).Last());
+            await Check(bars, owner);
+        }
+    }
+
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(4)]
     public void ExistingOrdinaryStateUpdatesAllocateNothing(int kind)
     {
         var owner = Create(kind, 10);

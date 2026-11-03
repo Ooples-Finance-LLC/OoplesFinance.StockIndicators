@@ -142,9 +142,17 @@ internal sealed class AverageRangeDojiState(int period, int warmup, AverageRange
     public double Update(in Bar bar)
     {
         var result = _seen >= warmup && Matches(bar) ? 100d : 0d;
-        _ranges.Enqueue((bar.High, bar.Low));
-        _rangeSum.Add(bar.High);
-        _rangeSum.Add(bar.Low, -1);
+        var rangeUpper = bar.High;
+        var rangeLower = bar.Low;
+#if !NETFRAMEWORK
+        // Store one exact range when certified; otherwise retain both original
+        // addends, including overflow and differences below the rounding grid.
+        if (Binary64ArithmeticCertificate.TryDifference(rangeUpper, rangeLower, out double range))
+        { rangeUpper = range; rangeLower = 0; }
+#endif
+        _ranges.Enqueue((rangeUpper, rangeLower));
+        _rangeSum.Add(rangeUpper);
+        _rangeSum.Add(rangeLower, -1);
         if (_ranges.Count > period)
         {
             var expired = _ranges.Dequeue();
