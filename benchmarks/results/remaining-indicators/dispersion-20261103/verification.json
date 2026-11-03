@@ -1,0 +1,55 @@
+{
+  "source": "c56ad6ab7273dc5e4e3c2834e07bf1a488b2739a",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-dispersion-20261103",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0
+    },
+    "restore-comparator": {
+      "exit_code": 0
+    },
+    "build-and-gpu": {
+      "exit_code": 0
+    },
+    "unit": {
+      "exit_code": 0
+    },
+    "parity": {
+      "exit_code": 0
+    }
+  },
+  "compiler_process_isolation": true,
+  "active": null,
+  "unit": {
+    "passed": 71,
+    "classes": {
+      "CompactDispersionMomentsTests": 1,
+      "CompactDispersionTests": 48,
+      "SharedDispersionWindowTests": 6,
+      "CompactDeviationBandsTests": 6,
+      "SharedDeviationBandsTests": 10
+    },
+    "sha256": "823989b6446d959c79787626c2dc185fc0a73256ba98b24118250f7a04dba395"
+  },
+  "parity": {
+    "passed": 55,
+    "classes": {
+      "DispersionComparisonTests": 13,
+      "ClassicBandsComparisonTests": 10,
+      "DeviationBandsComparisonTests": 10,
+      "SkenderDeviationComparisonTests": 10,
+      "RemainingDeviationFamilyBenchmarkTests": 12
+    },
+    "sha256": "e4a418bfa9b52119617fc0ab56ba3e5b4382d24cfb2658f24eb5f30a77464918"
+  },
+  "status": "correctness-complete",
+  "gpu_passed": 100,
+  "source_fingerprint": "3f6dd582b71b0656f6dd707fe6b205e993e381e238d85975742bf85cb5a2db7d",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "41e759366219418a13f5fa41faf6f17c073ca6ed93ddbc8c8e03c7cfa6ef5eaf",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "41e759366219418a13f5fa41faf6f17c073ca6ed93ddbc8c8e03c7cfa6ef5eaf",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "41e759366219418a13f5fa41faf6f17c073ca6ed93ddbc8c8e03c7cfa6ef5eaf",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "41e759366219418a13f5fa41faf6f17c073ca6ed93ddbc8c8e03c7cfa6ef5eaf"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}
