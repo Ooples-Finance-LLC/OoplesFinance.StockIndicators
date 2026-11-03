@@ -118,6 +118,10 @@ SCOPES['stoch-raw-certificate'] = dict(
     totals=(30,6), baseline_phase='targeted', baseline_totals=(30,6))
 
 
+SCOPES['trend-star-certified-bodies'] = {
+    **SCOPES['trend-star-compact-ranks'], 'baseline_totals': (30,6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
