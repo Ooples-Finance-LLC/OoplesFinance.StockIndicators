@@ -76,7 +76,8 @@ public sealed class SeededPriceMomentum : MultiOutputIndicatorBase, IIndicatorVa
     {
         private long _index = -1;
         private double _previous;
-        private readonly CompactMacdValue.EmaRecurrence _signalRecurrence = new(signal);
+        private readonly CompactMacdValue.EmaRecurrence _firstRecurrence = new(period - 1),
+            _secondRecurrence = new(Math.Max(1, smooth - 1)), _signalRecurrence = new(signal);
         private CompactMacdValue _first,
             _second,
             _signal;
@@ -112,9 +113,12 @@ public sealed class SeededPriceMomentum : MultiOutputIndicatorBase, IIndicatorVa
             return R(previous, divisor);
         }
 
-        private static CompactMacdValue Advance(CompactMacdValue previous, CompactMacdValue current, int length)
+        private static CompactMacdValue Advance(CompactMacdValue previous, CompactMacdValue current, int length,
+            in CompactMacdValue.EmaRecurrence recurrence)
         {
-            if (length > 2) return previous.AdvanceFixedEma(current, 2, length);
+            // EmaRecurrence(n) has weights n-1 and 2 over n+1. Setting
+            // n=length-1 gives PMO's exact weights length-2 and 2 over length.
+            if (length > 2) return recurrence.Advance(previous, current);
             // Smoothing one is nonconvex; smoothing two replaces the prior.
             // Retain the existing exact expression for both boundary cases.
             return CompactMacdValue.FromRounded(Smooth(previous.ToRoundedDyadic(),
@@ -158,7 +162,7 @@ public sealed class SeededPriceMomentum : MultiOutputIndicatorBase, IIndicatorVa
                 _firstSum = default;
             }
             else
-                _first = Advance(_first, CompactMacdValue.FromRounded(roc), period);
+                _first = Advance(_first, CompactMacdValue.FromRounded(roc), period, _firstRecurrence);
             var scaled = _first.ToRoundedDyadic();
             scaled.Multiply(10);
             scaled = scaled.Rounded();
@@ -172,7 +176,7 @@ public sealed class SeededPriceMomentum : MultiOutputIndicatorBase, IIndicatorVa
                 _secondSum = default;
             }
             else
-                _second = Advance(_second, CompactMacdValue.FromRounded(scaled), smooth);
+                _second = Advance(_second, CompactMacdValue.FromRounded(scaled), smooth, _secondRecurrence);
             output[0] = _second.Publish();
             output[2] = 1;
             var signalStart = secondStart + signal - 1;
