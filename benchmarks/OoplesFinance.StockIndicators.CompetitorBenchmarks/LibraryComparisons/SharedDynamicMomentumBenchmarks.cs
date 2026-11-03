@@ -53,8 +53,10 @@ public class SharedDynamicMomentumBenchmarks
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new DynamicMomentumStrength(), IndicatorHistoryMode.LatestOnly);
     // The tuple API avoids candle mapping. Compute eagerly returns its List;
     // casting preserves that native result without a measured normalization copy.
+    [InvocationCount(1)]
     [Benchmark(Baseline = true)] public List<decimal?> NativeSingle() =>
         (List<decimal?>)new DynamicMomentumIndexByTuple(_prices, 5, 10, 14, 30, 5).Compute();
+    [InvocationCount(1)]
     [Benchmark]
     public decimal?[] NativeParallel()
     {

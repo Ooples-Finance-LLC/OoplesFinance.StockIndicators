@@ -49,11 +49,13 @@ public class SharedTradyNativeCandleBenchmarks : SharedMappedBenchmarkBase
         _ => new FallingThreeMethodsPattern(20, 20)
     };
 
+    [InvocationCount(1)]
     [Benchmark(Baseline = true)]
     public object NativeSingle() => Operation == "DragonifyDoji"
         ? new DragonifyDojiByTuple(_prices, .1m, .1m).Compute()
         : ComputeNullable(_prices);
 
+    [InvocationCount(1)]
     [Benchmark]
     public object NativeParallel() => Operation == "DragonifyDoji"
         ? Parallel<bool>(static (prices, first, last) => new DragonifyDojiByTuple(prices, .1m, .1m).Compute(startIndex: first, endIndex: last))
