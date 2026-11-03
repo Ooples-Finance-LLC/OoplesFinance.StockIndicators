@@ -69,6 +69,47 @@ internal static class HilbertRoundedKernel
         return true;
     }
 
+    private static void AddTail(double value, ref double tail, ref double bound)
+    {
+        double next = tail + value;
+        double error = SumError(tail, value, next);
+        bound = Math.BitIncrement(bound + Math.Abs(error));
+        tail = next;
+    }
+
+    internal static bool TryFir(double value, double lag2, double lag4, double lag6, out double result)
+    {
+        result = 0;
+        double p = value * .0962, q = lag2 * .5769;
+        double r = -lag4 * .5769, s = -lag6 * .0962;
+        if (!SafeProduct(value, .0962, p) || !SafeProduct(lag2, .5769, q)
+            || !SafeProduct(-lag4, .5769, r) || !SafeProduct(-lag6, .0962, s)) return false;
+
+        // Product bounds keep every exact FMA and TwoSum residual normal or
+        // zero. Include all four product residuals and all three sum residuals.
+        double first = p + q, second = r + s, sum = first + second;
+        double tail = Math.FusedMultiplyAdd(value, .0962, -p), bound = 0;
+        AddTail(Math.FusedMultiplyAdd(lag2, .5769, -q), ref tail, ref bound);
+        AddTail(Math.FusedMultiplyAdd(-lag4, .5769, -r), ref tail, ref bound);
+        AddTail(Math.FusedMultiplyAdd(-lag6, .0962, -s), ref tail, ref bound);
+        AddTail(SumError(p, q, first), ref tail, ref bound);
+        AddTail(SumError(r, s, second), ref tail, ref bound);
+        AddTail(SumError(first, second, sum), ref tail, ref bound);
+
+        // Outward accumulation bounds every omitted tail-addition residual.
+        // Strict containment excludes uncertain midpoints; cancellation to zero
+        // and unsupported scales retain the existing exact path.
+        double rounded = sum + tail;
+        if (!double.IsFinite(rounded) || rounded == 0) return false;
+        double error = SumError(sum, tail, rounded);
+        double lower = Math.BitDecrement(error - bound), upper = Math.BitIncrement(error + bound);
+        double below = (rounded - Math.BitDecrement(rounded)) * .5;
+        double above = (Math.BitIncrement(rounded) - rounded) * .5;
+        if (!(lower > -below && upper < above)) return false;
+        result = rounded;
+        return true;
+    }
+
     internal static bool TrySmooth(double price, double a, double b, double c, out double result)
     {
         result = 0;
