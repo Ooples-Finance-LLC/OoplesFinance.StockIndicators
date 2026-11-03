@@ -1,0 +1,18 @@
+{
+  "qualified_source": "139d278a604cac41ea1a8e4fa83274242bb39c2e",
+  "baseline": "67acaff6bf2d8c8bf7b8358f7ea1576e1ee24737",
+  "timing_run": "41726781342",
+  "cases": 180,
+  "decisions": 36,
+  "verdicts": {
+    "faster": 32,
+    "inconclusive": 4
+  },
+  "local_hosted_equality": true,
+  "src_tests_exactly_qualified": true,
+  "unit": 15,
+  "comparator": 139,
+  "actual_gpu": 100,
+  "source_fingerprint": "bb933935e35bc2d2a421284f2784b63e1bd2f753e9882f70ce9a8cbe042d87e8",
+  "production_sha256": "819c5be920321fdde6b22bf47a590aa0d9ed69aa942ffbde5d4b5ccc6929ed22"
+}

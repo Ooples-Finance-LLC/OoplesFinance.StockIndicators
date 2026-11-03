@@ -132,6 +132,21 @@ public sealed class SumSeededDirectionalIndex
             return DivideRounded(previous, _divisor);
         }
 
+        private static JurikDyadic RoundedRange(double high, double low, double previous)
+        {
+#if !NETFRAMEWORK
+            // Binary64 rounding is monotone: max(round(a), round(b)) equals
+            // round(max(a,b)). Absolute differences preserve that identity.
+            // Overflow still needs the original unpublished extended exponent.
+            double value = Math.Max(high - low, Math.Max(Math.Abs(high - previous), Math.Abs(low - previous)));
+            if (double.IsFinite(value)) return JurikDyadic.FromDouble(value == 0 ? 0 : value); // NOSONAR: exact zero identity canonicalizes the dyadic zero sign.
+#endif
+            var wide = FearGreedWindow.TrueRange(high, low, previous);
+            var result = JurikDyadic.FromDouble(wide.Mantissa);
+            if (wide.UpperShift != 0) result.ScaleByPowerOfTwo(wide.UpperShift);
+            return result;
+        }
+
         private static void Publish(double? value, int slot, Span<double> output)
         {
             if (value.HasValue)
@@ -154,9 +169,7 @@ public sealed class SumSeededDirectionalIndex
                 dominance.Subtract(down);
                 var positive = up.Sign > 0 && dominance.Sign > 0 ? up.Rounded() : default;
                 var negative = down.Sign > 0 && dominance.Sign < 0 ? down.Rounded() : default;
-                var trueRange = FearGreedWindow.TrueRange(bar.High, bar.Low, _previous.Close);
-                var range = JurikDyadic.FromDouble(trueRange.Mantissa);
-                if (trueRange.UpperShift != 0) range.ScaleByPowerOfTwo(trueRange.UpperShift);
+                var range = RoundedRange(bar.High, bar.Low, _previous.Close);
                 if (_index <= period)
                 {
                     _positive.AddExact(positive);
