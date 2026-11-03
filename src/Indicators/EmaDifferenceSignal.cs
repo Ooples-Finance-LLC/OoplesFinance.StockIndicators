@@ -162,7 +162,7 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
         }
     }
 
-    private sealed class CompactAverage(int period, bool first)
+    internal sealed class CompactAverage(int period, bool first)
     {
         private readonly CompactMacdValue.EmaRecurrence _recurrence = new(period);
         private long _count;
