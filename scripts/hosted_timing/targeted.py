@@ -72,6 +72,17 @@ SCOPES['quartic-interval'] = dict(
            'tests/ModelsTests/QuarticSharedExecutionTests.cs'},
     totals=(60,12), baseline_phase='targeted', baseline_totals=(30,6))
 
+SCOPES['combined-compact-kernels'] = dict(
+    fixtures={
+        'SharedDeviationAverageBenchmarks': {'QuanTAlib.Dsma':'QuanTAlib.Dsma'},
+        'SharedTaWindowNativeBenchmarks': {'TaLib.Functions.Accbands':'TaLib.Functions.Accbands'}},
+    implicit_fixtures={'SharedDeviationAverageBenchmarks'},
+    paths={'src/Indicators/ValuesBarExecution.DeviationAverage.cs',
+           'tests/ModelsTests/DeviationAverageSharedExecutionTests.cs',
+           'src/Indicators/ValuesBarExecution.Acceleration.cs',
+           'tests/ModelsTests/AccelerationSharedExecutionTests.cs'},
+    totals=(60,12), baseline_phase='targeted', baseline_totals=(60,12))
+
 
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
@@ -115,7 +126,8 @@ def verify_reference(plan):
             expected_methods = ['Ooples', 'Competitor'] if batch else [
                 'BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']
             assert task['methods'] == expected_methods
-            assert bool(task.get('implicit_pair')) == (task['fixture'] == 'SharedTaHilbertTrendModeBenchmarks')
+            assert bool(task.get('implicit_pair')) == (task['fixture'] in scope.get(
+                'implicit_fixtures', {'SharedTaHilbertTrendModeBenchmarks'}))
             assert bool(task.get('variance_parameter')) == (task['fixture'] == 'SharedDispersionBenchmarks')
             category = 'batch' if batch else 'builder'
             for operation in task['operations']:
