@@ -64,5 +64,5 @@
     "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "b59ead93149d1808116e8d39e78c49668782b78e2d193b1980ee7f5d68c86336",
     "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "b59ead93149d1808116e8d39e78c49668782b78e2d193b1980ee7f5d68c86336"
   },
-  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+  "note": "Approved master dependency reconciliation from AiDotNet.Tensors0.144.0 to0.146.0; fresh source-bound CPU and actual GPU correctness. Historical performance evidence remains on original source; no timings reused or relabeled."
 }
