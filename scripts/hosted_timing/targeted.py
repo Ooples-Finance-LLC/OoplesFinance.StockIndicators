@@ -232,6 +232,9 @@ SCOPES['smoothed-accumulation-certified-ema'] = dict(
     totals=(60,12), baseline_phase='targeted', baseline_totals=(30,6))
 
 
+SCOPES['combined-directional-accumulation'] = {'fixtures': {'SharedSmoothedAccumulationBenchmarks': {'Skender.GetChaikinOsc': 'Skender.GetChaikinOsc', 'TaLib.Functions.AdOsc': 'TaLib.Functions.AdOsc'}, 'SharedTaDirectionalBenchmarks': {'TaLib.Functions.PlusDM': 'TaLib.Functions.PlusDM', 'TaLib.Functions.MinusDM': 'TaLib.Functions.MinusDM', 'TaLib.Functions.PlusDI': 'TaLib.Functions.PlusDI', 'TaLib.Functions.MinusDI': 'TaLib.Functions.MinusDI', 'TaLib.Functions.Dx': 'TaLib.Functions.Dx', 'TaLib.Functions.Adx': 'TaLib.Functions.Adx', 'TaLib.Functions.Adxr': 'TaLib.Functions.Adxr'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/PriorSeededDirectionalMeasure.cs', 'tests/ModelsTests/PriorDirectionalWeightedCertificateTests.cs', 'src/Indicators/SmoothedAccumulationOscillator.cs'}, 'totals': (270, 54), 'shards': 9, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
