@@ -265,6 +265,9 @@ SCOPES['klinger-private-blend'] = dict(
 SCOPES['combined-ratio-klinger'] = {'fixtures': {'SharedKlingerBenchmarks': {'Skender.GetKvo': 'Skender.GetKvo'}, 'SharedTaDirectionalBenchmarks': {'TaLib.Functions.PlusDM': 'TaLib.Functions.PlusDM', 'TaLib.Functions.MinusDM': 'TaLib.Functions.MinusDM', 'TaLib.Functions.PlusDI': 'TaLib.Functions.PlusDI', 'TaLib.Functions.MinusDI': 'TaLib.Functions.MinusDI', 'TaLib.Functions.Dx': 'TaLib.Functions.Dx', 'TaLib.Functions.Adx': 'TaLib.Functions.Adx', 'TaLib.Functions.Adxr': 'TaLib.Functions.Adxr'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/KlingerPrivateBlendTests.cs', 'tests/ModelsTests/PriorDirectionalRatioTests.cs', 'src/Indicators/KlingerVolumeWithSignal.cs', 'src/Indicators/PriorSeededDirectionalMeasure.cs'}, 'totals': (240, 48), 'shards': 8, 'baseline_phase': 'targeted', 'baseline_totals': (210, 42)}
 
 
+SCOPES['klinger-after-directional-ratios'] = {'fixtures': {'SharedKlingerBenchmarks': {'Skender.GetKvo': 'Skender.GetKvo'}, 'SharedTaDirectionalBenchmarks': {'TaLib.Functions.Adx': 'TaLib.Functions.Adx', 'TaLib.Functions.Adxr': 'TaLib.Functions.Adxr', 'TaLib.Functions.Dx': 'TaLib.Functions.Dx', 'TaLib.Functions.MinusDI': 'TaLib.Functions.MinusDI', 'TaLib.Functions.MinusDM': 'TaLib.Functions.MinusDM', 'TaLib.Functions.PlusDI': 'TaLib.Functions.PlusDI', 'TaLib.Functions.PlusDM': 'TaLib.Functions.PlusDM'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/KlingerPrivateBlendTests.cs', 'src/Indicators/KlingerVolumeWithSignal.cs'}, 'totals': (240, 48), 'shards': 8, 'baseline_phase': 'targeted', 'baseline_totals': (210, 42)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
