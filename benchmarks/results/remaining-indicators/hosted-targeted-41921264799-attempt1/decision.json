@@ -743,7 +743,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-41921264799-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "0ebf3e96fdf2a635f7de6ca6d946363741b60929",
+  "integrated_paths": [
+    "src/Indicators/ClassicPriceOscillator.cs",
+    "tests/ModelsTests/ClassicPpoNormalizationTests.cs"
+  ],
+  "report_sha256": "ebb9047929959af2290efbd9beea1201d471d20ad1bfd3282c8ac8eea84b712b",
+  "report_archive": "benchmarks/results/remaining-indicators/classic-ppo-normalization-report-integration-20261104"
 }

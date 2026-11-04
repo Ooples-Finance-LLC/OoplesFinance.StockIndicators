@@ -13658,7 +13658,7 @@
     "src/Indicators/ClassicDeviationBands.cs": "3fb04c999651744fb69ee8384e0387329ff2787c1015caf284728534b1db1f42",
     "src/Indicators/ClassicMacd.cs": "d1fd058f07d3bf3e31c9199689566e8043cea1df459a92e4ef48a1ea73f58923",
     "src/Indicators/ClassicMovingAverage.cs": "ece49e747eed1c8c3e386e0fc948cf86f6a77464d4f6c7639c92695652c10f22",
-    "src/Indicators/ClassicPriceOscillator.cs": "e7bf9fb3374352fd1e61e2689e357f687828cfb89908493089efdf3dadadae1c",
+    "src/Indicators/ClassicPriceOscillator.cs": "c9b73bd6ad8cd54b2b65e5f54652b65cd61ed75c0814bd7b34b9a0fd847c61f0",
     "src/Indicators/ClassicStochastic.cs": "2cd38f33d5a24086fb10f1df8d6456de6d2691debc69b814b215bf9313304577",
     "src/Indicators/ClassicStochasticRsi.cs": "addfd0745be1a8547599c71590f819dded39811b70f9dafde024a5a1af7923ce",
     "src/Indicators/CompensatedExponentialAverage.cs": "7d9d22d86b3a8d5f483893974a805b78957e80da8b604ca47814b41e892d8ce8",
