@@ -141,6 +141,16 @@ SCOPES['curvature-wide-slope'] = dict(
     totals=(30,6), baseline_phase='targeted', baseline_totals=(180,36))
 
 
+SCOPES['curvature-packed-statistics'] = dict(
+    fixtures=SCOPES['curvature-wide-slope']['fixtures'],
+    implicit_fixtures={'SharedCurvatureBenchmarks'},
+    paths={'src/Indicators/ValuesBarExecution.Curvature.cs',
+           'src/Indicators/ValuesBarExecution.CurvatureWide.cs',
+           'src/Indicators/ValuesBarExecution.CurvaturePacked.cs',
+           'tests/ModelsTests/CurvatureSharedExecutionTests.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(30,6))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
