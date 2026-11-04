@@ -191,6 +191,8 @@ public sealed class WindowAverageEnvelope : MultiOutputIndicatorBase, IIndicator
             IDisposable
     {
         private readonly object _average = AverageState(period, average);
+        private readonly ExactMeanAccumulator.ProductCoefficient _positivePercent = new(percent),
+            _negativePercent = new(-percent);
         private long _count;
 
         public void Reset()
@@ -225,12 +227,13 @@ public sealed class WindowAverageEnvelope : MultiOutputIndicatorBase, IIndicator
             output[3] = 1;
             if (!FrameworkCompatibility.IsFinite(center))
                 return; // The enclosing runtime rejects the nonfinite centerline.
+            var price = new ExactMeanAccumulator.ProductFactor(center);
             var upper = new ExactMeanAccumulator();
-            upper.Add(center, 100);
-            upper.AddProduct(center, percent);
+            upper.AddFactor(price, 100);
+            upper.AddProduct(in price, in _positivePercent);
             var lower = new ExactMeanAccumulator();
-            lower.Add(center, 100);
-            lower.AddProduct(center, percent, -1);
+            lower.AddFactor(price, 100);
+            lower.AddProduct(in price, in _negativePercent);
             output[1] = upper.Mean(100);
             output[2] = lower.Mean(100);
         }
