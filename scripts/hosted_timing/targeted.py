@@ -140,6 +140,13 @@ SCOPES['beta-squared-difference'] = dict(
     totals=(30,6), baseline_phase='targeted', baseline_totals=(180,36))
 
 
+SCOPES['doji-range-certificates'] = dict(
+    fixtures={'SharedRangeDojiBenchmarks': {'TaLib.Candles.'+name:'TaLib.Candles.'+name
+        for name in ('Doji','DragonflyDoji','GravestoneDoji','LongLeggedDoji','TakuriLine')}},
+    paths={'src/Indicators/AverageRangeDojiCandles.cs', 'tests/ModelsTests/RangeDojiSharedExecutionTests.cs'},
+    totals=(150,30), baseline_phase='targeted', baseline_totals=(30,6))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
