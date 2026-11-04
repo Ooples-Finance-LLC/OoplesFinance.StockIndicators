@@ -177,6 +177,12 @@ public sealed class PriorSeededDirectionalMeasure
 
         private RocBankValue Smooth(RocBankValue previous, RocBankValue current)
         {
+#if !NETFRAMEWORK
+            if (previous.UpperShift == 0 && current.UpperShift == 0
+                && SumSeededDirectionalIndex.WeightedCertificate.TrySum(
+                    previous.Mantissa, current.Mantissa, period, period, out var rounded))
+                return new RocBankValue(rounded);
+#endif
             var sum = new ExactMeanAccumulator();
             AddWeighted(ref sum, previous, _priorCoefficient, period - 1);
             AddWeighted(ref sum, current, _currentCoefficient, period);
@@ -284,10 +290,17 @@ public sealed class PriorSeededDirectionalMeasure
             }
             else if (hasDirection)
             {
-                var average = new ExactMeanAccumulator();
-                average.AddProduct(new ExactMeanAccumulator.ProductFactor(_average), _priorCoefficient);
-                average.Add(dx);
-                _average = average.Mean(period);
+#if !NETFRAMEWORK
+                if (SumSeededDirectionalIndex.WeightedCertificate.TrySum(_average, dx, period, 1, out var rounded))
+                    _average = rounded;
+                else
+#endif
+                {
+                    var average = new ExactMeanAccumulator();
+                    average.AddProduct(new ExactMeanAccumulator.ProductFactor(_average), _priorCoefficient);
+                    average.Add(dx);
+                    _average = average.Mean(period);
+                }
             }
             var available = _index >= seedIndex + unstable;
             if (measure == PriorDirectionalMeasure.Average)

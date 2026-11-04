@@ -151,6 +151,11 @@ public sealed class SmoothedAccumulationOscillator
                             return;
                         }
                     }
+                    if (EmaDifferenceSignal.VolumeAverage.TryBlend(previous, input, period, out var certified))
+                    {
+                        Value = JurikDyadic.FromDouble(certified);
+                        return;
+                    }
                     if (Binary64ArithmeticCertificate.TryProduct(previous, _weight, out var weighted)
                         && Binary64ArithmeticCertificate.TryDifference(weighted, -input, out var exactNumerator))
                     {
