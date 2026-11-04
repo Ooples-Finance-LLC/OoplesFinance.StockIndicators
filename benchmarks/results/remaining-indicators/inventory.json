@@ -13647,7 +13647,7 @@
     "src/Indicators/AnalyticWeightedAverages.cs": "20840c3ed4b8d2b289285f6706a8020179ab8e12a2fd5b504104e390a5b3f749",
     "src/Indicators/ArnaudLegouxWindow.cs": "b5a4d8a85d5b22609e72baf15f9a856301a2bcb5bd042071581fdab177a95872",
     "src/Indicators/AverageRangeDojiCandles.cs": "6f990481090aaf5bdd4992ef683836e3330ba140c53d43beb88fa5612ce68312",
-    "src/Indicators/AwesomeWithDetails.cs": "c1cb61ebca9b0376635d58d8a8bcb65822947f863f87c5a4542cb911c70553dd",
+    "src/Indicators/AwesomeWithDetails.cs": "c0d059bb01953c0f1fb92270f38874515d5241fee36726e6417657d771d5b781",
     "src/Indicators/BalanceOfPowerWithValidity.cs": "102a8cd07e15a2cc0dad603ed674a5ce37a90f27b544bdde9e3849bd34f6dee5",
     "src/Indicators/BarSnapshot.cs": "de2a90eabfe9736c7371a5398f68c49c88eab0ef3a78c1ee4115b8844767b61e",
     "src/Indicators/BarSource.cs": "58ebb0ebb5b990f2b48a8657e81edabe02ba99060debfea5d6d5edf79917349e",
