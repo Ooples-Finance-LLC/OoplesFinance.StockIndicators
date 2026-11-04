@@ -105,3 +105,4 @@ benchmarks/plans/hosted-crow-soldier-active-snapshots-20261104.json text eol=lf
 benchmarks/plans/hosted-prior-directional-weighted-certificate-20261104.json text eol=lf
 benchmarks/plans/hosted-smoothed-accumulation-certified-ema-20261104.json text eol=lf
 benchmarks/plans/hosted-combined-directional-accumulation-20261104.json text eol=lf
+benchmarks/plans/hosted-combined-directional-accumulation-cap-20261104.json text eol=lf

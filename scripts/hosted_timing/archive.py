@@ -4,7 +4,7 @@ import gzip
 import hashlib
 import subprocess
 
-from .pipeline import PLAN, read, write, digest, verify_inputs
+from .pipeline import PLAN, REPO, read, write, digest, verify_inputs
 from .verify import collect
 
 
@@ -23,7 +23,7 @@ def archive(raw, prepared, repo, phase):
     original = prepared/'original-preparation.json'
     if original.exists():
         blobs['prepared/original-preparation.json'] = original.read_bytes()
-        blobs['original-plan.json'] = (repo/read(PLAN)['reuse_inputs']['plan']).read_bytes()
+        blobs['original-plan.json'] = (REPO/read(PLAN)['reuse_inputs']['plan']).read_bytes()
     blobs['plan.json'] = PLAN.read_bytes()
     blobs.update({'scripts/'+p.name:p.read_bytes() for p in Path(__file__).parent.glob('*.py')})
     blobs['candidate-source.patch'] = subprocess.check_output(['git','diff','--binary',

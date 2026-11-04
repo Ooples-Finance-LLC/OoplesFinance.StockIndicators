@@ -440,6 +440,12 @@ def measure(inputs, out, phase, shard, diagnostic=None):
         raise
 
 
+def targeted_max_parallel(plan):
+    limit = plan.get('matrix', {}).get('max_parallel', 2)
+    assert type(limit) is int and 1 <= limit <= 256
+    return limit
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('mode',choices=['prepare','measure','collect','collect-preflight'])
@@ -462,6 +468,7 @@ def main():
                 output.write('coverage_matrix=' + json.dumps(list(phase_shards(read(PLAN), 'coverage'))) + '\n')
                 output.write('targeted_only=' + str(bool(read(PLAN).get('targeted_reference'))).lower() + '\n')
                 output.write('targeted_matrix=' + json.dumps(list(phase_shards(read(PLAN), 'targeted')) if read(PLAN).get('targeted_reference') else []) + '\n')
+                output.write('targeted_max_parallel=' + str(targeted_max_parallel(read(PLAN))) + '\n')
     elif args.mode == 'measure':
         measure(args.inputs.resolve(),args.out.resolve(),args.phase,args.shard,args.diagnostic)
     else:
