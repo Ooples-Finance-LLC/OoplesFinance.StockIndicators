@@ -225,6 +225,13 @@ SCOPES['prior-directional-weighted-certificate'] = dict(
     totals=(210,42), baseline_phase='targeted', baseline_totals=(30,6))
 
 
+
+SCOPES['smoothed-accumulation-certified-ema'] = dict(
+    fixtures={'SharedSmoothedAccumulationBenchmarks': {p:p for p in ('Skender.GetChaikinOsc','TaLib.Functions.AdOsc')}},
+    implicit_fixtures=set(), paths={'src/Indicators/SmoothedAccumulationOscillator.cs'},
+    totals=(60,12), baseline_phase='targeted', baseline_totals=(30,6))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
