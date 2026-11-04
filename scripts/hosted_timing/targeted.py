@@ -175,6 +175,9 @@ SCOPES['envelope-band-certificate'] = dict(
     totals=(30,6), baseline_phase='targeted', baseline_totals=(30,6))
 
 
+SCOPES['pvo-volume-dispatch'] = dict(SCOPES['pvo-certified-ema'])
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
