@@ -168,6 +168,13 @@ SCOPES['pvo-certified-ema'] = dict(
     totals=(120,24), shards=3, baseline_phase='targeted', baseline_totals=(30,6))
 
 
+SCOPES['envelope-band-certificate'] = dict(
+    fixtures={'SharedSkenderDiagnosticsBenchmarks': {'Skender.GetMaEnvelopes':'Skender.GetMaEnvelopes'}},
+    implicit_fixtures=set(),
+    paths={'src/Indicators/WindowAverageEnvelope.cs', 'tests/ModelsTests/EnvelopeBandCertificateTests.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(30,6))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
