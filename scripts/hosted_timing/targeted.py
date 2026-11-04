@@ -151,6 +151,13 @@ SCOPES['curvature-packed-statistics'] = dict(
     totals=(30,6), baseline_phase='targeted', baseline_totals=(30,6))
 
 
+SCOPES['envelope-coefficient-cache'] = dict(
+    fixtures={'SharedSkenderDiagnosticsBenchmarks': {'Skender.GetMaEnvelopes':'Skender.GetMaEnvelopes'}},
+    implicit_fixtures=set(),
+    paths={'src/Indicators/WindowAverageEnvelope.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(30,6))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
