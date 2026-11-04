@@ -1,0 +1,68 @@
+{
+  "source": "7b27814b7f32a9d8d664f42501accaadcf0e74bd",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-dependency-reconciliation-20261104",
+  "status": "correctness-complete",
+  "active": null,
+  "unit": {
+    "passed": 64,
+    "classes": {
+      "SelectedDirectionalStateTests": 14,
+      "AdxWeightedCertificateTests": 6,
+      "PriorDirectionalWeightedCertificateTests": 7,
+      "PriorDirectionalRawStageTests": 9,
+      "AwesomeArithmeticCertificateTests": 6,
+      "PriorDirectionalRatioTests": 4,
+      "KlingerVolumeWithSignalBuilderTests": 8,
+      "CompactKlingerSchaffEmaTests": 2,
+      "KlingerPrivateBlendTests": 8
+    },
+    "sha256": "01674f6a7f4783998e3bf08c18173a20fc3597618f9053e306f3d2a56b14404d"
+  },
+  "parity": {
+    "passed": 38,
+    "classes": {
+      "TaDirectionalComparisonTests": 16,
+      "SharedTaDirectionalBenchmarkTests": 7,
+      "KlingerComparisonTests": 5,
+      "SharedKlingerBenchmarkTests": 10
+    },
+    "sha256": "79ccacdc70f073ccc2769636fdf7848428aa41f830e38aafc0979948ecaae39c"
+  },
+  "build_origin": {
+    "run_id": "41913843547",
+    "workflow_head": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "7b27814b7f32a9d8d664f42501accaadcf0e74bd",
+    "artifact_id": 13364836353,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/41913843547"
+  },
+  "compiler_process_isolation": true,
+  "dependency_copy_mode": "Verified immutable CI artifacts; changed binaries installed without local compilation",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "build-and-gpu": {
+      "exit_code": 0,
+      "location": "CI build and actual local GPU"
+    },
+    "unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "parity": {
+      "exit_code": 0,
+      "location": "CI"
+    }
+  },
+  "workflow_finalization_note": "Successful immutable producer job used for actual GPU verification while aggregate run finalized; final workflow success now independently confirmed, all runtime hashes/source/TRX/GPU evidence reverified without duplicate GPU execution.",
+  "gpu_passed": 100,
+  "source_fingerprint": "c3dad847d5266f34688bfc8f3cf16fec6848a6f5a05889a1b7317378be16814a",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "b59ead93149d1808116e8d39e78c49668782b78e2d193b1980ee7f5d68c86336",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "b59ead93149d1808116e8d39e78c49668782b78e2d193b1980ee7f5d68c86336",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "b59ead93149d1808116e8d39e78c49668782b78e2d193b1980ee7f5d68c86336",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "b59ead93149d1808116e8d39e78c49668782b78e2d193b1980ee7f5d68c86336"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}
