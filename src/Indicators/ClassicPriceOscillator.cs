@@ -155,6 +155,22 @@ public sealed class ClassicPriceOscillator : MultiOutputIndicatorBase, IIndicato
                 output[1] = 1;
                 return;
             }
+            if (_percentage && double.IsFinite(_f[0]) && double.IsFinite(_s[0]))
+            {
+                double fast = _f[0], slow = _s[0];
+                double absoluteFast = Math.Abs(fast), absoluteSlow = Math.Abs(slow);
+                // Same-sign operands within a factor of two have an exact
+                // binary64 difference (Sterbenz), including gradual underflow.
+                // Certify normalization separately to avoid double rounding.
+                if ((fast >= 0) == (slow >= 0)
+                    && absoluteFast <= 2 * absoluteSlow && absoluteSlow <= 2 * absoluteFast
+                    && AwesomeWithDetails.Arithmetic.TryNormalize(fast - slow, slow, out var normalized))
+                {
+                    output[0] = normalized;
+                    output[1] = 1;
+                    return;
+                }
+            }
 #endif
             var f = _fast.RoundedUnits;
             var s = _slow.RoundedUnits;
