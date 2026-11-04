@@ -245,6 +245,16 @@ SCOPES['prior-directional-raw-stages'] = dict(
     totals=(210,42), baseline_phase='targeted', baseline_totals=(270,54))
 
 
+
+SCOPES['prior-directional-ratios'] = dict(
+    fixtures={'SharedTaDirectionalBenchmarks': {p:p for p in (
+        'TaLib.Functions.PlusDM','TaLib.Functions.MinusDM','TaLib.Functions.PlusDI',
+        'TaLib.Functions.MinusDI','TaLib.Functions.Dx','TaLib.Functions.Adx','TaLib.Functions.Adxr')}},
+    implicit_fixtures=set(), paths={'src/Indicators/PriorSeededDirectionalMeasure.cs',
+        'tests/ModelsTests/PriorDirectionalRatioTests.cs'},
+    totals=(210,42), baseline_phase='targeted', baseline_totals=(210,42))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
