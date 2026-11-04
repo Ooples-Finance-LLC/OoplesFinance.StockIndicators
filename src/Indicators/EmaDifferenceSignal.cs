@@ -192,17 +192,112 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
         }
     }
 
-    internal sealed class State(EmaDifferenceSignal owner) : IMultiOutputState
+#if !NETFRAMEWORK
+    // Separate from CompactAverage: Klinger, Schaff and signal recurrences keep
+    // their existing arithmetic. Only finite raw-volume EMA inputs use this tier.
+    internal sealed class VolumeAverage(int period, bool first)
     {
-        private readonly CompactAverage _fast = new(owner.FastPeriod, owner.FirstPrice),
-            _slow = new(owner.SlowPeriod, owner.FirstPrice),
-            _signal = new(owner.SignalPeriod, owner.FirstPrice);
+        private readonly CompactMacdValue.EmaRecurrence _recurrence = new(period);
+        private long _count;
+        private CompactMacdValue _sum, _value;
+        private double _previous;
 
         public void Reset()
         {
-            _fast.Reset();
-            _slow.Reset();
+            _count = 0;
+            _sum = _value = default;
+            _previous = 0;
+        }
+
+        public CompactMacdValue? Add(double input)
+        {
+            if (_count < (first ? 1 : period))
+            {
+                _sum += CompactMacdValue.Of(input);
+                if (++_count < (first ? 1 : period)) return null;
+                _value = _sum.Round(first ? 1 : period);
+                _sum = default;
+            }
+            else if (TryBlend(_previous, input, period, out var rounded))
+            {
+                _previous = rounded;
+                return _value = CompactMacdValue.Of(rounded);
+            }
+            else
+                _value = _recurrence.Advance(_value, CompactMacdValue.Of(input));
+            _previous = _value.Publish();
+            return _value;
+        }
+
+        internal static bool TryBlend(double previous, double input, int period, out double rounded)
+        {
+            double a = period - 1, denominator = (long)period + 1;
+            double p = previous * a, q = input * 2;
+            rounded = 0;
+            // Nonzero products in [2^-450,2^450] keep TwoSum, residuals,
+            // adjacent rounding cells and all scaled bounds normal and finite.
+            static bool Safe(double x, double y, double product) => product == 0
+                ? x == 0 || y == 0
+                : Math.Abs(product) >= 3.4395525670743494e-136
+                    && Math.Abs(product) <= 2.9073548971824276e135;
+            if (!Safe(previous, a, p) || !Safe(input, 2, q)) return false;
+            double total = p + q, candidate = total / denominator;
+            if (candidate == 0 || !double.IsFinite(candidate)) return false;
+            double virtualTerm = total - p;
+            double sumError = (p - (total - virtualTerm)) + (q - virtualTerm);
+            double residual = Math.FusedMultiplyAdd(-candidate, denominator, total);
+            double productError = Math.FusedMultiplyAdd(previous, a, -p);
+            // Doubling is exact. Product rounding leaves <=31 residual bits.
+            // Correct division leaves an integer residual <=denominator/2 on
+            // candidate's binary grid, also <=31 bits. Both FMAs and TwoSum
+            // are therefore exact under the guarded normal-product bounds.
+            // 32 unit roundoffs of the absolute terms cover two tail additions,
+            // the bound calculation and both endpoint additions, with margin.
+            // The product guard also keeps this bound above underflow.
+            double error = (residual + sumError) + productError;
+            double bound = (Math.Abs(residual) + Math.Abs(sumError) + Math.Abs(productError))
+                * 3.552713678800501e-15; // 2^-48 = 32 * binary64 unit roundoff.
+            double low = error - bound, high = error + bound;
+            // Power-of-two gaps times the integer divisor are exact here.
+            double below = (candidate - Math.BitDecrement(candidate)) * .5 * denominator;
+            double above = (Math.BitIncrement(candidate) - candidate) * .5 * denominator;
+            // Strict containment excludes both midpoint ties and uncertain cells.
+            if (low <= -below || high >= above) return false;
+            rounded = candidate;
+            return true;
+        }
+    }
+#endif
+
+    internal sealed class State(EmaDifferenceSignal owner) : IMultiOutputState
+    {
+        private readonly CompactAverage? _fast = OrdinaryAverage(owner.FastPeriod, owner),
+            _slow = OrdinaryAverage(owner.SlowPeriod, owner);
+        private readonly CompactAverage _signal = new(owner.SignalPeriod, owner.FirstPrice);
+
+        private static CompactAverage? OrdinaryAverage(int period, EmaDifferenceSignal owner)
+        {
+#if !NETFRAMEWORK
+            if (owner.Volume && owner.Percentage) return null;
+#endif
+            return new(period, owner.FirstPrice);
+        }
+#if !NETFRAMEWORK
+        private readonly VolumeAverage? _volumeFast = owner.Volume && owner.Percentage
+                ? new(owner.FastPeriod, owner.FirstPrice) : null,
+            _volumeSlow = owner.Volume && owner.Percentage
+                ? new(owner.SlowPeriod, owner.FirstPrice) : null;
+#endif
+
+        public void Reset()
+        {
+            _fast?.Reset();
+            _slow?.Reset();
             _signal.Reset();
+#if !NETFRAMEWORK
+            _volumeFast?.Reset();
+            _volumeSlow?.Reset();
+#endif
         }
 
         private void Publish(CompactMacdValue? value, int slot, Span<double> output)
@@ -214,12 +309,43 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
             }
         }
 
+#if !NETFRAMEWORK
+        // Keep the PVO-only dispatch behind the existing volume-input branch.
+        // Ordinary price MACD never needs to inspect these optional states.
+        private void AddVolumeAverages(double volume, out CompactMacdValue? fast, out CompactMacdValue? slow)
+        {
+            if (_volumeFast is not null)
+            {
+                fast = _volumeFast.Add(volume);
+                slow = _volumeSlow!.Add(volume);
+            }
+            else
+            {
+                var value = CompactMacdValue.Of(volume);
+                fast = _fast!.Add(value);
+                slow = _slow!.Add(value);
+            }
+        }
+#endif
+
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            var value = CompactMacdValue.Of(owner.Volume ? bar.Volume : bar.Close);
-            var fast = _fast.Add(value);
-            var slow = _slow.Add(value);
+            CompactMacdValue? fast, slow;
+#if !NETFRAMEWORK
+            if (owner.Volume)
+                AddVolumeAverages(bar.Volume, out fast, out slow);
+            else
+#endif
+            {
+#if !NETFRAMEWORK
+                var value = CompactMacdValue.Of(bar.Close);
+#else
+                var value = CompactMacdValue.Of(owner.Volume ? bar.Volume : bar.Close);
+#endif
+                fast = _fast!.Add(value);
+                slow = _slow!.Add(value);
+            }
             Publish(fast, 3, output);
             Publish(slow, 4, output);
             if (!fast.HasValue || !slow.HasValue)
