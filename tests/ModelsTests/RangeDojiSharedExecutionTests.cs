@@ -45,7 +45,9 @@ public sealed class RangeDojiSharedExecutionTests(ITestOutputHelper log)
             Bar[] bars = [new(default, 0, 10, low, 0, 1), new(default, 0, 10, low, 0, 1), current];
             var owner = Create(kind, 1);
             var state = (IIndicatorState)owner.CreateState();
-            Assert.Equal(low == 0 ? 100d : 0d, bars.Select(b => state.Update(b)).Last());
+            double actual = 0;
+            foreach (var bar in bars) actual = state.Update(bar);
+            Assert.Equal(low == 0 ? 100d : 0d, actual);
             await Check(bars, owner);
         }
     }
