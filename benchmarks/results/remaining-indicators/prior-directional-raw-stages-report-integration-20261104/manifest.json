@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "23ef350d749744ce93d1c04aadbdf707d240dfaf5c3157d6697ce735f21041fc",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-raw-stages-report-integration-20261104/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "b5d71a3234731bded7377298020474b14aad20efd47d79de25e1d21d4e7cf111",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-raw-stages-report-integration-20261104/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "6c670d931dfd09bec12591568ff76c62928ed88b941f0d7fc0becde876e3a8fc",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-raw-stages-report-integration-20261104/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "75a72b6324d63e07c53be49d9e0e19c837914cfcd0681ace30e47604c1390491",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-raw-stages-report-integration-20261104/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "53f293508c7c16692ad8a9415ee5f276d5de314dee6ef247fd1cda1a10f4f712",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-raw-stages-report-integration-20261104/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "21a639d1674502dc769d214c0b866adbda1ea4eb2ad68eac1a510c27236df0d2",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-raw-stages-report-integration-20261104/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "1b2c6fa57fd3f8521af96cb8ac0360e5955291e2be9ae27a540875f53f9a0a6d",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-raw-stages-report-integration-20261104/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "cca657b17ebea557c08ff804322fbd0c94d72437f7d7bc1a6f2537df86b3650c",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-raw-stages-report-integration-20261104/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "9ea1bdba6a7996d4ec598e52296a1d129ccd35fab8432e3621185f5bcd288674",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-raw-stages-report-integration-20261104/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "1c41fe31af6ad7d54d4c17163fcf2ea89463248fd3e42d577597064186f73867",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-raw-stages-report-integration-20261104/updated-pair-details.png.gz"
+  }
+}
