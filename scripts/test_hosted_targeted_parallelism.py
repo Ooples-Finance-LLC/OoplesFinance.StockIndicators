@@ -1,6 +1,7 @@
 """Transport the frozen targeted concurrency cap into the GitHub strategy."""
 import json
 import os
+import subprocess
 from pathlib import Path
 import tempfile
 import unittest
@@ -25,7 +26,8 @@ class TargetedParallelismTests(unittest.TestCase):
                 lines = dict(line.split('=',1) for line in output.read_text().splitlines())
                 self.assertEqual(str(limit), lines['targeted_max_parallel'])
                 self.assertEqual(list(range(9)), json.loads(lines['targeted_matrix']))
-        workflow = (pipeline.REPO/'.github/workflows/cpu-kernel-performance.yml').read_text()
+        workflow = subprocess.check_output(['git','show','HEAD:.github/workflows/cpu-kernel-performance.yml'],
+            cwd=pipeline.REPO,text=True)
         self.assertIn('targeted_max_parallel: ${{ steps.prepare.outputs.targeted_max_parallel }}', workflow)
         targeted = workflow.split('  hosted-targeted:',1)[1].split('\n  hosted-collect-targeted:',1)[0]
         self.assertIn('max-parallel: ${{ fromJSON(needs.hosted-prepare.outputs.targeted_max_parallel) }}', targeted)
