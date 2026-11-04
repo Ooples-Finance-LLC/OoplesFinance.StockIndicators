@@ -205,6 +205,16 @@ SCOPES['awesome-private-arithmetic'] = dict(
     totals=(30,6), baseline_phase='targeted', baseline_totals=(180, 36))
 
 
+
+SCOPES['crow-soldier-active-snapshots'] = dict(
+    fixtures={'SharedTaReversalContinuationBenchmarks': {
+        'TaLib.Candles.ThreeBlackCrows':'ThreeBlackCrows',
+        'TaLib.Candles.IdenticalThreeCrows':'IdenticalThreeCrows',
+        'TaLib.Candles.ThreeWhiteSoldiers':'ThreeWhiteSoldiers'}},
+    implicit_fixtures=set(), paths={'src/Indicators/CrowSoldierCandles.cs'},
+    totals=(90,18), baseline_phase='targeted', baseline_totals=(30,6))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
