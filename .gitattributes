@@ -97,3 +97,4 @@ benchmarks/plans/hosted-envelope-coefficient-cache-20261103.json text eol=lf
 benchmarks/plans/hosted-pvo-certified-ema-20261103.json text eol=lf
 benchmarks/plans/hosted-envelope-band-certificate-20261103.json text eol=lf
 benchmarks/plans/hosted-pvo-volume-dispatch-20261103.json text eol=lf
+benchmarks/plans/hosted-adx-weighted-certificate-20261104.json text eol=lf

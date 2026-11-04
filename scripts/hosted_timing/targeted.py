@@ -178,6 +178,14 @@ SCOPES['envelope-band-certificate'] = dict(
 SCOPES['pvo-volume-dispatch'] = dict(SCOPES['pvo-certified-ema'])
 
 
+
+SCOPES['adx-weighted-certificate'] = dict(
+    fixtures={'SharedSkenderStrengthBenchmarks': {'Skender.GetAdx':'Skender.GetAdx'}},
+    implicit_fixtures=set(),
+    paths={'src/Indicators/SumSeededDirectionalIndex.cs', 'tests/ModelsTests/AdxWeightedCertificateTests.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(30, 6))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
