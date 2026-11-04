@@ -2515,7 +2515,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-41901544931-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "34d612ef7ed4e01a781298c892fef05e686a28c3",
+  "integrated_paths": [
+    "src/Indicators/KlingerVolumeWithSignal.cs",
+    "tests/ModelsTests/KlingerPrivateBlendTests.cs"
+  ],
+  "report_sha256": "13872205c7b47bf6e26318a35e48ac28d0fa40eae1851e5599afd5980a196faf",
+  "report_archive": "benchmarks/results/remaining-indicators/klinger-after-directional-ratios-report-integration-20261104"
 }
