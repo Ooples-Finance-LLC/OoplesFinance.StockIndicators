@@ -268,6 +268,9 @@ SCOPES['combined-ratio-klinger'] = {'fixtures': {'SharedKlingerBenchmarks': {'Sk
 SCOPES['klinger-after-directional-ratios'] = {'fixtures': {'SharedKlingerBenchmarks': {'Skender.GetKvo': 'Skender.GetKvo'}, 'SharedTaDirectionalBenchmarks': {'TaLib.Functions.Adx': 'TaLib.Functions.Adx', 'TaLib.Functions.Adxr': 'TaLib.Functions.Adxr', 'TaLib.Functions.Dx': 'TaLib.Functions.Dx', 'TaLib.Functions.MinusDI': 'TaLib.Functions.MinusDI', 'TaLib.Functions.MinusDM': 'TaLib.Functions.MinusDM', 'TaLib.Functions.PlusDI': 'TaLib.Functions.PlusDI', 'TaLib.Functions.PlusDM': 'TaLib.Functions.PlusDM'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/KlingerPrivateBlendTests.cs', 'src/Indicators/KlingerVolumeWithSignal.cs'}, 'totals': (240, 48), 'shards': 8, 'baseline_phase': 'targeted', 'baseline_totals': (210, 42)}
 
 
+SCOPES['classic-ppo-normalization'] = {'fixtures': {'SharedTaAverageNativeBenchmarks': {'TaLib.Functions.Apo': 'TaLib.Functions.Apo', 'TaLib.Functions.Ppo': 'TaLib.Functions.Ppo'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ClassicPriceOscillator.cs', 'tests/ModelsTests/ClassicPpoNormalizationTests.cs'}, 'totals': (60, 12), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (240, 48)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
@@ -291,8 +294,12 @@ def verify_reference(plan):
     assert not decision['verdicts'].get('slower', 0)
     assert str(decision['run_id']) == str(reference['run_id'])
     assert decision['sources']['new'] == reference['qualified_source']
-    assert not git('diff', '--name-only', reference['qualified_source'], plan['sources']['old'],
-                   '--', 'src', 'tests', BENCH, TESTS)
+    if reference.get('dependency_reconciliation'):
+        from .reconciled_baseline import verify_reconciliation
+        verify_reconciliation(reference, plan['sources']['old'])
+    else:
+        assert not git('diff', '--name-only', reference['qualified_source'], plan['sources']['old'],
+                       '--', 'src', 'tests', BENCH, TESTS)
     changed = set(git('diff', '--name-only', plan['sources']['old'], plan['sources']['successor'],
                       '--', 'src', 'tests').splitlines())
     assert changed == scope['paths'], changed
