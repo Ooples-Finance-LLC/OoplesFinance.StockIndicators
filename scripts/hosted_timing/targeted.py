@@ -197,6 +197,14 @@ SCOPES['fisher-exact-inputs'] = dict(
 SCOPES['combined-private-inputs'] = {'fixtures': {'SharedSkenderStrengthBenchmarks': {'Skender.GetAdx': 'Skender.GetAdx'}, 'SharedFisherBenchmarks': {'Skender.GetFisherTransform': 'Skender.GetFisherTransform'}, 'SharedSkenderEmaFamilyBenchmarks': {'Skender.GetMacd': 'Skender.GetMacd', 'Skender.GetPvo': 'Skender.GetPvo'}, 'SharedTradyMacdBenchmarks': {'Trady.Indicator.MovingAverageConvergenceDivergence': 'MovingAverageConvergenceDivergence', 'Trady.Indicator.MovingAverageConvergenceDivergenceHistogram': 'MovingAverageConvergenceDivergenceHistogram'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/WindowFisherTransform.cs', 'src/Indicators/SumSeededDirectionalIndex.cs', 'tests/ModelsTests/AdxWeightedCertificateTests.cs', 'src/Indicators/EmaDifferenceSignal.cs', 'tests/ModelsTests/FisherExactInputsTests.cs', 'tests/ModelsTests/PvoCertifiedAverageTests.cs'}, 'totals': (180, 36), 'shards': 6, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+
+SCOPES['awesome-private-arithmetic'] = dict(
+    fixtures={'SharedSkenderFiniteWindowBenchmarks': {'Skender.GetAwesome':'Skender.GetAwesome'}},
+    implicit_fixtures=set(),
+    paths={'src/Indicators/AwesomeWithDetails.cs', 'tests/ModelsTests/AwesomeArithmeticCertificateTests.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(180, 36))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
