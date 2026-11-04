@@ -131,10 +131,18 @@ public sealed class AwesomeWithDetails : MultiOutputIndicatorBase, IIndicatorVal
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            var midpoint = new ExactMeanAccumulator();
-            midpoint.Add(bar.High);
-            midpoint.Add(bar.Low);
-            var price = chained ? bar.Close : midpoint.Mean(2);
+            var price = bar.Close;
+#if !NETFRAMEWORK
+            // Keep malformed quote rejection even when Close supplies the input.
+            if (chained ? !double.IsFinite(bar.High) || !double.IsFinite(bar.Low)
+                : !Arithmetic.TryMidpoint(bar.High, bar.Low, out price))
+#endif
+            {
+                var midpoint = new ExactMeanAccumulator();
+                midpoint.Add(bar.High);
+                midpoint.Add(bar.Low);
+                price = chained ? bar.Close : midpoint.Mean(2);
+            }
             var fastMean = _fast.Add(price);
             var slowMean = _slow.Add(price);
             if (_slow.Count < slow)
@@ -151,12 +159,66 @@ public sealed class AwesomeWithDetails : MultiOutputIndicatorBase, IIndicatorVal
             output[2] = 1;
             if (!FrameworkCompatibility.IsFinite(oscillator) || price == 0)
                 return; // NOSONAR: Exact zero defines the ratio domain.
-            var numerator = new ExactMeanAccumulator();
-            numerator.Add(oscillator, 100);
-            var denominator = new ExactMeanAccumulator();
-            denominator.Add(price);
-            output[1] = numerator.Ratio(denominator);
+#if !NETFRAMEWORK
+            if (Arithmetic.TryNormalize(oscillator, price, out var normalized))
+                output[1] = normalized;
+            else
+#endif
+            {
+                var numerator = new ExactMeanAccumulator();
+                numerator.Add(oscillator, 100);
+                var denominator = new ExactMeanAccumulator();
+                denominator.Add(price);
+                output[1] = numerator.Ratio(denominator);
+            }
             output[3] = 1;
         }
     }
+
+#if !NETFRAMEWORK
+    internal static class Arithmetic
+    {
+        internal static bool TryMidpoint(double high, double low, out double midpoint)
+        {
+            midpoint = 0;
+            const double twiceMinimumNormal = 4.450147717014403e-308;
+            // Guard the original inputs: a rounded, normal half could still
+            // have lost a subnormal bit. Eligible halves are exact scalings.
+            if (!double.IsFinite(high) || !double.IsFinite(low)
+                || !(high == 0 || Math.Abs(high) >= twiceMinimumNormal)
+                || !(low == 0 || Math.Abs(low) >= twiceMinimumNormal))
+                return false;
+            double value = high * .5 + low * .5;
+            midpoint = value == 0 ? 0 : value; // NOSONAR: canonical exact zero.
+            return true;
+        }
+
+        internal static bool TryNormalize(double oscillator, double price, out double normalized)
+        {
+            normalized = 0;
+            if (!double.IsFinite(oscillator) || !double.IsFinite(price) || price == 0) return false;
+            if (oscillator == 0) return true; // NOSONAR: exact zero ratio identity.
+            double product = oscillator * 100, absolutePrice = Math.Abs(price);
+            if (Math.Abs(product) < 3.4395525670743494e-136 || Math.Abs(product) > 2.9073548971824276e135
+                || absolutePrice < 6.223015277861142e-61 || absolutePrice > 1.6069380442589903e60)
+                return false;
+            double candidate = product / price;
+            double productError = Math.FusedMultiplyAdd(oscillator, 100, -product);
+            double residual = Math.FusedMultiplyAdd(-candidate, price, product);
+            // Division rounding leaves |product-candidate*price| bounded by
+            // half a candidate ulp times |price|. On the exact product grid
+            // that residual has <=53 bits, so its FMA is exact. Integer100's
+            // product residual is exact too. The product/price guards keep
+            // residuals, scaled cells and the absolute 16u bound normal.
+            double error = residual + productError;
+            if (price < 0) error = -error;
+            double bound = (Math.Abs(residual) + Math.Abs(productError)) * 1.7763568394002505e-15; // 2^-49.
+            double below = (candidate - Math.BitDecrement(candidate)) * .5 * absolutePrice;
+            double above = (Math.BitIncrement(candidate) - candidate) * .5 * absolutePrice;
+            if (error - bound <= -below || error + bound >= above) return false;
+            normalized = candidate;
+            return true;
+        }
+    }
+#endif
 }
