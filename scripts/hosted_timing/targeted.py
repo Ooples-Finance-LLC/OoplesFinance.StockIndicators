@@ -215,6 +215,16 @@ SCOPES['crow-soldier-active-snapshots'] = dict(
     totals=(90,18), baseline_phase='targeted', baseline_totals=(30,6))
 
 
+
+SCOPES['prior-directional-weighted-certificate'] = dict(
+    fixtures={'SharedTaDirectionalBenchmarks': {p:p for p in (
+        'TaLib.Functions.PlusDM','TaLib.Functions.MinusDM','TaLib.Functions.PlusDI',
+        'TaLib.Functions.MinusDI','TaLib.Functions.Dx','TaLib.Functions.Adx','TaLib.Functions.Adxr')}},
+    implicit_fixtures=set(), paths={'src/Indicators/PriorSeededDirectionalMeasure.cs',
+        'tests/ModelsTests/PriorDirectionalWeightedCertificateTests.cs'},
+    totals=(210,42), baseline_phase='targeted', baseline_totals=(30,6))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
