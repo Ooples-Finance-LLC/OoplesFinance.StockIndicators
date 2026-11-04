@@ -246,15 +246,19 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
             double virtualTerm = total - p;
             double sumError = (p - (total - virtualTerm)) + (q - virtualTerm);
             double residual = Math.FusedMultiplyAdd(-candidate, denominator, total);
-            double low = Math.BitDecrement(residual), high = Math.BitIncrement(residual);
             double productError = Math.FusedMultiplyAdd(previous, a, -p);
-            low = Math.BitDecrement(low + Math.BitDecrement(productError));
-            high = Math.BitIncrement(high + Math.BitIncrement(productError));
-            // Doubling input is exact under the guarded normal-product bounds.
-            low = Math.BitDecrement(low + sumError);
-            high = Math.BitIncrement(high + sumError);
-            double below = Math.BitDecrement((candidate - Math.BitDecrement(candidate)) * .5 * denominator);
-            double above = Math.BitDecrement((Math.BitIncrement(candidate) - candidate) * .5 * denominator);
+            // Doubling is exact. Both FMA residuals have at most 31 significant
+            // bits: the weights/divisor are integers <=2^31. TwoSum is exact.
+            // 32 unit roundoffs of the absolute terms cover two tail additions,
+            // the bound calculation and both endpoint additions, with margin.
+            // The product guard also keeps this bound above underflow.
+            double error = (residual + sumError) + productError;
+            double bound = (Math.Abs(residual) + Math.Abs(sumError) + Math.Abs(productError))
+                * 3.552713678800501e-15; // 2^-48 = 32 * binary64 unit roundoff.
+            double low = error - bound, high = error + bound;
+            // Power-of-two gaps times the integer divisor are exact here.
+            double below = (candidate - Math.BitDecrement(candidate)) * .5 * denominator;
+            double above = (Math.BitIncrement(candidate) - candidate) * .5 * denominator;
             // Strict containment excludes both midpoint ties and uncertain cells.
             if (low <= -below || high >= above) return false;
             rounded = candidate;
