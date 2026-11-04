@@ -13717,7 +13717,7 @@
     "src/Indicators/JurikAdaptiveSnapshot.cs": "fd6a43f305186e9a7432d7299f55618ad47e399c204660181f6125d167209adc",
     "src/Indicators/KickingCandles.cs": "07818c550a85b01719f1fd1420ac1e0129d453303a8d906024cb2ea2948ae71e",
     "src/Indicators/KlingerVolumeSnapshot.cs": "1aaa08c90537b2957d7925272ab40d4873b0a0995661ce588883761e0ddc95ba",
-    "src/Indicators/KlingerVolumeWithSignal.cs": "c3f5c25f959325cf1c25a8f5846b92180c25e61f9818bc72301b37023eec9256",
+    "src/Indicators/KlingerVolumeWithSignal.cs": "63b093b883d8cff6d3262de69c3460bb87f2a806b1f7566fdc2e4cec0e00515d",
     "src/Indicators/LaggedPriceChange.cs": "73a5a1acd3edc29db4931496126e24b9b5cdffccebc92a28e3234eb2c767198a",
     "src/Indicators/LatestOnlyIndicatorRun.cs": "012e9e497126daa5d4fb09e6d38421432e81c475ebfc8ae8ccdc93bf50e19e4f",
     "src/Indicators/LiveBarSource.cs": "8444b8b458722e99331be75c5570d74e887147da255b61a97ac743d2b2573ed1",
