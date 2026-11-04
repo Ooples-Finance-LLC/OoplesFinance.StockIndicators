@@ -1,0 +1,10 @@
+{
+  "run_id": "41742702091",
+  "source": "47edb91b7d31cd67c7de30e6e19048c5cc59c221",
+  "producer": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+  "status": "test-fixture-failure",
+  "reason": "Select(state.Update).Last skipped required array history; five positive controls failed. Existing11 tests passed. Corrected with explicit foreach; assertions preserved.",
+  "repaired_source": "b48f3ec27ba73195ae4551e2e5cc34de314c640b",
+  "repaired_run": "41745530483",
+  "qualified": false
+}
