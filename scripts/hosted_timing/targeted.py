@@ -271,6 +271,9 @@ SCOPES['klinger-after-directional-ratios'] = {'fixtures': {'SharedKlingerBenchma
 SCOPES['classic-ppo-normalization'] = {'fixtures': {'SharedTaAverageNativeBenchmarks': {'TaLib.Functions.Apo': 'TaLib.Functions.Apo', 'TaLib.Functions.Ppo': 'TaLib.Functions.Ppo'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ClassicPriceOscillator.cs', 'tests/ModelsTests/ClassicPpoNormalizationTests.cs'}, 'totals': (60, 12), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (240, 48)}
 
 
+SCOPES['log-return-short-certificate'] = {'fixtures': {'SharedLogVolatilityBenchmarks': {'QuanTAlib.Historical': 'QuanTAlib.Historical', 'QuanTAlib.Realized': 'QuanTAlib.Realized'}}, 'implicit_fixtures': set(), 'paths': {'src/Helpers/CertifiedLogReturn.cs', 'tests/ModelsTests/ShortLogReturnCertificateTests.cs', 'src/Helpers/CertifiedLogReturn.Short.cs'}, 'totals': (60, 12), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
