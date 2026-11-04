@@ -18,5 +18,7 @@
   "rejected_pvo_and_cache_source_excluded": true,
   "source_integration": "37f75c4c27ef0213f70b3531afc6a56c8b7b4caa",
   "inventory_commit": "37f75c4c27ef0213f70b3531afc6a56c8b7b4caa",
-  "inventory_tests": 8
+  "inventory_tests": 8,
+  "report_sha256": "a52255bcdef87a4a8dfa596051c1dd29b848cabb9a650f15a41fde2830c1fa76",
+  "remaining_slower_10000": 215
 }
