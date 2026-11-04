@@ -203,6 +203,15 @@ public sealed class PriorSeededDirectionalMeasure
 
         private static double Ratio(RocBankValue value, RocBankValue divisor, int weight = 1)
         {
+#if !NETFRAMEWORK
+            if (value.UpperShift == 0 && divisor.UpperShift == 0)
+            {
+                if (value.Mantissa is 0 || divisor.Mantissa is 0) return 0;
+                if (weight == 1) return value.Mantissa / divisor.Mantissa;
+                if (weight == 100 && AwesomeWithDetails.Arithmetic.TryNormalize(
+                    value.Mantissa, divisor.Mantissa, out var rounded)) return rounded;
+            }
+#endif
             var numerator = new ExactMeanAccumulator(); value.AddTo(ref numerator, weight);
             var denominator = new ExactMeanAccumulator(); divisor.AddTo(ref denominator);
             return numerator.Ratio(denominator);
@@ -211,6 +220,11 @@ public sealed class PriorSeededDirectionalMeasure
         private static RocBankValue Direction(RocBankValue movement, RocBankValue range)
         {
             if (range.Mantissa is 0) return default;
+#if !NETFRAMEWORK
+            if (movement.UpperShift == 0 && range.UpperShift == 0
+                && AwesomeWithDetails.Arithmetic.TryNormalize(movement.Mantissa, range.Mantissa, out var rounded))
+                return new RocBankValue(rounded);
+#endif
             var numerator = new ExactMeanAccumulator(); movement.AddTo(ref numerator, 100);
             numerator.ScaleByPowerOfTwo(-range.UpperShift);
             // DI is an unpublished rounded stage for DX/ADX. Keep its upper
