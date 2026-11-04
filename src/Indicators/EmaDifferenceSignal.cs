@@ -247,8 +247,10 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
             double sumError = (p - (total - virtualTerm)) + (q - virtualTerm);
             double residual = Math.FusedMultiplyAdd(-candidate, denominator, total);
             double productError = Math.FusedMultiplyAdd(previous, a, -p);
-            // Doubling is exact. Both FMA residuals have at most 31 significant
-            // bits: the weights/divisor are integers <=2^31. TwoSum is exact.
+            // Doubling is exact. Product rounding leaves <=31 residual bits.
+            // Correct division leaves an integer residual <=denominator/2 on
+            // candidate's binary grid, also <=31 bits. Both FMAs and TwoSum
+            // are therefore exact under the guarded normal-product bounds.
             // 32 unit roundoffs of the absolute terms cover two tail additions,
             // the bound calculation and both endpoint additions, with margin.
             // The product guard also keeps this bound above underflow.
