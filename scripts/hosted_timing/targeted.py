@@ -245,6 +245,14 @@ SCOPES['prior-directional-raw-stages'] = dict(
     totals=(210,42), baseline_phase='targeted', baseline_totals=(270,54))
 
 
+
+SCOPES['klinger-private-blend'] = dict(
+    fixtures={'SharedKlingerBenchmarks': {'Skender.GetKvo':'Skender.GetKvo'}},
+    implicit_fixtures=set(), paths={'src/Indicators/KlingerVolumeWithSignal.cs',
+        'tests/ModelsTests/KlingerPrivateBlendTests.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(210,42))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
