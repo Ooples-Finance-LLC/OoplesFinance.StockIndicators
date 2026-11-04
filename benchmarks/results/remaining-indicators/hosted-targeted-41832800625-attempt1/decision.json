@@ -2819,7 +2819,15 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-41832800625-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "40634e458e83cc21ccb2417cef1d3654320618be",
+  "integrated_paths": [
+    "src/Indicators/PriorSeededDirectionalMeasure.cs",
+    "src/Indicators/SmoothedAccumulationOscillator.cs",
+    "tests/ModelsTests/PriorDirectionalWeightedCertificateTests.cs"
+  ],
+  "report_sha256": "23ef350d749744ce93d1c04aadbdf707d240dfaf5c3157d6697ce735f21041fc",
+  "report_archive": "benchmarks/results/remaining-indicators/combined-directional-accumulation-report-integration-20261104"
 }

@@ -1,0 +1,27 @@
+{
+  "source_integration_commit": "40634e458e83cc21ccb2417cef1d3654320618be",
+  "qualified_source": "683cbf03d39c1a496a0f6d4f2e113db8189a1d7b",
+  "compiled_source": "09c898994a4a9a863a60deb9d0c5ce168f2e4140",
+  "source_fingerprint": "d1a12ab3395567d0367d163688e04cef54cde5dc9af45ee8b6f77c2b11cc9f93",
+  "unit": 48,
+  "comparator": 43,
+  "actual_gpu": 100,
+  "inventory_tests": 8,
+  "production_sha256": "9bd1776e81ba89aede51e2814d3f911a4384053b19891d50682ff0498854809e",
+  "run_id": "41832800625",
+  "cases": 270,
+  "decisions": 54,
+  "verdicts": {
+    "faster": 32,
+    "inconclusive": 22
+  },
+  "integrated_paths": [
+    "src/Indicators/PriorSeededDirectionalMeasure.cs",
+    "src/Indicators/SmoothedAccumulationOscillator.cs",
+    "tests/ModelsTests/PriorDirectionalWeightedCertificateTests.cs"
+  ],
+  "excluded": [
+    "Crow/Soldier snapshot candidate"
+  ],
+  "verified_utc": "2026-11-04T13:31:10.819716+00:00"
+}
