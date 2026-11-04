@@ -126,6 +126,11 @@ public sealed class SumSeededDirectionalIndex
 
         private JurikDyadic Smooth(JurikDyadic previous, JurikDyadic current)
         {
+#if !NETFRAMEWORK
+            if (previous.TryDouble(out var prior) && current.TryDouble(out var input)
+                && WeightedCertificate.TrySum(prior, input, period, period, out var rounded))
+                return JurikDyadic.FromDouble(rounded);
+#endif
             previous.Multiply(period - 1);
             current.Multiply(period);
             previous.AddExact(current);
@@ -214,10 +219,17 @@ public sealed class SumSeededDirectionalIndex
                     }
                     else if (_average.HasValue)
                     {
-                        var sum = JurikDyadic.FromDouble(_average.Value);
-                        sum.Multiply(period - 1);
-                        sum.Add(dx);
-                        _average = sum.Ratio(_divisor);
+#if !NETFRAMEWORK
+                        if (WeightedCertificate.TrySum(_average.Value, dx, period, 1, out var rounded))
+                            _average = rounded;
+                        else
+#endif
+                        {
+                            var sum = JurikDyadic.FromDouble(_average.Value);
+                            sum.Multiply(period - 1);
+                            sum.Add(dx);
+                            _average = sum.Ratio(_divisor);
+                        }
                     }
                     averageOutput = _average;
                     Publish(averageOutput, 3, output);
@@ -233,4 +245,45 @@ public sealed class SumSeededDirectionalIndex
             _history.Enqueue(averageOutput);
         }
     }
+
+#if !NETFRAMEWORK
+    internal static class WeightedCertificate
+    {
+        // Certify the once-rounded (previous*(period-1)+input*weight)/period.
+        // Both callers supply already-rounded stages; extended values stay on
+        // the original dyadic path. This does not change DI-before-DX rounding.
+        internal static bool TrySum(double previous, double input, int period, int weight, out double rounded)
+        {
+            double a = period - 1, denominator = period;
+            double p = previous * a, q = input * weight;
+            rounded = 0;
+            static bool Safe(double x, double y, double product) => product == 0
+                ? x == 0 || y == 0
+                : Math.Abs(product) >= 3.4395525670743494e-136
+                    && Math.Abs(product) <= 2.9073548971824276e135;
+            if (!Safe(previous, a, p) || !Safe(input, weight, q)) return false;
+            double total = p + q, candidate = total / denominator;
+            if (candidate == 0 || !double.IsFinite(candidate)) return false;
+            double virtualTerm = total - p;
+            double sumError = (p - (total - virtualTerm)) + (q - virtualTerm);
+            double residual = Math.FusedMultiplyAdd(-candidate, denominator, total);
+            double previousError = Math.FusedMultiplyAdd(previous, a, -p);
+            double inputError = Math.FusedMultiplyAdd(input, weight, -q);
+            // Integer weights have at most 31 bits. Under the normal-product
+            // guard both product residuals and the division residual are exact,
+            // as is TwoSum. 64 unit roundoffs enclose the three tail additions,
+            // absolute-term sum, bound multiplication and endpoint additions.
+            double error = ((residual + sumError) + previousError) + inputError;
+            double bound = (Math.Abs(residual) + Math.Abs(sumError) + Math.Abs(previousError) + Math.Abs(inputError))
+                * 7.105427357601002e-15; // 2^-47 = 64 * binary64 unit roundoff.
+            double low = error - bound, high = error + bound;
+            double below = (candidate - Math.BitDecrement(candidate)) * .5 * denominator;
+            double above = (Math.BitIncrement(candidate) - candidate) * .5 * denominator;
+            // Strict containment rejects midpoint ties and uncertain cells.
+            if (low <= -below || high >= above) return false;
+            rounded = candidate;
+            return true;
+        }
+    }
+#endif
 }
