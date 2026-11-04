@@ -28,6 +28,40 @@ public sealed class PvoCertifiedAverageTests
     }
 
     [Fact]
+    public void BenchmarkScaleIntegerVolumesExerciseBothCertificateAndFallback()
+    {
+        foreach (int period in new[] { 12, 26 })
+        {
+            var actual = new EmaDifferenceSignal.VolumeAverage(period, false);
+            var reference = new EmaDifferenceSignal.Average(period, false);
+            var random = new Random(42);
+            double? previous = null;
+            int accepted = 0, fallback = 0;
+            for (int i = 0; i < 1000; i++)
+            {
+                // Match the four price draws preceding each benchmark volume.
+                for (int draw = 0; draw < 4; draw++) random.NextDouble();
+                double input = random.Next(1000, 500000);
+                if (previous.HasValue)
+                {
+                    if (EmaDifferenceSignal.VolumeAverage.TryBlend(previous.Value, input, period, out _)) accepted++;
+                    else fallback++;
+                }
+                var expected = reference.Add(JurikDyadic.FromDouble(input).RoundedUnits());
+                var result = actual.Add(input);
+                Assert.Equal(expected.HasValue, result.HasValue);
+                if (expected.HasValue)
+                {
+                    Assert.Equal(expected.Value, result!.Value.Units);
+                    previous = result.Value.Publish();
+                }
+            }
+            Assert.True(accepted > 0);
+            Assert.True(fallback > 0);
+        }
+    }
+
+    [Fact]
     public void AcceptedMixedSignAndScaleCellsMatchIntegerReference()
     {
         var random = new Random(32817);
