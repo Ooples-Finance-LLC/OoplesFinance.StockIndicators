@@ -1,0 +1,73 @@
+{
+  "run_id": 41832800625,
+  "workflow_head": "371209d6e99befe0bfd66344628de2510eade518",
+  "configured_max_parallel": 6,
+  "observed_active": 6,
+  "observed_queued": 3,
+  "jobs": [
+    {
+      "name": "hosted-targeted (4)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-11-04T12:52:41Z",
+      "completed_at": null
+    },
+    {
+      "name": "hosted-targeted (6)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-11-04T12:52:39Z",
+      "completed_at": null
+    },
+    {
+      "name": "hosted-targeted (3)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-11-04T12:52:41Z",
+      "completed_at": null
+    },
+    {
+      "name": "hosted-targeted (0)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-11-04T12:52:41Z",
+      "completed_at": null
+    },
+    {
+      "name": "hosted-targeted (5)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-11-04T12:52:42Z",
+      "completed_at": null
+    },
+    {
+      "name": "hosted-targeted (2)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-11-04T12:52:42Z",
+      "completed_at": null
+    },
+    {
+      "name": "hosted-targeted (1)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-11-04T12:52:42Z",
+      "completed_at": null
+    },
+    {
+      "name": "hosted-targeted (7)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-11-04T12:52:39Z",
+      "completed_at": null
+    },
+    {
+      "name": "hosted-targeted (8)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-11-04T12:52:39Z",
+      "completed_at": null
+    }
+  ],
+  "observed_utc": "2026-11-04T12:54:58.843338+00:00"
+}
