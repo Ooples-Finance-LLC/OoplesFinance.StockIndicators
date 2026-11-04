@@ -186,6 +186,14 @@ SCOPES['adx-weighted-certificate'] = dict(
     totals=(30,6), baseline_phase='targeted', baseline_totals=(30, 6))
 
 
+
+SCOPES['fisher-exact-inputs'] = dict(
+    fixtures={'SharedFisherBenchmarks': {'Skender.GetFisherTransform':'Skender.GetFisherTransform'}},
+    implicit_fixtures=set(),
+    paths={'src/Indicators/WindowFisherTransform.cs', 'tests/ModelsTests/FisherExactInputsTests.cs'},
+    totals=(30,6), baseline_phase='targeted', baseline_totals=(30, 6))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 

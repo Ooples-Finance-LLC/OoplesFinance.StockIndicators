@@ -1,0 +1,1316 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "SharedTaDirectionalBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "TaLib.Functions.PlusDM",
+              "pair": "TaLib.Functions.PlusDM"
+            },
+            {
+              "raw": "TaLib.Functions.MinusDM",
+              "pair": "TaLib.Functions.MinusDM"
+            },
+            {
+              "raw": "TaLib.Functions.PlusDI",
+              "pair": "TaLib.Functions.PlusDI"
+            },
+            {
+              "raw": "TaLib.Functions.MinusDI",
+              "pair": "TaLib.Functions.MinusDI"
+            },
+            {
+              "raw": "TaLib.Functions.Dx",
+              "pair": "TaLib.Functions.Dx"
+            },
+            {
+              "raw": "TaLib.Functions.Adx",
+              "pair": "TaLib.Functions.Adx"
+            },
+            {
+              "raw": "TaLib.Functions.Adxr",
+              "pair": "TaLib.Functions.Adxr"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 140,
+          "decisions": 28,
+          "estimated_active_seconds": 916.2
+        },
+        {
+          "fixture": "SharedSkenderAtrFamilyBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "Skender.GetChandelier",
+              "pair": "Skender.GetChandelier"
+            },
+            {
+              "raw": "Skender.GetKeltner",
+              "pair": "Skender.GetKeltner"
+            },
+            {
+              "raw": "Skender.GetStarcBands",
+              "pair": "Skender.GetStarcBands"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 60,
+          "decisions": 12,
+          "estimated_active_seconds": 529.8
+        },
+        {
+          "fixture": "SharedSmoothedAccumulationBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "Skender.GetChaikinOsc",
+              "pair": "Skender.GetChaikinOsc"
+            },
+            {
+              "raw": "TaLib.Functions.AdOsc",
+              "pair": "TaLib.Functions.AdOsc"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 40,
+          "decisions": 8,
+          "estimated_active_seconds": 433.2
+        },
+        {
+          "fixture": "SharedReverseWilderBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "QuanTAlib.Rma",
+              "pair": "QuanTAlib.Rma"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": true,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        },
+        {
+          "fixture": "SharedClassicBandsBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Bbands",
+              "pair": "TaLib.Functions.Bbands"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        }
+      ],
+      "cases": 280,
+      "decisions": 56,
+      "estimated_active_seconds": 2552.4
+    },
+    {
+      "index": 1,
+      "tasks": [
+        {
+          "fixture": "SharedTradyAverageBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "ExponentialMovingAverage",
+              "pair": "Trady.Indicator.ExponentialMovingAverage"
+            },
+            {
+              "raw": "WeightedMovingAverage",
+              "pair": "Trady.Indicator.WeightedMovingAverage"
+            },
+            {
+              "raw": "SimpleMovingAverageOscillator",
+              "pair": "Trady.Indicator.SimpleMovingAverageOscillator"
+            },
+            {
+              "raw": "ExponentialMovingAverageOscillator",
+              "pair": "Trady.Indicator.ExponentialMovingAverageOscillator"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 80,
+          "decisions": 16,
+          "estimated_active_seconds": 626.4
+        },
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "group": 6,
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Ppo",
+              "pair": "TaLib.Functions.Ppo"
+            },
+            {
+              "raw": "TaLib.Functions.Stoch",
+              "pair": "TaLib.Functions.Stoch"
+            },
+            {
+              "raw": "TaLib.Functions.StochF",
+              "pair": "TaLib.Functions.StochF"
+            },
+            {
+              "raw": "TaLib.Functions.StochRsi",
+              "pair": "TaLib.Functions.StochRsi"
+            },
+            {
+              "raw": "TaLib.Functions.T3",
+              "pair": "TaLib.Functions.T3"
+            },
+            {
+              "raw": "TaLib.Functions.Trix",
+              "pair": "TaLib.Functions.Trix"
+            },
+            {
+              "raw": "Trady.Indicator.AccumulationDistributionLine",
+              "pair": "Trady.Indicator.AccumulationDistributionLine"
+            },
+            {
+              "raw": "Trady.Indicator.ChandelierExit",
+              "pair": "Trady.Indicator.ChandelierExit"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 80,
+          "decisions": 16,
+          "estimated_active_seconds": 626.4
+        },
+        {
+          "fixture": "SharedTradyAtrChannelBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "ChandelierExit",
+              "pair": "Trady.Indicator.ChandelierExit"
+            },
+            {
+              "raw": "KeltnerChannels",
+              "pair": "Trady.Indicator.KeltnerChannels"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 40,
+          "decisions": 8,
+          "estimated_active_seconds": 433.2
+        },
+        {
+          "fixture": "SharedSkenderSmoothingBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "Skender.GetElderRay",
+              "pair": "Skender.GetElderRay"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        },
+        {
+          "fixture": "SharedSkenderStatisticsBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "Skender.GetBeta",
+              "pair": "Skender.GetBeta"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        }
+      ],
+      "cases": 240,
+      "decisions": 48,
+      "estimated_active_seconds": 2359.2
+    },
+    {
+      "index": 2,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "QuanTAlib.Afirma",
+              "pair": "QuanTAlib.Afirma"
+            },
+            {
+              "raw": "QuanTAlib.Dwma",
+              "pair": "QuanTAlib.Dwma"
+            },
+            {
+              "raw": "QuanTAlib.Fwma",
+              "pair": "QuanTAlib.Fwma"
+            },
+            {
+              "raw": "QuanTAlib.Rma",
+              "pair": "QuanTAlib.Rma"
+            },
+            {
+              "raw": "QuanTAlib.T3",
+              "pair": "QuanTAlib.T3"
+            },
+            {
+              "raw": "QuanTAlib.Wma",
+              "pair": "QuanTAlib.Wma"
+            },
+            {
+              "raw": "Skender.GetAdl",
+              "pair": "Skender.GetAdl"
+            },
+            {
+              "raw": "Skender.GetBeta",
+              "pair": "Skender.GetBeta"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 80,
+          "decisions": 16,
+          "estimated_active_seconds": 626.4
+        },
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "group": 7,
+          "operations": [
+            {
+              "raw": "Trady.Indicator.CommodityChannelIndex",
+              "pair": "Trady.Indicator.CommodityChannelIndex"
+            },
+            {
+              "raw": "Trady.Indicator.ExponentialMovingAverage",
+              "pair": "Trady.Indicator.ExponentialMovingAverage"
+            },
+            {
+              "raw": "Trady.Indicator.ExponentialMovingAverageOscillator",
+              "pair": "Trady.Indicator.ExponentialMovingAverageOscillator"
+            },
+            {
+              "raw": "Trady.Indicator.KeltnerChannels",
+              "pair": "Trady.Indicator.KeltnerChannels"
+            },
+            {
+              "raw": "Trady.Indicator.MovingAverageConvergenceDivergence",
+              "pair": "Trady.Indicator.MovingAverageConvergenceDivergence"
+            },
+            {
+              "raw": "Trady.Indicator.MovingAverageConvergenceDivergenceHistogram",
+              "pair": "Trady.Indicator.MovingAverageConvergenceDivergenceHistogram"
+            },
+            {
+              "raw": "Trady.Indicator.SimpleMovingAverageOscillator",
+              "pair": "Trady.Indicator.SimpleMovingAverageOscillator"
+            },
+            {
+              "raw": "Trady.Indicator.WeightedMovingAverage",
+              "pair": "Trady.Indicator.WeightedMovingAverage"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 80,
+          "decisions": 16,
+          "estimated_active_seconds": 626.4
+        },
+        {
+          "fixture": "SharedWeightedWindowBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "Wma",
+              "pair": "QuanTAlib.Wma"
+            },
+            {
+              "raw": "Dwma",
+              "pair": "QuanTAlib.Dwma"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 40,
+          "decisions": 8,
+          "estimated_active_seconds": 433.2
+        },
+        {
+          "fixture": "SharedSkenderRocBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "Skender.GetRocWb",
+              "pair": "Skender.GetRocWb"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        },
+        {
+          "fixture": "SharedPivotBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "Skender.GetRollingPivots",
+              "pair": "Skender.GetRollingPivots"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": true,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        }
+      ],
+      "cases": 240,
+      "decisions": 48,
+      "estimated_active_seconds": 2359.2
+    },
+    {
+      "index": 3,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "group": 1,
+          "operations": [
+            {
+              "raw": "Skender.GetCci",
+              "pair": "Skender.GetCci"
+            },
+            {
+              "raw": "Skender.GetChaikinOsc",
+              "pair": "Skender.GetChaikinOsc"
+            },
+            {
+              "raw": "Skender.GetChandelier",
+              "pair": "Skender.GetChandelier"
+            },
+            {
+              "raw": "Skender.GetCmf",
+              "pair": "Skender.GetCmf"
+            },
+            {
+              "raw": "Skender.GetElderRay",
+              "pair": "Skender.GetElderRay"
+            },
+            {
+              "raw": "Skender.GetKeltner",
+              "pair": "Skender.GetKeltner"
+            },
+            {
+              "raw": "Skender.GetMacd",
+              "pair": "Skender.GetMacd"
+            },
+            {
+              "raw": "Skender.GetPivotPoints",
+              "pair": "Skender.GetPivotPoints"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 80,
+          "decisions": 16,
+          "estimated_active_seconds": 626.4
+        },
+        {
+          "fixture": "SharedTaAverageNativeBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Ma",
+              "pair": "TaLib.Functions.Ma"
+            },
+            {
+              "raw": "TaLib.Functions.Apo",
+              "pair": "TaLib.Functions.Apo"
+            },
+            {
+              "raw": "TaLib.Functions.Ppo",
+              "pair": "TaLib.Functions.Ppo"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 60,
+          "decisions": 12,
+          "estimated_active_seconds": 529.8
+        },
+        {
+          "fixture": "SharedTaAdaptiveRateNativeBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Mavp",
+              "pair": "TaLib.Functions.Mavp"
+            },
+            {
+              "raw": "TaLib.Functions.Trix",
+              "pair": "TaLib.Functions.Trix"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 40,
+          "decisions": 8,
+          "estimated_active_seconds": 433.2
+        },
+        {
+          "fixture": "SharedCommodityChannelBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Cci",
+              "pair": "TaLib.Functions.Cci"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        },
+        {
+          "fixture": "SharedRecursiveStateBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "Ad",
+              "pair": "TaLib.Functions.Ad"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        }
+      ],
+      "cases": 220,
+      "decisions": 44,
+      "estimated_active_seconds": 2262.6
+    },
+    {
+      "index": 4,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "group": 2,
+          "operations": [
+            {
+              "raw": "Skender.GetPrs",
+              "pair": "Skender.GetPrs"
+            },
+            {
+              "raw": "Skender.GetPvo",
+              "pair": "Skender.GetPvo"
+            },
+            {
+              "raw": "Skender.GetRocWb",
+              "pair": "Skender.GetRocWb"
+            },
+            {
+              "raw": "Skender.GetRollingPivots",
+              "pair": "Skender.GetRollingPivots"
+            },
+            {
+              "raw": "Skender.GetSmaAnalysis",
+              "pair": "Skender.GetSmaAnalysis"
+            },
+            {
+              "raw": "Skender.GetStarcBands",
+              "pair": "Skender.GetStarcBands"
+            },
+            {
+              "raw": "Skender.GetT3",
+              "pair": "Skender.GetT3"
+            },
+            {
+              "raw": "Skender.GetTrix",
+              "pair": "Skender.GetTrix"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 80,
+          "decisions": 16,
+          "estimated_active_seconds": 626.4
+        },
+        {
+          "fixture": "SharedTaMacdNativeBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "TaLib.Functions.MacdExt",
+              "pair": "TaLib.Functions.MacdExt"
+            },
+            {
+              "raw": "TaLib.Functions.Macd",
+              "pair": "TaLib.Functions.Macd"
+            },
+            {
+              "raw": "TaLib.Functions.MacdFix",
+              "pair": "TaLib.Functions.MacdFix"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 60,
+          "decisions": 12,
+          "estimated_active_seconds": 529.8
+        },
+        {
+          "fixture": "SharedTradyMacdBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "MovingAverageConvergenceDivergence",
+              "pair": "Trady.Indicator.MovingAverageConvergenceDivergence"
+            },
+            {
+              "raw": "MovingAverageConvergenceDivergenceHistogram",
+              "pair": "Trady.Indicator.MovingAverageConvergenceDivergenceHistogram"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 40,
+          "decisions": 8,
+          "estimated_active_seconds": 433.2
+        },
+        {
+          "fixture": "SharedSkenderFiniteWindowBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "Skender.GetCci",
+              "pair": "Skender.GetCci"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        },
+        {
+          "fixture": "SharedAdlDetailsBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "Skender.GetAdl",
+              "pair": "Skender.GetAdl"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        }
+      ],
+      "cases": 220,
+      "decisions": 44,
+      "estimated_active_seconds": 2262.6
+    },
+    {
+      "index": 5,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "group": 3,
+          "operations": [
+            {
+              "raw": "Skender.GetZigZag",
+              "pair": "Skender.GetZigZag"
+            },
+            {
+              "raw": "TaLib.Functions.Accbands",
+              "pair": "TaLib.Functions.Accbands"
+            },
+            {
+              "raw": "TaLib.Functions.Ad",
+              "pair": "TaLib.Functions.Ad"
+            },
+            {
+              "raw": "TaLib.Functions.AdOsc",
+              "pair": "TaLib.Functions.AdOsc"
+            },
+            {
+              "raw": "TaLib.Functions.Adx",
+              "pair": "TaLib.Functions.Adx"
+            },
+            {
+              "raw": "TaLib.Functions.Adxr",
+              "pair": "TaLib.Functions.Adxr"
+            },
+            {
+              "raw": "TaLib.Functions.Apo",
+              "pair": "TaLib.Functions.Apo"
+            },
+            {
+              "raw": "TaLib.Functions.AvgDev",
+              "pair": "TaLib.Functions.AvgDev"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 80,
+          "decisions": 16,
+          "estimated_active_seconds": 626.4
+        },
+        {
+          "fixture": "SharedTaStochasticNativeBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Stoch",
+              "pair": "TaLib.Functions.Stoch"
+            },
+            {
+              "raw": "TaLib.Functions.StochF",
+              "pair": "TaLib.Functions.StochF"
+            },
+            {
+              "raw": "TaLib.Functions.StochRsi",
+              "pair": "TaLib.Functions.StochRsi"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 60,
+          "decisions": 12,
+          "estimated_active_seconds": 529.8
+        },
+        {
+          "fixture": "SharedTaWindowNativeBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Accbands",
+              "pair": "TaLib.Functions.Accbands"
+            },
+            {
+              "raw": "TaLib.Functions.AvgDev",
+              "pair": "TaLib.Functions.AvgDev"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 40,
+          "decisions": 8,
+          "estimated_active_seconds": 433.2
+        },
+        {
+          "fixture": "SharedTradyCciAdaptiveBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "CommodityChannelIndex",
+              "pair": "Trady.Indicator.CommodityChannelIndex"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        },
+        {
+          "fixture": "SharedTradyNativeVolumeBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "AccumulationDistributionLine",
+              "pair": "Trady.Indicator.AccumulationDistributionLine"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        }
+      ],
+      "cases": 220,
+      "decisions": 44,
+      "estimated_active_seconds": 2262.6
+    },
+    {
+      "index": 6,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "group": 4,
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Bbands",
+              "pair": "TaLib.Functions.Bbands"
+            },
+            {
+              "raw": "TaLib.Functions.Beta",
+              "pair": "TaLib.Functions.Beta"
+            },
+            {
+              "raw": "TaLib.Functions.Cci",
+              "pair": "TaLib.Functions.Cci"
+            },
+            {
+              "raw": "TaLib.Functions.Dx",
+              "pair": "TaLib.Functions.Dx"
+            },
+            {
+              "raw": "TaLib.Functions.HtDcPhase",
+              "pair": "TaLib.Functions.HtDcPhase"
+            },
+            {
+              "raw": "TaLib.Functions.HtSine",
+              "pair": "TaLib.Functions.HtSine"
+            },
+            {
+              "raw": "TaLib.Functions.HtTrendMode",
+              "pair": "TaLib.Functions.HtTrendMode"
+            },
+            {
+              "raw": "TaLib.Functions.Ma",
+              "pair": "TaLib.Functions.Ma"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 80,
+          "decisions": 16,
+          "estimated_active_seconds": 626.4
+        },
+        {
+          "fixture": "SharedSkenderEmaFamilyBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "Skender.GetMacd",
+              "pair": "Skender.GetMacd"
+            },
+            {
+              "raw": "Skender.GetPvo",
+              "pair": "Skender.GetPvo"
+            },
+            {
+              "raw": "Skender.GetTrix",
+              "pair": "Skender.GetTrix"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 60,
+          "decisions": 12,
+          "estimated_active_seconds": 529.8
+        },
+        {
+          "fixture": "SharedSkenderDiagnosticsBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "Skender.GetPrs",
+              "pair": "Skender.GetPrs"
+            },
+            {
+              "raw": "Skender.GetSmaAnalysis",
+              "pair": "Skender.GetSmaAnalysis"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 40,
+          "decisions": 8,
+          "estimated_active_seconds": 433.2
+        },
+        {
+          "fixture": "SharedTaHilbertTrendModeBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "TaLib.Functions.HtTrendMode",
+              "pair": "TaLib.Functions.HtTrendMode"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        },
+        {
+          "fixture": "SharedCmfBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "Skender.GetCmf",
+              "pair": "Skender.GetCmf"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        }
+      ],
+      "cases": 220,
+      "decisions": 44,
+      "estimated_active_seconds": 2262.6
+    },
+    {
+      "index": 7,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "group": 5,
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Macd",
+              "pair": "TaLib.Functions.Macd"
+            },
+            {
+              "raw": "TaLib.Functions.MacdExt",
+              "pair": "TaLib.Functions.MacdExt"
+            },
+            {
+              "raw": "TaLib.Functions.MacdFix",
+              "pair": "TaLib.Functions.MacdFix"
+            },
+            {
+              "raw": "TaLib.Functions.Mavp",
+              "pair": "TaLib.Functions.Mavp"
+            },
+            {
+              "raw": "TaLib.Functions.MinusDI",
+              "pair": "TaLib.Functions.MinusDI"
+            },
+            {
+              "raw": "TaLib.Functions.MinusDM",
+              "pair": "TaLib.Functions.MinusDM"
+            },
+            {
+              "raw": "TaLib.Functions.PlusDI",
+              "pair": "TaLib.Functions.PlusDI"
+            },
+            {
+              "raw": "TaLib.Functions.PlusDM",
+              "pair": "TaLib.Functions.PlusDM"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 80,
+          "decisions": 16,
+          "estimated_active_seconds": 626.4
+        },
+        {
+          "fixture": "SharedTillsonBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "Skender.GetT3",
+              "pair": "Skender.GetT3"
+            },
+            {
+              "raw": "TaLib.Functions.T3",
+              "pair": "TaLib.Functions.T3"
+            },
+            {
+              "raw": "QuanTAlib.T3",
+              "pair": "QuanTAlib.T3"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 60,
+          "decisions": 12,
+          "estimated_active_seconds": 529.8
+        },
+        {
+          "fixture": "SharedTaHilbertNativeBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "TaLib.Functions.HtDcPhase",
+              "pair": "TaLib.Functions.HtDcPhase"
+            },
+            {
+              "raw": "TaLib.Functions.HtSine",
+              "pair": "TaLib.Functions.HtSine"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 40,
+          "decisions": 8,
+          "estimated_active_seconds": 433.2
+        },
+        {
+          "fixture": "SharedFibonacciWeightedBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "QuanTAlib.Fwma",
+              "pair": "QuanTAlib.Fwma"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        },
+        {
+          "fixture": "SharedPairInputBenchmarks",
+          "group": 0,
+          "operations": [
+            {
+              "raw": "Beta",
+              "pair": "TaLib.Functions.Beta"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4,
+          "estimated_active_seconds": 336.6
+        }
+      ],
+      "cases": 220,
+      "decisions": 44,
+      "estimated_active_seconds": 2262.6
+    }
+  ],
+  "status": "frozen",
+  "created_utc": "2026-11-04T05:40:18.578651+00:00",
+  "sources": {
+    "published": "d37c540a9f3702d687e58ed8037106456bad4079",
+    "old": "d37c540a9f3702d687e58ed8037106456bad4079",
+    "successor": "b763344f1de834453834d30ee9a185695bf27817",
+    "variants": "d802cd918abdc4d3c85d5f0b26f14ec84861eadc"
+  },
+  "gpu_sources": {
+    "old": "d37c540a9f3702d687e58ed8037106456bad4079",
+    "successor": "b763344f1de834453834d30ee9a185695bf27817",
+    "variants": "d802cd918abdc4d3c85d5f0b26f14ec84861eadc"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "SharedFisherStateTests"
+    ],
+    "successor": [
+      "SharedFisherStateTests",
+      "FisherExactInputsTests"
+    ]
+  },
+  "qualify_variants": false,
+  "trix_preflight": false,
+  "targeted_reference": {
+    "scope": "fisher-exact-inputs",
+    "run_id": "41769857963",
+    "decision": "benchmarks/results/remaining-indicators/hosted-targeted-41769857963-attempt1/decision.json",
+    "sha256": "69898d3ae8e153f12ceaac1d31d9057aa092671aec03b875c9b6151e910e5abc",
+    "qualified_source": "0285a8217d791857cf3ddeeac34c1aa826d27d65"
+  },
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetFisherTransform",
+              "pair": "Skender.GetFisherTransform"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 1,
+      "tasks": [
+        {
+          "fixture": "SharedFisherBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetFisherTransform",
+              "pair": "Skender.GetFisherTransform"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        }
+      ],
+      "cases": 20,
+      "decisions": 4
+    }
+  ],
+  "matrix": {
+    "shards": 2,
+    "max_parallel": 2,
+    "timeout_minutes_per_shard": 180
+  },
+  "cases": 30,
+  "decisions": 6,
+  "affected_pairs": [
+    "Skender.GetFisherTransform"
+  ],
+  "source_correctness": {
+    "unit": 8,
+    "comparator": 8,
+    "actual_local_gpu": 100,
+    "source_sha256": "e4219c75742748f16c93ce4abb58c49edf926f24b514a56cb013556b558fd171",
+    "cpu_build_run": "41778914314",
+    "cpu_build_workflow_head": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a"
+  },
+  "scope": "Private exact Fisher midpoint and range-position shortcuts; guarded exact halves and TwoSum-certified differences preserve original exact and extended fallbacks.",
+  "call_graph": [
+    "WindowFisherTransform.State uses private exact-input shortcuts only. Skender.GetFisherTransform and canonical SharedFisherBenchmarks cover batch and all four builder arms. Position smoothing, clamp, log and trigger arithmetic are unchanged; shared helpers and legacy arithmetic are unchanged."
+  ],
+  "limits": [
+    "Exactly two source/test paths; fresh complete 30-case / 6-decision qualification.",
+    "At least one faster and zero slower; no pooling; existing SDK/runtime/warmup/iteration/CPU/build/hash/source gates retained."
+  ],
+  "approval": "User explicitly requested continued work on the remaining overall performance gaps after the previous bounded batch completed.",
+  "frozen_utc": "2026-11-04T05:40:18.578651+00:00"
+}
