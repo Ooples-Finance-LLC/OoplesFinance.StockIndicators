@@ -94,3 +94,4 @@ benchmarks/plans/hosted-combined-local-certificates-20261103.json text eol=lf
 benchmarks/plans/hosted-curvature-wide-slope-20261103.json text eol=lf
 benchmarks/plans/hosted-curvature-packed-statistics-20261103.json text eol=lf
 benchmarks/plans/hosted-envelope-coefficient-cache-20261103.json text eol=lf
+benchmarks/plans/hosted-pvo-certified-ema-20261103.json text eol=lf

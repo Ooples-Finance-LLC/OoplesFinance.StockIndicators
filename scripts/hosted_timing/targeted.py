@@ -158,6 +158,16 @@ SCOPES['envelope-coefficient-cache'] = dict(
     totals=(30,6), baseline_phase='targeted', baseline_totals=(30,6))
 
 
+SCOPES['pvo-certified-ema'] = dict(
+    fixtures={
+        'SharedSkenderEmaFamilyBenchmarks': {p:p for p in ('Skender.GetMacd', 'Skender.GetPvo')},
+        'SharedTradyMacdBenchmarks': {'Trady.Indicator.'+p:p for p in (
+            'MovingAverageConvergenceDivergence', 'MovingAverageConvergenceDivergenceHistogram')}},
+    implicit_fixtures=set(),
+    paths={'src/Indicators/EmaDifferenceSignal.cs', 'tests/ModelsTests/PvoCertifiedAverageTests.cs'},
+    totals=(120,24), shards=3, baseline_phase='targeted', baseline_totals=(30,6))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
