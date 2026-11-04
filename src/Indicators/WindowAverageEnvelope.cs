@@ -186,11 +186,78 @@ public sealed class WindowAverageEnvelope : MultiOutputIndicatorBase, IIndicator
             _ => new PlainMean(period, average == EnvelopeAverage.Ema),
         };
 
+#if !NETFRAMEWORK
+    internal readonly struct BandCertificate
+    {
+        private readonly double _upper, _lower;
+        private readonly bool _exactCoefficients;
+
+        internal BandCertificate(double percent)
+        {
+            _upper = 100 + percent;
+            _lower = 100 - percent;
+            _exactCoefficients = percent > 0 && double.IsFinite(percent)
+                && SumError(100, percent, _upper) == 0
+                && SumError(100, -percent, _lower) == 0;
+        }
+
+        private static double SumError(double a, double b, double sum)
+        {
+            double virtualTerm = sum - a;
+            return (a - (sum - virtualTerm)) + (b - virtualTerm);
+        }
+
+        internal bool TryPublish(double center, out double upper, out double lower)
+        {
+            upper = lower = 0;
+            return _exactCoefficients && double.IsFinite(center)
+                && TryBand(center, _upper, out upper)
+                && TryBand(center, _lower, out lower);
+        }
+
+        private static bool TryBand(double center, double coefficient, out double value)
+        {
+            value = 0;
+            if (center == 0 || coefficient == 0) return true;
+            double product = center * coefficient, magnitude = Math.Abs(product);
+            if (!(magnitude >= 3.4395525670743494e-136 && magnitude <= 2.9073548971824276e135))
+                return false; // Keep all residual and cell calculations normal.
+            double candidate = product / 100;
+            double productError = Math.FusedMultiplyAdd(center, coefficient, -product);
+            // The guarded product's FMA residual is exact. Division by integer
+            // 100 leaves <=50 units on candidate's binary grid; one adjacent
+            // retry leaves <=250 units, so its FMA residual is also exact.
+            for (int attempt = 0; attempt < 2; attempt++)
+            {
+                double residual = Math.FusedMultiplyAdd(-candidate, 100, product);
+                double error = productError + residual;
+                // 32 binary64 unit roundoffs cover the sum, bound and endpoints.
+                double bound = (Math.Abs(productError) + Math.Abs(residual))
+                    * 3.552713678800501e-15;
+                double low = error - bound, high = error + bound;
+                double below = (candidate - Math.BitDecrement(candidate)) * .5 * 100;
+                double above = (Math.BitIncrement(candidate) - candidate) * .5 * 100;
+                if (low > -below && high < above)
+                {
+                    value = candidate;
+                    return true;
+                }
+                if (attempt == 0)
+                    candidate = error > 0 ? Math.BitIncrement(candidate) : Math.BitDecrement(candidate);
+            }
+            return false; // Ties and uncertain cells use the original exact sum.
+        }
+    }
+#endif
+
     internal sealed class State(int period, double percent, EnvelopeAverage average, long first)
         : IMultiOutputState,
             IDisposable
     {
         private readonly object _average = AverageState(period, average);
+#if !NETFRAMEWORK
+        private readonly BandCertificate _bands = new(percent);
+#endif
         private long _count;
 
         public void Reset()
@@ -225,6 +292,14 @@ public sealed class WindowAverageEnvelope : MultiOutputIndicatorBase, IIndicator
             output[3] = 1;
             if (!FrameworkCompatibility.IsFinite(center))
                 return; // The enclosing runtime rejects the nonfinite centerline.
+#if !NETFRAMEWORK
+            if (_bands.TryPublish(center, out var certifiedUpper, out var certifiedLower))
+            {
+                output[1] = certifiedUpper;
+                output[2] = certifiedLower;
+                return;
+            }
+#endif
             var upper = new ExactMeanAccumulator();
             upper.Add(center, 100);
             upper.AddProduct(center, percent);
