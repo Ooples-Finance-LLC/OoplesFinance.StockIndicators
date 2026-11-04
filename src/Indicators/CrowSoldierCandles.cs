@@ -230,15 +230,17 @@ internal sealed class CrowSoldierState(
                 : 0;
         _s2 = _s1;
         _s1 = _s;
-        _n2 = _n1;
-        _n1 = _n;
-        _f2 = _f1;
-        _f1 = _f;
         Accumulate(_shadows, ref _s, bar, shadowPeriod, false);
         if (nearPeriod > 0)
+        {
+            _n2 = _n1;
+            _n1 = _n;
             Accumulate(_nears, ref _n, bar, nearPeriod, false);
+        }
         if (farPeriod > 0)
         {
+            _f2 = _f1;
+            _f1 = _f;
             if (farPeriod == nearPeriod)
                 _f = _n;
             else
