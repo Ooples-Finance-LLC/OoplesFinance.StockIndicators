@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "4a2fc2c2d158031a4ccaff2f8a901091d5d51a889a3abc99b06c0f599773fe52",
+    "archive": "benchmarks/results/remaining-indicators/renko-direct-coordinates-report-integration-20261105/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "45115b1cbb7cae7db2ed9b77d6cfc9cac603d06d72c6cfcb7624ebb6ace976d5",
+    "archive": "benchmarks/results/remaining-indicators/renko-direct-coordinates-report-integration-20261105/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "b4824d89fd7dd20b909cff814669fd03f0c6748f2e632d1a56a16717418e3ff2",
+    "archive": "benchmarks/results/remaining-indicators/renko-direct-coordinates-report-integration-20261105/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "7e5b5a51122195cca7815e71f7799f121b30bc4be04125f422c620e570e7195a",
+    "archive": "benchmarks/results/remaining-indicators/renko-direct-coordinates-report-integration-20261105/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "5d98448dd2b7913b2cb7f5988ea2b10bef7ec0f7a749aa3db0590f0411647af2",
+    "archive": "benchmarks/results/remaining-indicators/renko-direct-coordinates-report-integration-20261105/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "e5d8ddedb495f55ce24a1c0779b6a27ff94d253978f1b5280fae85a006a8272e",
+    "archive": "benchmarks/results/remaining-indicators/renko-direct-coordinates-report-integration-20261105/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "06d998e6b60bec508df3b4e78686bf1f8dbdcb322238084e3ae1f8f416fa481a",
+    "archive": "benchmarks/results/remaining-indicators/renko-direct-coordinates-report-integration-20261105/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "1d91fbee9a23e5f1523c318712b5a1e360bdc3dd4fefa34d9cef452063d4084c",
+    "archive": "benchmarks/results/remaining-indicators/renko-direct-coordinates-report-integration-20261105/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "6bf4ec087015880dfaeb29b7a41c2ee99f3ece34a512e98231902616db068059",
+    "archive": "benchmarks/results/remaining-indicators/renko-direct-coordinates-report-integration-20261105/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "b129d01930e29e00f52d855a0a56086edba57966575c63e5b3f765952165bfa7",
+    "archive": "benchmarks/results/remaining-indicators/renko-direct-coordinates-report-integration-20261105/updated-pair-details.png.gz"
+  }
+}
