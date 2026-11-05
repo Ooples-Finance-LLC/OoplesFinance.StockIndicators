@@ -25,7 +25,18 @@ public sealed class SeededHilbertMidpointTests
             double close = 100 + (i * 17 % 31) / 8d;
             bars.Add(new(DateTime.UnixEpoch.AddMinutes(bars.Count), close, close + 2, close - 1, close, 1));
         }
-        var expected = SeededHilbertTrendReference.Values(bars, midpoint);
+        // The dyadic input stage canonicalizes zero before the filter. The
+        // rational publisher can retain negative zero after underflow instead.
+        var referenceBars = bars.Select(bar =>
+        {
+            double price = midpoint
+                ? ((ReferenceFraction.FromDouble(bar.High) + ReferenceFraction.FromDouble(bar.Low))
+                    / new ReferenceFraction(2)).ToDouble()
+                : bar.Close;
+            if (BitConverter.DoubleToInt64Bits(price) == long.MinValue) price = 0;
+            return new Bar(bar.Time, price, price, price, price, bar.Volume);
+        }).ToArray();
+        var expected = SeededHilbertTrendReference.Values(referenceBars, false);
         var state = (IMultiOutputState)new SeededHilbertTrendline(midpoint).CreateState();
         var output = new double[6];
         for (int replay = 0; replay < 2; replay++)
@@ -35,6 +46,8 @@ public sealed class SeededHilbertMidpointTests
             {
                 var bar = bars[i];
                 state.Update(in bar, output);
+                if (midpoint && i == 3)
+                    Assert.Equal(0L, BitConverter.DoubleToInt64Bits(output[0]));
                 for (int slot = 0; slot < 3; slot++)
                 {
                     Assert.Equal(expected[slot][i].HasValue ? 1d : 0d, output[slot + 3]);
