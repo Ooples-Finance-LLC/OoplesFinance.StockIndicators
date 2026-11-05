@@ -11,6 +11,10 @@ parser.add_argument('--out',type=Path,required=True)
 parser.add_argument('--shard',type=int,choices=[0,1])
 parser.add_argument('--evidence',type=Path)
 args=parser.parse_args()
+for name in ('plan','inputs','out','evidence'):
+    value=getattr(args,name)
+    if value is not None:
+        setattr(args,name,value.resolve())
 os.environ['HOSTED_TIMING_PLAN']='benchmarks/plans/hosted-pvo-adjacent-certificate-20261105.json'
 from hosted_timing import pipeline as p
 from hosted_timing.aa_control import validate, runtime_controls

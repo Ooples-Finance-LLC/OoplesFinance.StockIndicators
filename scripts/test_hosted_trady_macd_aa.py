@@ -2,6 +2,7 @@
 import copy
 import json
 import os
+import runpy
 from pathlib import Path
 import shutil
 import sys
@@ -69,6 +70,17 @@ class TradyMacdAATests(unittest.TestCase):
     def test_runtime_overrides_are_visible_and_rejected(self):
         with patch.dict(os.environ,{'DOTNET_TieredPGO':'0'}):
             self.assertEqual('0',aa.runtime_controls()['DOTNET_TieredPGO'])
+
+    def test_cli_resolves_relative_paths_before_changing_runtime_directory(self):
+        script=p.REPO/'scripts/run-trady-macd-aa-diagnostic.py'
+        argv=[str(script),'measure','--inputs','relative-inputs','--out','relative-output','--shard','0']
+        with patch.dict(os.environ),patch.object(sys,'argv',argv),patch.object(p,'measure') as measured,patch.object(aa,'runtime_controls',return_value={}):
+            runpy.run_path(str(script),run_name='__main__')
+        args,kwargs=measured.call_args
+        self.assertEqual(Path('relative-inputs').resolve(),args[0])
+        self.assertEqual(Path('relative-output').resolve(),args[1])
+        self.assertTrue(kwargs['aa_plan'].is_absolute())
+        self.assertEqual(('targeted',0),args[2:])
 
     def test_measure_copies_one_complete_profile_to_both_arms(self):
         original=p.read(ORIGINAL)
