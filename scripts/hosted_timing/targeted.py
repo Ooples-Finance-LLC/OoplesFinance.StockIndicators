@@ -310,6 +310,9 @@ SCOPES['price-relative-compact-mean'] = {'fixtures': {'SharedSkenderDiagnosticsB
 SCOPES['volatility-stop-finite-stages'] = {'fixtures': {'SharedSkenderVolatilityStopNativeBenchmarks': {'Skender.GetVolatilityStop': 'Skender.GetVolatilityStop'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/VolatilityStopSnapshot.cs', 'tests/ModelsTests/VolatilityStopFiniteStageTests.cs'}, 'methods': {'SharedSkenderVolatilityStopNativeBenchmarks': ['Snapshot', 'NativeSingle', 'NativeParallel']}, 'totals': (22, 4), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (44, 8)}
 
 
+SCOPES['combined-renko-mean-stop'] = {'fixtures': {'SharedSkenderRenkoChartNativeBenchmarks': {'Skender.GetRenko': 'Skender.GetRenko', 'Skender.GetRenkoAtr': 'Skender.GetRenkoAtr'}, 'SharedSkenderDiagnosticsBenchmarks': {'Skender.GetPrs': 'Skender.GetPrs'}, 'SharedSkenderVolatilityStopNativeBenchmarks': {'Skender.GetVolatilityStop': 'Skender.GetVolatilityStop'}}, 'methods': {'SharedSkenderRenkoChartNativeBenchmarks': ['Snapshot', 'NativeSingle', 'NativeParallel'], 'SharedSkenderVolatilityStopNativeBenchmarks': ['Snapshot', 'NativeSingle', 'NativeParallel']}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/VolatilityStopSnapshot.cs', 'tests/ModelsTests/VolatilityStopFiniteStageTests.cs', 'src/Indicators/PriceRelativeStrength.cs', 'tests/ModelsTests/PriceRelativeMeanTests.cs'}, 'totals': (96, 18), 'shards': 4, 'baseline_phase': 'targeted', 'baseline_totals': (44, 8)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
