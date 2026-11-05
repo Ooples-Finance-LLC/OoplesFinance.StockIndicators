@@ -292,6 +292,9 @@ SCOPES['pvo-adjacent-certificate'] = {'fixtures': {'SharedSkenderEmaFamilyBenchm
 SCOPES['beta-derived-ratio'] = {'fixtures': {'SharedSkenderStatisticsBenchmarks': {'Skender.GetBeta': 'Skender.GetBeta'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/WindowReturnBeta.cs', 'tests/ModelsTests/BetaDerivedRatioTests.cs'}, 'totals': (30, 6), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['atr-published-width'] = {'fixtures': {'SharedSkenderAtrFamilyBenchmarks': {'Skender.GetKeltner': 'Skender.GetKeltner', 'Skender.GetStarcBands': 'Skender.GetStarcBands'}, 'SharedTradyAtrChannelBenchmarks': {'Trady.Indicator.KeltnerChannels': 'KeltnerChannels'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/AtrPublishedWidthTests.cs', 'src/Indicators/WindowAtrBands.cs'}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
