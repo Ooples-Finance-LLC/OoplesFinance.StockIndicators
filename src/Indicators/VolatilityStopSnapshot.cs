@@ -45,17 +45,19 @@ public static class VolatilityStopSnapshot
         var reversals = new bool?[bars.Count];
         var initial = Math.Min(period, bars.Count);
         var bullish = bars[initial - 1].Close > bars[0].Close;
-        var extreme = ExactVarianceWindow.Units(bars[0].Close);
+        double firstPrice = bars[0].Close;
+        var extreme = ExactVarianceWindow.Units(firstPrice);
 #if !NETFRAMEWORK
-        double extremePrice = bars[0].Close;
+        double extremePrice = firstPrice;
 #endif
         var atr = new SeededAtrWindow(period);
         for (var i = 0; i < initial; i++)
         {
-            var price = ExactVarianceWindow.Units(bars[i].Close);
+            double close = bars[i].Close;
+            var price = ExactVarianceWindow.Units(close);
             extreme = bullish ? BigInteger.Max(extreme, price) : BigInteger.Min(extreme, price);
 #if !NETFRAMEWORK
-            extremePrice = bullish ? Math.Max(extremePrice, bars[i].Close) : Math.Min(extremePrice, bars[i].Close);
+            extremePrice = bullish ? Math.Max(extremePrice, close) : Math.Min(extremePrice, close);
 #endif
             atr.Add(bars[i]);
         }
@@ -70,7 +72,8 @@ public static class VolatilityStopSnapshot
         grid /= common;
         for (var i = period; i < bars.Count; i++)
         {
-            var price = ExactVarianceWindow.Units(bars[i].Close);
+            double close = bars[i].Close;
+            var price = ExactVarianceWindow.Units(close);
             longSide[i] = bullish;
             if (atr.HasAverage)
             {
@@ -98,7 +101,7 @@ public static class VolatilityStopSnapshot
                     firstStop = i;
                 extreme = price;
 #if !NETFRAMEWORK
-                extremePrice = bars[i].Close;
+                extremePrice = close;
 #endif
                 bullish = !bullish;
             }
@@ -106,7 +109,7 @@ public static class VolatilityStopSnapshot
             {
                 extreme = bullish ? BigInteger.Max(extreme, price) : BigInteger.Min(extreme, price);
 #if !NETFRAMEWORK
-                extremePrice = bullish ? Math.Max(extremePrice, bars[i].Close) : Math.Min(extremePrice, bars[i].Close);
+                extremePrice = bullish ? Math.Max(extremePrice, close) : Math.Min(extremePrice, close);
 #endif
             }
             atr.Add(bars[i]);

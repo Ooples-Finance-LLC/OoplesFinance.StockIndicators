@@ -57,4 +57,26 @@ public sealed class VolatilityStopFiniteStageTests
             Assert.Equal(BigInteger.Zero, actual);
         }
     }
+
+    [Fact]
+    public void CachedExtremesReuseOriginalInputReads()
+    {
+        double[] prices = [100, 110, 105, 90, 110, 130, 100, 80, 120, 110];
+        var bars = prices.Select(value => new Bar(default, value, value + 1, value - 1, value, 1)).ToArray();
+        var original = new TrackedBars(bars);
+        var candidate = new TrackedBars(bars);
+        var expected = OriginalVolatilityStopSnapshot.Calculate(original, 3, 3);
+        var actual = VolatilityStopSnapshot.Calculate(candidate, 3, 3);
+        Assert.Equal(expected, actual);
+        Assert.Equal(original.Reads, candidate.Reads);
+    }
+
+    private sealed class TrackedBars(Bar[] values) : IReadOnlyList<Bar>
+    {
+        internal List<int> Reads { get; } = [];
+        public int Count => values.Length;
+        public Bar this[int index] { get { Reads.Add(index); return values[index]; } }
+        public IEnumerator<Bar> GetEnumerator() => ((IEnumerable<Bar>)values).GetEnumerator();
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
 }
