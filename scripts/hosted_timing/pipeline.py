@@ -331,7 +331,7 @@ def trix_preflight_tasks(plan):
     return list(selected.values())
 
 
-def measure(inputs, out, phase, shard, diagnostic=None):
+def measure(inputs, out, phase, shard, diagnostic=None, aa_plan=None):
     import psutil
     plan = read(PLAN)
     proof = read(inputs/'provenance.json')
@@ -341,7 +341,16 @@ def measure(inputs, out, phase, shard, diagnostic=None):
     assert proof['sdk'] == subprocess.check_output(['dotnet','--version'],text=True).strip()
     tasks = phase_tasks(plan, phase, shard)
     diagnostic_env = {}
-    if diagnostic == 'trix-preflight':
+    aa = None
+    if diagnostic != 'trady-macd-aa':
+        assert aa_plan is None
+    if diagnostic == 'trady-macd-aa':
+        from .aa_control import validate, runtime_controls
+        aa = validate(aa_plan, inputs)
+        assert not runtime_controls(), 'Default runtime required'
+        assert phase == 'targeted' and shard in (0, 1)
+        tasks = copy.deepcopy(aa['shards'][shard]['tasks'])
+    elif diagnostic == 'trix-preflight':
         assert phase == 'successor' and shard == 0
         tasks = trix_preflight_tasks(plan)
     elif diagnostic:
@@ -355,7 +364,7 @@ def measure(inputs, out, phase, shard, diagnostic=None):
                 DOTNET_JitPrintInlinedMethods='1', DOTNET_TieredPGO='0' if diagnostic == 'trix-no-pgo' else '1')
             if diagnostic == 'trix-library-no-tiering':
                 diagnostic_env['DOTNET_TieredCompilation'] = '0'
-    labels = phase_labels(phase)
+    labels = ('old', 'old') if aa else phase_labels(phase)
     assert not out.exists(), 'Every shard attempt must start fresh on one VM'
     out.mkdir(parents=True)
     runtimes = {}
@@ -369,16 +378,21 @@ def measure(inputs, out, phase, shard, diagnostic=None):
         runtimes[arm] = runtime
         manifests[arm] = manifest(runtime)
     assert manifests['old'].keys() == manifests['new'].keys()
-    expected_changes = [] if phase == 'coverage' else [DLL]
+    expected_changes = [] if phase == 'coverage' or aa else [DLL]
     assert [p for p in manifests['old'] if manifests['old'][p] != manifests['new'][p]] == expected_changes
     identity = dict(machine=platform.node(), platform=platform.platform(), cpu=platform.processor(),
                     logical_cpus=psutil.cpu_count(), runner_image=os.environ.get('ImageVersion'),
                     run_id=os.environ.get('GITHUB_RUN_ID'), run_attempt=os.environ.get('GITHUB_RUN_ATTEMPT'),
                     job=os.environ.get('GITHUB_JOB'), instance_nonce=uuid.uuid4().hex)
     write(out/'provenance.json', dict(phase=phase, shard=shard, raw_root=str(out), host=identity,
-        sources=phase_sources(plan, phase), input_provenance=proof, input_provenance_sha256=digest(inputs/'provenance.json'),
+        sources=dict(old=plan['sources']['old'], new=plan['sources']['old']) if aa else phase_sources(plan, phase), input_provenance=proof, input_provenance_sha256=digest(inputs/'provenance.json'),
         plan_sha256=digest(PLAN), binary_manifest=manifests, diagnostic=diagnostic,
         diagnostic_environment=diagnostic_env, started_utc=datetime.datetime.now(datetime.timezone.utc).isoformat()))
+    if aa:
+        aa_proof = read(out/'provenance.json')
+        aa_proof.update(diagnostic_only=True, diagnostic_plan_sha256=digest(aa_plan),
+            runtime_controls=runtime_controls(), measured_profile_labels=dict(A='old', B='old'), measurement_workflow_head=git('rev-parse', 'HEAD'))
+        write(out/'provenance.json', aa_proof)
     state = dict(status='starting', phase=phase, shard=shard, order=['old','new','new','old'], rounds=[])
     last_print = [0.0]
     waiting_since = [None]

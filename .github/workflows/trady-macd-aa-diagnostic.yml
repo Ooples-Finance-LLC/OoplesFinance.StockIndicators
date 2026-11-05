@@ -1,0 +1,117 @@
+name: Trady MACD same-binary diagnostic
+on:
+  workflow_call:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+defaults:
+  run:
+    shell: pwsh
+concurrency:
+  group: trady-macd-aa-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m unittest discover -s scripts -p "test_hosted*.py"
+      - run: python -m unittest discover -s scripts -p test_candidate_correctness_inputs.py
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: '13398353405'
+          run-id: 41988339055
+          github-token: ${{ github.token }}
+          path: hosted-inputs
+          merge-multiple: true
+      - run: python scripts/run-trady-macd-aa-diagnostic.py verify-inputs --out aa-input-verification.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: aa-input-verification
+          path: aa-input-verification.json
+          retention-days: 14
+          if-no-files-found: error
+  diagnostic:
+    needs: validate
+    runs-on: windows-2025
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        shard: [0, 1]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install psutil==7.2.2
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: '13398353405'
+          run-id: 41988339055
+          github-token: ${{ github.token }}
+          path: hosted-inputs
+          merge-multiple: true
+      - run: python scripts/run-trady-macd-aa-diagnostic.py measure --out aa-raw --shard ${{ matrix.shard }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: trady-macd-aa-${{ matrix.shard }}
+          path: aa-raw/
+          retention-days: 14
+          if-no-files-found: error
+  collect:
+    needs: diagnostic
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: '13398353405'
+          run-id: 41988339055
+          github-token: ${{ github.token }}
+          path: hosted-inputs
+          merge-multiple: true
+      - uses: actions/download-artifact@v8
+        with:
+          name: trady-macd-aa-0
+          path: aa-evidence/shard0
+      - uses: actions/download-artifact@v8
+        with:
+          name: trady-macd-aa-1
+          path: aa-evidence/shard1
+      - run: python scripts/run-trady-macd-aa-diagnostic.py collect --evidence aa-evidence --out aa-verified.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: trady-macd-aa-verified
+          path: aa-verified.json
+          retention-days: 14
+          if-no-files-found: error

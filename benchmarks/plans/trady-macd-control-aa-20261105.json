@@ -1,0 +1,137 @@
+{
+  "status": "frozen",
+  "diagnostic_only": true,
+  "original_plan": {
+    "path": "benchmarks/plans/hosted-pvo-adjacent-certificate-20261105.json",
+    "sha256": "bece7c00fef12c147da613b8bc934a1dc322033f3bc7d7fb4c8efa922cc936a4"
+  },
+  "original_input": {
+    "run_id": "41988339055",
+    "run_attempt": "1",
+    "workflow_head": "9c8096a10bba8ffcca43c4da81a53fe922a4b7a8",
+    "artifact_id": 13398353405,
+    "artifact_digest": "sha256:72a7cc4bc4af990bf5318802fb940da4847861afbc43a1dcc209fa3f04d47ec7",
+    "provenance_sha256": "d377aaa63267c6deea8749d69da76c92086f0982e8358af08f5cb74d6c98a66e"
+  },
+  "sources": {
+    "published": "e9f7106541a010fe3d0ce72fb0c925483691165e",
+    "old": "e9f7106541a010fe3d0ce72fb0c925483691165e",
+    "successor": "8ca80d259b5cd87dc698f5df841907e450d1858a",
+    "variants": "d802cd918abdc4d3c85d5f0b26f14ec84861eadc"
+  },
+  "proposed_dotnet_sdk": "10.0.403",
+  "cpu_test_classes": {
+    "old": [
+      "MacdSharedExecutionTests",
+      "PvoCertifiedAverageTests",
+      "AwesomeArithmeticCertificateTests"
+    ],
+    "successor": [
+      "MacdSharedExecutionTests",
+      "PvoCertifiedAverageTests",
+      "AwesomeArithmeticCertificateTests",
+      "PvoAdjacentCertificateTests"
+    ],
+    "variants": [
+      "CompactMacdWordEmaTests",
+      "CompactClassicalWindowTests",
+      "ExactMeanUnitWeightTests"
+    ]
+  },
+  "gpu_sources": {
+    "old": "e9f7106541a010fe3d0ce72fb0c925483691165e",
+    "successor": "8ca80d259b5cd87dc698f5df841907e450d1858a",
+    "variants": "d802cd918abdc4d3c85d5f0b26f14ec84861eadc"
+  },
+  "production_hashes": {
+    "old": "3dd5de173fda90667c0801776acee1d888ac85d75fa0ea663146556798a575c1",
+    "successor": "ca8dffb5802aba78a512424eaf7b290bdf4769d44d5abda1eb8e02c64f74fd2b",
+    "variants": "f2b429ff8c347f8a5876f06459f7dce61a8148d01ba42fabc1eb93233e03e82a"
+  },
+  "profile_label": "old",
+  "actual_source": "e9f7106541a010fe3d0ce72fb0c925483691165e",
+  "production_sha256": "3dd5de173fda90667c0801776acee1d888ac85d75fa0ea663146556798a575c1",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "order": [
+    "A",
+    "B",
+    "B",
+    "A"
+  ],
+  "runtime_overrides": {},
+  "shards": [
+    {
+      "index": 0,
+      "cases": 10,
+      "comparisons": 2,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Trady.Indicator.MovingAverageConvergenceDivergence",
+              "pair": "Trady.Indicator.MovingAverageConvergenceDivergence"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "cases": 20,
+      "comparisons": 4,
+      "tasks": [
+        {
+          "fixture": "SharedTradyMacdBenchmarks",
+          "operations": [
+            {
+              "raw": "MovingAverageConvergenceDivergence",
+              "pair": "Trady.Indicator.MovingAverageConvergenceDivergence"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        }
+      ]
+    }
+  ],
+  "cases": 30,
+  "comparisons": 6,
+  "matrix": {
+    "max_parallel": 2,
+    "timeout_minutes_per_job": 180
+  },
+  "rejected_qualifications": [
+    "41969039432",
+    "41988339055"
+  ],
+  "approval": "Explicit user answer Approve control diagnostic (Recommended); diagnostic-only same old profile under both labels. No policy change or candidate requalification approved.",
+  "interpretation": "No source/report import or candidate acceptance; both PVO experiments remain rejected. Any follow-up qualification or policy repair requires a separate decision.",
+  "frozen_utc": "2026-11-05T13:27:31.018196+00:00"
+}
