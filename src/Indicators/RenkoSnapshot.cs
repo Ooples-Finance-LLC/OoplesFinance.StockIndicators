@@ -57,7 +57,7 @@ public static class RenkoSnapshot
             int priceShift = PriceShift(brickSize);
             var close = rounded * n.Sign * (grid >> priceShift);
             var open = close;
-            var step = (U(brickSize) >> priceShift) * scale;
+            var step = PriceUnits(brickSize, priceShift) * scale;
             double high = 0,
                 low = 0;
             BigInteger volume = 0;
@@ -91,13 +91,13 @@ public static class RenkoSnapshot
                 BigInteger count;
                 if (highLow)
                 {
-                    var up = (U(bar.High) >> priceShift) * scale - upper;
-                    var down = lower - (U(bar.Low) >> priceShift) * scale;
+                    var up = PriceUnits(bar.High, priceShift) * scale - upper;
+                    var down = lower - PriceUnits(bar.Low, priceShift) * scale;
                     count = (up >= down ? up : -down) / step;
                 }
                 else
                 {
-                    var price = (U(bar.Close) >> priceShift) * scale;
+                    var price = PriceUnits(bar.Close, priceShift) * scale;
                     count =
                         price > upper ? (price - upper) / step
                         : price < lower ? (price - lower) / step
@@ -127,6 +127,17 @@ public static class RenkoSnapshot
                 }
             }
         }
+    }
+
+    private static BigInteger PriceUnits(double value, int priceShift)
+    {
+        // Enumeration can observe mutations after Validate. Keep the original
+        // deferred exception, including its parameter name and message.
+        if (!FrameworkCompatibility.IsFinite(value)) return ExactVarianceWindow.Units(value);
+        if (value == 0) return BigInteger.Zero;
+        var factor = new ExactMeanAccumulator.ProductFactor(value);
+        // PriceShift never exceeds a finite nonzero factor's exact scale.
+        return new BigInteger(factor.Mantissa) << (factor.Scale - priceShift);
     }
 
     // A normal binary64 value is an integer multiple of 2^(exponent-1075).
