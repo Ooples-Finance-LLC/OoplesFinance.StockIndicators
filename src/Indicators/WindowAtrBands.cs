@@ -116,6 +116,26 @@ public sealed class WindowAtrBands : MultiOutputIndicatorBase, IIndicatorValidat
                 )
             );
 
+    // Called only for finite published bands and a nonzero center.
+    internal static double PublishedWidth(double upper, double lower, double center)
+    {
+#if !NETFRAMEWORK
+        double difference = upper - lower;
+        double virtualLower = difference - upper;
+        double error = (upper - (difference - virtualLower)) + (-lower - virtualLower);
+        // Certify the subtraction before division so width still rounds once
+        // from the exact difference of the already published bands.
+        if (double.IsFinite(center) && double.IsFinite(difference) && error == 0)
+            return difference == 0 ? 0d : difference / center;
+#endif
+        var numerator = new ExactMeanAccumulator();
+        numerator.Add(upper);
+        numerator.Add(lower, -1);
+        var denominator = new ExactMeanAccumulator();
+        denominator.Add(center);
+        return numerator.Ratio(denominator);
+    }
+
     internal sealed class State(
         int centerPeriod,
         int atrPeriod,
@@ -202,12 +222,7 @@ public sealed class WindowAtrBands : MultiOutputIndicatorBase, IIndicatorValidat
                 || !FrameworkCompatibility.IsFinite(output[2])
             )
                 return;
-            var numerator = new ExactMeanAccumulator();
-            numerator.Add(output[1]);
-            numerator.Add(output[2], -1);
-            var denominator = new ExactMeanAccumulator();
-            denominator.Add(_center);
-            output[3] = numerator.Ratio(denominator);
+            output[3] = PublishedWidth(output[1], output[2], _center);
             output[7] = 1;
         }
     }
