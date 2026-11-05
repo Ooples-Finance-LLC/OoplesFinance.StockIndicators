@@ -295,6 +295,9 @@ SCOPES['beta-derived-ratio'] = {'fixtures': {'SharedSkenderStatisticsBenchmarks'
 SCOPES['atr-published-width'] = {'fixtures': {'SharedSkenderAtrFamilyBenchmarks': {'Skender.GetKeltner': 'Skender.GetKeltner', 'Skender.GetStarcBands': 'Skender.GetStarcBands'}, 'SharedTradyAtrChannelBenchmarks': {'Trady.Indicator.KeltnerChannels': 'KeltnerChannels'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/AtrPublishedWidthTests.cs', 'src/Indicators/WindowAtrBands.cs'}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['deviation-position-certificate'] = {'fixtures': {'SharedDeviationBandsBenchmarks': {'Skender.GetBollingerBands': 'Skender.GetBollingerBands'}, 'SharedTradyBandsBenchmarks': {'Trady.Indicator.BollingerBands': 'Trady.Indicator.BollingerBands', 'Trady.Indicator.BollingerBandWidth': 'Trady.Indicator.BollingerBandWidth'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/WindowDeviationBands.cs', 'tests/ModelsTests/DeviationPositionCertificateTests.cs'}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
