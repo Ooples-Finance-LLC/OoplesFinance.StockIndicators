@@ -41,12 +41,25 @@ class HostedReportTests(unittest.TestCase):
     def test_targeted_report_preserves_other_pairs_and_supports_subsequent_updates(self):
         self.check_report('targeted')
 
-    def check_report(self,phase):
+    def test_snapshot_report_keeps_builder_measurements_and_retains_snapshot_provenance(self):
+        self.check_report('targeted',snapshot=True)
+
+    def check_report(self,phase,snapshot=False):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp); raw=root/'raw'; raw.mkdir()
             selected=PLAN
             if phase=='targeted':
-                selected=root/'plan.json';write(selected,read(REPO/'benchmarks/plans/hosted-hilbert-fir-20261102.json'))
+                selected=root/'plan.json';plan=read(REPO/'benchmarks/plans/hosted-hilbert-fir-20261102.json')
+                if snapshot:
+                    plan['targeted_shards']=[]
+                    for index,pair in enumerate(('Skender.GetRenko','Skender.GetRenkoAtr')):
+                        operation=[dict(raw=pair,pair=pair)]
+                        plan['targeted_shards'].append(dict(index=index,tasks=[
+                            dict(fixture='LibraryPairBenchmarks',operations=operation,methods=['Ooples','Competitor'],implicit_pair=False,cases=10,decisions=2),
+                            dict(fixture='SharedSkenderRenkoChartNativeBenchmarks',operations=operation,methods=['Snapshot','NativeSingle','NativeParallel'],implicit_pair=False,cases=12,decisions=2)]))
+                    plan['targeted_reference']['scope']='snapshot-test'
+                    self.enterContext(patch.dict('hosted_timing.targeted.SCOPES',{'snapshot-test':dict(totals=(44,8))}))
+                write(selected,plan)
                 for module in ('hosted_timing.pipeline','hosted_timing.verify','hosted_timing.report','test_hosted_timing'):
                     self.enterContext(patch(module+'.PLAN',selected))
                 self.enterContext(patch('hosted_timing.targeted.verify_reference'))
@@ -99,7 +112,17 @@ const detail=`${esc(r.raw.Ooples.host.ProcessorName)}`;
             receipts=embedded('current-competitor-data')['receipts']
             self.assertEqual(receipts[0]['comparisons'],[untouched])
             self.assertTrue(all(c['measurement_machine']=='runner' for r in receipts[1:] for c in r['comparisons']))
-            self.assertGreater(len({c['measurement_shard'] for r in receipts[1:] for c in r['comparisons']}),1)
+            if snapshot:
+                self.assertEqual(receipts,[dict(run_id='old-run',source_sha='old',comparisons=[untouched])])
+                self.assertEqual(embedded('current-competitor-data')['status'],dict(completed=[]))
+                self.assertEqual(embedded('rollout-status-data')['builder_measurement_sources'],[])
+                snapshots=after['evidence']['snapshotMeasurements']
+                self.assertEqual(len(snapshots),2)
+                self.assertTrue(all(r['complete'] and r['run_id']=='100' for r in snapshots))
+                self.assertEqual({row['method'] for r in snapshots for row in r['rows']},{'Snapshot','NativeSingle','NativeParallel'})
+                self.assertEqual(len({r['measurement_shard'] for r in snapshots}),2)
+            else:
+                self.assertGreater(len({c['measurement_shard'] for r in receipts[1:] for c in r['comparisons']}),1)
             self.assertIn('D.rows.flatMap',result)
             self.assertIn('absolute timings are compared only within the same runner',result)
             self.assertIn('<section id="ema-constructor-results"><p>Independent constructor measurements</p></section>',result)

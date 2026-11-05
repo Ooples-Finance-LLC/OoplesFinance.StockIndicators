@@ -21,7 +21,7 @@ PLAN = REPO / os.environ.get('HOSTED_TIMING_PLAN', 'benchmarks/plans/hosted-roll
 DLL = 'OoplesFinance.StockIndicators.dll'
 BENCH = 'benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks'
 TESTS = 'benchmarks/OoplesFinance.StockIndicators.CompetitorTests'
-OWNED = {'Ooples', 'BuilderFull', 'BuilderLatestOnly'}
+OWNED = {'Ooples', 'BuilderFull', 'BuilderLatestOnly', 'Snapshot'}
 
 
 def read(path):

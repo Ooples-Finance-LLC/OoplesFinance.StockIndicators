@@ -40,6 +40,7 @@ def stage(live, raw, repo, out, phase='successor'):
     old_builder_pairs = len({c['pair'] for receipt in builder['receipts'] for c in receipt['comparisons']})
     baseline = {}
     builder_receipts = []
+    snapshot_receipts = []
     run_ids = set()
     for root in sorted(p.parent for p in raw.glob('*/provenance.json')):
         proof, state = read(root/'provenance.json'),read(root/'status.json')
@@ -69,6 +70,14 @@ def stage(live, raw, repo, out, phase='successor'):
             cases={(r['pair'],r['bars'],r['method']):r for r in summary['final_candidate_rows'][fixture]
                    if r['provenance']['shard']==shard}
             pairs={key[0] for key in cases}
+            if task['methods'] == ['Snapshot','NativeSingle','NativeParallel']:
+                assert set(cases)=={(p,n,m) for p in pairs for n in (1000,10000)
+                                   for m in task['methods']}
+                snapshot_receipts.append(dict(fixture=fixture,source_sha=source,run_id=host['run_id'],
+                    measurement_url=url,round=2,report_file=report_file,report_sha256=record['sha256'],
+                    complete=True,selection='Chronologically final candidate round.',
+                    rows=list(cases.values()),**record_provenance))
+                continue
             assert set(cases)=={(p,n,m) for p in pairs for n in (1000,10000)
                                 for m in ('BuilderFull','BuilderLatestOnly','NativeSingle','NativeParallel')}
             def stats(row):
@@ -109,6 +118,12 @@ def stage(live, raw, repo, out, phase='successor'):
     data['evidence'].setdefault('baseSourceSha',data['evidence']['sourceSha'])
     data['evidence']['sourceSha']=None
     data['evidence']['rowOverrides']=[r for r in data['evidence'].get('rowOverrides',[]) if r['pair'] not in pairs]+overrides
+    if snapshot_receipts:
+        snapshot_pairs={row['pair'] for receipt in snapshot_receipts for row in receipt['rows']}
+        previous=data['evidence'].get('snapshotMeasurements',[])
+        for receipt in previous:
+            receipt['rows']=[row for row in receipt['rows'] if row['pair'] not in snapshot_pairs]
+        data['evidence']['snapshotMeasurements']=[r for r in previous if r['rows']]+snapshot_receipts
     replace('dataset',data)
     builder_pairs={c['pair'] for r in builder_receipts for c in r['comparisons']}
     replaced=0
@@ -125,15 +140,17 @@ def stage(live, raw, repo, out, phase='successor'):
     assert len({(r['pair'],r['bars'],r['mode']) for r in rows})==len(rows)
     counts={v:sum(r['verdict']==v for r in rows) for v in ('faster','slower','inconclusive')}
     builder.update(full_comparisons=len(rows),verdicts=counts)
-    builder['status'].update(commit=source,updated_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),run_url=url)
-    builder['status']['completed']=sorted(set(builder['status']['completed'])|{r['fixture'] for r in builder_receipts})
+    if builder_receipts:
+        builder['status'].update(commit=source,updated_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),run_url=url)
+        builder['status']['completed']=sorted(set(builder['status']['completed'])|{r['fixture'] for r in builder_receipts})
     replace('current-competitor-data',builder)
     status.update(published_head=head,inventory_commit=head,row_overrides=data['evidence']['rowOverrides'],
         inventory_sha256=digest(repo/'benchmarks/results/remaining-indicators/inventory.json'),
         updated_utc=datetime.datetime.now(datetime.timezone.utc).isoformat())
     status['measurement_totals'].update(counts,measured=len(rows),pending=oldcounts['expected']-len(rows))
-    status['builder_measurement_sources'].append(dict(source_sha=source,run_url=url,comparisons=4*len(builder_pairs),
-        replaces_pairs=sorted(builder_pairs),round=2,measurement_location='GitHub-hosted Windows; per-row runner provenance'))
+    if builder_receipts:
+        status['builder_measurement_sources'].append(dict(source_sha=source,run_url=url,comparisons=4*len(builder_pairs),
+            replaces_pairs=sorted(builder_pairs),round=2,measurement_location='GitHub-hosted Windows; per-row runner provenance'))
     replace('rollout-status-data',status)
     groups=defaultdict(int)
     for row in data['rows']: groups[row['source_sha'],row['measurement_run_url']]+=1
@@ -193,5 +210,6 @@ def stage(live, raw, repo, out, phase='successor'):
     write(out/'measurement.json',dict(source_sha=source,run_id=run,measurement_url=url))
     write(out/'staged.json',dict(before_sha256=hashlib.sha256(original).hexdigest(),candidate_sha256=digest(out/'candidate.html'),
         changed_baseline_rows=2*len(pairs),unchanged_baseline_rows=unchanged,changed_builder_slots=4*len(builder_pairs),
-        added_builder_slots=added,replaced_builder_slots=replaced,builder_rows=rows,verdicts=counts,run_id=run))
+        added_builder_slots=added,replaced_builder_slots=replaced,builder_rows=rows,verdicts=counts,run_id=run,
+        snapshot_receipts=snapshot_receipts,changed_snapshot_rows=sum(len(r['rows'])//3 for r in snapshot_receipts)))
     return out/'candidate.html'

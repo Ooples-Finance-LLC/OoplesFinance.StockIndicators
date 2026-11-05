@@ -301,6 +301,9 @@ SCOPES['deviation-position-certificate'] = {'fixtures': {'SharedDeviationBandsBe
 SCOPES['doji-shadow-comparison'] = {'fixtures': {'SharedRangeDojiBenchmarks': {'TaLib.Candles.Doji': 'TaLib.Candles.Doji', 'TaLib.Candles.DragonflyDoji': 'TaLib.Candles.DragonflyDoji', 'TaLib.Candles.GravestoneDoji': 'TaLib.Candles.GravestoneDoji', 'TaLib.Candles.LongLeggedDoji': 'TaLib.Candles.LongLeggedDoji', 'TaLib.Candles.TakuriLine': 'TaLib.Candles.TakuriLine'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/AverageRangeDojiCandles.cs', 'tests/ModelsTests/DojiShadowComparisonTests.cs'}, 'totals': (150, 30), 'shards': 5, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
 
 
+SCOPES['renko-price-grid'] = {'fixtures': {'SharedSkenderRenkoChartNativeBenchmarks': {'Skender.GetRenko': 'Skender.GetRenko', 'Skender.GetRenkoAtr': 'Skender.GetRenkoAtr'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/RenkoPriceGridTests.cs', 'src/Indicators/RenkoSnapshot.cs'}, 'methods': {'SharedSkenderRenkoChartNativeBenchmarks': ['Snapshot', 'NativeSingle', 'NativeParallel']}, 'totals': (44, 8), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
@@ -344,8 +347,8 @@ def verify_reference(plan):
         for task in shard['tasks']:
             batch = task['fixture'] == 'LibraryPairBenchmarks'
             allowed = {p:p for p in pairs} if batch else fixtures[task['fixture']]
-            expected_methods = ['Ooples', 'Competitor'] if batch else [
-                'BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']
+            expected_methods = ['Ooples', 'Competitor'] if batch else scope.get('methods', {}).get(
+                task['fixture'], ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'])
             assert task['methods'] == expected_methods
             assert bool(task.get('implicit_pair')) == (task['fixture'] in scope.get(
                 'implicit_fixtures', {'SharedTaHilbertTrendModeBenchmarks'}))
