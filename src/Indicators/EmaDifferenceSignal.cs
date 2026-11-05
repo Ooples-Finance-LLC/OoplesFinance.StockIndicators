@@ -202,6 +202,8 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
         private CompactMacdValue _sum, _value;
         private double _previous;
 
+        internal double PublishedValue => _previous;
+
         public void Reset()
         {
             _count = 0;
@@ -328,6 +330,25 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
         }
 #endif
 
+        private CompactMacdValue Percentage(CompactMacdValue fast, CompactMacdValue slow)
+        {
+#if !NETFRAMEWORK
+            if (_volumeFast is not null)
+            {
+                double f = _volumeFast.PublishedValue, s = _volumeSlow!.PublishedValue;
+                double absoluteFast = Math.Abs(f), absoluteSlow = Math.Abs(s);
+                // The cached values are the already-rounded EMA stages. Sterbenz
+                // certifies their exact difference; the ratio certificate excludes
+                // uncertain rounding cells. Other ranges keep the exact fallback.
+                if (double.IsFinite(f) && double.IsFinite(s) && (f >= 0) == (s >= 0)
+                    && absoluteFast <= 2 * absoluteSlow && absoluteSlow <= 2 * absoluteFast
+                    && AwesomeWithDetails.Arithmetic.TryNormalize(f - s, s, out var normalized))
+                    return CompactMacdValue.Of(normalized);
+            }
+#endif
+            return (fast - slow).Percentage(slow);
+        }
+
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
@@ -354,7 +375,7 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
                 ? (
                     slow.Value.IsZero
                         ? null
-                        : (fast.Value - slow.Value).Percentage(slow.Value)
+                        : Percentage(fast.Value, slow.Value)
                 )
                 : (fast.Value - slow.Value).Round(1);
             Publish(oscillator, 0, output);
