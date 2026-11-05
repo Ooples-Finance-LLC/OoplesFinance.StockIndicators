@@ -1,0 +1,25 @@
+{
+  "source_integration_commit": "f4c3adcb7e42e87c894ace2b7f4f6ed9dc4a612a",
+  "qualified_source": "691f29d06151ea29ad9f6116be8b23e1802a70dd",
+  "compiled_source": "48420e8248c70bd4d913e744414d4a304986c3ca",
+  "source_fingerprint": "e5b23edc3cb7708aedbfea0d090ec916f96138f5a2de1b6e86d0c4dca7a92901",
+  "unit": 17,
+  "comparator": 29,
+  "actual_gpu": 100,
+  "inventory_tests": 8,
+  "production_sha256": "9ae13bf0915b27f978f42feac96751bff88e00195066c5f82c577537656eb6f7",
+  "run_id": "41966671293",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 2,
+    "faster": 4
+  },
+  "integrated_paths": [
+    "src/Indicators/SumSeededDirectionalIndex.cs"
+  ],
+  "excluded": [
+    "Historical0.144.0 timings remain on original sources; only this complete fresh0.146.0 run imported; no pooling"
+  ],
+  "verified_utc": "2026-11-05T05:23:28.652601+00:00"
+}
