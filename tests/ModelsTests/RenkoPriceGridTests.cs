@@ -60,12 +60,12 @@ public sealed class RenkoPriceGridTests
         using var iterator = RenkoSnapshot.Calculate(bars, 1, highLow).GetEnumerator();
         Assert.True(iterator.MoveNext());
         Assert.Equal(11, iterator.Current.Close);
-        bars[2] = Candle(2, Math.BitDecrement(-2d), 39);
+        bars[2] = Candle(2, Math.BitDecrement(-.25), 33);
         Assert.True(iterator.MoveNext());
         Assert.Equal(12, iterator.Current.Close);
         var tail = new List<RenkoBrick>();
         while (iterator.MoveNext()) tail.Add(iterator.Current);
-        Assert.Equal(13, tail.Count);
+        Assert.Equal(11, tail.Count);
         for (int i = 0; i < tail.Count; i++)
         {
             Assert.Equal(11 - i, tail[i].Open);
