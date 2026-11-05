@@ -298,6 +298,9 @@ SCOPES['atr-published-width'] = {'fixtures': {'SharedSkenderAtrFamilyBenchmarks'
 SCOPES['deviation-position-certificate'] = {'fixtures': {'SharedDeviationBandsBenchmarks': {'Skender.GetBollingerBands': 'Skender.GetBollingerBands'}, 'SharedTradyBandsBenchmarks': {'Trady.Indicator.BollingerBands': 'Trady.Indicator.BollingerBands', 'Trady.Indicator.BollingerBandWidth': 'Trady.Indicator.BollingerBandWidth'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/WindowDeviationBands.cs', 'tests/ModelsTests/DeviationPositionCertificateTests.cs'}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
 
 
+SCOPES['doji-shadow-comparison'] = {'fixtures': {'SharedRangeDojiBenchmarks': {'TaLib.Candles.Doji': 'TaLib.Candles.Doji', 'TaLib.Candles.DragonflyDoji': 'TaLib.Candles.DragonflyDoji', 'TaLib.Candles.GravestoneDoji': 'TaLib.Candles.GravestoneDoji', 'TaLib.Candles.LongLeggedDoji': 'TaLib.Candles.LongLeggedDoji', 'TaLib.Candles.TakuriLine': 'TaLib.Candles.TakuriLine'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/AverageRangeDojiCandles.cs', 'tests/ModelsTests/DojiShadowComparisonTests.cs'}, 'totals': (150, 30), 'shards': 5, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
