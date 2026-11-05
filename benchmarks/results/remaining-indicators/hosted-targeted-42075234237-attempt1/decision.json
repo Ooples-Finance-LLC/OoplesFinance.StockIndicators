@@ -1335,7 +1335,16 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42075234237-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "647ab77d91fc1b7b6ee2742fb37fb5462688446f",
+  "integrated_paths": [
+    "src/Indicators/PriceRelativeStrength.cs",
+    "src/Indicators/VolatilityStopSnapshot.cs",
+    "tests/ModelsTests/PriceRelativeMeanTests.cs",
+    "tests/ModelsTests/VolatilityStopFiniteStageTests.cs"
+  ],
+  "report_sha256": "4a2fc2c2d158031a4ccaff2f8a901091d5d51a889a3abc99b06c0f599773fe52",
+  "report_archive": "benchmarks/results/remaining-indicators/combined-renko-mean-stop-report-integration-20261105"
 }
