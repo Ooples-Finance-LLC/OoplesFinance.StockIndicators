@@ -13958,7 +13958,7 @@
     "src/Indicators/WindowChoppinessIndex.cs": "74313363d7755510049b441711f511d4a2d1a65db303bfd56dac2342f39d0055",
     "src/Indicators/WindowCommodityChannelIndex.cs": "20aef10b5c11b5616bbf57b5b441f56f553e9cca980025adc5875930089f2ede",
     "src/Indicators/WindowCpuKernels.cs": "eacc328aa605a2e3e2e61c25b43d8bdf6e27317fcb408b01fbab292950f437aa",
-    "src/Indicators/WindowDeviationBands.cs": "123a48b2adbe613bb82f38676aec26d27ed2965a120f81b8d226734757f6a545",
+    "src/Indicators/WindowDeviationBands.cs": "0173106783902f371f502c57dec250d052501148dbe609da14dad22c8249252c",
     "src/Indicators/WindowDirectionalMeasure.cs": "80b1e591d9369df469ccd5b70e934b9062271c276bb9d2f3c7e07bd8f03481e5",
     "src/Indicators/WindowDispersion.cs": "090f5badb2b212eaa4485330bdd624119ea81ebd14a4e729b5b3637f05c3f27c",
     "src/Indicators/WindowExtremes.cs": "441c786fd5502d3aef4c74bf45193fb44ab4f47ec6bd8aa060d928561280e60f",
