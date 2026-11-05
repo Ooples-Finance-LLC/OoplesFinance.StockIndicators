@@ -113,3 +113,4 @@ benchmarks/plans/hosted-combined-ratio-klinger-20261104.json text eol=lf
 benchmarks/plans/hosted-klinger-after-directional-ratios-20261104.json text eol=lf
 benchmarks/plans/hosted-classic-ppo-normalization-20261104.json text eol=lf
 benchmarks/plans/hosted-log-return-short-certificate-20261104.json text eol=lf
+benchmarks/plans/hosted-classic-oscillator-finite-inputs-20261104.json text eol=lf
