@@ -743,7 +743,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42123318761-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "226fd2425cb54482b1d028a49df62872c2329e2e",
+  "integrated_paths": [
+    "src/Indicators/RenkoSnapshot.cs",
+    "tests/ModelsTests/RenkoCompactVolumeTests.cs"
+  ],
+  "report_sha256": "c154e8b7c6973a586ed92c42b9c32d598001b09e59c385ea0d6c38da3b9238d8",
+  "report_archive": "benchmarks/results/remaining-indicators/renko-compact-volume-report-integration-20261105"
 }
