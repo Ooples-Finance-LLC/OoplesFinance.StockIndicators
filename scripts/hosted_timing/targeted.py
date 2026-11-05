@@ -277,6 +277,9 @@ SCOPES['log-return-short-certificate'] = {'fixtures': {'SharedLogVolatilityBench
 SCOPES['classic-oscillator-finite-inputs'] = {'fixtures': {'SharedTaAverageNativeBenchmarks': {'TaLib.Functions.Apo': 'TaLib.Functions.Apo', 'TaLib.Functions.Ppo': 'TaLib.Functions.Ppo'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/ClassicOscillatorFiniteInputTests.cs', 'src/Indicators/ClassicPriceOscillator.cs'}, 'totals': (60, 12), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
 
 
+SCOPES['sum-directional-normalization'] = {'fixtures': {'SharedSkenderStrengthBenchmarks': {'Skender.GetAdx': 'Skender.GetAdx'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/SumSeededDirectionalIndex.cs'}, 'totals': (30, 6), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
