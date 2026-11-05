@@ -112,6 +112,9 @@ public sealed class ClassicPriceOscillator : MultiOutputIndicatorBase, IIndicato
         private readonly ClassicMovingAverage.State _fast,
             _slow;
         private readonly bool _percentage;
+#if !NETFRAMEWORK
+        private readonly bool _finiteInputs;
+#endif
         private readonly double[] _f = new double[2],
             _s = new double[2];
 
@@ -120,6 +123,10 @@ public sealed class ClassicPriceOscillator : MultiOutputIndicatorBase, IIndicato
             _fast = (ClassicMovingAverage.State)owner.Fast.CreateState();
             _slow = (ClassicMovingAverage.State)owner.Slow.CreateState();
             _percentage = owner.Percentage;
+#if !NETFRAMEWORK
+            _finiteInputs = owner.SlowPeriod > 1
+                && owner.Method is (ClassicAverageMethod.Sma or ClassicAverageMethod.Wma or ClassicAverageMethod.Trima);
+#endif
         }
 
         public void Reset()
@@ -139,10 +146,20 @@ public sealed class ClassicPriceOscillator : MultiOutputIndicatorBase, IIndicato
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            // Both averages consume the same exact price representation.
-            var input = ExactVarianceWindow.Units(bar.Close);
-            _fast.UpdateUnits(input, _f);
-            _slow.UpdateUnits(input, _s);
+#if !NETFRAMEWORK
+            if (_finiteInputs && double.IsFinite(bar.Close))
+            {
+                _fast.Update(in bar, _f);
+                _slow.Update(in bar, _s);
+            }
+            else
+#endif
+            {
+                // Composed engines and rejected closes keep the shared exact entry.
+                var input = ExactVarianceWindow.Units(bar.Close);
+                _fast.UpdateUnits(input, _f);
+                _slow.UpdateUnits(input, _s);
+            }
             if (_f[1] == 0 || _s[1] == 0)
                 return;
 #if !NETFRAMEWORK
