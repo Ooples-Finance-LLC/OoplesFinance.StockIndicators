@@ -1039,7 +1039,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42013615363-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "b354c3ec3ac4d6c009aecb59c2773ed07e2ce510",
+  "integrated_paths": [
+    "src/Indicators/WindowAtrBands.cs",
+    "tests/ModelsTests/AtrPublishedWidthTests.cs"
+  ],
+  "report_sha256": "1579825e4b7c5d56afc03cb3b7d0098eab6482ba05d6ed410946b4bb0e319259",
+  "report_archive": "benchmarks/results/remaining-indicators/atr-published-width-report-integration-20261105"
 }

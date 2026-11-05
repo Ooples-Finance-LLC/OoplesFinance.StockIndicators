@@ -13952,7 +13952,7 @@
     "src/Indicators/WilderMovingAverage.cs": "896b3c4c08f13b0691885866a7e7501202fddcd623bd9a006523c909650659dc",
     "src/Indicators/WilderStrengthOscillator.cs": "238613b4738941e5a0ec261bd8adc527c116dc53dd02bf2d31fb007a83973a85",
     "src/Indicators/WindowAroon.cs": "c809a11869d59a2f19c8e802ce9eeb33e6fbcbf32f6b242c6ad1d04e285fa3cc",
-    "src/Indicators/WindowAtrBands.cs": "42b4a78df0438ef234d5603e29e4d847a920d9fa412a4dc15b46f52855ce4cc2",
+    "src/Indicators/WindowAtrBands.cs": "2fe72a738705d02b412356486427431848753a90cf8f124227ee893861632526",
     "src/Indicators/WindowAverageEnvelope.cs": "c9c7445681496f4b0989925764ae17e3295756594a308ba513d848f876cb18f5",
     "src/Indicators/WindowChandelierExit.cs": "e87bec50e6c6d4bd7c1f0befa0a045b265c097bd502115111a3d058fb1bf9eab",
     "src/Indicators/WindowChoppinessIndex.cs": "74313363d7755510049b441711f511d4a2d1a65db303bfd56dac2342f39d0055",
