@@ -13762,7 +13762,7 @@
     "src/Indicators/RegressionWithFinalLine.cs": "bb131b82037a79dbb3851963e632736ad9b224fbb0b3d1e018d544f537aff919",
     "src/Indicators/RelativeVolatilitySnapshot.cs": "7c49b64decaf21b8dc993596516003fd625c3aa02c13276b7518e5194a7a5682",
     "src/Indicators/RelativeVolatilityStrength.cs": "bc2c28bcca4136442bc3986d6d8968ee14decc197cf78b951e123dae117ecf01",
-    "src/Indicators/RenkoSnapshot.cs": "6fcfa2e6456b4461ff1eb2859b03a324b813a41ffda546585beaed8cc9768914",
+    "src/Indicators/RenkoSnapshot.cs": "d9d9c433ca1b0bf9ec214e2901a75098502d52982ac0d90585f63f9cd9abeaa5",
     "src/Indicators/ReverseWilderAverage.cs": "be67fe2b8f022c9898c80b76b82423cd1885763c7cbe2b08d2106b64fccd4c96",
     "src/Indicators/RickshawGridState.cs": "008fcbbf9642d6258384367f4794f62f31d2ddb2cfd2867b082e32895066c57f",
     "src/Indicators/RickshawManCandle.cs": "3f60f5735a9cc9ecc57e0892a111daead05a57fd714178d8cedc2189d44c6b63",
