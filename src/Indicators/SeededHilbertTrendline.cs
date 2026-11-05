@@ -83,8 +83,15 @@ public sealed class SeededHilbertTrendline : MultiOutputIndicatorBase, IIndicato
             var price = JurikDyadic.FromDouble(midpoint ? bar.High : bar.Close);
             if (midpoint)
             {
-                price.Add(bar.Low);
-                price = price.Rounded(2);
+#if !NETFRAMEWORK
+                if (AwesomeWithDetails.Arithmetic.TryMidpoint(bar.High, bar.Low, out var rounded))
+                    price = JurikDyadic.FromDouble(rounded);
+                else
+#endif
+                {
+                    price.Add(bar.Low);
+                    price = price.Rounded(2);
+                }
             }
             _filter.Update(price);
             output[0] = price.Mean(1);
