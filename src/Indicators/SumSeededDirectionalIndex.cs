@@ -161,6 +161,19 @@ public sealed class SumSeededDirectionalIndex
             }
         }
 
+        private JurikDyadic Direction(JurikDyadic movement)
+        {
+#if !NETFRAMEWORK
+            // DI is rounded before DX. Certify that same exact scaled ratio;
+            // extended stages and uncertain rounding cells retain the original path.
+            if (movement.TryDouble(out var value) && _range.TryDouble(out var range)
+                && AwesomeWithDetails.Arithmetic.TryNormalize(value, range, out var rounded))
+                return JurikDyadic.FromDouble(rounded);
+#endif
+            movement.Multiply(100);
+            return DivideRounded(movement, _range);
+        }
+
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
@@ -195,12 +208,8 @@ public sealed class SumSeededDirectionalIndex
                 }
                 if (_index >= period && _range.Sign != 0)
                 {
-                    var pdi = _positive;
-                    var mdi = _negative;
-                    pdi.Multiply(100);
-                    mdi.Multiply(100);
-                    pdi = DivideRounded(pdi, _range);
-                    mdi = DivideRounded(mdi, _range);
+                    var pdi = Direction(_positive);
+                    var mdi = Direction(_negative);
                     var total = pdi;
                     total.AddExact(mdi);
                     var delta = pdi;
