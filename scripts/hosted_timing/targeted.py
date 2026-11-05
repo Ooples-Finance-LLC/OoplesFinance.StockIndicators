@@ -280,6 +280,9 @@ SCOPES['classic-oscillator-finite-inputs'] = {'fixtures': {'SharedTaAverageNativ
 SCOPES['sum-directional-normalization'] = {'fixtures': {'SharedSkenderStrengthBenchmarks': {'Skender.GetAdx': 'Skender.GetAdx'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/SumSeededDirectionalIndex.cs'}, 'totals': (30, 6), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
 
 
+SCOPES['pvo-normalization'] = {'fixtures': {'SharedSkenderEmaFamilyBenchmarks': {'Skender.GetMacd': 'Skender.GetMacd', 'Skender.GetPvo': 'Skender.GetPvo'}, 'SharedTradyMacdBenchmarks': {'Trady.Indicator.MovingAverageConvergenceDivergence': 'MovingAverageConvergenceDivergence', 'Trady.Indicator.MovingAverageConvergenceDivergenceHistogram': 'MovingAverageConvergenceDivergenceHistogram'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/EmaDifferenceSignal.cs', 'tests/ModelsTests/PvoNormalizationTests.cs'}, 'totals': (120, 24), 'shards': 4, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
