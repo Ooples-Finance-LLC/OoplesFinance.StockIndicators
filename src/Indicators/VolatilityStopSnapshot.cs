@@ -45,12 +45,20 @@ public static class VolatilityStopSnapshot
         var reversals = new bool?[bars.Count];
         var initial = Math.Min(period, bars.Count);
         var bullish = bars[initial - 1].Close > bars[0].Close;
-        var extreme = ExactVarianceWindow.Units(bars[0].Close);
+        double firstPrice = bars[0].Close;
+        var extreme = ExactVarianceWindow.Units(firstPrice);
+#if !NETFRAMEWORK
+        double extremePrice = firstPrice;
+#endif
         var atr = new SeededAtrWindow(period);
         for (var i = 0; i < initial; i++)
         {
-            var price = ExactVarianceWindow.Units(bars[i].Close);
+            double close = bars[i].Close;
+            var price = ExactVarianceWindow.Units(close);
             extreme = bullish ? BigInteger.Max(extreme, price) : BigInteger.Min(extreme, price);
+#if !NETFRAMEWORK
+            extremePrice = bullish ? Math.Max(extremePrice, close) : Math.Min(extremePrice, close);
+#endif
             atr.Add(bars[i]);
         }
         var firstStop = -1;
@@ -64,17 +72,25 @@ public static class VolatilityStopSnapshot
         grid /= common;
         for (var i = period; i < bars.Count; i++)
         {
-            var price = ExactVarianceWindow.Units(bars[i].Close);
+            double close = bars[i].Close;
+            var price = ExactVarianceWindow.Units(close);
             longSide[i] = bullish;
             if (atr.HasAverage)
             {
-                var average =
-                    ExactVarianceWindow.Units(atr.Average.Mantissa) << atr.Average.UpperShift;
-                var width = RocBankValue.RoundUnits(
-                    average * multiplierUnits,
-                    grid
-                );
-                stops[i] = RocBankValue.RoundUnits(bullish ? extreme - width : extreme + width, 1);
+#if !NETFRAMEWORK
+                if (TryFiniteStop(atr.Average, multiplier, extremePrice, bullish, out var finiteStop))
+                    stops[i] = finiteStop;
+                else
+#endif
+                {
+                    var average =
+                        ExactVarianceWindow.Units(atr.Average.Mantissa) << atr.Average.UpperShift;
+                    var width = RocBankValue.RoundUnits(
+                        average * multiplierUnits,
+                        grid
+                    );
+                    stops[i] = RocBankValue.RoundUnits(bullish ? extreme - width : extreme + width, 1);
+                }
             }
             var reverse =
                 stops[i].HasValue && (bullish ? price < stops[i]!.Value : price > stops[i]!.Value);
@@ -84,10 +100,18 @@ public static class VolatilityStopSnapshot
                 if (firstStop < 0)
                     firstStop = i;
                 extreme = price;
+#if !NETFRAMEWORK
+                extremePrice = close;
+#endif
                 bullish = !bullish;
             }
             else
+            {
                 extreme = bullish ? BigInteger.Max(extreme, price) : BigInteger.Min(extreme, price);
+#if !NETFRAMEWORK
+                extremePrice = bullish ? Math.Max(extremePrice, close) : Math.Min(extremePrice, close);
+#endif
+            }
             atr.Add(bars[i]);
         }
         return Enumerable
@@ -110,4 +134,24 @@ public static class VolatilityStopSnapshot
             })
             .ToArray();
     }
+
+#if !NETFRAMEWORK
+    internal static bool TryFiniteStop(RocBankValue average, double multiplier, double extreme,
+        bool bullish, out BigInteger stop)
+    {
+        stop = default;
+        if (average.UpperShift != 0) return false;
+        double width = average.Mantissa * multiplier;
+        // A finite normal product has the same once-rounded value as the
+        // original exact width stage. Keep all underflow and extended stages.
+        if (!double.IsFinite(width)
+            || average.Mantissa != 0 && Math.Abs(width) < 2.2250738585072014E-308) return false;
+        // Preserve the width rounding boundary before rounding the stop.
+        // Both operands are binary64 values on the original 2^-1074 grid.
+        double value = bullish ? extreme - width : extreme + width;
+        if (!double.IsFinite(value)) return false;
+        stop = ExactVarianceWindow.Units(value);
+        return true;
+    }
+#endif
 }

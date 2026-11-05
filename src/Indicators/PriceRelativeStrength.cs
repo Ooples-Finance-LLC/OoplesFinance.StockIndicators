@@ -99,14 +99,19 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
         private readonly Queue<(BigInteger Eval, BigInteger Base)> _history = new();
 #endif
         private readonly Queue<double?> _ratios = new();
+#if !NETFRAMEWORK
+        // Exact rounded-ratio sum, with compact storage and the existing wide fallback.
+        private ExactMeanAccumulator _sum;
+#else
         private BigInteger _sum;
+#endif
         private int _missing;
 
         public void Reset()
         {
             _history.Clear();
             _ratios.Clear();
-            _sum = 0;
+            _sum = default;
             _missing = 0;
         }
 
@@ -146,17 +151,29 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
                 {
                     var old = _ratios.Dequeue();
                     if (old.HasValue)
+#if !NETFRAMEWORK
+                        _sum.Add(old.Value, -1);
+#else
                         _sum -= ExactVarianceWindow.Units(old.Value);
+#endif
                     else
                         _missing--;
                 }
                 _ratios.Enqueue(ratio);
                 if (ratio.HasValue)
+#if !NETFRAMEWORK
+                    _sum.Add(ratio.Value);
+#else
                     _sum += ExactVarianceWindow.Units(ratio.Value);
+#endif
                 else
                     _missing++;
                 if (_ratios.Count == mean.Value && _missing == 0)
+#if !NETFRAMEWORK
+                    Put(_sum.Mean(mean.Value), 1, output);
+#else
                     Put(ExactMeanAccumulator.UnitRatio(_sum, mean.Value), 1, output);
+#endif
             }
             if (!period.HasValue)
                 return;
