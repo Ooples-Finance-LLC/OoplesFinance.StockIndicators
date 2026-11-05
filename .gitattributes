@@ -116,3 +116,4 @@ benchmarks/plans/hosted-log-return-short-certificate-20261104.json text eol=lf
 benchmarks/plans/hosted-classic-oscillator-finite-inputs-20261104.json text eol=lf
 benchmarks/plans/hosted-sum-directional-normalization-20261104.json text eol=lf
 benchmarks/plans/hosted-pvo-normalization-20261105.json text eol=lf
+benchmarks/plans/hosted-seeded-hilbert-midpoint-20261105.json text eol=lf
