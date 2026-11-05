@@ -304,6 +304,9 @@ SCOPES['doji-shadow-comparison'] = {'fixtures': {'SharedRangeDojiBenchmarks': {'
 SCOPES['renko-price-grid'] = {'fixtures': {'SharedSkenderRenkoChartNativeBenchmarks': {'Skender.GetRenko': 'Skender.GetRenko', 'Skender.GetRenkoAtr': 'Skender.GetRenkoAtr'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/RenkoPriceGridTests.cs', 'src/Indicators/RenkoSnapshot.cs'}, 'methods': {'SharedSkenderRenkoChartNativeBenchmarks': ['Snapshot', 'NativeSingle', 'NativeParallel']}, 'totals': (44, 8), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
 
 
+SCOPES['price-relative-compact-mean'] = {'fixtures': {'SharedSkenderDiagnosticsBenchmarks': {'Skender.GetPrs': 'Skender.GetPrs'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/PriceRelativeStrength.cs', 'tests/ModelsTests/PriceRelativeMeanTests.cs'}, 'totals': (30, 6), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 

@@ -1,0 +1,22 @@
+"""Require complete accepted private arithmetic consumers."""
+from unittest.mock import patch
+import test_hosted_stoch_compact
+from hosted_timing.pipeline import REPO
+
+
+class PriceRelativeCompactMeanPlanTests(test_hosted_stoch_compact.StochCompactTests):
+    expected_totals = (30, 6)
+
+    def setUp(self):
+        replacement = patch('test_hosted_stoch_compact.PLAN',
+            REPO / 'benchmarks/plans/hosted-price-relative-compact-mean-20261105.json')
+        replacement.start()
+        self.addCleanup(replacement.stop)
+
+    def test_fresh_correctness_metadata(self):
+        import json
+        p = json.loads((REPO / 'benchmarks/plans/hosted-price-relative-compact-mean-20261105.json').read_text())
+        self.assertNotIn('correctness_reuse', p)
+        self.assertNotIn('prior_rejected_qualification', p)
+        self.assertNotIn('superseded_plan', p)
+        self.assertEqual((23, 13, 100), tuple(p['source_correctness'][k] for k in ('unit', 'comparator', 'actual_local_gpu')))
