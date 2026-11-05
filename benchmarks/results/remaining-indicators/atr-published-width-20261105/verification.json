@@ -1,0 +1,57 @@
+{
+  "source": "525b779054bc34f9e8661c95d083366d1fc33906",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-atr-published-width-20261105",
+  "status": "correctness-complete",
+  "active": null,
+  "unit": {
+    "passed": 19,
+    "classes": {
+      "EnvelopeSharedExecutionTests": 16,
+      "AtrPublishedWidthTests": 3
+    },
+    "sha256": "57a7d5b49ad2821fb032c71ccac417fb9c7664c4d1dd74a60d78d29d502abe5e"
+  },
+  "parity": {
+    "passed": 14,
+    "classes": {
+      "AtrEnvelopeComparisonTests": 14
+    },
+    "sha256": "9eb7038096edba4db74a7e67c2f183f4c3845d2596ad31e1c81241ecd4dd1ad4"
+  },
+  "build_origin": {
+    "run_id": "42010937555",
+    "workflow_head": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "525b779054bc34f9e8661c95d083366d1fc33906",
+    "artifact_id": 13406784766,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42010937555"
+  },
+  "compiler_process_isolation": true,
+  "dependency_copy_mode": "Verified immutable CI artifacts; changed binaries installed without local compilation",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "build-and-gpu": {
+      "exit_code": 0,
+      "location": "CI build and actual local GPU"
+    },
+    "unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "parity": {
+      "exit_code": 0,
+      "location": "CI"
+    }
+  },
+  "gpu_passed": 100,
+  "source_fingerprint": "ebb15de9ef2d05cc85f114627d233e88b3bb857bce1d1c0ca84b52c79d7107a4",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "d9108f1bdec3797939416d03a19fc18d14f7d2d8dfcf711148289f5b62280071",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "d9108f1bdec3797939416d03a19fc18d14f7d2d8dfcf711148289f5b62280071",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "d9108f1bdec3797939416d03a19fc18d14f7d2d8dfcf711148289f5b62280071",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "d9108f1bdec3797939416d03a19fc18d14f7d2d8dfcf711148289f5b62280071"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}
