@@ -1,0 +1,570 @@
+{
+  "head": "ed2dfdfddb4ac64c136b690047c1e1104b2adb98",
+  "counts": {
+    "success": 73,
+    "skipped": 7
+  },
+  "checks": [
+    {
+      "name": "Auto-Fix PR Title",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42101850056/job/127506376497"
+    },
+    {
+      "name": "Auto-Fix PR Title",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42101834296/job/127506320089"
+    },
+    {
+      "name": "performance-summary",
+      "status": "completed",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127505984106"
+    },
+    {
+      "name": "performance",
+      "status": "completed",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127505983954"
+    },
+    {
+      "name": "complete-union",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127505687744"
+    },
+    {
+      "name": "CodeQL",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/runs/127492032085"
+    },
+    {
+      "name": "SonarCloud Code Analysis",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/runs/127491143746"
+    },
+    {
+      "name": "build-and-test",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127490929887"
+    },
+    {
+      "name": "contracts (1)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775587"
+    },
+    {
+      "name": "correctness (1)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775416"
+    },
+    {
+      "name": "contracts (19)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775402"
+    },
+    {
+      "name": "correctness (11)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775393"
+    },
+    {
+      "name": "contracts (10)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775344"
+    },
+    {
+      "name": "contracts (13)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775334"
+    },
+    {
+      "name": "correctness (10)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775333"
+    },
+    {
+      "name": "correctness (4)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775332"
+    },
+    {
+      "name": "contracts (12)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775302"
+    },
+    {
+      "name": "correctness (14)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775297"
+    },
+    {
+      "name": "correctness (6)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775287"
+    },
+    {
+      "name": "correctness (9)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775285"
+    },
+    {
+      "name": "contracts (4)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775263"
+    },
+    {
+      "name": "correctness (15)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775250"
+    },
+    {
+      "name": "contracts (8)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775243"
+    },
+    {
+      "name": "correctness (17)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775237"
+    },
+    {
+      "name": "contracts (0)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775234"
+    },
+    {
+      "name": "correctness (5)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775232"
+    },
+    {
+      "name": "contracts (6)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775225"
+    },
+    {
+      "name": "correctness (16)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775212"
+    },
+    {
+      "name": "correctness (18)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775211"
+    },
+    {
+      "name": "contracts (7)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775207"
+    },
+    {
+      "name": "correctness (19)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775185"
+    },
+    {
+      "name": "correctness (8)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775163"
+    },
+    {
+      "name": "contracts (9)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775144"
+    },
+    {
+      "name": "correctness (7)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775138"
+    },
+    {
+      "name": "correctness (3)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775106"
+    },
+    {
+      "name": "contracts (2)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775104"
+    },
+    {
+      "name": "contracts (16)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775102"
+    },
+    {
+      "name": "contracts (15)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775091"
+    },
+    {
+      "name": "contracts (3)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775086"
+    },
+    {
+      "name": "correctness (0)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775079"
+    },
+    {
+      "name": "contracts (14)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775078"
+    },
+    {
+      "name": "correctness (12)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775064"
+    },
+    {
+      "name": "contracts (18)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775055"
+    },
+    {
+      "name": "contracts (11)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775049"
+    },
+    {
+      "name": "correctness (13)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775043"
+    },
+    {
+      "name": "contracts (17)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775039"
+    },
+    {
+      "name": "correctness (2)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775028"
+    },
+    {
+      "name": "contracts (5)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127490775026"
+    },
+    {
+      "name": "Unit tests (shard 12)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875675"
+    },
+    {
+      "name": "Unit tests (shard 17)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875634"
+    },
+    {
+      "name": "Unit tests (shard 6)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875573"
+    },
+    {
+      "name": "Unit tests (shard 13)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875551"
+    },
+    {
+      "name": "Unit tests (shard 15)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875549"
+    },
+    {
+      "name": "Unit tests (shard 10)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875537"
+    },
+    {
+      "name": "Unit tests (shard 19)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875470"
+    },
+    {
+      "name": "Unit tests (shard 11)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875457"
+    },
+    {
+      "name": "Unit tests (shard 16)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875395"
+    },
+    {
+      "name": "Unit tests (shard 9)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875359"
+    },
+    {
+      "name": "Unit tests (shard 5)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875349"
+    },
+    {
+      "name": "Unit tests (shard 2)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875325"
+    },
+    {
+      "name": "Unit tests (shard 18)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875318"
+    },
+    {
+      "name": "Unit tests (shard 7)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875305"
+    },
+    {
+      "name": "Unit tests (shard 4)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875265"
+    },
+    {
+      "name": "Unit tests (shard 14)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875263"
+    },
+    {
+      "name": "Unit tests (shard 1)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875212"
+    },
+    {
+      "name": "Unit tests (shard 0)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875211"
+    },
+    {
+      "name": "Unit tests (shard 8)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875210"
+    },
+    {
+      "name": "Unit tests (shard 3)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127489875204"
+    },
+    {
+      "name": "build",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452627/job/127485490452"
+    },
+    {
+      "name": "Auto-Fix PR Title",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095493368/job/127484298866"
+    },
+    {
+      "name": "Formula contracts (${{ matrix.os }}, ${{ matrix.framework }})",
+      "status": "completed",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127484157534"
+    },
+    {
+      "name": "Build contracts (${{ matrix.os }}, ${{ matrix.framework }})",
+      "status": "completed",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127484157112"
+    },
+    {
+      "name": "Contracts (${{ matrix.target.os }}, ${{ matrix.target.framework }}, shard ${{ matrix.shard }})",
+      "status": "completed",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127484156996"
+    },
+    {
+      "name": "critical-correctness",
+      "status": "completed",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127484156887"
+    },
+    {
+      "name": "Build the immutable correctness package",
+      "status": "completed",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127484155488"
+    },
+    {
+      "name": "unit-build",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127484153977"
+    },
+    {
+      "name": "Build on the oldest supported SDK",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452953/job/127484153380"
+    },
+    {
+      "name": "Analyze (csharp)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452766/job/127484151984"
+    },
+    {
+      "name": "Lint commit messages",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095452599/job/127484151893"
+    },
+    {
+      "name": "Auto-Fix PR Title",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42095447023/job/127484134881"
+    }
+  ],
+  "statuses": [
+    {
+      "context": "CodeRabbit",
+      "state": "success",
+      "target_url": null
+    }
+  ],
+  "suites": [
+    {
+      "app": "vercel",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "app": "codecov",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "app": "sonarqubecloud",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "app": "codacy-production",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "app": "github-actions",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "app": "github-actions",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "app": "github-actions",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "app": "github-actions",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "app": "github-actions",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "app": "github-actions",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "app": "github-advanced-security",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "app": "github-actions",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "app": "github-actions",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "pr": {
+    "number": 266,
+    "draft": true,
+    "auto_merge": null,
+    "base": "master"
+  },
+  "verified_utc": "2026-11-05T20:16:56.176680+00:00"
+}

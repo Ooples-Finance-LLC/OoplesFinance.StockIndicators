@@ -313,6 +313,9 @@ SCOPES['volatility-stop-finite-stages'] = {'fixtures': {'SharedSkenderVolatility
 SCOPES['combined-renko-mean-stop'] = {'fixtures': {'SharedSkenderRenkoChartNativeBenchmarks': {'Skender.GetRenko': 'Skender.GetRenko', 'Skender.GetRenkoAtr': 'Skender.GetRenkoAtr'}, 'SharedSkenderDiagnosticsBenchmarks': {'Skender.GetPrs': 'Skender.GetPrs'}, 'SharedSkenderVolatilityStopNativeBenchmarks': {'Skender.GetVolatilityStop': 'Skender.GetVolatilityStop'}}, 'methods': {'SharedSkenderRenkoChartNativeBenchmarks': ['Snapshot', 'NativeSingle', 'NativeParallel'], 'SharedSkenderVolatilityStopNativeBenchmarks': ['Snapshot', 'NativeSingle', 'NativeParallel']}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/VolatilityStopSnapshot.cs', 'tests/ModelsTests/VolatilityStopFiniteStageTests.cs', 'src/Indicators/PriceRelativeStrength.cs', 'tests/ModelsTests/PriceRelativeMeanTests.cs'}, 'totals': (96, 18), 'shards': 4, 'baseline_phase': 'targeted', 'baseline_totals': (44, 8)}
 
 
+SCOPES['renko-direct-coordinates'] = {'fixtures': {'SharedSkenderRenkoChartNativeBenchmarks': {'Skender.GetRenko': 'Skender.GetRenko', 'Skender.GetRenkoAtr': 'Skender.GetRenkoAtr'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/RenkoSnapshot.cs', 'tests/ModelsTests/RenkoPriceGridTests.cs'}, 'methods': {'SharedSkenderRenkoChartNativeBenchmarks': ['Snapshot', 'NativeSingle', 'NativeParallel']}, 'totals': (44, 8), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (96, 18)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
