@@ -88,4 +88,46 @@ public sealed class RenkoPriceGridTests
             Assert.Equal(1, bricks[i].Volume);
         }
     }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SignedZeroPricesAccumulateVolumeBeforeTheNextBrick(bool highLow)
+    {
+        double negativeZero = BitConverter.Int64BitsToDouble(long.MinValue);
+        Bar[] bars = [Candle(0, negativeZero), Candle(1, negativeZero, 4), Candle(2, 2, 8)];
+        var bricks = RenkoSnapshot.Calculate(bars, 1, highLow).ToArray();
+        Assert.Equal(2, bricks.Length);
+        Assert.Equal(0L, BitConverter.DoubleToInt64Bits(bricks[0].Open));
+        Assert.Equal(1, bricks[0].Close);
+        Assert.Equal(1, bricks[1].Open);
+        Assert.Equal(2, bricks[1].Close);
+        Assert.All(bricks, brick => Assert.Equal(6, brick.Volume));
+    }
+
+    [Theory]
+    [InlineData(0, double.NaN)]
+    [InlineData(0, double.PositiveInfinity)]
+    [InlineData(0, double.NegativeInfinity)]
+    [InlineData(1, double.NaN)]
+    [InlineData(1, double.PositiveInfinity)]
+    [InlineData(1, double.NegativeInfinity)]
+    [InlineData(2, double.NaN)]
+    [InlineData(2, double.PositiveInfinity)]
+    [InlineData(2, double.NegativeInfinity)]
+    public void MutatedDeferredPriceRetainsOriginalUnitsException(int field, double invalid)
+    {
+        Bar[] bars = [new(DateTime.UnixEpoch, 10, 10, 10, 10, 0),
+            new(DateTime.UnixEpoch.AddDays(1), 10, 12, 10, 12, 4)];
+        var chart = RenkoSnapshot.Calculate(bars, 1, highLow: field != 0);
+        var original = bars[1];
+        bars[1] = new(original.Time, original.Open,
+            field == 1 ? invalid : original.High,
+            field == 2 ? invalid : original.Low,
+            field == 0 ? invalid : original.Close, original.Volume);
+        using var iterator = chart.GetEnumerator();
+        var error = Assert.Throws<ArgumentOutOfRangeException>(() => iterator.MoveNext());
+        Assert.Equal("value", error.ParamName);
+        Assert.Equal(new ArgumentOutOfRangeException("value").Message, error.Message);
+    }
 }
