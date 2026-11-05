@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "3ba1b451c6fd0247e08e6cf3d6dfe122925f0c025d88411c1aee35a124c60c76",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-grid-report-integration-20261105/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "f923f4a2e5b3ca688f86b509a8b3d564ed7b6aa751f60a62540138a9b49607c9",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-grid-report-integration-20261105/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "0ef29111f46001f5ae2dbe26da70605ac6584c1c688d99df891956e518918574",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-grid-report-integration-20261105/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "70969e5395a0b52262f852d448283c41fbad05c6bd2f0b6d69b54ef738645efd",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-grid-report-integration-20261105/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "ef9e5fb8f74212214edb087c16a6cd81e9e4d28cef20ee602350fa25b055d421",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-grid-report-integration-20261105/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "6285c73a75c4af771b204584aa7869f1924b340352f33b09f53266eb63068f5d",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-grid-report-integration-20261105/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "34584426b693f4c7b5353f2b0daf76f713bc0508bc78d17227c45763048914e3",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-grid-report-integration-20261105/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "364db171691a16ebdb8cb5afeb44aeeb3d6dd77da916975c148d0b07d51f7e48",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-grid-report-integration-20261105/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "db541617ff94fd5ec9f09a31bd7a88e270d0840ac8ec5cdcee9fbec8e9ee04f9",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-grid-report-integration-20261105/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "727cf91d5778ebbf119a0d747bcccb8d412c9451f27275065df877cf7ab3db66",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-grid-report-integration-20261105/updated-pair-details.png.gz"
+  }
+}
