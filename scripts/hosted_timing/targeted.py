@@ -289,6 +289,9 @@ SCOPES['seeded-hilbert-midpoint'] = {'fixtures': {'SharedHilbertTrendlineBenchma
 SCOPES['pvo-adjacent-certificate'] = {'fixtures': {'SharedSkenderEmaFamilyBenchmarks': {'Skender.GetMacd': 'Skender.GetMacd', 'Skender.GetPvo': 'Skender.GetPvo'}, 'SharedTradyMacdBenchmarks': {'Trady.Indicator.MovingAverageConvergenceDivergence': 'MovingAverageConvergenceDivergence', 'Trady.Indicator.MovingAverageConvergenceDivergenceHistogram': 'MovingAverageConvergenceDivergenceHistogram'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/PvoAdjacentCertificateTests.cs', 'src/Indicators/EmaDifferenceSignal.cs'}, 'totals': (120, 24), 'shards': 4, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['beta-derived-ratio'] = {'fixtures': {'SharedSkenderStatisticsBenchmarks': {'Skender.GetBeta': 'Skender.GetBeta'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/WindowReturnBeta.cs', 'tests/ModelsTests/BetaDerivedRatioTests.cs'}, 'totals': (30, 6), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
