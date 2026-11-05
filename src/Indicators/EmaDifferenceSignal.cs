@@ -245,26 +245,36 @@ public sealed class EmaDifferenceSignal : MultiOutputIndicatorBase, IIndicatorVa
             if (candidate == 0 || !double.IsFinite(candidate)) return false;
             double virtualTerm = total - p;
             double sumError = (p - (total - virtualTerm)) + (q - virtualTerm);
-            double residual = Math.FusedMultiplyAdd(-candidate, denominator, total);
             double productError = Math.FusedMultiplyAdd(previous, a, -p);
-            // Doubling is exact. Product rounding leaves <=31 residual bits.
-            // Correct division leaves an integer residual <=denominator/2 on
-            // candidate's binary grid, also <=31 bits. Both FMAs and TwoSum
-            // are therefore exact under the guarded normal-product bounds.
+            // Doubling is exact. Integer-weight product rounding leaves <=31
+            // residual bits, so that FMA and TwoSum are exact under these guards.
             // 32 unit roundoffs of the absolute terms cover two tail additions,
             // the bound calculation and both endpoint additions, with margin.
             // The product guard also keeps this bound above underflow.
-            double error = (residual + sumError) + productError;
-            double bound = (Math.Abs(residual) + Math.Abs(sumError) + Math.Abs(productError))
-                * 3.552713678800501e-15; // 2^-48 = 32 * binary64 unit roundoff.
-            double low = error - bound, high = error + bound;
-            // Power-of-two gaps times the integer divisor are exact here.
-            double below = (candidate - Math.BitDecrement(candidate)) * .5 * denominator;
-            double above = (Math.BitIncrement(candidate) - candidate) * .5 * denominator;
-            // Strict containment excludes both midpoint ties and uncertain cells.
-            if (low <= -below || high >= above) return false;
-            rounded = candidate;
-            return true;
+            // Relative error against total/divisor stays below four unit roundoffs
+            // for the native quotient and one adjacent float. A <=85-bit product
+            // cancels to <=35 residual bits, so each division FMA remains exact.
+            // The guarded product grid keeps both adjacent cells and bounds normal.
+            for (int attempt = 0; attempt < 2; attempt++)
+            {
+                double residual = Math.FusedMultiplyAdd(-candidate, denominator, total);
+                double error = (residual + sumError) + productError;
+                double bound = (Math.Abs(residual) + Math.Abs(sumError) + Math.Abs(productError))
+                    * 3.552713678800501e-15; // 2^-48 = 32 * binary64 unit roundoff.
+                double low = error - bound, high = error + bound;
+                // Power-of-two gaps times the integer divisor are exact here.
+                double below = (candidate - Math.BitDecrement(candidate)) * .5 * denominator;
+                double above = (Math.BitIncrement(candidate) - candidate) * .5 * denominator;
+                // Both attempts require strict containment; ties remain uncertified.
+                if (low > -below && high < above)
+                {
+                    rounded = candidate;
+                    return true;
+                }
+                if (attempt == 0)
+                    candidate = error > 0 ? Math.BitIncrement(candidate) : Math.BitDecrement(candidate);
+            }
+            return false;
         }
     }
 #endif
