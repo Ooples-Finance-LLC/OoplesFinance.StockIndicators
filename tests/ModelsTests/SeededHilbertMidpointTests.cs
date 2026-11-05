@@ -25,7 +25,7 @@ public sealed class SeededHilbertMidpointTests
             double close = 100 + (i * 17 % 31) / 8d;
             bars.Add(new(DateTime.UnixEpoch.AddMinutes(bars.Count), close, close + 2, close - 1, close, 1));
         }
-        // The dyadic input stage canonicalizes zero before the filter. The
+        // The dyadic stages canonicalize zero before the filter/publication. The
         // rational publisher can retain negative zero after underflow instead.
         var referenceBars = bars.Select(bar =>
         {
@@ -36,7 +36,10 @@ public sealed class SeededHilbertMidpointTests
             if (BitConverter.DoubleToInt64Bits(price) == long.MinValue) price = 0;
             return new Bar(bar.Time, price, price, price, price, bar.Volume);
         }).ToArray();
-        var expected = SeededHilbertTrendReference.Values(referenceBars, false);
+        var expected = SeededHilbertTrendReference.Values(referenceBars, false)
+            .Select(row => row.Select(value => value.HasValue
+                && BitConverter.DoubleToInt64Bits(value.Value) == long.MinValue ? 0d : value).ToArray())
+            .ToArray();
         var state = (IMultiOutputState)new SeededHilbertTrendline(midpoint).CreateState();
         var output = new double[6];
         for (int replay = 0; replay < 2; replay++)
@@ -48,6 +51,8 @@ public sealed class SeededHilbertMidpointTests
                 state.Update(in bar, output);
                 if (midpoint && i == 3)
                     Assert.Equal(0L, BitConverter.DoubleToInt64Bits(output[0]));
+                if (midpoint && i == 48)
+                    Assert.Equal(0L, BitConverter.DoubleToInt64Bits(output[1]));
                 for (int slot = 0; slot < 3; slot++)
                 {
                     Assert.Equal(expected[slot][i].HasValue ? 1d : 0d, output[slot + 3]);
