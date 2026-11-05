@@ -60,7 +60,7 @@ public static class RenkoSnapshot
             var step = PriceUnits(brickSize, priceShift) * scale;
             double high = 0,
                 low = 0;
-            BigInteger volume = 0;
+            var volume = new ExactMeanAccumulator();
             var reset = true;
             double Price(BigInteger value)
             {
@@ -85,7 +85,11 @@ public static class RenkoSnapshot
                 }
                 high = reset ? bar.High : Math.Max(high, bar.High);
                 low = reset ? bar.Low : Math.Min(low, bar.Low);
-                volume = reset ? U(bar.Volume) : volume + U(bar.Volume);
+                var barVolume = bar.Volume;
+                // Preserve the original deferred exception before compact addition.
+                if (!FrameworkCompatibility.IsFinite(barVolume)) _ = U(barVolume);
+                if (reset) volume = default;
+                volume.Add(barVolume);
                 var upper = BigInteger.Max(open, close);
                 var lower = BigInteger.Min(open, close);
                 BigInteger count;
@@ -107,7 +111,9 @@ public static class RenkoSnapshot
                 reset = quantity > 0;
                 if (quantity.IsZero)
                     continue;
-                var share = ExactMeanAccumulator.UnitRatio(volume, quantity);
+                var divisor = new ExactMeanAccumulator();
+                divisor.Add(1, quantity);
+                var share = volume.Ratio(divisor);
                 if (!FrameworkCompatibility.IsFinite(share))
                     throw new OverflowException("Renko volume is not representable.");
                 for (BigInteger j = 0; j < quantity; j++)
