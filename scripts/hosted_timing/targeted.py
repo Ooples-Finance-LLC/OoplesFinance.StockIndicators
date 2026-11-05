@@ -307,6 +307,9 @@ SCOPES['renko-price-grid'] = {'fixtures': {'SharedSkenderRenkoChartNativeBenchma
 SCOPES['price-relative-compact-mean'] = {'fixtures': {'SharedSkenderDiagnosticsBenchmarks': {'Skender.GetPrs': 'Skender.GetPrs'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/PriceRelativeStrength.cs', 'tests/ModelsTests/PriceRelativeMeanTests.cs'}, 'totals': (30, 6), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
 
 
+SCOPES['volatility-stop-finite-stages'] = {'fixtures': {'SharedSkenderVolatilityStopNativeBenchmarks': {'Skender.GetVolatilityStop': 'Skender.GetVolatilityStop'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/VolatilityStopSnapshot.cs', 'tests/ModelsTests/VolatilityStopFiniteStageTests.cs'}, 'methods': {'SharedSkenderVolatilityStopNativeBenchmarks': ['Snapshot', 'NativeSingle', 'NativeParallel']}, 'totals': (22, 4), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (44, 8)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 

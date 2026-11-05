@@ -125,3 +125,4 @@ benchmarks/plans/hosted-deviation-position-certificate-20261105.json text eol=lf
 benchmarks/plans/hosted-doji-shadow-comparison-20261105.json text eol=lf
 benchmarks/plans/hosted-renko-price-grid-20261105.json text eol=lf
 benchmarks/plans/hosted-price-relative-compact-mean-20261105.json text eol=lf
+benchmarks/plans/hosted-volatility-stop-finite-stages-20261105.json text eol=lf
