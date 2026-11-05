@@ -316,6 +316,9 @@ SCOPES['combined-renko-mean-stop'] = {'fixtures': {'SharedSkenderRenkoChartNativ
 SCOPES['renko-direct-coordinates'] = {'fixtures': {'SharedSkenderRenkoChartNativeBenchmarks': {'Skender.GetRenko': 'Skender.GetRenko', 'Skender.GetRenkoAtr': 'Skender.GetRenkoAtr'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/RenkoSnapshot.cs', 'tests/ModelsTests/RenkoPriceGridTests.cs'}, 'methods': {'SharedSkenderRenkoChartNativeBenchmarks': ['Snapshot', 'NativeSingle', 'NativeParallel']}, 'totals': (44, 8), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (96, 18)}
 
 
+SCOPES['renko-compact-volume'] = {'fixtures': {'SharedSkenderRenkoChartNativeBenchmarks': {'Skender.GetRenko': 'Skender.GetRenko', 'Skender.GetRenkoAtr': 'Skender.GetRenkoAtr'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/RenkoCompactVolumeTests.cs', 'src/Indicators/RenkoSnapshot.cs'}, 'methods': {'SharedSkenderRenkoChartNativeBenchmarks': ['Snapshot', 'NativeSingle', 'NativeParallel']}, 'totals': (44, 8), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (44, 8)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
