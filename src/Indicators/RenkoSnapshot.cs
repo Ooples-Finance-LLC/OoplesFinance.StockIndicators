@@ -51,16 +51,20 @@ public static class RenkoSnapshot
             var rounded = BigInteger.DivRem(BigInteger.Abs(n), grid, out var remainder);
             if (2 * remainder > grid || 2 * remainder == grid && !rounded.IsEven)
                 rounded++;
-            var close = rounded * n.Sign * grid;
+            // Remove only a proven common binary factor. The initial rounded
+            // coordinate is integral; every later price can lower this shift
+            // before it is consumed, preserving deferred input reads.
+            int priceShift = PriceShift(brickSize);
+            var close = rounded * n.Sign * (grid >> priceShift);
             var open = close;
-            var step = U(brickSize) * scale;
+            var step = (U(brickSize) >> priceShift) * scale;
             double high = 0,
                 low = 0;
             BigInteger volume = 0;
             var reset = true;
             double Price(BigInteger value)
             {
-                var published = ExactMeanAccumulator.UnitRatio(value, scale);
+                var published = ExactMeanAccumulator.UnitRatio(value << priceShift, scale);
                 if (!FrameworkCompatibility.IsFinite(published))
                     throw new OverflowException("Renko price is not representable.");
                 return published;
@@ -68,6 +72,17 @@ public static class RenkoSnapshot
             for (var i = 1; i < bars.Count; i++)
             {
                 var bar = bars[i];
+                int shift = highLow
+                    ? Math.Min(PriceShift(bar.High), PriceShift(bar.Low))
+                    : PriceShift(bar.Close);
+                if (shift < priceShift)
+                {
+                    int expansion = priceShift - shift;
+                    open <<= expansion;
+                    close <<= expansion;
+                    step <<= expansion;
+                    priceShift = shift;
+                }
                 high = reset ? bar.High : Math.Max(high, bar.High);
                 low = reset ? bar.Low : Math.Min(low, bar.Low);
                 volume = reset ? U(bar.Volume) : volume + U(bar.Volume);
@@ -76,13 +91,13 @@ public static class RenkoSnapshot
                 BigInteger count;
                 if (highLow)
                 {
-                    var up = U(bar.High) * scale - upper;
-                    var down = lower - U(bar.Low) * scale;
+                    var up = (U(bar.High) >> priceShift) * scale - upper;
+                    var down = lower - (U(bar.Low) >> priceShift) * scale;
                     count = (up >= down ? up : -down) / step;
                 }
                 else
                 {
-                    var price = U(bar.Close) * scale;
+                    var price = (U(bar.Close) >> priceShift) * scale;
                     count =
                         price > upper ? (price - upper) / step
                         : price < lower ? (price - lower) / step
@@ -112,6 +127,16 @@ public static class RenkoSnapshot
                 }
             }
         }
+    }
+
+    // A normal binary64 value is an integer multiple of 2^(exponent-1075).
+    // In 2^-1074 units this proves exponent-1 trailing zero bits. Zero
+    // permits every shift; subnormals retain the original unit grid.
+    private static int PriceShift(double value)
+    {
+        if (value == 0) return 1074;
+        int exponent = (int)((BitConverter.DoubleToInt64Bits(value) >> 52) & 0x7ff);
+        return exponent == 0 ? 0 : Math.Min(1074, exponent - 1);
     }
 
     /// <summary>Uses the last seeded Wilder ATR as the fixed brick size for the entire chart. Later input repaints earlier bricks.</summary>
