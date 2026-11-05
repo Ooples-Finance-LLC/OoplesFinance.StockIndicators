@@ -1,0 +1,35 @@
+{
+  "baseline_published": "e9f7106541a010fe3d0ce72fb0c925483691165e",
+  "baseline_dll_sha256": "9ae13bf0915b27f978f42feac96751bff88e00195066c5f82c577537656eb6f7",
+  "failed_run": "41975604131",
+  "superseded_cancelled_run": "41977396839",
+  "passing_run": "41978159942",
+  "reason": "Rational publication can retain negative underflow zero; existing rounded dyadic input and output stages canonicalize zero. Test oracle now characterizes that existing convention while checking every value/mask bit, with explicit positive-zero input and smoothed-price assertions.",
+  "baseline_replay": {
+    "runtime": ".NET 10.0.14",
+    "mismatch_count": 0,
+    "bars": 354,
+    "examples": [],
+    "compared": 8496
+  },
+  "counts_not_added_to_qualification": true,
+  "production_changed_by_oracle_fix": false,
+  "files": {
+    "probe-baseline-seeded-midpoint-20261105.ps1": {
+      "sha256": "643e79208ae5f020a8dd429ff365f11aebe03295fe727d797203a2757788d618",
+      "archive": "zero-characterization/probe-baseline-seeded-midpoint-20261105.ps1.gz"
+    },
+    "seeded-hilbert-midpoint-baseline-probe-20261105.json": {
+      "sha256": "a5465584b62f5a9798d75c73d12febad516761d51675c6472b5ae071c6f28815",
+      "archive": "zero-characterization/seeded-hilbert-midpoint-baseline-probe-20261105.json.gz"
+    },
+    "unit-tests.log": {
+      "sha256": "a7781815f6e5c50aaaf4a0b8ee081402ddf8bb4568d7ae6170980e0a3007f1c3",
+      "archive": "zero-characterization/unit-tests.log.gz"
+    },
+    "unit.trx": {
+      "sha256": "dd16ebf2eeed13dfb20ce1e48ca3685b4a81732b0c48598ebd2068a6f76417e9",
+      "archive": "zero-characterization/unit.trx.gz"
+    }
+  }
+}
