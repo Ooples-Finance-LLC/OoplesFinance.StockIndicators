@@ -220,6 +220,22 @@ public sealed class WindowBetaStatistics : MultiOutputIndicatorBase, IIndicatorV
         return difference.Mean(1);
     }
 
+    // Inputs are finite published betas and the caller excludes a zero divisor.
+    internal static double DerivedRatio(double up, double down)
+    {
+#if NETFRAMEWORK
+        var numerator = new ExactMeanAccumulator();
+        numerator.Add(up);
+        var denominator = new ExactMeanAccumulator();
+        denominator.Add(down);
+        return numerator.Ratio(denominator);
+#else
+        // ExactMeanAccumulator canonicalizes an exactly zero numerator. Retain
+        // signed underflow from every nonzero numerator with native division.
+        return up == 0 ? 0d : up / down;
+#endif
+    }
+
     internal sealed class State(
         int period,
         ReturnBetaSelection selection,
@@ -256,13 +272,9 @@ public sealed class WindowBetaStatistics : MultiOutputIndicatorBase, IIndicatorV
                 || !FrameworkCompatibility.IsFinite(output[2])
             )
                 return;
-            var up = new ExactMeanAccumulator();
-            up.Add(output[1]);
-            var down = new ExactMeanAccumulator();
-            down.Add(output[2]);
             if (output[2] != 0)
             {
-                output[3] = up.Ratio(down);
+                output[3] = DerivedRatio(output[1], output[2]);
                 output[10] = 1;
             }
             output[4] = SquaredDifference(output[1], output[2]);
