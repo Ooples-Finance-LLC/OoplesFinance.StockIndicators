@@ -179,8 +179,19 @@ internal sealed class AverageRangeDojiState(int period, int warmup, AverageRange
         return comparison.Sign;
     }
 
-    private static bool ShadowLongerThanBody(double upper, double lower, double top, double bottom, int multiplier = 1)
+    internal static bool ShadowLongerThanBody(double upper, double lower, double top, double bottom, int multiplier = 1)
     {
+#if !NETFRAMEWORK
+        if (multiplier is 1 or 2
+            && Binary64ArithmeticCertificate.TryDifference(upper, lower, out var shadow)
+            && Binary64ArithmeticCertificate.TryDifference(top, bottom, out var body))
+        {
+            // Identity and doubling are exact when finite; preserve the strict
+            // comparison of complete dyadic differences without rounding them.
+            double threshold = body * multiplier;
+            if (double.IsFinite(threshold)) return shadow > threshold;
+        }
+#endif
         var comparison = new ExactMeanAccumulator();
         comparison.Add(upper);
         comparison.Add(lower, -1);
