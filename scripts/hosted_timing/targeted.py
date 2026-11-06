@@ -331,6 +331,9 @@ SCOPES['adl-component-sharing'] = {'fixtures': {'SharedAdlDetailsBenchmarks': {'
 SCOPES['adl-exact-product-fallback'] = {'fixtures': {'SharedAdlDetailsBenchmarks': {'Skender.GetAdl': 'Skender.GetAdl'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/AccumulationDistributionComponentSharingTests.cs', 'src/Indicators/ValuesBarExecution.AccumulationDistribution.cs'}, 'methods': {'SharedAdlDetailsBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['doji-cached-weight'] = {'fixtures': {'SharedRangeDojiBenchmarks': {'TaLib.Candles.Doji': 'TaLib.Candles.Doji', 'TaLib.Candles.DragonflyDoji': 'TaLib.Candles.DragonflyDoji', 'TaLib.Candles.GravestoneDoji': 'TaLib.Candles.GravestoneDoji', 'TaLib.Candles.LongLeggedDoji': 'TaLib.Candles.LongLeggedDoji', 'TaLib.Candles.TakuriLine': 'TaLib.Candles.TakuriLine'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/AverageRangeDojiCandles.cs'}, 'methods': {'SharedRangeDojiBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (150, 30), 'shards': 5, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
