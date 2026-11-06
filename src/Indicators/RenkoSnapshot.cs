@@ -56,6 +56,14 @@ public static class RenkoSnapshot
             // before it is consumed, preserving deferred input reads.
             int priceShift = PriceShift(brickSize);
             var close = rounded * n.Sign * (grid >> priceShift);
+            // Cancel only after decimal seed rounding. Every later price and
+            // step contains scale, so this factor divides all coordinates.
+            var commonScale = BigInteger.GreatestCommonDivisor(close, scale);
+            if (commonScale > BigInteger.One)
+            {
+                close /= commonScale;
+                scale /= commonScale;
+            }
             var open = close;
             var step = PriceUnits(brickSize, priceShift) * scale;
             double high = 0,
@@ -64,7 +72,7 @@ public static class RenkoSnapshot
             var reset = true;
             double Price(BigInteger value)
             {
-                var published = ExactMeanAccumulator.UnitRatio(value << priceShift, scale);
+                var published = ExactMeanAccumulator.ScaledRatio(value, scale, priceShift - 1074);
                 if (!FrameworkCompatibility.IsFinite(published))
                     throw new OverflowException("Renko price is not representable.");
                 return published;
