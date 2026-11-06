@@ -331,6 +331,9 @@ SCOPES['adl-component-sharing'] = {'fixtures': {'SharedAdlDetailsBenchmarks': {'
 SCOPES['adl-exact-product-fallback'] = {'fixtures': {'SharedAdlDetailsBenchmarks': {'Skender.GetAdl': 'Skender.GetAdl'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/AccumulationDistributionComponentSharingTests.cs', 'src/Indicators/ValuesBarExecution.AccumulationDistribution.cs'}, 'methods': {'SharedAdlDetailsBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['zigzag-coordinate-normalization'] = {'fixtures': {'SharedSkenderZigZagChartNativeBenchmarks': {'Skender.GetZigZag': 'Skender.GetZigZag'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ZigZagSnapshot.cs', 'tests/ModelsTests/ZigZagExactScaleTests.cs'}, 'methods': {'SharedSkenderZigZagChartNativeBenchmarks': ['Snapshot', 'NativeSingle']}, 'totals': (20, 4), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
