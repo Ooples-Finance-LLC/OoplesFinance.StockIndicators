@@ -467,8 +467,8 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42163827026-attempt1/collection-recovery/original-collector-failure.log.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
+  "production_integrated": true,
+  "report_imported": true,
   "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
   "collection_recovery": {
     "measurement_run": "42163827026",
@@ -478,5 +478,12 @@
     "timings_rerun": false,
     "local_hosted_collection_equal": true,
     "reason": "Single artifact flattened by download action; original frozen collector succeeds on explicitly preserved shard container."
-  }
+  },
+  "source_integration_commit": "e43e155221e1b5e28a870f3e67c257d72efbce88",
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.AccumulationDistribution.cs",
+    "tests/ModelsTests/AccumulationDistributionComponentSharingTests.cs"
+  ],
+  "report_sha256": "90ad9d7da57fe3f0bf3b56c6dd291eea88fea62eb0c637a7d19902bfc15f1b6e",
+  "report_archive": "benchmarks/results/remaining-indicators/adl-component-sharing-report-integration-20261105"
 }
