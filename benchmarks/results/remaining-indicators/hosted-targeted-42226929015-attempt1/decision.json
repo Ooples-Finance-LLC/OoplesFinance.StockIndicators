@@ -446,7 +446,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42226929015-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "b84427fb6ec072b66daab42270ac25c789499367",
+  "integrated_paths": [
+    "src/Indicators/ZigZagSnapshot.cs",
+    "tests/ModelsTests/ZigZagExactScaleTests.cs"
+  ],
+  "report_sha256": "1843731f071bc6ba0cc5c5c33838c741e586669d3bc5658ecd39f9f33bd3c7e6",
+  "report_archive": "benchmarks/results/remaining-indicators/zigzag-coordinate-normalization-20261106-report-integration"
 }
