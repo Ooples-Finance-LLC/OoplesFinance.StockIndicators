@@ -445,9 +445,38 @@
     "scripts/verify.py": {
       "sha256": "6f1385d907d2b281b439e57b14a15ee957e95cc22d460d6bf513332e21d65fe1",
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42163827026-attempt1/scripts/verify.py.gz"
+    },
+    "collection-recovery/note.json": {
+      "sha256": "874be0fd06b6ddd6f4d868452db2616a7a451142cac3cb4de4e9f278a35d56f7",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42163827026-attempt1/collection-recovery/note.json.gz"
+    },
+    "collection-recovery/verification-run.json": {
+      "sha256": "f4df79a2cf2b156c3b191519300a4351dc3af433af6fcb4a5ec75c2f6aec61d0",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42163827026-attempt1/collection-recovery/verification-run.json.gz"
+    },
+    "collection-recovery/workflow.yml": {
+      "sha256": "56270cb8b0e650aa2306c41ec464afc65650fa3d11dbf83209b126eb085a534e",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42163827026-attempt1/collection-recovery/workflow.yml.gz"
+    },
+    "collection-recovery/workflow-tests.log": {
+      "sha256": "a0f6f088adcac1193cc3f522d6419b8a9f00722a2d3545f3b6a5ef738b715c74",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42163827026-attempt1/collection-recovery/workflow-tests.log.gz"
+    },
+    "collection-recovery/original-collector-failure.log": {
+      "sha256": "661bd88f468e01c496eb7a5d640eaba2513446d53793f1cf08dd6af42d6f2f72",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42163827026-attempt1/collection-recovery/original-collector-failure.log.gz"
     }
   },
   "production_integrated": false,
   "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "collection_recovery": {
+    "measurement_run": "42163827026",
+    "verification_run": "42169737391",
+    "workflow_head": "07c5e48002fb88552a41a9f6525360f4d9001c6a",
+    "collector_ref": "58c301fe77b19324fcec6aaa13cb379a799295ef",
+    "timings_rerun": false,
+    "local_hosted_collection_equal": true,
+    "reason": "Single artifact flattened by download action; original frozen collector succeeds on explicitly preserved shard container."
+  }
 }
