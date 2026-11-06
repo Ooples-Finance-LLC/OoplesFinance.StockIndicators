@@ -337,6 +337,9 @@ SCOPES['zigzag-coordinate-normalization'] = {'fixtures': {'SharedSkenderZigZagCh
 SCOPES['combined-containment-mfi-20261106'] = {'fixtures': {'SharedContainmentCandleBenchmarks': {'TaLib.Candles.Harami': 'TaLib.Candles.Harami', 'TaLib.Candles.HaramiCross': 'TaLib.Candles.HaramiCross', 'TaLib.Candles.HomingPigeon': 'TaLib.Candles.HomingPigeon', 'TaLib.Candles.DojiStar': 'TaLib.Candles.DojiStar'}, 'SharedMoneyFlowIndexBenchmarks': {'TaLib.Functions.Mfi': 'TaLib.Functions.Mfi', 'Skender.GetMfi': 'Skender.GetMfi'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/CompactMoneyFlowExecutionTests.cs', 'src/Indicators/ValuesBarExecution.MoneyFlow.cs', 'src/Indicators/ContainmentCandles.cs'}, 'methods': {'SharedContainmentCandleBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedMoneyFlowIndexBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (180, 36), 'shards': 6, 'baseline_phase': 'targeted', 'baseline_totals': (20, 4)}
 
 
+SCOPES['mfi-certified-conversions-20261106'] = {'fixtures': {'SharedMoneyFlowIndexBenchmarks': {'TaLib.Functions.Mfi': 'TaLib.Functions.Mfi', 'Skender.GetMfi': 'Skender.GetMfi'}, 'SharedContainmentCandleBenchmarks': {'TaLib.Candles.Harami': 'TaLib.Candles.Harami'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.MoneyFlow.cs', 'tests/ModelsTests/CompactMoneyFlowExecutionTests.cs'}, 'methods': {'SharedMoneyFlowIndexBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedContainmentCandleBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (120, 24)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
