@@ -191,9 +191,13 @@ internal enum BodyShadowCandleKind { Marubozu, ClosingMarubozu, BeltHold, Spinni
 internal sealed class BodyShadowCandleState(int period, BodyShadowCandleKind kind) : IIndicatorState
 {
     private readonly Queue<Bar> _history = new();
-    private readonly BigInteger _period = new(period);
     private readonly BigInteger _twicePeriod = new BigInteger(period) * 2;
     private readonly BigInteger _tenPeriod = new BigInteger(period) * 10;
+    private readonly int _smallTwicePeriod = period <= int.MaxValue / 2 ? period * 2 : 0;
+    private readonly int _smallTenPeriod = period <= int.MaxValue / 10 ? period * 10 : 0;
+    private readonly bool _usesRange = kind is BodyShadowCandleKind.Marubozu or BodyShadowCandleKind.ClosingMarubozu or BodyShadowCandleKind.BeltHold;
+    private readonly bool _usesShadow = kind is BodyShadowCandleKind.LongLine or BodyShadowCandleKind.ShortLine;
+    private readonly bool _longBody = kind is BodyShadowCandleKind.Marubozu or BodyShadowCandleKind.ClosingMarubozu or BodyShadowCandleKind.BeltHold or BodyShadowCandleKind.LongLine;
     private ExactMeanAccumulator _bodySum;
     private ExactMeanAccumulator _rangeSum;
     private ExactMeanAccumulator _shadowSum;
@@ -213,22 +217,18 @@ internal sealed class BodyShadowCandleState(int period, BodyShadowCandleKind kin
     {
         var top = Math.Max(bar.Open, bar.Close);
         var bottom = Math.Min(bar.Open, bar.Close);
-        _bodySum.Add(top, direction);
-        _bodySum.Add(bottom, -direction);
+        AddDifference(ref _bodySum, direction, top, bottom);
         // Only maintain the statistic read by this fixed pattern. In particular,
         // spinning-top/high-wave compare current shadows with the current body;
         // neither needs a rolling range or shadow sum.
-        if (kind is BodyShadowCandleKind.Marubozu or BodyShadowCandleKind.ClosingMarubozu or BodyShadowCandleKind.BeltHold)
+        if (_usesRange)
         {
-            _rangeSum.Add(bar.High, direction);
-            _rangeSum.Add(bar.Low, -direction);
+            AddDifference(ref _rangeSum, direction, bar.High, bar.Low);
         }
-        else if (kind is BodyShadowCandleKind.LongLine or BodyShadowCandleKind.ShortLine)
+        else if (_usesShadow)
         {
-            _shadowSum.Add(bar.High, direction);
-            _shadowSum.Add(top, -direction);
-            _shadowSum.Add(bottom, direction);
-            _shadowSum.Add(bar.Low, -direction);
+            AddDifference(ref _shadowSum, direction, bar.High, top);
+            AddDifference(ref _shadowSum, direction, bottom, bar.Low);
         }
     }
 
@@ -236,20 +236,48 @@ internal sealed class BodyShadowCandleState(int period, BodyShadowCandleKind kin
     {
         var top = Math.Max(bar.Open, bar.Close);
         var bottom = Math.Min(bar.Open, bar.Close);
-        var bodyComparison = Compare(_bodySum, _period, top, bottom);
-        var longBody = kind is BodyShadowCandleKind.Marubozu or BodyShadowCandleKind.ClosingMarubozu or BodyShadowCandleKind.BeltHold or BodyShadowCandleKind.LongLine;
-        if (longBody ? bodyComparison >= 0 : bodyComparison <= 0) return false;
+        var bodyComparison = Compare(_bodySum, period, top, bottom);
+        if (_longBody ? bodyComparison >= 0 : bodyComparison <= 0) return false;
         return kind switch
         {
-            BodyShadowCandleKind.Marubozu => Compare(_rangeSum, _tenPeriod, bar.High, top) > 0 && Compare(_rangeSum, _tenPeriod, bottom, bar.Low) > 0,
+            BodyShadowCandleKind.Marubozu => CompareRange(bar.High, top) > 0 && CompareRange(bottom, bar.Low) > 0,
             BodyShadowCandleKind.ClosingMarubozu => bar.Close >= bar.Open
-                ? Compare(_rangeSum, _tenPeriod, bar.High, top) > 0 : Compare(_rangeSum, _tenPeriod, bottom, bar.Low) > 0,
+                ? CompareRange(bar.High, top) > 0 : CompareRange(bottom, bar.Low) > 0,
             BodyShadowCandleKind.BeltHold => bar.Close >= bar.Open
-                ? Compare(_rangeSum, _tenPeriod, bottom, bar.Low) > 0 : Compare(_rangeSum, _tenPeriod, bar.High, top) > 0,
+                ? CompareRange(bottom, bar.Low) > 0 : CompareRange(bar.High, top) > 0,
             BodyShadowCandleKind.SpinningTop => BothShadowsExceedBody(bar, top, bottom, 1),
             BodyShadowCandleKind.HighWave => BothShadowsExceedBody(bar, top, bottom, 2),
-            _ => Compare(_shadowSum, _twicePeriod, bar.High, top) > 0 && Compare(_shadowSum, _twicePeriod, bottom, bar.Low) > 0
+            _ => CompareShadow(bar.High, top) > 0 && CompareShadow(bottom, bar.Low) > 0
         };
+    }
+
+    private int CompareRange(double upper, double lower) => _smallTenPeriod != 0
+        ? Compare(_rangeSum, _smallTenPeriod, upper, lower) : Compare(_rangeSum, _tenPeriod, upper, lower);
+
+    private int CompareShadow(double upper, double lower) => _smallTwicePeriod != 0
+        ? Compare(_shadowSum, _smallTwicePeriod, upper, lower) : Compare(_shadowSum, _twicePeriod, upper, lower);
+
+    private static int Compare(ExactMeanAccumulator sum, int divisor, double upper, double lower)
+    {
+        AddDifference(ref sum, -divisor, upper, lower);
+        return sum.Sign;
+    }
+
+    private static void AddDifference(ref ExactMeanAccumulator sum, int weight, double upper, double lower)
+    {
+#if !NETFRAMEWORK
+        // Collapse the two exact terms only when subtraction loses no bits.
+        if (Binary64ArithmeticCertificate.TryDifference(upper, lower, out double difference))
+        {
+            if (weight is 1 or -1)
+                sum.AddFactor(new ExactMeanAccumulator.ProductFactor(weight == 1 ? difference : -difference));
+            else if (Binary64ArithmeticCertificate.TryProduct(difference, weight, out double product))
+                sum.AddFactor(new ExactMeanAccumulator.ProductFactor(product));
+            else sum.Add(difference, weight);
+            return;
+        }
+#endif
+        sum.Add(upper, weight); sum.Add(lower, -weight);
     }
 
     private static int Compare(ExactMeanAccumulator sum, BigInteger divisor, double upper, double lower)
@@ -261,6 +289,24 @@ internal sealed class BodyShadowCandleState(int period, BodyShadowCandleKind kin
 
     private static bool BothShadowsExceedBody(in Bar bar, double top, double bottom, int multiplier)
     {
+#if !NETFRAMEWORK
+        if ((multiplier is 1 or 2)
+            && Binary64ArithmeticCertificate.TryDifference(top, bottom, out double body)
+            && Binary64ArithmeticCertificate.TryDifference(bar.High, top, out double upperShadow)
+            && Binary64ArithmeticCertificate.TryDifference(bottom, bar.Low, out double lowerShadow))
+        {
+            // Both supported multipliers are exact binary shifts, including
+            // unpublished values beyond the finite binary64 range.
+            var bodyFactor = new ExactMeanAccumulator.ProductFactor(-body, multiplier == 2 ? 1 : 0);
+            var upperMargin = new ExactMeanAccumulator();
+            upperMargin.AddFactor(new ExactMeanAccumulator.ProductFactor(upperShadow));
+            upperMargin.AddFactor(bodyFactor);
+            var lowerMargin = new ExactMeanAccumulator();
+            lowerMargin.AddFactor(new ExactMeanAccumulator.ProductFactor(lowerShadow));
+            lowerMargin.AddFactor(bodyFactor);
+            return upperMargin.Sign > 0 && lowerMargin.Sign > 0;
+        }
+#endif
         var upper = new ExactMeanAccumulator();
         upper.Add(bar.High); upper.Add(top, -1 - multiplier); upper.Add(bottom, multiplier);
         var lower = new ExactMeanAccumulator();
