@@ -29,8 +29,8 @@ internal static partial class ValuesBarExecution
         {
             cancellation.ThrowIfCancellationRequested();
             double high = output[0][i], low = output[1][i], close = output[2][i], volume = output[3][i];
-            output[0][i] = AccumulationMultiplier(high, low, close);
-            double flow = MoneyFlowAccumulationWindow.Flow(high, low, close, volume).Publish();
+            double flow = AccumulationFlow(high, low, close, volume, out double multiplier);
+            output[0][i] = multiplier;
             output[1][i] = flow;
             output[3][i] = 0;
             if (double.IsFinite(flow)) summary.Include(flow);
@@ -64,19 +64,37 @@ internal static partial class ValuesBarExecution
         return latest;
     }
 
-    private static double AccumulationMultiplier(double high, double low, double close)
+    private static double AccumulationFlow(double high, double low, double close, double volume,
+        out double multiplier)
     {
-        if (high == low) return 0; // NOSONAR: S1244 - Only an exactly zero range has zero flow.
+        if (high == low) // NOSONAR: S1244 - Only an exactly zero range has zero flow.
+        {
+            multiplier = 0;
+            return 0;
+        }
         if (Binary64ArithmeticCertificate.TryDifference(close, low, out double buying)
             && Binary64ArithmeticCertificate.TryDifference(high, close, out double selling)
             && Binary64ArithmeticCertificate.TryDifference(buying, selling, out double balance)
             && Binary64ArithmeticCertificate.TryDifference(high, low, out double range))
-            return balance == 0 ? 0 : balance / range;
-        var numerator = new ExactMeanAccumulator();
-        numerator.Add(close, 2); numerator.Add(high, -1); numerator.Add(low, -1);
-        var denominator = new ExactMeanAccumulator();
-        denominator.Add(high); denominator.Add(low, -1);
-        return numerator.Ratio(denominator);
+        {
+            // Flow rounds the complete product/ratio independently of multiplier.
+            multiplier = balance == 0 ? 0 : balance / range;
+            if (balance == 0 || volume == 0) return 0;
+            if (Binary64ArithmeticCertificate.TryProduct(balance, volume, out double product))
+            {
+                double flow = product / range;
+                if (double.IsFinite(flow)) return new RocBankValue(flow).Publish();
+            }
+        }
+        else
+        {
+            var numerator = new ExactMeanAccumulator();
+            numerator.Add(close, 2); numerator.Add(high, -1); numerator.Add(low, -1);
+            var denominator = new ExactMeanAccumulator();
+            denominator.Add(high); denominator.Add(low, -1);
+            multiplier = numerator.Ratio(denominator);
+        }
+        return MoneyFlowAccumulationWindow.Flow(high, low, close, volume).Publish();
     }
 }
 #endif
