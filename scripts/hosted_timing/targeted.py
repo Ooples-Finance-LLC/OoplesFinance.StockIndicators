@@ -334,6 +334,9 @@ SCOPES['adl-exact-product-fallback'] = {'fixtures': {'SharedAdlDetailsBenchmarks
 SCOPES['zigzag-coordinate-normalization'] = {'fixtures': {'SharedSkenderZigZagChartNativeBenchmarks': {'Skender.GetZigZag': 'Skender.GetZigZag'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ZigZagSnapshot.cs', 'tests/ModelsTests/ZigZagExactScaleTests.cs'}, 'methods': {'SharedSkenderZigZagChartNativeBenchmarks': ['Snapshot', 'NativeSingle']}, 'totals': (20, 4), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['combined-gap-cycle-20261106'] = {'fixtures': {'SharedAdlDetailsBenchmarks': {'Skender.GetAdl': 'Skender.GetAdl'}, 'SharedRangeDojiBenchmarks': {'TaLib.Candles.Doji': 'TaLib.Candles.Doji', 'TaLib.Candles.DragonflyDoji': 'TaLib.Candles.DragonflyDoji', 'TaLib.Candles.GravestoneDoji': 'TaLib.Candles.GravestoneDoji', 'TaLib.Candles.LongLeggedDoji': 'TaLib.Candles.LongLeggedDoji', 'TaLib.Candles.TakuriLine': 'TaLib.Candles.TakuriLine'}, 'SharedSkenderZigZagChartNativeBenchmarks': {'Skender.GetZigZag': 'Skender.GetZigZag'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ZigZagSnapshot.cs', 'src/Indicators/ValuesBarExecution.AccumulationDistribution.cs', 'tests/ModelsTests/CompactAccumulationDistributionExecutionTests.cs', 'tests/ModelsTests/ZigZagExactScaleTests.cs', 'src/Indicators/AverageRangeDojiCandles.cs'}, 'methods': {'SharedAdlDetailsBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedRangeDojiBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedSkenderZigZagChartNativeBenchmarks': ['Snapshot', 'NativeSingle']}, 'totals': (200, 40), 'shards': 7, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
