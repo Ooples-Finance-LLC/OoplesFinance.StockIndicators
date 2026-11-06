@@ -325,6 +325,9 @@ SCOPES['renko-price-normalization'] = {'fixtures': {'SharedSkenderRenkoChartNati
 SCOPES['renko-endpoint-cache'] = {'fixtures': {'SharedSkenderRenkoChartNativeBenchmarks': {'Skender.GetRenko': 'Skender.GetRenko', 'Skender.GetRenkoAtr': 'Skender.GetRenkoAtr'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/RenkoSnapshot.cs', 'tests/ModelsTests/RenkoEndpointCacheTests.cs'}, 'methods': {'SharedSkenderRenkoChartNativeBenchmarks': ['Snapshot', 'NativeSingle', 'NativeParallel']}, 'totals': (44, 8), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (44, 8)}
 
 
+SCOPES['adl-component-sharing'] = {'fixtures': {'SharedAdlDetailsBenchmarks': {'Skender.GetAdl': 'Skender.GetAdl'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/AccumulationDistributionComponentSharingTests.cs', 'src/Indicators/ValuesBarExecution.AccumulationDistribution.cs'}, 'methods': {'SharedAdlDetailsBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (44, 8)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
