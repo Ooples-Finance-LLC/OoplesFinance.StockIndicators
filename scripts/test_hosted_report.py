@@ -44,6 +44,9 @@ class HostedReportTests(unittest.TestCase):
     def test_snapshot_report_keeps_builder_measurements_and_retains_snapshot_provenance(self):
         self.check_report('targeted',snapshot=True)
 
+    def test_single_native_snapshot_preserves_complete_rows_without_parallel_invention(self):
+        self.check_report('targeted',snapshot='single')
+
     def check_report(self,phase,snapshot=False):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp); raw=root/'raw'; raw.mkdir()
@@ -52,13 +55,17 @@ class HostedReportTests(unittest.TestCase):
                 selected=root/'plan.json';plan=read(REPO/'benchmarks/plans/hosted-hilbert-fir-20261102.json')
                 if snapshot:
                     plan['targeted_shards']=[]
-                    for index,pair in enumerate(('Skender.GetRenko','Skender.GetRenkoAtr')):
+                    snapshot_methods=['Snapshot','NativeSingle'] if snapshot=='single' else ['Snapshot','NativeSingle','NativeParallel']
+                    snapshot_pairs=('Skender.GetZigZag',) if snapshot=='single' else ('Skender.GetRenko','Skender.GetRenkoAtr')
+                    snapshot_fixture='SharedSkenderZigZagChartNativeBenchmarks' if snapshot=='single' else 'SharedSkenderRenkoChartNativeBenchmarks'
+                    for index,pair in enumerate(snapshot_pairs):
                         operation=[dict(raw=pair,pair=pair)]
                         plan['targeted_shards'].append(dict(index=index,tasks=[
                             dict(fixture='LibraryPairBenchmarks',operations=operation,methods=['Ooples','Competitor'],implicit_pair=False,cases=10,decisions=2),
-                            dict(fixture='SharedSkenderRenkoChartNativeBenchmarks',operations=operation,methods=['Snapshot','NativeSingle','NativeParallel'],implicit_pair=False,cases=12,decisions=2)]))
+                            dict(fixture=snapshot_fixture,operations=operation,methods=snapshot_methods,implicit_pair=False,
+                                cases=10 if snapshot=='single' else 12,decisions=2)]))
                     plan['targeted_reference']['scope']='snapshot-test'
-                    self.enterContext(patch.dict('hosted_timing.targeted.SCOPES',{'snapshot-test':dict(totals=(44,8))}))
+                    self.enterContext(patch.dict('hosted_timing.targeted.SCOPES',{'snapshot-test':dict(totals=(20,4) if snapshot=='single' else (44,8))}))
                 write(selected,plan)
                 for module in ('hosted_timing.pipeline','hosted_timing.verify','hosted_timing.report','test_hosted_timing'):
                     self.enterContext(patch(module+'.PLAN',selected))
@@ -117,10 +124,14 @@ const detail=`${esc(r.raw.Ooples.host.ProcessorName)}`;
                 self.assertEqual(embedded('current-competitor-data')['status'],dict(completed=[]))
                 self.assertEqual(embedded('rollout-status-data')['builder_measurement_sources'],[])
                 snapshots=after['evidence']['snapshotMeasurements']
-                self.assertEqual(len(snapshots),2)
+                self.assertEqual(len(snapshots),len(snapshot_pairs))
                 self.assertTrue(all(r['complete'] and r['run_id']=='100' for r in snapshots))
-                self.assertEqual({row['method'] for r in snapshots for row in r['rows']},{'Snapshot','NativeSingle','NativeParallel'})
-                self.assertEqual(len({r['measurement_shard'] for r in snapshots}),2)
+                self.assertEqual({row['method'] for r in snapshots for row in r['rows']},set(snapshot_methods))
+                self.assertEqual(len({r['measurement_shard'] for r in snapshots}),len(snapshot_pairs))
+                for receipt in snapshots:
+                    self.assertEqual({(row['bars'],row['method']) for row in receipt['rows']},
+                        {(n,m) for n in (1000,10000) for m in snapshot_methods})
+                self.assertEqual(read(root/'staged/staged.json')['changed_snapshot_rows'],2*len(snapshot_pairs))
             else:
                 self.assertGreater(len({c['measurement_shard'] for r in receipts[1:] for c in r['comparisons']}),1)
             self.assertIn('D.rows.flatMap',result)

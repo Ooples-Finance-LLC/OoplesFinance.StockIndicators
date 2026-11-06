@@ -70,7 +70,7 @@ def stage(live, raw, repo, out, phase='successor'):
             cases={(r['pair'],r['bars'],r['method']):r for r in summary['final_candidate_rows'][fixture]
                    if r['provenance']['shard']==shard}
             pairs={key[0] for key in cases}
-            if task['methods'] == ['Snapshot','NativeSingle','NativeParallel']:
+            if task['methods'] in (['Snapshot','NativeSingle','NativeParallel'], ['Snapshot','NativeSingle']):
                 assert set(cases)=={(p,n,m) for p in pairs for n in (1000,10000)
                                    for m in task['methods']}
                 snapshot_receipts.append(dict(fixture=fixture,source_sha=source,run_id=host['run_id'],
@@ -211,5 +211,6 @@ def stage(live, raw, repo, out, phase='successor'):
     write(out/'staged.json',dict(before_sha256=hashlib.sha256(original).hexdigest(),candidate_sha256=digest(out/'candidate.html'),
         changed_baseline_rows=2*len(pairs),unchanged_baseline_rows=unchanged,changed_builder_slots=4*len(builder_pairs),
         added_builder_slots=added,replaced_builder_slots=replaced,builder_rows=rows,verdicts=counts,run_id=run,
-        snapshot_receipts=snapshot_receipts,changed_snapshot_rows=sum(len(r['rows'])//3 for r in snapshot_receipts)))
+        snapshot_receipts=snapshot_receipts,changed_snapshot_rows=len({(row['pair'],row['bars'])
+            for receipt in snapshot_receipts for row in receipt['rows'] if row['method']=='Snapshot'})))
     return out/'candidate.html'
