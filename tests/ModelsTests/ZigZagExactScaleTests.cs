@@ -52,6 +52,24 @@ public sealed class ZigZagExactScaleTests
         Check(bars.Select(b => new Bar(b.Time, b.Open, 0, -0d, b.Close, b.Volume)).ToArray(), 5, true);
     }
 
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
+    public void DyadicCoordinatesAndThresholdsPreserveEveryRetrospectiveBit(bool highLow)
+    {
+        var random = new Random(731);
+        double price = 100;
+        var prices = Enumerable.Range(0, 257).Select(_ => price += random.Next(-8, 9) / 8d).ToArray();
+        foreach (int exponent in new[] { -1071, -1022, -450, 0, 450, 1016 })
+        foreach (int sign in new[] { 1, -1 })
+        {
+            var bars = prices.Select(p => new Bar(default, Math.ScaleB(sign * p, exponent),
+                Math.ScaleB(sign * p + .125, exponent), Math.ScaleB(sign * p - .125, exponent),
+                Math.ScaleB(sign * p, exponent), 1)).ToArray();
+            Check(bars, 5, highLow);
+            Check(bars, Math.BitIncrement(5), highLow);
+        }
+    }
+
     private static void Check(Bar[] bars, double percent, bool highLow)
     {
         var expected = OriginalZigZagSnapshot.Calculate(bars, percent, highLow);
