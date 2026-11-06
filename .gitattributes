@@ -134,3 +134,4 @@ benchmarks/plans/hosted-renko-price-normalization-20261105.json text eol=lf
 benchmarks/plans/hosted-renko-endpoint-cache-20261105.json text eol=lf
 benchmarks/plans/hosted-adl-component-sharing-20261105.json text eol=lf
 benchmarks/plans/hosted-adl-component-sharing-zero-20261105.json text eol=lf
+benchmarks/plans/hosted-adl-exact-product-fallback-20261106.json text eol=lf
