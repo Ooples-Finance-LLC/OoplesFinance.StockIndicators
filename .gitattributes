@@ -137,3 +137,5 @@ benchmarks/plans/hosted-adl-component-sharing-zero-20261105.json text eol=lf
 benchmarks/plans/hosted-adl-exact-product-fallback-20261106.json text eol=lf
 benchmarks/plans/hosted-zigzag-coordinate-normalization-20261106.json text eol=lf
 benchmarks/plans/hosted-combined-containment-mfi-20261106.json text eol=lf
+benchmarks/plans/hosted-shared-ad-certified-fallback-20261106.json text eol=lf
+benchmarks/plans/evidence/pr266-ci-d38e32557-20261104.json -text
