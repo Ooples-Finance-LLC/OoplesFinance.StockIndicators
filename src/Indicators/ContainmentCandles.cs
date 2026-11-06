@@ -149,21 +149,21 @@ internal sealed class ContainmentCandleState(int period, ContainmentCandleKind k
     {
         var previousTop = Math.Max(_previous.Open, _previous.Close);
         var previousBottom = Math.Min(_previous.Open, _previous.Close);
-        var longMargin = _lagBodySum;
-        longMargin.Add(previousTop, -period); longMargin.Add(previousBottom, period);
-        if (longMargin.Sign >= 0) return false;
+        if (CompareMargin(_lagBodySum, period, previousTop, previousBottom) >= 0) return false;
         var top = Math.Max(bar.Open, bar.Close); var bottom = Math.Min(bar.Open, bar.Close);
         var shortMargin = _doji ? _rangeSum : _bodySum;
         int denominator = _doji ? _smallTenPeriod : period;
+        int shortComparison;
         if (denominator != 0)
         {
-            shortMargin.Add(top, -denominator); shortMargin.Add(bottom, denominator);
+            shortComparison = CompareMargin(shortMargin, denominator, top, bottom);
         }
         else
         {
             shortMargin.Add(top, -_tenPeriod); shortMargin.Add(bottom, _tenPeriod);
+            shortComparison = shortMargin.Sign;
         }
-        if (shortMargin.Sign < 0) return false;
+        if (shortComparison < 0) return false;
         return kind switch
         {
             ContainmentCandleKind.Harami => top <= previousTop && bottom >= previousBottom,
@@ -171,6 +171,19 @@ internal sealed class ContainmentCandleState(int period, ContainmentCandleKind k
             ContainmentCandleKind.HomingPigeon => _previous.Close < _previous.Open && bar.Close < bar.Open && top < previousTop && bottom > previousBottom,
             _ => _previous.Close >= _previous.Open ? bottom > previousTop : top < previousBottom
         };
+    }
+    private static int CompareMargin(ExactMeanAccumulator sum, int denominator, double upper, double lower)
+    {
+#if !NETFRAMEWORK
+        // A certified difference avoids two larger, cancelling weighted prices.
+        if (Binary64ArithmeticCertificate.TryDifference(upper, lower, out double difference))
+        {
+            sum.Add(difference, -denominator);
+            return sum.Sign;
+        }
+#endif
+        sum.Add(upper, -denominator); sum.Add(lower, denominator);
+        return sum.Sign;
     }
 }
 
