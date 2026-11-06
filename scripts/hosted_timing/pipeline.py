@@ -177,6 +177,9 @@ def _verify_input_contents(folder, plan, proof, plan_sha256):
     assert proof['sdk'] == plan['proposed_dotnet_sdk']
     assert manifest(folder/'common') == proof['common_manifest']
     assert manifest(folder/'evidence') == proof['evidence_manifest']
+    if plan.get('runtime_dependency_alignment'):
+        from .runtime_dependencies import verify_input_alignment
+        verify_input_alignment(folder, plan, proof)
     for label in ('old', 'successor', 'variants'):
         assert digest(folder/'production'/(label+'.dll')) == proof['production_sha256'][label]
         expected = cpu_test_classes(plan, label)
@@ -228,6 +231,7 @@ def prepare(out, reuse_from=None):
     evidence = out / 'evidence'
     evidence.mkdir()
     sources = {}
+    tested_dependencies = {}
     checks = {}
     source_root = Path(os.environ.get('RUNNER_TEMP', str(out.parent))) / ('si-sources-' + uuid.uuid4().hex)
     source_root.mkdir()
@@ -247,6 +251,9 @@ def prepare(out, reuse_from=None):
                  '/Logger:trx;LogFileName=' + label + '.trx', '/ResultsDirectory:' + str(evidence)],
                 tree, evidence / (label + '-tests.log'))
         checks[label] = verify_trx(evidence / (label + '.trx'), selected)
+        if plan.get('runtime_dependency_alignment'):
+            from .runtime_dependencies import tensor_closure
+            tested_dependencies[label] = tensor_closure(unit.parent, 'OoplesFinance.StockIndicators.Tests.Unit.deps.json')
         sources[label] = tree
     # The existing benchmark inputs are unchanged between the timing arms. The
     # variant harness adds only its dedicated fixture and correctness test.
@@ -265,6 +272,11 @@ def prepare(out, reuse_from=None):
     checks['variant-harness'] = verify_trx(evidence / 'variant-harness.trx', ['SharedClassicalWindowVariantBenchmarkTests'])
     assert checks['variant-harness']['passed'] == 13
     shutil.copytree(variant_tree / BENCH / 'bin/Release/net10.0', out / 'common')
+    if plan.get('runtime_dependency_alignment'):
+        from .runtime_dependencies import tensor_closure, verify_alignment
+        common = tensor_closure(out/'common', 'OoplesFinance.StockIndicators.CompetitorBenchmarks.deps.json')
+        for dependencies in tested_dependencies.values():
+            verify_alignment(common, dependencies, plan['runtime_dependency_alignment']['tensor_version'])
     (out / 'production').mkdir()
     production = {}
     source_trees = {}
@@ -296,6 +308,8 @@ def prepare(out, reuse_from=None):
                  sdk=plan['proposed_dotnet_sdk'], dotnet_info=subprocess.check_output(['dotnet','--info'],text=True),
                  workflow_head=os.environ.get('GITHUB_SHA', git('rev-parse','HEAD')),
                  run_id=os.environ.get('GITHUB_RUN_ID'), run_attempt=os.environ.get('GITHUB_RUN_ATTEMPT'))
+    if plan.get('runtime_dependency_alignment'):
+        proof['tested_runtime_dependencies'] = tested_dependencies
     write(out/'provenance.json', proof)
     print('Prepared immutable source-qualified hosted inputs.', flush=True)
 
@@ -338,6 +352,8 @@ def measure(inputs, out, phase, shard, diagnostic=None):
     assert proof['plan_sha256'] == digest(PLAN) and proof['sources'] == plan['sources']
     assert manifest(inputs/'common') == proof['common_manifest']
     assert manifest(inputs/'evidence') == proof['evidence_manifest']
+    from .runtime_dependencies import verify_input_alignment
+    verify_input_alignment(inputs, plan, proof)
     assert proof['sdk'] == subprocess.check_output(['dotnet','--version'],text=True).strip()
     tasks = phase_tasks(plan, phase, shard)
     diagnostic_env = {}
