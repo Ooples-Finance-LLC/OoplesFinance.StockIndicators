@@ -34,7 +34,10 @@ public static class ZigZagSnapshot
     {
         long bits = BitConverter.DoubleToInt64Bits(value);
         if ((bits & long.MaxValue) == 0) return int.MaxValue;
-        return Math.Max(0, (int)((bits >> 52) & 2047) - 1);
+        int exponent = (int)((bits >> 52) & 2047);
+        long significand = bits & 0xfffffffffffffL;
+        if (exponent != 0) significand |= 1L << 52;
+        return Math.Max(0, exponent - 1) + ExactMeanAccumulator.TrailingBinaryZeros(significand);
     }
 
     private static BigInteger GridUnits(double value, int grid)
@@ -44,9 +47,12 @@ public static class ZigZagSnapshot
         long significand = bits & 0xfffffffffffffL;
         if (exponent != 0) significand |= 1L << 52;
         if (significand == 0) return BigInteger.Zero;
-        // The chosen common grid is no larger than any nonzero input grid.
+        int zeros = ExactMeanAccumulator.TrailingBinaryZeros(significand);
+        significand >>= zeros;
+        // Cancel trailing powers before forming coordinates. The common grid
+        // is no larger than any normalized nonzero input grid.
         return new BigInteger(bits < 0 ? -significand : significand)
-            << (Math.Max(0, exponent - 1) - grid);
+            << (Math.Max(0, exponent - 1) + zeros - grid);
     }
 
     /// <summary>Calculates all retrospective outputs using closes, or candle highs/lows when selected.</summary>
