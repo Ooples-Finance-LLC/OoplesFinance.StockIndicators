@@ -21,7 +21,20 @@ internal sealed class MoneyFlowAccumulationWindow
 #pragma warning restore S1244
         {
 #if !NETFRAMEWORK
-            if (TryExactFlow(high, low, close, volume, out var ordinary)) return new RocBankValue(ordinary);
+            if (Binary64ArithmeticCertificate.TryDifference(close, low, out var buying)
+                && Binary64ArithmeticCertificate.TryDifference(high, close, out var selling)
+                && Binary64ArithmeticCertificate.TryDifference(buying, selling, out var balance)
+                && Binary64ArithmeticCertificate.TryDifference(high, low, out var range))
+            {
+                if (Binary64ArithmeticCertificate.TryProduct(balance, volume, out var product))
+                {
+                    double ordinary = product / range;
+                    if (double.IsFinite(ordinary)) return new RocBankValue(ordinary);
+                }
+                // The certified differences make balance exactly 2*close-high-low.
+                // Keep an uncertified product exact until the complete ratio rounds.
+                if (double.IsFinite(volume)) return CertifiedFlow(balance, range, volume);
+            }
 #endif
             var numerator = new ExactMeanAccumulator();
             numerator.AddProduct(close, volume, 2); numerator.AddProduct(high, volume, -1); numerator.AddProduct(low, volume, -1);
@@ -36,17 +49,17 @@ internal sealed class MoneyFlowAccumulationWindow
         return flow;
     }
 #if !NETFRAMEWORK
-    private static bool TryExactFlow(double high, double low, double close, double volume, out double flow)
+    private static RocBankValue CertifiedFlow(double balance, double range, double volume)
     {
-        flow = 0;
-        if (!Binary64ArithmeticCertificate.TryDifference(close, low, out var buying)
-            || !Binary64ArithmeticCertificate.TryDifference(high, close, out var selling)
-            || !Binary64ArithmeticCertificate.TryDifference(buying, selling, out var balance)
-            || !Binary64ArithmeticCertificate.TryDifference(high, low, out var range)
-            || !Binary64ArithmeticCertificate.TryProduct(balance, volume, out var product)) return false;
-        flow = product / range;
-        // Unpublished overflow uses RocBankValue's extended exponent instead.
-        return double.IsFinite(flow);
+        var numerator = new ExactMeanAccumulator();
+        numerator.AddProduct(balance, volume);
+        for (int shift = 0; ; shift += 1024)
+        {
+            var denominator = new ExactMeanAccumulator();
+            denominator.Add(range, BigInteger.One << shift);
+            double value = numerator.Ratio(denominator);
+            if (!double.IsInfinity(value)) return new RocBankValue(value, shift);
+        }
     }
 #endif
     internal void Reset() => _total = default;

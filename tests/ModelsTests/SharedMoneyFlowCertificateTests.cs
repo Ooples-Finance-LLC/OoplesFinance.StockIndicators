@@ -42,6 +42,42 @@ public sealed class SharedMoneyFlowCertificateTests
         }
     }
 
+    [Fact]
+    public void CertifiedDifferencesRetainUnroundedProductsAndExtendedExponents()
+    {
+        foreach (double sign in new[] { -1d, 1d })
+        foreach (var (high, low, close, volume) in new[]
+        {
+            (3d, 0d, 1.1, sign * 1.1),
+            (3d, 0d, 1.1, sign * double.Epsilon),
+            (2d, 1d, 3d, sign * double.MaxValue),
+            (1d, 2d, 3d, sign * double.MaxValue),
+            (3d, 0d, 1.1, sign * Math.ScaleB(1.1, -1022))
+        })
+        {
+            Assert.True(Binary64ArithmeticCertificate.TryDifference(close, low, out double buying));
+            Assert.True(Binary64ArithmeticCertificate.TryDifference(high, close, out double selling));
+            Assert.True(Binary64ArithmeticCertificate.TryDifference(buying, selling, out double balance));
+            Assert.True(Binary64ArithmeticCertificate.TryDifference(high, low, out _));
+            Assert.False(Binary64ArithmeticCertificate.TryProduct(balance, volume, out _));
+            Compare(high, low, close, volume);
+        }
+    }
+
+    [Fact]
+    public void NonfiniteVolumePreservesTheOriginalFallbackFailure()
+    {
+        foreach (double volume in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+        {
+            var expected = Record.Exception(() => Reference(2, 1, 3, volume));
+            var actual = Record.Exception(() => MoneyFlowAccumulationWindow.Flow(2, 1, 3, volume));
+            Assert.NotNull(expected); Assert.NotNull(actual);
+            Assert.Equal(expected.GetType(), actual.GetType());
+            Assert.Equal(expected.Message, actual.Message);
+            Compare(1, 1, 3, volume);
+        }
+    }
+
     private static void Compare(double high, double low, double close, double volume)
     {
         var expected = Reference(high, low, close, volume);
