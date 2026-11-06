@@ -70,6 +70,8 @@ public static class RenkoSnapshot
                 low = 0;
             var volume = new ExactMeanAccumulator();
             var reset = true;
+            double publishedOpen = 0, publishedClose = 0;
+            bool endpointsPublished = false;
             double Price(BigInteger value)
             {
                 var published = ExactMeanAccumulator.ScaledRatio(value, scale, priceShift - 1074);
@@ -126,15 +128,24 @@ public static class RenkoSnapshot
                     throw new OverflowException("Renko volume is not representable.");
                 for (BigInteger j = 0; j < quantity; j++)
                 {
-                    open =
-                        count.Sign > 0 ? BigInteger.Max(open, close) : BigInteger.Min(open, close);
+                    bool opensAtClose = count.Sign > 0 ? close >= open : close <= open;
+                    open = opensAtClose ? close : open;
                     close = open + count.Sign * step;
+                    // Select by exact coordinates, including on reversals. Grid
+                    // expansion preserves the prices of both retained endpoints.
+                    // Publish the first open here to preserve deferred exceptions.
+                    double nextOpen = opensAtClose ? publishedClose : publishedOpen;
+                    if (!endpointsPublished) nextOpen = Price(open);
+                    double nextClose = Price(close);
+                    publishedOpen = nextOpen;
+                    publishedClose = nextClose;
+                    endpointsPublished = true;
                     yield return new(
                         bar.Time,
-                        Price(open),
+                        publishedOpen,
                         high,
                         low,
-                        Price(close),
+                        publishedClose,
                         share,
                         count.Sign > 0
                     );
