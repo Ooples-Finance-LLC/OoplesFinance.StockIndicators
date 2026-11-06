@@ -85,6 +85,7 @@ internal static partial class ValuesBarExecution
                 double flow = product / range;
                 if (double.IsFinite(flow)) return new RocBankValue(flow).Publish();
             }
+            return ExactAccumulationFlow(balance, volume, range);
         }
         else
         {
@@ -95,6 +96,18 @@ internal static partial class ValuesBarExecution
             multiplier = numerator.Ratio(denominator);
         }
         return MoneyFlowAccumulationWindow.Flow(high, low, close, volume).Publish();
+    }
+
+    private static double ExactAccumulationFlow(double balance, double volume, double range)
+    {
+        // Both price stages are already certified exact. One exact product is
+        // the original three-product numerator; keep overflow for slot validation.
+        var numerator = new ExactMeanAccumulator();
+        numerator.AddProduct(balance, volume);
+        var denominator = new ExactMeanAccumulator();
+        denominator.Add(range);
+        double flow = numerator.Ratio(denominator);
+        return flow == 0 ? 0 : flow;
     }
 }
 #endif

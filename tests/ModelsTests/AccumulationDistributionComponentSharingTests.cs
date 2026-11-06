@@ -18,6 +18,11 @@ public sealed class AccumulationDistributionComponentSharingTests
         double flow = (new ReferenceFraction(sign * 5) / new ReferenceFraction(3)).ToDouble();
         Assert.NotEqual(BitConverter.DoubleToInt64Bits(flow),
             BitConverter.DoubleToInt64Bits(multiplier * (sign * 5)));
+        double fractionalVolume = sign * .1;
+        double fallbackFlow = (new ReferenceFraction(3) * ReferenceFraction.FromDouble(fractionalVolume)
+            / new ReferenceFraction(5)).ToDouble();
+        Assert.NotEqual(BitConverter.DoubleToInt64Bits(fallbackFlow),
+            BitConverter.DoubleToInt64Bits((3 * fractionalVolume) / 5));
         Bar[] bars =
         [
             new(DateTime.UnixEpoch, 0, 3, 0, 2, sign * 5),
@@ -28,7 +33,9 @@ public sealed class AccumulationDistributionComponentSharingTests
             // The product is exact and normal, but division underflows. Flow
             // publication canonicalizes even a negative underflowed zero.
             new(DateTime.UnixEpoch.AddDays(5), 0, Math.ScaleB(1, 1021), -Math.ScaleB(1, 1021),
-                Math.ScaleB(1, 969), sign * double.Epsilon)
+                Math.ScaleB(1, 969), sign * double.Epsilon),
+            new(DateTime.UnixEpoch.AddDays(6), 0, 5, 0, 4, fractionalVolume),
+            new(DateTime.UnixEpoch.AddDays(7), 0, 5, 0, 3, sign * double.Epsilon)
         ];
         var indicator = new AccumulationDistributionWithAverage(2);
         using var actual = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
@@ -37,11 +44,13 @@ public sealed class AccumulationDistributionComponentSharingTests
             .BuildAsync();
         double[][] expected =
         [
-            [multiplier, -multiplier, 0, multiplier, 0, Math.ScaleB(1, -52)],
-            [flow, -flow, 0, 0, 0, 0],
-            [flow, 0, 0, 0, 0, 0],
-            [0, flow / 2, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 1]
+            [multiplier, -multiplier, 0, multiplier, 0, Math.ScaleB(1, -52),
+                (new ReferenceFraction(3) / new ReferenceFraction(5)).ToDouble(),
+                (new ReferenceFraction(1) / new ReferenceFraction(5)).ToDouble()],
+            [flow, -flow, 0, 0, 0, 0, fallbackFlow, 0],
+            [flow, 0, 0, 0, 0, 0, fallbackFlow, fallbackFlow],
+            [0, flow / 2, 0, 0, 0, 0, fallbackFlow / 2, fallbackFlow],
+            [0, 1, 1, 1, 1, 1, 1, 1]
         ];
         for (int slot = 0; slot < expected.Length; slot++)
             Assert.Equal(expected[slot].Select(BitConverter.DoubleToInt64Bits),
