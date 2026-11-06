@@ -337,6 +337,9 @@ SCOPES['zigzag-coordinate-normalization'] = {'fixtures': {'SharedSkenderZigZagCh
 SCOPES['combined-gap-cycle-20261106'] = {'fixtures': {'SharedAdlDetailsBenchmarks': {'Skender.GetAdl': 'Skender.GetAdl'}, 'SharedRangeDojiBenchmarks': {'TaLib.Candles.Doji': 'TaLib.Candles.Doji', 'TaLib.Candles.DragonflyDoji': 'TaLib.Candles.DragonflyDoji', 'TaLib.Candles.GravestoneDoji': 'TaLib.Candles.GravestoneDoji', 'TaLib.Candles.LongLeggedDoji': 'TaLib.Candles.LongLeggedDoji', 'TaLib.Candles.TakuriLine': 'TaLib.Candles.TakuriLine'}, 'SharedSkenderZigZagChartNativeBenchmarks': {'Skender.GetZigZag': 'Skender.GetZigZag'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ZigZagSnapshot.cs', 'src/Indicators/ValuesBarExecution.AccumulationDistribution.cs', 'tests/ModelsTests/CompactAccumulationDistributionExecutionTests.cs', 'tests/ModelsTests/ZigZagExactScaleTests.cs', 'src/Indicators/AverageRangeDojiCandles.cs'}, 'methods': {'SharedAdlDetailsBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedRangeDojiBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedSkenderZigZagChartNativeBenchmarks': ['Snapshot', 'NativeSingle']}, 'totals': (200, 40), 'shards': 7, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['mfi-private-certified-ratio'] = {'fixtures': {'SharedMoneyFlowIndexBenchmarks': {'TaLib.Functions.Mfi': 'TaLib.Functions.Mfi', 'Skender.GetMfi': 'Skender.GetMfi'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.MoneyFlow.cs', 'tests/ModelsTests/CompactMoneyFlowExecutionTests.cs'}, 'methods': {'SharedMoneyFlowIndexBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (60, 12), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (20, 4)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
