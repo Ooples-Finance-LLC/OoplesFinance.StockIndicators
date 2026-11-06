@@ -113,8 +113,9 @@ internal enum ContainmentCandleKind { Harami, HaramiCross, HomingPigeon, DojiSta
 internal sealed class ContainmentCandleState(int period, ContainmentCandleKind kind) : IIndicatorState
 {
     private readonly Queue<Bar> _history = new();
-    private readonly BigInteger _period = new(period);
     private readonly BigInteger _tenPeriod = new BigInteger(period) * 10;
+    private readonly int _smallTenPeriod = period <= int.MaxValue / 10 ? period * 10 : 0;
+    private readonly bool _doji = kind is ContainmentCandleKind.HaramiCross or ContainmentCandleKind.DojiStar;
     private ExactMeanAccumulator _bodySum, _rangeSum, _lagBodySum;
     private Bar _previous;
     private int _seen;
@@ -139,21 +140,30 @@ internal sealed class ContainmentCandleState(int period, ContainmentCandleKind k
     private void Accumulate(in Bar bar, int sign)
     {
         _bodySum.Add(Math.Max(bar.Open, bar.Close), sign); _bodySum.Add(Math.Min(bar.Open, bar.Close), -sign);
-        _rangeSum.Add(bar.High, sign); _rangeSum.Add(bar.Low, -sign);
+        if (_doji)
+        {
+            _rangeSum.Add(bar.High, sign); _rangeSum.Add(bar.Low, -sign);
+        }
     }
     private bool Matches(in Bar bar)
     {
         var previousTop = Math.Max(_previous.Open, _previous.Close);
         var previousBottom = Math.Min(_previous.Open, _previous.Close);
-        var longMargin = _lagBodySum;
-        longMargin.Add(previousTop, -_period); longMargin.Add(previousBottom, _period);
-        if (longMargin.Sign >= 0) return false;
+        if (CompareMargin(_lagBodySum, period, previousTop, previousBottom) >= 0) return false;
         var top = Math.Max(bar.Open, bar.Close); var bottom = Math.Min(bar.Open, bar.Close);
-        var doji = kind is ContainmentCandleKind.HaramiCross or ContainmentCandleKind.DojiStar;
-        var shortMargin = doji ? _rangeSum : _bodySum;
-        var denominator = doji ? _tenPeriod : _period;
-        shortMargin.Add(top, -denominator); shortMargin.Add(bottom, denominator);
-        if (shortMargin.Sign < 0) return false;
+        var shortMargin = _doji ? _rangeSum : _bodySum;
+        int denominator = _doji ? _smallTenPeriod : period;
+        int shortComparison;
+        if (denominator != 0)
+        {
+            shortComparison = CompareMargin(shortMargin, denominator, top, bottom);
+        }
+        else
+        {
+            shortMargin.Add(top, -_tenPeriod); shortMargin.Add(bottom, _tenPeriod);
+            shortComparison = shortMargin.Sign;
+        }
+        if (shortComparison < 0) return false;
         return kind switch
         {
             ContainmentCandleKind.Harami => top <= previousTop && bottom >= previousBottom,
@@ -161,6 +171,19 @@ internal sealed class ContainmentCandleState(int period, ContainmentCandleKind k
             ContainmentCandleKind.HomingPigeon => _previous.Close < _previous.Open && bar.Close < bar.Open && top < previousTop && bottom > previousBottom,
             _ => _previous.Close >= _previous.Open ? bottom > previousTop : top < previousBottom
         };
+    }
+    private static int CompareMargin(ExactMeanAccumulator sum, int denominator, double upper, double lower)
+    {
+#if !NETFRAMEWORK
+        // A certified difference avoids two larger, cancelling weighted prices.
+        if (Binary64ArithmeticCertificate.TryDifference(upper, lower, out double difference))
+        {
+            sum.Add(difference, -denominator);
+            return sum.Sign;
+        }
+#endif
+        sum.Add(upper, -denominator); sum.Add(lower, denominator);
+        return sum.Sign;
     }
 }
 

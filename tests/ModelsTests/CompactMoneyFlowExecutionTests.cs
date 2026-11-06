@@ -8,6 +8,32 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 [Collection("IndicatorValuesDispatch")]
 public sealed class CompactMoneyFlowExecutionTests
 {
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
+    public async Task WideCapturedRatiosPreserveExactRoundingAndSignedCancellation(bool minimum)
+    {
+        var random = new Random(73192);
+        var bars = Enumerable.Range(0, 513).Select(i =>
+        {
+            double price = 10 + random.NextDouble();
+            double volume = 1024 + i % 13;
+            if (i % 5 == 0) volume = -volume;
+            return new Bar(default, price, price, price, price, volume);
+        }).ToArray();
+        foreach (int period in new[] { 2, 20 })
+        {
+            var indicator = new WindowMoneyFlowIndex(period, minimum);
+            using var expected = await Build(bars, indicator).ConfigureBehavior(_ => { }).BuildAsync();
+            foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+            {
+                using var actual = await Build(bars, indicator).ConfigureHistory(history).BuildAsync();
+                foreach (var output in indicator.Outputs)
+                    Assert.Equal(expected[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                        actual[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+            }
+        }
+    }
+
     private static StockIndicatorBuilder Build(Bar[] bars, IIndicator indicator) =>
         new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicator);
 
