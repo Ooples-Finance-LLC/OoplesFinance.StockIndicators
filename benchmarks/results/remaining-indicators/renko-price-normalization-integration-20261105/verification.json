@@ -1,0 +1,26 @@
+{
+  "source_integration_commit": "70d2ad0707bd263acc632dc8bd6ca5b8e0d52091",
+  "qualified_source": "107391c7c0eb863d694ca8ccac037906d3bd052e",
+  "compiled_source": "c6c0cf3bbe7d94d39bd823950acccc9379933e42",
+  "source_fingerprint": "ea373bd9872bec9581d5b92738b35b9600541c7472e90291f62660fa7fe94524",
+  "unit": 45,
+  "comparator": 22,
+  "actual_gpu": 100,
+  "inventory_tests": 8,
+  "production_sha256": "bedf3ee1124e10d59fdf55abe06c712d75a46afa4448f5eb75b7480f4dfd4e24",
+  "run_id": "42143562298",
+  "cases": 44,
+  "decisions": 8,
+  "verdicts": {
+    "inconclusive": 5,
+    "faster": 3
+  },
+  "integrated_paths": [
+    "src/Indicators/RenkoSnapshot.cs",
+    "tests/ModelsTests/RenkoPriceNormalizationTests.cs"
+  ],
+  "excluded": [
+    "Only this complete source-bound Renko qualification is imported; no pooling or policy changes"
+  ],
+  "verified_utc": "2026-11-06T01:59:31.776026+00:00"
+}

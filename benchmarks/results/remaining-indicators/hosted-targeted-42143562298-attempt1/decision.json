@@ -743,7 +743,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42143562298-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "70d2ad0707bd263acc632dc8bd6ca5b8e0d52091",
+  "integrated_paths": [
+    "src/Indicators/RenkoSnapshot.cs",
+    "tests/ModelsTests/RenkoPriceNormalizationTests.cs"
+  ],
+  "report_sha256": "13b7cea4dea84346d3ed58fa9d6ec62f4fc44bc7b21e2ddafe46163801674346",
+  "report_archive": "benchmarks/results/remaining-indicators/renko-price-normalization-report-integration-20261105"
 }
