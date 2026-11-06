@@ -13979,6 +13979,6 @@
     "src/Indicators/WindowVortex.cs": "53b281190ab0ab8b184d890b061488efb7d12304f8575e1a6facd05966c1b723",
     "src/Indicators/WindowedSinc.cs": "c7cb8f8b65c173e08a98f430cb24a2a514421b578d13ec7db71945187f1c3216",
     "src/Indicators/ZeroSeedLaguerreFilter.cs": "22cedebf855f3680e65630d251754d329ae2975bad8a823147f45d99ec0c2698",
-    "src/Indicators/ZigZagSnapshot.cs": "a5c99cda70b6e67e042f978797b45db31f4cfdb306b9ceeed57837d4d3bcfe7d"
+    "src/Indicators/ZigZagSnapshot.cs": "b34d3d090add6848c8cdd5b92ee3eac8b697654c0859ffdc0534287b736ce6f7"
   }
 }
