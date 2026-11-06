@@ -60,6 +60,39 @@ public sealed class CompactAccumulationDistributionExecutionTests
         await foreach (var _ in empty) Assert.Fail("Empty input published a row.");
     }
 
+    [Theory]
+    [InlineData(false, 1)] [InlineData(true, 1)]
+    [InlineData(false, -1)] [InlineData(true, -1)]
+    public async Task ExactPrefixesRetainLowBitsAcrossCompactAndWideCancellation(bool full, int sign)
+    {
+        // The first cancellation recovers bits beyond binary64 precision; the
+        // second spans more than 128 bits and must retain the exact wide path.
+        double[] flows = [1, Math.ScaleB(1, -70), -1, 1, Math.ScaleB(1, -180), -1,
+            -Math.ScaleB(1, -70), -Math.ScaleB(1, -180), double.Epsilon, -double.Epsilon,
+            Math.CopySign(0, -1), double.Epsilon];
+        var bars = flows.Select((flow, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i),
+            0, 1, 0, 1, sign * flow)).ToArray();
+        var prefixes = new double[flows.Length];
+        var means = new double[flows.Length];
+        var total = new ReferenceFraction(0);
+        for (int i = 0; i < flows.Length; i++)
+        {
+            total += ReferenceFraction.FromDouble(sign * flows[i]);
+            prefixes[i] = total.ToDouble();
+            if (i != 0) means[i] = ((ReferenceFraction.FromDouble(prefixes[i - 1])
+                + ReferenceFraction.FromDouble(prefixes[i])) / new ReferenceFraction(2)).ToDouble();
+        }
+        Assert.Equal(sign * Math.ScaleB(1, -70), prefixes[2]);
+        Assert.Equal(sign * Math.ScaleB(1, -180), prefixes[6]);
+        var indicator = new AccumulationDistributionWithAverage(2);
+        using var actual = await Build(bars, indicator)
+            .ConfigureHistory(full ? IndicatorHistoryMode.Full : IndicatorHistoryMode.LatestOnly).BuildAsync();
+        Assert.Equal(prefixes.Select(BitConverter.DoubleToInt64Bits),
+            actual[indicator.Outputs[2]].ToArray().Select(BitConverter.DoubleToInt64Bits));
+        Assert.Equal(means.Select(BitConverter.DoubleToInt64Bits),
+            actual[indicator.Outputs[3]].ToArray().Select(BitConverter.DoubleToInt64Bits));
+    }
+
     private static async Task SameFailure(Bar[] bars, int period)
     {
         var indicator = new AccumulationDistributionWithAverage(period);
