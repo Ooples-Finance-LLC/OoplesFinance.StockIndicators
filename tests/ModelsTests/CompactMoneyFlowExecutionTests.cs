@@ -261,6 +261,34 @@ public sealed class CompactMoneyFlowExecutionTests
         Assert.Equal(0L, BitConverter.DoubleToInt64Bits(zeroRun[zeroIndicator.Value][2]));
     }
 
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
+    public async Task CertifiedConversionsPreserveBothSignsAtTheInt64ExclusiveLimit(bool minimum)
+    {
+        double limit = Math.ScaleB(1d, 63);
+        foreach (double magnitude in new[] { Math.BitDecrement(limit), limit, Math.BitIncrement(limit), 2 * limit })
+        foreach (int sign in new[] { -1, 1 })
+        foreach (bool scalePrices in new[] { false, true })
+        {
+            var bars = Enumerable.Range(0, 513).Select(i =>
+            {
+                // Unit values force grid zero, retaining the actual conversion boundary.
+                double price = scalePrices ? (i % 3 == 0 ? 1 : sign * magnitude) : 1 + i % 3;
+                double volume = scalePrices ? 1 : (i % 4 == 0 ? 1 : sign * magnitude);
+                return new Bar(default, price, price, price, price, volume);
+            }).ToArray();
+            var indicator = new WindowMoneyFlowIndex(2, minimum);
+            using var expected = await Build(bars, indicator).ConfigureBehavior(_ => { }).BuildAsync();
+            foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+            {
+                using var actual = await Build(bars, indicator).ConfigureHistory(history).BuildAsync();
+                foreach (var output in indicator.Outputs)
+                    Assert.Equal(expected[output].ToArray().Select(BitConverter.DoubleToInt64Bits),
+                        actual[output].ToArray().Select(BitConverter.DoubleToInt64Bits));
+            }
+        }
+    }
+
     [Fact]
     public async Task NonfiniteOutputsDoNotMaskLaterInvalidInputOrCancellation()
     {

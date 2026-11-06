@@ -90,8 +90,9 @@ internal static partial class ValuesBarExecution
         {
             if (cancellation.IsCancellationRequested) return region;
             var bar = captured[i];
-            long price = (long)(priceFactor == 0 ? Math.ScaleB(bar.Open, -priceGrid) : bar.Open * priceFactor);
-            long volume = (long)(volumeFactor == 0 ? Math.ScaleB(bar.Volume, -volumeGrid) : bar.Volume * volumeFactor);
+            // The common-grid certificate bounds both finite scaled values within Int64.
+            long price = unchecked((long)(priceFactor == 0 ? Math.ScaleB(bar.Open, -priceGrid) : bar.Open * priceFactor));
+            long volume = unchecked((long)(volumeFactor == 0 ? Math.ScaleB(bar.Volume, -volumeGrid) : bar.Volume * volumeFactor));
             MoneyFlowIntegerPair<T> current = default;
             if (i > 0)
             {
