@@ -83,7 +83,7 @@ internal static partial class ValuesBarExecution
             if (Binary64ArithmeticCertificate.TryProduct(balance, volume, out double product))
             {
                 double flow = product / range;
-                if (double.IsFinite(flow)) return flow == 0 ? 0 : flow;
+                if (double.IsFinite(flow)) return new RocBankValue(flow).Publish();
             }
         }
         else
