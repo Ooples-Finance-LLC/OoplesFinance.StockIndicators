@@ -19,6 +19,8 @@ class CoverageEvidenceTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         self.plan = read(PLAN)
+        # This legacy synthetic runtime deliberately has no dependency assets.
+        self.plan.pop('runtime_dependency_alignment', None)
         self.plan.pop('coverage_shards', None)
         self.plan.pop('coverage_harness', None)
         self.plan['measurement_policy'].pop('operation_timeout_seconds', None)
