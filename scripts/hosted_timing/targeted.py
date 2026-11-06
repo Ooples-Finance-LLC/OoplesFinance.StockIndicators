@@ -322,6 +322,9 @@ SCOPES['renko-compact-volume'] = {'fixtures': {'SharedSkenderRenkoChartNativeBen
 SCOPES['renko-price-normalization'] = {'fixtures': {'SharedSkenderRenkoChartNativeBenchmarks': {'Skender.GetRenko': 'Skender.GetRenko', 'Skender.GetRenkoAtr': 'Skender.GetRenkoAtr'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/RenkoSnapshot.cs', 'tests/ModelsTests/RenkoPriceNormalizationTests.cs'}, 'methods': {'SharedSkenderRenkoChartNativeBenchmarks': ['Snapshot', 'NativeSingle', 'NativeParallel']}, 'totals': (44, 8), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (44, 8)}
 
 
+SCOPES['renko-endpoint-cache'] = {'fixtures': {'SharedSkenderRenkoChartNativeBenchmarks': {'Skender.GetRenko': 'Skender.GetRenko', 'Skender.GetRenkoAtr': 'Skender.GetRenkoAtr'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/RenkoSnapshot.cs', 'tests/ModelsTests/RenkoEndpointCacheTests.cs'}, 'methods': {'SharedSkenderRenkoChartNativeBenchmarks': ['Snapshot', 'NativeSingle', 'NativeParallel']}, 'totals': (44, 8), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (44, 8)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 

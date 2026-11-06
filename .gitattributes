@@ -131,3 +131,4 @@ benchmarks/plans/hosted-renko-direct-coordinates-20261105.json text eol=lf
 benchmarks/plans/evidence/pr266-ci-ed2dfdfdd-20261105.json text eol=lf
 benchmarks/plans/hosted-renko-compact-volume-20261105.json text eol=lf
 benchmarks/plans/hosted-renko-price-normalization-20261105.json text eol=lf
+benchmarks/plans/hosted-renko-endpoint-cache-20261105.json text eol=lf
