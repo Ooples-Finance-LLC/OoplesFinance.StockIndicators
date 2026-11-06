@@ -62,7 +62,8 @@ class RuntimeDependencyTests(unittest.TestCase):
             plan={'sources':{},'runtime_dependency_alignment':{'tensor_version':'0.147.0'}}
             proof={'plan_sha256':'plan','sources':{},'common_manifest':pipeline.manifest(root/'common'),
                 'evidence_manifest':{},'tested_runtime_dependencies':dict.fromkeys(('old','successor','variants'),closure)}
-            with patch.object(pipeline,'read',side_effect=[plan,proof]),patch.object(pipeline,'digest',return_value='plan'), \
+            with patch.dict('sys.modules',{'psutil':None}), \
+                patch.object(pipeline,'read',side_effect=[plan,proof]),patch.object(pipeline,'digest',return_value='plan'), \
                 patch.object(pipeline,'command') as launch:
                 with self.assertRaises(AssertionError):pipeline.measure(root,root/'output','targeted',0)
                 launch.assert_not_called()

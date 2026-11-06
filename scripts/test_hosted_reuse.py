@@ -14,6 +14,8 @@ from hosted_timing.reuse import prepare_reused
 
 def original_inputs(root):
     plan = copy.deepcopy(pipeline.read(pipeline.PLAN))
+    # Synthetic legacy reuse is independent of the selected qualification plan.
+    plan.pop('runtime_dependency_alignment', None)
     plan.pop('reuse_inputs', None)
     plan.pop('coverage_harness', None)
     plan.pop('coverage_shards', None)

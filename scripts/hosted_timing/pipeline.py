@@ -346,7 +346,6 @@ def trix_preflight_tasks(plan):
 
 
 def measure(inputs, out, phase, shard, diagnostic=None):
-    import psutil
     plan = read(PLAN)
     proof = read(inputs/'provenance.json')
     assert proof['plan_sha256'] == digest(PLAN) and proof['sources'] == plan['sources']
@@ -354,6 +353,7 @@ def measure(inputs, out, phase, shard, diagnostic=None):
     assert manifest(inputs/'evidence') == proof['evidence_manifest']
     from .runtime_dependencies import verify_input_alignment
     verify_input_alignment(inputs, plan, proof)
+    import psutil
     assert proof['sdk'] == subprocess.check_output(['dotnet','--version'],text=True).strip()
     tasks = phase_tasks(plan, phase, shard)
     diagnostic_env = {}
