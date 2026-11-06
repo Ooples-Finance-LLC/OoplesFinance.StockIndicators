@@ -13664,7 +13664,7 @@
     "src/Indicators/CompensatedExponentialAverage.cs": "7d9d22d86b3a8d5f483893974a805b78957e80da8b604ca47814b41e892d8ce8",
     "src/Indicators/ConnorsStrength.cs": "ec2976fa9a665e02a8d3df22acc587c5805bc02d86f3081e8ac6ea4667a9f554",
     "src/Indicators/ConnorsStrengthSnapshot.cs": "d8618034945e8a1e47d126f8e758da623a1e4e1443b5a3a193f04e90adc6ec6f",
-    "src/Indicators/ContainmentCandles.cs": "31f8d962c95ad4cba31eead3337173ea46e510520ad2c647a1b5ca1f92e2a9b8",
+    "src/Indicators/ContainmentCandles.cs": "c2198b2ea4a1314680bd06454446c24d66eca59c4e0b4f22876f6212ed5703cd",
     "src/Indicators/ContextReversalCandles.cs": "f30abbc01db41f70bfec3f7d25d570bf5e6a0330dd143a4fc83cac39dd76b5f0",
     "src/Indicators/ConventionalCandles.cs": "fae989afa3ef29302006cfdca5736e710b7ebd5ad05c1b56fe4c1e30a1a47da2",
     "src/Indicators/CrowSoldierCandles.cs": "58c4088ab6414d5a3dc40abd039e4a29f22ca39d708457a50828671737c44620",

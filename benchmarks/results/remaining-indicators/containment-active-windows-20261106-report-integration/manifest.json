@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "1843731f071bc6ba0cc5c5c33838c741e586669d3bc5658ecd39f9f33bd3c7e6",
+    "archive": "benchmarks/results/remaining-indicators/containment-active-windows-20261106-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "66087ce57c0a10cec37458b35733fc8dc1a468ac54ed8d336bace6d9dc9eea80",
+    "archive": "benchmarks/results/remaining-indicators/containment-active-windows-20261106-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "ecca2f1fa89d87af19d3ab1c988cb9fdd290323b73951d5cb84ef678cbd455df",
+    "archive": "benchmarks/results/remaining-indicators/containment-active-windows-20261106-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "3f93e9702c446e1eb31eebc82d539e43b1eb6fe2dc64fa6d393df1b23aa92d7a",
+    "archive": "benchmarks/results/remaining-indicators/containment-active-windows-20261106-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "33961c6a2f12230cfb3165621d9f4fd520d4317fd0a24bd21b46e4717b6a07ad",
+    "archive": "benchmarks/results/remaining-indicators/containment-active-windows-20261106-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "a9cbed9806bc6e6a7249ca32c1a78c8aee9c362ce615ea8ac97895ac4e7a95c5",
+    "archive": "benchmarks/results/remaining-indicators/containment-active-windows-20261106-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "b4e0cc96d91af8ad8f248b9fd59e3b1a92f6ba910fed36329019dac5a7c15f25",
+    "archive": "benchmarks/results/remaining-indicators/containment-active-windows-20261106-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "8f0c9a2cd953415f65dad7c6946b6256b00c30a5eb0342525ac0c032c088fcf6",
+    "archive": "benchmarks/results/remaining-indicators/containment-active-windows-20261106-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "0a20e74f9ba371dd72f0361907f8d98d9433891b95948c35eaf9137672b94130",
+    "archive": "benchmarks/results/remaining-indicators/containment-active-windows-20261106-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "fa009b7870690f4df6da2f59418e5cae25d9cee2fe99242ee856117ba0a4d477",
+    "archive": "benchmarks/results/remaining-indicators/containment-active-windows-20261106-report-integration/updated-pair-details.png.gz"
+  }
+}
