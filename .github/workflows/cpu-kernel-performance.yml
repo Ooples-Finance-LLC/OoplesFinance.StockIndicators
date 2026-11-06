@@ -25,7 +25,7 @@ on:
       evidence_phase:
         description: Original evidence phase for verification-only recovery
         type: choice
-        options: [variants, coverage]
+        options: [variants, coverage, targeted]
         default: variants
       candidate_source:
         description: Immutable source SHA for CPU build and later local GPU validation
@@ -474,7 +474,7 @@ jobs:
           retention-days: 14
           if-no-files-found: error
   hosted-collect-targeted:
-    needs: hosted-targeted
+    needs: [hosted-prepare, hosted-targeted]
     if: always() && needs.hosted-targeted.result != 'skipped'
     runs-on: windows-2025
     timeout-minutes: 15
@@ -491,7 +491,8 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           pattern: hosted-targeted-*
-          path: evidence
+          # A single artifact is flattened; preserve its shard container.
+          path: evidence${{ needs.hosted-prepare.outputs.targeted_matrix == '[0]' && '/hosted-targeted-0' || '' }}
       - uses: actions/download-artifact@v8
         with:
           name: hosted-inputs
