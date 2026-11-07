@@ -7,7 +7,7 @@ on:
       suite:
         description: Public builder comparisons, diagnostic kernels, or both
         type: choice
-        options: [builder, kernel, all, qualified-rollout, qualified-variants, qualified-coverage, qualified-targeted, verify-evidence, trix-diagnostic, trix-library-diagnostic, build-correctness-inputs, body-shadow-control-diagnostic, body-shadow-collect-repair]
+        options: [builder, kernel, all, qualified-rollout, qualified-variants, qualified-coverage, qualified-targeted, verify-evidence, trix-diagnostic, trix-library-diagnostic, build-correctness-inputs, body-shadow-control-diagnostic, body-shadow-collect-repair, harami-warmup-stability]
         default: builder
       qualification_plan:
         description: Immutable source and measurement plan for qualified-rollout
@@ -47,6 +47,17 @@ concurrency:
   group: cpu-kernels-${{ github.ref }}-${{ inputs.suite == 'verify-evidence' && format('verify-{0}', inputs.evidence_run) || github.event.label.name || 'dispatch' }}
   cancel-in-progress: true
 jobs:
+  harami-warmup-stability:
+    if: github.event_name == 'workflow_dispatch' && inputs.suite == 'harami-warmup-stability'
+    permissions:
+      contents: read
+      actions: read
+    uses: ./.github/workflows/body-shadow-control-diagnostic.yml
+    with:
+      plan: benchmarks/plans/harami-warmup-stability-20261107.json
+      shards: '[0,1]'
+      max_parallel: 2
+      artifact_prefix: harami-warmup-stability
   body-shadow-collect-repair:
     if: github.event_name == 'workflow_dispatch' && inputs.suite == 'body-shadow-collect-repair'
     permissions:

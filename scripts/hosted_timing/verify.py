@@ -71,6 +71,9 @@ def collect_aa(folder, inputs, aa_plan, collection_receipt=None):
 
 def _collect(folder, phase, *, preflight, aa=None):
     plan = read(PLAN)
+    if aa:
+        from .aa_control import measurement_plan
+        plan=measurement_plan(plan,aa)
     repair=aa.get('_collection_receipt') if aa else None
     logger_logs=set()
     if phase == 'coverage':
@@ -82,8 +85,8 @@ def _collect(folder, phase, *, preflight, aa=None):
         from .targeted import expected_totals, verify_reference
         assert plan.get('targeted_reference') and not preflight
         verify_reference(plan)
-        targeted_totals = (30, 6) if aa else expected_totals(plan)
-    expected_shards = {0, 1, 2} if aa else {0} if preflight else set(phase_shards(plan, phase))
+        targeted_totals = (aa['cases'],aa['comparisons']) if aa else expected_totals(plan)
+    expected_shards = {s['index'] for s in aa['shards']} if aa else {0} if preflight else set(phase_shards(plan, phase))
     assert len(roots) == len(expected_shards)
     shards, nonces, input_hashes, run_ids = set(), set(), set(), set()
     decisions, candidates = [], defaultdict(list)
@@ -229,11 +232,13 @@ def _collect(folder, phase, *, preflight, aa=None):
         comparisons = [dict(diagnostic_job=d['diagnostic_job'], kind=aa['jobs'][d['diagnostic_job']]['kind'], fixture=d['fixture'], pair=d['pair'], bars=d['bars'], method=d['method'],
             A_means_ms=d['old_means_ms'], B_means_ms=d['new_means_ms'],
             separation=names[d['verdict']], provenance=d['provenance']) for d in decisions]
-        return dict(diagnostic_only=True, same_binary=False, all_cases_verified=True,
+        return dict(diagnostic_only=True, same_binary=all(len(set(j['label_profiles'].values()))==1 for j in aa['jobs']), all_cases_verified=True,
             case_count=case_count, comparison_count=len(comparisons), comparisons=comparisons,
             separation_counts={names[k]:v for k,v in counts.items()},
             jobs=aa['jobs'], production_sha256=aa['production_hashes'], input_provenance_sha256=next(iter(input_hashes)),
             original_input=aa['original_input'], diagnostic_plan_sha256=aa['_plan_sha256'],
+            measurement_policy=aa['measurement_policy'],
+            warmup_experiment=aa.get('warmup_experiment',False),
             **(dict(collection_repair=repair,collection_tooling_head=git('rev-parse','HEAD')) if repair else {}),
             production_integrated=False, report_imported=False, policy_changed=False,
             interpretation='Diagnostic only. Body/shadow source remains excluded; observational JIT instrumentation cannot qualify source or change policy.')

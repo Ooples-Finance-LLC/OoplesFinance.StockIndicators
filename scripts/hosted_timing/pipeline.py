@@ -147,7 +147,11 @@ def warmups_for(plan, fixture):
     assert plan['measurement_policy']['iterations'] == 10
     # LibraryPair is the fixed-invocation batch fixture in this qualification matrix.
     count = plan['measurement_policy'].get('fixed_invocation_warmups', 10)
-    assert count in (10, 1000)
+    if count == 20000:
+        from .aa_control import DiagnosticPlan
+        assert isinstance(plan, DiagnosticPlan), 'Longer warmups require the frozen diagnostic entry point'
+    else:
+        assert count in (10, 1000)
     return count if fixture == 'LibraryPairBenchmarks' else 10
 
 
@@ -361,10 +365,11 @@ def measure(inputs, out, phase, shard, diagnostic=None, aa_plan=None):
     if diagnostic != 'body-shadow-control':
         assert aa_plan is None
     if diagnostic == 'body-shadow-control':
-        from .aa_control import validate, runtime_controls, profiles, environment
+        from .aa_control import validate, runtime_controls, profiles, environment, measurement_plan
         aa = validate(aa_plan, inputs)
+        plan = measurement_plan(plan, aa)
         assert not runtime_controls(), 'Default runtime required'
-        assert phase == 'targeted' and shard in range(3)
+        assert phase == 'targeted' and shard in range(len(aa['shards']))
         tasks = copy.deepcopy(aa['shards'][shard]['tasks'])
         diagnostic_env = environment(aa, shard)
     elif diagnostic == 'trix-preflight':

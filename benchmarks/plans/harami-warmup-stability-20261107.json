@@ -1,0 +1,193 @@
+{
+  "status": "frozen",
+  "diagnostic_only": true,
+  "original_plan": {
+    "path": "benchmarks/plans/hosted-body-shadow-comparison-weights-20261106.json",
+    "sha256": "e6cec4820db09d5dd75b86916fcc528f9f915c2a461d8b309f6a29f3751530ca"
+  },
+  "original_input": {
+    "run_id": "42298436560",
+    "workflow_head": "772506037400472aa9d7ac7f151f366971223b2b",
+    "artifact_id": 13544163288,
+    "artifact_digest": "sha256:248e246505292eb741a2f91ea5096912e1e3e591a23055f5ae3753581c6ed86a",
+    "provenance_sha256": "fdaedf29d16a788950d7bc8d69742c03857919a28a819233d3b6780b3c986592",
+    "run_attempt": "1"
+  },
+  "sources": {
+    "published": "d38e32557dfc3816b5c1efb845f863f71b8d3a03",
+    "old": "d38e32557dfc3816b5c1efb845f863f71b8d3a03",
+    "successor": "6a702fda89e587f3a50dcf4ba77024a906c5461c",
+    "variants": "76b51e1580489119d99a30a521c2e810e04e21bc"
+  },
+  "production_hashes": {
+    "old": "eec63e2995c9af5c01e4aa5da9b775e4965ab9fa272b2e4e15381436ec3aef73",
+    "successor": "7136a624dc126a845425d2925e4aae9fcf2db5bd17d8cf2d1aa77cd133c15c2c",
+    "variants": "1cf0c1bcde88aa85ab31660f0bc510804e38a7e6e0dd552607d8bc08bb8cef97"
+  },
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 20000
+  },
+  "order": [
+    "A",
+    "B",
+    "B",
+    "A"
+  ],
+  "instrumentation_only": {},
+  "runtime_policy_overrides": {},
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.148.0"
+  },
+  "jobs": [
+    {
+      "index": 0,
+      "kind": "same-binary-AA",
+      "label_profiles": {
+        "A": "old",
+        "B": "old"
+      },
+      "actual_source": "d38e32557dfc3816b5c1efb845f863f71b8d3a03",
+      "production_sha256": "eec63e2995c9af5c01e4aa5da9b775e4965ab9fa272b2e4e15381436ec3aef73",
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.Harami",
+      "raw_operation": "TaLib.Candles.Harami",
+      "methods": [
+        "Ooples",
+        "Competitor"
+      ],
+      "cases": 10,
+      "comparisons": 2
+    },
+    {
+      "index": 1,
+      "kind": "same-binary-AA",
+      "label_profiles": {
+        "A": "successor",
+        "B": "successor"
+      },
+      "actual_source": "6a702fda89e587f3a50dcf4ba77024a906c5461c",
+      "production_sha256": "7136a624dc126a845425d2925e4aae9fcf2db5bd17d8cf2d1aa77cd133c15c2c",
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.Harami",
+      "raw_operation": "TaLib.Candles.Harami",
+      "methods": [
+        "Ooples",
+        "Competitor"
+      ],
+      "cases": 10,
+      "comparisons": 2
+    }
+  ],
+  "cases": 20,
+  "comparisons": 4,
+  "matrix": {
+    "max_parallel": 2,
+    "timeout_minutes_per_job": 90
+  },
+  "limits": [
+    "Reuse and fully verify complete original authenticated0.148.0inputs; no production rebuild.",
+    "Only diagnostic unmeasuredfixed-invocationwarmups change1000to20000;10measurediterations/order/CPUquiet/buildgates/runtimepolicy unchanged.",
+    "Both labels within each job use identical complete old or successor profiles.",
+    "No source/report import, acceptance, pooling, or qualification-policy rollout; body/shadow candidate remains excluded."
+  ],
+  "estimated_additional_time": "30-45minutes",
+  "finding": {
+    "body_shadow_result": {
+      "cases": 240,
+      "decisions": 48,
+      "faster": 23,
+      "inconclusive": 23,
+      "slower": 2
+    },
+    "identical_harami_methods": 31,
+    "marubozu_builder_full_1000_regression_percent": 15.4,
+    "harami_batch_1000_ratio": 4.54
+  },
+  "created_utc": "2026-11-06T23:18:43.755510+00:00",
+  "cpu_test_classes": {
+    "old": [
+      "SharedBodyShadowTests"
+    ],
+    "successor": [
+      "SharedBodyShadowTests"
+    ],
+    "variants": [
+      "CompactMacdWordEmaTests",
+      "CompactClassicalWindowTests",
+      "ExactMeanUnitWeightTests"
+    ]
+  },
+  "gpu_sources": {
+    "old": "d38e32557dfc3816b5c1efb845f863f71b8d3a03",
+    "successor": "6a702fda89e587f3a50dcf4ba77024a906c5461c",
+    "variants": "76b51e1580489119d99a30a521c2e810e04e21bc"
+  },
+  "frozen_utc": "2026-11-07T03:08:31.750848+00:00",
+  "approval": "User explicitly approved20cases4comparisons2jobs using20000unmeasuredwarmups;10measurediterations/defaulttiering/CPUgates retained; no automatic qualification-policy or source-acceptance change.",
+  "shards": [
+    {
+      "index": 0,
+      "cases": 10,
+      "comparisons": 2,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.Harami",
+              "pair": "TaLib.Candles.Harami"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "cases": 10,
+      "comparisons": 2,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.Harami",
+              "pair": "TaLib.Candles.Harami"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ]
+    }
+  ],
+  "warmup_experiment": true,
+  "scope": "Approved diagnostic-only Harami fixed-invocation warmup stability experiment",
+  "parent_diagnostic": {
+    "measurement_run": "42325654760",
+    "collection_run": "42327644840",
+    "evidence_commit": "7f3e3da4bb2e9768a3d69db195b7042c24313889"
+  }
+}

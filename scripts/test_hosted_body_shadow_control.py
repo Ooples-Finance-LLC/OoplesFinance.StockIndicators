@@ -84,13 +84,13 @@ class BodyShadowControlTests(unittest.TestCase):
                 production_sha256={k:p.digest(inputs/'production'/(k+'.dll')) for k in ('old','successor','variants')})
             p.write(inputs/'provenance.json',proof)
             fake=types.SimpleNamespace(cpu_count=lambda:4,process_iter=lambda fields:[])
-            for shard in range(3):
+            for shard in range(len(d['jobs'])):
                 labels=aa.profiles(d,shard)
                 def run(**kw):
                     kw['assert_binaries']()
                     label=labels[kw['arm']=='new']
                     self.assertEqual(label.encode(),(kw['runtime']/p.DLL).read_bytes())
-                    self.assertEqual(1000 if kw['fixture']=='LibraryPairBenchmarks' else 10,kw['warmups'])
+                    self.assertEqual(d['measurement_policy']['fixed_invocation_warmups'] if kw['fixture']=='LibraryPairBenchmarks' else 10,kw['warmups'])
                     for key,value in aa.environment(d,shard).items(): self.assertEqual(value,kw['env'][key])
                     return dict(index=kw['index'],arm=kw['arm'],fixture=kw['fixture'],cases=2*len(kw['methods']))
                 with patch.dict(sys.modules,{'psutil':fake}),patch.object(p.subprocess,'check_output',return_value='10.0.403'),patch.object(p,'git',return_value='workflow'),patch.object(aa,'runtime_controls',return_value={}),patch.object(aa,'validate',return_value=d),patch('hosted_timing.runtime_dependencies.verify_input_alignment') as alignment,patch.object(p,'run_checkpointed',side_effect=run):
@@ -104,13 +104,13 @@ class BodyShadowControlTests(unittest.TestCase):
 
     def evidence(self,root):
         d=aa.validate_plan(PLAN)
-        with patch.object(base,'PLAN',ORIGINAL),patch.object(base,'phase_shards',return_value=range(3)),patch.object(base,'phase_tasks',side_effect=lambda plan,phase,shard:d['shards'][shard]['tasks']):
+        with patch.object(base,'PLAN',ORIGINAL),patch.object(base,'phase_shards',return_value=range(len(d['jobs']))),patch.object(base,'phase_tasks',side_effect=lambda plan,phase,shard:d['shards'][shard]['tasks']):
             base.make_evidence(root,'targeted',new_mean=50)
         inputs=p.read(root/'input.json');inputs.update(production_sha256=d['production_hashes'],
             **{k:d['original_input'][k] for k in ('run_id','run_attempt','workflow_head')})
         p.write(root/'input.json',inputs)
         d['original_input']=dict(d['original_input'],provenance_sha256=p.digest(root/'input.json'));d['_verified_inputs']=inputs
-        for shard in range(3):
+        for shard in range(len(d['jobs'])):
             folder=root/f'shard{shard}';proof=p.read(folder/'provenance.json');labels=aa.profiles(d,shard)
             manifests={arm:{**inputs['common_manifest'],p.DLL:d['production_hashes'][label]} for arm,label in zip(('old','new'),labels)}
             proof.update(input_provenance=inputs,input_provenance_sha256=p.digest(root/'input.json'),

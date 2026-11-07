@@ -1,6 +1,19 @@
 name: Harami and Marubozu diagnostic
 on:
   workflow_call:
+    inputs:
+      plan:
+        type: string
+        default: benchmarks/plans/harami-body-shadow-control-20261107.json
+      shards:
+        type: string
+        default: '[0,1,2]'
+      max_parallel:
+        type: number
+        default: 3
+      artifact_prefix:
+        type: string
+        default: body-shadow-control
 permissions:
   contents: read
   actions: read
@@ -8,6 +21,7 @@ defaults:
   run:
     shell: pwsh
 env:
+  DIAGNOSTIC_PLAN: ${{ inputs.plan }}
   HOSTED_TIMING_PLAN: benchmarks/plans/hosted-body-shadow-comparison-weights-20261106.json
   HOSTED_TIMING_SUITE: qualified-targeted
 jobs:
@@ -33,7 +47,7 @@ jobs:
           github-token: ${{ github.token }}
           path: hosted-inputs
           merge-multiple: true
-      - run: python scripts/run-body-shadow-control.py verify-inputs --out diagnostic-input-verification.json
+      - run: python scripts/run-body-shadow-control.py verify-inputs --plan "$env:DIAGNOSTIC_PLAN" --out diagnostic-input-verification.json
       - uses: actions/upload-artifact@v7
         with:
           name: diagnostic-input-verification
@@ -46,9 +60,9 @@ jobs:
     timeout-minutes: 90
     strategy:
       fail-fast: false
-      max-parallel: 3
+      max-parallel: ${{ inputs.max_parallel }}
       matrix:
-        shard: [0, 1, 2]
+        shard: ${{ fromJSON(inputs.shards) }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -70,11 +84,11 @@ jobs:
           github-token: ${{ github.token }}
           path: hosted-inputs
           merge-multiple: true
-      - run: python scripts/run-body-shadow-control.py measure --out diagnostic-raw --shard ${{ matrix.shard }}
+      - run: python scripts/run-body-shadow-control.py measure --plan "$env:DIAGNOSTIC_PLAN" --out diagnostic-raw --shard ${{ matrix.shard }}
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: body-shadow-control-${{ matrix.shard }}
+          name: ${{ inputs.artifact_prefix }}-${{ matrix.shard }}
           path: diagnostic-raw/
           retention-days: 14
           if-no-files-found: error
@@ -101,20 +115,21 @@ jobs:
           merge-multiple: true
       - uses: actions/download-artifact@v8
         with:
-          name: body-shadow-control-0
+          name: ${{ inputs.artifact_prefix }}-0
           path: diagnostic-evidence/shard0
       - uses: actions/download-artifact@v8
         with:
-          name: body-shadow-control-1
+          name: ${{ inputs.artifact_prefix }}-1
           path: diagnostic-evidence/shard1
       - uses: actions/download-artifact@v8
+        if: contains(fromJSON(inputs.shards), 2)
         with:
-          name: body-shadow-control-2
+          name: ${{ inputs.artifact_prefix }}-2
           path: diagnostic-evidence/shard2
-      - run: python scripts/run-body-shadow-control.py collect --evidence diagnostic-evidence --out diagnostic-verified.json
+      - run: python scripts/run-body-shadow-control.py collect --plan "$env:DIAGNOSTIC_PLAN" --evidence diagnostic-evidence --out diagnostic-verified.json
       - uses: actions/upload-artifact@v7
         with:
-          name: body-shadow-control-verified
+          name: ${{ inputs.artifact_prefix }}-verified
           path: diagnostic-verified.json
           retention-days: 14
           if-no-files-found: error
