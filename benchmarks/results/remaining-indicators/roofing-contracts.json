@@ -1,0 +1,40 @@
+{
+  "batch": "generated-roofing-filters",
+  "types": [
+    "EhlersRoofingFilter",
+    "EhlersRoofingFilterV1",
+    "EhlersRoofingFilterV2",
+    "EhlersRoofingFilterIndicator",
+    "EhlersHpLpRoofingFilter",
+    "EhlersZeroMeanRoofingFilter",
+    "EhlersDetrendedLeadingIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing roofing kernels, preserving original/V2 gain differences and roof/zero output selection. Compute both detrended-leading outputs together from original candle high/low fields. Preserve both period orders, staged rounding, checked warmup and custom-component fallback.",
+  "verification": {
+    "unit_passed": 540,
+    "fixture_passed": 28,
+    "discovery_passed": 41,
+    "gpu_passed": 100,
+    "contract_methods": 1376,
+    "hosted_methods": 1364,
+    "evidence": [
+      {
+        "file": "roofing-unit.trx.gz",
+        "passed_cases": 540,
+        "trx_sha256": "6efb92de94be3602e8c085b50dc0442e71c17a97cef9cec5c41de4d20c224ead"
+      },
+      {
+        "file": "roofing-fixture.trx.gz",
+        "passed_cases": 69,
+        "trx_sha256": "c2579a91252b30ed415e079da4dd1131a9932fd3b6829339a1028abc1cc753ff"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingRoofingBenchmarks",
+    "cases": 56,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

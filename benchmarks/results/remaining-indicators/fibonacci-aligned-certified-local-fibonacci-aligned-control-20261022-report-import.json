@@ -1,0 +1,60 @@
+{
+  "before_sha256": "c70a1180218f269faa87a335430d8ce2f46ce0ac95e7584ba2e51a2c1272b5c6",
+  "candidate_sha256": "4eee9aaba59c67ba23c340e2ffba2299a1b9880ab33844a6f6a89c3642005d35",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 0,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 0,
+  "verdicts": {
+    "faster": 589,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-fibonacci-aligned-control-20261022",
+  "imported_utc": "2026-10-22T17:35:18.657037+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "322b0c5719cc29e9abc075cb1d69a0223d1cd559f0ad219d5e0c6d62712db13e",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-aligned-certified-local-fibonacci-aligned-control-20261022-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "2414820108f399f623fa557530ce43cbc9aada09cb46bb7e899742c9c5fc8fb3",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-aligned-certified-local-fibonacci-aligned-control-20261022-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "932cb2f747474591e391bd717c236d18150935c0783b7cf1c79cb003990d9810",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-aligned-certified-local-fibonacci-aligned-control-20261022-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "20346dbf7bab72fb3c0aae5698aa3256a8b589ecfd477eeb7d5e07f2e4ee735a",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-aligned-certified-local-fibonacci-aligned-control-20261022-measurement.json.gz"
+    },
+    "stage-fibonacci-aligned-report.py": {
+      "sha256": "8167197c30b1f23e0d6fa0cc02a3a0533216d19510ebe721d969dfd0cb5b73d2",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-aligned-certified-local-fibonacci-aligned-control-20261022-stage-fibonacci-aligned-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-aligned-certified-local-fibonacci-aligned-control-20261022-verify-approved-certified-report.py.gz"
+    },
+    "import-fibonacci-aligned-report.py": {
+      "sha256": "1cc930c9bcc2d96d58bbc1b415f2e8acb25c195621dad51e04f33d87eee83f9c",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-aligned-certified-local-fibonacci-aligned-control-20261022-import-fibonacci-aligned-report.py.gz"
+    },
+    "archive-fibonacci-aligned-control.py": {
+      "sha256": "bf9ef1bd79100c6bb05756d90b7db3ff5da984903f8a429914da38ad349933bc",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-aligned-certified-local-fibonacci-aligned-control-20261022-archive-fibonacci-aligned-control.py.gz"
+    },
+    "prove-fibonacci-aligned-integration.py": {
+      "sha256": "dfcf16dc3480d5129a4146b03aee95b9bc41394f4d31c1debb3b531140948bd0",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-aligned-certified-local-fibonacci-aligned-control-20261022-prove-fibonacci-aligned-integration.py.gz"
+    },
+    "archive-fibonacci-aligned-report.py": {
+      "sha256": "0d8ff997a23c3af54355915fe0932501a751b126409f2684fdd437dd866a5acd",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-aligned-certified-local-fibonacci-aligned-control-20261022-archive-fibonacci-aligned-report.py.gz"
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "before_sha256": "d79a0dc50d04afa2cb82ecf88757e0907b54133474f312a44c8cdfa0c41b0bec",
+  "candidate_sha256": "3a9b0862ff5385439dcaa38a421157ac6cd841aaa724e6c69a0bfea741ae6ef0",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 4,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 4,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-sma-count-publication-control-20261024",
+  "imported_utc": "2026-10-24T20:53:05.356935+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "e3e23dbb0d2cd95bbd3b474c9f54c818e0323068717493cb117d911b1ed4fe4c",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-publication-certified-local-sma-count-publication-control-20261024-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "22886943b81e1e2be11768d72748733119b814636fb6253d42a9f8dcb3d1027c",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-publication-certified-local-sma-count-publication-control-20261024-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "ddf5d118a27974129748a58dca424a9020a7fbce23e386ba4a4a1353455d4b81",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-publication-certified-local-sma-count-publication-control-20261024-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "052a61eb08e0ef8e244797e399f90180bfed0804ac1f4fb190e1b78d84a5c459",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-publication-certified-local-sma-count-publication-control-20261024-measurement.json.gz"
+    },
+    "stage-sma-count-publication-report.py": {
+      "sha256": "535f915ab025296f8e41b3c36b2f9ce3fde4fda0799887f992014adaec90e37a",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-publication-certified-local-sma-count-publication-control-20261024-stage-sma-count-publication-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-publication-certified-local-sma-count-publication-control-20261024-verify-approved-certified-report.py.gz"
+    },
+    "import-sma-count-publication-report.py": {
+      "sha256": "a55f1ba7ebf7fe3bf889a511a8d615721b0ce1df3640a8902a8573fb486eb1ab",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-publication-certified-local-sma-count-publication-control-20261024-import-sma-count-publication-report.py.gz"
+    },
+    "archive-sma-count-publication-control.py": {
+      "sha256": "0ca841e87aac7c968b3141ab18a20c59f380122bba3d8dd5a2e4c17a489a7822",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-publication-certified-local-sma-count-publication-control-20261024-archive-sma-count-publication-control.py.gz"
+    },
+    "prove-sma-count-publication-integration.py": {
+      "sha256": "54def9c072ed63825e889c9633545d059f44a872cc16096fa87f60c835af1b0f",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-publication-certified-local-sma-count-publication-control-20261024-prove-sma-count-publication-integration.py.gz"
+    },
+    "archive-sma-count-publication-report.py": {
+      "sha256": "d7014bfe3406b70a78140b90bdf7d697ac1347cd21c2ebea01a9abcf21d70f8d",
+      "archive": "benchmarks/results/remaining-indicators/sma-count-publication-certified-local-sma-count-publication-control-20261024-archive-sma-count-publication-report.py.gz"
+    }
+  }
+}

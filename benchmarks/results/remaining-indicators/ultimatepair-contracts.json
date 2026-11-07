@@ -1,0 +1,39 @@
+{
+  "batch": "ultimate-trader-volatility-shared-execution",
+  "types": [
+    "UltimateTraderOscillator",
+    "UltimateVolatilityIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share unchanged UltimateTraderWindow with fixed legacy lookback5/range2 and weighted smoothing5/4/4; facade Length still controls warmup. Share exact UltimateVolatilityWindow over original close/open, preserving startup, output bits and custom/source fallback.",
+  "verification": {
+    "unit_passed": 115,
+    "fixture_passed": 8,
+    "discovery_passed": 83,
+    "gpu_passed": 100,
+    "contract_methods": 1418,
+    "hosted_methods": 1406,
+    "evidence": [
+      {
+        "file": "ultimatepair-unit.trx.gz",
+        "passed_cases": 115,
+        "trx_sha256": "1e2194cea4cd202698c83caaca485f719ca1e06317ae9ffbe3e0acbb524220e5"
+      },
+      {
+        "file": "ultimatepair-fixture.trx.gz",
+        "passed_cases": 91,
+        "trx_sha256": "f31eb76934a95d5825b12af780ab6bea136515c230a225da2c4bfe24c3d70aa2"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingUltimatePairBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "UltimateTraderOscillator",
+      "UltimateVolatilityIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

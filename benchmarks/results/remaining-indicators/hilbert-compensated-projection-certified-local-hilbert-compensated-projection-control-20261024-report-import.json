@@ -1,0 +1,60 @@
+{
+  "before_sha256": "3a9b0862ff5385439dcaa38a421157ac6cd841aaa724e6c69a0bfea741ae6ef0",
+  "candidate_sha256": "288dd6c01315b6e3f0a1c27e95eb7a15780dfda32cd508910f9fa41bfafccd33",
+  "changed_baseline_rows": 6,
+  "unchanged_baseline_rows": 796,
+  "changed_builder_slots": 12,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 12,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 796,
+  "run_id": "local-hilbert-compensated-projection-control-20261024",
+  "imported_utc": "2026-10-24T21:29:03.466955+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "c540dfef6fc2ab6da14b5b1d98d6cc933754e5f76c570781a07006de8d714df3",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-compensated-projection-certified-local-hilbert-compensated-projection-control-20261024-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "90641b05003da0c468495414416a78c3f777c7a2212b3d437a9891bad830d50c",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-compensated-projection-certified-local-hilbert-compensated-projection-control-20261024-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "a528de239d232a65a2466ce0dd63e467f0b594937c988de57072549f40f50439",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-compensated-projection-certified-local-hilbert-compensated-projection-control-20261024-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "0ee1ccc3652c2dbf3df13b3fb4cb6e9ae111376a98d3607d04a5b649bdb887c8",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-compensated-projection-certified-local-hilbert-compensated-projection-control-20261024-measurement.json.gz"
+    },
+    "stage-hilbert-compensated-projection-report.py": {
+      "sha256": "c2d764068aff8103297ab8ed9c8201c6f172f25e46de649cdf4bfec6247482ff",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-compensated-projection-certified-local-hilbert-compensated-projection-control-20261024-stage-hilbert-compensated-projection-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-compensated-projection-certified-local-hilbert-compensated-projection-control-20261024-verify-approved-certified-report.py.gz"
+    },
+    "import-hilbert-compensated-projection-report.py": {
+      "sha256": "5c1493fc629f12707030d08d7f149eb66ef5b4b1e668bd365fa4a8737f840de5",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-compensated-projection-certified-local-hilbert-compensated-projection-control-20261024-import-hilbert-compensated-projection-report.py.gz"
+    },
+    "archive-hilbert-compensated-projection-control.py": {
+      "sha256": "4d341f326654b5dc246697e678a8db847488168d655d392407a51f9983479c86",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-compensated-projection-certified-local-hilbert-compensated-projection-control-20261024-archive-hilbert-compensated-projection-control.py.gz"
+    },
+    "prove-hilbert-compensated-projection-integration.py": {
+      "sha256": "6e6ebb85ac663ca63fb267f67dbb772d60aceb34fc7aedd508996ee1a1270a3f",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-compensated-projection-certified-local-hilbert-compensated-projection-control-20261024-prove-hilbert-compensated-projection-integration.py.gz"
+    },
+    "archive-hilbert-compensated-projection-report.py": {
+      "sha256": "c72fd93435d5ed4c288fb7508857b4834a50b35035d5f65d91febd0f8ce4f781",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-compensated-projection-certified-local-hilbert-compensated-projection-control-20261024-archive-hilbert-compensated-projection-report.py.gz"
+    }
+  }
+}

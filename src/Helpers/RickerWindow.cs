@@ -5,7 +5,7 @@ internal sealed class RickerWindow : IDisposable
     private readonly double[] _weights;
     private readonly ExactMeanAccumulator _mass;
     private readonly PooledRingBuffer<double> _prices;
-    internal RickerWindow(int length, double pctWidth)
+    internal RickerWindow(int length, double pctWidth, int capacityHint = int.MaxValue)
     {
         if (double.IsNaN(pctWidth) || double.IsInfinity(pctWidth)) throw new ArgumentOutOfRangeException(nameof(pctWidth));
         length = Math.Max(1, length); _weights = new double[length];
@@ -18,7 +18,7 @@ internal sealed class RickerWindow : IDisposable
             var weight = radius > 40 ? 0 : radius > 37 ? -Math.Exp(Math.Log(square - 1) - square / 2) : (1 - square) * Math.Exp(-square / 2);
             _weights[lag] = weight; mass.Add(weight);
         }
-        _mass = mass; _prices = new PooledRingBuffer<double>(length);
+        _mass = mass; _prices = new PooledRingBuffer<double>(Math.Min(length, Math.Max(1, capacityHint)));
     }
     internal double Next(double price, bool commit)
     {

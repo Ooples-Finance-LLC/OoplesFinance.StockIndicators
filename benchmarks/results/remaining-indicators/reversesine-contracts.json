@@ -1,0 +1,41 @@
+{
+  "batch": "reverse-ema-sine-shared-execution",
+  "types": [
+    "EhlersReverseEmaIndicatorV1",
+    "EhlersReverseEmaIndicatorV2",
+    "EhlersEvenBetterSineWaveIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact reverse EMA and sine kernels; publish independent cycle/trend outputs together while preserving alpha clamps, NaN fallback, period normalization and lifecycle.",
+  "verification": {
+    "unit_passed": 30,
+    "fixture_passed": 12,
+    "discovery_passed": 164,
+    "gpu_passed": 100,
+    "contract_methods": 1505,
+    "hosted_methods": 1493,
+    "evidence": [
+      {
+        "file": "reversesine-unit.trx.gz",
+        "passed_cases": 30,
+        "trx_sha256": "d6bdba88507f1af9391fb489a715800c371446a1f0f73813562259f87c44936e"
+      },
+      {
+        "file": "reversesine-fixture.trx.gz",
+        "passed_cases": 176,
+        "trx_sha256": "0b7c4ccc2ab9c44b734d3f5f20f97d55c0b12e180763e68654bbc3f09f365c9f"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingReverseSineBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersReverseEmaIndicatorV1",
+      "EhlersReverseEmaIndicatorV2",
+      "EhlersEvenBetterSineWaveIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -1,0 +1,243 @@
+{
+  "pair": "Skender.GetSmaAnalysis",
+  "workflow_sha": "d8977041a681ae8542463b402edeac2b261ffb58",
+  "run_id": "39727929133",
+  "order": [
+    "old",
+    "new",
+    "new",
+    "old"
+  ],
+  "rounds": [
+    {
+      "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+      "rows": [
+        {
+          "pair": "Skender.GetSmaAnalysis",
+          "bars": 1000,
+          "ooples": {
+            "mean_ns": 3596103.25,
+            "lower_ns": 3575195.1364143915,
+            "upper_ns": 3617011.3635856085,
+            "allocated_bytes": 306024,
+            "samples": 8
+          },
+          "competitor": {
+            "mean_ns": 609378.3333333334,
+            "lower_ns": 541378.3450778001,
+            "upper_ns": 677378.3215888666,
+            "allocated_bytes": 296504,
+            "samples": 9
+          },
+          "competitor_over_ooples": 0.16945518272684004,
+          "verdict": "slower"
+        },
+        {
+          "pair": "Skender.GetSmaAnalysis",
+          "bars": 10000,
+          "ooples": {
+            "mean_ns": 4375136.1,
+            "lower_ns": 4180018.1877263184,
+            "upper_ns": 4570254.01227368,
+            "allocated_bytes": 2946088,
+            "samples": 10
+          },
+          "competitor": {
+            "mean_ns": 780292.3333333334,
+            "lower_ns": 765167.2497208721,
+            "upper_ns": 795417.4169457946,
+            "allocated_bytes": 2891528,
+            "samples": 9
+          },
+          "competitor_over_ooples": 0.17834698521340478,
+          "verdict": "slower"
+        }
+      ],
+      "order": 0,
+      "version": "old",
+      "source_sha": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+      "report_sha256": "f421fe7c441e2a0147b81d8b70440548606c0e7822e693a8fc211da2090b57e9",
+      "report_file": "control/0-old/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "binary_hashes": {
+        "OoplesFinance.StockIndicators.dll": "7a0a5b6e68c7cbc983fd225e8eb379fffe88c8b3654b4f556fc2432e085b0ee6",
+        "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "510a4fefa59fc19ae213e60a5f55a52f8b549615eab65c1ab016e0db5e7f0c98"
+      },
+      "archived_report": "benchmarks/results/remaining-indicators/sma-bounded-control-39727929133-0-old-raw.json.gz"
+    },
+    {
+      "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+      "rows": [
+        {
+          "pair": "Skender.GetSmaAnalysis",
+          "bars": 1000,
+          "ooples": {
+            "mean_ns": 2943097,
+            "lower_ns": 2920427.6608302537,
+            "upper_ns": 2965766.3391697463,
+            "allocated_bytes": 306024,
+            "samples": 8
+          },
+          "competitor": {
+            "mean_ns": 564729.8888888889,
+            "lower_ns": 551748.372701368,
+            "upper_ns": 577711.4050764098,
+            "allocated_bytes": 299192,
+            "samples": 9
+          },
+          "competitor_over_ooples": 0.1918828665480237,
+          "verdict": "slower"
+        },
+        {
+          "pair": "Skender.GetSmaAnalysis",
+          "bars": 10000,
+          "ooples": {
+            "mean_ns": 3849153.25,
+            "lower_ns": 3753699.8626387273,
+            "upper_ns": 3944606.6373612727,
+            "allocated_bytes": 2946424,
+            "samples": 8
+          },
+          "competitor": {
+            "mean_ns": 838107.3,
+            "lower_ns": 823498.6696799822,
+            "upper_ns": 852715.9303200179,
+            "allocated_bytes": 2891528,
+            "samples": 10
+          },
+          "competitor_over_ooples": 0.21773809603449798,
+          "verdict": "slower"
+        }
+      ],
+      "order": 1,
+      "version": "new",
+      "source_sha": "e4c3cbf1771d87c39ff05b28d7b7891b66e68b12",
+      "report_sha256": "c2e1211ff3a0ee8b23bb0ff0ac429a278916a6ab0cb3d124fccd5d79a02f32ff",
+      "report_file": "control/1-new/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "binary_hashes": {
+        "OoplesFinance.StockIndicators.dll": "c49404cbd456398ab6cc2e45a8a090028a2a4d4086e46a6fca4b35d676e60b65",
+        "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "510a4fefa59fc19ae213e60a5f55a52f8b549615eab65c1ab016e0db5e7f0c98"
+      },
+      "archived_report": "benchmarks/results/remaining-indicators/sma-bounded-control-39727929133-1-new-raw.json.gz"
+    },
+    {
+      "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+      "rows": [
+        {
+          "pair": "Skender.GetSmaAnalysis",
+          "bars": 1000,
+          "ooples": {
+            "mean_ns": 2947445.9444444445,
+            "lower_ns": 2906320.991411584,
+            "upper_ns": 2988570.897477305,
+            "allocated_bytes": 306024,
+            "samples": 9
+          },
+          "competitor": {
+            "mean_ns": 529916.2222222222,
+            "lower_ns": 514203.55585636443,
+            "upper_ns": 545628.8885880801,
+            "allocated_bytes": 299528,
+            "samples": 9
+          },
+          "competitor_over_ooples": 0.17978827507287995,
+          "verdict": "slower"
+        },
+        {
+          "pair": "Skender.GetSmaAnalysis",
+          "bars": 10000,
+          "ooples": {
+            "mean_ns": 3988411.6,
+            "lower_ns": 3915521.151163065,
+            "upper_ns": 4061302.0488369353,
+            "allocated_bytes": 2946424,
+            "samples": 10
+          },
+          "competitor": {
+            "mean_ns": 971080.4444444445,
+            "lower_ns": 952415.5839096694,
+            "upper_ns": 989745.3049792196,
+            "allocated_bytes": 2888504,
+            "samples": 9
+          },
+          "competitor_over_ooples": 0.24347548393562102,
+          "verdict": "slower"
+        }
+      ],
+      "order": 2,
+      "version": "new",
+      "source_sha": "e4c3cbf1771d87c39ff05b28d7b7891b66e68b12",
+      "report_sha256": "e0cf4c1325ec4f61119b9e3b1a0ef847210bc0402186aa8851307048b226cb41",
+      "report_file": "control/2-new/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "binary_hashes": {
+        "OoplesFinance.StockIndicators.dll": "c49404cbd456398ab6cc2e45a8a090028a2a4d4086e46a6fca4b35d676e60b65",
+        "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "510a4fefa59fc19ae213e60a5f55a52f8b549615eab65c1ab016e0db5e7f0c98"
+      },
+      "archived_report": "benchmarks/results/remaining-indicators/sma-bounded-control-39727929133-2-new-raw.json.gz"
+    },
+    {
+      "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+      "rows": [
+        {
+          "pair": "Skender.GetSmaAnalysis",
+          "bars": 1000,
+          "ooples": {
+            "mean_ns": 2958147.222222222,
+            "lower_ns": 2918303.151923488,
+            "upper_ns": 2997991.292520956,
+            "allocated_bytes": 306024,
+            "samples": 9
+          },
+          "competitor": {
+            "mean_ns": 717268.8,
+            "lower_ns": 542416.1276780351,
+            "upper_ns": 892121.472321965,
+            "allocated_bytes": 299192,
+            "samples": 10
+          },
+          "competitor_over_ooples": 0.24247231328168067,
+          "verdict": "slower"
+        },
+        {
+          "pair": "Skender.GetSmaAnalysis",
+          "bars": 10000,
+          "ooples": {
+            "mean_ns": 4259154.3,
+            "lower_ns": 4150813.908121298,
+            "upper_ns": 4367494.691878702,
+            "allocated_bytes": 2946424,
+            "samples": 10
+          },
+          "competitor": {
+            "mean_ns": 809758.1,
+            "lower_ns": 799006.5878685381,
+            "upper_ns": 820509.6121314619,
+            "allocated_bytes": 2891528,
+            "samples": 10
+          },
+          "competitor_over_ooples": 0.19012180422766087,
+          "verdict": "slower"
+        }
+      ],
+      "order": 3,
+      "version": "old",
+      "source_sha": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+      "report_sha256": "60faab03a203497c5de91d4c5f8d55ddb174fb8e43620aaddbc1b59cfd7a4a36",
+      "report_file": "control/3-old/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json",
+      "binary_hashes": {
+        "OoplesFinance.StockIndicators.dll": "7a0a5b6e68c7cbc983fd225e8eb379fffe88c8b3654b4f556fc2432e085b0ee6",
+        "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "510a4fefa59fc19ae213e60a5f55a52f8b549615eab65c1ab016e0db5e7f0c98"
+      },
+      "archived_report": "benchmarks/results/remaining-indicators/sma-bounded-control-39727929133-3-old-raw.json.gz"
+    }
+  ],
+  "complete": true,
+  "decision": "Accept bounded SMA accumulator change: both new 10,000-bar intervals are below both old intervals in the same-runner ABBA control. The 1,000-bar result overlaps the final old control; no clear speedup is claimed there. All candidate measurements remain slower than Skender.",
+  "provenance.json": {
+    "archive": "sma-bounded-control-39727929133-provenance.json.gz",
+    "sha256": "ba4b8337765548f02e933c5738430a0bb90f1589be1f3b917572d56a7da7d751"
+  },
+  "binary-manifest.json": {
+    "archive": "sma-bounded-control-39727929133-binary-manifest.json.gz",
+    "sha256": "34d5ae5534ba4d9b735aeda3c9a06a63d70053ab9d247dc8d76e37b96fcc94b8"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "source_integration_commit": "778d2773ef8f5eabe3d307acfc902331df42a085",
+  "qualified_source": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0",
+  "compiled_source": "7521d550c8d75c0e74fad21c3b306ebb1e1b5f55",
+  "source_fingerprint": "6ff014721b9b772a7845b6f39084bec8b40283432515dfedc5da02e8e9ec432e",
+  "unit": 16,
+  "comparator": 97,
+  "actual_gpu": 100,
+  "production_sha256": "2bdfa1b87ac805a6b506382caae2f6e9387f79b6dd3105ebb9548b337c577544",
+  "run_id": "42347569932",
+  "cases": 90,
+  "decisions": 18,
+  "verdicts": {
+    "inconclusive": 15,
+    "faster": 3
+  },
+  "integrated_paths": [
+    "src/Helpers/CertifiedHilbertProjection.cs",
+    "src/Indicators/HilbertCycleSignalState.cs"
+  ],
+  "verified_utc": "2026-11-07T07:17:34.614883+00:00"
+}

@@ -1,0 +1,35 @@
+{
+  "batch": "generated-buff-and-equity-averages",
+  "types": [
+    "BuffAverage",
+    "EquityMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Compute Buff fast and fixed-20 slow outputs together using observed partial-volume means. Share Equity default-SMA execution with its existing exact/rounded staged kernel. Preserve raw warmup, source fields, custom-average fallback, ownership and lifecycle.",
+  "verification": {
+    "unit_passed": 97,
+    "fixture_passed": 8,
+    "discovery_passed": 62,
+    "gpu_passed": 100,
+    "contract_methods": 1397,
+    "hosted_methods": 1385,
+    "evidence": [
+      {
+        "file": "buffequity-unit.trx.gz",
+        "passed_cases": 97,
+        "trx_sha256": "26e1ea1873306243ad82287d3976c1e33c2383965ebf3b24479c3350ad8a670f"
+      },
+      {
+        "file": "buffequity-fixture.trx.gz",
+        "passed_cases": 70,
+        "trx_sha256": "2d030ffd27da857bda2db9349d6a5d490ab3cfb9db28103403682b69b62539e7"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingBuffEquityBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

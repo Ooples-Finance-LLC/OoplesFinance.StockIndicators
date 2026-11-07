@@ -1,0 +1,54 @@
+{
+  "batch": "uni-pseudo-channel-shared-execution",
+  "types": [
+    "UniChannel",
+    "PseudoPolynomialChannel"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share rounded Uni mean and exact offset arithmetic, and the unchanged PseudoPolynomial two-lag kernel. Bound storage by input count while preserving staged rounding, cumulative-error denominator, startup, original fields, explicit components/source fallback and ownership.",
+  "verification": {
+    "unit_passed": 116,
+    "fixture_passed": 8,
+    "discovery_passed": 132,
+    "gpu_passed": 100,
+    "contract_methods": 1471,
+    "hosted_methods": 1459,
+    "evidence": [
+      {
+        "file": "unipseudo-unit-initial.trx.gz",
+        "passed_cases": 115,
+        "failed_cases": 1,
+        "retained_passed_cases": 88,
+        "superseded_class": "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedGeneratedUniPseudoTests",
+        "trx_sha256": "10ed353d10e5121b6fe30a6bc9b94c007c89a86bd2849666535122875d162fa5"
+      },
+      {
+        "file": "unipseudo-unit.trx.gz",
+        "passed_cases": 28,
+        "trx_sha256": "86ea5f4abadcd7a2ea24bff4363cd142e821f677a3dd4e68e2a749811ff5091a"
+      },
+      {
+        "file": "unipseudo-fixture.trx.gz",
+        "passed_cases": 140,
+        "trx_sha256": "0d203acb1b34c7e4ee599036dea892d35ca8f3f311c48eae0c266f4ad0371cdf"
+      }
+    ],
+    "unit_rerun": {
+      "corrected_class": "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedGeneratedUniPseudoTests",
+      "interpretation": "Initial completed run retained unchanged passing numerical tests; the corrected test class was rerun in full. Both raw runs are preserved, including the superseded failures. Production source and binaries were unchanged.",
+      "production_dll_sha256": "4d9216d95e5da7dddc5683e24d56e451963c238d7a906c3d7d7de27f378e4892",
+      "verifier_file": "unipseudo-unit-rerun-verifier.py",
+      "verifier_sha256": "31d7f2baad0135ce18a02ab607b91f94a42e32cce28112ed3334d36046079ff2"
+    }
+  },
+  "benchmark_fixture": {
+    "type": "RemainingUniPseudoBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "UniChannel",
+      "PseudoPolynomialChannel"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

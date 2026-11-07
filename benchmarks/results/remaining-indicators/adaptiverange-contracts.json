@@ -1,0 +1,34 @@
+{
+  "batch": "adaptive-least-squares-monotonic-range",
+  "types": [
+    "AdaptiveLeastSquares"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Replace the exact range maximum full-window scan with a descending candidate ring that grows with observations and reuses storage. Preserve gain/moment arithmetic, preview, rejection, signal and reset behavior against frozen 4d0b4f3e scan. Shared AdaptiveLeastSquares uses original high/low/close fields. Builder timing fixture compares current legacy/shared routes; the ring algorithm latency and allocation benefit remains unmeasured.",
+  "verification": {
+    "unit_passed": 75,
+    "fixture_passed": 4,
+    "discovery_passed": 52,
+    "gpu_passed": 100,
+    "contract_methods": 1387,
+    "hosted_methods": 1375,
+    "evidence": [
+      {
+        "file": "adaptiverange-unit.trx.gz",
+        "passed_cases": 75,
+        "trx_sha256": "40dfa674f1e2c0b2927d94b6ff090db481fd693c01b37d0bc528105d85cfb984"
+      },
+      {
+        "file": "adaptiverange-fixture.trx.gz",
+        "passed_cases": 56,
+        "trx_sha256": "7f28e46a78a15b33a08989e98f262e2e3b9a12131d7e67dc8417ba154ba315e5"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAdaptiveRangeBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -1,0 +1,267 @@
+{
+  "types": [
+    "InsyncIndex",
+    "JmaRsxClone",
+    "JrcFractalDimension",
+    "JapaneseCorrelationCoefficient",
+    "MayerMultiple",
+    "OceanIndicator",
+    "KaseIndicator",
+    "KaseConvergenceDivergence",
+    "KasePeakOscillatorV1",
+    "KasePeakOscillatorV2",
+    "KaufmanAdaptiveBands",
+    "KaufmanBinaryWave",
+    "KarobeinOscillator",
+    "KwanIndicator",
+    "LBRPaintBars",
+    "LindaRaschke310Oscillator"
+  ],
+  "reused_unit_evidence": {
+    "class_counts": {
+      "SharedGeneratedInsyncTests": 64,
+      "SharedGeneratedRsxJrcTests": 51,
+      "SharedGeneratedJapaneseTests": 25,
+      "SharedGeneratedMayerOceanTests": 39,
+      "SharedGeneratedKaseCoreTests": 53,
+      "SharedGeneratedKasePeakTests": 44,
+      "SharedGeneratedKaufmanPairTests": 38,
+      "SharedGeneratedLbrLindaTests": 76,
+      "BatchSmoothingWarmupTests": 10
+    },
+    "count": 400,
+    "trx_sha256": "226489b556779246d02817971abcb74dd36323e4441d799d6901192b2c0166e4",
+    "input_sha256": "2cd612c8874cb597f05fbdb10bd9968d2ee82f9de6acaca6ffbc4d76f54e6574",
+    "production_sha256": "cc11bee656ca25a1974428771a4e33b011e7968ebf1968a285298afdb89a1b6c",
+    "context": "Completed cases from aborted v2 suite; source changes since then are confined to CertifiedKarobeinWindow.cs and its certification tests. Unrelated families are not rerun."
+  },
+  "source_audit": {
+    "previous_input_sha256": "2cd612c8874cb597f05fbdb10bd9968d2ee82f9de6acaca6ffbc4d76f54e6574",
+    "current_input_sha256": "14c533a873bff44d8a6aaa2ab36b770614b2529529e2fe8b0a25aac1f657582c",
+    "changed": {
+      "src/Helpers/CertifiedKarobeinWindow.cs": {
+        "old": "37b26a5aa07bcfcec9c048e79460172e2463072f93577ef22a111ffc8c409018",
+        "new": "8845fb5413691f15aff8d2b9370997c6f5caccb5c33f893e2d396b611474b199"
+      },
+      "tests/ValidationTests/CertifiedKarobeinWindowTests.cs": {
+        "old": "2ea81913b21c3d9d71c53ea766d097ba3170513e247cba78be0e3429ad8541ae",
+        "new": "011efbc9f7d44f4fe42993df4eb3824a6cf655bdcf83bcb2d37de2b3f67d56b3"
+      }
+    },
+    "reuse": "400 unrelated completed v2 cases only. Affected Karobein cases rerun."
+  },
+  "status": "scoped-nine-families-contracts-passed-performance-pending",
+  "target": "Release/net10.0",
+  "base_head": "df044b216aa1a6c47c5c6573617a99fe11fa6b7a",
+  "input_sha256": "14c533a873bff44d8a6aaa2ab36b770614b2529529e2fe8b0a25aac1f657582c",
+  "production_sha256": "e184e99d1b3bc2f16a40a2b8fe872a58158af079cc4d840c0591029e7686a742",
+  "unit_sha256": "8a408d774c34041bdcc1f6cfb80a1cbaa01915420e5e406e39fadf63e675427f",
+  "fixture_sha256": "33034e230177e02c405e2af497d57dc7b53490a9d7001366bb450dc23406d8eb",
+  "families": [
+    "insync",
+    "rsxjrc",
+    "japanese",
+    "mayerocean",
+    "kasecore",
+    "kasepeak",
+    "kaufmanpair",
+    "karobeinkwan",
+    "lbrlinda"
+  ],
+  "steps": {
+    "production": {
+      "status": "passed",
+      "command": [
+        "dotnet",
+        "build",
+        "src/OoplesFinance.StockIndicators.csproj",
+        "-c",
+        "Release",
+        "-f",
+        "net10.0",
+        "--no-restore",
+        "-p:BuildProjectReferences=false"
+      ],
+      "pid": 17604,
+      "exit_code": 0,
+      "log_sha256": "3d38beaae793a7f5e43e4fcff5a6083c7dbd9f7ef40778cc842735542584ae54"
+    },
+    "unit-build": {
+      "status": "passed",
+      "command": [
+        "dotnet",
+        "build",
+        "tests/OoplesFinance.StockIndicators.Tests.Unit.csproj",
+        "-c",
+        "Release",
+        "-f",
+        "net10.0",
+        "--no-restore",
+        "-p:BuildProjectReferences=false"
+      ],
+      "pid": 33852,
+      "exit_code": 0,
+      "log_sha256": "15e315f4d172ee96d1215f8e3a29be1d975809d2f39e953a918c8fada1cc4db3"
+    },
+    "certification": {
+      "status": "passed",
+      "command": [
+        "dotnet",
+        "vstest",
+        "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-karobein-certified-window\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.Tests.Unit.dll",
+        "/Settings:Z:\\StockIndicators-work\\si-karobein-streamed-validation\\serial.runsettings",
+        "/TestCaseFilter:FullyQualifiedName~CertifiedKarobeinWindowTests|FullyQualifiedName~KarobeinSignalTests",
+        "/Logger:trx;LogFileName=certification.trx",
+        "/ResultsDirectory:Z:\\StockIndicators-work\\si-ninth-adaptive4-validation-20261019\\certification"
+      ],
+      "pid": 35872,
+      "exit_code": 0,
+      "log_sha256": "3b1483821e1e363700da20ef46437b6367fe8419e02a2344a10f287a495307b3",
+      "class_counts": {
+        "CertifiedKarobeinWindowTests": 36,
+        "KarobeinSignalTests": 29
+      },
+      "count": 65,
+      "trx_sha256": "84a58287d3a8cd2f866cad77be37c20ef7829375d16720f6c20af1d2c240dba8"
+    },
+    "karobeinkwan": {
+      "status": "passed",
+      "command": [
+        "dotnet",
+        "vstest",
+        "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-karobein-certified-window\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.Tests.Unit.dll",
+        "/Settings:Z:\\StockIndicators-work\\si-karobein-streamed-validation\\serial.runsettings",
+        "/TestCaseFilter:FullyQualifiedName~SharedGeneratedKarobeinKwanTests",
+        "/Logger:trx;LogFileName=karobeinkwan.trx",
+        "/ResultsDirectory:Z:\\StockIndicators-work\\si-ninth-adaptive4-validation-20261019\\karobeinkwan"
+      ],
+      "pid": 29320,
+      "exit_code": 0,
+      "log_sha256": "b65c1f21d1e96f3438b7d72dad46bafbfe9eace3d9d751bebee63de173273b1f",
+      "class_counts": {
+        "SharedGeneratedKarobeinKwanTests": 47
+      },
+      "count": 47,
+      "trx_sha256": "446056a87ca91aefddfa10c9bf8cf8019ab3819ed4eaf80195b736471146e171"
+    },
+    "parity": {
+      "status": "passed",
+      "command": [
+        "dotnet",
+        "vstest",
+        "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-karobein-certified-window\\ninth-adaptive4-comparator\\OoplesFinance.StockIndicators.CompetitorTests.dll",
+        "/Settings:Z:\\StockIndicators-work\\si-karobein-streamed-validation\\serial.runsettings",
+        "/TestCaseFilter:FullyQualifiedName~RemainingInsyncBenchmarkTests|FullyQualifiedName~RemainingRsxJrcBenchmarkTests|FullyQualifiedName~RemainingJapaneseBenchmarkTests|FullyQualifiedName~RemainingMayerOceanBenchmarkTests|FullyQualifiedName~RemainingKaseCoreBenchmarkTests|FullyQualifiedName~RemainingKasePeakBenchmarkTests|FullyQualifiedName~RemainingKaufmanPairBenchmarkTests|FullyQualifiedName~RemainingKarobeinKwanBenchmarkTests|FullyQualifiedName~RemainingLbrLindaBenchmarkTests",
+        "/Logger:trx;LogFileName=parity.trx",
+        "/ResultsDirectory:Z:\\StockIndicators-work\\si-ninth-adaptive4-validation-20261019\\parity"
+      ],
+      "pid": 23832,
+      "exit_code": 0,
+      "log_sha256": "ac7e67fc53fb55f8b82d3789285290edb79604011714c8d511c0a3e94761ec8a",
+      "class_counts": {
+        "RemainingInsyncBenchmarkTests": 4,
+        "RemainingRsxJrcBenchmarkTests": 8,
+        "RemainingJapaneseBenchmarkTests": 4,
+        "RemainingMayerOceanBenchmarkTests": 8,
+        "RemainingKaseCoreBenchmarkTests": 8,
+        "RemainingKasePeakBenchmarkTests": 8,
+        "RemainingKaufmanPairBenchmarkTests": 8,
+        "RemainingKarobeinKwanBenchmarkTests": 8,
+        "RemainingLbrLindaBenchmarkTests": 8
+      },
+      "count": 64,
+      "trx_sha256": "903b39d690447f17de3b78bdbf50a5cb09a98c8d7e6bd299d500f17f5de7b72a"
+    },
+    "discovery": {
+      "status": "passed",
+      "command": [
+        "dotnet",
+        "vstest",
+        "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-karobein-certified-window\\ninth-adaptive4-comparator\\OoplesFinance.StockIndicators.CompetitorTests.dll",
+        "/Settings:Z:\\StockIndicators-work\\si-karobein-streamed-validation\\serial.runsettings",
+        "/TestCaseFilter:FullyQualifiedName~RemainingBenchmarkDiscoveryTests",
+        "/Logger:trx;LogFileName=discovery.trx",
+        "/ResultsDirectory:Z:\\StockIndicators-work\\si-ninth-adaptive4-validation-20261019\\discovery"
+      ],
+      "pid": 23888,
+      "exit_code": 0,
+      "log_sha256": "ce2dc73f3a3f81f27daa35a51de04a66733b926f72b634a72af25fad71ac8c36",
+      "count": 257,
+      "trx_sha256": "787338ae1be473d84b57f5cb8dc81826a64c241d38beb7acbe6619de91d3a956"
+    },
+    "gpu": {
+      "status": "passed",
+      "command": [
+        "dotnet",
+        "vstest",
+        "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-karobein-certified-window\\ninth-adaptive4-comparator\\OoplesFinance.StockIndicators.CompetitorTests.dll",
+        "/Settings:Z:\\StockIndicators-work\\si-karobein-streamed-validation\\serial.runsettings",
+        "/TestCaseFilter:FullyQualifiedName=OoplesFinance.StockIndicators.CompetitorTests.ScaledTrueRangeFixtureTests.AllocationProbeRetainsEagerCpuAndOptionalGpuArms|FullyQualifiedName=OoplesFinance.StockIndicators.CompetitorTests.ScaledTrueRangeFixtureTests.EveryArmMatchesItsIndependentArithmeticAndRestoresSettings|FullyQualifiedName=OoplesFinance.StockIndicators.CompetitorTests.SharedCmfFixtureTests.GpuFixtureVerifiesAllColumnsAndRestoresSettings|FullyQualifiedName=OoplesFinance.StockIndicators.CompetitorTests.SharedCmfFixtureTests.GpuNativeArmsAreEagerAndAllocationProbeRetainsAllSix|FullyQualifiedName=OoplesFinance.StockIndicators.CompetitorTests.SharedForceIndexFixtureTests.EagerNativeResultsAndAllAllocationArmsRemainAvailable|FullyQualifiedName=OoplesFinance.StockIndicators.CompetitorTests.SharedForceIndexFixtureTests.GpuColumnsMatchIndependentReferencesAcrossStartupAndBlocks|FullyQualifiedName=OoplesFinance.StockIndicators.CompetitorTests.SharedGpuRegressionStatisticsFixtureTests.AllocationProbeRetainsSixEagerArms|FullyQualifiedName=OoplesFinance.StockIndicators.CompetitorTests.SharedGpuRegressionStatisticsFixtureTests.DeviceColumnsMatchIndependentCpuAndNativeReferences|FullyQualifiedName=OoplesFinance.StockIndicators.CompetitorTests.SharedGpuSeededAtrFixtureTests.AllocationProbeRetainsSixEagerArms|FullyQualifiedName=OoplesFinance.StockIndicators.CompetitorTests.SharedGpuSeededAtrFixtureTests.DeviceColumnsMatchIndependentCpuAndNativeReferences|FullyQualifiedName=OoplesFinance.StockIndicators.CompetitorTests.SharedGpuVolumeWeightedPriceFixtureTests.AllocationProbeRetainsSixEagerArms|FullyQualifiedName=OoplesFinance.StockIndicators.CompetitorTests.SharedGpuVolumeWeightedPriceFixtureTests.DeviceColumnsMatchIndependentCpuAndNativeReferences",
+        "/Logger:trx;LogFileName=gpu.trx",
+        "/ResultsDirectory:Z:\\StockIndicators-work\\si-ninth-adaptive4-validation-20261019\\gpu"
+      ],
+      "pid": 37860,
+      "exit_code": 0,
+      "log_sha256": "98e07b8cff792eb5ca7b058186264c4735c3654bb0d467a0b06dfa2aa419e06e",
+      "count": 100,
+      "trx_sha256": "f7ffb22dfe3b8adb81fe56181f65c159930b00d5a4fdb7674321dc7919c67dfc"
+    },
+    "inventory": {
+      "status": "passed",
+      "command": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "benchmarks",
+        "-p",
+        "test_remaining_indicator_inventory.py"
+      ],
+      "pid": 25224,
+      "exit_code": 0,
+      "log_sha256": "573e930823a86f14c70ac6985530329191d5a241da357388aeb317e5dab9b2dd",
+      "count": 6
+    },
+    "discover-methods": {
+      "status": "passed",
+      "command": [
+        "python",
+        "scripts/run-competitor-contracts.py",
+        "discover",
+        "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-karobein-certified-window\\ninth-adaptive4-comparator\\OoplesFinance.StockIndicators.CompetitorTests.dll",
+        "Z:\\StockIndicators-work\\si-ninth-adaptive4-validation-20261019\\all-methods.json"
+      ],
+      "pid": 34796,
+      "exit_code": 0,
+      "log_sha256": "730e75031a1885ca74b26062e33f9ae56cb99b7692623b18a8456d01a30bbdd2"
+    },
+    "gpu-partition": {
+      "status": "passed",
+      "command": [
+        "python",
+        "scripts/verify-competitor-local-gpu.py",
+        "verify",
+        "Z:\\StockIndicators-work\\si-ninth-adaptive4-validation-20261019\\all-methods.json",
+        "Z:\\StockIndicators-work\\si-ninth-adaptive4-validation-20261019\\hosted-methods.json"
+      ],
+      "pid": 25864,
+      "exit_code": 0,
+      "log_sha256": "b08700c74ade018effc798d41b1e9491136b5ae4e93ebb76d95ebb669aae5dfe",
+      "retry_reason": "Refreshed stale repository GPU receipt from current verified100-case TRX; original failure preserved under stale-gpu-receipt."
+    }
+  },
+  "context": "Fresh Karobein checks (112 cases), all64 parity and shared checks used the combined adaptive candidate.400 unrelated unit cases are reused from the interrupted v2 suite with exact source-change audit; the full aborted v2 suite is not a pass. Production and unit assemblies rebuilt for the period-one algebraic fix. Isolated commits were not separately built. Guppy/MACD fixes are in an unverified separate draft.",
+  "pending": [
+    "controlled performance measurements",
+    "remaining indicator rollout",
+    "Guppy and MACD numerical failures"
+  ],
+  "post_validation_line_endings": {
+    "path": "tests/ValidationTests/KarobeinSignalTests.cs",
+    "before_sha256": "6d9164cbd057f20bf42d9e6b555bda807b44d428afadd073feb2b4352b2695fb",
+    "after_sha256": "9eb64f536f4023d57fa726017beaa0542ee1db8d3b4e254e1de75d4c13b8c8dd",
+    "transformation": "Remove carriage returns only; C# tokens unchanged. No rebuild or rerun."
+  },
+  "post_validation_input_sha256": "97353f47b34fa6ae8c2bd2d0ff74ab6bd18c11c1dd5fdc79a7bb6382ad1ca801"
+}

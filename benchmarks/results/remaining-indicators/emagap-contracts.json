@@ -1,0 +1,38 @@
+{
+  "batch": "generated-apo-ppo-macd",
+  "types": [
+    "Apo",
+    "Ppo",
+    "Macd"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Shared EMA gap states preserve ordinary subtraction for APO/MACD and exact percentage ratios for PPO. Signal and histogram are computed with the line once per bar, retaining nonfinite signal suffixes. Custom components retain graph execution.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 34,
+    "fixture_passed": 12,
+    "gpu_passed": 100,
+    "contract_methods": 1338,
+    "hosted_methods": 1326,
+    "unit_trx_sha256": "e383e73425b1b3896613c95597de349eda1b4f803039dd4401a6633ba464e562",
+    "fixture_trx_sha256": "8abb1a5e86c86fb0d6409f29d2b81577151e8eb5b9360ccdf4b673e08d83b33a"
+  },
+  "benchmark_fixture": {
+    "type": "RemainingEmaGapBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

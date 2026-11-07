@@ -1,0 +1,62 @@
+{
+  "input_head": "d2b49d03b78546b5858d50ca034d1afb1da6aec3",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedTillson.cs",
+    "src/Indicators/ValuesBarExecution.Tillson.cs",
+    "tests/ModelsTests/TillsonBoundedStateTests.cs"
+  ],
+  "batch_note": "Approved T3 state refinement guided by a qualified-binary sampled-thread profile: retain proven positive input bounds across six convex stages, hoist constant weights and completed warmup branching. Smoothing certificate arithmetic and original exact fallback remain unchanged. Focused range-exit/reentry, startup and reset regressions compare every output bit against the original exact state. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-24T23:06:22.260859+00:00",
+  "unit": {
+    "passed": 42,
+    "class_counts": {
+      "TillsonSharedExecutionTests": 12,
+      "CertifiedTillsonTests": 17,
+      "TillsonFloatingSmoothingTests": 7,
+      "TillsonBoundedStateTests": 2,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-bounded-state\\unit\\unit.trx",
+    "sha256": "171a720bff21a1cd6afd0b655818d77eb8ece79ccace74dd21e00d20aa1b3f3f",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-bounded-state-certified-20261024-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 26,
+    "class_counts": {
+      "TillsonComparisonTests": 10,
+      "SharedTillsonBenchmarkTests": 16
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-bounded-state\\parity\\parity.trx",
+    "sha256": "9f1c0aab59dad6af3104d13be0c9d74a0b330fc05e22ae89a5e376c88350e1d9",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-bounded-state-certified-20261024-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-bounded-state-20261024\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a06c1c29db045d317d9704ff37b15167cf52e926fdce0826d2f3c9e4b7460c32",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-bounded-state-20261024\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a06c1c29db045d317d9704ff37b15167cf52e926fdce0826d2f3c9e4b7460c32",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-bounded-state-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a06c1c29db045d317d9704ff37b15167cf52e926fdce0826d2f3c9e4b7460c32",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-bounded-state-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a06c1c29db045d317d9704ff37b15167cf52e926fdce0826d2f3c9e4b7460c32"
+  },
+  "source_fingerprint_sha256": "3d544cd27447eeb7a16a85f61e2e5796f933b1b55b7f397b15900d31d3768a18",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved T3 state refinement guided by a qualified-binary sampled-thread profile: retain proven positive input bounds across six convex stages, hoist constant weights and completed warmup branching. Smoothing certificate arithmetic and original exact fallback remain unchanged. Focused range-exit/reentry, startup and reset regressions compare every output bit against the original exact state. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

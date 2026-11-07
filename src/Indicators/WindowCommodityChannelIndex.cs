@@ -95,7 +95,14 @@ public sealed class WindowCommodityChannelIndex
             _prices.Enqueue(value);
             _sum.Add(value);
             if (_prices.Count < period) return;
-            double meanValue = _sum.Mean(period);
+            double meanValue = CertifiedCommodityChannel.Mean(_sum, period);
+            if (!rollingDeviations && CertifiedCommodityChannel.TryCompute(_prices, meanValue, value,
+                    out double certified, out bool defined))
+            {
+                output[0] = certified;
+                output[1] = defined || flatZero ? 1 : 0;
+                return;
+            }
             var mean = JurikDyadic.FromDouble(meanValue);
             var distance = JurikDyadic.FromDouble(value);
             distance.Subtract(mean);

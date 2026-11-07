@@ -1,0 +1,58 @@
+{
+  "input_head": "58a4db090b0758e64bcaad40d92e3b6b13ff3c76",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/PriceRelativeStrength.cs",
+    "tests/ModelsTests/PriceRelativeRatioTests.cs"
+  ],
+  "batch_note": "Bounded Price Relative Strength ratio optimization: one correctly rounded binary64 division, positive exact-zero normalization, deferred wide operands for optional returns; compound return expression and mean unchanged.",
+  "step": "complete",
+  "updated_utc": "2026-10-28T12:22:55.252828+00:00",
+  "unit": {
+    "passed": 18,
+    "class_counts": {
+      "PriceRelativeRatioTests": 2,
+      "PriceRelativeSharedExecutionTests": 16
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\price-relative-ratio\\unit\\unit.trx",
+    "sha256": "71e893082db0904aa492d7e71958eb1d52c6d9020f565a43e9dec9c37ce4c958",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-price-relative-ratio-certified-20261028-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 11,
+    "class_counts": {
+      "PriceRelativeComparisonTests": 9,
+      "SharedPriceRelativeBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\price-relative-ratio\\parity\\parity.trx",
+    "sha256": "1a0a876a72ec6c86d561e314c22f7618dcb441a1e3aecf617edc68a55476a3db",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-price-relative-ratio-certified-20261028-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-price-relative-ratio-20261028\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bf4cc9ad28cc045c2ec42af5d44cd04ecb7aa94fdb081d3e24061f1b0bb703a5",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-price-relative-ratio-20261028\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bf4cc9ad28cc045c2ec42af5d44cd04ecb7aa94fdb081d3e24061f1b0bb703a5",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-price-relative-ratio-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bf4cc9ad28cc045c2ec42af5d44cd04ecb7aa94fdb081d3e24061f1b0bb703a5",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-price-relative-ratio-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bf4cc9ad28cc045c2ec42af5d44cd04ecb7aa94fdb081d3e24061f1b0bb703a5"
+  },
+  "source_fingerprint_sha256": "9e04352575c9d04f7b22470a2ee714d34da8b4e3fff4b9fd8126454531e59a09",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Bounded Price Relative Strength ratio optimization: one correctly rounded binary64 division, positive exact-zero normalization, deferred wide operands for optional returns; compound return expression and mean unchanged. Correctness checks passed; controlled performance remains pending."
+}

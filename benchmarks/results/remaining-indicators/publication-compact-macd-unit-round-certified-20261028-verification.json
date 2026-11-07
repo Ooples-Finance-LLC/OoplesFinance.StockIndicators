@@ -1,0 +1,70 @@
+{
+  "input_head": "4037fd97ed485a40c8f6adff81cbcc23d71faefb",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CompactMacdValue.cs",
+    "tests/ModelsTests/CompactMacdUnitRoundTests.cs"
+  ],
+  "batch_note": "Approved compact MACD follow-up: use the existing binary publisher only for divisor1 within its106-bit contract, preserving exact wide and overflow fallback. Two boundary/state regressions plus affected-consumer qualification.",
+  "step": "complete",
+  "updated_utc": "2026-10-28T22:49:31.129607+00:00",
+  "unit": {
+    "passed": 239,
+    "class_counts": {
+      "CompactRatioArithmeticTests": 6,
+      "MacdNumericalTests": 81,
+      "PvoNumericalTests": 46,
+      "CompactMacdFusedRecurrenceTests": 2,
+      "MacdSharedExecutionTests": 18,
+      "PpoNumericalTests": 71,
+      "CompactRocUnitsTests": 5,
+      "MacdFixedCoefficientReductionTests": 2,
+      "CompactMacdFixedRecurrenceTests": 2,
+      "CompactMacdValueTests": 4,
+      "CompactMacdUnitRoundTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\compact-macd-unit-round\\unit\\unit.trx",
+    "sha256": "80d560e9fd1ae5aa99688e3997ff3cacabffdc25a6369b28d41ca1513a541991",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-compact-macd-unit-round-certified-20261028-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 119,
+    "class_counts": {
+      "SharedTradyMacdBenchmarkTests": 33,
+      "SharedTaMacdNativeBenchmarkTests": 46,
+      "SharedMacdBenchmarkTests": 14,
+      "ClassicMacdComparisonTests": 16,
+      "AlignedMacdComparisonTests": 10
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\compact-macd-unit-round\\parity\\parity.trx",
+    "sha256": "d4a59d551ff74827e6fe4cbd8dc6b0862088fa51dc99906ecf64755be6af848e",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-compact-macd-unit-round-certified-20261028-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-unit-round-20261028\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9bc486c9f6492d3a7ccd55bedf6037d7c85696adc68e98d72bdc4572f24ffb80",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-unit-round-20261028\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9bc486c9f6492d3a7ccd55bedf6037d7c85696adc68e98d72bdc4572f24ffb80",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-unit-round-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9bc486c9f6492d3a7ccd55bedf6037d7c85696adc68e98d72bdc4572f24ffb80",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-unit-round-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9bc486c9f6492d3a7ccd55bedf6037d7c85696adc68e98d72bdc4572f24ffb80"
+  },
+  "source_fingerprint_sha256": "ae6de7aa4e22d45c2c8d71e22cf3b83c14764c39965a49ebc9c8c58b8ce27ca2",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved compact MACD follow-up: use the existing binary publisher only for divisor1 within its106-bit contract, preserving exact wide and overflow fallback. Two boundary/state regressions plus affected-consumer qualification. Correctness checks passed; controlled performance remains pending."
+}

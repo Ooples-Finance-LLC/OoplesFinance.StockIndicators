@@ -1,0 +1,54 @@
+{
+  "source_sha": "eb9d6058b009f526ecd9c89c1b76eaee9e1fcadc",
+  "measurement_location": "Local Windows; unchanged correctness setup; CPU builder and native methods timed",
+  "cases": 48,
+  "comparisons": 24,
+  "partial": false,
+  "excluded_fixtures": [],
+  "archives": {
+    "verified-summary.json": {
+      "sha256": "26baec5eeec1fdd054eb9584979da1956c47c5e9069a45cfa7d66096b71ab956",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch5-20261022/verified-summary.json.gz"
+    },
+    "status.json": {
+      "sha256": "9b19e4966dc70596ee9401d87560ae9c0e151b9e8ef1069054addc3478618cb1",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch5-20261022/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "b85e8887bad21e0415720bd6e78ca111bb860e05d3a70895efa7ef3618428125",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch5-20261022/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "a20a1647ad4f01ccae6a76522fffc7337df7481cc86d7714dfd77d029ff70e10",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch5-20261022/binary-manifest.json.gz"
+    },
+    "SharedTradyCciAdaptiveBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyCciAdaptiveBenchmarks-report-full-compressed.json": {
+      "sha256": "06dbf3ffa5ee3a7ae127168b461f8418386a203893e76421f53129b4feff3a1b",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch5-20261022/SharedTradyCciAdaptiveBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyCciAdaptiveBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedTradyAtrChannelBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyAtrChannelBenchmarks-report-full-compressed.json": {
+      "sha256": "4d981d23749f4869e81ea378402b0e8686d5f2f465136446134b3cce41c85f7a",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch5-20261022/SharedTradyAtrChannelBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyAtrChannelBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedTradyNativeCandleBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyNativeCandleBenchmarks-report-full-compressed.json": {
+      "sha256": "eb1c59f5156f7886bb54b8e5cc00591836151af41a448aa146669c377b2521c5",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch5-20261022/SharedTradyNativeCandleBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyNativeCandleBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedTradyAtrChannelBenchmarks.log": {
+      "sha256": "3fad6a54f1c2db8e456684b20228cba13c2a40abed94b6a3769b5529ad5abc2d",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch5-20261022/SharedTradyAtrChannelBenchmarks.log.gz"
+    },
+    "SharedTradyCciAdaptiveBenchmarks.log": {
+      "sha256": "089f478e26826dc48130042fd5d2bb218d41f9791d3c2392df45ec82d1339fa4",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch5-20261022/SharedTradyCciAdaptiveBenchmarks.log.gz"
+    },
+    "SharedTradyNativeCandleBenchmarks.log": {
+      "sha256": "90b4692f8cd9ba9a54ccd26ebccc45ac6fbf7e55aa2b6df023630d9cdc5f934a",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch5-20261022/SharedTradyNativeCandleBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-local-mapped-batch5.py": "6bc7429d425ef25879d5db51a8fc4e4d76b8fb419c2a1ef40bc1079c7eeeb3a2",
+    "verify-local-mapped-batch5.py": "e2c76c8a758e3d6ec97b6d451dafda6d02df9ee1bf0bb5c0852e26404e7ffcae"
+  }
+}

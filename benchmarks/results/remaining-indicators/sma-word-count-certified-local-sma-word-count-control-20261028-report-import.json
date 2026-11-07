@@ -1,0 +1,64 @@
+{
+  "before_sha256": "b3dabad3826d3711ac81f96603f0ff2f7edb576732ea6eab474f9e59bc52c957",
+  "candidate_sha256": "bbf3faead45f82e1fc42eea1adadc83d8914b2ffd41a5ad3166e42f44e168ec2",
+  "changed_baseline_rows": 4,
+  "unchanged_baseline_rows": 798,
+  "changed_builder_slots": 8,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 8,
+  "verdicts": {
+    "faster": 602,
+    "slower": 886,
+    "inconclusive": 48
+  },
+  "unchanged_rows": 798,
+  "run_id": "local-sma-word-count-control-20261028",
+  "imported_utc": "2026-10-29T21:06:29.170059+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "ebb9db42281e87faccbb6a21bccbfc9907996b1f4e557caf15585b42ad4fdb37",
+      "archive": "benchmarks/results/remaining-indicators/sma-word-count-certified-local-sma-word-count-control-20261028-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "5a5a5b900340e696b5e9cf1c1b44a718588e59cf107ddbb51fddcd8baac5a01a",
+      "archive": "benchmarks/results/remaining-indicators/sma-word-count-certified-local-sma-word-count-control-20261028-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "e9b4d3b5f29cef80d05322e2eb30511220bac93ed88f87003cf5996c7655f32c",
+      "archive": "benchmarks/results/remaining-indicators/sma-word-count-certified-local-sma-word-count-control-20261028-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "69f2431dd3ba2bb9389541ed99d38f548cbed92c7b455b718c1a4dba476d05d4",
+      "archive": "benchmarks/results/remaining-indicators/sma-word-count-certified-local-sma-word-count-control-20261028-measurement.json.gz"
+    },
+    "sma_word_acceptance.py": {
+      "sha256": "bd6a3fb5eb0570764aa6052bcce084c981237ffe97bdfe87ac492501eb67d36a",
+      "archive": "benchmarks/results/remaining-indicators/sma-word-count-certified-local-sma-word-count-control-20261028-sma_word_acceptance.py.gz"
+    },
+    "stage-sma-word-count-report-20261028.py": {
+      "sha256": "efbb706618280483f0931dd971c8b37de0587acdc839adf7f20aa35acb3b6f99",
+      "archive": "benchmarks/results/remaining-indicators/sma-word-count-certified-local-sma-word-count-control-20261028-stage-sma-word-count-report-20261028.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/sma-word-count-certified-local-sma-word-count-control-20261028-verify-approved-certified-report.py.gz"
+    },
+    "import-sma-word-count-report-20261028.py": {
+      "sha256": "62eddb168384eb440d2d9ac5c0aea1f01a15b5265954f60a2a3e9319408452dd",
+      "archive": "benchmarks/results/remaining-indicators/sma-word-count-certified-local-sma-word-count-control-20261028-import-sma-word-count-report-20261028.py.gz"
+    },
+    "archive-sma-word-count-control-20261028.py": {
+      "sha256": "be24082f74f29a7ea586edd23f54879c76c467cc0755b479798be9c4fbdd9193",
+      "archive": "benchmarks/results/remaining-indicators/sma-word-count-certified-local-sma-word-count-control-20261028-archive-sma-word-count-control-20261028.py.gz"
+    },
+    "prove-sma-word-count-integration-20261028.py": {
+      "sha256": "e15f7403b8c91bac9494541240336178c128c41c9af03a15dbce6f16c5580d65",
+      "archive": "benchmarks/results/remaining-indicators/sma-word-count-certified-local-sma-word-count-control-20261028-prove-sma-word-count-integration-20261028.py.gz"
+    },
+    "archive-sma-word-count-report-20261028.py": {
+      "sha256": "9ade1904a6fef269cbd33f0d1e159c4deb3ee1366e3796500b98ce8b02c1bb07",
+      "archive": "benchmarks/results/remaining-indicators/sma-word-count-certified-local-sma-word-count-control-20261028-archive-sma-word-count-report-20261028.py.gz"
+    }
+  }
+}

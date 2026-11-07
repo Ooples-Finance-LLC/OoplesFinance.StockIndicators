@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "419cf12feaad5e36ea9a2600875c85afb2c3265b869f4888177fa5c517fd6dc9",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-variable-window-20261107-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "24c480b16859afeb7bd8cf0615ec1f048c28f9c669a1eb008c42aaf759024f2c",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-variable-window-20261107-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "2903883f9aa18cad2f3f0bc00120b5c07c52bfbb524a3e15c322377c98b7cd46",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-variable-window-20261107-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "1be7d06355c12d3815182ff2a62d0cf650ad91bcd9206c35095593985211200d",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-variable-window-20261107-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "e1846e2a3daa2e7121d3ddcc1e88d0b2e6912bea0778cfa26dc1474f4160cd33",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-variable-window-20261107-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "8a8297ecb315d8e57580bf87e54afef6d8bceb4179b2d1e6dfcb53e4aded7326",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-variable-window-20261107-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "758dfc20435600c7c48e97ad9fa3bbc702047b2ec4a4f22a67f683b02a6b5b67",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-variable-window-20261107-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "d93af23fff36d947c0d93438eaffdb90aaa72d7674acbed1e83f391335f3137b",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-variable-window-20261107-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "87b1a9e22f58f500d082119213a42e6836aa3de27cb23e395ed762293f9858af",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-variable-window-20261107-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "d901ada205f5d62d5595c38ea751b8dcb1a2bc2b825f02637d506cbc21e948c3",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-variable-window-20261107-report-integration/updated-pair-details.png.gz"
+  }
+}

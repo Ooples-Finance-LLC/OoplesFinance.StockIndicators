@@ -1,0 +1,37 @@
+{
+  "batch": "vertical-horizontal-shared-execution",
+  "types": [
+    "VerticalHorizontalFilter"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share unchanged exact VerticalHorizontalWindow over original closes with the default weighted signal average at the facade fixed period of six; preserve custom-component/source fallback and output mapping.",
+  "verification": {
+    "unit_passed": 84,
+    "fixture_passed": 4,
+    "discovery_passed": 80,
+    "gpu_passed": 100,
+    "contract_methods": 1415,
+    "hosted_methods": 1403,
+    "evidence": [
+      {
+        "file": "verticalhorizontal-unit.trx.gz",
+        "passed_cases": 84,
+        "trx_sha256": "7439e3d721733226b6f6eb1d3da5858ccfdaeeae9c689e14c54443815a2c123b"
+      },
+      {
+        "file": "verticalhorizontal-fixture.trx.gz",
+        "passed_cases": 84,
+        "trx_sha256": "ecbd0159d60d2e5d260df97043cd9b03741228fc61c38b6f734ba6d8dc5c557d"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVerticalHorizontalBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "VerticalHorizontalFilter"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

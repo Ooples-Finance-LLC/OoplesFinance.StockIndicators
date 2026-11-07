@@ -1,0 +1,29 @@
+{
+  "types": [
+    "DominantCycleTunedRelativeStrengthIndex"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "59b05c882af4f23ba640c3cff6dd7ed463b189e0",
+  "combined_input_sha256": "89441676b5cc0b84d758c692fd7506365c49c7273e079505341041be2d2d25f5",
+  "benchmark_fixture": {
+    "type": "RemainingCycleTunedRsiBenchmarks",
+    "operations": [
+      "DominantCycleTunedRelativeStrengthIndex"
+    ]
+  },
+  "checks": {
+    "unit": 51,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/cycle-tuned-rsi-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/cycle-tuned-rsi-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

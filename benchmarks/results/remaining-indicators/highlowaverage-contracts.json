@@ -1,0 +1,37 @@
+{
+  "batch": "high-low-average-shared-execution",
+  "types": [
+    "HighLowMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse the exact weighted extrema kernel with input-bounded capacity. Preserve newest equal-extremum ties, exact weighted startup and midpoint, original fields, clamps, component/source fallback and ownership.",
+  "verification": {
+    "unit_passed": 55,
+    "fixture_passed": 4,
+    "discovery_passed": 118,
+    "gpu_passed": 100,
+    "contract_methods": 1457,
+    "hosted_methods": 1445,
+    "evidence": [
+      {
+        "file": "highlowaverage-unit.trx.gz",
+        "passed_cases": 55,
+        "trx_sha256": "7ae00563cf156141355ef461348863d0a49c00c9226d84d461c311c4ae599fbf"
+      },
+      {
+        "file": "highlowaverage-fixture.trx.gz",
+        "passed_cases": 122,
+        "trx_sha256": "84d5782408373b467b7d9d89f32f84643ef82a6bec12824f342e4c48c9ee2258"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingHighLowAverageBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "HighLowMovingAverage"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

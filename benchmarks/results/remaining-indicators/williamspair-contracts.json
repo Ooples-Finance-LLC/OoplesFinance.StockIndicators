@@ -1,0 +1,39 @@
+{
+  "batch": "williams-pair-shared-execution",
+  "types": [
+    "SmoothedWilliamsR",
+    "EnhancedWilliamsR"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share unchanged exact SmoothedWilliamsWindow over original high/low/close and EnhancedWilliamsWindow over original close/volume, preserving both period parameters, default SMA, output mapping and source/custom-component fallback.",
+  "verification": {
+    "unit_passed": 184,
+    "fixture_passed": 8,
+    "discovery_passed": 82,
+    "gpu_passed": 100,
+    "contract_methods": 1417,
+    "hosted_methods": 1405,
+    "evidence": [
+      {
+        "file": "williamspair-unit.trx.gz",
+        "passed_cases": 184,
+        "trx_sha256": "9617aeec7e450b78ad82d7b9747e06f030fb9d3e2c785e343c01cd36da1ae16e"
+      },
+      {
+        "file": "williamspair-fixture.trx.gz",
+        "passed_cases": 90,
+        "trx_sha256": "3219372e6300110ff78f2cd85d7802e76016dbfd4672680862ef250c7e7a2a5a"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingWilliamsPairBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "SmoothedWilliamsR",
+      "EnhancedWilliamsR"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -1,0 +1,34 @@
+{
+  "types": [
+    "KalmanSmoother"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "e2e897c706c8181b3021552e959e76ecf7fe5345",
+  "source_fingerprint_sha256": "4a52e454f2ac2f1fba5883c30ba8ce057071d6c7bc8b3209ef8165ad0591f75c",
+  "benchmark_fixture": {
+    "type": "RemainingKalmanSmootherBenchmarks",
+    "operations": [
+      "KalmanSmoother"
+    ]
+  },
+  "checks": {
+    "unit": 59,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "unit_class_counts": {
+    "KalmanRationalRootTests": 8,
+    "SharedGeneratedKalmanSmootherTests": 10,
+    "KalmanSmootherNumericalTests": 41
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/publication-kalman-rational-20261021-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-kalman-rational-20261021-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

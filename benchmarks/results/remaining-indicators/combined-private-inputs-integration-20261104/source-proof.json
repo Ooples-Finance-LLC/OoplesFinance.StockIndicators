@@ -1,0 +1,45 @@
+{
+  "qualified_source": "c4dcc86686b45640478973017ebb224bf1db539e",
+  "compiled_source": "bc538c0bbdcd41545c1bce489454e5a9cee06cff",
+  "source_integration_commit": "ae80ae81586bdd17a249719d53ed9adca5ef9ac0",
+  "source_test_equality": true,
+  "source_paths": [
+    "src/Indicators/EmaDifferenceSignal.cs",
+    "src/Indicators/SumSeededDirectionalIndex.cs",
+    "src/Indicators/WindowFisherTransform.cs",
+    "tests/ModelsTests/AdxWeightedCertificateTests.cs",
+    "tests/ModelsTests/FisherExactInputsTests.cs",
+    "tests/ModelsTests/PvoCertifiedAverageTests.cs"
+  ],
+  "source_fingerprint": "784c777d99074bac6bd95f976c63a4f0f03f308b78885107bf570a983b069b41",
+  "qualified_production_dll_sha256": "66cc9a7c9676c90dc907055ca9410a12d8d2f0bb0e158150ab2c92d5830432a8",
+  "correctness": {
+    "unit": 43,
+    "comparator": 189,
+    "actual_gpu": 100
+  },
+  "timing": {
+    "run": 41787289953,
+    "cases": 180,
+    "decisions": 36,
+    "faster": 16,
+    "inconclusive": 20,
+    "slower": 0
+  },
+  "inventory": {
+    "generated": true,
+    "check": true,
+    "tests": 8
+  },
+  "report_imported": true,
+  "report_sha256": "3a8a46687d19f8d311db47c3d2d758ae07b8f2b513602a5b3249206b69c07633",
+  "report_archive": "benchmarks/results/remaining-indicators/combined-private-report-integration-20261104",
+  "report_verification": {
+    "displayed": 802,
+    "csv": 802,
+    "builder_values_and_provenance": 1544,
+    "javascript_errors": 0,
+    "changed_baseline_rows": 12,
+    "changed_builder_slots": 24
+  }
+}

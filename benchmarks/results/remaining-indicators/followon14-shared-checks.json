@@ -1,0 +1,53 @@
+{
+  "status": "followon-checks-passed-inherited-macd-failures-and-performance-pending",
+  "context": "Eight new families in the preserved combined working candidate, not an isolated committed tree. Earlier unaffected unit/parity receipts are reused under recorded source-diff audits; per-family receipts identify their execution fingerprints. Common GPU fixtures do not establish per-indicator GPU performance.",
+  "input_sha256": "766bf7006df16711e91b86c07f83e351dc2019699347abbc5c80a46aad3de270",
+  "family_check_counts": {
+    "unit": 241,
+    "parity": 56
+  },
+  "family_cpu_receipts": [
+    "directionaltrend-cpu-contracts.json",
+    "coralcorrected-cpu-contracts.json",
+    "cubicweight-cpu-contracts.json",
+    "dema2lines-cpu-contracts.json",
+    "demarkpressure-cpu-contracts.json",
+    "dinapoli-cpu-contracts.json",
+    "distancepair-cpu-contracts.json",
+    "disparity-cpu-contracts.json"
+  ],
+  "checks": {
+    "discovery": {
+      "status": "passed",
+      "verified_count": 219,
+      "log_sha256": "2b71fbe851cb1598c7dda36d425a692ead0baab19b7a3f20d474290762dad4f0"
+    },
+    "gpu": {
+      "status": "passed",
+      "verified_count": 100,
+      "log_sha256": "ee9c336d2db5732d3aff6fbb661f8b339d9add72225171519ea695a963b66ff1"
+    },
+    "verify-gpu-partition": {
+      "status": "passed",
+      "verified_count": null,
+      "log_sha256": "8f3104a27e5f3ca9fc5fc0b91abfd193a0b7282cf84f5cec31808b8b1064d33c",
+      "result": "Verified 100 local GPU cases; 1548 methods remain assigned to hosted CI"
+    },
+    "inventory": {
+      "status": "passed",
+      "verified_count": 4,
+      "log_sha256": "262a167b2e3299637946eade56e9fd98d58f2d444f0979727cd26adb7ff085ab",
+      "result": "....\n----------------------------------------------------------------------\nRan 4 tests in 0.536s\n\nOK"
+    }
+  },
+  "discovery_evidence": "followon14-discovery.trx.gz",
+  "gpu_evidence": "followon14-gpu-contracts.json",
+  "gpu_trx_evidence": "followon14-gpu.trx.gz",
+  "inherited_failed_unit_cases": 3,
+  "inherited_failure_evidence": "combined113-known-macd-failures.trx.gz",
+  "pending": [
+    "inherited MACD unit-contract failures",
+    "raw timing and performance comparison",
+    "required hosted checks"
+  ]
+}

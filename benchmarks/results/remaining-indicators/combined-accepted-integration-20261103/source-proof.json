@@ -1,0 +1,84 @@
+{
+  "measured_source": "f556860be6552ae78843aed9ec4355d80bf50860",
+  "integration_source_commit": "37347c8b7b32a523eb904a4e29578fbb9c1475f3",
+  "inventory_commit": "f63bee634e4fd413a33f70a4ab4e39bb227a36bc",
+  "measurement_run": "41577446099",
+  "plan_sha256": "c8666d5a483e93d463be4fed50230c445ca7fddcec51632bb1dcd815a95967ce",
+  "source_and_tests_exactly_match": true,
+  "accepted": true,
+  "cases": 360,
+  "decisions": 72,
+  "verdicts": {
+    "faster": 70,
+    "inconclusive": 2
+  },
+  "local_summary_matches_hosted": true,
+  "correctness": {
+    "unit": 472,
+    "comparator": 272,
+    "actual_gpu": 100
+  },
+  "gpu_source_sha256": "076c34871b9c65898269830585124f7aa987c1f2a76a9d0505b9cc2c14a3811e",
+  "inventory_regenerated": true,
+  "inventory_check_passed": true,
+  "inventory_tests_passed": 8,
+  "report_imported": true,
+  "report_sha256": "7f241df516aad001571aed1279760f271f2209f5cb551b307c7a591b7caf3f53",
+  "report_tooling_commit": "6f91440abfdab015037b6435b1f5e01f0f01b15e",
+  "baseline_rows_updated": 24,
+  "baseline_rows_preserved": 778,
+  "builder_slots_updated": 48,
+  "builder_slots_preserved": 1488,
+  "browser_all802_and_csv_verified": true,
+  "javascript_errors": [],
+  "report_archives": {
+    "before.html": {
+      "sha256": "3fe43a871b194fe1267e7f4cfc63b14e5694d22723d4fd19d5e6f30c19ae4537",
+      "archive": "benchmarks/results/remaining-indicators/combined-accepted-integration-20261103/before.html.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "1a638c65b12b8a553e304960fda6809b2bcbfab7a6cc40c9872b8e866e7233c9",
+      "archive": "benchmarks/results/remaining-indicators/combined-accepted-integration-20261103/browser-verification.json.gz"
+    },
+    "candidate.html": {
+      "sha256": "7f241df516aad001571aed1279760f271f2209f5cb551b307c7a591b7caf3f53",
+      "archive": "benchmarks/results/remaining-indicators/combined-accepted-integration-20261103/candidate.html.gz"
+    },
+    "imported.json": {
+      "sha256": "9bad54e77bb3a4eae8bed1ba3d4ac8056a8e2275a902ded86a368042ca17c073",
+      "archive": "benchmarks/results/remaining-indicators/combined-accepted-integration-20261103/imported.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "d2b864ffece49ffec423fbfd435380cd003499c82e6463d5ceeed39247c4ead1",
+      "archive": "benchmarks/results/remaining-indicators/combined-accepted-integration-20261103/measurement.json.gz"
+    },
+    "refreshed-baseline.png": {
+      "sha256": "70923bb1bf4fd901a3966125673f93081007316ca387bbace90ad2a185a7a2a1",
+      "archive": "benchmarks/results/remaining-indicators/combined-accepted-integration-20261103/refreshed-baseline.png"
+    },
+    "staged.json": {
+      "sha256": "d3ce6017134af4cbbecba948a59694f594ffb68cbcc8da30c0e1f929b4ea2bca",
+      "archive": "benchmarks/results/remaining-indicators/combined-accepted-integration-20261103/staged.json.gz"
+    },
+    "updated-pair-details.png": {
+      "sha256": "efdcf326adde713858d00a95f2565ceca7fda20f0c5ecdb3140fd502a7a64eb7",
+      "archive": "benchmarks/results/remaining-indicators/combined-accepted-integration-20261103/updated-pair-details.png"
+    },
+    "verify-hosted-certified-report-20261101.py": {
+      "sha256": "f1112bb2e981aa1fa68e0a41e917e423bcd8fd0856a40df97ccd6567986a7cda",
+      "archive": "benchmarks/results/remaining-indicators/combined-accepted-integration-20261103/verify-hosted-certified-report-20261101.py.gz"
+    },
+    "import-hosted-certified-report-20261101.py": {
+      "sha256": "380745f04a0b07f71a33dd049bdf1f3392ff9a388f5cda9849c0ae3bda66be75",
+      "archive": "benchmarks/results/remaining-indicators/combined-accepted-integration-20261103/import-hosted-certified-report-20261101.py.gz"
+    },
+    "report.py": {
+      "sha256": "ec5151d32284558921f0d3aee547f9b18e5599acd5e506f1348946adf7a29853",
+      "archive": "benchmarks/results/remaining-indicators/combined-accepted-integration-20261103/report.py.gz"
+    }
+  },
+  "excluded_candidates": [
+    "A/D cumulative state and bounded small-first repair",
+    "rolling dispersion"
+  ]
+}

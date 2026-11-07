@@ -1,0 +1,124 @@
+{
+  "implementation_commit": "79cb43b4",
+  "status": "aborted-not-qualified",
+  "passed_cases": [
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingVolumeBenchmarks), count: 32)",
+      "duration": "00:00:00.0010184"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingRatioBenchmarks), count: 16)",
+      "duration": "00:00:00.0007311"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingExactStatisticsBenchmarks), count: 24)",
+      "duration": "00:00:00.0009957"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit(operation: \"Kvo\", count: 10000, history: Full)",
+      "duration": "00:17:26.1454816"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit(operation: \"Kvo\", count: 1000, history: Full)",
+      "duration": "00:00:02.6288542"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingExtrapolationBenchmarks), count: 16)",
+      "duration": "00:00:00.0007701"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit(operation: \"UltimateOscillator\", count: 10000, history: Full)",
+      "duration": "00:00:00.2723722"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingVolumeTrendBenchmarks), count: 32)",
+      "duration": "00:00:00.0009467"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingAtrDerivedBenchmarks), count: 32)",
+      "duration": "00:00:00.0009780"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingAroonDpoBenchmarks), count: 16)",
+      "duration": "00:00:00.0006718"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingComposedAverageBenchmarks), count: 24)",
+      "duration": "00:00:00.0022597"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingPressureFlowBenchmarks), count: 24)",
+      "duration": "00:00:00.0008934"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingPriceAverageBenchmarks), count: 32)",
+      "duration": "00:00:00.0103087"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingBarFlowBenchmarks), count: 32)",
+      "duration": "00:00:00.0009970"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingDirectionalFlowBenchmarks), count: 24)",
+      "duration": "00:00:00.0009031"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit(operation: \"KlingerVolumeOscillator\", count: 1000, history: LatestOnly)",
+      "duration": "00:00:02.6491067"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingStrengthRangeBenchmarks), count: 16)",
+      "duration": "00:00:00.0007810"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingOrderedVolatilityBenchmarks), count: 16)",
+      "duration": "00:00:00.1259505"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingOscillatorBenchmarks), count: 24)",
+      "duration": "00:00:00.0009428"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit(operation: \"KlingerVolumeOscillator\", count: 10000, history: Full)",
+      "duration": "00:16:57.4392689"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingRangeHealthBenchmarks), count: 32)",
+      "duration": "00:00:00.0032528"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingWilderBenchmarks), count: 24)",
+      "duration": "00:00:00.0008660"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingBenchmarkDiscoveryTests.SharedLifecycleRetainsEveryBenchmarkCase(type: typeof(OoplesFinance.StockIndicators.CompetitorBenchmarks.RemainingEmaGapBenchmarks), count: 24)",
+      "duration": "00:00:00.0008127"
+    }
+  ],
+  "trx_sha256": "f3e33adc5fcb447bff6786a8aa4d5cf20ce748579f6d1bcd9751f30a70d0c831",
+  "remaining_fixture_cases": 2,
+  "note": "Test host crashed; no managed/application crash or resource-exhaustion event was found in the queried logs. Cause unproven. Preserve passes and resume only missing cases.",
+  "resumed_passed_cases": [
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit(operation: \"KlingerVolumeOscillator\", count: 1000, history: Full)",
+      "duration": "00:00:03.5188317"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit(operation: \"UltimateOscillator\", count: 10000, history: LatestOnly)",
+      "duration": "00:00:00.3068593"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit(operation: \"UltimateOscillator\", count: 1000, history: Full)",
+      "duration": "00:00:00.0327269"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit(operation: \"Kvo\", count: 1000, history: LatestOnly)",
+      "duration": "00:00:02.6526370"
+    },
+    {
+      "name": "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit(operation: \"UltimateOscillator\", count: 1000, history: LatestOnly)",
+      "duration": "00:00:00.0393018"
+    }
+  ],
+  "resume_trx_sha256": "e33cc287328f323cc012266c14ac4ce04ca0ae9bfb7b5e108ea253c0ece95b51"
+}

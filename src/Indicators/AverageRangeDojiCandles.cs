@@ -135,6 +135,7 @@ internal sealed class AverageRangeDojiState(int period, int warmup, AverageRange
 {
     private readonly Queue<(double High, double Low)> _ranges = new();
     private readonly BigInteger _comparisonWeight = new BigInteger(period) * 10;
+    private readonly int _smallComparisonWeight = period <= int.MaxValue / 10 ? period * 10 : 0;
     private ExactMeanAccumulator _rangeSum;
     private int _seen;
     public void Reset() { _ranges.Clear(); _rangeSum = default; _seen = 0; }
@@ -174,8 +175,16 @@ internal sealed class AverageRangeDojiState(int period, int warmup, AverageRange
     private int CompareWithLimit(double upper, double lower)
     {
         var comparison = _rangeSum;
-        comparison.Add(upper, -_comparisonWeight);
-        comparison.Add(lower, _comparisonWeight);
+        if (_smallComparisonWeight != 0)
+        {
+            comparison.Add(upper, -_smallComparisonWeight);
+            comparison.Add(lower, _smallComparisonWeight);
+        }
+        else
+        {
+            comparison.Add(upper, -_comparisonWeight);
+            comparison.Add(lower, _comparisonWeight);
+        }
         return comparison.Sign;
     }
 

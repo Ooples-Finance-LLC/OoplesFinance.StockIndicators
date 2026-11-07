@@ -1,0 +1,21 @@
+{
+  "source_integration_commit": "400ae0138e83082fd524e61794d17e229d18781a",
+  "qualified_source": "784f1fe5c49549125ecda7aa22e51782ee022fe1",
+  "compiled_source": "a158f717bd11ff103802599d45eba01acfcb2926",
+  "source_fingerprint": "5f1788313e661214a56a35b01d107c10b7b7104455c91c4df67e698eed0281fa",
+  "unit": 14,
+  "comparator": 126,
+  "actual_gpu": 100,
+  "production_sha256": "cc286b342f5be0a511f6551b23ddc95cfd01608b51f097d546450557390992bf",
+  "run_id": "42255018673",
+  "cases": 120,
+  "decisions": 24,
+  "verdicts": {
+    "inconclusive": 19,
+    "faster": 5
+  },
+  "integrated_paths": [
+    "src/Indicators/ContainmentCandles.cs"
+  ],
+  "verified_utc": "2026-11-06T18:56:24.221383+00:00"
+}

@@ -1,0 +1,39 @@
+{
+  "batch": "fractal-chaos-shared-execution",
+  "types": [
+    "FractalChaosBands",
+    "FractalChaosOscillator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share the existing strict five-bar fractal test using four retained highs and lows. Preserve upper-change oscillator priority, ignored period, exact midpoint, warmup, original fields, fallback and ownership.",
+  "verification": {
+    "unit_passed": 18,
+    "fixture_passed": 8,
+    "discovery_passed": 131,
+    "gpu_passed": 100,
+    "contract_methods": 1470,
+    "hosted_methods": 1458,
+    "evidence": [
+      {
+        "file": "fractalchaos-unit.trx.gz",
+        "passed_cases": 18,
+        "trx_sha256": "83b1681aa3f37400b7a8ce87ddbb5312aee4f3038f21855b0158dd35ffb79fdb"
+      },
+      {
+        "file": "fractalchaos-fixture.trx.gz",
+        "passed_cases": 139,
+        "trx_sha256": "b74cc50c174e09cabb0332435da10b05419f844d2b36498d0043b680c2c6ef14"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingFractalChaosBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "FractalChaosBands",
+      "FractalChaosOscillator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

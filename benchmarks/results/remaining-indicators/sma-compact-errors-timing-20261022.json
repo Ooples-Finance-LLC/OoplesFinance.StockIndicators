@@ -1,0 +1,55 @@
+{
+  "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+  "rows": [
+    {
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 1000,
+      "ooples": {
+        "mean_ns": 9174640.555555556,
+        "lower_ns": 9119772.59299862,
+        "upper_ns": 9229508.518112492,
+        "allocated_bytes": 2059504,
+        "samples": 9
+      },
+      "competitor": {
+        "mean_ns": 721794.1,
+        "lower_ns": 697794.6043721625,
+        "upper_ns": 745793.5956278375,
+        "allocated_bytes": 299528,
+        "samples": 10
+      },
+      "competitor_over_ooples": 0.07867273879878914,
+      "verdict": "slower"
+    },
+    {
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 10000,
+      "ooples": {
+        "mean_ns": 18036005.888888888,
+        "lower_ns": 15335053.888800628,
+        "upper_ns": 20736957.888977148,
+        "allocated_bytes": 20408376,
+        "samples": 9
+      },
+      "competitor": {
+        "mean_ns": 1314182.5,
+        "lower_ns": 1278333.3264769628,
+        "upper_ns": 1350031.6735230372,
+        "allocated_bytes": 2891528,
+        "samples": 10
+      },
+      "competitor_over_ooples": 0.07286438627798433,
+      "verdict": "slower"
+    }
+  ],
+  "source_sha": "83a6a5e5949f8a07218b6edfb7fd3fa2a02929b3",
+  "binary_run": 39698944971,
+  "workflow_sha": "c48e880523060fb7749d2d85269c3f3c436c76d2",
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/39699077102",
+  "report_sha256": "e3f5d2472466d3c935d2c40d1b67bafc68221b8e37dcaba11e0e7a16df40c76e",
+  "benchmark_binary_sha256": "9a35764f2e6b4397ba58c124e1bf045609589d5d07c0f4358cc42ffe84c43f97",
+  "production_binary_sha256": "f7812c846fccbe87a86096840cbc5643c9ec427f9f3ba48dd90caf85bfb3c4bf",
+  "note": "Dedicated hosted SMA comparison only; confidence intervals are retained; this does not establish performance for other indicators.",
+  "raw_evidence": "benchmarks/results/remaining-indicators/sma-compact-errors-timing-20261022-raw.json.gz",
+  "report_import": "Actual SMA rows replaced at both sizes;800 other rows unchanged; all802 displayed/exported rows and source provenance verified."
+}

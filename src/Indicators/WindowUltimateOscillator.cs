@@ -88,6 +88,51 @@ public sealed class WindowUltimateOscillator
             );
 
 #if !NETFRAMEWORK
+    // Enclose each exact ratio on a 64-bit fractional grid. The rolling
+    // sums remain exact; uncertain publication falls through to the original
+    // weighted rational expression. This path handles nonnegative pressure
+    // no larger than its range; unusual candles retain exact fallback.
+    internal static bool TryWeightedRatio(ReadOnlySpan<JurikDyadic> pressure,
+        ReadOnlySpan<JurikDyadic> range, bool zero, out double result)
+    {
+        result = 0;
+        if (pressure.Length != 3 || range.Length != 3) return false;
+        UInt128 lower = 0, upper = 0;
+        for (int k = 0; k < 3; k++)
+        {
+            if (range[k].Sign == 0)
+            {
+                if (!zero) return false;
+                continue;
+            }
+            if (!pressure[k].TryBinaryParts(out Int128 p, out int pe)
+                || !range[k].TryBinaryParts(out Int128 r, out int re)
+                || p < 0 || r <= 0) return false;
+            if (p == 0) continue;
+            long shift = 64L + pe - re;
+            // Restrict the shifted numerator to 127 bits and use unsigned
+            // division. All conversion and shift bounds precede arithmetic.
+            if (shift is < 0 or > 126
+                || (UInt128)p > (((UInt128)1 << 127) - 1) >> (int)shift) return false;
+            var divided = UInt128.DivRem((UInt128)p << (int)shift, (UInt128)r);
+            UInt128 ceiling = divided.Quotient + (divided.Remainder == 0 ? (UInt128)0 : 1);
+            if (ceiling > (UInt128)1 << 64) return false;
+            // Each term is at most 2^64. Weights sum to seven, so scaling
+            // either bound by 100 fits comfortably within signed Int128.
+            uint weight = (uint)(4 >> k);
+            lower = unchecked(lower + divided.Quotient * weight);
+            upper = unchecked(upper + ceiling * weight);
+        }
+        Int128 denominator = (Int128)7 << 64;
+        // The accepted weighted bounds are at most 7 * 2^64; scaling by
+        // 100 stays below 2^74, including the conversion to signed Int128.
+        double low = JurikDyadic.IntegerRatio(unchecked((Int128)(lower * 100)), denominator);
+        double high = JurikDyadic.IntegerRatio(unchecked((Int128)(upper * 100)), denominator);
+        if (BitConverter.DoubleToInt64Bits(low) != BitConverter.DoubleToInt64Bits(high)) return false;
+        result = low;
+        return true;
+    }
+
     internal sealed class CompactState(int[] periods, bool zero, int count = 0) : IMultiOutputState
     {
         // All three windows refer to the same observations. Retain each exact
@@ -137,6 +182,11 @@ public sealed class WindowUltimateOscillator
             if (++_next == _history.Length) _next = 0;
             if (_seen < periods[2]) _seen++;
             if (_seen < periods[2]) return;
+            if (TryWeightedRatio(_pressure, _range, zero, out double certified))
+            {
+                output[0] = certified; output[1] = 1;
+                return;
+            }
             var numerator = new JurikDyadic();
             var denominator = JurikDyadic.FromDouble(1);
             for (int k = 0; k < 3; k++)

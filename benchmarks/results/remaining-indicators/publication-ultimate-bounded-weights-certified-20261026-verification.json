@@ -1,0 +1,56 @@
+{
+  "input_head": "9cfc05237cc40e69c91ab47df54371d66d64a4b1",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/WindowUltimateOscillator.cs"
+  ],
+  "batch_note": "Approved Ultimate weighted-ratio refinement: retain every guard and exact fallback; unchecked weighted products and publication scaling are proven below2^74. Existing maximum accepted ratio, midpoint rejection, numerical/lifecycle, long-history benchmark setup and GPU/inventory checks retained. Profile identified checked128bit products as material cost. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-26T07:46:57.312252+00:00",
+  "unit": {
+    "passed": 18,
+    "class_counts": {
+      "CompactUltimateOscillatorTests": 14,
+      "CertifiedUltimateRatioTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\ultimate-bounded-weights\\unit\\unit.trx",
+    "sha256": "878cdad5f79ba923594a391c8bfe514a66ca2cd95bf09881149b4349b29fddfc",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-ultimate-bounded-weights-certified-20261026-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 15,
+    "class_counts": {
+      "TrueRangeRatioComparisonTests": 15
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\ultimate-bounded-weights\\parity\\parity.trx",
+    "sha256": "8ca6b224a65c5de9f28a76ef0f4019221eae2dcc4d7d5b2c0bcea6b0802441ce",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-ultimate-bounded-weights-certified-20261026-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-ultimate-bounded-weights-20261026\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "00c047463c69b912d2392dae987b20badac77963c356af67d3cf161f96819a24",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-ultimate-bounded-weights-20261026\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "00c047463c69b912d2392dae987b20badac77963c356af67d3cf161f96819a24",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-ultimate-bounded-weights-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "00c047463c69b912d2392dae987b20badac77963c356af67d3cf161f96819a24",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-ultimate-bounded-weights-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "00c047463c69b912d2392dae987b20badac77963c356af67d3cf161f96819a24"
+  },
+  "source_fingerprint_sha256": "301dff11cd342085c2680a0f1083fa39119a2fd51f05eb2b6a1c14f2a48605b9",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved Ultimate weighted-ratio refinement: retain every guard and exact fallback; unchecked weighted products and publication scaling are proven below2^74. Existing maximum accepted ratio, midpoint rejection, numerical/lifecycle, long-history benchmark setup and GPU/inventory checks retained. Profile identified checked128bit products as material cost. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

@@ -1,0 +1,31 @@
+{
+  "types": [
+    "GOscillator",
+    "GannSwingOscillator"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "d5aefd1e4bfdecea3f6eb03d24dc878354920f50",
+  "combined_input_sha256": "2cf104774da69e61eb5b9a970b42befb14901f0d4d53e682371a166afb5fcb55",
+  "benchmark_fixture": {
+    "type": "RemainingGOscillatorsBenchmarks",
+    "operations": [
+      "GOscillator",
+      "GannSwingOscillator"
+    ]
+  },
+  "checks": {
+    "unit": 112,
+    "parity": 8,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/goscillators-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/goscillators-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

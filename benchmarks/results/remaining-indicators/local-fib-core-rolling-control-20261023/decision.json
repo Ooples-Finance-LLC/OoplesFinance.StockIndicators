@@ -1,0 +1,148 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "0bf3a5b18eab1b73bbd7664f0b5715d4eabc2c7e",
+    "new": "c879ac3f9c6a3e71a9ffd54341f5ec55385abbb0"
+  },
+  "candidate_code_source": "2d27f8bcf15d2580a3cd113d5e1b28dcb43c0d39",
+  "scope": "Direct fixed-normalization Fibonacci Core span API; no competitor comparison or available-prefix facade claim.",
+  "measurement_location": "Local Windows; identical standalone host loading source-qualified production DLLs",
+  "decisions": [
+    {
+      "count": 1000,
+      "period": 1,
+      "old_means_ms": [
+        0.042792608642578125,
+        0.04282341918945313
+      ],
+      "new_means_ms": [
+        0.040090581597222216,
+        0.03950724826388889
+      ],
+      "verdict": "faster"
+    },
+    {
+      "count": 1000,
+      "period": 20,
+      "old_means_ms": [
+        0.3939387890625,
+        0.394030546875
+      ],
+      "new_means_ms": [
+        0.05155892578125,
+        0.05078189697265625
+      ],
+      "verdict": "faster"
+    },
+    {
+      "count": 1000,
+      "period": 79,
+      "old_means_ms": [
+        10.205390277777777,
+        10.657808333333334
+      ],
+      "new_means_ms": [
+        0.68859359375,
+        0.6906713671875
+      ],
+      "verdict": "faster"
+    },
+    {
+      "count": 10000,
+      "period": 1,
+      "old_means_ms": [
+        0.421200078125,
+        0.4269203125
+      ],
+      "new_means_ms": [
+        0.400030078125,
+        0.39849097222222224
+      ],
+      "verdict": "faster"
+    },
+    {
+      "count": 10000,
+      "period": 20,
+      "old_means_ms": [
+        4.0464178125,
+        4.0113928125
+      ],
+      "new_means_ms": [
+        0.512275,
+        0.509226611328125
+      ],
+      "verdict": "faster"
+    },
+    {
+      "count": 10000,
+      "period": 79,
+      "old_means_ms": [
+        105.04509722222222,
+        107.3202475
+      ],
+      "new_means_ms": [
+        7.03821,
+        6.9648666666666665
+      ],
+      "verdict": "faster"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "d2855a6fc32eca252818f85292db5dabe9f81deb2392b4c7f1414badac6a0d79",
+      "archive": "benchmarks/results/remaining-indicators/local-fib-core-rolling-control-20261023/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "a1b8cd86b30f9082e7ec5c151f36dd08b22e4d4d9b0a86edeb5c9ff5fc7a4a0d",
+      "archive": "benchmarks/results/remaining-indicators/local-fib-core-rolling-control-20261023/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "1cc606282be6da10db275407c5a405b33e7a39f20d1199d50ff7e4c0815b5008",
+      "archive": "benchmarks/results/remaining-indicators/local-fib-core-rolling-control-20261023/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "a630ffce0f3288f72f82024b7234d8719fb830cd4a8e229ea84b2a2a47601f32",
+      "archive": "benchmarks/results/remaining-indicators/local-fib-core-rolling-control-20261023/verified-summary.json.gz"
+    },
+    "round0-old/results/FibonacciCoreBenchmarks-report-full-compressed.json": {
+      "sha256": "96f0a1481fb24d638316e223ab7675d64598f7eb4061f4584272e755a8b35351",
+      "archive": "benchmarks/results/remaining-indicators/local-fib-core-rolling-control-20261023/round0-old/results/FibonacciCoreBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new/results/FibonacciCoreBenchmarks-report-full-compressed.json": {
+      "sha256": "34519df603b08b9a32bbf28c231d308f9c41a04172a2f162fb11b6bf71a7e79d",
+      "archive": "benchmarks/results/remaining-indicators/local-fib-core-rolling-control-20261023/round1-new/results/FibonacciCoreBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new/results/FibonacciCoreBenchmarks-report-full-compressed.json": {
+      "sha256": "3252ebe65c586e78eabc2973bc7fa92fd4f7556ef63ef11d2c6541afc56181dd",
+      "archive": "benchmarks/results/remaining-indicators/local-fib-core-rolling-control-20261023/round2-new/results/FibonacciCoreBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old/results/FibonacciCoreBenchmarks-report-full-compressed.json": {
+      "sha256": "b00872ca2ece2cdf7df0f414b968c7f3f7685551f67815f055e694db7089249b",
+      "archive": "benchmarks/results/remaining-indicators/local-fib-core-rolling-control-20261023/round3-old/results/FibonacciCoreBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old.log": {
+      "sha256": "71897eaa5c4c7d23a8845809f308f3e807406b07120fddfaefca1b265ecad393",
+      "archive": "benchmarks/results/remaining-indicators/local-fib-core-rolling-control-20261023/round0-old.log.gz"
+    },
+    "round1-new.log": {
+      "sha256": "837d4d763a17efd063718c89744572b20f2c9d4bcd2cbf08b34ad3275862bedb",
+      "archive": "benchmarks/results/remaining-indicators/local-fib-core-rolling-control-20261023/round1-new.log.gz"
+    },
+    "round2-new.log": {
+      "sha256": "bd1ca0137aed8112b35d351ab486730c411e2be6861fc80119d953bf65d969c6",
+      "archive": "benchmarks/results/remaining-indicators/local-fib-core-rolling-control-20261023/round2-new.log.gz"
+    },
+    "round3-old.log": {
+      "sha256": "7a4f5a0534e03676403a5d63a5feb1fe655366fa780e232d358f2eed8453e697",
+      "archive": "benchmarks/results/remaining-indicators/local-fib-core-rolling-control-20261023/round3-old.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-fib-core-rolling-control.py": "39385d2a34408e53291b5de27ff9a24fcaa6e5de77a2af7e5b5c819b4864db11",
+    "verify-fib-core-rolling-control.py": "310dd76c1e480e6eb35aad5336a394b5e754fa71485d75ca36779be6c4c03f55",
+    "Program.cs": "833766122b733511f660963e1f8102141d7d7eb9c37771bef55636033a21f207",
+    "FibonacciCoreRunner.csproj": "30a2f7466f3cde62c229fa18e86927660bb220aedcc547a08be6b3a2120b4dc1"
+  },
+  "report_imported": false,
+  "production_integrated": true
+}

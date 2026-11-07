@@ -1,0 +1,65 @@
+{
+  "input_head": "79df64a4d8b1c8a353103242bb4e26c6234f3ca5",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedTillson.cs",
+    "src/Indicators/ValuesBarExecution.Tillson.cs",
+    "tests/ModelsTests/TillsonCachedCoefficientTests.cs"
+  ],
+  "batch_note": "Approved private T3 polynomial redesign: cache exact outward coefficient bounds once per state, use three fixed-width products on supported finite differences, and retain all existing fallbacks. Independent coefficient oracle, factor/sign/exponent boundaries, state/reset and long-history parity required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-27T15:26:08.401310+00:00",
+  "unit": {
+    "passed": 50,
+    "class_counts": {
+      "TillsonFloatingSmoothingTests": 7,
+      "CertifiedTillsonTests": 17,
+      "TillsonSharedExecutionTests": 12,
+      "TillsonWordSmoothingTests": 4,
+      "TillsonCachedCoefficientTests": 2,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "TillsonPolynomialExecutionTests": 2,
+      "TillsonWordBinadeTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-cached-coefficients\\unit\\unit.trx",
+    "sha256": "c585ba4bc7f83ea93d99133018c843eada881c9b22fe5490cb0232f46c986936",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-cached-coefficients-certified-20261027-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 26,
+    "class_counts": {
+      "TillsonComparisonTests": 10,
+      "SharedTillsonBenchmarkTests": 16
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-cached-coefficients\\parity\\parity.trx",
+    "sha256": "64d8da96c8db7c5c5c2a4b9e6a1a3bc00ba3fd9b8f0b2c7fe0c594027b1bc463",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-cached-coefficients-certified-20261027-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-cached-coefficients-20261027\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e65bd60d840185637a5492cefa2cf3bdc537e98554e3e3ed56cfdd7b76449ed4",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-cached-coefficients-20261027\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e65bd60d840185637a5492cefa2cf3bdc537e98554e3e3ed56cfdd7b76449ed4",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-cached-coefficients-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e65bd60d840185637a5492cefa2cf3bdc537e98554e3e3ed56cfdd7b76449ed4",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-cached-coefficients-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e65bd60d840185637a5492cefa2cf3bdc537e98554e3e3ed56cfdd7b76449ed4"
+  },
+  "source_fingerprint_sha256": "d024f38ad85121157f2cc398dc283fdfd26e5c5e4275a373585f8a0d5688dac1",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved private T3 polynomial redesign: cache exact outward coefficient bounds once per state, use three fixed-width products on supported finite differences, and retain all existing fallbacks. Independent coefficient oracle, factor/sign/exponent boundaries, state/reset and long-history parity required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

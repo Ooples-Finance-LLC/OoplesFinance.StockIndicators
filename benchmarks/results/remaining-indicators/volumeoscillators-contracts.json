@@ -1,0 +1,39 @@
+{
+  "batch": "volume-zone-momentum-oscillators-shared-execution",
+  "types": [
+    "VolumeZoneOscillator",
+    "VolumeMomentumOscillator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share original-volume oscillator execution using existing EmaState, RoundedSeededEma, RoundedMomentumRatio and RoundedPercentageChange. Preserve signed-volume direction, first-bar zero, both momentum periods, staged rounding, source fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 51,
+    "fixture_passed": 8,
+    "discovery_passed": 86,
+    "gpu_passed": 100,
+    "contract_methods": 1421,
+    "hosted_methods": 1409,
+    "evidence": [
+      {
+        "file": "volumeoscillators-unit.trx.gz",
+        "passed_cases": 51,
+        "trx_sha256": "26f124c7cc3c085107964a43c114b0ef445b1b5bb09ded7366f6ea0758dce5f2"
+      },
+      {
+        "file": "volumeoscillators-fixture.trx.gz",
+        "passed_cases": 94,
+        "trx_sha256": "de0c1a964007a83a36645499860e759b6767c82a61b2031920e54a30b05b7b4c"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVolumeOscillatorsBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "VolumeZoneOscillator",
+      "VolumeMomentumOscillator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

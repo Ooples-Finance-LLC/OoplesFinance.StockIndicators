@@ -1,0 +1,58 @@
+{
+  "input_head": "622a65a0edbe80ea1213307fd3d74426a3ffe5fb",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "parallel_batch_note": "Approved Volume Positive Negative certification on published Kalman source; exact fallback and bitwise parity required.",
+  "step": "complete",
+  "updated_utc": "2026-10-21T22:17:42.446107+00:00",
+  "unit": {
+    "passed": 111,
+    "class_counts": {
+      "VolumePositiveNegativeNumericalTests": 83,
+      "VolumePositiveNegativeCertifiedTests": 11,
+      "SharedGeneratedVolumePositiveNegativeTests": 13,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\vpni-certified\\unit\\unit.trx",
+    "sha256": "197a7aa1c58caa71ca88ff450eb40674062f3b5f503e9d94577f7b3c5a83a383",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-vpni-certified-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 409,
+    "class_counts": {
+      "RemainingBenchmarkDiscoveryTests": 405,
+      "RemainingVolumePositiveNegativeBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\vpni-certified\\parity\\parity.trx",
+    "sha256": "1947f0415f2b4f67cbcc3386221be4d582f1a0ac689d13c3d1d82e7985cf9104",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-vpni-certified-20261021-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vpni-certified-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7a1b849e83b96b2d9384b468e1cc7d302be1b5f84ed9cde9e3baedd7a9f50f65",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vpni-certified-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7a1b849e83b96b2d9384b468e1cc7d302be1b5f84ed9cde9e3baedd7a9f50f65",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vpni-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7a1b849e83b96b2d9384b468e1cc7d302be1b5f84ed9cde9e3baedd7a9f50f65",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vpni-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7a1b849e83b96b2d9384b468e1cc7d302be1b5f84ed9cde9e3baedd7a9f50f65"
+  },
+  "prior_head": "635bdf6b151fd7a7bafab4d52eda8113cb3d4b67",
+  "inventory_tests_passed": 6,
+  "upstream_master": "9e41a4617d8603d31f4ac57b1781e8d978e55947",
+  "dependency": "AiDotNet.Tensors 0.141.0",
+  "performance": "Pending; correctness does not establish competitor speed."
+}

@@ -7,10 +7,10 @@ internal sealed class RepulsionWindow : IDisposable
     private readonly RocBankAverage[]? _averages;
     private readonly IMovingAverageSmoother[]? _fallbacks;
     internal static int Period(int length, int multiple) => (int)Math.Min(int.MaxValue, Math.Max(1, (long)length) * multiple);
-    internal RepulsionWindow(MovingAvgType kind, int length)
+    internal RepulsionWindow(MovingAvgType kind, int length, int capacityHint = int.MaxValue)
     {
         var periods = new[] { Period(length, 1), Period(length, 2), Period(length, 3) };
-        if (StrengthWindow.Supports(kind)) _averages = periods.Select(p => new RocBankAverage(kind, p, int.MaxValue)).ToArray();
+        if (StrengthWindow.Supports(kind)) _averages = periods.Select(p => new RocBankAverage(kind, p, capacityHint)).ToArray();
         else _fallbacks = periods.Select(p => MovingAverageSmootherFactory.Create(kind, p)).ToArray();
     }
     private RocBankValue Smooth(RocBankValue value, int stage, bool commit) => _averages is null

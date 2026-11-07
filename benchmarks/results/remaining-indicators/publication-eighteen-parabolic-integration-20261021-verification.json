@@ -1,0 +1,140 @@
+{
+  "input_head": "7715ede0a6cc7a1f898570f13fa7f267283e6740",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reused_eighteen_checks": {
+    "source": "876702915e51123dd9da97e45f491a5c6e63e1cd",
+    "source_proof": "Production and tests unchanged except the three already-qualified Parabolic files; changed boundary repeats on current binaries.",
+    "unit": {
+      "passed": 397,
+      "class_counts": {
+        "SharedGeneratedVolumeFlowTests": 54,
+        "SharedGeneratedObvVixTests": 22,
+        "SharedGeneratedRmoQqeTests": 20,
+        "SharedGeneratedVervoortCandlesTests": 31,
+        "MeanDiagnosticsCertifiedTests": 18,
+        "RegressionWithChannelsBuilderTests": 12,
+        "SharedGeneratedVolatilityMomentumTests": 13,
+        "SharedGeneratedTradingVanillaTests": 12,
+        "SharedGeneratedTechnicalRatingsTests": 11,
+        "PairedInputContractTests": 8,
+        "SharedGeneratedQuasiNoiseTests": 14,
+        "SharedGeneratedSupportResistanceTests": 15,
+        "SharedGeneratedVolumePositiveNegativeTests": 13,
+        "RollingStatisticsSharedExecutionTests": 17,
+        "PairedBatchAllocationTests": 14,
+        "RegressionWithFinalLineBuilderTests": 10,
+        "SharedGeneratedSpearmanTests": 13,
+        "SharedGeneratedSvamaProjectedTests": 19,
+        "SharedGeneratedSwamiTdiTests": 20,
+        "SharedGeneratedZigZagTests": 10,
+        "SharedGeneratedVervoortModifiedTests": 11,
+        "SharedGeneratedKalmanSmootherTests": 10,
+        "SharedGeneratedTotalPowerTests": 12,
+        "ComparisonFrameworkCompatibilityTests": 4,
+        "SharedGeneratedSupportResistanceLevelsTests": 12,
+        "MeanDiagnosticsScaleReductionTests": 2
+      },
+      "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\qualified-eighteen-integration\\unit\\unit.trx",
+      "sha256": "e88225b6e43915d3ba28302bfc166f0dc1f925700e8b104a5c44bde2e0244b19"
+    },
+    "parity": {
+      "passed": 539,
+      "class_counts": {
+        "RemainingBenchmarkDiscoveryTests": 419,
+        "RemainingSvamaProjectedBenchmarkTests": 8,
+        "PairedBatchAllocationBenchmarkTests": 9,
+        "RemainingTradingVanillaBenchmarkTests": 8,
+        "SectorRotationBatchBenchmarkTests": 3,
+        "RemainingPeriodicChannelBenchmarkTests": 4,
+        "RemainingSupportResistanceBenchmarkTests": 4,
+        "RemainingRmoQqeBenchmarkTests": 8,
+        "RemainingKalmanSmootherBenchmarkTests": 4,
+        "RemainingSwamiTdiBenchmarkTests": 8,
+        "RemainingTechnicalRatingsBenchmarkTests": 4,
+        "RemainingVervoortCandlesBenchmarkTests": 12,
+        "KaufmanStressBatchBenchmarkTests": 3,
+        "RemainingVolumePositiveNegativeBenchmarkTests": 4,
+        "RemainingTotalPowerBenchmarkTests": 4,
+        "RsmkBatchBenchmarkTests": 3,
+        "SharedRollingStatisticsBenchmarkTests": 2,
+        "RemainingSpearmanBenchmarkTests": 4,
+        "RemainingVolatilityMomentumBenchmarkTests": 4,
+        "RemainingSupportResistanceLevelsBenchmarkTests": 4,
+        "RemainingObvVixBenchmarkTests": 8,
+        "RemainingZigZagBenchmarkTests": 4,
+        "RemainingVervoortModifiedBenchmarkTests": 4,
+        "RemainingQuasiNoiseBenchmarkTests": 4
+      },
+      "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\remaining-combined-integration\\parity\\parity.trx",
+      "sha256": "d3e4acc83a1924e22497505f440d55d1d0c2980143730ea4a7b367df91706165"
+    },
+    "current-parity": {
+      "passed": 420,
+      "class_counts": {
+        "RemainingBenchmarkDiscoveryTests": 418,
+        "SharedRollingStatisticsBenchmarkTests": 2
+      },
+      "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\qualified-eighteen-integration\\current-parity\\current-parity.trx",
+      "sha256": "9b22711708e9222532fe02d15508f0d4e5a28a5dc020fcdd095b4ed4b13ffa79"
+    }
+  },
+  "reviewed_source_changes": [
+    "src/Helpers/ParabolicStopValue.cs",
+    "src/Indicators/ParabolicStopSnapshots.cs",
+    "tests/ModelsTests/ParabolicCertifiedArithmeticTests.cs"
+  ],
+  "parallel_batch_note": "Approved Parabolic snapshot redesign: exact-difference FMA certificate, compact comparisons and clamping, original wide integer fallback; bitwise four-variant regression and controlled competitor timing required.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T01:54:47.339352+00:00",
+  "unit": {
+    "passed": 72,
+    "class_counts": {
+      "ParabolicSarNumericalTests": 38,
+      "ParabolicSnapshotSharedExecutionTests": 9,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "ParabolicCertifiedArithmeticTests": 4,
+      "SharedGeneratedParabolicSarTests": 17
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\eighteen-parabolic-integration\\unit\\unit.trx",
+    "sha256": "5cefb6f9b08cf373b40b4a6878221f82847acf4550938cf2292c7d3ea632955c",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-eighteen-parabolic-integration-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 41,
+    "class_counts": {
+      "ParabolicComparisonTests": 13,
+      "SharedParabolicSnapshotBenchmarkTests": 28
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\eighteen-parabolic-integration\\parity\\parity.trx",
+    "sha256": "c8b70c0659529da988a6e16ff599c1d14beef350931f426c17faad85c1c940ab",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-eighteen-parabolic-integration-20261021-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-remaining-qualified-eighteen-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "cfecaf7c45619c13b208b3cc6e54d67068eec6b263b89e37f0bcb28ddf921ac8",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-remaining-qualified-eighteen-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "cfecaf7c45619c13b208b3cc6e54d67068eec6b263b89e37f0bcb28ddf921ac8",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-remaining-qualified-eighteen-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "cfecaf7c45619c13b208b3cc6e54d67068eec6b263b89e37f0bcb28ddf921ac8",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-remaining-qualified-eighteen-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "cfecaf7c45619c13b208b3cc6e54d67068eec6b263b89e37f0bcb28ddf921ac8"
+  },
+  "source_fingerprint_sha256": "9d6a2f77e73e3aab0b89378d3d5aabe552906f6e3e47cd78ba7607b8a7e3ee21",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Parabolic snapshot recurrences retain exact comparisons, once-rounded updates, reversal rules, and wide overflow behavior. Direct exact-oracle arithmetic, preserved four-variant baseline and long-history checks are archived. Direct competitor timing remains pending."
+}

@@ -1,0 +1,41 @@
+{
+  "batch": "generated-weighted-extras",
+  "types": [
+    "RepulsionMovingAverage",
+    "CompoundRatioMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing Repulsion and Compound Ratio numerical kernels in shared owned-bar execution. Bound Repulsion rolling storage by owned input count while retaining default helper capacity for other callers. Preserve custom component graph fallback, checked warmup overflow and exact startup.",
+  "verification": {
+    "unit_passed": 105,
+    "fixture_passed": 8,
+    "discovery_passed": 31,
+    "gpu_passed": 100,
+    "contract_methods": 1366,
+    "hosted_methods": 1354,
+    "evidence": [
+      {
+        "file": "weightedextra-unit-repair.trx.gz",
+        "passed_cases": 1,
+        "trx_sha256": "32f8148afe66106d4b7a38f7c988780758b4e0a0cbf9faa9761b06fa2ac0d3a4"
+      },
+      {
+        "file": "weightedextra-unit.trx.gz",
+        "passed_cases": 104,
+        "trx_sha256": "0cb20b8d0460a3ad798f94da0b942d5d3cff0c5ccd10d42bfc3ff8ff84cb62ac"
+      },
+      {
+        "file": "weightedextra-fixture.trx.gz",
+        "passed_cases": 39,
+        "trx_sha256": "a7ca64ce76a8f233af157e6cc3f76d0738cd24467120c44a58be895372fdffea"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingWeightedExtraBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun.",
+  "provenance": "Original unit run preserved 104 passes and one failed new-test expectation: int.MaxValue overflows the existing checked warmup property. Only that test changed: zero startup now uses int.MaxValue/3 and explicitly verifies the existing overflow at int.MaxValue. The corrected test passed separately; production and fixture binaries are unchanged. Both original raw TRX files are retained. No saved passing tests repeated."
+}

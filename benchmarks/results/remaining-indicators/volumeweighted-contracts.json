@@ -1,0 +1,36 @@
+{
+  "batch": "generated-volume-weighted-averages-and-exact-bartlett-recurrence",
+  "types": [
+    "Vwma",
+    "VolumeWeightedMovingAverage",
+    "WindowedVolumeWeightedMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share exact full-window volume-weighted means for the two simple facades. Use exact rolling Bartlett numerator/denominator sums for the windowed shared route instead of per-bar tap scans; preserve the original core and streaming loops. Skip unused raw mean storage for default averaging. Frozen-tap tests cover odd/even/extreme periods, previews, reset and extreme signed values.",
+  "verification": {
+    "unit_passed": 111,
+    "fixture_passed": 12,
+    "discovery_passed": 61,
+    "gpu_passed": 100,
+    "contract_methods": 1396,
+    "hosted_methods": 1384,
+    "evidence": [
+      {
+        "file": "volumeweighted-unit.trx.gz",
+        "passed_cases": 111,
+        "trx_sha256": "0d50537e48bcd519524bd9bde4b80bd9c7ec0055f7ab4dd22081f1a4b1f4671d"
+      },
+      {
+        "file": "volumeweighted-fixture.trx.gz",
+        "passed_cases": 73,
+        "trx_sha256": "4567d34d147e5af3da1d96feb76f203b41e21a6521a7663d756343c90a2a2366"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVolumeWeightedBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

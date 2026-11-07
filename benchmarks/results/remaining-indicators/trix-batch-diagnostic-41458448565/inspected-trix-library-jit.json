@@ -1,0 +1,2160 @@
+{
+  "run": "41458448565",
+  "profile": "trix-library-jit",
+  "integrity_verified": true,
+  "diagnostic_only": true,
+  "rows": [
+    {
+      "round": 0,
+      "arm": "old",
+      "bars": 1000,
+      "method": "Ooples",
+      "mean_ns": 6261280,
+      "lower_ns": 6066164.535726624,
+      "upper_ns": 6456395.464273376,
+      "samples": 10,
+      "allocated_bytes": 197624
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "bars": 10000,
+      "method": "Ooples",
+      "mean_ns": 26006500,
+      "lower_ns": 20682192.84267851,
+      "upper_ns": 31330807.15732149,
+      "samples": 8,
+      "allocated_bytes": 1943312
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "bars": 1000,
+      "method": "Ooples",
+      "mean_ns": 2014690,
+      "lower_ns": 1940084.2220819392,
+      "upper_ns": 2089295.7779180608,
+      "samples": 10,
+      "allocated_bytes": 197640
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "bars": 10000,
+      "method": "Ooples",
+      "mean_ns": 11940988.888888888,
+      "lower_ns": 11548623.993621526,
+      "upper_ns": 12333353.78415625,
+      "samples": 9,
+      "allocated_bytes": 1943040
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "bars": 1000,
+      "method": "Ooples",
+      "mean_ns": 1961430,
+      "lower_ns": 1813720.104647469,
+      "upper_ns": 2109139.8953525308,
+      "samples": 10,
+      "allocated_bytes": 197640
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "bars": 10000,
+      "method": "Ooples",
+      "mean_ns": 11373111.111111112,
+      "lower_ns": 10922781.02106319,
+      "upper_ns": 11823441.201159034,
+      "samples": 9,
+      "allocated_bytes": 1943328
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "bars": 1000,
+      "method": "Ooples",
+      "mean_ns": 6195310,
+      "lower_ns": 5862975.033411192,
+      "upper_ns": 6527644.966588808,
+      "samples": 10,
+      "allocated_bytes": 197624
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "bars": 10000,
+      "method": "Ooples",
+      "mean_ns": 26565400,
+      "lower_ns": 24732448.48202356,
+      "upper_ns": 28398351.51797644,
+      "samples": 9,
+      "allocated_bytes": 1943344
+    }
+  ],
+  "code": [
+    {
+      "round": 0,
+      "method": "System.SpanHelpers:Fill[char](byref,nuint,char) (Instrumented Tier0)",
+      "bytes": 1000,
+      "sha256": "1192dc8d076ad75a0ccb5352bd4ca093881cf5b2287b4fb253ce2e3cd5f5e847"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.ValueTuple`4[System.__Canon,System.__Canon,bool,System.__Canon],System.__Canon]:Fill(System.ReadOnlySpan`1[System.ValueTuple`4[System.__Canon,System.__Canon,bool,System.__Canon]],System.Span`1[System.__Canon],System.Func`2[System.ValueTuple`4[System.__Canon,System.__Canon,bool,System.__Canon],System.__Canon]) (Instrumented Tier0)",
+      "bytes": 330,
+      "sha256": "ecb1ca03404edd4fce72a519f0b7f89b7305ea3205d4a22c77018590aaa64e98"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,System.__Canon]:Fill(System.Span`1[System.__Canon],int,System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 281,
+      "sha256": "60966682a6f110bfd956263731352731f6be8f9e6b9a49d3014439d81948a725"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 0,
+      "method": "System.Span`1[System.ValueTuple`4[double,double,double,double]]:Fill(System.ValueTuple`4[double,double,double,double]):this (Tier0)",
+      "bytes": 87,
+      "sha256": "907e1cf8b907779a4f9bf35bbd3b2c01d01ff5e3e9ab61f125624ad68db33f03"
+    },
+    {
+      "round": 0,
+      "method": "System.SpanHelpers:Fill[System.ValueTuple`4[double,double,double,double]](byref,nuint,System.ValueTuple`4[double,double,double,double]) (Instrumented Tier0)",
+      "bytes": 1136,
+      "sha256": "7c99c8ed50210b3028e5642f552227d4fbe185b4e73901999542e642bae6f2c5"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.ValueTuple`4[double,double,double,double],double]:Fill(System.ReadOnlySpan`1[System.ValueTuple`4[double,double,double,double]],System.Span`1[double],System.Func`2[System.ValueTuple`4[double,double,double,double],double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "2428e60130359c27f8301ab0b546d8a04cc03f36fa75260ef409a85a17dc103a"
+    },
+    {
+      "round": 0,
+      "method": "System.Array:Fill[double](double[],double) (Instrumented Tier0)",
+      "bytes": 141,
+      "sha256": "410eb78abe8d0f1723a89289c57fa63389601cc063fc5fa88c1d495653afd1f3"
+    },
+    {
+      "round": 0,
+      "method": "System.SpanHelpers:Fill[double](byref,nuint,double) (Instrumented Tier0)",
+      "bytes": 1079,
+      "sha256": "828d1072e304074c8b06720dc08683a988022e485979026c4134cfeb8f3305ba"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,System.DateTime]:Fill(System.Span`1[System.DateTime],int,System.Func`2[int,System.DateTime]) (Instrumented Tier0)",
+      "bytes": 257,
+      "sha256": "a0dc344709a78442df2f99cd7261222177cec7abbc01daf3b5835408e1c16449"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,OoplesFinance.StockIndicators.Indicators.Bar]:Fill(System.Span`1[OoplesFinance.StockIndicators.Indicators.Bar],int,System.Func`2[int,OoplesFinance.StockIndicators.Indicators.Bar]) (Instrumented Tier0)",
+      "bytes": 315,
+      "sha256": "6f93d4ff4ab29a51dab1fe415d6ed3ef2bc7f36b9025b54b901c942d7104bf54"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[OoplesFinance.StockIndicators.Indicators.Bar,OoplesFinance.StockIndicators.Indicators.Bar]:Fill(System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Span`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Func`2[OoplesFinance.StockIndicators.Indicators.Bar,OoplesFinance.StockIndicators.Indicators.Bar]) (Instrumented Tier0)",
+      "bytes": 363,
+      "sha256": "840e064ebc489ddd82e64a60cb9f0c8c7bd66bb77bda7033363d4566f7d58771"
+    },
+    {
+      "round": 0,
+      "method": "System.Span`1[System.ValueTuple`3[double,double,double]]:Fill(System.ValueTuple`3[double,double,double]):this (Tier0)",
+      "bytes": 92,
+      "sha256": "8f6d662afee6e2a81f41ecfb3b30ee345b1cadfa9b661946dca5505b96aa29fd"
+    },
+    {
+      "round": 0,
+      "method": "System.SpanHelpers:Fill[System.ValueTuple`3[double,double,double]](byref,nuint,System.ValueTuple`3[double,double,double]) (Instrumented Tier0)",
+      "bytes": 950,
+      "sha256": "d82f3edfd554778722e9f94ce105f9721cab80df345f637733414419ece0ec12"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable:Append[System.ValueTuple`3[double,double,double]](System.Collections.Generic.IEnumerable`1[System.ValueTuple`3[double,double,double]],System.ValueTuple`3[double,double,double]):System.Collections.Generic.IEnumerable`1[System.ValueTuple`3[double,double,double]] (Tier0)",
+      "bytes": 201,
+      "sha256": "9e7a199b7a7fc5fd0d64751f1b730302dda65a74cfc55355e0e26e6fe21c25c4"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+AppendPrepend1Iterator`1[System.ValueTuple`3[double,double,double]]:Append(System.ValueTuple`3[double,double,double]):System.Linq.Enumerable+AppendPrependIterator`1[System.ValueTuple`3[double,double,double]]:this (Tier0)",
+      "bytes": 439,
+      "sha256": "99d4e5008bcbdaf376cd6efbeb84e843d0c38ee138c43fedac00f6ce65ca581b"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+IListSkipTakeIterator`1[System.ValueTuple`3[double,double,double]]:Fill(System.Collections.Generic.IList`1[System.ValueTuple`3[double,double,double]],System.Span`1[System.ValueTuple`3[double,double,double]],int) (Instrumented Tier0)",
+      "bytes": 433,
+      "sha256": "f98e7ebd7593890d42c4cc94d647f48e8a167638105297c79ca15ca2f6d1057d"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,double]:Fill(System.ReadOnlySpan`1[double],System.Span`1[double],System.Func`2[double,double]) (Instrumented Tier0)",
+      "bytes": 271,
+      "sha256": "7d4ae117c0d26d666c53699d9ef7756f8a50125aff0f6bb7d5c0dfc341db2d20"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.ValueTuple`2[System.__Canon,int],System.__Canon]:Fill(System.ReadOnlySpan`1[System.ValueTuple`2[System.__Canon,int]],System.Span`1[System.__Canon],System.Func`2[System.ValueTuple`2[System.__Canon,int],System.__Canon]) (Instrumented Tier0)",
+      "bytes": 310,
+      "sha256": "34b89f94f226e01893e64825efc689c18700aff7db588578b49c09ea8cb602e2"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,double]:Fill(System.Span`1[double],int,System.Func`2[int,double]) (Instrumented Tier0)",
+      "bytes": 258,
+      "sha256": "ccbc6b445ebfced722f86b3460a6380d2e1fe092cb49b17268605574c424ec37"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,System.Numerics.BigInteger]:Fill(System.ReadOnlySpan`1[double],System.Span`1[System.Numerics.BigInteger],System.Func`2[double,System.Numerics.BigInteger]) (Instrumented Tier0)",
+      "bytes": 295,
+      "sha256": "317498dfb15081b1b10333553af15a5392bdc0795e8e4ebf8252d09bf78be839"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Tier0)",
+      "bytes": 998,
+      "sha256": "413ef53b77e74eb3b3f1f577331cd0c793067cf596c17c0386fee842d35215db"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],double]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[double],System.Func`2[System.Nullable`1[double],double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "020911c38fd073dc910ee44f607dd11f598e051e42d1f8f13d4b8edae12202a1"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],bool]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[bool],System.Func`2[System.Nullable`1[double],bool]) (Instrumented Tier0)",
+      "bytes": 287,
+      "sha256": "c76ab9d4612310aff38456e017b636dd7f76a85c8a0e22f5653db33166456a51"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+IListSkipTakeIterator`1[double]:Fill(System.Collections.Generic.IList`1[double],System.Span`1[double],int) (Instrumented Tier0)",
+      "bytes": 381,
+      "sha256": "4a63596da7296d903c05fae39eadefb8561ddbd6195784c7a9f8f8589adc627c"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Multiply(double,double):double (Tier0)",
+      "bytes": 241,
+      "sha256": "24bf0660edef46c1f9dd048f12bd383820a62f6a04f3849bab3276c54b3b36df"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:FromDouble(double):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Tier0)",
+      "bytes": 159,
+      "sha256": "82ebbb150f868f384e4a1f48cc10f8d43ad0180fb9fadc13d3d2186a35526b2c"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node:Append(byref,int,System.Threading.CancellationToken):this (Instrumented Tier0)",
+      "bytes": 95,
+      "sha256": "73a9b639e2f76bb06796326d0d9160747ba6a023bbe04a3bb8c88cd4ebfead77"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 4025,
+      "sha256": "cdd016f7e4b6ce817120abd63bf0281b40056abbc383a1d6bea1dfe9f04e9564"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:AddExact(OoplesFinance.StockIndicators.Helpers.JurikDyadic):this (Tier0)",
+      "bytes": 1406,
+      "sha256": "d85e53a3888095dcb5335aaa8c14f759455c963f09ee6f2a99be6b0031c2b77e"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 317,
+      "sha256": "1ca2a3ed6271a41294d7afde6cd2a6344b21e9069ef4fdae2d7897810d6efebb"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Tier0)",
+      "bytes": 400,
+      "sha256": "86163c9703412bbfe87cad01ebc7e3eb6c2b2a375d809bc9fef56cc21e4d7477"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Tier0)",
+      "bytes": 260,
+      "sha256": "04fe89aad2283785edfef459701f6d4f33dbef657a636909b62202c8798647b7"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Multiply(OoplesFinance.StockIndicators.Helpers.JurikDyadic):this (Tier0)",
+      "bytes": 1002,
+      "sha256": "ca7631d57ec649dec5e669644f7af87f3db25c451b2290541e53a32ecaff925f"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Promote():this (Tier0)",
+      "bytes": 334,
+      "sha256": "8c5e2790ce00b6c544ff6be46e2e682f4ca29949f4ad03f832577b1c45ff9561"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Normalize():this (Tier0)",
+      "bytes": 466,
+      "sha256": "9b49c0856e3cbb91a74e8d2978e3a847a17255d420e676e2ea03e98bfdb5b16d"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Bits(System.UInt128):int (Tier0)",
+      "bytes": 160,
+      "sha256": "45c9be42c3bc3ac70d388d8db4eed1f63c1160ff1b397c8a945a9def768fbb2e"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Instrumented Tier0)",
+      "bytes": 2818,
+      "sha256": "93c837cb52fb2fddfab2b4d1c2c3d97d71a3a97dad1ca0daa6c16b0738fffb95"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:CompactDivRem(System.UInt128,System.UInt128):System.ValueTuple`2[System.UInt128,System.UInt128] (Tier0)",
+      "bytes": 474,
+      "sha256": "24bf2a1a6236c8e1308df89fc4f0e88243288d4874a3930c11bca3e97ddf8a6d"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Mean(int):double:this (Tier0)",
+      "bytes": 389,
+      "sha256": "646645266c057ce2c829d0eca071999395ddd84a5a71b381ce76020b686173cd"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],double]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[double],System.Func`2[System.Nullable`1[double],double]) (Tier1-OSR)",
+      "bytes": 339,
+      "sha256": "7f9d253c061ba764bd137c0fa153f13fc1e25953ef7659f88cd4edb8a8b44133"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],bool]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[bool],System.Func`2[System.Nullable`1[double],bool]) (Tier1-OSR)",
+      "bytes": 287,
+      "sha256": "8ed1f526041eddd6abc94c6a549c3e39811ac736f8ab6dd2dfb157c09c203e0a"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[BenchmarkDotNet.Reports.Measurement,double]:Fill(System.ReadOnlySpan`1[BenchmarkDotNet.Reports.Measurement],System.Span`1[double],System.Func`2[BenchmarkDotNet.Reports.Measurement,double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "49009d79929ed6ba12a7853bca6d922e2c5cd4e7e628f49cba8a820a75174e04"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ListSelectIterator`2[BenchmarkDotNet.Reports.Measurement,double]:Fill(System.ReadOnlySpan`1[BenchmarkDotNet.Reports.Measurement],System.Span`1[double],System.Func`2[BenchmarkDotNet.Reports.Measurement,double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "8e73d5db6965a9bf6795d887c40709cc2baa1e029bd1c4779c405d5aa388f1b9"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+OrderedIterator`1[double]:Fill(double[],System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 233,
+      "sha256": "2144d921fd3d928690a678c5a1f38d5cbbc27264b945ccab55f284fd5bc5203a"
+    },
+    {
+      "round": 0,
+      "method": "System.Numerics.BigInteger:Multiply(System.ReadOnlySpan`1[uint],int,System.ReadOnlySpan`1[uint],int):System.Numerics.BigInteger (Instrumented Tier1)",
+      "bytes": 1538,
+      "sha256": "229535aa2c962292ef2817ce34677b16b028063b1f00cd9079afa315ff586273"
+    },
+    {
+      "round": 0,
+      "method": "System.Numerics.BigIntegerCalculator:Multiply(System.ReadOnlySpan`1[uint],uint,System.Span`1[uint]) (Instrumented Tier1)",
+      "bytes": 204,
+      "sha256": "0fd25d7757764e5e5e9e07c57f4c218d1e4239448aae237b2eab6ef67f9150db"
+    },
+    {
+      "round": 0,
+      "method": "System.Numerics.BigIntegerCalculator:Multiply(System.ReadOnlySpan`1[uint],System.ReadOnlySpan`1[uint],System.Span`1[uint]) (Instrumented Tier1)",
+      "bytes": 882,
+      "sha256": "54a1e7c00c579df97fbd280512729ca1e546df8d90b0c7df249fb8b88d2fc6b2"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:FromDouble(double):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 189,
+      "sha256": "fd2e206bb3083d483847dfda71badf007c98be1e11fd8aefb520358e22afb66a"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,double]:Fill(System.Span`1[double],int,System.Func`2[int,double]) (Tier1-OSR)",
+      "bytes": 236,
+      "sha256": "5a0a0733aaea665733006578b32e71e7257f6f3c03ad4e07cd001ef66f60f33c"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,System.DateTime]:Fill(System.Span`1[System.DateTime],int,System.Func`2[int,System.DateTime]) (Tier1-OSR)",
+      "bytes": 618,
+      "sha256": "ea8d8944e6752b9e2aef9d72767fda9301207a49c655093708c6a212e4ac24b3"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,double]:Fill(System.ReadOnlySpan`1[double],System.Span`1[double],System.Func`2[double,double]) (Tier1-OSR)",
+      "bytes": 288,
+      "sha256": "99ff7936bc38a641c949b41af08421f9eb44ff7ef8c23270f86842d4fe2fda75"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,OoplesFinance.StockIndicators.Indicators.Bar]:Fill(System.Span`1[OoplesFinance.StockIndicators.Indicators.Bar],int,System.Func`2[int,OoplesFinance.StockIndicators.Indicators.Bar]) (Tier1-OSR)",
+      "bytes": 656,
+      "sha256": "a15e903e00055ce92b180476f061beba26241fa402f08becb8fbf081139b9bc0"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,System.Numerics.BigInteger]:Fill(System.ReadOnlySpan`1[double],System.Span`1[System.Numerics.BigInteger],System.Func`2[double,System.Numerics.BigInteger]) (Tier1-OSR)",
+      "bytes": 189,
+      "sha256": "b2ce1c6144344092f3d14ebb440340a8a0900cdf46a595b1b47a9835c26cadf1"
+    },
+    {
+      "round": 0,
+      "method": "System.Text.StringBuilder:Append(System.String):System.Text.StringBuilder:this (Instrumented Tier1)",
+      "bytes": 153,
+      "sha256": "020063eceaa6f75978c158195b5f372d1a479a3703fcf83333a7027e55d74623"
+    },
+    {
+      "round": 0,
+      "method": "System.Text.StringBuilder:Append(byref,int):this (Instrumented Tier1)",
+      "bytes": 229,
+      "sha256": "f0261badbb6997270ba9937d8f4f94431711ec35b14d6f7692350195b99579af"
+    },
+    {
+      "round": 0,
+      "method": "System.Text.StringBuilder:Append(char):System.Text.StringBuilder:this (Tier1)",
+      "bytes": 62,
+      "sha256": "2421c1e8895dddb57ce9c891f9d3fbbe2386147fbc6cef05d5ce9f76f6faae50"
+    },
+    {
+      "round": 0,
+      "method": "System.Number+DiyFp:Normalize():System.Number+DiyFp:this (Instrumented Tier1)",
+      "bytes": 32,
+      "sha256": "44307d1d9359911466de35d9dd28aa8cb95f08f15117ff2ca54e0492c399dfb9"
+    },
+    {
+      "round": 0,
+      "method": "System.Number+DiyFp:Multiply(byref):System.Number+DiyFp:this (Instrumented Tier1)",
+      "bytes": 114,
+      "sha256": "2e58bd7f143bb61636b9f58e981810f79e2347c1eb1ab1c97b332a5ae871747e"
+    },
+    {
+      "round": 0,
+      "method": "System.SpanHelpers:Fill[char](byref,nuint,char) (Instrumented Tier0)",
+      "bytes": 1000,
+      "sha256": "1192dc8d076ad75a0ccb5352bd4ca093881cf5b2287b4fb253ce2e3cd5f5e847"
+    },
+    {
+      "round": 0,
+      "method": "System.Numerics.BigInteger:Multiply(System.ReadOnlySpan`1[uint],int,System.ReadOnlySpan`1[uint],int):System.Numerics.BigInteger (Tier1)",
+      "bytes": 1435,
+      "sha256": "d50b1aca116b0b32a211c7fcc2ba27870e0d0c6943ddea5b7c8e01401dd0d955"
+    },
+    {
+      "round": 0,
+      "method": "System.Numerics.BigIntegerCalculator:Multiply(System.ReadOnlySpan`1[uint],uint,System.Span`1[uint]) (Tier1)",
+      "bytes": 147,
+      "sha256": "0f293d7b8457519f4d17f8481f2efe30002669898a9ff11c24ebf15d18c8df36"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Instrumented Tier0)",
+      "bytes": 1160,
+      "sha256": "73c37e19636072bd0c0997e238d208a0955d14308f4a6692b98c172d8d3b0889"
+    },
+    {
+      "round": 0,
+      "method": "System.Numerics.BigIntegerCalculator:Multiply(System.ReadOnlySpan`1[uint],System.ReadOnlySpan`1[uint],System.Span`1[uint]) (Tier1)",
+      "bytes": 711,
+      "sha256": "d2f2f91a5b4d35276d811915fd97d257e85910ab889779f07e467148c992dda0"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Multiply(double,double):double (Instrumented Tier0)",
+      "bytes": 241,
+      "sha256": "4f23648eb70c7a67eb1d4fb6170c93099888f9f89e3f45c7b5158761bca62844"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Tier1)",
+      "bytes": 2350,
+      "sha256": "5518551f7f1f425dc9a657d0124d8de1bee71a2650e7f01ff6f622082b80426d"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Multiply(double,double):double (Tier1)",
+      "bytes": 3037,
+      "sha256": "b9a97e9b42e347deb28df950fce716b240fa441988342e91ac329d5339b5fab2"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:FromDouble(double):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Tier1)",
+      "bytes": 45,
+      "sha256": "aa89f2de20f29f5a1c1cf213ede5b0654c37ee24c68ff41246514d72a65eeb99"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Promote():this (Instrumented Tier0)",
+      "bytes": 399,
+      "sha256": "3163d8c71589ee2dc8876e84feb9d05f7a09d496647fdd4fe385ed88c99f6c99"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Bits(System.UInt128):int (Instrumented Tier0)",
+      "bytes": 190,
+      "sha256": "c0e3f092a4b65db5bdacf6cd5a4891aadb2a206cb112a742bbab7be3ad8bb823"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Normalize():this (Instrumented Tier0)",
+      "bytes": 515,
+      "sha256": "5bd0be4609109d14043c8481d81c24428a96e7500d05c8172bf8a15c5ee721fd"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:AddExact(OoplesFinance.StockIndicators.Helpers.JurikDyadic):this (Instrumented Tier0)",
+      "bytes": 1673,
+      "sha256": "d8773280b5095b98aa8419d2c0a36aa58e5b3416f04d4b921a48a2940b965c72"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node:Append(byref,int,System.Threading.CancellationToken):this (Instrumented Tier0)",
+      "bytes": 15872,
+      "sha256": "f18b8899aa402f7374745e37cbd268e25770b818f5bf565ac1ea5a88d8b7aec3"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 4009,
+      "sha256": "6001575b75511ae5260aa7123b75df0dfb29109cc9e7b373ab3cd0e6042e81a0"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 317,
+      "sha256": "1ca2a3ed6271a41294d7afde6cd2a6344b21e9069ef4fdae2d7897810d6efebb"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Instrumented Tier0)",
+      "bytes": 589,
+      "sha256": "91bbf72930bb58aef55a395153ba3c50726b5627a899c9044b2fc948ffdaed85"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Instrumented Tier0)",
+      "bytes": 2818,
+      "sha256": "64088f9e3797a960b1c0e59e3602e3ae10425bf673347b738a4374a97da43fde"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:CompactDivRem(System.UInt128,System.UInt128):System.ValueTuple`2[System.UInt128,System.UInt128] (Instrumented Tier0)",
+      "bytes": 536,
+      "sha256": "a8ef775539a2149576528ee4ebddaba82bfa739c9e6808c7c88a240199e062ee"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Instrumented Tier0)",
+      "bytes": 290,
+      "sha256": "14d82128a57a56e9e4c85392fe9e990cada62bddbaa4752cd76bb7012cb10de8"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Multiply(OoplesFinance.StockIndicators.Helpers.JurikDyadic):this (Instrumented Tier0)",
+      "bytes": 1129,
+      "sha256": "e72f847dbe7cf6fb08262e576b0f95eba0a2f7be3d70e10b29cba50b37a5c17f"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Mean(int):double:this (Instrumented Tier0)",
+      "bytes": 569,
+      "sha256": "2041b6db017154d9a9987ec2e21e815f2d1810ff9929d5c47fae4b20e79e0c92"
+    },
+    {
+      "round": 0,
+      "method": "System.Text.StringBuilder:Append(System.String):System.Text.StringBuilder:this (Tier1)",
+      "bytes": 125,
+      "sha256": "52cbe78497c7f0ed16b2152d05a79a432f8f83634c74ee6ab367bada2a8c3c8e"
+    },
+    {
+      "round": 0,
+      "method": "System.Number+DiyFp:Multiply(byref):System.Number+DiyFp:this (Tier1)",
+      "bytes": 114,
+      "sha256": "023d9c402bb11b5bd1f1a392e1106a31685a1e0aa6bf884e6424c6ef20faab4f"
+    },
+    {
+      "round": 0,
+      "method": "System.SpanHelpers:Fill[char](byref,nuint,char) (Tier1)",
+      "bytes": 232,
+      "sha256": "28e36ea90aac9e0733e556e4a4d32d5e2ecd4035a7b364ff7683d218eeed884a"
+    },
+    {
+      "round": 0,
+      "method": "System.Number+BigInteger:Multiply(byref,uint,byref) (Instrumented Tier1)",
+      "bytes": 334,
+      "sha256": "5fd44f3026a77afa3aaa697aabed5ced8d9cb85e7562a2bc79e4e17a562348b6"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],double]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[double],System.Func`2[System.Nullable`1[double],double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "c8c7fcd5071b04da2eb7a76373fd24d373efc0871e99b0f83c35ecbe30520d6f"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],bool]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[bool],System.Func`2[System.Nullable`1[double],bool]) (Instrumented Tier0)",
+      "bytes": 287,
+      "sha256": "c76ab9d4612310aff38456e017b636dd7f76a85c8a0e22f5653db33166456a51"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Promote():this (Tier1)",
+      "bytes": 143,
+      "sha256": "60b0478bc29ba33084ec0e8e1fb1bcd55e8e0f6b5e742a471c59b8991aa77256"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Bits(System.UInt128):int (Tier1)",
+      "bytes": 66,
+      "sha256": "aa9d8cc2122584267129ab696c1f5eadb4a6f556afd3b07a8d9ea352a7e3cff1"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Normalize():this (Tier1)",
+      "bytes": 328,
+      "sha256": "5059829f614992ab17092673d8ed999635d6114f1cf5791a71a0cb9e0d21af33"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],bool]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[bool],System.Func`2[System.Nullable`1[double],bool]) (Tier1-OSR)",
+      "bytes": 287,
+      "sha256": "e70ff61f02af66891649198fb712be40a1e7a8e0bb667b10fbc98bbadfea0e00"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node:Append(byref,int,System.Threading.CancellationToken):this (Tier1)",
+      "bytes": 7825,
+      "sha256": "a77610fa2bde41532a6335f3cc961f596c65e52ce085295129df77a65003bacb"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Tier1)",
+      "bytes": 9963,
+      "sha256": "3d3ac9ee4800e55aa946f21db5a20019813ebc292d1b7885f8ed73fcb38ee3dc"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.__Canon,bool]:Fill(System.ReadOnlySpan`1[System.__Canon],System.Span`1[bool],System.Func`2[System.__Canon,bool]) (Instrumented Tier0)",
+      "bytes": 282,
+      "sha256": "495ee6afc9410ceffb99fafae741f09eb7a1414d1d4a42ae8950cd01e9ed8fac"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Tier1)",
+      "bytes": 3403,
+      "sha256": "3362d3c35e0f7daf32ed90dad093d6edd6d83e6a7b734f96932dbd7c4c470d85"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Tier1)",
+      "bytes": 3251,
+      "sha256": "7c684b47a4134cc402d7d4dffc78540db0afbfa1da94b72e9e043a1aa43c0957"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Tier1)",
+      "bytes": 2631,
+      "sha256": "bde559604935d9c47616d37c35ce206588cf6ae461cc564233d915d4cbedb82a"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:CompactDivRem(System.UInt128,System.UInt128):System.ValueTuple`2[System.UInt128,System.UInt128] (Tier1)",
+      "bytes": 102,
+      "sha256": "c59f20c8595fa09b7372b326fed8b98e0798b6a4b974f04ecc7ce05e54b671bb"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Tier1)",
+      "bytes": 2036,
+      "sha256": "b834157941cf771dbf730c615d7cfafb3496255f04298b7674d76b1359f5a5cc"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Multiply(OoplesFinance.StockIndicators.Helpers.JurikDyadic):this (Tier1)",
+      "bytes": 1667,
+      "sha256": "1808f89ee4e558262baf0378284b09943f8f3a310734abae69c52bea327a437c"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Mean(int):double:this (Tier1)",
+      "bytes": 271,
+      "sha256": "7665aa067639bd27973fec249034e932c4babc9120fd68cd96119e79d8b21760"
+    },
+    {
+      "round": 0,
+      "method": "System.Number+BigInteger:Multiply(byref,uint,byref) (Tier1)",
+      "bytes": 186,
+      "sha256": "8eadc1cf948812bd809981c092194dc513462346bfcfa3812a576f193b8f32fc"
+    },
+    {
+      "round": 0,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.__Canon,System.__Canon]:Fill(System.ReadOnlySpan`1[System.__Canon],System.Span`1[System.__Canon],System.Func`2[System.__Canon,System.__Canon]) (Instrumented Tier1)",
+      "bytes": 153,
+      "sha256": "8be66ef7dc0c15310b0013e7707488efe2a571d3c92c68cffdabdb7f55c47835"
+    },
+    {
+      "round": 1,
+      "method": "System.SpanHelpers:Fill[char](byref,nuint,char) (Instrumented Tier0)",
+      "bytes": 1000,
+      "sha256": "1192dc8d076ad75a0ccb5352bd4ca093881cf5b2287b4fb253ce2e3cd5f5e847"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.ValueTuple`4[System.__Canon,System.__Canon,bool,System.__Canon],System.__Canon]:Fill(System.ReadOnlySpan`1[System.ValueTuple`4[System.__Canon,System.__Canon,bool,System.__Canon]],System.Span`1[System.__Canon],System.Func`2[System.ValueTuple`4[System.__Canon,System.__Canon,bool,System.__Canon],System.__Canon]) (Instrumented Tier0)",
+      "bytes": 330,
+      "sha256": "ecb1ca03404edd4fce72a519f0b7f89b7305ea3205d4a22c77018590aaa64e98"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,System.__Canon]:Fill(System.Span`1[System.__Canon],int,System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 281,
+      "sha256": "60966682a6f110bfd956263731352731f6be8f9e6b9a49d3014439d81948a725"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 1,
+      "method": "System.Span`1[System.ValueTuple`4[double,double,double,double]]:Fill(System.ValueTuple`4[double,double,double,double]):this (Tier0)",
+      "bytes": 87,
+      "sha256": "907e1cf8b907779a4f9bf35bbd3b2c01d01ff5e3e9ab61f125624ad68db33f03"
+    },
+    {
+      "round": 1,
+      "method": "System.SpanHelpers:Fill[System.ValueTuple`4[double,double,double,double]](byref,nuint,System.ValueTuple`4[double,double,double,double]) (Instrumented Tier0)",
+      "bytes": 1136,
+      "sha256": "7c99c8ed50210b3028e5642f552227d4fbe185b4e73901999542e642bae6f2c5"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.ValueTuple`4[double,double,double,double],double]:Fill(System.ReadOnlySpan`1[System.ValueTuple`4[double,double,double,double]],System.Span`1[double],System.Func`2[System.ValueTuple`4[double,double,double,double],double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "2428e60130359c27f8301ab0b546d8a04cc03f36fa75260ef409a85a17dc103a"
+    },
+    {
+      "round": 1,
+      "method": "System.Array:Fill[double](double[],double) (Instrumented Tier0)",
+      "bytes": 141,
+      "sha256": "410eb78abe8d0f1723a89289c57fa63389601cc063fc5fa88c1d495653afd1f3"
+    },
+    {
+      "round": 1,
+      "method": "System.SpanHelpers:Fill[double](byref,nuint,double) (Instrumented Tier0)",
+      "bytes": 1079,
+      "sha256": "828d1072e304074c8b06720dc08683a988022e485979026c4134cfeb8f3305ba"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,System.DateTime]:Fill(System.Span`1[System.DateTime],int,System.Func`2[int,System.DateTime]) (Instrumented Tier0)",
+      "bytes": 257,
+      "sha256": "a0dc344709a78442df2f99cd7261222177cec7abbc01daf3b5835408e1c16449"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,OoplesFinance.StockIndicators.Indicators.Bar]:Fill(System.Span`1[OoplesFinance.StockIndicators.Indicators.Bar],int,System.Func`2[int,OoplesFinance.StockIndicators.Indicators.Bar]) (Instrumented Tier0)",
+      "bytes": 315,
+      "sha256": "6f93d4ff4ab29a51dab1fe415d6ed3ef2bc7f36b9025b54b901c942d7104bf54"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[OoplesFinance.StockIndicators.Indicators.Bar,OoplesFinance.StockIndicators.Indicators.Bar]:Fill(System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Span`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Func`2[OoplesFinance.StockIndicators.Indicators.Bar,OoplesFinance.StockIndicators.Indicators.Bar]) (Instrumented Tier0)",
+      "bytes": 363,
+      "sha256": "840e064ebc489ddd82e64a60cb9f0c8c7bd66bb77bda7033363d4566f7d58771"
+    },
+    {
+      "round": 1,
+      "method": "System.Span`1[System.ValueTuple`3[double,double,double]]:Fill(System.ValueTuple`3[double,double,double]):this (Tier0)",
+      "bytes": 92,
+      "sha256": "8f6d662afee6e2a81f41ecfb3b30ee345b1cadfa9b661946dca5505b96aa29fd"
+    },
+    {
+      "round": 1,
+      "method": "System.SpanHelpers:Fill[System.ValueTuple`3[double,double,double]](byref,nuint,System.ValueTuple`3[double,double,double]) (Instrumented Tier0)",
+      "bytes": 950,
+      "sha256": "d82f3edfd554778722e9f94ce105f9721cab80df345f637733414419ece0ec12"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable:Append[System.ValueTuple`3[double,double,double]](System.Collections.Generic.IEnumerable`1[System.ValueTuple`3[double,double,double]],System.ValueTuple`3[double,double,double]):System.Collections.Generic.IEnumerable`1[System.ValueTuple`3[double,double,double]] (Tier0)",
+      "bytes": 201,
+      "sha256": "9e7a199b7a7fc5fd0d64751f1b730302dda65a74cfc55355e0e26e6fe21c25c4"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+AppendPrepend1Iterator`1[System.ValueTuple`3[double,double,double]]:Append(System.ValueTuple`3[double,double,double]):System.Linq.Enumerable+AppendPrependIterator`1[System.ValueTuple`3[double,double,double]]:this (Tier0)",
+      "bytes": 439,
+      "sha256": "99d4e5008bcbdaf376cd6efbeb84e843d0c38ee138c43fedac00f6ce65ca581b"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+IListSkipTakeIterator`1[System.ValueTuple`3[double,double,double]]:Fill(System.Collections.Generic.IList`1[System.ValueTuple`3[double,double,double]],System.Span`1[System.ValueTuple`3[double,double,double]],int) (Instrumented Tier0)",
+      "bytes": 433,
+      "sha256": "f98e7ebd7593890d42c4cc94d647f48e8a167638105297c79ca15ca2f6d1057d"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,double]:Fill(System.ReadOnlySpan`1[double],System.Span`1[double],System.Func`2[double,double]) (Instrumented Tier0)",
+      "bytes": 271,
+      "sha256": "7d4ae117c0d26d666c53699d9ef7756f8a50125aff0f6bb7d5c0dfc341db2d20"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.ValueTuple`2[System.__Canon,int],System.__Canon]:Fill(System.ReadOnlySpan`1[System.ValueTuple`2[System.__Canon,int]],System.Span`1[System.__Canon],System.Func`2[System.ValueTuple`2[System.__Canon,int],System.__Canon]) (Instrumented Tier0)",
+      "bytes": 310,
+      "sha256": "34b89f94f226e01893e64825efc689c18700aff7db588578b49c09ea8cb602e2"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 1,
+      "method": "System.Text.StringBuilder:Append(char):System.Text.StringBuilder:this (Instrumented Tier1)",
+      "bytes": 95,
+      "sha256": "7c3d82041e074ea5a2b61bf959cefe7e1fe7892ac0dc73c5c573274f5d40aa99"
+    },
+    {
+      "round": 1,
+      "method": "System.Text.StringBuilder:Append(System.String):System.Text.StringBuilder:this (Instrumented Tier1)",
+      "bytes": 153,
+      "sha256": "020063eceaa6f75978c158195b5f372d1a479a3703fcf83333a7027e55d74623"
+    },
+    {
+      "round": 1,
+      "method": "System.Text.StringBuilder:Append(byref,int):this (Instrumented Tier1)",
+      "bytes": 229,
+      "sha256": "f0261badbb6997270ba9937d8f4f94431711ec35b14d6f7692350195b99579af"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,double]:Fill(System.Span`1[double],int,System.Func`2[int,double]) (Instrumented Tier0)",
+      "bytes": 258,
+      "sha256": "ccbc6b445ebfced722f86b3460a6380d2e1fe092cb49b17268605574c424ec37"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,System.Numerics.BigInteger]:Fill(System.ReadOnlySpan`1[double],System.Span`1[System.Numerics.BigInteger],System.Func`2[double,System.Numerics.BigInteger]) (Instrumented Tier0)",
+      "bytes": 295,
+      "sha256": "317498dfb15081b1b10333553af15a5392bdc0795e8e4ebf8252d09bf78be839"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Tier0)",
+      "bytes": 998,
+      "sha256": "413ef53b77e74eb3b3f1f577331cd0c793067cf596c17c0386fee842d35215db"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],double]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[double],System.Func`2[System.Nullable`1[double],double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "020911c38fd073dc910ee44f607dd11f598e051e42d1f8f13d4b8edae12202a1"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],bool]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[bool],System.Func`2[System.Nullable`1[double],bool]) (Instrumented Tier0)",
+      "bytes": 287,
+      "sha256": "c76ab9d4612310aff38456e017b636dd7f76a85c8a0e22f5653db33166456a51"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+IListSkipTakeIterator`1[double]:Fill(System.Collections.Generic.IList`1[double],System.Span`1[double],int) (Instrumented Tier0)",
+      "bytes": 381,
+      "sha256": "4a63596da7296d903c05fae39eadefb8561ddbd6195784c7a9f8f8589adc627c"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Multiply(double,double):double (Tier0)",
+      "bytes": 241,
+      "sha256": "24bf0660edef46c1f9dd048f12bd383820a62f6a04f3849bab3276c54b3b36df"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:FromDouble(double):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Tier0)",
+      "bytes": 159,
+      "sha256": "82ebbb150f868f384e4a1f48cc10f8d43ad0180fb9fadc13d3d2186a35526b2c"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node:Append(byref,int,System.Threading.CancellationToken):this (Instrumented Tier0)",
+      "bytes": 15918,
+      "sha256": "0166bd67520f13bbc35a750fd1b8b2e7031e2da699de793189be0d0010db3eda"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (FullOpts)",
+      "bytes": 8177,
+      "sha256": "1a47f3f115edd817d65a8fcbdc76f0b7b53973c71b20ef90956e6063b5d014de"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:AddExact(OoplesFinance.StockIndicators.Helpers.JurikDyadic):this (FullOpts)",
+      "bytes": 1854,
+      "sha256": "84a32027e56569a37b9806dc2912bead51a7f76e6b9d8795ab0922eb55d636eb"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 317,
+      "sha256": "1ca2a3ed6271a41294d7afde6cd2a6344b21e9069ef4fdae2d7897810d6efebb"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (FullOpts)",
+      "bytes": 288,
+      "sha256": "337e942502d7d8b0eab1a4d73fe607984a7b2f3b3c24d4b0d4a44a7bd7aed7aa"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Promote():this (FullOpts)",
+      "bytes": 370,
+      "sha256": "a0d2434910e0c954858ebfc887fffcf92d1059f50471006fe20967ebd116d18b"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (FullOpts)",
+      "bytes": 2429,
+      "sha256": "7cf4ec78fb80a76739f9758a2a0c7d5383816c0d7772c478d966b79da4b54927"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Mean(int):double:this (FullOpts)",
+      "bytes": 274,
+      "sha256": "53329f323c8423a0cb794e26193486edb66395affd494ab2b4c0a2c79c7b2a3a"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Multiply(OoplesFinance.StockIndicators.Helpers.JurikDyadic):this (FullOpts)",
+      "bytes": 1214,
+      "sha256": "003f820767af2ca89f1f89f61275528157bc078fc482d6887f38434ad54c2779"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],double]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[double],System.Func`2[System.Nullable`1[double],double]) (Tier1-OSR)",
+      "bytes": 339,
+      "sha256": "7f9d253c061ba764bd137c0fa153f13fc1e25953ef7659f88cd4edb8a8b44133"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],bool]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[bool],System.Func`2[System.Nullable`1[double],bool]) (Tier1-OSR)",
+      "bytes": 287,
+      "sha256": "8ed1f526041eddd6abc94c6a549c3e39811ac736f8ab6dd2dfb157c09c203e0a"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[BenchmarkDotNet.Reports.Measurement,double]:Fill(System.ReadOnlySpan`1[BenchmarkDotNet.Reports.Measurement],System.Span`1[double],System.Func`2[BenchmarkDotNet.Reports.Measurement,double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "49009d79929ed6ba12a7853bca6d922e2c5cd4e7e628f49cba8a820a75174e04"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ListSelectIterator`2[BenchmarkDotNet.Reports.Measurement,double]:Fill(System.ReadOnlySpan`1[BenchmarkDotNet.Reports.Measurement],System.Span`1[double],System.Func`2[BenchmarkDotNet.Reports.Measurement,double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "8e73d5db6965a9bf6795d887c40709cc2baa1e029bd1c4779c405d5aa388f1b9"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+OrderedIterator`1[double]:Fill(double[],System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 233,
+      "sha256": "2144d921fd3d928690a678c5a1f38d5cbbc27264b945ccab55f284fd5bc5203a"
+    },
+    {
+      "round": 1,
+      "method": "System.Text.StringBuilder:Append(char):System.Text.StringBuilder:this (Tier1)",
+      "bytes": 62,
+      "sha256": "3d5df552015a69e0a6d07608c10f3aa748920683d7a0ca75d40f054d59cb6d79"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,double]:Fill(System.Span`1[double],int,System.Func`2[int,double]) (Tier1-OSR)",
+      "bytes": 236,
+      "sha256": "5a0a0733aaea665733006578b32e71e7257f6f3c03ad4e07cd001ef66f60f33c"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,System.DateTime]:Fill(System.Span`1[System.DateTime],int,System.Func`2[int,System.DateTime]) (Tier1-OSR)",
+      "bytes": 618,
+      "sha256": "ea8d8944e6752b9e2aef9d72767fda9301207a49c655093708c6a212e4ac24b3"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,double]:Fill(System.ReadOnlySpan`1[double],System.Span`1[double],System.Func`2[double,double]) (Tier1-OSR)",
+      "bytes": 288,
+      "sha256": "99ff7936bc38a641c949b41af08421f9eb44ff7ef8c23270f86842d4fe2fda75"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,OoplesFinance.StockIndicators.Indicators.Bar]:Fill(System.Span`1[OoplesFinance.StockIndicators.Indicators.Bar],int,System.Func`2[int,OoplesFinance.StockIndicators.Indicators.Bar]) (Tier1-OSR)",
+      "bytes": 656,
+      "sha256": "a15e903e00055ce92b180476f061beba26241fa402f08becb8fbf081139b9bc0"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,System.Numerics.BigInteger]:Fill(System.ReadOnlySpan`1[double],System.Span`1[System.Numerics.BigInteger],System.Func`2[double,System.Numerics.BigInteger]) (Tier1-OSR)",
+      "bytes": 189,
+      "sha256": "b2ce1c6144344092f3d14ebb440340a8a0900cdf46a595b1b47a9835c26cadf1"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.__Canon,System.__Canon]:Fill(System.ReadOnlySpan`1[System.__Canon],System.Span`1[System.__Canon],System.Func`2[System.__Canon,System.__Canon]) (Instrumented Tier1)",
+      "bytes": 153,
+      "sha256": "8be66ef7dc0c15310b0013e7707488efe2a571d3c92c68cffdabdb7f55c47835"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.ValueTuple`4[System.__Canon,System.__Canon,bool,System.__Canon],System.__Canon]:Fill(System.ReadOnlySpan`1[System.ValueTuple`4[System.__Canon,System.__Canon,bool,System.__Canon]],System.Span`1[System.__Canon],System.Func`2[System.ValueTuple`4[System.__Canon,System.__Canon,bool,System.__Canon],System.__Canon]) (Instrumented Tier0)",
+      "bytes": 330,
+      "sha256": "ecb1ca03404edd4fce72a519f0b7f89b7305ea3205d4a22c77018590aaa64e98"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+IListSkipTakeIterator`1[System.__Canon]:Fill(System.Collections.Generic.IList`1[System.__Canon],System.Span`1[System.__Canon],int) (Instrumented Tier1)",
+      "bytes": 527,
+      "sha256": "07a814bc6bbb3c8dd9b877d5308384eefcffe9fd94246d530e424fa1b6e141d6"
+    },
+    {
+      "round": 1,
+      "method": "System.Numerics.BigInteger:Multiply(System.ReadOnlySpan`1[uint],int,System.ReadOnlySpan`1[uint],int):System.Numerics.BigInteger (Instrumented Tier1)",
+      "bytes": 1586,
+      "sha256": "0ede563a4a881fcf034943250c4719242dce61e1a10deaceb229225d1b485ece"
+    },
+    {
+      "round": 1,
+      "method": "System.Numerics.BigIntegerCalculator:Multiply(System.ReadOnlySpan`1[uint],uint,System.Span`1[uint]) (Instrumented Tier1)",
+      "bytes": 204,
+      "sha256": "0fd25d7757764e5e5e9e07c57f4c218d1e4239448aae237b2eab6ef67f9150db"
+    },
+    {
+      "round": 1,
+      "method": "System.Numerics.BigIntegerCalculator:Multiply(System.ReadOnlySpan`1[uint],System.ReadOnlySpan`1[uint],System.Span`1[uint]) (Instrumented Tier1)",
+      "bytes": 900,
+      "sha256": "c51027213a4868c53e88bbb48552d421145fbf37d1d64529571fbe742a10e1dc"
+    },
+    {
+      "round": 1,
+      "method": "System.Text.StringBuilder:Append(System.String):System.Text.StringBuilder:this (Tier1)",
+      "bytes": 123,
+      "sha256": "67718373b309c09eeba436518b2ce5f1228f9fbf0d8347ec292bba2d923cbd6e"
+    },
+    {
+      "round": 1,
+      "method": "System.Number+DiyFp:Normalize():System.Number+DiyFp:this (Instrumented Tier1)",
+      "bytes": 32,
+      "sha256": "44307d1d9359911466de35d9dd28aa8cb95f08f15117ff2ca54e0492c399dfb9"
+    },
+    {
+      "round": 1,
+      "method": "System.Number+DiyFp:Multiply(byref):System.Number+DiyFp:this (Instrumented Tier1)",
+      "bytes": 114,
+      "sha256": "2e58bd7f143bb61636b9f58e981810f79e2347c1eb1ab1c97b332a5ae871747e"
+    },
+    {
+      "round": 1,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.__Canon,bool]:Fill(System.ReadOnlySpan`1[System.__Canon],System.Span`1[bool],System.Func`2[System.__Canon,bool]) (Instrumented Tier0)",
+      "bytes": 282,
+      "sha256": "495ee6afc9410ceffb99fafae741f09eb7a1414d1d4a42ae8950cd01e9ed8fac"
+    },
+    {
+      "round": 1,
+      "method": "System.SpanHelpers:Fill[char](byref,nuint,char) (Instrumented Tier0)",
+      "bytes": 1000,
+      "sha256": "1192dc8d076ad75a0ccb5352bd4ca093881cf5b2287b4fb253ce2e3cd5f5e847"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:FromDouble(double):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 189,
+      "sha256": "fd2e206bb3083d483847dfda71badf007c98be1e11fd8aefb520358e22afb66a"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Instrumented Tier0)",
+      "bytes": 1160,
+      "sha256": "73c37e19636072bd0c0997e238d208a0955d14308f4a6692b98c172d8d3b0889"
+    },
+    {
+      "round": 2,
+      "method": "System.SpanHelpers:Fill[char](byref,nuint,char) (Instrumented Tier0)",
+      "bytes": 1000,
+      "sha256": "1192dc8d076ad75a0ccb5352bd4ca093881cf5b2287b4fb253ce2e3cd5f5e847"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.ValueTuple`4[System.__Canon,System.__Canon,bool,System.__Canon],System.__Canon]:Fill(System.ReadOnlySpan`1[System.ValueTuple`4[System.__Canon,System.__Canon,bool,System.__Canon]],System.Span`1[System.__Canon],System.Func`2[System.ValueTuple`4[System.__Canon,System.__Canon,bool,System.__Canon],System.__Canon]) (Instrumented Tier0)",
+      "bytes": 330,
+      "sha256": "ecb1ca03404edd4fce72a519f0b7f89b7305ea3205d4a22c77018590aaa64e98"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,System.__Canon]:Fill(System.Span`1[System.__Canon],int,System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 281,
+      "sha256": "60966682a6f110bfd956263731352731f6be8f9e6b9a49d3014439d81948a725"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 2,
+      "method": "System.Span`1[System.ValueTuple`4[double,double,double,double]]:Fill(System.ValueTuple`4[double,double,double,double]):this (Tier0)",
+      "bytes": 87,
+      "sha256": "907e1cf8b907779a4f9bf35bbd3b2c01d01ff5e3e9ab61f125624ad68db33f03"
+    },
+    {
+      "round": 2,
+      "method": "System.SpanHelpers:Fill[System.ValueTuple`4[double,double,double,double]](byref,nuint,System.ValueTuple`4[double,double,double,double]) (Instrumented Tier0)",
+      "bytes": 1136,
+      "sha256": "7c99c8ed50210b3028e5642f552227d4fbe185b4e73901999542e642bae6f2c5"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.ValueTuple`4[double,double,double,double],double]:Fill(System.ReadOnlySpan`1[System.ValueTuple`4[double,double,double,double]],System.Span`1[double],System.Func`2[System.ValueTuple`4[double,double,double,double],double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "2428e60130359c27f8301ab0b546d8a04cc03f36fa75260ef409a85a17dc103a"
+    },
+    {
+      "round": 2,
+      "method": "System.Array:Fill[double](double[],double) (Instrumented Tier0)",
+      "bytes": 141,
+      "sha256": "410eb78abe8d0f1723a89289c57fa63389601cc063fc5fa88c1d495653afd1f3"
+    },
+    {
+      "round": 2,
+      "method": "System.SpanHelpers:Fill[double](byref,nuint,double) (Instrumented Tier0)",
+      "bytes": 1079,
+      "sha256": "828d1072e304074c8b06720dc08683a988022e485979026c4134cfeb8f3305ba"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,System.DateTime]:Fill(System.Span`1[System.DateTime],int,System.Func`2[int,System.DateTime]) (Instrumented Tier0)",
+      "bytes": 257,
+      "sha256": "a0dc344709a78442df2f99cd7261222177cec7abbc01daf3b5835408e1c16449"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,OoplesFinance.StockIndicators.Indicators.Bar]:Fill(System.Span`1[OoplesFinance.StockIndicators.Indicators.Bar],int,System.Func`2[int,OoplesFinance.StockIndicators.Indicators.Bar]) (Instrumented Tier0)",
+      "bytes": 315,
+      "sha256": "6f93d4ff4ab29a51dab1fe415d6ed3ef2bc7f36b9025b54b901c942d7104bf54"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[OoplesFinance.StockIndicators.Indicators.Bar,OoplesFinance.StockIndicators.Indicators.Bar]:Fill(System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Span`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Func`2[OoplesFinance.StockIndicators.Indicators.Bar,OoplesFinance.StockIndicators.Indicators.Bar]) (Instrumented Tier0)",
+      "bytes": 363,
+      "sha256": "840e064ebc489ddd82e64a60cb9f0c8c7bd66bb77bda7033363d4566f7d58771"
+    },
+    {
+      "round": 2,
+      "method": "System.Span`1[System.ValueTuple`3[double,double,double]]:Fill(System.ValueTuple`3[double,double,double]):this (Tier0)",
+      "bytes": 92,
+      "sha256": "8f6d662afee6e2a81f41ecfb3b30ee345b1cadfa9b661946dca5505b96aa29fd"
+    },
+    {
+      "round": 2,
+      "method": "System.SpanHelpers:Fill[System.ValueTuple`3[double,double,double]](byref,nuint,System.ValueTuple`3[double,double,double]) (Instrumented Tier0)",
+      "bytes": 950,
+      "sha256": "d82f3edfd554778722e9f94ce105f9721cab80df345f637733414419ece0ec12"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable:Append[System.ValueTuple`3[double,double,double]](System.Collections.Generic.IEnumerable`1[System.ValueTuple`3[double,double,double]],System.ValueTuple`3[double,double,double]):System.Collections.Generic.IEnumerable`1[System.ValueTuple`3[double,double,double]] (Tier0)",
+      "bytes": 201,
+      "sha256": "9e7a199b7a7fc5fd0d64751f1b730302dda65a74cfc55355e0e26e6fe21c25c4"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+AppendPrepend1Iterator`1[System.ValueTuple`3[double,double,double]]:Append(System.ValueTuple`3[double,double,double]):System.Linq.Enumerable+AppendPrependIterator`1[System.ValueTuple`3[double,double,double]]:this (Tier0)",
+      "bytes": 439,
+      "sha256": "99d4e5008bcbdaf376cd6efbeb84e843d0c38ee138c43fedac00f6ce65ca581b"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+IListSkipTakeIterator`1[System.ValueTuple`3[double,double,double]]:Fill(System.Collections.Generic.IList`1[System.ValueTuple`3[double,double,double]],System.Span`1[System.ValueTuple`3[double,double,double]],int) (Instrumented Tier0)",
+      "bytes": 433,
+      "sha256": "f98e7ebd7593890d42c4cc94d647f48e8a167638105297c79ca15ca2f6d1057d"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,double]:Fill(System.ReadOnlySpan`1[double],System.Span`1[double],System.Func`2[double,double]) (Instrumented Tier0)",
+      "bytes": 271,
+      "sha256": "7d4ae117c0d26d666c53699d9ef7756f8a50125aff0f6bb7d5c0dfc341db2d20"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.ValueTuple`2[System.__Canon,int],System.__Canon]:Fill(System.ReadOnlySpan`1[System.ValueTuple`2[System.__Canon,int]],System.Span`1[System.__Canon],System.Func`2[System.ValueTuple`2[System.__Canon,int],System.__Canon]) (Instrumented Tier0)",
+      "bytes": 310,
+      "sha256": "34b89f94f226e01893e64825efc689c18700aff7db588578b49c09ea8cb602e2"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,double]:Fill(System.Span`1[double],int,System.Func`2[int,double]) (Instrumented Tier0)",
+      "bytes": 258,
+      "sha256": "ccbc6b445ebfced722f86b3460a6380d2e1fe092cb49b17268605574c424ec37"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,System.Numerics.BigInteger]:Fill(System.ReadOnlySpan`1[double],System.Span`1[System.Numerics.BigInteger],System.Func`2[double,System.Numerics.BigInteger]) (Instrumented Tier0)",
+      "bytes": 295,
+      "sha256": "317498dfb15081b1b10333553af15a5392bdc0795e8e4ebf8252d09bf78be839"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Tier0)",
+      "bytes": 998,
+      "sha256": "413ef53b77e74eb3b3f1f577331cd0c793067cf596c17c0386fee842d35215db"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],double]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[double],System.Func`2[System.Nullable`1[double],double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "020911c38fd073dc910ee44f607dd11f598e051e42d1f8f13d4b8edae12202a1"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],bool]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[bool],System.Func`2[System.Nullable`1[double],bool]) (Instrumented Tier0)",
+      "bytes": 287,
+      "sha256": "c76ab9d4612310aff38456e017b636dd7f76a85c8a0e22f5653db33166456a51"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+IListSkipTakeIterator`1[double]:Fill(System.Collections.Generic.IList`1[double],System.Span`1[double],int) (Instrumented Tier0)",
+      "bytes": 381,
+      "sha256": "4a63596da7296d903c05fae39eadefb8561ddbd6195784c7a9f8f8589adc627c"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Multiply(double,double):double (Tier0)",
+      "bytes": 241,
+      "sha256": "24bf0660edef46c1f9dd048f12bd383820a62f6a04f3849bab3276c54b3b36df"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:FromDouble(double):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Tier0)",
+      "bytes": 159,
+      "sha256": "82ebbb150f868f384e4a1f48cc10f8d43ad0180fb9fadc13d3d2186a35526b2c"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node:Append(byref,int,System.Threading.CancellationToken):this (Instrumented Tier0)",
+      "bytes": 15918,
+      "sha256": "0166bd67520f13bbc35a750fd1b8b2e7031e2da699de793189be0d0010db3eda"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (FullOpts)",
+      "bytes": 8177,
+      "sha256": "1a47f3f115edd817d65a8fcbdc76f0b7b53973c71b20ef90956e6063b5d014de"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:AddExact(OoplesFinance.StockIndicators.Helpers.JurikDyadic):this (FullOpts)",
+      "bytes": 1854,
+      "sha256": "84a32027e56569a37b9806dc2912bead51a7f76e6b9d8795ab0922eb55d636eb"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 317,
+      "sha256": "1ca2a3ed6271a41294d7afde6cd2a6344b21e9069ef4fdae2d7897810d6efebb"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (FullOpts)",
+      "bytes": 288,
+      "sha256": "337e942502d7d8b0eab1a4d73fe607984a7b2f3b3c24d4b0d4a44a7bd7aed7aa"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Promote():this (FullOpts)",
+      "bytes": 370,
+      "sha256": "a0d2434910e0c954858ebfc887fffcf92d1059f50471006fe20967ebd116d18b"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (FullOpts)",
+      "bytes": 2429,
+      "sha256": "7cf4ec78fb80a76739f9758a2a0c7d5383816c0d7772c478d966b79da4b54927"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Mean(int):double:this (FullOpts)",
+      "bytes": 274,
+      "sha256": "53329f323c8423a0cb794e26193486edb66395affd494ab2b4c0a2c79c7b2a3a"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Multiply(OoplesFinance.StockIndicators.Helpers.JurikDyadic):this (FullOpts)",
+      "bytes": 1214,
+      "sha256": "003f820767af2ca89f1f89f61275528157bc078fc482d6887f38434ad54c2779"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],double]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[double],System.Func`2[System.Nullable`1[double],double]) (Tier1-OSR)",
+      "bytes": 339,
+      "sha256": "7f9d253c061ba764bd137c0fa153f13fc1e25953ef7659f88cd4edb8a8b44133"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],bool]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[bool],System.Func`2[System.Nullable`1[double],bool]) (Tier1-OSR)",
+      "bytes": 287,
+      "sha256": "8ed1f526041eddd6abc94c6a549c3e39811ac736f8ab6dd2dfb157c09c203e0a"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[BenchmarkDotNet.Reports.Measurement,double]:Fill(System.ReadOnlySpan`1[BenchmarkDotNet.Reports.Measurement],System.Span`1[double],System.Func`2[BenchmarkDotNet.Reports.Measurement,double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "49009d79929ed6ba12a7853bca6d922e2c5cd4e7e628f49cba8a820a75174e04"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ListSelectIterator`2[BenchmarkDotNet.Reports.Measurement,double]:Fill(System.ReadOnlySpan`1[BenchmarkDotNet.Reports.Measurement],System.Span`1[double],System.Func`2[BenchmarkDotNet.Reports.Measurement,double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "8e73d5db6965a9bf6795d887c40709cc2baa1e029bd1c4779c405d5aa388f1b9"
+    },
+    {
+      "round": 2,
+      "method": "System.Text.StringBuilder:Append(char):System.Text.StringBuilder:this (Instrumented Tier1)",
+      "bytes": 95,
+      "sha256": "7c3d82041e074ea5a2b61bf959cefe7e1fe7892ac0dc73c5c573274f5d40aa99"
+    },
+    {
+      "round": 2,
+      "method": "System.Numerics.BigInteger:Multiply(System.ReadOnlySpan`1[uint],int,System.ReadOnlySpan`1[uint],int):System.Numerics.BigInteger (Instrumented Tier1)",
+      "bytes": 1538,
+      "sha256": "229535aa2c962292ef2817ce34677b16b028063b1f00cd9079afa315ff586273"
+    },
+    {
+      "round": 2,
+      "method": "System.Numerics.BigIntegerCalculator:Multiply(System.ReadOnlySpan`1[uint],uint,System.Span`1[uint]) (Instrumented Tier1)",
+      "bytes": 204,
+      "sha256": "0fd25d7757764e5e5e9e07c57f4c218d1e4239448aae237b2eab6ef67f9150db"
+    },
+    {
+      "round": 2,
+      "method": "System.Numerics.BigIntegerCalculator:Multiply(System.ReadOnlySpan`1[uint],System.ReadOnlySpan`1[uint],System.Span`1[uint]) (Instrumented Tier1)",
+      "bytes": 882,
+      "sha256": "fec462019a60214911a31d61238cc0cfd6384aad19189577f8080baba068c6cf"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,System.DateTime]:Fill(System.Span`1[System.DateTime],int,System.Func`2[int,System.DateTime]) (Tier1-OSR)",
+      "bytes": 618,
+      "sha256": "ea8d8944e6752b9e2aef9d72767fda9301207a49c655093708c6a212e4ac24b3"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,double]:Fill(System.ReadOnlySpan`1[double],System.Span`1[double],System.Func`2[double,double]) (Tier1-OSR)",
+      "bytes": 288,
+      "sha256": "99ff7936bc38a641c949b41af08421f9eb44ff7ef8c23270f86842d4fe2fda75"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,OoplesFinance.StockIndicators.Indicators.Bar]:Fill(System.Span`1[OoplesFinance.StockIndicators.Indicators.Bar],int,System.Func`2[int,OoplesFinance.StockIndicators.Indicators.Bar]) (Tier1-OSR)",
+      "bytes": 656,
+      "sha256": "a15e903e00055ce92b180476f061beba26241fa402f08becb8fbf081139b9bc0"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,System.Numerics.BigInteger]:Fill(System.ReadOnlySpan`1[double],System.Span`1[System.Numerics.BigInteger],System.Func`2[double,System.Numerics.BigInteger]) (Tier1-OSR)",
+      "bytes": 189,
+      "sha256": "b2ce1c6144344092f3d14ebb440340a8a0900cdf46a595b1b47a9835c26cadf1"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node:Append(byref,int,System.Threading.CancellationToken):this (Instrumented Tier0)",
+      "bytes": 15872,
+      "sha256": "cd05677a826882cb03d82b8416723f430f294ff167de946d2e9211e6cd7134a3"
+    },
+    {
+      "round": 2,
+      "method": "System.Text.StringBuilder:Append(System.String):System.Text.StringBuilder:this (Instrumented Tier1)",
+      "bytes": 153,
+      "sha256": "020063eceaa6f75978c158195b5f372d1a479a3703fcf83333a7027e55d74623"
+    },
+    {
+      "round": 2,
+      "method": "System.Text.StringBuilder:Append(byref,int):this (Instrumented Tier1)",
+      "bytes": 229,
+      "sha256": "f0261badbb6997270ba9937d8f4f94431711ec35b14d6f7692350195b99579af"
+    },
+    {
+      "round": 2,
+      "method": "System.Number+DiyFp:Normalize():System.Number+DiyFp:this (Instrumented Tier1)",
+      "bytes": 32,
+      "sha256": "44307d1d9359911466de35d9dd28aa8cb95f08f15117ff2ca54e0492c399dfb9"
+    },
+    {
+      "round": 2,
+      "method": "System.Number+DiyFp:Multiply(byref):System.Number+DiyFp:this (Instrumented Tier1)",
+      "bytes": 114,
+      "sha256": "2e58bd7f143bb61636b9f58e981810f79e2347c1eb1ab1c97b332a5ae871747e"
+    },
+    {
+      "round": 2,
+      "method": "System.SpanHelpers:Fill[char](byref,nuint,char) (Instrumented Tier0)",
+      "bytes": 1000,
+      "sha256": "1192dc8d076ad75a0ccb5352bd4ca093881cf5b2287b4fb253ce2e3cd5f5e847"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:FromDouble(double):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 189,
+      "sha256": "fd2e206bb3083d483847dfda71badf007c98be1e11fd8aefb520358e22afb66a"
+    },
+    {
+      "round": 2,
+      "method": "System.Text.StringBuilder:Append(char):System.Text.StringBuilder:this (Tier1)",
+      "bytes": 62,
+      "sha256": "4ee1cce8d2022c6f45fd88bcd41d5a697c94cc0d0cc93904d6280e1c9e42bc7a"
+    },
+    {
+      "round": 2,
+      "method": "System.Numerics.BigInteger:Multiply(System.ReadOnlySpan`1[uint],int,System.ReadOnlySpan`1[uint],int):System.Numerics.BigInteger (Tier1)",
+      "bytes": 1413,
+      "sha256": "b31170355c7a4d414bb92f0037033c570dfd2f81f02f2710cb97ad25a11ad55a"
+    },
+    {
+      "round": 2,
+      "method": "System.Numerics.BigIntegerCalculator:Multiply(System.ReadOnlySpan`1[uint],uint,System.Span`1[uint]) (Tier1)",
+      "bytes": 147,
+      "sha256": "a6551987e92dd83b8d1d97fe38c247556738e0ae0cd5c256be14efcd850452a9"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Instrumented Tier0)",
+      "bytes": 1160,
+      "sha256": "73c37e19636072bd0c0997e238d208a0955d14308f4a6692b98c172d8d3b0889"
+    },
+    {
+      "round": 2,
+      "method": "System.Numerics.BigIntegerCalculator:Multiply(System.ReadOnlySpan`1[uint],System.ReadOnlySpan`1[uint],System.Span`1[uint]) (Tier1)",
+      "bytes": 708,
+      "sha256": "a3d892c7f126462886911f73b8d3915d3c5c5b8f5f639e6ab1d283502b034380"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Multiply(double,double):double (Instrumented Tier0)",
+      "bytes": 241,
+      "sha256": "4f23648eb70c7a67eb1d4fb6170c93099888f9f89e3f45c7b5158761bca62844"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Tier1)",
+      "bytes": 2345,
+      "sha256": "99be73a433144b91d522263a3e487aaab87fec00f6ebb2946766479069caee50"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node:Append(byref,int,System.Threading.CancellationToken):this (Tier1)",
+      "bytes": 7825,
+      "sha256": "fe5176b3573d1e9a726f28e07629cd0b1a1a5c18ca46424171b218a3cabbdd75"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.__Canon,bool]:Fill(System.ReadOnlySpan`1[System.__Canon],System.Span`1[bool],System.Func`2[System.__Canon,bool]) (Instrumented Tier0)",
+      "bytes": 282,
+      "sha256": "495ee6afc9410ceffb99fafae741f09eb7a1414d1d4a42ae8950cd01e9ed8fac"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:FromDouble(double):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Tier1)",
+      "bytes": 45,
+      "sha256": "0f930edbf8803784f4607602c02d551d8741e9c7fb535c2b5e2e73af556eb34d"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 317,
+      "sha256": "1ca2a3ed6271a41294d7afde6cd2a6344b21e9069ef4fdae2d7897810d6efebb"
+    },
+    {
+      "round": 2,
+      "method": "System.Text.StringBuilder:Append(System.String):System.Text.StringBuilder:this (Tier1)",
+      "bytes": 123,
+      "sha256": "50a66108ca51a497ff5c325f62f5d102ca062b31f084f19ea7085e056c8998cc"
+    },
+    {
+      "round": 2,
+      "method": "System.Linq.Enumerable+OrderedIterator`1[double]:Fill(double[],System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 233,
+      "sha256": "2144d921fd3d928690a678c5a1f38d5cbbc27264b945ccab55f284fd5bc5203a"
+    },
+    {
+      "round": 3,
+      "method": "System.SpanHelpers:Fill[char](byref,nuint,char) (Instrumented Tier0)",
+      "bytes": 1000,
+      "sha256": "1192dc8d076ad75a0ccb5352bd4ca093881cf5b2287b4fb253ce2e3cd5f5e847"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.ValueTuple`4[System.__Canon,System.__Canon,bool,System.__Canon],System.__Canon]:Fill(System.ReadOnlySpan`1[System.ValueTuple`4[System.__Canon,System.__Canon,bool,System.__Canon]],System.Span`1[System.__Canon],System.Func`2[System.ValueTuple`4[System.__Canon,System.__Canon,bool,System.__Canon],System.__Canon]) (Instrumented Tier0)",
+      "bytes": 330,
+      "sha256": "ecb1ca03404edd4fce72a519f0b7f89b7305ea3205d4a22c77018590aaa64e98"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,System.__Canon]:Fill(System.Span`1[System.__Canon],int,System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 281,
+      "sha256": "60966682a6f110bfd956263731352731f6be8f9e6b9a49d3014439d81948a725"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 3,
+      "method": "System.Span`1[System.ValueTuple`4[double,double,double,double]]:Fill(System.ValueTuple`4[double,double,double,double]):this (Tier0)",
+      "bytes": 87,
+      "sha256": "907e1cf8b907779a4f9bf35bbd3b2c01d01ff5e3e9ab61f125624ad68db33f03"
+    },
+    {
+      "round": 3,
+      "method": "System.SpanHelpers:Fill[System.ValueTuple`4[double,double,double,double]](byref,nuint,System.ValueTuple`4[double,double,double,double]) (Instrumented Tier0)",
+      "bytes": 1136,
+      "sha256": "7c99c8ed50210b3028e5642f552227d4fbe185b4e73901999542e642bae6f2c5"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.ValueTuple`4[double,double,double,double],double]:Fill(System.ReadOnlySpan`1[System.ValueTuple`4[double,double,double,double]],System.Span`1[double],System.Func`2[System.ValueTuple`4[double,double,double,double],double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "2428e60130359c27f8301ab0b546d8a04cc03f36fa75260ef409a85a17dc103a"
+    },
+    {
+      "round": 3,
+      "method": "System.Array:Fill[double](double[],double) (Instrumented Tier0)",
+      "bytes": 141,
+      "sha256": "410eb78abe8d0f1723a89289c57fa63389601cc063fc5fa88c1d495653afd1f3"
+    },
+    {
+      "round": 3,
+      "method": "System.SpanHelpers:Fill[double](byref,nuint,double) (Instrumented Tier0)",
+      "bytes": 1079,
+      "sha256": "828d1072e304074c8b06720dc08683a988022e485979026c4134cfeb8f3305ba"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,System.DateTime]:Fill(System.Span`1[System.DateTime],int,System.Func`2[int,System.DateTime]) (Instrumented Tier0)",
+      "bytes": 257,
+      "sha256": "a0dc344709a78442df2f99cd7261222177cec7abbc01daf3b5835408e1c16449"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,OoplesFinance.StockIndicators.Indicators.Bar]:Fill(System.Span`1[OoplesFinance.StockIndicators.Indicators.Bar],int,System.Func`2[int,OoplesFinance.StockIndicators.Indicators.Bar]) (Instrumented Tier0)",
+      "bytes": 315,
+      "sha256": "6f93d4ff4ab29a51dab1fe415d6ed3ef2bc7f36b9025b54b901c942d7104bf54"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[OoplesFinance.StockIndicators.Indicators.Bar,OoplesFinance.StockIndicators.Indicators.Bar]:Fill(System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Span`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Func`2[OoplesFinance.StockIndicators.Indicators.Bar,OoplesFinance.StockIndicators.Indicators.Bar]) (Instrumented Tier0)",
+      "bytes": 363,
+      "sha256": "840e064ebc489ddd82e64a60cb9f0c8c7bd66bb77bda7033363d4566f7d58771"
+    },
+    {
+      "round": 3,
+      "method": "System.Span`1[System.ValueTuple`3[double,double,double]]:Fill(System.ValueTuple`3[double,double,double]):this (Tier0)",
+      "bytes": 92,
+      "sha256": "8f6d662afee6e2a81f41ecfb3b30ee345b1cadfa9b661946dca5505b96aa29fd"
+    },
+    {
+      "round": 3,
+      "method": "System.SpanHelpers:Fill[System.ValueTuple`3[double,double,double]](byref,nuint,System.ValueTuple`3[double,double,double]) (Instrumented Tier0)",
+      "bytes": 950,
+      "sha256": "d82f3edfd554778722e9f94ce105f9721cab80df345f637733414419ece0ec12"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable:Append[System.ValueTuple`3[double,double,double]](System.Collections.Generic.IEnumerable`1[System.ValueTuple`3[double,double,double]],System.ValueTuple`3[double,double,double]):System.Collections.Generic.IEnumerable`1[System.ValueTuple`3[double,double,double]] (Tier0)",
+      "bytes": 201,
+      "sha256": "9e7a199b7a7fc5fd0d64751f1b730302dda65a74cfc55355e0e26e6fe21c25c4"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+AppendPrepend1Iterator`1[System.ValueTuple`3[double,double,double]]:Append(System.ValueTuple`3[double,double,double]):System.Linq.Enumerable+AppendPrependIterator`1[System.ValueTuple`3[double,double,double]]:this (Tier0)",
+      "bytes": 439,
+      "sha256": "99d4e5008bcbdaf376cd6efbeb84e843d0c38ee138c43fedac00f6ce65ca581b"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+IListSkipTakeIterator`1[System.ValueTuple`3[double,double,double]]:Fill(System.Collections.Generic.IList`1[System.ValueTuple`3[double,double,double]],System.Span`1[System.ValueTuple`3[double,double,double]],int) (Instrumented Tier0)",
+      "bytes": 433,
+      "sha256": "f98e7ebd7593890d42c4cc94d647f48e8a167638105297c79ca15ca2f6d1057d"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,double]:Fill(System.ReadOnlySpan`1[double],System.Span`1[double],System.Func`2[double,double]) (Instrumented Tier0)",
+      "bytes": 271,
+      "sha256": "7d4ae117c0d26d666c53699d9ef7756f8a50125aff0f6bb7d5c0dfc341db2d20"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.ValueTuple`2[System.__Canon,int],System.__Canon]:Fill(System.ReadOnlySpan`1[System.ValueTuple`2[System.__Canon,int]],System.Span`1[System.__Canon],System.Func`2[System.ValueTuple`2[System.__Canon,int],System.__Canon]) (Instrumented Tier0)",
+      "bytes": 310,
+      "sha256": "34b89f94f226e01893e64825efc689c18700aff7db588578b49c09ea8cb602e2"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[int,System.__Canon]:Fill(System.ReadOnlySpan`1[int],System.Span`1[System.__Canon],System.Func`2[int,System.__Canon]) (Instrumented Tier0)",
+      "bytes": 291,
+      "sha256": "c00ed8de2b496460dfe0c3b5989d94546af879373b3c180f14fc5616809f310c"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,double]:Fill(System.Span`1[double],int,System.Func`2[int,double]) (Instrumented Tier0)",
+      "bytes": 258,
+      "sha256": "ccbc6b445ebfced722f86b3460a6380d2e1fe092cb49b17268605574c424ec37"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,System.Numerics.BigInteger]:Fill(System.ReadOnlySpan`1[double],System.Span`1[System.Numerics.BigInteger],System.Func`2[double,System.Numerics.BigInteger]) (Instrumented Tier0)",
+      "bytes": 295,
+      "sha256": "317498dfb15081b1b10333553af15a5392bdc0795e8e4ebf8252d09bf78be839"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Tier0)",
+      "bytes": 998,
+      "sha256": "413ef53b77e74eb3b3f1f577331cd0c793067cf596c17c0386fee842d35215db"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],double]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[double],System.Func`2[System.Nullable`1[double],double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "020911c38fd073dc910ee44f607dd11f598e051e42d1f8f13d4b8edae12202a1"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],bool]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[bool],System.Func`2[System.Nullable`1[double],bool]) (Instrumented Tier0)",
+      "bytes": 287,
+      "sha256": "c76ab9d4612310aff38456e017b636dd7f76a85c8a0e22f5653db33166456a51"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+IListSkipTakeIterator`1[double]:Fill(System.Collections.Generic.IList`1[double],System.Span`1[double],int) (Instrumented Tier0)",
+      "bytes": 381,
+      "sha256": "4a63596da7296d903c05fae39eadefb8561ddbd6195784c7a9f8f8589adc627c"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Multiply(double,double):double (Tier0)",
+      "bytes": 241,
+      "sha256": "24bf0660edef46c1f9dd048f12bd383820a62f6a04f3849bab3276c54b3b36df"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:FromDouble(double):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Tier0)",
+      "bytes": 159,
+      "sha256": "82ebbb150f868f384e4a1f48cc10f8d43ad0180fb9fadc13d3d2186a35526b2c"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node:Append(byref,int,System.Threading.CancellationToken):this (Instrumented Tier0)",
+      "bytes": 15918,
+      "sha256": "0166bd67520f13bbc35a750fd1b8b2e7031e2da699de793189be0d0010db3eda"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 4025,
+      "sha256": "cdd016f7e4b6ce817120abd63bf0281b40056abbc383a1d6bea1dfe9f04e9564"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:AddExact(OoplesFinance.StockIndicators.Helpers.JurikDyadic):this (Tier0)",
+      "bytes": 1406,
+      "sha256": "d85e53a3888095dcb5335aaa8c14f759455c963f09ee6f2a99be6b0031c2b77e"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 317,
+      "sha256": "1ca2a3ed6271a41294d7afde6cd2a6344b21e9069ef4fdae2d7897810d6efebb"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Tier0)",
+      "bytes": 400,
+      "sha256": "86163c9703412bbfe87cad01ebc7e3eb6c2b2a375d809bc9fef56cc21e4d7477"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Tier0)",
+      "bytes": 260,
+      "sha256": "04fe89aad2283785edfef459701f6d4f33dbef657a636909b62202c8798647b7"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Multiply(OoplesFinance.StockIndicators.Helpers.JurikDyadic):this (Tier0)",
+      "bytes": 1002,
+      "sha256": "ca7631d57ec649dec5e669644f7af87f3db25c451b2290541e53a32ecaff925f"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Promote():this (Tier0)",
+      "bytes": 334,
+      "sha256": "8c5e2790ce00b6c544ff6be46e2e682f4ca29949f4ad03f832577b1c45ff9561"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Normalize():this (Tier0)",
+      "bytes": 466,
+      "sha256": "9b49c0856e3cbb91a74e8d2978e3a847a17255d420e676e2ea03e98bfdb5b16d"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Bits(System.UInt128):int (Tier0)",
+      "bytes": 160,
+      "sha256": "45c9be42c3bc3ac70d388d8db4eed1f63c1160ff1b397c8a945a9def768fbb2e"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Instrumented Tier0)",
+      "bytes": 2818,
+      "sha256": "93c837cb52fb2fddfab2b4d1c2c3d97d71a3a97dad1ca0daa6c16b0738fffb95"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:CompactDivRem(System.UInt128,System.UInt128):System.ValueTuple`2[System.UInt128,System.UInt128] (Tier0)",
+      "bytes": 474,
+      "sha256": "24bf2a1a6236c8e1308df89fc4f0e88243288d4874a3930c11bca3e97ddf8a6d"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Mean(int):double:this (Tier0)",
+      "bytes": 389,
+      "sha256": "646645266c057ce2c829d0eca071999395ddd84a5a71b381ce76020b686173cd"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],double]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[double],System.Func`2[System.Nullable`1[double],double]) (Tier1-OSR)",
+      "bytes": 339,
+      "sha256": "7f9d253c061ba764bd137c0fa153f13fc1e25953ef7659f88cd4edb8a8b44133"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],bool]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[bool],System.Func`2[System.Nullable`1[double],bool]) (Tier1-OSR)",
+      "bytes": 287,
+      "sha256": "8ed1f526041eddd6abc94c6a549c3e39811ac736f8ab6dd2dfb157c09c203e0a"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[BenchmarkDotNet.Reports.Measurement,double]:Fill(System.ReadOnlySpan`1[BenchmarkDotNet.Reports.Measurement],System.Span`1[double],System.Func`2[BenchmarkDotNet.Reports.Measurement,double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "49009d79929ed6ba12a7853bca6d922e2c5cd4e7e628f49cba8a820a75174e04"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ListSelectIterator`2[BenchmarkDotNet.Reports.Measurement,double]:Fill(System.ReadOnlySpan`1[BenchmarkDotNet.Reports.Measurement],System.Span`1[double],System.Func`2[BenchmarkDotNet.Reports.Measurement,double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "8e73d5db6965a9bf6795d887c40709cc2baa1e029bd1c4779c405d5aa388f1b9"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+OrderedIterator`1[double]:Fill(double[],System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 233,
+      "sha256": "2144d921fd3d928690a678c5a1f38d5cbbc27264b945ccab55f284fd5bc5203a"
+    },
+    {
+      "round": 3,
+      "method": "System.Text.StringBuilder:Append(char):System.Text.StringBuilder:this (Instrumented Tier1)",
+      "bytes": 95,
+      "sha256": "7c3d82041e074ea5a2b61bf959cefe7e1fe7892ac0dc73c5c573274f5d40aa99"
+    },
+    {
+      "round": 3,
+      "method": "System.Numerics.BigInteger:Multiply(System.ReadOnlySpan`1[uint],int,System.ReadOnlySpan`1[uint],int):System.Numerics.BigInteger (Instrumented Tier1)",
+      "bytes": 1538,
+      "sha256": "229535aa2c962292ef2817ce34677b16b028063b1f00cd9079afa315ff586273"
+    },
+    {
+      "round": 3,
+      "method": "System.Numerics.BigIntegerCalculator:Multiply(System.ReadOnlySpan`1[uint],uint,System.Span`1[uint]) (Instrumented Tier1)",
+      "bytes": 204,
+      "sha256": "0fd25d7757764e5e5e9e07c57f4c218d1e4239448aae237b2eab6ef67f9150db"
+    },
+    {
+      "round": 3,
+      "method": "System.Numerics.BigIntegerCalculator:Multiply(System.ReadOnlySpan`1[uint],System.ReadOnlySpan`1[uint],System.Span`1[uint]) (Instrumented Tier1)",
+      "bytes": 236,
+      "sha256": "9272f909f5dd1a452ab4564d7129cc2ccdbbaeafb368c1821beb5e530522651b"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,System.DateTime]:Fill(System.Span`1[System.DateTime],int,System.Func`2[int,System.DateTime]) (Tier1-OSR)",
+      "bytes": 882,
+      "sha256": "902ff5cec74e5347a060f025db18d3938c8a7b619dc884294216e324d6eb86bf"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,double]:Fill(System.ReadOnlySpan`1[double],System.Span`1[double],System.Func`2[double,double]) (Tier1-OSR)",
+      "bytes": 288,
+      "sha256": "99ff7936bc38a641c949b41af08421f9eb44ff7ef8c23270f86842d4fe2fda75"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+RangeSelectIterator`2[int,OoplesFinance.StockIndicators.Indicators.Bar]:Fill(System.Span`1[OoplesFinance.StockIndicators.Indicators.Bar],int,System.Func`2[int,OoplesFinance.StockIndicators.Indicators.Bar]) (Tier1-OSR)",
+      "bytes": 656,
+      "sha256": "a15e903e00055ce92b180476f061beba26241fa402f08becb8fbf081139b9bc0"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[double,System.Numerics.BigInteger]:Fill(System.ReadOnlySpan`1[double],System.Span`1[System.Numerics.BigInteger],System.Func`2[double,System.Numerics.BigInteger]) (Tier1-OSR)",
+      "bytes": 189,
+      "sha256": "b2ce1c6144344092f3d14ebb440340a8a0900cdf46a595b1b47a9835c26cadf1"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:FromDouble(double):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 189,
+      "sha256": "fd2e206bb3083d483847dfda71badf007c98be1e11fd8aefb520358e22afb66a"
+    },
+    {
+      "round": 3,
+      "method": "System.Text.StringBuilder:Append(System.String):System.Text.StringBuilder:this (Instrumented Tier1)",
+      "bytes": 153,
+      "sha256": "020063eceaa6f75978c158195b5f372d1a479a3703fcf83333a7027e55d74623"
+    },
+    {
+      "round": 3,
+      "method": "System.Text.StringBuilder:Append(byref,int):this (Instrumented Tier1)",
+      "bytes": 229,
+      "sha256": "f0261badbb6997270ba9937d8f4f94431711ec35b14d6f7692350195b99579af"
+    },
+    {
+      "round": 3,
+      "method": "System.Number+DiyFp:Normalize():System.Number+DiyFp:this (Instrumented Tier1)",
+      "bytes": 32,
+      "sha256": "44307d1d9359911466de35d9dd28aa8cb95f08f15117ff2ca54e0492c399dfb9"
+    },
+    {
+      "round": 3,
+      "method": "System.Number+DiyFp:Multiply(byref):System.Number+DiyFp:this (Instrumented Tier1)",
+      "bytes": 114,
+      "sha256": "2e58bd7f143bb61636b9f58e981810f79e2347c1eb1ab1c97b332a5ae871747e"
+    },
+    {
+      "round": 3,
+      "method": "System.SpanHelpers:Fill[char](byref,nuint,char) (Instrumented Tier0)",
+      "bytes": 1000,
+      "sha256": "1192dc8d076ad75a0ccb5352bd4ca093881cf5b2287b4fb253ce2e3cd5f5e847"
+    },
+    {
+      "round": 3,
+      "method": "System.Text.StringBuilder:Append(char):System.Text.StringBuilder:this (Tier1)",
+      "bytes": 62,
+      "sha256": "4ee1cce8d2022c6f45fd88bcd41d5a697c94cc0d0cc93904d6280e1c9e42bc7a"
+    },
+    {
+      "round": 3,
+      "method": "System.Numerics.BigInteger:Multiply(System.ReadOnlySpan`1[uint],int,System.ReadOnlySpan`1[uint],int):System.Numerics.BigInteger (Tier1)",
+      "bytes": 1418,
+      "sha256": "03cdaa946bb2e1f64875321688e0eb3201528decd0e2dbe6964340784714a9f6"
+    },
+    {
+      "round": 3,
+      "method": "System.Numerics.BigIntegerCalculator:Multiply(System.ReadOnlySpan`1[uint],uint,System.Span`1[uint]) (Tier1)",
+      "bytes": 147,
+      "sha256": "d670fc9658b7fdf1bbf18f2e2706276a0884456106faa364e0d6710d66a3dcae"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Instrumented Tier0)",
+      "bytes": 1160,
+      "sha256": "73c37e19636072bd0c0997e238d208a0955d14308f4a6692b98c172d8d3b0889"
+    },
+    {
+      "round": 3,
+      "method": "System.Numerics.BigIntegerCalculator:Multiply(System.ReadOnlySpan`1[uint],System.ReadOnlySpan`1[uint],System.Span`1[uint]) (Tier1)",
+      "bytes": 708,
+      "sha256": "33b4c2e95b9bd09d52ad021915a9c73da14376fd091653f6017c84d5c1e41e57"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Multiply(double,double):double (Instrumented Tier0)",
+      "bytes": 241,
+      "sha256": "4f23648eb70c7a67eb1d4fb6170c93099888f9f89e3f45c7b5158761bca62844"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Tier1)",
+      "bytes": 2347,
+      "sha256": "4865914ab4de599f987368652008f007ecc81022d3e07e9d3d6d42e608608f96"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Multiply(double,double):double (Tier1)",
+      "bytes": 3037,
+      "sha256": "4bff57f973ee77c057be6c70ff58797959dd2183dbce1d90cfcc76dcaab78645"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:FromDouble(double):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Tier1)",
+      "bytes": 45,
+      "sha256": "81d0d8347885b704d25bdf21784c2326575ba700fbba8b264ed5164e90cd3bbd"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Promote():this (Instrumented Tier0)",
+      "bytes": 399,
+      "sha256": "941d18c85d63f4e1fa34fbce58e4a5c9dcc726fbc4c7170db0a5ec9037247d1e"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Bits(System.UInt128):int (Instrumented Tier0)",
+      "bytes": 190,
+      "sha256": "103a268ba0431eb0ea2de881f36f2d42e652ddce887cbdaa8ac53fa26315428d"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Normalize():this (Instrumented Tier0)",
+      "bytes": 515,
+      "sha256": "5bd0be4609109d14043c8481d81c24428a96e7500d05c8172bf8a15c5ee721fd"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:AddExact(OoplesFinance.StockIndicators.Helpers.JurikDyadic):this (Instrumented Tier0)",
+      "bytes": 1673,
+      "sha256": "d8773280b5095b98aa8419d2c0a36aa58e5b3416f04d4b921a48a2940b965c72"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node:Append(byref,int,System.Threading.CancellationToken):this (Instrumented Tier0)",
+      "bytes": 15872,
+      "sha256": "e51985cbeb52fcefe32b3d5eb38505282c86f28ae9391f9f62d1b110537bab12"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 4009,
+      "sha256": "81dac5744d37c4e1d7071b810c121c82206fbb2388a6899b9ac6479b24dfceda"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 317,
+      "sha256": "1ca2a3ed6271a41294d7afde6cd2a6344b21e9069ef4fdae2d7897810d6efebb"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Instrumented Tier0)",
+      "bytes": 589,
+      "sha256": "91bbf72930bb58aef55a395153ba3c50726b5627a899c9044b2fc948ffdaed85"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Instrumented Tier0)",
+      "bytes": 2818,
+      "sha256": "6847e8417c77ce2da8fe941fdfb3263ea8372f229c4330d9393b284ccfbf2cef"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:CompactDivRem(System.UInt128,System.UInt128):System.ValueTuple`2[System.UInt128,System.UInt128] (Instrumented Tier0)",
+      "bytes": 536,
+      "sha256": "a8ef775539a2149576528ee4ebddaba82bfa739c9e6808c7c88a240199e062ee"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Instrumented Tier0)",
+      "bytes": 290,
+      "sha256": "14d82128a57a56e9e4c85392fe9e990cada62bddbaa4752cd76bb7012cb10de8"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Multiply(OoplesFinance.StockIndicators.Helpers.JurikDyadic):this (Instrumented Tier0)",
+      "bytes": 1129,
+      "sha256": "e72f847dbe7cf6fb08262e576b0f95eba0a2f7be3d70e10b29cba50b37a5c17f"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Mean(int):double:this (Instrumented Tier0)",
+      "bytes": 569,
+      "sha256": "1efe43b2840aae8f5b4417fdf964283c37648a793c2cc8fac1cc9d15a2ca2f4a"
+    },
+    {
+      "round": 3,
+      "method": "System.Text.StringBuilder:Append(System.String):System.Text.StringBuilder:this (Tier1)",
+      "bytes": 125,
+      "sha256": "719dfdc3a774613bce1f861971313979079d2597a19b9d19524ec3aa1fc8d604"
+    },
+    {
+      "round": 3,
+      "method": "System.Number+DiyFp:Multiply(byref):System.Number+DiyFp:this (Tier1)",
+      "bytes": 114,
+      "sha256": "023d9c402bb11b5bd1f1a392e1106a31685a1e0aa6bf884e6424c6ef20faab4f"
+    },
+    {
+      "round": 3,
+      "method": "System.SpanHelpers:Fill[char](byref,nuint,char) (Tier1)",
+      "bytes": 232,
+      "sha256": "5c8e4492fe54b25eca2d3cb293b796fc6f7e05f5e9fc2a975a20c9e203e05a15"
+    },
+    {
+      "round": 3,
+      "method": "System.Number+BigInteger:Multiply(byref,uint,byref) (Instrumented Tier1)",
+      "bytes": 334,
+      "sha256": "5fd44f3026a77afa3aaa697aabed5ced8d9cb85e7562a2bc79e4e17a562348b6"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],double]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[double],System.Func`2[System.Nullable`1[double],double]) (Instrumented Tier0)",
+      "bytes": 293,
+      "sha256": "020911c38fd073dc910ee44f607dd11f598e051e42d1f8f13d4b8edae12202a1"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],bool]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[bool],System.Func`2[System.Nullable`1[double],bool]) (Instrumented Tier0)",
+      "bytes": 287,
+      "sha256": "c76ab9d4612310aff38456e017b636dd7f76a85c8a0e22f5653db33166456a51"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Promote():this (Tier1)",
+      "bytes": 143,
+      "sha256": "614c5488a79abc167c2d158bdcea209153dfeb3ee7ae2203440a0991109a4741"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Bits(System.UInt128):int (Tier1)",
+      "bytes": 66,
+      "sha256": "c0d3854fbaee2b3a85a6fb51a6ef1571396c4dca2cf814f2aa2baf2b9f2c4515"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Normalize():this (Tier1)",
+      "bytes": 339,
+      "sha256": "8b386570317d4f9bde26d0d47c4f5a55fd0012c1f051cfa1004b5b992afce3cc"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.Nullable`1[double],bool]:Fill(System.ReadOnlySpan`1[System.Nullable`1[double]],System.Span`1[bool],System.Func`2[System.Nullable`1[double],bool]) (Tier1-OSR)",
+      "bytes": 287,
+      "sha256": "8a19be6fe4ff8b61fa453dc1851300c362887c098b9eb9e480b4cc78398f623f"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node:Append(byref,int,System.Threading.CancellationToken):this (Tier1)",
+      "bytes": 7825,
+      "sha256": "f6e9aaa306472ad44cd91dcbd7187827611872cc96ec8c1b51217b2a9075d398"
+    },
+    {
+      "round": 3,
+      "method": "System.Linq.Enumerable+ArraySelectIterator`2[System.__Canon,bool]:Fill(System.ReadOnlySpan`1[System.__Canon],System.Span`1[bool],System.Func`2[System.__Canon,bool]) (Instrumented Tier0)",
+      "bytes": 282,
+      "sha256": "495ee6afc9410ceffb99fafae741f09eb7a1414d1d4a42ae8950cd01e9ed8fac"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Tier1)",
+      "bytes": 9954,
+      "sha256": "1e28e4585f03b6af4e47db7602fd74969c2463c9ce8b61f6aab3fa9ad709bae5"
+    }
+  ],
+  "logs": [
+    {
+      "round": 0,
+      "console_sha256": "b45deade8850c7016525110f2c2a4efce7ceb52d5658295937167817570173cb",
+      "bdn_sha256": "332436b4993c35b4abe41fe0a06c77340f50f6366e2e33c2ee26e6b9c1120664"
+    },
+    {
+      "round": 1,
+      "console_sha256": "d49ca2679924f664bbe02a4af47dd4197cd58805202ea3c34652490a13d0dcd3",
+      "bdn_sha256": "8f61ebfa53bed1af3498fd32476c8a15582958f0e689a0eecba8d7e4192a953d"
+    },
+    {
+      "round": 2,
+      "console_sha256": "7862ada88432d93381fb526141a7cf1a531bd21906a88477284a1acfce21ec89",
+      "bdn_sha256": "733c6f283e69d7e872ec3d2a92b674b0fd32ca543f86aea63e34b436a2dff581"
+    },
+    {
+      "round": 3,
+      "console_sha256": "6112a976d0bd01634bc0d0ecb17dda9f63dab3382e2189d8840eabcd9396baaa",
+      "bdn_sha256": "3b084e94ab57890e2e489ca74483008c6d4bd63126ca5dc00ca09c33fe65c0b2"
+    }
+  ]
+}

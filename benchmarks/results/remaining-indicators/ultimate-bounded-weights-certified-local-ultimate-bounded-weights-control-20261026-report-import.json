@@ -1,0 +1,60 @@
+{
+  "before_sha256": "ed905f068715ca79afacd8a8b092511e70c103bbac9c2ec9afd743e7dd47a3e9",
+  "candidate_sha256": "c58eeae5709b53af329e3738895fa910c5022d7a9b8f127a353819223280f85c",
+  "changed_baseline_rows": 4,
+  "unchanged_baseline_rows": 798,
+  "changed_builder_slots": 8,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 8,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 798,
+  "run_id": "local-ultimate-bounded-weights-control-20261026",
+  "imported_utc": "2026-10-26T08:02:23.459639+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "008f2abc105ae1771968e6e98437a5c34a1a3b67ffa87d98b3666969c1593a27",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-bounded-weights-certified-local-ultimate-bounded-weights-control-20261026-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "043dd2b80607266577140793ef4c2da91c82583193208b865bf33a0185f64496",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-bounded-weights-certified-local-ultimate-bounded-weights-control-20261026-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "7d7757b55587703df63fac85d0523bed39b6c414f9f0e6b7da888d068957f10c",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-bounded-weights-certified-local-ultimate-bounded-weights-control-20261026-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "c75bfbad41b9dd3747cd9e5da8c296e71ff644e83ffdde6cb7ab289bcfaf301b",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-bounded-weights-certified-local-ultimate-bounded-weights-control-20261026-measurement.json.gz"
+    },
+    "stage-ultimate-bounded-weights-report.py": {
+      "sha256": "3779f1ec558cdd33b53482ad3788aeb82fa85fce47a2c9440c80f3f910c3bf48",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-bounded-weights-certified-local-ultimate-bounded-weights-control-20261026-stage-ultimate-bounded-weights-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-bounded-weights-certified-local-ultimate-bounded-weights-control-20261026-verify-approved-certified-report.py.gz"
+    },
+    "import-ultimate-bounded-weights-report.py": {
+      "sha256": "e746f74b41f83d701155ad9107b570b3dd2ea0528a8553823021fc70a4ad6f91",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-bounded-weights-certified-local-ultimate-bounded-weights-control-20261026-import-ultimate-bounded-weights-report.py.gz"
+    },
+    "archive-ultimate-bounded-weights-control.py": {
+      "sha256": "c1a99f73df3503ca420a816eefc9bb7aaf9b6f708a0ccc317f7911368d126a00",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-bounded-weights-certified-local-ultimate-bounded-weights-control-20261026-archive-ultimate-bounded-weights-control.py.gz"
+    },
+    "prove-ultimate-bounded-weights-integration.py": {
+      "sha256": "b84fc8a60d27195d65f07dbb4861db10e170269057eb301bfdf919be04340e5a",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-bounded-weights-certified-local-ultimate-bounded-weights-control-20261026-prove-ultimate-bounded-weights-integration.py.gz"
+    },
+    "archive-ultimate-bounded-weights-report.py": {
+      "sha256": "2b7243bdf4dbf31a3f539a88f55332a1f034b4cbb8cdbbd226ef5729acbfc017",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-bounded-weights-certified-local-ultimate-bounded-weights-control-20261026-archive-ultimate-bounded-weights-report.py.gz"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "batch": "generated-extrapolated-ema",
+  "types": [
+    "Dema",
+    "Tema"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Compose the same rounded EMA stages and exact ExponentialExtrapolation helper in shared values execution; plain typed runs omit intermediate EMA arrays and the legacy runtime.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 38,
+    "fixture_passed": 8,
+    "gpu_passed": 100,
+    "contract_methods": 1332,
+    "hosted_methods": 1320,
+    "unit_trx_sha256": "119f288e70fc2cf4961c8ec744013f245fa6d7e317a4b002094832bf8e64c7ae",
+    "fixture_trx_sha256": "b9c4cfe1b7f40bada63c260eb6c7c88fde4ad0301919387fa085288dd1de6bc0"
+  },
+  "benchmark_fixture": {
+    "type": "RemainingExtrapolationBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 16,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency or allocation claim; no competitor benchmarks rerun."
+}

@@ -1,0 +1,89 @@
+{
+  "types": [
+    "PringSpecialK",
+    "PercentageTrend",
+    "PentupleExponentialMovingAverage",
+    "QuadrupleExponentialMovingAverage",
+    "PpoMa",
+    "QmaSmaDifference",
+    "QuadraticMovingAverage",
+    "ParabolicWma",
+    "QuadraticWma",
+    "ParametricCorrectiveLinearMovingAverage",
+    "ParametricKalmanFilter",
+    "PeakValleyEstimation",
+    "ReallySimpleIndicator",
+    "RexOscillator",
+    "RelativeDifferenceOfSquaresOscillator",
+    "RecursiveDifferenciator"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "base_head": "2d49dfbcd8563ca0125aca4702753613871c987d",
+  "combined_input_sha256": "cec27a3ba50b69e6361d737be3d21c2b0b8f8ddc91f6acab303b5d49179a5b60",
+  "manifest_sha256": "9dfb47a3e179ea88ad286092aa2945dafc022ab7a1d8b2409aa3443364945bc8",
+  "unit_class_counts": {
+    "SharedGeneratedPringSpecialTests": 135,
+    "SharedGeneratedPercentTrendTests": 28,
+    "SharedGeneratedBinomialPairTests": 33,
+    "SharedGeneratedAverageGapsTests": 57,
+    "SharedGeneratedSquareWeightsTests": 32,
+    "SharedGeneratedParametricPeakTests": 59,
+    "SharedGeneratedRSeriesTests": 88
+  },
+  "parity_class_counts": {
+    "RemainingPringSpecialBenchmarkTests": 4,
+    "RemainingPercentTrendBenchmarkTests": 4,
+    "RemainingBinomialPairBenchmarkTests": 8,
+    "RemainingAverageGapsBenchmarkTests": 12,
+    "RemainingSquareWeightsBenchmarkTests": 8,
+    "RemainingParametricPeakBenchmarkTests": 12,
+    "RemainingRSeriesBenchmarkTests": 16
+  },
+  "unique_check_counts": {
+    "unit": 432,
+    "finite_smoothing": 0,
+    "parity": 64,
+    "discovery": 291,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/thirteenth-integrated-unit-evidence-0.trx.gz",
+    "benchmarks/results/remaining-indicators/thirteenth-integrated-unit-evidence-1.trx.gz",
+    "benchmarks/results/remaining-indicators/thirteenth-integrated-parity.trx.gz",
+    "benchmarks/results/remaining-indicators/thirteenth-integrated-discovery.trx.gz"
+  ],
+  "production_sha256": "d63028331338282a904bc82a43c5110c052deaf0bb2fbee84610862b03ebe9e9",
+  "fixture_sha256": "aec819db09e59a08b456692b14f06a995f559ae019204fb019e97fd4f9571d92",
+  "input_repairs": [
+    {
+      "file": "tests/ModelsTests/SharedGeneratedPercentTrendTests.cs",
+      "original_file": "Z:\\StockIndicators-work\\si-thirteenth-integrated-validation-20261019\\unit-assertion-repair\\SharedGeneratedPercentTrendTests.cs",
+      "before_sha256": "65239c7b567f281cebef78fcd76a687d9c62d20825d0c120c7eaafbfbbecc28b",
+      "after_sha256": "1b68d7ec905ca2e0f1be81e558fe8505256470130a4cb56aab6ef719f4a1b6fc",
+      "reason": "Nonpositive PercentageTrend length retains deliberate fallback. Preserve all output/error comparisons; correct only owned-route expectation.",
+      "before_inputs_sha256": "9b5e58ada93362468d81edb951414ebd33ceeedd442acbd979586ea1ce260fae",
+      "after_inputs_sha256": "cec27a3ba50b69e6361d737be3d21c2b0b8f8ddc91f6acab303b5d49179a5b60",
+      "production_sha256": "d63028331338282a904bc82a43c5110c052deaf0bb2fbee84610862b03ebe9e9"
+    }
+  ],
+  "context": "Combined candidate validated using preserved original evidence and explicit replacement runs. Original failures remain in their TRX; later passing replacements supersede them by test identity. See input repair metadata for the bounded changes and evidence reuse. Performance remains unmeasured.",
+  "pending": [
+    "controlled raw timing",
+    "remaining rollout"
+  ],
+  "unit_evidence_sets": [
+    {
+      "path": "Z:\\StockIndicators-work\\si-thirteenth-integrated-validation-20261019\\unit-assertion-repair\\unit.trx",
+      "sha256": "0339fe9d492517a67bc54b7b829c7c8f9c1f651fc12f64833521a4c01c9121b2"
+    },
+    {
+      "path": "Z:\\StockIndicators-work\\si-thirteenth-integrated-validation-20261019\\unit-assertion-repair\\repair.trx",
+      "sha256": "eb44490806f31ff8ab7a7ebe7064e4617afcea96b8d9ccc1c04efad8201be04d"
+    }
+  ],
+  "validation_repair": null,
+  "additional_reference_checks": 0,
+  "parity_reuse": null
+}

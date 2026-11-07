@@ -115,6 +115,9 @@ public sealed class PriorSeededDirectionalMeasure
         private ExactMeanAccumulator _positiveSeed, _negativeSeed, _rangeSeed, _seedDx;
         private ExactMeanAccumulator.ProductFactor _previousHigh, _previousLow, _previousClose;
         private double _previousClosePrice;
+#if !NETFRAMEWORK
+        private double _previousHighPrice, _previousLowPrice;
+#endif
         private long _index = -1;
         private double _average, _lastDx;
 
@@ -125,6 +128,9 @@ public sealed class PriorSeededDirectionalMeasure
             _positiveSeed = _negativeSeed = _rangeSeed = _seedDx = default;
             _previousHigh = _previousLow = _previousClose = default;
             _previousClosePrice = 0;
+#if !NETFRAMEWORK
+            _previousHighPrice = _previousLowPrice = 0;
+#endif
             _index = -1;
             _average = _lastDx = 0;
         }
@@ -138,8 +144,7 @@ public sealed class PriorSeededDirectionalMeasure
         private static ExactMeanAccumulator Difference(ExactMeanAccumulator.ProductFactor left, ExactMeanAccumulator.ProductFactor right)
         {
             var result = new ExactMeanAccumulator(); result.AddFactor(left);
-            var subtract = new ExactMeanAccumulator(); subtract.AddFactor(right);
-            result.Subtract(subtract);
+            result.AddFactor(right, -1);
             return result;
         }
 
@@ -159,11 +164,17 @@ public sealed class PriorSeededDirectionalMeasure
             ExactMeanAccumulator.ProductFactor low, ExactMeanAccumulator.ProductFactor close,
             double highPrice, double lowPrice, double closePrice)
         {
-            // For an ordered range, select its extended endpoints without any
-            // rounded subtraction. Inverted candles retain the original formula.
+            // An ordered range is one endpoint difference, rounded once.
+            // Overflow and inverted candles retain the original exact formula.
             if (highPrice >= lowPrice)
+            {
+#if !NETFRAMEWORK
+                double ordinary = Math.Max(highPrice, closePrice) - Math.Min(lowPrice, closePrice);
+                if (double.IsFinite(ordinary)) return new RocBankValue(ordinary);
+#endif
                 return RocBankValue.Round(Difference(closePrice > highPrice ? close : high,
                     closePrice < lowPrice ? close : low));
+            }
             return RocBankValue.Round(Maximum(Difference(high, low),
                 Maximum(Absolute(Difference(high, close)), Absolute(Difference(low, close)))));
         }
@@ -178,6 +189,12 @@ public sealed class PriorSeededDirectionalMeasure
 
         private RocBankValue Smooth(RocBankValue previous, RocBankValue current)
         {
+#if !NETFRAMEWORK
+            if (previous.UpperShift == 0 && current.UpperShift == 0
+                && SumSeededDirectionalIndex.WeightedCertificate.TrySum(
+                    previous.Mantissa, current.Mantissa, period, period, out var rounded))
+                return new RocBankValue(rounded);
+#endif
             var sum = new ExactMeanAccumulator();
             AddWeighted(ref sum, previous, _priorCoefficient, period - 1);
             AddWeighted(ref sum, current, _currentCoefficient, period);
@@ -186,6 +203,15 @@ public sealed class PriorSeededDirectionalMeasure
 
         private static double Ratio(RocBankValue value, RocBankValue divisor, int weight = 1)
         {
+#if !NETFRAMEWORK
+            if (value.UpperShift == 0 && divisor.UpperShift == 0)
+            {
+                if (value.Mantissa is 0 || divisor.Mantissa is 0) return 0;
+                if (weight == 1) return value.Mantissa / divisor.Mantissa;
+                if (weight == 100 && AwesomeWithDetails.Arithmetic.TryNormalize(
+                    value.Mantissa, divisor.Mantissa, out var rounded)) return rounded;
+            }
+#endif
             var numerator = new ExactMeanAccumulator(); value.AddTo(ref numerator, weight);
             var denominator = new ExactMeanAccumulator(); divisor.AddTo(ref denominator);
             return numerator.Ratio(denominator);
@@ -194,12 +220,36 @@ public sealed class PriorSeededDirectionalMeasure
         private static RocBankValue Direction(RocBankValue movement, RocBankValue range)
         {
             if (range.Mantissa is 0) return default;
+#if !NETFRAMEWORK
+            if (movement.UpperShift == 0 && range.UpperShift == 0
+                && AwesomeWithDetails.Arithmetic.TryNormalize(movement.Mantissa, range.Mantissa, out var rounded))
+                return new RocBankValue(rounded);
+#endif
             var numerator = new ExactMeanAccumulator(); movement.AddTo(ref numerator, 100);
             numerator.ScaleByPowerOfTwo(-range.UpperShift);
             // DI is an unpublished rounded stage for DX/ADX. Keep its upper
             // exponent extended so a later finite ratio can cancel large values.
             return RocBankValue.Round(numerator, range.Mantissa);
         }
+
+#if !NETFRAMEWORK
+        private bool TryOrdinaryMovements(double high, double low,
+            out RocBankValue positive, out RocBankValue negative)
+        {
+            double up = high - _previousHighPrice, down = _previousLowPrice - low;
+            positive = negative = default;
+            // Correct rounding is monotone: unequal finite results retain exact
+            // dominance. A positive rounded tie can hide unequal exact changes.
+            if (!double.IsFinite(up) || !double.IsFinite(down)
+                || up > 0 && up == down) // NOSONAR: S1244 - A rounded tie requires exact dominance fallback.
+                return false;
+            // Finite binary64 differences are multiples of the least subnormal,
+            // so a nonzero exact difference cannot round to zero.
+            if (_needsPositive && up > 0 && up > down) positive = new RocBankValue(up);
+            if (_needsNegative && down > 0 && down > up) negative = new RocBankValue(down);
+            return true;
+        }
+#endif
 
         public void Update(in Bar bar, Span<double> output)
         {
@@ -211,17 +261,29 @@ public sealed class PriorSeededDirectionalMeasure
             {
                 _previousHigh = high; _previousLow = low; _previousClose = close;
                 _previousClosePrice = bar.Close;
+#if !NETFRAMEWORK
+                _previousHighPrice = bar.High; _previousLowPrice = bar.Low;
+#endif
                 return;
             }
-            var up = Difference(high, _previousHigh);
-            var down = Difference(_previousLow, low);
-            var dominance = up; dominance.Subtract(down);
-            var positive = _needsPositive && up.Sign > 0 && dominance.Sign > 0 ? RocBankValue.Round(up) : default;
-            var negative = _needsNegative && down.Sign > 0 && dominance.Sign < 0 ? RocBankValue.Round(down) : default;
+            RocBankValue positive, negative;
+#if !NETFRAMEWORK
+            if (!TryOrdinaryMovements(bar.High, bar.Low, out positive, out negative))
+#endif
+            {
+                var up = Difference(high, _previousHigh);
+                var down = Difference(_previousLow, low);
+                var dominance = up; dominance.Subtract(down);
+                positive = _needsPositive && up.Sign > 0 && dominance.Sign > 0 ? RocBankValue.Round(up) : default;
+                negative = _needsNegative && down.Sign > 0 && dominance.Sign < 0 ? RocBankValue.Round(down) : default;
+            }
             var range = _needsRange ? TrueRange(high, low, _previousClose,
                 bar.High, bar.Low, _previousClosePrice) : default;
             _previousHigh = high; _previousLow = low; _previousClose = close;
             _previousClosePrice = bar.Close;
+#if !NETFRAMEWORK
+            _previousHighPrice = bar.High; _previousLowPrice = bar.Low;
+#endif
             if (period == 1)
             {
                 var movement = measure is PriorDirectionalMeasure.PositiveMovement or PriorDirectionalMeasure.PositiveIndicator
@@ -285,10 +347,17 @@ public sealed class PriorSeededDirectionalMeasure
             }
             else if (hasDirection)
             {
-                var average = new ExactMeanAccumulator();
-                average.AddProduct(new ExactMeanAccumulator.ProductFactor(_average), _priorCoefficient);
-                average.Add(dx);
-                _average = average.Mean(period);
+#if !NETFRAMEWORK
+                if (SumSeededDirectionalIndex.WeightedCertificate.TrySum(_average, dx, period, 1, out var rounded))
+                    _average = rounded;
+                else
+#endif
+                {
+                    var average = new ExactMeanAccumulator();
+                    average.AddProduct(new ExactMeanAccumulator.ProductFactor(_average), _priorCoefficient);
+                    average.Add(dx);
+                    _average = average.Mean(period);
+                }
             }
             var available = _index >= seedIndex + unstable;
             if (measure == PriorDirectionalMeasure.Average)

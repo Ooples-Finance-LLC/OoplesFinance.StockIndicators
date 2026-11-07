@@ -1,0 +1,39 @@
+{
+  "batch": "inertiapair-shared-execution",
+  "types": [
+    "Inertia",
+    "InertiaIndicator"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 40,
+    "parity_passed": 8,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "inertiapair-unit-verified.trx.gz",
+        "passed_cases": 40,
+        "trx_sha256": "f0ccf244f809ae3deefe20453fbf701f379ece57644be1387512ae726da648cb"
+      },
+      {
+        "file": "inertiapair-parity-verified.trx.gz",
+        "passed_cases": 8,
+        "trx_sha256": "87a7ff72d890ff73bbc980c7c1b8fbd4911c95ab63260338e9a89b016a14de3b"
+      }
+    ],
+    "context": "Executed in the 16-facade eighth-stage working candidate with unresolved Guppy and inherited MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7",
+    "test_execution_input_sha256": {
+      "unit": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7",
+      "parity": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "d28318c046bb0c9b8717ab5203d047d262659e2f"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification",
+    "combined candidate retains unresolved Guppy and MACD failures"
+  ]
+}

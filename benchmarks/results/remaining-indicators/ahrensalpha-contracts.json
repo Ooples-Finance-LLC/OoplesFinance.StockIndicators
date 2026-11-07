@@ -1,0 +1,35 @@
+{
+  "batch": "generated-ahrens-and-alpha-decreasing-averages",
+  "types": [
+    "AhrensMovingAverage",
+    "AlphaDecreasingEma"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing exact Ahrens and Alpha Decreasing kernels through shared execution. Preserve staged rounding, zero seed, Alpha Decreasing length-independent recurrence, full/latest ownership, error priority and selected-source fallback.",
+  "verification": {
+    "unit_passed": 83,
+    "fixture_passed": 8,
+    "discovery_passed": 56,
+    "gpu_passed": 100,
+    "contract_methods": 1391,
+    "hosted_methods": 1379,
+    "evidence": [
+      {
+        "file": "ahrensalpha-unit.trx.gz",
+        "passed_cases": 83,
+        "trx_sha256": "2caa7e5b5adb5d031439bdd202386610d94b2f0a96c1e9c716206558a03b76d7"
+      },
+      {
+        "file": "ahrensalpha-fixture.trx.gz",
+        "passed_cases": 64,
+        "trx_sha256": "e08aff6be09cf67689ef4ef7a9551fc04a2508c05d241da843077e0de904f347"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAhrensAlphaBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

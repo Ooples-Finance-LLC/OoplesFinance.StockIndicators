@@ -1,0 +1,62 @@
+{
+  "input_head": "a00a31f43ea0f2794078ee7dff9f6361166553f6",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/ValuesBarExecution.cs"
+  ],
+  "batch_note": "A/D concrete dispatch specialization: identical scratch clearing, output copy and exception capture; no arithmetic changes. Mixed-node, numerical boundary, error precedence, history and cancellation regressions plus A/D comparison and GPU/inventory contracts required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-26T21:31:58.238218+00:00",
+  "unit": {
+    "passed": 24,
+    "class_counts": {
+      "PriceVolumeDetailsSharedExecutionTests": 12,
+      "SharedRecursiveStateTests": 8,
+      "CompactAccumulationDistributionExecutionTests": 3,
+      "AccumulationAliasNumericalTests": 1
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\adl-direct-dispatch\\unit\\unit.trx",
+    "sha256": "ed51ed9a7f048e068f2d4bdc289b77ad96354266075259bc644809a80564d162",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-adl-direct-dispatch-certified-20261026-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 54,
+    "class_counts": {
+      "SharedSmoothedAccumulationFixtureTests": 12,
+      "AccumulationDistributionComparisonTests": 17,
+      "SharedAdlDetailsFixtureTests": 8,
+      "SmoothedAccumulationComparisonTests": 8,
+      "MoneyFlowDetailComparisonTests": 9
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\adl-direct-dispatch\\parity\\parity.trx",
+    "sha256": "42fee9b88cd471ed7fd2dc2dbeecb32266a182fcfd199dde6041fce71c32d1d0",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-adl-direct-dispatch-certified-20261026-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-adl-direct-dispatch-20261026\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "585aaa558fa42ddb6aa4a883386af1cf723570642a3d5bc0e7a0a584a1c260db",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-adl-direct-dispatch-20261026\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "585aaa558fa42ddb6aa4a883386af1cf723570642a3d5bc0e7a0a584a1c260db",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-adl-direct-dispatch-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "585aaa558fa42ddb6aa4a883386af1cf723570642a3d5bc0e7a0a584a1c260db",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-adl-direct-dispatch-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "585aaa558fa42ddb6aa4a883386af1cf723570642a3d5bc0e7a0a584a1c260db"
+  },
+  "source_fingerprint_sha256": "68ef554f0e04204b0183347faaa5b2bfee7911a6999e18288748f7ea769e5e99",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "A/D concrete dispatch specialization: identical scratch clearing, output copy and exception capture; no arithmetic changes. Mixed-node, numerical boundary, error precedence, history and cancellation regressions plus A/D comparison and GPU/inventory contracts required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

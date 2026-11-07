@@ -1,0 +1,96 @@
+{
+  "status": "constructor-coverage-qualified",
+  "source_sha": "b8a0cd963bbc2f7dc8366ec1295c290a1634fb37",
+  "all_16_cases_verified": true,
+  "additional_constructor_comparisons": 8,
+  "qualification_type": "New constructor coverage; not a candidate-versus-prior-Ooples speedup trial.",
+  "production_integrated": true,
+  "report_imported": true,
+  "archives": {
+    "status.json": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/status.json.gz",
+      "sha256": "7a846b275248919499e235fdc17dbd75613468197585ae10a647c70bc37e8b2d"
+    },
+    "provenance.json": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/provenance.json.gz",
+      "sha256": "2c9b9cc9b04cb1c3416c867bc5bf003740d14f9e7b35391f9767a5134691c3ad"
+    },
+    "verified-summary.json": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/verified-summary.json.gz",
+      "sha256": "6749d27cd44a1502772cb79c4d061b368ff883bcc2d19ef48c3e82b2eeb98f86"
+    },
+    "benchmark-report.json": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/benchmark-report.json.gz",
+      "sha256": "a99ff5d0d60b2e87341aaa544cdc41da98cc1d87c63c7cd8f872520566c67b0b"
+    },
+    "benchmark.log": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/benchmark.log.gz",
+      "sha256": "08f5f6ed4069f6278d45b52ffaadcffec4b1bf195bbf5f2438a8fffd7b5225c8"
+    },
+    "validate-mass-normalized-ema-coverage.py": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/validate-mass-normalized-ema-coverage.py.gz",
+      "sha256": "4f96739ff0eee0c9a900377da02426a814804b8a39c12f10696bd324e897c795"
+    },
+    "measure-mass-normalized-ema-coverage.py": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/measure-mass-normalized-ema-coverage.py.gz",
+      "sha256": "501628349d490eb9321615c380a28065bd80f82ee2cd8b3f35f2a38b3a220378"
+    },
+    "verify-mass-normalized-ema-coverage.py": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/verify-mass-normalized-ema-coverage.py.gz",
+      "sha256": "351d02ff8f2d0679d9694d75d0fae3a216048e789a6c526ed305268e37e32a4f"
+    },
+    "build-ema-constructor-receipt.py": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/build-ema-constructor-receipt.py.gz",
+      "sha256": "ad35afa8d5edaa8789e344d02da4cd093c07ba77852bf8488d2016d7a902411a"
+    },
+    "archive-mass-normalized-ema-coverage-qualification.py": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/archive-mass-normalized-ema-coverage-qualification.py.gz",
+      "sha256": "b74e713b0860452c756fd4b83a96fa3c12f6edba312f4ab1dce3056ad5961671"
+    },
+    "stage-ema-constructor-report.py": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/stage-ema-constructor-report.py.gz",
+      "sha256": "969b2e68f4f9508dfd499ee58bfc9cdcc73f43ff6f30aa361402f1984d40ccaf"
+    },
+    "verify-ema-constructor-report.py": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/verify-ema-constructor-report.py.gz",
+      "sha256": "1ce5324a1813173dcf0100811ac76af88d854db9bbdced095e7256ab59b6c082"
+    },
+    "import-ema-constructor-report.py": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/import-ema-constructor-report.py.gz",
+      "sha256": "45beab3d4f5e530ee4b13fdab0801b28b43e09a31ac2418afdcc5593743f1268"
+    },
+    "archive-ema-coverage-evidence.py": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/archive-ema-coverage-evidence.py.gz",
+      "sha256": "f17149fd7306f54edfe14f35803cf40d04ec422b08195e229970787e02501d4c"
+    },
+    "prove-mass-normalized-ema-coverage-integration.py": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/prove-mass-normalized-ema-coverage-integration.py.gz",
+      "sha256": "855c80bcf192ebf27f9245abbcb57f4fdec2941d351c674708a94a401a27ddbe"
+    },
+    "continue-ema-coverage-publication-20261026.py": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/continue-ema-coverage-publication-20261026.py.gz",
+      "sha256": "1ac0f2309443dcc599ee1473e33ea63d5e8338c0cc9cae0a413a4f615ec26187"
+    },
+    "benchmark_process_cleanup.py": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/benchmark_process_cleanup.py.gz",
+      "sha256": "fa2c088e49c3cc04c2e5a99bbe875080b95253f5e156f2983e4691420b8d8fc3"
+    }
+  },
+  "integration_source_proof": "benchmarks/results/remaining-indicators/mass-normalized-ema-coverage-integration-source-proof-20261026.json",
+  "qualified_source_commit": "ca2c307eb9322b911b92f018f5422d5fac9ccff0",
+  "report_archives": {
+    "staged.json": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/report-staged.json.gz",
+      "sha256": "81d2349ef0e54aef072bc646a290746e532a419936c28897a646fef0852670c5"
+    },
+    "browser-verification.json": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/report-browser-verification.json.gz",
+      "sha256": "f66ea72453e2dc49ca19b088bbd9c6af23aea5e576037eec6a5f11ba68c94b3b"
+    },
+    "imported.json": {
+      "archive": "benchmarks/results/remaining-indicators/local-mass-normalized-ema-coverage-20261026/report-imported.json.gz",
+      "sha256": "89c4fd40301af504a46cb8173c1965d6999ae990fe7e6d570aad8eead35b2446"
+    }
+  },
+  "report_sha256": "eeda21897d069dd3a40a5efd8e5eb4c0ba8b23764078da37a0c8598c9a8c35f8"
+}

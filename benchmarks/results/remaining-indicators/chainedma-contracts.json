@@ -1,0 +1,37 @@
+{
+  "batch": "generated-chained-averages",
+  "types": [
+    "ZeroLowLagMovingAverage",
+    "ZeroLagTripleExponentialMovingAverage",
+    "SlowSmoothedMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing exact lag-correction windows and compose three bounded WMA states with legacy split lengths. SlowSmoothed int.MinValue retains the legacy path because full-history and streaming error behavior differ. Custom component averages retain graph execution.",
+  "verification": {
+    "production_build": "Release net10.0; zero warnings/errors",
+    "unit_passed": 48,
+    "fixture_passed": 12,
+    "discovery_passed": 21,
+    "gpu_passed": 100,
+    "contract_methods": 1352,
+    "hosted_methods": 1340,
+    "evidence": [
+      {
+        "file": "chainedma-unit.trx.gz",
+        "passed_cases": 48,
+        "trx_sha256": "579d9dde62a643bdd9f42e1f9b053ae68df7de36456d562336bccc3ce24b41e9"
+      },
+      {
+        "file": "chainedma-fixture.trx.gz",
+        "passed_cases": 33,
+        "trx_sha256": "f2a8bc6e90a681bd591651dfacf7fb164b95dba3810f5ec5bbf3b5d278da2ee3"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingChainedAverageBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

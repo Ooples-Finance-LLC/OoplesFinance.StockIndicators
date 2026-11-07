@@ -1,0 +1,45 @@
+{
+  "batch": "ehlers-adaptive-v2-shared-execution",
+  "types": [
+    "EhlersAdaptiveRelativeStrengthIndexV2",
+    "EhlersAdaptiveRsiFisherTransformV2",
+    "EhlersAdaptiveStochasticIndicatorV2",
+    "EhlersAdaptiveStochasticInverseFisherTransform",
+    "EhlersAdaptiveCommodityChannelIndexV2"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact adaptive RSI/range kernels to publish paired outputs together and stream Fisher transforms; preserve transform arithmetic, one-bar inverse-Fisher lag, independent periods, explicit-average/source fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 95,
+    "fixture_passed": 20,
+    "discovery_passed": 168,
+    "gpu_passed": 100,
+    "contract_methods": 1509,
+    "hosted_methods": 1497,
+    "evidence": [
+      {
+        "file": "adaptivev2-unit.trx.gz",
+        "passed_cases": 95,
+        "trx_sha256": "85c7501a5a0e1c4efb0834fceba4adabb2c7f8f05c36cb3b32f86efee681592e"
+      },
+      {
+        "file": "adaptivev2-fixture.trx.gz",
+        "passed_cases": 188,
+        "trx_sha256": "bec2a3dbc1a4484c37db5e168583628411e90092d2b1dcf2917ee0d03270a473"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAdaptiveV2Benchmarks",
+    "cases": 40,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersAdaptiveRelativeStrengthIndexV2",
+      "EhlersAdaptiveRsiFisherTransformV2",
+      "EhlersAdaptiveStochasticIndicatorV2",
+      "EhlersAdaptiveStochasticInverseFisherTransform",
+      "EhlersAdaptiveCommodityChannelIndexV2"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -1,0 +1,58 @@
+{
+  "input_head": "3b82b6f5b33b31d64d3e916cd120109e0257d5a0",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/GatorWithDetails.cs",
+    "tests/ModelsTests/GatorDirectDifferenceTests.cs"
+  ],
+  "batch_note": "Replace Gator single-subtraction exact accumulators with correctly rounded binary64 subtraction. Preserve abs/sign, missing/presence/expansion, reset and overflow rejection. Exact oracle over144extremepairs plus missing values, existing reference/long-history fixtures,GPU/inventory. Performance remains unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-23T06:02:26.889034+00:00",
+  "unit": {
+    "passed": 11,
+    "class_counts": {
+      "AlligatorSharedExecutionTests": 10,
+      "GatorDirectDifferenceTests": 1
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\gator-direct-difference\\unit\\unit.trx",
+    "sha256": "aa85524d89e52b1f85714e888b5a433080ff9bccefe18bd1e531a3d8e8db5821",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-gator-direct-difference-certified-20261023-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 20,
+    "class_counts": {
+      "AlligatorComparisonTests": 16,
+      "SharedAlligatorBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\gator-direct-difference\\parity\\parity.trx",
+    "sha256": "487c4002bdebc7a918731c9ecd2139b254fb6eaf5ce77a6469cb63c2327360c1",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-gator-direct-difference-certified-20261023-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-gator-direct-difference-20261023\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b4344f970a47c1409174e2a58703f066309ce3506748ae9c7e120fa6ac6f3d7f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-gator-direct-difference-20261023\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b4344f970a47c1409174e2a58703f066309ce3506748ae9c7e120fa6ac6f3d7f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-gator-direct-difference-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b4344f970a47c1409174e2a58703f066309ce3506748ae9c7e120fa6ac6f3d7f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-gator-direct-difference-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b4344f970a47c1409174e2a58703f066309ce3506748ae9c7e120fa6ac6f3d7f"
+  },
+  "source_fingerprint_sha256": "8c953514aa4250af9a36953875c6afb2c695df2c59fbcdb9c74c4e57cfbbf03a",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Replace Gator single-subtraction exact accumulators with correctly rounded binary64 subtraction. Preserve abs/sign, missing/presence/expansion, reset and overflow rejection. Exact oracle over144extremepairs plus missing values, existing reference/long-history fixtures,GPU/inventory. Performance remains unqualified. Correctness checks passed; controlled performance remains pending."
+}

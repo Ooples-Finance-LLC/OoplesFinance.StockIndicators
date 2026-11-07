@@ -1,0 +1,34 @@
+{
+  "qualified_commit": "09ef7ae89e74b45609f6f2c1baf4a8d1225c0155",
+  "qualified_code": "1ce088263bede77f4bc15062b40f80fb08a8659b",
+  "matched_paths": [
+    "src",
+    "tests",
+    "examples",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "4d1e69fe0d5e81c1e40e1d8bc74e2ebf0ffa813a14f3e523a1e2cd653950cd19",
+  "qualification_reused": {
+    "unit": 8,
+    "parity": 13,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-zigzag-rolling-interpolation-20261024\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a95a0e01e228aaf3d527a4e24b2b727f1cf543b272e2ecb9235b6eb57c34d3b2",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-zigzag-rolling-interpolation-20261024\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a95a0e01e228aaf3d527a4e24b2b727f1cf543b272e2ecb9235b6eb57c34d3b2",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-zigzag-rolling-interpolation-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a95a0e01e228aaf3d527a4e24b2b727f1cf543b272e2ecb9235b6eb57c34d3b2",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-zigzag-rolling-interpolation-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "a95a0e01e228aaf3d527a4e24b2b727f1cf543b272e2ecb9235b6eb57c34d3b2"
+  },
+  "control": "local-zigzag-rolling-interpolation-control-20261024",
+  "note": "Integrated executable sources and build inputs exactly match qualified candidate. Publishing checkout binaries remain older; preserved candidate DLL supplied the new measurement arm. No redundant production rebuild."
+}

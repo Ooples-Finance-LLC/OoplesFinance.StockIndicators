@@ -1,0 +1,41 @@
+{
+  "batch": "generated-atr-derived-chaikin",
+  "types": [
+    "Natr",
+    "AtrPercent",
+    "AtrChannelWidth",
+    "ChaikinVolatility"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse AtrDerivedWindow for both normalized ATR aliases and channel width, preserving unpublished exponents. Reuse ChaikinVolatilityWindow with its default 12-bar lag. Multiplier edge cases retain raw-input validation priority and custom volatility averages retain graph execution.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 53,
+    "fixture_passed": 16,
+    "gpu_passed": 100,
+    "contract_methods": 1346,
+    "hosted_methods": 1334,
+    "unit_trx_sha256": "ee8eafe88a2cf201a7285a673714f919fbfc1b8e525511257cd0922a4805e338",
+    "fixture_trx_sha256": "5d29cc67938701e683d982c2948e7eb1d8f0a4fbd9ecc3e88d7f839091ceb545",
+    "discovery_passed": 15,
+    "selected_comparator_passed": 31
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAtrDerivedBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -1,0 +1,640 @@
+{
+  "run": "41379488119",
+  "profile": "trix-jit",
+  "integrity_verified": true,
+  "diagnostic_only": true,
+  "rows": [
+    {
+      "round": 0,
+      "arm": "old",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "mean_ns": 1091944.9999999998,
+      "lower_ns": 974696.217637319,
+      "upper_ns": 1209193.7823626804,
+      "samples": 10,
+      "allocated_bytes": 91407
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "mean_ns": 532963.8671875,
+      "lower_ns": 525230.0698746119,
+      "upper_ns": 540697.6645003881,
+      "samples": 8,
+      "allocated_bytes": 42636
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "mean_ns": 5203318.75,
+      "lower_ns": 5165490.659609976,
+      "upper_ns": 5241146.840390024,
+      "samples": 9,
+      "allocated_bytes": 883938
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "mean_ns": 5292531.5625,
+      "lower_ns": 5053914.905365483,
+      "upper_ns": 5531148.219634517,
+      "samples": 10,
+      "allocated_bytes": 402828
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "mean_ns": 931609.8214285714,
+      "lower_ns": 918803.7399750676,
+      "upper_ns": 944415.9028820752,
+      "samples": 8,
+      "allocated_bytes": 91407
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "mean_ns": 518959.765625,
+      "lower_ns": 514472.62553652504,
+      "upper_ns": 523446.90571347496,
+      "samples": 8,
+      "allocated_bytes": 42636
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "mean_ns": 5187310.9375,
+      "lower_ns": 5165158.61416105,
+      "upper_ns": 5209463.26083895,
+      "samples": 8,
+      "allocated_bytes": 883948
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "mean_ns": 5281122.916666667,
+      "lower_ns": 5095455.516717181,
+      "upper_ns": 5466790.316616153,
+      "samples": 9,
+      "allocated_bytes": 402839
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "mean_ns": 1045343.5714285715,
+      "lower_ns": 937128.6484189732,
+      "upper_ns": 1153558.4944381698,
+      "samples": 10,
+      "allocated_bytes": 91407
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "mean_ns": 534501.4453125,
+      "lower_ns": 514001.185985478,
+      "upper_ns": 555001.704639522,
+      "samples": 10,
+      "allocated_bytes": 42601
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "mean_ns": 6543759.375,
+      "lower_ns": 6023908.003974326,
+      "upper_ns": 7063610.746025674,
+      "samples": 10,
+      "allocated_bytes": 883916
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "mean_ns": 5390637.5,
+      "lower_ns": 5308235.658692522,
+      "upper_ns": 5473039.341307478,
+      "samples": 9,
+      "allocated_bytes": 402839
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "mean_ns": 940023.015873016,
+      "lower_ns": 932658.5666474139,
+      "upper_ns": 947387.4650986181,
+      "samples": 9,
+      "allocated_bytes": 91407
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "mean_ns": 509815.8203125,
+      "lower_ns": 499350.5713513895,
+      "upper_ns": 520281.0692736105,
+      "samples": 8,
+      "allocated_bytes": 42636
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "mean_ns": 5131483.333333333,
+      "lower_ns": 5063139.862460325,
+      "upper_ns": 5199826.8042063415,
+      "samples": 9,
+      "allocated_bytes": 883938
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "mean_ns": 5129075.390625,
+      "lower_ns": 5108125.7546517495,
+      "upper_ns": 5150025.0265982505,
+      "samples": 8,
+      "allocated_bytes": 402839
+    }
+  ],
+  "code": [
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Tier0)",
+      "bytes": 1006,
+      "sha256": "dcb0a0e1738e83d65638ff8b98f6ce12f866cde45c7b9ece0d79c56d808af619"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 4047,
+      "sha256": "a6db4a66a13877f4115b190d56144b57d35067ab225106817b95f563cff5cf74"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 327,
+      "sha256": "73f73c6ed6434b644340c0e9cdd2ee4eb179a5fc1c5d040420e86a100dcd500d"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Tier0)",
+      "bytes": 403,
+      "sha256": "a28870d5393a0fd1c55f5bdfebe3d5ec348a45a2051d78e183d1e92766723fab"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Tier0)",
+      "bytes": 274,
+      "sha256": "8d8f4c3b2027ec90172cb3860165c7a3690a2c832c4a0c89923926cab56a0dfa"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Instrumented Tier0)",
+      "bytes": 2880,
+      "sha256": "54ea9c37789f93dea446f95ca01374064b90e7d173ed222d43d826d0058f6dd0"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Instrumented Tier0)",
+      "bytes": 592,
+      "sha256": "ea5396d4baace69cf0d67c67db4a5d3b925d84bb380c920cc76b3bc8b24090c3"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Instrumented Tier0)",
+      "bytes": 2880,
+      "sha256": "54ea9c37789f93dea446f95ca01374064b90e7d173ed222d43d826d0058f6dd0"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Instrumented Tier0)",
+      "bytes": 304,
+      "sha256": "bd5ede0c214d2473db8acdc5b516effde17a68527e37f8b4646b9ee52dc033cc"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 327,
+      "sha256": "73f73c6ed6434b644340c0e9cdd2ee4eb179a5fc1c5d040420e86a100dcd500d"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 4031,
+      "sha256": "29b3f0b23ba1bdf34ab79053a9eafa80ed023137cf214cb47683aa09a6a2be85"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Tier1)",
+      "bytes": 3321,
+      "sha256": "9009850abe808a327fdfb06fec202a5cdc7d4c5da6410722d16113f7ef2f77e7"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Tier1)",
+      "bytes": 2697,
+      "sha256": "25f562b3bc4d3870b6b68d0cf2a81815d776d899ae0c3792d0479a65ddad20c0"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Tier1)",
+      "bytes": 2043,
+      "sha256": "864e0d7e7188f0f47e1cb42ce1a3bfb540274a349b999c7e23006277fbd3e3f6"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Tier1)",
+      "bytes": 3448,
+      "sha256": "e69c4e0b557f35e49b6ca466765b102ddb1b64d7aa1c2720322dd06d21e6a9c6"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Tier1)",
+      "bytes": 9719,
+      "sha256": "27bafe600e7afef722a44f729798802a467405add135624e00ea35866ebc8feb"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Instrumented Tier0)",
+      "bytes": 1168,
+      "sha256": "d694bf4136e2c30459f2b3c37bafaa25b9f03be1820b00335b5804e481a5499b"
+    },
+    {
+      "round": 0,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Tier1)",
+      "bytes": 2359,
+      "sha256": "a7965cfccb02e64d03880ff2708758f4565590ab4e393ac2ff737b6367b90867"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Tier0)",
+      "bytes": 1006,
+      "sha256": "dcb0a0e1738e83d65638ff8b98f6ce12f866cde45c7b9ece0d79c56d808af619"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 4047,
+      "sha256": "a6db4a66a13877f4115b190d56144b57d35067ab225106817b95f563cff5cf74"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 327,
+      "sha256": "73f73c6ed6434b644340c0e9cdd2ee4eb179a5fc1c5d040420e86a100dcd500d"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Tier0)",
+      "bytes": 403,
+      "sha256": "a28870d5393a0fd1c55f5bdfebe3d5ec348a45a2051d78e183d1e92766723fab"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Tier0)",
+      "bytes": 274,
+      "sha256": "8d8f4c3b2027ec90172cb3860165c7a3690a2c832c4a0c89923926cab56a0dfa"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Instrumented Tier0)",
+      "bytes": 2880,
+      "sha256": "54ea9c37789f93dea446f95ca01374064b90e7d173ed222d43d826d0058f6dd0"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Instrumented Tier0)",
+      "bytes": 592,
+      "sha256": "ea5396d4baace69cf0d67c67db4a5d3b925d84bb380c920cc76b3bc8b24090c3"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Instrumented Tier0)",
+      "bytes": 2880,
+      "sha256": "54ea9c37789f93dea446f95ca01374064b90e7d173ed222d43d826d0058f6dd0"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Instrumented Tier0)",
+      "bytes": 304,
+      "sha256": "bd5ede0c214d2473db8acdc5b516effde17a68527e37f8b4646b9ee52dc033cc"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 327,
+      "sha256": "73f73c6ed6434b644340c0e9cdd2ee4eb179a5fc1c5d040420e86a100dcd500d"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 4031,
+      "sha256": "66288190e7f1d5040632b5d6c1a480ecb0996f4dbf08e8f1ea9741680022c869"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Tier1)",
+      "bytes": 3321,
+      "sha256": "871ceb884d89aa9abca70c13ad79b13d86f7d583f562b4e6b8fedd7cd6510cb3"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Tier1)",
+      "bytes": 2697,
+      "sha256": "82dd8c25dcf331d9eb511ac04d6e4402ce176d6a396a297775aa0e60b232d09b"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Tier1)",
+      "bytes": 2033,
+      "sha256": "57a765502a2b250e96eaa042d282768a7c3c25e7750cc8a0f367448a9f8a2a1e"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Tier1)",
+      "bytes": 3448,
+      "sha256": "977448854b7d10c53763655b0a035ad8a526b7adf89e444566749dfe884f0ae9"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Tier1)",
+      "bytes": 9679,
+      "sha256": "43b2a853b0aa958d1ed61adc4284d7d98254126a97d8b4d75dc8ee24ff29ed07"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Instrumented Tier0)",
+      "bytes": 1168,
+      "sha256": "b32a663aefef142d6d8bc4fc2c8910f7b2a68258dec47ed2596cf893d44c0f75"
+    },
+    {
+      "round": 1,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Tier1)",
+      "bytes": 2363,
+      "sha256": "484d7aaeeb1a3a86e2ca2eb9629851ecf86248b26bf0640c6a7885d13cca25b7"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Tier0)",
+      "bytes": 1006,
+      "sha256": "dcb0a0e1738e83d65638ff8b98f6ce12f866cde45c7b9ece0d79c56d808af619"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 4047,
+      "sha256": "a6db4a66a13877f4115b190d56144b57d35067ab225106817b95f563cff5cf74"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 327,
+      "sha256": "73f73c6ed6434b644340c0e9cdd2ee4eb179a5fc1c5d040420e86a100dcd500d"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Tier0)",
+      "bytes": 403,
+      "sha256": "a28870d5393a0fd1c55f5bdfebe3d5ec348a45a2051d78e183d1e92766723fab"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Tier0)",
+      "bytes": 274,
+      "sha256": "8d8f4c3b2027ec90172cb3860165c7a3690a2c832c4a0c89923926cab56a0dfa"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Instrumented Tier0)",
+      "bytes": 2880,
+      "sha256": "54ea9c37789f93dea446f95ca01374064b90e7d173ed222d43d826d0058f6dd0"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Instrumented Tier0)",
+      "bytes": 592,
+      "sha256": "ea5396d4baace69cf0d67c67db4a5d3b925d84bb380c920cc76b3bc8b24090c3"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Instrumented Tier0)",
+      "bytes": 2880,
+      "sha256": "54ea9c37789f93dea446f95ca01374064b90e7d173ed222d43d826d0058f6dd0"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Instrumented Tier0)",
+      "bytes": 304,
+      "sha256": "bd5ede0c214d2473db8acdc5b516effde17a68527e37f8b4646b9ee52dc033cc"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 327,
+      "sha256": "73f73c6ed6434b644340c0e9cdd2ee4eb179a5fc1c5d040420e86a100dcd500d"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 4031,
+      "sha256": "76ac8ef4dbf39b5f3bbe877e24add6bb05a01a48e8e63207d616df68d307c1f9"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Tier1)",
+      "bytes": 3321,
+      "sha256": "b2ffca6dcb99d1128debdd69eccd7ba41a53bc43c6d43f977d005ddd9cdbaf96"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Tier1)",
+      "bytes": 2697,
+      "sha256": "149d66c77162c1df81a7d2197ac26b3cf31c9861fc4f7e80c40f9af5aaa1e5c6"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Tier1)",
+      "bytes": 2043,
+      "sha256": "bfc1f689cb0879cfcd7981ef050c19455baa64986831c11711226ae1f6b76f8f"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Tier1)",
+      "bytes": 3448,
+      "sha256": "e41af68655c8718a4a2a896d1928af4b59dbc2b009f332937e9834d60f08f27d"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Tier1)",
+      "bytes": 9698,
+      "sha256": "f21d6a97fd1a26a45bceaccacfdcd84167064dfe41e90cfae5d5a91ccc7605c6"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Instrumented Tier0)",
+      "bytes": 1168,
+      "sha256": "d694bf4136e2c30459f2b3c37bafaa25b9f03be1820b00335b5804e481a5499b"
+    },
+    {
+      "round": 2,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Tier1)",
+      "bytes": 2368,
+      "sha256": "0e4270016f71ff498e86cb05b4eb593617b637b7a8242e30811f42573e8bb59f"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Tier0)",
+      "bytes": 1006,
+      "sha256": "dcb0a0e1738e83d65638ff8b98f6ce12f866cde45c7b9ece0d79c56d808af619"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 4047,
+      "sha256": "a6db4a66a13877f4115b190d56144b57d35067ab225106817b95f563cff5cf74"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 327,
+      "sha256": "73f73c6ed6434b644340c0e9cdd2ee4eb179a5fc1c5d040420e86a100dcd500d"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Tier0)",
+      "bytes": 403,
+      "sha256": "a28870d5393a0fd1c55f5bdfebe3d5ec348a45a2051d78e183d1e92766723fab"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Tier0)",
+      "bytes": 274,
+      "sha256": "8d8f4c3b2027ec90172cb3860165c7a3690a2c832c4a0c89923926cab56a0dfa"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Instrumented Tier0)",
+      "bytes": 2880,
+      "sha256": "54ea9c37789f93dea446f95ca01374064b90e7d173ed222d43d826d0058f6dd0"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Instrumented Tier0)",
+      "bytes": 592,
+      "sha256": "ea5396d4baace69cf0d67c67db4a5d3b925d84bb380c920cc76b3bc8b24090c3"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Instrumented Tier0)",
+      "bytes": 2880,
+      "sha256": "54ea9c37789f93dea446f95ca01374064b90e7d173ed222d43d826d0058f6dd0"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Instrumented Tier0)",
+      "bytes": 304,
+      "sha256": "bd5ede0c214d2473db8acdc5b516effde17a68527e37f8b4646b9ee52dc033cc"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Instrumented Tier0)",
+      "bytes": 327,
+      "sha256": "73f73c6ed6434b644340c0e9cdd2ee4eb179a5fc1c5d040420e86a100dcd500d"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Instrumented Tier0)",
+      "bytes": 4031,
+      "sha256": "66288190e7f1d5040632b5d6c1a480ecb0996f4dbf08e8f1ea9741680022c869"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:Ratio(OoplesFinance.StockIndicators.Helpers.JurikDyadic):double:this (Tier1)",
+      "bytes": 3321,
+      "sha256": "e8c3e625bf561cf0444abc679294bf38537f960064d5e13942583b461e7686e2"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Helpers.JurikDyadic:TryRatio(System.Int128,int,System.Int128,int,byref):bool (Tier1)",
+      "bytes": 2697,
+      "sha256": "5833eeb48676fc7e533290e4ef305797d330ae032f5fafa3b96ef644e61e8fdc"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Smooth(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic:this (Tier1)",
+      "bytes": 2043,
+      "sha256": "05a5caccb0fdc67dbc6709158047056e6cd08b0f9e9def14a8a682e1bf7e934a"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Round(OoplesFinance.StockIndicators.Helpers.JurikDyadic,OoplesFinance.StockIndicators.Helpers.JurikDyadic):OoplesFinance.StockIndicators.Helpers.JurikDyadic (Tier1)",
+      "bytes": 3448,
+      "sha256": "29ea5d8dcda0a1a58a78c396fafddf6647047bd5924ac0ee3df727d7893b0e00"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TripleRateState:Update(byref,System.Span`1[double]):this (Tier1)",
+      "bytes": 9719,
+      "sha256": "9381e15380b6b0dcbfae68f4ff1ac3f0c0a6ae0257d4576c8979296a6b35418f"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Instrumented Tier0)",
+      "bytes": 1168,
+      "sha256": "0f4535f0803bc524aad3fe61db89cb7c6c27c9ea80efba55b479b8751f9abc51"
+    },
+    {
+      "round": 3,
+      "method": "OoplesFinance.StockIndicators.CompetitorBenchmarks.MoneyFlowReferenceArithmetic:Round(System.Numerics.BigInteger,System.Numerics.BigInteger):double (Tier1)",
+      "bytes": 2359,
+      "sha256": "08803bdcf0d8c7aba2286b4e26c69c224a7611e2d95226568230f066d66a5ad8"
+    }
+  ],
+  "logs": [
+    {
+      "round": 0,
+      "console_sha256": "bcc002e234350aa7499d6291ff0d9b876f425dc52e0f7c99a80e7080f785c832",
+      "bdn_sha256": "d3e66afa631cd3871fa455517ae6a2ff8060668b31ba64572a90d94e7bbeb704"
+    },
+    {
+      "round": 1,
+      "console_sha256": "478aa94aea7354d92403bbf501caa9bc91c81432d4d98262f3f68edfb7dcad69",
+      "bdn_sha256": "658d817dbe05b0ed0326df13890088c4f75397e1eb373168017889831d03a657"
+    },
+    {
+      "round": 2,
+      "console_sha256": "2e7a2c3ad70b9152b7274ba8aab9401c2e6e2d956c6f5cfff32ac370a3f93f44",
+      "bdn_sha256": "a9d652e3ce00f4ec4d07c299888a0c08335895968a9a053c1a1d25f088c115ed"
+    },
+    {
+      "round": 3,
+      "console_sha256": "e4c8cd9fae178bd0477cec4fd09087826ba9e67865c07b3525b26dd70c92fa68",
+      "bdn_sha256": "cea8a632607ed3c07853991dfa41278d6b07e21b963b112941e6b65cf47ae62f"
+    }
+  ]
+}

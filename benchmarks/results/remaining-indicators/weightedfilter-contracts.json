@@ -1,0 +1,38 @@
+{
+  "batch": "generated-weighted-filters",
+  "types": [
+    "Spencer15PointMovingAverage",
+    "Spencer21PointMovingAverage",
+    "DampedSineWaveWeightedFilter",
+    "HendersonWeightedMovingAverage",
+    "RightSidedRickerMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing Spencer, Damped Sine, Henderson and Ricker kernels through shared owned execution. Bound Damped Sine/Henderson/Ricker rolling history by owned input count while retaining full coefficient sums and default helper capacities for other callers. Avoid constructing those helpers for empty owned input. Preserve fixed Spencer taps, min-period clamps and fixed Ricker width60.",
+  "verification": {
+    "unit_passed": 210,
+    "fixture_passed": 20,
+    "discovery_passed": 35,
+    "gpu_passed": 100,
+    "contract_methods": 1370,
+    "hosted_methods": 1358,
+    "evidence": [
+      {
+        "file": "weightedfilter-unit.trx.gz",
+        "passed_cases": 210,
+        "trx_sha256": "00d68b74b791af9e0e100d2852b5291ce19d823af45bac17947172e969119336"
+      },
+      {
+        "file": "weightedfilter-fixture.trx.gz",
+        "passed_cases": 55,
+        "trx_sha256": "de0d2cd61582862b5508703e132c75c9c0a52af33eca45ed860166f2da24a631"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingWeightedFilterBenchmarks",
+    "cases": 40,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

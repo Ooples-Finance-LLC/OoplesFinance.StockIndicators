@@ -1,0 +1,28 @@
+{
+  "scope": "Combined integration of adaptivevalueonly, volumeadjusted, variablelength, volumeweighted, buffequity",
+  "source_commit": "ad949bb5",
+  "source_sha256": "68fd7b4b56347c6c40d37c7d953d53a4a537287d444cb1c8794c9305d2d2f548",
+  "verification": {
+    "unit_passed": 138,
+    "discovery_passed": 64,
+    "gpu_passed": 100,
+    "inventory_passed": 4,
+    "contract_methods": 1399,
+    "hosted_methods": 1387,
+    "evidence": [
+      {
+        "file": "volumeintegration-unit.trx.gz",
+        "passed_cases": 138,
+        "trx_sha256": "946994857b0fa4c0134089e247102be4302e64afc57d1c85e3d86a6b8c8cbee3"
+      },
+      {
+        "file": "volumeintegration-discovery.trx.gz",
+        "passed_cases": 64,
+        "trx_sha256": "2101199734af5da1dbf3069eecf06bcd4381adf5e2ec7a093b5ca391b69c5083"
+      }
+    ]
+  },
+  "individual_numerical_receipts": "Retained from the independently verified immutable batches; unchanged numerical suites were not rerun during integration.",
+  "hosted": "Previous run38898656895 incomplete due30minute shard13 timeout; approved45minute limit applied for next integrated run.",
+  "performance": "64preserved stages1720pending timing cases; no measured speedup claim."
+}

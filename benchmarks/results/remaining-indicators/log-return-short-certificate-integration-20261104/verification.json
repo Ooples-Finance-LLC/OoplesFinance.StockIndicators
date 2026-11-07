@@ -1,0 +1,27 @@
+{
+  "source_integration_commit": "4ee9efda672e69655432a67bd08b34d849bb128c",
+  "qualified_source": "464e60735d207bc902cec622dfeaf1377e2995e2",
+  "compiled_source": "2a3926eb2efb5c9f505958e705320e759c0e088a",
+  "source_fingerprint": "7f0837546f522ec9b39a7b7df0cc1a4552e5d51c8b6191e9b2ac29cfced5780f",
+  "unit": 18,
+  "comparator": 10,
+  "actual_gpu": 100,
+  "inventory_tests": 8,
+  "production_sha256": "60764dd8dcc9b1227e7df5a30d0821f37d3b3f6bd7c707e112ed5dba42af775a",
+  "run_id": "41934672129",
+  "cases": 60,
+  "decisions": 12,
+  "verdicts": {
+    "inconclusive": 5,
+    "faster": 7
+  },
+  "integrated_paths": [
+    "src/Helpers/CertifiedLogReturn.cs",
+    "src/Helpers/CertifiedLogReturn.Short.cs",
+    "tests/ModelsTests/ShortLogReturnCertificateTests.cs"
+  ],
+  "excluded": [
+    "Historical0.144.0 timings remain on original sources; only this complete fresh0.146.0 run imported; no pooling"
+  ],
+  "verified_utc": "2026-11-05T00:24:23.037781+00:00"
+}

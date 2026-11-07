@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "2864caefdac527bd540d801071280374818a4de3c9e5e34803d3b4c2e75b6d1c",
+    "archive": "benchmarks/results/remaining-indicators/klinger-after-directional-ratios-report-integration-20261104/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "2d644a415fd1daf2cef93bcb973ad24dbbfce7152288d6c84001ff56e3d717bb",
+    "archive": "benchmarks/results/remaining-indicators/klinger-after-directional-ratios-report-integration-20261104/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "4a6e94e9cf8aeab73561871300ee510e64c47d97a430efbf6a7a3002a9643190",
+    "archive": "benchmarks/results/remaining-indicators/klinger-after-directional-ratios-report-integration-20261104/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "13872205c7b47bf6e26318a35e48ac28d0fa40eae1851e5599afd5980a196faf",
+    "archive": "benchmarks/results/remaining-indicators/klinger-after-directional-ratios-report-integration-20261104/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "38a5447cec69cd39099edadccce65abfd821252aee4838077931284f0ddfc14b",
+    "archive": "benchmarks/results/remaining-indicators/klinger-after-directional-ratios-report-integration-20261104/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "878f6e6f9e4b17c44f211ce34c5dce80e6190c87cf464bf8b8e0395e10308bee",
+    "archive": "benchmarks/results/remaining-indicators/klinger-after-directional-ratios-report-integration-20261104/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "0dfd39bd70842bfd09ed5f9ef206106ad90aba47e8ec8456c6c926fe8df13c41",
+    "archive": "benchmarks/results/remaining-indicators/klinger-after-directional-ratios-report-integration-20261104/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "15aa68400452e3439a6d85c13fa98b85215c7aacd6350ca36075b18089886eb7",
+    "archive": "benchmarks/results/remaining-indicators/klinger-after-directional-ratios-report-integration-20261104/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "c5bd092831f59324350492faf86a57859fec85f6e14f84d4be8808eb53e4b2dc",
+    "archive": "benchmarks/results/remaining-indicators/klinger-after-directional-ratios-report-integration-20261104/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "feb59c413c136f1aea90cc8f82d72f07d6b6168b88174561dc34721e2f564ce2",
+    "archive": "benchmarks/results/remaining-indicators/klinger-after-directional-ratios-report-integration-20261104/updated-pair-details.png.gz"
+  }
+}

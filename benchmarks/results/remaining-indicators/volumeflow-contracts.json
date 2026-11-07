@@ -1,0 +1,37 @@
+{
+  "batch": "volume-flow-shared-execution",
+  "types": [
+    "VolumeFlowIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Compute VFI, signal and histogram together using the existing exact default-SMA kernel. Preserve legacy whole-series typical-price/close equality, per-bar derived range policy and exact adjusted typical-price mean. Nonfinite coefficient, custom-average and selected-source fallback remain unchanged.",
+  "verification": {
+    "unit_passed": 176,
+    "fixture_passed": 4,
+    "discovery_passed": 66,
+    "gpu_passed": 100,
+    "contract_methods": 1401,
+    "hosted_methods": 1389,
+    "evidence": [
+      {
+        "file": "volumeflow-unit.trx.gz",
+        "passed_cases": 176,
+        "trx_sha256": "49ee4a5b9ea959d3833aec9e0a6a41f1528baf93fa497ca5e7735d311ac5f1a1"
+      },
+      {
+        "file": "volumeflow-fixture.trx.gz",
+        "passed_cases": 70,
+        "trx_sha256": "7885fe4de28b5f78c832f72198222eb21c8655fd22a91f38f630bf53bc00e5c6"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVolumeFlowBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "VolumeFlowIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

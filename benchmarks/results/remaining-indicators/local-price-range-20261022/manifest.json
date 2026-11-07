@@ -1,0 +1,31 @@
+{
+  "status.json": {
+    "sha256": "1e654c58c204087b7aa59227efb5b5fb3de1337d3c7232cf967b7cb4cd5db30a",
+    "archive": "benchmarks/results/remaining-indicators/local-price-range-20261022/status.json.gz"
+  },
+  "provenance.json": {
+    "sha256": "2714e6fb33be18d1714f79c3914e26db4950addb09108beea46f30e555182bf4",
+    "archive": "benchmarks/results/remaining-indicators/local-price-range-20261022/provenance.json.gz"
+  },
+  "binary-manifest.json": {
+    "sha256": "9caa8cfb9d7eedf3e7da609598ebb77cb46984e11875eef5ae99fa7da956ddf6",
+    "archive": "benchmarks/results/remaining-indicators/local-price-range-20261022/binary-manifest.json.gz"
+  },
+  "verified-summary.json": {
+    "sha256": "daf91bba676c7dd7a2ddb98cdf0c843f974d38bbcab258ecb9acb92bdd5b806c",
+    "archive": "benchmarks/results/remaining-indicators/local-price-range-20261022/verified-summary.json.gz"
+  },
+  "SharedPriceRangeBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceRangeBenchmarks-report-full-compressed.json": {
+    "sha256": "e5178255f7d48e5c03445ba9877c2081a42883fdf20e99a1d7f36d6575e604f0",
+    "archive": "benchmarks/results/remaining-indicators/local-price-range-20261022/SharedPriceRangeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedPriceRangeBenchmarks-report-full-compressed.json.gz"
+  },
+  "measure-local-price-range.py": {
+    "sha256": "7802467faa965412249d57b60b5b82ebb9e78c09d30ffba35da874ee8eb398bb",
+    "archive": "benchmarks/results/remaining-indicators/local-price-range-20261022/measure-local-price-range.py.gz"
+  },
+  "verify-local-price-range.py": {
+    "sha256": "dc2265d9a6532b298d72697f773de9a858c28d45c8835b334e65e1eeba1fba87",
+    "archive": "benchmarks/results/remaining-indicators/local-price-range-20261022/verify-local-price-range.py.gz"
+  },
+  "measurement_location": "Local Windows CPU measurements with original required OpenCL setup checks; replaces failed hosted qualification, not valid prior timings."
+}

@@ -4,11 +4,17 @@ namespace OoplesFinance.StockIndicators.Helpers;
 internal sealed class BetterVolumeWindow
 {
     private readonly int _length, _lookback; private long _count;
+    private readonly bool _includeSignals;
     private double _previousClose, _previousOpen; private BigInteger _previousUp, _previousDown;
     private readonly LinkedList<(long Index, BigInteger Value)> _highs = new(), _lows = new();
-    private readonly LinkedList<(long Index, BigInteger Value)>[] _metrics = Enumerable.Range(0, 22).Select(_ => new LinkedList<(long Index, BigInteger Value)>()).ToArray();
+    private readonly LinkedList<(long Index, BigInteger Value)>[] _metrics;
     private static readonly BigInteger Unit = BigInteger.One << 1074;
-    internal BetterVolumeWindow(int length, int lookback) { _length = Math.Max(1, length); _lookback = Math.Max(1, lookback); }
+    internal BetterVolumeWindow(int length, int lookback, bool includeSignals = true)
+    {
+        _length = Math.Max(1, length); _lookback = Math.Max(1, lookback); _includeSignals = includeSignals;
+        _metrics = includeSignals ? Enumerable.Range(0, 22).Select(_ => new LinkedList<(long Index, BigInteger Value)>()).ToArray()
+            : Array.Empty<LinkedList<(long Index, BigInteger Value)>>();
+    }
     private static BigInteger R(BigInteger value) => RocBankValue.RoundUnits(value, BigInteger.One);
     private static BigInteger Ratio(BigInteger numerator, BigInteger denominator)
         => denominator.IsZero ? BigInteger.Zero : RocBankValue.RoundUnits(numerator * denominator.Sign, BigInteger.Abs(denominator));
@@ -22,12 +28,19 @@ internal sealed class BetterVolumeWindow
     internal (double Value, Signal Signal) Next(double open, double high, double low, double close, double volume, bool commit)
     {
         var o = ExactVarianceWindow.Units(open); var h = ExactVarianceWindow.Units(high); var l = ExactVarianceWindow.Units(low); var c = ExactVarianceWindow.Units(close); var v = ExactVarianceWindow.Units(volume);
-        var previousClose = _count == 0 ? c : ExactVarianceWindow.Units(_previousClose); var previousOpen = _count == 0 ? BigInteger.Zero : ExactVarianceWindow.Units(_previousOpen);
+        var previousClose = _count == 0 ? c : ExactVarianceWindow.Units(_previousClose);
         var range = BigInteger.Max(h - l, BigInteger.Max(BigInteger.Abs(h - previousClose), BigInteger.Abs(l - previousClose)));
-        var span = Extreme(_highs, h, _lookback, true, commit) - Extreme(_lows, l, _lookback, false, commit);
         var body = c - o;
         // A zero allocation denominator carries no directional share; doji volume is split equally.
         var up = body.Sign > 0 ? Ratio(v * range, 2 * range - body) : body.Sign < 0 ? Ratio(v * (range + body), 2 * range + body) : Ratio(v, new BigInteger(2));
+        // This mode is fixed for the lifetime of a shared value-only state.
+        if (!_includeSignals)
+        {
+            if (commit) { _count++; _previousClose = close; }
+            return (ExactMeanAccumulator.UnitRatio(up, BigInteger.One), Signal.None);
+        }
+        var previousOpen = _count == 0 ? BigInteger.Zero : ExactVarianceWindow.Units(_previousOpen);
+        var span = Extreme(_highs, h, _lookback, true, commit) - Extreme(_lows, l, _lookback, false, commit);
         var down = R(v - up); var pairUp = up + _previousUp; var pairDown = down + _previousDown;
         var metric = new BigInteger[22];
         metric[4] = Ratio(up * range, Unit); metric[5] = Ratio((up - down) * range, Unit);

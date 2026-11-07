@@ -1,0 +1,97 @@
+{
+  "types": [
+    "MovingAverageAdaptiveQ",
+    "MovingAverageAdaptiveFilter",
+    "MovingAverageV3",
+    "ModularFilter",
+    "MultiDepthZeroLagExponentialMovingAverage",
+    "NormalizedMacd",
+    "NickRypockTrailingReverse",
+    "MovingAverageConvergenceDivergenceLeader",
+    "PercentagePriceOscillatorLeader",
+    "PercentChangeOscillator",
+    "PerformanceIndex",
+    "PremierStochasticOscillator",
+    "PrettyGoodOscillator",
+    "PriceZoneOscillator",
+    "PriceVolumeRank",
+    "PsychologicalLine"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "base_head": "09bec70f014c7dcd66a989fdaa0c47c2edcd18b0",
+  "combined_input_sha256": "a0bf53906679d6cea5cf604d186f222e352aa1db79586c21d7ba3af00879e527",
+  "manifest_sha256": "73a2a34acef2a06b0a2445572e2d5e4c31a9d03d1097f17a480a7d49d4f0f579",
+  "unit_class_counts": {
+    "SharedGeneratedAdaptiveQFilterTests": 47,
+    "SharedGeneratedV3ModularTests": 45,
+    "SharedGeneratedMultiDepthTests": 20,
+    "SharedGeneratedNormalizedNickTests": 45,
+    "SharedGeneratedMacdLeaderTests": 42,
+    "SharedGeneratedPpoLeaderTests": 16,
+    "SharedGeneratedPercentPerformanceTests": 34,
+    "SharedGeneratedPriceOscillatorsTests": 103
+  },
+  "parity_class_counts": {
+    "RemainingAdaptiveQFilterBenchmarkTests": 8,
+    "RemainingV3ModularBenchmarkTests": 8,
+    "RemainingMultiDepthBenchmarkTests": 4,
+    "RemainingNormalizedNickBenchmarkTests": 8,
+    "RemainingMacdLeaderBenchmarkTests": 4,
+    "RemainingPpoLeaderBenchmarkTests": 4,
+    "RemainingPercentPerformanceBenchmarkTests": 8,
+    "RemainingPriceOscillatorsBenchmarkTests": 20
+  },
+  "unique_check_counts": {
+    "unit": 352,
+    "finite_smoothing": 0,
+    "parity": 64,
+    "discovery": 284,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/twelfth-integrated-unit-evidence-0.trx.gz",
+    "benchmarks/results/remaining-indicators/twelfth-integrated-unit-evidence-1.trx.gz",
+    "benchmarks/results/remaining-indicators/twelfth-integrated-unit-evidence-2.trx.gz",
+    "benchmarks/results/remaining-indicators/twelfth-integrated-parity.trx.gz",
+    "benchmarks/results/remaining-indicators/twelfth-integrated-discovery.trx.gz"
+  ],
+  "production_sha256": "706c62a48f29a0c40b5a3cc074a1dffa71ea41430ba12db0dc8d26d845a4ecac",
+  "fixture_sha256": "8a966f68c5032a037919f401650b5d9acbfeb286f328b68bab9729f6743be756",
+  "input_repairs": [],
+  "context": "Combined candidate validated using preserved original evidence and explicit replacement runs. Original failures remain in their TRX; later passing replacements supersede them by test identity. Only leader validation changed after original runtime parity inputs. See scope proof and validation repair metadata. Performance remains unmeasured.",
+  "pending": [
+    "controlled raw timing",
+    "remaining rollout"
+  ],
+  "unit_evidence_sets": [
+    {
+      "path": "Z:\\StockIndicators-work\\si-twelfth-integrated-validation-20261019\\test-source-repair\\unit.trx",
+      "sha256": "beb5ae0124275888facd7b923d4496bcd2d717fba4710de97a112fb73bc94b5b"
+    },
+    {
+      "path": "Z:\\StockIndicators-work\\si-twelfth-integrated-validation-20261019\\focused-test-repair\\repair.trx",
+      "sha256": "74ce364d7a5fc881d8fb85efe867d743b349d384aee9866a7415bfd058ff0295"
+    },
+    {
+      "path": "Z:\\StockIndicators-work\\si-twelfth-leader-validator-repair-20261019\\leader.trx",
+      "sha256": "02ffac1b210210c5c736a71c229347d96b69955978acc004df872be5f4a57c99"
+    }
+  ],
+  "validation_repair": {
+    "commit": "09bec70f014c7dcd66a989fdaa0c47c2edcd18b0",
+    "receipt": "Z:\\StockIndicators-work\\si-twelfth-leader-validator-repair-20261019\\receipt.json",
+    "scope_proof": "Z:\\StockIndicators-work\\si-twelfth-leader-validator-repair-20261019\\scope-proof.json",
+    "context": "Independent leader reference only; runtime calculations unchanged. Parity on preserved pre-repair binary is reusable for unchanged runtime and benchmark sources."
+  },
+  "additional_reference_checks": 51,
+  "parity_reuse": {
+    "original_binary": "Z:\\StockIndicators-work\\si-twelfth-leader-validator-repair-20261019\\parity-production-before-validator-repair.dll",
+    "sha256": "fa5bc865439533c1f4885b0da982dd9b2e281b96a7f3485e47090159bbfaab88",
+    "current_production_sha256": "706c62a48f29a0c40b5a3cc074a1dffa71ea41430ba12db0dc8d26d845a4ecac",
+    "receipt": "Z:\\StockIndicators-work\\si-twelfth-integrated-validation-20261019\\independent-parity\\receipt.json",
+    "scope_proof": "Z:\\StockIndicators-work\\si-twelfth-leader-validator-repair-20261019\\scope-proof.json",
+    "reason": "Only independent leader validation reference/rules changed; indicator runtime and benchmark source unchanged. Completed parity used original binary, preserved here. Current binary passed109 focused leader checks."
+  }
+}

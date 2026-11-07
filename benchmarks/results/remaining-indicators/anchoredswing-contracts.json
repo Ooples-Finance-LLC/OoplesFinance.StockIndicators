@@ -1,0 +1,39 @@
+{
+  "batch": "anchored-momentum-accumulated-swing-shared-execution",
+  "types": [
+    "AnchoredMomentum",
+    "AccumulativeSwingIndex"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact Anchored Momentum and Accumulated Swing kernels for Value/Signal outputs. Preserve EMA7/signal8 stages and facade momentum clamp, original OHLC swing inputs, default SMA signal period, finite limit eligibility and component/source fallback. No kernel edits.",
+  "verification": {
+    "unit_passed": 125,
+    "fixture_passed": 8,
+    "discovery_passed": 94,
+    "gpu_passed": 100,
+    "contract_methods": 1429,
+    "hosted_methods": 1417,
+    "evidence": [
+      {
+        "file": "anchoredswing-unit.trx.gz",
+        "passed_cases": 125,
+        "trx_sha256": "02ff7faf8f55f3250b2e7f000eb4da09893249f944a50f8ba70f72413f8e6f78"
+      },
+      {
+        "file": "anchoredswing-fixture.trx.gz",
+        "passed_cases": 102,
+        "trx_sha256": "881ea23eefab50967a109b6860321c8302c9b58a69f5d058ebc34741bd1633f0"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAnchoredSwingBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "AnchoredMomentum",
+      "AccumulativeSwingIndex"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

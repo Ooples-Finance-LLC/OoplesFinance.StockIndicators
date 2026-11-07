@@ -1,0 +1,40 @@
+{
+  "batch": "pmofamily-shared-execution",
+  "types": [
+    "Pmo",
+    "PriceMomentumOscillator",
+    "DecisionPointPriceMomentumOscillator"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared exact PriceMomentumWindow replaces per-bar streaming result dictionaries for the default-average owned route. Decision Point derived periods retain checked overflow. Custom averages and sources retain fallback.",
+  "verification": {
+    "unit_passed": 58,
+    "parity_passed": 12,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "pmofamily-unit-verified.trx.gz",
+        "passed_cases": 58,
+        "trx_sha256": "a75e18ddbe2841d6a9dad24a22261c7da1d56c496db46ba113e0e1f6b4ede15b"
+      },
+      {
+        "file": "pmofamily-parity-verified.trx.gz",
+        "passed_cases": 12,
+        "trx_sha256": "73dff5e7aa5772c4b73ba4f3fa5dde95f5edc838a0ed781abb114d1e2e0cec88"
+      }
+    ],
+    "context": "Executed in the combined 113-facade working candidate; this receipt does not claim the isolated committed tree was separately built or tested.",
+    "combined_validation_base_head": "b7e13308b78c1e23f9f21cbbd9323a7d9d6548ee",
+    "current_combined_input_sha256": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+    "test_execution_input_sha256": {
+      "unit": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+      "parity": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary."
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification",
+    "remaining combined families and known MACD failures"
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "input_head": "0b25a09d766d0530393fe8e301cabf6037b0dfd0",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reused_builds": {
+    "production_source": "eda226f109a522d2c3f82c5afbbfe5190faefda0",
+    "consumer_source": "d3a640b3aad41af57ef87d750dae2e2a728e92be",
+    "provenance_file": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\parabolic-array-rollback\\reused-build-provenance.json",
+    "sha256": "c0777817ca2ffd06a9a41028060c786a3296eb8c32722bdb40f151c6ca6b0d91",
+    "note": "Production source tree exactly restored to qualified29a/eda. Unit/comparator source identical to qualifiedd3a, retaining extra list/array regressions. Reuse compiled consumer assemblies against source-matched prior production DLL; no new production build claimed. Current78unit/41parity/100GPU checks verify this assembly combination.",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-parabolic-array-rollback-20261022-reused-build-provenance.json.gz"
+  },
+  "reviewed_source_changes": [
+    "tests/ModelsTests/ParabolicClassicFastTests.cs"
+  ],
+  "parallel_batch_note": "Controlled same-runnerABBA confirmed10kregression inarray/scalarfollowup. Restore entireproductiontree exactlytoqualified29a/eda; retainnewarray/listbitwiseregressions. Source-matched priorproduction andunchangedconsumerbinaries reused withfilehashproof; currentunit/parity/GPUverify combination. No newbuild claimed.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T04:34:13.510912+00:00",
+  "unit": {
+    "passed": 78,
+    "class_counts": {
+      "ParabolicSarNumericalTests": 38,
+      "SharedGeneratedParabolicSarTests": 17,
+      "ParabolicSnapshotSharedExecutionTests": 9,
+      "ParabolicCertifiedArithmeticTests": 4,
+      "ParabolicClassicFastTests": 6,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\parabolic-array-rollback\\unit\\unit.trx",
+    "sha256": "787c978dca52078b637ee915d77dd38a1c6cfbcd0d235e9604e0b6b1602ef39a",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-parabolic-array-rollback-20261022-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 41,
+    "class_counts": {
+      "SharedParabolicSnapshotBenchmarkTests": 28,
+      "ParabolicComparisonTests": 13
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\parabolic-array-rollback\\parity\\parity.trx",
+    "sha256": "07896905473dca2059027de39e886c6032a8cdb502c4fdb30577fdc7a79db941",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-parabolic-array-rollback-20261022-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b144d89a47b27fe49d1e01cb42329752a4e2e0f97263474905807f9e2b3c77c2",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b144d89a47b27fe49d1e01cb42329752a4e2e0f97263474905807f9e2b3c77c2",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b144d89a47b27fe49d1e01cb42329752a4e2e0f97263474905807f9e2b3c77c2",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b144d89a47b27fe49d1e01cb42329752a4e2e0f97263474905807f9e2b3c77c2"
+  },
+  "source_fingerprint_sha256": "b4ff3960bf6c3767796fcef32a7844b5edc1a0a03d1ab9a94933ff0e09b8b312",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Controlled same-runnerABBA confirmed10kregression inarray/scalarfollowup. Restore entireproductiontree exactlytoqualified29a/eda; retainnewarray/listbitwiseregressions. Source-matched priorproduction andunchangedconsumerbinaries reused withfilehashproof; currentunit/parity/GPUverify combination. No newbuild claimed."
+}

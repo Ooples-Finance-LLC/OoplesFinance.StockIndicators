@@ -1,0 +1,60 @@
+{
+  "before_sha256": "c004cf59099d6ab0dacc63520ca6d50acb01abaa46c924159926b99f40bd5851",
+  "candidate_sha256": "75e913962993c707123cdae642c7fd83876fc0fb95d0df22466b1e4b439302f4",
+  "changed_baseline_rows": 4,
+  "unchanged_baseline_rows": 798,
+  "changed_builder_slots": 8,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 8,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 798,
+  "run_id": "local-ultimate-certified-ratio-control-20261025",
+  "imported_utc": "2026-10-25T14:34:19.668980+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "b8522a7d50d1ea02d6353336a7f818872afcdb22616e98848335a37ae58be6b7",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-certified-ratio-certified-local-ultimate-certified-ratio-control-20261025-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "b1b01f2c6d3b2e691977f924c533473ffa68c9d39487b2cf0167abaf30a50002",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-certified-ratio-certified-local-ultimate-certified-ratio-control-20261025-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "93f1e5c1b33f84a561cde1623b308a31e7a6224d29b3671af572dc75e135f192",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-certified-ratio-certified-local-ultimate-certified-ratio-control-20261025-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "d68025d461714f2bcbaf879223bcb09de4a4f6ea26b7a7cbe2b07d659d1eacb1",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-certified-ratio-certified-local-ultimate-certified-ratio-control-20261025-measurement.json.gz"
+    },
+    "stage-ultimate-certified-ratio-report.py": {
+      "sha256": "4eaee7d1b094be1948cf2227ae88c9f5ef8c932864974a1d75c792cd2fd49c45",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-certified-ratio-certified-local-ultimate-certified-ratio-control-20261025-stage-ultimate-certified-ratio-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-certified-ratio-certified-local-ultimate-certified-ratio-control-20261025-verify-approved-certified-report.py.gz"
+    },
+    "import-ultimate-certified-ratio-report.py": {
+      "sha256": "59338dff83c66d693dd123634df9415f4eae12bbc2d1cbc192d18a1b7952d900",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-certified-ratio-certified-local-ultimate-certified-ratio-control-20261025-import-ultimate-certified-ratio-report.py.gz"
+    },
+    "archive-ultimate-certified-ratio-control.py": {
+      "sha256": "62127075451fb0ff8fee844eb80b8c468a9244a6534ce240af36c64bf8207005",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-certified-ratio-certified-local-ultimate-certified-ratio-control-20261025-archive-ultimate-certified-ratio-control.py.gz"
+    },
+    "prove-ultimate-certified-ratio-integration.py": {
+      "sha256": "d1bdcef6a10feb05745f56ac82eea7fd8fa0a3810a516c1594afe92d40828632",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-certified-ratio-certified-local-ultimate-certified-ratio-control-20261025-prove-ultimate-certified-ratio-integration.py.gz"
+    },
+    "archive-ultimate-certified-ratio-report.py": {
+      "sha256": "f6ae080a4271df07c23595d2e7146fdeb4f436271a6eb0803dd21de236b068fc",
+      "archive": "benchmarks/results/remaining-indicators/ultimate-certified-ratio-certified-local-ultimate-certified-ratio-control-20261025-archive-ultimate-certified-ratio-report.py.gz"
+    }
+  }
+}

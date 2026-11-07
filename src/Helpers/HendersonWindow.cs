@@ -6,7 +6,7 @@ internal sealed class HendersonWindow : IDisposable
     private readonly ExactMeanAccumulator _denominator;
     private readonly PooledRingBuffer<double> _values;
 
-    internal HendersonWindow(int length)
+    internal HendersonWindow(int length, int capacityHint = int.MaxValue)
     {
         length = Math.Max(1, length);
         _weights = new System.Numerics.BigInteger[length];
@@ -20,7 +20,7 @@ internal sealed class HendersonWindow : IDisposable
             denominator.Add(1, _weights[lag]);
         }
         _denominator = denominator;
-        _values = new PooledRingBuffer<double>(length);
+        _values = new PooledRingBuffer<double>(Math.Min(length, Math.Max(1, capacityHint)));
     }
 
     internal double Next(double value, bool commit)

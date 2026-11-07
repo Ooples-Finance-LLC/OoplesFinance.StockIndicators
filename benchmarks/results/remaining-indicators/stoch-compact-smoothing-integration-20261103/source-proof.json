@@ -1,0 +1,77 @@
+{
+  "measured_source": "09b5129d6c3cfba95bb1fbe10a0afb290733d89e",
+  "integration_source_commit": "9e5c04bca61711b58bfb97fd898e8b6fd8b11d05",
+  "inventory_commit": "ec62b6767d71120b72dee315b529603215716f32",
+  "run_id": "41698498048",
+  "plan_sha256": "6c49738aaac072b7b51496d92a225da46ed850bbf670513708edcfcf8edd8c52",
+  "source_and_tests_exactly_match": true,
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "faster": 6
+  },
+  "correctness": {
+    "unit": 15,
+    "comparator": 88,
+    "actual_gpu": 100,
+    "cpu_build_run": "41696160866",
+    "gpu_location": "Actual local Radeon RX5500XT on source-bound CI-built binaries"
+  },
+  "gpu_source_sha256": "3be13e7fc02d3c666131618505ccc056e9bf5e86479be730a6c9f9fa92c67a11",
+  "inventory_tests": 8,
+  "report_imported": true,
+  "report_sha256": "23a69e80c54e9b07f9acd7b6b9d63d818a6c9f588d3915c266c56baebfe48cc8",
+  "baseline_rows_updated": 2,
+  "baseline_rows_preserved": 800,
+  "builder_slots_updated": 4,
+  "builder_slots_preserved": 1540,
+  "browser_all802_csv_and_builder_values_verified": true,
+  "javascript_errors": [],
+  "report_archives": {
+    "before.html": {
+      "sha256": "79c464e499217b3ddd8861d0d3a33e8b73a031be8014d45b29177b7759af1b88",
+      "archive": "benchmarks/results/remaining-indicators/stoch-compact-smoothing-integration-20261103/before.html.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "6ed5c00b1186a123cf1ada4fd9df0495521e58cc0231ecd080059d3014189b71",
+      "archive": "benchmarks/results/remaining-indicators/stoch-compact-smoothing-integration-20261103/browser-verification.json.gz"
+    },
+    "candidate.html": {
+      "sha256": "23a69e80c54e9b07f9acd7b6b9d63d818a6c9f588d3915c266c56baebfe48cc8",
+      "archive": "benchmarks/results/remaining-indicators/stoch-compact-smoothing-integration-20261103/candidate.html.gz"
+    },
+    "imported.json": {
+      "sha256": "ffcadee356cd6a2b600f0a31f5af778e81e3ce592df9d594039ad691d76e3e87",
+      "archive": "benchmarks/results/remaining-indicators/stoch-compact-smoothing-integration-20261103/imported.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "f848b8f6c2c42c3d7125e334a100837f5180f4797a56fd44810c3b27733efe93",
+      "archive": "benchmarks/results/remaining-indicators/stoch-compact-smoothing-integration-20261103/measurement.json.gz"
+    },
+    "refreshed-baseline.png": {
+      "sha256": "036cb137012df2c9f3aed00cf0caf2b4b5639308f11fa42b77f5e5119ba21920",
+      "archive": "benchmarks/results/remaining-indicators/stoch-compact-smoothing-integration-20261103/refreshed-baseline.png"
+    },
+    "staged.json": {
+      "sha256": "3e8a07a3758cd20953dbcea7613d2cf21af05586540f3a722ccf0503a237e017",
+      "archive": "benchmarks/results/remaining-indicators/stoch-compact-smoothing-integration-20261103/staged.json.gz"
+    },
+    "updated-pair-details.png": {
+      "sha256": "94edfe6d598e4d5c55f6881fc2f9118c146f7ad107ac22a34cd7e68aef9b642e",
+      "archive": "benchmarks/results/remaining-indicators/stoch-compact-smoothing-integration-20261103/updated-pair-details.png"
+    },
+    "verify-hosted-certified-report-20261101.py": {
+      "sha256": "f1112bb2e981aa1fa68e0a41e917e423bcd8fd0856a40df97ccd6567986a7cda",
+      "archive": "benchmarks/results/remaining-indicators/stoch-compact-smoothing-integration-20261103/verify-hosted-certified-report-20261101.py.gz"
+    },
+    "import-hosted-certified-report-20261101.py": {
+      "sha256": "380745f04a0b07f71a33dd049bdf1f3392ff9a388f5cda9849c0ae3bda66be75",
+      "archive": "benchmarks/results/remaining-indicators/stoch-compact-smoothing-integration-20261103/import-hosted-certified-report-20261101.py.gz"
+    },
+    "report.py": {
+      "sha256": "ec5151d32284558921f0d3aee547f9b18e5599acd5e506f1348946adf7a29853",
+      "archive": "benchmarks/results/remaining-indicators/stoch-compact-smoothing-integration-20261103/report.py.gz"
+    }
+  },
+  "overall_goal_complete": false
+}

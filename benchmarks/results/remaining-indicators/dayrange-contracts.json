@@ -1,0 +1,39 @@
+{
+  "batch": "average-day-range-shared-execution",
+  "types": [
+    "Adr",
+    "AverageDayRange"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share exact rolling high-minus-low mean for both aliases, round only the final mean, and skip history allocation when the full window cannot fill. Preserve signed ranges, warmup, clamps, error priority and source fallback.",
+  "verification": {
+    "unit_passed": 32,
+    "fixture_passed": 8,
+    "discovery_passed": 100,
+    "gpu_passed": 100,
+    "contract_methods": 1437,
+    "hosted_methods": 1425,
+    "evidence": [
+      {
+        "file": "dayrange-unit.trx.gz",
+        "passed_cases": 32,
+        "trx_sha256": "9847e79f2504a095c6eb07f137f886886656c92609d10528556cc21f8cc0056f"
+      },
+      {
+        "file": "dayrange-fixture.trx.gz",
+        "passed_cases": 108,
+        "trx_sha256": "5d7ec4e140fe2119ae3f3f12a16480826000c619e9f868eaf06f57d057c89ac6"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingDayRangeBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "Adr",
+      "AverageDayRange"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

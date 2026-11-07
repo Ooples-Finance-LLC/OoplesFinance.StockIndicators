@@ -32,6 +32,7 @@ public sealed class CertifiedKaufmanBinaryTests
     [InlineData(1, 0.6022, 0.0645, 10)]
     [InlineData(3, 0.6022, 0.0645, 10)]
     [InlineData(3, 0.6022, 0.0645, -10)]
+    [InlineData(3, 2, 1, 10)]
     [InlineData(2, 1, 0, 100)]
     [InlineData(2, 0, 1, -100)]
     [InlineData(2147483647, 0.6022, 0.0645, 0)]
@@ -112,6 +113,48 @@ public sealed class CertifiedKaufmanBinaryTests
             var values = new[] { .75, -.75, -.75, -.75, -.75 };
             Assert.Equal(new[] { 1d, -1, -1, -1, 0 }, values.Select(value => actual.Next(value, true)).ToArray());
             Assert.True(actual.ExactReplayUpdates > 0);
+        }
+    }
+
+    [Theory]
+    [InlineData(0d)] [InlineData(.5d)] [InlineData(1d)] [InlineData(1.5d)]
+    public void AffineEnclosureContainsIndependentRationalRecurrence(double slow)
+    {
+        var actual = new CertifiedKaufmanBinaryWindow(3, 0, slow, 10);
+        var field = typeof(CertifiedKaufmanBinaryWindow).GetField("_average",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!;
+        var gain = F.Of(slow) * F.Of(slow);
+        F average = 0;
+        var started = false;
+        foreach (var price in new[] { double.MaxValue, -double.MaxValue, double.Epsilon,
+            -double.Epsilon, 1d, -3d, 0d, 2d, 2d, -1d })
+        {
+            var value = F.Of(price);
+            var previous = started ? average : value;
+            average = previous + gain * (value - previous);
+            actual.Next(price, true);
+            var bounds = (CertifiedKaufmanBinaryWindow.Interval)field.GetValue(actual)!;
+            Assert.True(bounds.Lower.CompareTo(average) <= 0);
+            Assert.True(bounds.Upper.CompareTo(average) >= 0);
+            started = true;
+        }
+    }
+
+    [Fact]
+    public void PersistentTrendContractsBoundsWithoutExactReplay()
+    {
+        var actual = new CertifiedKaufmanBinaryWindow(20, .6022, .0645, 10);
+        for (var replay = 0; replay < 2; replay++)
+        {
+            actual.Reset();
+            // The increasing average stays above 100, its low stays zero, and
+            // its change deviation cannot approach the ten-times-average threshold.
+            for (var i = 0; i < 2000; i++)
+            {
+                if (i % 127 == 0) Assert.Equal(1d, actual.Next(100 + i, false));
+                Assert.Equal(1d, actual.Next(100 + i, true));
+            }
+            Assert.Equal(0, actual.ExactReplayUpdates);
         }
     }
 

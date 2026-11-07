@@ -1,0 +1,72 @@
+{
+  "input_head": "1d6ee0d4d5007ba9e11bdd12b05ed6c76fb2ddb7",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedMeanRelativeError.cs",
+    "src/Helpers/RoundedMeanErrorWindow.cs",
+    "src/Indicators/MovingAverageDiagnostics.cs",
+    "tests/ModelsTests/MeanDiagnosticsCertifiedTests.cs"
+  ],
+  "reused_qualification_sources": {
+    "qualified-eighteen-integration": {
+      "source": "876702915e51123dd9da97e45f491a5c6e63e1cd",
+      "note": "Published family sources unchanged; current run checks only the changed SMA boundary and current GPU/inventory contracts."
+    },
+    "eighteen-parabolic-integration": {
+      "source": "7715ede0a6cc7a1f898570f13fa7f267283e6740",
+      "note": "Published family sources unchanged; current run checks only the changed SMA boundary and current GPU/inventory contracts."
+    }
+  },
+  "parallel_batch_note": "Approved SMA follow-up: cache exact decoded samples and share aligned absolute/squared deviations in one pass. Original publication certificates and independent fallback order retained. Existing independent-fraction, overflow fallback, allocation, reset and long-history checks include fused evaluation.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T03:35:15.548650+00:00",
+  "unit": {
+    "passed": 44,
+    "class_counts": {
+      "MeanDiagnosticsCertifiedTests": 21,
+      "RollingStatisticsSharedExecutionTests": 17,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "MeanDiagnosticsScaleReductionTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-fused-current-integration\\unit\\unit.trx",
+    "sha256": "2ba1a2961d98d46ef0e4816b9c53eaa28edd0ff28d6b038d9b597014bcf84992",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-fused-current-integration-20261022-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 2,
+    "class_counts": {
+      "SharedRollingStatisticsBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-fused-current-integration\\parity\\parity.trx",
+    "sha256": "058bf5dd3a0da543eca9d502ed33cb073e80ca1addd45d47a1f875ca176fba55",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-fused-current-integration-20261022-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-fused-errors-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e8aefbc0f840127fc2b7e1a1a4d7756d47f587528c6c10ba4fe341861b135d09",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-fused-errors-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e8aefbc0f840127fc2b7e1a1a4d7756d47f587528c6c10ba4fe341861b135d09",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-fused-errors-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e8aefbc0f840127fc2b7e1a1a4d7756d47f587528c6c10ba4fe341861b135d09",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-fused-errors-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e8aefbc0f840127fc2b7e1a1a4d7756d47f587528c6c10ba4fe341861b135d09"
+  },
+  "source_fingerprint_sha256": "f235bf3788556ca1a0ec0a29ef4a664854d0f03a076f0ae724d00affae4195f2",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Exact decoded sample parts are cached and absolute/squared deviations share one aligned pass. Original quotient certificates and fallback evaluation order remain unchanged. Independent fractions, overflow fallback, zero allocation, reset and long-history checks cover the fused route. Controlled performance remains pending."
+}

@@ -1,0 +1,64 @@
+{
+  "before_sha256": "bbf3faead45f82e1fc42eea1adadc83d8914b2ffd41a5ad3166e42f44e168ec2",
+  "candidate_sha256": "21ddc4203854a8742376b75f8b753b5172e35ca74c587b169cb7e6fd789aa619",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 4,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 4,
+  "verdicts": {
+    "faster": 602,
+    "slower": 886,
+    "inconclusive": 48
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-dsma-cached-coefficients-control-20261029",
+  "imported_utc": "2026-10-30T04:34:26.366081+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "48ccb21fe48eb2dcf41c31df2eaaf3d3be2df1519cda3c54a7af8f3fd54e2801",
+      "archive": "benchmarks/results/remaining-indicators/dsma-cached-coefficients-certified-local-dsma-cached-coefficients-control-20261029-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "5031f29df57775ab7e7fb9bb253cc8d98d2f15be9b26f33c0cdfb9119440c331",
+      "archive": "benchmarks/results/remaining-indicators/dsma-cached-coefficients-certified-local-dsma-cached-coefficients-control-20261029-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "b58fbfce7746643d3758e532afaac4ec8291df6d8f4b7da1a702556bb44d7cce",
+      "archive": "benchmarks/results/remaining-indicators/dsma-cached-coefficients-certified-local-dsma-cached-coefficients-control-20261029-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "1b30c4a53475f387d607ea3242fb1c94c5a4ec6de8ba9e3c6decce30e50411bb",
+      "archive": "benchmarks/results/remaining-indicators/dsma-cached-coefficients-certified-local-dsma-cached-coefficients-control-20261029-measurement.json.gz"
+    },
+    "dsma_cached_acceptance.py": {
+      "sha256": "1b05df46fabdcb32c053cc494a746092a6c2ce9431fe741877bf62435ef134cb",
+      "archive": "benchmarks/results/remaining-indicators/dsma-cached-coefficients-certified-local-dsma-cached-coefficients-control-20261029-dsma_cached_acceptance.py.gz"
+    },
+    "stage-dsma-cached-coefficients-report-20261029.py": {
+      "sha256": "fa7e0959facafe242e985b85dd79de08216d376f9348fd1f1cd1f8781d8e40ed",
+      "archive": "benchmarks/results/remaining-indicators/dsma-cached-coefficients-certified-local-dsma-cached-coefficients-control-20261029-stage-dsma-cached-coefficients-report-20261029.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/dsma-cached-coefficients-certified-local-dsma-cached-coefficients-control-20261029-verify-approved-certified-report.py.gz"
+    },
+    "import-dsma-cached-coefficients-report-20261029.py": {
+      "sha256": "7412e0a6944017f77676460c9600bbfe272d27aa9a6500cf8a9ff7875c6446c0",
+      "archive": "benchmarks/results/remaining-indicators/dsma-cached-coefficients-certified-local-dsma-cached-coefficients-control-20261029-import-dsma-cached-coefficients-report-20261029.py.gz"
+    },
+    "archive-dsma-cached-coefficients-control-20261029.py": {
+      "sha256": "b627c93a7be7fd5f16f722537e12d78ed7e9f587401ea01a7e41f8d94e895eb4",
+      "archive": "benchmarks/results/remaining-indicators/dsma-cached-coefficients-certified-local-dsma-cached-coefficients-control-20261029-archive-dsma-cached-coefficients-control-20261029.py.gz"
+    },
+    "prove-dsma-cached-coefficients-integration-20261029.py": {
+      "sha256": "92a9660d4842872e7548f0c4791b467464499f9415416de175f385fc37937582",
+      "archive": "benchmarks/results/remaining-indicators/dsma-cached-coefficients-certified-local-dsma-cached-coefficients-control-20261029-prove-dsma-cached-coefficients-integration-20261029.py.gz"
+    },
+    "archive-dsma-cached-coefficients-report-20261029.py": {
+      "sha256": "907a8928e948e6769b9750e62c96edccacf697d4ad5c30dd37c9dcaeede48806",
+      "archive": "benchmarks/results/remaining-indicators/dsma-cached-coefficients-certified-local-dsma-cached-coefficients-control-20261029-archive-dsma-cached-coefficients-report-20261029.py.gz"
+    }
+  }
+}

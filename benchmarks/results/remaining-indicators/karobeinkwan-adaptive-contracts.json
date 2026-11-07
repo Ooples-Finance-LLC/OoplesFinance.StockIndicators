@@ -1,0 +1,27 @@
+{
+  "batch": "karobeinkwan-shared-execution",
+  "types": [
+    "KarobeinOscillator",
+    "KwanIndicator"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "verification": {
+    "unit_passed": 47,
+    "parity_passed": 8,
+    "shared_discovery_passed": 257,
+    "shared_gpu_passed": 100,
+    "inventory_passed": 6,
+    "target": "Release/net10.0",
+    "receipt": "ninth-adaptive-contracts.json",
+    "unit_results_fresh": true,
+    "unit_input_sha256": "14c533a873bff44d8a6aaa2ab36b770614b2529529e2fe8b0a25aac1f657582c",
+    "context": "Karobein units run fresh; Kaufman units reused from completed v2 cases with source-change audit. Parity and shared checks run on adaptive candidate. Isolated commits not separately built. Guppy/MACD fixes remain separately unverified.",
+    "combined_input_sha256": "97353f47b34fa6ae8c2bd2d0ff74ab6bd18c11c1dd5fdc79a7bb6382ad1ca801",
+    "validated_combined_input_sha256": "14c533a873bff44d8a6aaa2ab36b770614b2529529e2fe8b0a25aac1f657582c"
+  },
+  "pending": [
+    "controlled raw timing",
+    "remaining rollout",
+    "Guppy and MACD numerical failures"
+  ]
+}

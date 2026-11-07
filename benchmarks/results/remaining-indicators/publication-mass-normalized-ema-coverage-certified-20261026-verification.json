@@ -1,0 +1,58 @@
+{
+  "input_head": "b8a0cd963bbc2f7dc8366ec1295c290a1634fb37",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedMassNormalizedEmaBenchmarks.cs",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/MassNormalizedEmaBenchmarkTests.cs",
+    "src/OoplesFinance.StockIndicators.csproj"
+  ],
+  "batch_note": "Compensated/explicit-alpha EMA coverage and master dependency alignment; six existing numerical regression cases, four new constructor fixture cases, existing mass-normalized comparisons, GPU100 and inventory8. No speed claim before separate controlled measurements.",
+  "step": "complete",
+  "updated_utc": "2026-10-27T03:33:40.847650+00:00",
+  "unit": {
+    "passed": 6,
+    "class_counts": {
+      "MassNormalizedStageExecutionTests": 6
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\mass-normalized-ema-coverage\\unit\\unit.trx",
+    "sha256": "082763ca6e574b6d96159fb8d76e8199675bf73eab281554503d57c788d888e9",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-mass-normalized-ema-coverage-certified-20261026-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 20,
+    "class_counts": {
+      "MassNormalizedComparisonTests": 16,
+      "MassNormalizedEmaBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\mass-normalized-ema-coverage\\parity\\parity.trx",
+    "sha256": "5bd7604043df7578fada88fece3cd2360d2e55663d19bfc2defb67d8d14be4d2",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-mass-normalized-ema-coverage-certified-20261026-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mass-normalized-ema-coverage-20261026\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0d029a30ef1524f55ef39b55ba3005cc2c2781ae4ff9bc9bd991545b6c1d548b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mass-normalized-ema-coverage-20261026\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0d029a30ef1524f55ef39b55ba3005cc2c2781ae4ff9bc9bd991545b6c1d548b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mass-normalized-ema-coverage-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0d029a30ef1524f55ef39b55ba3005cc2c2781ae4ff9bc9bd991545b6c1d548b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mass-normalized-ema-coverage-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0d029a30ef1524f55ef39b55ba3005cc2c2781ae4ff9bc9bd991545b6c1d548b"
+  },
+  "source_fingerprint_sha256": "42bc48391afe24995c1d29565d10a3f1276bd07c212c54fc1d798132c1be0ddd",
+  "inventory_tests_passed": 8,
+  "performance": "See separate local-mass-normalized-ema-coverage-20261026 timing evidence; correctness alone does not establish competitor speed.",
+  "evidence_note": "Compensated/explicit-alpha EMA coverage and master dependency alignment; six existing numerical regression cases, four new constructor fixture cases, existing mass-normalized comparisons, GPU100 and inventory8. No speed claim before separate controlled measurements. Correctness checks passed. Constructor-specific timings are archived separately; seeded EMA measurements are unchanged."
+}

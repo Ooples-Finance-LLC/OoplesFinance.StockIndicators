@@ -1,0 +1,160 @@
+{
+  "stage": "directionaltrend",
+  "status": "reviewed-same-library-only",
+  "archive_sha256": "31dba763bb6dab8b830f45adaa52ebae9ec9019d521f7b1dd6b3c453f2a316b8",
+  "candidate_base_commit": "7af73507777ab43dcdb8730c576566feddcf1f97",
+  "candidate_input_sha256": "766bf7006df16711e91b86c07f83e351dc2019699347abbc5c80a46aad3de270",
+  "commit_is_base_only": true,
+  "candidate_manifest_sha256": "9914d38ad0e95daf38e0e0ae89388f0e329281eb627fc680a89ea4f2862c1b30",
+  "comparisons": [
+    {
+      "operation": "DirectionalTrendIndex",
+      "count": 1000,
+      "history": "Full",
+      "latency_result": "overlapping-intervals",
+      "shared_to_legacy_mean_ratio": 0.8768507756869542,
+      "mean_latency_delta_ns": -123696.36284722225,
+      "allocation_delta_bytes": -90592,
+      "shared_to_legacy_allocation_ratio": 0.3973029252682771,
+      "legacy": {
+        "mean_ns": 1004442.890625,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 1004442.890625,
+          "StandardError": 29207.29498780558,
+          "Level": 12,
+          "Margin": 139637.52416983174,
+          "Lower": 864805.3664551682,
+          "Upper": 1144080.4147948318
+        },
+        "allocated_bytes": 150311
+      },
+      "shared": {
+        "mean_ns": 880746.5277777778,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 880746.5277777778,
+          "StandardError": 9572.009439896096,
+          "Level": 12,
+          "Margin": 48255.42317139376,
+          "Lower": 832491.104606384,
+          "Upper": 929001.9509491716
+        },
+        "allocated_bytes": 59719
+      }
+    },
+    {
+      "operation": "DirectionalTrendIndex",
+      "count": 1000,
+      "history": "LatestOnly",
+      "latency_result": "overlapping-intervals",
+      "shared_to_legacy_mean_ratio": 1.00251644861001,
+      "mean_latency_delta_ns": 2196.321614583372,
+      "allocation_delta_bytes": -140017,
+      "shared_to_legacy_allocation_ratio": 0.07079669509241132,
+      "legacy": {
+        "mean_ns": 872786.1979166666,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 872786.1979166666,
+          "StandardError": 9044.492499713042,
+          "Level": 12,
+          "Margin": 45596.04915609939,
+          "Lower": 827190.1487605672,
+          "Upper": 918382.2470727661
+        },
+        "allocated_bytes": 150685
+      },
+      "shared": {
+        "mean_ns": 874982.51953125,
+        "confidence_interval": {
+          "N": 8,
+          "Mean": 874982.51953125,
+          "StandardError": 5874.571420985899,
+          "Level": 12,
+          "Margin": 31768.992087843806,
+          "Lower": 843213.5274434062,
+          "Upper": 906751.5116190938
+        },
+        "allocated_bytes": 10668
+      }
+    },
+    {
+      "operation": "DirectionalTrendIndex",
+      "count": 10000,
+      "history": "Full",
+      "latency_result": "overlapping-intervals",
+      "shared_to_legacy_mean_ratio": 0.9831934263010037,
+      "mean_latency_delta_ns": -171057.7272727266,
+      "allocation_delta_bytes": -813535,
+      "shared_to_legacy_allocation_ratio": 0.4097680455565463,
+      "legacy": {
+        "mean_ns": 10178025,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 10178025,
+          "StandardError": 409558.66331468447,
+          "Level": 12,
+          "Margin": 1958064.1675802465,
+          "Lower": 8219960.832419753,
+          "Upper": 12136089.167580247
+        },
+        "allocated_bytes": 1378331
+      },
+      "shared": {
+        "mean_ns": 10006967.272727273,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 10006967.272727273,
+          "StandardError": 377556.62683233863,
+          "Level": 12,
+          "Margin": 1805065.2286284147,
+          "Lower": 8201902.044098859,
+          "Upper": 11812032.501355689
+        },
+        "allocated_bytes": 564796
+      }
+    },
+    {
+      "operation": "DirectionalTrendIndex",
+      "count": 10000,
+      "history": "LatestOnly",
+      "latency_result": "overlapping-intervals",
+      "shared_to_legacy_mean_ratio": 1.057478369577783,
+      "mean_latency_delta_ns": 495363.70370370336,
+      "allocation_delta_bytes": -1294665,
+      "shared_to_legacy_allocation_ratio": 0.06046714485176939,
+      "legacy": {
+        "mean_ns": 8618262.962962963,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 8618262.962962963,
+          "StandardError": 74083.83879070671,
+          "Level": 12,
+          "Margin": 373479.25881753775,
+          "Lower": 8244783.704145425,
+          "Upper": 8991742.221780501
+        },
+        "allocated_bytes": 1377988
+      },
+      "shared": {
+        "mean_ns": 9113626.666666666,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 9113626.666666666,
+          "StandardError": 284686.69418460026,
+          "Level": 12,
+          "Margin": 1361062.1989002742,
+          "Lower": 7752564.467766392,
+          "Upper": 10474688.865566941
+        },
+        "allocated_bytes": 83323
+      }
+    }
+  ],
+  "qualification": "Same-library legacy/shared comparison only. Native comparison, correctness, and hosted checks remain separate.",
+  "latency_wins": 0,
+  "latency_losses": 0,
+  "overlapping_intervals": 4,
+  "allocation_regressions": 0
+}

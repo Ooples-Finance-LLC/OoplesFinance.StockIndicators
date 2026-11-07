@@ -1,0 +1,39 @@
+{
+  "batch": "contract-high-low-shared-execution",
+  "types": [
+    "ContractHigh",
+    "ContractLow"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing prefix price extreme state for running high/low contracts. Finite-domain sentinel equivalence, strict comparisons and earliest equal values preserve signed zeros; source fallback and ownership remain intact.",
+  "verification": {
+    "unit_passed": 30,
+    "fixture_passed": 8,
+    "discovery_passed": 104,
+    "gpu_passed": 100,
+    "contract_methods": 1443,
+    "hosted_methods": 1431,
+    "evidence": [
+      {
+        "file": "contractextrema-unit.trx.gz",
+        "passed_cases": 30,
+        "trx_sha256": "9a42872e771072ef66f76040ba425cae0185024f94f3109b05c7bce58e182b94"
+      },
+      {
+        "file": "contractextrema-fixture.trx.gz",
+        "passed_cases": 112,
+        "trx_sha256": "9a5173f8c16d75c8b43f6d2f0a79bb09e780380a1f6631c9ae1803a674b7ef92"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingContractExtremaBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "ContractHigh",
+      "ContractLow"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

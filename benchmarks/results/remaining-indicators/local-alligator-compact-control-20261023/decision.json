@@ -1,0 +1,291 @@
+{
+  "status": "candidate-rejected-or-inconclusive",
+  "sources": {
+    "old": "851f49fa359a31b963ad43af449c78db9979bf0a",
+    "new": "e5b68abe3b99fe54d2e515539812de02d3d63dc2"
+  },
+  "candidate_code_source": "62beed447df2c993a12fa606ee357160acf6da7d",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "SharedAlligatorBenchmarks",
+      "pair": "Skender.GetAlligator",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.1891370703125,
+        0.203940234375
+      ],
+      "new_means_ms": [
+        0.44621,
+        0.38900603298611114
+      ],
+      "verdict": "slower"
+    },
+    {
+      "fixture": "SharedAlligatorBenchmarks",
+      "pair": "Skender.GetAlligator",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.178075068359375,
+        0.19900046875
+      ],
+      "new_means_ms": [
+        0.4414923828125,
+        0.379770234375
+      ],
+      "verdict": "slower"
+    },
+    {
+      "fixture": "SharedAlligatorBenchmarks",
+      "pair": "Skender.GetAlligator",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        1.83171421875,
+        1.963890625
+      ],
+      "new_means_ms": [
+        4.197962847222222,
+        3.79845375
+      ],
+      "verdict": "slower"
+    },
+    {
+      "fixture": "SharedAlligatorBenchmarks",
+      "pair": "Skender.GetAlligator",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        1.7758434375,
+        1.9072796875
+      ],
+      "new_means_ms": [
+        4.187965972222222,
+        3.708864453125
+      ],
+      "verdict": "slower"
+    },
+    {
+      "fixture": "SharedAlligatorBenchmarks",
+      "pair": "Skender.GetGator",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.26465806640625,
+        0.27224294704861113
+      ],
+      "new_means_ms": [
+        0.5058914496527778,
+        0.48238706597222225
+      ],
+      "verdict": "slower"
+    },
+    {
+      "fixture": "SharedAlligatorBenchmarks",
+      "pair": "Skender.GetGator",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.26161658203125,
+        0.2646657470703125
+      ],
+      "new_means_ms": [
+        0.4979511067708333,
+        0.47018843315972225
+      ],
+      "verdict": "slower"
+    },
+    {
+      "fixture": "SharedAlligatorBenchmarks",
+      "pair": "Skender.GetGator",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        2.46711359375,
+        2.64004984375
+      ],
+      "new_means_ms": [
+        4.9631975,
+        4.759916796875
+      ],
+      "verdict": "slower"
+    },
+    {
+      "fixture": "SharedAlligatorBenchmarks",
+      "pair": "Skender.GetGator",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        2.46718640625,
+        2.56810640625
+      ],
+      "new_means_ms": [
+        4.871756875,
+        4.676692708333333
+      ],
+      "verdict": "slower"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetAlligator",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        1.25511,
+        1.1838
+      ],
+      "new_means_ms": [
+        4.63687,
+        4.73378
+      ],
+      "verdict": "slower"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetAlligator",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        2.6705555555555556,
+        2.4819
+      ],
+      "new_means_ms": [
+        5.32315,
+        5.3832
+      ],
+      "verdict": "slower"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetGator",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        2.43115,
+        2.3806833333333337
+      ],
+      "new_means_ms": [
+        6.2143,
+        3.35142
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetGator",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        3.4541166666666667,
+        3.2507444444444444
+      ],
+      "new_means_ms": [
+        5.869975,
+        6.04188
+      ],
+      "verdict": "slower"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "f9051125e5ca5788dcc5ad9075952249595b7e2b8359888aee88589e0896878f",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "7a4c762026608006fdf689771376d70f4fc3ebb846324ef8fd5592687e39fc8c",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "ecd67f2e8b6f2cf18a478eecd69e5d4ab16f61ddd961843259ff23c02f11fad8",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "869c98604ef3f083e8946ab46703bace85b78b3e74103599e896b422ed475ba3",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/verified-summary.json.gz"
+    },
+    "round0-old-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json": {
+      "sha256": "7ae1bd7dff1dbaa875cf279e04af8516a76d2636ab2488bdc4fbbccd9daeeb40",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round0-old-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "5c2070d5cbc57f23a02ba5ea537fc20a7748309889f4ebdd0105517e6dfab8bb",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json": {
+      "sha256": "da229fa847269ef1e15ab646c39c3b9ac284dca15a07c3495c23b06d6866aa46",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round1-new-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "7bc91b1d609b1716adb4b02c3ed767889ab27d092130706c4d3b04f2d9cec205",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json": {
+      "sha256": "0ed9ca98787979cf96db44a909d7259d2dfdd9e3300942004d62955155dcae27",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round2-new-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "27b177abf3ea9037d79acb52e3eebe3ed2d831b8f492c35987df20fd04854135",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json": {
+      "sha256": "0629746b5a002c3fd913e96d8448ae75785add7c6663d482d8e9dabdc0cb31a5",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round3-old-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "b76a2989c13d8a8562cd74a4e3bb3ce8a20cb66c41bf2d2a823ef5a7197868a9",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "7686097626d7ecd1341e5cebfa17ce6664f8ae0f4b1522ecd1496f119f6dbb4f",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round0-old-SharedAlligatorBenchmarks.log": {
+      "sha256": "8bf308d326a386162b703a5d14a59080f6f2c38fa980fe9800d6458049fe4df0",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round0-old-SharedAlligatorBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "8ee217a272e358bdaeb2455f5eab635086437ef4f335599b4576cf56e099fa88",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-SharedAlligatorBenchmarks.log": {
+      "sha256": "6689d420d7f3912d7c97c954f6454cdc8c259cd3f2acbd552dd5afadfa9df251",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round1-new-SharedAlligatorBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "2bdd83b71cce14d6db2b0a0abbc014e49ef547e92666b658f3f7517b43f787c1",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-SharedAlligatorBenchmarks.log": {
+      "sha256": "5749a711c4088c95cbeaf553cdbebf8033a690db33c87b52760d3fe0fc712486",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round2-new-SharedAlligatorBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "80096a03173c0a336caff5954fb9fd5aa63b0586cef6120bda562782932a52df",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-SharedAlligatorBenchmarks.log": {
+      "sha256": "d27f0f049c9d229972dec9e792463745a56a29f2e6451f780e2b1e31ebb95a60",
+      "archive": "benchmarks/results/remaining-indicators/local-alligator-compact-control-20261023/round3-old-SharedAlligatorBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-alligator-compact-control.py": "82c4f9db03985a96ef5d332bd87a8a04ea181c3c7564ee965ea96966ab8463fd",
+    "verify-alligator-compact-control.py": "0ab69d14b9d655640f05d4fc9cba4b03aa94548288931cfc6770313b99327983"
+  },
+  "report_imported": false,
+  "production_integrated": false,
+  "candidate_patch_sha256": "e62765f25b4e07624e8fd74f3c44ae114f05a6dda82ab9c95b4a2ee88ab160ec",
+  "qualification_archives": {
+    "validate-alligator-compact.py": "15052b957bc8c2c46e5a820b3adbd4fb42de6b22db120c910f3713449bc8eba6",
+    "archive-alligator-compact-qualification.py": "a69220c9161691467d3c060ef5885c5feb41e8967e02ac9a930678d45cabe947",
+    "status.json": "bac61a79b8282ceec5de88f93c6766f1635985efd8e40665257f0e9e7b33d58d",
+    "publication-alligator-compact-certified-20261022-parity.trx.gz": "6beb5073a93c7b1a900c37713b629d7446002216cb82ca4d126258979f7c5473",
+    "publication-alligator-compact-certified-20261022-unit.trx.gz": "66c6e0634e640da1a649de788976dfc53aa491bba35b59e65f7955c754c06cb5",
+    "publication-alligator-compact-certified-20261022-verification.json": "3d4289b51f2b6868624fe5688e18c9c11bf299672d410f3bb01c8aac9a07595a",
+    "gpu.trx.gz": "ed2305239bc6ff94ddf4fadbafd6888a585a3e3122cc631fb91d84b23756b61b",
+    "receipt.json": "de9cf0fe6d61633cce92a45c435aa17d150a5293b58c6a89d238cdf191cb5d84"
+  },
+  "decision_reason": "11 slower configurations and1 inconclusive; reject candidate, retain published implementation and report measurements."
+}

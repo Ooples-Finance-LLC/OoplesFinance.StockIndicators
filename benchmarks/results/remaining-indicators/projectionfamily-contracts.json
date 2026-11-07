@@ -1,0 +1,41 @@
+{
+  "batch": "projection-family-shared-execution",
+  "types": [
+    "ProjectionBands",
+    "ProjectionOscillator",
+    "ProjectionBandwidth"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact projection family kernel for one update across related outputs. Preserve lag pairing, weighted signal stages, observed history, hidden overflow ratios, warmup, original fields, fallback and ownership.",
+  "verification": {
+    "unit_passed": 137,
+    "fixture_passed": 12,
+    "discovery_passed": 133,
+    "gpu_passed": 100,
+    "contract_methods": 1472,
+    "hosted_methods": 1460,
+    "evidence": [
+      {
+        "file": "projectionfamily-unit.trx.gz",
+        "passed_cases": 137,
+        "trx_sha256": "913b7ce7eb9da94e673f5c456ffa1aae37b4abca07710378ef4df98366a63314"
+      },
+      {
+        "file": "projectionfamily-fixture.trx.gz",
+        "passed_cases": 145,
+        "trx_sha256": "d6aa3aec7400c5dd8e0a782794f31780f6def92eb6100c1313579690e58d6bb6"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingProjectionFamilyBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "ProjectionBands",
+      "ProjectionOscillator",
+      "ProjectionBandwidth"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

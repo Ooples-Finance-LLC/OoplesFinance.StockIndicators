@@ -8,6 +8,20 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 [Collection("IndicatorValuesDispatch")]
 public sealed class SmoothedStochasticSharedExecutionTests
 {
+    [Theory]
+    [InlineData(1,1,1)] [InlineData(3,5,7)] [InlineData(14,3,3)]
+    public async Task CompactSmoothingRetainsScaleTransitionsAndStageRounding(int period,int k,int d)
+    {
+        int[] exponents = [-1074,-500,0,500,900];
+        var bars = Enumerable.Range(0,321).Select(i =>
+        {
+            int exponent = exponents[i/65%exponents.Length];
+            return new Bar(default,0,Math.ScaleB(16+i%7,exponent),Math.ScaleB(8+i%3,exponent),
+                Math.ScaleB(12+i%5,exponent),1);
+        }).ToArray();
+        await CheckReference(bars,new WindowStochasticKdj(period,k,d,false,2.5,.5));
+    }
+
     private static IIndicator Create(int kind,int period,int k=3,int d=3) => kind switch
     {
         0 => new WindowStochasticKdj(period,k,d),

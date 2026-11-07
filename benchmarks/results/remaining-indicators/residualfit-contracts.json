@@ -1,0 +1,37 @@
+{
+  "batch": "generated-adaptive-and-residual-regression",
+  "types": [
+    "R2AdaptiveRegression",
+    "KaufmanAdaptiveLeastSquaresMovingAverage",
+    "RegressionOscillator",
+    "KaufmanAdaptiveCorrelationOscillator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing R2 adaptive and Kaufman weighted-moment kernels. Compute all Kaufman correlation outputs in one pass in IndexSt/SrcSt/Kaco order. Regression Oscillator uses compact exact fit residuals with observed history for unfillable periods. Preserve default averaging, custom-average fallback, exact outputs, startup and error priority.",
+  "verification": {
+    "unit_passed": 227,
+    "fixture_passed": 16,
+    "discovery_passed": 54,
+    "gpu_passed": 100,
+    "contract_methods": 1389,
+    "hosted_methods": 1377,
+    "evidence": [
+      {
+        "file": "residualfit-unit.trx.gz",
+        "passed_cases": 227,
+        "trx_sha256": "efb93e5e79fa6defb1ba922babe1f1a02c8f5674983304df332b513d3321160a"
+      },
+      {
+        "file": "residualfit-fixture.trx.gz",
+        "passed_cases": 70,
+        "trx_sha256": "f290d50c141a30b08c6f99b42f045f870845e6d4b741986cef2b1235c16a5248"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingResidualFitBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

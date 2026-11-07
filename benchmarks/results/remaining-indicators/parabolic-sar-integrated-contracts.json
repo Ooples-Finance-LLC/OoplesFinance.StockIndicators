@@ -1,0 +1,29 @@
+{
+  "types": [
+    "ParabolicSar"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "2a0203594013bdafff0153e9a4cde262ea2f8081",
+  "combined_input_sha256": "42708ceffd53f6cf53ed6a2f3cbc16f247b82c5593b56bc3338b4e18b760c348",
+  "benchmark_fixture": {
+    "type": "RemainingParabolicSarBenchmarks",
+    "operations": [
+      "ParabolicSar"
+    ]
+  },
+  "checks": {
+    "unit": 55,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/parabolic-sar-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/parabolic-sar-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

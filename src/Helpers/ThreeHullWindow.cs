@@ -9,10 +9,10 @@ internal sealed class ThreeHullWindow : IDisposable
     internal static int Period(int length) => Math.Max(1, (int)Math.Ceiling(length / 2d));
     internal static int Third(int period) => Math.Max(1, (int)Math.Ceiling(period / 3d));
     internal static int Half(int period) => Math.Max(1, (int)Math.Ceiling(period / 2d));
-    internal ThreeHullWindow(MovingAvgType kind, int length)
+    internal ThreeHullWindow(MovingAvgType kind, int length, int capacityHint = int.MaxValue)
     {
         var p = Period(length); var periods = new[] { Third(p), Half(p), p, p };
-        if (StrengthWindow.Supports(kind)) _averages = periods.Select(p => new RocBankAverage(kind, p, int.MaxValue)).ToArray();
+        if (StrengthWindow.Supports(kind)) _averages = periods.Select(p => new RocBankAverage(kind, p, capacityHint)).ToArray();
         else _fallbacks = periods.Select(p => MovingAverageSmootherFactory.Create(kind, p)).ToArray();
     }
     private RocBankValue Smooth(RocBankValue value, int stage, bool commit) => _averages is null

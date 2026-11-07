@@ -1,0 +1,177 @@
+{
+  "input_head": "6bbcf3419b3d351736ed151c6bb319d17cf2b9cd",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "parallel_batch_note": "Integrate qualified Vervoort candles and RMO/QQE with published kernels; preserve independent numerical receipts, run combined dispatch/range tests and 20 new parity cases plus current-source GPU.",
+  "reused_numerical_qualifications": {
+    "e0a0aa672074c8c2795a3edd49d887f4a7a9d82c": {
+      "source_changes": [
+        "src/Helpers/CertifiedSwami.cs",
+        "src/Helpers/CertifiedVervoortModified.cs",
+        "src/Helpers/CertifiedVervoortSmoothed.cs",
+        "src/Helpers/CertifiedVolatilityMomentum.cs",
+        "src/Helpers/CertifiedVolumePositiveNegative.cs",
+        "src/Helpers/SwamiWindow.cs",
+        "src/Helpers/VervoortModifiedWindow.cs",
+        "src/Helpers/VervoortSmoothedWindow.cs",
+        "src/Helpers/VolatilityMomentumWindow.cs",
+        "src/Helpers/VolumePositiveNegativeWindow.cs",
+        "src/Indicators/ValuesBarExecution.GeneratedStates.cs",
+        "src/Indicators/ValuesBarExecution.SwamiTdi.cs",
+        "src/Indicators/ValuesBarExecution.VervoortCandles.cs",
+        "src/Indicators/ValuesBarExecution.VolatilityMomentum.cs",
+        "src/Indicators/ValuesBarExecution.VolumePositiveNegative.cs",
+        "src/Indicators/ValuesBarExecution.cs"
+      ],
+      "qualification": {
+        "passed": 158,
+        "class_counts": {
+          "RmoQqeCertifiedTests": 14,
+          "QqeNumericalTests": 80,
+          "RmoNumericalTests": 40,
+          "SharedGeneratedRmoQqeTests": 20,
+          "ComparisonFrameworkCompatibilityTests": 4
+        },
+        "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\rmo-qqe-certified\\unit\\unit.trx",
+        "sha256": "9082b82cc10a3e2ad1abcc30313474e8247e1313b5aa5742db268d02023479de"
+      },
+      "note": "Only the other independently qualified family and reviewed dispatch additions changed; mathematical helpers and numerical assertions for this family are unchanged."
+    },
+    "c596070561a7b44cad4618095029251595a35058": {
+      "source_changes": [
+        "src/Helpers/CertifiedRmoQqe.cs",
+        "src/Helpers/CertifiedVervoortSmoothed.cs",
+        "src/Helpers/QqeWindow.cs",
+        "src/Helpers/RmoWindow.cs",
+        "src/Helpers/VervoortSmoothedWindow.cs",
+        "src/Indicators/ValuesBarExecution.GeneratedStates.cs",
+        "src/Indicators/ValuesBarExecution.RmoQqe.cs",
+        "src/Indicators/ValuesBarExecution.VervoortCandles.cs",
+        "src/Indicators/ValuesBarExecution.cs"
+      ],
+      "qualification": {
+        "passed": 71,
+        "class_counts": {
+          "SharedGeneratedKalmanSmootherTests": 10,
+          "SharedGeneratedVolatilityMomentumTests": 13,
+          "SharedGeneratedSwamiTdiTests": 20,
+          "SharedGeneratedVolumePositiveNegativeTests": 13,
+          "SharedGeneratedVervoortModifiedTests": 11,
+          "ComparisonFrameworkCompatibilityTests": 4
+        },
+        "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\volatility-integration\\unit\\unit.trx",
+        "sha256": "cdaeeddaca90a33e4585503aa10553b1f5dc1609951e77cdd9b296f88ccdcbd4"
+      },
+      "note": "Only the other independently qualified family and reviewed dispatch additions changed; mathematical helpers and numerical assertions for this family are unchanged."
+    },
+    "3700798cfd417935133a2ab8ee0f4bd4eef440a5": {
+      "source_changes": [
+        "src/Helpers/CertifiedRmoQqe.cs",
+        "src/Helpers/CertifiedSwami.cs",
+        "src/Helpers/CertifiedVervoortModified.cs",
+        "src/Helpers/CertifiedVolatilityMomentum.cs",
+        "src/Helpers/CertifiedVolumePositiveNegative.cs",
+        "src/Helpers/QqeWindow.cs",
+        "src/Helpers/RmoWindow.cs",
+        "src/Helpers/SwamiWindow.cs",
+        "src/Helpers/VervoortModifiedWindow.cs",
+        "src/Helpers/VolatilityMomentumWindow.cs",
+        "src/Helpers/VolumePositiveNegativeWindow.cs",
+        "src/Indicators/ValuesBarExecution.GeneratedStates.cs",
+        "src/Indicators/ValuesBarExecution.RmoQqe.cs",
+        "src/Indicators/ValuesBarExecution.SwamiTdi.cs",
+        "src/Indicators/ValuesBarExecution.VolatilityMomentum.cs",
+        "src/Indicators/ValuesBarExecution.VolumePositiveNegative.cs"
+      ],
+      "qualification": {
+        "passed": 277,
+        "class_counts": {
+          "SharedGeneratedVolumeFlowTests": 54,
+          "SharedGeneratedVervoortCandlesTests": 31,
+          "VervoortSmoothedNumericalTests": 103,
+          "ComparisonFrameworkCompatibilityTests": 4,
+          "VervoortCandleNumericalTests": 63,
+          "SharedGeneratedVervoortModifiedTests": 11,
+          "VervoortSmoothedCertifiedTests": 11
+        },
+        "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\vervoort-smoothed-certified\\unit\\unit.trx",
+        "sha256": "b4e1fca1085cd2bd9cb99b2d1a8641a8737277ca282d072512901cd8abf76ded"
+      },
+      "note": "Only the other independently qualified family and reviewed dispatch additions changed; mathematical helpers and numerical assertions for this family are unchanged."
+    }
+  },
+  "reused_published_parity": {
+    "source": "c596070561a7b44cad4618095029251595a35058",
+    "qualification": {
+      "passed": 431,
+      "class_counts": {
+        "RemainingBenchmarkDiscoveryTests": 407,
+        "RemainingVolatilityMomentumBenchmarkTests": 4,
+        "RemainingVervoortModifiedBenchmarkTests": 4,
+        "RemainingSwamiTdiBenchmarkTests": 8,
+        "RemainingKalmanSmootherBenchmarkTests": 4,
+        "RemainingVolumePositiveNegativeBenchmarkTests": 4
+      },
+      "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\volatility-integration\\parity\\parity.trx",
+      "sha256": "b3ba1330b897d37ad58d1c4e5a97a29f616edad7eeac01ccf4031c6a4c71f73d"
+    },
+    "note": "The reviewed diff adds RMO/QQE and Vervoort candle helpers, dispatch entries, and candle range detection. Existing family helpers are byte-identical; combined generated-state tests cover dispatch integration. Avoid repeating unchanged long-history checks."
+  },
+  "step": "complete",
+  "updated_utc": "2026-10-22T00:04:00.072975+00:00",
+  "unit": {
+    "passed": 176,
+    "class_counts": {
+      "SharedGeneratedVolumePositiveNegativeTests": 13,
+      "SharedGeneratedVolumeFlowTests": 54,
+      "SharedGeneratedVolatilityMomentumTests": 13,
+      "SharedGeneratedVervoortCandlesTests": 31,
+      "SharedGeneratedRmoQqeTests": 20,
+      "SharedGeneratedKalmanSmootherTests": 10,
+      "SharedGeneratedVervoortModifiedTests": 11,
+      "SharedGeneratedSwamiTdiTests": 20,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\vervoort-smoothed-integration\\unit\\unit.trx",
+    "sha256": "07444e809229fc7077bd4ae9f98d072003c17ae64c30a5a171124cdc330e9b8f",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-vervoort-smoothed-integration-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 429,
+    "class_counts": {
+      "RemainingBenchmarkDiscoveryTests": 409,
+      "RemainingVervoortCandlesBenchmarkTests": 12,
+      "RemainingRmoQqeBenchmarkTests": 8
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\vervoort-smoothed-integration\\parity\\parity.trx",
+    "sha256": "3e34766e1e81ca970b8dbc9c95b30573ec055fc3909d63d335f8026cb96e2843",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-vervoort-smoothed-integration-20261021-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vervoort-smoothed-certified-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "fff12d1edc4154b198ed79e6d0040517baf8f6c477185b18a68a6023d60ca738",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vervoort-smoothed-certified-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "fff12d1edc4154b198ed79e6d0040517baf8f6c477185b18a68a6023d60ca738",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vervoort-smoothed-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "fff12d1edc4154b198ed79e6d0040517baf8f6c477185b18a68a6023d60ca738",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vervoort-smoothed-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "fff12d1edc4154b198ed79e6d0040517baf8f6c477185b18a68a6023d60ca738"
+  },
+  "source_fingerprint_sha256": "c2bfa15f1c72ad705699b1ef3560144282b2860b986c22bb8f5ec08295c0f7ae",
+  "inventory_tests_passed": 6,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Merged-source integration checks supplement the unchanged source-pinned Vervoort candles, RMO/QQE, and previously published kernels numerical qualifications. Counts overlap and must not be added as unique coverage."
+}

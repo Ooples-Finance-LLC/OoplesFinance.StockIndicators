@@ -41,13 +41,16 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
         ref readonly var lag6 = ref past[_filterCursor];
 #if !NETFRAMEWORK
         if (value.TryDouble(out double v) && lag2.TryDouble(out double a)
-            && lag4.TryDouble(out double b) && lag6.TryDouble(out double c)
-            && HilbertRoundedKernel.TryExactSum(v, -c, out double outer)
-            && HilbertRoundedKernel.TryExactSum(a, -b, out double inner)
-            && HilbertRoundedKernel.TryProductSum(outer, .0962, inner, .5769, out double rounded))
+            && lag4.TryDouble(out double b) && lag6.TryDouble(out double c))
         {
-            double corrected = rounded * correction;
-            if (double.IsFinite(corrected)) return JurikDyadic.FromDouble(corrected);
+            if ((HilbertRoundedKernel.TryExactSum(v, -c, out double outer)
+                 && HilbertRoundedKernel.TryExactSum(a, -b, out double inner)
+                 && HilbertRoundedKernel.TryProductSum(outer, .0962, inner, .5769, out double rounded))
+                || HilbertRoundedKernel.TryFir(v, a, b, c, out rounded))
+            {
+                double corrected = rounded * correction;
+                if (double.IsFinite(corrected)) return JurikDyadic.FromDouble(corrected);
+            }
         }
 #endif
         var sum = Product(value, .0962);

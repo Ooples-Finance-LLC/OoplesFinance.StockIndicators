@@ -17,11 +17,23 @@ internal sealed class HirashimaWindow
     private static double Publish(BigInteger value) => ExactMeanAccumulator.UnitRatio(value, BigInteger.One);
     internal (double[] Bands, Signal Trade) Next(double price, bool final)
     {
+        var bands = new double[5];
+        var trade = Next(price, final, bands);
+        return (bands, trade);
+    }
+    internal Signal Next(double price, bool final, Span<double> bands)
+    {
         var ema = _ema.Next(U(price), final); var residual = Round(U(price) - ema);
         var width = _width.Next(BigInteger.Abs(residual), final);
-        return Finish(price, ema, residual, width, final);
+        return Finish(price, ema, residual, width, final, bands);
     }
     private (double[] Bands, Signal Trade) Finish(double price, BigInteger ema, BigInteger residual, BigInteger width, bool final)
+    {
+        var bands = new double[5];
+        var trade = Finish(price, ema, residual, width, final, bands);
+        return (bands, trade);
+    }
+    private Signal Finish(double price, BigInteger ema, BigInteger residual, BigInteger width, bool final, Span<double> bands)
     {
         var first = _first.Next(residual, final);
         var remaining = Round(U(price) - ema - first);
@@ -33,7 +45,9 @@ internal sealed class HirashimaWindow
         if (final) { _previousSecond = second; _previousMargin = margin; }
         // Publish each complete band independently; inner-band overflow must
         // not prevent the opposite band or center from remaining finite.
-        return (new[] { Publish(basis + width), Publish(basis + 2 * width), Publish(basis), Publish(basis - width), Publish(basis - 2 * width) }, trade);
+        bands[0] = Publish(basis + width); bands[1] = Publish(basis + 2 * width);
+        bands[2] = Publish(basis); bands[3] = Publish(basis - width); bands[4] = Publish(basis - 2 * width);
+        return trade;
     }
     internal static (double[][] Bands, Signal[] Trades) Calculate(IReadOnlyList<double> prices, MovingAvgType kind, int length, bool callbacks)
     {

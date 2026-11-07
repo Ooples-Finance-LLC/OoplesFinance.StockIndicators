@@ -1,0 +1,39 @@
+{
+  "batch": "cumulative-price-volume-shared-execution",
+  "types": [
+    "CumulativeSum",
+    "CumulativeVolumeIndex"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share exact cumulative price and signed-volume accumulators. Preserve first-bar zero for volume, strict price comparisons, exact contributions through cancellation, output overflow validation, ownership and source fallback.",
+  "verification": {
+    "unit_passed": 19,
+    "fixture_passed": 8,
+    "discovery_passed": 107,
+    "gpu_passed": 100,
+    "contract_methods": 1446,
+    "hosted_methods": 1434,
+    "evidence": [
+      {
+        "file": "cumulative-unit.trx.gz",
+        "passed_cases": 19,
+        "trx_sha256": "23e5445304799ff056dcbb6d655bc7a9b9eb42f7fde89af44dc0a329c6d4b96b"
+      },
+      {
+        "file": "cumulative-fixture.trx.gz",
+        "passed_cases": 115,
+        "trx_sha256": "6dedd112789e23e27ca7d5a68ac5727c9fa569a003f5815fa98c39d704c2fe72"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingCumulativeBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "CumulativeSum",
+      "CumulativeVolumeIndex"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

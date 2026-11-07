@@ -1,0 +1,43 @@
+{
+  "batch": "standardized-score-family-shared-execution",
+  "types": [
+    "ZScore",
+    "FastZScore",
+    "InverseFisherZScore",
+    "InverseFisherFastZScore"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share default-SMA standardized-score kernels with optional observed-history storage. Preserve logical periods independently of queue size, exact normalization, fast regressions and existing inverse transforms; retain default pooled mode and source/custom-average fallback.",
+  "verification": {
+    "unit_passed": 267,
+    "fixture_passed": 16,
+    "discovery_passed": 89,
+    "gpu_passed": 100,
+    "contract_methods": 1424,
+    "hosted_methods": 1412,
+    "evidence": [
+      {
+        "file": "standardizedscore-unit.trx.gz",
+        "passed_cases": 267,
+        "trx_sha256": "bf555f0117e10e74cf5932a3e8eac1059d078e40ef07894b46d1312e0226a272"
+      },
+      {
+        "file": "standardizedscore-fixture.trx.gz",
+        "passed_cases": 105,
+        "trx_sha256": "64624427c7741d8b9b28e8335ba2e35aa894023fe4c69a54c19f8cd9fd6d35d1"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingStandardizedScoreBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured",
+    "operations": [
+      "ZScore",
+      "FastZScore",
+      "InverseFisherZScore",
+      "InverseFisherFastZScore"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

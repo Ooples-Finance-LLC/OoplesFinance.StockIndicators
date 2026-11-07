@@ -1,0 +1,38 @@
+{
+  "batch": "distancepair-shared-execution",
+  "types": [
+    "DistanceWeightedMovingAverage",
+    "InverseDistanceWeightedMovingAverage"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 34,
+    "parity_passed": 8,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "distancepair-unit-verified.trx.gz",
+        "passed_cases": 34,
+        "trx_sha256": "e7772e311c3177d7bf7569ff01f169872048509f8676e344c80f425c7329828b"
+      },
+      {
+        "file": "distancepair-parity-verified.trx.gz",
+        "passed_cases": 8,
+        "trx_sha256": "d51f70ac681a5eb3cba9f9761af25a8a3576fb1db359598662bff89d78ef51e2"
+      }
+    ],
+    "context": "Executed in the 14-facade follow-on working candidate with inherited unresolved MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "766bf7006df16711e91b86c07f83e351dc2019699347abbc5c80a46aad3de270",
+    "test_execution_input_sha256": {
+      "unit": "766bf7006df16711e91b86c07f83e351dc2019699347abbc5c80a46aad3de270",
+      "parity": "766bf7006df16711e91b86c07f83e351dc2019699347abbc5c80a46aad3de270"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "ee7078a17110e39d923f1607a7ba4512a71c0799"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

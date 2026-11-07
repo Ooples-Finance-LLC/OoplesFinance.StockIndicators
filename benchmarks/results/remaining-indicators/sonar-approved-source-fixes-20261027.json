@@ -1,0 +1,29 @@
+{
+  "input_head": "07efd26bc7dcd74f176d6d739cc03b624a216f36",
+  "changes": [
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PreservedKaufmanStressBatch.cs",
+    "src/Helpers/CertifiedMeanRelativeError.cs",
+    "src/Indicators/ValuesBarExecution.Spearman.cs",
+    "benchmarks/results/remaining-indicators/inventory.json"
+  ],
+  "exact_equality": {
+    "passed": 48,
+    "classes": {
+      "MeanDiagnosticsCertifiedTests": 26,
+      "SharedGeneratedSpearmanTests": 13,
+      "SpearmanSharedNumericalTests": 9
+    },
+    "trx_sha256": "2150f8196692f9ae6a069dbe58b3df7b6fb7dd9e007f3f796a4dfc9ac6a1d41f"
+  },
+  "kaufman": {
+    "passed": 97,
+    "classes": {
+      "KaufmanStressBatchTests": 97
+    },
+    "trx_sha256": "50f84c77c6ab3572ce9a4f43922f06cc1e36f98e6e7733c0fe5ece1dfcd25805"
+  },
+  "method": "Diagnostic directives restore original executable source exactly when removed; existing qualified binaries reused. Kaufman predicates compiled with original 97 regression cases in isolated project.",
+  "pending": "Three XML namespace false positives and private temporary-directory finding need authenticated Sonar disposition. Gate outcome still requires analysis.",
+  "inventory": "Regenerated source hashes; inventory check and focused inventory tests passed.",
+  "report_changed": false
+}
