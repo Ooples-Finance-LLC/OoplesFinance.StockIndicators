@@ -343,6 +343,9 @@ SCOPES['hilbert-variable-window-20261107'] = {'fixtures': {'SharedHilbertTrendli
 SCOPES['hilbert-coefficient-certificates-20261107'] = {'fixtures': {'SharedTaHilbertNativeBenchmarks': {'TaLib.Functions.HtDcPhase': 'TaLib.Functions.HtDcPhase', 'TaLib.Functions.HtSine': 'TaLib.Functions.HtSine'}, 'SharedTaHilbertTrendModeBenchmarks': {'TaLib.Functions.HtTrendMode': 'TaLib.Functions.HtTrendMode'}}, 'implicit_fixtures': set(), 'paths': {'src/Helpers/CertifiedHilbertProjection.cs'}, 'methods': {'SharedTaHilbertNativeBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedTaHilbertTrendModeBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
 
 
+SCOPES['hilbert-phase-only-trigonometry-20261107'] = {'fixtures': {'SharedTaHilbertNativeBenchmarks': {'TaLib.Functions.HtDcPhase': 'TaLib.Functions.HtDcPhase', 'TaLib.Functions.HtSine': 'TaLib.Functions.HtSine'}, 'SharedTaHilbertTrendModeBenchmarks': {'TaLib.Functions.HtTrendMode': 'TaLib.Functions.HtTrendMode'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/HilbertCycleSignalState.cs'}, 'methods': {'SharedTaHilbertNativeBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedTaHilbertTrendModeBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
