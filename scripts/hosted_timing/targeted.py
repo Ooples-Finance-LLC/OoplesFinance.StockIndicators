@@ -340,6 +340,9 @@ SCOPES['combined-containment-mfi-20261106'] = {'fixtures': {'SharedContainmentCa
 SCOPES['hilbert-variable-window-20261107'] = {'fixtures': {'SharedHilbertTrendlineBenchmarks': {'Skender.GetHtTrendline': 'Skender.GetHtTrendline'}, 'SharedTaHilbertNativeBenchmarks': {'TaLib.Functions.HtTrendline': 'TaLib.Functions.HtTrendline'}, 'SharedTaHilbertTrendModeBenchmarks': {'TaLib.Functions.HtTrendMode': 'TaLib.Functions.HtTrendMode'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/HilbertVariableWindowTests.cs', 'src/Indicators/HilbertTrendMeanState.cs'}, 'methods': {'SharedHilbertTrendlineBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedTaHilbertNativeBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedTaHilbertTrendModeBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (270, 54)}
 
 
+SCOPES['hilbert-coefficient-certificates-20261107'] = {'fixtures': {'SharedTaHilbertNativeBenchmarks': {'TaLib.Functions.HtDcPhase': 'TaLib.Functions.HtDcPhase', 'TaLib.Functions.HtSine': 'TaLib.Functions.HtSine'}, 'SharedTaHilbertTrendModeBenchmarks': {'TaLib.Functions.HtTrendMode': 'TaLib.Functions.HtTrendMode'}}, 'implicit_fixtures': set(), 'paths': {'src/Helpers/CertifiedHilbertProjection.cs'}, 'methods': {'SharedTaHilbertNativeBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedTaHilbertTrendModeBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 

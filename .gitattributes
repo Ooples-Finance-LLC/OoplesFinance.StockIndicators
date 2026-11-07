@@ -138,3 +138,4 @@ benchmarks/plans/hosted-adl-exact-product-fallback-20261106.json text eol=lf
 benchmarks/plans/hosted-zigzag-coordinate-normalization-20261106.json text eol=lf
 benchmarks/plans/hosted-combined-containment-mfi-20261106.json text eol=lf
 benchmarks/plans/hosted-hilbert-variable-window-20261107.json text eol=lf
+benchmarks/plans/hosted-hilbert-coefficient-certificates-20261107.json text eol=lf
