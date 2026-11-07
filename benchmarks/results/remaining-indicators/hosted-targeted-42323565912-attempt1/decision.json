@@ -2819,7 +2819,17 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42323565912-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "04d351f4d22ec15a5e8a33a00ae042256f3004b0",
+  "integrated_paths": [
+    "src/Indicators/AverageRangeDojiCandles.cs",
+    "src/Indicators/ValuesBarExecution.AccumulationDistribution.cs",
+    "src/Indicators/ValuesBarExecution.MoneyFlow.cs",
+    "tests/ModelsTests/CompactAccumulationDistributionExecutionTests.cs",
+    "tests/ModelsTests/CompactMoneyFlowExecutionTests.cs"
+  ],
+  "report_sha256": "419cf12feaad5e36ea9a2600875c85afb2c3265b869f4888177fa5c517fd6dc9",
+  "report_archive": "benchmarks/results/remaining-indicators/accepted-carryover-composition-20261107-report-integration"
 }

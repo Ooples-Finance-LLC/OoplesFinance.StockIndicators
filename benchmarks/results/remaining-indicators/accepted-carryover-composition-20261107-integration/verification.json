@@ -1,0 +1,25 @@
+{
+  "source_integration_commit": "04d351f4d22ec15a5e8a33a00ae042256f3004b0",
+  "qualified_source": "81f8d56dacb13a5b84830d35de51d81d4caf2cfd",
+  "compiled_source": "0b6a908340e0f78246113f365619052b135b41f8",
+  "source_fingerprint": "efb799639091cbed4d2f6d31773357ddc394beba916a3661d93672623ebc42b4",
+  "unit": 67,
+  "comparator": 238,
+  "actual_gpu": 100,
+  "production_sha256": "45ba7355dc1e52beb82bfc1e54eb3896efda0cdf3ee7a306e39f6a9121e66c20",
+  "run_id": "42323565912",
+  "cases": 270,
+  "decisions": 54,
+  "verdicts": {
+    "inconclusive": 36,
+    "faster": 18
+  },
+  "integrated_paths": [
+    "src/Indicators/AverageRangeDojiCandles.cs",
+    "src/Indicators/ValuesBarExecution.AccumulationDistribution.cs",
+    "src/Indicators/ValuesBarExecution.MoneyFlow.cs",
+    "tests/ModelsTests/CompactAccumulationDistributionExecutionTests.cs",
+    "tests/ModelsTests/CompactMoneyFlowExecutionTests.cs"
+  ],
+  "verified_utc": "2026-11-07T02:33:16.091583+00:00"
+}
