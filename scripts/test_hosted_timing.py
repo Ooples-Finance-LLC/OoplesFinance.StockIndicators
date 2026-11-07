@@ -52,7 +52,7 @@ def make_evidence(folder, phase, new_mean=50, preflight=False):
                             cases.append(dict(FullName=name, Method=method, Statistics=dict(N=10, OriginalValues=[mean]*10,
                                 Mean=mean, StandardDeviation=0, ConfidenceInterval=dict(Lower=mean-1,Upper=mean+1)), Memory=dict(BytesAllocatedPerOperation=8)))
                     report = dict(Benchmarks=cases, HostEnvironmentInfo=dict(ProcessorName='test CPU', RuntimeVersion='test runtime'))
-                    warmups = warmups_for(plan, fixture)
+                    warmups = warmups_for(plan, fixture, task)
                     native_one = phase == 'coverage' and plan.get('coverage_harness',{}).get('native_invocation_count') == 1
                     log = ''.join(f'// Benchmark: {fixture}.{case["Method"]}: IterationCount=10 WarmupCount={warmups}' +
                         (' InvocationCount=1' if native_one and case['Method'].startswith('Native') else '') + '\n' +
@@ -67,7 +67,7 @@ def make_evidence(folder, phase, new_mean=50, preflight=False):
                         log=str(raw_root/str(relative.with_suffix('.log'))), sha256=digest(report_path), log_sha256=digest(log_path),
                         quiet_cpu_samples=[5]*12, quiet_build_free_samples=12, quiet_sequence_started_utc='2026-11-01T00:00:00Z',
                         build_monitor_observations=2, cases=len(cases), execution_context=dict(host_nonce=host['instance_nonce'],
-                            production_sha256=manifests[arm][DLL], phase=phase, shard=shard, **warmup_context(plan, fixture)))
+                            production_sha256=manifests[arm][DLL], phase=phase, shard=shard, **warmup_context(plan, fixture, task)))
                     write((root/relative).with_suffix('.json'),receipt)
                     receipts.append(receipt); reports.append(report); logs.append(log)
                 merged = combine_reports(reports,[o['raw'] for o in task['operations']],methods)
@@ -83,6 +83,8 @@ def make_evidence(folder, phase, new_mean=50, preflight=False):
 class HostedTimingTests(unittest.TestCase):
     def test_fixed_batch_warmups_preserve_builder_and_legacy_contracts(self):
         plan = copy.deepcopy(read(PLAN))
+        # Exercise the original contract independently of the separately tested pair exception.
+        plan['measurement_policy'].pop('fixed_invocation_pair_warmups', None)
         plan['measurement_policy'].pop('fixed_invocation_warmups', None)
         self.assertEqual(warmups_for(plan, 'LibraryPairBenchmarks'), 10)
         self.assertEqual(warmup_context(plan, 'LibraryPairBenchmarks'), {})

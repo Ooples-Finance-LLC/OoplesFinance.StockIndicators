@@ -355,6 +355,9 @@ SCOPES['hilbert-finite-bit-steps-20261107'] = {'fixtures': {'SharedTaHilbertNati
 SCOPES['hilbert-residual-bound-20261107'] = {'fixtures': {'SharedTaHilbertNativeBenchmarks': {'TaLib.Functions.HtDcPhase': 'TaLib.Functions.HtDcPhase', 'TaLib.Functions.HtSine': 'TaLib.Functions.HtSine'}, 'SharedTaHilbertTrendModeBenchmarks': {'TaLib.Functions.HtTrendMode': 'TaLib.Functions.HtTrendMode'}}, 'implicit_fixtures': set(), 'paths': {'src/Helpers/CertifiedHilbertProjection.cs', 'tests/ModelsTests/CertifiedHilbertProjectionTests.cs'}, 'methods': {'SharedTaHilbertNativeBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedTaHilbertTrendModeBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
 
 
+SCOPES['body-shadow-retained-differences-20261107'] = {'fixtures': {'SharedBodyShadowBenchmarks': {'TaLib.Candles.BeltHold': 'BeltHold', 'TaLib.Candles.Marubozu': 'Marubozu', 'TaLib.Candles.ClosingMarubozu': 'ClosingMarubozu', 'TaLib.Candles.SpinningTop': 'SpinningTop', 'TaLib.Candles.HighWave': 'HighWave', 'TaLib.Candles.LongLine': 'LongLine', 'TaLib.Candles.ShortLine': 'ShortLine'}, 'SharedContainmentCandleBenchmarks': {'TaLib.Candles.Harami': 'TaLib.Candles.Harami'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/BodyShadowCandles.cs', 'tests/ModelsTests/RetainedBodyShadowTests.cs'}, 'methods': {'SharedBodyShadowBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedContainmentCandleBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (240, 48), 'shards': 8, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 

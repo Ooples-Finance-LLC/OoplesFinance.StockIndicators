@@ -142,17 +142,32 @@ def cpu_test_classes(plan, label):
     return selected
 
 
-def warmups_for(plan, fixture):
+def warmups_for(plan, fixture, task=None):
     assert plan['measurement_policy']['warmups'] == 10
     assert plan['measurement_policy']['iterations'] == 10
     # LibraryPair is the fixed-invocation batch fixture in this qualification matrix.
     count = plan['measurement_policy'].get('fixed_invocation_warmups', 10)
     assert count in (10, 1000)
+    overrides = plan['measurement_policy'].get('fixed_invocation_pair_warmups')
+    if overrides is not None:
+        assert overrides == {'TaLib.Candles.Harami': 20000}
+        assert count == 1000 and plan['qualification_warmup_approval']['approved'] is True
+        assert plan['qualification_warmup_approval']['proposal'] == 'harami-qualified-warmup-policy-proposal-20261107.json'
+        if fixture == 'LibraryPairBenchmarks':
+            assert task and task['fixture'] == fixture and task['operations']
+            assert all(operation['raw'] == operation['pair'] for operation in task['operations'])
+            counts = {overrides.get(operation['pair'], count) for operation in task['operations']}
+            assert len(counts) == 1, 'Split operations requiring different warmup counts'
+            selected = counts.pop()
+            if selected == 20000:
+                assert len(task['operations']) == 1
+                assert set(task['methods']) == {'Ooples', 'Competitor'} and len(task['methods']) == 2
+            return selected
     return count if fixture == 'LibraryPairBenchmarks' else 10
 
 
-def warmup_context(plan, fixture):
-    return {'warmup_count': warmups_for(plan, fixture)} if 'fixed_invocation_warmups' in plan['measurement_policy'] else {}
+def warmup_context(plan, fixture, task=None):
+    return {'warmup_count': warmups_for(plan, fixture, task)} if 'fixed_invocation_warmups' in plan['measurement_policy'] else {}
 
 
 def verify_inputs(folder):
@@ -440,9 +455,9 @@ def measure(inputs, out, phase, shard, diagnostic=None):
                     variance=task.get('variance_parameter',False),
                     operation_timeout_seconds=operation_timeout_for(plan,phase),
                     context=dict(host_nonce=identity['instance_nonce'],production_sha256=manifests[arm][DLL],phase=phase,shard=shard,
-                        **warmup_context(plan, task['fixture']),
+                        **warmup_context(plan, task['fixture'], task),
                         **({'diagnostic_warmups':1000} if diagnostic == 'trix-library-warmup' else {})),
-                    warmups=1000 if diagnostic == 'trix-library-warmup' else warmups_for(plan, task['fixture']))
+                    warmups=1000 if diagnostic == 'trix-library-warmup' else warmups_for(plan, task['fixture'], task))
                 state['rounds'].append(record)
                 state['status'] = 'round-complete'
                 save()

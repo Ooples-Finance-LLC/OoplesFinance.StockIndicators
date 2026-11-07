@@ -54,7 +54,7 @@ def stage(live, raw, repo, out, phase='successor'):
         for record in state['rounds']:
             if record['index'] != 2: continue
             fixture=record['fixture']; task=tasks[fixture]
-            record_provenance = {**provenance, **warmup_context(read(PLAN), fixture)}
+            record_provenance = {**provenance, **warmup_context(read(PLAN), fixture, task)}
             mapping={op['raw']:op['pair'] for op in task['operations']}
             implicit=next(iter(mapping)) if task.get('implicit_pair') else None
             path=archived(root,proof['raw_root'],record['report'])
@@ -158,6 +158,8 @@ def stage(live, raw, repo, out, phase='successor'):
     disclosure=' Each row identifies its measured source and run. Results combine earlier measurements and GitHub-hosted Windows measurements; absolute timings are compared only within the same runner.'
     if read(PLAN)['measurement_policy'].get('fixed_invocation_warmups') == 1000:
         disclosure += ' Latest fixed-invocation batch timings use 1,000 unmeasured warmups; builder timings retain ten warmups. Both use ten measured iterations.'
+    if read(PLAN)['measurement_policy'].get('fixed_invocation_pair_warmups'):
+        disclosure += ' Harami batch timings alone use the approved 20,000 unmeasured warmups for both libraries at both bar counts; its builder policy is unchanged.'
     document=re.sub(r'Measured builds: [^<]*?\.',lambda _:caption,document)
     document=re.sub(r'(<section id="explorer"[^>]*>.*?<p class="sub">).*?(</p>)',lambda m:m[1]+caption+disclosure+m[2],document,count=1,flags=re.S)
     oldwins=sum(r['competitor_over_ooples']>1 for r in before['rows'] if r['bars']==10000)
