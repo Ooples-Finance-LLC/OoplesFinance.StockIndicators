@@ -166,6 +166,10 @@ public sealed class CertifiedHilbertProjectionTests
             Check(prices, (count + 17 * replay) % 50, count, floating: true, cached: true);
             Check(prices, (count + 17 * replay) % 50, count, cached: true);
         }
+        var zeros = Enumerable.Range(0, 50).Select(index => index % 2 == 0 ? 0d : -0d).ToArray();
+        foreach (int cursor in new[] { 0, 17, 49 })
+            Assert.True(Check(zeros, cursor, 50, floating: true, cached: true));
+        Assert.True(Check(zeros, 49, 0, floating: true, cached: true));
         var tiny = Enumerable.Repeat(double.Epsilon, 50).ToArray();
         Assert.False(Check(tiny, 0, 50, floating: true, cached: true));
     }
