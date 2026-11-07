@@ -11,6 +11,10 @@ internal sealed class MoneyFlowAccumulationWindow
         var flow = Flow(high, low, close, volume);
         var total = _total; flow.AddTo(ref total);
         if (commit) _total = total;
+#if !NETFRAMEWORK
+        double ordinary = total.SumWithCompactRounding();
+        if (!double.IsInfinity(ordinary)) return new RocBankValue(ordinary);
+#endif
         return RocBankValue.Round(total);
     }
     internal static RocBankValue Flow(double high, double low, double close, double volume)
