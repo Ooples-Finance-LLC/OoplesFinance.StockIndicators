@@ -122,8 +122,9 @@ internal static class CertifiedHilbertProjection
 
 #pragma warning disable S1244 // Only exact zero terms may be skipped; near-axis nonzero terms retain their residuals.
     // FMA retains each exact product residual; TwoSum retains every exact
-    // addition residual. Outward additions enclose the residual sum. Only
-    // endpoints rounding to identical doubles certify the complete projection.
+    // addition residual. A normal-grid summation bound encloses their accumulated
+    // rounding error. Only endpoints rounding to identical doubles certify the
+    // complete projection.
     internal static bool TryProjectFloating(JurikDyadic[] values, int cursor, int count,
         out JurikDyadic real, out JurikDyadic imaginary)
     {
@@ -133,8 +134,8 @@ internal static class CertifiedHilbertProjection
         // per cached window instead of repeating the same check for every price.
         if (!FloatingCoefficientCertificates[count]) return false;
         const double maximum = 2.9073548971824276E+135; // 2^450
-        double realSum = 0, realLow = 0, realHigh = 0;
-        double imaginarySum = 0, imaginaryLow = 0, imaginaryHigh = 0;
+        double realSum = 0, realResidual = 0, realMaximum = 0;
+        double imaginarySum = 0, imaginaryResidual = 0, imaginaryMaximum = 0;
         var coefficients = FloatingCoefficients[count];
         int index = cursor;
         for (int lag = 0; lag < count; lag++)
@@ -143,17 +144,14 @@ internal static class CertifiedHilbertProjection
             double magnitude = Math.Abs(value);
             if (!double.IsFinite(value) || magnitude > maximum || magnitude != 0 && magnitude < MinimumFloatingMagnitude) return false;
             var coefficient = coefficients[lag];
-            AccumulateFloating(value, coefficient.Sine, ref realSum, ref realLow, ref realHigh);
-            AccumulateFloating(value, coefficient.Cosine, ref imaginarySum, ref imaginaryLow, ref imaginaryHigh);
+            AccumulateFloating(value, coefficient.Sine, ref realSum, ref realResidual, ref realMaximum);
+            AccumulateFloating(value, coefficient.Cosine, ref imaginarySum, ref imaginaryResidual, ref imaginaryMaximum);
             if (--index < 0) index = 49;
         }
-        double realLower = realSum + realLow, realUpper = realSum + realHigh;
-        double imaginaryLower = imaginarySum + imaginaryLow, imaginaryUpper = imaginarySum + imaginaryHigh;
-        if (!double.IsFinite(realLower) || !double.IsFinite(imaginaryLower)
-            || BitConverter.DoubleToInt64Bits(realLower) != BitConverter.DoubleToInt64Bits(realUpper)
-            || BitConverter.DoubleToInt64Bits(imaginaryLower) != BitConverter.DoubleToInt64Bits(imaginaryUpper)) return false;
-        real = JurikDyadic.FromDouble(realLower);
-        imaginary = JurikDyadic.FromDouble(imaginaryLower);
+        if (!PublishFloating(realSum, realResidual, realMaximum, out double realValue)
+            || !PublishFloating(imaginarySum, imaginaryResidual, imaginaryMaximum, out double imaginaryValue)) return false;
+        real = JurikDyadic.FromDouble(realValue);
+        imaginary = JurikDyadic.FromDouble(imaginaryValue);
         return true;
     }
 
@@ -176,8 +174,30 @@ internal static class CertifiedHilbertProjection
         return BitConverter.Int64BitsToDouble(bits + (bits < 0 ? -1 : 1));
     }
 
+    private static bool PublishFloating(double sum, double residual, double maximum, out double value)
+    {
+        // Zero maximum means every captured residual was zero: the leading
+        // sum is exact. The caller's FromDouble publication canonicalizes zero.
+        if (maximum == 0)
+        {
+            value = sum;
+            return double.IsFinite(value);
+        }
+        // Each component has at most 100 rounded residual additions. Products
+        // and TwoSum residuals lie on the 2^-1006 grid, so nonzero partial sums
+        // remain normal. With u = 2^-53, 100*gamma(100) < 2^-39. The maximum
+        // bounds each residual, making 2^-38 * maximum a conservative enclosure
+        // of all residual-sum rounding. Round its scaled value outward too.
+        double bound = IncrementFinite(maximum * 3.637978807091713E-12); // 2^-38
+        double lower = sum + DecrementFinite(residual - bound);
+        double upper = sum + IncrementFinite(residual + bound);
+        value = lower;
+        return double.IsFinite(lower)
+            && BitConverter.DoubleToInt64Bits(lower) == BitConverter.DoubleToInt64Bits(upper);
+    }
+
     private static void AccumulateFloating(double value, double coefficient,
-        ref double sum, ref double lower, ref double upper)
+        ref double sum, ref double residual, ref double maximum)
     {
         if (value == 0 || coefficient == 0) return;
         // Nonzero products are >=2^-900; their exact residuals are multiples
@@ -188,8 +208,10 @@ internal static class CertifiedHilbertProjection
         double next = sum + product;
         double virtualProduct = next - sum;
         double sumError = (sum - (next - virtualProduct)) + (product - virtualProduct);
-        lower = DecrementFinite(DecrementFinite(lower + productError) + sumError);
-        upper = IncrementFinite(IncrementFinite(upper + productError) + sumError);
+        residual = (residual + productError) + sumError;
+        // A rounded sum of nonnegative representable magnitudes is at least
+        // either operand, so this maximum bounds every captured residual.
+        maximum = Math.Max(maximum, Math.Abs(productError) + Math.Abs(sumError));
         sum = next;
     }
 #pragma warning restore S1244
