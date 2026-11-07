@@ -16,15 +16,16 @@ PLAN = REPO/'benchmarks/plans/hosted-stoch-compact-smoothing-20261103.json'
 
 class StochCompactTests(unittest.TestCase):
     expected_totals = (30,6)
+    target_shard_index = 1
     def test_real_baseline_and_source_scope(self):
         verify_reference(read(PLAN))
 
     def test_wrong_fixture_methods_or_pair_rejected(self):
         for key,value in [('fixture','SharedSmoothedStochasticBenchmarks'),
-                          ('implicit_pair',not read(PLAN)['targeted_shards'][1]['tasks'][0].get('implicit_pair',False)),('methods',['BuilderFull','BuilderLatestOnly']),
+                          ('implicit_pair',not read(PLAN)['targeted_shards'][self.target_shard_index]['tasks'][0].get('implicit_pair',False)),('methods',['BuilderFull','BuilderLatestOnly']),
                           ('operations',[dict(raw='Skender.GetSmi',pair='Skender.GetSmi')])]:
             plan=copy.deepcopy(read(PLAN))
-            plan['targeted_shards'][1]['tasks'][0][key]=value
+            plan['targeted_shards'][self.target_shard_index]['tasks'][0][key]=value
             with self.assertRaises((AssertionError,KeyError)): verify_reference(plan)
 
     def test_unintegrated_or_unreported_baseline_rejected(self):
@@ -45,5 +46,5 @@ class StochCompactTests(unittest.TestCase):
                 result=collect(root,'targeted')
                 self.assertEqual(self.expected_totals,(result['case_count'],result['decision_count']))
                 self.assertTrue(result['accepted'])
-                (root/'shard1/provenance.json').unlink()
+                (root/f'shard{self.target_shard_index}'/'provenance.json').unlink()
                 with self.assertRaises(AssertionError): collect(root,'targeted')
