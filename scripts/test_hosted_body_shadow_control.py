@@ -91,6 +91,7 @@ class BodyShadowControlTests(unittest.TestCase):
                     label=labels[kw['arm']=='new']
                     self.assertEqual(label.encode(),(kw['runtime']/p.DLL).read_bytes())
                     self.assertEqual(d['measurement_policy']['fixed_invocation_warmups'] if kw['fixture']=='LibraryPairBenchmarks' else 10,kw['warmups'])
+                    if kw['warmups']==20000:self.assertIsInstance(kw['diagnostic_plan'],aa.DiagnosticPlan)
                     for key,value in aa.environment(d,shard).items(): self.assertEqual(value,kw['env'][key])
                     return dict(index=kw['index'],arm=kw['arm'],fixture=kw['fixture'],cases=2*len(kw['methods']))
                 with patch.dict(sys.modules,{'psutil':fake}),patch.object(p.subprocess,'check_output',return_value='10.0.403'),patch.object(p,'git',return_value='workflow'),patch.object(aa,'runtime_controls',return_value={}),patch.object(aa,'validate',return_value=d),patch('hosted_timing.runtime_dependencies.verify_input_alignment') as alignment,patch.object(p,'run_checkpointed',side_effect=run):

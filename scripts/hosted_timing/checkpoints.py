@@ -36,8 +36,14 @@ def filters(fixture, pair, methods, *, implicit=False, variant=False, variance=F
 
 def run_checkpointed(*, out, index, arm, fixture, pairs, methods, runtime, env,
                     state, save, builds, assert_binaries, implicit=False, variant=False, variance=False, context=None, warmups=10,
-                    operation_timeout_seconds=3600):
-    assert warmups in (10, 1000)
+                    operation_timeout_seconds=3600, diagnostic_plan=None):
+    if warmups==20000:
+        from .aa_control import DiagnosticPlan
+        assert isinstance(diagnostic_plan,DiagnosticPlan)
+        assert diagnostic_plan['measurement_policy']['fixed_invocation_warmups']==warmups
+    else:
+        assert diagnostic_plan is None
+        assert warmups in (10, 1000)
     assert operation_timeout_seconds in (3600,10800)
     assert operation_timeout_seconds == 3600 or context and context.get('phase') == 'coverage'
     from .cleanup import capture_children, stop_owned_benchmark, archive_with_retry

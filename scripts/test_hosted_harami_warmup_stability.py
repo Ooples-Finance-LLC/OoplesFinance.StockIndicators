@@ -1,12 +1,15 @@
 """The approved warmup exception is diagnostic-only and requires fresh complete logs."""
 import copy
+import json
 from pathlib import Path
+import sys
 import tempfile
+import types
 import unittest
 from unittest.mock import patch
 
 import test_hosted_body_shadow_control as controls
-from hosted_timing import aa_control as aa, pipeline as p, verify as v
+from hosted_timing import aa_control as aa, checkpoints as cp, pipeline as p, verify as v
 
 PLAN=p.REPO/'benchmarks/plans/harami-warmup-stability-20261107.json'
 ORIGINAL=p.REPO/aa.ORIGINAL
@@ -45,6 +48,41 @@ class HaramiWarmupStabilityTests(unittest.TestCase):
         fixture=controls.BodyShadowControlTests('test_measure_routes_every_job_to_complete_original_profile')
         with patch.object(controls,'PLAN',PLAN):
             fixture.test_measure_routes_every_job_to_complete_original_profile()
+
+    def test_real_checkpoint_runner_requires_diagnostic_plan_and_emits20000_warmups(self):
+        plan=aa.measurement_plan(p.read(ORIGINAL),aa.validate_plan(PLAN))
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);runtime=root/'runtime';runtime.mkdir()
+            context=p.warmup_context(plan,'LibraryPairBenchmarks')
+            kwargs=dict(out=root/'raw',index=0,arm='old',fixture='LibraryPairBenchmarks',
+                pairs=['TaLib.Candles.Harami'],methods=['Ooples'],runtime=runtime,env={},state={},
+                save=lambda:None,builds=lambda:[],assert_binaries=lambda:None,
+                context=context,warmups=20000,diagnostic_plan=plan)
+            def popen(args,**options):
+                self.assertEqual('20000',args[args.index('--warmupCount')+1])
+                self.assertEqual('10',args[args.index('--iterationCount')+1])
+                folder=Path(args[args.index('--artifacts')+1]);(folder/'results').mkdir(parents=True)
+                cases=[];log=[]
+                for bars in (1000,10000):
+                    cases.append(dict(FullName=f'LibraryPairBenchmarks.Ooples(Bars: {bars}, PairId: "TaLib.Candles.Harami")',
+                        Method='Ooples',Statistics=dict(N=10,OriginalValues=[1]*10)))
+                    log.append('// Benchmark: LibraryPairBenchmarks.Ooples IterationCount=10 WarmupCount=20000\n')
+                    for kind,count in [('Warmup',20000),('Actual',10)]:
+                        log.extend(f'Workload{kind} {i}: 1 op, sample\n' for i in range(1,count+1))
+                (folder/'results/stub-report-full-compressed.json').write_text(json.dumps(dict(Benchmarks=cases)))
+                options['stdout'].write(''.join(log).encode())
+                return types.SimpleNamespace(poll=lambda:0)
+            fake=types.SimpleNamespace(cpu_percent=lambda interval:0)
+            with patch.dict(sys.modules,{'psutil':fake}),patch.object(cp.subprocess,'Popen',side_effect=popen) as spawned,patch('hosted_timing.cleanup.capture_children'):
+                for invalid in (None,dict(plan)):
+                    with self.assertRaises(AssertionError):cp.run_checkpointed(**dict(kwargs,diagnostic_plan=invalid))
+                spawned.assert_not_called()
+                record=cp.run_checkpointed(**kwargs)
+                spawned.assert_called_once()
+            self.assertEqual(2,record['cases'])
+            receipt=record['operation_checkpoints'][0]
+            self.assertEqual({'warmup_count':20000},receipt['execution_context'])
+            v.check_log(Path(receipt['log']).read_text(),2,warmups=20000)
 
     def test_complete20case_collection_never_accepts_source_or_old_warmup_logs(self):
         fixture=controls.BodyShadowControlTests('test_separated_controls_and_observations_never_qualify_source')

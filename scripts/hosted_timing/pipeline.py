@@ -462,7 +462,8 @@ def measure(inputs, out, phase, shard, diagnostic=None, aa_plan=None):
                     context=dict(host_nonce=identity['instance_nonce'],production_sha256=manifests[arm][DLL],phase=phase,shard=shard,
                         **warmup_context(plan, task['fixture']),
                         **({'diagnostic_warmups':1000} if diagnostic == 'trix-library-warmup' else {})),
-                    warmups=1000 if diagnostic == 'trix-library-warmup' else warmups_for(plan, task['fixture']))
+                    warmups=1000 if diagnostic == 'trix-library-warmup' else warmups_for(plan, task['fixture']),
+                    **({'diagnostic_plan':plan} if aa and aa.get('warmup_experiment') else {}))
                 state['rounds'].append(record)
                 state['status'] = 'round-complete'
                 save()
