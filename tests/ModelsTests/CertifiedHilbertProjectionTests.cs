@@ -10,7 +10,7 @@ public sealed class CertifiedHilbertProjectionTests
     {
         var random = new Random(904215);
         int accepted = 0;
-        foreach (int exponent in new[] { -400, -100, 0, 100, 400 })
+        foreach (int exponent in new[] { -450, -400, -100, 0, 100, 400, 449 })
         for (int count = 1; count <= 50; count++)
         for (int replay = 0; replay < 4; replay++)
         {
@@ -18,18 +18,20 @@ public sealed class CertifiedHilbertProjectionTests
                 Math.ScaleB((1 + random.NextDouble()) * (random.Next(2) == 0 ? -1 : 1), exponent)).ToArray();
             if (Check(prices, (count + 13 * replay) % 50, count, floating: true)) accepted++;
         }
-        Assert.True(accepted > 900, $"Only {accepted} floating projections certified");
+        Assert.True(accepted > 1260, $"Only {accepted} floating projections certified");
     }
 
     [Fact]
     public void FloatingProjectionPreservesAxesZerosAndBoundedFallback()
     {
+        foreach (double magnitude in new[] { Math.ScaleB(1, -450), 1d, Math.ScaleB(1, 450) })
         foreach (int count in new[] { 1, 2, 4, 25, 49, 50 })
         foreach (int cursor in new[] { 0, 17, 49 })
         {
-            Check(Enumerable.Repeat(1d, 50).ToArray(), cursor, count, floating: true);
-            Check(Enumerable.Range(0, 50).Select(i => i % 2 == 0 ? 1d : -1d).ToArray(), cursor, count, floating: true);
-            Check(Enumerable.Range(0, 50).Select(i => i == cursor ? 1d : 0d).ToArray(), cursor, count, floating: true);
+            bool certified = Check(Enumerable.Repeat(magnitude, 50).ToArray(), cursor, count, floating: true);
+            if (count == 1) Assert.True(certified);
+            Check(Enumerable.Range(0, 50).Select(i => i % 2 == 0 ? magnitude : -magnitude).ToArray(), cursor, count, floating: true);
+            Check(Enumerable.Range(0, 50).Select(i => i == cursor ? magnitude : 0d).ToArray(), cursor, count, floating: true);
         }
         Assert.True(CertifiedHilbertProjection.TryProjectFloating(new JurikDyadic[50], 0, 50, out var real, out var imaginary));
         Equal(0, real.Mean(1)); Equal(0, imaginary.Mean(1));

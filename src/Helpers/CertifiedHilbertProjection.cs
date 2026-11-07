@@ -1,4 +1,6 @@
 #if !NETFRAMEWORK
+using System.Runtime.CompilerServices;
+
 namespace OoplesFinance.StockIndicators.Helpers;
 
 // Floating residual bounds, then outward integer bounds, for complete projections. A result
@@ -155,6 +157,25 @@ internal static class CertifiedHilbertProjection
         return true;
     }
 
+    // Bounded products, fifty-term sums and their residual additions stay
+    // finite. These private steps preserve both zero transitions and gradual
+    // underflow while avoiding non-finite handling at each error addition.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static double DecrementFinite(double value)
+    {
+        long bits = BitConverter.DoubleToInt64Bits(value);
+        if (bits == 0) return -double.Epsilon;
+        return BitConverter.Int64BitsToDouble(bits + (bits < 0 ? 1 : -1));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static double IncrementFinite(double value)
+    {
+        long bits = BitConverter.DoubleToInt64Bits(value);
+        if (bits == long.MinValue) return double.Epsilon;
+        return BitConverter.Int64BitsToDouble(bits + (bits < 0 ? -1 : 1));
+    }
+
     private static void AccumulateFloating(double value, double coefficient,
         ref double sum, ref double lower, ref double upper)
     {
@@ -167,8 +188,8 @@ internal static class CertifiedHilbertProjection
         double next = sum + product;
         double virtualProduct = next - sum;
         double sumError = (sum - (next - virtualProduct)) + (product - virtualProduct);
-        lower = Math.BitDecrement(Math.BitDecrement(lower + productError) + sumError);
-        upper = Math.BitIncrement(Math.BitIncrement(upper + productError) + sumError);
+        lower = DecrementFinite(DecrementFinite(lower + productError) + sumError);
+        upper = IncrementFinite(IncrementFinite(upper + productError) + sumError);
         sum = next;
     }
 #pragma warning restore S1244
