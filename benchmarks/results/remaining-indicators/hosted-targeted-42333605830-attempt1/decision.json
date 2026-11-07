@@ -1043,7 +1043,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42333605830-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "6ac55f12642f417a3e2b170371d2f9f4c5bc3da8",
+  "integrated_paths": [
+    "src/Indicators/HilbertTrendMeanState.cs",
+    "tests/ModelsTests/HilbertVariableWindowTests.cs"
+  ],
+  "report_sha256": "1be7d06355c12d3815182ff2a62d0cf650ad91bcd9206c35095593985211200d",
+  "report_archive": "benchmarks/results/remaining-indicators/hilbert-variable-window-20261107-report-integration"
 }
