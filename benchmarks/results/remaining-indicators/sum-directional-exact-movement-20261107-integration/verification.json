@@ -1,0 +1,21 @@
+{
+  "source_integration_commit": "717112dc0e2f6ca1810a9e20e51dabf5a4c79f63",
+  "qualified_source": "f8c9ea070b0aa22d7d25a40b39e2921a98506f7d",
+  "compiled_source": "f63c2af517841dba0ad597a4296f69e99c0646e6",
+  "source_fingerprint": "45822917a286638fd67f1ea9484d75eaaa19f87b97a550e4f9ef771c7206b38f",
+  "unit": 8,
+  "comparator": 29,
+  "actual_gpu": 100,
+  "production_sha256": "f8c9ddc1757155ebcb6b06dbdcd6d31a655cf41354bd14e9649f8adb5a97e1a1",
+  "run_id": "42415866800",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "faster": 6
+  },
+  "integrated_paths": [
+    "src/Indicators/SumSeededDirectionalIndex.cs",
+    "tests/ModelsTests/SumDirectionalExecutionTests.cs"
+  ],
+  "verified_utc": "2026-11-07T23:22:40.825923+00:00"
+}

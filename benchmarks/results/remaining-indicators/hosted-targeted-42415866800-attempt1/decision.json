@@ -450,7 +450,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42415866800-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "717112dc0e2f6ca1810a9e20e51dabf5a4c79f63",
+  "integrated_paths": [
+    "src/Indicators/SumSeededDirectionalIndex.cs",
+    "tests/ModelsTests/SumDirectionalExecutionTests.cs"
+  ],
+  "report_sha256": "05d9290667f2741bcbc7b0702d1fe0dd1d59017544b1988f7168448f20ec27b0",
+  "report_archive": "benchmarks/results/remaining-indicators/sum-directional-exact-movement-20261107-report-integration"
 }

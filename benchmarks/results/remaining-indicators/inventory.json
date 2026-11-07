@@ -13791,7 +13791,7 @@
     "src/Indicators/StarReversalCandles.cs": "73606694a8f021ba6c13841887aa3437ec8babe4568b997f499800d1f2ddb747",
     "src/Indicators/StochasticRsiConventions.cs": "56288090aa2c7f0aed488f1e2a9d8433b2a56a08269587339a050101f8f4ae34",
     "src/Indicators/StrictHaramiCandles.cs": "a2af7c59b6959aaf19bf6d731373a0b57bf5c5503efcf59f2e69b71f1c7cc2aa",
-    "src/Indicators/SumSeededDirectionalIndex.cs": "aeef4afe2447299f643b95bf805f4517eb9ad14e9947d81eb69ee854285209b1",
+    "src/Indicators/SumSeededDirectionalIndex.cs": "2ad328bf44a405e38767f537028bd9b0d2890ec77a7a794d269a37c983c991c8",
     "src/Indicators/TensorsGpuExecution.AccumulationDistribution.cs": "69aee2d32957cf93c23bebcbde5867e17db06f32a842e8d0a91ac210ebf5eb1d",
     "src/Indicators/TensorsGpuExecution.CandleWindows.cs": "e946b72817c800d2873b11ea6e06cb6cc0ecca1979482b40730cc63667ab17a8",
     "src/Indicators/TensorsGpuExecution.Cmf.cs": "e3f25f6fdd95395fbb711c616c74e05ac246acebfd0093ad9abda53fa05ea910",
