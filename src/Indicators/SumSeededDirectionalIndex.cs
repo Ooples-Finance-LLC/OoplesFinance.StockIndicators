@@ -181,12 +181,26 @@ public sealed class SumSeededDirectionalIndex
             double? averageOutput = null;
             if (++_index > 0)
             {
-                var up = Difference(bar.High, _previous.High);
-                var down = Difference(_previous.Low, bar.Low);
-                var dominance = up;
-                dominance.Subtract(down);
-                var positive = up.Sign > 0 && dominance.Sign > 0 ? up.Rounded() : default;
-                var negative = down.Sign > 0 && dominance.Sign < 0 ? down.Rounded() : default;
+                JurikDyadic positive, negative;
+#if !NETFRAMEWORK
+                if (Binary64ArithmeticCertificate.TryDifference(bar.High, _previous.High, out double upward)
+                    && Binary64ArithmeticCertificate.TryDifference(_previous.Low, bar.Low, out double downward))
+                {
+                    // Both differences are exact, so direct ordering preserves
+                    // strict dominance and ties without a third exact wrapper.
+                    positive = upward > 0 && upward > downward ? JurikDyadic.FromDouble(upward) : default;
+                    negative = downward > 0 && downward > upward ? JurikDyadic.FromDouble(downward) : default;
+                }
+                else
+#endif
+                {
+                    var up = Difference(bar.High, _previous.High);
+                    var down = Difference(_previous.Low, bar.Low);
+                    var dominance = up;
+                    dominance.Subtract(down);
+                    positive = up.Sign > 0 && dominance.Sign > 0 ? up.Rounded() : default;
+                    negative = down.Sign > 0 && dominance.Sign < 0 ? down.Rounded() : default;
+                }
                 var range = RoundedRange(bar.High, bar.Low, _previous.Close);
                 if (_index <= period)
                 {
