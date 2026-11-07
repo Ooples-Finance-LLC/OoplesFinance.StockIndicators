@@ -1,9 +1,11 @@
 """Keep the approved qualification exception confined to Harami's two batch methods."""
 import copy
+import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 from hosted_timing.checkpoints import run_checkpointed
 from hosted_timing.pipeline import methods_for, warmups_for, warmup_context
@@ -93,7 +95,10 @@ class HaramiQualificationWarmupTests(unittest.TestCase):
         t = task()
         with tempfile.TemporaryDirectory() as folder:
             for index, arm in enumerate(('old','new','new','old')):
-                with patch('psutil.cpu_percent', return_value=0), patch(
+                cleanup = SimpleNamespace(capture_children=Mock(), stop_owned_benchmark=Mock(), archive_with_retry=Mock())
+                with patch.dict(sys.modules, {'psutil':SimpleNamespace(cpu_percent=lambda **kwargs:0),
+                        'hosted_timing.cleanup':cleanup}), patch.object(sys.modules['hosted_timing'],
+                        'cleanup',cleanup,create=True), patch(
                         'hosted_timing.checkpoints.subprocess.Popen', side_effect=StopBeforeExecution) as launch:
                     with self.assertRaises(StopBeforeExecution):
                         run_checkpointed(out=Path(folder),index=index,arm=arm,fixture=t['fixture'],
