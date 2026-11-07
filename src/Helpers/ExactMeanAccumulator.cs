@@ -395,7 +395,7 @@ internal struct ExactMeanAccumulator
         int shift = bits - 53; // At least eleven: one guard bit and the exact sticky mask fit.
         ulong guarded = (ulong)(compact >> (shift - 1));
         ulong mantissa = guarded >> 1;
-        var sticky = compact & (((UInt128)1 << (shift - 1)) - 1);
+        var sticky = compact & (UInt128.MaxValue >> (129 - shift));
         if ((guarded & 1) != 0 && ((mantissa & 1) != 0 || sticky != 0)) mantissa++;
         return Encode(mantissa, bits + _scale - 53, _large.Sign < 0);
     }
