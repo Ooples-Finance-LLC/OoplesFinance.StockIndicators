@@ -7,7 +7,7 @@ on:
       suite:
         description: Public builder comparisons, diagnostic kernels, or both
         type: choice
-        options: [builder, kernel, all, qualified-rollout, qualified-variants, qualified-coverage, qualified-targeted, verify-evidence, trix-diagnostic, trix-library-diagnostic, build-correctness-inputs]
+        options: [builder, kernel, all, qualified-rollout, qualified-variants, qualified-coverage, qualified-targeted, verify-evidence, trix-diagnostic, trix-library-diagnostic, build-correctness-inputs, body-shadow-control-diagnostic]
         default: builder
       qualification_plan:
         description: Immutable source and measurement plan for qualified-rollout
@@ -47,6 +47,12 @@ concurrency:
   group: cpu-kernels-${{ github.ref }}-${{ inputs.suite == 'verify-evidence' && format('verify-{0}', inputs.evidence_run) || github.event.label.name || 'dispatch' }}
   cancel-in-progress: true
 jobs:
+  body-shadow-control:
+    if: github.event_name == 'workflow_dispatch' && inputs.suite == 'body-shadow-control-diagnostic'
+    permissions:
+      contents: read
+      actions: read
+    uses: ./.github/workflows/body-shadow-control-diagnostic.yml
   candidate-correctness-inputs:
     if: github.event_name == 'workflow_dispatch' && inputs.suite == 'build-correctness-inputs'
     runs-on: windows-latest

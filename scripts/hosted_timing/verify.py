@@ -61,7 +61,12 @@ def collect_preflight(folder):
     return _collect(folder, 'successor', preflight=True)
 
 
-def _collect(folder, phase, *, preflight):
+def collect_aa(folder, inputs, aa_plan):
+    from .aa_control import validate
+    return _collect(folder, 'targeted', preflight=False, aa=validate(aa_plan, inputs))
+
+
+def _collect(folder, phase, *, preflight, aa=None):
     plan = read(PLAN)
     if phase == 'coverage':
         from .coverage import verify_reference
@@ -72,15 +77,25 @@ def _collect(folder, phase, *, preflight):
         from .targeted import expected_totals, verify_reference
         assert plan.get('targeted_reference') and not preflight
         verify_reference(plan)
-        targeted_totals = expected_totals(plan)
-    expected_shards = {0} if preflight else set(phase_shards(plan, phase))
+        targeted_totals = (30, 6) if aa else expected_totals(plan)
+    expected_shards = {0, 1, 2} if aa else {0} if preflight else set(phase_shards(plan, phase))
     assert len(roots) == len(expected_shards)
     shards, nonces, input_hashes, run_ids = set(), set(), set(), set()
     decisions, candidates = [], defaultdict(list)
     case_count = 0
     for root in roots:
         proof, state = read(root/'provenance.json'), read(root/'status.json')
-        if preflight:
+        shard = proof['shard']
+        if aa:
+            from .pipeline import git
+            assert proof.get('diagnostic') == 'body-shadow-control' and proof.get('diagnostic_only') is True
+            from .aa_control import profiles, environment
+            assert proof.get('diagnostic_environment') == environment(aa, shard)
+            assert proof.get('runtime_controls') == {}
+            assert proof['diagnostic_plan_sha256'] == aa['_plan_sha256']
+            assert proof['measured_profile_labels'] == dict(zip(('A','B'), profiles(aa, shard)))
+            assert proof['measurement_workflow_head'] == git('rev-parse', 'HEAD')
+        elif preflight:
             assert proof.get('diagnostic') == 'trix-preflight'
             assert proof.get('diagnostic_environment') == {}, 'Preflight must use the qualification runtime settings'
         else:
@@ -88,7 +103,8 @@ def _collect(folder, phase, *, preflight):
         shard = proof['shard']
         assert shard in expected_shards and shard not in shards
         shards.add(shard)
-        assert proof['phase'] == phase and proof['sources'] == phase_sources(plan, phase)
+        sources = dict(zip(('old','new'), (plan['sources'][label] for label in profiles(aa, shard)))) if aa else phase_sources(plan, phase)
+        assert proof['phase'] == phase and proof['sources'] == sources
         assert proof['plan_sha256'] == digest(PLAN)
         inputs, host = proof['input_provenance'], proof['host']
         # The embedded document has the exact canonical encoding used by prepare.
@@ -97,13 +113,17 @@ def _collect(folder, phase, *, preflight):
         assert inputs['sources'] == plan['sources'] and inputs['plan_sha256'] == digest(PLAN)
         assert inputs['sdk'] == plan['proposed_dotnet_sdk']
         assert host['run_id'] and host['run_attempt'] and host['machine'] and host['runner_image']
-        assert host['run_id'] == inputs['run_id'] and host['run_attempt'] == inputs['run_attempt']
+        if aa:
+            assert inputs == aa['_verified_inputs']
+            assert proof['input_provenance_sha256'] == aa['original_input']['provenance_sha256']
+        else:
+            assert host['run_id'] == inputs['run_id'] and host['run_attempt'] == inputs['run_attempt']
         assert host['instance_nonce'] and host['instance_nonce'] not in nonces
         nonces.add(host['instance_nonce'])
         input_hashes.add(proof['input_provenance_sha256'])
-        run_ids.add((host['run_id'], host['run_attempt'], inputs['workflow_head']))
+        run_ids.add((host['run_id'], host['run_attempt'], proof['measurement_workflow_head'] if aa else inputs['workflow_head']))
         manifests = proof['binary_manifest']
-        labels = phase_labels(phase)
+        labels = profiles(aa, shard) if aa else phase_labels(phase)
         for arm, label in zip(('old', 'new'), labels):
             expected = dict(inputs['common_manifest'])
             expected[DLL] = inputs['production_sha256'][label]
@@ -111,7 +131,8 @@ def _collect(folder, phase, *, preflight):
         assert state['status'] == 'raw-measurements-complete'
         assert state['phase'] == phase and state['shard'] == shard
         assert state['order'] == ['old', 'new', 'new', 'old']
-        tasks = {t['fixture']: t for t in (trix_preflight_tasks(plan) if preflight else phase_tasks(plan, phase, shard))}
+        selected = aa['shards'][shard]['tasks'] if aa else trix_preflight_tasks(plan) if preflight else phase_tasks(plan, phase, shard)
+        tasks = {t['fixture']: t for t in selected}
         assert len(state['rounds']) == 4 * len(tasks)
         rounds = {}
         for record in state['rounds']:
@@ -174,14 +195,27 @@ def _collect(folder, phase, *, preflight):
                 decisions.append(dict(fixture=fixture, pair=key[0], bars=key[1], method=key[2],
                     old_means_ms=[r['mean_ns']/1e6 for r in old], new_means_ms=[r['mean_ns']/1e6 for r in new],
                     verdict=verdict, provenance=provenance))
+                if aa: decisions[-1]['diagnostic_job'] = shard
             candidates[fixture].extend(dict(**row, provenance=provenance) for row in rounds[fixture, 2].values())
     assert shards == expected_shards and len(input_hashes) == len(run_ids) == 1
     expected_cases, expected_decisions = ((48, 12) if preflight else (1860, 372) if phase == 'successor'
                                           else targeted_totals if phase == 'targeted'
                                           else (40, 8) if phase == 'coverage' else (32, 8))
     assert case_count == expected_cases and len(decisions) == expected_decisions
-    assert len({(d['pair'], d['bars'], d['method']) for d in decisions}) == expected_decisions
+    assert len({(d.get('diagnostic_job'), d['pair'], d['bars'], d['method']) for d in decisions}) == expected_decisions
     counts = Counter(d['verdict'] for d in decisions)
+    if aa:
+        names = dict(faster='B_below_A', slower='B_above_A', inconclusive='overlap')
+        comparisons = [dict(diagnostic_job=d['diagnostic_job'], kind=aa['jobs'][d['diagnostic_job']]['kind'], fixture=d['fixture'], pair=d['pair'], bars=d['bars'], method=d['method'],
+            A_means_ms=d['old_means_ms'], B_means_ms=d['new_means_ms'],
+            separation=names[d['verdict']], provenance=d['provenance']) for d in decisions]
+        return dict(diagnostic_only=True, same_binary=False, all_cases_verified=True,
+            case_count=case_count, comparison_count=len(comparisons), comparisons=comparisons,
+            separation_counts={names[k]:v for k,v in counts.items()},
+            jobs=aa['jobs'], production_sha256=aa['production_hashes'], input_provenance_sha256=next(iter(input_hashes)),
+            original_input=aa['original_input'], diagnostic_plan_sha256=aa['_plan_sha256'],
+            production_integrated=False, report_imported=False, policy_changed=False,
+            interpretation='Diagnostic only. Body/shadow source remains excluded; observational JIT instrumentation cannot qualify source or change policy.')
     return dict(all_cases_verified=True, phase='trix-preflight' if preflight else phase, case_count=case_count, decision_count=len(decisions),
         input_provenance_sha256=next(iter(input_hashes)),
         sources=phase_sources(plan, phase), decisions=decisions, verdicts=dict(counts),

@@ -1,0 +1,120 @@
+name: Harami and Marubozu diagnostic
+on:
+  workflow_call:
+permissions:
+  contents: read
+  actions: read
+defaults:
+  run:
+    shell: pwsh
+env:
+  HOSTED_TIMING_PLAN: benchmarks/plans/hosted-body-shadow-comparison-weights-20261106.json
+  HOSTED_TIMING_SUITE: qualified-targeted
+jobs:
+  validate:
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m unittest discover -s scripts -p "test_hosted*.py"
+      - run: python -m unittest discover -s scripts -p test_candidate_correctness_inputs.py
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: '13544163288'
+          run-id: 42298436560
+          github-token: ${{ github.token }}
+          path: hosted-inputs
+          merge-multiple: true
+      - run: python scripts/run-body-shadow-control.py verify-inputs --out diagnostic-input-verification.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: diagnostic-input-verification
+          path: diagnostic-input-verification.json
+          retention-days: 14
+          if-no-files-found: error
+  diagnostic:
+    needs: validate
+    runs-on: windows-2025
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        shard: [0, 1, 2]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install psutil==7.2.2
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: '13544163288'
+          run-id: 42298436560
+          github-token: ${{ github.token }}
+          path: hosted-inputs
+          merge-multiple: true
+      - run: python scripts/run-body-shadow-control.py measure --out diagnostic-raw --shard ${{ matrix.shard }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: body-shadow-control-${{ matrix.shard }}
+          path: diagnostic-raw/
+          retention-days: 14
+          if-no-files-found: error
+  collect:
+    needs: diagnostic
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: '13544163288'
+          run-id: 42298436560
+          github-token: ${{ github.token }}
+          path: hosted-inputs
+          merge-multiple: true
+      - uses: actions/download-artifact@v8
+        with:
+          name: body-shadow-control-0
+          path: diagnostic-evidence/shard0
+      - uses: actions/download-artifact@v8
+        with:
+          name: body-shadow-control-1
+          path: diagnostic-evidence/shard1
+      - uses: actions/download-artifact@v8
+        with:
+          name: body-shadow-control-2
+          path: diagnostic-evidence/shard2
+      - run: python scripts/run-body-shadow-control.py collect --evidence diagnostic-evidence --out diagnostic-verified.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: body-shadow-control-verified
+          path: diagnostic-verified.json
+          retention-days: 14
+          if-no-files-found: error
