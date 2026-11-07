@@ -1,0 +1,31 @@
+{
+  "diagnostic_only": true,
+  "run_id": "42335244138",
+  "tooling_head": "a13794e9a56bd4ea9416b94d76431b74b74c9e69",
+  "case_count": 20,
+  "comparison_count": 4,
+  "local_hosted_collection_equal": true,
+  "separation_counts": {
+    "overlap": 4
+  },
+  "warmups": 20000,
+  "iterations": 10,
+  "original_input_run": "42298436560",
+  "orchestration_tests": 344,
+  "package_tests": 5,
+  "actionlint": "passed",
+  "source_accepted": false,
+  "production_integrated": false,
+  "report_imported": false,
+  "qualification_policy_changed": false,
+  "failed_runs": [
+    {
+      "run": "42334047115",
+      "head": "4f0a9b0859d89f6534d08951bdb9beea176a9224",
+      "measured_rounds": 0,
+      "reason": "Checkpoint runner retained second10/1000allow-list; authorized20k plan had not been passed to it. Fixed diagnostic-only permission transport and added realrunnerregression; frozen plan/sources/sampling unchanged.",
+      "log": "harami-warmup-first-failed-20261107.log"
+    }
+  ],
+  "interpretation": "All4same-binarycomparisons overlap for these2profilesand2input sizes. This supports stability under the tested20000warmupdiagnostic; it does not establishJITcausality, qualifybody/shadow source, or automatically adopt a qualification policy."
+}
