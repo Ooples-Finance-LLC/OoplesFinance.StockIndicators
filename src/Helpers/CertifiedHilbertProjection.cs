@@ -11,6 +11,27 @@ internal static class CertifiedHilbertProjection
     private readonly record struct Coefficient(Factor Sine, Factor Cosine);
     private static readonly Coefficient[][] Coefficients = CreateCoefficients();
     private static readonly (double Sine, double Cosine)[][] FloatingCoefficients = CreateFloatingCoefficients();
+    private const double MinimumFloatingMagnitude = 3.4395525670743494E-136; // 2^-450
+    private static readonly bool[] FloatingCoefficientCertificates = CreateFloatingCoefficientCertificates();
+
+    private static bool[] CreateFloatingCoefficientCertificates()
+    {
+        var result = new bool[FloatingCoefficients.Length];
+        for (int count = 0; count < result.Length; count++)
+        {
+            result[count] = true;
+            foreach (var coefficient in FloatingCoefficients[count])
+            {
+                if (Math.Abs(coefficient.Sine) is > 0 and < MinimumFloatingMagnitude
+                    || Math.Abs(coefficient.Cosine) is > 0 and < MinimumFloatingMagnitude)
+                {
+                    result[count] = false;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 
     private static (double Sine, double Cosine)[][] CreateFloatingCoefficients()
     {
@@ -106,7 +127,9 @@ internal static class CertifiedHilbertProjection
     {
         real = imaginary = default;
         if (values.Length != 50 || cursor is < 0 or >= 50 || count is < 0 or > 50) return false;
-        const double minimum = 3.4395525670743494E-136; // 2^-450
+        // Coefficients never change; certify their product-residual range once
+        // per cached window instead of repeating the same check for every price.
+        if (!FloatingCoefficientCertificates[count]) return false;
         const double maximum = 2.9073548971824276E+135; // 2^450
         double realSum = 0, realLow = 0, realHigh = 0;
         double imaginarySum = 0, imaginaryLow = 0, imaginaryHigh = 0;
@@ -116,12 +139,8 @@ internal static class CertifiedHilbertProjection
         {
             if (!values[index].TryDouble(out double value)) return false;
             double magnitude = Math.Abs(value);
-            if (!double.IsFinite(value) || magnitude > maximum || magnitude != 0 && magnitude < minimum) return false;
+            if (!double.IsFinite(value) || magnitude > maximum || magnitude != 0 && magnitude < MinimumFloatingMagnitude) return false;
             var coefficient = coefficients[lag];
-            // Checking the cached coefficients makes the product-residual
-            // normal-range proof explicit, including tiny near-axis terms.
-            if (coefficient.Sine != 0 && Math.Abs(coefficient.Sine) < minimum
-                || coefficient.Cosine != 0 && Math.Abs(coefficient.Cosine) < minimum) return false;
             AccumulateFloating(value, coefficient.Sine, ref realSum, ref realLow, ref realHigh);
             AccumulateFloating(value, coefficient.Cosine, ref imaginarySum, ref imaginaryLow, ref imaginaryHigh);
             if (--index < 0) index = 49;

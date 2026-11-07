@@ -137,8 +137,13 @@ internal sealed class HilbertCycleSignalState(HilbertCycleSignal kind, int suppr
             phase += 180;
         if (phase > 315)
             phase -= 360;
-        var sine = Math.Sin(phase * (Math.PI / 180));
-        var lead = Math.Sin((phase + 45) * (Math.PI / 180));
+        double sine = 0, lead = 0;
+        // Phase-only outputs never consume these values or their prior-bar caches.
+        if (kind != HilbertCycleSignal.Phase)
+        {
+            sine = Math.Sin(phase * (Math.PI / 180));
+            lead = Math.Sin((phase + 45) * (Math.PI / 180));
+        }
         var trend = 1;
         if (_trend is not null)
         {
