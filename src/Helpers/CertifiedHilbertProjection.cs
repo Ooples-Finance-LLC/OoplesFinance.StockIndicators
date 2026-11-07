@@ -188,7 +188,7 @@ internal static class CertifiedHilbertProjection
         // remain normal. With u = 2^-53, 100*gamma(100) < 2^-39. The maximum
         // bounds each residual, making 2^-38 * maximum a conservative enclosure
         // of all residual-sum rounding. Round its scaled value outward too.
-        double bound = IncrementFinite(Math.ScaleB(maximum, -38));
+        double bound = IncrementFinite(maximum * 3.637978807091713E-12); // 2^-38
         double lower = sum + DecrementFinite(residual - bound);
         double upper = sum + IncrementFinite(residual + bound);
         value = lower;
