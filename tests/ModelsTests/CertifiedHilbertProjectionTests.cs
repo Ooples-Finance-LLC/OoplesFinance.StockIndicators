@@ -22,6 +22,31 @@ public sealed class CertifiedHilbertProjectionTests
     }
 
     [Fact]
+    public void FloatingCertificatesRetainMixedScalesAndHalfwayRounding()
+    {
+        var random = new Random(87125);
+        int accepted = 0;
+        for (int count = 1; count <= 50; count++)
+        for (int replay = 0; replay < 20; replay++)
+        {
+            var prices = Enumerable.Range(0, 50).Select(_ => random.Next(10) == 0 ? 0d :
+                Math.ScaleB((1 + random.NextDouble()) * (random.Next(2) == 0 ? -1 : 1), random.Next(-450, 450))).ToArray();
+            if (Check(prices, (count + 13 * replay) % 50, count, floating: true)) accepted++;
+        }
+        Assert.True(accepted > 900, $"Only {accepted} mixed-scale projections certified");
+        foreach (int exponent in new[] { -397, -200, 0, 200, 450 })
+        foreach (int firstSign in new[] { -1, 1 })
+        foreach (int secondSign in new[] { -1, 1 })
+        foreach (int cursor in new[] { 0, 17, 49 })
+        {
+            var prices = new double[50];
+            prices[cursor] = firstSign * Math.ScaleB(1, exponent);
+            prices[(cursor + 49) % 50] = secondSign * Math.ScaleB(1, exponent - 53);
+            Check(prices, cursor, 2, floating: true);
+        }
+    }
+
+    [Fact]
     public void FloatingProjectionPreservesAxesZerosAndBoundedFallback()
     {
         foreach (double magnitude in new[] { Math.ScaleB(1, -450), 1d, Math.ScaleB(1, 450) })
