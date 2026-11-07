@@ -1,0 +1,67 @@
+{
+  "source": "0b6a908340e0f78246113f365619052b135b41f8",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-accepted-carryover-composition-20261107",
+  "status": "correctness-complete",
+  "active": null,
+  "unit": {
+    "passed": 67,
+    "classes": {
+      "CompactAccumulationDistributionExecutionTests": 7,
+      "AccumulationDistributionComponentSharingTests": 4,
+      "RangeDojiSharedExecutionTests": 11,
+      "CompactMoneyFlowExecutionTests": 31,
+      "ContainmentSharedExecutionTests": 9,
+      "ContainmentParallelExecutionTests": 5
+    },
+    "sha256": "959767438a59ef72b5e15bd6f065d68cafa9f4a97df5cd516196c1d275dce12d"
+  },
+  "parity": {
+    "passed": 238,
+    "classes": {
+      "AccumulationDistributionComparisonTests": 17,
+      "SharedAdlDetailsFixtureTests": 8,
+      "AverageRangeDojiTests": 29,
+      "SharedRangeDojiBenchmarkTests": 40,
+      "MoneyFlowIndexComparisonTests": 18,
+      "ContainmentCandleTests": 94,
+      "SharedContainmentCandleBenchmarkTests": 32
+    },
+    "sha256": "f2525c863054740dd16f8affc3ade25dcb21248ebcff7e834d558c193ae924ca"
+  },
+  "build_origin": {
+    "run_id": "42321670231",
+    "workflow_head": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "0b6a908340e0f78246113f365619052b135b41f8",
+    "artifact_id": 13553049584,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42321670231"
+  },
+  "compiler_process_isolation": true,
+  "dependency_copy_mode": "Verified immutable CI artifacts; changed binaries installed without local compilation",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "build-and-gpu": {
+      "exit_code": 0,
+      "location": "CI build and actual local GPU"
+    },
+    "unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "parity": {
+      "exit_code": 0,
+      "location": "CI"
+    }
+  },
+  "gpu_passed": 100,
+  "source_fingerprint": "efb799639091cbed4d2f6d31773357ddc394beba916a3661d93672623ebc42b4",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "45ba7355dc1e52beb82bfc1e54eb3896efda0cdf3ee7a306e39f6a9121e66c20",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "45ba7355dc1e52beb82bfc1e54eb3896efda0cdf3ee7a306e39f6a9121e66c20",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "45ba7355dc1e52beb82bfc1e54eb3896efda0cdf3ee7a306e39f6a9121e66c20",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "45ba7355dc1e52beb82bfc1e54eb3896efda0cdf3ee7a306e39f6a9121e66c20"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}
