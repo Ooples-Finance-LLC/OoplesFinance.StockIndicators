@@ -1043,7 +1043,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42353522909-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "5840422cb280a2d842233c5c1c98fbde038ff5ba",
+  "integrated_paths": [
+    "src/Helpers/CertifiedHilbertProjection.cs",
+    "tests/ModelsTests/CertifiedHilbertProjectionTests.cs"
+  ],
+  "report_sha256": "0df58f11bb68216960a3c35aac9f5395e94c79e78bbb8b11fcb83e18b041fead",
+  "report_archive": "benchmarks/results/remaining-indicators/hilbert-finite-bit-steps-20261107-report-integration"
 }
