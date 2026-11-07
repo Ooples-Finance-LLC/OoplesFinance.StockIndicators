@@ -123,13 +123,83 @@ public sealed class CertifiedHilbertProjectionTests
         Assert.False(CertifiedHilbertProjection.TryProject(new JurikDyadic[50], 0, 51, out _, out _));
     }
 
-    private static bool Check(double[] prices, int cursor, int count, bool floating = false)
+    [Fact]
+    public void FloatingCacheTracksEveryWrappedWindowAndReset()
+    {
+        var cache = new CertifiedHilbertProjection.FloatingWindow();
+        for (int invalid = 0; invalid < 50; invalid++)
+        {
+            cache.Set(invalid, JurikDyadic.FromDouble(double.Epsilon));
+            for (int cursor = 0; cursor < 50; cursor++)
+            for (int count = 0; count <= 50; count++)
+            {
+                int distance = (cursor - invalid + 50) % 50;
+                Assert.Equal(distance >= count, cache.Contains(cursor, count));
+            }
+            cache.Set(invalid, JurikDyadic.FromDouble(1));
+            Assert.True(cache.Contains(49, 50));
+        }
+        var extended = JurikDyadic.FromDouble(1);
+        extended.ScaleByPowerOfTwo(1100);
+        cache.Set(17, extended);
+        Assert.False(cache.Contains(17, 1));
+        cache.Set(18, JurikDyadic.FromDouble(double.MaxValue));
+        Assert.False(cache.Contains(18, 1));
+        extended.AddExact(JurikDyadic.FromDouble(1));
+        cache.Set(19, extended);
+        Assert.False(cache.Contains(19, 1));
+        cache.Reset();
+        Assert.True(cache.Contains(49, 50));
+        Assert.All(Enumerable.Range(0, 50), index => Equal(0, cache[index]));
+    }
+
+    [Fact]
+    public void CachedFloatingProjectionsMatchUncachedCertificatesAndExactOracle()
+    {
+        var random = new Random(92833);
+        for (int count = 1; count <= 50; count++)
+        for (int replay = 0; replay < 10; replay++)
+        {
+            int exponent = new[] { -450, -397, 0, 200, 450 }[replay % 5];
+            var prices = Enumerable.Range(0, 50).Select(_ =>
+                Math.ScaleB(random.Next(-1024, 1025) / 1024d, exponent)).ToArray();
+            Check(prices, (count + 17 * replay) % 50, count, floating: true, cached: true);
+            Check(prices, (count + 17 * replay) % 50, count, cached: true);
+        }
+        var zeros = Enumerable.Range(0, 50).Select(index => index % 2 == 0 ? 0d : -0d).ToArray();
+        foreach (int cursor in new[] { 0, 17, 49 })
+            Assert.True(Check(zeros, cursor, 50, floating: true, cached: true));
+        Assert.True(Check(zeros, 49, 0, floating: true, cached: true));
+        var tiny = Enumerable.Repeat(double.Epsilon, 50).ToArray();
+        Assert.False(Check(tiny, 0, 50, floating: true, cached: true));
+    }
+
+    private static bool Check(double[] prices, int cursor, int count, bool floating = false, bool cached = false)
     {
         var values = prices.Select(JurikDyadic.FromDouble).ToArray();
+        CertifiedHilbertProjection.FloatingWindow? cache = null;
+        if (cached)
+        {
+            cache = new();
+            for (int index = 0; index < values.Length; index++) cache.Set(index, values[index]);
+        }
         JurikDyadic real, imaginary;
         bool accepted = floating
-            ? CertifiedHilbertProjection.TryProjectFloating(values, cursor, count, out real, out imaginary)
-            : CertifiedHilbertProjection.TryProject(values, cursor, count, out real, out imaginary);
+            ? CertifiedHilbertProjection.TryProjectFloating(values, cursor, count, out real, out imaginary, cache)
+            : CertifiedHilbertProjection.TryProject(values, cursor, count, out real, out imaginary, cache);
+        if (cached)
+        {
+            JurikDyadic otherReal, otherImaginary;
+            bool uncached = floating
+                ? CertifiedHilbertProjection.TryProjectFloating(values, cursor, count, out otherReal, out otherImaginary)
+                : CertifiedHilbertProjection.TryProject(values, cursor, count, out otherReal, out otherImaginary);
+            Assert.Equal(uncached, accepted);
+            if (accepted)
+            {
+                Equal(otherReal.Mean(1), real.Mean(1));
+                Equal(otherImaginary.Mean(1), imaginary.Mean(1));
+            }
+        }
         if (!accepted) return false;
         BigInteger sineSum = 0, cosineSum = 0;
         for (int lag = 0; lag < count; lag++)

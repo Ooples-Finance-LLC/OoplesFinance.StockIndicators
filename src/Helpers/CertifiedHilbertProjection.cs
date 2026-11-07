@@ -14,7 +14,46 @@ internal static class CertifiedHilbertProjection
     private static readonly Coefficient[][] Coefficients = CreateCoefficients();
     private static readonly (double Sine, double Cosine)[][] FloatingCoefficients = CreateFloatingCoefficients();
     private const double MinimumFloatingMagnitude = 3.4395525670743494E-136; // 2^-450
+    private const double MaximumFloatingMagnitude = 2.9073548971824276E+135; // 2^450
     private static readonly bool[] FloatingCoefficientCertificates = CreateFloatingCoefficientCertificates();
+
+    // Only the state owning the exact ring updates this companion cache. A slot
+    // is eligible only when its exact dyadic value has a bounded double image.
+    internal sealed class FloatingWindow
+    {
+        private const ulong AllSlots = (1UL << 50) - 1;
+        private readonly double[] _values = new double[50];
+        private ulong _eligible = AllSlots;
+
+#pragma warning disable S1244 // Only exact zero is eligible below the nonzero magnitude floor.
+        internal void Set(int index, JurikDyadic value)
+        {
+            bool eligible = value.TryDouble(out double ordinary) && double.IsFinite(ordinary)
+                && Math.Abs(ordinary) <= MaximumFloatingMagnitude
+                && (ordinary == 0 || Math.Abs(ordinary) >= MinimumFloatingMagnitude);
+            _values[index] = ordinary;
+            ulong slot = 1UL << index;
+            _eligible = eligible ? _eligible | slot : _eligible & ~slot;
+        }
+#pragma warning restore S1244
+
+        internal void Reset()
+        {
+            Array.Clear(_values, 0, 50);
+            _eligible = AllSlots;
+        }
+
+        internal bool Contains(int cursor, int count)
+        {
+            ulong mask = (1UL << count) - 1;
+            int shift = cursor + 1 - count;
+            mask = shift >= 0 ? mask << shift : (mask >> -shift) | (mask << (50 + shift));
+            mask &= AllSlots;
+            return (_eligible & mask) == mask;
+        }
+
+        internal double this[int index] => _values[index];
+    }
 
     private static bool[] CreateFloatingCoefficientCertificates()
     {
@@ -78,12 +117,12 @@ internal static class CertifiedHilbertProjection
     }
 
     internal static bool TryProject(JurikDyadic[] values, int cursor, int count,
-        out JurikDyadic real, out JurikDyadic imaginary)
+        out JurikDyadic real, out JurikDyadic imaginary, FloatingWindow? cache = null)
     {
         real = imaginary = default;
         if (values.Length != 50 || cursor is < 0 or >= 50 || count is < 0 or > 50) return false;
         if (count == 0) return true;
-        if (TryProjectFloating(values, cursor, count, out real, out imaginary)) return true;
+        if (TryProjectFloating(values, cursor, count, out real, out imaginary, cache)) return true;
         if (!values[cursor].TryDouble(out double anchor)) return false;
         int anchorExponent = (int)((BitConverter.DoubleToInt64Bits(anchor) >> 52) & 2047);
         if (anchorExponent is 0 or 2047) return false;
@@ -126,23 +165,28 @@ internal static class CertifiedHilbertProjection
     // rounding error. Only endpoints rounding to identical doubles certify the
     // complete projection.
     internal static bool TryProjectFloating(JurikDyadic[] values, int cursor, int count,
-        out JurikDyadic real, out JurikDyadic imaginary)
+        out JurikDyadic real, out JurikDyadic imaginary, FloatingWindow? cache = null)
     {
         real = imaginary = default;
         if (values.Length != 50 || cursor is < 0 or >= 50 || count is < 0 or > 50) return false;
         // Coefficients never change; certify their product-residual range once
         // per cached window instead of repeating the same check for every price.
         if (!FloatingCoefficientCertificates[count]) return false;
-        const double maximum = 2.9073548971824276E+135; // 2^450
+        if (cache is not null && !cache.Contains(cursor, count)) return false;
         double realSum = 0, realResidual = 0, realMaximum = 0;
         double imaginarySum = 0, imaginaryResidual = 0, imaginaryMaximum = 0;
         var coefficients = FloatingCoefficients[count];
         int index = cursor;
         for (int lag = 0; lag < count; lag++)
         {
-            if (!values[index].TryDouble(out double value)) return false;
-            double magnitude = Math.Abs(value);
-            if (!double.IsFinite(value) || magnitude > maximum || magnitude != 0 && magnitude < MinimumFloatingMagnitude) return false;
+            double value;
+            if (cache is null)
+            {
+                if (!values[index].TryDouble(out value)) return false;
+                double magnitude = Math.Abs(value);
+                if (!double.IsFinite(value) || magnitude > MaximumFloatingMagnitude || magnitude != 0 && magnitude < MinimumFloatingMagnitude) return false;
+            }
+            else value = cache[index];
             var coefficient = coefficients[lag];
             AccumulateFloating(value, coefficient.Sine, ref realSum, ref realResidual, ref realMaximum);
             AccumulateFloating(value, coefficient.Cosine, ref imaginarySum, ref imaginaryResidual, ref imaginaryMaximum);
