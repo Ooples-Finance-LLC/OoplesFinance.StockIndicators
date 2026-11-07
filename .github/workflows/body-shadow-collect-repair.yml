@@ -1,0 +1,63 @@
+name: Collect preserved body shadow diagnostic
+on:
+  workflow_call:
+permissions:
+  contents: read
+  actions: read
+defaults:
+  run:
+    shell: pwsh
+env:
+  HOSTED_TIMING_PLAN: benchmarks/plans/hosted-body-shadow-comparison-weights-20261106.json
+  HOSTED_TIMING_SUITE: qualified-targeted
+jobs:
+  collect:
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m unittest discover -s scripts -p "test_hosted*.py"
+      - run: python -m unittest discover -s scripts -p test_candidate_correctness_inputs.py
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: '13544163288'
+          run-id: 42298436560
+          github-token: ${{ github.token }}
+          path: hosted-inputs
+          merge-multiple: true
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: '13555761480'
+          run-id: 42325654760
+          github-token: ${{ github.token }}
+          path: diagnostic-evidence/shard0
+          merge-multiple: true
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: '13555258805'
+          run-id: 42325654760
+          github-token: ${{ github.token }}
+          path: diagnostic-evidence/shard1
+          merge-multiple: true
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: '13555546119'
+          run-id: 42325654760
+          github-token: ${{ github.token }}
+          path: diagnostic-evidence/shard2
+          merge-multiple: true
+      - run: python scripts/run-body-shadow-control.py collect --evidence diagnostic-evidence --collection-receipt benchmarks/plans/body-shadow-collection-repair-20261107.json --out diagnostic-verified.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: body-shadow-control-repaired-verified
+          path: diagnostic-verified.json
+          retention-days: 14
+          if-no-files-found: error

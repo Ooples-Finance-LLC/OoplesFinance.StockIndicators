@@ -127,10 +127,41 @@ class BodyShadowControlTests(unittest.TestCase):
             p.write(folder/'status.json',state)
         return d
 
-    def collected(self,root,d):
+    def collected(self,root,d,receipt=None):
         real_git=p.git
         def git(*args,**kw):return 'workflow' if args==('rev-parse','HEAD') else real_git(*args,**kw)
-        with patch.object(aa,'validate',return_value=d),patch.object(p,'git',side_effect=git):return v.collect_aa(root,root,PLAN)
+        with patch.object(aa,'validate',return_value=d),patch.object(aa,'collection_receipt',return_value=receipt),patch.object(p,'git',side_effect=git):
+            return v.collect_aa(root,root,PLAN,Path('receipt.json') if receipt else None)
+
+    def test_collection_receipt_is_immutable(self):
+        path=p.REPO/'benchmarks/plans/body-shadow-collection-repair-20261107.json'
+        d=aa.validate_plan(PLAN);receipt=aa.collection_receipt(path,d)
+        self.assertEqual(4,len(receipt['benchmark_logger_logs']))
+        with tempfile.TemporaryDirectory() as tmp:
+            broken=p.read(path);broken['measurement_run']='another-run';target=Path(tmp)/'receipt.json';p.write(target,broken)
+            with self.assertRaises(AssertionError):aa.collection_receipt(target,d)
+
+    def test_interleaved_console_requires_hash_bound_complete_logger_iterations(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);d=self.evidence(root);folder=root/'shard2';state=p.read(folder/'status.json')
+            receipt=dict(measurement_workflow_head='workflow',measurement_run='100',measurement_attempt='1',benchmark_logger_logs={},sha256='receipt')
+            for record in state['rounds']:
+                checkpoint=folder/'operation-checkpoints'/record['fixture']/f"round{record['index']}-{record['arm']}"
+                raw=checkpoint/'operation0.log';own=checkpoint/'operation0'/'logger.log'
+                original=raw.read_text();own.write_text(original)
+                key='shard2/'+own.relative_to(folder).as_posix();receipt['benchmark_logger_logs'][key]=p.digest(own)
+                raw.write_text(original.replace('WorkloadWarmup 1:', 'WorkloadWar; Assembly listing for method BodyShadowCandleState:Update (Tier1)\nmup 1:',1))
+                (folder/f"round{record['index']}-{record['arm']}-{record['fixture']}.log").write_text(raw.read_text())
+                chunk=record['operation_checkpoints'][0];chunk['log_sha256']=p.digest(raw);p.write(checkpoint/'operation0.json',chunk)
+            p.write(folder/'status.json',state)
+            with self.assertRaises(AssertionError):self.collected(root,d)
+            result=self.collected(root,d,receipt)
+            self.assertEqual((30,6),(result['case_count'],result['comparison_count']))
+            own.write_text(original+'tampered')
+            with self.assertRaises(AssertionError):self.collected(root,d,receipt)
+            own.write_text(original.replace('WorkloadWarmup 1:', 'MissingWarmup 1:',1))
+            receipt['benchmark_logger_logs'][key]=p.digest(own)
+            with self.assertRaises(AssertionError):self.collected(root,d,receipt)
 
     def test_separated_controls_and_observations_never_qualify_source(self):
         with tempfile.TemporaryDirectory() as tmp:

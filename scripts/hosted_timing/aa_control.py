@@ -54,3 +54,14 @@ def validate(path, inputs):
         assert proof[key] == d['original_input'][key]
     assert proof['production_sha256'] == d['production_hashes']
     return dict(d, _verified_inputs=proof)
+
+
+def collection_receipt(path, diagnostic):
+    from . import pipeline as p
+    assert p.digest(path) == 'ae95064cda9ff190d471596cd1cd12abf463455a3640fcff4b6198c055a1f9c3'
+    d=p.read(path)
+    assert d['diagnostic_only'] is True and d['diagnostic_plan_sha256']==diagnostic['_plan_sha256']
+    assert d['measurement_workflow_head']=='b32555a46fc68c9fab1c456ffe626bd6bfb8167a'
+    assert d['measurement_run']=='42325654760' and d['measurement_attempt']=='1'
+    assert len(d['benchmark_logger_logs'])==4 and set(d['artifacts'])=={'0','1','2'}
+    return dict(d, sha256=p.digest(path))

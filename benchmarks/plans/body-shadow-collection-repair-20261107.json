@@ -1,0 +1,35 @@
+{
+  "diagnostic_only": true,
+  "kind": "jit-console-interleaving-log-recovery",
+  "diagnostic_plan_sha256": "5560fbd7e2323b6e93eba842437e5f1513b6524aabf2d9ab93a0e6da7e584c6a",
+  "measurement_workflow_head": "b32555a46fc68c9fab1c456ffe626bd6bfb8167a",
+  "measurement_run": "42325654760",
+  "measurement_attempt": "1",
+  "artifacts": {
+    "0": {
+      "id": 13555761480,
+      "name": "body-shadow-control-0",
+      "digest": "sha256:e88609fe787dcd1e9cab5f23c29c07126875a8e06b073fb993f2dbb79e47a994",
+      "download_sha256": "e88609fe787dcd1e9cab5f23c29c07126875a8e06b073fb993f2dbb79e47a994"
+    },
+    "1": {
+      "id": 13555258805,
+      "name": "body-shadow-control-1",
+      "digest": "sha256:5b53b393e363a5a30adec7c3e3ce089182b6c837bfe6ade83916bfbd3d733836",
+      "download_sha256": "5b53b393e363a5a30adec7c3e3ce089182b6c837bfe6ade83916bfbd3d733836"
+    },
+    "2": {
+      "id": 13555546119,
+      "name": "body-shadow-control-2",
+      "digest": "sha256:ced4a707a3f15a504ee90534aad8149422b6f81be50ac953d95b763f544fbc9e",
+      "download_sha256": "ced4a707a3f15a504ee90534aad8149422b6f81be50ac953d95b763f544fbc9e"
+    }
+  },
+  "benchmark_logger_logs": {
+    "shard2/operation-checkpoints/SharedBodyShadowBenchmarks/round0-old/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedBodyShadowBenchmarks-20261107-014914.log": "486df22d3bc84f8337c3960067ee1dcd59c5a1bbda464093131796036288475c",
+    "shard2/operation-checkpoints/SharedBodyShadowBenchmarks/round1-new/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedBodyShadowBenchmarks-20261107-015053.log": "6e49c6c7a3b87da6a370767faf19a963d6f648a28f6a2ccaa4e6b378f3017db0",
+    "shard2/operation-checkpoints/SharedBodyShadowBenchmarks/round2-new/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedBodyShadowBenchmarks-20261107-015226.log": "27683b38aa661c168076f6cad07c79eb2db85834491b984ebc13aa7196cffcdd",
+    "shard2/operation-checkpoints/SharedBodyShadowBenchmarks/round3-old/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedBodyShadowBenchmarks-20261107-015408.log": "9f09c8085ade2d835a086bcd1dd0e717ef50ad323533a3b11f05f602f0388756"
+  },
+  "policy": "Retain original hashed console logs; use authenticated BenchmarkDotNet logger logs for observational job2 only. Require all ten numbered warmups and ten measured iterations unchanged. No measurement rerun, pooling, source acceptance or runtime-policy change."
+}

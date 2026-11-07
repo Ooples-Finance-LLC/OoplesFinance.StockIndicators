@@ -139,4 +139,5 @@ benchmarks/plans/hosted-zigzag-coordinate-normalization-20261106.json text eol=l
 benchmarks/plans/hosted-combined-containment-mfi-20261106.json text eol=lf
 benchmarks/plans/hosted-body-shadow-comparison-weights-20261106.json text eol=lf
 benchmarks/plans/harami-body-shadow-control-20261107.json text eol=lf
+benchmarks/plans/body-shadow-collection-repair-20261107.json text eol=lf
 benchmarks/plans/evidence/pr266-ci-d38e32557-20261104.json -text

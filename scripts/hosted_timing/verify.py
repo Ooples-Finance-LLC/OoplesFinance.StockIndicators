@@ -61,13 +61,18 @@ def collect_preflight(folder):
     return _collect(folder, 'successor', preflight=True)
 
 
-def collect_aa(folder, inputs, aa_plan):
-    from .aa_control import validate
-    return _collect(folder, 'targeted', preflight=False, aa=validate(aa_plan, inputs))
+def collect_aa(folder, inputs, aa_plan, collection_receipt=None):
+    from .aa_control import validate, collection_receipt as verify_receipt
+    aa=validate(aa_plan, inputs)
+    if collection_receipt is not None:
+        aa['_collection_receipt']=verify_receipt(collection_receipt,aa)
+    return _collect(folder, 'targeted', preflight=False, aa=aa)
 
 
 def _collect(folder, phase, *, preflight, aa=None):
     plan = read(PLAN)
+    repair=aa.get('_collection_receipt') if aa else None
+    logger_logs=set()
     if phase == 'coverage':
         from .coverage import verify_reference
         assert plan.get('coverage_reference') and not preflight
@@ -94,7 +99,10 @@ def _collect(folder, phase, *, preflight, aa=None):
             assert proof.get('runtime_controls') == {}
             assert proof['diagnostic_plan_sha256'] == aa['_plan_sha256']
             assert proof['measured_profile_labels'] == dict(zip(('A','B'), profiles(aa, shard)))
-            assert proof['measurement_workflow_head'] == git('rev-parse', 'HEAD')
+            assert proof['measurement_workflow_head'] == (repair['measurement_workflow_head'] if repair else git('rev-parse', 'HEAD'))
+            if repair:
+                assert proof['host']['run_id']==repair['measurement_run']
+                assert proof['host']['run_attempt']==repair['measurement_attempt']
         elif preflight:
             assert proof.get('diagnostic') == 'trix-preflight'
             assert proof.get('diagnostic_environment') == {}, 'Preflight must use the qualification runtime settings'
@@ -164,10 +172,21 @@ def _collect(folder, phase, *, preflight, aa=None):
                 original = read(paths['report'])
                 combine_reports([original], [chunk['pair']], methods, implicit)
                 log = paths['log'].read_text(encoding='utf-8-sig')
+                console_log=log
+                if repair and aa['jobs'][shard]['kind']=='observational-AB':
+                    assert '; Assembly listing for method ' in log and 'BodyShadowCandleState:' in log
+                    own_logs=list((checkpoint/f'operation{position}').glob('*.log'))
+                    assert len(own_logs)==1
+                    own_log=own_logs[0]
+                    key=f'shard{shard}/'+own_log.relative_to(root).as_posix()
+                    assert key in repair['benchmark_logger_logs']
+                    assert digest(own_log)==repair['benchmark_logger_logs'][key]
+                    logger_logs.add(key)
+                    log=own_log.read_text(encoding='utf-8-sig')
                 check_log(log, chunk['cases'], warmups=warmups_for(plan, fixture),
                     native_invocations=plan.get('coverage_harness',{}).get('native_invocation_count') if phase == 'coverage' else None)
                 originals.append(original)
-                logs.append(log)
+                logs.append(console_log)
             merged_path = archived(root, proof['raw_root'], record['report'])
             assert digest(merged_path) == record['sha256']
             merged = read(merged_path)
@@ -205,6 +224,7 @@ def _collect(folder, phase, *, preflight, aa=None):
     assert len({(d.get('diagnostic_job'), d['pair'], d['bars'], d['method']) for d in decisions}) == expected_decisions
     counts = Counter(d['verdict'] for d in decisions)
     if aa:
+        if repair: assert logger_logs==set(repair['benchmark_logger_logs'])
         names = dict(faster='B_below_A', slower='B_above_A', inconclusive='overlap')
         comparisons = [dict(diagnostic_job=d['diagnostic_job'], kind=aa['jobs'][d['diagnostic_job']]['kind'], fixture=d['fixture'], pair=d['pair'], bars=d['bars'], method=d['method'],
             A_means_ms=d['old_means_ms'], B_means_ms=d['new_means_ms'],
@@ -214,6 +234,7 @@ def _collect(folder, phase, *, preflight, aa=None):
             separation_counts={names[k]:v for k,v in counts.items()},
             jobs=aa['jobs'], production_sha256=aa['production_hashes'], input_provenance_sha256=next(iter(input_hashes)),
             original_input=aa['original_input'], diagnostic_plan_sha256=aa['_plan_sha256'],
+            **(dict(collection_repair=repair,collection_tooling_head=git('rev-parse','HEAD')) if repair else {}),
             production_integrated=False, report_imported=False, policy_changed=False,
             interpretation='Diagnostic only. Body/shadow source remains excluded; observational JIT instrumentation cannot qualify source or change policy.')
     return dict(all_cases_verified=True, phase='trix-preflight' if preflight else phase, case_count=case_count, decision_count=len(decisions),
