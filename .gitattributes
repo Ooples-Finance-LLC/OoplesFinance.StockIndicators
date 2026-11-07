@@ -145,3 +145,4 @@ benchmarks/plans/hosted-hilbert-finite-bit-steps-20261107.json text eol=lf
 benchmarks/plans/hosted-hilbert-residual-bound-20261107.json text eol=lf
 benchmarks/plans/hosted-body-shadow-retained-differences-20261107.json text eol=lf
 benchmarks/plans/hosted-sum-directional-exact-movement-20261107.json text eol=lf
+benchmarks/plans/hosted-hilbert-accumulation-directional-composition-20261107.json text eol=lf
