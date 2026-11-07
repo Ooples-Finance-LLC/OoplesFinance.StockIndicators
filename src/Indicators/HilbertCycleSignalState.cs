@@ -40,6 +40,9 @@ internal sealed class HilbertCycleSignalState(HilbertCycleSignal kind, int suppr
     private readonly HilbertTrendMeanState? _trend =
         kind == HilbertCycleSignal.Trend ? new() : null;
     private readonly JurikDyadic[] _smooth = new JurikDyadic[50];
+#if !NETFRAMEWORK
+    private readonly CertifiedHilbertProjection.FloatingWindow _floating = new();
+#endif
     private long _index = -1;
     private int _cursor,
         _days;
@@ -53,6 +56,9 @@ internal sealed class HilbertCycleSignalState(HilbertCycleSignal kind, int suppr
         _filter.Reset();
         _trend?.Reset();
         Array.Clear(_smooth, 0, 50);
+#if !NETFRAMEWORK
+        _floating.Reset();
+#endif
         _index = -1;
         _cursor = _days = 0;
         _period = _phase = _sine = _lead = 0;
@@ -99,7 +105,8 @@ internal sealed class HilbertCycleSignalState(HilbertCycleSignal kind, int suppr
         _smooth[_cursor] = _filter.SmoothPrice;
         JurikDyadic real = default, imaginary = default;
 #if !NETFRAMEWORK
-        if (!CertifiedHilbertProjection.TryProject(_smooth, _cursor, count, out real, out imaginary))
+        _floating.Set(_cursor, _smooth[_cursor]);
+        if (!CertifiedHilbertProjection.TryProject(_smooth, _cursor, count, out real, out imaginary, _floating))
 #endif
         {
             JurikDyadic smallReal = default, smallImaginary = default;
