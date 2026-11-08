@@ -147,3 +147,4 @@ benchmarks/plans/hosted-body-shadow-retained-differences-20261107.json text eol=
 benchmarks/plans/hosted-sum-directional-exact-movement-20261107.json text eol=lf
 benchmarks/plans/hosted-hilbert-accumulation-directional-composition-20261107.json text eol=lf
 benchmarks/plans/hosted-body-shadow-compact-slot-20261108.json text eol=lf
+benchmarks/plans/hosted-adl-batch-wide-publication-20261108.json text eol=lf

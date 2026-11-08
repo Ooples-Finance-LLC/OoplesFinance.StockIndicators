@@ -367,6 +367,9 @@ SCOPES['hilbert-accumulation-directional-composition-20261107'] = {'fixtures': {
 SCOPES['body-shadow-compact-slot-20261108'] = {'fixtures': {'SharedBodyShadowBenchmarks': {'TaLib.Candles.BeltHold': 'BeltHold', 'TaLib.Candles.Marubozu': 'Marubozu', 'TaLib.Candles.ClosingMarubozu': 'ClosingMarubozu', 'TaLib.Candles.SpinningTop': 'SpinningTop', 'TaLib.Candles.HighWave': 'HighWave', 'TaLib.Candles.LongLine': 'LongLine', 'TaLib.Candles.ShortLine': 'ShortLine'}, 'SharedContainmentCandleBenchmarks': {'TaLib.Candles.Harami': 'TaLib.Candles.Harami'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/BodyShadowCandles.cs', 'tests/ModelsTests/RetainedBodyShadowTests.cs'}, 'methods': {'SharedBodyShadowBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedContainmentCandleBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (240, 48), 'shards': 8, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['adl-batch-wide-publication-20261108'] = {'fixtures': {'SharedRecursiveStateBenchmarks': {'TaLib.Functions.Ad': 'Ad'}, 'SharedSmoothedAccumulationBenchmarks': {'TaLib.Functions.AdOsc': 'TaLib.Functions.AdOsc', 'Skender.GetChaikinOsc': 'Skender.GetChaikinOsc'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/CompactMoneyFlowPublicationTests.cs', 'src/Helpers/ExactMeanAccumulator.cs', 'src/Indicators/ValuesBarExecution.GeneratedStates.cs', 'src/Helpers/MoneyFlowAccumulationWindow.cs'}, 'methods': {'SharedRecursiveStateBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedSmoothedAccumulationBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (240, 48)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
