@@ -379,6 +379,28 @@ internal struct ExactMeanAccumulator
         return Encode((ulong)mantissa, grid, signed.Sign < 0);
     }
 
+#if !NETFRAMEWORK
+    // The cumulative money-flow caller can round an already-wide ordinary sum
+    // without creating a shifted BigInteger. Keep storage and the small path
+    // unchanged; larger spans, fractional grids and extended totals use Mean.
+    internal double SumWithCompactRounding()
+    {
+        if (IsZero) return 0;
+        if (!_wide && TrySmallMean(1, out var small)) return small;
+        if (!_wide) return Mean(1);
+        var magnitude = BigInteger.Abs(_large);
+        int bits = BitLength(magnitude);
+        if (bits is < 64 or > 128 || _scale < 0 || _scale > 2098 - bits) return Mean(1);
+        var compact = (UInt128)magnitude;
+        int shift = bits - 53; // At least eleven: one guard bit and the exact sticky mask fit.
+        ulong guarded = (ulong)(compact >> (shift - 1));
+        ulong mantissa = guarded >> 1;
+        var sticky = compact & (UInt128.MaxValue >> (129 - shift));
+        if ((guarded & 1) != 0 && ((mantissa & 1) != 0 || sticky != 0)) mantissa++;
+        return Encode(mantissa, bits + _scale - 53, _large.Sign < 0);
+    }
+#endif
+
     private double RoundSum(BigInteger magnitude, bool negative)
     {
         var grid = Math.Max(0, BitLength(magnitude) + _scale - 53);

@@ -9658,9 +9658,16 @@ internal static partial class ValuesBarExecution
         public void Reset() { _line.Reset(); _signal.Reset(); }
         public void Update(in Bar bar, Span<double> outputs)
         {
+            if (_identitySignal)
+            {
+                double published = _line.NextBatch(bar.High, bar.Low, bar.Close, bar.Volume, commit: true).Publish();
+                outputs[0] = published;
+                outputs[1] = published;
+                return;
+            }
             var value = _line.Next(bar.High, bar.Low, bar.Close, bar.Volume, commit: true);
             outputs[0] = value.Publish();
-            outputs[1] = _identitySignal ? outputs[0] : _signal.Next(value, true).Publish();
+            outputs[1] = _signal.Next(value, true).Publish();
         }
         public void Dispose() => _signal.Dispose();
     }
