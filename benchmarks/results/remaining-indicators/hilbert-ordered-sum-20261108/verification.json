@@ -1,0 +1,69 @@
+{
+  "source": "879cd2944d220e00638362d1b76c40ba7e864423",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-ordered-sum-20261108",
+  "status": "correctness-complete",
+  "active": null,
+  "unit": {
+    "passed": 42,
+    "classes": {
+      "HilbertRoundedKernelTests": 6,
+      "CompactHilbertPhaseTests": 11,
+      "SeededPhaseSharedExecutionTests": 11,
+      "HilbertTrendlineSharedExecutionTests": 11,
+      "HilbertOrderedSumTests": 3
+    },
+    "sha256": "81e4ba235a469bcb0988f10873143094141242d133876e0d32925e20f9bdae47"
+  },
+  "parity": {
+    "passed": 160,
+    "classes": {
+      "HilbertCycleComparisonTests": 9,
+      "SeededPhaseComparisonTests": 8,
+      "HilbertCycleSignalComparisonTests": 11,
+      "DelayedHilbertTrendComparisonTests": 8,
+      "SeededHilbertTrendComparisonTests": 5,
+      "SharedHilbertBenchmarkTests": 13,
+      "SharedHilbertSignalBenchmarkTests": 32,
+      "SharedHilbertTrendlineBenchmarkTests": 10,
+      "SharedSeededPhaseBenchmarkTests": 10,
+      "SharedTaHilbertNativeBenchmarkTests": 54
+    },
+    "sha256": "abf5ca91ad2612ad73188b1d845f4ce482926437537b8b0facd719f1359cd8d3"
+  },
+  "build_origin": {
+    "run_id": "42490416359",
+    "workflow_head": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "879cd2944d220e00638362d1b76c40ba7e864423",
+    "artifact_id": 13621501641,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42490416359"
+  },
+  "compiler_process_isolation": true,
+  "dependency_copy_mode": "Verified immutable CI artifacts; changed binaries installed without local compilation",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "build-and-gpu": {
+      "exit_code": 0,
+      "location": "CI build and actual local GPU"
+    },
+    "unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "parity": {
+      "exit_code": 0,
+      "location": "CI"
+    }
+  },
+  "gpu_passed": 100,
+  "source_fingerprint": "cc420b17feac5b0eaf9bb083180e6ec7b6b5980fe27454dc59fd48ddfcc6333a",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "30ef2b5e65a57ce794d35f8bb615313566646d1b5546699aa5324287acc6cfb2",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "30ef2b5e65a57ce794d35f8bb615313566646d1b5546699aa5324287acc6cfb2",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "30ef2b5e65a57ce794d35f8bb615313566646d1b5546699aa5324287acc6cfb2",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "30ef2b5e65a57ce794d35f8bb615313566646d1b5546699aa5324287acc6cfb2"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}
