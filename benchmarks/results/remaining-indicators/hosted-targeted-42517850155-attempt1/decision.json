@@ -2227,7 +2227,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42517850155-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "8e7295882654d3c026bbf82e22ff4a8d0b983cac",
+  "integrated_paths": [
+    "src/Indicators/PriorSeededDirectionalMeasure.cs",
+    "tests/ModelsTests/PriorDirectionalLazyFactorTests.cs"
+  ],
+  "report_sha256": "6cbb4ad7ecbe29a213660108e8ab24315fd064c10fa9c535c6d165af75b3e671",
+  "report_archive": "benchmarks/results/remaining-indicators/prior-directional-lazy-factors-20261108-report-integration"
 }

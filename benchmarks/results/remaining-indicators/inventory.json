@@ -13749,7 +13749,7 @@
     "src/Indicators/PriceRoundingTransform.cs": "aca3031e4701fd3adca81857eef171be677c1697b67182efa47d814fbafa45c5",
     "src/Indicators/PriceTranscendentalTransform.cs": "ad9b946e28fad6b27442483bdb6a3b3f741f10afd63c610f5eaa5a1eafdabacb",
     "src/Indicators/PriceWindowChannels.cs": "96a20e0e07c6e1fac7dce3faf86c600a32532bee96344f71ce35ba5fac33b60a",
-    "src/Indicators/PriorSeededDirectionalMeasure.cs": "11d945067c6eb595a588dbc39f630ded1e19179e5e0f6ca41a1fafa1015549ff",
+    "src/Indicators/PriorSeededDirectionalMeasure.cs": "68530ce9d02570922be7e15cc4fb468672e9d8550d4a699f8aa9eb725d7a2810",
     "src/Indicators/QuarticDynamicAverage.cs": "cafd9383412e878c2cd0bf14db2b23c73a4bda1230c8e5b0f58d152e9b49d703",
     "src/Indicators/RangeAccelerationBands.cs": "e92491a86eab37ff12b8114ce189a62a8d4f396171b90c5c92daad973a8aea92",
     "src/Indicators/RangeFractalAverage.cs": "f6b7761ae731edcb9a48e3160c5358bdea8aac98911cc78227788d256474b480",
