@@ -133,7 +133,8 @@ internal static class CertifiedHilbertProjection
         // Coefficients never change; certify their product-residual range once
         // per cached window instead of repeating the same check for every price.
         if (!FloatingCoefficientCertificates[count]) return false;
-        const double maximum = 2.9073548971824276E+135; // 2^450
+        const long minimumBits = 0x23d0000000000000L; // 2^-450
+        const long maximumBits = 0x5c10000000000000L; // 2^450
         double realSum = 0, realResidual = 0, realMaximum = 0;
         double imaginarySum = 0, imaginaryResidual = 0, imaginaryMaximum = 0;
         var coefficients = FloatingCoefficients[count];
@@ -141,8 +142,10 @@ internal static class CertifiedHilbertProjection
         for (int lag = 0; lag < count; lag++)
         {
             if (!values[index].TryDouble(out double value)) return false;
-            double magnitude = Math.Abs(value);
-            if (!double.IsFinite(value) || magnitude > maximum || magnitude != 0 && magnitude < MinimumFloatingMagnitude) return false;
+            // Positive binary64 encodings follow magnitude order. The exact
+            // inclusive range also rejects infinities/NaNs; either zero is valid.
+            long magnitudeBits = BitConverter.DoubleToInt64Bits(value) & long.MaxValue;
+            if (magnitudeBits != 0 && (magnitudeBits < minimumBits || magnitudeBits > maximumBits)) return false;
             var coefficient = coefficients[lag];
             AccumulateFloating(value, coefficient.Sine, ref realSum, ref realResidual, ref realMaximum);
             AccumulateFloating(value, coefficient.Cosine, ref imaginarySum, ref imaginaryResidual, ref imaginaryMaximum);

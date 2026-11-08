@@ -6,6 +6,39 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class CertifiedHilbertProjectionTests
 {
     [Fact]
+    public void FloatingGridGuardPreservesInclusiveBoundariesAndBothZeroSigns()
+    {
+        double minimum = Math.ScaleB(1, -450), maximum = Math.ScaleB(1, 450);
+        foreach (double magnitude in new[] { 0d, double.Epsilon, Math.ScaleB(1, -1022),
+                     Math.BitDecrement(minimum), minimum, Math.BitIncrement(minimum),
+                     Math.BitDecrement(maximum), maximum, Math.BitIncrement(maximum), double.MaxValue })
+        foreach (int sign in new[] { -1, 1 })
+        foreach (int cursor in new[] { 0, 17, 49 })
+        {
+            double value = sign * magnitude;
+            var prices = new double[50]; prices[cursor] = value;
+            bool eligible = magnitude == 0 || magnitude >= minimum && magnitude <= maximum;
+            Assert.Equal(eligible, Check(prices, cursor, 1, floating: true));
+        }
+    }
+
+    [Fact]
+    public void FloatingGridGuardMatchesNumericEligibilityAcrossEveryFiniteExponent()
+    {
+        for (long exponent = 0; exponent < 2047; exponent++)
+        foreach (long fraction in new[] { 0L, 1L, 1L << 51, 0xfffffffffffffL })
+        foreach (long sign in new[] { 0L, long.MinValue })
+        {
+            double value = BitConverter.Int64BitsToDouble(sign | (exponent << 52) | fraction);
+            double magnitude = Math.Abs(value);
+            bool eligible = magnitude == 0
+                || magnitude >= Math.ScaleB(1, -450) && magnitude <= Math.ScaleB(1, 450);
+            var prices = new double[50]; prices[17] = value;
+            Assert.Equal(eligible, Check(prices, 17, 1, floating: true));
+        }
+    }
+
+    [Fact]
     public void FloatingProjectionCertificatesMatchIndependentIntegerProducts()
     {
         var random = new Random(904215);
