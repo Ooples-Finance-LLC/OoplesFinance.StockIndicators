@@ -13651,7 +13651,7 @@
     "src/Indicators/BalanceOfPowerWithValidity.cs": "102a8cd07e15a2cc0dad603ed674a5ce37a90f27b544bdde9e3849bd34f6dee5",
     "src/Indicators/BarSnapshot.cs": "de2a90eabfe9736c7371a5398f68c49c88eab0ef3a78c1ee4115b8844767b61e",
     "src/Indicators/BarSource.cs": "58ebb0ebb5b990f2b48a8657e81edabe02ba99060debfea5d6d5edf79917349e",
-    "src/Indicators/BodyShadowCandles.cs": "5bd1b586ed885935448a1ef53ac342156527e260f7ca08dff13b85e0d93e0883",
+    "src/Indicators/BodyShadowCandles.cs": "64e19377f3a9824b72cf41f9fd1d612e93bfdfd684a016714ab9771ade3a005f",
     "src/Indicators/BuilderCpuIndicators.cs": "ec880f10405d682d1d0e1fed7401e5f98d3e9baa8db322942ca4ff23ec535b60",
     "src/Indicators/CandleArithmetic.cs": "b57acd3fae537f21e8585715a337a73da1f5e0d088978d50bf8e4acf9f093c9e",
     "src/Indicators/CandleTrendPatterns.cs": "7637dc26180d15b71dd51f1880cde9b8592a0bec2445449f40fdfa21fc218bd0",
