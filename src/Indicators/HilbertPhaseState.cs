@@ -43,8 +43,8 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
         if (value.TryDouble(out double v) && lag2.TryDouble(out double a)
             && lag4.TryDouble(out double b) && lag6.TryDouble(out double c))
         {
-            if ((HilbertRoundedKernel.TryExactSum(v, -c, out double outer)
-                 && HilbertRoundedKernel.TryExactSum(a, -b, out double inner)
+            if ((HilbertRoundedKernel.TryExactPhaseSum(v, -c, out double outer)
+                 && HilbertRoundedKernel.TryExactPhaseSum(a, -b, out double inner)
                  && HilbertRoundedKernel.TryProductSum(outer, .0962, inner, .5769, out double rounded))
                 || HilbertRoundedKernel.TryFir(v, a, b, c, out rounded))
             {

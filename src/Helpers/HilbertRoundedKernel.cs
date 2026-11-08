@@ -22,6 +22,19 @@ internal static class HilbertRoundedKernel
             && SumError(a, b, sum) == 0;
     }
 
+    internal static bool TryExactPhaseSum(double a, double b, out double sum)
+    {
+        sum = a + b;
+        double magnitudeA = Math.Abs(a), magnitudeB = Math.Abs(b);
+        if (!(magnitudeA <= MaximumProduct && magnitudeB <= MaximumProduct)) return false;
+        // FastTwoSum is exact when the leading operand has greater magnitude.
+        // The same bounds as TwoSum prevent intermediate overflow; every finite
+        // operand and residual remains on the binary64 subnormal integer grid.
+        double large = magnitudeA >= magnitudeB ? a : b;
+        double small = magnitudeA >= magnitudeB ? b : a;
+        return small - (sum - large) == 0;
+    }
+
     private static bool SafeProduct(double a, double b, double product)
     {
         double magnitude = Math.Abs(product);
@@ -116,9 +129,9 @@ internal static class HilbertRoundedKernel
         double p = price * 4, q = a * 3, r = b * 2;
         // Integer scaling cannot lose a bit below the binary64 subnormal grid.
         if (!double.IsFinite(q) || Math.FusedMultiplyAdd(a, 3, -q) != 0
-            || !TryExactSum(p, q, out double sum)
-            || !TryExactSum(sum, r, out sum)
-            || !TryExactSum(sum, c, out sum)) return false;
+            || !TryExactPhaseSum(p, q, out double sum)
+            || !TryExactPhaseSum(sum, r, out sum)
+            || !TryExactPhaseSum(sum, c, out sum)) return false;
         result = sum / 10;
         if (result == 0) result = 0;
         return true;
