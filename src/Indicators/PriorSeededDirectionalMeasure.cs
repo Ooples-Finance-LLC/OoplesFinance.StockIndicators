@@ -258,7 +258,7 @@ public sealed class PriorSeededDirectionalMeasure
                 || !Binary64ArithmeticCertificate.TryDifference(positive.Mantissa, -negative.Mantissa, out var total)
                 || !Binary64ArithmeticCertificate.TryDifference(positive.Mantissa, negative.Mantissa, out var difference))
                 return false;
-            if (total == 0) return true;
+            if (total is 0) return true;
             hasDirection = true;
             // Both DI stages and their sum/difference are exact binary64 inputs.
             // Certify the complete 100*absolute(difference)/total rounding;
