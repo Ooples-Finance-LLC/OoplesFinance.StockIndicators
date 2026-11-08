@@ -158,6 +158,8 @@ internal static partial class ValuesBarExecution
                 latest = FillBoundedWindow(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (boundedBatch)
                 latest = FillBoundedBatch(source, nodes, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is PriorSeededDirectionalMeasure)
+                latest = nodes[0].FillPriorDirectional(source, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].HasScalarState)
                 latest = nodes[0].FillScalar(source, cancellation, owned);
             else
@@ -1003,6 +1005,34 @@ internal static partial class ValuesBarExecution
                 Failure = ExceptionDispatchInfo.Capture(error);
             }
         }
+        internal Bar FillPriorDirectional(Bar[] source, CancellationToken cancellation, OwnedBarBuffer? owned)
+        {
+            // Select this sealed indicator once, keeping the original state and
+            // both complete output columns. Mixed plans retain Append's routing.
+            var state = (IMultiOutputState)_state!;
+            var value = Values[0];
+            var defined = Values[1];
+            Bar latest = default;
+            for (int i = 0; i < source.Length; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                var bar = source[i];
+                latest = bar;
+                if (owned is not null) owned[i] = bar;
+                if (!AllFieldsFinite(in bar)) IndicatorInputDomain.Finite.Validate(in bar);
+                if (Failure is not null) continue;
+                try
+                {
+                    Array.Clear(_scratch);
+                    state.Update(in bar, _scratch);
+                    value[i] = _scratch[0];
+                    defined[i] = _scratch[1];
+                }
+                catch (Exception error) { Failure = ExceptionDispatchInfo.Capture(error); }
+            }
+            return latest;
+        }
+
         internal Bar FillScalar(Bar[] source, CancellationToken cancellation, OwnedBarBuffer? owned)
         {
             // Keep the existing Rickshaw batch's concrete Update call available to
