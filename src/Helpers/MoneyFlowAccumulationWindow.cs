@@ -13,6 +13,18 @@ internal sealed class MoneyFlowAccumulationWindow
         if (commit) _total = total;
         return RocBankValue.Round(total);
     }
+#if !NETFRAMEWORK
+    // Only the captured batch line opts into compact wide-sum publication.
+    // Streaming callers retain Next and its original publication path.
+    internal RocBankValue NextBatch(double high, double low, double close, double volume, bool commit)
+    {
+        var flow = Flow(high, low, close, volume);
+        var total = _total; flow.AddTo(ref total);
+        if (commit) _total = total;
+        double ordinary = total.SumWithCompactRounding();
+        return !double.IsInfinity(ordinary) ? new RocBankValue(ordinary) : RocBankValue.Round(total);
+    }
+#endif
     internal static RocBankValue Flow(double high, double low, double close, double volume)
     {
         RocBankValue flow = default;
