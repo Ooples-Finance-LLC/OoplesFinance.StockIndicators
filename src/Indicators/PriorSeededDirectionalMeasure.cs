@@ -249,6 +249,25 @@ public sealed class PriorSeededDirectionalMeasure
         }
 
 #if !NETFRAMEWORK
+        private static bool TryDx(RocBankValue positive, RocBankValue negative,
+            out bool hasDirection, out double dx)
+        {
+            hasDirection = false;
+            dx = 0;
+            if (positive.UpperShift != 0 || negative.UpperShift != 0
+                || !Binary64ArithmeticCertificate.TryDifference(positive.Mantissa, -negative.Mantissa, out var total)
+                || !Binary64ArithmeticCertificate.TryDifference(positive.Mantissa, negative.Mantissa, out var difference))
+                return false;
+            if (total == 0) return true;
+            hasDirection = true;
+            // Both DI stages and their sum/difference are exact binary64 inputs.
+            // Certify the complete 100*absolute(difference)/total rounding;
+            // the intermediate multiplication itself need not be exact.
+            return AwesomeWithDetails.Arithmetic.TryNormalize(Math.Abs(difference), total, out dx);
+        }
+#endif
+
+#if !NETFRAMEWORK
         private bool TryOrdinaryMovements(double high, double low,
             out RocBankValue positive, out RocBankValue negative)
         {
@@ -371,10 +390,17 @@ public sealed class PriorSeededDirectionalMeasure
             }
             var pdi = Direction(_positive, _range);
             var mdi = Direction(_negative, _range);
-            var total = new ExactMeanAccumulator(); pdi.AddTo(ref total); mdi.AddTo(ref total);
-            var difference = new ExactMeanAccumulator(); pdi.AddTo(ref difference, 100); mdi.AddTo(ref difference, -100);
-            var hasDirection = !total.IsExactlyZero;
-            var dx = hasDirection ? Absolute(difference).Ratio(total) : 0;
+            bool hasDirection;
+            double dx;
+#if !NETFRAMEWORK
+            if (!TryDx(pdi, mdi, out hasDirection, out dx))
+#endif
+            {
+                var total = new ExactMeanAccumulator(); pdi.AddTo(ref total); mdi.AddTo(ref total);
+                var difference = new ExactMeanAccumulator(); pdi.AddTo(ref difference, 100); mdi.AddTo(ref difference, -100);
+                hasDirection = !total.IsExactlyZero;
+                dx = hasDirection ? Absolute(difference).Ratio(total) : 0;
+            }
             if (measure == PriorDirectionalMeasure.Index)
             {
                 if (_index < firstDx) return;
