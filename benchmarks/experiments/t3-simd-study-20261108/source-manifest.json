@@ -1,0 +1,17 @@
+{
+  "baseline": "b2afb7edd136c5acb79ddaf98ebc44d64c63a685",
+  "original_helper_sha256": "1793adbc5ef6037334c01ec095d373f6f02db2185361c3fd38d9da501f5d9e15",
+  "extracted_word_sha256": "3532b6a312263c54cff96a76d31bea12e7b0f3ea5df2efe1fb202058e925ec86",
+  "files": {
+    "Scalar.cs": "837ac2dd72a4513cfea9aeb142cd58625088929524383cbb5927292270539a76",
+    "ScalarInline.cs": "5446e9e4b9cf4a89e7ab07ab2e714ddec65257944bce9aef3272b9bf52920108",
+    "Kernel256.cs": "b27b1b1b70012e0b3e7879f600cf8762691009e73fa613411bb3b36ed796eb5e",
+    "Kernel512.cs": "bcf641f35c1886da0c121e784aaaa5f4e355c3e14a772b433b0da2aa55ffd6bf"
+  },
+  "prototype_files": {
+    "Program.cs": "4a0dec87e261133c005eeae090623400e90433f7de9014bceee26bb1653389a0",
+    "Study.csproj": "4eee639c063128746cc31e3604bc80f8d12011652470f19480e6795330171224"
+  },
+  "generator_sha256": "95a2324c448d548ba30cb15774634828be06aa6977efe0ba1270a5aed02163e3",
+  "note": "Diagnostic prototype only. Original scalar word implementation is copied verbatim; scalar-inline adds only an inlining annotation. No production code, runtime environment override or qualification plan is changed."
+}

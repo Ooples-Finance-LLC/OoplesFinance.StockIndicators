@@ -7,7 +7,7 @@ on:
       suite:
         description: Public builder comparisons, diagnostic kernels, or both
         type: choice
-        options: [builder, kernel, all, qualified-rollout, qualified-variants, qualified-coverage, qualified-targeted, verify-evidence, trix-diagnostic, trix-library-diagnostic, build-correctness-inputs]
+        options: [builder, kernel, all, qualified-rollout, qualified-variants, qualified-coverage, qualified-targeted, verify-evidence, trix-diagnostic, trix-library-diagnostic, build-correctness-inputs, simd-study]
         default: builder
       qualification_plan:
         description: Immutable source and measurement plan for qualified-rollout
@@ -660,3 +660,39 @@ jobs:
             verified-evidence.json
             collection-recovery.json
           retention-days: 14
+
+  simd-study:
+    if: github.event_name == 'workflow_dispatch' && inputs.suite == 'simd-study'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        os: [windows-2025, ubuntu-24.04]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.403
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Verify exact scalar extraction and generated kernels
+        run: python benchmarks/experiments/t3-simd-study-20261108/generate.py --check
+      - name: Build isolated diagnostic only
+        run: dotnet build benchmarks/experiments/t3-simd-study-20261108/Study.csproj -c Release --disable-build-servers -p:UseSharedCompilation=false
+      - name: Run independent oracle and diagnostic timings
+        run: dotnet benchmarks/experiments/t3-simd-study-20261108/bin/Release/net10.0/Study.dll benchmarks/experiments/t3-simd-study-20261108/source-manifest.json simd-study-${{ matrix.os }}.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: simd-study-${{ matrix.os }}
+          path: |
+            simd-study-${{ matrix.os }}*.json
+            benchmarks/experiments/t3-simd-study-20261108/source-manifest.json
+            benchmarks/experiments/t3-simd-study-20261108/bin/Release/net10.0/Study.*
+          retention-days: 14
+          if-no-files-found: error
