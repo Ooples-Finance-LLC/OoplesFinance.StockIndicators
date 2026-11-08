@@ -1,0 +1,19 @@
+{
+  "kind": "Additional local CPU fixture checks using authenticated unchanged CI-built binaries; not additional CI test results or timing.",
+  "source": "339d29571790b5737945be5a813ca9ce7cd178f1",
+  "source_fingerprint": "dbdd38f0758fe2886777dea25b0ed4940519d5660240db2d41f07cdb24f1dd89",
+  "production_sha256": "c2510a678c6c26854d85d4550ce18d265672c3168ee4f434a08ab7813f3b04e0",
+  "test_assembly_sha256": "a1806ee8cf2b9545c5c175dc9f2e32c4deef2ad28fcc5d16f5982f365caf59e9",
+  "build_origin": {
+    "run_id": "42507718870",
+    "workflow_head": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "339d29571790b5737945be5a813ca9ce7cd178f1",
+    "artifact_id": 13628147417,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42507718870"
+  },
+  "classes": {
+    "SharedTaDirectionalBenchmarkTests": 7
+  },
+  "passed": 7,
+  "trx_sha256": "09e73288ebd3a2197a4f23cd03aae5ced13a12f1a32562c54d35c444d34c353b"
+}
