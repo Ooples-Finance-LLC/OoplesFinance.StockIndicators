@@ -1,0 +1,226 @@
+{
+  "kind": "Bounded diagnostic study; NOT production qualification",
+  "records": [
+    {
+      "run": "42536703696",
+      "host": "ubuntu-24.04",
+      "source": "e2a8a8dffec8ebb65c102b29f2434d8db6300d40",
+      "avx2": true,
+      "avx512f": true,
+      "oracle_pairs": 524032,
+      "vector256_smoothing_checks": 262016,
+      "vector512_smoothing_checks": 524032,
+      "high_product_oracle_pairs": 262144,
+      "vector256_high_product_checks": 131072,
+      "vector512_high_product_checks": 262144,
+      "chain_checks_per_method": 7196,
+      "comparisons": [
+        {
+          "candidate": "scalar-inline",
+          "round_means_ns_per_bar": [
+            15.404226779937744,
+            13.667373657226562,
+            13.58403205871582,
+            13.750770092010498
+          ]
+        },
+        {
+          "candidate": "vector256",
+          "round_means_ns_per_bar": [
+            13.736462593078613,
+            15.48703670501709,
+            15.492219924926758,
+            14.195282459259033
+          ]
+        },
+        {
+          "candidate": "vector512",
+          "round_means_ns_per_bar": [
+            13.736112117767334,
+            18.549182415008545,
+            18.55598211288452,
+            13.729257583618164
+          ]
+        }
+      ]
+    },
+    {
+      "run": "42536921019",
+      "host": "ubuntu-24.04",
+      "source": "4ef848d758bcfaac08853ab6a16d74275966a2cd",
+      "avx2": true,
+      "avx512f": true,
+      "oracle_pairs": 524032,
+      "vector256_smoothing_checks": 262016,
+      "vector512_smoothing_checks": 524032,
+      "high_product_oracle_pairs": 262144,
+      "vector256_high_product_checks": 131072,
+      "vector512_high_product_checks": 262144,
+      "chain_checks_per_method": 7196,
+      "comparisons": [
+        {
+          "candidate": "scalar-inline",
+          "round_means_ns_per_bar": [
+            16.313655376434326,
+            14.737575054168701,
+            14.679789543151855,
+            14.41798448562622
+          ]
+        },
+        {
+          "candidate": "vector256",
+          "round_means_ns_per_bar": [
+            14.485166072845459,
+            19.376144409179688,
+            19.360084533691406,
+            14.428396224975586
+          ]
+        },
+        {
+          "candidate": "vector512",
+          "round_means_ns_per_bar": [
+            14.425394535064697,
+            18.00375461578369,
+            18.00807476043701,
+            14.43488597869873
+          ]
+        }
+      ]
+    },
+    {
+      "run": "42536921019",
+      "host": "windows-2025",
+      "source": "4ef848d758bcfaac08853ab6a16d74275966a2cd",
+      "avx2": true,
+      "avx512f": false,
+      "oracle_pairs": 524032,
+      "vector256_smoothing_checks": 262016,
+      "vector512_smoothing_checks": 0,
+      "high_product_oracle_pairs": 262144,
+      "vector256_high_product_checks": 131072,
+      "vector512_high_product_checks": 0,
+      "chain_checks_per_method": 7196,
+      "comparisons": [
+        {
+          "candidate": "scalar-inline",
+          "round_means_ns_per_bar": [
+            18.169007301330566,
+            16.477508544921875,
+            16.670114994049072,
+            16.066102981567383
+          ]
+        },
+        {
+          "candidate": "vector256",
+          "round_means_ns_per_bar": [
+            16.082558631896973,
+            20.42715549468994,
+            19.77764368057251,
+            16.101958751678467
+          ]
+        }
+      ]
+    }
+  ],
+  "conclusion": "Exactness passed on supported hardware. Every tested vector round mean exceeded both matched scalar round means. This prototype does not justify a production SIMD path.",
+  "limitations": "Measures only a six-EMA first-price smoothing pipeline, excluding real T3 startup/polynomial/validation/history/API. AVX512F was exercised only on Linux. Initial Windows checkout failed before code execution; sparse-checkout repair changed no prototype bytes. Runs remain separate, with no pooling or source/report import.",
+  "files": {
+    "runs/42536703696/ubuntu-24.04/simd-study-ubuntu-24.04-correctness.json.gz": {
+      "sha256": "c74acd0494c7c77c3f158bf4e87e1a8697d6b6b0822533fa38543d11c9357396",
+      "bytes": 290
+    },
+    "runs/42536703696/ubuntu-24.04/simd-study-ubuntu-24.04.json.gz": {
+      "sha256": "e956f81f2b1773ad715245488ab2e036d279be28efce7e455f7507c27aa481a2",
+      "bytes": 9348
+    },
+    "runs/42536703696/ubuntu-24.04/source-manifest.json.gz": {
+      "sha256": "af780270b563da11dd829aacccb4e78a6bb2c6adaa871273e5864079e415538a",
+      "bytes": 1139
+    },
+    "runs/42536703696/ubuntu-24.04/Study.deps.json.gz": {
+      "sha256": "4a906945ae99dfe78032c8c34b3a95703a13fa320da68ed9d8bb927d2c7ed298",
+      "bytes": 387
+    },
+    "runs/42536703696/ubuntu-24.04/Study.dll.gz": {
+      "sha256": "67eddea1ff775e9dfecd956a552cc684f047c1aede1b3ca9531ba325525387b6",
+      "bytes": 35328
+    },
+    "runs/42536703696/ubuntu-24.04/Study.pdb.gz": {
+      "sha256": "338a1cf6a0dccaf518ec82624bea8fcb31a90759678b1ae2b80b91151e27b4d3",
+      "bytes": 17376
+    },
+    "runs/42536703696/ubuntu-24.04/Study.runtimeconfig.json.gz": {
+      "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f",
+      "bytes": 330
+    },
+    "runs/42536703696/windows-2025/source-manifest.json.gz": {
+      "sha256": "af780270b563da11dd829aacccb4e78a6bb2c6adaa871273e5864079e415538a",
+      "bytes": 1139
+    },
+    "runs/42536921019/ubuntu-24.04/simd-study-ubuntu-24.04-correctness.json.gz": {
+      "sha256": "f576b795fc2fea190d309e97c394dbd393a66d26d1e0e14020e81f60983bd61c",
+      "bytes": 290
+    },
+    "runs/42536921019/ubuntu-24.04/simd-study-ubuntu-24.04.json.gz": {
+      "sha256": "501599de296e4237a82cd95277f96d2b0012bb8f4a3c5a4c137eb9cef0565526",
+      "bytes": 9697
+    },
+    "runs/42536921019/ubuntu-24.04/source-manifest.json.gz": {
+      "sha256": "af780270b563da11dd829aacccb4e78a6bb2c6adaa871273e5864079e415538a",
+      "bytes": 1139
+    },
+    "runs/42536921019/ubuntu-24.04/Study.deps.json.gz": {
+      "sha256": "4a906945ae99dfe78032c8c34b3a95703a13fa320da68ed9d8bb927d2c7ed298",
+      "bytes": 387
+    },
+    "runs/42536921019/ubuntu-24.04/Study.dll.gz": {
+      "sha256": "687a97417e8d9140e338eba8eb3afc47522cb93cc0f78267f832f1bfeda0ce73",
+      "bytes": 35328
+    },
+    "runs/42536921019/ubuntu-24.04/Study.pdb.gz": {
+      "sha256": "ac9404975365cfe042629ee55f232c2fc45b5717e6c3c7348788c8fec8c86d17",
+      "bytes": 17380
+    },
+    "runs/42536921019/ubuntu-24.04/Study.runtimeconfig.json.gz": {
+      "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f",
+      "bytes": 330
+    },
+    "runs/42536921019/windows-2025/simd-study-windows-2025-correctness.json.gz": {
+      "sha256": "024b9b8a3dc2b2bb982320308e6b39ea04d0a38a85a33e66bdebb15bf16dfa62",
+      "bytes": 300
+    },
+    "runs/42536921019/windows-2025/simd-study-windows-2025.json.gz": {
+      "sha256": "61243d8e166cbcd504fcbc4dc257fc07cfbb56c2c0707880319b53f11b865cea",
+      "bytes": 6908
+    },
+    "runs/42536921019/windows-2025/source-manifest.json.gz": {
+      "sha256": "af780270b563da11dd829aacccb4e78a6bb2c6adaa871273e5864079e415538a",
+      "bytes": 1139
+    },
+    "runs/42536921019/windows-2025/Study.deps.json.gz": {
+      "sha256": "efaf3c1e487edcd6b4ea6e4490460bf991eaa7799a76508ac6355155242167d4",
+      "bytes": 409
+    },
+    "runs/42536921019/windows-2025/Study.dll.gz": {
+      "sha256": "de0fe58eeed2ea162c39c4729fbf035c1791f778a8a01565c300cae2baad4c98",
+      "bytes": 35328
+    },
+    "runs/42536921019/windows-2025/Study.exe.gz": {
+      "sha256": "7b7fbaee100ced8cb0b3ed91c044bc447c489e78b21954baa337297c477f4620",
+      "bytes": 162304
+    },
+    "runs/42536921019/windows-2025/Study.pdb.gz": {
+      "sha256": "5cbf17069ba076a73c20f11c69a5af95615399ec4337ac56debc53cdf3f2866e",
+      "bytes": 17304
+    },
+    "runs/42536921019/windows-2025/Study.runtimeconfig.json.gz": {
+      "sha256": "c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097",
+      "bytes": 342
+    },
+    "first-windows-checkout.log.gz": {
+      "sha256": "cbaa10fdd6bce0c8901a15495eaf7cb98ba02f45c0b15c5da99310f7409793b7",
+      "bytes": 257062
+    }
+  },
+  "completed_utc": "2026-11-08T23:56:30.892341+00:00"
+}
