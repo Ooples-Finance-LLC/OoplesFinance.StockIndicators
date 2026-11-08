@@ -1043,7 +1043,16 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42446630682-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "04f5725b217048b55d1700b0082daf3916826ec2",
+  "integrated_paths": [
+    "src/Helpers/ExactMeanAccumulator.cs",
+    "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs",
+    "tests/ModelsTests/CompactMoneyFlowPublicationTests.cs"
+  ],
+  "report_sha256": "ea56f58bb9a155163deaad9460d1ad2051eb742f40a9629d60b9481e774de4e9",
+  "report_archive": "benchmarks/results/remaining-indicators/adl-batch-wide-publication-20261108-report-integration"
 }
