@@ -150,3 +150,4 @@ benchmarks/plans/hosted-body-shadow-compact-slot-20261108.json text eol=lf
 benchmarks/plans/hosted-adl-batch-wide-publication-20261108.json text eol=lf
 benchmarks/plans/hosted-hilbert-lag-zero-seed-20261108.json text eol=lf
 benchmarks/plans/hosted-hilbert-ordered-sum-20261108.json text eol=lf
+benchmarks/plans/hosted-hilbert-floating-grid-guard-20261108.json text eol=lf
