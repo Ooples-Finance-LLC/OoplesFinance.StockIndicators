@@ -155,3 +155,4 @@ benchmarks/plans/hosted-prior-directional-single-loop-20261108.json text eol=lf
 benchmarks/plans/evidence/prior-directional-single-loop-20261108-additional-correctness.json -text
 benchmarks/plans/hosted-prior-directional-lazy-factors-20261108.json text eol=lf
 benchmarks/plans/hosted-prior-directional-dx-ratio-20261108.json text eol=lf
+benchmarks/plans/hosted-trix-scalar-stage-storage-20261108.json text eol=lf
