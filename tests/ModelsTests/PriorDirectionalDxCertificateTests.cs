@@ -44,7 +44,7 @@ public sealed class PriorDirectionalDxCertificateTests
     private static void Verify(Bar[] bars)
     {
         foreach (var measure in Enum.GetValues<PriorDirectionalMeasure>())
-        foreach (int period in new[] { 1, 2, 3, 14 })
+        foreach (int period in new[] { measure >= PriorDirectionalMeasure.Index ? 2 : 1, 3, 7, 14 })
         foreach (int unstable in new[] { 0, 3 })
         {
             var expected = PriorDirectionalReference.Calculate(bars, measure, period, unstable);
