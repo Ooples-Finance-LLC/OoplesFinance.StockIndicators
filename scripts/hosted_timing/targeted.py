@@ -370,6 +370,9 @@ SCOPES['body-shadow-compact-slot-20261108'] = {'fixtures': {'SharedBodyShadowBen
 SCOPES['adl-batch-wide-publication-20261108'] = {'fixtures': {'SharedRecursiveStateBenchmarks': {'TaLib.Functions.Ad': 'Ad'}, 'SharedSmoothedAccumulationBenchmarks': {'TaLib.Functions.AdOsc': 'TaLib.Functions.AdOsc', 'Skender.GetChaikinOsc': 'Skender.GetChaikinOsc'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/CompactMoneyFlowPublicationTests.cs', 'src/Helpers/ExactMeanAccumulator.cs', 'src/Indicators/ValuesBarExecution.GeneratedStates.cs', 'src/Helpers/MoneyFlowAccumulationWindow.cs'}, 'methods': {'SharedRecursiveStateBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedSmoothedAccumulationBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (240, 48)}
 
 
+SCOPES['hilbert-lag-zero-seed-20261108'] = {'fixtures': {'SharedTaHilbertNativeBenchmarks': {'TaLib.Functions.HtDcPhase': 'TaLib.Functions.HtDcPhase', 'TaLib.Functions.HtSine': 'TaLib.Functions.HtSine'}, 'SharedTaHilbertTrendModeBenchmarks': {'TaLib.Functions.HtTrendMode': 'TaLib.Functions.HtTrendMode'}}, 'implicit_fixtures': set(), 'paths': {'src/Helpers/CertifiedHilbertProjection.cs', 'tests/ModelsTests/CertifiedHilbertProjectionTests.cs'}, 'methods': {'SharedTaHilbertNativeBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedTaHilbertTrendModeBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
