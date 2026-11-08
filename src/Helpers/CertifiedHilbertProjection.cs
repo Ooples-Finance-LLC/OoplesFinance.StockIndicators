@@ -133,12 +133,19 @@ internal static class CertifiedHilbertProjection
         // Coefficients never change; certify their product-residual range once
         // per cached window instead of repeating the same check for every price.
         if (!FloatingCoefficientCertificates[count]) return false;
+        if (count == 0) return true;
         const double maximum = 2.9073548971824276E+135; // 2^450
+        if (!values[cursor].TryDouble(out double first)) return false;
+        double firstMagnitude = Math.Abs(first);
+        if (!double.IsFinite(first) || firstMagnitude > maximum || firstMagnitude != 0 && firstMagnitude < MinimumFloatingMagnitude) return false;
+        // Lag zero has coefficients (0, 1). Its product and initial addition
+        // are exact, so both residuals and their bounds remain zero. Keep the
+        // original positive-zero addition and every later near-axis term.
         double realSum = 0, realResidual = 0, realMaximum = 0;
-        double imaginarySum = 0, imaginaryResidual = 0, imaginaryMaximum = 0;
+        double imaginarySum = 0d + first, imaginaryResidual = 0, imaginaryMaximum = 0;
         var coefficients = FloatingCoefficients[count];
-        int index = cursor;
-        for (int lag = 0; lag < count; lag++)
+        int index = cursor == 0 ? 49 : cursor - 1;
+        for (int lag = 1; lag < count; lag++)
         {
             if (!values[index].TryDouble(out double value)) return false;
             double magnitude = Math.Abs(value);

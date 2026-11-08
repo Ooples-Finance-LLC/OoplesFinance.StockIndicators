@@ -6,6 +6,28 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class CertifiedHilbertProjectionTests
 {
     [Fact]
+    public void LagZeroSeedsExactCosineAndRetainsLaterNearAxisTerms()
+    {
+        foreach (double value in new[] { 0d, -0d, 1d, -1d,
+            Math.ScaleB(1, -450), -Math.ScaleB(1, -450), Math.ScaleB(1, 450), -Math.ScaleB(1, 450) })
+        foreach (int cursor in new[] { 0, 17, 49 })
+        for (int count = 0; count <= 50; count++)
+        {
+            var prices = new double[50]; prices[cursor] = value;
+            Assert.True(Check(prices, cursor, count, floating: true));
+        }
+        foreach (int count in new[] { 2, 4, 50 })
+        foreach (int cursor in new[] { 0, 17, 49 })
+        {
+            var prices = new double[50]; prices[(cursor - count / 2 + 50) % 50] = 1;
+            Assert.True(Check(prices, cursor, count, floating: true));
+            Assert.True(CertifiedHilbertProjection.TryProjectFloating(prices.Select(JurikDyadic.FromDouble).ToArray(),
+                cursor, count, out var real, out _));
+            Assert.NotEqual(0d, real.Mean(1));
+        }
+    }
+
+    [Fact]
     public void FloatingProjectionCertificatesMatchIndependentIntegerProducts()
     {
         var random = new Random(904215);
