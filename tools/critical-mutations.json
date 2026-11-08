@@ -8251,6 +8251,7 @@
   },
   {
     "id": "moneyflow-accumulation-drops-running-total",
+    "scope": "internal RocBankValue Next(",
     "module": "numerical",
     "file": "src/Helpers/MoneyFlowAccumulationWindow.cs",
     "before": "var total = _total; flow.AddTo",
@@ -8259,6 +8260,7 @@
   },
   {
     "id": "moneyflow-accumulation-rounds-away-recovery",
+    "scope": "internal RocBankValue Next(",
     "module": "numerical",
     "file": "src/Helpers/MoneyFlowAccumulationWindow.cs",
     "before": "if (commit) _total = total;",
@@ -8267,6 +8269,7 @@
   },
   {
     "id": "moneyflow-accumulation-commits-preview",
+    "scope": "internal RocBankValue Next(",
     "module": "numerical",
     "file": "src/Helpers/MoneyFlowAccumulationWindow.cs",
     "before": "if (commit) _total = total;",
