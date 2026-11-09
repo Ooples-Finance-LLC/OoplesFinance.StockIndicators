@@ -7,7 +7,8 @@ internal static partial class ValuesBarExecution
 {
     // Same staged rounding and startup as TripleExponentialRate.State, with
     // binary64 rounded stages and exact dyadic intermediates when needed.
-    internal sealed class TripleRateState(int period, TripleRateSeed seed, int? signalPeriod, int suppression)
+    internal sealed class TripleRateState(int period, TripleRateSeed seed, int? signalPeriod, int suppression,
+        bool outputAlreadyCleared = false)
         : IMultiOutputState
     {
         // Every published EMA stage is a rounded convex mean of finite inputs,
@@ -72,7 +73,10 @@ internal static partial class ValuesBarExecution
 
         public void Update(in Bar bar, Span<double> output)
         {
-            output.Clear(); _index++;
+            // Node.Append clears its private scratch before the multi-output call.
+            // Direct state users retain the original complete-output contract.
+            if (!outputAlreadyCleared) output.Clear();
+            _index++;
             double input = bar.Close is 0 ? 0 : bar.Close;
             if (seed == TripleRateSeed.SharedMean && _index < period)
             {
