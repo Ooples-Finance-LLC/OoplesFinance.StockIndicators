@@ -18,11 +18,30 @@ internal sealed class MoneyFlowAccumulationWindow
     // Streaming callers retain Next and its original publication path.
     internal RocBankValue NextBatch(double high, double low, double close, double volume, bool commit)
     {
-        var flow = Flow(high, low, close, volume);
+        var flow = BoundedBatchFlow(high, low, close, volume);
         var total = _total; flow.AddTo(ref total);
         if (commit) _total = total;
         double ordinary = total.SumWithCompactRounding();
         return !double.IsInfinity(ordinary) ? new RocBankValue(ordinary) : RocBankValue.Round(total);
+    }
+
+    private static RocBankValue BoundedBatchFlow(double high, double low, double close, double volume)
+    {
+        if (high == low) return default; // NOSONAR: exact degenerate-range identity.
+        if (double.IsFinite(high) && high >= 4.450147717014403E-308
+            && low >= high * .5 && low <= close && close <= high)
+        {
+            // Sterbenz proves both legs and range exact. For g=ULP(low),
+            // all prices are integral and |balance| <= range <= low < 2^53*g;
+            // hence the balance subtraction is exact on that grid as well.
+            double balance = (close - low) - (high - close);
+            if (Binary64ArithmeticCertificate.TryProduct(balance, volume, out double product))
+            {
+                double value = product / (high - low);
+                if (double.IsFinite(value)) return new RocBankValue(value);
+            }
+        }
+        return Flow(high, low, close, volume);
     }
 #endif
     internal static RocBankValue Flow(double high, double low, double close, double volume)
