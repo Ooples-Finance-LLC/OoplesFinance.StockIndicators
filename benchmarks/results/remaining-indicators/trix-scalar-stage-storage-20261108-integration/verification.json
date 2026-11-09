@@ -1,0 +1,20 @@
+{
+  "source_integration_commit": "9e0f17abf0293a28f2efe99be7400a5b5be0588e",
+  "qualified_source": "0f248f91b478ff0213999f48aaffc0ee8a29cbdf",
+  "compiled_source": "cde573b62a445a3fb5f59f90e3fa6ca84eb985b8",
+  "source_fingerprint": "666e0f363648dc4add3c19c3a37f081cc127006c059da07b3204164d42a45de1",
+  "unit": 62,
+  "comparator": 18,
+  "actual_gpu": 100,
+  "production_sha256": "ade3b413c047d2dddca9d62036c6905458cb7ae0bfd0779807109d232ea45e48",
+  "run_id": "42538747399",
+  "cases": 60,
+  "decisions": 12,
+  "verdicts": {
+    "faster": 12
+  },
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.TripleRate.cs"
+  ],
+  "verified_utc": "2026-11-09T00:47:10.543861+00:00"
+}
