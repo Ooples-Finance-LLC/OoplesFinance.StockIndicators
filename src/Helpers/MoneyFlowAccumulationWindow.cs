@@ -18,11 +18,32 @@ internal sealed class MoneyFlowAccumulationWindow
     // Streaming callers retain Next and its original publication path.
     internal RocBankValue NextBatch(double high, double low, double close, double volume, bool commit)
     {
-        var flow = Flow(high, low, close, volume);
+        var flow = BatchFlow(high, low, close, volume);
         var total = _total; flow.AddTo(ref total);
         if (commit) _total = total;
         double ordinary = total.SumWithCompactRounding();
         return !double.IsInfinity(ordinary) ? new RocBankValue(ordinary) : RocBankValue.Round(total);
+    }
+
+    private static RocBankValue BatchFlow(double high, double low, double close, double volume)
+    {
+        if (high == low) return default; // NOSONAR: only the exactly degenerate range is zero.
+        if (!Binary64ArithmeticCertificate.TryDifference(close, low, out double buying)
+            || !Binary64ArithmeticCertificate.TryDifference(high, close, out double selling)
+            || !Binary64ArithmeticCertificate.TryDifference(buying, selling, out double balance)
+            || !Binary64ArithmeticCertificate.TryDifference(high, low, out double range))
+            return Flow(high, low, close, volume);
+        if (Binary64ArithmeticCertificate.TryProduct(balance, volume, out double product))
+        {
+            double ordinary = product / range;
+            return double.IsFinite(ordinary) ? new RocBankValue(ordinary) : Flow(high, low, close, volume);
+        }
+        // Certified differences make balance exactly 2*close-high-low. Retain
+        // every product bit, then round once from the same exact rational flow.
+        var numerator = new ExactMeanAccumulator(); numerator.AddProduct(balance, volume);
+        var denominator = new ExactMeanAccumulator(); denominator.Add(range);
+        double value = numerator.Ratio(denominator);
+        return double.IsFinite(value) ? new RocBankValue(value) : Flow(high, low, close, volume);
     }
 #endif
     internal static RocBankValue Flow(double high, double low, double close, double volume)

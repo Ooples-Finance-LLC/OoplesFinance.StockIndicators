@@ -7,6 +7,44 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class CompactMoneyFlowPublicationTests
 {
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void BatchBalancedProductsMatchOriginalFlowThroughPreviewAndReset(int scenario)
+    {
+        var random = new Random(91403);
+        var bars = new List<(double High, double Low, double Close, double Volume)>();
+        for (int i = 0; i < 256; i++)
+        {
+            double high = scenario == 0 ? 100 + random.NextDouble() :
+                scenario == 1 ? Math.ScaleB(1 + random.NextDouble(), random.Next(-1074, 1023)) : 1;
+            double low = scenario == 2 ? 0 : high * .5;
+            double close = scenario == 2 ? i % 2 : low + (high - low) * random.NextDouble();
+            double volume = scenario == 2 ? double.MaxValue : (random.NextDouble() - .5) * 1e12;
+            bars.Add((high, low, close, volume));
+        }
+        bars.AddRange(new[] { (1d, 1d, 1d, double.MaxValue),
+            (double.MaxValue, -double.MaxValue, double.MaxValue, double.MaxValue),
+            (1d, 0d, double.Epsilon, double.Epsilon), (1d, 0d, .5d, -0d),
+            (1d, 0d, 1d, double.MaxValue), (1d, 0d, 0d, double.MaxValue) });
+        var original = new MoneyFlowAccumulationWindow();
+        var candidate = new MoneyFlowAccumulationWindow();
+        for (int repeat = 0; repeat < 2; repeat++)
+        {
+            original.Reset(); candidate.Reset();
+            foreach (var bar in bars)
+            foreach (bool commit in new[] { false, false, true })
+            {
+                var expected = original.Next(bar.High, bar.Low, bar.Close, bar.Volume, commit);
+                var actual = candidate.NextBatch(bar.High, bar.Low, bar.Close, bar.Volume, commit);
+                Equal(expected.Mantissa, actual.Mantissa);
+                Assert.Equal(expected.UpperShift, actual.UpperShift);
+                Equal(expected.Publish(), actual.Publish());
+            }
+        }
+    }
+
     [Fact]
     public void CompactSumsMatchTheWideIntegerReference()
     {
