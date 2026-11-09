@@ -49,6 +49,43 @@ public sealed class SeededMomentumSharedExecutionTests(ITestOutputHelper log)
         }
     }
 
+    [Theory]
+    [InlineData(TripleRateSeed.SharedMean)]
+    [InlineData(TripleRateSeed.CascadedMeans)]
+    [InlineData(TripleRateSeed.CascadedFirstPrice)]
+    public void TripleRatesMatchOriginalAtRoundingAndFallbackBoundaries(TripleRateSeed seed)
+    {
+        // Period one exposes each pair directly to the rate calculation. Include
+        // adjacent values, cancellation, inexact differences, overflow and zero
+        // transitions on both sides of the normalization certificate's range.
+        var prices = new List<double>();
+        foreach (int exponent in new[] { -1074, -1022, -452, -201, -200, -1, 0, 1, 199, 200, 450, 1023 })
+        foreach (double sign in new[] { -1d, 1d })
+        {
+            double value = sign * Math.ScaleB(1d, exponent);
+            prices.AddRange(new[] { value, Math.BitIncrement(value), value, Math.BitDecrement(value),
+                value, -value, value, 0d, -0d, value, double.Epsilon, double.MaxValue });
+        }
+        var random = new Random(69107);
+        for (int i = 0; i < 512; i++)
+            prices.Add(Math.ScaleB(random.NextDouble() * 2 - 1, random.Next(-1074, 1024)));
+        foreach (int? signal in new int?[] { null, 1, 5 })
+        {
+            var original = (IMultiOutputState)new TripleExponentialRate(1, seed, signal).CreateState();
+            var candidate = new ValuesBarExecution.TripleRateState(1, seed, signal, 0);
+            var expected = new double[6]; var actual = new double[6];
+            for (int repeat = 0; repeat < 2; repeat++)
+            {
+                original.Reset(); candidate.Reset();
+                foreach (var bar in BarsOf(prices))
+                {
+                    original.Update(in bar, expected); candidate.Update(in bar, actual);
+                    Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits), actual.Select(BitConverter.DoubleToInt64Bits));
+                }
+            }
+        }
+    }
+
     [Fact]
     public void CompactTripleUpdatesReduceOrdinaryAllocation()
     {

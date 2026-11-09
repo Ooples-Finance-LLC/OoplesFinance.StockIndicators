@@ -112,6 +112,9 @@ internal static partial class ValuesBarExecution
             if (_previousThird is 0)
                 rate = seed != TripleRateSeed.SharedMean ? 0 : input is 0 ? null
                     : input > 0 ? double.PositiveInfinity : double.NegativeInfinity;
+            else if (Binary64ArithmeticCertificate.TryDifference(input, _previousThird, out double exactDifference)
+                && AwesomeWithDetails.Arithmetic.TryNormalize(exactDifference, _previousThird, out double certifiedRate))
+                rate = certifiedRate;
             else
             {
                 var previous = JurikDyadic.FromDouble(_previousThird);
