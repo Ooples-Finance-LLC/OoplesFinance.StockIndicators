@@ -7,6 +7,57 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 public sealed class CompactMoneyFlowPublicationTests
 {
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void BatchPriceBoundsMatchOriginalAcrossPreviewResetAndExtremeInputs(int scenario)
+    {
+        var bars = new List<(double High, double Low, double Close, double Volume)>();
+        var random = new Random(91404);
+        if (scenario == 0)
+            for (int i = 0; i < 256; i++)
+            {
+                double high = 100 + random.NextDouble(), low = high * .5;
+                bars.Add((high, low, low + (high - low) * random.NextDouble(), Math.ScaleB(1d, i % 20)));
+            }
+        else if (scenario == 1)
+        {
+            double edge = Math.ScaleB(1d, -1021);
+            foreach (double high in new[] { Math.BitDecrement(edge), edge, Math.BitIncrement(edge), 4d, double.MaxValue })
+            foreach (double low in new[] { high * .5, Math.BitDecrement(high * .5) })
+            foreach (double close in new[] { low, Math.BitIncrement(low), Math.BitDecrement(high), high })
+            foreach (double volume in new[] { 0d, -0d, 1d, Math.ScaleB(1d, 1000), double.MaxValue, -double.MaxValue })
+                bars.Add((high, low, close, volume));
+        }
+        else
+        {
+            for (int i = 0; i < 256; i++)
+            {
+                double high = random.NextDouble() * 200 - 100;
+                bars.Add((high, -high, high * .5, (random.NextDouble() - .5) * 1e12));
+            }
+            bars.AddRange(new[] { (double.Epsilon, 0d, double.Epsilon, double.Epsilon),
+                (double.MaxValue, -double.MaxValue, double.MaxValue, double.MaxValue),
+                (4d, 2d, Math.BitIncrement(4d), 1d), (4d, 4d, 4d, double.MaxValue) });
+        }
+        var original = new MoneyFlowAccumulationWindow();
+        var candidate = new MoneyFlowAccumulationWindow();
+        for (int repeat = 0; repeat < 2; repeat++)
+        {
+            original.Reset(); candidate.Reset();
+            foreach (var bar in bars)
+            foreach (bool commit in new[] { false, false, true })
+            {
+                var expected = original.Next(bar.High, bar.Low, bar.Close, bar.Volume, commit);
+                var actual = candidate.NextBatch(bar.High, bar.Low, bar.Close, bar.Volume, commit);
+                Equal(expected.Mantissa, actual.Mantissa);
+                Assert.Equal(expected.UpperShift, actual.UpperShift);
+                Equal(expected.Publish(), actual.Publish());
+            }
+        }
+    }
+
     [Fact]
     public void CompactSumsMatchTheWideIntegerReference()
     {
