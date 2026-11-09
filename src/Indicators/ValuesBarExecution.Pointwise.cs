@@ -35,7 +35,7 @@ internal static partial class ValuesBarExecution
         PriceCircularTransform { Operation: PriceCircularOperation.ArcTangent } => FillPointwise<ArcTangent, AllReal>(source, output, indicator, cancellation, owned),
         PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.NaturalLogarithm } => FillPointwise<Logarithm, Positive>(source, output, indicator, cancellation, owned),
         PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.CommonLogarithm } => FillPointwise<CommonLogarithm, Positive>(source, output, indicator, cancellation, owned),
-        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.Exponential } => FillPointwise<Exponential, AllReal>(source, output, indicator, cancellation, owned),
+        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.Exponential } => FillPointwise<Exponential, AllReal>(source, output, indicator, cancellation, owned, 65536),
         PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.HyperbolicSine } => FillPointwise<HyperbolicSine, AllReal>(source, output, indicator, cancellation, owned),
         PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.HyperbolicCosine } => FillPointwise<HyperbolicCosine, AllReal>(source, output, indicator, cancellation, owned),
         PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.HyperbolicTangent } => FillPointwise<HyperbolicTangent, AllReal>(source, output, indicator, cancellation, owned),
