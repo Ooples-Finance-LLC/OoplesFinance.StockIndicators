@@ -85,25 +85,27 @@ internal static partial class ValuesBarExecution
                 }
                 return;
             }
-            for (int j = 0; j < 3; j++)
+            if (seed == TripleRateSeed.SharedMean)
             {
-                if (seed == TripleRateSeed.SharedMean) _values[j] = Smooth(_values[j], input);
-                else
+                _values[0] = Smooth(_values[0], input);
+                _values[1] = Smooth(_values[1], _values[0]);
+                input = _values[2] = Smooth(_values[2], _values[1]);
+            }
+            else for (int j = 0; j < 3; j++)
+            {
+                long lookback = (long)period - 1 + suppression;
+                long start = j * lookback;
+                if (_index < start) return;
+                if (seed == TripleRateSeed.CascadedFirstPrice)
+                    _values[j] = _index == start ? input : Smooth(_values[j], input);
+                else if (_index < start + period)
                 {
-                    long lookback = (long)period - 1 + suppression;
-                    long start = j * lookback;
-                    if (_index < start) return;
-                    if (seed == TripleRateSeed.CascadedFirstPrice)
-                        _values[j] = _index == start ? input : Smooth(_values[j], input);
-                    else if (_index < start + period)
-                    {
-                        _sums[j].AddExact(JurikDyadic.FromDouble(input));
-                        if (_index != start + period - 1) return;
-                        _values[j] = Round(_sums[j], _periodDivisor).Mean(1); _sums[j] = default;
-                    }
-                    else _values[j] = Smooth(_values[j], input);
-                    if (_index < start + lookback) return;
+                    _sums[j].AddExact(JurikDyadic.FromDouble(input));
+                    if (_index != start + period - 1) return;
+                    _values[j] = Round(_sums[j], _periodDivisor).Mean(1); _sums[j] = default;
                 }
+                else _values[j] = Smooth(_values[j], input);
+                if (_index < start + lookback) return;
                 input = _values[j];
             }
             Publish(input, 1, output);
