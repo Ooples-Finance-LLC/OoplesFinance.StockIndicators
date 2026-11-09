@@ -754,7 +754,7 @@ internal static partial class ValuesBarExecution
                 VariablePeriodClassicAverage { Method: ClassicAverageMethod.Sma } variable => new VariableSmaState(variable, count),
                 DeviationRatioAdaptiveAverage ratio => new DeviationRatioValueState(ratio, count),
                 OldestFirstHilbertTrendline => new OldestHilbertValueState(),
-                TripleExponentialRate triple => new TripleRateState(triple.Period, triple.Seed, triple.SignalPeriod, triple.Suppression, outputAlreadyCleared: true),
+                TripleExponentialRate triple => new TripleRateState(triple.Period, triple.Seed, triple.SignalPeriod, triple.Suppression),
                 WindowChandelierExit chandelierOwner => new ChandelierState(chandelierOwner, count),
                 AlligatorWithDetails alligator => new AlligatorState(alligator, count),
                 GatorWithDetails gator => new GatorWithDetails.State(new AlligatorState(gator.Alligator, count)),
