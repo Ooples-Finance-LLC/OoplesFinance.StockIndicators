@@ -6,11 +6,14 @@ namespace OoplesFinance.StockIndicators.Indicators;
 internal static partial class ValuesBarExecution
 {
     // Same staged rounding and startup as TripleExponentialRate.State, with
-    // compact dyadics for ordinary values and exact wide fallback when needed.
+    // binary64 rounded stages and exact dyadic intermediates when needed.
     internal sealed class TripleRateState(int period, TripleRateSeed seed, int? signalPeriod, int suppression)
         : IMultiOutputState
     {
-        private readonly JurikDyadic[] _values = new JurikDyadic[3], _sums = new JurikDyadic[3];
+        // Every published EMA stage is a rounded convex mean of finite inputs,
+        // so it fits binary64. Only unrounded sums and rate arithmetic need dyadics.
+        private readonly double[] _values = new double[3];
+        private readonly JurikDyadic[] _sums = new JurikDyadic[3];
         // Decode invariant operands once; retain the same exact arithmetic.
         private readonly JurikDyadic _periodDivisor = JurikDyadic.FromDouble(period);
         private readonly JurikDyadic _smoothDivisor = JurikDyadic.FromDouble((long)period + 1);
@@ -20,7 +23,8 @@ internal static partial class ValuesBarExecution
         private static readonly JurikDyadic PercentMultiplier = JurikDyadic.FromFactor(
             new ExactMeanAccumulator.ProductFactor(100));
         private readonly Queue<double?> _signal = new();
-        private JurikDyadic _signalSum, _previousThird;
+        private JurikDyadic _signalSum;
+        private double _previousThird;
         private int _missing;
         private long _index = -1;
         private bool _hasThird;
@@ -28,7 +32,7 @@ internal static partial class ValuesBarExecution
         public void Reset()
         {
             Array.Clear(_values); Array.Clear(_sums); _signal.Clear();
-            _signalSum = _previousThird = default;
+            _signalSum = default; _previousThird = 0;
             _missing = 0; _index = -1; _hasThird = false;
         }
 
@@ -47,17 +51,17 @@ internal static partial class ValuesBarExecution
             }
         }
 
-        private JurikDyadic Smooth(JurikDyadic prior, JurikDyadic input)
+        private double Smooth(double prior, double input)
         {
             // The existing certificate rounds the same exact weighted ratio.
-            // Unsupported periods, signs, exponents, or wide values fall through.
-            if (prior.TryDouble(out double a) && input.TryDouble(out double b)
-                && _wordSmoother.TrySmooth(a, b, out double rounded))
-                return JurikDyadic.FromDouble(rounded);
+            // Unsupported periods, signs, or exponents retain the dyadic fallback.
+            if (_wordSmoother.TrySmooth(prior, input, out double rounded)) return rounded;
+            var numerator = JurikDyadic.FromDouble(prior);
+            var incoming = JurikDyadic.FromDouble(input);
             // Retain Multiply(double)'s identity no-op for period two.
-            if (period != 2) prior.Multiply(_priorMultiplier);
-            input.ScaleByPowerOfTwo(1); prior.AddExact(input);
-            return Round(prior, _smoothDivisor);
+            if (period != 2) numerator.Multiply(_priorMultiplier);
+            incoming.ScaleByPowerOfTwo(1); numerator.AddExact(incoming);
+            return Round(numerator, _smoothDivisor).Mean(1);
         }
 
         private static void Publish(double? value, int slot, Span<double> output)
@@ -69,13 +73,13 @@ internal static partial class ValuesBarExecution
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear(); _index++;
-            var input = JurikDyadic.FromDouble(bar.Close);
+            double input = bar.Close is 0 ? 0 : bar.Close;
             if (seed == TripleRateSeed.SharedMean && _index < period)
             {
-                _sums[0].AddExact(input);
+                _sums[0].AddExact(JurikDyadic.FromDouble(input));
                 if (_index == period - 1)
                 {
-                    var initial = Round(_sums[0], _periodDivisor);
+                    double initial = Round(_sums[0], _periodDivisor).Mean(1);
                     for (int j = 0; j < 3; j++) _values[j] = initial;
                     _previousThird = initial; _hasThird = true; _sums[0] = default;
                 }
@@ -93,25 +97,26 @@ internal static partial class ValuesBarExecution
                         _values[j] = _index == start ? input : Smooth(_values[j], input);
                     else if (_index < start + period)
                     {
-                        _sums[j].AddExact(input);
+                        _sums[j].AddExact(JurikDyadic.FromDouble(input));
                         if (_index != start + period - 1) return;
-                        _values[j] = Round(_sums[j], _periodDivisor); _sums[j] = default;
+                        _values[j] = Round(_sums[j], _periodDivisor).Mean(1); _sums[j] = default;
                     }
                     else _values[j] = Smooth(_values[j], input);
                     if (_index < start + lookback) return;
                 }
                 input = _values[j];
             }
-            Publish(input.Mean(1), 1, output);
+            Publish(input, 1, output);
             if (!_hasThird) { _hasThird = true; _previousThird = input; return; }
             double? rate;
-            if (_previousThird.Sign == 0)
-                rate = seed != TripleRateSeed.SharedMean ? 0 : input.Sign == 0 ? null
-                    : input.Sign > 0 ? double.PositiveInfinity : double.NegativeInfinity;
+            if (_previousThird is 0)
+                rate = seed != TripleRateSeed.SharedMean ? 0 : input is 0 ? null
+                    : input > 0 ? double.PositiveInfinity : double.NegativeInfinity;
             else
             {
-                var difference = input; difference.Subtract(_previousThird); difference.Multiply(PercentMultiplier);
-                rate = difference.Sign == 0 ? 0 : difference.Ratio(_previousThird);
+                var previous = JurikDyadic.FromDouble(_previousThird);
+                var difference = JurikDyadic.FromDouble(input); difference.Subtract(previous); difference.Multiply(PercentMultiplier);
+                rate = difference.Sign == 0 ? 0 : difference.Ratio(previous);
             }
             _previousThird = input;
             Publish(rate, 0, output);
