@@ -154,6 +154,8 @@ internal static partial class ValuesBarExecution
                 latest = FillSeededAtr(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is AccumulationDistributionWithAverage adl)
                 latest = FillAccumulationDistribution(source, nodes[0].Values, adl, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is Adl { Length: 1 })
+                latest = FillIdentityAdl(source, nodes[0], cancellation, owned);
             else if (nodes.Count == 1 && IsBoundedWindowIndicator(nodes[0].Indicator))
                 latest = FillBoundedWindow(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (boundedBatch)
@@ -770,6 +772,8 @@ internal static partial class ValuesBarExecution
             _scratch = _state is null or IIndicatorState or GeneratedZigZagWriter ? Array.Empty<double>()
                 : new double[indicator is RegressionWithChannels ? 10 : indicator.Outputs.Count];
         }
+        internal void CaptureFailure(Exception error) => Failure = ExceptionDispatchInfo.Capture(error);
+
         internal void Append(in Bar bar, int index, CancellationToken cancellation)
         {
             if (Failure is not null || Indicator is Sma) return;
