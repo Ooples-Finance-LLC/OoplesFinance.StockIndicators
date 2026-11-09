@@ -418,6 +418,9 @@ SCOPES['adl-four-difference-bounds-20261109'] = {'fixtures': {'SharedAdlDetailsB
 SCOPES['adl-cached-word-mean-20261109'] = {'fixtures': {'SharedAdlDetailsBenchmarks': {'Skender.GetAdl': 'Skender.GetAdl'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.AccumulationDistribution.cs', 'src/Helpers/ExactMeanAccumulator.cs', 'src/Helpers/ExactMeanAccumulator.CachedWordMean.cs', 'tests/ModelsTests/CachedWordAccumulationMeanTests.cs'}, 'methods': {'SharedAdlDetailsBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['adl-direct-binary-publication-20261109'] = {'fixtures': {'SharedAdlDetailsBenchmarks': {'Skender.GetAdl': 'Skender.GetAdl'}}, 'implicit_fixtures': set(), 'paths': {'src/Helpers/CompactMacdValue.cs', 'src/Helpers/JurikDyadic.cs', 'tests/ModelsTests/DirectBinaryAccumulationPublicationTests.cs'}, 'methods': {'SharedAdlDetailsBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
