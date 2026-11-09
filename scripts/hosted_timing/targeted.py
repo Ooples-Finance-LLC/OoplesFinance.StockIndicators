@@ -412,6 +412,9 @@ SCOPES['beta-return-bounds-20261109'] = {'fixtures': {'SharedPairInputBenchmarks
 SCOPES['adl-fixed-grid-20261109'] = {'fixtures': {'SharedAdlDetailsBenchmarks': {'Skender.GetAdl': 'Skender.GetAdl'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.AccumulationDistribution.cs', 'tests/ModelsTests/FixedGridAccumulationDistributionTests.cs'}, 'methods': {'SharedAdlDetailsBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['adl-four-difference-bounds-20261109'] = {'fixtures': {'SharedAdlDetailsBenchmarks': {'Skender.GetAdl': 'Skender.GetAdl'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/BoundedAccumulationDifferenceTests.cs', 'src/Indicators/ValuesBarExecution.AccumulationDistribution.cs'}, 'methods': {'SharedAdlDetailsBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
