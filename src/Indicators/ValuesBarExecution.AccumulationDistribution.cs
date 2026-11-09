@@ -64,6 +64,23 @@ internal static partial class ValuesBarExecution
         return latest;
     }
 
+    private static bool TryBoundedAccumulationDifferences(double high, double low, double close,
+        out double balance, out double range)
+    {
+        // Sterbenz makes both legs and the range exact. On g=ULP(low), all
+        // prices are integers; |balance| <= range <= low < 2^53*g, so the
+        // subtraction of the legs is exact too. Exclude subnormal prices.
+        if (high >= 4.450147717014403E-308 && double.IsFinite(high)
+            && low >= high * .5 && low <= close && close <= high)
+        {
+            balance = (close - low) - (high - close);
+            range = high - low;
+            return true;
+        }
+        balance = range = 0;
+        return false;
+    }
+
     private static double AccumulationFlow(double high, double low, double close, double volume,
         out double multiplier)
     {
@@ -72,10 +89,11 @@ internal static partial class ValuesBarExecution
             multiplier = 0;
             return 0;
         }
-        if (Binary64ArithmeticCertificate.TryDifference(close, low, out double buying)
-            && Binary64ArithmeticCertificate.TryDifference(high, close, out double selling)
-            && Binary64ArithmeticCertificate.TryDifference(buying, selling, out double balance)
-            && Binary64ArithmeticCertificate.TryDifference(high, low, out double range))
+        if (TryBoundedAccumulationDifferences(high, low, close, out double balance, out double range)
+            || (Binary64ArithmeticCertificate.TryDifference(close, low, out double buying)
+                && Binary64ArithmeticCertificate.TryDifference(high, close, out double selling)
+                && Binary64ArithmeticCertificate.TryDifference(buying, selling, out balance)
+                && Binary64ArithmeticCertificate.TryDifference(high, low, out range)))
         {
             // Flow rounds the complete product/ratio independently of multiplier.
             multiplier = balance == 0 ? 0 : balance / range;
