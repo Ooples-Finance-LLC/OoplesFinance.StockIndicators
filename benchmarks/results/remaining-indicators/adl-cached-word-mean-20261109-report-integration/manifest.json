@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "82f8305da33c97b5e52504739b22f5168febbebaa9a9dc7a7db6b1648bbf1170",
+    "archive": "benchmarks/results/remaining-indicators/adl-cached-word-mean-20261109-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "65c08543b03da0af93b569bd707a961a0f1031dda8bba303dbf6d24f9a6e5996",
+    "archive": "benchmarks/results/remaining-indicators/adl-cached-word-mean-20261109-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "47ecf22b7723a71943e20ed11a556b8a8ff147d19956246b0f0edc68af9a6842",
+    "archive": "benchmarks/results/remaining-indicators/adl-cached-word-mean-20261109-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "552cc20bc998e2409199fada0fb94ef63c91fb34b26fa813e8dd086e77030780",
+    "archive": "benchmarks/results/remaining-indicators/adl-cached-word-mean-20261109-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "ad91bcd7fcbb26a856efb1551e92347f389e5839d61f75e548ae06a5a1a66e6e",
+    "archive": "benchmarks/results/remaining-indicators/adl-cached-word-mean-20261109-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "30be9c20f6adf9a70829e03a6fbb75e0d713434b89c6252544dbd4f46068cdcd",
+    "archive": "benchmarks/results/remaining-indicators/adl-cached-word-mean-20261109-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "de3f852c068db021de474716df74b5a89c772481a1891cacc5167e0eeba00862",
+    "archive": "benchmarks/results/remaining-indicators/adl-cached-word-mean-20261109-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "0fa648035c6c3fc4023f981bf9205a3111bc25bdf0a7165e65a76f194b317bed",
+    "archive": "benchmarks/results/remaining-indicators/adl-cached-word-mean-20261109-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "4f9e3ed473758a66793e721a2c8a3dc16188460af18643c6823cffe180c01ac3",
+    "archive": "benchmarks/results/remaining-indicators/adl-cached-word-mean-20261109-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "e56dee4bc70d2623cdbedb3da5ef240a1c535a9f4912f926f48959e5b2ca6f19",
+    "archive": "benchmarks/results/remaining-indicators/adl-cached-word-mean-20261109-report-integration/updated-pair-details.png.gz"
+  }
+}

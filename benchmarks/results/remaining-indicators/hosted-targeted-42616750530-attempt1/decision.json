@@ -451,7 +451,16 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42616750530-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "e569c5740f450b2782f07ef4caecf191cfdf61a0",
+  "integrated_paths": [
+    "src/Helpers/ExactMeanAccumulator.CachedWordMean.cs",
+    "src/Helpers/ExactMeanAccumulator.cs",
+    "src/Indicators/ValuesBarExecution.AccumulationDistribution.cs",
+    "tests/ModelsTests/CachedWordAccumulationMeanTests.cs"
+  ],
+  "report_sha256": "552cc20bc998e2409199fada0fb94ef63c91fb34b26fa813e8dd086e77030780",
+  "report_archive": "benchmarks/results/remaining-indicators/adl-cached-word-mean-20261109-report-integration"
 }
