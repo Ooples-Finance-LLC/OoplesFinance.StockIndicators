@@ -43,6 +43,9 @@ def verify_reconciliation(reference, baseline):
         'master-tensors-0.147.0-to-0.148.0': (
             b'Include="AiDotNet.Tensors" Version="0.147.0"',
             b'Include="AiDotNet.Tensors" Version="0.148.0"', 53, 355),
+        'master-tensors-0.148.0-to-0.149.0': (
+            b'Include="AiDotNet.Tensors" Version="0.148.0"',
+            b'Include="AiDotNet.Tensors" Version="0.149.0"', 78, 45),
     }
     assert proof['kind'] in versions
     old, new, unit_count, parity_count = versions[proof['kind']]
@@ -61,7 +64,8 @@ def verify_reconciliation(reference, baseline):
     assert evidence['unit']['passed'] == unit_count and evidence['parity']['passed'] == parity_count
     assert evidence['gpu_passed'] == 100
     directory = proof['evidence'].rsplit('/', 1)[0]
-    if proof['kind'] in ('master-tensors-0.146.0-to-0.147.0', 'master-tensors-0.147.0-to-0.148.0'):
+    if proof['kind'] in ('master-tensors-0.146.0-to-0.147.0', 'master-tensors-0.147.0-to-0.148.0',
+                         'master-tensors-0.148.0-to-0.149.0'):
         manifest = json.loads(gzip.decompress(blob(baseline, directory + '/ci-manifest.json.gz')))
         assert manifest['status'] == 'cpu-correctness-complete'
         assert manifest['source'] == evidence['source']
