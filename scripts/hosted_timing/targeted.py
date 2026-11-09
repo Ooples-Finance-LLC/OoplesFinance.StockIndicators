@@ -400,6 +400,9 @@ SCOPES['adl-batch-balanced-product-20261109'] = {'fixtures': {'SharedRecursiveSt
 SCOPES['trix-private-update-work-20261109'] = {'fixtures': {'SharedSkenderEmaFamilyBenchmarks': {'Skender.GetTrix': 'Skender.GetTrix'}, 'SharedTaAdaptiveRateNativeBenchmarks': {'TaLib.Functions.Trix': 'TaLib.Functions.Trix'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.TripleRate.cs'}, 'methods': {'SharedSkenderEmaFamilyBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedTaAdaptiveRateNativeBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (60, 12), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
 
 
+SCOPES['adl-price-bounds-20261109'] = {'fixtures': {'SharedRecursiveStateBenchmarks': {'TaLib.Functions.Ad': 'Ad'}}, 'implicit_fixtures': set(), 'paths': {'src/Helpers/MoneyFlowAccumulationWindow.cs', 'tests/ModelsTests/CompactMoneyFlowPublicationTests.cs'}, 'methods': {'SharedRecursiveStateBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
