@@ -403,6 +403,9 @@ SCOPES['trix-private-update-work-20261109'] = {'fixtures': {'SharedSkenderEmaFam
 SCOPES['adl-price-bounds-20261109'] = {'fixtures': {'SharedRecursiveStateBenchmarks': {'TaLib.Functions.Ad': 'Ad'}}, 'implicit_fixtures': set(), 'paths': {'src/Helpers/MoneyFlowAccumulationWindow.cs', 'tests/ModelsTests/CompactMoneyFlowPublicationTests.cs'}, 'methods': {'SharedRecursiveStateBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
 
 
+SCOPES['adl-direct-prefix-publication-20261109'] = {'fixtures': {'SharedAdlDetailsBenchmarks': {'Skender.GetAdl': 'Skender.GetAdl'}}, 'implicit_fixtures': set(), 'paths': {'src/Helpers/CompactMacdValue.cs', 'tests/ModelsTests/CompactAccumulationDistributionExecutionTests.cs', 'src/Indicators/ValuesBarExecution.AccumulationDistribution.cs'}, 'methods': {'SharedAdlDetailsBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 

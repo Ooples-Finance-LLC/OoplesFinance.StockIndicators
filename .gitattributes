@@ -162,3 +162,4 @@ benchmarks/plans/hosted-trix-rate-certificate-20261109.json text eol=lf
 benchmarks/plans/hosted-adl-batch-balanced-product-20261109.json text eol=lf
 benchmarks/plans/hosted-trix-private-update-work-20261109.json text eol=lf
 benchmarks/plans/hosted-adl-price-bounds-20261109.json text eol=lf
+benchmarks/plans/hosted-adl-direct-prefix-publication-20261109.json text eol=lf
