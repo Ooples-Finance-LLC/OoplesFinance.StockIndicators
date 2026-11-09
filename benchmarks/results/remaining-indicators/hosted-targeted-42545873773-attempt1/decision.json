@@ -746,7 +746,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42545873773-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "74c62550489e436a4182156e0b9fe273dec14699",
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.TripleRate.cs",
+    "tests/ModelsTests/SeededMomentumSharedExecutionTests.cs"
+  ],
+  "report_sha256": "a41a8048418c044f00e72096fe7cffc719d0f1ff3cb116ba45c527a4e6baa93e",
+  "report_archive": "benchmarks/results/remaining-indicators/trix-rate-certificate-20261109-report-integration"
 }

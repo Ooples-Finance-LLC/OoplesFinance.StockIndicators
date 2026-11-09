@@ -13927,7 +13927,7 @@
     "src/Indicators/ValuesBarExecution.TradingVanilla.cs": "284cc57abef26253964fb8d20ad671dc8ee907fe6a5da95dd7b2c64d4740e189",
     "src/Indicators/ValuesBarExecution.TradyStochastic.cs": "731bc7b1e181f348f828cd87101365360b9950d40da287466dad2e38cf482e06",
     "src/Indicators/ValuesBarExecution.Triangular.cs": "a7cc907c59d3c17e5987fbbae6b385703ad704b5fd2cf2e4e7b6497ce52a57d2",
-    "src/Indicators/ValuesBarExecution.TripleRate.cs": "da1da4d104e68066583dfa48638bdaafe9706ade7f5bc82a2853ae1c80d88a1b",
+    "src/Indicators/ValuesBarExecution.TripleRate.cs": "d3f4b882c841cd8129cefe6a6c2874167f3170c7d8c9add24cfbfeaf4ed8bc61",
     "src/Indicators/ValuesBarExecution.TrueRange.cs": "2bb456459c323b86905775c2909ff19df4143aa4b6e705db5bd4b00ddd472c20",
     "src/Indicators/ValuesBarExecution.TurboFollowups.cs": "afcffcc24251cf0a16ec09a5b9af9bc73627683204a7f0cc3199089df390903a",
     "src/Indicators/ValuesBarExecution.Ultimate.cs": "af074c00625cd0385aabb85ef4e24c275ca8f6c438d7635b46528cd9cf4835cd",
