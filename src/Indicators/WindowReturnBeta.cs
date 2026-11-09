@@ -328,6 +328,17 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
         if (previous == 0)
             return default;
 #if !NETFRAMEWORK
+        const double twiceMinimumNormal = 4.450147717014403e-308;
+        if (double.IsFinite(previous) && previous >= twiceMinimumNormal
+            && current >= previous * .5 && current * .5 <= previous)
+        {
+            // Positive prices within a factor of two have an exact difference
+            // by Sterbenz. Its relative return lies in [-.5, 1], so division
+            // cannot overflow. Keep the original certificate for other prices.
+            double value = (current - previous) / previous;
+            return value == 0 ? default : new RocBankValue(value);
+        }
+
         double difference = current - previous;
         double virtualPrevious = difference - current;
         double error = (current - (difference - virtualPrevious)) + (-previous - virtualPrevious);
