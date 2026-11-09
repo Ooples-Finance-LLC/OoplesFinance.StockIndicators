@@ -56,7 +56,7 @@ internal static partial class ValuesBarExecution
             {
                 cancellation.ThrowIfCancellationRequested();
                 total += CompactMacdValue.Of(output[1][i]);
-                output[2][i] = total.Round(1L).Publish();
+                output[2][i] = total.PublishRoundedSum();
             }
         }
         if (indicator.AveragePeriod is int period && period <= source.Length)
