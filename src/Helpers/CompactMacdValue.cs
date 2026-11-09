@@ -398,7 +398,7 @@ internal readonly struct CompactMacdValue
 #if !NETFRAMEWORK
         if (!_wide && Width(Magnitude(_compact)) <= 106)
         {
-            double rounded = JurikDyadic.FromBinaryProduct(_compact, _scale - 1074).Mean(1);
+            double rounded = JurikDyadic.RoundBinaryProduct(_compact, _scale - 1074);
             if (double.IsFinite(rounded)) return rounded == 0 ? 0 : rounded;
         }
 #endif

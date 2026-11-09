@@ -36,6 +36,33 @@ internal struct JurikDyadic
     internal static JurikDyadic FromBinaryProduct(Int128 product, int exponent) =>
         new() { _fixed = true, _integer = product, _exponent = product == 0 ? 0 : exponent };
 
+    // Same fixed-value publisher as Mean(1), without its generic wrapper.
+    // Callers retain the existing at-most-106-bit product precondition.
+    internal static double RoundBinaryProduct(Int128 integer, int exponent)
+    {
+        if (integer == 0) return 0;
+        var magnitude = Magnitude(integer);
+        var grid = Math.Max(exponent + Bits(magnitude) - 53, -1074);
+        var shift = grid - exponent;
+        UInt128 rounded;
+        if (shift > 127) rounded = 0;
+        else if (shift > 0)
+        {
+            rounded = magnitude >> shift;
+            var half = (UInt128)1 << (shift - 1);
+            var remainder = magnitude & ((half << 1) - 1);
+            if (remainder > half || remainder == half && (rounded & 1) != 0) rounded++;
+        }
+        else rounded = magnitude << -shift;
+        var mantissa = (ulong)rounded;
+        if (mantissa >= 1UL << 53) { mantissa >>= 1; grid++; }
+        if (grid > 971) return integer < 0 ? double.NegativeInfinity : double.PositiveInfinity;
+        var payload = grid > -1074 || mantissa >= 1UL << 52
+            ? ((ulong)(grid + 1075) << 52) | (mantissa - (1UL << 52)) : mantissa;
+        if (integer < 0) payload |= 1UL << 63;
+        return BitConverter.Int64BitsToDouble(unchecked((long)payload));
+    }
+
     // Exact bounded integer, normalized for the existing rational publisher.
     internal static JurikDyadic FromInteger(Int128 value)
     {
