@@ -388,6 +388,9 @@ SCOPES['prior-directional-lazy-factors-20261108'] = {'fixtures': {'SharedTaDirec
 SCOPES['prior-directional-dx-ratio-20261108'] = {'fixtures': {'SharedTaDirectionalBenchmarks': {'TaLib.Functions.PlusDM': 'TaLib.Functions.PlusDM', 'TaLib.Functions.MinusDM': 'TaLib.Functions.MinusDM', 'TaLib.Functions.PlusDI': 'TaLib.Functions.PlusDI', 'TaLib.Functions.MinusDI': 'TaLib.Functions.MinusDI', 'TaLib.Functions.Dx': 'TaLib.Functions.Dx', 'TaLib.Functions.Adx': 'TaLib.Functions.Adx', 'TaLib.Functions.Adxr': 'TaLib.Functions.Adxr'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/PriorDirectionalDxCertificateTests.cs', 'src/Indicators/PriorSeededDirectionalMeasure.cs'}, 'methods': {'SharedTaDirectionalBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (210, 42), 'shards': 7, 'baseline_phase': 'targeted', 'baseline_totals': (210, 42)}
 
 
+SCOPES['trix-scalar-stage-storage-20261108'] = {'fixtures': {'SharedSkenderEmaFamilyBenchmarks': {'Skender.GetTrix': 'Skender.GetTrix'}, 'SharedTaAdaptiveRateNativeBenchmarks': {'TaLib.Functions.Trix': 'TaLib.Functions.Trix'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.TripleRate.cs'}, 'methods': {'SharedSkenderEmaFamilyBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedTaAdaptiveRateNativeBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (60, 12), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (210, 42)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
