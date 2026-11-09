@@ -1,0 +1,457 @@
+{
+  "status": "qualified-for-integration",
+  "accepted": true,
+  "phase": "targeted",
+  "case_count": 30,
+  "decision_count": 6,
+  "verdicts": {
+    "inconclusive": 5,
+    "faster": 1
+  },
+  "sources": {
+    "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+    "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+  },
+  "run_id": "42572319702",
+  "run_attempt": "1",
+  "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+  "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+  "measurement_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42572319702",
+  "archives": {
+    "candidate-source.patch": {
+      "sha256": "9cf5a56757ed2f64c2980aee6e17e1493adf8a66fb3b62104fe231af00856e7e",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/candidate-source.patch.gz"
+    },
+    "plan.json": {
+      "sha256": "a63e6de2f8eee2e84f947f967b5c51d0712962e32f1e8485ce3bfc3e90dcf261",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/plan.json.gz"
+    },
+    "prepared/evidence/old-build.log": {
+      "sha256": "cac9520270e24495c4b22547b93556ff33667b87cd8bcd366954e1f6c1eae93f",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/old-build.log.gz"
+    },
+    "prepared/evidence/old-original-gpu-gpu.trx.gz": {
+      "sha256": "581ee06bb638b2b071a93a12ad901364eb672f8c44bedd851a321d452c0a8094",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/old-original-gpu-gpu.trx.gz.gz"
+    },
+    "prepared/evidence/old-original-gpu-receipt.json": {
+      "sha256": "c7992f68fe80e2b0ff605616fbc58ad55bc001efe4634aabe4745bd1f6815034",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/old-original-gpu-receipt.json.gz"
+    },
+    "prepared/evidence/old-tests.log": {
+      "sha256": "6a44dd5b722ec21390ad5185b1d5bf77beeb885f973c71b5c64a7452ff38b7c0",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/old-tests.log.gz"
+    },
+    "prepared/evidence/old.trx": {
+      "sha256": "4bc33658ecd79a9ce75566182d11ddafc5765a292f768c5385c9e2c9a81c11ad",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/old.trx.gz"
+    },
+    "prepared/evidence/successor-build.log": {
+      "sha256": "fcef4fc9e4947f4f02161e13a9b70784e6d318e981414ef46e4b5c08228d974f",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/successor-build.log.gz"
+    },
+    "prepared/evidence/successor-original-gpu-gpu.trx.gz": {
+      "sha256": "bcc5dd050e9cf2a9255dd8d962cb3221de957332ca5c99583a40b25d781dc730",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/successor-original-gpu-gpu.trx.gz.gz"
+    },
+    "prepared/evidence/successor-original-gpu-receipt.json": {
+      "sha256": "725feb0d7d0a3dd33ae744d96f59e00d8f243fb22f2d695b39124d632e448025",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/successor-original-gpu-receipt.json.gz"
+    },
+    "prepared/evidence/successor-tests.log": {
+      "sha256": "17bf36f8881322351b93afe7929009a61314a9bd573e8a1a1bbd00038f322c2f",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/successor-tests.log.gz"
+    },
+    "prepared/evidence/successor.trx": {
+      "sha256": "1b50b96796d18a865080f50df711071ed2beff69f48c904e99a868610b383514",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/successor.trx.gz"
+    },
+    "prepared/evidence/variant-harness-build.log": {
+      "sha256": "1582db89127940639673741b2474031466e326aa1d02bca5c48ba6f757628f2d",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/variant-harness-build.log.gz"
+    },
+    "prepared/evidence/variant-harness-tests.log": {
+      "sha256": "1b2790c4b9ea37d2c41af6ae7023ebc6b28802c6b65f57276820246738d3083f",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/variant-harness-tests.log.gz"
+    },
+    "prepared/evidence/variant-harness.trx": {
+      "sha256": "c868413f70e01264a0453303ddcc658a9d56d4259a1a5f4070cdd565b6af6ad0",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/variant-harness.trx.gz"
+    },
+    "prepared/evidence/variants-build.log": {
+      "sha256": "490f4ebd02471815239200f8220f7e9b538d87f3c195dc3252323b158a5e000f",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/variants-build.log.gz"
+    },
+    "prepared/evidence/variants-original-gpu-gpu.trx.gz": {
+      "sha256": "01afd166ad4a57a5bc32edd67e1ac8f68b2bdab2b54f3c03b77f4c2599bd8899",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/variants-original-gpu-gpu.trx.gz.gz"
+    },
+    "prepared/evidence/variants-original-gpu-receipt.json": {
+      "sha256": "f4dd95b6f5bb38e14d6c46e212cfd59316c172514a00c81072363ea9a2b3ccea",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/variants-original-gpu-receipt.json.gz"
+    },
+    "prepared/evidence/variants-tests.log": {
+      "sha256": "02e36b861e949aeffd400fe2a071be3228e6845a240ef9cfa5c5f1ec54cd67fc",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/variants-tests.log.gz"
+    },
+    "prepared/evidence/variants.trx": {
+      "sha256": "3a94192818f5f277c8845308bbf5fc9d294be6e7cb7fd1b4aa5f164d201bf511",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/evidence/variants.trx.gz"
+    },
+    "prepared/provenance.json": {
+      "sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/prepared/provenance.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round0-old/operation0.json": {
+      "sha256": "55c3309d6976f43ec35a060dac543dbab8b09f944f545ecdfc94862ca3e142e9",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round0-old/operation0.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round0-old/operation0.log": {
+      "sha256": "e917fcccd05acb8cf368c73f1c640d0223cc68539432c90b3c6a82ed325e340b",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round0-old/operation0.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round0-old/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-20261109-064459.log": {
+      "sha256": "bb643e1bc499fa3ede125210018c92844ecbfb21212490870242c676aa829ad7",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round0-old/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-20261109-064459.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "1446f6e431b11085820fc6b399a9659673c88f49224b4f5664f19e1d80a4dcd3",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-github.md": {
+      "sha256": "88de9af9bdc93c10c4f9d557063e994f0268a592f3593c2b2731134fa2e3c893",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-github.md.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.csv": {
+      "sha256": "d3a072eb4269ee91c774476edc7d17283ac29a8d3458c9fe4dc90d6155bb0487",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.csv.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.html": {
+      "sha256": "89ac720636f9711ffa44b1bf33613aafa1987052e827faae020c3f18a80e6b7a",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.html.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round1-new/operation0.json": {
+      "sha256": "bfbfdffc87f1d38954682197ca70cabe269ebe6b3e8175c1104dc3c258898dbd",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round1-new/operation0.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round1-new/operation0.log": {
+      "sha256": "a69f65555828282005e2e445d139085365bfa103ed5f712466c72afb10f7e96d",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round1-new/operation0.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round1-new/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-20261109-064823.log": {
+      "sha256": "bf05f220ea42f2d1189e27fec342f5dd6be18655db2c9e48eb17f7e52640b224",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round1-new/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-20261109-064823.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "45b8e369c27cc8f3bbf88e5d4b9669dd659c53bad27d292f4cdbee2522c11da2",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-github.md": {
+      "sha256": "d939bdee16c925bcffb7dce4a72a5d27ea61c8e1ef930467d620d3eb03876735",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-github.md.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.csv": {
+      "sha256": "275a70e015b6fbe3edb7854fdcba31b1df422093a72ff4afc96878a19901bad0",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.csv.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.html": {
+      "sha256": "b9a32c1da5b577b64c8e0a70b0a601b695cd1a81f279665f1b95b97a50632ca0",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.html.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round2-new/operation0.json": {
+      "sha256": "1bc78bc47b37e87c5bc6483afa5d632cd7c4531b1daa4748f71767fe117b9e2e",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round2-new/operation0.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round2-new/operation0.log": {
+      "sha256": "fd8b89104a47a36fe34dc30e8a1a1430daccdcd3326e5d0bb7a4c8b9826f8762",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round2-new/operation0.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round2-new/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-20261109-065420.log": {
+      "sha256": "2aa92f8e862fb228fdf3349acbd9df4e7b3853c82d7d636c586478647d03c6ed",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round2-new/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-20261109-065420.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "2aa24e10d4311df8023811c18ea6b45eeb52f0144bf41c01bc291c3edd585b2b",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-github.md": {
+      "sha256": "02bd0617c3a3bfa4f194a3d0ba474a11ff9ddeef93bba9d324545baea55e6047",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-github.md.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.csv": {
+      "sha256": "8d56a076f597ef61f6dda7af6eee20430fa3407d5145da2a81cbb922db134fdd",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.csv.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.html": {
+      "sha256": "22a026844ba628711df9a3c457714c20a7afb03a9818b6a39e2f8410e96375df",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.html.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round3-old/operation0.json": {
+      "sha256": "d15d820f5ee3cbfa08900f408388bb182ab6946aec5458c54871747e2d38e8df",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round3-old/operation0.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round3-old/operation0.log": {
+      "sha256": "b002b18041a305fd867e339c39b119793911b6337b029e10079f93664f586dcf",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round3-old/operation0.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round3-old/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-20261109-065801.log": {
+      "sha256": "7f3ce2b3f3656a482214571282152e63f86cf244b287db0e7b34ae5f5f754160",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round3-old/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-20261109-065801.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "bc2facb6201feb62538af5226ff9731b23fa9f830fa153dac502bc0d13db9ba2",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-github.md": {
+      "sha256": "fd07799b4cde06543127bd8af2601227739801a20538d8f9677ea39ecd1c81d3",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-github.md.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.csv": {
+      "sha256": "1ba49d29de88ec6e0105f0dbc1cf2a4924bb168e0529d12a56dc582ff1cb5d18",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.csv.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.html": {
+      "sha256": "3f9203b125ca90680f076e7c53d2ed2e49f12a9468ca8d08c6ac5725aa7dac3b",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/LibraryPairBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report.html.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round0-old/operation0.json": {
+      "sha256": "dea7f674217f617599697e299569c7afb191b010b9d30cd18900bfc19664f088",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round0-old/operation0.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round0-old/operation0.log": {
+      "sha256": "00cf2ea52491bb61c6cefc0435e2c152aba17386912844d07777f480a215cda1",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round0-old/operation0.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round0-old/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-20261109-064640.log": {
+      "sha256": "ed9b7fda5c8ba775a52ccbeb36ada951b1afe02f8098833386e410c747029ddf",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round0-old/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-20261109-064640.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json": {
+      "sha256": "e5a5e5d4434d603f1d5f0ac2b81fe185920ecdefa7fbd3cebc3dd037629a48c2",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-github.md": {
+      "sha256": "079663ef02d32a8f914ddf0f0387690c51c0ef0fdc5ec81f523653936b059dcc",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-github.md.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.csv": {
+      "sha256": "e59661a122900fc467129a1c2e020f66a1e11bb1d8344ff88325cda2eca6150b",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.csv.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.html": {
+      "sha256": "20ccf8da26151e81c33f1ed1f2f38c9f3f8e55944589b2b012d6ae78b860e398",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round0-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.html.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round1-new/operation0.json": {
+      "sha256": "fbe6d0009d0e8f48521829c323a36bb59b3519973e0e3d61c15ce56453f318e0",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round1-new/operation0.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round1-new/operation0.log": {
+      "sha256": "ee3de314e90b1425b94fb3c23ba00bdc4f602afda2b6a4d6a043777bd75fd3ed",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round1-new/operation0.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round1-new/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-20261109-065001.log": {
+      "sha256": "5722ee630e0daf8bd3f809810f6bc08e3952c5e901740bb698f419c8ce4aba0a",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round1-new/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-20261109-065001.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json": {
+      "sha256": "8725e78d13795bc9191bc77dd4884e1a5f140ac2b6f1c69aeae43aa754c1f8a3",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-github.md": {
+      "sha256": "557d3e61ffe9d85013eb3c7a0f83fc80bffc22daef844dfa1899d12319e1fad9",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-github.md.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.csv": {
+      "sha256": "efaf9a06bf2e9bd7cfbbc6065d99679a10bccb264c5768d7668eebea184b418e",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.csv.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.html": {
+      "sha256": "121ad600caecef460a515422f8a4a984c958f30c369c07a9fd161566e0b093ac",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round1-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.html.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round2-new/operation0.json": {
+      "sha256": "beb5ec8393db32571771610bdd93f9f8e95130d116b47ec4336d89c7a640d068",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round2-new/operation0.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round2-new/operation0.log": {
+      "sha256": "95098e75cf0a93e02cb0824c38a3e8a5bc21e3e17c0f5c1383b9b635da43dedd",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round2-new/operation0.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round2-new/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-20261109-065603.log": {
+      "sha256": "1572a3b6c8c0ecfff7f858fb9d0160e94083c9f8be3ef64448b9ca34a8e0304c",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round2-new/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-20261109-065603.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json": {
+      "sha256": "d2912cd35dd8c6f7b3955e181248d4a36dac8b6fe3d04929776d2a1c5669c3c6",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-github.md": {
+      "sha256": "a414e6e829ca993bfef9b11040a5ce92869fdbd83b0a6b65a88332bfb4e6be8f",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-github.md.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.csv": {
+      "sha256": "45a1fcc223a83a840471801af2e43ebf0d51d2f5612d6c452771deeb379583f2",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.csv.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.html": {
+      "sha256": "40179d9850d2c1969829f08ab8c9fdab2586e23d4fc0fa6402b415bfb89ea9c2",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round2-new/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.html.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round3-old/operation0.json": {
+      "sha256": "68bf3b2e75ccd77733a0ab75ddca47e9b76096448d47dde2f8ff21717a7bd764",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round3-old/operation0.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round3-old/operation0.log": {
+      "sha256": "098d0808de3e7c82f62338f050f518198f6c9125c246981a6080403f9530568c",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round3-old/operation0.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round3-old/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-20261109-065938.log": {
+      "sha256": "af7d51eeb88763b87bd40b19fcd9baf6267cf7a2ad63d3ff721bb748b4e5238f",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round3-old/operation0/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-20261109-065938.log.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json": {
+      "sha256": "15175fcf167ee69d33de8eaae183afb03cdca29fe5b64a29ab5d28ce72a1ec91",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-github.md": {
+      "sha256": "cdfb1ba324fb4a6ae8327a4e01f1f9aae415f7c783a69bcfce2e6a50c94a23e6",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-github.md.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.csv": {
+      "sha256": "b76686105349a44b6fbe6a7af9d0cda24470a2b4598b56c0747c675f331ebf87",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.csv.gz"
+    },
+    "raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.html": {
+      "sha256": "50635022a15155888e4b6fb7229f548737e7bdff05bb136dd099236caae3b4f1",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/operation-checkpoints/SharedAdlDetailsBenchmarks/round3-old/operation0/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report.html.gz"
+    },
+    "raw/hosted-targeted-0/provenance.json": {
+      "sha256": "89772e2337fb88c0c8dbaf1fc0fc0865c1d853b66d8c9b220a700212aeb19b48",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/provenance.json.gz"
+    },
+    "raw/hosted-targeted-0/round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "e917fcccd05acb8cf368c73f1c640d0223cc68539432c90b3c6a82ed325e340b",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "raw/hosted-targeted-0/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "ec2ef83fc447a0f0f92416a5e2e8a0ec61ed0f0d0cba515347f9d32368cb2ac6",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/round0-old-SharedAdlDetailsBenchmarks.log": {
+      "sha256": "00cf2ea52491bb61c6cefc0435e2c152aba17386912844d07777f480a215cda1",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round0-old-SharedAdlDetailsBenchmarks.log.gz"
+    },
+    "raw/hosted-targeted-0/round0-old-SharedAdlDetailsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json": {
+      "sha256": "f59aea53b2b10b7404c867e9d0358c2dcba28b22ccaddd2cdee6f03d28a43e84",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round0-old-SharedAdlDetailsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "a69f65555828282005e2e445d139085365bfa103ed5f712466c72afb10f7e96d",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "raw/hosted-targeted-0/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "151ce6ca5ecccabc783c4ddac2a14bb39867ba963f9b98439cc94293ce6e334b",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/round1-new-SharedAdlDetailsBenchmarks.log": {
+      "sha256": "ee3de314e90b1425b94fb3c23ba00bdc4f602afda2b6a4d6a043777bd75fd3ed",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round1-new-SharedAdlDetailsBenchmarks.log.gz"
+    },
+    "raw/hosted-targeted-0/round1-new-SharedAdlDetailsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json": {
+      "sha256": "58191d6bb030d28fcb404cda5b00e08a728183d454216f811ca06bcf46bb906a",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round1-new-SharedAdlDetailsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "fd8b89104a47a36fe34dc30e8a1a1430daccdcd3326e5d0bb7a4c8b9826f8762",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "raw/hosted-targeted-0/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "42651b814180cb3be717c60d58dc21d82deeed42285a92b9718f95cc07069fdf",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/round2-new-SharedAdlDetailsBenchmarks.log": {
+      "sha256": "95098e75cf0a93e02cb0824c38a3e8a5bc21e3e17c0f5c1383b9b635da43dedd",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round2-new-SharedAdlDetailsBenchmarks.log.gz"
+    },
+    "raw/hosted-targeted-0/round2-new-SharedAdlDetailsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json": {
+      "sha256": "df46ca586366f8cae2ce283b4858123ef63a47295541033aba25cf9fc874e1fc",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round2-new-SharedAdlDetailsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "b002b18041a305fd867e339c39b119793911b6337b029e10079f93664f586dcf",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "raw/hosted-targeted-0/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "644f3c98f5476c1d28348e4d519e314c2f08fae77ab41750bd230639c833a48f",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/round3-old-SharedAdlDetailsBenchmarks.log": {
+      "sha256": "098d0808de3e7c82f62338f050f518198f6c9125c246981a6080403f9530568c",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round3-old-SharedAdlDetailsBenchmarks.log.gz"
+    },
+    "raw/hosted-targeted-0/round3-old-SharedAdlDetailsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json": {
+      "sha256": "72b769e058c72a2af7a8a101ca85a911ff62015b8871d851410165c15f674625",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/round3-old-SharedAdlDetailsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAdlDetailsBenchmarks-report-full-compressed.json.gz"
+    },
+    "raw/hosted-targeted-0/status.json": {
+      "sha256": "d1d776a73317ac4299990a4abfd1a78692fd2a3d89315fc3b57e574abde768de",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/raw/hosted-targeted-0/status.json.gz"
+    },
+    "scripts/__init__.py": {
+      "sha256": "20b7397c93129d931662810cebfb86db9ef921ef2003ece492465d9070f6d6ab",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/scripts/__init__.py.gz"
+    },
+    "scripts/archive.py": {
+      "sha256": "b013edbefced252dd917515da4b87796c5d38d3794d2ddac6baeb9301d115828",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/scripts/archive.py.gz"
+    },
+    "scripts/checkpoints.py": {
+      "sha256": "dc0ea3356e091305497972e9a61dfb424995ea64074c3513bfc7ff60db146818",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/scripts/checkpoints.py.gz"
+    },
+    "scripts/cleanup.py": {
+      "sha256": "5be89fa6771d95c5fb546eccd07d2d1b2772d698b3ab079ec528ce81ee08d4bc",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/scripts/cleanup.py.gz"
+    },
+    "scripts/coverage.py": {
+      "sha256": "d525bbebbbb5c7fe5c40fee78bb022a0bb25298dad47e109a97005336a2d1b0d",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/scripts/coverage.py.gz"
+    },
+    "scripts/pipeline.py": {
+      "sha256": "d1281ffc3d1211fc0ce7323c1930b004557c811c7e79a46068cf7491e179d20e",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/scripts/pipeline.py.gz"
+    },
+    "scripts/reconciled_baseline.py": {
+      "sha256": "e5034899885518259ea20eef74f09786bf8f6442ccf858f8f8ec242f3810b11e",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/scripts/reconciled_baseline.py.gz"
+    },
+    "scripts/report.py": {
+      "sha256": "ac8e116b15fe07a3f0e3e8c323efb295dad9a6a067999b73e70df36be7b6d64c",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/scripts/report.py.gz"
+    },
+    "scripts/reuse.py": {
+      "sha256": "2aa4a9f339758985257703b0c65de1ccf2fbc62efd14d8a82a0b7daf557be785",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/scripts/reuse.py.gz"
+    },
+    "scripts/runtime_dependencies.py": {
+      "sha256": "95b3c89f6459869ff4aa02e2a29ddd6c2cfca8da9f726a8b359ebe94ee5752a8",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/scripts/runtime_dependencies.py.gz"
+    },
+    "scripts/targeted.py": {
+      "sha256": "8289a022214041fd5a00214db4d10d97601e918208883ab22980f552c6144173",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/scripts/targeted.py.gz"
+    },
+    "scripts/variants.py": {
+      "sha256": "c35e1fa3241feb8fe855e2f7492b0222843be30cb8433c213ab6e435a09297f6",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/scripts/variants.py.gz"
+    },
+    "scripts/verify.py": {
+      "sha256": "2a532f745686545ac69ea5d2d03925b99720058ab0cac3dfbc4bec3267e4f026",
+      "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42572319702-attempt1/scripts/verify.py.gz"
+    }
+  },
+  "production_integrated": false,
+  "report_imported": false,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+}
