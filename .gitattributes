@@ -158,3 +158,4 @@ benchmarks/plans/hosted-prior-directional-dx-ratio-20261108.json text eol=lf
 benchmarks/plans/hosted-trix-scalar-stage-storage-20261108.json text eol=lf
 
 benchmarks/plans/evidence/trix-scalar-stage-storage-20261108-additional-correctness.json -text
+benchmarks/plans/hosted-trix-rate-certificate-20261109.json text eol=lf
