@@ -424,6 +424,9 @@ SCOPES['adl-direct-binary-publication-20261109'] = {'fixtures': {'SharedAdlDetai
 SCOPES['adl-identity-column-20261109'] = {'fixtures': {'SharedRecursiveStateBenchmarks': {'TaLib.Functions.Ad': 'Ad'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.IdentityAdl.cs', 'src/Indicators/ValuesBarExecution.cs', 'tests/ModelsTests/IdentityAdlColumnExecutionTests.cs'}, 'methods': {'SharedRecursiveStateBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['adl-direct-binary-inline-hint-20261109'] = {'fixtures': {'SharedAdlDetailsBenchmarks': {'Skender.GetAdl': 'Skender.GetAdl'}}, 'implicit_fixtures': set(), 'paths': {'src/Helpers/JurikDyadic.cs', 'tests/ModelsTests/DirectBinaryAccumulationPublicationTests.cs', 'src/Helpers/CompactMacdValue.cs'}, 'methods': {'SharedAdlDetailsBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
