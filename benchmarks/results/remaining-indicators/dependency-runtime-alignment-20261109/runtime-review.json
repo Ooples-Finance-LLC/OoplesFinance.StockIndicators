@@ -1,0 +1,81 @@
+{
+  "kind": "Dependency-only compatibility verification; no new performance claim",
+  "versions": {
+    "old": {
+      "version": "0.148.0",
+      "tensor_sha256": "35cd549dc9d981f324ce6bce31f6ba94e8d842d95364dad0c3193c57c15f5339",
+      "source": "207d0ef26b987567447b3884fa70e288acf87c46",
+      "ci_run": "42647326211"
+    },
+    "production": {
+      "version": "0.149.0",
+      "tensor_sha256": "6280808e8107c30ea92622fff531c9be2738d3e9164a2f3073c08dbbac3aceed",
+      "source": "f75fe34f8d80813dce151c218949df2af38fae3f",
+      "ci_run": "42662982257"
+    },
+    "variants": {
+      "version": "0.149.0",
+      "tensor_sha256": "6280808e8107c30ea92622fff531c9be2738d3e9164a2f3073c08dbbac3aceed",
+      "source": "a7469c1782c6b1a693a4317456e3aa74a99a783b",
+      "ci_run": "42663134343"
+    }
+  },
+  "production_checks": {
+    "unit": 78,
+    "comparator": 45,
+    "actual_gpu": 100
+  },
+  "variant_checks": {
+    "unit": 54,
+    "comparator": 13,
+    "actual_gpu": 100,
+    "source": "e3f03152e6841cb177556850a45491bcc7b23a77"
+  },
+  "selected_cpu_il": {
+    "methods": 131,
+    "changed": 0,
+    "direct_tensor_references": 0,
+    "scope": "Selected A/D kernels; not whole-program or throughput equivalence"
+  },
+  "changed_runtime_files": [
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.deps.json",
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll",
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.pdb",
+    "tests/bin/Release/net10.0/AiDotNet.Tensors.dll",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.FXMacroData.dll",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.FXMacroData.pdb",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.pdb",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.SourceGeneration.dll",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.SourceGeneration.pdb",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.Tests.Unit.deps.json",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.Tests.Unit.dll",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.Tests.Unit.pdb",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/AiDotNet.Tensors.dll",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.deps.json",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.exe",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.pdb",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.pdb",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/AiDotNet.Tensors.dll",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.deps.json",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.exe",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorBenchmarks.pdb",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorTests.deps.json",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorTests.dll",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorTests.pdb",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.pdb"
+  ],
+  "historical_timing": {
+    "run_id": "42650703055",
+    "tensor_version": "0.148.0",
+    "source": "7c3a8c4c74870eadc3cbb57c368c086c8a3eb6e7",
+    "relabelled": false
+  },
+  "fresh_timing_required_for_this_compatibility_publication": false,
+  "timing_decision": "No indicator implementation changed; selected CPU IL is unchanged and both dependency closures passed fresh correctness/GPU100. No0.149performance claim is made. Existing0.148measurements remain historical. Every subsequent performance batch requires fresh matched0.149qualification.",
+  "report_sha256": "ee54b7ef903fc435f119108c82558b9ec8f21b1c69a7aa509cd96a18c71896ab"
+}
