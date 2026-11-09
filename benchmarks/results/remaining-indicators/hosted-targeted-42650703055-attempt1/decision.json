@@ -451,7 +451,15 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42650703055-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "1f6176e207d44797ce6c935448c0a1770fef2700",
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.IdentityAdl.cs",
+    "src/Indicators/ValuesBarExecution.cs",
+    "tests/ModelsTests/IdentityAdlColumnExecutionTests.cs"
+  ],
+  "report_sha256": "ee54b7ef903fc435f119108c82558b9ec8f21b1c69a7aa509cd96a18c71896ab",
+  "report_archive": "benchmarks/results/remaining-indicators/adl-identity-column-20261109-report-integration"
 }
