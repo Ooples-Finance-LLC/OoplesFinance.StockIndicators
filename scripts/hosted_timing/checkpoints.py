@@ -27,6 +27,14 @@ def combine_reports(reports, pairs, methods, implicit_pair=None):
 
 
 def filters(fixture, pair, methods, *, implicit=False, variant=False, variance=False):
+    if fixture == 'SharedPointwiseBenchmarks':
+        assert not (implicit or variant or variance)
+        # This existing fixture also declares 100,000 bars. Preserve the
+        # qualification's two sizes, regardless of parameter display order.
+        return [pattern for method in methods for count in (1000, 10000)
+                for pattern in (
+                    f'*{fixture}.{method}*"{pair}"*Count: {count})*',
+                    f'*{fixture}.{method}*Count: {count},*"{pair}"*')]
     assert sum(map(bool, (implicit, variant, variance))) <= 1
     if variance: assert fixture == 'SharedDispersionBenchmarks' and pair in ('True','False')
     return [(f'*{fixture}.{method}*' if implicit else
