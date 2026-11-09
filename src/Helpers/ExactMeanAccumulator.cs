@@ -4,7 +4,7 @@ namespace OoplesFinance.StockIndicators.Helpers;
 
 // An exact integer times 2^(scale-1074). Ordinary price windows fit signed 64-bit
 // integers on their shared binary grid; wider exponent spans use BigInteger.
-internal struct ExactMeanAccumulator
+internal partial struct ExactMeanAccumulator
 {
     private long _small;
     private BigInteger _large;
