@@ -1,4 +1,5 @@
 using OoplesFinance.StockIndicators.Builder;
+using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -7,6 +8,56 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 [Collection("IndicatorValuesDispatch")]
 public sealed class CompactAccumulationDistributionExecutionTests
 {
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
+    public async Task PublishedPrefixTiesAndCancellationMatchIndependentFractions(bool full)
+    {
+        foreach (int sign in new[] { -1, 1 })
+        foreach (int exponent in new[] { -1074, -1022, -70, 0, 500, 970 })
+        {
+            double unit = Math.ScaleB(1, exponent);
+            // At 2^53 grid units, odd prefixes are exact halfway cases.
+            double[] flows = [unit, Math.ScaleB(unit, 53), unit, unit,
+                -Math.ScaleB(unit, 53), -unit, -unit, -unit];
+            var bars = flows.Select((flow, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i),
+                0, 1, 0, 1, sign * flow)).ToArray();
+            var expected = new double[flows.Length];
+            var sum = new ReferenceFraction(0);
+            for (int i = 0; i < flows.Length; i++)
+            {
+                sum += ReferenceFraction.FromDouble(sign * flows[i]);
+                expected[i] = sum.ToDouble();
+            }
+            var indicator = new AccumulationDistributionWithAverage();
+            using var actual = await Build(bars, indicator)
+                .ConfigureHistory(full ? IndicatorHistoryMode.Full : IndicatorHistoryMode.LatestOnly).BuildAsync();
+            Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits),
+                actual[indicator.Outputs[2]].ToArray().Select(BitConverter.DoubleToInt64Bits));
+        }
+    }
+
+    [Fact]
+    public void DirectPrefixPublicationPreservesWideFallbackAndCanonicalZero()
+    {
+        double[][] sequences = [
+            [1, Math.ScaleB(1, -105), -1, -Math.ScaleB(1, -105)],
+            [1, Math.ScaleB(1, -106), -1, -Math.ScaleB(1, -106)],
+            [1, Math.ScaleB(1, -180), -1, -Math.ScaleB(1, -180)],
+            [double.MaxValue, double.MaxValue, -double.MaxValue, -double.MaxValue],
+            [-0d, double.Epsilon, -double.Epsilon, -double.Epsilon, double.Epsilon]];
+        foreach (var sequence in sequences)
+        {
+            var total = CompactMacdValue.Of(0);
+            foreach (double flow in sequence)
+            {
+                total += CompactMacdValue.Of(flow);
+                Assert.Equal(BitConverter.DoubleToInt64Bits(total.Round(1L).Publish()),
+                    BitConverter.DoubleToInt64Bits(total.PublishRoundedSum()));
+            }
+            Assert.Equal(0L, BitConverter.DoubleToInt64Bits(total.PublishRoundedSum()));
+        }
+    }
+
     [Theory]
     [InlineData(false)] [InlineData(true)]
     public async Task CapturedFlowsPrefixesAndMeansPreserveExactOutputsAndOwnership(bool full)

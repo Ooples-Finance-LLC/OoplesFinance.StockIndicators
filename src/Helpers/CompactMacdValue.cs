@@ -391,6 +391,20 @@ internal readonly struct CompactMacdValue
         return ExactMeanAccumulator.UnitRatio(Units, divisor);
     }
 
+    // A/D publishes each exact prefix immediately; avoid decoding and encoding
+    // the already-rounded finite result again. Stored exact state stays intact.
+    internal double PublishRoundedSum()
+    {
+#if !NETFRAMEWORK
+        if (!_wide && Width(Magnitude(_compact)) <= 106)
+        {
+            double rounded = JurikDyadic.FromBinaryProduct(_compact, _scale - 1074).Mean(1);
+            if (double.IsFinite(rounded)) return rounded == 0 ? 0 : rounded;
+        }
+#endif
+        return Round(1L).Publish();
+    }
+
     internal double Publish()
     {
 #if !NETFRAMEWORK
