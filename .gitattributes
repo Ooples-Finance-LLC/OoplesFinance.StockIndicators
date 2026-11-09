@@ -169,3 +169,5 @@ benchmarks/plans/hosted-adl-four-difference-bounds-20261109.json text eol=lf
 benchmarks/plans/hosted-adl-cached-word-mean-20261109.json text eol=lf
 benchmarks/plans/hosted-adl-direct-binary-publication-20261109.json text eol=lf
 benchmarks/plans/hosted-adl-identity-column-20261109.json text eol=lf
+benchmarks/plans/hosted-adl-batch-four-bounds-20261109.json text eol=lf
+benchmarks/plans/evidence/pr266-ci-f2275f461-20261104.json -text
