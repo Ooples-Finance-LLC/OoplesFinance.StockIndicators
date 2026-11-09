@@ -451,7 +451,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42601193547-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "dd4e2a77f0d70b8e679007ece83fa313d21731ad",
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.AccumulationDistribution.cs",
+    "tests/ModelsTests/BoundedAccumulationDifferenceTests.cs"
+  ],
+  "report_sha256": "82f8305da33c97b5e52504739b22f5168febbebaa9a9dc7a7db6b1648bbf1170",
+  "report_archive": "benchmarks/results/remaining-indicators/adl-four-difference-bounds-20261109-report-integration"
 }
