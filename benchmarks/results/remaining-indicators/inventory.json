@@ -13822,7 +13822,7 @@
     "src/Indicators/TripleBodyCandles.cs": "2467a3d1c80c1107c501520e5a46225dbe3795bbb26c9a8f25d33b3239b3f986",
     "src/Indicators/TripleExponentialRate.cs": "e63a61448029f6b9d8fda2655901ac159e68cd4eadca4cf16f4f27d1e5157310",
     "src/Indicators/ValuesBarExecution.Acceleration.cs": "06bdec4bc55efdc7d2fdc09e4f75c087984a669a8a83711c6ecb905c0325fe91",
-    "src/Indicators/ValuesBarExecution.AccumulationDistribution.cs": "be5385281a2453684ad6a8da3164ee3faac28ed555bc393ca2ce4f5242e60326",
+    "src/Indicators/ValuesBarExecution.AccumulationDistribution.cs": "67255a4a6f89bd8591d3c69b4a6f973cde4599e9632a192d1a9f4ae38cf31e86",
     "src/Indicators/ValuesBarExecution.Alligator.cs": "9ccd8e7c35cd1b4569585e388a959aba7d3de8c9e3e542cad3ddf7e601e46bd0",
     "src/Indicators/ValuesBarExecution.Arithmetic.cs": "4e5cb88a6ab321c30429f28ed1d0b67f4d460633a25104e8d499346680ffa3c2",
     "src/Indicators/ValuesBarExecution.AverageCompositions.cs": "502eb3739d52246c938099b01a56537fb9770e2c1b9eb4f6184ad9bbbb42381d",
