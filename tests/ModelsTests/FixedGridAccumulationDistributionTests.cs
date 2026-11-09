@@ -20,11 +20,12 @@ public sealed class FixedGridAccumulationDistributionTests
         foreach (int count in new[] { 512, 513 })
         foreach (int exponent in new[] { -1021, 0, 1021 })
         foreach (double[] pattern in patterns)
+        foreach (int sign in new[] { -1, 1 })
         {
             // At normal scales, the 44-binade pattern straddles the 106-bit
             // bound at these adjacent counts. Wider spans keep the fallback.
             var flows = Enumerable.Range(0, count)
-                .Select(i => Math.ScaleB(pattern[i % pattern.Length], exponent)).ToArray();
+                .Select(i => sign * Math.ScaleB(pattern[i % pattern.Length], exponent)).ToArray();
             var bars = flows.Select((flow, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i),
                 0, 1, 0, 1, flow)).ToArray();
             await Check(flows, bars, full);
