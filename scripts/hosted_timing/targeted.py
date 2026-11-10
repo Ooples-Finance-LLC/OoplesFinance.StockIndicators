@@ -436,6 +436,9 @@ SCOPES['log-physical-fanout-threshold-20261110'] = {'fixtures': {'SharedPointwis
 SCOPES['circular-physical-fanout-threshold-20261110'] = {'fixtures': {'SharedPointwiseBenchmarks': {'TaLib.Functions.Ln': 'Ln', 'TaLib.Functions.Log10': 'Log10', 'TaLib.Functions.Sin': 'Sin', 'TaLib.Functions.Cos': 'Cos', 'TaLib.Functions.Tan': 'Tan'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/PointwiseParallelLimitTests.cs', 'src/Indicators/ValuesBarExecution.Pointwise.cs'}, 'methods': {'SharedPointwiseBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (150, 30), 'shards': 5, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
 
 
+SCOPES['inverse-circular-fanout-threshold-20261110'] = {'fixtures': {'SharedPointwiseBenchmarks': {'TaLib.Functions.Acos': 'Acos', 'TaLib.Functions.Atan': 'Atan'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.Pointwise.cs', 'tests/ModelsTests/PointwiseParallelLimitTests.cs'}, 'methods': {'SharedPointwiseBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (60, 12), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
