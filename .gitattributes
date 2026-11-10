@@ -173,3 +173,4 @@ benchmarks/plans/hosted-exp-parallel-minimum-20261109.json text eol=lf
 benchmarks/plans/hosted-log-parallel-minimum-20261109.json text eol=lf
 benchmarks/plans/hosted-log-physical-fanout-threshold-20261110.json text eol=lf
 benchmarks/plans/hosted-circular-physical-fanout-threshold-20261110.json text eol=lf
+benchmarks/plans/hosted-log-volatility-estimated-root-20261110.json text eol=lf
