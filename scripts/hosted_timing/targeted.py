@@ -439,6 +439,9 @@ SCOPES['circular-physical-fanout-threshold-20261110'] = {'fixtures': {'SharedPoi
 SCOPES['tsi-compact-signal-20261110'] = {'fixtures': {'SharedSkenderEmaFamilyBenchmarks': {'Skender.GetTsi': 'Skender.GetTsi'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/SeededTrueStrengthExecutionTests.cs', 'src/Indicators/SeededTrueStrength.cs'}, 'methods': {'SharedSkenderEmaFamilyBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (150, 30)}
 
 
+SCOPES['tsi-private-word-ema-20261110'] = {'fixtures': {'SharedSkenderEmaFamilyBenchmarks': {'Skender.GetTsi': 'Skender.GetTsi'}}, 'implicit_fixtures': set(), 'paths': {'src/Helpers/TsiWordEmaRecurrence.cs', 'src/Indicators/SeededTrueStrength.cs', 'tests/ModelsTests/TsiWordEmaRecurrenceTests.cs'}, 'methods': {'SharedSkenderEmaFamilyBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
