@@ -78,8 +78,14 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
     {
         private long _index = -1;
         private double _previous;
+#if !NETFRAMEWORK
+        private readonly TsiWordEmaRecurrence _firstRecurrence = new(period),
+            _secondRecurrence = new(smooth);
+#else
         private readonly CompactMacdValue.EmaRecurrence _firstRecurrence = new(period),
-            _secondRecurrence = new(smooth), _signalRecurrence = new(signal);
+            _secondRecurrence = new(smooth);
+#endif
+        private readonly CompactMacdValue.EmaRecurrence _signalRecurrence = new(signal);
         private CompactMacdValue _signed,
             _absolute,
             _secondSigned,
