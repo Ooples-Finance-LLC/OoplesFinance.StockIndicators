@@ -11,6 +11,8 @@ public sealed class SeededTrueStrengthExecutionTests
     [InlineData(7, 3, 5)]
     [InlineData(2047, 2, 3)]
     [InlineData(2048, 2, 3)]
+    [InlineData(2, 2, 2047)]
+    [InlineData(2, 2, 2048)]
     public void RecurrenceBoundariesAndMixedExponentsPreserveIndependentReferenceBits(int period, int smooth, int signal)
     {
         int count = period + smooth + signal + 81;

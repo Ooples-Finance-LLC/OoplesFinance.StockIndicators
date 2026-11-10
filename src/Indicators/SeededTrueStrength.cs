@@ -79,7 +79,7 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
         private long _index = -1;
         private double _previous;
         private readonly CompactMacdValue.EmaRecurrence _firstRecurrence = new(period),
-            _secondRecurrence = new(smooth);
+            _secondRecurrence = new(smooth), _signalRecurrence = new(signal);
         private CompactMacdValue _signed,
             _absolute,
             _secondSigned,
@@ -112,6 +112,19 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
             current.ScaleByPowerOfTwo(1);
             previous.AddExact(current);
             return previous;
+        }
+
+        private double AdvanceSignal(double previous, double current)
+        {
+#if !NETFRAMEWORK
+            double rounded = _signalRecurrence.Advance(CompactMacdValue.Of(previous),
+                CompactMacdValue.Of(current)).Publish();
+            // Compact zero does not retain an underflow sign. Keep the original
+            // publication for zero; all nonzero results use the existing EMA kernel.
+            if (rounded != 0) return rounded; // NOSONAR: Exact zero boundary preserves signed-underflow publication.
+#endif
+            return Numerator(JurikDyadic.FromDouble(previous), JurikDyadic.FromDouble(current), signal)
+                .Ratio(JurikDyadic.FromDouble((long)signal + 1));
         }
 
         public void Reset()
@@ -204,8 +217,7 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
                     _signal = _seedSignal.Ratio(JurikDyadic.FromDouble(signal));
             }
             else if (_signal.HasValue && tsi.HasValue)
-                _signal = Numerator(JurikDyadic.FromDouble(_signal.Value),
-                    JurikDyadic.FromDouble(tsi.Value), signal).Ratio(JurikDyadic.FromDouble((long)signal + 1));
+                _signal = AdvanceSignal(_signal.Value, tsi.Value);
             else
                 _signal = null;
             Publish(_signal, 1, output);
