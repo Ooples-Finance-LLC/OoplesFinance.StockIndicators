@@ -170,3 +170,4 @@ benchmarks/plans/hosted-adl-cached-word-mean-20261109.json text eol=lf
 benchmarks/plans/hosted-adl-direct-binary-publication-20261109.json text eol=lf
 benchmarks/plans/hosted-adl-identity-column-20261109.json text eol=lf
 benchmarks/plans/hosted-exp-parallel-minimum-20261109.json text eol=lf
+benchmarks/plans/hosted-log-parallel-minimum-20261109.json text eol=lf

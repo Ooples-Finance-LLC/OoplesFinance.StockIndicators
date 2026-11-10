@@ -427,6 +427,9 @@ SCOPES['adl-identity-column-20261109'] = {'fixtures': {'SharedRecursiveStateBenc
 SCOPES['exp-parallel-minimum-20261109'] = {'fixtures': {'SharedPointwiseBenchmarks': {'TaLib.Functions.Exp': 'Exp'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.Pointwise.cs'}, 'methods': {'SharedPointwiseBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['log-parallel-minimum-20261109'] = {'fixtures': {'SharedPointwiseBenchmarks': {'TaLib.Functions.Ln': 'Ln', 'TaLib.Functions.Log10': 'Log10'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.Pointwise.cs'}, 'methods': {'SharedPointwiseBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (60, 12), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
