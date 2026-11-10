@@ -451,7 +451,15 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42909557184-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "e2035ecbcb62eea56e8ce3bb32db9bb36d52d4ae",
+  "integrated_paths": [
+    "src/Helpers/TsiWordEmaRecurrence.cs",
+    "src/Indicators/SeededTrueStrength.cs",
+    "tests/ModelsTests/TsiWordEmaRecurrenceTests.cs"
+  ],
+  "report_sha256": "db6edc3f9b4851507e5a08789e2e8867a128454664e8dd172b2a2ab9a3d71c98",
+  "report_archive": "benchmarks/results/remaining-indicators/tsi-private-word-ema-20261110-report-integration"
 }
