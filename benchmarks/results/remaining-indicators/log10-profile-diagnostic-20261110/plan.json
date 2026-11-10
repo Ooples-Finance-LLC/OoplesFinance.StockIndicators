@@ -1,0 +1,103 @@
+{
+  "status": "frozen",
+  "purpose": "Explain why the rejected Log10 threshold candidate regressed in10kLibraryPair while improving10kbuilders; cannot qualify source or change policy",
+  "baseline": "7016890fd3e32650f77cc27ec8db5e1b33bdc2aa",
+  "candidate": "15d9777d34f8c5db3d7a50ab539ef7a733faf8e4",
+  "qualification_run": "42734662811",
+  "input_provenance": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\hosted-runs\\42734662811\\hosted-inputs\\provenance.json",
+  "input_provenance_sha256": "9ad55278a6edb2756f0d96681082555c9f28366612ecc1fb600ac4b301a77102",
+  "pair": "TaLib.Functions.Log10",
+  "bars": [
+    10000
+  ],
+  "profiles": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "operation": "TaLib.Functions.Log10",
+      "methods": [
+        "Ooples",
+        "Competitor"
+      ]
+    },
+    {
+      "fixture": "SharedPointwiseBenchmarks",
+      "operation": "Log10",
+      "methods": [
+        "BuilderFull",
+        "NativeSingle",
+        "NativeParallel"
+      ]
+    }
+  ],
+  "jobs": 2,
+  "max_parallel": 2,
+  "order": [
+    "old",
+    "new",
+    "new",
+    "old"
+  ],
+  "policy": {
+    "default_runtime": true,
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "fixed_invocation_warmups": 1000,
+    "builder_warmups": 10,
+    "measured_iterations": 10
+  },
+  "instrumentation": "Source-bound CPU sample traces plus allocation/JIT observations on authenticated existing binaries; any instrumentation overhead labeled; diagnostic timings never accepted as qualification",
+  "scope_limits": [
+    "No production source change or build",
+    "No new qualification or source/report import",
+    "No sampling, runtime or acceptance-policy change",
+    "Do not replay rejected source as a qualifying candidate or select winning subsets"
+  ],
+  "deliverable": "Compare compute, capture/hash, output-copy/mask, allocation/GC and dispatch call stacks across the two profiles, with hashes and limitations",
+  "estimated_added_effort": "45\u201390minutes including isolated hosted diagnostic setup and review",
+  "diagnostic_only": true,
+  "approval": "User explicitly approved bounded diagnostic: yes you have my approval so continue",
+  "original_plan": "benchmarks/plans/hosted-log-parallel-minimum-20261109.json",
+  "original_plan_sha256": "fee35b7e9c3c0053cf85238220f6b1a1ef7732d01f4826381a1689317e80f03c",
+  "sources": {
+    "published": "7016890fd3e32650f77cc27ec8db5e1b33bdc2aa",
+    "old": "7016890fd3e32650f77cc27ec8db5e1b33bdc2aa",
+    "successor": "15d9777d34f8c5db3d7a50ab539ef7a733faf8e4",
+    "variants": "e3f03152e6841cb177556850a45491bcc7b23a77"
+  },
+  "production_sha256": {
+    "old": "1f3d8e06e46a7ebb69ca26096cc0eeded02a474c50e43d715a742d2957d15db3",
+    "successor": "1b06ba338cde7fb25852050fa51bac67c3da4fd24b3f5952861d3322fca8684b",
+    "variants": "a06ef7ea68981fa9ac344f968935e5ee23b649883949c2cc0b677ac767d225ea"
+  },
+  "input_artifact": {
+    "run_id": 42734662811,
+    "artifact_id": 13727772374,
+    "name": "hosted-inputs",
+    "digest": "sha256:075ce26dd1f7073dbb129e76d67c973effe7f04694adb97ba028d07a39f71a19",
+    "workflow_head": "19534aee1fb62ae9c60957edbc891ce0dba53e90",
+    "run_attempt": "1"
+  },
+  "sdk": "10.0.403",
+  "trace_tool_version": "10.0.750501",
+  "trace_profile": "dotnet-sampled-thread-time,dotnet-common,gc-verbose",
+  "trace_limit_seconds": 60,
+  "trace_replay": {
+    "chunks": 10,
+    "invocations_per_chunk": 1000,
+    "kind": "Unmeasured amplified attribution replay; separate from unchanged BDN measurements; no throughput claim"
+  },
+  "runtime_policy_overrides": {},
+  "limitations": [
+    "Sampled thread time estimates wall-clock stack attribution, not CPU share; blocked threads can appear.",
+    "Traces include instrumentation and PowerShell/delegate overhead. Allocation and latency claims come only from the separate BDN diagnostic, never replay counters.",
+    "No qualification decision, source import, or report import is permitted."
+  ],
+  "supersedes": {
+    "tooling_head": "e110b20550a348377be2da108dbbe2466ee98347",
+    "run_id": "42812393874",
+    "plan": "benchmarks/plans/log10-profile-diagnostic-20261110.json",
+    "plan_sha256": "17c8289b39d10902952c0f71b64b1289f9dec6d6577487cd15c60d57fbfe15f2",
+    "reason": "Driver expected the wrong BDN JSON export suffix; both partial runs excluded, preserved and never pooled"
+  },
+  "repair": "Discover the existing full-compressed JSON exporter output; all source binaries, methods, sample counts, runtime/CPU policies and two-job cap unchanged"
+}
