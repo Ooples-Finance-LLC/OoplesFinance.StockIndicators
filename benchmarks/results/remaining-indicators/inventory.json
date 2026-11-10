@@ -13884,7 +13884,7 @@
     "src/Indicators/ValuesBarExecution.PivotDetector.cs": "f8e1ac698675b64eee46d2b2044fafb02144565db1f51bc6cd907983d5dc9af1",
     "src/Indicators/ValuesBarExecution.PivotFamilies.cs": "90d659f3c1c61126cbd59861542d039781d69912670138619daacd088928741a",
     "src/Indicators/ValuesBarExecution.Pivots.cs": "64afefd7352681b0af32ee036659eeefedcb5922d2d0eb423aabe170091a7725",
-    "src/Indicators/ValuesBarExecution.Pointwise.cs": "795f8b67fdd89e74928ea9ecb7ab5152f8c40a055e7a4af4a96242768a7dc53f",
+    "src/Indicators/ValuesBarExecution.Pointwise.cs": "843fe8b5c70551d167472240cac0bc821493a6691108ae560ee1eb7c2bf83a3a",
     "src/Indicators/ValuesBarExecution.PointwiseBatch.cs": "fff765514e3ab0154b2cab98100f8f33500a853571767a1e1550e75d5449c3d7",
     "src/Indicators/ValuesBarExecution.PolarizedEfficiency.cs": "0bf709ed231d389d6011f4f45526ddfadeab356606c09059f013f9948fb67317",
     "src/Indicators/ValuesBarExecution.PriceCandle.cs": "2f8d3c781c605cb5928bb4cbdb916ed99d0fdd66b715612e79f8e1659f89a977",

@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "18559680aa92b425a5ae4ea1dabc47cfe73718964f5c4bf8123e1dacbad92bd0",
+    "archive": "benchmarks/results/remaining-indicators/circular-physical-fanout-threshold-20261110-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "98306d6669f0778f3d06d3de6d08de399082a3a0cb5bb8b412feeabb1a544419",
+    "archive": "benchmarks/results/remaining-indicators/circular-physical-fanout-threshold-20261110-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "8e0f0cd7d3ff53f4d0e394a2143f2a931c046ef1fc67987ae4075de247d99e94",
+    "archive": "benchmarks/results/remaining-indicators/circular-physical-fanout-threshold-20261110-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "a7ebe9397436fb516bf441b76c57b51c8f602bc9f940fa8dbe209a00885040ed",
+    "archive": "benchmarks/results/remaining-indicators/circular-physical-fanout-threshold-20261110-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "ae520f2ece4f6bc920724bb7f8c6081f68dee35be6797fa991cc1dc84a672f24",
+    "archive": "benchmarks/results/remaining-indicators/circular-physical-fanout-threshold-20261110-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "c59960c951f8c59d4e37303a0143cc36caf5121fb398568eb2cc41a37a626cfd",
+    "archive": "benchmarks/results/remaining-indicators/circular-physical-fanout-threshold-20261110-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "78d369cc7a97c22196ab8e8d47d2fb008b8c0fc33de445a0a3a4cfcd83dca78a",
+    "archive": "benchmarks/results/remaining-indicators/circular-physical-fanout-threshold-20261110-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "3991a472450d759e8f8b2650102a211515d48839c3dfe96af5dd87a80be9c97c",
+    "archive": "benchmarks/results/remaining-indicators/circular-physical-fanout-threshold-20261110-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "598db04c930c8af3a8fcaf356ab014047ac903cf246ac84d874f96412c5e409b",
+    "archive": "benchmarks/results/remaining-indicators/circular-physical-fanout-threshold-20261110-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "e03fdfcda83c6a8a79ef6b1bf0a7e5f5799faa1342ff08894b273bb6a7e359ce",
+    "archive": "benchmarks/results/remaining-indicators/circular-physical-fanout-threshold-20261110-report-integration/updated-pair-details.png.gz"
+  }
+}
