@@ -13780,7 +13780,7 @@
     "src/Indicators/SeededOnBalanceVolume.cs": "34c58606afac1695ac32bdbe34e4cdb95dc21b6fce64065bce1685ec26c555fe",
     "src/Indicators/SeededPhaseAdaptiveAverage.cs": "f57fa3facc70ff5bd644ce1f8214396f73ef02c24aeb3979f872f5244bf2b7b5",
     "src/Indicators/SeededPriceMomentum.cs": "c0da20d2839faf83a5158d1b73499e24f1b266e6d37631a514577a7ba78261d8",
-    "src/Indicators/SeededTrueStrength.cs": "4c20af8cee446bdd8f86c97833a1376e8de4f5f78ba33a701de40527ff641416",
+    "src/Indicators/SeededTrueStrength.cs": "0b3382c5cdc1bd6436ce25161a2f6c174465c991d0edbebd1cfe3cabfd9c3e46",
     "src/Indicators/SequenceCandles.cs": "51d11329d068eba1cc5b02d815d15d2ec439be8a6192d76f503ed297c0453223",
     "src/Indicators/ShadowDojiCandles.cs": "1adc6a2049409623f9d0c5e69d03f47405343fd8414c14e36b3f841a34b43fe5",
     "src/Indicators/SharedCpuStates.cs": "148596b930ae5b7c219f9490042bc834935b729d61c6de56311f0eb5b7bb44f3",

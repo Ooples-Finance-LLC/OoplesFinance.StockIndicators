@@ -450,7 +450,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-42893400524-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "cde901697cf6b23f723f10460cb470dbb0e3d7ff",
+  "integrated_paths": [
+    "src/Indicators/SeededTrueStrength.cs",
+    "tests/ModelsTests/SeededTrueStrengthExecutionTests.cs"
+  ],
+  "report_sha256": "eac9fd5263a8b821e19cc7917624a6a937b4422d52b642f83e75a0a41eae38d7",
+  "report_archive": "benchmarks/results/remaining-indicators/tsi-compact-signal-20261110-report-integration"
 }
