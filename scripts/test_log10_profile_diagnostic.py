@@ -22,6 +22,15 @@ class DiagnosticTests(unittest.TestCase):
                         for parameters in (f'{param}: {size}, Operation: "{op}"',f'Operation: "{op}", {param}: {size}'):
                             name=f'{fixture}.{method}({parameters})'
                             self.assertEqual(size==10000 and op==pair and method in methods,any(fnmatch.fnmatchcase(name,p) for p in m.filters(profile)),name)
+    def test_existing_full_compressed_export_discovery(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);(root/'results').mkdir()
+            with self.assertRaises(AssertionError):m.find_report(root)
+            real=root/'results/Fixture-report-full-compressed.json';real.write_text('{}')
+            (root/'results/Fixture-report.csv').write_text('csv')
+            self.assertEqual(real,m.find_report(root))
+            (root/'results/Other-report-full-compressed.json').write_text('{}')
+            with self.assertRaises(AssertionError):m.find_report(root)
     def test_runtime_overrides_detected_case_insensitively(self):
         self.assertFalse(m.controls({'DOTNET_ROOT':'sdk','DOTNET_CLI_TELEMETRY_OPTOUT':'1'}))
         for key in ('DOTNET_TieredPGO','COMPlus_TieredCompilation','dotnet_tc_quickjit','DOTNET_JitDisasm'):

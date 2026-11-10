@@ -6,8 +6,8 @@ from hosted_timing import pipeline as p
 from hosted_timing.checkpoints import case_key
 from hosted_timing.verify import check_log, sample
 
-PLAN=p.REPO/'benchmarks/plans/log10-profile-diagnostic-20261110.json'
-PLAN_SHA='17c8289b39d10902952c0f71b64b1289f9dec6d6577487cd15c60d57fbfe15f2'
+PLAN=p.REPO/'benchmarks/plans/log10-profile-diagnostic-repair-20261110.json'
+PLAN_SHA='b82ddbbd82d8ac70fee4485a28538d991d00d33d1cb38c8e1ad492eebe991ecd'
 POLICY_NAMES=('TieredPGO','TieredCompilation','ReadyToRun','TC_QuickJit','TC_QuickJitForLoops','TC_OnStackReplacement','JitStress','GCStress','JitDisasm','JitDisasmAssemblies','JitStdOutFile')
 
 def controls(env):
@@ -31,6 +31,11 @@ def spec(profile):
 def filters(profile):
     fixture,pair,methods,param,_=spec(profile)
     return [s for m in methods for s in (f'*{fixture}.{m}*"{pair}"*{param}: 10000)*',f'*{fixture}.{m}*{param}: 10000,*"{pair}"*')]
+
+def find_report(folder):
+    reports=list((folder/'results').glob('*-report-full-compressed.json'))
+    assert len(reports)==1,'Expected exactly one existing full-compressed JSON export'
+    return reports[0]
 
 def validate_cases(profile,reports,log):
     fixture,pair,methods,_,warmups=spec(profile)
@@ -144,7 +149,7 @@ def main():
         samples=quiet(folder);runtime=runtimes[arm]
         args=['dotnet',str(runtime/'OoplesFinance.StockIndicators.CompetitorBenchmarks.dll'),'--filter',*filters(a.profile),'--warmupCount',str(warmups),'--iterationCount','10','--exporters','json','--artifacts',str(folder/'bdn')]
         checked_process(args,runtime,env,folder/'bdn.log')
-        reports=list((folder/'bdn').rglob('*-report-full.json'));assert len(reports)==1
+        reports=[find_report(folder/'bdn')]
         rows=validate_cases(a.profile,[p.read(x) for x in reports],(folder/'bdn.log').read_text(errors='replace'))
         replay=trace_replay(d,a.profile,runtime,folder/'trace',manifests[arm][p.DLL])
         assert all(p.manifest(runtimes[k])==manifests[k] for k in runtimes)
