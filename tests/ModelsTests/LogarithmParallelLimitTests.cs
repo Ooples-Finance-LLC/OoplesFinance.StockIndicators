@@ -38,7 +38,7 @@ public sealed class LogarithmParallelLimitTests
                     using var full = await Build(bars, indicator, IndicatorHistoryMode.Full);
                     using var latest = await Build(bars, indicator, IndicatorHistoryMode.LatestOnly);
                     Assert.False(((IndicatorRun)full).HasLegacyRuntime);
-                    Assert.False(((IndicatorRun)latest).HasLegacyRuntime);
+                    Assert.IsType<LatestOnlyIndicatorRun>(latest);
                     Array.Clear(bars);
                     for (int slot = 0; slot < 2; slot++)
                     {
