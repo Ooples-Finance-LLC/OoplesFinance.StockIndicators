@@ -33,8 +33,8 @@ internal static partial class ValuesBarExecution
         PriceCircularTransform { Operation: PriceCircularOperation.Tangent } => FillPointwise<Tangent, AllReal>(source, output, indicator, cancellation, owned),
         PriceCircularTransform { Operation: PriceCircularOperation.ArcCosine } => FillPointwise<ArcCosine, UnitInterval>(source, output, indicator, cancellation, owned),
         PriceCircularTransform { Operation: PriceCircularOperation.ArcTangent } => FillPointwise<ArcTangent, AllReal>(source, output, indicator, cancellation, owned),
-        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.NaturalLogarithm } => FillPointwise<Logarithm, Positive>(source, output, indicator, cancellation, owned),
-        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.CommonLogarithm } => FillPointwise<CommonLogarithm, Positive>(source, output, indicator, cancellation, owned),
+        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.NaturalLogarithm } => FillPointwise<Logarithm, Positive>(source, output, indicator, cancellation, owned, LogarithmParallelMinimum(source.Length, cancellation)),
+        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.CommonLogarithm } => FillPointwise<CommonLogarithm, Positive>(source, output, indicator, cancellation, owned, LogarithmParallelMinimum(source.Length, cancellation)),
         PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.Exponential } => FillPointwise<Exponential, AllReal>(source, output, indicator, cancellation, owned, 65536),
         PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.HyperbolicSine } => FillPointwise<HyperbolicSine, AllReal>(source, output, indicator, cancellation, owned),
         PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.HyperbolicCosine } => FillPointwise<HyperbolicCosine, AllReal>(source, output, indicator, cancellation, owned),
@@ -44,6 +44,15 @@ internal static partial class ValuesBarExecution
         PriceRoundingTransform { Operation: PriceRoundingOperation.SquareRoot } => FillPointwise<SquareRoot, Nonnegative>(source, output, indicator, cancellation, owned, 65536),
         _ => throw new InvalidOperationException("Unqualified pointwise indicator.")
     };
+
+    private static int LogarithmParallelMinimum(int count, CancellationToken cancellation)
+    {
+        // Both limits select the same route outside this interval. Avoid probing
+        // topology for small inputs or before the kernel observes cancellation.
+        if (count is < 8192 or >= 65536 || cancellation.IsCancellationRequested) return 8192;
+        int physical = AiDotNet.Tensors.Helpers.CpuParallelSettings.PhysicalCoreCount;
+        return physical > 0 && WorkerCount() > physical ? 65536 : 8192;
+    }
 
     private interface IPointwiseMath
     {
