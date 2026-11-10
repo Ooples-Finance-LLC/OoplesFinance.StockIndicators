@@ -439,6 +439,9 @@ SCOPES['circular-physical-fanout-threshold-20261110'] = {'fixtures': {'SharedPoi
 SCOPES['tsi-compact-signal-20261110'] = {'fixtures': {'SharedSkenderEmaFamilyBenchmarks': {'Skender.GetTsi': 'Skender.GetTsi'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/SeededTrueStrengthExecutionTests.cs', 'src/Indicators/SeededTrueStrength.cs'}, 'methods': {'SharedSkenderEmaFamilyBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (150, 30)}
 
 
+SCOPES['log-volatility-word-series-20261110'] = {'fixtures': {'SharedLogVolatilityBenchmarks': {'QuanTAlib.Historical': 'QuanTAlib.Historical', 'QuanTAlib.Realized': 'QuanTAlib.Realized'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/ShortLogReturnCertificateTests.cs', 'src/Helpers/CertifiedLogReturn.cs', 'tests/ModelsTests/WordLogReturnCertificateTests.cs', 'src/Helpers/CertifiedLogReturn.Word.cs'}, 'methods': {'SharedLogVolatilityBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (60, 12), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
