@@ -36,7 +36,7 @@ public sealed class ShortLogReturnCertificateTests
     }
 
     [Fact]
-    public void AdjacentPricesRetainTheAdaptiveFallback()
+    public void AdjacentPricesKeepIndependentRoundingWhenFixedCertificatesDoNotResolve()
     {
         double current = Math.BitIncrement(1d);
         Assert.False(CertifiedLogReturn.TryShort(new(current), new(1d), out _));
