@@ -1,0 +1,72 @@
+{
+  "source": "9e8dbeb546da0b25aa6dca5f380af988079423f7",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-scalar-state-20261110",
+  "status": "correctness-complete",
+  "active": null,
+  "unit": {
+    "passed": 55,
+    "classes": {
+      "ScalarHilbertPhaseTests": 9,
+      "CompactHilbertPhaseTests": 11,
+      "CompactPhaseAdaptiveTests": 9,
+      "HilbertRoundedKernelTests": 6,
+      "HilbertTrendlineSharedExecutionTests": 11,
+      "HilbertVariableWindowTests": 3,
+      "CertifiedHilbertProjectionTests": 6
+    },
+    "sha256": "f6c48b2505efcad728ddfee054175f394b9b78161fdd3686019c39ccdb8046c4"
+  },
+  "parity": {
+    "passed": 167,
+    "classes": {
+      "SeededPhaseComparisonTests": 8,
+      "DelayedPhaseComparisonTests": 7,
+      "SeededHilbertTrendComparisonTests": 5,
+      "DelayedHilbertTrendComparisonTests": 8,
+      "HilbertCycleComparisonTests": 9,
+      "HilbertCycleSignalComparisonTests": 11,
+      "SharedHilbertBenchmarkTests": 13,
+      "SharedSeededPhaseBenchmarkTests": 10,
+      "SharedHilbertTrendlineBenchmarkTests": 10,
+      "SharedTaHilbertNativeBenchmarkTests": 54,
+      "SharedHilbertSignalBenchmarkTests": 32
+    },
+    "sha256": "e878f9a7934605f9d0dbedc87cd2a10d75de5ee40673811b9e5cf6a3100dab7b"
+  },
+  "build_origin": {
+    "run_id": "42923854461",
+    "workflow_head": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "9e8dbeb546da0b25aa6dca5f380af988079423f7",
+    "artifact_id": 13813173763,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42923854461"
+  },
+  "compiler_process_isolation": true,
+  "dependency_copy_mode": "Verified immutable CI artifacts; changed binaries installed without local compilation",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "build-and-gpu": {
+      "exit_code": 0,
+      "location": "CI build and actual local GPU"
+    },
+    "unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "parity": {
+      "exit_code": 0,
+      "location": "CI"
+    }
+  },
+  "gpu_passed": 100,
+  "source_fingerprint": "5c5bd41dbaf4240abdb8e68eec2bd2ae2c4bff8b14c654edb8021b09f54826af",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "a259b7bb161934229ca4ec8cde736efb665bb6087235d2132d912c13ac64e10f",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "a259b7bb161934229ca4ec8cde736efb665bb6087235d2132d912c13ac64e10f",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "a259b7bb161934229ca4ec8cde736efb665bb6087235d2132d912c13ac64e10f",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "a259b7bb161934229ca4ec8cde736efb665bb6087235d2132d912c13ac64e10f"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}
