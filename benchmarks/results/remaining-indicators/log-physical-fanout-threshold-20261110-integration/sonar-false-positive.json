@@ -1,0 +1,18 @@
+{
+  "issue": "AaHGGhweEOCndYxdSD-L",
+  "head": "d1c8ac46c132c80f53d0a6bddac7fb1d2ce3d93b",
+  "ui_verified_status": "False positive",
+  "reason": "The highlighted JSON key is a sampled .NET method signature containing System.Threading.CancellationToken; its value is numeric profile time, not a credential. Original immutable evidence was preserved.",
+  "issues_api": [
+    {
+      "key": "AaHGGhweEOCndYxdSD-L",
+      "rule": "json:S6418",
+      "component": "Ooples-Finance-LLC_OoplesFinance.StockIndicators:benchmarks/results/remaining-indicators/log10-profile-diagnostic-20261110/analysis.json",
+      "line": 1578,
+      "status": "RESOLVED",
+      "resolution": "FALSE-POSITIVE",
+      "issueStatus": "FALSE_POSITIVE"
+    }
+  ],
+  "verified_utc": "2026-11-10T15:45:04.430520+00:00"
+}
