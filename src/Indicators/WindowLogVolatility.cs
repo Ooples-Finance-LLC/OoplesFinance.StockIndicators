@@ -140,7 +140,7 @@ public sealed class WindowLogVolatility : MultiOutputIndicatorBase, IIndicatorVa
                 numerator.Subtract(sumSquared);
             }
             if (annualized) numerator.Multiply(252);
-            output[0] = numerator.SqrtMean(_denominator);
+            output[0] = LogVolatilityRoot.Mean(numerator, _denominator);
         }
     }
 }
