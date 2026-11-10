@@ -28,13 +28,13 @@ internal static partial class ValuesBarExecution
         GravestoneDojiCandle candle => FillPointwiseKernel(source, output, indicator,
             new ShadowDojiKernel(candle.BodyFraction, candle.ShadowFraction, false), cancellation, owned),
         PriceCircularTransform { Operation: PriceCircularOperation.ArcSine } => FillAsin(source, output, cancellation, owned),
-        PriceCircularTransform { Operation: PriceCircularOperation.Sine } => FillPointwise<Sine, AllReal>(source, output, indicator, cancellation, owned),
-        PriceCircularTransform { Operation: PriceCircularOperation.Cosine } => FillPointwise<Cosine, AllReal>(source, output, indicator, cancellation, owned),
-        PriceCircularTransform { Operation: PriceCircularOperation.Tangent } => FillPointwise<Tangent, AllReal>(source, output, indicator, cancellation, owned),
+        PriceCircularTransform { Operation: PriceCircularOperation.Sine } => FillPointwise<Sine, AllReal>(source, output, indicator, cancellation, owned, FanoutParallelMinimum(source.Length, cancellation)),
+        PriceCircularTransform { Operation: PriceCircularOperation.Cosine } => FillPointwise<Cosine, AllReal>(source, output, indicator, cancellation, owned, FanoutParallelMinimum(source.Length, cancellation)),
+        PriceCircularTransform { Operation: PriceCircularOperation.Tangent } => FillPointwise<Tangent, AllReal>(source, output, indicator, cancellation, owned, FanoutParallelMinimum(source.Length, cancellation)),
         PriceCircularTransform { Operation: PriceCircularOperation.ArcCosine } => FillPointwise<ArcCosine, UnitInterval>(source, output, indicator, cancellation, owned),
         PriceCircularTransform { Operation: PriceCircularOperation.ArcTangent } => FillPointwise<ArcTangent, AllReal>(source, output, indicator, cancellation, owned),
-        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.NaturalLogarithm } => FillPointwise<Logarithm, Positive>(source, output, indicator, cancellation, owned, LogarithmParallelMinimum(source.Length, cancellation)),
-        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.CommonLogarithm } => FillPointwise<CommonLogarithm, Positive>(source, output, indicator, cancellation, owned, LogarithmParallelMinimum(source.Length, cancellation)),
+        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.NaturalLogarithm } => FillPointwise<Logarithm, Positive>(source, output, indicator, cancellation, owned, FanoutParallelMinimum(source.Length, cancellation)),
+        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.CommonLogarithm } => FillPointwise<CommonLogarithm, Positive>(source, output, indicator, cancellation, owned, FanoutParallelMinimum(source.Length, cancellation)),
         PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.Exponential } => FillPointwise<Exponential, AllReal>(source, output, indicator, cancellation, owned, 65536),
         PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.HyperbolicSine } => FillPointwise<HyperbolicSine, AllReal>(source, output, indicator, cancellation, owned),
         PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.HyperbolicCosine } => FillPointwise<HyperbolicCosine, AllReal>(source, output, indicator, cancellation, owned),
@@ -45,7 +45,7 @@ internal static partial class ValuesBarExecution
         _ => throw new InvalidOperationException("Unqualified pointwise indicator.")
     };
 
-    private static int LogarithmParallelMinimum(int count, CancellationToken cancellation)
+    private static int FanoutParallelMinimum(int count, CancellationToken cancellation)
     {
         // Both limits select the same route outside this interval. Avoid probing
         // topology for small inputs or before the kernel observes cancellation.

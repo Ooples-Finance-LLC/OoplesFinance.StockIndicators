@@ -5,12 +5,15 @@ using OoplesFinance.StockIndicators.Indicators;
 namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
 [Collection("IndicatorValuesDispatch")]
-public sealed class LogarithmParallelLimitTests
+public sealed class PointwiseParallelLimitTests
 {
     [Theory]
-    [InlineData(PriceTranscendentalOperation.NaturalLogarithm)]
-    [InlineData(PriceTranscendentalOperation.CommonLogarithm)]
-    public async Task ParallelLimitsPreserveStateBitsPresenceAndOwnedHistory(PriceTranscendentalOperation operation)
+    [InlineData("Ln")]
+    [InlineData("Log10")]
+    [InlineData("Sin")]
+    [InlineData("Cos")]
+    [InlineData("Tan")]
+    public async Task ParallelLimitsPreserveStateBitsPresenceAndOwnedHistory(string operation)
     {
         int previous = CpuParallelSettings.MaxDegreeOfParallelism;
         try
@@ -25,8 +28,8 @@ public sealed class LogarithmParallelLimitTests
                     var bars = Enumerable.Range(0, count).Select(i => new Bar(DateTime.UnixEpoch.AddMinutes(i),
                         3, 4, 2, domain[i % domain.Length], i)).ToArray();
                     var original = bars.ToArray();
-                    var indicator = new PriceTranscendentalTransform(operation);
-                    var state = (IMultiOutputState)indicator.CreateState();
+                    var indicator = Create(operation);
+                    var state = Assert.IsAssignableFrom<IMultiOutputState>(indicator.CreateState());
                     var expected = new[] { new double[count], new double[count] };
                     var scratch = new double[2];
                     for (int i = 0; i < count; i++)
@@ -57,13 +60,23 @@ public sealed class LogarithmParallelLimitTests
                     Assert.Equal(original[^1], latest.Latest.Bar);
                     full.Dispose();
                     latest.Dispose();
-                    Bits(expected[0], full[indicator.Value].ToArray());
-                    Bits(expected[1], latest[indicator.IsDefined].ToArray());
+                    Bits(expected[0], full[indicator.Outputs[0]].ToArray());
+                    Bits(expected[1], latest[indicator.Outputs[1]].ToArray());
                 }
             }
         }
         finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
     }
+
+    private static MultiOutputIndicatorBase Create(string operation) => operation switch
+    {
+        "Ln" => new PriceTranscendentalTransform(PriceTranscendentalOperation.NaturalLogarithm),
+        "Log10" => new PriceTranscendentalTransform(PriceTranscendentalOperation.CommonLogarithm),
+        "Sin" => new PriceCircularTransform(PriceCircularOperation.Sine),
+        "Cos" => new PriceCircularTransform(PriceCircularOperation.Cosine),
+        "Tan" => new PriceCircularTransform(PriceCircularOperation.Tangent),
+        _ => throw new ArgumentOutOfRangeException(nameof(operation)),
+    };
 
     private static Task<IIndicatorRun> Build(Bar[] bars, IIndicator indicator, IndicatorHistoryMode history) =>
         new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicator)
