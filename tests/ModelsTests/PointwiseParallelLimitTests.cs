@@ -13,6 +13,8 @@ public sealed class PointwiseParallelLimitTests
     [InlineData("Sin")]
     [InlineData("Cos")]
     [InlineData("Tan")]
+    [InlineData("Acos")]
+    [InlineData("Atan")]
     public async Task ParallelLimitsPreserveStateBitsPresenceAndOwnedHistory(string operation)
     {
         int previous = CpuParallelSettings.MaxDegreeOfParallelism;
@@ -75,6 +77,8 @@ public sealed class PointwiseParallelLimitTests
         "Sin" => new PriceCircularTransform(PriceCircularOperation.Sine),
         "Cos" => new PriceCircularTransform(PriceCircularOperation.Cosine),
         "Tan" => new PriceCircularTransform(PriceCircularOperation.Tangent),
+        "Acos" => new PriceCircularTransform(PriceCircularOperation.ArcCosine),
+        "Atan" => new PriceCircularTransform(PriceCircularOperation.ArcTangent),
         _ => throw new ArgumentOutOfRangeException(nameof(operation)),
     };
 
