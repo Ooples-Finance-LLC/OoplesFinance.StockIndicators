@@ -448,6 +448,9 @@ SCOPES['hilbert-scalar-state-0150-20261111'] = {'fixtures': {'SharedHilbertBench
 SCOPES['tsi-finite-change-20261111'] = {'fixtures': {'SharedSkenderEmaFamilyBenchmarks': {'Skender.GetTsi': 'Skender.GetTsi'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/SeededTrueStrength.cs', 'tests/ModelsTests/TsiFiniteDifferenceTests.cs'}, 'methods': {'SharedSkenderEmaFamilyBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
 
 
+SCOPES['ta-ad-compact-prefix-20261111'] = {'fixtures': {'SharedRecursiveStateBenchmarks': {'TaLib.Functions.Ad': 'Ad'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.GeneratedStates.cs', 'src/Helpers/MoneyFlowAccumulationWindow.cs', 'src/Indicators/ValuesBarExecution.IdentityAdl.cs', 'tests/ModelsTests/CompactIdentityAdlPrefixTests.cs'}, 'methods': {'SharedRecursiveStateBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
