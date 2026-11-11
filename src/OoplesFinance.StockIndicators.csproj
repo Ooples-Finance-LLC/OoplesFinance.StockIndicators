@@ -11,7 +11,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Description>Largest C# stock indicator library with over 750 to choose from and easiest to use with abilities such as making an indicator out of any other indicator or using any moving average with any indicator. </Description>
-    <Version>1.1.0</Version> <!-- x-release-please-version -->
+    <Version>2.0.0</Version> <!-- x-release-please-version -->
     <Authors>ooples</Authors>
     <Company>Ooples Finance</Company>
     <RepositoryUrl>https://github.com/ooples/OoplesFinance.StockIndicators</RepositoryUrl>
