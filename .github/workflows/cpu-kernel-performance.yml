@@ -7,7 +7,7 @@ on:
       suite:
         description: Public builder comparisons, diagnostic kernels, or both
         type: choice
-        options: [builder, kernel, all, qualified-rollout, qualified-variants, qualified-coverage, qualified-targeted, verify-evidence, trix-diagnostic, trix-library-diagnostic, build-correctness-inputs]
+        options: [builder, kernel, all, qualified-rollout, qualified-variants, qualified-coverage, qualified-targeted, verify-evidence, trix-diagnostic, trix-library-diagnostic, build-correctness-inputs, legacy-net461-build]
         default: builder
       qualification_plan:
         description: Immutable source and measurement plan for qualified-rollout
@@ -47,6 +47,57 @@ concurrency:
   group: cpu-kernels-${{ github.ref }}-${{ inputs.suite == 'verify-evidence' && format('verify-{0}', inputs.evidence_run) || github.event.label.name || 'dispatch' }}
   cancel-in-progress: true
 jobs:
+  runtime-legacy-build:
+    if: github.event_name == 'workflow_dispatch' && inputs.suite == 'legacy-net461-build'
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      CANDIDATE_SOURCE: ${{ inputs.candidate_source }}
+      GIT_CONFIG_COUNT: '1'
+      GIT_CONFIG_KEY_0: core.longpaths
+      GIT_CONFIG_VALUE_0: 'true'
+    steps:
+      - name: Require an immutable source
+        shell: pwsh
+        run: |
+          if ($env:CANDIDATE_SOURCE -notmatch '^[0-9a-f]{40}$') { throw 'An exact source SHA is required' }
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.candidate_source }}
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Record the checked source and project
+        shell: pwsh
+        run: |
+          $sourceSha = (git rev-parse HEAD).Trim()
+          if ($sourceSha -ne $env:CANDIDATE_SOURCE) { throw 'Source checkout mismatch' }
+          $projectText = (Get-Content -Raw -LiteralPath 'src/OoplesFinance.StockIndicators.csproj').Replace("`r`n", "`n")
+          if (-not $projectText.Contains('Include="AiDotNet.Tensors" Version="0.150.0"')) { throw 'Tensor version mismatch' }
+          if (-not $projectText.Contains('Include="System.Text.Json" Version="11.0.0"')) { throw 'Legacy JSON version mismatch' }
+          $projectHash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($projectText))).ToLowerInvariant()
+          @{ source = $sourceSha; project_sha256 = $projectHash; tensor_version = '0.150.0'; legacy_json_version = '11.0.0'; framework = 'net461'; tooling_sha = $env:GITHUB_WORKFLOW_SHA; run_id = $env:GITHUB_RUN_ID } | ConvertTo-Json | Set-Content -LiteralPath 'legacy-source.json' -Encoding utf8
+          dotnet --info | Set-Content -LiteralPath 'legacy-dotnet-info.log'
+      - name: Build the legacy target
+        shell: pwsh
+        run: |
+          dotnet restore src/OoplesFinance.StockIndicators.csproj 2>&1 | Tee-Object -FilePath legacy-restore.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet build src/OoplesFinance.StockIndicators.csproj -c Release --framework net461 --no-restore -p:GeneratePackageOnBuild=false 2>&1 | Tee-Object -FilePath legacy-build.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: runtime-legacy-net461
+          path: |
+            legacy-source.json
+            legacy-dotnet-info.log
+            legacy-restore.log
+            legacy-build.log
+          if-no-files-found: error
+          retention-days: 30
+
   candidate-correctness-inputs:
     if: github.event_name == 'workflow_dispatch' && inputs.suite == 'build-correctness-inputs'
     runs-on: windows-latest
