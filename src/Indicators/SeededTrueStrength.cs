@@ -160,9 +160,20 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            var change = JurikDyadic.FromDouble(bar.Close);
-            change.Subtract(JurikDyadic.FromDouble(_previous));
-            change = change.Rounded();
+            JurikDyadic change;
+#if !NETFRAMEWORK
+            // Binary64 subtraction already rounds the exact difference once.
+            // FromDouble canonicalizes zero; extended results keep the original path.
+            double difference = bar.Close - _previous;
+            if (double.IsFinite(difference))
+                change = JurikDyadic.FromDouble(difference);
+            else
+#endif
+            {
+                change = JurikDyadic.FromDouble(bar.Close);
+                change.Subtract(JurikDyadic.FromDouble(_previous));
+                change = change.Rounded();
+            }
             var absoluteChange = change;
             if (absoluteChange.Sign < 0) absoluteChange.Multiply(-1);
             _previous = bar.Close;
