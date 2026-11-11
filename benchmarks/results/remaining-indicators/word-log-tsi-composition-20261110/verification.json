@@ -1,0 +1,67 @@
+{
+  "source": "4e0674d77c8735c4f8281edb5a8854ab903b7b36",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-word-log-tsi-composition-20261110",
+  "status": "correctness-complete",
+  "active": null,
+  "unit": {
+    "passed": 92,
+    "classes": {
+      "CertifiedLogReturnTests": 2,
+      "CertifiedLogReturnExecutionTests": 4,
+      "ShortLogReturnCertificateTests": 10,
+      "CompactLogVolatilityTests": 4,
+      "WordLogReturnCertificateTests": 4,
+      "SeededTrueStrengthExecutionTests": 16,
+      "SeededMomentumSharedExecutionTests": 18,
+      "SharedGeneratedTrueStrengthTests": 30,
+      "TsiWordEmaRecurrenceTests": 4
+    },
+    "sha256": "837d3a43dc77fb477e8e220791d77fe8ee27bec0ea5d358de203c05f834bcc0c"
+  },
+  "parity": {
+    "passed": 108,
+    "classes": {
+      "LogVolatilityComparisonTests": 10,
+      "SeededMomentumComparisonTests": 9,
+      "SharedSeededMomentumBenchmarkTests": 8,
+      "SharedSkenderEmaFamilyBenchmarkTests": 81
+    },
+    "sha256": "dd525be583215e6e2c65ec295e8657d74c4bb8cdbac88b4a6c741834eed865a6"
+  },
+  "build_origin": {
+    "run_id": "42929279121",
+    "workflow_head": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "4e0674d77c8735c4f8281edb5a8854ab903b7b36",
+    "artifact_id": 13815533448,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42929279121"
+  },
+  "compiler_process_isolation": true,
+  "dependency_copy_mode": "Verified immutable CI artifacts; changed binaries installed without local compilation",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "build-and-gpu": {
+      "exit_code": 0,
+      "location": "CI build and actual local GPU"
+    },
+    "unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "parity": {
+      "exit_code": 0,
+      "location": "CI"
+    }
+  },
+  "gpu_passed": 100,
+  "source_fingerprint": "59477687df69e32b2696ef459e0ce47b74b494befb2df293054e23124f57162f",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "80615032659328868d250e80095f042ffe06d26b7f61625f75a381e15b7f3a88",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "80615032659328868d250e80095f042ffe06d26b7f61625f75a381e15b7f3a88",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "80615032659328868d250e80095f042ffe06d26b7f61625f75a381e15b7f3a88",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "80615032659328868d250e80095f042ffe06d26b7f61625f75a381e15b7f3a88"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}
