@@ -14,6 +14,24 @@ internal sealed class MoneyFlowAccumulationWindow
         return RocBankValue.Round(total);
     }
 #if !NETFRAMEWORK
+    // Identity batch consumers retain exact prefixes without allocating a
+    // BigInteger for ordinary 64-127-bit sums. Streaming keeps its original state.
+    internal sealed class IdentityBatchState
+    {
+        private CompactMacdValue _total;
+
+        internal double Next(double high, double low, double close, double volume)
+        {
+            var flow = BoundedBatchFlow(high, low, close, volume);
+            var value = flow.UpperShift == 0 ? CompactMacdValue.Of(flow.Mantissa)
+                : CompactMacdValue.FromUnits(ExactVarianceWindow.Units(flow.Mantissa) << flow.UpperShift);
+            _total += value;
+            return _total.PublishRoundedSum();
+        }
+
+        internal void Reset() => _total = default;
+    }
+
     // Only the captured batch line opts into compact wide-sum publication.
     // Streaming callers retain Next and its original publication path.
     internal RocBankValue NextBatch(double high, double low, double close, double volume, bool commit)

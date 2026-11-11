@@ -9652,20 +9652,21 @@ internal static partial class ValuesBarExecution
 
     private sealed class AdlValueState(int period, int count) : IMultiOutputState, IDisposable
     {
-        private readonly MoneyFlowAccumulationWindow _line = new();
+        private readonly MoneyFlowAccumulationWindow? _line = period > 1 ? new() : null;
+        private readonly MoneyFlowAccumulationWindow.IdentityBatchState? _identityLine = period <= 1 ? new() : null;
         private readonly bool _identitySignal = period <= 1;
         private readonly RocBankAverage _signal = new(MovingAvgType.ExponentialMovingAverage, period, count);
-        public void Reset() { _line.Reset(); _signal.Reset(); }
+        public void Reset() { _line?.Reset(); _identityLine?.Reset(); _signal.Reset(); }
         public void Update(in Bar bar, Span<double> outputs)
         {
             if (_identitySignal)
             {
-                double published = _line.NextBatch(bar.High, bar.Low, bar.Close, bar.Volume, commit: true).Publish();
+                double published = _identityLine!.Next(bar.High, bar.Low, bar.Close, bar.Volume);
                 outputs[0] = published;
                 outputs[1] = published;
                 return;
             }
-            var value = _line.Next(bar.High, bar.Low, bar.Close, bar.Volume, commit: true);
+            var value = _line!.Next(bar.High, bar.Low, bar.Close, bar.Volume, commit: true);
             outputs[0] = value.Publish();
             outputs[1] = _signal.Next(value, true).Publish();
         }

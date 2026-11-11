@@ -9,7 +9,7 @@ internal static partial class ValuesBarExecution
     private static Bar FillIdentityAdl(Bar[] source, Node node,
         CancellationToken cancellation, OwnedBarBuffer? owned)
     {
-        var line = new MoneyFlowAccumulationWindow();
+        var line = new MoneyFlowAccumulationWindow.IdentityBatchState();
         double[][] output = node.Values;
         Bar latest = default;
         for (int i = 0; i < source.Length; i++)
@@ -23,8 +23,7 @@ internal static partial class ValuesBarExecution
             if (node.Failure is not null) continue;
             try
             {
-                double value = line.NextBatch(latest.High, latest.Low, latest.Close,
-                    latest.Volume, commit: true).Publish();
+                double value = line.Next(latest.High, latest.Low, latest.Close, latest.Volume);
                 output[0][i] = value;
                 output[1][i] = value;
             }
