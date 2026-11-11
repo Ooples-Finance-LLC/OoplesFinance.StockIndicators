@@ -439,6 +439,9 @@ SCOPES['circular-physical-fanout-threshold-20261110'] = {'fixtures': {'SharedPoi
 SCOPES['inverse-circular-fanout-threshold-20261110'] = {'fixtures': {'SharedPointwiseBenchmarks': {'TaLib.Functions.Acos': 'Acos', 'TaLib.Functions.Atan': 'Atan'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.Pointwise.cs', 'tests/ModelsTests/PointwiseParallelLimitTests.cs'}, 'methods': {'SharedPointwiseBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (60, 12), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['word-log-tsi-composition-20261110'] = {'fixtures': {'SharedLogVolatilityBenchmarks': {'QuanTAlib.Historical': 'QuanTAlib.Historical', 'QuanTAlib.Realized': 'QuanTAlib.Realized'}, 'SharedSkenderEmaFamilyBenchmarks': {'Skender.GetTsi': 'Skender.GetTsi'}}, 'implicit_fixtures': set(), 'paths': {'src/Helpers/CertifiedLogReturn.Word.cs', 'tests/ModelsTests/WordLogReturnCertificateTests.cs', 'tests/ModelsTests/ShortLogReturnCertificateTests.cs', 'src/Helpers/CertifiedLogReturn.cs'}, 'methods': {'SharedLogVolatilityBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedSkenderEmaFamilyBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
