@@ -1,0 +1,9 @@
+{
+  "framework": "net461",
+  "tensor_version": "0.150.0",
+  "tooling_sha": "acca7eccc1e4143481cf7945969016f1387c9fe7",
+  "source": "5a9d80f52faa59abca68522ecd5e55f29b85ceba",
+  "legacy_json_version": "11.0.0",
+  "run_id": "43106175412",
+  "project_sha256": "220dde08e10fbd067c46a40970e1a932bcc9a97cca17e60ec9d60855481f501c"
+}
