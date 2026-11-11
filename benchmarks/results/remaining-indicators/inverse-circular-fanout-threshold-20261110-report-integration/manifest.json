@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "db6edc3f9b4851507e5a08789e2e8867a128454664e8dd172b2a2ab9a3d71c98",
+    "archive": "benchmarks/results/remaining-indicators/inverse-circular-fanout-threshold-20261110-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "92ad01aa9cce4f9999be0106d0be5cc2924051b8ef1696fa10950bd99b67da77",
+    "archive": "benchmarks/results/remaining-indicators/inverse-circular-fanout-threshold-20261110-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "92d20cbc738dde8b1b1f394e768094df1307fe423be4900f7897e1495e7d6bc7",
+    "archive": "benchmarks/results/remaining-indicators/inverse-circular-fanout-threshold-20261110-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "0107c1198e73bf039f54c4b41e24a9cc03eb920cc99a45607a3cd3eef928ec37",
+    "archive": "benchmarks/results/remaining-indicators/inverse-circular-fanout-threshold-20261110-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "bc21ce76640ff8b7d4493813397476a84dd120b6e99b406b894faadeda482985",
+    "archive": "benchmarks/results/remaining-indicators/inverse-circular-fanout-threshold-20261110-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "0e4f722d35e6c04a6d9b5142f8abf9dcef68e9c4ac0ade9c1dddfede815f9b0e",
+    "archive": "benchmarks/results/remaining-indicators/inverse-circular-fanout-threshold-20261110-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "cc32c3fd6b7c4c6cde3eb7812e8cdaa95862b6c2e733ec56f16d2fc534874498",
+    "archive": "benchmarks/results/remaining-indicators/inverse-circular-fanout-threshold-20261110-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "d82dc4dd6ee19600a9a3918de781681085c2a8dc3b08752f75b074e7203ea26a",
+    "archive": "benchmarks/results/remaining-indicators/inverse-circular-fanout-threshold-20261110-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "d81d97783e4f4e3d2784f3e8d6b1d03198677df97bc7cc9cab9f973c2f6a6e4b",
+    "archive": "benchmarks/results/remaining-indicators/inverse-circular-fanout-threshold-20261110-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "0eac7f9ebf49346e3061dd4a7962e1228928d5404afb2040ece9d63c03a73a70",
+    "archive": "benchmarks/results/remaining-indicators/inverse-circular-fanout-threshold-20261110-report-integration/updated-pair-details.png.gz"
+  }
+}
