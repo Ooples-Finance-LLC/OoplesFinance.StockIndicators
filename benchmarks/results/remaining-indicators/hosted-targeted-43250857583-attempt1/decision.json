@@ -1352,6 +1352,18 @@
     }
   },
   "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "existing_source_retained": {
+    "retained_head": "e2be75b463478e6361d3b1910011002bedddbeed",
+    "publication_baseline": "24df0f52166fc35f33e51578110d27eea85cd915",
+    "historical_qualified_source": "1bab34336fc6f06e3ab5130963582ed2f77039a4",
+    "src_tree": "25a9387231cd4dc430b0f1f205428ab4db46f1d3",
+    "tests_tree": "9402ef42f1c3b388580f2274a0b7aadebcda30f1",
+    "unrelated_private_source_changes": [],
+    "production_source_imported": false,
+    "gpu_evidence_preserved": true
+  },
+  "report_sha256": "713e13f6c00e5cdc5bb032568f670cd70f9598f398b4e62e2461821feccbf66a",
+  "report_archive": "benchmarks/results/remaining-indicators/arithmetic-warmup-policy-20261112-report-integration"
 }
