@@ -29,8 +29,19 @@ internal sealed class MoneyFlowAccumulationWindow
             return _total.PublishRoundedSum();
         }
 
+        internal double AddCaptured(RocBankValue flow)
+        {
+            var value = flow.UpperShift == 0 ? CompactMacdValue.Of(flow.Mantissa)
+                : CompactMacdValue.FromUnits(ExactVarianceWindow.Units(flow.Mantissa) << flow.UpperShift);
+            _total += value;
+            return _total.PublishRoundedSum();
+        }
+
         internal void Reset() => _total = default;
     }
+
+    internal static RocBankValue CaptureIdentityBatchFlow(double high, double low, double close, double volume) =>
+        BoundedBatchFlow(high, low, close, volume);
 
     // Only the captured batch line opts into compact wide-sum publication.
     // Streaming callers retain Next and its original publication path.
