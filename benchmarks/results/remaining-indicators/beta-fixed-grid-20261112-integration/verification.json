@@ -1,0 +1,23 @@
+{
+  "source_integration_commit": "8da2d1dacf6dcc36900b336d8362c3ab6d7f47dc",
+  "qualified_source": "874a685b2656a39d8696c3611a19a4d4b91ec5ed",
+  "compiled_source": "c86550021d3e10d201d40b59e7272489f106cff2",
+  "source_fingerprint": "c5ec6496f0a45b1b8e91dadfe0d43efcc818cd8d6a861678ec9a8d2756695ccd",
+  "unit": 43,
+  "comparator": 13,
+  "actual_gpu": 100,
+  "production_sha256": "de7ced704cdf4d012010699e8495588d6e9595caa90d0b98dab7dd25deb5d57c",
+  "run_id": "43153683698",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "faster": 6
+  },
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.ReturnBeta.cs",
+    "src/Indicators/ValuesBarExecution.cs",
+    "src/Indicators/WindowReturnBeta.cs",
+    "tests/ModelsTests/FixedGridReturnBetaExecutionTests.cs"
+  ],
+  "verified_utc": "2026-11-12T04:51:12.975220+00:00"
+}

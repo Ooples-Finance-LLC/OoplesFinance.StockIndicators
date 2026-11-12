@@ -450,7 +450,16 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-43153683698-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "8da2d1dacf6dcc36900b336d8362c3ab6d7f47dc",
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.ReturnBeta.cs",
+    "src/Indicators/ValuesBarExecution.cs",
+    "src/Indicators/WindowReturnBeta.cs",
+    "tests/ModelsTests/FixedGridReturnBetaExecutionTests.cs"
+  ],
+  "report_sha256": "7ce7a6ab46f7b862c124fecb7ef313bc2b6a906312ea4ac6963f217507cdd501",
+  "report_archive": "benchmarks/results/remaining-indicators/beta-fixed-grid-20261112-report-integration"
 }
