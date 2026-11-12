@@ -187,3 +187,4 @@ benchmarks/plans/hosted-beta-fixed-grid-20261112.json text eol=lf
 benchmarks/plans/hosted-arithmetic-field-selection-20261112.json text eol=lf
 benchmarks/plans/hosted-arithmetic-warmup-policy-20261112.json text eol=lf
 benchmarks/plans/arithmetic-warmup-policy-proposal-20261112.json text eol=lf
+benchmarks/plans/hosted-hilbert-word-blend-20261112.json text eol=lf
