@@ -208,7 +208,7 @@ internal static partial class ValuesBarExecution
                     // slot. Rechecking the same array cannot discover a new error.
                     bool distinctColumn = node.Indicator is not RollingPivotLevels pivot
                         || PivotColumnOwner(pivot.Style, slot) == slot;
-                    if (distinctColumn && (!finiteByConstruction || node.Indicator is RollingPivotLevels or WindowDeviationBands or ClassicDeviationBands or PriorPriceChannel or WindowPairStatistics or WindowVortex or MoneyFlowWithDetails or MovingAverageDiagnostics or WindowBetaStatistics or AwesomeWithDetails or StochasticSmaKdj or WindowStochasticKdj
+                    if (distinctColumn && (!finiteByConstruction || node.Indicator is RollingPivotLevels or WindowDeviationBands or ClassicDeviationBands or PriorPriceChannel or WindowPairStatistics or WindowVortex or MoneyFlowWithDetails or MovingAverageDiagnostics or WindowBetaStatistics or WindowReturnBeta or AwesomeWithDetails or StochasticSmaKdj or WindowStochasticKdj
                         || (gpu is not null && node.Indicator is WindowMoneyFlowIndex)))
                     {
                         for (int i = 0; i < source.Length; i++)
