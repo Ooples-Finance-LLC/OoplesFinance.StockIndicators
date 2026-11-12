@@ -88,10 +88,17 @@ public sealed class FixedGridReturnBetaExecutionTests
             fixedGridOverflow.Append(new Bar(default, 1, 1, 0, 1, double.NaN)).ToArray() })
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
-            StockIndicatorBuilder Builder() => new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
-                .ConfigureIndicators(new WindowReturnBeta(2)).ConfigureHistory(history);
-            var expected = await Record.ExceptionAsync(() => Builder().ConfigureBehavior(_ => { }).BuildAsync());
-            var actual = await Record.ExceptionAsync(() => Builder().BuildAsync());
+            async Task Consume(bool original)
+            {
+                var indicator = new WindowReturnBeta(2);
+                var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                    .ConfigureIndicators(indicator).ConfigureHistory(history);
+                if (original) builder.ConfigureBehavior(_ => { });
+                using var result = await builder.BuildAsync();
+                _ = result[indicator.Value].ToArray();
+            }
+            var expected = await Record.ExceptionAsync(() => Consume(true));
+            var actual = await Record.ExceptionAsync(() => Consume(false));
             Assert.NotNull(expected); Assert.NotNull(actual);
             Assert.Equal(expected.GetType(), actual.GetType());
             Assert.Equal(expected.Message, actual.Message);
