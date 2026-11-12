@@ -323,6 +323,8 @@ internal sealed class ReturnBetaWindow(int period, ReturnBetaSelection selection
         Accumulate(marketReturn, evaluationReturn, 1);
     }
 
+    internal static RocBankValue RoundedReturnForBatch(double current, double previous) => Return(current, previous);
+
     private static RocBankValue Return(double current, double previous)
     {
         if (previous == 0)
