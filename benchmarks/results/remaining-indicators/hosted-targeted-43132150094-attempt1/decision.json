@@ -3707,7 +3707,21 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-43132150094-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "236701ec0085d95a5a4babd5cb3a4a928dbe0e69",
+  "integrated_paths": [
+    "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "src/Indicators/HilbertPhaseState.Scalar.cs",
+    "src/Indicators/HilbertPhaseState.cs",
+    "src/Indicators/SeededTrueStrength.cs",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs",
+    "src/Indicators/ValuesBarExecution.IdentityAdl.cs",
+    "tests/ModelsTests/CompactIdentityAdlPrefixTests.cs",
+    "tests/ModelsTests/ScalarHilbertPhaseTests.cs",
+    "tests/ModelsTests/TsiFiniteDifferenceTests.cs"
+  ],
+  "report_sha256": "bad1878757c01b05785c49b68777bb7f5aa226bc7459ab5e297cfd701da96df3",
+  "report_archive": "benchmarks/results/remaining-indicators/hilbert-tsi-taad-composition-20261111-report-integration"
 }
