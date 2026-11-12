@@ -1,0 +1,217 @@
+{
+  "diagnostic_only": true,
+  "run_id": "43230319639",
+  "tooling_head": "640adeffb8bd53e05cb72733aec09e09cc69a439",
+  "local_hosted_collection_equal": true,
+  "case_count": 16,
+  "comparison_count": 4,
+  "orchestration_tests": 572,
+  "package_tests": 5,
+  "actionlint": "passed",
+  "failed_runs": [
+    {
+      "run": "43230072036",
+      "tooling_head": "bdca4f104b5bd1e5c7417abc987c615ff6b1d975",
+      "conclusion": "startup_failure",
+      "benchmarks_started": false,
+      "reason": "The workflow is requesting 'actions: read', but is only allowed 'actions: none'."
+    }
+  ],
+  "warmups": {
+    "A": 1000,
+    "B": 20000
+  },
+  "iterations": 10,
+  "same_binary": true,
+  "source_accepted": false,
+  "production_integrated": false,
+  "report_imported": false,
+  "qualification_policy_changed": false,
+  "comparisons": [
+    {
+      "pair": "TaLib.Functions.Add",
+      "bars": 1000,
+      "method": "Ooples",
+      "A": [
+        {
+          "mean_ns": 122433.33333333333,
+          "lower_ns": 95154.19761604091,
+          "upper_ns": 149712.46905062575,
+          "samples": 9,
+          "allocated_bytes": 100616
+        },
+        {
+          "mean_ns": 264040,
+          "lower_ns": 229686.17200373556,
+          "upper_ns": 298393.82799626444,
+          "samples": 10,
+          "allocated_bytes": 100616
+        }
+      ],
+      "B": [
+        {
+          "mean_ns": 39350,
+          "lower_ns": 37160.45147042673,
+          "upper_ns": 41539.54852957327,
+          "samples": 8,
+          "allocated_bytes": 100504
+        },
+        {
+          "mean_ns": 44177.77777777778,
+          "lower_ns": 40151.936172978596,
+          "upper_ns": 48203.619382576966,
+          "samples": 9,
+          "allocated_bytes": 100504
+        }
+      ],
+      "separation": "B_below_A",
+      "host": {
+        "machine": "runnervmm7ud1",
+        "instance_nonce": "3bd68416931243b4b541b79a5376b147",
+        "run_id": "43230319639",
+        "run_attempt": "1",
+        "runner_image": "20261103.298.1",
+        "logical_cpus": 4
+      }
+    },
+    {
+      "pair": "TaLib.Functions.Sub",
+      "bars": 1000,
+      "method": "Ooples",
+      "A": [
+        {
+          "mean_ns": 111311.11111111111,
+          "lower_ns": 107456.67818606796,
+          "upper_ns": 115165.54403615426,
+          "samples": 9,
+          "allocated_bytes": 100544
+        },
+        {
+          "mean_ns": 135820,
+          "lower_ns": 111483.44865352266,
+          "upper_ns": 160156.55134647732,
+          "samples": 10,
+          "allocated_bytes": 100504
+        }
+      ],
+      "B": [
+        {
+          "mean_ns": 45511.11111111111,
+          "lower_ns": 39413.62930047017,
+          "upper_ns": 51608.592921752046,
+          "samples": 9,
+          "allocated_bytes": 100504
+        },
+        {
+          "mean_ns": 39444.444444444445,
+          "lower_ns": 37405.10102039837,
+          "upper_ns": 41483.78786849052,
+          "samples": 9,
+          "allocated_bytes": 100504
+        }
+      ],
+      "separation": "B_below_A",
+      "host": {
+        "machine": "runnervmm7ud1",
+        "instance_nonce": "3bd68416931243b4b541b79a5376b147",
+        "run_id": "43230319639",
+        "run_attempt": "1",
+        "runner_image": "20261103.298.1",
+        "logical_cpus": 4
+      }
+    },
+    {
+      "pair": "TaLib.Functions.Mult",
+      "bars": 1000,
+      "method": "Ooples",
+      "A": [
+        {
+          "mean_ns": 248800,
+          "lower_ns": 237701.5997788428,
+          "upper_ns": 259898.4002211572,
+          "samples": 8,
+          "allocated_bytes": 100616
+        },
+        {
+          "mean_ns": 150475,
+          "lower_ns": 142913.8002421832,
+          "upper_ns": 158036.1997578168,
+          "samples": 8,
+          "allocated_bytes": 100616
+        }
+      ],
+      "B": [
+        {
+          "mean_ns": 39811.11111111111,
+          "lower_ns": 38896.683970828846,
+          "upper_ns": 40725.53825139337,
+          "samples": 9,
+          "allocated_bytes": 100504
+        },
+        {
+          "mean_ns": 43655.555555555555,
+          "lower_ns": 34820.43262203411,
+          "upper_ns": 52490.678489077,
+          "samples": 9,
+          "allocated_bytes": 100504
+        }
+      ],
+      "separation": "B_below_A",
+      "host": {
+        "machine": "runnervmm7ud1",
+        "instance_nonce": "93adbbc5665a4123bfb31bd06997a2c1",
+        "run_id": "43230319639",
+        "run_attempt": "1",
+        "runner_image": "20261103.298.1",
+        "logical_cpus": 4
+      }
+    },
+    {
+      "pair": "TaLib.Functions.Div",
+      "bars": 1000,
+      "method": "Ooples",
+      "A": [
+        {
+          "mean_ns": 236044.44444444444,
+          "lower_ns": 208312.79509188532,
+          "upper_ns": 263776.09379700356,
+          "samples": 9,
+          "allocated_bytes": 100616
+        },
+        {
+          "mean_ns": 258611.11111111112,
+          "lower_ns": 237020.38945170303,
+          "upper_ns": 280201.83277051925,
+          "samples": 9,
+          "allocated_bytes": 100616
+        }
+      ],
+      "B": [
+        {
+          "mean_ns": 43255.555555555555,
+          "lower_ns": 35644.2272280421,
+          "upper_ns": 50866.88388306901,
+          "samples": 9,
+          "allocated_bytes": 100504
+        },
+        {
+          "mean_ns": 41655.555555555555,
+          "lower_ns": 38974.60164182429,
+          "upper_ns": 44336.50946928682,
+          "samples": 9,
+          "allocated_bytes": 100504
+        }
+      ],
+      "separation": "B_below_A",
+      "host": {
+        "machine": "runnervmm7ud1",
+        "instance_nonce": "93adbbc5665a4123bfb31bd06997a2c1",
+        "run_id": "43230319639",
+        "run_attempt": "1",
+        "runner_image": "20261103.298.1",
+        "logical_cpus": 4
+      }
+    }
+  ],
+  "interpretation": "Two repeated rounds per label with identical source and binaries at1000bars. Warmup counts differ between labels. Confidence-interval separation is diagnostic evidence only, not source qualification or proof of JIT causality. No selected or pooled results are imported."
+}
