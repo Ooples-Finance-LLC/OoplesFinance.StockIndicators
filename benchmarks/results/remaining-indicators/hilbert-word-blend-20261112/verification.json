@@ -1,0 +1,73 @@
+{
+  "source": "2dc70ba934d6365beca13314c018fdf4089e3c19",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-word-blend-20261112",
+  "status": "correctness-complete",
+  "active": null,
+  "unit": {
+    "passed": 58,
+    "classes": {
+      "HilbertWordBlendTests": 3,
+      "ScalarHilbertPhaseTests": 9,
+      "CompactHilbertPhaseTests": 11,
+      "CompactPhaseAdaptiveTests": 9,
+      "HilbertRoundedKernelTests": 6,
+      "HilbertTrendlineSharedExecutionTests": 11,
+      "HilbertVariableWindowTests": 3,
+      "CertifiedHilbertProjectionTests": 6
+    },
+    "sha256": "2ef0a6da0b242144f9dd25203fd274acd41b949125f72c9225b022cbeadef44b"
+  },
+  "parity": {
+    "passed": 167,
+    "classes": {
+      "SeededPhaseComparisonTests": 8,
+      "DelayedPhaseComparisonTests": 7,
+      "SeededHilbertTrendComparisonTests": 5,
+      "DelayedHilbertTrendComparisonTests": 8,
+      "HilbertCycleComparisonTests": 9,
+      "HilbertCycleSignalComparisonTests": 11,
+      "SharedHilbertBenchmarkTests": 13,
+      "SharedSeededPhaseBenchmarkTests": 10,
+      "SharedHilbertTrendlineBenchmarkTests": 10,
+      "SharedTaHilbertNativeBenchmarkTests": 54,
+      "SharedHilbertSignalBenchmarkTests": 32
+    },
+    "sha256": "e6a975920547c8d617bd391d066dd7b65ed48169dff0a07cda6c86dd3db23893"
+  },
+  "build_origin": {
+    "run_id": "43264426131",
+    "workflow_head": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "2dc70ba934d6365beca13314c018fdf4089e3c19",
+    "artifact_id": 13964993941,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/43264426131"
+  },
+  "compiler_process_isolation": true,
+  "dependency_copy_mode": "Verified immutable CI artifacts; changed binaries installed without local compilation",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "build-and-gpu": {
+      "exit_code": 0,
+      "location": "CI build and actual local GPU"
+    },
+    "unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "parity": {
+      "exit_code": 0,
+      "location": "CI"
+    }
+  },
+  "gpu_passed": 100,
+  "source_fingerprint": "cc31c3b4d974676c0a1329f99e97e36e54b32c214caf49646b447ae2aac4b0b9",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "f2d6ad572dc8675b29ad6b666b73f7263f1d6c5b160c05bbe0aaf2a4ce963917",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "f2d6ad572dc8675b29ad6b666b73f7263f1d6c5b160c05bbe0aaf2a4ce963917",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "f2d6ad572dc8675b29ad6b666b73f7263f1d6c5b160c05bbe0aaf2a4ce963917",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "f2d6ad572dc8675b29ad6b666b73f7263f1d6c5b160c05bbe0aaf2a4ce963917"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}
