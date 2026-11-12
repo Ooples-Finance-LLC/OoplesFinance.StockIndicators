@@ -190,3 +190,4 @@ benchmarks/plans/arithmetic-warmup-policy-proposal-20261112.json text eol=lf
 benchmarks/plans/hosted-hilbert-word-blend-20261112.json text eol=lf
 benchmarks/plans/hosted-adosc-word-ema-20261112.json text eol=lf
 benchmarks/plans/hosted-identity-adl-fixed-grid-20261112.json text eol=lf
+benchmarks/plans/hosted-acceleration-word-mean-20261112.json text eol=lf

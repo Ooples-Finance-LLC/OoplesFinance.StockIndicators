@@ -473,6 +473,9 @@ SCOPES['adosc-word-ema-20261112'] = {'fixtures': {'SharedSmoothedAccumulationBen
 SCOPES['identity-adl-fixed-grid-20261112'] = {'fixtures': {'SharedRecursiveStateBenchmarks': {'TaLib.Functions.Ad': 'Ad'}}, 'implicit_fixtures': set(), 'paths': {'src/Helpers/MoneyFlowAccumulationWindow.cs', 'tests/ModelsTests/CapturedIdentityAdlGridTests.cs', 'src/Indicators/ValuesBarExecution.IdentityAdl.cs'}, 'methods': {'SharedRecursiveStateBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
 
 
+SCOPES['acceleration-word-mean-20261112'] = {'fixtures': {'SharedTaWindowNativeBenchmarks': {'TaLib.Functions.Accbands': 'TaLib.Functions.Accbands'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/AccelerationWordMeanTests.cs', 'src/Indicators/ValuesBarExecution.Acceleration.cs'}, 'methods': {'SharedTaWindowNativeBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
