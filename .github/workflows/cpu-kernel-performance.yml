@@ -663,4 +663,7 @@ jobs:
 
   arithmetic-warmup-diagnostic:
     if: github.event_name == 'workflow_dispatch' && inputs.suite == 'arithmetic-warmup-diagnostic'
+    permissions:
+      contents: read
+      actions: read
     uses: ./.github/workflows/arithmetic-warmup-diagnostic.yml
