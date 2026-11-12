@@ -32,9 +32,50 @@ internal static partial class ValuesBarExecution
         return true;
     }
 
+    internal static bool TryAccelerationMean(in JurikDyadic sum,
+        in ExactMeanAccumulator.WordMeanDivisor divisor, out double result)
+    {
+        result = 0;
+        if (divisor.Count <= 0 || !sum.TryBinaryParts(out Int128 integer, out int exponent)) return false;
+        UInt128 magnitude = integer < 0 ? (UInt128)(-(integer + 1)) + 1 : (UInt128)integer;
+        if (magnitude > ulong.MaxValue) return false;
+        ulong numerator = (ulong)magnitude;
+        int bits = 64 - BitOperations.LeadingZeroCount(numerator);
+        // Preserve the original small-coefficient path. These conservative
+        // exponent bounds also keep publication normal, including after carry.
+        if (bits <= 53 || exponent < -450 || exponent > 450 - bits) return false;
+        ulong denominator = (ulong)divisor.Count;
+        int power = bits - divisor.Bits;
+        if (numerator < (denominator << power)) power--;
+        int grid = exponent + power - 52, shift = power - 52;
+        if (shift < 0)
+        {
+            if (bits - shift > 64) return false;
+            numerator <<= -shift;
+        }
+        else
+        {
+            if (divisor.Bits + shift > 64) return false;
+            denominator <<= shift;
+        }
+        ulong quotient = divisor.Divide(numerator);
+        // floor(floor(n/d)/2^s) = floor(n/(d*2^s)). Thus the aligned
+        // product is <= numerator and both remainder subtractions are bounded.
+        if (shift > 0) quotient >>= shift;
+        ulong remainder = numerator - quotient * denominator;
+        ulong complement = denominator - remainder;
+        if (remainder > complement || remainder == complement && (quotient & 1) != 0) quotient++;
+        // The rounding grid leaves <=53 significant bits, including carry.
+        // Conversion and normal power-of-two scaling introduce no second round.
+        result = Math.ScaleB((double)quotient, grid);
+        if (integer < 0) result = -result;
+        return true;
+    }
+
     private sealed class AccelerationValueState(int period, int count) : IMultiOutputState
     {
         private readonly Row[] _window = new Row[Math.Min(period, Math.Max(1, count))];
+        private readonly ExactMeanAccumulator.WordMeanDivisor _meanDivisor = new(period);
         private JurikDyadic _upper, _middle, _lower;
         private int _seen, _position;
         private readonly record struct Row(JurikDyadic Upper, JurikDyadic Middle, JurikDyadic Lower);
@@ -82,9 +123,12 @@ internal static partial class ValuesBarExecution
             if (++_position == _window.Length) _position = 0;
             _upper.AddExact(row.Upper); _middle.AddExact(row.Middle); _lower.AddExact(row.Lower);
             if (_seen != period) return;
-            output[0] = _upper.Mean(period); output[1] = _middle.Mean(period); output[2] = _lower.Mean(period);
+            output[0] = Mean(ref _upper); output[1] = Mean(ref _middle); output[2] = Mean(ref _lower);
             output[3] = output[4] = output[5] = 1;
         }
+
+        private double Mean(ref JurikDyadic sum) =>
+            TryAccelerationMean(in sum, in _meanDivisor, out double result) ? result : sum.Mean(period);
     }
 
     private struct AccelerationKernel(AccelerationValueState state, BoundedOutput target) : IBoundedKernel<AccelerationKernel>
