@@ -1,0 +1,64 @@
+{
+  "status": "frozen",
+  "diagnostic_only": true,
+  "approval": "User approved bounded arithmetic warmup diagnostic; no source qualification or policy adoption.",
+  "original_plan": "benchmarks/plans/hosted-arithmetic-field-selection-20261112.json",
+  "original_plan_sha256": "9b4f2f2fb37183c0214569ac1f2dce1a167aba080ac8d62f1427550e8f54900c",
+  "original_input": {
+    "run_id": "43214078458",
+    "run_attempt": "1",
+    "workflow_head": "19cdd650f5f1bb7e7f9f2b846c302622b5301450",
+    "artifact_id": 13943697779,
+    "artifact_digest": "sha256:7d6c12f4f6c55cafcdcb5a9650836259cf6aad580d0673866df20891324aee22",
+    "provenance_sha256": "e3e8bcd0af5d5cdc551da2c5e95bfb282e78e3503a334ef18448c0e3f7acff20"
+  },
+  "sources": {
+    "published": "d0a68355aae11100151df7648fbb37fd787deca8",
+    "old": "d0a68355aae11100151df7648fbb37fd787deca8",
+    "successor": "1bab34336fc6f06e3ab5130963582ed2f77039a4",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "production_sha256": {
+    "old": "36289722a232b567d0fb134bbf57b6d38306fbace8902525746fd6b164f11161",
+    "successor": "e6204b13979880ba181999068d97384a675f114e0b98e90ff29efe3439c1e4a7",
+    "variants": "d8b9edcd4d84c28580dfb224db6573918edf89e7100d0aa01439e6b6bd92070c"
+  },
+  "profile": "successor",
+  "bars": [
+    1000
+  ],
+  "methods": [
+    "Ooples"
+  ],
+  "order": [
+    "A",
+    "B",
+    "B",
+    "A"
+  ],
+  "warmups": {
+    "A": 1000,
+    "B": 20000
+  },
+  "iterations": 10,
+  "quiet_samples": 12,
+  "max_cpu_percent": 15,
+  "runtime_policy_overrides": {},
+  "sdk": "10.0.403",
+  "tensor_version": "0.150.0",
+  "jobs": [
+    [
+      "TaLib.Functions.Add",
+      "TaLib.Functions.Sub"
+    ],
+    [
+      "TaLib.Functions.Mult",
+      "TaLib.Functions.Div"
+    ]
+  ],
+  "cases": 16,
+  "comparisons": 4,
+  "max_parallel": 2,
+  "published_source": "24df0f52166fc35f33e51578110d27eea85cd915",
+  "published_src_tree": "25a9387231cd4dc430b0f1f205428ab4db46f1d3"
+}

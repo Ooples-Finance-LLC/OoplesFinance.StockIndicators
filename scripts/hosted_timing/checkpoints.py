@@ -14,11 +14,11 @@ def case_key(case, implicit_pair=None):
     assert pair is not None, name
     return (pair, int(re.search(r'(?:Count|Bars): (\d+)', name)[1]), case['Method'])
 
-def combine_reports(reports, pairs, methods, implicit_pair=None):
+def combine_reports(reports, pairs, methods, implicit_pair=None, *, bars=(1000, 10000)):
     merged = dict(reports[0])
     cases = [case for report in reports for case in report['Benchmarks']]
     keys = [case_key(case, implicit_pair) for case in cases]
-    expected = {(p, n, m) for p in pairs for n in (1000, 10000) for m in methods}
+    expected = {(p, n, m) for p in pairs for n in bars for m in methods}
     assert len(keys) == len(set(keys)) == len(expected)
     assert set(keys) == expected
     assert all(c.get('Statistics') and c['Statistics']['N'] >= 7 for c in cases)
@@ -26,7 +26,13 @@ def combine_reports(reports, pairs, methods, implicit_pair=None):
     return merged
 
 
-def filters(fixture, pair, methods, *, implicit=False, variant=False, variance=False):
+def filters(fixture, pair, methods, *, implicit=False, variant=False, variance=False, bars=(1000, 10000)):
+    if bars != (1000, 10000):
+        assert bars == (1000,) and fixture == "LibraryPairBenchmarks"
+        assert not (implicit or variant or variance)
+        return [pattern for method in methods for pattern in (
+            f'*{fixture}.{method}*"{pair}"*Bars: 1000)*',
+            f'*{fixture}.{method}*Bars: 1000,*"{pair}"*')]
     if fixture == 'SharedPointwiseBenchmarks':
         assert not (implicit or variant or variance)
         # This existing fixture also declares 100,000 bars. Preserve the
@@ -44,9 +50,17 @@ def filters(fixture, pair, methods, *, implicit=False, variant=False, variance=F
 
 def run_checkpointed(*, out, index, arm, fixture, pairs, methods, runtime, env,
                     state, save, builds, assert_binaries, implicit=False, variant=False, variance=False, context=None, warmups=10,
-                    operation_timeout_seconds=3600):
+                    operation_timeout_seconds=3600, bars=(1000, 10000)):
+    if bars != (1000, 10000):
+        from .arithmetic_warmup import ArithmeticWarmupContext
+        assert isinstance(context, ArithmeticWarmupContext)
+        from .arithmetic_warmup import SHA
+        assert context['diagnostic_plan_sha256'] == SHA and fixture == 'LibraryPairBenchmarks'
+        assert set(pairs) <= {'TaLib.Functions.' + op for op in ('Add','Sub','Mult','Div')}
+        assert bars == (1000,) and pairs == context["pairs"] and methods == ["Ooples"]
+        assert warmups == context["warmup_count"]
     assert warmups in (10, 1000, 20000)
-    if warmups == 20000:
+    if warmups == 20000 and bars == (1000, 10000):
         assert fixture == 'LibraryPairBenchmarks' and pairs == ['TaLib.Candles.Harami']
         assert set(methods) in ({'Ooples'}, {'Ooples', 'Competitor'}) and len(methods) == len(set(methods))
         assert context and context.get('warmup_count') == 20000
@@ -105,7 +119,7 @@ def run_checkpointed(*, out, index, arm, fixture, pairs, methods, runtime, env,
             state.update(status='measuring', waiting_build_pids=[])
             save()
             args = ['dotnet', str(runtime / 'OoplesFinance.StockIndicators.CompetitorBenchmarks.dll'),
-                    '--filter', *filters(fixture,pair,methods,implicit=implicit,variant=variant,variance=variance),
+                    '--filter', *filters(fixture,pair,methods,implicit=implicit,variant=variant,variance=variance,bars=bars),
                     '--warmupCount', str(warmups), '--iterationCount', '10', '--exporters', 'json',
                     '--artifacts', str(folder)]
             interrupted = []
@@ -146,17 +160,17 @@ def run_checkpointed(*, out, index, arm, fixture, pairs, methods, runtime, env,
                 continue
             reports = list((folder / 'results').glob('*-report-full-compressed.json'))
             assert len(reports) == 1
-            combine_reports([json.loads(reports[0].read_bytes())], [pair], methods, pair if implicit else None)
+            combine_reports([json.loads(reports[0].read_bytes())], [pair], methods, pair if implicit else None, bars=bars)
             receipt = dict(pair=pair, report=str(reports[0]), sha256=digest(reports[0]),
                 log=str(log_path), log_sha256=digest(log_path), quiet_cpu_samples=quiet[-12:],
                 quiet_build_free_samples=12, quiet_sequence_started_utc=quiet_started,
-                build_monitor_observations=observations, cases=2 * len(methods), execution_context=context)
+                build_monitor_observations=observations, cases=len(bars) * len(methods), execution_context=context)
             temporary = receipt_path.with_suffix('.tmp')
             temporary.write_text(json.dumps(receipt, indent=2))
             temporary.replace(receipt_path)
             receipts.append(receipt)
             break
-    merged = combine_reports([json.loads(Path(r['report']).read_bytes()) for r in receipts], pairs, methods, pairs[0] if implicit else None)
+    merged = combine_reports([json.loads(Path(r['report']).read_bytes()) for r in receipts], pairs, methods, pairs[0] if implicit else None, bars=bars)
     folder = out / f'round{index}-{arm}-{fixture}'
     (folder / 'results').mkdir(parents=True, exist_ok=True)
     report = folder / 'results' / f'OoplesFinance.StockIndicators.CompetitorBenchmarks.{fixture}-report-full-compressed.json'

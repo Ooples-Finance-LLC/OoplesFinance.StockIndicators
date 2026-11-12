@@ -7,7 +7,7 @@ on:
       suite:
         description: Public builder comparisons, diagnostic kernels, or both
         type: choice
-        options: [builder, kernel, all, qualified-rollout, qualified-variants, qualified-coverage, qualified-targeted, verify-evidence, trix-diagnostic, trix-library-diagnostic, build-correctness-inputs]
+        options: [builder, kernel, all, qualified-rollout, qualified-variants, qualified-coverage, qualified-targeted, verify-evidence, trix-diagnostic, trix-library-diagnostic, build-correctness-inputs, arithmetic-warmup-diagnostic]
         default: builder
       qualification_plan:
         description: Immutable source and measurement plan for qualified-rollout
@@ -660,3 +660,7 @@ jobs:
             verified-evidence.json
             collection-recovery.json
           retention-days: 14
+
+  arithmetic-warmup-diagnostic:
+    if: github.event_name == 'workflow_dispatch' && inputs.suite == 'arithmetic-warmup-diagnostic'
+    uses: ./.github/workflows/arithmetic-warmup-diagnostic.yml

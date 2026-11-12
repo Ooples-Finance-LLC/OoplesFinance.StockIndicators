@@ -1,0 +1,113 @@
+name: Arithmetic warmup diagnostic
+on:
+  workflow_call:
+permissions:
+  contents: read
+  actions: read
+defaults:
+  run:
+    shell: pwsh
+jobs:
+  validate:
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m unittest discover -s scripts -p "test_hosted*.py"
+      - run: python -m unittest discover -s scripts -p test_candidate_correctness_inputs.py
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: '13943697779'
+          run-id: 43214078458
+          github-token: ${{ github.token }}
+          path: hosted-inputs
+          merge-multiple: true
+      - run: python scripts/run-arithmetic-warmup.py verify-inputs --out diagnostic-input-verification.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: arithmetic-warmup-input-verification
+          path: diagnostic-input-verification.json
+          if-no-files-found: error
+          retention-days: 14
+  diagnostic:
+    needs: validate
+    runs-on: windows-2025
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        shard: [0,1]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - run: python -m pip install psutil==7.2.2
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: '13943697779'
+          run-id: 43214078458
+          github-token: ${{ github.token }}
+          path: hosted-inputs
+          merge-multiple: true
+      - run: python scripts/run-arithmetic-warmup.py measure --out diagnostic-raw --shard ${{ matrix.shard }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: arithmetic-warmup-${{ matrix.shard }}
+          path: diagnostic-raw/
+          if-no-files-found: error
+          retention-days: 14
+  collect:
+    needs: diagnostic
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: '13943697779'
+          run-id: 43214078458
+          github-token: ${{ github.token }}
+          path: hosted-inputs
+          merge-multiple: true
+      - uses: actions/download-artifact@v8
+        with:
+          name: arithmetic-warmup-0
+          path: diagnostic-evidence/shard0
+      - uses: actions/download-artifact@v8
+        with:
+          name: arithmetic-warmup-1
+          path: diagnostic-evidence/shard1
+      - run: python scripts/run-arithmetic-warmup.py collect --evidence diagnostic-evidence --out diagnostic-verified.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: arithmetic-warmup-verified
+          path: diagnostic-verified.json
+          if-no-files-found: error
+          retention-days: 14
