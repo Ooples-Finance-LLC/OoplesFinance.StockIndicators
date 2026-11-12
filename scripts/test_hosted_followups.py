@@ -16,6 +16,9 @@ from hosted_timing.verify import collect
 
 def plan_for(scope):
     plan = copy.deepcopy(read(PLAN))
+    # A different synthetic consumer scope cannot inherit arithmetic approval.
+    plan.pop('arithmetic_warmup_approval',None)
+    plan['measurement_policy'].pop('fixed_invocation_pair_warmups',None)
     plan.pop('coverage_reference',None);plan.pop('coverage_harness',None);plan.pop('reuse_inputs',None)
     plan['sources']['published'] = plan['sources']['old']
     plan['qualify_variants'] = plan['trix_preflight'] = False

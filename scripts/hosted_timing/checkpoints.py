@@ -47,9 +47,13 @@ def run_checkpointed(*, out, index, arm, fixture, pairs, methods, runtime, env,
                     operation_timeout_seconds=3600):
     assert warmups in (10, 1000, 20000)
     if warmups == 20000:
-        assert fixture == 'LibraryPairBenchmarks' and pairs == ['TaLib.Candles.Harami']
-        assert set(methods) in ({'Ooples'}, {'Ooples', 'Competitor'}) and len(methods) == len(set(methods))
-        assert context and context.get('warmup_count') == 20000
+        assert fixture == 'LibraryPairBenchmarks'
+        if pairs == ['TaLib.Candles.Harami']:
+            assert set(methods) in ({'Ooples'}, {'Ooples', 'Competitor'}) and len(methods) == len(set(methods))
+            assert context and context.get('warmup_count') == 20000
+        else:
+            from .arithmetic_warmup_policy import permits_context
+            assert permits_context(pairs,methods,context), 'Unapproved longer arithmetic warmups'
     assert operation_timeout_seconds in (3600,10800)
     assert operation_timeout_seconds == 3600 or context and context.get('phase') == 'coverage'
     from .cleanup import capture_children, stop_owned_benchmark, archive_with_retry

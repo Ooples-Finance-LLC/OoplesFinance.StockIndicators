@@ -150,9 +150,12 @@ def warmups_for(plan, fixture, task=None):
     assert count in (10, 1000)
     overrides = plan['measurement_policy'].get('fixed_invocation_pair_warmups')
     if overrides is not None:
-        assert overrides == {'TaLib.Candles.Harami': 20000}
-        assert count == 1000 and plan['qualification_warmup_approval']['approved'] is True
-        assert plan['qualification_warmup_approval']['proposal'] == 'harami-qualified-warmup-policy-proposal-20261107.json'
+        if overrides == {'TaLib.Candles.Harami': 20000}:
+            assert count == 1000 and plan['qualification_warmup_approval']['approved'] is True
+            assert plan['qualification_warmup_approval']['proposal'] == 'harami-qualified-warmup-policy-proposal-20261107.json'
+        else:
+            from .arithmetic_warmup_policy import validate
+            validate(plan)
         if fixture == 'LibraryPairBenchmarks':
             assert task and task['fixture'] == fixture and task['operations']
             assert all(operation['raw'] == operation['pair'] for operation in task['operations'])
@@ -167,7 +170,13 @@ def warmups_for(plan, fixture, task=None):
 
 
 def warmup_context(plan, fixture, task=None):
-    return {'warmup_count': warmups_for(plan, fixture, task)} if 'fixed_invocation_warmups' in plan['measurement_policy'] else {}
+    if 'fixed_invocation_warmups' not in plan['measurement_policy']: return {}
+    count=warmups_for(plan, fixture, task)
+    context={'warmup_count':count}
+    if fixture == 'LibraryPairBenchmarks' and count == 20000 and plan.get('arithmetic_warmup_approval'):
+        from .arithmetic_warmup_policy import SHA
+        context['arithmetic_warmup_policy_sha256']=SHA
+    return context
 
 
 def verify_inputs(folder):

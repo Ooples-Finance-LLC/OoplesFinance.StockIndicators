@@ -19,6 +19,9 @@ class CoverageEvidenceTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         self.plan = read(PLAN)
+        # These synthetic coverage fixtures use the default batch policy.
+        self.plan.pop('arithmetic_warmup_approval', None)
+        self.plan['measurement_policy'].pop('fixed_invocation_pair_warmups', None)
         # This legacy synthetic runtime deliberately has no dependency assets.
         self.plan.pop('runtime_dependency_alignment', None)
         self.plan.pop('coverage_shards', None)

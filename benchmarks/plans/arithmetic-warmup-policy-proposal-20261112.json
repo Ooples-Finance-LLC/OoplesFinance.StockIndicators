@@ -1,0 +1,38 @@
+{
+  "approved": true,
+  "authorization": "User selected Approve bounded policy qualification after verified same-binary diagnostic; dispatch after Beta closure.",
+  "diagnostic_run": "43230319639",
+  "diagnostic_evidence": "ef0f2783c08d1aa4ca7e71ceedc1b8f8230ce45b",
+  "pairs": [
+    "TaLib.Functions.Add",
+    "TaLib.Functions.Sub",
+    "TaLib.Functions.Mult",
+    "TaLib.Functions.Div"
+  ],
+  "bars": [
+    1000,
+    10000
+  ],
+  "fixture": "LibraryPairBenchmarks",
+  "methods": [
+    "Ooples",
+    "Competitor"
+  ],
+  "warmups": 20000,
+  "iterations": 10,
+  "sources": {
+    "published": "d0a68355aae11100151df7648fbb37fd787deca8",
+    "old": "d0a68355aae11100151df7648fbb37fd787deca8",
+    "successor": "1bab34336fc6f06e3ab5130963582ed2f77039a4",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.150.0"
+  },
+  "runtime_policy_overrides": {},
+  "cases": 120,
+  "decisions": 24,
+  "max_parallel": 2,
+  "report_refresh_only": true,
+  "source_integration": false
+}
