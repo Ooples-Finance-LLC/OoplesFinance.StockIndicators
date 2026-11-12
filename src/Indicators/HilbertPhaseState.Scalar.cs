@@ -47,6 +47,7 @@ internal sealed partial class HilbertPhaseState
 
     private static bool TryScalarBlend(double value, double old, out double rounded)
     {
+        if (TryWordBlend(value, old, out rounded)) return true;
         if (HilbertRoundedKernel.TryProductSum(value, .2, old, .8, out rounded)) return true;
         return Blend(JurikDyadic.FromDouble(value), JurikDyadic.FromDouble(old)).TryDouble(out rounded);
     }
