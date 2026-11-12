@@ -57,7 +57,7 @@ public sealed class AccelerationWordMeanTests
         foreach ((Int128 integer, int exponent) in new (Int128, int)[]
         {
             (0, 0), (1, 0), (((Int128)1 << 53) - 1, 0),
-            ((Int128)1 << 64, 0), (Int128.MinValue, 0),
+            ((Int128)1 << 64, 0),
             (((Int128)1 << 53) + 1, -451), (((Int128)1 << 53) + 1, 397)
         })
         {
@@ -67,6 +67,11 @@ public sealed class AccelerationWordMeanTests
         }
         var wide = JurikDyadic.FromUnits((BigInteger.One << 3000) + 1);
         Assert.False(ValuesBarExecution.TryAccelerationMean(in wide, in divisor, out _));
+        // This synthetic factory state is outside the rolling sum's signed
+        // magnitude bound. Preserve its existing checked-arithmetic exception.
+        var minimum = JurikDyadic.FromBinaryProduct(Int128.MinValue, 0);
+        Assert.False(ValuesBarExecution.TryAccelerationMean(in minimum, in divisor, out _));
+        Assert.Throws<OverflowException>(() => minimum.Mean(20));
         var normal = JurikDyadic.FromBinaryProduct(((Int128)1 << 54) + 1, 0);
         Assert.False(ValuesBarExecution.TryAccelerationMean(in normal, default, out _));
     }
