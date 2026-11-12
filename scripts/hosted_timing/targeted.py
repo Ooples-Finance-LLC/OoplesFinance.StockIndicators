@@ -457,6 +457,9 @@ SCOPES['hilbert-tsi-taad-composition-20261111'] = {'fixtures': {'SharedHilbertBe
 SCOPES['beta-fixed-grid-20261112'] = {'fixtures': {'SharedPairInputBenchmarks': {'TaLib.Functions.Beta': 'Beta'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/WindowReturnBeta.cs', 'src/Indicators/ValuesBarExecution.ReturnBeta.cs', 'src/Indicators/ValuesBarExecution.cs', 'tests/ModelsTests/FixedGridReturnBetaExecutionTests.cs'}, 'methods': {'SharedPairInputBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (360, 72)}
 
 
+SCOPES['arithmetic-field-selection-20261112'] = {'fixtures': {'SharedPairInputBenchmarks': {'TaLib.Functions.Add': 'Add', 'TaLib.Functions.Sub': 'Sub', 'TaLib.Functions.Mult': 'Mult', 'TaLib.Functions.Div': 'Div'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.Arithmetic.cs'}, 'methods': {'SharedPairInputBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (120, 24), 'shards': 4, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
