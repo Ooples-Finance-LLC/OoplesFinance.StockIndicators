@@ -13825,7 +13825,7 @@
     "src/Indicators/ValuesBarExecution.Acceleration.cs": "06bdec4bc55efdc7d2fdc09e4f75c087984a669a8a83711c6ecb905c0325fe91",
     "src/Indicators/ValuesBarExecution.AccumulationDistribution.cs": "622ef92a5a639efc47eb4462a2280761661c7b7ca94b75f1e8965444252239d5",
     "src/Indicators/ValuesBarExecution.Alligator.cs": "9ccd8e7c35cd1b4569585e388a959aba7d3de8c9e3e542cad3ddf7e601e46bd0",
-    "src/Indicators/ValuesBarExecution.Arithmetic.cs": "4e5cb88a6ab321c30429f28ed1d0b67f4d460633a25104e8d499346680ffa3c2",
+    "src/Indicators/ValuesBarExecution.Arithmetic.cs": "4b0030aa9f75064e4bc0931f76d4a3bde2e6e6ba5647a83c2e5bb961840f063f",
     "src/Indicators/ValuesBarExecution.AverageCompositions.cs": "502eb3739d52246c938099b01a56537fb9770e2c1b9eb4f6184ad9bbbb42381d",
     "src/Indicators/ValuesBarExecution.AverageOscillators.cs": "cad7157b195f9e887674ed819f7ffaf5f61cedaf288325c5190c846f46c360be",
     "src/Indicators/ValuesBarExecution.BalanceOfPower.cs": "b26035ad53e2c23c821da14f15f99c810ae6ca6593db7464e1a8f4f21fc7df44",

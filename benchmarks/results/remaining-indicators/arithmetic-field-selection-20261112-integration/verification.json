@@ -1,0 +1,21 @@
+{
+  "source_integration_commit": "c0aa16ca2d61a10d6abc8bd26a12f2759222d441",
+  "qualified_source": "1bab34336fc6f06e3ab5130963582ed2f77039a4",
+  "compiled_source": "c3b78f8e1d232d5821151e1e52df9f93097372e1",
+  "source_fingerprint": "19167269e0951d16e9fe90fe848b8ef9dbfc80db4419a1fbb9bc25d754b4b144",
+  "unit": 71,
+  "comparator": 24,
+  "actual_gpu": 100,
+  "production_sha256": "59ac5153a54b0af3e8156e1ed187b7bcd1968d8b4e51bf01b249f2f0c0e4cdae",
+  "run_id": "43214078458",
+  "cases": 120,
+  "decisions": 24,
+  "verdicts": {
+    "faster": 15,
+    "inconclusive": 9
+  },
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.Arithmetic.cs"
+  ],
+  "verified_utc": "2026-11-12T13:00:13.728070+00:00"
+}
