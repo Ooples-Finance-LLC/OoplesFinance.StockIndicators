@@ -470,6 +470,9 @@ SCOPES['hilbert-word-blend-20261112'] = {'fixtures': {'SharedHilbertBenchmarks':
 SCOPES['adosc-word-ema-20261112'] = {'fixtures': {'SharedSmoothedAccumulationBenchmarks': {'Skender.GetChaikinOsc': 'Skender.GetChaikinOsc', 'TaLib.Functions.AdOsc': 'TaLib.Functions.AdOsc'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/SmoothedAccumulationOscillator.cs'}, 'methods': {'SharedSmoothedAccumulationBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (60, 12), 'shards': 2, 'baseline_phase': 'targeted', 'baseline_totals': (120, 24)}
 
 
+SCOPES['identity-adl-fixed-grid-20261112'] = {'fixtures': {'SharedRecursiveStateBenchmarks': {'TaLib.Functions.Ad': 'Ad'}}, 'implicit_fixtures': set(), 'paths': {'src/Helpers/MoneyFlowAccumulationWindow.cs', 'tests/ModelsTests/CapturedIdentityAdlGridTests.cs', 'src/Indicators/ValuesBarExecution.IdentityAdl.cs'}, 'methods': {'SharedRecursiveStateBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (60, 12)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
