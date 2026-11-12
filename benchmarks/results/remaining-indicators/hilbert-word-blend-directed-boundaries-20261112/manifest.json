@@ -1,0 +1,13 @@
+{
+  "compiled_source": "2dc70ba934d6365beca13314c018fdf4089e3c19",
+  "qualified_source": "9e6bf5fcbb35b4ea7349976fdf31adbf63d609be",
+  "production_sha256": "f2d6ad572dc8675b29ad6b666b73f7263f1d6c5b160c05bbe0aaf2a4ce963917",
+  "directed_cases_passed": 42,
+  "files": {
+    "generate-hilbert-word-boundaries-20261112.py": "46324a8c663eba27b1489927abcbadf0a1b4e13d62ac0513a5a61ff966dc5bec",
+    "check-hilbert-word-boundaries-20261112.ps1": "842bb89fa7a6b805fbc12f604414fef7b76c0aa9c272203fbd91f63517233d6d",
+    "hilbert-word-boundary-cases-20261112.json": "7ee8f3870f8f3c6725b9eed8a501db932428519e64cc12b1a623fdcfc445c749",
+    "hilbert-word-boundary-result-20261112.json": "bf90bf7e5ea5dbc4332fbb2eb059ca9abd73f27d387a4142a762e9076ad20217"
+  },
+  "source_imported": false
+}
