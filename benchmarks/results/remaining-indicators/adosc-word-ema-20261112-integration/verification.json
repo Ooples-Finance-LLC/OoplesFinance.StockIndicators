@@ -1,0 +1,21 @@
+{
+  "source_integration_commit": "ecd4b2c2876a4df0d6020d006a0c5ad9416bc7ca",
+  "qualified_source": "8cebb7e579e50f8689f42f4a99beb7022fa2792b",
+  "compiled_source": "bc06bcfb460e65cdb2685cdc68cf5f43762f6aa5",
+  "source_fingerprint": "b1674d0309e10c81443a3e936a18101388bdfaf0957e71397451a266074ef7f3",
+  "unit": 25,
+  "comparator": 20,
+  "actual_gpu": 100,
+  "production_sha256": "c9ba537e90b40e0897d7e2a6d5f74ba011fc5e8274a6aabf1a3eafa10fcb2df4",
+  "run_id": "43296691464",
+  "cases": 60,
+  "decisions": 12,
+  "verdicts": {
+    "inconclusive": 4,
+    "faster": 8
+  },
+  "integrated_paths": [
+    "src/Indicators/SmoothedAccumulationOscillator.cs"
+  ],
+  "verified_utc": "2026-11-12T21:08:28.971317+00:00"
+}
