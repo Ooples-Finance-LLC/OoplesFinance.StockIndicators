@@ -30,6 +30,14 @@ internal static partial class ValuesBarExecution
                 FillFixedReturnBeta(market, evaluation, indicator.Period, xGrid.Scale, yGrid.Scale, cancellation);
             else
             {
+                // Certification may have replaced a prefix with rounded returns.
+                // Restore all prices before the unchanged exact fallback reads them.
+                for (int i = 0; i < source.Length; i++)
+                {
+                    cancellation.ThrowIfCancellationRequested();
+                    market[i] = PairStatisticsWindow.Select(source[i], indicator.Market);
+                    evaluation[i] = PairStatisticsWindow.Select(source[i], indicator.Evaluation);
+                }
                 var window = new ReturnBetaWindow(indicator.Period, ReturnBetaSelection.Standard);
                 for (int i = 0; i < market.Length; i++)
                 {
@@ -69,13 +77,17 @@ internal static partial class ValuesBarExecution
     {
         xGrid = yGrid = default;
         if (market.Length <= period) return false;
+        double previousMarket = market[0], previousEvaluation = evaluation[0];
         for (int i = 1; i < market.Length; i++)
         {
             cancellation.ThrowIfCancellationRequested();
-            var x = ReturnBetaWindow.RoundedReturnForBatch(market[i], market[i - 1]);
-            var y = ReturnBetaWindow.RoundedReturnForBatch(evaluation[i], evaluation[i - 1]);
+            double marketPrice = market[i], evaluationPrice = evaluation[i];
+            var x = ReturnBetaWindow.RoundedReturnForBatch(marketPrice, previousMarket);
+            var y = ReturnBetaWindow.RoundedReturnForBatch(evaluationPrice, previousEvaluation);
+            previousMarket = marketPrice; previousEvaluation = evaluationPrice;
             if (x.UpperShift != 0 || y.UpperShift != 0) return false;
             xGrid.Include(x.Mantissa); yGrid.Include(y.Mantissa);
+            market[i] = x.Mantissa; evaluation[i] = y.Mantissa;
         }
         if (!xGrid.HasValues || !yGrid.HasValues || xGrid.Width > 63 || yGrid.Width > 63) return false;
         ulong countSquared = (ulong)period * (ulong)period;
@@ -99,17 +111,12 @@ internal static partial class ValuesBarExecution
         var history = new (long X, long Y)[period];
         Int128 sx = 0, sy = 0, sxx = 0, sxy = 0;
         int cursor = 0;
-        double previousMarket = market[0], previousEvaluation = evaluation[0];
         market[0] = evaluation[0] = 0;
         for (int i = 1; i < market.Length; i++)
         {
             cancellation.ThrowIfCancellationRequested();
-            double marketPrice = market[i], evaluationPrice = evaluation[i];
-            var xReturn = ReturnBetaWindow.RoundedReturnForBatch(marketPrice, previousMarket);
-            var yReturn = ReturnBetaWindow.RoundedReturnForBatch(evaluationPrice, previousEvaluation);
-            previousMarket = marketPrice; previousEvaluation = evaluationPrice;
-            long x = ReturnBetaCoefficient(xReturn.Mantissa, xScale);
-            long y = ReturnBetaCoefficient(yReturn.Mantissa, yScale);
+            long x = ReturnBetaCoefficient(market[i], xScale);
+            long y = ReturnBetaCoefficient(evaluation[i], yScale);
             if (i > period)
             {
                 var old = history[cursor];

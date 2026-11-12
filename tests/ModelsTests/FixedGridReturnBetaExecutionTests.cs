@@ -50,6 +50,22 @@ public sealed class FixedGridReturnBetaExecutionTests
         await Check(bars, period, CandlePriceField.Close, CandlePriceField.Open);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task LateRejectedGridRestoresOriginalPricesForFallback(bool finiteWideGrid)
+    {
+        double[] tail = finiteWideGrid
+            ? [Math.ScaleB(1, -100), 1, 2, 4]
+            : [double.Epsilon, double.MaxValue, 1, 2, 4];
+        double[] prices = Enumerable.Range(0, 64).Select(i => Math.ScaleB(1, i % 4))
+            .Concat(tail).ToArray();
+        double[] evaluation = [3, 6, 2, 8, 4];
+        var bars = prices.Select((price, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i),
+            evaluation[i % evaluation.Length], Math.Max(price, 8), Math.Min(price, 1), price, 1)).ToArray();
+        await Check(bars, 3, CandlePriceField.Close, CandlePriceField.Open);
+    }
+
     [Fact]
     public async Task EmptyAndUnderfilledWindowsPreserveStartupWithoutPeriodSizedStorage()
     {
