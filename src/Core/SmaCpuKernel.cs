@@ -499,6 +499,16 @@ internal static class SmaCpuKernel
             && _lowest - 1075 + BitOperations.TrailingZeroCount(_significands) >= -512
             && _highest - _lowest + 52 - BitOperations.TrailingZeroCount(_significands)
                 + BitOperations.Log2((uint)length) + 1 <= 52);
+
+        // Same conservative prefix certificate as the identity A/D pair writer:
+        // all signed prefixes fit 103 grid bits and stay in its normal band.
+        internal readonly bool CertifiesCompensatedPrefix(int length)
+        {
+            if (length <= 0 || _significands == 0 || _lowest <= 0 || _highest >= 2047) return false;
+            int countBits = BitOperations.Log2((uint)length) + 1;
+            return _highest - _lowest + 53 + countBits <= 103
+                && _lowest - 1075 >= -450 && _highest - 1022 + countBits <= 450;
+        }
     }
 
     // Single-output finite SMA can speculate cheap arithmetic while owning its

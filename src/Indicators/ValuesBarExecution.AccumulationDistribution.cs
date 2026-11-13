@@ -49,6 +49,13 @@ internal static partial class ValuesBarExecution
                 output[2][i] = total == 0 ? 0 : total;
             }
         }
+        else if (source.Length >= 8192 && finiteFlows && summary.CertifiesCompensatedPrefix(source.Length))
+        {
+            // Preserve the published flow column. The existing pair writer reads
+            // each captured flow once, then overwrites its two destinations.
+            output[1].AsSpan().CopyTo(output[2]);
+            FillIdentityAdlPair([output[2], output[2]], cancellation);
+        }
         else
         {
             var total = default(CompactMacdValue);
