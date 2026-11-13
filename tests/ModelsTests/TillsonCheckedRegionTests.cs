@@ -34,7 +34,8 @@ public sealed class TillsonCheckedRegionTests
         }
         var key = ConstantKey(20, .7, 0);
         Assert.Equal(key, ConstantKey(20, .7, 0));
-        Assert.NotEqual(key, ConstantKey(2, .7, 0));
+        // Both configurations start publishing at114, but their future means differ.
+        Assert.NotEqual(key, ConstantKey(2, .7, 108));
         Assert.NotEqual(key, ConstantKey(20, .5, 0));
         Assert.NotEqual(key, ConstantKey(20, .7, 5000));
         foreach (var seed in new[] { TillsonSeed.FirstPrice, TillsonSeed.FollowingPrefix })
