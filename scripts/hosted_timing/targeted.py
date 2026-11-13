@@ -482,6 +482,9 @@ SCOPES['identity-adl-size-guard-20261112'] = {'fixtures': {'SharedRecursiveState
 SCOPES['hyperbolic-fanout-threshold-20261112'] = {'fixtures': {'SharedPointwiseBenchmarks': {'TaLib.Functions.Sinh': 'Sinh', 'TaLib.Functions.Cosh': 'Cosh', 'TaLib.Functions.Tanh': 'Tanh'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/PointwiseParallelLimitTests.cs', 'src/Indicators/ValuesBarExecution.Pointwise.cs'}, 'methods': {'SharedPointwiseBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['qema-difference-combination-20261113'] = {'fixtures': {'SharedNativeEmaBenchmarks': {'QuanTAlib.Qema': 'QuanTAlib.Qema'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/MassNormalizedEma.cs', 'tests/ModelsTests/MassNormalizedStageExecutionTests.cs'}, 'methods': {'SharedNativeEmaBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
