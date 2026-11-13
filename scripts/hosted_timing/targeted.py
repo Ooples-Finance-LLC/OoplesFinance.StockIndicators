@@ -479,6 +479,9 @@ SCOPES['acceleration-word-mean-20261112'] = {'fixtures': {'SharedTaWindowNativeB
 SCOPES['identity-adl-size-guard-20261112'] = {'fixtures': {'SharedRecursiveStateBenchmarks': {'TaLib.Functions.Ad': 'Ad'}}, 'implicit_fixtures': set(), 'paths': {'src/Helpers/MoneyFlowAccumulationWindow.cs', 'tests/ModelsTests/CapturedIdentityAdlGridTests.cs', 'src/Indicators/ValuesBarExecution.IdentityAdl.cs'}, 'methods': {'SharedRecursiveStateBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['hyperbolic-fanout-threshold-20261112'] = {'fixtures': {'SharedPointwiseBenchmarks': {'TaLib.Functions.Sinh': 'Sinh', 'TaLib.Functions.Cosh': 'Cosh', 'TaLib.Functions.Tanh': 'Tanh'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/PointwiseParallelLimitTests.cs', 'src/Indicators/ValuesBarExecution.Pointwise.cs'}, 'methods': {'SharedPointwiseBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (90, 18), 'shards': 3, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
