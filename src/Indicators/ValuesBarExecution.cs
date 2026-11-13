@@ -158,6 +158,9 @@ internal static partial class ValuesBarExecution
                 latest = FillIdentityAdl(source, nodes[0], cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is WindowReturnBeta returnBeta)
                 latest = FillReturnBeta(source, nodes[0], returnBeta, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is TillsonAverage tillson
+                && TryFillTillsonRegions(source, nodes[0], tillson, cancellation, owned, out var tillsonLatest))
+                latest = tillsonLatest;
             else if (nodes.Count == 1 && IsBoundedWindowIndicator(nodes[0].Indicator))
                 latest = FillBoundedWindow(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (boundedBatch)
