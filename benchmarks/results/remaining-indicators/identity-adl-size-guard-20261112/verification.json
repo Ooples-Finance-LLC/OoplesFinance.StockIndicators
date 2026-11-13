@@ -1,0 +1,65 @@
+{
+  "source": "83239529036a52ed7ead92eb9b1095757260a38f",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-identity-adl-size-guard-20261112",
+  "status": "correctness-complete",
+  "active": null,
+  "unit": {
+    "passed": 83,
+    "classes": {
+      "CompactMoneyFlowPublicationTests": 6,
+      "SharedRecursiveStateTests": 8,
+      "SharedGeneratedAccumulationTests": 26,
+      "CompactSmoothedAccumulationTests": 15,
+      "CompactAccumulationDistributionExecutionTests": 10,
+      "IdentityAdlColumnExecutionTests": 3,
+      "CompactIdentityAdlPrefixTests": 3,
+      "CapturedIdentityAdlGridTests": 12
+    },
+    "sha256": "7daef2e49d0b6b080067690e5e4ca9595b153da85837307cfd92811c04c5ccbb"
+  },
+  "parity": {
+    "passed": 37,
+    "classes": {
+      "AccumulationDistributionComparisonTests": 17,
+      "SmoothedAccumulationComparisonTests": 8,
+      "SharedSmoothedAccumulationFixtureTests": 12
+    },
+    "sha256": "38cea819ae579d998c0ea0e1f08b3b0f672a78c55a47f909d401351d248dec51"
+  },
+  "build_origin": {
+    "run_id": "43342065061",
+    "workflow_head": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "83239529036a52ed7ead92eb9b1095757260a38f",
+    "artifact_id": 13999649089,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/43342065061"
+  },
+  "compiler_process_isolation": true,
+  "dependency_copy_mode": "Verified immutable CI artifacts; changed binaries installed without local compilation",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "build-and-gpu": {
+      "exit_code": 0,
+      "location": "CI build and actual local GPU"
+    },
+    "unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "parity": {
+      "exit_code": 0,
+      "location": "CI"
+    }
+  },
+  "gpu_passed": 100,
+  "source_fingerprint": "0824276eac557862d3c454bc0b4c68b77aae489852fbb305db9394fd7ce58a05",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "959bcb4a0e258d32001b0bb63fbac30b0aeba07b7651940962b79b02d14f5f13",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "959bcb4a0e258d32001b0bb63fbac30b0aeba07b7651940962b79b02d14f5f13",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "959bcb4a0e258d32001b0bb63fbac30b0aeba07b7651940962b79b02d14f5f13",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "959bcb4a0e258d32001b0bb63fbac30b0aeba07b7651940962b79b02d14f5f13"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}
