@@ -10,6 +10,8 @@ public sealed class CompensatedAverageBenchmarkTests
     [InlineData("QuanTAlib.Dema", 10000)]
     [InlineData("QuanTAlib.Tema", 1000)]
     [InlineData("QuanTAlib.Tema", 10000)]
+    [InlineData("QuanTAlib.Qema", 1000)]
+    [InlineData("QuanTAlib.Qema", 10000)]
     public void LongHistoriesPreserveIndependentReferences(string operation, int count)
     {
         var benchmark = new SharedNativeEmaBenchmarks { Operation = operation, Count = count };
