@@ -28,14 +28,17 @@ internal static partial class ValuesBarExecution
         {
             // Freeze each caller bar once before workers replay overlapping
             // regions. Raw-input errors still precede every state/output error.
-            var captured = GC.AllocateUninitializedArray<Bar>(source.Length);
-            for (int i = 0; i < source.Length; i++)
+            cancellation.ThrowIfCancellationRequested();
+            int count = source.Length;
+            // Full history already owns this fixed storage. LatestOnly needs
+            // private capture storage, but neither mode rereads caller bars.
+            var captured = owned ?? new OwnedBarBuffer(count);
+            for (int i = 0; i < count; i++)
             {
                 cancellation.ThrowIfCancellationRequested();
                 latest = source[i];
                 if (!AllFieldsFinite(in latest)) IndicatorInputDomain.Finite.Validate(in latest);
                 captured[i] = latest;
-                if (owned is not null) owned[i] = latest;
             }
             cancellation.ThrowIfCancellationRequested();
             var regions = new TillsonRegion[chunks];
@@ -48,8 +51,8 @@ internal static partial class ValuesBarExecution
                 {
                     var state = CreateTillsonRegionState(owner);
                     region.State = state;
-                    int start = (int)((long)captured.Length * chunk / chunks);
-                    int end = (int)((long)captured.Length * (chunk + 1) / chunks);
+                    int start = (int)((long)count * chunk / chunks);
+                    int end = (int)((long)count * (chunk + 1) / chunks);
                     Span<double> scratch = stackalloc double[2];
                     for (int i = Math.Max(0, start - replay); i < start; i++)
                     {
@@ -91,8 +94,8 @@ internal static partial class ValuesBarExecution
                 // Speculative errors and mismatches are not published. Repair
                 // from the actual state with the unchanged original update.
                 actual ??= CreateTillsonRegionState(owner);
-                int start = (int)((long)captured.Length * chunk / chunks);
-                int end = (int)((long)captured.Length * (chunk + 1) / chunks);
+                int start = (int)((long)count * chunk / chunks);
+                int end = (int)((long)count * (chunk + 1) / chunks);
                 for (int i = start; i < end; i++)
                 {
                     cancellation.ThrowIfCancellationRequested();

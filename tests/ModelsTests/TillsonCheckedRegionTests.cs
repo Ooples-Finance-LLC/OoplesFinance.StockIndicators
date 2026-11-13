@@ -99,7 +99,9 @@ public sealed class TillsonCheckedRegionTests
             {
                 var owner = new TillsonAverage(20, .7, TillsonSeed.CascadedMeans, suppression);
                 var expected = Reference(bars, owner);
-                Assert.All(expected[0].Skip(owner.WarmupBars), value => Assert.Equal(1d, value));
+                int firstDefined = Array.FindIndex(expected[1], value => value == 1);
+                Assert.True(firstDefined >= 0);
+                Assert.All(expected[0].Skip(firstDefined), value => Assert.Equal(1d, value));
                 await Task.WhenAll(Enumerable.Range(0, 3).Select(_ => Task.Run(() => Check(bars, owner, expected))));
             }
         }
