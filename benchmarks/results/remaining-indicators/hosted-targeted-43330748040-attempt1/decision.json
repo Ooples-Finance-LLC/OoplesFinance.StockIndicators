@@ -455,7 +455,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-43330748040-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "4e51aa310fd998fafc269716cb43a626ce9edbcc",
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.Acceleration.cs",
+    "tests/ModelsTests/AccelerationWordMeanTests.cs"
+  ],
+  "report_sha256": "6d1bbd96655a827d1760b71454316a4537825d10d2ef4fd962f058aad3a23f18",
+  "report_archive": "benchmarks/results/remaining-indicators/acceleration-word-mean-20261112-report-integration"
 }
