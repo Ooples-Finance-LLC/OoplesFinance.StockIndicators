@@ -13856,7 +13856,7 @@
     "src/Indicators/ValuesBarExecution.GeneratedStates.cs": "666ebbaee51f744b995d479deafbacc272bdbc32a68ecb8e72c5b1b8354839d3",
     "src/Indicators/ValuesBarExecution.GeometricMeans.cs": "9cb3599f6996a988041c8dece678550a50d3ba6da94ec605568216ac39b4a043",
     "src/Indicators/ValuesBarExecution.Ichimoku.cs": "459397c5a7db8d4e7705eee86fb78d66bcfbc55b279a915f5acd7870fcff0fd7",
-    "src/Indicators/ValuesBarExecution.IdentityAdl.cs": "91ccd7984717efdab2e42b95eda850123c8a8f3bcfec6611287bbefc3eff5218",
+    "src/Indicators/ValuesBarExecution.IdentityAdl.cs": "3236b4f484de365eadc1745fd5e0974cec49042a294b55b9c750690cc0c10956",
     "src/Indicators/ValuesBarExecution.ImpulsePair.cs": "22eb567c61c55733702c849068aaa24497b122f1aeda3865e9b9f21442e3a611",
     "src/Indicators/ValuesBarExecution.Jurik.cs": "bf315e1de57c553205129acd017681f4f0b097a50cb030fa63f2ac5b1f43dbe3",
     "src/Indicators/ValuesBarExecution.KalmanSmoother.cs": "707fb7a0d4670aa1b13a345bd40a2d41df87e04e97257e250a147cfa7bb42a6d",

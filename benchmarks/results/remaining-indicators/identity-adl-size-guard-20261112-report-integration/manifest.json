@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "6d1bbd96655a827d1760b71454316a4537825d10d2ef4fd962f058aad3a23f18",
+    "archive": "benchmarks/results/remaining-indicators/identity-adl-size-guard-20261112-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "cb4b87d5557ec1f16eceb4f52e07929030214e0c8ade319b9699b24fe7ba923e",
+    "archive": "benchmarks/results/remaining-indicators/identity-adl-size-guard-20261112-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "205d91e6c05e37e8e779ec2ebf79dbc6c3b5b2e6d2b7b468641b7f8eb0a1e9bc",
+    "archive": "benchmarks/results/remaining-indicators/identity-adl-size-guard-20261112-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "e8176bdef5ec2b59ed1be9f1ecde0fa9c9b95499c22834e8b1be2c0d351cff58",
+    "archive": "benchmarks/results/remaining-indicators/identity-adl-size-guard-20261112-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "9c4ca507969daf47d0d6aa9c1f93eebe3a86d86148819bd97b0ec333da131ad2",
+    "archive": "benchmarks/results/remaining-indicators/identity-adl-size-guard-20261112-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "0a4f7f104470897ba6c3a12cb4698961b1b840bb11ec4c9d02623b27de6aeaad",
+    "archive": "benchmarks/results/remaining-indicators/identity-adl-size-guard-20261112-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "0b0a7e4362ef5235e5d657b853f7f6ae4e73e8d4e1ed5702f4e5476c470121af",
+    "archive": "benchmarks/results/remaining-indicators/identity-adl-size-guard-20261112-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "4eb5ccf06da43948d667026c02891661e7da93e224f7f7c222f60e8d08a9a78b",
+    "archive": "benchmarks/results/remaining-indicators/identity-adl-size-guard-20261112-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "57265fe3d6ecd995fdeb4718c39349aebeeca79d8f5cd8e61dd9aece5c76ad46",
+    "archive": "benchmarks/results/remaining-indicators/identity-adl-size-guard-20261112-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "117cd71d14ce4c24f637b331d3723103e3344805e49871841765262708ac169b",
+    "archive": "benchmarks/results/remaining-indicators/identity-adl-size-guard-20261112-report-integration/updated-pair-details.png.gz"
+  }
+}
