@@ -1,0 +1,73 @@
+{
+  "dependency": "AiDotNet.Tensors 0.150.0",
+  "package_repository_commit": "c76e17f4bd9eecd5704f372c1cf3c7290e2452ce",
+  "production_baseline": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+  "scope": "Targeted capability map, not an exhaustive tensor repository audit",
+  "capabilities": [
+    {
+      "api": "CpuParallelSettings.LightweightParallel / ParallelForChunks / ParallelForOrSerial",
+      "available": true,
+      "use": "Existing persistent pool for independent regions",
+      "stock_usage": "Already used by pointwise, SMA, bounded-window, MACD, envelope and other captured CPU paths",
+      "decision": "Reuse existing dispatcher; no new thread pool or blanket replacement",
+      "risks": ["grain size", "nested parallelism", "configured worker limits", "exception and cancellation ordering", "shared-memory contention"]
+    },
+    {
+      "api": "DoubleOperations.Floor / Ceiling",
+      "available": true,
+      "precision": "binary64; existing AVX/SSE directed rounding and scalar tails",
+      "probe": "Zero mismatches against Math on 10000 fixture-like values and 11 boundaries",
+      "decision": "First bounded integration draft; source correctness, SIMD reachability and end-to-end native diagnostic gates required",
+      "adapter": "Validate/capture each Bar once; reuse final output span in place; preserve existing serial/pool thresholds"
+    },
+    {
+      "api": "DoubleOperations.Sqrt",
+      "available": true,
+      "probe": "Zero mismatches on initial probe only",
+      "decision": "Not in first implementation; negative-domain presence and signed-zero behavior require dedicated compatibility review"
+    },
+    {
+      "api": "DoubleOperations.Sin / Cos / Exp",
+      "available": true,
+      "probe_mismatches_per_10000_fixture_like_values": {"Sin": 3960, "Cos": 10000, "Exp": 990},
+      "decision": "Not direct replacements under current bit-exact Math contract; no assertion weakening or package change"
+    },
+    {
+      "api": "DoubleOperations.Log",
+      "available": true,
+      "probe": "Zero mismatches on initial probe only",
+      "decision": "Undetermined; finite sample is not proof of identical argument reduction/rounding. Review exact package source and boundary behavior before proposing an integration"
+    },
+    {
+      "api": "DoubleOperations.MultiplyAdd",
+      "available": true,
+      "probe": "Actual FMA result 1.1102230246251563e-16 where separate multiplication/addition yields zero",
+      "decision": "Not a blanket EMA or QEMA replacement. Correctness requires matching the full expression rounding contract, not merely similar algebra"
+    },
+    {
+      "api": "Inspected FusedPointwise / ScanKernels implementations",
+      "precision": "internal float32 helpers",
+      "decision": "Not directly callable binary64 replacements; this does not rule out other public generic fused tensor APIs"
+    },
+    {
+      "api": "Stock ValuesBarExecution.PointwiseBatch / bounded writers",
+      "available": true,
+      "use": "Already fuses input validation, owned history, per-node computation and final output writes",
+      "decision": "Preserve; avoid introducing duplicate staging or outer dispatch"
+    }
+  ],
+  "adversarial_review": [
+    "Use package commit rather than newer dirty tensor checkout",
+    "Do not equate a public method inside an internal type with a callable public API",
+    "Count data gathering, history copying and output conversion in end-to-end costs",
+    "Preserve recurrence dependencies and exact rounding",
+    "Verify generated code and actual call-path reachability",
+    "Measure native gaps separately from old/new improvements",
+    "Reject an unpromising diagnostic before spending a full qualification cycle"
+  ],
+  "independent_agent_review": false,
+  "production_candidate": "tensor-rounding-spans-20261113",
+  "implementation_source": "8a15ebe965c3e9ef5b4896ff10a49f40febb7aaf",
+  "correctness_ci": "43434535092",
+  "performance_verdict": "pending; no gap closure claimed"
+}

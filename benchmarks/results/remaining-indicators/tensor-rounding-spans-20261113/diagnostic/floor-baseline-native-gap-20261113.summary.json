@@ -1,0 +1,268 @@
+{
+  "trace": "floor-baseline-native-gap-20261113.speedscope.json",
+  "window_ms": [
+    11047.161800305177,
+    27047.161800305177
+  ],
+  "selected_sample_weight_ms": 16000.0,
+  "leaf": [
+    [
+      "System.Private.CoreLib!System.GC.<AllocateUninitializedArray>g__AllocateNewArrayWorker|77_0(int32,bool)",
+      3704.5098648248495
+    ],
+    [
+      "System.Linq!System.Linq.Enumerable+<SelectIterator>d__251`2[System.Double,System.Nullable`1[System.Double]].MoveNext()",
+      3433.9248504539773
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.FillPointwise(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[][],class OoplesFinance.StockIndicators.Indicators.IIndicator,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+      2201.7256569450565
+    ],
+    [
+      "System.Private.CoreLib!System.Buffer.MemmoveInternal(unsigned int8&,unsigned int8&,unsigned int)",
+      1836.721765870654
+    ],
+    [
+      "System.Linq!System.Linq.Enumerable.<ToArray>g__EnumerableToArray|324_0(class System.Collections.Generic.IEnumerable`1<!!0>)",
+      1697.4029692537752
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.Thread.<PollGC>g__PollGCWorker|70_0()",
+      1211.87449037459
+    ],
+    [
+      "System.Private.CoreLib!System.Runtime.CompilerServices.RuntimeHelpers.<GetHashCode>g__GetHashCodeWorker|15_0(class System.Object)",
+      1144.6679756702433
+    ],
+    [
+      "OoplesFinance.StockIndicators.CompetitorBenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.VolumePriceComparison.Nullable(value class System.Nullable`1<float64>[])",
+      562.4212913123993
+    ],
+    [
+      "OoplesFinance.StockIndicators.CompetitorBenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.ElementaryMathComparison.Owned(class OoplesFinance.StockIndicators.CompetitorBenchmarks.CompetitorData,value class System.Nullable`1<value class OoplesFinance.StockIndicators.Indicators.CandleArithmeticOperation>,value class System.Nullable`1<value class OoplesFinance.StockIndicators.Indicators.PriceRoundingOperation>)",
+      66.701867069929
+    ],
+    [
+      "System.Private.CoreLib!System.Enum+EnumInfo`1[System.UInt32].Create(class System.RuntimeType)",
+      46.055699102404105
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.Execute(value class OoplesFinance.StockIndicators.Indicators.Bar[],class System.Collections.Generic.IReadOnlyList`1<class OoplesFinance.StockIndicators.Indicators.IIndicator>,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.OwnedBarHistory,class OoplesFinance.StockIndicators.Indicators.TensorsGpuExecution)",
+      31.149246103668702
+    ],
+    [
+      "System.Private.CoreLib!System.Reflection.CustomAttribute.IsCustomAttributeDefined(class System.Reflection.RuntimeModule,int32,class System.RuntimeType,int32,bool)",
+      22.25129934749566
+    ],
+    [
+      "System.Private.CoreLib!System.RuntimeType.InitializeCache()",
+      20.664099900242945
+    ],
+    [
+      "x00smm35.lb0!NativeGapProfile.Run(class System.String,class System.String,int32)",
+      5.999323968126191
+    ],
+    [
+      "System.Private.CoreLib!System.Collections.Generic.Dictionary`2[System.__Canon,System.__Canon].TryInsert(!0,!1,value class System.Collections.Generic.InsertionBehavior)",
+      4.417699783705757
+    ],
+    [
+      "System.Private.CoreLib!System.Collections.Generic.Dictionary`2[System.__Canon,System.__Canon].Initialize(int32)",
+      4.028200149536133
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.Thread.PollGC()",
+      2.525199841689755
+    ],
+    [
+      "System.Linq!System.Linq.Enumerable+<SelectIterator>d__251`2[System.Double,System.Nullable`1[System.Double]].<>m__Finally1()",
+      1.5357999801635742
+    ],
+    [
+      "System.Private.CoreLib!System.Collections.HashHelpers.GetPrime(int32)",
+      1.422700047492981
+    ]
+  ],
+  "inclusive": [
+    [
+      "Threads",
+      16000.0
+    ],
+    [
+      "System.Linq.Expressions!System.Dynamic.UpdateDelegates.UpdateAndExecute4(class System.Runtime.CompilerServices.CallSite,!!0,!!1,!!2,!!3)",
+      16000.0
+    ],
+    [
+      "Process64 pwsh (36932) Args:  -NoProfile -File profile-native-gaps-perfview-20261113.ps1 -Pair TaLib.Functions.Floor -Seconds 20 ",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Runspaces.PipelineThread.WorkerProc()",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Internal.PipelineProcessor.SynchronousExecuteEnumerate(class System.Object)",
+      16000.0
+    ],
+    [
+      "Thread (4752)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Interpreter.Interpreter.Run(class System.Management.Automation.Interpreter.InterpretedFrame)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Interpreter.LightLambda.RunVoid1(!!0)",
+      16000.0
+    ],
+    [
+      "Anonymously Hosted DynamicMethods Assembly!dynamicClass.CallSite.Target(pMT: 00007FFEC59F1DD8,pMT: 00007FFEC53C4E30,pMT: 00007FFEC4FD80E8,class System.Object,class System.Object,class System.Object)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Runspaces.LocalPipeline.InvokeThreadProc()",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.DlrScriptCommandProcessor.Complete()",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Internal.PipelineProcessor.DoCompleteCore(class System.Management.Automation.CommandProcessorBase)",
+      16000.0
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.Thread+StartHelper.Callback(class System.Object)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(class System.Management.Automation.Interpreter.InterpretedFrame)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Interpreter.DynamicInstruction`5[System.__Canon,System.__Canon,System.__Canon,System.__Canon,System.__Canon].Run(class System.Management.Automation.Interpreter.InterpretedFrame)",
+      16000.0
+    ],
+    [
+      "x00smm35.lb0!NativeGapProfile.Run(class System.String,class System.String,int32)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.CommandProcessorBase.DoComplete()",
+      16000.0
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.ExecutionContext.RunInternal(class System.Threading.ExecutionContext,class System.Threading.ContextCallback,class System.Object)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.DlrScriptCommandProcessor.RunClause(class System.Action`1<class System.Management.Automation.Language.FunctionContext>,class System.Object,class System.Object)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Runspaces.LocalPipeline.InvokeHelper()",
+      16000.0
+    ],
+    [
+      "(Non-Activities)",
+      16000.0
+    ],
+    [
+      "Anonymously Hosted DynamicMethods Assembly!dynamicClass.lambda_method17(pMT: 00007FFEC59F1DD8)",
+      14789.609185566873
+    ],
+    [
+      "OoplesFinance.StockIndicators.CompetitorBenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.ElementaryMathComparison.Owned(class OoplesFinance.StockIndicators.CompetitorBenchmarks.CompetitorData,value class System.Nullable`1<value class OoplesFinance.StockIndicators.Indicators.CandleArithmeticOperation>,value class System.Nullable`1<value class OoplesFinance.StockIndicators.Indicators.PriceRoundingOperation>)",
+      14789.609185566873
+    ],
+    [
+      "OoplesFinance.StockIndicators.CompetitorBenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.ComparisonPair.Ooples(class OoplesFinance.StockIndicators.CompetitorBenchmarks.CompetitorData,int32)",
+      14789.609185566873
+    ],
+    [
+      "CPU_TIME",
+      14166.30116888895
+    ],
+    [
+      "System.Linq!System.Linq.Enumerable.<ToArray>g__EnumerableToArray|324_0(class System.Collections.Generic.IEnumerable`1<!!0>)",
+      7424.75158606669
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.Execute(value class OoplesFinance.StockIndicators.Indicators.Bar[],class System.Collections.Generic.IReadOnlyList`1<class OoplesFinance.StockIndicators.Indicators.IIndicator>,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.OwnedBarHistory,class OoplesFinance.StockIndicators.Indicators.TensorsGpuExecution)",
+      5647.78286462745
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder+<BuildWithHistoryAsync>d__68.MoveNext()",
+      5647.78286462745
+    ],
+    [
+      "System.Private.CoreLib!System.GC.<AllocateUninitializedArray>g__AllocateNewArrayWorker|77_0(int32,bool)",
+      3704.5098648248495
+    ],
+    [
+      "System.Linq!System.Linq.Enumerable+<SelectIterator>d__251`2[System.Double,System.Nullable`1[System.Double]].MoveNext()",
+      3435.460650434141
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.FillPointwise(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[][],class OoplesFinance.StockIndicators.Indicators.IIndicator,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+      2201.7256569450565
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer..ctor(int32)",
+      2061.8999883935576
+    ],
+    [
+      "System.Private.CoreLib!System.Buffer.MemmoveInternal(unsigned int8&,unsigned int8&,unsigned int)",
+      1836.721765870654
+    ],
+    [
+      "UNMANAGED_CODE_TIME",
+      1833.6980663886516
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.Thread.<PollGC>g__PollGCWorker|70_0()",
+      1211.87449037459
+    ],
+    [
+      "System.Private.CoreLib!System.Diagnostics.Stopwatch.get_Elapsed()",
+      1204.391490465001
+    ],
+    [
+      "System.Private.CoreLib!System.Collections.Generic.Dictionary`2[System.__Canon,System.__Canon].TryInsert(!0,!1,value class System.Collections.Generic.InsertionBehavior)",
+      1149.085675453949
+    ],
+    [
+      "System.Private.CoreLib!System.Runtime.CompilerServices.RuntimeHelpers.<GetHashCode>g__GetHashCodeWorker|15_0(class System.Object)",
+      1144.6679756702433
+    ],
+    [
+      "OoplesFinance.StockIndicators.CompetitorBenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.VolumePriceComparison.Mask(value class System.Nullable`1<float64>[])",
+      567.8721915094284
+    ],
+    [
+      "OoplesFinance.StockIndicators.CompetitorBenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.VolumePriceComparison.Nullable(value class System.Nullable`1<float64>[])",
+      562.4212913123993
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node..ctor(class OoplesFinance.StockIndicators.Indicators.IIndicator,int32,bool,bool,bool,bool,bool,bool)",
+      193.91409797993947
+    ],
+    [
+      "System.Private.CoreLib!System.RuntimeType.IsEnumDefined(class System.Object)",
+      88.97109835014271
+    ],
+    [
+      "System.Private.CoreLib!System.Enum+EnumInfo`1[System.UInt32].Create(class System.RuntimeType)",
+      68.30699844989977
+    ],
+    [
+      "System.Private.CoreLib!System.Enum.<GetEnumInfo>g__InitializeEnumInfo|5_0(class System.RuntimeType,bool)",
+      68.30699844989977
+    ],
+    [
+      "System.Private.CoreLib!System.RuntimeType+IGenericCacheEntry`1[System.__Canon].CreateAndCache(class System.RuntimeType)",
+      68.30699844989977
+    ]
+  ]
+}

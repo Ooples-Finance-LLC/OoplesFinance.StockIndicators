@@ -1,0 +1,28 @@
+{
+  "source": "8a15ebe965c3e9ef5b4896ff10a49f40febb7aaf",
+  "production_sha256": "94923c0eac83bc7527e54a41307816fe52a8b2af4b1e6baece60afb688879471",
+  "correctness": {
+    "unit": 56,
+    "comparator": 24,
+    "actual_gpu": 100
+  },
+  "tensor_simd_observed": true,
+  "source_bound_codegen_sha256": "20594c0f610accac68c3164130c0b6c9061dc93561f7f99d26e9d98d6df50805",
+  "diagnostic_only": true,
+  "diagnostic_median_ns": {
+    "tensor-rounding-floor-baseline-diagnostic-20261113.json": 552645.5,
+    "tensor-rounding-floor-native-diagnostic-20261113.json": 288879.1,
+    "tensor-rounding-floor-candidate-diagnostic-20261113.json": 558604.1,
+    "tensor-rounding-ceil-candidate-diagnostic-20261113.json": 777047.5
+  },
+  "accepted_for_full_qualification": false,
+  "performance_qualified": false,
+  "native_gap_closures": 0,
+  "conclusion": "Do not promote this two-operation span-only batch: the observed floor end-to-end diagnostic shows no useful gain and the profile attributes most time to allocation/copy/normalization outside the rounding kernel.",
+  "limitations": [
+    "Shared host under concurrent load; diagnostic rounds are not confidence-qualified comparisons and do not establish a regression.",
+    "Ceiling has a candidate diagnostic only; no comparative verdict is asserted.",
+    "No full qualification, pooling, selected-operation import, production integration or report update.",
+    "SIMD availability alone is insufficient; changing the benchmark boundary or arithmetic contract is outside this source batch."
+  ]
+}

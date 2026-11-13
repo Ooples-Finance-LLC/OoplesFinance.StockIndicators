@@ -1,0 +1,68 @@
+{
+  "assembly": "AiDotNet.Tensors, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+  "mvid": "6a2c017c-fdf5-4dea-8937-1bae8dd2b309",
+  "fixtureCount": 10000,
+  "boundaryCount": 11,
+  "results": [
+    {
+      "name": "Sin",
+      "available": true,
+      "fixtureMismatch": 3960,
+      "boundaryMismatch": 0,
+      "first": "input=101.625,expected=0.8884858592296214,actual=0.8884858592296218"
+    },
+    {
+      "name": "Cos",
+      "available": true,
+      "fixtureMismatch": 10000,
+      "boundaryMismatch": 2,
+      "first": "input=100,expected=0.8623188722876839,actual=0.8623188722876828"
+    },
+    {
+      "name": "Exp",
+      "available": true,
+      "fixtureMismatch": 990,
+      "boundaryMismatch": 1,
+      "first": "input=100.375,expected=3.911187362830495E\u002B43,actual=3.9111873628304953E\u002B43"
+    },
+    {
+      "name": "Log",
+      "available": true,
+      "fixtureMismatch": 0,
+      "boundaryMismatch": 0,
+      "first": null
+    },
+    {
+      "name": "Sqrt",
+      "available": true,
+      "fixtureMismatch": 0,
+      "boundaryMismatch": 0,
+      "first": null
+    },
+    {
+      "name": "Floor",
+      "available": true,
+      "fixtureMismatch": 0,
+      "boundaryMismatch": 0,
+      "first": null
+    },
+    {
+      "name": "Ceiling",
+      "available": true,
+      "fixtureMismatch": 0,
+      "boundaryMismatch": 0,
+      "first": null
+    },
+    {
+      "name": "MultiplyAdd-rounding-probe",
+      "separate": 0,
+      "fused": 1.1102230246251563E-16,
+      "actual": [
+        1.1102230246251563E-16,
+        1.1102230246251563E-16,
+        1.1102230246251563E-16,
+        1.1102230246251563E-16
+      ]
+    }
+  ]
+}

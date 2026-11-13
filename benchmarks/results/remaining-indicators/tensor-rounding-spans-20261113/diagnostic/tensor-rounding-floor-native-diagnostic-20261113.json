@@ -1,0 +1,45 @@
+{
+  "diagnosticOnly": true,
+  "operation": "Floor",
+  "arm": "Competitor",
+  "count": 10000,
+  "warmups": 1000,
+  "productionModule": "3a4c4fb0-1620-4fbc-b220-c2bb490d2276",
+  "rounds": [
+    {
+      "round": 0,
+      "iterations": 1000,
+      "elapsedMs": 282.3734,
+      "nsPerCall": 282373.4,
+      "allocatedBytes": 330625120
+    },
+    {
+      "round": 1,
+      "iterations": 1000,
+      "elapsedMs": 288.8791,
+      "nsPerCall": 288879.1,
+      "allocatedBytes": 330615496
+    },
+    {
+      "round": 2,
+      "iterations": 1000,
+      "elapsedMs": 271.932,
+      "nsPerCall": 271932,
+      "allocatedBytes": 330609016
+    },
+    {
+      "round": 3,
+      "iterations": 1000,
+      "elapsedMs": 325.0425,
+      "nsPerCall": 325042.5,
+      "allocatedBytes": 330609728
+    },
+    {
+      "round": 4,
+      "iterations": 1000,
+      "elapsedMs": 329.4811,
+      "nsPerCall": 329481.1,
+      "allocatedBytes": 330618552
+    }
+  ]
+}

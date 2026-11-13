@@ -1,0 +1,45 @@
+{
+  "diagnosticOnly": true,
+  "operation": "Ceil",
+  "arm": "Ooples",
+  "count": 10000,
+  "warmups": 1000,
+  "productionModule": "9321c918-716c-4f3c-a434-bb2f94d7f4b9",
+  "rounds": [
+    {
+      "round": 0,
+      "iterations": 1000,
+      "elapsedMs": 777.0475,
+      "nsPerCall": 777047.5,
+      "allocatedBytes": 973237520
+    },
+    {
+      "round": 1,
+      "iterations": 1000,
+      "elapsedMs": 791.9189,
+      "nsPerCall": 791918.9,
+      "allocatedBytes": 973230536
+    },
+    {
+      "round": 2,
+      "iterations": 1000,
+      "elapsedMs": 792.5448,
+      "nsPerCall": 792544.8,
+      "allocatedBytes": 973222192
+    },
+    {
+      "round": 3,
+      "iterations": 1000,
+      "elapsedMs": 708.3471,
+      "nsPerCall": 708347.1,
+      "allocatedBytes": 973223704
+    },
+    {
+      "round": 4,
+      "iterations": 1000,
+      "elapsedMs": 740.9888,
+      "nsPerCall": 740988.8,
+      "allocatedBytes": 973225256
+    }
+  ]
+}

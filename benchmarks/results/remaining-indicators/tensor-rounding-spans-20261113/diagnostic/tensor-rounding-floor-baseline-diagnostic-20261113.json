@@ -1,0 +1,45 @@
+{
+  "diagnosticOnly": true,
+  "operation": "Floor",
+  "arm": "Ooples",
+  "count": 10000,
+  "warmups": 1000,
+  "productionModule": "3a4c4fb0-1620-4fbc-b220-c2bb490d2276",
+  "rounds": [
+    {
+      "round": 0,
+      "iterations": 1000,
+      "elapsedMs": 591.2537,
+      "nsPerCall": 591253.7,
+      "allocatedBytes": 976071936
+    },
+    {
+      "round": 1,
+      "iterations": 1000,
+      "elapsedMs": 594.6256,
+      "nsPerCall": 594625.6,
+      "allocatedBytes": 976522208
+    },
+    {
+      "round": 2,
+      "iterations": 1000,
+      "elapsedMs": 552.6455,
+      "nsPerCall": 552645.5,
+      "allocatedBytes": 976650872
+    },
+    {
+      "round": 3,
+      "iterations": 1000,
+      "elapsedMs": 477.606,
+      "nsPerCall": 477606,
+      "allocatedBytes": 975856096
+    },
+    {
+      "round": 4,
+      "iterations": 1000,
+      "elapsedMs": 549.9098,
+      "nsPerCall": 549909.8,
+      "allocatedBytes": 976399360
+    }
+  ]
+}
