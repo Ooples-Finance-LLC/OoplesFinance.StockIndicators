@@ -169,6 +169,10 @@ internal static partial class ValuesBarExecution
         Span<double> values, ulong[]? missing, OwnedBarBuffer? owned, int offset, TKernel kernel, CancellationToken cancellation)
         where TKernel : struct, IPointwiseKernel
     {
+        if (source.Length >= 4 && (typeof(TKernel) == typeof(UnaryKernel<Floor, AllReal>)
+            || typeof(TKernel) == typeof(UnaryKernel<Ceiling, AllReal>)))
+            return ComputeTensorRoundingRegion(source, values, owned, offset,
+                typeof(TKernel) == typeof(UnaryKernel<Ceiling, AllReal>), cancellation);
         var region = new PointwiseRegion { InvalidOutputIndex = -1 };
         Bar latest = default;
         for (int i = 0; i < source.Length; i++)
