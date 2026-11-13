@@ -28,7 +28,8 @@ internal static partial class ValuesBarExecution
         || ContextReversalWindow(indicator) > 0 || TripleBodyWindow(indicator) > 0 || PenetrationWindow(indicator) > 0
         || StarReversalWindow(indicator) > 0 || GapContinuationWindow(indicator) > 0 || CrowSoldierWindow(indicator) > 0
         || ExhaustionWindowLength(indicator) > 0 || FiveContinuationWindow(indicator) > 0 || ExtendedReversalWindow(indicator) > 0
-        || HikkakeWindow(indicator) > 0 || DelayedCloudWindow(indicator) > 0 || IsRawDirectional(indicator);
+        || HikkakeWindow(indicator) > 0 || DelayedCloudWindow(indicator) > 0 || IsRawDirectional(indicator)
+        || RangeDojiWindow(indicator) > 0;
 
     private static bool IsRawDirectional(IIndicator indicator) => indicator is WindowDirectionalMeasure
         { Measure: DirectionalWindowMeasure.PositiveMovement or DirectionalWindowMeasure.NegativeMovement };
@@ -1344,6 +1345,7 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<HikkakeKernel>(source, output, indicator, HikkakeWindow(indicator), cancellation, owned),
         _ when TasukiWindow(indicator) > 0 =>
             FillBoundedWindow<TasukiKernel>(source, output, indicator, TasukiWindow(indicator), cancellation, owned),
+        _ when RangeDojiWindow(indicator) > 0 => FillBoundedWindow<RangeDojiKernel>(source, output, indicator, RangeDojiWindow(indicator), cancellation, owned),
         _ => throw new InvalidOperationException("Unqualified bounded-window kernel.")
     };
 
