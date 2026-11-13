@@ -49,7 +49,7 @@ internal static partial class ValuesBarExecution
                 output[2][i] = total == 0 ? 0 : total;
             }
         }
-        else if (source.Length >= 8192 && finiteFlows && summary.CertifiesCompensatedPrefix(source.Length))
+        else if (source.Length >= 8192 && summary.CertifiesCompensatedPrefix(source.Length))
         {
             // Preserve the published flow column. The existing pair writer reads
             // each captured flow once, then overwrites its two destinations.
