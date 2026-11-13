@@ -1639,7 +1639,16 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-43486167503-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "de03a42c66d37327154c63c6336c013a5cc36e8d",
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.BoundedBatch.cs",
+    "src/Indicators/ValuesBarExecution.BoundedWindows.cs",
+    "src/Indicators/ValuesBarExecution.RangeDoji.cs",
+    "tests/ModelsTests/DojiRegionPoolTests.cs"
+  ],
+  "report_sha256": "a986e16d06c167dc3891efc850354ddc4ab2652203f4e7ebfee08545c5d5199e",
+  "report_archive": "benchmarks/results/remaining-indicators/doji-region-pool-20261113-report-integration"
 }
