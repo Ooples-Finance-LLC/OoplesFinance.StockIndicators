@@ -127,20 +127,41 @@ public sealed class MassNormalizedQuadrupleEma
 
         public double Update(in Bar bar)
         {
-            var value = bar.Close;
+            var first = _stages[0].Next(bar.Close);
+            var second = _stages[1].Next(first);
+            var third = _stages[2].Next(second);
+            var fourth = _stages[3].Next(third);
+#if !NETFRAMEWORK
+            if (TryCombine(first, second, third, fourth, out var combined)) return combined;
+#endif
             var sum = new ExactMeanAccumulator();
-            for (var i = 0; i < 4; i++)
-            {
-                value = _stages[i].Next(value);
-                sum.Add(
-                    value,
-                    i == 0 || i == 2 ? 4
-                        : i == 1 ? -6
-                        : -1
-                );
-            }
+            sum.Add(first, 4);
+            sum.Add(second, -6);
+            sum.Add(third, 4);
+            sum.Add(fourth, -1);
             return sum.Mean(1);
         }
+
+#if !NETFRAMEWORK
+        private static bool TryCombine(double first, double second, double third, double fourth, out double value)
+        {
+            value = 0;
+            // 4*a-6*b+4*c-d = a+3*((a-b)+(c-b))+(c-d). Certify
+            // every intermediate exactly; only the final addition may round.
+            if (!Binary64ArithmeticCertificate.TryDifference(first, second, out var ab)
+                || !Binary64ArithmeticCertificate.TryDifference(third, second, out var cb)
+                || !Binary64ArithmeticCertificate.TryDifference(third, fourth, out var cd)
+                || !Binary64ArithmeticCertificate.TryDifference(ab, -cb, out var curvature)) return false;
+            double weighted = 0;
+            if (curvature != 0 && !Binary64ArithmeticCertificate.TryProduct(curvature, 3, out weighted)) return false; // NOSONAR: Exact zero needs no product certificate.
+            if (!Binary64ArithmeticCertificate.TryDifference(weighted, -cd, out var correction)) return false;
+            value = first + correction;
+            // Integer weights cannot underflow a nonzero binary64-grid sum.
+            // Preserve the original exact accumulator's canonical zero.
+            if (value == 0) value = 0; // NOSONAR: Canonicalize both exact zero signs.
+            return double.IsFinite(value);
+        }
+#endif
     }
 }
 
