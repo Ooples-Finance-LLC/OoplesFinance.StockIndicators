@@ -145,7 +145,7 @@ public sealed class MassNormalizedQuadrupleEma
 #if !NETFRAMEWORK
         private static bool TryCombine(double first, double second, double third, double fourth, out double value)
         {
-            value = 0;
+            if (TryCombineCommonBinade(first, second, third, fourth, out value)) return true;
             // 4*a-6*b+4*c-d = a+3*((a-b)+(c-b))+(c-d). Certify
             // every intermediate exactly; only the final addition may round.
             if (!Binary64ArithmeticCertificate.TryDifference(first, second, out var ab)
@@ -160,6 +160,42 @@ public sealed class MassNormalizedQuadrupleEma
             // Preserve the original exact accumulator's canonical zero.
             if (value == 0) value = 0; // NOSONAR: Canonicalize both exact zero signs.
             return double.IsFinite(value);
+        }
+
+        private static bool TryCombineCommonBinade(double first, double second, double third, double fourth, out double value)
+        {
+            value = 0;
+            ulong firstBits = unchecked((ulong)BitConverter.DoubleToInt64Bits(first));
+            ulong binade = firstBits >> 52;
+            int exponent = (int)(binade & 0x7ff);
+            // A nonzero integer sum scaled by 2^(E-1075) is normal for E>=53.
+            // Excluding smaller exponents avoids a second subnormal rounding.
+            if (exponent is < 53 or > 2046) return false;
+            ulong secondBits = unchecked((ulong)BitConverter.DoubleToInt64Bits(second));
+            ulong thirdBits = unchecked((ulong)BitConverter.DoubleToInt64Bits(third));
+            ulong fourthBits = unchecked((ulong)BitConverter.DoubleToInt64Bits(fourth));
+            if (secondBits >> 52 != binade || thirdBits >> 52 != binade || fourthBits >> 52 != binade) return false;
+            if (firstBits == secondBits && firstBits == thirdBits && firstBits == fourthBits)
+            {
+                value = first; // Integer coefficients sum to one.
+                return true;
+            }
+            const ulong fractionMask = (1UL << 52) - 1;
+            const long hidden = 1L << 52;
+            long a = (long)(firstBits & fractionMask) | hidden;
+            long b = (long)(secondBits & fractionMask) | hidden;
+            long c = (long)(thirdBits & fractionMask) | hidden;
+            long d = (long)(fourthBits & fractionMask) | hidden;
+            // The absolute sum is bounded by 15*2^53 < 2^57, including every
+            // intermediate. Only conversion to double rounds; normal scaling
+            // by a power of two preserves that rounding. Overflow falls back.
+            long sum = 4 * a - 6 * b + 4 * c - d;
+            if ((binade & 0x800) != 0) sum = -sum;
+            if (sum == 0) return true; // Exact cancellation publishes canonical +0.
+            double rounded = Math.ScaleB((double)sum, exponent - 1075);
+            if (!double.IsFinite(rounded)) return false;
+            value = rounded;
+            return true;
         }
 #endif
     }
