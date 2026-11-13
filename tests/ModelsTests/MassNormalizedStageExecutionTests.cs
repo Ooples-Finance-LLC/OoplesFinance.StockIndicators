@@ -1,4 +1,5 @@
 using System.Reflection;
+using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -120,6 +121,28 @@ public sealed class MassNormalizedStageExecutionTests
             var expected = MassNormalizedReference.Calculate(bars, [a, b, c, d]);
             state.Reset();
             for (int i = 0; i < bars.Length; i++) Bits(expected[i], state.Update(in bars[i]));
+        }
+    }
+
+    [Theory]
+    [InlineData(1000)]
+    [InlineData(10000)]
+    public async Task DefaultQuadrupleLongHistoriesMatchIndependentReference(int count)
+    {
+        var bars = Enumerable.Range(0, count).Select(i =>
+        {
+            double price = 100 + (i * 17 % 101) / 8d;
+            return new Bar(DateTime.UnixEpoch.AddMinutes(i), price, price, price, price, 1);
+        }).ToArray();
+        var expected = MassNormalizedReference.Calculate(bars, [.2, .2, .2, .2]);
+        foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+        {
+            var indicator = new MassNormalizedQuadrupleEma();
+            using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                .ConfigureIndicators(indicator).ConfigureHistory(history)
+                .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync();
+            Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits),
+                run[indicator].ToArray().Select(BitConverter.DoubleToInt64Bits));
         }
     }
 
