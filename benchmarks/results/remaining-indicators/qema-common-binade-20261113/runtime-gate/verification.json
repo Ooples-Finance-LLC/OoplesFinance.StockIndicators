@@ -1,0 +1,36 @@
+{
+  "productionSha256": "0428f3867cb110fdf86375647c79766672adabb3faea6cc2553f58bf786a166c",
+  "productionModule": "007464cc-2552-4487-afd4-56911014a619",
+  "accepted": 9829,
+  "rejected": 171,
+  "publicBatchInvocations": 150,
+  "performanceEvidence": false,
+  "source": "978aa5281e818ff2b7ba5ee0dd7a4ebea1e5d857",
+  "jit_sections": [
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.MassNormalizedQuadrupleEma+State:TryCombineCommonBinade(double,double,double,double,byref):bool (Tier1)",
+      "bytes": 606,
+      "calls": [
+        "call     CORINFO_HELP_OVERFLOW\r"
+      ]
+    },
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.MassNormalizedQuadrupleEma+State:TryCombine(double,double,double,double,byref):bool (Tier1)",
+      "bytes": 401,
+      "calls": [
+        "call     [OoplesFinance.StockIndicators.Indicators.MassNormalizedQuadrupleEma+State:TryCombineCommonBinade(double,double,double,double,byref):bool]\r",
+        "call     [OoplesFinance.StockIndicators.Helpers.Binary64ArithmeticCertificate:TryDifference(double,double,byref):bool]\r",
+        "call     [OoplesFinance.StockIndicators.Helpers.Binary64ArithmeticCertificate:TryDifference(double,double,byref):bool]\r",
+        "call     [OoplesFinance.StockIndicators.Helpers.Binary64ArithmeticCertificate:TryDifference(double,double,byref):bool]\r",
+        "call     [OoplesFinance.StockIndicators.Helpers.Binary64ArithmeticCertificate:TryDifference(double,double,byref):bool]\r",
+        "call     [OoplesFinance.StockIndicators.Helpers.Binary64ArithmeticCertificate:TryProduct(double,double,byref):bool]\r",
+        "call     [OoplesFinance.StockIndicators.Helpers.Binary64ArithmeticCertificate:TryDifference(double,double,byref):bool]\r"
+      ]
+    }
+  ],
+  "disassembly_sha256": "117c88b2409b772200c35bfe318da25dbe6bc395de6c5503d73f98fc55b574b5",
+  "fixture_sha256": "bcbdcc6ae8e7457103e054c89103a44c0a7322d99b61da932a5f19a60650b2bc",
+  "claim": "Compiled helper exactly matches9829authenticated replay rows;171retainfallback; optimized caller reaches the word helper, whose observed calls contain no exact certificate or BigInteger arithmetic.",
+  "performance_qualified": false,
+  "local_timing_usable_for_acceptance": false
+}
