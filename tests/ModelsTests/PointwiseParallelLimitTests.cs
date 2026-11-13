@@ -15,6 +15,9 @@ public sealed class PointwiseParallelLimitTests
     [InlineData("Tan")]
     [InlineData("Acos")]
     [InlineData("Atan")]
+    [InlineData("Sinh")]
+    [InlineData("Cosh")]
+    [InlineData("Tanh")]
     public async Task ParallelLimitsPreserveStateBitsPresenceAndOwnedHistory(string operation)
     {
         int previous = CpuParallelSettings.MaxDegreeOfParallelism;
@@ -25,8 +28,9 @@ public sealed class PointwiseParallelLimitTests
                 CpuParallelSettings.MaxDegreeOfParallelism = workers;
                 foreach (int count in new[] { 8193, 65537 })
                 {
+                    double limit = operation is "Sinh" or "Cosh" ? 700 : double.MaxValue;
                     double[] domain = [-0d, 0d, double.Epsilon, -double.Epsilon, -1d, 1d,
-                        Math.BitIncrement(1d), .125, .875, 64d, double.MaxValue, -double.MaxValue];
+                        Math.BitIncrement(1d), .125, .875, 64d, limit, -limit];
                     var bars = Enumerable.Range(0, count).Select(i => new Bar(DateTime.UnixEpoch.AddMinutes(i),
                         3, 4, 2, domain[i % domain.Length], i)).ToArray();
                     var original = bars.ToArray();
@@ -70,6 +74,47 @@ public sealed class PointwiseParallelLimitTests
         finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
     }
 
+    [Theory]
+    [InlineData("Sinh")]
+    [InlineData("Cosh")]
+    public async Task ChangedDispatchPreservesCancellationRawPriorityOverflowAndRecovery(string operation)
+    {
+        int previous = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            foreach (int workers in new[] { 2, 8 })
+            foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+            {
+                CpuParallelSettings.MaxDegreeOfParallelism = workers;
+                var bars = Enumerable.Repeat(new Bar(default, 1, 2, 0, .5, 1), 8193).ToArray();
+                bars[1] = new Bar(default, 1, 2, 0, 1000, 1);
+                bars[^1] = new Bar(default, 1, 2, 0, .5, double.NaN);
+                var indicator = Create(operation);
+                var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                    .ConfigureIndicators(indicator).ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu);
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(new CancellationToken(true)));
+                var expectedInput = Record.Exception(() => OoplesFinance.StockIndicators.Validation.IndicatorInputDomain.Finite.Validate(in bars[^1]));
+                var inputError = await Record.ExceptionAsync(() => builder.BuildAsync());
+                Assert.Equal(expectedInput!.GetType(), inputError!.GetType());
+                Assert.Equal(expectedInput.Message, inputError.Message);
+                Assert.Null(builder.LastExecution);
+                bars[^1] = bars[0];
+                var ordinary = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars, bar => bar))
+                    .ConfigureIndicators(indicator).ConfigureHistory(history);
+                var expectedOutput = await Record.ExceptionAsync(() => ordinary.BuildAsync());
+                var outputError = await Record.ExceptionAsync(() => builder.BuildAsync());
+                Assert.NotNull(outputError);
+                Assert.Equal(expectedOutput!.GetType(), outputError.GetType());
+                Assert.Equal(expectedOutput.Message, outputError.Message);
+                Assert.Null(builder.LastExecution);
+                bars[1] = bars[0];
+                using var result = await builder.BuildAsync();
+                Assert.Equal(bars.Length, result.BarCount);
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = previous; }
+    }
+
     private static MultiOutputIndicatorBase Create(string operation) => operation switch
     {
         "Ln" => new PriceTranscendentalTransform(PriceTranscendentalOperation.NaturalLogarithm),
@@ -79,6 +124,9 @@ public sealed class PointwiseParallelLimitTests
         "Tan" => new PriceCircularTransform(PriceCircularOperation.Tangent),
         "Acos" => new PriceCircularTransform(PriceCircularOperation.ArcCosine),
         "Atan" => new PriceCircularTransform(PriceCircularOperation.ArcTangent),
+        "Sinh" => new PriceTranscendentalTransform(PriceTranscendentalOperation.HyperbolicSine),
+        "Cosh" => new PriceTranscendentalTransform(PriceTranscendentalOperation.HyperbolicCosine),
+        "Tanh" => new PriceTranscendentalTransform(PriceTranscendentalOperation.HyperbolicTangent),
         _ => throw new ArgumentOutOfRangeException(nameof(operation)),
     };
 
