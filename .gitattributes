@@ -194,3 +194,4 @@ benchmarks/plans/hosted-acceleration-word-mean-20261112.json text eol=lf
 benchmarks/plans/hosted-identity-adl-size-guard-20261112.json text eol=lf
 benchmarks/plans/hosted-hyperbolic-fanout-threshold-20261112.json text eol=lf
 benchmarks/plans/hosted-qema-difference-combination-20261113.json text eol=lf
+benchmarks/plans/hosted-qema-harness-aligned-combination-20261113.json text eol=lf

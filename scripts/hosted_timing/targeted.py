@@ -485,6 +485,9 @@ SCOPES['hyperbolic-fanout-threshold-20261112'] = {'fixtures': {'SharedPointwiseB
 SCOPES['qema-difference-combination-20261113'] = {'fixtures': {'SharedNativeEmaBenchmarks': {'QuanTAlib.Qema': 'QuanTAlib.Qema'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/MassNormalizedEma.cs', 'tests/ModelsTests/MassNormalizedStageExecutionTests.cs'}, 'methods': {'SharedNativeEmaBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
 
 
+SCOPES['qema-harness-aligned-combination-20261113'] = {'fixtures': {'SharedNativeEmaBenchmarks': {'QuanTAlib.Qema': 'QuanTAlib.Qema'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/MassNormalizedEma.cs', 'tests/ModelsTests/MassNormalizedStageExecutionTests.cs'}, 'methods': {'SharedNativeEmaBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (90, 18)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
