@@ -124,13 +124,13 @@ public sealed class TillsonCheckedRegionTests
                     .ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu);
                 await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(new CancellationToken(true)));
                 var last = bars[^1];
-                bars[^1] = new(last.Date, last.Open, last.High, last.Low, last.Close, double.NaN);
+                bars[^1] = new(last.Time, last.Open, last.High, last.Low, last.Close, double.NaN);
                 await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => builder.BuildAsync());
                 bars[^1] = last;
                 var error = await Assert.ThrowsAsync<IndicatorOutputException>(() => builder.BuildAsync());
                 Assert.Equal(0, error.OutputSlot);
                 Assert.Equal(firstFailure, error.BarIndex);
-                for (int i = 0; i < bars.Length; i++) bars[i] = new(bars[i].Date, 1, 1, 1, 1, 1);
+                for (int i = 0; i < bars.Length; i++) bars[i] = new(bars[i].Time, 1, 1, 1, 1, 1);
                 using var recovered = await builder.BuildAsync();
                 AssertColumns(recovered, owner, Reference(bars, owner));
             }
