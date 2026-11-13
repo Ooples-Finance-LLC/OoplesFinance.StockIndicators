@@ -1,0 +1,34 @@
+{
+  "source": "3d939e55bdaca3fcc51eb44a0e0bc91e23534893",
+  "production_sha256": "321827d7ad9b3e153c6b57c8cb83f64bde40792c65a9df731a4938c05b073cfc",
+  "production_module": "cd074de0-c849-4f04-abf5-35c5cd446411",
+  "disassembly_sha256": "8a096b08a499bf457a6cb6f1c23858c63e6e7dbde660df022600bff2faab4faf",
+  "optimized_callers": [
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeBoundedRegion[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+AwesomeKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.IIndicator):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier1-OSR)",
+      "adapter_calls": 0,
+      "stack_cookie_checks": 0,
+      "code_bytes": 2600
+    },
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeBoundedRegion[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+AwesomeKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.IIndicator):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier1-OSR)",
+      "adapter_calls": 0,
+      "stack_cookie_checks": 0,
+      "code_bytes": 5673
+    },
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeBoundedRegion[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+AwesomeKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.IIndicator):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier1)",
+      "adapter_calls": 0,
+      "stack_cookie_checks": 0,
+      "code_bytes": 11142
+    }
+  ],
+  "accepted": true,
+  "claim": "All observed optimized Awesome region callers have no AwesomeKernel.Update call or stack-cookie check; adapter/state are inlined.",
+  "risks": [
+    "Final caller is11142bytes; increased code size may offset saved setup/calls. Only qualification can decide performance."
+  ],
+  "performance_qualified": false,
+  "local_timing_usable_for_acceptance": false,
+  "verification_route": "Local host reached100%CPU with unrelated jobs. Consolidate the end-to-end/native decision into the already planned isolated30case6decision qualification; do not wait for idle or interpret contaminated local samples as performance evidence."
+}

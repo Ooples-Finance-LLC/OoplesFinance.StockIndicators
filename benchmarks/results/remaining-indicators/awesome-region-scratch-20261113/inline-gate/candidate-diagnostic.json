@@ -1,0 +1,45 @@
+{
+  "diagnosticOnly": true,
+  "operation": "Awesome",
+  "arm": "Ooples",
+  "count": 10000,
+  "warmups": 1000,
+  "productionModule": "cd074de0-c849-4f04-abf5-35c5cd446411",
+  "rounds": [
+    {
+      "round": 0,
+      "iterations": 1000,
+      "elapsedMs": 5221.0906,
+      "nsPerCall": 5221090.6,
+      "allocatedBytes": 1634453584
+    },
+    {
+      "round": 1,
+      "iterations": 1000,
+      "elapsedMs": 5727.8972,
+      "nsPerCall": 5727897.2,
+      "allocatedBytes": 1631669088
+    },
+    {
+      "round": 2,
+      "iterations": 1000,
+      "elapsedMs": 3975.6752,
+      "nsPerCall": 3975675.2,
+      "allocatedBytes": 1628465648
+    },
+    {
+      "round": 3,
+      "iterations": 1000,
+      "elapsedMs": 3341.0481,
+      "nsPerCall": 3341048.1,
+      "allocatedBytes": 1629454880
+    },
+    {
+      "round": 4,
+      "iterations": 1000,
+      "elapsedMs": 1811.8923,
+      "nsPerCall": 1811892.3,
+      "allocatedBytes": 1628635168
+    }
+  ]
+}
