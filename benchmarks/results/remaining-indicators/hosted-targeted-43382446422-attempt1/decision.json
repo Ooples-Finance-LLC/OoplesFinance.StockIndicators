@@ -455,7 +455,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-43382446422-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "aab40c9b47a282bd3d0e58c968eda5d7de6590a1",
+  "integrated_paths": [
+    "src/Indicators/MassNormalizedEma.cs",
+    "tests/ModelsTests/MassNormalizedStageExecutionTests.cs"
+  ],
+  "report_sha256": "f7ed9d261280fb6f9f85ef2d000ee45da4f1aa98b55c994cc4cd2dc3c9afca82",
+  "report_archive": "benchmarks/results/remaining-indicators/qema-harness-aligned-combination-20261113-report-integration"
 }

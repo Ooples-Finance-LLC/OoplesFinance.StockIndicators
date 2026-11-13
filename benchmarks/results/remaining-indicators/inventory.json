@@ -13723,7 +13723,7 @@
     "src/Indicators/LatestOnlyIndicatorRun.cs": "012e9e497126daa5d4fb09e6d38421432e81c475ebfc8ae8ccdc93bf50e19e4f",
     "src/Indicators/LiveBarSource.cs": "8444b8b458722e99331be75c5570d74e887147da255b61a97ac743d2b2573ed1",
     "src/Indicators/LiveIndicatorRun.cs": "4299d30e6224c3a408c0fd4f72130ecd2a52ceecd11e6405243584ad49d2a5d0",
-    "src/Indicators/MassNormalizedEma.cs": "201b89db09f8534f596bef0fb275234ee2a8d5ccdd097a9a09430df350dddc1a",
+    "src/Indicators/MassNormalizedEma.cs": "762b5942751f56b682c322195711583d3631e4696f799e788d042642568a13aa",
     "src/Indicators/MatchedLinesCandles.cs": "c37fbfe77fe770b9134db1d2b7026cccb0c4a88c7f6951d33b9bc324fa1bac57",
     "src/Indicators/MedianAdaptiveAverage.cs": "5a156053ce8e8ce42cbaebfadf507199125dff16c006c0b4ba8dc92fe0511d81",
     "src/Indicators/MedianAdaptiveSnapshot.cs": "802ad5f20ea2e186e7328f3b7c4b6ae602e037fcbabf8f374560f73d247049d3",
