@@ -503,6 +503,9 @@ SCOPES['doji-region-pool-20261113'] = {'fixtures': {'SharedRangeDojiBenchmarks':
 SCOPES['skender-adl-pair-prefix-20261113'] = {'fixtures': {'SharedAdlDetailsBenchmarks': {'Skender.GetAdl': 'Skender.GetAdl'}}, 'implicit_fixtures': set(), 'paths': {'src/Core/SmaCpuKernel.cs', 'src/Indicators/ValuesBarExecution.AccumulationDistribution.cs', 'tests/ModelsTests/AccumulationPairPrefixTests.cs'}, 'methods': {'SharedAdlDetailsBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (150, 30)}
 
 
+SCOPES['t3-state-checked-regions-20261113'] = {'fixtures': {'SharedTillsonBenchmarks': {'TaLib.Functions.T3': 'TaLib.Functions.T3'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.cs', 'src/Indicators/ValuesBarExecution.TillsonRegions.cs', 'src/Indicators/ValuesBarExecution.Tillson.cs', 'tests/ModelsTests/TillsonCheckedRegionTests.cs'}, 'methods': {'SharedTillsonBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
