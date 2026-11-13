@@ -1,0 +1,23 @@
+{
+  "source_integration_commit": "4c5e3c8609438234de2d1772720bc043f0bac9f0",
+  "qualified_source": "06b7f09f4dd865f25778cb863673a18be4bfac2f",
+  "compiled_source": "94cb6d6fa0bdb247f7a7f7153947808342b3631c",
+  "source_fingerprint": "19604e8c01ae5901068b418a0d5741b9bed9e610941022e1477171d38e4f548f",
+  "unit": 23,
+  "comparator": 25,
+  "actual_gpu": 100,
+  "production_sha256": "94176b27549ad9c690a78483d42b32c5146fe21e99161edb23bfcb18162eac44",
+  "run_id": "43509389789",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 5,
+    "faster": 1
+  },
+  "integrated_paths": [
+    "src/Core/SmaCpuKernel.cs",
+    "src/Indicators/ValuesBarExecution.AccumulationDistribution.cs",
+    "tests/ModelsTests/AccumulationPairPrefixTests.cs"
+  ],
+  "verified_utc": "2026-11-13T22:09:34.761325+00:00"
+}
