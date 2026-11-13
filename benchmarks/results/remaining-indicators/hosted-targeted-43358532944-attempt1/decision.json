@@ -1047,7 +1047,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-43358532944-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "6981d876d672d02375139707c4435cbeb0184e0a",
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.Pointwise.cs",
+    "tests/ModelsTests/PointwiseParallelLimitTests.cs"
+  ],
+  "report_sha256": "9732a804f8f02fc2aa2a39f8f7da9d70958a0a7a9b5d2d0b862ad09e1bf67cf0",
+  "report_archive": "benchmarks/results/remaining-indicators/hyperbolic-fanout-threshold-20261112-report-integration"
 }
