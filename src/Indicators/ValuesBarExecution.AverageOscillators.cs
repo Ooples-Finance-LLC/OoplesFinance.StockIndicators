@@ -36,17 +36,27 @@ internal static partial class ValuesBarExecution
         }
     }
 
+    [System.Runtime.CompilerServices.InlineArray(4)]
+    private struct AwesomeScratch
+    {
+        private double _element0;
+    }
+
     private struct AwesomeKernel(AwesomeWithDetails.State state, BoundedOutput target) : IBoundedKernel<AwesomeKernel>
     {
         private int _index = target.Origin;
+        private AwesomeScratch _scratch;
         public static AwesomeKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
         {
             var awesome = (AwesomeWithDetails)indicator;
             return new(new(awesome.FastPeriod, awesome.SlowPeriod, false), target);
         }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public double Update(in Bar bar)
         {
-            Span<double> values = stackalloc double[4];
+            // Each region owns its buffer. State.Update clears all four slots,
+            // including absent outputs, before publishing the next bar.
+            Span<double> values = _scratch;
             state.Update(in bar, values);
             int index = _index++;
             if (index >= target.WriteStart)
