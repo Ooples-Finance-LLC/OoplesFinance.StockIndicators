@@ -491,6 +491,9 @@ SCOPES['qema-harness-aligned-combination-20261113'] = {'fixtures': {'SharedNativ
 SCOPES['awesome-region-scratch-20261113'] = {'fixtures': {'SharedAverageOscillatorBenchmarks': {'Skender.GetAwesome': 'Skender.GetAwesome'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.AverageOscillators.cs', 'tests/ModelsTests/AwesomeRegionScratchTests.cs'}, 'methods': {'SharedAverageOscillatorBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
 
 
+SCOPES['awesome-native-fixture-repair-20261113'] = {'fixtures': {'SharedSkenderFiniteWindowBenchmarks': {'Skender.GetAwesome': 'Skender.GetAwesome'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.AverageOscillators.cs', 'tests/ModelsTests/AwesomeRegionScratchTests.cs'}, 'methods': {'SharedSkenderFiniteWindowBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (30, 6), 'shards': 1, 'baseline_phase': 'targeted', 'baseline_totals': (30, 6)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 

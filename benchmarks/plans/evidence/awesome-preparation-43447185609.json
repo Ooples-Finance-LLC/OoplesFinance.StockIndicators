@@ -1,0 +1,259 @@
+{
+  "plan_sha256": "675bff42ca6dada8e415cffdfe3243f4037c715a87c4442f756852c45f32a599",
+  "sources": {
+    "published": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+    "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+    "successor": "ddb65bac446f0a5a0f64ef36c9995748918ad2db",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "source_trees": {
+    "old": "2049a2de216fdfe397508caeb5c7b64394af1293",
+    "successor": "f62274565bc7d64e0625dd88e06e3158177d6568",
+    "variants": "35a742cdcff95a1220cf16ee9b46428b4d1d6dae"
+  },
+  "production_sha256": {
+    "old": "3d36eb08654c61999f3d23015c5246f78d84e18f1aa04b30f89084e607c713b6",
+    "successor": "032ca2b5b9edd6e2c123f8c0b3e663b8021f57e89883f3a9869034487ea9dfc4",
+    "variants": "4deaed0e778271ea8a8e32556c5fab192b6791117b78863c9051e785e7a0b499"
+  },
+  "common_manifest": {
+    "AiDotNet.Evolution.dll": "cbdfb8cca25727b967b75b51f15da2832f275c56d4204ce434af2e96c7e166e6",
+    "AiDotNet.Tensors.dll": "4679eed71749ed6ebdd7d7e5674b79dd6f2610884f8fe909e900c43dcfe59cf4",
+    "amd64/KernelTraceControl.dll": "98de2f1de4fb1711688c04e2cb0187bf8c47e627771e8f51329671f296bfc688",
+    "amd64/msdia140.dll": "52b87b5cacbad5a32362ef467693dd559f380b626af310d3875b05cb5ed81a98",
+    "arm64/KernelTraceControl.dll": "45b6d97a6c64229976b71a0fe709617190267fd02147a5c7e1e4fb9b17fa2956",
+    "arm64/msdia140.dll": "4c330ab3b24cf8d1aca253014fdfba33dc24198aa0d9b6c3a4ede06486546c17",
+    "BenchmarkDotNet.Annotations.dll": "4b5d273032cae7c8fc97e16713b8d4f1ee3a2aa28a0e2bd0695232fb9dd7d558",
+    "BenchmarkDotNet.dll": "d460626b2e1a9fa2f786e09e6c85cdf4d7b73deca636450a0e23892c8ce6192b",
+    "BouncyCastle.Cryptography.dll": "e5eeaf6d263c493619982fd3638e6135077311d08c961e1fe128f9107d29ebc6",
+    "CommandLine.dll": "8a55501cd1a1590a4bd93a17c6fdd2c01a0ed5bff1aea9036bdc78d98c9a3fad",
+    "cs/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "27124fd265633dbbb0bb32c61cf5a52d8e98a3c766f53df074cb76ae52244d25",
+    "cs/Microsoft.CodeAnalysis.Scripting.resources.dll": "4e30f57fc909fd730cb57ca134ba1d6bb1b99897575ae96db346defed996cea1",
+    "de/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "8daa5eb5a38ef75bfeeba6b7363b0324b8be16022bc7fa5a9568bb5128a07bd2",
+    "de/Microsoft.CodeAnalysis.Scripting.resources.dll": "88f7088332ec3497fa94567b6f99e153cad6fc7c6aa56bec94a13a780c6a2a85",
+    "Dia2Lib.dll": "6c4cac68010fe032218efe5e9fcf46eef9f77bfaa5f3bd33f03c5ff77d5a8fac",
+    "es/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "6cb57aeeaf19e3a8824f56c2d5bebfcb8a5d5b6f24bfa01023ff7e9e7b9a3a8a",
+    "es/Microsoft.CodeAnalysis.Scripting.resources.dll": "3b244dd084db040f26a666f6f71eb0d14d71ee1fb91203c65440b98822d61834",
+    "fr/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "f8c8b6e5eb6b8bb4386e545faea50be7bb3fc8bbbe8bccae930645411c1a1793",
+    "fr/Microsoft.CodeAnalysis.Scripting.resources.dll": "36fc265402f7d968246acf0ded7fad5df1b74c409f38455f38cc56dd1ada997a",
+    "Gee.External.Capstone.dll": "6dfda67784598de9677173b89d0692593935f1a4024d36040c95dea48c1b5965",
+    "Iced.dll": "f058c01321b4cdfc9b9151879e88e59571c8d0ba176fbcf95bc936a8f3d073ed",
+    "Images/Favicon.jpg": "f4389ae10788328843689312a54aad54076333a19d9e0a4288a9b0d89c5f782d",
+    "it/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "c90b4c0b4566df060ba7aefdc6084df54d35a32926fe6978037e82e562c66a82",
+    "it/Microsoft.CodeAnalysis.Scripting.resources.dll": "1b4efd447169acf38c3a85fcc15728ef975e68d8e8ad35d00cf419f89b954d4d",
+    "ja/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "05655b512402c85e69e6f77e04c726868ff9ab3414f66b17a30f6e814e8459a2",
+    "ja/Microsoft.CodeAnalysis.Scripting.resources.dll": "23bed3b5b5621e8d078013c9703c8820e9092db18b316e726a53fd0bdb94158a",
+    "JetBrains.Annotations.dll": "288e2dc80cfed580d51586321df26381590182619ed2bfea595e1b154fdd2eca",
+    "K4os.Compression.LZ4.dll": "e282aadc2353b864fe95cd5fb525a1a093d99a30a5bf2530b7ab831d56179816",
+    "ko/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "cb58785c30551eaf97db5e63d9278f4b4b51da3e755c019063149a01589fb596",
+    "ko/Microsoft.CodeAnalysis.Scripting.resources.dll": "dc73366bee4f18839bbacbcd5b0ff8804bfeafe58c7967cd7774ee42edba805c",
+    "Microsoft.AspNetCore.Html.Abstractions.dll": "c886039e64b4cafac80929bf7f153fde9966b088facb38d89ce1ae490bc3bb1c",
+    "Microsoft.CodeAnalysis.CSharp.dll": "53302acca07700e9bb10dcf21034435d6e0454c8eebf2481164ec13e520004c9",
+    "Microsoft.CodeAnalysis.CSharp.Scripting.dll": "6a1a6797944431e747e8cc49c8d938341214be56c92939d20990bc70313414f2",
+    "Microsoft.CodeAnalysis.dll": "395736b2d0e02be77bedc3847b269da7a93bf8e49cd3431a4a8e68d2c52d5846",
+    "Microsoft.CodeAnalysis.Scripting.dll": "3d3b8eef0bdf99f46b2280257d19bf69fd0c826a8afbbc03d2589ec5e0217ff0",
+    "Microsoft.Diagnostics.FastSerialization.dll": "83e89baf0bbecca8cfa194cff13365f716849e22efc374b669206f26998a019f",
+    "Microsoft.Diagnostics.NETCore.Client.dll": "baed2d25ca5bc53a3447c237d5572c92eac1fd842807b3e72602a711749b1b22",
+    "Microsoft.Diagnostics.Runtime.dll": "06f9910c8a37f8d4d758538e6dd307de58bcfb3bb13e83658142c08087a25382",
+    "Microsoft.Diagnostics.Tracing.TraceEvent.dll": "401e948dac99d0f9756ef96d5a8b8e4736e19e9f82ce8cdd744495951e3a94bb",
+    "Microsoft.DotNet.Interactive.Formatting.dll": "ec41df3311be1f10b8cfeefa94afaefc354581ef8a9974e1ec8cb0aebe95ed26",
+    "Microsoft.DotNet.PlatformAbstractions.dll": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3",
+    "Microsoft.Extensions.Caching.Abstractions.dll": "62347619a8470e0aac5e9b16ca09b443e592c3ea74a498542500875e39ee9b9b",
+    "Microsoft.Extensions.Caching.Memory.dll": "80628cfa9f2d7f5a91ed89fd5397bace231ab9d0f81cf703f6de0936da3994f6",
+    "Microsoft.Extensions.DependencyInjection.Abstractions.dll": "7c97c4463fe0fc11d1f22f4d160b2bd2288981adf1de2717a6ff3fb993ddf294",
+    "Microsoft.Extensions.DependencyInjection.dll": "2aa8182b5356a8cc5c35fc3641a87e814857d8d9be399ac78f260343754d09e0",
+    "Microsoft.Extensions.Logging.Abstractions.dll": "a76a735b63e6ef3b0bf41ff92423cbd16103b8952e8306140a9bd650346034dc",
+    "Microsoft.Extensions.Logging.dll": "183650081b551dfad967a7cbf79946a229cb79458b8d04a12db7c44b03bb9ab7",
+    "Microsoft.Extensions.Options.dll": "786112cb2f6646ef1170219a8c0bb813c9f14a6781e67c6266414f55a679565d",
+    "Microsoft.Extensions.Primitives.dll": "8ce9a85927ec7507b11ffe90080e7a811d51304a9e8b1da20c350159ba403902",
+    "NuGet.Frameworks.dll": "bdef879f0a4ab2ad97fe934f54e30aee0d06ad06a3ef292933308fca34906ef8",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.deps.json": "44b91eb02ef601214183108fb0eb4461514fbfe50f086e704c1a8d895b2d83de",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "3fc0aa8dd401f21fab0c9d3badc3858cc91ff2b62af41e9fac78c214b911279a",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.exe": "78a4bb7d1bf81c30dc4449816a22c0e8d31cc2acf7cb45009e5e748c88826f07",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.pdb": "8648d9cb7e24d5a7e4183a8783cf54ed8f369c4b59da669c9d78d633c6db3e5b",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json": "c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097",
+    "OoplesFinance.StockIndicators.dll": "4deaed0e778271ea8a8e32556c5fab192b6791117b78863c9051e785e7a0b499",
+    "OoplesFinance.StockIndicators.pdb": "2d26be9650edda51ba08a909b1a4106606023de9cdc62aa0547c4fbacb2764fd",
+    "Perfolizer.dll": "22a4a336db943465cbdfc8d0a8e23e89df3024d39f1c5954d97554b3da39e300",
+    "pl/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "ae252641248285be49550fb0fa0371122bf85ffbe5fdedad0908dfbe292262b2",
+    "pl/Microsoft.CodeAnalysis.Scripting.resources.dll": "f7af384c6516fe42165aff36ce37b223d4b7e16e91a17c2ce0f05145b03086d1",
+    "Pragmastat.dll": "e9b3fc36000e7fe3fb11d3ea6a65f3c9c7b17e03c9f5034306437d65972e8c51",
+    "pt-BR/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "bf822dd4695826fae55d1f2ad7056c26dddbdbf691f0d992a055069d14adfbb7",
+    "pt-BR/Microsoft.CodeAnalysis.Scripting.resources.dll": "e91fb30d165853ea29e667a10e4200597c667a91701d3103c1acb5e400054e4e",
+    "QuanTAlib.dll": "71a83a3cc9331db0661bd5d1349481b178a10309c838793a055c41387623cfc6",
+    "ru/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "72a2df33b22e2715cd4d2d2139dc23ea00224ff01d17c59c336da5ac5b33075d",
+    "ru/Microsoft.CodeAnalysis.Scripting.resources.dll": "8f51645e119bd588042bbea139ab5f5130e36631ca4c9d72cea296c80f5018f2",
+    "runtimes/linux-arm/native/libshaderc_shared.so": "c417c58fd11517ead6f2c5e719cec939207177c3ff50d5d560662e8bd685891d",
+    "runtimes/linux-arm64/native/libshaderc_shared.so": "098442f2b2e6d9b5eb82fef44228c7a01d00364e2caee529334226cda8ec515f",
+    "runtimes/linux-x64/native/libshaderc_shared.so": "9f2d5c6f53c191e59376251c614043019c6a7e325809703cad186da9b9dce6d3",
+    "runtimes/osx-arm64/native/libshaderc_shared.dylib": "1a4b2d850e6d967346565ae3c5c5a3d60e543eccd5d643543ce7572312e50965",
+    "runtimes/osx-x64/native/libshaderc_shared.dylib": "25248b7c357f87e18e2d34de29607c9dbfccfe28c85ab3176b49ecb9cd0eb97e",
+    "runtimes/win/lib/net9.0/System.Management.dll": "6cfb974d66ad8d17398d5aa3898309e446c239152f7525b141c86c3172206caf",
+    "runtimes/win-arm64/native/shaderc_shared.dll": "cae601b38a3389d3a5cc4b956a06e53d7e383f043e64c55640ce329c62c2dbea",
+    "runtimes/win-x64/native/capstone.dll": "f03321188a1615d044314b1183dcd9a7ffda09286c31c369d109165d4892dcbb",
+    "runtimes/win-x64/native/shaderc_shared.dll": "8e13592eac48b94755e4aa4c41552b210b41ca906d0bfe35b0a6d47a97d0b7c6",
+    "runtimes/win-x86/native/shaderc_shared.dll": "1882e7c8f08d747e55e98d833a5cc1b37e252e1f7cdbd7a87ba4aaa37a02686e",
+    "Skender.Stock.Indicators.dll": "0408495cde22e3795c6efcb16d88da9e82d0aa0dbd88e5d39b41db9fb171bf93",
+    "System.CodeDom.dll": "8d0cf191c86feea81c9875652c06e454abe8dbff66bea9e4cb5f8aa2dc02f32a",
+    "System.CommandLine.dll": "68234d41239b528a72d9899bffb8d338a6054c28bbd6a7afd1691242b50ae184",
+    "System.CommandLine.Rendering.dll": "a767150ce81014ca69ed968f0081f4ba224ea49deafef24b6f5f7ca8615ec1c4",
+    "System.Management.dll": "0be24b09da5abad0b20efcb58fab14b0dedc79b09d4fbdcb894be268105a2195",
+    "TALib.NETCore.dll": "980edcda5db3ab7b0cdd9ef877aa784aa93728129f134c023a1e08acedeefcbe",
+    "tr/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "e851cc875e5264ba5a07d506b3e64c524efde83977caefa25ca4af7bee84c7dd",
+    "tr/Microsoft.CodeAnalysis.Scripting.resources.dll": "138d228976e10aef027f18a919ebc33cad28d0de2c7dcc5fa7336ef524bf03f2",
+    "TraceReloggerLib.dll": "6830c0f1d3f3c17719181e73dd5cfa8ccbb3f3c575329d2120576545103467b5",
+    "Trady.Analysis.dll": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+    "Trady.Core.dll": "eddc81389f75c0b47910b631ea7d9bcfae670c2ce44ffc6aff60a966e1312b7d",
+    "x86/KernelTraceControl.dll": "7a4b8319f36304a7686576ea130a351818f73fabf90c511e243b957fdfa8cbb0",
+    "x86/KernelTraceControl.Win61.dll": "b7a83f51eae2824e9259ffe567f0fb42177d7b02674be760eb88df270459d8bf",
+    "x86/msdia140.dll": "6d05dd14282dcb59b9d347f8ed0c81bf2cb46a43a17295f8352f3e213f8844c2",
+    "zh-Hans/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "c50c1f8cb6c860b0ac37ec08d2352e3286d9be7d1a5f00a34c2495e5ca1acb33",
+    "zh-Hans/Microsoft.CodeAnalysis.Scripting.resources.dll": "ddee52594e7781e07d64c9eb3d95f6881d3fac33f9808a482b9b1f7bc36c5d3d",
+    "zh-Hant/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "ef11f6c38f005b7abff3c6a9e1133a08045ee69abfd859475725053149f70548",
+    "zh-Hant/Microsoft.CodeAnalysis.Scripting.resources.dll": "c5509918a0b8b95afa5f71fbb2ca837aca12fc26eb2da0d6988a313a58e983cd"
+  },
+  "evidence_manifest": {
+    "old-build.log": "a2a73d1b4f1af77bda59bb01a58edd0b628f0f7c1fff294ce16bddb3ccf8902c",
+    "old-original-gpu-gpu.trx.gz": "d508db5bf063752d698068ad3fec4e97b152892c283367a2941b3114689b0b25",
+    "old-original-gpu-receipt.json": "5479a976d2ddd88440ef6f6412ed4a01552d270dbb15b224ce0c92656d908074",
+    "old-tests.log": "67ade54ab391404e303dc883551d893a491d3fe6bbba2883462c409ccd43a90e",
+    "old.trx": "ed3b15596362de0d88063f52f7303407fd92c594507ad7601acfb6e042160c72",
+    "successor-build.log": "873a1f5f789b97f4ab64e8d9b85d3f72f97d00846e0f3a1aac70067560ba0dda",
+    "successor-original-gpu-gpu.trx.gz": "e54f43cedd34d725347074f11fda960ec61382d3bf5fa4307b78aa3cc85bc61f",
+    "successor-original-gpu-receipt.json": "2dce89b1ed7fa916c8cc9d29f49817b7b8490962bd96c5e38cd5a034dd0273df",
+    "successor-tests.log": "2c3c4926551b9fde51042d55308d3d5e5d9928041ff87ef9523c5432882a5e7b",
+    "successor.trx": "39d687ee38147146276734c4a29d00786aeb4519a05dc47e2a66bc03f841ec74",
+    "variant-harness-build.log": "3e70d81b40c4a24a028e479cbef94d72d1eee6e6500ec2b2bb9a3fce6c5606a0",
+    "variant-harness-tests.log": "6d0e5545227fb7ea99d4853aa8c6e3820b525b23a0281c63dccef51c30ca357d",
+    "variant-harness.trx": "da51d7992515c3baab9a2ca1f6e784903cf32d11d9c03a654a4233a68463231f",
+    "variants-build.log": "62088443938b80aa4e302ce05943e0b7aaad4b1e32bc57cd53fe1484400c7221",
+    "variants-original-gpu-gpu.trx.gz": "494ac1c797c6b2aedb1810e7001d343988eb2a6ea3e6050fb206ea272dff45e1",
+    "variants-original-gpu-receipt.json": "a75c195b52345ae71630817a34b557ac1614c74ea60be211ec95fd9e3635b5e6",
+    "variants-tests.log": "528f23553bc562bd807ab69b38471329a5ee28b829cf525de96034a0c857cfd0",
+    "variants.trx": "96afce79d66378289d8fa14bdcfad4987807b70e7071950e917b85a710be16df"
+  },
+  "checks": {
+    "old": {
+      "passed": 11,
+      "classes": {
+        "AverageOscillatorSharedExecutionTests": 11
+      },
+      "sha256": "ed3b15596362de0d88063f52f7303407fd92c594507ad7601acfb6e042160c72",
+      "original_gpu_source": "1b8a85f85a9629d2639113c526be82fc01d378aa"
+    },
+    "successor": {
+      "passed": 14,
+      "classes": {
+        "AverageOscillatorSharedExecutionTests": 11,
+        "AwesomeRegionScratchTests": 3
+      },
+      "sha256": "39d687ee38147146276734c4a29d00786aeb4519a05dc47e2a66bc03f841ec74",
+      "original_gpu_source": "ddb65bac446f0a5a0f64ef36c9995748918ad2db"
+    },
+    "variants": {
+      "passed": 54,
+      "classes": {
+        "CompactMacdWordEmaTests": 27,
+        "CompactClassicalWindowTests": 23,
+        "ExactMeanUnitWeightTests": 4
+      },
+      "sha256": "96afce79d66378289d8fa14bdcfad4987807b70e7071950e917b85a710be16df",
+      "original_gpu_source": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+    },
+    "variant-harness": {
+      "passed": 13,
+      "classes": {
+        "SharedClassicalWindowVariantBenchmarkTests": 13
+      },
+      "sha256": "da51d7992515c3baab9a2ca1f6e784903cf32d11d9c03a654a4233a68463231f"
+    }
+  },
+  "sdk": "10.0.403",
+  "dotnet_info": ".NET SDK:\n Version:           10.0.403\n Commit:            5a2162bea6\n Workload version:  10.0.400-manifests.899c35d8\n MSBuild version:   18.9.15+5a2162bea\n\nRuntime Environment:\n OS Name:     Windows\n OS Version:  10.0.26100\n OS Platform: Windows\n RID:         win-x64\n Base Path:   C:\\Program Files\\dotnet\\sdk\\10.0.403\\\n\n.NET workloads installed:\n [maui-windows]\n   Installation Source: VS 18.11.12328.437\n   Manifest Version:    10.0.110/10.0.100\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.maui\\10.0.110\\WorkloadManifest.json\n   Install Type:              Msi\n\n [maccatalyst]\n   Installation Source: VS 18.11.12328.437\n   Manifest Version:    26.5.10315/10.0.100\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.maccatalyst\\26.5.10315\\WorkloadManifest.json\n   Install Type:              Msi\n\n [ios]\n   Installation Source: VS 18.11.12328.437\n   Manifest Version:    26.5.10315/10.0.100\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.ios\\26.5.10315\\WorkloadManifest.json\n   Install Type:              Msi\n\n [android]\n   Installation Source: VS 18.11.12328.437\n   Manifest Version:    36.1.118/10.0.100\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.android\\36.1.118\\WorkloadManifest.json\n   Install Type:              Msi\n\n [wasm-tools]\n   Installation Source: VS 18.11.12328.437\n   Manifest Version:    10.0.114/10.0.100\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.workload.mono.toolchain.current\\10.0.114\\WorkloadManifest.json\n   Install Type:              Msi\n\nConfigured to use workload sets when installing new manifests.\nNo workload sets are installed. Run \"dotnet workload restore\" to install a workload set.\n\nHost:\n  Version:      10.0.15\n  Architecture: x64\n  Commit:       8e0f8ed231\n\n.NET SDKs installed:\n  8.0.133 [C:\\Program Files\\dotnet\\sdk]\n  8.0.206 [C:\\Program Files\\dotnet\\sdk]\n  8.0.319 [C:\\Program Files\\dotnet\\sdk]\n  8.0.427 [C:\\Program Files\\dotnet\\sdk]\n  9.0.123 [C:\\Program Files\\dotnet\\sdk]\n  9.0.205 [C:\\Program Files\\dotnet\\sdk]\n  9.0.320 [C:\\Program Files\\dotnet\\sdk]\n  10.0.114 [C:\\Program Files\\dotnet\\sdk]\n  10.0.204 [C:\\Program Files\\dotnet\\sdk]\n  10.0.303 [C:\\Program Files\\dotnet\\sdk]\n  10.0.403 [C:\\Program Files\\dotnet\\sdk]\n\n.NET runtimes installed:\n  Microsoft.AspNetCore.App 8.0.6 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 8.0.22 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 8.0.33 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 9.0.6 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 9.0.22 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 10.0.8 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 10.0.11 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\n  Microsoft.AspNetCore.App 10.0.14 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\n  Microsoft.NETCore.App 8.0.6 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\n  Microsoft.NETCore.App 8.0.22 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\n  Microsoft.NETCore.App 8.0.33 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\n  Microsoft.NETCore.App 9.0.6 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\n  Microsoft.NETCore.App 9.0.22 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\n  Microsoft.NETCore.App 10.0.8 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\n  Microsoft.NETCore.App 10.0.11 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\n  Microsoft.NETCore.App 10.0.14 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\n  Microsoft.NETCore.App 10.0.15 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\n  Microsoft.WindowsDesktop.App 8.0.6 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\n  Microsoft.WindowsDesktop.App 8.0.22 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\n  Microsoft.WindowsDesktop.App 8.0.33 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\n  Microsoft.WindowsDesktop.App 9.0.6 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\n  Microsoft.WindowsDesktop.App 9.0.22 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\n  Microsoft.WindowsDesktop.App 10.0.8 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\n  Microsoft.WindowsDesktop.App 10.0.11 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\n  Microsoft.WindowsDesktop.App 10.0.14 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\n\nOther architectures found:\n  x86   [C:\\Program Files (x86)\\dotnet]\n    registered at [HKLM\\SOFTWARE\\dotnet\\Setup\\InstalledVersions\\x86\\InstallLocation]\n\nEnvironment variables:\n  DOTNET_MULTILEVEL_LOOKUP                 [0]\n  DOTNET_NOLOGO                            [1]\n  DOTNET_ROOT                              [C:\\Program Files\\dotnet]\n  DOTNET_SKIP_FIRST_TIME_EXPERIENCE        [1]\n\nglobal.json file:\n  Not found\n\nLearn more:\n  https://aka.ms/dotnet/info\n\nDownload .NET:\n  https://aka.ms/dotnet/download\n",
+  "workflow_head": "30d42ffa4c74b3c3262c4f89de219afb5dcd12dd",
+  "run_id": "43447185609",
+  "run_attempt": "1",
+  "tested_runtime_dependencies": {
+    "old": {
+      "packages": {
+        "AiDotNet.Tensors": "0.150.0",
+        "Silk.NET.Shaderc.Native": "2.23.0",
+        "Microsoft.Extensions.Logging.Abstractions": "10.0.0",
+        "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
+        "K4os.Compression.LZ4": "1.3.8",
+        "BouncyCastle.Cryptography": "2.6.2",
+        "AiDotNet.Evolution": "0.7.0"
+      },
+      "files": {
+        "AiDotNet.Tensors.dll": "4679eed71749ed6ebdd7d7e5674b79dd6f2610884f8fe909e900c43dcfe59cf4",
+        "runtimes/linux-arm/native/libshaderc_shared.so": "c417c58fd11517ead6f2c5e719cec939207177c3ff50d5d560662e8bd685891d",
+        "runtimes/linux-arm64/native/libshaderc_shared.so": "098442f2b2e6d9b5eb82fef44228c7a01d00364e2caee529334226cda8ec515f",
+        "runtimes/linux-x64/native/libshaderc_shared.so": "9f2d5c6f53c191e59376251c614043019c6a7e325809703cad186da9b9dce6d3",
+        "runtimes/osx-arm64/native/libshaderc_shared.dylib": "1a4b2d850e6d967346565ae3c5c5a3d60e543eccd5d643543ce7572312e50965",
+        "runtimes/osx-x64/native/libshaderc_shared.dylib": "25248b7c357f87e18e2d34de29607c9dbfccfe28c85ab3176b49ecb9cd0eb97e",
+        "runtimes/win-arm64/native/shaderc_shared.dll": "cae601b38a3389d3a5cc4b956a06e53d7e383f043e64c55640ce329c62c2dbea",
+        "runtimes/win-x64/native/shaderc_shared.dll": "8e13592eac48b94755e4aa4c41552b210b41ca906d0bfe35b0a6d47a97d0b7c6",
+        "runtimes/win-x86/native/shaderc_shared.dll": "1882e7c8f08d747e55e98d833a5cc1b37e252e1f7cdbd7a87ba4aaa37a02686e",
+        "Microsoft.Extensions.Logging.Abstractions.dll": "a76a735b63e6ef3b0bf41ff92423cbd16103b8952e8306140a9bd650346034dc",
+        "Microsoft.Extensions.DependencyInjection.Abstractions.dll": "7c97c4463fe0fc11d1f22f4d160b2bd2288981adf1de2717a6ff3fb993ddf294",
+        "K4os.Compression.LZ4.dll": "e282aadc2353b864fe95cd5fb525a1a093d99a30a5bf2530b7ab831d56179816",
+        "BouncyCastle.Cryptography.dll": "e5eeaf6d263c493619982fd3638e6135077311d08c961e1fe128f9107d29ebc6",
+        "AiDotNet.Evolution.dll": "cbdfb8cca25727b967b75b51f15da2832f275c56d4204ce434af2e96c7e166e6"
+      }
+    },
+    "successor": {
+      "packages": {
+        "AiDotNet.Tensors": "0.150.0",
+        "Silk.NET.Shaderc.Native": "2.23.0",
+        "Microsoft.Extensions.Logging.Abstractions": "10.0.0",
+        "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
+        "K4os.Compression.LZ4": "1.3.8",
+        "BouncyCastle.Cryptography": "2.6.2",
+        "AiDotNet.Evolution": "0.7.0"
+      },
+      "files": {
+        "AiDotNet.Tensors.dll": "4679eed71749ed6ebdd7d7e5674b79dd6f2610884f8fe909e900c43dcfe59cf4",
+        "runtimes/linux-arm/native/libshaderc_shared.so": "c417c58fd11517ead6f2c5e719cec939207177c3ff50d5d560662e8bd685891d",
+        "runtimes/linux-arm64/native/libshaderc_shared.so": "098442f2b2e6d9b5eb82fef44228c7a01d00364e2caee529334226cda8ec515f",
+        "runtimes/linux-x64/native/libshaderc_shared.so": "9f2d5c6f53c191e59376251c614043019c6a7e325809703cad186da9b9dce6d3",
+        "runtimes/osx-arm64/native/libshaderc_shared.dylib": "1a4b2d850e6d967346565ae3c5c5a3d60e543eccd5d643543ce7572312e50965",
+        "runtimes/osx-x64/native/libshaderc_shared.dylib": "25248b7c357f87e18e2d34de29607c9dbfccfe28c85ab3176b49ecb9cd0eb97e",
+        "runtimes/win-arm64/native/shaderc_shared.dll": "cae601b38a3389d3a5cc4b956a06e53d7e383f043e64c55640ce329c62c2dbea",
+        "runtimes/win-x64/native/shaderc_shared.dll": "8e13592eac48b94755e4aa4c41552b210b41ca906d0bfe35b0a6d47a97d0b7c6",
+        "runtimes/win-x86/native/shaderc_shared.dll": "1882e7c8f08d747e55e98d833a5cc1b37e252e1f7cdbd7a87ba4aaa37a02686e",
+        "Microsoft.Extensions.Logging.Abstractions.dll": "a76a735b63e6ef3b0bf41ff92423cbd16103b8952e8306140a9bd650346034dc",
+        "Microsoft.Extensions.DependencyInjection.Abstractions.dll": "7c97c4463fe0fc11d1f22f4d160b2bd2288981adf1de2717a6ff3fb993ddf294",
+        "K4os.Compression.LZ4.dll": "e282aadc2353b864fe95cd5fb525a1a093d99a30a5bf2530b7ab831d56179816",
+        "BouncyCastle.Cryptography.dll": "e5eeaf6d263c493619982fd3638e6135077311d08c961e1fe128f9107d29ebc6",
+        "AiDotNet.Evolution.dll": "cbdfb8cca25727b967b75b51f15da2832f275c56d4204ce434af2e96c7e166e6"
+      }
+    },
+    "variants": {
+      "packages": {
+        "AiDotNet.Tensors": "0.150.0",
+        "Silk.NET.Shaderc.Native": "2.23.0",
+        "Microsoft.Extensions.Logging.Abstractions": "10.0.0",
+        "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
+        "K4os.Compression.LZ4": "1.3.8",
+        "BouncyCastle.Cryptography": "2.6.2",
+        "AiDotNet.Evolution": "0.7.0"
+      },
+      "files": {
+        "AiDotNet.Tensors.dll": "4679eed71749ed6ebdd7d7e5674b79dd6f2610884f8fe909e900c43dcfe59cf4",
+        "runtimes/linux-arm/native/libshaderc_shared.so": "c417c58fd11517ead6f2c5e719cec939207177c3ff50d5d560662e8bd685891d",
+        "runtimes/linux-arm64/native/libshaderc_shared.so": "098442f2b2e6d9b5eb82fef44228c7a01d00364e2caee529334226cda8ec515f",
+        "runtimes/linux-x64/native/libshaderc_shared.so": "9f2d5c6f53c191e59376251c614043019c6a7e325809703cad186da9b9dce6d3",
+        "runtimes/osx-arm64/native/libshaderc_shared.dylib": "1a4b2d850e6d967346565ae3c5c5a3d60e543eccd5d643543ce7572312e50965",
+        "runtimes/osx-x64/native/libshaderc_shared.dylib": "25248b7c357f87e18e2d34de29607c9dbfccfe28c85ab3176b49ecb9cd0eb97e",
+        "runtimes/win-arm64/native/shaderc_shared.dll": "cae601b38a3389d3a5cc4b956a06e53d7e383f043e64c55640ce329c62c2dbea",
+        "runtimes/win-x64/native/shaderc_shared.dll": "8e13592eac48b94755e4aa4c41552b210b41ca906d0bfe35b0a6d47a97d0b7c6",
+        "runtimes/win-x86/native/shaderc_shared.dll": "1882e7c8f08d747e55e98d833a5cc1b37e252e1f7cdbd7a87ba4aaa37a02686e",
+        "Microsoft.Extensions.Logging.Abstractions.dll": "a76a735b63e6ef3b0bf41ff92423cbd16103b8952e8306140a9bd650346034dc",
+        "Microsoft.Extensions.DependencyInjection.Abstractions.dll": "7c97c4463fe0fc11d1f22f4d160b2bd2288981adf1de2717a6ff3fb993ddf294",
+        "K4os.Compression.LZ4.dll": "e282aadc2353b864fe95cd5fb525a1a093d99a30a5bf2530b7ab831d56179816",
+        "BouncyCastle.Cryptography.dll": "e5eeaf6d263c493619982fd3638e6135077311d08c961e1fe128f9107d29ebc6",
+        "AiDotNet.Evolution.dll": "cbdfb8cca25727b967b75b51f15da2832f275c56d4204ce434af2e96c7e166e6"
+      }
+    }
+  }
+}

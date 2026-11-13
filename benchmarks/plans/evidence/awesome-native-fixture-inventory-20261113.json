@@ -1,0 +1,44 @@
+{
+  "productionSha256": "321827d7ad9b3e153c6b57c8cb83f64bde40792c65a9df731a4938c05b073cfc",
+  "benchmarkModule": "add0a909-e6dd-4be9-9a52-1c33781528d2",
+  "originalFixture": "SharedAverageOscillatorBenchmarks",
+  "originalMethods": [
+    "BuilderFull",
+    "BuilderLatestOnly"
+  ],
+  "missingOriginal": [
+    "NativeSingle",
+    "NativeParallel"
+  ],
+  "correctedFixture": "SharedSkenderFiniteWindowBenchmarks",
+  "correctedMethods": [
+    "BuilderFull",
+    "BuilderLatestOnly",
+    "NativeParallel",
+    "NativeSingle"
+  ],
+  "checks": [
+    {
+      "count": 1000,
+      "setupIndependentReferences": true,
+      "requestedMethodsInvoked": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ]
+    },
+    {
+      "count": 10000,
+      "setupIndependentReferences": true,
+      "requestedMethodsInvoked": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ]
+    }
+  ],
+  "passed": true,
+  "note": "Source-bound metadata and independent-reference setup smoke; not timing or a replacement for the planned qualification."
+}
