@@ -1,0 +1,433 @@
+{
+  "diagnostic_only": true,
+  "qualification": false,
+  "partial_results_not_imported": true,
+  "incomplete_run": "43610765565",
+  "complete_pair_diagnostic_count": 30,
+  "verdicts": {
+    "inconclusive": 24,
+    "faster": 6
+  },
+  "decisions": [
+    {
+      "pair": "TaLib.Candles.MorningStar",
+      "bars": 1000,
+      "method": "Ooples",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.0311875,
+        0.038075
+      ],
+      "new_means_ms": [
+        0.027575,
+        0.03256666666666667
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.MorningStar",
+      "bars": 10000,
+      "method": "Ooples",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.1988625,
+        0.20821111111111112
+      ],
+      "new_means_ms": [
+        0.20238888888888887,
+        0.2264625
+      ]
+    },
+    {
+      "pair": "MorningStar",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.08263111979166667,
+        0.111923203125
+      ],
+      "new_means_ms": [
+        0.10969765625,
+        0.11159828125
+      ]
+    },
+    {
+      "pair": "MorningStar",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.07923231879340278,
+        0.10943952907986111
+      ],
+      "new_means_ms": [
+        0.110103232421875,
+        0.10751744384765625
+      ]
+    },
+    {
+      "pair": "MorningStar",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.2875526171875,
+        0.3234439453125
+      ],
+      "new_means_ms": [
+        0.32776345703125,
+        0.3082315755208333
+      ]
+    },
+    {
+      "pair": "MorningStar",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.26028794921875,
+        0.29806508246527774
+      ],
+      "new_means_ms": [
+        0.28434337890625,
+        0.2857908203125
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.EveningStar",
+      "bars": 1000,
+      "method": "Ooples",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.04416666666666667,
+        0.06599
+      ],
+      "new_means_ms": [
+        0.04327777777777778,
+        0.0423875
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.EveningStar",
+      "bars": 10000,
+      "method": "Ooples",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.2803,
+        0.31091111111111114
+      ],
+      "new_means_ms": [
+        0.2852444444444444,
+        0.2909375
+      ]
+    },
+    {
+      "pair": "EveningStar",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.10510283203125,
+        0.10582544921875
+      ],
+      "new_means_ms": [
+        0.10645353515625,
+        0.10598337890625
+      ]
+    },
+    {
+      "pair": "EveningStar",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.10162271728515625,
+        0.10240962890625
+      ],
+      "new_means_ms": [
+        0.10171192626953125,
+        0.09883509521484375
+      ]
+    },
+    {
+      "pair": "EveningStar",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.326821044921875,
+        0.323872998046875
+      ],
+      "new_means_ms": [
+        0.322324267578125,
+        0.3360263671875
+      ]
+    },
+    {
+      "pair": "EveningStar",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.328507734375,
+        0.3278864583333333
+      ],
+      "new_means_ms": [
+        0.32124447265625,
+        0.32305884765625
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.MorningDojiStar",
+      "bars": 1000,
+      "method": "Ooples",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.06742222222222222,
+        0.07973
+      ],
+      "new_means_ms": [
+        0.07925555555555557,
+        0.0681125
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.MorningDojiStar",
+      "bars": 10000,
+      "method": "Ooples",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.7156444444444445,
+        0.7541555555555555
+      ],
+      "new_means_ms": [
+        0.47377777777777774,
+        0.58081
+      ]
+    },
+    {
+      "pair": "MorningDojiStar",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.1410920703125,
+        0.14239390625
+      ],
+      "new_means_ms": [
+        0.13184638671875,
+        0.1424896875
+      ]
+    },
+    {
+      "pair": "MorningDojiStar",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.12702393798828124,
+        0.1273915771484375
+      ],
+      "new_means_ms": [
+        0.12963292236328125,
+        0.132642705078125
+      ]
+    },
+    {
+      "pair": "MorningDojiStar",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.49348876953125,
+        0.503363134765625
+      ],
+      "new_means_ms": [
+        0.5252890234375,
+        0.498614599609375
+      ]
+    },
+    {
+      "pair": "MorningDojiStar",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.5088174479166667,
+        0.5073908203125
+      ],
+      "new_means_ms": [
+        0.5342233203125,
+        0.5074808984375
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.EveningDojiStar",
+      "bars": 1000,
+      "method": "Ooples",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.07958,
+        0.07905
+      ],
+      "new_means_ms": [
+        0.09236666666666667,
+        0.06909444444444444
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.EveningDojiStar",
+      "bars": 10000,
+      "method": "Ooples",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.44451111111111113,
+        0.43703333333333333
+      ],
+      "new_means_ms": [
+        0.4341888888888889,
+        0.42865555555555557
+      ]
+    },
+    {
+      "pair": "EveningDojiStar",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.1389601953125,
+        0.14399234375
+      ],
+      "new_means_ms": [
+        0.136719140625,
+        0.134233935546875
+      ]
+    },
+    {
+      "pair": "EveningDojiStar",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.13019837890625,
+        0.130175576171875
+      ],
+      "new_means_ms": [
+        0.13063592664930557,
+        0.132344462890625
+      ]
+    },
+    {
+      "pair": "EveningDojiStar",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.5046775607638889,
+        0.5149758984375
+      ],
+      "new_means_ms": [
+        0.5510333984375,
+        0.50555322265625
+      ]
+    },
+    {
+      "pair": "EveningDojiStar",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "verdict": "inconclusive",
+      "old_means_ms": [
+        0.48383349609375,
+        0.495182275390625
+      ],
+      "new_means_ms": [
+        0.50730203125,
+        0.492829541015625
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.AbandonedBaby",
+      "bars": 1000,
+      "method": "Ooples",
+      "verdict": "faster",
+      "old_means_ms": [
+        0.044475,
+        0.04495
+      ],
+      "new_means_ms": [
+        0.025975,
+        0.019975
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.AbandonedBaby",
+      "bars": 10000,
+      "method": "Ooples",
+      "verdict": "faster",
+      "old_means_ms": [
+        0.3148888888888889,
+        0.3136333333333333
+      ],
+      "new_means_ms": [
+        0.10252222222222222,
+        0.10417777777777779
+      ]
+    },
+    {
+      "pair": "AbandonedBaby",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "verdict": "faster",
+      "old_means_ms": [
+        0.1176192578125,
+        0.119700859375
+      ],
+      "new_means_ms": [
+        0.084775888671875,
+        0.084487138671875
+      ]
+    },
+    {
+      "pair": "AbandonedBaby",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "verdict": "faster",
+      "old_means_ms": [
+        0.104115556640625,
+        0.105416884765625
+      ],
+      "new_means_ms": [
+        0.08078052734375,
+        0.0810309423828125
+      ]
+    },
+    {
+      "pair": "AbandonedBaby",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "verdict": "faster",
+      "old_means_ms": [
+        0.4821753515625,
+        0.36660244140625
+      ],
+      "new_means_ms": [
+        0.13436365017361113,
+        0.13631290147569444
+      ]
+    },
+    {
+      "pair": "AbandonedBaby",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "verdict": "faster",
+      "old_means_ms": [
+        0.360705546875,
+        0.335873291015625
+      ],
+      "new_means_ms": [
+        0.11690369873046876,
+        0.119809609375
+      ]
+    }
+  ]
+}

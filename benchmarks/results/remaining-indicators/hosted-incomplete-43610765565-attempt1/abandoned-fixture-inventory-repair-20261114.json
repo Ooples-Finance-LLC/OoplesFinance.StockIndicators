@@ -1,0 +1,47 @@
+{
+  "diagnostic_only": true,
+  "benchmark_sha256": "4ddcec72554e810eaaac84160d6a1c354989cd55aefa5c703438c72b3ecaf806",
+  "original_plan_rejected": "Frozen fixture SharedCrowSoldierBenchmarks lacks requested methods ['NativeParallel', 'NativeSingle']; available=['BuilderFull', 'BuilderLatestOnly']",
+  "corrected_actual_inventory": {
+    "LibraryPairBenchmarks": {
+      "requested": [
+        "Competitor",
+        "Ooples"
+      ],
+      "available": [
+        "Competitor",
+        "Ooples"
+      ]
+    },
+    "SharedCrowSoldierBenchmarks": {
+      "requested": [
+        "BuilderFull",
+        "BuilderLatestOnly"
+      ],
+      "available": [
+        "BuilderFull",
+        "BuilderLatestOnly"
+      ]
+    },
+    "SharedTaStarReversalBenchmarks": {
+      "requested": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeParallel",
+        "NativeSingle"
+      ],
+      "available": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeParallel",
+        "NativeSingle"
+      ]
+    }
+  },
+  "proposed_cases": 176,
+  "proposed_decisions": 36,
+  "new_cycle_approved": false,
+  "new_cycle_dispatched": false,
+  "sampling_runtime_cpu_gates_changed": false,
+  "partial_measurements_reused": false
+}

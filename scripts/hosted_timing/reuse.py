@@ -51,6 +51,9 @@ def prepare_reused(source, out):
         run_id=os.environ['GITHUB_RUN_ID'], run_attempt=os.environ['GITHUB_RUN_ATTEMPT'],
         preparation_mode='reused', reused_from=plan['reuse_inputs'],
         reused_at_utc=datetime.datetime.now(datetime.timezone.utc).isoformat())
+    if plan.get('require_fixture_inventory'):
+        from .fixture_inventory import record_inventory
+        proof['fixture_inventory_sha256'] = record_inventory(out, plan, digest(PLAN))
     write(out/'provenance.json', proof)
     verify_inputs(out)
     return proof

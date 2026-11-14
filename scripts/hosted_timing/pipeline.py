@@ -188,6 +188,9 @@ def warmup_context(plan, fixture, task=None):
 def verify_inputs(folder):
     proof, plan = read(folder/'provenance.json'), read(PLAN)
     _verify_input_contents(folder, plan, proof, digest(PLAN))
+    if plan.get('require_fixture_inventory'):
+        from .fixture_inventory import verify_inventory
+        verify_inventory(folder, plan, proof)
     if plan.get('reuse_inputs'):
         from .reuse import verify_reused
         verify_reused(folder, plan, proof)
@@ -340,6 +343,9 @@ def prepare(out, reuse_from=None):
                  run_id=os.environ.get('GITHUB_RUN_ID'), run_attempt=os.environ.get('GITHUB_RUN_ATTEMPT'))
     if plan.get('runtime_dependency_alignment'):
         proof['tested_runtime_dependencies'] = tested_dependencies
+    if plan.get('require_fixture_inventory'):
+        from .fixture_inventory import record_inventory
+        proof['fixture_inventory_sha256'] = record_inventory(out, plan, digest(PLAN))
     write(out/'provenance.json', proof)
     print('Prepared immutable source-qualified hosted inputs.', flush=True)
 
