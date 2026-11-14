@@ -33,6 +33,46 @@ public sealed class SmoothedCheckedRegionTests
     }
 
     [Fact]
+    public void ScalarBatchMeansMatchUnchangedMeansAtEveryStage()
+    {
+        foreach (bool first in new[] { false, true })
+        foreach (int period in new[] { 1, 2, 3, 7, 10, 40 })
+        {
+            var scalar = new SmoothedAccumulationOscillator.BatchMean(period, first);
+            var original = new SmoothedAccumulationOscillator.CompactMean(period, first);
+            for (int i = 0; i < 1000; i++)
+            {
+                int exponent = new[] { -400, -100, 0, 100, 400 }[i % 5];
+                double input = i % 17 == 0 ? -0d : Math.ScaleB((i * 13 % 101) / 8d - 6, exponent);
+                scalar.Add(input);
+                original.Add(JurikDyadic.FromDouble(input));
+                Assert.Equal(BitConverter.DoubleToInt64Bits(original.Value.Mean(1)),
+                    BitConverter.DoubleToInt64Bits(scalar.Value));
+                var key = original.CaptureContinuation();
+                if (key.Ready) Assert.Equal(key, scalar.CaptureContinuation());
+            }
+        }
+        // Certified finite prefixes can cancel to zero for long enough that
+        // an EMA crosses the subnormal boundary. Hidden state must round at
+        // every update before a later nonzero prefix resumes.
+        foreach (bool first in new[] { false, true })
+        foreach (int period in new[] { 3, 10 })
+        {
+            var scalar = new SmoothedAccumulationOscillator.BatchMean(period, first);
+            var original = new SmoothedAccumulationOscillator.CompactMean(period, first);
+            for (int i = 0; i < 10006; i++)
+            {
+                double input = i is 0 or 10003 ? Math.ScaleB(1d, 400)
+                    : i == 10005 ? Math.ScaleB(-1d, 400) : 0;
+                scalar.Add(input);
+                original.Add(JurikDyadic.FromDouble(input));
+                Assert.Equal(BitConverter.DoubleToInt64Bits(original.Value.Mean(1)),
+                    BitConverter.DoubleToInt64Bits(scalar.Value));
+            }
+        }
+    }
+
+    [Fact]
     public async Task ThresholdsDetailsSeedsAndOwnershipPreserveEveryColumn()
     {
         int prior = CpuParallelSettings.MaxDegreeOfParallelism;

@@ -198,6 +198,65 @@ public sealed class SmoothedAccumulationOscillator
         }
     }
 
+    // Guarded batch prefixes are finite. Keep already-rounded EMA state in
+    // binary64, reusing the original seed and exact smoothing certificates.
+    internal sealed class BatchMean(int period, bool first)
+    {
+        private CompactMean? _seed = new(period, first);
+        private readonly double _weight = ((long)period - 1) * .5;
+        private readonly double _denominator = ((long)period + 1) * .5;
+        private readonly bool _powerOfTwoDivisor = (((long)period + 1) & period) == 0;
+        private readonly JurikDyadic _divisor = JurikDyadic.FromDouble(((long)period + 1) * .5);
+        private readonly TsiWordEmaRecurrence _wordBlend = new(period);
+        internal double Value { get; private set; }
+
+        internal MeanContinuation CaptureContinuation() => _seed is null
+            ? new(true, period, first, first ? 1 : period, BitConverter.DoubleToInt64Bits(Value)) : default;
+
+        internal void Add(double input)
+        {
+            if (_seed is not null)
+            {
+                _seed.Add(JurikDyadic.FromDouble(input));
+                Value = _seed.Value.Mean(1);
+                if (_seed.CaptureContinuation().Ready) _seed = null;
+                return;
+            }
+            double mean;
+            if (_powerOfTwoDivisor)
+            {
+                double numerator = Math.FusedMultiplyAdd(Value, _weight, input);
+                mean = numerator / _denominator;
+                if (double.IsNormal(mean) || numerator == 0)
+                {
+                    Value = mean == 0 ? 0 : mean; // NOSONAR: Original state canonicalizes zero.
+                    return;
+                }
+            }
+            if (_wordBlend.TryAdvance(Value, input, out mean)
+                || EmaDifferenceSignal.VolumeAverage.TryBlend(Value, input, period, out mean))
+            {
+                Value = mean == 0 ? 0 : mean; // NOSONAR: Original state canonicalizes zero.
+                return;
+            }
+            if (Binary64ArithmeticCertificate.TryProduct(Value, _weight, out var weighted)
+                && Binary64ArithmeticCertificate.TryDifference(weighted, -input, out var exactNumerator))
+            {
+                mean = exactNumerator / _denominator;
+                if (double.IsFinite(mean))
+                {
+                    Value = mean == 0 ? 0 : mean; // NOSONAR: Original state canonicalizes zero.
+                    return;
+                }
+            }
+            var next = JurikDyadic.FromDouble(Value);
+            next.Multiply(_weight);
+            next.AddExact(JurikDyadic.FromDouble(input));
+            var rounded = SeededDyadicEma.RoundedRatio(next, _divisor);
+            Value = rounded.Sign == 0 ? 0 : rounded.Mean(1);
+        }
+    }
+
     private sealed class CompactState(SmoothedAccumulationOscillator owner) : IMultiOutputState
     {
         private readonly CompactMean _fast = new(owner.FastPeriod, owner.FirstValue),

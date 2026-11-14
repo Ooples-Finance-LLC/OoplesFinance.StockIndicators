@@ -8,7 +8,7 @@ internal static partial class ValuesBarExecution
 {
     private sealed class SmoothedRegion
     {
-        internal SmoothedAccumulationOscillator.CompactMean? Fast, Slow;
+        internal SmoothedAccumulationOscillator.BatchMean? Fast, Slow;
         internal SmoothedAccumulationOscillator.MeanContinuation StartFast, StartSlow;
         internal bool Ready;
         internal Exception? Error;
@@ -78,8 +78,8 @@ internal static partial class ValuesBarExecution
                 regions[chunk] = region;
                 try
                 {
-                    var fast = new SmoothedAccumulationOscillator.CompactMean(owner.FastPeriod, owner.FirstValue);
-                    var slow = new SmoothedAccumulationOscillator.CompactMean(owner.SlowPeriod, owner.FirstValue);
+                    var fast = new SmoothedAccumulationOscillator.BatchMean(owner.FastPeriod, owner.FirstValue);
+                    var slow = new SmoothedAccumulationOscillator.BatchMean(owner.SlowPeriod, owner.FirstValue);
                     region.Fast = fast;
                     region.Slow = slow;
                     int start = (int)((long)count * chunk / chunks);
@@ -104,7 +104,7 @@ internal static partial class ValuesBarExecution
             });
             cancellation.ThrowIfCancellationRequested();
 
-            SmoothedAccumulationOscillator.CompactMean? actualFast = null, actualSlow = null;
+            SmoothedAccumulationOscillator.BatchMean? actualFast = null, actualSlow = null;
             for (int chunk = 0; chunk < chunks; chunk++)
             {
                 cancellation.ThrowIfCancellationRequested();
@@ -139,16 +139,15 @@ internal static partial class ValuesBarExecution
         finally { Monitor.Exit(ParallelBarGate); }
     }
 
-    private static void AddSmoothedLine(SmoothedAccumulationOscillator.CompactMean fast,
-        SmoothedAccumulationOscillator.CompactMean slow, double line)
+    private static void AddSmoothedLine(SmoothedAccumulationOscillator.BatchMean fast,
+        SmoothedAccumulationOscillator.BatchMean slow, double line)
     {
-        var value = JurikDyadic.FromDouble(line);
-        fast.Add(value);
-        slow.Add(value);
+        fast.Add(line);
+        slow.Add(line);
     }
 
     private static void WriteSmoothedValue(SmoothedAccumulationOscillator owner,
-        SmoothedAccumulationOscillator.CompactMean fast, SmoothedAccumulationOscillator.CompactMean slow,
+        SmoothedAccumulationOscillator.BatchMean fast, SmoothedAccumulationOscillator.BatchMean slow,
         int index, double[][] output)
     {
         if (index < (long)Math.Max(owner.FastPeriod, owner.SlowPeriod) - 1 + owner.Suppression)
@@ -156,10 +155,10 @@ internal static partial class ValuesBarExecution
             output[0][index] = output[4][index] = 0;
             return;
         }
-        var oscillator = fast.Value;
-        oscillator.Subtract(slow.Value);
-        oscillator = oscillator.Rounded();
-        output[0][index] = oscillator.Sign == 0 ? 0 : oscillator.Mean(1);
+        // The certified prefix and convex means are finite and bounded well
+        // below overflow. Hardware subtraction rounds this exact difference once.
+        double oscillator = fast.Value - slow.Value;
+        output[0][index] = oscillator == 0 ? 0 : oscillator; // NOSONAR: Canonical zero.
         output[4][index] = 1;
     }
 
