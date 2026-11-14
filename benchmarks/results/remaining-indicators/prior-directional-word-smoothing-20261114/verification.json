@@ -1,0 +1,67 @@
+{
+  "source": "136ce36ffb3ecd90ff86b5b543552c420b19d751",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-prior-directional-word-smoothing-20261114",
+  "status": "correctness-complete",
+  "active": null,
+  "unit": {
+    "passed": 56,
+    "classes": {
+      "PriorDirectionalWeightedCertificateTests": 7,
+      "PriorDirectionalRawStageTests": 9,
+      "PriorDirectionalRatioTests": 4,
+      "PriorDirectionalLazyFactorTests": 3,
+      "PriorDirectionalTypedExecutionTests": 3,
+      "TillsonSharedExecutionTests": 12,
+      "TillsonWordSmoothingTests": 4,
+      "TillsonCheckedRegionTests": 4,
+      "PriorDirectionalWordSmoothingTests": 10
+    },
+    "sha256": "cb5b94604aeb9ee245c4c157cb4ab79fc94f839cb2b78dca65c2cdc6e176bdb0"
+  },
+  "parity": {
+    "passed": 49,
+    "classes": {
+      "TaDirectionalComparisonTests": 16,
+      "SharedTaDirectionalBenchmarkTests": 7,
+      "TillsonComparisonTests": 10,
+      "SharedTillsonBenchmarkTests": 16
+    },
+    "sha256": "74561d33c5eda3277dbf45c1bc07911842369823fae0e7b85a6a7d2f98d233d7"
+  },
+  "build_origin": {
+    "run_id": "43558614651",
+    "workflow_head": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "136ce36ffb3ecd90ff86b5b543552c420b19d751",
+    "artifact_id": 14099897699,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/43558614651"
+  },
+  "compiler_process_isolation": true,
+  "dependency_copy_mode": "Verified immutable CI artifacts; changed binaries installed without local compilation",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "build-and-gpu": {
+      "exit_code": 0,
+      "location": "CI build and actual local GPU"
+    },
+    "unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "parity": {
+      "exit_code": 0,
+      "location": "CI"
+    }
+  },
+  "gpu_passed": 100,
+  "source_fingerprint": "6ae43476bf358c7bcc495c4e4afbbe6ff6fbdf773c4ca722dc1da3303958a043",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "53e5ff044c5b6b1932a517dca01b194c1a4952630bf1b3927764be16777dd459",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "53e5ff044c5b6b1932a517dca01b194c1a4952630bf1b3927764be16777dd459",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "53e5ff044c5b6b1932a517dca01b194c1a4952630bf1b3927764be16777dd459",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "53e5ff044c5b6b1932a517dca01b194c1a4952630bf1b3927764be16777dd459"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}
