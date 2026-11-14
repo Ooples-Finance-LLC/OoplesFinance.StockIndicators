@@ -89,7 +89,8 @@ public sealed class ContextReversalSharedExecutionTests(ITestOutputHelper log)
         Assert.Equal(0, actual[8]); // A wrong-side context must reject.
         Assert.Equal(kind == 2 ? 100 : -100, actual[11]);
         await Check(bars.ToArray(), owner);
-        await Check(Enumerable.Range(0, 8193).Select(i => bars[i % bars.Count]).ToArray(), Create(kind, 1));
+        foreach (int count in new[] { 8191, 8192, 8193 })
+            await Check(Enumerable.Range(0, count).Select(i => bars[i % bars.Count]).ToArray(), Create(kind, 1));
     }
     private static async Task Check(Bar[] bars, IndicatorBase owner)
     {
