@@ -1,0 +1,132 @@
+{
+  "source": "b6cf7f9dc2698d6aadb93d0ed26eac57e7454758",
+  "qualified_source": "87bd6bbaf84693c55c81efb74a5190c18b1c4f4f",
+  "baseline": "7f5290b20498bb562cdd2511482857baa0b293e8",
+  "production_sha256": "9d62f5f3d2893ac2c9e10b36098982c10abe660ac541d992d2863375ba3d6006",
+  "baseline_production_sha256": "186c441ad23620cfaae3a94e9d10df7f0b46cacc66cdb8fb03860536b00ce7e5",
+  "source_fingerprint": "3b7bd152fb256a08a793e7e613b3b853eae5e2c4c512d577beaa0fe324b2c9c7",
+  "pair": "TaLib.Candles.AbandonedBaby",
+  "workers": 4,
+  "optimized_block_helper_observed": true,
+  "non_star_specialization_eliminated": true,
+  "optimized_callers": [
+    {
+      "bars": 1000,
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeAbandonedBlocks(OoplesFinance.StockIndicators.Indicators.Bar[],double[],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.AbandonedBabyCandle):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier0-FullOpts)",
+      "code_bytes": [
+        "3705"
+      ]
+    },
+    {
+      "bars": 10000,
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeAbandonedBlocks(OoplesFinance.StockIndicators.Indicators.Bar[],double[],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.AbandonedBabyCandle):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier0-FullOpts)",
+      "code_bytes": [
+        "3705"
+      ]
+    }
+  ],
+  "diagnostic_rounds": [
+    {
+      "bars": 1000,
+      "label": "old1",
+      "batches": 98950,
+      "seconds": 5.0000348,
+      "allocated_bytes": 6944252200,
+      "mean_batch_ms": 0.05053092268822637
+    },
+    {
+      "bars": 1000,
+      "label": "new1",
+      "batches": 238307,
+      "seconds": 5.0000085,
+      "allocated_bytes": 15927924600,
+      "mean_batch_ms": 0.020981374865194895
+    },
+    {
+      "bars": 1000,
+      "label": "new2",
+      "batches": 254300,
+      "seconds": 5.0000088,
+      "allocated_bytes": 16996554792,
+      "mean_batch_ms": 0.019661851356665355
+    },
+    {
+      "bars": 1000,
+      "label": "old2",
+      "batches": 97610,
+      "seconds": 5.0000208,
+      "allocated_bytes": 6854632744,
+      "mean_batch_ms": 0.05122447290236656
+    },
+    {
+      "bars": 10000,
+      "label": "old1",
+      "batches": 13276,
+      "seconds": 5.0002559,
+      "allocated_bytes": 8583779312,
+      "mean_batch_ms": 0.3766387390780356
+    },
+    {
+      "bars": 10000,
+      "label": "new1",
+      "batches": 38599,
+      "seconds": 5.0000392,
+      "allocated_bytes": 24955613920,
+      "mean_batch_ms": 0.12953805020855463
+    },
+    {
+      "bars": 10000,
+      "label": "new2",
+      "batches": 32161,
+      "seconds": 5.0000304,
+      "allocated_bytes": 20793060072,
+      "mean_batch_ms": 0.1554687478623177
+    },
+    {
+      "bars": 10000,
+      "label": "old2",
+      "batches": 2929,
+      "seconds": 5.0001777,
+      "allocated_bytes": 1902455496,
+      "mean_batch_ms": 1.7071279276203484
+    }
+  ],
+  "diagnostic_by_bars": {
+    "1000": {
+      "promising": true,
+      "mean_reduction": 0.600579153705166
+    },
+    "10000": {
+      "promising": true,
+      "mean_reduction": 0.8632251860893569
+    }
+  },
+  "roi_promising": true,
+  "disassembly_sha256": {
+    "candidate-jit-1000.txt": "5ce79c647c539cb4672cbdbb5bd7aeac43e7189cffef4ce1b63a715a3a083924",
+    "candidate-jit-10000.txt": "7961814c17e432c83237bd8986706123a49a04e4a09b8dff0d0267c5fd9e08ac",
+    "crow-control-jit.txt": "2b61dab36c58b0b509a048a5d5cd29ed41f95df139a9a8b6eec70f98fba9e821"
+  },
+  "performance_qualified": false,
+  "local_timing_usable_for_acceptance": false,
+  "limits": [
+    "Unisolated local diagnostic;100warmups,five-second paired windows,four workers,default runtime.",
+    "Conservative go/no-go only; never source qualification or native-win evidence.",
+    "Full approved180case36decision qualification still required; no selected imports.",
+    "10k baseline round2 was variable; only all-new-below-all-old dominance used for go/no-go,not inflated mean reduction as a speed claim."
+  ],
+  "actual_tensor_workers_observed": true,
+  "block_path_trace_observed": true,
+  "trace_summary": {
+    "source": "b6cf7f9dc2698d6aadb93d0ed26eac57e7454758",
+    "production_sha256": "9d62f5f3d2893ac2c9e10b36098982c10abe660ac541d992d2863375ba3d6006",
+    "actual_block_helper_observed": true,
+    "actual_tensor_worker_block_stacks_observed": true,
+    "matching_evented_intervals": 6724,
+    "sampled_thread_weight_by_unit": {
+      "milliseconds": 20291.05781612491
+    },
+    "trace_sha256": "30ee80d0dd23067f24b1aa1ce063632a381064266ede217f2e4202814e02f27e",
+    "limits": "PerfView evented export of sampled thread-time stacks,not processCPUpercentages or qualification. Intrusive local profiling only."
+  }
+}
