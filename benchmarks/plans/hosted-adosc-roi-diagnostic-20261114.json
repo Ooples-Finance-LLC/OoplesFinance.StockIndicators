@@ -1,0 +1,140 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "sources": {
+    "published": "7f5290b20498bb562cdd2511482857baa0b293e8",
+    "old": "7f5290b20498bb562cdd2511482857baa0b293e8",
+    "successor": "64f3fb9fb9a2fdc0a48283dbf028385c5a95b727",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "gpu_sources": {
+    "old": "7f5290b20498bb562cdd2511482857baa0b293e8",
+    "successor": "64f3fb9fb9a2fdc0a48283dbf028385c5a95b727",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "StarReversalSharedExecutionTests",
+      "CrowSoldierSharedExecutionTests"
+    ],
+    "successor": [
+      "SmoothedCheckedRegionTests",
+      "CompactSmoothedAccumulationTests"
+    ],
+    "variants": [
+      "CompactMacdWordEmaTests",
+      "CompactClassicalWindowTests",
+      "ExactMeanUnitWeightTests"
+    ]
+  },
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.150.0"
+  },
+  "diagnostic_only": true,
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "cases": 20,
+  "decisions": 4,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 60
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetChaikinOsc",
+              "pair": "Skender.GetChaikinOsc"
+            },
+            {
+              "raw": "TaLib.Functions.AdOsc",
+              "pair": "TaLib.Functions.AdOsc"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        }
+      ],
+      "cases": 20,
+      "decisions": 4
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetChaikinOsc",
+              "pair": "Skender.GetChaikinOsc"
+            },
+            {
+              "raw": "TaLib.Functions.AdOsc",
+              "pair": "TaLib.Functions.AdOsc"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        }
+      ],
+      "cases": 20,
+      "decisions": 4
+    }
+  ],
+  "roi_approval": {
+    "path": "benchmarks/plans/evidence/adosc-prefix-roi-scope-20261114.json",
+    "sha256": "1050a10755753ceda712efb2bb560117d36851f55294428ddfd61d52f490723b"
+  },
+  "baseline_inputs": {
+    "run_id": "43641607785",
+    "plan": "benchmarks/plans/hosted-abandoned-inventory-repair-20261114.json",
+    "plan_sha256": "7ae67dbb259bfda634e2db384168100a37bf3423d7521c9cf6c6ca26b4fd01dd",
+    "provenance_sha256": "d2b4187278ca5a720ea560eaf565559bf912643f4be4a0fa3aa242a7725d51dd"
+  },
+  "candidate": {
+    "ci_run": "43650278951",
+    "producer": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "64f3fb9fb9a2fdc0a48283dbf028385c5a95b727",
+    "evidence_source": "d20f94cc089aa46fd29cfb17ddbc06964c5236af",
+    "manifest_sha256": "caef02a300eb8d9af2e0fd3021850005d0262682783c1b65cc3c891303739107",
+    "gpu_receipt_sha256": "d3847ccb234ad0cfbf329401d1c8559ef9e88afa130e4960d68661de8595b21e",
+    "unit_classes": [
+      "SmoothedCheckedRegionTests",
+      "CompactSmoothedAccumulationTests"
+    ],
+    "parity_classes": [
+      "SmoothedAccumulationComparisonTests",
+      "SharedSmoothedAccumulationFixtureTests"
+    ]
+  }
+}

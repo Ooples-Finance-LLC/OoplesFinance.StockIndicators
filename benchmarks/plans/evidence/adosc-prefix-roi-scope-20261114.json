@@ -1,0 +1,24 @@
+{
+  "approved": true,
+  "diagnostic_only": true,
+  "qualification": false,
+  "source_imported": false,
+  "report_imported": false,
+  "policy_changed": false,
+  "source": "64f3fb9fb9a2fdc0a48283dbf028385c5a95b727",
+  "initial_prototype": "8251c9d548ba13f9d696846325b179868c078c4e",
+  "baseline": "7f5290b20498bb562cdd2511482857baa0b293e8",
+  "pairs": [
+    "Skender.GetChaikinOsc",
+    "TaLib.Functions.AdOsc"
+  ],
+  "cases": 20,
+  "comparisons": 4,
+  "max_parallel": 1,
+  "warmups": 1000,
+  "measured_iterations": 10,
+  "quiet_samples": 12,
+  "max_cpu_percent": 15,
+  "runtime_policy_overrides": {},
+  "authorization": "User approved bounded hosted ROI diagnostic after the within-study scalar refinement was frozen and reported. Same20cases/4comparisons and45\u201390min scope; no qualification or publication."
+}
