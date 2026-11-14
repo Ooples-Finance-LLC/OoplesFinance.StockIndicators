@@ -161,6 +161,9 @@ internal static partial class ValuesBarExecution
             else if (nodes.Count == 1 && nodes[0].Indicator is TillsonAverage tillson
                 && TryFillTillsonRegions(source, nodes[0], tillson, cancellation, owned, out var tillsonLatest))
                 latest = tillsonLatest;
+            else if (nodes.Count == 1 && nodes[0].Indicator is PriorSeededDirectionalMeasure
+                && nodes[0].TryFillPriorDirectional(source, cancellation, owned, out var directionalLatest))
+                latest = directionalLatest;
             else if (nodes.Count == 1 && IsBoundedWindowIndicator(nodes[0].Indicator))
                 latest = FillBoundedWindow(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (boundedBatch)
@@ -1011,6 +1014,39 @@ internal static partial class ValuesBarExecution
                 // matching the finite builder's input-before-output validation order.
                 Failure = ExceptionDispatchInfo.Capture(error);
             }
+        }
+        internal bool TryFillPriorDirectional(Bar[] source, CancellationToken cancellation,
+            OwnedBarBuffer? owned, out Bar latest)
+        {
+            latest = default;
+            if (_state is not PriorSeededDirectionalMeasure.State state) return false;
+            var values = Values[0];
+            var defined = Values[1];
+            Span<double> scratch = _scratch;
+            for (int i = 0; i < source.Length; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                var bar = source[i];
+                latest = bar;
+                if (owned is not null) owned[i] = bar;
+                if (!AllFieldsFinite(in bar))
+                    IndicatorInputDomain.Finite.Validate(in bar);
+                if (Failure is not null) continue;
+                try
+                {
+                    // The original state clears both slots, including absence.
+                    state.Update(in bar, scratch);
+                    values[i] = scratch[0];
+                    defined[i] = scratch[1];
+                }
+                catch (Exception error)
+                {
+                    // Continue capturing/validating raw input before surfacing
+                    // the same deferred state failure as the generic writer.
+                    CaptureFailure(error);
+                }
+            }
+            return true;
         }
         internal Bar FillScalar(Bar[] source, CancellationToken cancellation, OwnedBarBuffer? owned)
         {
