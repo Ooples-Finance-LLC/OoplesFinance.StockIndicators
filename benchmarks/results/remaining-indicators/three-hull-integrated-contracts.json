@@ -1,0 +1,35 @@
+{
+  "types": [
+    "ThreeHMA",
+    "ThreeHma",
+    "TripleHullMovingAverage",
+    "_3HMA"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "8407344b199f9cf6b9078b13a8b0ab3561b2f763",
+  "combined_input_sha256": "664a3ae5b5a04f55bd50c85795ddf051ac4f424db230d5c619bce88ab8539833",
+  "benchmark_fixture": {
+    "type": "RemainingThreeHullBenchmarks",
+    "operations": [
+      "ThreeHMA",
+      "ThreeHma",
+      "TripleHullMovingAverage",
+      "_3HMA"
+    ]
+  },
+  "checks": {
+    "unit": 188,
+    "parity": 16,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/three-hull-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/three-hull-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

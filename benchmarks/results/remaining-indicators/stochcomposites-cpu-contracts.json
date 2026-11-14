@@ -1,0 +1,38 @@
+{
+  "batch": "stochcomposites-shared-execution",
+  "types": [
+    "DoubleStochasticOscillator",
+    "DMIStochastic"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 86,
+    "parity_passed": 8,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "stochcomposites-unit-verified.trx.gz",
+        "passed_cases": 86,
+        "trx_sha256": "82469bfeff592b095eb70399427be1d87113acee52af12376e567f7294bff652"
+      },
+      {
+        "file": "stochcomposites-parity-verified.trx.gz",
+        "passed_cases": 8,
+        "trx_sha256": "c9ca69aaef2f9650939c563adaed5b4d2261f2476bc68c78249e1f1f82245646"
+      }
+    ],
+    "context": "Executed in the combined 113-facade working candidate; the isolated committed tree was not separately built or tested.",
+    "combined_validation_base_head": "b7e13308b78c1e23f9f21cbbd9323a7d9d6548ee",
+    "current_combined_input_sha256": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+    "test_execution_input_sha256": {
+      "unit": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+      "parity": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary."
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

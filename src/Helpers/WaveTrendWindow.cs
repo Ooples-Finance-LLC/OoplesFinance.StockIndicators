@@ -8,8 +8,22 @@ internal sealed class WaveTrendWindow : IDisposable
 {
     private readonly Average _basis, _deviation, _line, _signal;
     private Number _previousLine, _previousMargin;
+    private readonly MovingAvgType _kind;
+    private readonly int _channelLength, _averageLength, _signalLength;
+    private readonly bool _allowCertified;
+    private readonly List<Number>? _replay;
+    private CertifiedWaveTrend? _certified;
+    internal long CertifiedCount { get; private set; }
+    internal int FallbackCount { get; private set; }
     internal WaveTrendWindow(MovingAvgType kind, int channel, int average, int signal)
-    { _basis = new(kind, channel); _deviation = new(kind, channel); _line = new(kind, average); _signal = new(kind, signal); }
+        : this(kind, channel, average, signal, true) { }
+    internal WaveTrendWindow(MovingAvgType kind, int channel, int average, int signal, bool allowCertified)
+    {
+        _kind = kind; _channelLength = Math.Max(1, channel); _averageLength = Math.Max(1, average); _signalLength = Math.Max(1, signal);
+        _basis = new(kind, channel); _deviation = new(kind, channel); _line = new(kind, average); _signal = new(kind, signal);
+        _allowCertified = allowCertified && CertifiedWaveTrend.Supports(kind, _channelLength, _averageLength, _signalLength);
+        if (_allowCertified) { _replay = new(); _certified = new(kind, _channelLength, _averageLength, _signalLength); }
+    }
     internal static Number Price(double open, double high, double low, double close)
         => (Number.Of(open) + Number.Of(high) + Number.Of(low) + Number.Of(close)).Divide(4);
     internal static Number Price(double high, double low, double close)
@@ -27,6 +41,21 @@ internal sealed class WaveTrendWindow : IDisposable
     }
     internal (double Line, double SignalLine, Signal Trade) Next(Number price, bool final)
     {
+        if (_certified is not null)
+        {
+            if (_certified.TryNext(price, final, out var result))
+            {
+                if (final) { _replay!.Add(price); CertifiedCount++; }
+                return result;
+            }
+            _certified = null; FallbackCount++;
+            foreach (var committed in _replay!) NextExact(committed, true);
+            _replay.Clear();
+        }
+        return NextExact(price, final);
+    }
+    private (double Line, double SignalLine, Signal Trade) NextExact(Number price, bool final)
+    {
         var residual = price - _basis.Next(price, final); var absolute = residual.Sign < 0 ? residual.Times(-1) : residual;
         var ci = Channel(residual, _deviation.Next(absolute, final));
         var line = _line.Next(ci, final); var signal = _signal.Next(line, final);
@@ -43,6 +72,26 @@ internal sealed class WaveTrendWindow : IDisposable
         var selected = data.ChainedValues.Count > 0;
         var prices = Enumerable.Range(0, data.Count).Select(i => selected ? Number.Of(data.ChainedValues[i])
             : Price(data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i], data.ClosePrices[i])).ToArray();
+        if ((!fast || !ComponentAverage.HasOverrides) && CertifiedWaveTrend.Supports(kind, channel, average, signal))
+        {
+            if (fast)
+            {
+                // Keep request accounting even when there are no replacements.
+                // Take cannot invoke a callback on this guarded path.
+                _ = ComponentAverage.Take(ReadOnlySpan<double>.Empty, channel);
+                _ = ComponentAverage.Take(ReadOnlySpan<double>.Empty, channel);
+                _ = ComponentAverage.Take(ReadOnlySpan<double>.Empty, average);
+                if (includeSignal) _ = ComponentAverage.Take(ReadOnlySpan<double>.Empty, signal);
+            }
+            using var window = new WaveTrendWindow(kind, channel, average, signal);
+            var lines = new double[prices.Length]; var signals = new double[prices.Length]; var actions = new Signal[prices.Length];
+            for (var i = 0; i < prices.Length; i++)
+            {
+                var point = window.Next(prices[i], true); lines[i] = point.Line;
+                if (includeSignal) { signals[i] = point.SignalLine; actions[i] = point.Trade; }
+            }
+            return (lines, signals, actions);
+        }
         Number[] ExactMean(Number[] values, int period)
         { using var mean = new Average(kind, period); return values.Select(v => mean.Next(v, true)).ToArray(); }
         Number[] Mean(Number[] values, int period)
@@ -66,8 +115,13 @@ internal sealed class WaveTrendWindow : IDisposable
             trades[i] = Trade(line[i], smoothed[i], i == 0 ? default : line[i - 1], i == 0 ? default : line[i - 1] - smoothed[i - 1]);
         return (line.Select(v => v.Publish()).ToArray(), smoothed.Select(v => v.Publish()).ToArray(), trades);
     }
-    internal void Reset() { _basis.Reset(); _deviation.Reset(); _line.Reset(); _signal.Reset(); _previousLine = _previousMargin = default; }
-    public void Dispose() { _basis.Dispose(); _deviation.Dispose(); _line.Dispose(); _signal.Dispose(); }
+    internal void Reset()
+    {
+        _basis.Reset(); _deviation.Reset(); _line.Reset(); _signal.Reset(); _previousLine = _previousMargin = default;
+        _replay?.Clear(); CertifiedCount = 0; FallbackCount = 0;
+        _certified = _allowCertified ? new(_kind, _channelLength, _averageLength, _signalLength) : null;
+    }
+    public void Dispose() { _basis.Dispose(); _deviation.Dispose(); _line.Dispose(); _signal.Dispose(); _replay?.Clear(); }
     private sealed class Average : IDisposable
     {
         private readonly MovingAvgType _kind;

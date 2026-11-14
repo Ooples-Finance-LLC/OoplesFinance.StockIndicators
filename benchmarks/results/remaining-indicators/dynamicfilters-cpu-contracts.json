@@ -1,0 +1,39 @@
+{
+  "batch": "dynamicfilters-shared-execution",
+  "types": [
+    "DynamicSupportAndResistance",
+    "DynamicallyAdjustableFilter",
+    "DynamicallyAdjustableMovingAverage"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 50,
+    "parity_passed": 12,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "dynamicfilters-unit-verified.trx.gz",
+        "passed_cases": 50,
+        "trx_sha256": "55222fe580abf93cf68a9144c0680ce7cc8243f51b308db2c720ec074c683687"
+      },
+      {
+        "file": "dynamicfilters-parity-verified.trx.gz",
+        "passed_cases": 12,
+        "trx_sha256": "5d1d3ab9dbde8f98a1c571bbbd06c735f455428e17c280edf0ac2d4cd6a8ce52"
+      }
+    ],
+    "context": "Executed in the 14-facade third-stage working candidate with inherited unresolved MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696",
+    "test_execution_input_sha256": {
+      "unit": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696",
+      "parity": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "8c30d2b907fb3098519f35300adeb3573d8e7bcd"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

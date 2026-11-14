@@ -1,0 +1,39 @@
+{
+  "batch": "ehlers-kaufman-cycle-shared-execution",
+  "types": [
+    "EhlersKaufmanAdaptiveMovingAverage",
+    "EhlersSimpleCycleIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact Kaufman travel/gain recurrence and simple-cycle wide recurrence; preserve cycle startup boundary, finite-alpha eligibility, clamped periods, source fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 25,
+    "fixture_passed": 8,
+    "discovery_passed": 156,
+    "gpu_passed": 100,
+    "contract_methods": 1497,
+    "hosted_methods": 1485,
+    "evidence": [
+      {
+        "file": "ehlerskaufmancycle-unit.trx.gz",
+        "passed_cases": 25,
+        "trx_sha256": "034fd5521447aeff59d76fd49332b7b30cb11ce141e43c8988eeaf962fa33ea2"
+      },
+      {
+        "file": "ehlerskaufmancycle-fixture.trx.gz",
+        "passed_cases": 164,
+        "trx_sha256": "586b11eeb43b5afcb182d18782eb94732c6f2482e2509ecea9f504c1ac61f6cb"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingEhlersKaufmanCycleBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersKaufmanAdaptiveMovingAverage",
+      "EhlersSimpleCycleIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

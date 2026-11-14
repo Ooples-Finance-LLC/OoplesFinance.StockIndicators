@@ -1,0 +1,43 @@
+{
+  "batch": "ehlers-modified-momentum-shared-execution",
+  "types": [
+    "EhlersModifiedRelativeStrengthIndex",
+    "EhlersModifiedStochasticIndicator",
+    "EhlersRocketRelativeStrengthIndex",
+    "EhlersMovingAverageDifferenceIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact modified RSI, modified stochastic, Rocket RSI and weighted average-gap kernels; preserve independent periods, wide arithmetic, related outputs, finite Rocket option eligibility, source/component fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 88,
+    "fixture_passed": 16,
+    "discovery_passed": 160,
+    "gpu_passed": 100,
+    "contract_methods": 1501,
+    "hosted_methods": 1489,
+    "evidence": [
+      {
+        "file": "ehlersmodifiedmomentum-unit.trx.gz",
+        "passed_cases": 88,
+        "trx_sha256": "02bae57baecc495159a487d43d1dfb3381fae4b365ed53286b9bab5cb86c2d52"
+      },
+      {
+        "file": "ehlersmodifiedmomentum-fixture.trx.gz",
+        "passed_cases": 176,
+        "trx_sha256": "835033576c2fac70c5b7a634a6b37cb6fa1e82cedb0bffc4b97e4ef717cf1ab6"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingEhlersModifiedMomentumBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersModifiedRelativeStrengthIndex",
+      "EhlersModifiedStochasticIndicator",
+      "EhlersRocketRelativeStrengthIndex",
+      "EhlersMovingAverageDifferenceIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

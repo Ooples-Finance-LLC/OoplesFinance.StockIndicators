@@ -1,0 +1,881 @@
+{
+  "fixture": "SharedWeightedWindowBenchmarks",
+  "source_sha": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+  "binary_run": 39719116665,
+  "run_id": "39746464521",
+  "workflow_sha": "1d1ede43b65678a7a03d78a4bd44d4e0de4e5931",
+  "report_sha256": "196965fd16a11b83cbfec011b5cf7c83b18e1a95228d8c3b75f4bce3bba9962b",
+  "report_file": "artifacts/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedWeightedWindowBenchmarks-report-full-compressed.json",
+  "host": {
+    "BenchmarkDotNetCaption": "BenchmarkDotNet",
+    "BenchmarkDotNetVersion": "0.15.8",
+    "OsVersion": "Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
+    "ProcessorName": "AMD EPYC 9V45",
+    "PhysicalProcessorCount": 1,
+    "PhysicalCoreCount": 2,
+    "LogicalCoreCount": 4,
+    "RuntimeVersion": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+    "Architecture": "X64",
+    "HasAttachedDebugger": false,
+    "HasRyuJit": true,
+    "Configuration": "RELEASE",
+    "DotNetCliVersion": "10.0.402",
+    "ChronometerFrequency": {
+      "Hertz": 1000000000
+    },
+    "HardwareTimerKind": "Unknown"
+  },
+  "comparisons": [
+    {
+      "pair": "QuanTAlib.Wma",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 8726.683050537109,
+        "lower_ns": 8327.449036185137,
+        "upper_ns": 9125.917064889081,
+        "samples": 10,
+        "allocated_bytes": 59850
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 96838.44357638889,
+          "lower_ns": 94904.94633400581,
+          "upper_ns": 98771.94081877197,
+          "samples": 9,
+          "allocated_bytes": 260433
+        },
+        "NativeParallel": {
+          "mean_ns": 39043.8752746582,
+          "lower_ns": 38404.681108012366,
+          "upper_ns": 39683.06944130404,
+          "samples": 8,
+          "allocated_bytes": 268266
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Wma",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 6266.632507324219,
+        "lower_ns": 6177.313339000839,
+        "upper_ns": 6355.951675647599,
+        "samples": 8,
+        "allocated_bytes": 10816
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 96838.44357638889,
+          "lower_ns": 94904.94633400581,
+          "upper_ns": 98771.94081877197,
+          "samples": 9,
+          "allocated_bytes": 260433
+        },
+        "NativeParallel": {
+          "mean_ns": 39043.8752746582,
+          "lower_ns": 38404.681108012366,
+          "upper_ns": 39683.06944130404,
+          "samples": 8,
+          "allocated_bytes": 268266
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Wma",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 54905.73370361328,
+        "lower_ns": 54350.454657145274,
+        "upper_ns": 55461.01275008129,
+        "samples": 8,
+        "allocated_bytes": 564201
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 956136.3259548611,
+          "lower_ns": 946974.2083795368,
+          "upper_ns": 965298.4435301855,
+          "samples": 9,
+          "allocated_bytes": 2625671
+        },
+        "NativeParallel": {
+          "mean_ns": 349226.0068359375,
+          "lower_ns": 338758.0480956577,
+          "upper_ns": 359693.9655762173,
+          "samples": 10,
+          "allocated_bytes": 2633664
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Wma",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 40489.824157714844,
+        "lower_ns": 39732.931719408065,
+        "upper_ns": 41246.71659602162,
+        "samples": 8,
+        "allocated_bytes": 82818
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 956136.3259548611,
+          "lower_ns": 946974.2083795368,
+          "upper_ns": 965298.4435301855,
+          "samples": 9,
+          "allocated_bytes": 2625671
+        },
+        "NativeParallel": {
+          "mean_ns": 349226.0068359375,
+          "lower_ns": 338758.0480956577,
+          "upper_ns": 359693.9655762173,
+          "samples": 10,
+          "allocated_bytes": 2633664
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Dwma",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 47193.34562988281,
+        "lower_ns": 46293.82111101016,
+        "upper_ns": 48092.87014875546,
+        "samples": 10,
+        "allocated_bytes": 177423
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 211114.95008680556,
+          "lower_ns": 208958.6753479363,
+          "upper_ns": 213271.2248256748,
+          "samples": 9,
+          "allocated_bytes": 553087
+        },
+        "NativeParallel": {
+          "mean_ns": 87221.71861436631,
+          "lower_ns": 82093.19534671571,
+          "upper_ns": 92350.24188201691,
+          "samples": 9,
+          "allocated_bytes": 602877
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Dwma",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 46261.32019042969,
+        "lower_ns": 45649.57891251078,
+        "upper_ns": 46873.0614683486,
+        "samples": 8,
+        "allocated_bytes": 128645
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 211114.95008680556,
+          "lower_ns": 208958.6753479363,
+          "upper_ns": 213271.2248256748,
+          "samples": 9,
+          "allocated_bytes": 553087
+        },
+        "NativeParallel": {
+          "mean_ns": 87221.71861436631,
+          "lower_ns": 82093.19534671571,
+          "upper_ns": 92350.24188201691,
+          "samples": 9,
+          "allocated_bytes": 602877
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Dwma",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 466329.25,
+        "lower_ns": 369360.4886481039,
+        "upper_ns": 563298.0113518961,
+        "samples": 10,
+        "allocated_bytes": 1647639
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 2108010.409722222,
+          "lower_ns": 2091576.72723917,
+          "upper_ns": 2124444.092205274,
+          "samples": 9,
+          "allocated_bytes": 5571555
+        },
+        "NativeParallel": {
+          "mean_ns": 746423.780078125,
+          "lower_ns": 730255.8196640577,
+          "upper_ns": 762591.7404921922,
+          "samples": 10,
+          "allocated_bytes": 5621678
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Dwma",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 395460.14765625,
+        "lower_ns": 386863.34532120934,
+        "upper_ns": 404056.94999129063,
+        "samples": 10,
+        "allocated_bytes": 1166513
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 2108010.409722222,
+          "lower_ns": 2091576.72723917,
+          "upper_ns": 2124444.092205274,
+          "samples": 9,
+          "allocated_bytes": 5571555
+        },
+        "NativeParallel": {
+          "mean_ns": 746423.780078125,
+          "lower_ns": 730255.8196640577,
+          "upper_ns": 762591.7404921922,
+          "samples": 10,
+          "allocated_bytes": 5621678
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Convolution",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 20312.2490234375,
+        "lower_ns": 18745.036200660743,
+        "upper_ns": 21879.461846214257,
+        "samples": 8,
+        "allocated_bytes": 61986
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 78098.85942925347,
+          "lower_ns": 77233.04235816163,
+          "upper_ns": 78964.6765003453,
+          "samples": 9,
+          "allocated_bytes": 220274
+        },
+        "NativeParallel": {
+          "mean_ns": 31146.475341796875,
+          "lower_ns": 30205.151571870396,
+          "upper_ns": 32087.799111723354,
+          "samples": 10,
+          "allocated_bytes": 225376
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Convolution",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 15249.490026855468,
+        "lower_ns": 15102.948306594046,
+        "upper_ns": 15396.031747116891,
+        "samples": 10,
+        "allocated_bytes": 12953
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 78098.85942925347,
+          "lower_ns": 77233.04235816163,
+          "upper_ns": 78964.6765003453,
+          "samples": 9,
+          "allocated_bytes": 220274
+        },
+        "NativeParallel": {
+          "mean_ns": 31146.475341796875,
+          "lower_ns": 30205.151571870396,
+          "upper_ns": 32087.799111723354,
+          "samples": 10,
+          "allocated_bytes": 225376
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Convolution",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 139712.4425048828,
+        "lower_ns": 135988.7350615945,
+        "upper_ns": 143436.14994817114,
+        "samples": 8,
+        "allocated_bytes": 566340
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 782250.604296875,
+          "lower_ns": 776435.9223707851,
+          "upper_ns": 788065.2862229648,
+          "samples": 10,
+          "allocated_bytes": 2225507
+        },
+        "NativeParallel": {
+          "mean_ns": 281031.0619140625,
+          "lower_ns": 265450.564050813,
+          "upper_ns": 296611.559777312,
+          "samples": 10,
+          "allocated_bytes": 2230778
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Convolution",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 123680.55859375,
+        "lower_ns": 122241.93468117132,
+        "upper_ns": 125119.18250632868,
+        "samples": 10,
+        "allocated_bytes": 84964
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 782250.604296875,
+          "lower_ns": 776435.9223707851,
+          "upper_ns": 788065.2862229648,
+          "samples": 10,
+          "allocated_bytes": 2225507
+        },
+        "NativeParallel": {
+          "mean_ns": 281031.0619140625,
+          "lower_ns": 265450.564050813,
+          "upper_ns": 296611.559777312,
+          "samples": 10,
+          "allocated_bytes": 2230778
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Gma",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 161624.63888888888,
+        "lower_ns": 158637.2043689777,
+        "upper_ns": 164612.07340880006,
+        "samples": 9,
+        "allocated_bytes": 66234
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 93900.10415039063,
+          "lower_ns": 92520.04130808971,
+          "upper_ns": 95280.16699269155,
+          "samples": 10,
+          "allocated_bytes": 260426
+        },
+        "NativeParallel": {
+          "mean_ns": 38225.11048719618,
+          "lower_ns": 37632.619886732355,
+          "upper_ns": 38817.601087660005,
+          "samples": 9,
+          "allocated_bytes": 268266
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "QuanTAlib.Gma",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 158819.19716796876,
+        "lower_ns": 155748.0254907593,
+        "upper_ns": 161890.36884517822,
+        "samples": 10,
+        "allocated_bytes": 17202
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 93900.10415039063,
+          "lower_ns": 92520.04130808971,
+          "upper_ns": 95280.16699269155,
+          "samples": 10,
+          "allocated_bytes": 260426
+        },
+        "NativeParallel": {
+          "mean_ns": 38225.11048719618,
+          "lower_ns": 37632.619886732355,
+          "upper_ns": 38817.601087660005,
+          "samples": 9,
+          "allocated_bytes": 268266
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "QuanTAlib.Gma",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 1572395.5164930555,
+        "lower_ns": 1522997.6730563957,
+        "upper_ns": 1621793.3599297153,
+        "samples": 9,
+        "allocated_bytes": 570731
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 944042.171875,
+          "lower_ns": 929935.0428532376,
+          "upper_ns": 958149.3008967624,
+          "samples": 10,
+          "allocated_bytes": 2625700
+        },
+        "NativeParallel": {
+          "mean_ns": 351042.623046875,
+          "lower_ns": 342658.5606466646,
+          "upper_ns": 359426.6854470854,
+          "samples": 9,
+          "allocated_bytes": 2633648
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "QuanTAlib.Gma",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 1524265.6904296875,
+        "lower_ns": 1513026.7238895746,
+        "upper_ns": 1535504.6569698004,
+        "samples": 8,
+        "allocated_bytes": 89195
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 944042.171875,
+          "lower_ns": 929935.0428532376,
+          "upper_ns": 958149.3008967624,
+          "samples": 10,
+          "allocated_bytes": 2625700
+        },
+        "NativeParallel": {
+          "mean_ns": 351042.623046875,
+          "lower_ns": 342658.5606466646,
+          "upper_ns": 359426.6854470854,
+          "samples": 9,
+          "allocated_bytes": 2633648
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "QuanTAlib.Sinema",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 157941.70966796874,
+        "lower_ns": 156465.31005294554,
+        "upper_ns": 159418.10928299194,
+        "samples": 10,
+        "allocated_bytes": 66218
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 93315.03662109375,
+          "lower_ns": 92365.60712889684,
+          "upper_ns": 94264.46611329066,
+          "samples": 10,
+          "allocated_bytes": 260429
+        },
+        "NativeParallel": {
+          "mean_ns": 38506.470947265625,
+          "lower_ns": 36950.62863658275,
+          "upper_ns": 40062.3132579485,
+          "samples": 9,
+          "allocated_bytes": 268266
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "QuanTAlib.Sinema",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 156100.730078125,
+        "lower_ns": 153092.59453331906,
+        "upper_ns": 159108.86562293093,
+        "samples": 10,
+        "allocated_bytes": 17185
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 93315.03662109375,
+          "lower_ns": 92365.60712889684,
+          "upper_ns": 94264.46611329066,
+          "samples": 10,
+          "allocated_bytes": 260429
+        },
+        "NativeParallel": {
+          "mean_ns": 38506.470947265625,
+          "lower_ns": 36950.62863658275,
+          "upper_ns": 40062.3132579485,
+          "samples": 9,
+          "allocated_bytes": 268266
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "QuanTAlib.Sinema",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 1574859.2239583333,
+        "lower_ns": 1560930.04599825,
+        "upper_ns": 1588788.4019184166,
+        "samples": 9,
+        "allocated_bytes": 570723
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 942346.833984375,
+          "lower_ns": 927106.90256515,
+          "upper_ns": 957586.7654036,
+          "samples": 8,
+          "allocated_bytes": 2625700
+        },
+        "NativeParallel": {
+          "mean_ns": 348781.4479166667,
+          "lower_ns": 333483.8681717284,
+          "upper_ns": 364079.027661605,
+          "samples": 9,
+          "allocated_bytes": 2633657
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "QuanTAlib.Sinema",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 1516801.15859375,
+        "lower_ns": 1491712.4961935936,
+        "upper_ns": 1541889.8209939066,
+        "samples": 10,
+        "allocated_bytes": 89187
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 942346.833984375,
+          "lower_ns": 927106.90256515,
+          "upper_ns": 957586.7654036,
+          "samples": 8,
+          "allocated_bytes": 2625700
+        },
+        "NativeParallel": {
+          "mean_ns": 348781.4479166667,
+          "lower_ns": 333483.8681717284,
+          "upper_ns": 364079.027661605,
+          "samples": 9,
+          "allocated_bytes": 2633657
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "QuanTAlib.Epma",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 23908.1861328125,
+        "lower_ns": 23488.871669498934,
+        "upper_ns": 24327.50059612607,
+        "samples": 10,
+        "allocated_bytes": 61483
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 94159.02778320313,
+          "lower_ns": 93144.9979699974,
+          "upper_ns": 95173.05759640885,
+          "samples": 10,
+          "allocated_bytes": 262413
+        },
+        "NativeParallel": {
+          "mean_ns": 38946.68413085937,
+          "lower_ns": 37756.18444883747,
+          "upper_ns": 40137.183812881274,
+          "samples": 10,
+          "allocated_bytes": 276202
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Epma",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 21390.779528808594,
+        "lower_ns": 20979.920347044794,
+        "upper_ns": 21801.638710572395,
+        "samples": 10,
+        "allocated_bytes": 12450
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 94159.02778320313,
+          "lower_ns": 93144.9979699974,
+          "upper_ns": 95173.05759640885,
+          "samples": 10,
+          "allocated_bytes": 262413
+        },
+        "NativeParallel": {
+          "mean_ns": 38946.68413085937,
+          "lower_ns": 37756.18444883747,
+          "upper_ns": 40137.183812881274,
+          "samples": 10,
+          "allocated_bytes": 276202
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Epma",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 195978.93432617188,
+        "lower_ns": 188604.480555093,
+        "upper_ns": 203353.38809725075,
+        "samples": 8,
+        "allocated_bytes": 565839
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 935421.1892361111,
+          "lower_ns": 926756.5976881497,
+          "upper_ns": 944085.7807840726,
+          "samples": 9,
+          "allocated_bytes": 2627671
+        },
+        "NativeParallel": {
+          "mean_ns": 357245.5539550781,
+          "lower_ns": 351863.82714664703,
+          "upper_ns": 362627.2807635092,
+          "samples": 8,
+          "allocated_bytes": 2641594
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Epma",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 181356.88997395834,
+        "lower_ns": 180218.62670543697,
+        "upper_ns": 182495.15324247972,
+        "samples": 9,
+        "allocated_bytes": 84458
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 935421.1892361111,
+          "lower_ns": 926756.5976881497,
+          "upper_ns": 944085.7807840726,
+          "samples": 9,
+          "allocated_bytes": 2627671
+        },
+        "NativeParallel": {
+          "mean_ns": 357245.5539550781,
+          "lower_ns": 351863.82714664703,
+          "upper_ns": 362627.2807635092,
+          "samples": 8,
+          "allocated_bytes": 2641594
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Mma",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 23246.89940185547,
+        "lower_ns": 22672.001376357308,
+        "upper_ns": 23821.79742735363,
+        "samples": 10,
+        "allocated_bytes": 61483
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 66595.96630859375,
+          "lower_ns": 65669.80898100561,
+          "upper_ns": 67522.12363618189,
+          "samples": 9,
+          "allocated_bytes": 219813
+        },
+        "NativeParallel": {
+          "mean_ns": 38049.645111083984,
+          "lower_ns": 37516.636667085106,
+          "upper_ns": 38582.65355508286,
+          "samples": 8,
+          "allocated_bytes": 223521
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Mma",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 20792.433447265626,
+        "lower_ns": 20498.353099636068,
+        "upper_ns": 21086.513794895185,
+        "samples": 10,
+        "allocated_bytes": 12449
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 66595.96630859375,
+          "lower_ns": 65669.80898100561,
+          "upper_ns": 67522.12363618189,
+          "samples": 9,
+          "allocated_bytes": 219813
+        },
+        "NativeParallel": {
+          "mean_ns": 38049.645111083984,
+          "lower_ns": 37516.636667085106,
+          "upper_ns": 38582.65355508286,
+          "samples": 8,
+          "allocated_bytes": 223521
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Mma",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 198101.58116319444,
+        "lower_ns": 193376.19966960672,
+        "upper_ns": 202826.96265678215,
+        "samples": 9,
+        "allocated_bytes": 565830
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 672041.794921875,
+          "lower_ns": 663738.1510283075,
+          "upper_ns": 680345.4388154425,
+          "samples": 10,
+          "allocated_bytes": 2225046
+        },
+        "NativeParallel": {
+          "mean_ns": 362333.9345703125,
+          "lower_ns": 358200.3152843539,
+          "upper_ns": 366467.5538562711,
+          "samples": 8,
+          "allocated_bytes": 2228923
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "QuanTAlib.Mma",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 178434.32345920138,
+        "lower_ns": 176728.16105148543,
+        "upper_ns": 180140.48586691733,
+        "samples": 9,
+        "allocated_bytes": 84460
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 672041.794921875,
+          "lower_ns": 663738.1510283075,
+          "upper_ns": 680345.4388154425,
+          "samples": 10,
+          "allocated_bytes": 2225046
+        },
+        "NativeParallel": {
+          "mean_ns": 362333.9345703125,
+          "lower_ns": 358200.3152843539,
+          "upper_ns": 366467.5538562711,
+          "samples": 8,
+          "allocated_bytes": 2228923
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    }
+  ],
+  "complete": true,
+  "raw_archive": "benchmarks/results/remaining-indicators/cpu-builder-39746464521-SharedWeightedWindowBenchmarks-raw.json.gz",
+  "provenance.json": {
+    "archive": "cpu-builder-39746464521-SharedWeightedWindowBenchmarks-provenance.json.gz",
+    "sha256": "e05c9ac3de809ebd2c67e124e286241be1fbe4cbe442b6fc55ed69c633a2b6d0"
+  },
+  "binary-manifest.json": {
+    "archive": "cpu-builder-39746464521-SharedWeightedWindowBenchmarks-binary-manifest.json.gz",
+    "sha256": "3db250a0c0f15ec643073c3408fab85828aa180fd569a460425fe015d50123c8"
+  },
+  "source_note": "Qualified baseline binaries reused; selected fixture and implementation code is unchanged; the later SMA diagnostics and standalone compensated EMA changes do not participate in these fixtures."
+}

@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "9f57c2ccb57a96b3f337bca26d601ae8ab64ea5e6b6d66ab49e68f1be03929be",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-exact-movement-20261107-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "7b9b25e51bb96481428650aa5eb3892373eac295f56174e088cccb26a88112b4",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-exact-movement-20261107-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "e66077aa0dd4e87f157b91411073d21b0a36a084a928e70c2691510e699ce9d8",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-exact-movement-20261107-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "05d9290667f2741bcbc7b0702d1fe0dd1d59017544b1988f7168448f20ec27b0",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-exact-movement-20261107-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "6920c5691e3090726ff9569afb6c9be4ef1df756d33d407dde32dc1cf9e204e4",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-exact-movement-20261107-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "07e1577bf85d6a52e65dd13ddf5036f683ecebd86b4ee795de6c67f5e700584a",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-exact-movement-20261107-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "4d8050eb8f268535bc929119ed233e32fafe4d602db398e171c441a9d6f01b9c",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-exact-movement-20261107-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "a0b81abb34ad23b39aceffa7c6f050bff49b7d97be87b29a3b88333dd9f6477d",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-exact-movement-20261107-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "68991a3305b392f426a5a6cfbd33329d979e471b0a8f4617e67080460ff4b968",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-exact-movement-20261107-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "075bfdf427459d0c05f3562aa8295e33bf8a79ae04fb98e5b1ca2713a0c07380",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-exact-movement-20261107-report-integration/updated-pair-details.png.gz"
+  }
+}

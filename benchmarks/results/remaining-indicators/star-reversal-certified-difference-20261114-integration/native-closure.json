@@ -1,0 +1,195 @@
+{
+  "source": "e3db0fa7a5ad96edb8e33ac9f2f94b0da419d3fc",
+  "run": "43590354236",
+  "rows": [
+    {
+      "pair": "TaLib.Candles.AbandonedBaby",
+      "bars": 1000,
+      "old_ratio": 3.2520229886692316,
+      "new_ratio": 0.2995539696699376,
+      "old_win": true,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "fe9618e5e1b06371b07ba0c460019814bf08833d",
+      "same_run_old_source_ooples_means_ms": [
+        0.07512222222222222,
+        0.10301
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.1163,
+        0.39235
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.AbandonedBaby",
+      "bars": 10000,
+      "old_ratio": 0.85357650518205,
+      "new_ratio": 1.8867835136245377,
+      "old_win": false,
+      "new_win": true,
+      "native_intervals_separated": true,
+      "historical_report_source": "fe9618e5e1b06371b07ba0c460019814bf08833d",
+      "same_run_old_source_ooples_means_ms": [
+        0.5027888888888888,
+        0.4961
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.3983555555555556,
+        0.40572222222222226
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.EveningDojiStar",
+      "bars": 1000,
+      "old_ratio": 1.4574105849481611,
+      "new_ratio": 0.6650111987535301,
+      "old_win": true,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "fe9618e5e1b06371b07ba0c460019814bf08833d",
+      "same_run_old_source_ooples_means_ms": [
+        0.36621,
+        0.36579
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.2860625,
+        0.1141
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.EveningDojiStar",
+      "bars": 10000,
+      "old_ratio": 0.2554310464694772,
+      "new_ratio": 1.110829301181883,
+      "old_win": false,
+      "new_win": true,
+      "native_intervals_separated": true,
+      "historical_report_source": "fe9618e5e1b06371b07ba0c460019814bf08833d",
+      "same_run_old_source_ooples_means_ms": [
+        0.4075111111111111,
+        0.459475
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.42791,
+        0.5603111111111111
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.EveningStar",
+      "bars": 1000,
+      "old_ratio": 5.856126465756087,
+      "new_ratio": 1.1002940215615813,
+      "old_win": true,
+      "new_win": true,
+      "native_intervals_separated": false,
+      "historical_report_source": "fe9618e5e1b06371b07ba0c460019814bf08833d",
+      "same_run_old_source_ooples_means_ms": [
+        0.18036,
+        0.1446125
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.14466666666666667,
+        0.0382625
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.EveningStar",
+      "bars": 10000,
+      "old_ratio": 1.0719482801614795,
+      "new_ratio": 1.3769664157261057,
+      "old_win": true,
+      "new_win": true,
+      "native_intervals_separated": false,
+      "historical_report_source": "fe9618e5e1b06371b07ba0c460019814bf08833d",
+      "same_run_old_source_ooples_means_ms": [
+        0.2275125,
+        0.2319125
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.207925,
+        0.29799
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.MorningDojiStar",
+      "bars": 1000,
+      "old_ratio": 3.274914841511991,
+      "new_ratio": 0.6069013630997102,
+      "old_win": true,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "fe9618e5e1b06371b07ba0c460019814bf08833d",
+      "same_run_old_source_ooples_means_ms": [
+        0.0688125,
+        0.0711375
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.1174111111111111,
+        0.10352222222222222
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.MorningDojiStar",
+      "bars": 10000,
+      "old_ratio": 1.1125357332025696,
+      "new_ratio": 1.3359252810468485,
+      "old_win": true,
+      "new_win": true,
+      "native_intervals_separated": false,
+      "historical_report_source": "fe9618e5e1b06371b07ba0c460019814bf08833d",
+      "same_run_old_source_ooples_means_ms": [
+        0.4042875,
+        0.41336666666666666
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.3324666666666667,
+        0.47669
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.MorningStar",
+      "bars": 1000,
+      "old_ratio": 3.14182670604947,
+      "new_ratio": 0.28896682507768234,
+      "old_win": true,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "fe9618e5e1b06371b07ba0c460019814bf08833d",
+      "same_run_old_source_ooples_means_ms": [
+        0.0720375,
+        0.28655
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.22448,
+        0.21884
+      ]
+    },
+    {
+      "pair": "TaLib.Candles.MorningStar",
+      "bars": 10000,
+      "old_ratio": 1.9933782769914163,
+      "new_ratio": 2.096,
+      "old_win": true,
+      "new_win": true,
+      "native_intervals_separated": true,
+      "historical_report_source": "fe9618e5e1b06371b07ba0c460019814bf08833d",
+      "same_run_old_source_ooples_means_ms": [
+        0.3164666666666667,
+        0.3002125
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.28275555555555554,
+        0.291875
+      ]
+    }
+  ],
+  "new_wins": {
+    "1000": 1,
+    "10000": 5
+  },
+  "old_wins": {
+    "1000": 5,
+    "10000": 3
+  },
+  "comparison_basis": "old_ratio/old_win are the prior report values with historical source/host/runtime provenance. Same-run old/new source means are separate qualification evidence; native intervals refer to the final candidate/native control, not a paired old-source/native measurement."
+}

@@ -1,0 +1,43 @@
+{
+  "batch": "ergodic-candle-gap-strength-shared-execution",
+  "types": [
+    "ErgodicCandlestickOscillator",
+    "ErgodicMovingAverageConvergenceDivergence",
+    "ErgodicPercentagePriceOscillator",
+    "ErgodicTrueStrengthIndexV2"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact candle, EMA gap/finite signal and strength kernels to compute all related outputs together. Preserve hidden periods, independent TSI triples and output slots, overflowing signal tails, original fields, component/source fallback and ownership.",
+  "verification": {
+    "unit_passed": 77,
+    "fixture_passed": 16,
+    "discovery_passed": 151,
+    "gpu_passed": 100,
+    "contract_methods": 1490,
+    "hosted_methods": 1478,
+    "evidence": [
+      {
+        "file": "ergodicfamily-unit.trx.gz",
+        "passed_cases": 77,
+        "trx_sha256": "9b641920daffb94745767a57d5d27732a864a24332a83f2becdec194da64ed95"
+      },
+      {
+        "file": "ergodicfamily-fixture.trx.gz",
+        "passed_cases": 167,
+        "trx_sha256": "0af218584b6e3427511aa859dd7d6a2796987af4516e587f30e68fa68549bb23"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingErgodicFamilyBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured",
+    "operations": [
+      "ErgodicCandlestickOscillator",
+      "ErgodicMovingAverageConvergenceDivergence",
+      "ErgodicPercentagePriceOscillator",
+      "ErgodicTrueStrengthIndexV2"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

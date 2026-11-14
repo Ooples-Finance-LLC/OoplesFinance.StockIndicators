@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "e8176bdef5ec2b59ed1be9f1ecde0fa9c9b95499c22834e8b1be2c0d351cff58",
+    "archive": "benchmarks/results/remaining-indicators/hyperbolic-fanout-threshold-20261112-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "cf65f00a09a5e09d7343ac1f88a677bd6aaa44f040c6497e3b58f594dcd583b3",
+    "archive": "benchmarks/results/remaining-indicators/hyperbolic-fanout-threshold-20261112-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "a51aa90f10f971e498b9524c9d436ca522226d905f6e089cb637c80e45617bd0",
+    "archive": "benchmarks/results/remaining-indicators/hyperbolic-fanout-threshold-20261112-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "9732a804f8f02fc2aa2a39f8f7da9d70958a0a7a9b5d2d0b862ad09e1bf67cf0",
+    "archive": "benchmarks/results/remaining-indicators/hyperbolic-fanout-threshold-20261112-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "3ca09f56573dfec07873fbf68a5a751515e0b4c4ee0235f1f5189d37185bdb4a",
+    "archive": "benchmarks/results/remaining-indicators/hyperbolic-fanout-threshold-20261112-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "d77816023343e927bff6f7dfb92286ad3b2131844b7fb6de039e358f1b4b9dbf",
+    "archive": "benchmarks/results/remaining-indicators/hyperbolic-fanout-threshold-20261112-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "d4b1114c2fc8643372edc83c5f8d254e18b8df82cb3f443716acf78b8fd2a0e3",
+    "archive": "benchmarks/results/remaining-indicators/hyperbolic-fanout-threshold-20261112-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "91151a0632e71cb4b660d724abedefb65137264189dc7b07354004cc2cf4d4d0",
+    "archive": "benchmarks/results/remaining-indicators/hyperbolic-fanout-threshold-20261112-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "394456acd40e2848bce38b37f020a6df3e473ab76bd64673ae16994df9d5f9ee",
+    "archive": "benchmarks/results/remaining-indicators/hyperbolic-fanout-threshold-20261112-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "07b0e488160e51784ece071b574232bc8ed0a298735e9b42e89853ce91fd59c6",
+    "archive": "benchmarks/results/remaining-indicators/hyperbolic-fanout-threshold-20261112-report-integration/updated-pair-details.png.gz"
+  }
+}

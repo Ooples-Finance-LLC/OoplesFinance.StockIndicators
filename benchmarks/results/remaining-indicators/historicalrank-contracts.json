@@ -1,0 +1,37 @@
+{
+  "batch": "historical-volatility-rank-shared-execution",
+  "types": [
+    "HistoricalVolatilityPercentile"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse the existing rolling log and residual sums, strict rank boundary and EMA recurrence to compute rank and signal together. Preserve clamped periods, original close inputs, warmup, source/component fallback and ownership.",
+  "verification": {
+    "unit_passed": 18,
+    "fixture_passed": 4,
+    "discovery_passed": 148,
+    "gpu_passed": 100,
+    "contract_methods": 1487,
+    "hosted_methods": 1475,
+    "evidence": [
+      {
+        "file": "historicalrank-unit.trx.gz",
+        "passed_cases": 18,
+        "trx_sha256": "ceba195945c7509a5a9c2550b656cdcefca26a2e47736279ece119b9a19e7d41"
+      },
+      {
+        "file": "historicalrank-fixture.trx.gz",
+        "passed_cases": 152,
+        "trx_sha256": "a204b5eeb9610c00d84bada19d03662091cd12e817129ec526bd7a7b309fc922"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingHistoricalRankBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "HistoricalVolatilityPercentile"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

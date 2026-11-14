@@ -4,7 +4,7 @@ using OoplesFinance.StockIndicators.Helpers;
 namespace OoplesFinance.StockIndicators.Indicators;
 
 // Exact rounded logical Hilbert stages shared by adaptive averages and cycle readings.
-internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retainOlder)
+internal sealed partial class HilbertPhaseState(int start, bool retainPeriod, bool retainOlder)
 {
     private readonly JurikDyadic[] _prices = new JurikDyadic[3],
         _smooth = new JurikDyadic[6],
@@ -22,9 +22,15 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
         _olderPhase;
     private long _index = -1;
     private int _priceCursor, _filterCursor;
+#if !NETFRAMEWORK
+    internal JurikDyadic InPhase => _scalarState ? JurikDyadic.FromDouble(_scalarInPhase) : _inPhaseValue;
+    internal JurikDyadic Quadrature => _scalarState ? JurikDyadic.FromDouble(_scalarQuadrature) : _quadratureValue;
+    internal JurikDyadic SmoothPrice => _scalarState ? JurikDyadic.FromDouble(_scalarSmoothPrice) : _smoothPriceValue;
+#else
     internal JurikDyadic InPhase => _inPhaseValue;
     internal JurikDyadic Quadrature => _quadratureValue;
     internal JurikDyadic SmoothPrice => _smoothPriceValue;
+#endif
     internal double Period { get; private set; }
     internal double Phase { get; private set; }
 
@@ -41,13 +47,16 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
         ref readonly var lag6 = ref past[_filterCursor];
 #if !NETFRAMEWORK
         if (value.TryDouble(out double v) && lag2.TryDouble(out double a)
-            && lag4.TryDouble(out double b) && lag6.TryDouble(out double c)
-            && HilbertRoundedKernel.TryExactSum(v, -c, out double outer)
-            && HilbertRoundedKernel.TryExactSum(a, -b, out double inner)
-            && HilbertRoundedKernel.TryProductSum(outer, .0962, inner, .5769, out double rounded))
+            && lag4.TryDouble(out double b) && lag6.TryDouble(out double c))
         {
-            double corrected = rounded * correction;
-            if (double.IsFinite(corrected)) return JurikDyadic.FromDouble(corrected);
+            if ((HilbertRoundedKernel.TryExactSum(v, -c, out double outer)
+                 && HilbertRoundedKernel.TryExactSum(a, -b, out double inner)
+                 && HilbertRoundedKernel.TryProductSum(outer, .0962, inner, .5769, out double rounded))
+                || HilbertRoundedKernel.TryFir(v, a, b, c, out rounded))
+            {
+                double corrected = rounded * correction;
+                if (double.IsFinite(corrected)) return JurikDyadic.FromDouble(corrected);
+            }
         }
 #endif
         var sum = Product(value, .0962);
@@ -111,12 +120,31 @@ internal sealed class HilbertPhaseState(int start, bool retainPeriod, bool retai
         _olderPeriod = _olderPhase = Period = Phase = 0;
         _index = -1;
         _priceCursor = _filterCursor = 0;
+#if !NETFRAMEWORK
+        ResetScalar();
+#endif
     }
 
     internal void Update(BigInteger price) => Update(JurikDyadic.FromUnits(price));
-    internal void Update(double price) => Update(JurikDyadic.FromDouble(price));
+    internal void Update(double price)
+    {
+#if !NETFRAMEWORK
+        if (_scalarState && TryUpdateScalar(price)) return;
+        SynchronizeScalar();
+#endif
+        UpdateExact(JurikDyadic.FromDouble(price));
+    }
 
     internal void Update(JurikDyadic price)
+    {
+#if !NETFRAMEWORK
+        if (_scalarState && price.TryDouble(out double value) && TryUpdateScalar(value)) return;
+        SynchronizeScalar();
+#endif
+        UpdateExact(price);
+    }
+
+    private void UpdateExact(JurikDyadic price)
     {
         _index++;
         if (_index >= start)

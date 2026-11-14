@@ -37,6 +37,31 @@ public sealed class CurvatureSharedExecutionTests
     }
 
     [Theory]
+    [InlineData(70, false)] [InlineData(83, true)] [InlineData(83, false)]
+    public async Task PackedMomentsKeepExactGuardBoundaryAndFlatWindowRecovery(int exponent, bool below)
+    {
+        double magnitude = Math.ScaleB(1d, exponent);
+        if (below) magnitude = Math.BitDecrement(magnitude);
+        foreach (int scale in new[] { -1074, 0, 900 })
+        {
+            var bars = Enumerable.Range(0, 513).Select(i => new Bar(default, 0, 0, 0,
+                Math.ScaleB(i % 101 < 40 ? (i % 2 == 0 ? 0 : magnitude)
+                    : i % 101 < 80 ? (i % 2 == 0 ? 0 : 1) : 0, scale), 0)).ToArray();
+            await Check(bars, 2, 20);
+        }
+    }
+
+    [Theory]
+    [InlineData(4096)] [InlineData(4097)]
+    public async Task PackedMomentPeriodBoundaryMatchesIndependentStages(int period)
+    {
+        double magnitude = Math.BitDecrement(Math.ScaleB(1d, 83));
+        var bars = Enumerable.Range(0, period == 4096 ? 8193 : 33).Select(i =>
+            new Bar(default, 0, 0, 0, i % 97 == 0 ? 1 : i % 2 == 0 ? 0 : magnitude, 0)).ToArray();
+        await Check(bars, 2, period);
+    }
+
+    [Theory]
     [InlineData(3)] [InlineData(20)] [InlineData(256)] [InlineData(4096)]
     public async Task FullSignificandSlopesKeepIndependentRatioAndRootRounding(int period)
     {

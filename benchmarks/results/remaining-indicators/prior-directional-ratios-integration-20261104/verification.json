@@ -1,0 +1,26 @@
+{
+  "source_integration_commit": "3e358537cef3e4249fc844fc82c6a3b6a7a4dcaa",
+  "qualified_source": "c7fab5d9313e876e729b072e9eb4fb0a6ab93e3d",
+  "compiled_source": "77c5cff4caf9afadf08d6a0d1def2222e510ef4b",
+  "source_fingerprint": "08dd860a1a94479b4cfa439dec5900bf400b390342f83ff9a19ddecef539ca6e",
+  "unit": 46,
+  "comparator": 23,
+  "actual_gpu": 100,
+  "inventory_tests": 8,
+  "production_sha256": "13b9eb2a6f81358cf168d593b650bc2330e7898984bea0070d83b687aade407b",
+  "run_id": "41870750086",
+  "cases": 210,
+  "decisions": 42,
+  "verdicts": {
+    "inconclusive": 21,
+    "faster": 21
+  },
+  "integrated_paths": [
+    "src/Indicators/PriorSeededDirectionalMeasure.cs",
+    "tests/ModelsTests/PriorDirectionalRatioTests.cs"
+  ],
+  "excluded": [
+    "Rejected combined41883056295; private Klinger source excluded; cancelled original correctness dispatches excluded; no pooling"
+  ],
+  "verified_utc": "2026-11-04T19:15:39.514209+00:00"
+}

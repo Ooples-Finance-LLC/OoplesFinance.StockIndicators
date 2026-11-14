@@ -1,0 +1,47 @@
+{
+  "batch": "fisher-frama-shared-execution",
+  "types": [
+    "Frama",
+    "EhlersFrama",
+    "FisherTransform",
+    "EhlersFisherTransform",
+    "EhlersInverseFisherTransform",
+    "EhlersRelativeStrengthIndexInverseFisherTransform"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact FRAMA and inverse-RSI Fisher kernels; stream Fisher normalization without full intermediate history; preserve original ranges, odd-period overflow fallback, operation order, hidden nine-bar smoothing, alias defaults, components/source fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 94,
+    "fixture_passed": 24,
+    "discovery_passed": 161,
+    "gpu_passed": 100,
+    "contract_methods": 1502,
+    "hosted_methods": 1490,
+    "evidence": [
+      {
+        "file": "fisherframa-unit.trx.gz",
+        "passed_cases": 94,
+        "trx_sha256": "093fd17104c88d7169ba3ff033ff0ceafa005f8a08a8ad2ee3882265f10152bc"
+      },
+      {
+        "file": "fisherframa-fixture.trx.gz",
+        "passed_cases": 185,
+        "trx_sha256": "db404d96c9c96652842f956d44f878d96fdcbbfd30c05babcff614b04b1a7844"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingFisherFramaBenchmarks",
+    "cases": 48,
+    "status": "prepared-not-measured",
+    "operations": [
+      "Frama",
+      "EhlersFrama",
+      "FisherTransform",
+      "EhlersFisherTransform",
+      "EhlersInverseFisherTransform",
+      "EhlersRelativeStrengthIndexInverseFisherTransform"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

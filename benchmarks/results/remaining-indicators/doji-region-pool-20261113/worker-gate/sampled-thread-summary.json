@@ -1,0 +1,374 @@
+{
+  "trace": "doji-region-pool-candidate-20261113.speedscope.json",
+  "window_ms": [
+    16569.348378710936,
+    32569.348378710936
+  ],
+  "selected_sample_weight_ms": 16000.0,
+  "leaf": [
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+<>c__DisplayClass142_0`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+RangeDojiKernel].<FillBoundedWindow>b__0(int32)",
+      6059.859895974532
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.Thread.<PollGC>g__PollGCWorker|70_0()",
+      4529.135090056025
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.ManualResetEventSlim.Wait(int32,value class System.Threading.CancellationToken)",
+      3349.0437807201342
+    ],
+    [
+      "System.Private.CoreLib!System.GC.<AllocateUninitializedArray>g__AllocateNewArrayWorker|77_0(int32,bool)",
+      686.6513392373927
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.AverageRangeDojiState.Matches(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      457.35328961601044
+    ],
+    [
+      "System.Private.CoreLib!System.Buffer.MemmoveInternal(unsigned int8&,unsigned int8&,unsigned int)",
+      399.9724351881014
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.Monitor.TryEnter_Slowpath(class System.Object,int32)",
+      399.0036123994869
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node..ctor(class OoplesFinance.StockIndicators.Indicators.IIndicator,int32,bool,bool,bool,bool,bool,bool)",
+      90.19377900810287
+    ],
+    [
+      "System.Private.CoreLib!System.Runtime.CompilerServices.RuntimeHelpers.<GetHashCode>g__GetHashCodeWorker|15_0(class System.Object)",
+      10.699389378929482
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor.RunSet(class Job,int32,bool)",
+      4.618299961090088
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.FillBoundedWindow(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[][],class OoplesFinance.StockIndicators.Indicators.IIndicator,int32,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+      3.9527402689091105
+    ],
+    [
+      "System.Private.CoreLib!System.SpanHelpers.Memmove(unsigned int8&,unsigned int8&,unsigned int)",
+      2.4184000492095947
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.Thread.Sleep(int32)",
+      2.104399910353095
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor.FinishPlainDispatch(class Job)",
+      1.9711886364202655
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.Monitor.Enter_Slowpath(class System.Object)",
+      1.6354999027244048
+    ],
+    [
+      "System.Linq!System.Linq.Enumerable.Any(class System.Collections.Generic.IEnumerable`1<!!0>,class System.Func`2<!!0,bool>)",
+      1.386199951171875
+    ],
+    [
+      "OoplesFinance.StockIndicators.CompetitorBenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.AverageRangeDojiComparison.Ooples(class System.String,class OoplesFinance.StockIndicators.CompetitorBenchmarks.CompetitorData)",
+      0.0002828849828802049
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.Execute(value class OoplesFinance.StockIndicators.Indicators.Bar[],class System.Collections.Generic.IReadOnlyList`1<class OoplesFinance.StockIndicators.Indicators.IIndicator>,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.OwnedBarHistory,class OoplesFinance.StockIndicators.Indicators.TensorsGpuExecution)",
+      0.00023478221555706114
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor.Execute(int32,int32,class System.Action`1<int32>)",
+      0.0001417068524460774
+    ],
+    [
+      "ynbenpqd.0m1!NativeGapProfile.Run(class System.String,class System.String,int32,int32)",
+      1.880653144326061e-07
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor.WaitForZero(int32&)",
+      1.792905095499009e-07
+    ]
+  ],
+  "inclusive": [
+    [
+      "Thread (26136)",
+      16000.0
+    ],
+    [
+      "(Non-Activities)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Interpreter.DynamicInstruction`6[System.__Canon,System.__Canon,System.__Canon,System.__Canon,System.__Canon,System.__Canon].Run(class System.Management.Automation.Interpreter.InterpretedFrame)",
+      16000.0
+    ],
+    [
+      "Anonymously Hosted DynamicMethods Assembly!dynamicClass.CallSite.Target(pMT: 00007FFEC58B4EB0,pMT: 00007FFEC53D5B68,pMT: 00007FFEC4FE80E8,class System.Object,class System.Object,class System.Object,class System.Object)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Interpreter.Interpreter.Run(class System.Management.Automation.Interpreter.InterpretedFrame)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Runspaces.LocalPipeline.InvokeThreadProc()",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.CommandProcessorBase.DoComplete()",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.DlrScriptCommandProcessor.RunClause(class System.Action`1<class System.Management.Automation.Language.FunctionContext>,class System.Object,class System.Object)",
+      16000.0
+    ],
+    [
+      "Process64 pwsh (55960) Args:  -NoProfile -File profile-native-gaps-perfview-20261113.ps1 -Pair TaLib.Candles.DragonflyDoji -Seconds 20 -Runtime C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-doji-region-pool-20261113\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0 -Expected e5ee21bd5708383ef23aba78fc7cf621216a4dc92bfb23366a1512480e034713 ",
+      16000.0
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.Thread+StartHelper.Callback(class System.Object)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Internal.PipelineProcessor.DoCompleteCore(class System.Management.Automation.CommandProcessorBase)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Interpreter.LightLambda.RunVoid1(!!0)",
+      16000.0
+    ],
+    [
+      "System.Linq.Expressions!System.Dynamic.UpdateDelegates.UpdateAndExecute5(class System.Runtime.CompilerServices.CallSite,!!0,!!1,!!2,!!3,!!4)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(class System.Management.Automation.Interpreter.InterpretedFrame)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Internal.PipelineProcessor.SynchronousExecuteEnumerate(class System.Object)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Runspaces.PipelineThread.WorkerProc()",
+      16000.0
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.ExecutionContext.RunInternal(class System.Threading.ExecutionContext,class System.Threading.ContextCallback,class System.Object)",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.Runspaces.LocalPipeline.InvokeHelper()",
+      16000.0
+    ],
+    [
+      "Threads",
+      16000.0
+    ],
+    [
+      "System.Management.Automation!System.Management.Automation.DlrScriptCommandProcessor.Complete()",
+      16000.0
+    ],
+    [
+      "ynbenpqd.0m1!NativeGapProfile.Run(class System.String,class System.String,int32,int32)",
+      16000.0
+    ],
+    [
+      "OoplesFinance.StockIndicators.CompetitorBenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.ComparisonPair.Ooples(class OoplesFinance.StockIndicators.CompetitorBenchmarks.CompetitorData,int32)",
+      15993.917839043424
+    ],
+    [
+      "OoplesFinance.StockIndicators.CompetitorBenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.AverageRangeDojiComparison.Ooples(class System.String,class OoplesFinance.StockIndicators.CompetitorBenchmarks.CompetitorData)",
+      15993.917839043424
+    ],
+    [
+      "Anonymously Hosted DynamicMethods Assembly!dynamicClass.lambda_method17(pMT: 00007FFEC58B4EB0)",
+      15993.917839043424
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.Execute(value class OoplesFinance.StockIndicators.Indicators.Bar[],class System.Collections.Generic.IReadOnlyList`1<class OoplesFinance.StockIndicators.Indicators.IIndicator>,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.OwnedBarHistory,class OoplesFinance.StockIndicators.Indicators.TensorsGpuExecution)",
+      15591.52672092113
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder+<BuildWithHistoryAsync>d__68.MoveNext()",
+      15591.52672092113
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.FillBoundedWindow(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[][],class OoplesFinance.StockIndicators.Indicators.IIndicator,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+      14802.595778563318
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.FillBoundedWindow(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[][],class OoplesFinance.StockIndicators.Indicators.IIndicator,int32,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+      14802.595778563318
+    ],
+    [
+      "CPU_TIME",
+      13533.749212355015
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor.Execute(int32,int32,class System.Action`1<int32>)",
+      13333.904208690645
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor.FinishPlainDispatch(class Job)",
+      10650.05791639557
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor.RunSet(class Job,int32,bool)",
+      6521.831485551633
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+<>c__DisplayClass142_0`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+RangeDojiKernel].<FillBoundedWindow>b__0(int32)",
+      6517.213185590543
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.Thread.<PollGC>g__PollGCWorker|70_0()",
+      4529.135090056025
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor.WaitForZero(int32&)",
+      3475.347379402341
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.ManualResetEventSlim.Wait(int32,value class System.Threading.CancellationToken)",
+      3353.169880535883
+    ],
+    [
+      "UNMANAGED_CODE_TIME",
+      2466.2495619344736
+    ],
+    [
+      "System.Private.CoreLib!System.Buffers.SharedArrayPool`1[OoplesFinance.StockIndicators.Indicators.Bar].Return(!0[],bool)",
+      1053.819917548175
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer..ctor(int32)",
+      686.6513392373927
+    ],
+    [
+      "System.Private.CoreLib!System.GC.<AllocateUninitializedArray>g__AllocateNewArrayWorker|77_0(int32,bool)",
+      686.6513392373927
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.AverageRangeDojiState.Matches(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      457.35328961601044
+    ],
+    [
+      "System.Private.CoreLib!System.Buffer.MemmoveInternal(unsigned int8&,unsigned int8&,unsigned int)",
+      399.9724351881014
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.Monitor.TryEnter_Slowpath(class System.Object,int32)",
+      399.0036123994869
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node..ctor(class OoplesFinance.StockIndicators.Indicators.IIndicator,int32,bool,bool,bool,bool,bool,bool)",
+      90.19377900810287
+    ],
+    [
+      "System.Private.CoreLib!System.Buffers.SharedArrayPool`1[OoplesFinance.StockIndicators.Indicators.Bar].Rent(int32)",
+      11.915299656102434
+    ]
+  ],
+  "worker_region_sample_weight_ms": 15772.306661376013,
+  "worker_region_leaf": [
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+<>c__DisplayClass142_0`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+RangeDojiKernel].<FillBoundedWindow>b__0(int32)",
+      13545.688963843539
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.AverageRangeDojiState.Matches(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      1401.0853346439471
+    ],
+    [
+      "System.Private.CoreLib!System.Collections.Generic.Queue`1[System.ValueTuple`2[System.Double,System.Double]].Grow(int32)",
+      825.5323628885271
+    ]
+  ],
+  "worker_region_inclusive": [
+    [
+      "(Non-Activities)",
+      15772.306661376013
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor.WorkerLoop(int32)",
+      15772.306661376013
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor.RunSet(class Job,int32,bool)",
+      15772.306661376013
+    ],
+    [
+      "Process64 pwsh (55960) Args:  -NoProfile -File profile-native-gaps-perfview-20261113.ps1 -Pair TaLib.Candles.DragonflyDoji -Seconds 20 -Runtime C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-doji-region-pool-20261113\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0 -Expected e5ee21bd5708383ef23aba78fc7cf621216a4dc92bfb23366a1512480e034713 ",
+      15772.306661376013
+    ],
+    [
+      "Threads",
+      15772.306661376013
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+<>c__DisplayClass142_0`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+RangeDojiKernel].<FillBoundedWindow>b__0(int32)",
+      15772.306661376013
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor+<>c__DisplayClass28_0.<.ctor>b__0()",
+      15772.306661376013
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.Thread.StartCallback()",
+      15772.306661376013
+    ],
+    [
+      "CPU_TIME",
+      15270.07625134298
+    ],
+    [
+      "Thread (19924)",
+      2613.731900754352
+    ],
+    [
+      "Thread (53948)",
+      2421.254212896729
+    ],
+    [
+      "Thread (64844)",
+      2404.7954046735904
+    ],
+    [
+      "Thread (56332)",
+      2394.858611068561
+    ],
+    [
+      "Thread (25840)",
+      2227.0901095123263
+    ],
+    [
+      "Thread (53972)",
+      1902.3048170412003
+    ],
+    [
+      "Thread (38824)",
+      1808.2716054292541
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.AverageRangeDojiState.Matches(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      1401.0853346439471
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.AverageRangeDojiState.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      825.5323628885271
+    ],
+    [
+      "System.Private.CoreLib!System.Collections.Generic.Queue`1[System.ValueTuple`2[System.Double,System.Double]].Grow(int32)",
+      825.5323628885271
+    ],
+    [
+      "UNMANAGED_CODE_TIME",
+      502.23037938213383
+    ]
+  ],
+  "interpretation": "Sampled thread time. Main and worker-region buckets remain separate; neither is whole-process CPU utilization."
+}

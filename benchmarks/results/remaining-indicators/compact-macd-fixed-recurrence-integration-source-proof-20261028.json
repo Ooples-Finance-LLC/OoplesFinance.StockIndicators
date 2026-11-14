@@ -1,0 +1,25 @@
+{
+  "combined_code_source": "4db57c6842167f9f58f7d8e19ad210dfa23f6aba",
+  "individual_qualified_source": "fd9cd44cf0ea437857a22ec19e9753f29732c666",
+  "source_fingerprint_sha256": "4a5978f75a89b26d349d166f593f48fba577c2e88a11cb99f190d03399fda0fd",
+  "fresh_combined_tree_checks": {
+    "unit": 266,
+    "parity": 147,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "add8ca2989b7b1c20b8faa87594047a50d96751aefabca7771c21557ae559332",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "add8ca2989b7b1c20b8faa87594047a50d96751aefabca7771c21557ae559332",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "add8ca2989b7b1c20b8faa87594047a50d96751aefabca7771c21557ae559332",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "add8ca2989b7b1c20b8faa87594047a50d96751aefabca7771c21557ae559332"
+  },
+  "matched_source_files": [
+    "src/Helpers/CompactMacdValue.cs",
+    "src/Indicators/AlignedEmaMacd.cs",
+    "src/Indicators/EmaDifferenceSignal.cs",
+    "tests/ModelsTests/CompactMacdFixedRecurrenceTests.cs",
+    "tests/ModelsTests/CompactMacdFusedRecurrenceTests.cs"
+  ],
+  "note": "Fresh combined-tree correctness evidence. Timing rows retain the individually measured source commit; no individual GPU receipt is relabeled as combined evidence."
+}

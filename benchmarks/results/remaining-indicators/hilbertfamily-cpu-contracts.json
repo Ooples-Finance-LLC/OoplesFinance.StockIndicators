@@ -1,0 +1,41 @@
+{
+  "batch": "hilbertfamily-shared-execution",
+  "types": [
+    "EhlersClassicHilbertTransformer",
+    "EhlersHilbertTransformer",
+    "EhlersHilbertTransformerIndicator",
+    "EhlersHilbertTransformIndicator",
+    "EhlersInstantaneousPhaseIndicator"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 83,
+    "parity_passed": 20,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "hilbertfamily-unit-verified.trx.gz",
+        "passed_cases": 83,
+        "trx_sha256": "d541ae84dbf33d32cedcf13069a66fa2dbebcb3d2d59ae4949ce0f08680e3e7b"
+      },
+      {
+        "file": "hilbertfamily-parity-verified.trx.gz",
+        "passed_cases": 20,
+        "trx_sha256": "2b060211316ab955e7c7cec59f451d433695a826b3de5cfe8227cd81356228c0"
+      }
+    ],
+    "context": "Executed in the combined 113-facade working candidate; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+    "test_execution_input_sha256": {
+      "unit": "54839491c1974bca029c0108d53ac0195d8fdbcdb65460c259321c5c095493ef",
+      "parity": "54839491c1974bca029c0108d53ac0195d8fdbcdb65460c259321c5c095493ef"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "b7e13308b78c1e23f9f21cbbd9323a7d9d6548ee"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

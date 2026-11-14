@@ -1,0 +1,39 @@
+{
+  "batch": "volatility-ratio-switch-shared-execution",
+  "types": [
+    "VolatilityRatio",
+    "VolatilitySwitchIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse lagged range ratio and exact midpoint-return deviation/WMA kernels without intermediate series; preserve extended range differences, lag startup, zero denominators, clamps, original fields, component/source fallback and ownership.",
+  "verification": {
+    "unit_passed": 108,
+    "fixture_passed": 8,
+    "discovery_passed": 138,
+    "gpu_passed": 100,
+    "contract_methods": 1477,
+    "hosted_methods": 1465,
+    "evidence": [
+      {
+        "file": "ratioswitch-unit.trx.gz",
+        "passed_cases": 108,
+        "trx_sha256": "ad5979d24eb5da56f5f2931b023d7e3a4b3968e3e91e5d6a95a5799b47f03c85"
+      },
+      {
+        "file": "ratioswitch-fixture.trx.gz",
+        "passed_cases": 146,
+        "trx_sha256": "734f1f5ec2f64a5d881dbe36c4ed6316d0decdd5430e3beb93f9fad09834c62c"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingRatioSwitchBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "VolatilityRatio",
+      "VolatilitySwitchIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

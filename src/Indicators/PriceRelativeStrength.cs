@@ -93,16 +93,25 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
         CandlePriceField basis
     ) : IMultiOutputState
     {
+#if !NETFRAMEWORK
+        private readonly Queue<(double Eval, double Base)> _history = new();
+#else
         private readonly Queue<(BigInteger Eval, BigInteger Base)> _history = new();
+#endif
         private readonly Queue<double?> _ratios = new();
+#if !NETFRAMEWORK
+        // Exact rounded-ratio sum, with compact storage and the existing wide fallback.
+        private ExactMeanAccumulator _sum;
+#else
         private BigInteger _sum;
+#endif
         private int _missing;
 
         public void Reset()
         {
             _history.Clear();
             _ratios.Clear();
-            _sum = 0;
+            _sum = default;
             _missing = 0;
         }
 
@@ -121,9 +130,18 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            var e = ExactVarianceWindow.Units(PairStatisticsWindow.Select(bar, evaluation));
-            var b = ExactVarianceWindow.Units(PairStatisticsWindow.Select(bar, basis));
+            double evaluationPrice = PairStatisticsWindow.Select(bar, evaluation);
+            double basePrice = PairStatisticsWindow.Select(bar, basis);
+#if !NETFRAMEWORK
+            // Both operands are already binary64 values: one hardware division
+            // rounds the exact ratio once, including subnormals and overflow.
+            // Exact zero numerators historically publish positive zero.
+            double? ratio = basePrice == 0 ? null : evaluationPrice == 0 ? 0 : evaluationPrice / basePrice;
+#else
+            var e = ExactVarianceWindow.Units(evaluationPrice);
+            var b = ExactVarianceWindow.Units(basePrice);
             double? ratio = b.IsZero ? null : Divide(e, b);
+#endif
             Put(ratio, 0, output);
             if (ratio.HasValue && !FrameworkCompatibility.IsFinite(ratio.Value))
                 return;
@@ -133,20 +151,61 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
                 {
                     var old = _ratios.Dequeue();
                     if (old.HasValue)
+#if !NETFRAMEWORK
+                        _sum.Add(old.Value, -1);
+#else
                         _sum -= ExactVarianceWindow.Units(old.Value);
+#endif
                     else
                         _missing--;
                 }
                 _ratios.Enqueue(ratio);
                 if (ratio.HasValue)
+#if !NETFRAMEWORK
+                    _sum.Add(ratio.Value);
+#else
                     _sum += ExactVarianceWindow.Units(ratio.Value);
+#endif
                 else
                     _missing++;
                 if (_ratios.Count == mean.Value && _missing == 0)
+#if !NETFRAMEWORK
+                    Put(_sum.Mean(mean.Value), 1, output);
+#else
                     Put(ExactMeanAccumulator.UnitRatio(_sum, mean.Value), 1, output);
+#endif
             }
             if (!period.HasValue)
                 return;
+#if !NETFRAMEWORK
+            if (_history.Count == period.Value)
+            {
+                var old = _history.Dequeue();
+                if (old.Eval != 0 && old.Base != 0)
+                {
+                    var oldEvaluation = ExactMeanAccumulator.DecomposeFinite(old.Eval);
+                    var oldBase = ExactMeanAccumulator.DecomposeFinite(old.Base);
+                    var currentEvaluation = ExactMeanAccumulator.DecomposeFinite(evaluationPrice);
+                    var currentBase = ExactMeanAccumulator.DecomposeFinite(basePrice);
+                    // Each normalized binary64 factor has at most 53 bits. Its exact
+                    // product fits Int128; reuse the prior factors for the denominator.
+                    var numerator = JurikDyadic.FromBinaryProduct(
+                        (Int128)currentEvaluation.Integer * oldBase.Integer,
+                        currentEvaluation.Exponent + oldBase.Exponent);
+                    var term = JurikDyadic.FromBinaryProduct(
+                        (Int128)currentBase.Integer * oldEvaluation.Integer,
+                        currentBase.Exponent + oldEvaluation.Exponent);
+                    numerator.Subtract(term);
+                    var denominator = JurikDyadic.FromBinaryProduct(
+                        (Int128)oldEvaluation.Integer * oldBase.Integer,
+                        oldEvaluation.Exponent + oldBase.Exponent);
+                    // Round the complete exact expression once. Exact cancellation
+                    // retains positive zero even when the denominator is negative.
+                    Put(numerator.Sign == 0 ? 0 : numerator.Ratio(denominator), 2, output);
+                }
+            }
+            _history.Enqueue((evaluationPrice, basePrice));
+#else
             if (_history.Count == period.Value)
             {
                 var old = _history.Dequeue();
@@ -154,6 +213,7 @@ public sealed class PriceRelativeStrength : MultiOutputIndicatorBase, IIndicator
                     Put(Divide(e * old.Base - b * old.Eval, old.Eval * old.Base), 2, output);
             }
             _history.Enqueue((e, b));
+#endif
         }
     }
 }

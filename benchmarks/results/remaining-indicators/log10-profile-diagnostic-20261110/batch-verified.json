@@ -1,0 +1,18 @@
+{
+  "profile": "batch",
+  "artifact_root": "Z:\\Codex-Archives\\StockIndicators-Recovery-20261021\\log10-profile-diagnostic-repair-20261110\\batch",
+  "files": 72,
+  "rounds": 4,
+  "bdn_cases": 8,
+  "host": {
+    "machine": "runnervmm7ud1",
+    "platform": "Windows-2025Server-10.0.26100-SP0",
+    "logical_cpus": 4,
+    "runner_image": "20261103.298.1",
+    "run_id": "42813611722",
+    "run_attempt": "1",
+    "instance_nonce": "b0dd773f76d944bf9e0d552ec88547e2"
+  },
+  "artifact_id": 13764361387,
+  "archive_sha256": "d3e2e0ce5e3ea7c6b97c005e68f8e97cab363fda78b704df29c697e4d8f2027b"
+}

@@ -1,0 +1,99 @@
+{
+  "reason": "Hosted38940232724 contract16 canceled at45m18s; completed local Vortex10000 cases each take36minutes and previously shared one method.",
+  "case_mapping": {
+    "original_trx_sha256": "fdf1db6d711ca6a3e30702a28d77a771674f65952c3c064de067537225a66122",
+    "discovered_output_sha256": "be18b5fe4f0433750b60cddf0f9e2a7ad8fea522de58709346c5a676239a3f02",
+    "original_cases": 12,
+    "discovered_cases": 12,
+    "cases": [
+      [
+        "VolumeWeightedRsi",
+        1000,
+        "Full"
+      ],
+      [
+        "VolumeWeightedRsi",
+        1000,
+        "LatestOnly"
+      ],
+      [
+        "VolumeWeightedRsi",
+        10000,
+        "Full"
+      ],
+      [
+        "VolumeWeightedRsi",
+        10000,
+        "LatestOnly"
+      ],
+      [
+        "VortexBands",
+        1000,
+        "Full"
+      ],
+      [
+        "VortexBands",
+        1000,
+        "LatestOnly"
+      ],
+      [
+        "VortexBands",
+        10000,
+        "Full"
+      ],
+      [
+        "VortexBands",
+        10000,
+        "LatestOnly"
+      ],
+      [
+        "Vpci",
+        1000,
+        "Full"
+      ],
+      [
+        "Vpci",
+        1000,
+        "LatestOnly"
+      ],
+      [
+        "Vpci",
+        10000,
+        "Full"
+      ],
+      [
+        "Vpci",
+        10000,
+        "LatestOnly"
+      ]
+    ],
+    "note": "Exact original input combinations retained; two long cases are separate Facts. Mapping is discovery evidence, not a new execution claim."
+  },
+  "long_methods": {
+    "OoplesFinance.StockIndicators.CompetitorTests.RemainingVolumeVortexBenchmarkTests.VortexFull10000": {
+      "prior_passed_case": "OoplesFinance.StockIndicators.CompetitorTests.RemainingVolumeVortexBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit(operation: \"VortexBands\", count: 10000, history: Full)",
+      "prior_duration_seconds": 2172.2879122,
+      "scheduled_seconds": 2173,
+      "shard": 1
+    },
+    "OoplesFinance.StockIndicators.CompetitorTests.RemainingVolumeVortexBenchmarkTests.VortexLatest10000": {
+      "prior_passed_case": "OoplesFinance.StockIndicators.CompetitorTests.RemainingVolumeVortexBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit(operation: \"VortexBands\", count: 10000, history: LatestOnly)",
+      "prior_duration_seconds": 2175.7362101,
+      "scheduled_seconds": 2176,
+      "shard": 0
+    }
+  },
+  "retained_long_execution": "volumevortex-fixture.trx.gz",
+  "local_checks": {
+    "short_parity": 10,
+    "discovery": 95,
+    "gpu": 100,
+    "scheduler_tests": 6,
+    "gpu_verifier_tests": 3,
+    "short_trx_sha256": "62df27f614cd1159ed773d46e42c612d08eb890708f51d9bb8e5ce9bfe63ab4c"
+  },
+  "hosted_methods": 1420,
+  "runners": 20,
+  "timeout_minutes": 45,
+  "hosted_validation": "Pending next integrated run; long cases are retained from accepted local evidence, not replayed here."
+}

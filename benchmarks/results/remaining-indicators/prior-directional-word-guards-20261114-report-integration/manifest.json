@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "2a2b6701d74a3e3d221c240481ec5e1254e538c355506cc1fe7b640aa027cd5f",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-word-guards-20261114-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "533de6ed51f130dd4e1bd33004af945930f3b81383727dd3c7c0bf23a1bf6787",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-word-guards-20261114-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "366937dfbcf0a2324223037cdc214068123674339fead2647e2382048449e4cf",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-word-guards-20261114-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "3744e8cb387d3859ea2da247cbe23821a2dd381607e805b907b77e795892683d",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-word-guards-20261114-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "597057f4aae0d57ce375397562caf2a55bb142c7b81b5459fc246b1f55665f67",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-word-guards-20261114-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "f125e05d18c38d85694977db916c490809a1b313fc0b6947767128ece635572f",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-word-guards-20261114-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "b0f114795fb7a314dc96ad19b2154fc0bf0d4db7b6679988721434559f40457b",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-word-guards-20261114-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "eddd9ca335a2a577f3a099816f8f50abf302eed94357706f081d6736743f5ab7",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-word-guards-20261114-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "57cb57eb2768c04dfbf21598b048ce16157d57a287bed3b1e4a7e59df44930dc",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-word-guards-20261114-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "d20e4dadf1a7d41c128b590c3bae1e426c4ee350abbdf301faff2f7d28cd0324",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-word-guards-20261114-report-integration/updated-pair-details.png.gz"
+  }
+}

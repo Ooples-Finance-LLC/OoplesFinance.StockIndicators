@@ -1,0 +1,39 @@
+{
+  "batch": "auto-line-drift-shared-execution",
+  "types": [
+    "AutoLine",
+    "AutoLineWithDrift"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse translated two-pass rolling deviation for AutoLine to preserve legacy rounding, avoid unfillable period-sized windows, and reuse exact AutoDriftWindow with its rounded seed and lagged drift. Preserve source fallback and error priority.",
+  "verification": {
+    "unit_passed": 93,
+    "fixture_passed": 8,
+    "discovery_passed": 97,
+    "gpu_passed": 100,
+    "contract_methods": 1434,
+    "hosted_methods": 1422,
+    "evidence": [
+      {
+        "file": "autolinepair-unit.trx.gz",
+        "passed_cases": 93,
+        "trx_sha256": "5d462eab17fde67c17f107dd972651c2813e30104babd7f6aa9d59485a9d0cc4"
+      },
+      {
+        "file": "autolinepair-fixture.trx.gz",
+        "passed_cases": 105,
+        "trx_sha256": "34b9322eeeef4c025ccc788945099e0be943f91f86456e03bcabe022664ecffc"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAutoLinePairBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "AutoLine",
+      "AutoLineWithDrift"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

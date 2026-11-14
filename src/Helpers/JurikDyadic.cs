@@ -352,6 +352,18 @@ internal struct JurikDyadic
         _exponent = Math.Max(0, exponent - 1) - 1074;
         _fixed = true; Normalize();
     }
+    // Read the exact compact representation without changing the stored value.
+    // Wide values retain their original arithmetic path.
+    internal readonly bool TryBinaryParts(out Int128 integer, out int exponent)
+    {
+        integer = 0; exponent = 0;
+        if (_wide || !_fixed && !double.IsFinite(_simple)) return false;
+        var copy = this;
+        copy.Promote();
+        integer = copy._integer; exponent = copy._exponent;
+        return true;
+    }
+
     internal readonly bool TryDouble(out double value)
     {
         value = 0;

@@ -1,0 +1,60 @@
+{
+  "before_sha256": "08c5dc91b718e4f75f879927482b91a20c378152c4e362b33cd9e02da016cf1f",
+  "candidate_sha256": "d79a0dc50d04afa2cb82ecf88757e0907b54133474f312a44c8cdfa0c41b0bec",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 4,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 4,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-sma-fused-diagnostics-control-20261024",
+  "imported_utc": "2026-10-24T19:55:02.814965+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "fec1197a2a9f65ff247623628067339a0a681b0a9f121bcaa956fdaaaaf4fe7f",
+      "archive": "benchmarks/results/remaining-indicators/sma-fused-diagnostics-certified-local-sma-fused-diagnostics-control-20261024-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "93ca7eea38328f8f891d301cf767ff38f13b4a22a14840265929a22c49018d92",
+      "archive": "benchmarks/results/remaining-indicators/sma-fused-diagnostics-certified-local-sma-fused-diagnostics-control-20261024-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "2f81681de2a2cd9cf87193da0ead1cba6904e046ea244e228e0edd9171ebc646",
+      "archive": "benchmarks/results/remaining-indicators/sma-fused-diagnostics-certified-local-sma-fused-diagnostics-control-20261024-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "08c52354961f0c2d28f1138b592ef5a15fb699eb6d4d6277a21ba5a0e49dbf96",
+      "archive": "benchmarks/results/remaining-indicators/sma-fused-diagnostics-certified-local-sma-fused-diagnostics-control-20261024-measurement.json.gz"
+    },
+    "stage-sma-fused-diagnostics-report.py": {
+      "sha256": "499ed942b5eabee9182b9b14c2bc8327350c373dfcf3057f0a14a71ebd95c661",
+      "archive": "benchmarks/results/remaining-indicators/sma-fused-diagnostics-certified-local-sma-fused-diagnostics-control-20261024-stage-sma-fused-diagnostics-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/sma-fused-diagnostics-certified-local-sma-fused-diagnostics-control-20261024-verify-approved-certified-report.py.gz"
+    },
+    "import-sma-fused-diagnostics-report.py": {
+      "sha256": "11e0767e34963c463366a8b2ee1d30f23d5bdf0506adcd207d08a9edd32e842e",
+      "archive": "benchmarks/results/remaining-indicators/sma-fused-diagnostics-certified-local-sma-fused-diagnostics-control-20261024-import-sma-fused-diagnostics-report.py.gz"
+    },
+    "archive-sma-fused-diagnostics-control.py": {
+      "sha256": "92a80185537dbbcec68ccbdbb9eb11fa84d1be294f352418decc7c96b4a6c01f",
+      "archive": "benchmarks/results/remaining-indicators/sma-fused-diagnostics-certified-local-sma-fused-diagnostics-control-20261024-archive-sma-fused-diagnostics-control.py.gz"
+    },
+    "prove-sma-fused-diagnostics-integration.py": {
+      "sha256": "40bcc8348ac81182e536c9aca4089912f2d142f9fb141b0ef56265595756072e",
+      "archive": "benchmarks/results/remaining-indicators/sma-fused-diagnostics-certified-local-sma-fused-diagnostics-control-20261024-prove-sma-fused-diagnostics-integration.py.gz"
+    },
+    "archive-sma-fused-diagnostics-report.py": {
+      "sha256": "2538ab5210e464874d78f66144c09994e761b18579368163da8375e34ff39414",
+      "archive": "benchmarks/results/remaining-indicators/sma-fused-diagnostics-certified-local-sma-fused-diagnostics-control-20261024-archive-sma-fused-diagnostics-report.py.gz"
+    }
+  }
+}

@@ -78,6 +78,33 @@ public sealed class WindowDeviationBands : MultiOutputIndicatorBase, IIndicatorV
                 )
             );
 
+    // Inputs are finite, and half is nonzero. Publish the exact three-term
+    // numerator divided by twice the already rounded half-width.
+    internal static double FinitePosition(double close, double center, double half)
+    {
+#if !NETFRAMEWORK
+        double difference = close - center;
+        double virtualCenter = difference - close;
+        double error = (close - (difference - virtualCenter)) + (-center - virtualCenter);
+        if (double.IsFinite(difference) && error == 0)
+        {
+            double numerator = difference + half;
+            double virtualHalf = numerator - difference;
+            double sumError = (difference - (numerator - virtualHalf)) + (half - virtualHalf);
+            double width = half * 2;
+            if (double.IsFinite(numerator) && double.IsFinite(width) && sumError == 0)
+                return numerator == 0 ? 0d : numerator / width;
+        }
+#endif
+        var position = new ExactMeanAccumulator();
+        position.Add(close);
+        position.Add(center, -1);
+        position.Add(half);
+        var denominator = new ExactMeanAccumulator();
+        denominator.Add(half, 2);
+        return position.Ratio(denominator);
+    }
+
     internal sealed class State(WindowDeviationBands owner) : IMultiOutputState
     {
         private static readonly BigInteger Grid = BigInteger.One << 1074;
@@ -144,9 +171,7 @@ public sealed class WindowDeviationBands : MultiOutputIndicatorBase, IIndicatorV
             if (half != 0)
             {
                 // Do not use the published bands: those have already rounded.
-                var position = new ExactMeanAccumulator(); position.Add(close); position.Add(center, -1); position.Add(half);
-                var width = new ExactMeanAccumulator(); width.Add(half, 2);
-                output[3] = position.Ratio(width);
+                output[3] = FinitePosition(close, center, half);
                 output[9] = 1;
             }
             if (center != 0)

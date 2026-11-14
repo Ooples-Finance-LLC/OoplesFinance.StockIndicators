@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "7e5b5a51122195cca7815e71f7799f121b30bc4be04125f422c620e570e7195a",
+    "archive": "benchmarks/results/remaining-indicators/renko-compact-volume-report-integration-20261105/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "32d297b215cced3cc8d67bc9634cce71b42dc2244e5e26c92ef7c4aa690349c8",
+    "archive": "benchmarks/results/remaining-indicators/renko-compact-volume-report-integration-20261105/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "b2f6c9d3d797f162a5d42ae07a938c7b5aa0039ab136f0a0916099a98f9e7d62",
+    "archive": "benchmarks/results/remaining-indicators/renko-compact-volume-report-integration-20261105/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "c154e8b7c6973a586ed92c42b9c32d598001b09e59c385ea0d6c38da3b9238d8",
+    "archive": "benchmarks/results/remaining-indicators/renko-compact-volume-report-integration-20261105/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "78bcc2c0d7ca1354a19fd8877fe8ba2b5e9baf288af040196910544f11d331c2",
+    "archive": "benchmarks/results/remaining-indicators/renko-compact-volume-report-integration-20261105/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "7c205ca003f9514844f6fcc091b50396c440499b514c8974b0ea6b5d62afa013",
+    "archive": "benchmarks/results/remaining-indicators/renko-compact-volume-report-integration-20261105/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "fd78b25cb875cf7ed7be8f772a4205ef760f49b3b5b878523e29e4f0fb42f0ae",
+    "archive": "benchmarks/results/remaining-indicators/renko-compact-volume-report-integration-20261105/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "a09a052f7fbadbbb91c10590abf42bd187a807dbc0bc24c672163ca57c055daa",
+    "archive": "benchmarks/results/remaining-indicators/renko-compact-volume-report-integration-20261105/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "25184e9f9ebcd18f4bfdd3f864aa2c3d44fffbbe3826b1aa70d60ce4bbb666dd",
+    "archive": "benchmarks/results/remaining-indicators/renko-compact-volume-report-integration-20261105/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "f36c65d1cccaa3dec89749120b8ea70be4d2634afeeb7df39fe480d1615d835b",
+    "archive": "benchmarks/results/remaining-indicators/renko-compact-volume-report-integration-20261105/updated-pair-details.png.gz"
+  }
+}

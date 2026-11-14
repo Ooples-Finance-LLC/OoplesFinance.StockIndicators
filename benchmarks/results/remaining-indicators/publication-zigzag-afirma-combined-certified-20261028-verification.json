@@ -1,0 +1,62 @@
+{
+  "input_head": "40f70b6e0103cc0d81be4d7eadde1918a27da1c6",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/FixedKernelSnapshots.cs",
+    "tests/ModelsTests/WindowedSincCompactTests.cs"
+  ],
+  "batch_note": "Combined-tree validation of approved ZigZag exact-scale and Afirma compact arithmetic; focused unit and parity checks plus required GPU contracts and inventory.",
+  "step": "complete",
+  "updated_utc": "2026-10-28T19:15:09.490566+00:00",
+  "unit": {
+    "passed": 29,
+    "class_counts": {
+      "WindowedSincTests": 15,
+      "ZigZagSnapshotSharedExecutionTests": 8,
+      "ZigZagExactScaleTests": 3,
+      "WindowedSincCompactTests": 3
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\zigzag-afirma-combined-20261028\\unit\\unit.trx",
+    "sha256": "de0e8128aa906ab96181a6db2d9c86a472193b3f6f4c1230cd1fb6a46373133f",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-zigzag-afirma-combined-certified-20261028-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 28,
+    "class_counts": {
+      "ZigZagComparisonTests": 7,
+      "SharedZigZagSnapshotBenchmarkTests": 6,
+      "SincBuilderComparisonTests": 7,
+      "FixedKernelSnapshotComparisonTests": 8
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\zigzag-afirma-combined-20261028\\parity\\parity.trx",
+    "sha256": "a8542bfdff26ad8c105b10445342a4c7562e1d0643d12dcc508f8e83524fa37e",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-zigzag-afirma-combined-certified-20261028-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bbce032f7e97765aaeb8dbfb6dd8fd4686eeff9bab3c9e43eda2d65133ed7531",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bbce032f7e97765aaeb8dbfb6dd8fd4686eeff9bab3c9e43eda2d65133ed7531",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bbce032f7e97765aaeb8dbfb6dd8fd4686eeff9bab3c9e43eda2d65133ed7531",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-parabolic-array-rollback-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "bbce032f7e97765aaeb8dbfb6dd8fd4686eeff9bab3c9e43eda2d65133ed7531"
+  },
+  "source_fingerprint_sha256": "02d4627889a0174b5a86e390c3fa8319b63e2c873bed99df17d79a486a13935e",
+  "inventory_tests_passed": 8,
+  "performance": "Individual ZigZag and Afirma controlled timings accepted; combined-tree correctness is separate from those measurements.",
+  "evidence_note": "Combined-tree validation of approved ZigZag exact-scale and Afirma compact arithmetic; focused unit and parity checks plus required GPU contracts and inventory. Combined-tree correctness passed; performance rows retain their individually measured source commits."
+}

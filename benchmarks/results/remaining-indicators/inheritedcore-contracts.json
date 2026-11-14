@@ -1,0 +1,49 @@
+{
+  "batch": "inherited-core-shared-qualification",
+  "types": [
+    "BalanceOfPower",
+    "Ema",
+    "HighestHigh",
+    "LowestLow",
+    "TrueRange",
+    "Wma",
+    "WilliamsR"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Qualify existing shared pointwise, rolling and recursive routes without production changes. Reuse verified integrated production/unit binaries; preserve exact arithmetic, parallel boundary behavior, warmup, signs, ownership and fallbacks.",
+  "verification": {
+    "unit_passed": 270,
+    "fixture_passed": 28,
+    "discovery_passed": 102,
+    "gpu_passed": 100,
+    "contract_methods": 1441,
+    "hosted_methods": 1429,
+    "evidence": [
+      {
+        "file": "inheritedcore-unit.trx.gz",
+        "passed_cases": 270,
+        "trx_sha256": "af854c9c1964c8213edc7644d99a298c9b2f46042465bed4245b4f339bbbee5b"
+      },
+      {
+        "file": "inheritedcore-fixture.trx.gz",
+        "passed_cases": 130,
+        "trx_sha256": "8dc2c626e58558796a5a37d2c7b83d3ce43b11b26a950dbf3117e10f0d8da1cc"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingInheritedCoreBenchmarks",
+    "cases": 56,
+    "status": "prepared-not-measured",
+    "operations": [
+      "BalanceOfPower",
+      "Ema",
+      "HighestHigh",
+      "LowestLow",
+      "TrueRange",
+      "Wma",
+      "WilliamsR"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

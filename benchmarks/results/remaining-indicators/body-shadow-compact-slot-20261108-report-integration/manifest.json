@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "05d9290667f2741bcbc7b0702d1fe0dd1d59017544b1988f7168448f20ec27b0",
+    "archive": "benchmarks/results/remaining-indicators/body-shadow-compact-slot-20261108-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "98d7391a7e47ff8fd9cc612762917633a9b5bfaa456815daded2ab5e1aa108f4",
+    "archive": "benchmarks/results/remaining-indicators/body-shadow-compact-slot-20261108-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "1f633de185bd85c8a74e15a072d5e26cc09c3b63363cebbbe4b5e93925be8521",
+    "archive": "benchmarks/results/remaining-indicators/body-shadow-compact-slot-20261108-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "8da9d99d6cd69051866d8e8d33c7f4281cedceb55b98cd03e99ec21a9b04affd",
+    "archive": "benchmarks/results/remaining-indicators/body-shadow-compact-slot-20261108-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "71faef031d5e03fb2f014b4e6077cca84de93e7e9e9e275d81f0a5bdae050ff6",
+    "archive": "benchmarks/results/remaining-indicators/body-shadow-compact-slot-20261108-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "57d93802bf7d6a31a1f6424f151c0387d81374f26f2cca5da4f2db701c7c8202",
+    "archive": "benchmarks/results/remaining-indicators/body-shadow-compact-slot-20261108-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "e8cc60ad68315aa37a6d8c066edb9744e1aad87efd37079ffd1795a2926ab77b",
+    "archive": "benchmarks/results/remaining-indicators/body-shadow-compact-slot-20261108-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "054ad6000e9bec6577a5a6c9891dd6a693dc7ca23f96b8e4c27734ca84f043e1",
+    "archive": "benchmarks/results/remaining-indicators/body-shadow-compact-slot-20261108-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "6fda259dd9479922145ab3db0d15f67ed26650bc1f091c51ffea65f0cfbed615",
+    "archive": "benchmarks/results/remaining-indicators/body-shadow-compact-slot-20261108-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "cca864f6be9667f799f56b78d70a35016575df28a72aa7d628c82b2627224d5f",
+    "archive": "benchmarks/results/remaining-indicators/body-shadow-compact-slot-20261108-report-integration/updated-pair-details.png.gz"
+  }
+}

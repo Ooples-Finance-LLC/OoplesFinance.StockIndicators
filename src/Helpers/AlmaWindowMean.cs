@@ -8,7 +8,7 @@ internal sealed class AlmaWindowMean : IDisposable
     private readonly ExactMeanAccumulator _denominator;
     private readonly PooledRingBuffer<double> _values;
 
-    internal AlmaWindowMean(int length, double offset, double sigma)
+    internal AlmaWindowMean(int length, double offset, double sigma, int capacityHint = int.MaxValue)
     {
         if (double.IsNaN(offset) || double.IsInfinity(offset)) throw new ArgumentOutOfRangeException(nameof(offset));
         if (double.IsNaN(sigma) || double.IsInfinity(sigma)) throw new ArgumentOutOfRangeException(nameof(sigma));
@@ -28,7 +28,7 @@ internal sealed class AlmaWindowMean : IDisposable
             denominator.Add(weight);
         }
         _denominator = denominator;
-        _values = new PooledRingBuffer<double>(length);
+        _values = new PooledRingBuffer<double>(Math.Min(length, Math.Max(1, capacityHint)));
     }
 
     internal double Next(double value, bool commit)

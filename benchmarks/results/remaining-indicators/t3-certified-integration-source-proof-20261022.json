@@ -1,0 +1,34 @@
+{
+  "qualified_commit": "c851480a86b60d7104486959ba057649d2b24ff6",
+  "qualified_code": "f2e1d75429289dc36ff9097c83aa435366c6eb0e",
+  "matched_paths": [
+    "src",
+    "tests",
+    "examples",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "710129ea810098104f4f5ab6cba43a341da75688c97528d46d88dd5fee5a87ac",
+  "qualification_reused": {
+    "unit": 24,
+    "parity": 26,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-certified-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e66f906fb67bad919413d848cf56004ff96c696e05f3bfeb7b1563bed92ca552",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-certified-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e66f906fb67bad919413d848cf56004ff96c696e05f3bfeb7b1563bed92ca552",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-certified-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e66f906fb67bad919413d848cf56004ff96c696e05f3bfeb7b1563bed92ca552",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-certified-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e66f906fb67bad919413d848cf56004ff96c696e05f3bfeb7b1563bed92ca552"
+  },
+  "control": "local-t3-certified-control-20261022",
+  "note": "Integrated executable sources and build inputs exactly match qualified candidate. Publishing checkout binaries remain older; preserved candidate DLL supplied the new measurement arm. No redundant production rebuild."
+}

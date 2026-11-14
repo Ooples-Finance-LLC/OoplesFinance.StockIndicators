@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "8ff8ca57114ae9c47f3e687a6ba53c3e6cfa094890351e11f7b16170ee438ebf",
+    "archive": "benchmarks/results/remaining-indicators/log-physical-fanout-threshold-20261110-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "186952e9d29b19d1192c5a245f33fa79f41e8b0371ecc3d1d305d6eca4196671",
+    "archive": "benchmarks/results/remaining-indicators/log-physical-fanout-threshold-20261110-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "f73131092a09b7c6db0670963c78b269061207817ccdc28358f73f896dbad58c",
+    "archive": "benchmarks/results/remaining-indicators/log-physical-fanout-threshold-20261110-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "18559680aa92b425a5ae4ea1dabc47cfe73718964f5c4bf8123e1dacbad92bd0",
+    "archive": "benchmarks/results/remaining-indicators/log-physical-fanout-threshold-20261110-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "90d5391ed67ddaa11f6fe9cb8b4f8c39b4b291667632add7b00bd550b966cf6a",
+    "archive": "benchmarks/results/remaining-indicators/log-physical-fanout-threshold-20261110-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "5ed58459951cebbfbb1f7fca60ad0e73b34bc7cdb77896708f3b382aee7668f2",
+    "archive": "benchmarks/results/remaining-indicators/log-physical-fanout-threshold-20261110-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "47f55b5c2b26af8e8867219c07215ce737d8957369de947148d586f8272db006",
+    "archive": "benchmarks/results/remaining-indicators/log-physical-fanout-threshold-20261110-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "4554a0a82124688448c7ef6027d91d6e4a355dfd0bc758114d714e8fe002ba20",
+    "archive": "benchmarks/results/remaining-indicators/log-physical-fanout-threshold-20261110-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "acda426fdcd1c979b6fc0d4dd928c243a0427f87e328be26fbd1db6fddbd9160",
+    "archive": "benchmarks/results/remaining-indicators/log-physical-fanout-threshold-20261110-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "e85e9745236c38d2817e21cc378830413df6ee16602aaf0d2cc3e5a2fe3b5cf5",
+    "archive": "benchmarks/results/remaining-indicators/log-physical-fanout-threshold-20261110-report-integration/updated-pair-details.png.gz"
+  }
+}

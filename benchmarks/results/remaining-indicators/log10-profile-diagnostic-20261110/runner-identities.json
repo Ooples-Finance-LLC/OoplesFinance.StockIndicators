@@ -1,0 +1,48 @@
+{
+  "kind": "Distinct concurrent GitHub-hosted runner IDs and distinct instance nonces; template hostname is not unique",
+  "run_id": "42813611722",
+  "jobs": [
+    {
+      "id": 129820985169,
+      "name": "observe (batch)",
+      "runner_id": 1000117292,
+      "runner_name": "GitHub Actions 1000117292",
+      "started_at": "2026-11-10T12:11:22Z",
+      "completed_at": "2026-11-10T12:28:51Z",
+      "labels": [
+        "windows-latest"
+      ]
+    },
+    {
+      "id": 129820985789,
+      "name": "observe (builder)",
+      "runner_id": 1000117293,
+      "runner_name": "GitHub Actions 1000117293",
+      "started_at": "2026-11-10T12:11:21Z",
+      "completed_at": "2026-11-10T12:26:58Z",
+      "labels": [
+        "windows-latest"
+      ]
+    }
+  ],
+  "hosts": {
+    "batch": {
+      "machine": "runnervmm7ud1",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "logical_cpus": 4,
+      "runner_image": "20261103.298.1",
+      "run_id": "42813611722",
+      "run_attempt": "1",
+      "instance_nonce": "b0dd773f76d944bf9e0d552ec88547e2"
+    },
+    "builder": {
+      "machine": "runnervmm7ud1",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "logical_cpus": 4,
+      "runner_image": "20261103.298.1",
+      "run_id": "42813611722",
+      "run_attempt": "1",
+      "instance_nonce": "851b5b4d709e4229b549b6ceff41fbe4"
+    }
+  }
+}

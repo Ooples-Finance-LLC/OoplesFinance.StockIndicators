@@ -1,0 +1,43 @@
+{
+  "batch": "ehlers-phase-gravity-shared-execution",
+  "types": [
+    "EhlersAllPassPhaseShifter",
+    "EhlersCenterOfGravityOscillator",
+    "EhlersCenterofGravityOscillator",
+    "EhlersChebyshevLowPassFilter"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact phase, center-gravity and nine Chebyshev wave kernels; preserve clamping before hidden phase q=.5, alias defaults, ignored ripple/length options, nine output slots, source/component fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 52,
+    "fixture_passed": 16,
+    "discovery_passed": 155,
+    "gpu_passed": 100,
+    "contract_methods": 1496,
+    "hosted_methods": 1484,
+    "evidence": [
+      {
+        "file": "ehlersphasegravity-unit.trx.gz",
+        "passed_cases": 52,
+        "trx_sha256": "820be1558d01c3402ec41f76808823882a0ba95092b43c1decaf378228306292"
+      },
+      {
+        "file": "ehlersphasegravity-fixture.trx.gz",
+        "passed_cases": 171,
+        "trx_sha256": "6686053c08350c88a2e0afef15d15ac3394672b2db789e611415fc6e9ba5f296"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingEhlersPhaseGravityBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersAllPassPhaseShifter",
+      "EhlersCenterOfGravityOscillator",
+      "EhlersCenterofGravityOscillator",
+      "EhlersChebyshevLowPassFilter"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

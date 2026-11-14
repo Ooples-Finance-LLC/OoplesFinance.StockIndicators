@@ -1,0 +1,64 @@
+{
+  "before_sha256": "cdccd3385826fe9184f56a25f795564c9e77d6517052b13f3248fc5d95e3cf05",
+  "candidate_sha256": "d6128eee0b4df8fcad9de58a04a04697263bdcbe186fad3209844e32330c36b4",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 4,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 4,
+  "verdicts": {
+    "faster": 602,
+    "slower": 886,
+    "inconclusive": 48
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-price-relative-compact-return-control-20261029",
+  "imported_utc": "2026-10-30T10:08:40.551107+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "d8623f1328f526cd578f105bcae0412ce92230e2aef58342f0aec8b34bbd3f8f",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-compact-return-certified-local-price-relative-compact-return-control-20261029-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "cbdf949cdc9999da8561609862b75b19e05d89d705b0d3af613c3fb5d30c3bf0",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-compact-return-certified-local-price-relative-compact-return-control-20261029-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "cecd3789d608c6ff7bc753b3a95606f86745eaa3fc30e9d645453bce57479860",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-compact-return-certified-local-price-relative-compact-return-control-20261029-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "4f6f8169dc08e3e06ea107fd1be6c6be962691107ef178b4c4f11f5e8ce1ed38",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-compact-return-certified-local-price-relative-compact-return-control-20261029-measurement.json.gz"
+    },
+    "price_relative_compact_acceptance.py": {
+      "sha256": "7122a874d1dd548ef3b98285fd3fdaeba4ac618ad7ef2a22d91093ae9462f599",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-compact-return-certified-local-price-relative-compact-return-control-20261029-price_relative_compact_acceptance.py.gz"
+    },
+    "stage-price-relative-compact-return-report-20261029.py": {
+      "sha256": "905077cbf79eeb1b8d6484ab6899df6132a6e14d18e5fe2b4769650bc97fc45d",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-compact-return-certified-local-price-relative-compact-return-control-20261029-stage-price-relative-compact-return-report-20261029.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-compact-return-certified-local-price-relative-compact-return-control-20261029-verify-approved-certified-report.py.gz"
+    },
+    "import-price-relative-compact-return-report-20261029.py": {
+      "sha256": "a3fbf04a7180fbba3f2624749dec4599d9c236d4dab7de3478fea1ad35fff38b",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-compact-return-certified-local-price-relative-compact-return-control-20261029-import-price-relative-compact-return-report-20261029.py.gz"
+    },
+    "archive-price-relative-compact-return-control-20261029.py": {
+      "sha256": "bd32741e2d7d370d8b5a18d8466a35df941cbc47bb02ca20b16ab6f658e63880",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-compact-return-certified-local-price-relative-compact-return-control-20261029-archive-price-relative-compact-return-control-20261029.py.gz"
+    },
+    "prove-price-relative-compact-return-integration-20261029.py": {
+      "sha256": "bf7d5a8a8652f48938b58bea4b2fa0bd2b3179305f09185515a7b89cc6c0d428",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-compact-return-certified-local-price-relative-compact-return-control-20261029-prove-price-relative-compact-return-integration-20261029.py.gz"
+    },
+    "archive-price-relative-compact-return-report-20261029.py": {
+      "sha256": "96c507a5d688395da7bdc61bbb73c63f53565b480bd6c1c67b4264f82ac1d0d9",
+      "archive": "benchmarks/results/remaining-indicators/price-relative-compact-return-certified-local-price-relative-compact-return-control-20261029-archive-price-relative-compact-return-report-20261029.py.gz"
+    }
+  }
+}

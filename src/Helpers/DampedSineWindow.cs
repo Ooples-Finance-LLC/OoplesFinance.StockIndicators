@@ -6,7 +6,7 @@ internal sealed class DampedSineWindow : IDisposable
     private readonly ExactMeanAccumulator _denominator;
     private readonly PooledRingBuffer<double> _values;
 
-    internal DampedSineWindow(int length)
+    internal DampedSineWindow(int length, int capacityHint = int.MaxValue)
     {
         length = Math.Max(3, length);
         _weights = new double[length];
@@ -17,7 +17,7 @@ internal sealed class DampedSineWindow : IDisposable
             denominator.Add(_weights[lag]);
         }
         _denominator = denominator;
-        _values = new PooledRingBuffer<double>(length);
+        _values = new PooledRingBuffer<double>(Math.Min(length, Math.Max(1, capacityHint)));
     }
 
     internal double Next(double value, bool commit)

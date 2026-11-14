@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "kind": "source-bound-arithmetic-selector-jit",
+  "accepted": true,
+  "timing_qualification": false,
+  "source": "c3b78f8e1d232d5821151e1e52df9f93097372e1",
+  "baseline": "d0a68355aae11100151df7648fbb37fd787deca8",
+  "source_fingerprint": "19167269e0951d16e9fe90fe848b8ef9dbfc80db4419a1fbb9bc25d754b4b144",
+  "production_sha256": "59ac5153a54b0af3e8156e1ed187b7bcd1968d8b4e51bf01b249f2f0c0e4cdae",
+  "runtime": "10.0.15",
+  "runtime_policy": "Default .NET10 runtime; diagnostic JitDisasm/JitDisasmAssemblies/JitDisasmDiffable/JitStdOutFile only. Tiered/ReadyToRun/HW-intrinsic overrides removed from child process. No timing qualification.",
+  "operations": {
+    "Add": {
+      "old_asm": "old-Add-tier1.asm",
+      "new_asm": "new-Add-tier1.asm"
+    },
+    "Subtract": {
+      "old_asm": "old-Subtract-tier1.asm",
+      "new_asm": "new-Subtract-tier1.asm"
+    },
+    "Multiply": {
+      "old_asm": "old-Multiply-tier1.asm",
+      "new_asm": "new-Multiply-tier1.asm"
+    },
+    "Divide": {
+      "old_asm": "old-Divide-tier1.asm",
+      "new_asm": "new-Divide-tier1.asm"
+    }
+  },
+  "files": {
+    "arithmetic_selector_jit_gate.py": "c5d998a0645be8fb1b85c580bcf9b68fc2935a2b52624b1917339562547ea801",
+    "new-Add-tier1.asm": "ab01f8acd8f5359940bfeebf477569a6e6c7d907590ad1eae51a19de4157b49f",
+    "new-Divide-tier1.asm": "9a8b28d974da6ed62742ed4468b7373fc8d03db3215c262322924397be9740e6",
+    "new-jit.log": "d9c0147388db20c22b959f09ec456bdf6d91048d6054b2a6e7983a3326cc786b",
+    "new-Multiply-tier1.asm": "e1eaf3cd1f04af6d70322c2297c217c3d7ef7b70e3ade9f9782ba038c1b1c817",
+    "new-replay.log": "765a6a28a3c166a0a41ec49df184de819d81f0336728ab94ae12ba825fb765c8",
+    "new-runtime-origin.json": "13f1ddc059dadbb83de743659c8699c16de7424a2352594b815872d2695ad866",
+    "new-Subtract-tier1.asm": "6e002af7d4a1543eea982d0a4ed4ae5adafce518b85493c3f8ae4d67d4b44480",
+    "old-Add-tier1.asm": "62799aa0784e8530bd77b866514fcd6fe78103c0c17622195d19e73887625f2f",
+    "old-Divide-tier1.asm": "b1801313d0e7597f0cf16756b1087b6333cbf0b1ac663ade165546a3a19d6f5e",
+    "old-jit.log": "a1fe38f13b6f91587d3ebe16da8b2ce12415c29132ba2bbded77ec18328b34ed",
+    "old-Multiply-tier1.asm": "61d6bf0873e2fa16a87dc2dd5fa9b637ef3289855d73bf55b8b62e81c068d564",
+    "old-replay.log": "1c82b8477bff948de917912ed232a3e55f93dcc59d5521dcc3a7b61cf4926147",
+    "old-runtime-origin.json": "055d7add2323d8f204f1dd9977775be49762ae48087fa1d45f827504f7d1843e",
+    "old-Subtract-tier1.asm": "2baa3fc3cfc773f688e589ca0f6cc37473f2d773fb23d600ab8c4075e4ce2b8b",
+    "probe-arithmetic-fields-20261112.ps1": "8dd8e1e4d924288bc119afa2bb78ffb2555a9f0ad568459d4d0e3c5b89e9c557",
+    "test_arithmetic_selector_jit_gate.py": "ecc7922c72e522d0ce4d80055235b432c4b93378dfe2d806be6d093b1ecbe663"
+  },
+  "limitations": "Local source-bound structural codegen evidence, not latency evidence or a claim about the exact hosted runtime patch. Fresh hosted qualification remains mandatory."
+}

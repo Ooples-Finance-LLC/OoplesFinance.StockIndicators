@@ -1,0 +1,21 @@
+{
+  "source_integration_commit": "74c62550489e436a4182156e0b9fe273dec14699",
+  "qualified_source": "e08aa841c33d4b3b4f8995f4b855d89343a9ad17",
+  "compiled_source": "f8c73578cce006fbfc14dc0e73924f2ff61956f9",
+  "source_fingerprint": "c13bdb133cac24ad7adfc9f204448fa82a101417ac9c26a57cf3b8a30a4c81f1",
+  "unit": 65,
+  "comparator": 139,
+  "actual_gpu": 100,
+  "production_sha256": "678e7ceba2513b9ba00349a00150d3f936eed34248e6886349615360b9704fd1",
+  "run_id": "42545873773",
+  "cases": 60,
+  "decisions": 12,
+  "verdicts": {
+    "faster": 12
+  },
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.TripleRate.cs",
+    "tests/ModelsTests/SeededMomentumSharedExecutionTests.cs"
+  ],
+  "verified_utc": "2026-11-09T02:20:41.683976+00:00"
+}

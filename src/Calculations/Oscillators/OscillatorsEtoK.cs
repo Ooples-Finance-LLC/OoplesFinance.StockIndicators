@@ -736,11 +736,17 @@ public static partial class Calculations
             var superGmmaOscRaw = GuppyRibbonArithmetic.Percent(superGmmaFast, superGmmaSlow);
             superGmmaOscRawList.Add(superGmmaOscRaw);
 
-            var superGmmaOsc = superGmmaOscRawSumWindow.Next(superGmmaOscRaw, true);
+            var superGmmaOsc = FrameworkCompatibility.IsFinite(superGmmaOscRaw) || smoothLength > 1
+                ? superGmmaOscRawSumWindow.Next(superGmmaOscRaw, true) : superGmmaOscRaw;
             superGmmaOscList.Add(superGmmaOsc);
         }
 
-        var superGmmaSignalList = GetMovingAverageList(stockData, maType, signalLength, superGmmaOscRawList);
+        var finiteSignalCount = superGmmaOscRawList.FindIndex(value => !FrameworkCompatibility.IsFinite(value));
+        var finiteSignalInput = finiteSignalCount < 0 ? superGmmaOscRawList
+            : FiniteSignalInput.Create(superGmmaOscRawList, out finiteSignalCount);
+        if (finiteSignalCount < 0) finiteSignalCount = superGmmaOscRawList.Count;
+        var superGmmaSignalList = GetMovingAverageList(stockData, maType, signalLength, finiteSignalInput);
+        for (var i = finiteSignalCount; i < superGmmaSignalList.Count; i++) superGmmaSignalList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var superGmmaOsc = superGmmaOscList[i];
@@ -1837,18 +1843,35 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList1, highList1, lowList1, _, _) = GetInputValuesList(stockData);
         var (inputList2, highList2, lowList2, _, _) = GetInputValuesList(marketData);
-        var (highestList1, lowestList1) = GetMaxAndMinValuesList(highList1, lowList1, length);
-        var (highestList2, lowestList2) = GetMaxAndMinValuesList(highList2, lowList2, length);
+        // Preserve the legacy path for malformed list shapes; normal paired bars
+        // consume the same extrema windows directly without four history lists.
+        var direct = highList1.Count == stockData.Count && lowList1.Count == stockData.Count
+            && highList2.Count == marketData.Count && lowList2.Count == marketData.Count;
+        List<double>? highestList1 = null, lowestList1 = null, highestList2 = null, lowestList2 = null;
+        if (!direct)
+        {
+            (highestList1, lowestList1) = GetMaxAndMinValuesList(highList1, lowList1, length);
+            (highestList2, lowestList2) = GetMaxAndMinValuesList(highList2, lowList2, length);
+        }
+        var highWindow1 = direct ? new RollingMinMax(length) : null;
+        var lowWindow1 = direct ? new RollingMinMax(length) : null;
+        var highWindow2 = direct ? new RollingMinMax(length) : null;
+        var lowWindow2 = direct ? new RollingMinMax(length) : null;
         var dWindow = new RollingMinMax(length);
 
         if (stockData.Count == marketData.Count)
         {
             for (var i = 0; i < stockData.Count; i++)
             {
-                var highestHigh1 = highestList1[i];
-                var lowestLow1 = lowestList1[i];
-                var highestHigh2 = highestList2[i];
-                var lowestLow2 = lowestList2[i];
+                if (direct)
+                {
+                    highWindow1!.Add(highList1[i]); lowWindow1!.Add(lowList1[i]);
+                    highWindow2!.Add(highList2[i]); lowWindow2!.Add(lowList2[i]);
+                }
+                var highestHigh1 = direct ? highWindow1!.Max : highestList1![i];
+                var lowestLow1 = direct ? lowWindow1!.Min : lowestList1![i];
+                var highestHigh2 = direct ? highWindow2!.Max : highestList2![i];
+                var lowestLow2 = direct ? lowWindow2!.Min : lowestList2![i];
                 var currentValue1 = inputList1[i];
                 var currentValue2 = inputList2[i];
                 var prevSv1 = i >= 1 ? svList[i - 1] : 0;

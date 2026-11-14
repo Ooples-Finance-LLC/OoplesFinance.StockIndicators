@@ -1,0 +1,15 @@
+{
+  "run_id": "local-price-range-20261022",
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/blob/0db29120681a7c10bb5cbe41ad1402643b7762a3/benchmarks/results/remaining-indicators/local-price-range-20261022/manifest.json",
+  "source_sha": "0e62018ed67b73a18cd94c6320af6d0612a78af7",
+  "apis": 1,
+  "comparisons": 4,
+  "verdicts": {
+    "faster": 4
+  },
+  "receipt_files": [
+    "cpu-builder-local-price-range-20261022-SharedPriceRangeBenchmarks.json"
+  ],
+  "changed_production_files_since_baseline": [],
+  "archive_commit": "0db29120681a7c10bb5cbe41ad1402643b7762a3"
+}

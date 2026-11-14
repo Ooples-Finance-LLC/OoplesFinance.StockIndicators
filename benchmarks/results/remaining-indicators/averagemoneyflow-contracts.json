@@ -1,0 +1,37 @@
+{
+  "batch": "average-money-flow-shared-execution",
+  "types": [
+    "AverageMoneyFlowOscillator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Use the existing exact AverageMoneyFlowWindow with default weighted averaging and fixed three-bar smoothing. Preserve directed logarithm rounding, original close/volume, extrema, custom-average fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 59,
+    "fixture_passed": 4,
+    "discovery_passed": 70,
+    "gpu_passed": 100,
+    "contract_methods": 1405,
+    "hosted_methods": 1393,
+    "evidence": [
+      {
+        "file": "averagemoneyflow-unit.trx.gz",
+        "passed_cases": 59,
+        "trx_sha256": "e1a483c0eed7a75d75a8f3e8aea7ed75450e9c42260808eeab234c809a3d2e52"
+      },
+      {
+        "file": "averagemoneyflow-fixture.trx.gz",
+        "passed_cases": 74,
+        "trx_sha256": "229b83361c4e41c9e5db3cc5336d8f40e717eb8543d6d34961a99c3a4e0af873"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAverageMoneyFlowBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "AverageMoneyFlowOscillator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

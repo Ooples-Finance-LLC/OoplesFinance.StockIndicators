@@ -1,0 +1,37 @@
+{
+  "batch": "z-distance-vwap-shared-execution",
+  "types": [
+    "ZDistanceFromVwap"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share unchanged ZDistanceWindow with default VWAP and original close/volume. Preserve exact weighted means, residual history, radical signals, period normalization, source/custom-component fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 72,
+    "fixture_passed": 4,
+    "discovery_passed": 88,
+    "gpu_passed": 100,
+    "contract_methods": 1423,
+    "hosted_methods": 1411,
+    "evidence": [
+      {
+        "file": "zdistance-unit.trx.gz",
+        "passed_cases": 72,
+        "trx_sha256": "c612a47edf0cbd1b374e7a10caa8d8b0c384033b93c8c269e063f7d36063882c"
+      },
+      {
+        "file": "zdistance-fixture.trx.gz",
+        "passed_cases": 92,
+        "trx_sha256": "4488be2b9a50562d3ab20a6f6d7c68fda7c090d67e55ae7b0eab8c29a8ad1b2d"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingZDistanceBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "ZDistanceFromVwap"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

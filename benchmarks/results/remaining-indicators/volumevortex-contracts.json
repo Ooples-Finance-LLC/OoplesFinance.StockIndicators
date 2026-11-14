@@ -1,0 +1,41 @@
+{
+  "batch": "volume-vortex-shared-execution",
+  "types": [
+    "Vpci",
+    "VolumeWeightedRsi",
+    "VortexBands"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact VPCI, volume weighted RSI and Vortex bands kernels in shared owned-bar execution. Preserve fixed VPCI fast/slow periods, weighted RSI smoothing, McNicholl bands with upper primary output, negative volumes, component/source fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 167,
+    "fixture_passed": 12,
+    "discovery_passed": 86,
+    "gpu_passed": 100,
+    "contract_methods": 1421,
+    "hosted_methods": 1409,
+    "evidence": [
+      {
+        "file": "volumevortex-unit.trx.gz",
+        "passed_cases": 167,
+        "trx_sha256": "00ca346f0c193dc2d05817ba0a3403ef55f5ddc843e43cf585f4f96f4aac59c8"
+      },
+      {
+        "file": "volumevortex-fixture.trx.gz",
+        "passed_cases": 98,
+        "trx_sha256": "fdf1db6d711ca6a3e30702a28d77a771674f65952c3c064de067537225a66122"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVolumeVortexBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "Vpci",
+      "VolumeWeightedRsi",
+      "VortexBands"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

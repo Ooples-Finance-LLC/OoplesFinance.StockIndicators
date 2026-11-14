@@ -1,0 +1,7 @@
+{
+  "run_id": 41832270387,
+  "conclusion": "failure",
+  "timing_started": false,
+  "reason": "Regression test assumed workflow file present in sparse checkout; now reads committed workflow with git show",
+  "fix": "371209d6e99befe0bfd66344628de2510eade518"
+}

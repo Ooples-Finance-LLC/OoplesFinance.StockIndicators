@@ -1,0 +1,32 @@
+{
+  "types": [
+    "MovingAverageDiagnostics"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "aa2ea8765a860d97220b1bdf70c54093a9dc1420",
+  "source_fingerprint_sha256": "90d7a35c5b0245b6376a97bda3c43d2f1c0374896a14324979be4dc66a09ae9b",
+  "benchmark_fixture": {
+    "type": "SharedRollingStatisticsBenchmarks",
+    "operations": [
+      "MovingAverageDiagnostics"
+    ]
+  },
+  "checks": {
+    "unit": 2,
+    "parity": 2,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "unit_class_counts": {
+    "MeanDiagnosticsScaleReductionTests": 2
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/publication-mean-diagnostics-20261021-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-mean-diagnostics-20261021-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

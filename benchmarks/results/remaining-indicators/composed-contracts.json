@@ -1,0 +1,38 @@
+{
+  "batch": "generated-composed-averages",
+  "types": [
+    "Zlema",
+    "Tma",
+    "Hma"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Shared values execution reuses the existing zero-lag EMA, rounded two-stage SMA and weighted Hull recurrences. Custom TMA components retain graph execution. Pooled triangular stages are disposed, including partial construction failure.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 47,
+    "fixture_passed": 12,
+    "gpu_passed": 100,
+    "contract_methods": 1333,
+    "hosted_methods": 1321,
+    "unit_trx_sha256": "1e3cb7c7abe47309c7c1bc26ebcab899d46cc972d4b74e697511cca036dbf453",
+    "fixture_trx_sha256": "d16ee801e0a0bc2b58e3b87b6f0249a5f457b0e0bf0542b839d36c643c4737b0"
+  },
+  "benchmark_fixture": {
+    "type": "RemainingComposedAverageBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

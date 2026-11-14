@@ -1,0 +1,14 @@
+{
+  "updated_utc": "2026-10-28T11:56:54.311529+00:00",
+  "change": "Refresh mixed-source labels and retained sample counts without changing measurement data",
+  "before_sha256": "a256d7190ba77952cc3c0f2da48e4f22c3020dbfbaacb5e237df7f63527040ce",
+  "after_sha256": "aee582f4cc787067d2ae4351fe46e24abf52bc827a221688bed2db75839d8d70",
+  "datasets_preserved": 7,
+  "comparisons": 802,
+  "wins_10000": 184,
+  "gaps_10000": 217,
+  "primary_report_tests": 25,
+  "status_report_tests": 4,
+  "idempotent": true,
+  "full_goal_complete": false
+}

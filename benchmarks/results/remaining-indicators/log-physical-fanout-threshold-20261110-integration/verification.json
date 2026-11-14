@@ -1,0 +1,22 @@
+{
+  "source_integration_commit": "4805f76a9f0d5d23eedf240650c9d7649834bc35",
+  "qualified_source": "4b282a1eac64592307b32f5c858278bc0f2dc8fb",
+  "compiled_source": "782dabddbfdae0d23ca8f5d2e3a37ae5371cad7f",
+  "source_fingerprint": "6a0f0771a9e44240d452cb7898be0e04523a78f5961cc288320ab51376ab4942",
+  "unit": 42,
+  "comparator": 16,
+  "actual_gpu": 100,
+  "production_sha256": "77e8d22f5c2b9fef7a89a6d9e7ebdaadcf9d6419b9dd7850428c614294adb620",
+  "run_id": "42834812600",
+  "cases": 60,
+  "decisions": 12,
+  "verdicts": {
+    "inconclusive": 8,
+    "faster": 4
+  },
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.Pointwise.cs",
+    "tests/ModelsTests/LogarithmParallelLimitTests.cs"
+  ],
+  "verified_utc": "2026-11-10T15:22:02.730236+00:00"
+}

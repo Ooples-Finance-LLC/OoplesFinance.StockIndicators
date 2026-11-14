@@ -1,0 +1,62 @@
+{
+  "input_head": "3f074e2b5bc29ce81195e739663a8c4b000f750d",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/CompactPriceRelativeFixtureTests.cs",
+    "src/Indicators/PriceRelativeStrength.cs",
+    "tests/ModelsTests/PriceRelativeReturnTests.cs"
+  ],
+  "batch_note": "Private Price Relative Strength return arithmetic uses exact dyadic products with wide fallback. Preserves legacy framework, complete-expression rounding, positive exact zero, underflow, overflow, missing history and reset. Controlled performance pending.",
+  "step": "complete",
+  "updated_utc": "2026-10-30T09:56:09.171258+00:00",
+  "unit": {
+    "passed": 24,
+    "class_counts": {
+      "PriceRelativeSharedExecutionTests": 16,
+      "PriceRelativeReturnTests": 2,
+      "PriceRelativeRatioTests": 2,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\price-relative-compact-return\\unit\\unit.trx",
+    "sha256": "63091538e3ea0e2f075c4443b8c93556ba751ba39057c101963c3c85fda05bd6",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-price-relative-compact-return-certified-20261029-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 13,
+    "class_counts": {
+      "PriceRelativeComparisonTests": 9,
+      "CompactPriceRelativeFixtureTests": 2,
+      "SharedPriceRelativeBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\price-relative-compact-return\\parity\\parity.trx",
+    "sha256": "40598f07c40af06cca8ffbcf9487bfd5351b2fc4f1b75313e6b6d517f68793b0",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-price-relative-compact-return-certified-20261029-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-price-relative-compact-return-20261029\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ccf74acdbe0bb21ff6743a1096dd5caf53a05ecea2007836d39f11d541d3431b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-price-relative-compact-return-20261029\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ccf74acdbe0bb21ff6743a1096dd5caf53a05ecea2007836d39f11d541d3431b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-price-relative-compact-return-20261029\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ccf74acdbe0bb21ff6743a1096dd5caf53a05ecea2007836d39f11d541d3431b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-price-relative-compact-return-20261029\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ccf74acdbe0bb21ff6743a1096dd5caf53a05ecea2007836d39f11d541d3431b"
+  },
+  "source_fingerprint_sha256": "4c9fc96b96c2c2ca62adc72bea8810dfbdbb76a41c0208c3c70a49010a91cd0b",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Private Price Relative Strength return arithmetic uses exact dyadic products with wide fallback. Preserves legacy framework, complete-expression rounding, positive exact zero, underflow, overflow, missing history and reset. Controlled performance pending. Correctness checks passed; controlled performance remains pending."
+}

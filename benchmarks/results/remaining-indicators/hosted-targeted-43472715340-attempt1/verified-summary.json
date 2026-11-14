@@ -1,0 +1,630 @@
+{
+  "all_cases_verified": true,
+  "phase": "targeted",
+  "case_count": 30,
+  "decision_count": 6,
+  "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+  "sources": {
+    "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+    "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+  },
+  "decisions": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Qema",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.44216,
+        0.46184
+      ],
+      "new_means_ms": [
+        0.43864444444444445,
+        0.44858
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "43472715340",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+          "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+        },
+        "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+        "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+        "warmup_count": 1000
+      }
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Qema",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        1.6963375,
+        1.7477777777777777
+      ],
+      "new_means_ms": [
+        1.702188888888889,
+        2.1426625
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "43472715340",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+          "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+        },
+        "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+        "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+        "warmup_count": 1000
+      }
+    },
+    {
+      "fixture": "SharedNativeEmaBenchmarks",
+      "pair": "QuanTAlib.Qema",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.4349751736111111,
+        0.4262248046875
+      ],
+      "new_means_ms": [
+        0.42854045138888885,
+        0.4288239583333333
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "43472715340",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+          "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+        },
+        "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+        "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "SharedNativeEmaBenchmarks",
+      "pair": "QuanTAlib.Qema",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.42852881944444443,
+        0.42155380859375
+      ],
+      "new_means_ms": [
+        0.4223862413194444,
+        0.4255444010416667
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "43472715340",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+          "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+        },
+        "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+        "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "SharedNativeEmaBenchmarks",
+      "pair": "QuanTAlib.Qema",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        1.683080078125,
+        1.7642752604166667
+      ],
+      "new_means_ms": [
+        1.8710684027777778,
+        1.68532265625
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "43472715340",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+          "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+        },
+        "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+        "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "SharedNativeEmaBenchmarks",
+      "pair": "QuanTAlib.Qema",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        1.6930072265625,
+        1.7554759375
+      ],
+      "new_means_ms": [
+        1.7534397569444444,
+        1.7262088541666667
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "43472715340",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+          "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+        },
+        "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+        "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+        "warmup_count": 10
+      }
+    }
+  ],
+  "verdicts": {
+    "inconclusive": 6
+  },
+  "accepted": false,
+  "final_candidate_round": 2,
+  "final_candidate_rows": {
+    "LibraryPairBenchmarks": [
+      {
+        "pair": "QuanTAlib.Qema",
+        "bars": 1000,
+        "method": "Ooples",
+        "mean_ns": 448580,
+        "lower_ns": 403257.00473293674,
+        "upper_ns": 493902.99526706326,
+        "samples": 10,
+        "allocated_bytes": 374704,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "43472715340",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+            "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+          },
+          "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+          "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "QuanTAlib.Qema",
+        "bars": 1000,
+        "method": "Competitor",
+        "mean_ns": 154420,
+        "lower_ns": 132831.43996255432,
+        "upper_ns": 176008.56003744568,
+        "samples": 10,
+        "allocated_bytes": 218544,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "43472715340",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+            "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+          },
+          "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+          "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "QuanTAlib.Qema",
+        "bars": 10000,
+        "method": "Ooples",
+        "mean_ns": 2142662.5,
+        "lower_ns": 2117202.7637898703,
+        "upper_ns": 2168122.2362101297,
+        "samples": 8,
+        "allocated_bytes": 957424,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "43472715340",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+            "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+          },
+          "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+          "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "QuanTAlib.Qema",
+        "bars": 10000,
+        "method": "Competitor",
+        "mean_ns": 1439640,
+        "lower_ns": 1416352.0313374046,
+        "upper_ns": 1462927.9686625954,
+        "samples": 10,
+        "allocated_bytes": 2090208,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "43472715340",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+            "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+          },
+          "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+          "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+          "warmup_count": 1000
+        }
+      }
+    ],
+    "SharedNativeEmaBenchmarks": [
+      {
+        "pair": "QuanTAlib.Qema",
+        "bars": 1000,
+        "method": "BuilderFull",
+        "mean_ns": 428823.9583333333,
+        "lower_ns": 421397.90572665003,
+        "upper_ns": 436250.0109400166,
+        "samples": 9,
+        "allocated_bytes": 364839,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "43472715340",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+            "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+          },
+          "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+          "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "QuanTAlib.Qema",
+        "bars": 1000,
+        "method": "BuilderLatestOnly",
+        "mean_ns": 425544.4010416667,
+        "lower_ns": 419258.11860154336,
+        "upper_ns": 431830.68348179,
+        "samples": 9,
+        "allocated_bytes": 315830,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "43472715340",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+            "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+          },
+          "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+          "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "QuanTAlib.Qema",
+        "bars": 1000,
+        "method": "NativeSingle",
+        "mean_ns": 126641.923828125,
+        "lower_ns": 122188.54794872903,
+        "upper_ns": 131095.299707521,
+        "samples": 10,
+        "allocated_bytes": 210119,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "43472715340",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+            "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+          },
+          "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+          "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "QuanTAlib.Qema",
+        "bars": 1000,
+        "method": "NativeParallel",
+        "mean_ns": 411717.08984375,
+        "lower_ns": 380656.14029947424,
+        "upper_ns": 442778.03938802576,
+        "samples": 10,
+        "allocated_bytes": 516568,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "43472715340",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+            "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+          },
+          "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+          "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "QuanTAlib.Qema",
+        "bars": 10000,
+        "method": "BuilderFull",
+        "mean_ns": 1685322.65625,
+        "lower_ns": 1676053.3544403014,
+        "upper_ns": 1694591.9580596986,
+        "samples": 10,
+        "allocated_bytes": 869316,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "43472715340",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+            "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+          },
+          "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+          "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "QuanTAlib.Qema",
+        "bars": 10000,
+        "method": "BuilderLatestOnly",
+        "mean_ns": 1726208.8541666667,
+        "lower_ns": 1712850.4975627107,
+        "upper_ns": 1739567.2107706228,
+        "samples": 9,
+        "allocated_bytes": 387927,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "43472715340",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+            "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+          },
+          "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+          "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "QuanTAlib.Qema",
+        "bars": 10000,
+        "method": "NativeSingle",
+        "mean_ns": 1209874.6875,
+        "lower_ns": 1191344.284556208,
+        "upper_ns": 1228405.090443792,
+        "samples": 10,
+        "allocated_bytes": 2082169,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "43472715340",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+            "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+          },
+          "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+          "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "QuanTAlib.Qema",
+        "bars": 10000,
+        "method": "NativeParallel",
+        "mean_ns": 2303560.15625,
+        "lower_ns": 2191787.8999343975,
+        "upper_ns": 2415332.4125656025,
+        "samples": 10,
+        "allocated_bytes": 5088677,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 1 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "43472715340",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "38afd80e9dc04b54b417be2bc18537f2"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "1b8a85f85a9629d2639113c526be82fc01d378aa",
+            "new": "08ce13d3c016f63ebe5291d66b91ffd2992d6350"
+          },
+          "workflow_head": "84e9aecf5062ad11434c878c1149606fba210d0b",
+          "input_provenance_sha256": "bf3d3564f17a4b699cc5fcf813d9d9778eaf8fd7bfeb4f6b40c941e7f0fb7e00",
+          "warmup_count": 10
+        }
+      }
+    ]
+  }
+}

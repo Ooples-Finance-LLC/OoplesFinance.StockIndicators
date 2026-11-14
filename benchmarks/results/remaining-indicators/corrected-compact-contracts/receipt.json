@@ -1,0 +1,46 @@
+{
+  "status": "focused-contracts-verified-raw-performance-pending",
+  "change": "Store Corrected Average exact variance moments using compact dyadic arithmetic with arbitrary-precision fallback. Preserve rounded deviation, variance, displacement, gain, blend and signal stages.",
+  "context": "Tested combined stage9 inputs plus committed Kaufman affine correction and this candidate. Commit alone does not contain all tested shared routes. Original stage9 validation remains independent.",
+  "candidate_inputs_sha256": "64e66bf45854912c42d634d26b1b0c57ac8b33d843c83008025ee397dbf6ad28",
+  "original_inputs_sha256": "885d6998d7d92b1d255b8230456d80d926d72607b2c580df5aabbf04887df3d5",
+  "base_head": "661a1b6c7be326c90cfc637229b950b493c53129",
+  "evidence": [
+    {
+      "file": "numerical.trx.gz",
+      "cases": 54,
+      "trx_sha256": "0987a523ce90d32b1cd71ed0b5c374a33fec87b34cf2f826f54df7a7919726be"
+    },
+    {
+      "file": "shared.trx.gz",
+      "cases": 27,
+      "trx_sha256": "aacfdefec7aeef65311beac9fc059ad77a7e378c601b2a4ef2a6a948d6e0a71c"
+    },
+    {
+      "file": "parity.trx.gz",
+      "cases": 8,
+      "trx_sha256": "cf956641d5ce085d182c3525a8c961b34c701db1dabda79d42b8f40e84ca48d3"
+    }
+  ],
+  "builds": {
+    "build-production": {
+      "log_sha256": "28b8eee8b279b2c07422951152e78bd9bc53808c42fadc12565dbbb08900d1b2",
+      "exit_code": 0
+    },
+    "build-unit": {
+      "log_sha256": "0870d74c284f21ec9974b0dfc4691b85ae47c5d32392f8422a987dfadfd36f0b",
+      "exit_code": 0
+    }
+  },
+  "reused_fixture": {
+    "source": "Z:\\StockIndicators-work\\si-ninth-validation\\comparator",
+    "fixture_sha256": "33034e230177e02c405e2af497d57dc7b53490a9d7001366bb450dc23406d8eb",
+    "candidate_production_sha256": "ab8b22fabf0367798e149fca0fcf8374c5faca60dee156bb847e266990cdc181"
+  },
+  "pending": [
+    "controlled candidate-only performance measurement against saved baseline",
+    "integration after original stage9 validation and preservation",
+    "inherited Guppy and MACD failures",
+    "required hosted checks"
+  ]
+}

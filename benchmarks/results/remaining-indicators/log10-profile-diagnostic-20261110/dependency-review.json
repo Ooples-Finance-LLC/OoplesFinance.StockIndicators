@@ -1,0 +1,53 @@
+{
+  "package": "AiDotNet.Tensors",
+  "version": "0.149.0",
+  "package_metadata_sha256": "c7991fcd3cabb9e07a3e1207be9f3eb58362ecb457b6456718240deac227155a",
+  "input_dependency_sha256": "6280808e8107c30ea92622fff531c9be2738d3e9164a2f3073c08dbbac3aceed",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ooples/AiDotNet.Tensors",
+    "commit": "7a7beabf00db7e780f93e470fd148741f891433a"
+  },
+  "source_url": "https://github.com/ooples/AiDotNet.Tensors/blob/7a7beabf00db7e780f93e470fd148741f891433a/src/AiDotNet.Tensors/Helpers/CpuParallelSettings.cs",
+  "source_sha256": "8a242f22d792095e0af1cee48a3a5aced268683ffb98177bc68117319b96a76a",
+  "source_excerpt": [
+    {
+      "line": 26,
+      "text": "    /// Default is the physical core count (<see cref=\"PhysicalCoreCount\"/>, the logical count when it cannot be"
+    },
+    {
+      "line": 27,
+      "text": "    /// detected), as PyTorch and OpenMP default to; the <c>AIDOTNET_CPU_THREADS</c> environment variable overrides it."
+    },
+    {
+      "line": 30,
+      "text": "    public static int MaxDegreeOfParallelism { get; set; } = DefaultDegreeOfParallelism();"
+    },
+    {
+      "line": 40,
+      "text": "        if (int.TryParse(Environment.GetEnvironmentVariable(\"AIDOTNET_CPU_THREADS\"), out int requested) && requested > 0)"
+    },
+    {
+      "line": 41,
+      "text": "            return requested;"
+    },
+    {
+      "line": 42,
+      "text": "        int physical = DetectPhysicalCores();"
+    },
+    {
+      "line": 43,
+      "text": "        return physical > 0 && physical <= Environment.ProcessorCount ? physical : Environment.ProcessorCount;"
+    }
+  ],
+  "observations": [
+    "DefaultDegreeOfParallelism uses detected physical cores unless explicitly overridden; trace batch limit2 matches its2physical cores.",
+    "SharedPointwiseBenchmarks.Setup explicitly sets MaxDegreeOfParallelism=8; captured kernel WorkerCount additionally caps by logical Environment.ProcessorCount.",
+    "Opposite profile outcomes reproduced; differing policy/workload/hardware contexts are not interchangeable. No benchmark workload or runtime settings changed."
+  ],
+  "limitations": [
+    "Evidence supports a dispatch-topology hypothesis; it does not qualify any new source.",
+    "Replay sample attribution is wall/thread time and can include waiting and PowerShell overhead; PollGC samples do not prove equivalent GC pause duration.",
+    "Trace workers eventually reached Tier1; this does not establish BDN measurement-phase JIT timing."
+  ]
+}

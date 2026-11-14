@@ -1,0 +1,82 @@
+{
+  "source": "5a9d80f52faa59abca68522ecd5e55f29b85ceba",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-runtime-0150-alignment-20261111",
+  "status": "correctness-complete",
+  "active": null,
+  "unit": {
+    "passed": 161,
+    "classes": {
+      "SharedPointwiseExecutionTests": 40,
+      "PointwiseParallelLimitTests": 7,
+      "SeededTrueStrengthExecutionTests": 16,
+      "SeededMomentumSharedExecutionTests": 18,
+      "SharedGeneratedTrueStrengthTests": 30,
+      "TsiWordEmaRecurrenceTests": 4,
+      "CompactHilbertPhaseTests": 11,
+      "CompactPhaseAdaptiveTests": 9,
+      "HilbertRoundedKernelTests": 6,
+      "HilbertTrendlineSharedExecutionTests": 11,
+      "HilbertVariableWindowTests": 3,
+      "CertifiedHilbertProjectionTests": 6
+    },
+    "sha256": "443fc5b437956c73694a56330a97c599b4de2cf4a758fa5cf3bf0c8b95d607b2"
+  },
+  "parity": {
+    "passed": 292,
+    "classes": {
+      "TranscendentalComparisonTests": 16,
+      "CircularComparisonTests": 11,
+      "SeededMomentumComparisonTests": 9,
+      "SharedSeededMomentumBenchmarkTests": 8,
+      "SharedSkenderEmaFamilyBenchmarkTests": 81,
+      "SeededPhaseComparisonTests": 8,
+      "DelayedPhaseComparisonTests": 7,
+      "SeededHilbertTrendComparisonTests": 5,
+      "DelayedHilbertTrendComparisonTests": 8,
+      "HilbertCycleComparisonTests": 9,
+      "HilbertCycleSignalComparisonTests": 11,
+      "SharedHilbertBenchmarkTests": 13,
+      "SharedSeededPhaseBenchmarkTests": 10,
+      "SharedHilbertTrendlineBenchmarkTests": 10,
+      "SharedTaHilbertNativeBenchmarkTests": 54,
+      "SharedHilbertSignalBenchmarkTests": 32
+    },
+    "sha256": "ba600def73e897ab8f7d8592988567e3653f4ce828a82a2d8c25daa805f9acd9"
+  },
+  "build_origin": {
+    "run_id": "43104859307",
+    "workflow_head": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "5a9d80f52faa59abca68522ecd5e55f29b85ceba",
+    "artifact_id": 13893663864,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/43104859307"
+  },
+  "compiler_process_isolation": true,
+  "dependency_copy_mode": "Verified immutable CI artifacts; changed binaries installed without local compilation",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "build-and-gpu": {
+      "exit_code": 0,
+      "location": "CI build and actual local GPU"
+    },
+    "unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "parity": {
+      "exit_code": 0,
+      "location": "CI"
+    }
+  },
+  "gpu_passed": 100,
+  "source_fingerprint": "40c05c93107c68e689c8984fa3d9fbb6f7df3f2d8388611849ee190f03a370fb",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "c3ceeb79f8a87f666971237f3f5e5ddf84d9a075ca8c5b9bc0431dc9bf755baa",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "c3ceeb79f8a87f666971237f3f5e5ddf84d9a075ca8c5b9bc0431dc9bf755baa",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "c3ceeb79f8a87f666971237f3f5e5ddf84d9a075ca8c5b9bc0431dc9bf755baa",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "c3ceeb79f8a87f666971237f3f5e5ddf84d9a075ca8c5b9bc0431dc9bf755baa"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}

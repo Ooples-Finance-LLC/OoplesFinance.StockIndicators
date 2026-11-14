@@ -1,0 +1,61 @@
+{
+  "input_head": "3700798cfd417935133a2ab8ee0f4bd4eef440a5",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "parallel_batch_note": "Approved Vervoort Smoothed certification plus preserved candle candidate and range-boundary regressions.",
+  "step": "complete",
+  "updated_utc": "2026-10-21T23:38:51.626352+00:00",
+  "unit": {
+    "passed": 277,
+    "class_counts": {
+      "SharedGeneratedVolumeFlowTests": 54,
+      "SharedGeneratedVervoortCandlesTests": 31,
+      "VervoortSmoothedNumericalTests": 103,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "VervoortCandleNumericalTests": 63,
+      "SharedGeneratedVervoortModifiedTests": 11,
+      "VervoortSmoothedCertifiedTests": 11
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\vervoort-smoothed-certified\\unit\\unit.trx",
+    "sha256": "b4e1fca1085cd2bd9cb99b2d1a8641a8737277ca282d072512901cd8abf76ded",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-vervoort-smoothed-certified-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 417,
+    "class_counts": {
+      "RemainingBenchmarkDiscoveryTests": 405,
+      "RemainingVervoortCandlesBenchmarkTests": 12
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\vervoort-smoothed-certified\\parity\\parity.trx",
+    "sha256": "b0bde4c0b5a384ca2c7d93ae925ae46451cf32d3e8fe96a8db8ebb93ed5987b1",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-vervoort-smoothed-certified-20261021-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vervoort-smoothed-certified-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e0307b4e1384d8bad14c1e95c6472972dadc41702002a8752c549a7a63a2b48f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vervoort-smoothed-certified-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e0307b4e1384d8bad14c1e95c6472972dadc41702002a8752c549a7a63a2b48f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vervoort-smoothed-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e0307b4e1384d8bad14c1e95c6472972dadc41702002a8752c549a7a63a2b48f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-vervoort-smoothed-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "e0307b4e1384d8bad14c1e95c6472972dadc41702002a8752c549a7a63a2b48f"
+  },
+  "prior_head": "682c97334fe43c4a641b72ce63293133d7960323",
+  "inventory_tests_passed": 6,
+  "upstream_master": "9e41a4617d8603d31f4ac57b1781e8d978e55947",
+  "dependency": "AiDotNet.Tensors 0.141.0",
+  "performance": "Pending; correctness does not establish competitor speed."
+}

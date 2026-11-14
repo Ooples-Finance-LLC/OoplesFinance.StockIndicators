@@ -1,0 +1,276 @@
+{
+  "fixture": "SharedSkenderRocBenchmarks",
+  "source_sha": "eb9d6058b009f526ecd9c89c1b76eaee9e1fcadc",
+  "run_id": "local-skender-batch2-20261022",
+  "measurement_location": "Local Windows host; unchanged CPU setup and direct native methods.",
+  "host": {
+    "BenchmarkDotNetCaption": "BenchmarkDotNet",
+    "BenchmarkDotNetVersion": "0.15.8",
+    "OsVersion": "Windows 11 (10.0.26220.9739)",
+    "ProcessorName": "AMD Ryzen 9 3950X",
+    "PhysicalProcessorCount": 1,
+    "PhysicalCoreCount": 16,
+    "LogicalCoreCount": 32,
+    "RuntimeVersion": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+    "Architecture": "X64",
+    "HasAttachedDebugger": false,
+    "HasRyuJit": true,
+    "Configuration": "RELEASE",
+    "DotNetCliVersion": "10.0.402",
+    "ChronometerFrequency": {
+      "Hertz": 10000000
+    },
+    "HardwareTimerKind": "Unknown"
+  },
+  "report_sha256": "23336601409c1e4acaad77435d65026d65366787ae31c97e57874bbbfa56a183",
+  "report_file": "SharedSkenderRocBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderRocBenchmarks-report-full-compressed.json",
+  "quiet_cpu_samples": [
+    3.8,
+    4.1,
+    5.6
+  ],
+  "complete": true,
+  "comparisons": [
+    {
+      "pair": "Skender.GetRoc",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 69573.58940972222,
+        "lower_ns": 66013.25082732481,
+        "upper_ns": 73133.92799211963,
+        "samples": 9,
+        "allocated_bytes": 104977
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 62353.6328125,
+          "lower_ns": 57985.571481160194,
+          "upper_ns": 66721.6941438398,
+          "samples": 10,
+          "allocated_bytes": 124404
+        },
+        "NativeParallel": {
+          "mean_ns": 26287.139892578125,
+          "lower_ns": 25617.85905937909,
+          "upper_ns": 26956.42072577716,
+          "samples": 8,
+          "allocated_bytes": 169266
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "Skender.GetRoc",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 59054.0673828125,
+        "lower_ns": 58466.25475314824,
+        "upper_ns": 59641.88001247676,
+        "samples": 10,
+        "allocated_bytes": 56225
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 62353.6328125,
+          "lower_ns": 57985.571481160194,
+          "upper_ns": 66721.6941438398,
+          "samples": 10,
+          "allocated_bytes": 124404
+        },
+        "NativeParallel": {
+          "mean_ns": 26287.139892578125,
+          "lower_ns": 25617.85905937909,
+          "upper_ns": 26956.42072577716,
+          "samples": 8,
+          "allocated_bytes": 169266
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "Skender.GetRoc",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 542257.2265625,
+        "lower_ns": 450762.5670444966,
+        "upper_ns": 633751.8860805035,
+        "samples": 10,
+        "allocated_bytes": 897411
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1133551.8229166667,
+          "lower_ns": 1062619.93070207,
+          "upper_ns": 1204483.7151312635,
+          "samples": 9,
+          "allocated_bytes": 1241298
+        },
+        "NativeParallel": {
+          "mean_ns": 246516.26953125,
+          "lower_ns": 241023.60990714954,
+          "upper_ns": 252008.92915535046,
+          "samples": 10,
+          "allocated_bytes": 1357306
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "Skender.GetRoc",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 461089.95225694444,
+        "lower_ns": 413806.53634208796,
+        "upper_ns": 508373.3681718009,
+        "samples": 9,
+        "allocated_bytes": 416286
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1133551.8229166667,
+          "lower_ns": 1062619.93070207,
+          "upper_ns": 1204483.7151312635,
+          "samples": 9,
+          "allocated_bytes": 1241298
+        },
+        "NativeParallel": {
+          "mean_ns": 246516.26953125,
+          "lower_ns": 241023.60990714954,
+          "upper_ns": 252008.92915535046,
+          "samples": 10,
+          "allocated_bytes": 1357306
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "slower"
+    },
+    {
+      "pair": "Skender.GetRocWb",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 538271.796875,
+        "lower_ns": 523126.8446084427,
+        "upper_ns": 553416.7491415574,
+        "samples": 10,
+        "allocated_bytes": 107870
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 71840.693359375,
+          "lower_ns": 64581.358422047604,
+          "upper_ns": 79100.0282967024,
+          "samples": 10,
+          "allocated_bytes": 236640
+        },
+        "NativeParallel": {
+          "mean_ns": 154102.33289930556,
+          "lower_ns": 150689.9486954466,
+          "upper_ns": 157514.71710316453,
+          "samples": 9,
+          "allocated_bytes": 1075289
+        }
+      },
+      "fastest_native": "NativeSingle",
+      "verdict": "slower"
+    },
+    {
+      "pair": "Skender.GetRocWb",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 526299.0234375,
+        "lower_ns": 504237.03150230355,
+        "upper_ns": 548361.0153726964,
+        "samples": 10,
+        "allocated_bytes": 59113
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 71840.693359375,
+          "lower_ns": 64581.358422047604,
+          "upper_ns": 79100.0282967024,
+          "samples": 10,
+          "allocated_bytes": 236640
+        },
+        "NativeParallel": {
+          "mean_ns": 154102.33289930556,
+          "lower_ns": 150689.9486954466,
+          "upper_ns": 157514.71710316453,
+          "samples": 9,
+          "allocated_bytes": 1075289
+        }
+      },
+      "fastest_native": "NativeSingle",
+      "verdict": "slower"
+    },
+    {
+      "pair": "Skender.GetRocWb",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 5276245.833333333,
+        "lower_ns": 5193585.223182845,
+        "upper_ns": 5358906.443483821,
+        "samples": 9,
+        "allocated_bytes": 1044515
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 2121527.0833333335,
+          "lower_ns": 2086581.9800404992,
+          "upper_ns": 2156472.1866261675,
+          "samples": 9,
+          "allocated_bytes": 2361952
+        },
+        "NativeParallel": {
+          "mean_ns": 6542252.136752137,
+          "lower_ns": 5921340.916908425,
+          "upper_ns": 7163163.356595849,
+          "samples": 9,
+          "allocated_bytes": 10710791
+        }
+      },
+      "fastest_native": "NativeSingle",
+      "verdict": "slower"
+    },
+    {
+      "pair": "Skender.GetRocWb",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 5538345.3125,
+        "lower_ns": 5145572.9916768465,
+        "upper_ns": 5931117.6333231535,
+        "samples": 10,
+        "allocated_bytes": 563426
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 2121527.0833333335,
+          "lower_ns": 2086581.9800404992,
+          "upper_ns": 2156472.1866261675,
+          "samples": 9,
+          "allocated_bytes": 2361952
+        },
+        "NativeParallel": {
+          "mean_ns": 6542252.136752137,
+          "lower_ns": 5921340.916908425,
+          "upper_ns": 7163163.356595849,
+          "samples": 9,
+          "allocated_bytes": 10710791
+        }
+      },
+      "fastest_native": "NativeSingle",
+      "verdict": "slower"
+    }
+  ],
+  "measurement_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/blob/21d4d04c7542d1098f37b61b42cff0b0418a91fe/benchmarks/results/remaining-indicators/local-skender-batch2-20261022/manifest.json"
+}

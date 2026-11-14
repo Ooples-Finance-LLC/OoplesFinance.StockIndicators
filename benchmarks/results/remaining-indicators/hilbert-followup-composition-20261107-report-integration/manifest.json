@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "1be7d06355c12d3815182ff2a62d0cf650ad91bcd9206c35095593985211200d",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-followup-composition-20261107-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "c847c7ba7732d3bb832727037f06c8e216726b3f2a360834b3de907f5f0ae114",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-followup-composition-20261107-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "b181626c34943368bb4e1f15d2b0ec12bb186c395bf8a84ab541f9bd67516d9d",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-followup-composition-20261107-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "9df1326b214394d3cd61cc1bae3e77c660adf15f905c31ea572f4657b62b2797",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-followup-composition-20261107-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "49662f748815614a997b9de37230090b6790a4a3b57aa659c67676f00f5a898a",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-followup-composition-20261107-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "dcf21311f7c9fa12ad8d3de333a64d2e1d02b727e489a84d8ce053ad3cbe4c6f",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-followup-composition-20261107-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "d305d38d07fe391d89d714f625e8f9c312bc1b2b1b99409c09b83823eae2d8bf",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-followup-composition-20261107-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "14ee3bdee8810ad66ac8ac39681d80f59b7f0fe9d23c7db80cd3c85964a2173f",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-followup-composition-20261107-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "1bd7de42fa68b8cbd234eaab77bae2e71719d390bbe4c93f6d8fc3b8345429fc",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-followup-composition-20261107-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "952585ec5b1d5f385ecce053eab231724df360e055310fab0e46a11221c0d5cf",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-followup-composition-20261107-report-integration/updated-pair-details.png.gz"
+  }
+}

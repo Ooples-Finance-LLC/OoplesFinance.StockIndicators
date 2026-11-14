@@ -5,13 +5,18 @@ namespace OoplesFinance.StockIndicators.Helpers;
 internal sealed class QuickWindowMean : IDisposable
 {
     private readonly int _length;
+    private readonly int _peak, _newWeight;
     private readonly PooledRingBuffer<double> _values;
     private readonly ExactMeanAccumulator _denominator;
+    private ExactMeanAccumulator _sum, _recent, _weighted;
 
-    internal QuickWindowMean(int length)
+    internal QuickWindowMean(int length, int capacityHint = int.MaxValue)
     {
-        _length = Math.Max(1, length);
-        _values = new PooledRingBuffer<double>(Math.Max(2, _length));
+        // Periods one and two both have the historical weights [1, 2].
+        _length = Math.Max(2, length);
+        _peak = (int)Peak(_length);
+        _newWeight = _length - _peak + 1;
+        _values = new PooledRingBuffer<double>(Math.Min(_length, Math.Max(1, capacityHint)));
         _denominator = Denominator(_length);
     }
 
@@ -50,14 +55,23 @@ internal sealed class QuickWindowMean : IDisposable
 
     internal double Next(double value, bool commit)
     {
-        var sum = new ExactMeanAccumulator();
-        for (var lag = 0; lag < _values.Capacity && lag <= _values.Count; lag++)
-            sum.Add(lag == 0 ? value : _values[_values.Count - lag], new BigInteger(Weight(_length, lag)));
-        var result = sum.Ratio(_denominator);
-        if (commit) _values.TryAdd(value, out _);
+        // Advancing the tent adds L+1 times the newest P-1 observations and
+        // subtracts P times the complete prior window. All stages stay exact.
+        var weighted = _weighted;
+        weighted.Add(value, _newWeight);
+        var recent = _recent; recent.Multiply(_length + 1d); weighted.AddExact(recent);
+        var total = _sum; total.Multiply(_peak); weighted.Subtract(total);
+        var result = weighted.Ratio(_denominator);
+        if (commit)
+        {
+            if (_values.Count == _length) _sum.Add(_values[0], -1);
+            if (_values.Count >= _peak - 1) _recent.Add(_values[_values.Count - (_peak - 1)], -1);
+            _sum.Add(value); _recent.Add(value); _weighted = weighted;
+            _values.TryAdd(value, out _);
+        }
         return result;
     }
 
-    internal void Reset() => _values.Clear();
+    internal void Reset() { _values.Clear(); _sum = _recent = _weighted = default; }
     public void Dispose() => _values.Dispose();
 }

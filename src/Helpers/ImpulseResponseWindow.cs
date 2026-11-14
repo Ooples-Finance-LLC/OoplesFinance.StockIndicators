@@ -10,7 +10,7 @@ internal sealed class ImpulseResponseWindow : IDisposable
     private readonly IMovingAverageSmoother? _fallback;
     private RocBankValue _first, _second;
     private double _previous, _older;
-    private int _startup;
+    private int _startup, _nextHistory;
     internal RocBankValue ExtendedOutput { get; private set; }
     internal static bool Supports(MovingAvgType kind) => HannIndicatorWindow.Supports(kind);
     internal ImpulseResponseWindow(MovingAvgType kind, int length, double bandwidth)
@@ -45,7 +45,9 @@ internal sealed class ImpulseResponseWindow : IDisposable
             var sum = new ExactMeanAccumulator();
             for (var lag = 0; lag < _weights.Length && lag <= _history.Count; lag++)
             {
-                var v = lag == 0 ? band : _history[_history.Count - lag];
+                var index = _nextHistory - lag;
+                if (index < 0) index += _history.Count;
+                var v = lag == 0 ? band : _history[index];
                 var term = new ExactMeanAccumulator(); term.AddProduct(v.Mantissa, _weights[lag], -1); term.ScaleByPowerOfTwo(v.UpperShift); sum.Subtract(term);
             }
             output = sum.Ratio(_mass);
@@ -58,7 +60,12 @@ internal sealed class ImpulseResponseWindow : IDisposable
                     if (!double.IsInfinity(rounded)) { ExtendedOutput = new(rounded, shift); break; }
                 }
             }
-            if (commit) { if (_history.Count == _weights.Length) _history.RemoveAt(0); _history.Add(band); }
+            if (commit)
+            {
+                if (_history.Count == _weights.Length) _history[_nextHistory] = band;
+                else _history.Add(band);
+                if (++_nextHistory == _weights.Length) _nextHistory = 0;
+            }
         }
         else if (_average is not null)
         {
@@ -73,6 +80,6 @@ internal sealed class ImpulseResponseWindow : IDisposable
         if (commit) { _second = _first; _first = band; _older = _previous; _previous = value; _startup = Math.Min(3, _startup + 1); }
         return output;
     }
-    internal void Reset() { ExtendedOutput = default; _first = _second = default; _previous = _older = 0; _startup = 0; _history.Clear(); _average?.Reset(); _fallback?.Reset(); }
-    public void Dispose() { _average?.Dispose(); _fallback?.Dispose(); _history.Clear(); }
+    internal void Reset() { ExtendedOutput = default; _first = _second = default; _previous = _older = 0; _startup = 0; _history.Clear(); _nextHistory = 0; _average?.Reset(); _fallback?.Reset(); }
+    public void Dispose() { _average?.Dispose(); _fallback?.Dispose(); _history.Clear(); _nextHistory = 0; }
 }

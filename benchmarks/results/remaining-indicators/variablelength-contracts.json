@@ -1,0 +1,34 @@
+{
+  "batch": "generated-variable-length-moving-average",
+  "types": [
+    "VariableLengthMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Compute LengthOutput and Value together with the existing unrounded variable-length kernel, preserving default SMA, independent period clamps, raw warmup, exact outputs, custom average fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 106,
+    "fixture_passed": 4,
+    "discovery_passed": 61,
+    "gpu_passed": 100,
+    "contract_methods": 1396,
+    "hosted_methods": 1384,
+    "evidence": [
+      {
+        "file": "variablelength-unit.trx.gz",
+        "passed_cases": 106,
+        "trx_sha256": "9d25a5c40da304f83578a82b9eba11efee75913984bd2a2cf601a7a6bf0dee72"
+      },
+      {
+        "file": "variablelength-fixture.trx.gz",
+        "passed_cases": 65,
+        "trx_sha256": "a67ba03ed71bc55a3c07fe7757715643de7b3cd1777551399ce0090ae8aab2af"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVariableLengthBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

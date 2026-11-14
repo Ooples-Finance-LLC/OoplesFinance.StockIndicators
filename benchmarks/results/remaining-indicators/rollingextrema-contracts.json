@@ -1,0 +1,41 @@
+{
+  "batch": "rolling-extrema-shared-execution",
+  "types": [
+    "RollingMax",
+    "RollingMin"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Use a monotonic close-price deque retaining oldest equal values, including signed zero. Periods covering the entire finite batch use constant prefix storage. Nonpositive periods and custom sources retain the existing route. No public numerical formula changes.",
+  "verification": {
+    "unit_passed": 26,
+    "fixture_passed": 8,
+    "discovery_passed": 337,
+    "gpu_passed": 100,
+    "contract_methods": 1678,
+    "hosted_methods": 1666,
+    "evidence": [
+      {
+        "file": "rollingextrema-unit.trx.gz",
+        "passed_cases": 26,
+        "trx_sha256": "819a5cae72cf92ad3f16d43f1bfac6fdb1019cb463e13636cdf86721f1098f55"
+      },
+      {
+        "file": "rollingextrema-parity.trx.gz",
+        "passed_cases": 345,
+        "trx_sha256": "f09f26c98c558bd3717ec0a157bfe985d95a02a307464bad889fff7f25a3cb6e"
+      }
+    ],
+    "gpu_receipt": "rollingextrema-gpu-contracts.json",
+    "gpu_trx": "rollingextrema-gpu.trx.gz"
+  },
+  "benchmark_fixture": {
+    "type": "RemainingRollingExtremaBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "RollingMax",
+      "RollingMin"
+    ]
+  },
+  "performance": "Controlled timing and integrated-head qualification remain pending."
+}

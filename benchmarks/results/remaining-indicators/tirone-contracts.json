@@ -1,0 +1,37 @@
+{
+  "batch": "tirone-shared-execution",
+  "types": [
+    "TironeLevels"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Compute all eight Tirone levels together with unchanged exact staged arithmetic, writing directly to destination storage while retaining the allocating wrapper and primary mean in slot three. Preserve source fallback, output order, previews and lifecycle.",
+  "verification": {
+    "unit_passed": 46,
+    "fixture_passed": 4,
+    "discovery_passed": 76,
+    "gpu_passed": 100,
+    "contract_methods": 1411,
+    "hosted_methods": 1399,
+    "evidence": [
+      {
+        "file": "tirone-unit.trx.gz",
+        "passed_cases": 46,
+        "trx_sha256": "78355943bb9da18bea271bf878f240de45499b505e3e3f9a4d9b2784e9dd281a"
+      },
+      {
+        "file": "tirone-fixture.trx.gz",
+        "passed_cases": 80,
+        "trx_sha256": "06bf923075b657dcfbf7166c4f5b528fdf1e78987a93bcd5a61538ed88f21b6a"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingTironeBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "TironeLevels"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

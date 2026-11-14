@@ -1,0 +1,29 @@
+{
+  "types": [
+    "Jma"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "e1af0cbf61686e2ce515b04ba1ccb5ed57df65d8",
+  "combined_input_sha256": "6b79cd4644bc6e7464ff0c58e460d3ec9dc78e1402364eeb56a180b79b4e2b81",
+  "benchmark_fixture": {
+    "type": "RemainingRecursiveAliasesBenchmarks",
+    "operations": [
+      "Jma"
+    ]
+  },
+  "checks": {
+    "unit": 51,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/recursivealiases-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/recursivealiases-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

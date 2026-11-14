@@ -1,0 +1,48 @@
+{
+  "batch": "volatility-geometry-shared-execution",
+  "types": [
+    "TypicalPriceVolatility",
+    "StandardDeviationVolatility",
+    "ClosedFormDistanceVolatility"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Compute typical-price population deviation, all three residual-volatility outputs, and closed-form distance through existing exact kernels. Avoid an unfillable typical-price window allocation. Preserve original fields, full-window startup, SMA/EMA defaults, ignored annualization, distance domain/error order, component/source fallback and ownership.",
+  "verification": {
+    "unit_passed": 86,
+    "fixture_passed": 12,
+    "discovery_passed": 144,
+    "gpu_passed": 100,
+    "contract_methods": 1483,
+    "hosted_methods": 1471,
+    "evidence": [
+      {
+        "file": "volatilitygeometry-unit.trx.gz",
+        "passed_cases": 86,
+        "trx_sha256": "bb67834aa26eaea6581e5c0c2ea7125e6cad213c5c1d2ae5be367290c3f66b53"
+      },
+      {
+        "file": "volatilitygeometry-fixture.trx.gz",
+        "passed_cases": 156,
+        "trx_sha256": "9def89e6a0a1d26ab657ff04af1e770674ef1755ae66304fa2119b0bf6f8b66d"
+      }
+    ],
+    "initial_candidate": {
+      "file": "volatilitygeometry-unit-initial.trx.gz",
+      "passed_cases": 37,
+      "failed_cases": 1,
+      "trx_sha256": "64758ce2073d6bf46d8c67034b793c7d7bbd7ed71cbe4fa4401055ab0d47a478",
+      "interpretation": "The initial adapter used the kernel range error instead of the public builder domain error. Closed Form Distance was added to the existing finite-first/root-order domain prepass. The complete affected unit selection, parity and GPU checks were rerun on corrected production."
+    }
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVolatilityGeometryBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "TypicalPriceVolatility",
+      "StandardDeviationVolatility",
+      "ClosedFormDistanceVolatility"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

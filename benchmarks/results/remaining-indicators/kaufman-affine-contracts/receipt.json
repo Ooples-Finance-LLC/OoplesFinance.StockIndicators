@@ -1,0 +1,46 @@
+{
+  "status": "focused-contracts-verified-raw-performance-pending",
+  "change": "Bound the equivalent affine average recurrence to avoid treating repeated previous-average terms as independent. Exact gain, change, signed threshold comparisons and rational fallback remain intact.",
+  "context": "Tests executed on an isolated copy of the combined stage9 working candidate, including uncommitted shared routes. This commit alone was not separately built or tested; original stage9 parity continues independently.",
+  "candidate_inputs_sha256": "d06c138f71f8befa27cfb3e2974104ee71af64c484d7457a29fc473c5042b22b",
+  "original_inputs_sha256": "885d6998d7d92b1d255b8230456d80d926d72607b2c580df5aabbf04887df3d5",
+  "base_head": "e7d23c476998159e478c2e35817360eb2309bf08",
+  "evidence": [
+    {
+      "file": "certified.trx.gz",
+      "cases": 21,
+      "trx_sha256": "f6826c0527d962c266703edb38fa990555b83e7f9f1d93217047d8123dbab733"
+    },
+    {
+      "file": "shared.trx.gz",
+      "cases": 38,
+      "trx_sha256": "2140958194513ac5e0901e85689dbbdd2743cf5a054f34431e49332fe93f15ae"
+    },
+    {
+      "file": "parity.trx.gz",
+      "cases": 8,
+      "trx_sha256": "37bc9c16e5488f51425c16f73f630f2258128fedafec45ef2bd17b9664222513"
+    }
+  ],
+  "builds": {
+    "build-production": {
+      "log_sha256": "c0a5ce2c29a7bbd7269d519d519c4d096656e91ce1d54176af035d399c97dd11",
+      "exit_code": 0
+    },
+    "build-unit": {
+      "log_sha256": "60f0f713f36efc7b3d1f18f24b2348532628ee201d6a455fe1f7411a0042136f",
+      "exit_code": 0
+    }
+  },
+  "reused_fixture": {
+    "source": "Z:\\StockIndicators-work\\si-ninth-validation\\comparator",
+    "fixture_sha256": "33034e230177e02c405e2af497d57dc7b53490a9d7001366bb450dc23406d8eb",
+    "candidate_production_sha256": "042ab89a53a798bf11a6c70c182be492fcccebc7845d6889623b6071311048f8"
+  },
+  "pending": [
+    "raw controlled performance measurement",
+    "integration after original stage9 validation and candidate preservation",
+    "inherited Guppy and MACD failures",
+    "required hosted checks"
+  ]
+}

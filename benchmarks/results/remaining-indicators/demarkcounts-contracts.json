@@ -1,0 +1,39 @@
+{
+  "batch": "demark-rolling-counts-shared-execution",
+  "types": [
+    "DemarkSetupIndicator",
+    "DemarkReversalPoints"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Replace repeated window scans with rolling strict-comparison counts and bounded lag history. Preserve zero-padded comparisons, signed current-close publication, facade clamps and source fallback; preserve legacy fallback where int j+lag can overflow. Unfillable valid windows allocate no history.",
+  "verification": {
+    "unit_passed": 46,
+    "fixture_passed": 8,
+    "discovery_passed": 105,
+    "gpu_passed": 100,
+    "contract_methods": 1444,
+    "hosted_methods": 1432,
+    "evidence": [
+      {
+        "file": "demarkcounts-unit.trx.gz",
+        "passed_cases": 46,
+        "trx_sha256": "bfc436e3487073ba010687224b862bd43e241c9b29b57a6bcc23a3e2e65de286"
+      },
+      {
+        "file": "demarkcounts-fixture.trx.gz",
+        "passed_cases": 113,
+        "trx_sha256": "04d2b3bca58ed37cc0aeab8b19cb1328b8e284559b32723b37d55e4960d8e854"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingDemarkCountBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "DemarkSetupIndicator",
+      "DemarkReversalPoints"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

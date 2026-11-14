@@ -1,0 +1,23 @@
+{
+  "source_integration_commit": "1f6176e207d44797ce6c935448c0a1770fef2700",
+  "qualified_source": "7c3a8c4c74870eadc3cbb57c368c086c8a3eb6e7",
+  "compiled_source": "207d0ef26b987567447b3884fa70e288acf87c46",
+  "source_fingerprint": "53a90e5fc0fc6a847a60fed87555d693b7f749859934e816027cc6d4dc013a06",
+  "unit": 68,
+  "comparator": 37,
+  "actual_gpu": 100,
+  "production_sha256": "5d9b5cef884654a7f2ab10887f55a9e81a86dc6cad1d8b44492c9e5457c0bccf",
+  "run_id": "42650703055",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 5,
+    "faster": 1
+  },
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.IdentityAdl.cs",
+    "src/Indicators/ValuesBarExecution.cs",
+    "tests/ModelsTests/IdentityAdlColumnExecutionTests.cs"
+  ],
+  "verified_utc": "2026-11-09T16:51:23.867161+00:00"
+}

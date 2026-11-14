@@ -1,0 +1,55 @@
+{
+  "types": [
+    "Svama",
+    "ProjectedSupportAndResistance"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "876702915e51123dd9da97e45f491a5c6e63e1cd",
+  "source_fingerprint_sha256": "3e1029b4835c7294724ce6cd6088521e87014b1284f4b7044441ea2418ed1cd1",
+  "benchmark_fixture": {
+    "type": "RemainingSvamaProjectedBenchmarks",
+    "operations": [
+      "Svama",
+      "ProjectedSupportAndResistance"
+    ]
+  },
+  "checks": {
+    "unit": 95,
+    "parity": 8,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "unit_class_counts": {
+    "SharedGeneratedSvamaProjectedTests": 19,
+    "SvamaNumericalTests": 41,
+    "ProjectedLevelsNumericalTests": 35
+  },
+  "unit_sources": {
+    "SharedGeneratedSvamaProjectedTests": {
+      "source": "876702915e51123dd9da97e45f491a5c6e63e1cd",
+      "evidence": "benchmarks/results/remaining-indicators/publication-qualified-eighteen-integration-20261021-unit.trx.gz"
+    },
+    "SvamaNumericalTests": {
+      "source": "402c9d448103ce8f47222609b70ae6214725aca3",
+      "evidence": "benchmarks/results/remaining-indicators/publication-qualified-eighteen-integration-20261021-reused-remaining-queue-unit.trx.gz"
+    },
+    "ProjectedLevelsNumericalTests": {
+      "source": "402c9d448103ce8f47222609b70ae6214725aca3",
+      "evidence": "benchmarks/results/remaining-indicators/publication-qualified-eighteen-integration-20261021-reused-remaining-queue-unit.trx.gz"
+    }
+  },
+  "parity_source": "d2a694db317e8ea2c2956dc318907f967d6201c1",
+  "evidence": [
+    "benchmarks/results/remaining-indicators/publication-qualified-eighteen-integration-20261021-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-qualified-eighteen-integration-20261021-parity.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-qualified-eighteen-integration-20261021-reused-remaining-queue-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-qualified-eighteen-integration-20261021-reused-rmo-qqe-certified.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-qualified-eighteen-integration-20261021-reused-vervoort-smoothed-certified.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-qualified-eighteen-integration-20261021-reused-sma-window-integration.trx.gz"
+  ],
+  "note": "Current dispatch and independent numerical checks are source-pinned. Long-history evidence reuses the stated prior source after exact source comparison. Periodic is excluded; overlapping counts are not unique coverage.",
+  "pending": [
+    "controlled timing"
+  ]
+}

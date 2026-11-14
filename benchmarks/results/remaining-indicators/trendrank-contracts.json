@@ -1,0 +1,39 @@
+{
+  "batch": "trend-step-technical-rank-shared-execution",
+  "types": [
+    "TrendStep",
+    "TechnicalRank"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Use unchanged TrendStepWindow and TechnicalRankWindow in shared execution over original closes, preserving all nine rank periods, exact staged calculations, warmup, source fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 357,
+    "fixture_passed": 8,
+    "discovery_passed": 77,
+    "gpu_passed": 100,
+    "contract_methods": 1412,
+    "hosted_methods": 1400,
+    "evidence": [
+      {
+        "file": "trendrank-unit.trx.gz",
+        "passed_cases": 357,
+        "trx_sha256": "92d82c03b6574393d968a8f4342f24489c7bc9c3bd07c90aee79c741032f2ead"
+      },
+      {
+        "file": "trendrank-fixture.trx.gz",
+        "passed_cases": 85,
+        "trx_sha256": "9bf9d411901dca53edcb5f206e65c47e77b4479a818d5a26ebbb98b1e780578f"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingTrendRankBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "TrendStep",
+      "TechnicalRank"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

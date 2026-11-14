@@ -1,0 +1,293 @@
+{
+  "status": "candidate-rejected-or-inconclusive",
+  "sources": {
+    "old": "c02f77369bf5d98d53f431efef70a78bcb033da0",
+    "new": "162f4fa2afaa62937a85c2b895d3afd9c5c52eb0"
+  },
+  "candidate_code_source": "ce70d9924a33be966bf8a08830a31d41c425cb33",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "SharedCommodityChannelBenchmarks",
+      "pair": "TaLib.Functions.Cci",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.08137822265625,
+        0.08395984375
+      ],
+      "new_means_ms": [
+        0.0798027734375,
+        0.0708421875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedCommodityChannelBenchmarks",
+      "pair": "TaLib.Functions.Cci",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.070911513671875,
+        0.07652703125
+      ],
+      "new_means_ms": [
+        0.068997451171875,
+        0.07339538845486111
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedCommodityChannelBenchmarks",
+      "pair": "TaLib.Functions.Cci",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.8110295138888889,
+        0.82892890625
+      ],
+      "new_means_ms": [
+        0.8068544270833333,
+        0.8215303125
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedCommodityChannelBenchmarks",
+      "pair": "TaLib.Functions.Cci",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.7775716579861112,
+        0.7945894965277778
+      ],
+      "new_means_ms": [
+        0.7851154513888888,
+        0.7855881944444445
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetCci",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.88607,
+        0.89222
+      ],
+      "new_means_ms": [
+        0.8441222222222222,
+        0.85331
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetCci",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.8838125,
+        1.24805
+      ],
+      "new_means_ms": [
+        0.8274875,
+        1.13095
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.Cci",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        1.54,
+        1.59633
+      ],
+      "new_means_ms": [
+        1.338911111111111,
+        1.37486
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.Cci",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.8513111111111111,
+        0.8625666666666666
+      ],
+      "new_means_ms": [
+        0.8078944444444445,
+        0.7868625
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Trady.Indicator.CommodityChannelIndex",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.26658,
+        0.39717
+      ],
+      "new_means_ms": [
+        0.26138,
+        0.27323333333333333
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Trady.Indicator.CommodityChannelIndex",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.9476777777777777,
+        0.9615666666666667
+      ],
+      "new_means_ms": [
+        0.90935,
+        0.9977833333333334
+      ],
+      "verdict": "inconclusive"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "414a35c2bbf7d83c1d4a859b729311997d399f4be8d5569eb6eaa93ff09d0932",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "d74d471690406cd2439c7bfb0dcf57606fc9c36a7a200cb5be5fc55d2c1a7622",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "90e43e23ea48ce0d49ed53393d85012e77624ef4971caa541c81e22844615022",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "8a5df7794a13d083b2a237e035543060ba69bc3f7513ac5e30c7715470944d6b",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/verified-summary.json.gz"
+    },
+    "round0-old-SharedCommodityChannelBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCommodityChannelBenchmarks-report-full-compressed.json": {
+      "sha256": "08ebc074feced2969aa8e835a94813c53d8e8f0a40a1a17c4de939b3d648d3bb",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round0-old-SharedCommodityChannelBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCommodityChannelBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "1a352043de511d67f71cd1c4e2ded2217159280a8223b0fd3ebac1ce67136eb7",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedCommodityChannelBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCommodityChannelBenchmarks-report-full-compressed.json": {
+      "sha256": "153bc7f7abe29a26b549c4a9d5b45fcdca97ece6783681171c39b9c76a93ec08",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round1-new-SharedCommodityChannelBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCommodityChannelBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "dd5f47682d5d8feb0ca1ade69025c042ff1b3e51a98d8d2731fe1c1c66fb6e73",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedCommodityChannelBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCommodityChannelBenchmarks-report-full-compressed.json": {
+      "sha256": "0f4cf1162a6ebcacad1f1992d7cccd36aeab739cbee5c12fcf1aec61f47085c6",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round2-new-SharedCommodityChannelBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCommodityChannelBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "e355b1d03b90e9dc6c238ac64465387247cdb027a05187b6f1ae79ffc8f24dd7",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedCommodityChannelBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCommodityChannelBenchmarks-report-full-compressed.json": {
+      "sha256": "86fd0303169dd2878acc75cf1ea52acfc464c4817d823bf6268eb0ae34d77d13",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round3-old-SharedCommodityChannelBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedCommodityChannelBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "1b97a0b421bd8b2ceb0b67e6167b405710dd3b8f696178d1f98ad0e7eecca8f5",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "9fb01d31ff6cfe097667be474596822fc74bee5cf108b5a107d253dde2abef20",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round0-old-SharedCommodityChannelBenchmarks.log": {
+      "sha256": "41d42d3918e5ada04b62917c96fcc429f08c104466f7a043876624175c1f5d82",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round0-old-SharedCommodityChannelBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "acc332ccefe7d1596cd84e111698f53dc4ea0fea19983c3900074004d48eec1b",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-SharedCommodityChannelBenchmarks.log": {
+      "sha256": "1e274750371673a2b16f127f499cc1fffa48d9b129aee7d962dd6839bbc63acd",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round1-new-SharedCommodityChannelBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "9bad8a965d7c13bb2f609eaebee4ee1d222b367e39cdb7433f3b2a2bda50be71",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-SharedCommodityChannelBenchmarks.log": {
+      "sha256": "d92d7580cd471b0e70dd68145e60014fdf914c85d4f1a3e445c197a0137d92a1",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round2-new-SharedCommodityChannelBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "bde435edd9136bad0ed0b84458899126429b9e02579ce6c86909ffa888f10b90",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-SharedCommodityChannelBenchmarks.log": {
+      "sha256": "b0d7f1d752b48bfb74078dd7374bcef7a2a07c9fbdcd65c17afd15ec4715939d",
+      "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/round3-old-SharedCommodityChannelBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-cci-aligned-window-control.py": "3d727845587ae05c1403c6a860245e97ae420c45e836902066583cd18484b45f",
+    "verify-cci-aligned-window-control.py": "1d969da89f5fe513c14e0e88f5c81f0288a54ecb5154da8b9e52688492966838"
+  },
+  "report_imported": false,
+  "production_integrated": false,
+  "diagnostic": {
+    "note": "Published qualified-source CCI profile during concurrent compilation; sampled-thread attribution only, not timing qualification.",
+    "archives": {
+      "cci-published-profile-20261024/status.json": {
+        "sha256": "616ff90aff3aca92307464f84f88ac3517573d5b83192347075eb03bd9ca0aca",
+        "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/diagnostic/cci-published-profile-20261024/status.json.gz"
+      },
+      "cci-published-profile-20261024/ready.json": {
+        "sha256": "3154224a309abe0aa8c7dca2a039270c42832016b0fc9f91816efa4330f643bd",
+        "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/diagnostic/cci-published-profile-20261024/ready.json.gz"
+      },
+      "cci-published-profile-20261024/completed.json": {
+        "sha256": "4a69db59aebea986d36b567203ae6cb9f8cf003e5d5aae44c6badb2df2f8066a",
+        "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/diagnostic/cci-published-profile-20261024/completed.json.gz"
+      },
+      "cci-published-profile-20261024/profile-summary.json": {
+        "sha256": "96160d9cd2a3bd467da1cfa3bb3db37220dc16ef636d0fba67e1074efa312096",
+        "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/diagnostic/cci-published-profile-20261024/profile-summary.json.gz"
+      },
+      "cci-published-profile-20261024/cci.speedscope.json": {
+        "sha256": "f749b8ecd5fab586098b62d1cb138f95b26ae346ccd68cd0a5ca14e14e0ff6f9",
+        "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/diagnostic/cci-published-profile-20261024/cci.speedscope.json.gz"
+      },
+      "cci-published-profile-20261024/worker.ps1": {
+        "sha256": "a2aca4031d207df4ba243a318d6833c743b78b873d98af73330d4d92c3ad7a7b",
+        "archive": "benchmarks/results/remaining-indicators/local-cci-aligned-window-control-20261024/diagnostic/cci-published-profile-20261024/worker.ps1.gz"
+      }
+    }
+  },
+  "candidate_evidence": {
+    "rejected-candidate.patch": {
+      "sha256": "88318ac717eef28e738e1bdca1f03a5c4777e1349abbd20f6bd6a14e48b5b8cf"
+    },
+    "publication-cci-aligned-window-certified-20261024-parity.trx.gz": {
+      "sha256": "5af7337576952910b63bd81b958d80adcca8c999f84fa57c86f81e37916d015c"
+    },
+    "publication-cci-aligned-window-certified-20261024-unit.trx.gz": {
+      "sha256": "40690845152d4b87b18f471e6cbdd96e665819f51c1a7b681165e3e2f9efd0d5"
+    },
+    "publication-cci-aligned-window-certified-20261024-verification.json": {
+      "sha256": "1a45a62168aca21a40eec00d50025d33950546d63b4014faa32e39959d75d34f"
+    }
+  },
+  "reason": "Aligned CCI deviation-window trial: 0 faster, 10 inconclusive, 0 slower. Existing 40 unit/20 parity/100 GPU/8 inventory checks passed; all 80 controls verified. Candidate source not integrated and no report row imported."
+}

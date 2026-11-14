@@ -1,0 +1,59 @@
+{
+  "input_head": "32fa74926d459f62cab70afaaa1b7558b3becc90",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/RateOfChangeWithAverage.cs",
+    "tests/ModelsTests/RocDirectDifferenceTests.cs"
+  ],
+  "batch_note": "Direct rounded momentum subtraction only; retain NETFRAMEWORK, ROC percentage and average behavior. Extreme-pair/reset tests plus existing shared execution, numerical, long-history, native benchmark contracts and GPU/inventory. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-23T07:14:20.712386+00:00",
+  "unit": {
+    "passed": 15,
+    "class_counts": {
+      "RocSharedExecutionTests": 13,
+      "RocDirectDifferenceTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\roc-direct-difference\\unit\\unit.trx",
+    "sha256": "ad3a02cde87c05c3a684493b01bf68891a4ad58468730cc3ab517a615f2a44db",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-roc-direct-difference-certified-20261023-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 51,
+    "class_counts": {
+      "SkenderRocComparisonTests": 12,
+      "SharedSkenderRocBenchmarkTests": 35,
+      "SharedRocBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\roc-direct-difference\\parity\\parity.trx",
+    "sha256": "6b0ffd55f8cd71c003860eb414e912c2f09f6ecfde8d041ab8ebfcd3cc44f45b",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-roc-direct-difference-certified-20261023-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-direct-difference-20261023\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "6be69b366d66d1e03ba8a626162014330edf14721df3a85d84fb44efbea3001b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-direct-difference-20261023\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "6be69b366d66d1e03ba8a626162014330edf14721df3a85d84fb44efbea3001b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-direct-difference-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "6be69b366d66d1e03ba8a626162014330edf14721df3a85d84fb44efbea3001b",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-roc-direct-difference-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "6be69b366d66d1e03ba8a626162014330edf14721df3a85d84fb44efbea3001b"
+  },
+  "source_fingerprint_sha256": "79e74f1e5bb49f4db14beaa6bf94c2fb031cece5a58e0b4bbbccf89cffa95129",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Direct rounded momentum subtraction only; retain NETFRAMEWORK, ROC percentage and average behavior. Extreme-pair/reset tests plus existing shared execution, numerical, long-history, native benchmark contracts and GPU/inventory. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

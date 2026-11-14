@@ -81,7 +81,33 @@ internal static class UltimatePowerWeights
         return bits;
     }
 
+    // Weight ratios repeat across bars even when the exponent changes. Reuse
+    // their exact intervals without changing precision or rounding decisions.
+    // Thread ownership avoids locks; both entry count and integer sizes are bounded.
+    [ThreadStatic]
+    private static Dictionary<(int Numerator, int Denominator, int Bits), Bounds>? _smallLogs;
+
+    [ThreadStatic]
+    private static Dictionary<(int Numerator, int Denominator, int Bits), Bounds>? _logs;
+
     private static Bounds SmallLog(Fraction value, int bits)
+    {
+        if (bits > 256 || value.Numerator > int.MaxValue || value.Denominator > int.MaxValue)
+            return CalculateSmallLog(value, bits);
+        var key = ((int)value.Numerator, (int)value.Denominator, bits);
+        var cache = _smallLogs ??= new();
+        if (cache.TryGetValue(key, out var cached)) return cached;
+        var result = CalculateSmallLog(value, bits);
+        if (Bits(result.Lower.Numerator) <= 4096 && Bits(result.Lower.Denominator) <= 4096
+            && Bits(result.Upper.Numerator) <= 4096 && Bits(result.Upper.Denominator) <= 4096)
+        {
+            if (cache.Count == 512) cache.Clear();
+            cache.Add(key, result);
+        }
+        return result;
+    }
+
+    private static Bounds CalculateSmallLog(Fraction value, int bits)
     {
         var z = (value - 1) / (value + 1); var square = z * z;
         var term = z; Fraction sum = 0; var index = 0; var tolerance = Fraction.Grid(bits);
@@ -96,6 +122,25 @@ internal static class UltimatePowerWeights
     internal static Bounds Log(Fraction value, int bits)
     {
         if (value.Sign <= 0) throw new ArgumentOutOfRangeException(nameof(value));
+        if (bits > 256 || value.Numerator > int.MaxValue || value.Denominator > int.MaxValue)
+            return CalculateLog(value, bits);
+        var key = ((int)value.Numerator, (int)value.Denominator, bits);
+        var cache = _logs ??= new();
+        if (cache.TryGetValue(key, out var cached)) return cached;
+        var result = CalculateLog(value, bits);
+        // Scaling the cached small logarithms still combines large exact
+        // fractions. Reuse that unchanged result, with the same storage bounds.
+        if (Bits(result.Lower.Numerator) <= 4096 && Bits(result.Lower.Denominator) <= 4096
+            && Bits(result.Upper.Numerator) <= 4096 && Bits(result.Upper.Denominator) <= 4096)
+        {
+            if (cache.Count == 512) cache.Clear();
+            cache.Add(key, result);
+        }
+        return result;
+    }
+
+    private static Bounds CalculateLog(Fraction value, int bits)
+    {
         var exponent = Bits(value.Numerator) - Bits(value.Denominator);
         var scale = exponent >= 0 ? new Fraction(BigInteger.One << exponent, BigInteger.One)
             : Fraction.Grid(-exponent);
@@ -118,23 +163,28 @@ internal static class UltimatePowerWeights
         // every Taylor degree. Each multiplication and division rounds outward.
         var precision = checked(bits + squares + Bits(bits) + 16);
         var scale = BigInteger.One << precision;
+        var scaleMask = scale - 1;
         var yLow = y.Numerator * scale / y.Denominator;
         var yHigh = CeilingPositive(y.Numerator * scale, y.Denominator);
         var totalLow = scale; var totalHigh = scale;
-        var termLow = scale; var termHigh = scale; BigInteger tail; var index = 0;
+        // The tail bound already computes the next upper Taylor term. Carry
+        // that exact integer into the next iteration instead of recomputing it.
+        var termLow = scale; var nextHigh = yHigh; BigInteger tail; var index = 0;
         do
         {
             index++;
             termLow = (termLow * yLow >> precision) / index;
-            termHigh = CeilingPositive((termHigh * yHigh + scale - 1) >> precision, index);
+            var termHigh = nextHigh;
             totalLow += termLow; totalHigh += termHigh;
-            var first = CeilingPositive((termHigh * yHigh + scale - 1) >> precision, index + 1);
-            tail = CeilingPositive(first * scale * (index + 2), scale * (index + 2) - yHigh);
+            nextHigh = CeilingPositive((termHigh * yHigh + scaleMask) >> precision, index + 1);
+            var tailScale = scale * (index + 2);
+            tail = CeilingPositive(nextHigh * tailScale, tailScale - yHigh);
         } while (tail > 2);
-        var lower = scale * scale / (totalHigh + tail);
-        var upper = CeilingPositive(scale * scale, totalLow);
+        var scaleSquared = scale * scale;
+        var lower = scaleSquared / (totalHigh + tail);
+        var upper = CeilingPositive(scaleSquared, totalLow);
         for (var i = 0; i < squares; i++)
-        { lower = lower * lower >> precision; upper = (upper * upper + scale - 1) >> precision; }
+        { lower = lower * lower >> precision; upper = (upper * upper + scaleMask) >> precision; }
         return new(new Fraction(lower, scale), new Fraction(upper, scale));
     }
 

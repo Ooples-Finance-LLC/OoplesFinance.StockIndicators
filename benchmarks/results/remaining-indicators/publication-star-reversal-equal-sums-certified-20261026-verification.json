@@ -1,0 +1,59 @@
+{
+  "input_head": "f2aa856ce4748235fda331e799a02fff84136aa0",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/StarReversalCandles.cs"
+  ],
+  "batch_note": "Bounded star-reversal optimization: reuse the existing exact long body sum for equal short periods. Original unequal-period updates and independent reference remain. Validate all five facades, lifecycle, numerical boundaries, long-history builder parity, GPU and inventory. Performance unqualified.",
+  "unit": {
+    "passed": 16,
+    "class_counts": {
+      "StarReversalSharedExecutionTests": 16
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\star-reversal-equal-sums\\unit\\unit.trx",
+    "sha256": "953eae66b26d0e923b46b93a75a2664c80fdfa9cde8134cacad58a2b904b8c14",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-star-reversal-equal-sums-certified-20261026-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 246,
+    "class_counts": {
+      "StarReversalTests": 84,
+      "GapContinuationTests": 91,
+      "SharedTaStarReversalBenchmarkTests": 61,
+      "SharedStarReversalBenchmarkTests": 10
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\star-reversal-equal-sums\\parity\\parity.trx",
+    "sha256": "301702c4bc477a901e522661ea0c0803db7327a73e1c6001a9b46a8342d2533c",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-star-reversal-equal-sums-certified-20261026-parity.trx.gz"
+  },
+  "resume_note": "Reused passing unit and parity TRX and unchanged build outputs; corrected 60 theory cases plus 1 metadata Fact.",
+  "step": "complete",
+  "updated_utc": "2026-10-26T12:47:35.512278+00:00",
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-star-reversal-equal-sums-20261026\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "de751b65eaf9b7e97b677ebddaaf76923ff87170a868d90dbc57b498a9cf1cfe",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-star-reversal-equal-sums-20261026\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "de751b65eaf9b7e97b677ebddaaf76923ff87170a868d90dbc57b498a9cf1cfe",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-star-reversal-equal-sums-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "de751b65eaf9b7e97b677ebddaaf76923ff87170a868d90dbc57b498a9cf1cfe",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-star-reversal-equal-sums-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "de751b65eaf9b7e97b677ebddaaf76923ff87170a868d90dbc57b498a9cf1cfe"
+  },
+  "source_fingerprint_sha256": "3583359e98016daca7d4de55f3207cd068a8e23de668166d444bfd7bd9c6a072",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Bounded star-reversal optimization: reuse the existing exact long body sum for equal short periods. Original unequal-period updates and independent reference remain. Validate all five facades, lifecycle, numerical boundaries, long-history builder parity, GPU and inventory. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

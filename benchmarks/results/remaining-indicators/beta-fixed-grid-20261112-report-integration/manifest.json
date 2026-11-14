@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "bad1878757c01b05785c49b68777bb7f5aa226bc7459ab5e297cfd701da96df3",
+    "archive": "benchmarks/results/remaining-indicators/beta-fixed-grid-20261112-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "6daf67e38b0dc1235bacb8107b7deed044c1aad4a3c2b45f1b4661c468cd7920",
+    "archive": "benchmarks/results/remaining-indicators/beta-fixed-grid-20261112-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "4e59648ca5adebaf6a8b428955b90dbdf33ad5abb83a98360a684790149e82a2",
+    "archive": "benchmarks/results/remaining-indicators/beta-fixed-grid-20261112-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "7ce7a6ab46f7b862c124fecb7ef313bc2b6a906312ea4ac6963f217507cdd501",
+    "archive": "benchmarks/results/remaining-indicators/beta-fixed-grid-20261112-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "94a815bc0b04e8fc9d0fa9ef0b4f78ec587124ba9407eafbfc064266ee10c8c6",
+    "archive": "benchmarks/results/remaining-indicators/beta-fixed-grid-20261112-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "8fb57c73dcc5e96ef6418323c6c16b7f085354633e859cc092e6285f5ae9275b",
+    "archive": "benchmarks/results/remaining-indicators/beta-fixed-grid-20261112-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "bbb1aa876726dcb14d6723b701dd3b587d142857cd5c56c6e28d845b1dd4e751",
+    "archive": "benchmarks/results/remaining-indicators/beta-fixed-grid-20261112-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "9ae3e8ffa319bc7086e4031416300ecad28f4b4f025e61a6319da6c9d560fe97",
+    "archive": "benchmarks/results/remaining-indicators/beta-fixed-grid-20261112-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "d3eb9f3464712a68a6c47ac5cec8d2e5a003e54dad82e150432b3d295e146861",
+    "archive": "benchmarks/results/remaining-indicators/beta-fixed-grid-20261112-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "c0681d1f0875b8cfd8e5ce4c3e848006672a5621f76b0453e272b6c3bb8e2070",
+    "archive": "benchmarks/results/remaining-indicators/beta-fixed-grid-20261112-report-integration/updated-pair-details.png.gz"
+  }
+}

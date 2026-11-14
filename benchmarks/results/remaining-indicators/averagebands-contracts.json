@@ -1,0 +1,39 @@
+{
+  "batch": "moving-average-bands-shared-execution",
+  "types": [
+    "MovingAverageBands",
+    "MovingAverageBandWidth"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse the exact EMA gap-deviation kernel for four bands and scalar width, with input-bounded history. Preserve staged rounding, seeded startup, output selection, finite multipliers, clamps, component/source fallback and ownership.",
+  "verification": {
+    "unit_passed": 192,
+    "fixture_passed": 8,
+    "discovery_passed": 121,
+    "gpu_passed": 100,
+    "contract_methods": 1460,
+    "hosted_methods": 1448,
+    "evidence": [
+      {
+        "file": "averagebands-unit.trx.gz",
+        "passed_cases": 192,
+        "trx_sha256": "30597e26b7055e354ba608dae5540089cca62a9d75a0c0322d52dcf41e83c143"
+      },
+      {
+        "file": "averagebands-fixture.trx.gz",
+        "passed_cases": 129,
+        "trx_sha256": "9ca31936725240587112359f6af77d3964dd8f510ccbcb629fe739e490ddba6a"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingMovingAverageBandBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "MovingAverageBands",
+      "MovingAverageBandWidth"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

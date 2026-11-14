@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "eac9fd5263a8b821e19cc7917624a6a937b4422d52b642f83e75a0a41eae38d7",
+    "archive": "benchmarks/results/remaining-indicators/tsi-private-word-ema-20261110-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "b63852ac62d747de989b53c273cf5da9e6fb909c93787889e531f98fb2f55a7d",
+    "archive": "benchmarks/results/remaining-indicators/tsi-private-word-ema-20261110-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "7fe89b55bb2aee86272eaf4be94afeb9ccc055545f26cead49ce6e7f84478282",
+    "archive": "benchmarks/results/remaining-indicators/tsi-private-word-ema-20261110-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "db6edc3f9b4851507e5a08789e2e8867a128454664e8dd172b2a2ab9a3d71c98",
+    "archive": "benchmarks/results/remaining-indicators/tsi-private-word-ema-20261110-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "c3bba3094fbba1ce6d73e6a9cf818d8be8a04c9498f722ffb806e380a2f57efe",
+    "archive": "benchmarks/results/remaining-indicators/tsi-private-word-ema-20261110-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "be55d1ce64e654fdf6369b25e2a59bbc64abb57e62a89de9998f71ecb07e269c",
+    "archive": "benchmarks/results/remaining-indicators/tsi-private-word-ema-20261110-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "16731a43a82413e67bddee3a962c9b88252d9f03c981a8f5f3cebd824dbaf62a",
+    "archive": "benchmarks/results/remaining-indicators/tsi-private-word-ema-20261110-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "ecf49b90cf1e350c448de7b567333005d418f376958b7f261ef58a82a5642916",
+    "archive": "benchmarks/results/remaining-indicators/tsi-private-word-ema-20261110-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "c58d4b182a56ffaaf21674042631ef49f30fdfc04cb9e7adca7980a586e128a2",
+    "archive": "benchmarks/results/remaining-indicators/tsi-private-word-ema-20261110-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "49a70ae8cbcbb4f63e570898bc7b9d693d9e0fca8ab2a263c7af2b9e9b999403",
+    "archive": "benchmarks/results/remaining-indicators/tsi-private-word-ema-20261110-report-integration/updated-pair-details.png.gz"
+  }
+}

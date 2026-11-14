@@ -1,0 +1,63 @@
+{
+  "input_head": "f378919e7477ec8d1a797cf8f44acf23fee47eec",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-comparator": "passed",
+    "build-unit": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reused_production_and_comparator_builds": "b614ba9f970b7cbdfdc488d7bb3cfa51c7b46c55",
+  "step": "complete",
+  "updated_utc": "2026-10-21T18:58:44.507261+00:00",
+  "unit": {
+    "passed": 197,
+    "class_counts": {
+      "SharedGeneratedFourOscillatorTests": 24,
+      "FourOscillatorNumericalTests": 76,
+      "PivotAverageNumericalTests": 48,
+      "SharedGeneratedPivotAverageTests": 20,
+      "SharedGeneratedStochasticMacdTests": 13,
+      "StochasticMacdNumericalTests": 12,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\pivot-three\\unit\\unit.trx",
+    "sha256": "9ae857e25fb65ffa66c2471fa76e159381beaece8983ae23b800c271b49bc36b",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-pivot-three-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 419,
+    "class_counts": {
+      "RemainingBenchmarkDiscoveryTests": 403,
+      "RemainingFourOscillatorBenchmarkTests": 8,
+      "RemainingPivotAverageBenchmarkTests": 4,
+      "RemainingStochasticMacdBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\pivot-three\\parity\\parity.trx",
+    "sha256": "bfd3129ccec73c11e25234ab1983b16a579e20f43e4c96092328b4cb956faff1",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-pivot-three-20261021-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-c-drive-recovery-followup-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7e177e59d9630b075d0de8b047fb09ab2d451299a85d053dbac6d70f2b7672da",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-c-drive-recovery-followup-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7e177e59d9630b075d0de8b047fb09ab2d451299a85d053dbac6d70f2b7672da",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-c-drive-recovery-followup-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7e177e59d9630b075d0de8b047fb09ab2d451299a85d053dbac6d70f2b7672da",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-c-drive-recovery-followup-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7e177e59d9630b075d0de8b047fb09ab2d451299a85d053dbac6d70f2b7672da"
+  },
+  "prior_head": "8e923e69b268125b4eabfcf638fea990f794644b",
+  "inventory_tests_passed": 6,
+  "upstream_master": "9e41a4617d8603d31f4ac57b1781e8d978e55947",
+  "dependency": "AiDotNet.Tensors 0.141.0",
+  "performance": "Pending; correctness does not establish competitor speed."
+}

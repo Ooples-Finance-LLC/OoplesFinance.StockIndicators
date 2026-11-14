@@ -1,0 +1,37 @@
+{
+  "batch": "generated-band-pass-filters",
+  "types": [
+    "EhlersBandPassFilterV1",
+    "EhlersBandPassFilterV2",
+    "EhlersCycleBandPassFilter",
+    "EhlersSuperPassbandFilter"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact clamped band-pass variants and Super Passband kernel through shared owned execution. Compute V1 value/signal and Super Passband line/RMS bands together. Preserve finite bandwidth extremes, nonfinite fallback, all four Super Passband period parameters, equal fast/slow periods, startup and staged rounding.",
+  "verification": {
+    "unit_passed": 295,
+    "fixture_passed": 16,
+    "discovery_passed": 43,
+    "gpu_passed": 100,
+    "contract_methods": 1378,
+    "hosted_methods": 1366,
+    "evidence": [
+      {
+        "file": "bandpass-unit.trx.gz",
+        "passed_cases": 295,
+        "trx_sha256": "dc43039d07538df1c50ad9e1929d4a7e9f5ae9ded67b66112e4269dbfa0b9a6b"
+      },
+      {
+        "file": "bandpass-fixture.trx.gz",
+        "passed_cases": 59,
+        "trx_sha256": "fc424e9704fc5f335fec7e92f40cf284f7b3f8b2700bc423e1d26d7e44f92202"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingBandPassBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

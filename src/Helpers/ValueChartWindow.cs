@@ -25,14 +25,14 @@ internal sealed class ValueChartWindow : IDisposable
 
     internal static Number Median(double high, double low) => (Number.Of(high) + Number.Of(low)).Divide(2);
 
-    private Number[] Coordinates(double open, double high, double low, double close, Number basis, bool final)
+    private (Number Close, Number Open, Number High, Number Low) Coordinates(double open, double high, double low, double close, Number basis, bool final)
     {
         var highest = final ? _high.Add(high, out _) : _high.Preview(high, out _);
         var lowest = final ? _low.Add(low, out _) : _low.Preview(low, out _);
         var range = Number.Of(highest) - Number.Of(lowest);
         var total = _rangeSum + range;
         Number Coordinate(double value) => total.Sign == 0 ? default : (Number.Of(value) - basis).Times(25).Divide(total);
-        var result = new[] { Coordinate(close), Coordinate(open), Coordinate(high), Coordinate(low) };
+        var result = (Coordinate(close), Coordinate(open), Coordinate(high), Coordinate(low));
         if (final)
         {
             // Retain four preceding ranges; the current one makes the fifth.
@@ -45,17 +45,26 @@ internal sealed class ValueChartWindow : IDisposable
     internal double[] Next(OhlcvBar bar, bool custom, bool final)
     {
         StreamingInputValidation.Validate(bar);
-        var input = custom ? Number.Of(bar.Close) : Median(bar.High, bar.Low);
-        var high = bar.High; var low = bar.Low;
+        var output = new double[4];
+        Next(bar.Open, bar.High, bar.Low, bar.Close, output, custom, final);
+        return output;
+    }
+
+    internal void Next(double open, double high, double low, double close, Span<double> output,
+        bool custom, bool final, bool adjustRange = true)
+    {
+        if (output.Length < 4) throw new ArgumentException("Four output slots are required.", nameof(output));
+        var input = custom ? Number.Of(close) : Median(high, low);
         var publishedInput = input.Publish();
-        if (!custom && !CalculationsHelper.IsWithinBarRange(publishedInput, low, high))
+        if (!custom && adjustRange && !CalculationsHelper.IsWithinBarRange(publishedInput, low, high))
         {
             var previous = _hasPrevious ? _previousInput : publishedInput;
             high = Math.Max(previous, publishedInput); low = Math.Min(previous, publishedInput);
         }
-        var result = Coordinates(bar.Open, high, low, bar.Close, _basis.Next(input, final), final);
+        var result = Coordinates(open, high, low, close, _basis.Next(input, final), final);
         if (final) { _previousInput = publishedInput; _hasPrevious = true; }
-        return result.Select(v => v.Publish()).ToArray();
+        output[0] = result.Close.Publish(); output[1] = result.Open.Publish();
+        output[2] = result.High.Publish(); output[3] = result.Low.Publish();
     }
 
     internal static (double[][] Outputs, Signal[] Trades) Calculate(StockData data, MovingAvgType kind, int length, bool includeTrades)
@@ -89,7 +98,8 @@ internal sealed class ValueChartWindow : IDisposable
         for (var i = 0; i < count; i++)
         {
             var point = window.Coordinates(data.OpenPrices[i], highs[i], lows[i], closes[i], basis[i], true);
-            for (var slot = 0; slot < 4; slot++) outputs[slot][i] = point[slot];
+            outputs[0][i] = point.Close; outputs[1][i] = point.Open;
+            outputs[2][i] = point.High; outputs[3][i] = point.Low;
         }
         var trades = new Signal[count];
         if (includeTrades)

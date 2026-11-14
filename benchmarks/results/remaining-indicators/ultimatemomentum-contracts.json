@@ -1,0 +1,37 @@
+{
+  "batch": "ultimate-momentum-shared-execution",
+  "types": [
+    "UltimateMomentumIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share unchanged exact UltimateMomentumWindow with all five periods, default SMA, finite deviation multiplier and existing typical-price helper; preserve nonfinite multiplier fallback, selected/custom source, startup and lifecycle.",
+  "verification": {
+    "unit_passed": 154,
+    "fixture_passed": 4,
+    "discovery_passed": 84,
+    "gpu_passed": 100,
+    "contract_methods": 1419,
+    "hosted_methods": 1407,
+    "evidence": [
+      {
+        "file": "ultimatemomentum-unit.trx.gz",
+        "passed_cases": 154,
+        "trx_sha256": "2008f6f421edbecabf844f0ebbb209b19b0fd3ab32373ab65274e99bfd34b944"
+      },
+      {
+        "file": "ultimatemomentum-fixture.trx.gz",
+        "passed_cases": 88,
+        "trx_sha256": "b34584fe212eb389dac0d9f1527b827fcd3d516686a7ccb934e8d5c3e50cab27"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingUltimateMomentumBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "UltimateMomentumIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

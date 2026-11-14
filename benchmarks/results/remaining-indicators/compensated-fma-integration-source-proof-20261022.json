@@ -1,0 +1,34 @@
+{
+  "qualified_commit": "eb9d6058b009f526ecd9c89c1b76eaee9e1fcadc",
+  "qualified_code": "1b71a3f065591b4cc649565f850b544cf34b2cff",
+  "matched_paths": [
+    "src",
+    "tests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "88934b2f1be637c6b1c504f674031bc94a93a98bff249a85573471d7988207b6",
+  "qualification_reused": {
+    "builds": 4,
+    "unit": 16,
+    "parity": 21,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compensated-fma-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "5ba43927aace18afdbab83217d4332b578cb5b536f3580cf3abf648ba4939911",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compensated-fma-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "5ba43927aace18afdbab83217d4332b578cb5b536f3580cf3abf648ba4939911",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compensated-fma-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "5ba43927aace18afdbab83217d4332b578cb5b536f3580cf3abf648ba4939911",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compensated-fma-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "5ba43927aace18afdbab83217d4332b578cb5b536f3580cf3abf648ba4939911"
+  },
+  "control": "local-compensated-fma-control-20261022",
+  "note": "Integrated executable sources and build inputs exactly match qualified candidate. Publishing checkout binaries remain older; preserved candidate binaries supplied the new measurement arm."
+}

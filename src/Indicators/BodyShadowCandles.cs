@@ -190,7 +190,24 @@ internal enum BodyShadowCandleKind { Marubozu, ClosingMarubozu, BeltHold, Spinni
 
 internal sealed class BodyShadowCandleState(int period, BodyShadowCandleKind kind) : IIndicatorState
 {
-    private readonly Queue<Bar> _history = new();
+    private readonly struct RetainedBar
+    {
+        // Certified entries store body/other; fallback entries store open/close.
+        // Only historical price arithmetic reads this payload, never time/volume.
+        internal readonly double BodyOrOpen, OtherOrClose, High, Low;
+        internal readonly bool Certified;
+
+        internal RetainedBar(in Bar bar, double body, double other, bool certified)
+        {
+            BodyOrOpen = certified ? body : bar.Open;
+            OtherOrClose = certified ? other : bar.Close;
+            High = certified ? 0 : bar.High;
+            Low = certified ? 0 : bar.Low;
+            Certified = certified;
+        }
+    }
+
+    private readonly Queue<RetainedBar> _history = new();
     private readonly BigInteger _period = new(period);
     private readonly BigInteger _twicePeriod = new BigInteger(period) * 2;
     private readonly BigInteger _tenPeriod = new BigInteger(period) * 10;
@@ -203,10 +220,45 @@ internal sealed class BodyShadowCandleState(int period, BodyShadowCandleKind kin
     {
         var result = 0d;
         if (_history.Count == period && Matches(bar)) result = bar.Close >= bar.Open ? 100 : -100;
-        _history.Enqueue(bar);
-        Accumulate(bar, 1);
+        var retained = Retain(bar);
+        _history.Enqueue(retained);
+        Accumulate(retained, 1);
         if (_history.Count > period) Accumulate(_history.Dequeue(), -1);
         return result;
+    }
+
+    private RetainedBar Retain(in Bar bar)
+    {
+        double body = 0, other = 0;
+        bool certified = false;
+#if !NETFRAMEWORK
+        var top = Math.Max(bar.Open, bar.Close);
+        var bottom = Math.Min(bar.Open, bar.Close);
+        certified = Binary64ArithmeticCertificate.TryDifference(top, bottom, out body);
+        if (certified && kind is BodyShadowCandleKind.Marubozu or BodyShadowCandleKind.ClosingMarubozu or BodyShadowCandleKind.BeltHold)
+            certified = Binary64ArithmeticCertificate.TryDifference(bar.High, bar.Low, out other);
+        else if (certified && kind is BodyShadowCandleKind.LongLine or BodyShadowCandleKind.ShortLine)
+            certified = Binary64ArithmeticCertificate.TryDifference(bar.High, bar.Low, out var range)
+                && Binary64ArithmeticCertificate.TryDifference(range, body, out other);
+#endif
+        return new(bar, body, other, certified);
+    }
+
+    private void Accumulate(in RetainedBar retained, int direction)
+    {
+        // Reconstruct the original price bits for uncertified differences,
+        // retaining the original arithmetic and enqueue/throw order.
+        if (!retained.Certified)
+        {
+            var original = new Bar(default, retained.BodyOrOpen, retained.High, retained.Low, retained.OtherOrClose, 0);
+            Accumulate(original, direction);
+            return;
+        }
+        _bodySum.Add(retained.BodyOrOpen, direction);
+        if (kind is BodyShadowCandleKind.Marubozu or BodyShadowCandleKind.ClosingMarubozu or BodyShadowCandleKind.BeltHold)
+            _rangeSum.Add(retained.OtherOrClose, direction);
+        else if (kind is BodyShadowCandleKind.LongLine or BodyShadowCandleKind.ShortLine)
+            _shadowSum.Add(retained.OtherOrClose, direction);
     }
 
     private void Accumulate(in Bar bar, int direction)

@@ -502,6 +502,7 @@ public sealed class GuppyMultipleMovingAverageState : IStreamingIndicatorState, 
     private readonly IMovingAverageSmoother _ema70;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly ExactPartialMeanWindow _oscRawSum;
+    private bool _invalidSignal;
     private readonly StreamingInputResolver _input;
     private readonly int _smoothLength;
 
@@ -579,6 +580,7 @@ public sealed class GuppyMultipleMovingAverageState : IStreamingIndicatorState, 
         _ema70.Reset();
         _signalSmoother.Reset();
         _oscRawSum.Reset();
+        _invalidSignal = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -615,8 +617,12 @@ public sealed class GuppyMultipleMovingAverageState : IStreamingIndicatorState, 
         var superGmmaFast = GuppyRibbonArithmetic.Mean(stackalloc double[] { emaF1, emaF2, emaF3, emaF4, emaF5, emaF6, emaF7, emaF8, emaF9, emaF10, emaF11 });
         var superGmmaSlow = GuppyRibbonArithmetic.Mean(stackalloc double[] { emaS1, emaS2, emaS3, emaS4, emaS5, emaS6, emaS7, emaS8, emaS9, emaS10, emaS11, emaS12, emaS13, emaS14, emaS15, emaS16 });
         var superGmmaOscRaw = GuppyRibbonArithmetic.Percent(superGmmaFast, superGmmaSlow);
-        var superGmmaOsc = _oscRawSum.Next(superGmmaOscRaw, isFinal);
-        var signal = _signalSmoother.Next(superGmmaOscRaw, isFinal);
+        var finite = FrameworkCompatibility.IsFinite(superGmmaOscRaw);
+        var invalidSignal = _invalidSignal || !finite;
+        var superGmmaOsc = finite || _smoothLength > 1
+            ? _oscRawSum.Next(superGmmaOscRaw, isFinal) : superGmmaOscRaw;
+        var signal = invalidSignal ? double.NaN : _signalSmoother.Next(superGmmaOscRaw, isFinal);
+        if (isFinal) _invalidSignal = invalidSignal;
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

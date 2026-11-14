@@ -35,9 +35,29 @@ jobs:
         with:
           # commitlint needs the full base..head range, which a shallow clone does not contain.
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+
+      - name: Install pinned commitlint
+        run: |
+          npm install --prefix "$RUNNER_TEMP/commitlint" --no-package-lock --ignore-scripts --no-audit --no-fund @commitlint/cli@19.8.1 @commitlint/config-conventional@19.8.1
+          cp commitlint.config.mjs "$RUNNER_TEMP/commitlint/commitlint.config.mjs"
+
+      - name: Verify full-range lint behavior
+        run: >-
+          python3 .github/scripts/test_commitlint_range.py
+          --cli "$RUNNER_TEMP/commitlint/node_modules/@commitlint/cli/cli.js"
+          --config "$RUNNER_TEMP/commitlint/commitlint.config.mjs"
 
       - name: Lint commits
-        uses: wagoid/commitlint-github-action@b948419dd99f3fd78a6548d48f94e3df7f6bf3ed # v6
-        # No commitDepth: it does NOT mean "the newest N commits". It lints a window from the far
-        # end of the PR range, which on a long-lived branch checks only ancient commits and none of
-        # the ones under review. The default (the PR's full base..head range) is the correct scope.
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git fetch --no-tags origin "$PR_BASE" "$PR_HEAD"
+          echo "Linting $(git rev-list --count "$PR_BASE..$PR_HEAD") commits in the complete PR range"
+          node "$RUNNER_TEMP/commitlint/node_modules/@commitlint/cli/cli.js" --config "$RUNNER_TEMP/commitlint/commitlint.config.mjs" --from "$PR_BASE" --to "$PR_HEAD" --verbose

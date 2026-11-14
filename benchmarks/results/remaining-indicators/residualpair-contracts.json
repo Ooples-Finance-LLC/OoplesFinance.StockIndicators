@@ -1,0 +1,57 @@
+{
+  "batch": "mean-error-ergodic-residual-shared-execution",
+  "types": [
+    "StandardErrorCore",
+    "ErgodicMeanDeviationIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Use exact population mean-error and wide residual smoothing kernels in shared execution; compute Ergodic value/signal together, avoid allocating unfillable mean-error windows and preserve original fields, period clamping, component/source fallback and ownership.",
+  "verification": {
+    "unit_passed": 36,
+    "fixture_passed": 8,
+    "discovery_passed": 149,
+    "gpu_passed": 100,
+    "contract_methods": 1488,
+    "hosted_methods": 1476,
+    "evidence": [
+      {
+        "file": "residualpair-unit.trx.gz",
+        "passed_cases": 36,
+        "trx_sha256": "8c21b2f176f64a22d7fe89a84141b83f613ef952cea949ec6a3174322aac31d2"
+      },
+      {
+        "file": "residualpair-fixture.trx.gz",
+        "passed_cases": 157,
+        "trx_sha256": "74b87cf3446de232d35e24ec13959ed42c6cc6c2c0529d1b87f9a1ea87d63f08"
+      }
+    ],
+    "integration": {
+      "base": "3007ebbf",
+      "integrated_candidate": "d7229fb8",
+      "evidence": [
+        {
+          "file": "deviation-residual-integration-unit.trx.gz",
+          "passed_cases": 46,
+          "trx_sha256": "a4f7caf19477aab6c1a837761dbd3f013183997d1824c5310004382c59f892e5"
+        },
+        {
+          "file": "deviation-residual-integration-fixture.trx.gz",
+          "passed_cases": 170,
+          "trx_sha256": "95edbb9792e379451717baac4f6d8519eab529a1521b3b00b4a9c3753d108b5a"
+        }
+      ],
+      "gpu_source_sha256": "cba95604d2b38ebe48bab2b6a9bb23adf0df31486b955170064916fb11c8ad60",
+      "interpretation": "Integrated residual states match the preserved candidate exactly. Prior Ehlers states and domain validation remain unchanged. Added cross-batch mixed-root coverage and revalidated 46 focused unit cases, 20 parity cases, 150 discovery cases and 100 GPU cases. Unchanged independent numerical cases retain their original archived evidence."
+    }
+  },
+  "benchmark_fixture": {
+    "type": "RemainingResidualPairBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "StandardErrorOfTheMean",
+      "ErgodicMeanDeviationIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

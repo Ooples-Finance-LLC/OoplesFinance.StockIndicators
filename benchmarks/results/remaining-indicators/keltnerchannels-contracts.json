@@ -1,0 +1,39 @@
+{
+  "batch": "keltner-channels-shared-execution",
+  "types": [
+    "KeltnerChannels",
+    "KeltnerChannelMiddle"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact KeltnerWindow for all three channel outputs and shared EMA for the middle alias. Preserve EMA/Wilder stage order, independent facade clamps, finite multiplier boundaries, invalid-multiplier fallback, original fields, ownership and component/source fallback.",
+  "verification": {
+    "unit_passed": 152,
+    "fixture_passed": 8,
+    "discovery_passed": 113,
+    "gpu_passed": 100,
+    "contract_methods": 1452,
+    "hosted_methods": 1440,
+    "evidence": [
+      {
+        "file": "keltnerchannels-unit.trx.gz",
+        "passed_cases": 152,
+        "trx_sha256": "b66d1f6d598300d6d3da858ce18cde2b0292fc7894a1da6c39797b16b6a05170"
+      },
+      {
+        "file": "keltnerchannels-fixture.trx.gz",
+        "passed_cases": 121,
+        "trx_sha256": "c14c116a2b198cb78afe9a8d2b3b8b43dbd2ab720c216436ee8547ea76735370"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingKeltnerChannelBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "KeltnerChannels",
+      "KeltnerChannelMiddle"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

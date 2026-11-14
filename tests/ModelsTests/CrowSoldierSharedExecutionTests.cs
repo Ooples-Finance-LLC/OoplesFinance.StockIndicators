@@ -97,6 +97,27 @@ public sealed class CrowSoldierSharedExecutionTests
         }
     }
 
+    [Fact]
+    public void EqualAndUnequalRangesReplayAfterResetAgainstIndependentReference()
+    {
+        foreach (int kind in new[] { 0, 1, 2 })
+        foreach (var (period, near, far) in new[] { (10, 5, 5), (3, 3, 3), (3, 1, 1), (3, 5, 7), (3, 7, 5) })
+        {
+            var owner = Create(kind, period, near, far);
+            var state = (IIndicatorState)owner.CreateState();
+            var bars = Data(513, kind);
+            for (int i = 124; i < bars.Length; i += 125)
+                bars[i] = new(bars[i].Time, double.Epsilon, double.MaxValue, -double.MaxValue, -double.Epsilon, i);
+            var first = bars.Select(b => state.Update(b)).ToArray();
+            foreach (var rule in ((IIndicatorValidationContract)owner).ValidationRules)
+                rule.Check(new IndicatorValidationContext("CrowSoldier reset reference", bars, [first], 0));
+            state.Reset();
+            Assert.Equal(first, bars.Select(b => state.Update(b)).ToArray());
+            state.Reset();
+            Assert.Equal(0d, state.Update(bars[0]));
+        }
+    }
+
     private static async Task CheckReference(Bar[] bars, IndicatorBase owner)
     {
         var state = (IIndicatorState)owner.CreateState();

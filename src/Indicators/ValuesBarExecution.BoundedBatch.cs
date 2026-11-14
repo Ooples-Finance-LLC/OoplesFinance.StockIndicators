@@ -46,6 +46,7 @@ internal static partial class ValuesBarExecution
         _ when HikkakeWindow(indicator) > 0 => HikkakeWindow(indicator),
         _ when DelayedCloudWindow(indicator) > 0 => DelayedCloudWindow(indicator),
         _ when TasukiWindow(indicator) > 0 => TasukiWindow(indicator),
+        _ when RangeDojiWindow(indicator) > 0 => RangeDojiWindow(indicator),
         _ => throw new InvalidOperationException("Unqualified bounded-window batch.")
     };
 
@@ -120,6 +121,7 @@ internal static partial class ValuesBarExecution
             (PercentileCandleState)((IndicatorBase)indicator).CreateState()!,
         _ when WeightedWindowPeriod(indicator) > 0 =>
             (IIndicatorState)((IndicatorBase)indicator).CreateState()!,
+        _ when RangeDojiWindow(indicator) > 0 => (AverageRangeDojiState)((IndicatorBase)indicator).CreateState()!,
         _ => throw new InvalidOperationException("Unqualified bounded-window batch.")
     };
 

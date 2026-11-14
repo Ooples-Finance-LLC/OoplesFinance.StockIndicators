@@ -1,0 +1,39 @@
+{
+  "master_commit": "3eb1bfc358d916c62f6089266e7f660afc38e1f8",
+  "approved_paths": [
+    "src/OoplesFinance.StockIndicators.csproj"
+  ],
+  "changes": {
+    "AiDotNet.Tensors": [
+      "0.149.0",
+      "0.150.0"
+    ],
+    "net461 System.Text.Json": [
+      "10.0.14",
+      "11.0.0"
+    ]
+  },
+  "tensor_release_commits": [
+    "7a7beabf00db7e780f93e470fd148741f891433a",
+    "c76e17f4bd9eecd5704f372c1cf3c7290e2452ce"
+  ],
+  "transitive_dependency_declarations_equal": true,
+  "captured_cpu_parallel_settings_unchanged": true,
+  "source_algorithms_changed": false,
+  "additional_dependency_qualification_required": false,
+  "reason": "The captured CPU hot paths use unchanged CpuParallelSettings and repository arithmetic/System.Math. Engine/GPU changes are covered by fresh baseline/frozen-variant correctness and actual GPU100. No0.150 performance claim is inferred; historical0.149 timings remain unchanged.",
+  "legacy_build": {
+    "run_id": "43106175412",
+    "source": "5a9d80f52faa59abca68522ecd5e55f29b85ceba",
+    "workflow_head": "acca7eccc1e4143481cf7945969016f1387c9fe7",
+    "framework": "net461",
+    "project_sha256": "220dde08e10fbd067c46a40970e1a932bcc9a97cca17e60ec9d60855481f501c",
+    "result": "passed",
+    "project_hash_policy": "UTF-8 text, BOM removed and CRLF normalized, matching PowerShell Get-Content",
+    "project_bytes_sha256": "497ebefdff8d31824d54fd29c47b5c8c0e3377406615713a55067a98b19de92a",
+    "log_sha256": "69b8ea5b6e0ec5e405fb530a7dd6e52c52d914f34afdd9ea9895792c75110cc3",
+    "target_support_warning": "System.Text.Json 11.0.0 reports net461 is unsupported; build succeeds. Prior 10.0.14 declares the same target limitation.",
+    "limitation": "Legacy build verified; no legacy runtime tests claimed."
+  },
+  "excluded_master_test_only_update": "Microsoft.NET.Test.Sdk18.11.0->18.11.1 in unit test project is outside the GPU fingerprint and this production-dependency change; normal merged publication CI will exercise it."
+}

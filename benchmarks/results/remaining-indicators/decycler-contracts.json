@@ -1,0 +1,37 @@
+{
+  "batch": "generated-decycler-filters",
+  "types": [
+    "EhlersDecycler",
+    "EhlersHighPassFilterV1",
+    "EhlersLeadingIndicator",
+    "EhlersSimpleDecycler"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing exact decycler, high-pass and leading kernels through shared owned execution; compute all three simple-decycler bands in one pass while preserving output order, fixed parameters, startup and checked warmup.",
+  "verification": {
+    "unit_passed": 212,
+    "fixture_passed": 16,
+    "discovery_passed": 39,
+    "gpu_passed": 100,
+    "contract_methods": 1374,
+    "hosted_methods": 1362,
+    "evidence": [
+      {
+        "file": "decycler-unit.trx.gz",
+        "passed_cases": 212,
+        "trx_sha256": "84e0e59c39913c36bf8cfd8afaac8dc37c6440f2379c858414105e7429878c69"
+      },
+      {
+        "file": "decycler-fixture.trx.gz",
+        "passed_cases": 55,
+        "trx_sha256": "3be50e4c445feaef9c3dd3ed381361c159355c7fd6cfa9cebb09344e9ead0263"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingDecyclerBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

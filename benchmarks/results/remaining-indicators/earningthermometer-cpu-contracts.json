@@ -1,0 +1,38 @@
+{
+  "batch": "earningthermometer-shared-execution",
+  "types": [
+    "EarningSupportResistanceLevels",
+    "ElderMarketThermometer"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 21,
+    "parity_passed": 8,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "earningthermometer-unit-verified.trx.gz",
+        "passed_cases": 21,
+        "trx_sha256": "0cf4e03ab420061eeace642a43480c2f6b2eaf1f1d3c9a63068a86a1ec201d28"
+      },
+      {
+        "file": "earningthermometer-parity-verified.trx.gz",
+        "passed_cases": 8,
+        "trx_sha256": "8eac3f71848400018c8348bf999aa04cde2ff8c664b78fe5cb41b9dab3fa3b62"
+      }
+    ],
+    "context": "Executed in the 14-facade third-stage working candidate with inherited unresolved MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "6f322184dccc472f8e1a3c6f304af1643602d5ab2bc48f7309f3a191cb50078d",
+    "test_execution_input_sha256": {
+      "unit": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696",
+      "parity": "2c12a798f6bb0c167aa58d3efacb6c6954df244051a2a6a2049bdd18a4e45696"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "9709e6b7d82fd46f40e9527c65cafd2f48cbc47a"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

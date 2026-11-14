@@ -1,0 +1,41 @@
+{
+  "batch": "trend-window-shared-execution",
+  "types": [
+    "TrendContinuationFactor",
+    "TrendTriggerFactor",
+    "TrendIntensityIndex"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share existing exact continuation, trigger and intensity kernels. Preserve continuation plus/minus order, original candle inputs, and default SMA intensity slow period60. Rent the raw intensity mean buffer only for custom averages without changing callbacks.",
+  "verification": {
+    "unit_passed": 134,
+    "fixture_passed": 12,
+    "discovery_passed": 78,
+    "gpu_passed": 100,
+    "contract_methods": 1413,
+    "hosted_methods": 1401,
+    "evidence": [
+      {
+        "file": "trendwindow-unit.trx.gz",
+        "passed_cases": 134,
+        "trx_sha256": "9192999899d77450ce2a162ab29bff8607444ea04e84a5933cc22796ea60597d"
+      },
+      {
+        "file": "trendwindow-fixture.trx.gz",
+        "passed_cases": 90,
+        "trx_sha256": "f7e715075329544c4b8ce23794d6f9a786c4de2aee2922a8c14a903fb63fe55b"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingTrendWindowBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "TrendContinuationFactor",
+      "TrendTriggerFactor",
+      "TrendIntensityIndex"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

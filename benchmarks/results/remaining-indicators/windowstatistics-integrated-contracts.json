@@ -1,0 +1,35 @@
+{
+  "types": [
+    "Skewness",
+    "PercentRank",
+    "MedianValue",
+    "MedianMa"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "39713a6b430a4ee0886980e24235dabb8ecdfaf3",
+  "combined_input_sha256": "736bc0ac14a3462caf006b60d59ae078b02f7d4ed87b38542ea1dbb9d4fade45",
+  "benchmark_fixture": {
+    "type": "RemainingWindowStatisticsBenchmarks",
+    "operations": [
+      "Skewness",
+      "PercentRank",
+      "MedianValue",
+      "MedianMa"
+    ]
+  },
+  "checks": {
+    "unit": 63,
+    "parity": 16,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/windowstatistics-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/windowstatistics-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

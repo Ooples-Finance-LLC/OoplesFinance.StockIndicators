@@ -1,0 +1,64 @@
+{
+  "before_sha256": "d6128eee0b4df8fcad9de58a04a04697263bdcbe186fad3209844e32330c36b4",
+  "candidate_sha256": "bd87950daafaa1e4643d90930fa63eaede3d426ff11018eac48eb4bcdc1dc0ce",
+  "changed_baseline_rows": 72,
+  "unchanged_baseline_rows": 730,
+  "changed_builder_slots": 132,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 132,
+  "verdicts": {
+    "faster": 602,
+    "slower": 886,
+    "inconclusive": 48
+  },
+  "unchanged_rows": 730,
+  "run_id": "local-consolidated-followups-control-20261030",
+  "imported_utc": "2026-11-01T12:36:50.730534+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "417beeee69bf2a60b49a6bdf9e95c173efdf27a9be3d4321287c6473fbad3829",
+      "archive": "benchmarks/results/remaining-indicators/consolidated-certified-local-consolidated-followups-control-20261030-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "3cf4d1ba99de682f01b6e027838ac58f7c8acbbaecb46c78e18310028c981fbb",
+      "archive": "benchmarks/results/remaining-indicators/consolidated-certified-local-consolidated-followups-control-20261030-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "82304f2c2d1ce9f76e56b2c5145a3314382532323775ca18b0f26d8929afaa5b",
+      "archive": "benchmarks/results/remaining-indicators/consolidated-certified-local-consolidated-followups-control-20261030-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "ad4a14711d6f449564ed2bfc2e84d0e6690a91544b609544084eb4b9f300469a",
+      "archive": "benchmarks/results/remaining-indicators/consolidated-certified-local-consolidated-followups-control-20261030-measurement.json.gz"
+    },
+    "consolidated_acceptance.py": {
+      "sha256": "d77c42abc37f3859bf3b7d2dbdd64d2bab0435678e36b2ff7ed16e18a78b2753",
+      "archive": "benchmarks/results/remaining-indicators/consolidated-certified-local-consolidated-followups-control-20261030-consolidated_acceptance.py.gz"
+    },
+    "stage-consolidated-report-20261030.py": {
+      "sha256": "b88766780ba931b1d6035952a00abfbd6440e1e9501dc053bf634cd21e559f92",
+      "archive": "benchmarks/results/remaining-indicators/consolidated-certified-local-consolidated-followups-control-20261030-stage-consolidated-report-20261030.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/consolidated-certified-local-consolidated-followups-control-20261030-verify-approved-certified-report.py.gz"
+    },
+    "import-consolidated-report-20261030.py": {
+      "sha256": "d0d79e1d50f9c1032e4a30d87b7fe156dccd8859bc2c9ced2f925ec19877c4c6",
+      "archive": "benchmarks/results/remaining-indicators/consolidated-certified-local-consolidated-followups-control-20261030-import-consolidated-report-20261030.py.gz"
+    },
+    "archive-consolidated-control-20261030.py": {
+      "sha256": "89e61724fed62f57b2d78cde4092aef7c94f179759b6a9dc886a30bf657c429c",
+      "archive": "benchmarks/results/remaining-indicators/consolidated-certified-local-consolidated-followups-control-20261030-archive-consolidated-control-20261030.py.gz"
+    },
+    "prove-consolidated-integration-20261030.py": {
+      "sha256": "8714d15979269af7f21926a9ab8b75f2d369adc1ce9d292e249473374d59e56e",
+      "archive": "benchmarks/results/remaining-indicators/consolidated-certified-local-consolidated-followups-control-20261030-prove-consolidated-integration-20261030.py.gz"
+    },
+    "archive-consolidated-report-20261030.py": {
+      "sha256": "93936cff4d441e2bfc69974796e0689a903c70df73cc780258b0b33eb782e27f",
+      "archive": "benchmarks/results/remaining-indicators/consolidated-certified-local-consolidated-followups-control-20261030-archive-consolidated-report-20261030.py.gz"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "batch": "generated-volume-oscillators",
+  "types": [
+    "Pvo",
+    "PercentageVolumeOscillator",
+    "VolumeOscillator",
+    "PriceVolumeOscillator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse rounded EMA gap/signal states on volume for PVO facades, exact rounded SMA windows for VolumeOscillator, and independent lagged-balance windows for price and volume. Preserve the fixed14 volume lag and avoid allocating windows whose startup cannot finish in the owned input.",
+  "verification": {
+    "unit_passed": 40,
+    "fixture_passed": 16,
+    "discovery_passed": 27,
+    "gpu_passed": 100,
+    "contract_methods": 1362,
+    "hosted_methods": 1350,
+    "evidence": [
+      {
+        "file": "volumeoscillator-unit.trx.gz",
+        "passed_cases": 40,
+        "trx_sha256": "a3ee2e00fce311f6f2ae53e6497ed91660859afee0b8428f1fe18641c5861665"
+      },
+      {
+        "file": "volumeoscillator-fixture.trx.gz",
+        "passed_cases": 43,
+        "trx_sha256": "bbedcef9b6583ec1fff0003a5f1a6b20b3b9a07ba8904ad3e32f629feb0022ee"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVolumeOscillatorBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

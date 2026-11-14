@@ -1,0 +1,22 @@
+{
+  "source_integration_commit": "12e9d321903536019c7fa2612461d9027a5af951",
+  "qualified_source": "a8263bee96941063e2a13dbf9868438cbe4ea14f",
+  "compiled_source": "c4e569986ec392606880144ed194ff112858a24a",
+  "source_fingerprint": "0d5a3a0a01f8e6847a0e06e876c1bca8504aafba31aa649a46fd5dad1cbbed04",
+  "unit": 15,
+  "comparator": 211,
+  "actual_gpu": 100,
+  "production_sha256": "c1598ddd95db48f87b0ad8294c9dbbaf3bede420d9e32c4312629c81cbede009",
+  "run_id": "42438691791",
+  "cases": 240,
+  "decisions": 48,
+  "verdicts": {
+    "inconclusive": 31,
+    "faster": 17
+  },
+  "integrated_paths": [
+    "src/Indicators/BodyShadowCandles.cs",
+    "tests/ModelsTests/RetainedBodyShadowTests.cs"
+  ],
+  "verified_utc": "2026-11-08T03:36:38.056736+00:00"
+}

@@ -1,0 +1,60 @@
+{
+  "input_head": "cb8ec3d68b275a4af22a524733cbe46513daf745",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedMeanRelativeError.cs",
+    "tests/ModelsTests/MeanDiagnosticsWordCountTests.cs"
+  ],
+  "batch_note": "Approved SMA diagnostics count refinement: counts <=2048 use exact machine-word division with discarded-bit and nearest-even rounding; original wide-count, subnormal and overflow fallback retained. Two independent rational boundary and midpoint tests plus affected SMA/AvgDev lifecycle, parity, GPU and inventory checks. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-29T11:20:14.726959+00:00",
+  "unit": {
+    "passed": 51,
+    "class_counts": {
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "RollingStatisticsSharedExecutionTests": 17,
+      "MeanDiagnosticsCertifiedTests": 26,
+      "MeanDiagnosticsScaleReductionTests": 2,
+      "MeanDiagnosticsWordCountTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-word-count\\unit\\unit.trx",
+    "sha256": "56c98366caefc3b82cea746a27421cafbe34aaa78a9928bf70ddc06bd1128bf1",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-word-count-certified-20261028-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 4,
+    "class_counts": {
+      "SharedRollingStatisticsBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-word-count\\parity\\parity.trx",
+    "sha256": "93dd6d4e3939fffb124af34b4172455f345f59e6c422d61f17d1594792e6aaef",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-word-count-certified-20261028-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-word-count-20261028\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2b18cfada0aa17c8d3d137e37a468b87b49f2acdfd3c4ba00626d8a6831e7b76",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-word-count-20261028\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2b18cfada0aa17c8d3d137e37a468b87b49f2acdfd3c4ba00626d8a6831e7b76",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-word-count-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2b18cfada0aa17c8d3d137e37a468b87b49f2acdfd3c4ba00626d8a6831e7b76",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-word-count-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2b18cfada0aa17c8d3d137e37a468b87b49f2acdfd3c4ba00626d8a6831e7b76"
+  },
+  "source_fingerprint_sha256": "eae6382f690ee675b18a0bfb8164fc4de6c505e42921046ae3c91112cd041c1d",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved SMA diagnostics count refinement: counts <=2048 use exact machine-word division with discarded-bit and nearest-even rounding; original wide-count, subnormal and overflow fallback retained. Two independent rational boundary and midpoint tests plus affected SMA/AvgDev lifecycle, parity, GPU and inventory checks. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

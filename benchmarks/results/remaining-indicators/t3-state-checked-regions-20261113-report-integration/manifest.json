@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "308536840c09761a08e751ab88ca1be160dd50a29455225c61599fc1af273bd8",
+    "archive": "benchmarks/results/remaining-indicators/t3-state-checked-regions-20261113-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "720ab7d24038f20506402779f1d5caea0612fe1d1f1df8ae9b297755cdb9e4d5",
+    "archive": "benchmarks/results/remaining-indicators/t3-state-checked-regions-20261113-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "c84d9ed9b12bbe47465cdc4a3b250b166a5f8dff5f31fce07484db3dbb0b4ac8",
+    "archive": "benchmarks/results/remaining-indicators/t3-state-checked-regions-20261113-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "fe7248780365eecefe7fb69f14d603d00ab5d961b2f4ee7aeb92e5da8330f9ad",
+    "archive": "benchmarks/results/remaining-indicators/t3-state-checked-regions-20261113-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "1d0579c3570b39e62294ddee55ab118dda60a2d9c3a0ce53c0e997f31eb96ddb",
+    "archive": "benchmarks/results/remaining-indicators/t3-state-checked-regions-20261113-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "44803a340d500a84d5d694c876b394e46a4d327670814c5c39ea5e5788c69560",
+    "archive": "benchmarks/results/remaining-indicators/t3-state-checked-regions-20261113-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "c88da1b090c0b410dea5f7335cb20d7f7141d87e018745cfb2fa5d1cdf574bb5",
+    "archive": "benchmarks/results/remaining-indicators/t3-state-checked-regions-20261113-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "ceb3a37289b4f2f8b35fbd955228a6333e7fd0c806b80abc06be47aeb903aec0",
+    "archive": "benchmarks/results/remaining-indicators/t3-state-checked-regions-20261113-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "f5d2469c5a9d2da770774b264e22e52ec0a8bc9765a83a2ecb9b31324552c43e",
+    "archive": "benchmarks/results/remaining-indicators/t3-state-checked-regions-20261113-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "ae8ec40085c32102a23f8b629c171ae841edd062fae8c0707a7da0dfbc5ab1d0",
+    "archive": "benchmarks/results/remaining-indicators/t3-state-checked-regions-20261113-report-integration/updated-pair-details.png.gz"
+  }
+}

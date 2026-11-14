@@ -1,0 +1,40 @@
+{
+  "batch": "generated-oscillator-aliases",
+  "types": [
+    "AbsolutePriceOscillator",
+    "PriceOscillator",
+    "PriceOscillatorPercent",
+    "PercentagePriceOscillator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse APO/PPO shared EMA states for independently verified facade aliases, retaining three PPO outputs and custom-component fallback.",
+  "verification": {
+    "production_build": "Release net10.0; zero warnings/errors",
+    "unit_passed": 39,
+    "fixture_passed": 16,
+    "discovery_passed": 22,
+    "gpu_passed": 100,
+    "gpu_source_sha256": "28f32e6e4f984e224955550bc20deefbae944a85d0b47b305943a259921c6cd2",
+    "contract_methods": 1357,
+    "hosted_methods": 1345,
+    "evidence": [
+      {
+        "file": "oscillatoralias-unit.trx.gz",
+        "passed_cases": 39,
+        "trx_sha256": "2aa3530718678059d52cde16a5be0b93dae77d139b5b52363fd79b51cd2f706e"
+      },
+      {
+        "file": "oscillatoralias-fixture.trx.gz",
+        "passed_cases": 38,
+        "trx_sha256": "693b00c14bf5fe18bcf061b44fd703dfa9e499bcab2e9c6128d5118cb723690b"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingOscillatorAliasBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun.",
+  "gpu_retry": "Initial run aborted after47passes with testhostcrash, no failed assertions. Complete retry required; local recorder now retains failure diagnostics. Crash cause unproven."
+}

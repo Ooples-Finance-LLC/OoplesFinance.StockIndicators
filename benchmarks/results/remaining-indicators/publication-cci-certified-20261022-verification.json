@@ -1,0 +1,60 @@
+{
+  "input_head": "c0242e57d4ed91090b8b60ce82e40d0b98b92422",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedCommodityChannel.cs",
+    "src/Indicators/WindowCommodityChannelIndex.cs",
+    "tests/ModelsTests/CertifiedCommodityChannelTests.cs"
+  ],
+  "batch_note": "Approved CCI window sums: exact64-bit deviation accumulation for nearby normal inputs at periods1..256, certified final ratio, existing fallback for all other cases. Rolling-deviation semantics and NETFRAMEWORK remain unchanged. Independent numerical boundaries, reset, both histories, long-history parity and controlled competitor timing required.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T12:32:45.884715+00:00",
+  "unit": {
+    "passed": 35,
+    "class_counts": {
+      "CompactCommodityChannelTests": 11,
+      "BoundedCommodityChannelExecutionTests": 15,
+      "CertifiedCommodityChannelTests": 9
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\cci-certified\\unit\\unit.trx",
+    "sha256": "1737341474873560980226b4e6fa62dbf0cd0b71a037b7e2cd5e3f178f09d2a6",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-cci-certified-20261022-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 20,
+    "class_counts": {
+      "CommodityChannelComparisonTests": 16,
+      "SharedCommodityChannelBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\cci-certified\\parity\\parity.trx",
+    "sha256": "b6d387648a1bf2996fdb4fcfc8c1c73c614a119879e61237384de194c219df8e",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-cci-certified-20261022-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-certified-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "306a12828e80c1073d4bafd6330167731c98bb69c61d457f3b8c7e77dad37f65",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-certified-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "306a12828e80c1073d4bafd6330167731c98bb69c61d457f3b8c7e77dad37f65",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-certified-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "306a12828e80c1073d4bafd6330167731c98bb69c61d457f3b8c7e77dad37f65",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-certified-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "306a12828e80c1073d4bafd6330167731c98bb69c61d457f3b8c7e77dad37f65"
+  },
+  "source_fingerprint_sha256": "f8e8ea2eb5aba38437ce6117cdc1b865de9be6d7cde71a72fcc75a8bbc05a017",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved CCI window sums: exact64-bit deviation accumulation for nearby normal inputs at periods1..256, certified final ratio, existing fallback for all other cases. Rolling-deviation semantics and NETFRAMEWORK remain unchanged. Independent numerical boundaries, reset, both histories, long-history parity and controlled competitor timing required. Correctness checks passed; controlled performance remains pending."
+}

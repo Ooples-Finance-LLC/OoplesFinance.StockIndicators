@@ -1,0 +1,136 @@
+{
+  "candidate_base_commit": "7af73507777ab43dcdb8730c576566feddcf1f97",
+  "candidate_input_sha256": "766bf7006df16711e91b86c07f83e351dc2019699347abbc5c80a46aad3de270",
+  "commit_is_base_only": true,
+  "comparisons": [
+    {
+      "operation": "CubedWeightedMovingAverage",
+      "count": 1000,
+      "history": "Full",
+      "legacy": {
+        "mean_ns": 1543052.421875,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 1543052.421875,
+          "StandardError": 74054.5038164556,
+          "Level": 12,
+          "Margin": 354048.1092436882,
+          "Lower": 1189004.3126313118,
+          "Upper": 1897100.5311186882
+        },
+        "allocated_bytes": 148295
+      },
+      "shared": {
+        "mean_ns": 146155.322265625,
+        "confidence_interval": {
+          "N": 8,
+          "Mean": 146155.322265625,
+          "StandardError": 2016.7392672137798,
+          "Level": 12,
+          "Margin": 10906.289026375645,
+          "Lower": 135249.03323924934,
+          "Upper": 157061.61129200066
+        },
+        "allocated_bytes": 58264
+      },
+      "shared_to_legacy_ratio": 0.094718312996799
+    },
+    {
+      "operation": "CubedWeightedMovingAverage",
+      "count": 1000,
+      "history": "LatestOnly",
+      "legacy": {
+        "mean_ns": 1498665.78125,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 1498665.78125,
+          "StandardError": 69141.31386415308,
+          "Level": 12,
+          "Margin": 330558.57757010945,
+          "Lower": 1168107.2036798906,
+          "Upper": 1829224.3588201094
+        },
+        "allocated_bytes": 148670
+      },
+      "shared": {
+        "mean_ns": 171914.404296875,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 171914.404296875,
+          "StandardError": 9788.959911626482,
+          "Level": 12,
+          "Margin": 46800.16163181006,
+          "Lower": 125114.24266506494,
+          "Upper": 218714.56592868507
+        },
+        "allocated_bytes": 9225
+      },
+      "shared_to_legacy_ratio": 0.11471163647540245
+    },
+    {
+      "operation": "CubedWeightedMovingAverage",
+      "count": 10000,
+      "history": "Full",
+      "legacy": {
+        "mean_ns": 13000750,
+        "confidence_interval": {
+          "N": 8,
+          "Mean": 13000750,
+          "StandardError": 156034.41929773174,
+          "Level": 12,
+          "Margin": 843815.8083145793,
+          "Lower": 12156934.191685421,
+          "Upper": 13844565.808314579
+        },
+        "allocated_bytes": 1373566
+      },
+      "shared": {
+        "mean_ns": 1625467.03125,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 1625467.03125,
+          "StandardError": 71353.99595571503,
+          "Level": 12,
+          "Margin": 341137.2172274154,
+          "Lower": 1284329.8140225846,
+          "Upper": 1966604.2484774154
+        },
+        "allocated_bytes": 562693
+      },
+      "shared_to_legacy_ratio": 0.12502871228582965
+    },
+    {
+      "operation": "CubedWeightedMovingAverage",
+      "count": 10000,
+      "history": "LatestOnly",
+      "legacy": {
+        "mean_ns": 12976632.857142856,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 12976632.857142856,
+          "StandardError": 200970.00119150005,
+          "Level": 12,
+          "Margin": 960820.007827012,
+          "Lower": 12015812.849315844,
+          "Upper": 13937452.864969868
+        },
+        "allocated_bytes": 1374150
+      },
+      "shared": {
+        "mean_ns": 1822095.546875,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 1822095.546875,
+          "StandardError": 116366.4730098777,
+          "Level": 12,
+          "Margin": 556337.9352404628,
+          "Lower": 1265757.611634537,
+          "Upper": 2378433.482115463
+        },
+        "allocated_bytes": 81289
+      },
+      "shared_to_legacy_ratio": 0.1404135854758383
+    }
+  ],
+  "interpretation": "Same-library legacy/shared measurements from the exact preserved working candidate. The base commit alone does not identify the candidate. Inherited MACD failures remain. Review before performance qualification; no native competitor timings collected."
+}

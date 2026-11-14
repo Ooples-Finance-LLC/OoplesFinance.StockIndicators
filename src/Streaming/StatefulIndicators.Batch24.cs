@@ -158,6 +158,14 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        var point = NextValues(bar, isFinal);
+        return new StreamingIndicatorStateResult(point.Total, includeOutputs
+            ? new Dictionary<string, double>(3) { { "Tr", point.Total }, { "Or", point.Oscillator }, { "Mr", point.Averages } }
+            : null);
+    }
+
+    internal (double Total, double Oscillator, double Averages) NextValues(OhlcvBar bar, bool isFinal)
+    {
         StreamingInputValidation.Validate(bar);
         var ranged = _customInput ? _componentRange.Next(bar, bar.Close, isFinal) : bar;
         var value = _input.GetValue(bar);
@@ -289,18 +297,7 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
             _hasPrev = true;
         }
 
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Tr", totalRating },
-                { "Or", oscRating },
-                { "Mr", maRating }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(totalRating, outputs);
+        return (totalRating, oscRating, maRating);
     }
 
 public void Dispose()

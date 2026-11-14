@@ -16,7 +16,8 @@ internal static partial class ValuesBarExecution
     // These sealed states publish their own outputs without graph or built-in
     // evaluator substitution. Variable SMA's documented pure selector runs once
     // per published bar; deferred node failures retain raw-input priority.
-    private static bool IsSharedState(IIndicator indicator) => indicator.Source is null && indicator.Components.Count == 0
+    private static bool IsSharedState(IIndicator indicator) => indicator.Source is null
+        && (indicator.Components.Count == 0 || indicator is BollingerBands { HasUnmodifiedDefaultAverage: true })
         && (SharedCpuStates.Contains(indicator) || IsGeneratedState(indicator)
             || indicator is VariablePeriodClassicAverage { Method: ClassicAverageMethod.Sma });
 
@@ -73,11 +74,21 @@ internal static partial class ValuesBarExecution
             var owned = history is null ? null : new OwnedBarBuffer(source.Length);
             bool boundedBatch = indicators.Count > 1 && indicators.All(i => i.Outputs.Count == 1 && IsSharedState(i) && IsBoundedWindowIndicator(i));
             bool pointwiseBatch = indicators.Count > 1 && indicators.All(IsPointwise);
+            bool volumeFlowCustomRange = indicators.Any(i => i is VolumeFlowIndicator or VervoortSmoothedOscillator)
+                && UsesVolumeFlowCustomRange(source, cancellation);
+            bool valueChartCustomRange = indicators.Any(i => i is ValueChartIndicator)
+                && UsesValueChartCustomRange(source, cancellation);
+            bool vervoortModifiedCustomRange = indicators.Any(i => i is VervoortModifiedBollingerBandIndicator or VervoortHeikenAshiCandlestickOscillator or VervoortHeikenAshiLongTermCandlestickOscillator)
+                && UsesVervoortModifiedCustomRange(source, cancellation);
+            if (indicators.Any(i => i is PrimeNumberOscillator or PrimeNumberBands or ClosedFormDistanceVolatility))
+                ValidatePrimeGraphInput(source, indicators, cancellation);
+            else if (indicators.Any(i => i is AbsoluteStrengthIndex))
+                ValidateAbsoluteStrengthInput(source, cancellation);
             if (indicators.Count == 1)
-                nodes.Add(new Node(indicators[0], source.Length, true, false, false));
+                nodes.Add(new Node(indicators[0], source.Length, true, false, false, volumeFlowCustomRange, valueChartCustomRange, vervoortModifiedCustomRange));
             else
                 foreach (var indicator in indicators.Distinct(IndicatorIdentity.Comparer))
-                    nodes.Add(new Node(indicator, source.Length, false, boundedBatch, pointwiseBatch));
+                    nodes.Add(new Node(indicator, source.Length, false, boundedBatch, pointwiseBatch, volumeFlowCustomRange, valueChartCustomRange, vervoortModifiedCustomRange));
             // The guarded batch SMA contract needs replayable closes, not OHLCV
             // history. Multiple SMA periods share this one temporary input column.
             bool singleSma = nodes.Count == 1 && nodes[0].Indicator is Sma;
@@ -143,6 +154,16 @@ internal static partial class ValuesBarExecution
                 latest = FillSeededAtr(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is AccumulationDistributionWithAverage adl)
                 latest = FillAccumulationDistribution(source, nodes[0].Values, adl, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is Adl { Length: 1 })
+                latest = FillIdentityAdl(source, nodes[0], cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is WindowReturnBeta returnBeta)
+                latest = FillReturnBeta(source, nodes[0], returnBeta, cancellation, owned);
+            else if (nodes.Count == 1 && nodes[0].Indicator is TillsonAverage tillson
+                && TryFillTillsonRegions(source, nodes[0], tillson, cancellation, owned, out var tillsonLatest))
+                latest = tillsonLatest;
+            else if (nodes.Count == 1 && nodes[0].Indicator is PriorSeededDirectionalMeasure
+                && nodes[0].TryFillPriorDirectional(source, cancellation, owned, out var directionalLatest))
+                latest = directionalLatest;
             else if (nodes.Count == 1 && IsBoundedWindowIndicator(nodes[0].Indicator))
                 latest = FillBoundedWindow(source, nodes[0].Values, nodes[0].Indicator, cancellation, owned);
             else if (boundedBatch)
@@ -193,7 +214,7 @@ internal static partial class ValuesBarExecution
                     // slot. Rechecking the same array cannot discover a new error.
                     bool distinctColumn = node.Indicator is not RollingPivotLevels pivot
                         || PivotColumnOwner(pivot.Style, slot) == slot;
-                    if (distinctColumn && (!finiteByConstruction || node.Indicator is RollingPivotLevels or WindowDeviationBands or ClassicDeviationBands or PriorPriceChannel or WindowPairStatistics or WindowVortex or MoneyFlowWithDetails or MovingAverageDiagnostics or WindowBetaStatistics or AwesomeWithDetails or StochasticSmaKdj or WindowStochasticKdj
+                    if (distinctColumn && (!finiteByConstruction || node.Indicator is RollingPivotLevels or WindowDeviationBands or ClassicDeviationBands or PriorPriceChannel or WindowPairStatistics or WindowVortex or MoneyFlowWithDetails or MovingAverageDiagnostics or WindowBetaStatistics or WindowReturnBeta or AwesomeWithDetails or StochasticSmaKdj or WindowStochasticKdj
                         || (gpu is not null && node.Indicator is WindowMoneyFlowIndex)))
                     {
                         for (int i = 0; i < source.Length; i++)
@@ -624,7 +645,7 @@ internal static partial class ValuesBarExecution
         private readonly object? _state;
         private readonly double[] _scratch;
         internal bool HasScalarState => _state is IIndicatorState;
-        internal Node(IIndicator indicator, int count, bool singleRoot, bool boundedBatch, bool pointwiseBatch)
+        internal Node(IIndicator indicator, int count, bool singleRoot, bool boundedBatch, bool pointwiseBatch, bool volumeFlowCustomRange, bool valueChartCustomRange, bool vervoortModifiedCustomRange)
         {
             Indicator = indicator;
             bool pointwise = (singleRoot || pointwiseBatch) && IsPointwise(indicator);
@@ -733,7 +754,7 @@ internal static partial class ValuesBarExecution
                 SeededOnBalanceVolume or AccumulationDistributionWithAverage or VolumeWeightedPrice when singleRoot => null,
                 SeededAverageTrueRange or NormalizedSeededAverageTrueRange or AverageTrueRangeWithDetails when singleRoot => null,
                 _ when (singleRoot || boundedBatch) && IsBoundedWindowIndicator(indicator) => null,
-                _ when IsGeneratedState(indicator) => CreateGeneratedState(indicator, count),
+                _ when IsGeneratedState(indicator) => CreateGeneratedState(indicator, count, volumeFlowCustomRange, valueChartCustomRange, vervoortModifiedCustomRange),
                 NormalizedWindowEntropy { Period: <= 4096 } entropy => new EntropyValueState(entropy.Period, count),
                 RangeFractalAverage fractal => new FractalValueState(fractal.Period, count),
                 FilteredDeviationAverage deviation => new DeviationAverageValueState(deviation.Period, deviation.ScaleFactor, count),
@@ -756,15 +777,30 @@ internal static partial class ValuesBarExecution
                 _ => throw new InvalidOperationException("Unqualified values plan.")
             };
             // Scalar and fused kernels never use a per-node output scratch buffer.
-            _scratch = _state is null or IIndicatorState ? Array.Empty<double>()
+            _scratch = _state is null or IIndicatorState or GeneratedZigZagWriter ? Array.Empty<double>()
                 : new double[indicator is RegressionWithChannels ? 10 : indicator.Outputs.Count];
         }
+        internal void CaptureFailure(Exception error) => Failure = ExceptionDispatchInfo.Capture(error);
+
         internal void Append(in Bar bar, int index, CancellationToken cancellation)
         {
             if (Failure is not null || Indicator is Sma) return;
             try
             {
-                if (_state is RegressionWithFinalLine.Writer regression) regression.Append(in bar, index, Values, _scratch);
+                if (_state is TillsonValueState tillson)
+                {
+                    // Tillson clears the entire scratch span before updating its stages.
+                    tillson.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
+                }
+                else if (_state is AdlValueState adl)
+                {
+                    Array.Clear(_scratch);
+                    adl.Update(in bar, _scratch);
+                    for (int slot = 0; slot < Values.Length; slot++) Values[slot][index] = _scratch[slot];
+                }
+                else if (_state is GeneratedZigZagWriter zigzag) zigzag.Append(in bar, index);
+                else if (_state is RegressionWithFinalLine.Writer regression) regression.Append(in bar, index, Values, _scratch);
                 else if (_state is RegressionWithChannels.Writer channels) channels.Append(in bar, index, Values, _scratch, cancellation);
                 else if (Indicator is PriceCircularTransform)
                 {
@@ -979,6 +1015,39 @@ internal static partial class ValuesBarExecution
                 Failure = ExceptionDispatchInfo.Capture(error);
             }
         }
+        internal bool TryFillPriorDirectional(Bar[] source, CancellationToken cancellation,
+            OwnedBarBuffer? owned, out Bar latest)
+        {
+            latest = default;
+            if (_state is not PriorSeededDirectionalMeasure.State state) return false;
+            var values = Values[0];
+            var defined = Values[1];
+            Span<double> scratch = _scratch;
+            for (int i = 0; i < source.Length; i++)
+            {
+                cancellation.ThrowIfCancellationRequested();
+                var bar = source[i];
+                latest = bar;
+                if (owned is not null) owned[i] = bar;
+                if (!AllFieldsFinite(in bar))
+                    IndicatorInputDomain.Finite.Validate(in bar);
+                if (Failure is not null) continue;
+                try
+                {
+                    // The original state clears both slots, including absence.
+                    state.Update(in bar, scratch);
+                    values[i] = scratch[0];
+                    defined[i] = scratch[1];
+                }
+                catch (Exception error)
+                {
+                    // Continue capturing/validating raw input before surfacing
+                    // the same deferred state failure as the generic writer.
+                    CaptureFailure(error);
+                }
+            }
+            return true;
+        }
         internal Bar FillScalar(Bar[] source, CancellationToken cancellation, OwnedBarBuffer? owned)
         {
             // Keep the existing Rickshaw batch's concrete Update call available to
@@ -1056,6 +1125,7 @@ internal static partial class ValuesBarExecution
         }
         internal void Complete(CancellationToken cancellation)
         {
+            if (_state is GeneratedZigZagWriter zigzag) zigzag.Complete(Values[0], cancellation);
             if (_state is RegressionWithFinalLine.Writer regression) regression.Complete(Values, cancellation);
             if (_state is RegressionWithChannels.Writer channels) channels.Complete();
         }

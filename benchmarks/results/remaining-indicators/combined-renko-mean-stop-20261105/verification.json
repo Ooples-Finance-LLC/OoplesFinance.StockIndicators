@@ -1,0 +1,68 @@
+{
+  "source": "ab6c6a6f960f50168c8ea3467c6023b80b5aa9b2",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-combined-renko-mean-stop-20261105",
+  "status": "correctness-complete",
+  "active": null,
+  "unit": {
+    "passed": 53,
+    "classes": {
+      "RenkoPriceGridTests": 15,
+      "PriceRelativeSharedExecutionTests": 16,
+      "PriceRelativeRatioTests": 2,
+      "PriceRelativeReturnTests": 2,
+      "PriceRelativeMeanTests": 3,
+      "VolatilityStopSnapshotSharedExecutionTests": 10,
+      "VolatilityStopFiniteStageTests": 5
+    },
+    "sha256": "15cb8bf0001bf87cdbd6d6d049d3efe7898e1810eed859ed98ef71735fc7d4c1"
+  },
+  "parity": {
+    "passed": 56,
+    "classes": {
+      "RenkoComparisonTests": 8,
+      "SharedRenkoSnapshotBenchmarkTests": 14,
+      "PriceRelativeComparisonTests": 9,
+      "SharedPriceRelativeBenchmarkTests": 2,
+      "CompactPriceRelativeFixtureTests": 2,
+      "SharedVolatilityStopSnapshotBenchmarkTests": 6,
+      "SharedSkenderVolatilityStopNativeBenchmarkTests": 15
+    },
+    "sha256": "52d25e1406eb3ce53a3f75160a15ac39ebd3dd0a74aae152f483500d624eedab"
+  },
+  "build_origin": {
+    "run_id": "42072240103",
+    "workflow_head": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "ab6c6a6f960f50168c8ea3467c6023b80b5aa9b2",
+    "artifact_id": 13436584129,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/42072240103"
+  },
+  "compiler_process_isolation": true,
+  "dependency_copy_mode": "Verified immutable CI artifacts; changed binaries installed without local compilation",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "build-and-gpu": {
+      "exit_code": 0,
+      "location": "CI build and actual local GPU"
+    },
+    "unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "parity": {
+      "exit_code": 0,
+      "location": "CI"
+    }
+  },
+  "gpu_passed": 100,
+  "source_fingerprint": "b136acab49f8a241064a24befc111b063508cfe0f103f25fb65b4ff4d43f4832",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "89039eda294d0159a51ba14853a55a2b1cc5adb48914ee7a099434e22a70ab40",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "89039eda294d0159a51ba14853a55a2b1cc5adb48914ee7a099434e22a70ab40",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "89039eda294d0159a51ba14853a55a2b1cc5adb48914ee7a099434e22a70ab40",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "89039eda294d0159a51ba14853a55a2b1cc5adb48914ee7a099434e22a70ab40"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}

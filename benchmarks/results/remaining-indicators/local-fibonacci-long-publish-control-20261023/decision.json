@@ -1,0 +1,112 @@
+{
+  "status": "candidate-rejected-or-inconclusive",
+  "sources": {
+    "old": "c879ac3f9c6a3e71a9ffd54341f5ec55385abbb0",
+    "new": "6e54c6c99d845b4a99483138c0992a7c1d419111"
+  },
+  "candidate_code_source": "16ba9f1f11bc85b8fc7c5da68a28d7eb24699a06",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Fwma",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.58626,
+        0.57308
+      ],
+      "new_means_ms": [
+        0.56525,
+        0.58221
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Fwma",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.7804,
+        0.8405125
+      ],
+      "new_means_ms": [
+        2.70176,
+        2.4394
+      ],
+      "verdict": "slower"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "b5406f25846531ebf97b2a16a13aecfdad892220912007db6386f39ecda1463b",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-long-publish-control-20261023/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "7e31560ffcf1043ea2e317515e2d127530842cdd8fac5e23c843863e9d91749a",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-long-publish-control-20261023/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "586212103c16a16272e0770e1f2a9f3f5a89cc1a23c22c2b87d6c9a4064f0cda",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-long-publish-control-20261023/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "569ec23e18fe0e603ac2c63ad00717f3fee6c35faa1fa571a8d9811230d5c7fb",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-long-publish-control-20261023/verified-summary.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "441cc01d15b93e22e2e16fa493e5285c42b2c8968f1a0f773ec09cd43f8f2b3e",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-long-publish-control-20261023/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "bcc7862fed4cca74861ba667b5a4b1a86f38ba41724d6347bd3f432167267bae",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-long-publish-control-20261023/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "978785e12abee1949e01637cc54b7a0c22d7d01d30415eed9a1ad0c8cd49afbb",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-long-publish-control-20261023/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "6b28cf8d1a9109913fa185502001e7b2b4f5bc3d46a9acb562dd098f0a559245",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-long-publish-control-20261023/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "de1b35ccdbb7ccc1536f5757bba11a9b9cff17bdabdc1485eebb53e85f0c5b36",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-long-publish-control-20261023/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "06b49f458c36efc92a1857902903af606fa3496d3f1ff4cce5dc407f73008c9a",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-long-publish-control-20261023/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "384caf17078efcca56d6f714a7a3ce05e2ba73aa07fd93ebfecbb262f970f7ef",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-long-publish-control-20261023/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "85f3eac6208e63a89f506ce5a56828e450fd2e7d5f066bdcf7e3fa591b05cdb9",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-long-publish-control-20261023/round3-old-LibraryPairBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-fibonacci-long-publish-control.py": "6747a6d61ea71cbb3f6eb8047683866fc578ac00f7dcdfef4df4768798100025",
+    "verify-fibonacci-long-publish-control.py": "c8b5df9a2676002ad636fc61759925291dbd5755abb6e34cd4ff8463a8fab822"
+  },
+  "report_imported": false,
+  "production_integrated": false,
+  "candidate_evidence": {
+    "rejected-candidate.patch": {
+      "sha256": "c7bf6536a11b1a2b5ecf6becb6e0be455c20670b9f6054b69938a43508c5aa51"
+    },
+    "publication-fibonacci-long-publish-certified-20261023-parity.trx.gz": {
+      "sha256": "b3418f9188122636cc66a8250d07f20c24f09c25fa5256f752673f6c7ee7403d"
+    },
+    "publication-fibonacci-long-publish-certified-20261023-unit.trx.gz": {
+      "sha256": "fa60655f94299b32e9d4af0a80a7c3a8ca1ae69b3f7b36e6511717dd6ca5b8e7"
+    },
+    "publication-fibonacci-long-publish-certified-20261023-verification.json": {
+      "sha256": "f96da57fbb797a38331795a3728689eb24a9acf5298024a7bb968b32f4daa87d"
+    }
+  },
+  "reason": "The separate long-history routine regressed at10,000bars;1,000bars was inconclusive. Candidate source is not integrated and no report row is imported."
+}

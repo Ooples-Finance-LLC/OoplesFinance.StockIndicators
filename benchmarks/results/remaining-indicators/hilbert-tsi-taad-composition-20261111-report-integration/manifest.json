@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "0107c1198e73bf039f54c4b41e24a9cc03eb920cc99a45607a3cd3eef928ec37",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-tsi-taad-composition-20261111-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "e4e5714f2ac138f1a326e0e958079596d2d19935996df0eb0af9d35b2da0e40a",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-tsi-taad-composition-20261111-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "82b0f43941807232e1abd548440742395cbc9a46e4c6d46dbe782fc8aae1589a",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-tsi-taad-composition-20261111-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "bad1878757c01b05785c49b68777bb7f5aa226bc7459ab5e297cfd701da96df3",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-tsi-taad-composition-20261111-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "ff94ac82ee3be37f6169d2ee7e7ac36f9046e0c1633cb074e9ec7cf73d0ea49b",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-tsi-taad-composition-20261111-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "ab49545434318368b47edf1af08611f96be697ea99f2a57beff2b404e09b25e9",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-tsi-taad-composition-20261111-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "283de42fe316b6cf7ee99d39dc8aa730799bb603c506093b98bfecd81646a58c",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-tsi-taad-composition-20261111-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "f9ebe380564206b75e5aa58c7276d87449521b38dfc2a629ff5a644c9d2ceb01",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-tsi-taad-composition-20261111-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "df933aedd5dbd7f7f688a63bdbab22330e7989e63003abf1125b17d9357a1ec1",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-tsi-taad-composition-20261111-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "1ab81011718f40a4df2dac8e44b20608bed86efc7a46a32b34e8ae591c3ea384",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-tsi-taad-composition-20261111-report-integration/updated-pair-details.png.gz"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "types": [
+    "GeneralFilterEstimator"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "e146f5e0b7902d4bd8d558218807ad9f53b7c20e",
+  "combined_input_sha256": "be8ca8b61ae2ee9be8f6cb33fb107414fa8ef714cf7910861569949fd9589e9a",
+  "benchmark_fixture": {
+    "type": "RemainingGeneralFilterBenchmarks",
+    "operations": [
+      "GeneralFilterEstimator"
+    ]
+  },
+  "checks": {
+    "unit": 46,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/generalfilter-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/generalfilter-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

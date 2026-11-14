@@ -1,0 +1,60 @@
+{
+  "before_sha256": "8ffbcb61f3f1f5f6c76980b3966a046df7cdff1aaf95c5a5ffaffd826a8dcc8b",
+  "candidate_sha256": "c04fa38c7e8ad6a50d776774a87d90e26fc1255cb6c31c87e7e7857ba617f90b",
+  "changed_baseline_rows": 6,
+  "unchanged_baseline_rows": 796,
+  "changed_builder_slots": 4,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 4,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 796,
+  "run_id": "local-cci-bounded-arithmetic-control-20261023",
+  "imported_utc": "2026-10-24T16:25:23.682513+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "64ec4d1b4d7919d4cc8b11c8910bdb9b2fdbcdf4489eedfef5f23f73a0091f20",
+      "archive": "benchmarks/results/remaining-indicators/cci-bounded-arithmetic-certified-local-cci-bounded-arithmetic-control-20261023-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "25d6ccde608b392f580974dc9ed5b5f799a66f6650ec690fbad9841d1b08897c",
+      "archive": "benchmarks/results/remaining-indicators/cci-bounded-arithmetic-certified-local-cci-bounded-arithmetic-control-20261023-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "d72aab21520cb42d57a13fef99dbac64b4bafcfec75eba72303c9fe367521862",
+      "archive": "benchmarks/results/remaining-indicators/cci-bounded-arithmetic-certified-local-cci-bounded-arithmetic-control-20261023-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "eef55137f9642e991c1a23f5794424f61ceeb65cf400b14e6dc8b86aabe65fc6",
+      "archive": "benchmarks/results/remaining-indicators/cci-bounded-arithmetic-certified-local-cci-bounded-arithmetic-control-20261023-measurement.json.gz"
+    },
+    "stage-cci-bounded-arithmetic-report.py": {
+      "sha256": "f77aad3b2f5258a07d50c6d318fee963f9f727ba033e96e52efcf062e8db0f25",
+      "archive": "benchmarks/results/remaining-indicators/cci-bounded-arithmetic-certified-local-cci-bounded-arithmetic-control-20261023-stage-cci-bounded-arithmetic-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/cci-bounded-arithmetic-certified-local-cci-bounded-arithmetic-control-20261023-verify-approved-certified-report.py.gz"
+    },
+    "import-cci-bounded-arithmetic-report.py": {
+      "sha256": "9c815967ecfef67084b60289ac3d94a3345c617e657a64bf7287b968787971af",
+      "archive": "benchmarks/results/remaining-indicators/cci-bounded-arithmetic-certified-local-cci-bounded-arithmetic-control-20261023-import-cci-bounded-arithmetic-report.py.gz"
+    },
+    "archive-cci-bounded-arithmetic-control.py": {
+      "sha256": "f9b5e3840da73a5cd616fcb8de6843b3ce1741a3b53a235c893aee7eca11ee3d",
+      "archive": "benchmarks/results/remaining-indicators/cci-bounded-arithmetic-certified-local-cci-bounded-arithmetic-control-20261023-archive-cci-bounded-arithmetic-control.py.gz"
+    },
+    "prove-cci-bounded-arithmetic-integration.py": {
+      "sha256": "bc00fed9a0725ecbab25369d79e5cbe8cacfdcb3a06f1ce8679842dc6add1700",
+      "archive": "benchmarks/results/remaining-indicators/cci-bounded-arithmetic-certified-local-cci-bounded-arithmetic-control-20261023-prove-cci-bounded-arithmetic-integration.py.gz"
+    },
+    "archive-cci-bounded-arithmetic-report.py": {
+      "sha256": "c66425d454e3172d1c3782f3902e2e01ba02490f7ca57657eb685ddd502f6e72",
+      "archive": "benchmarks/results/remaining-indicators/cci-bounded-arithmetic-certified-local-cci-bounded-arithmetic-control-20261023-archive-cci-bounded-arithmetic-report.py.gz"
+    }
+  }
+}

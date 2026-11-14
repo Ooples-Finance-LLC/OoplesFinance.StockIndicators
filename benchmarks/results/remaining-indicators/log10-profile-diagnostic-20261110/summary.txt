@@ -1,0 +1,22 @@
+Log10 profile diagnostic: observations only, no source qualification
+
+Complete run 42813611722: two isolated GitHub-hosted jobs,20 BDN cases and 8 separate unmeasured trace replays. All input/binary/file hashes, raw BDN records, logs, 12 quiet CPU samples below 15% and independently recomputed Speedscope summaries passed. Default runtime,1,000 batch warmups,10 builder warmups and10 measured iterations are unchanged.
+
+Paired round means in microseconds (old rounds0/3; new rounds1/2):
+batch/Ooples: old=[216.45555555555555, 227.51111111111112]; new=[247.8875, 248.45]; descriptive change=+11.80percent.
+batch/Competitor: old=[137.2625, 132.9]; new=[131.09444444444443, 130.35]; descriptive change=-3.23percent.
+builder/BuilderFull: old=[111.31723090277778, 107.83697916666667]; new=[67.48095703125, 66.59287109375]; descriptive change=-38.82percent.
+builder/NativeSingle: old=[42.07649536132813, 39.140350341796875]; new=[39.61763780381945, 38.84251302083334]; descriptive change=-3.39percent.
+builder/NativeParallel: old=[92.7649853515625, 91.2358837890625]; new=[88.1360595703125, 98.077958984375]; descriptive change=+1.20percent.
+
+Descriptive changes average round means for presentation only. They are not qualification decisions and are not pooled with the rejected qualification. Log10 batch reproduced the regression (~11.8percent) while BuilderFull improved (~38.8percent). Allocation changed by less than0.1%; an allocation increase does not explain the difference.
+
+The batch trace worker's configured parallelism limit was 2; builder was 8. Both VMs report 2 physical / 4 logical cores. The pinned 0.149.0 dependency defaults to physical cores, while SharedPointwiseBenchmarks.Setup explicitly sets 8. ValuesBarExecution.WorkerCount caps by the logical processor count as well as this setting. This supports a topology/fan-out hypothesis; it does not isolate fan-out from differing fixtures, warmup policies and hardware models (batch EPYC9V74; builder EPYC9V45).
+
+The unchanged batch adapter also copies values/presence and materializes nullable/masked output, allocating about 974 KB/call versus 563 KB for BuilderFull. Traces show these adapter costs. Old builder traces spend substantial sampled thread time in PollGC; sampled waiting is not equivalent to actual GC pause time or CPU share. Replay counters include PowerShell/delegate overhead. They cannot be substituted for BDN latency/allocation evidence. Every trace worker eventually reached Tier1; this does not establish JIT state during BDN measurements.
+
+Run42812393874 stopped after its first old-round BDN output because the driver expected the wrong export filename. Its partial outputs remain separately archived and excluded. The repaired frozen plan consumes the existing full-compressed exporter; source binaries, sampling, runtime and gates are unchanged. Windows manifest separators were normalized by the independent collector with collision rejection. The two VMs reuse a template hostname; distinct concurrent GitHub-hosted runner IDs and instance nonces establish job separation.
+
+The unchanged blanket 65,536 threshold remains rejected. No candidate source, report values, acceptance policy or runtime setting is imported. A distinct topology-aware Ln/Log10 trial could preserve 8,192 when fan-out stays within physical cores and use 65,536 for SMT fan-out; that proposal has not been implemented or dispatched and requires new approval/correctness/GPU100and a complete qualification.
+
+Raw files are gzip-compressed individually; retention.json maps each original path/hash to its archive/hash. Raw ZIPs and failed-attempt artifacts remain in the verified network archive. This record is diagnostic-only and cannot qualify any source.

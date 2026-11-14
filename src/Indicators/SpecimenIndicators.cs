@@ -160,6 +160,8 @@ public sealed class Ema : IndicatorBase, IMovingAverage, ITrendIndicator, IBuilt
 public sealed class BollingerBands : MultiOutputIndicatorBase, IVolatilityIndicator, IBuiltInIndicator
 {
     private readonly IMovingAverage _average;
+    private readonly bool _usesDefaultAverage;
+    internal bool HasUnmodifiedDefaultAverage => _usesDefaultAverage && _average.Source is null && _average.Components.Count == 0;
 
     /// <summary>Creates Bollinger bands.</summary>
     /// <param name="length">The lookback length.</param>
@@ -170,6 +172,7 @@ public sealed class BollingerBands : MultiOutputIndicatorBase, IVolatilityIndica
     {
         Length = length;
         StdDev = stdDev;
+        _usesDefaultAverage = average is null;
         _average = average ?? new Sma(length);
 
         // Declared as a component so a caller's own average becomes a node in the graph. When it is one of

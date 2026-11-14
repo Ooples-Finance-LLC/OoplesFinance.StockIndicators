@@ -1,0 +1,63 @@
+{
+  "input_head": "c25cda06db62c6dc04a9b958c05e51a82376adec",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedTillson.cs",
+    "src/Indicators/ValuesBarExecution.Tillson.cs",
+    "tests/ModelsTests/TillsonWordBinadeTests.cs"
+  ],
+  "batch_note": "Approved T3 certified-check refinement: cache a common positive normal exponent after all six seeds finish; convex exact means preserve it until input leaves. Word and polynomial arithmetic operation text is unchanged, with local unchecked contexts justified by exact UInt64 numerator bounds and existing polynomial products below2^125. All range guards and exact publication/fallback remain. The hot loop uses its immutable six-element array length to expose its index bound. Existing exact word/independent polynomial-boundary cases and focused original-state transitions/reset regressions required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-25T01:01:07.655626+00:00",
+  "unit": {
+    "passed": 46,
+    "class_counts": {
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "TillsonFloatingSmoothingTests": 7,
+      "TillsonSharedExecutionTests": 12,
+      "CertifiedTillsonTests": 17,
+      "TillsonWordSmoothingTests": 4,
+      "TillsonWordBinadeTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-word-binade\\unit\\unit.trx",
+    "sha256": "03efad9a24005cdadae44593bb86540a45bb928a2f955589821932f6f6041015",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-word-binade-certified-20261024-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 26,
+    "class_counts": {
+      "SharedTillsonBenchmarkTests": 16,
+      "TillsonComparisonTests": 10
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-word-binade\\parity\\parity.trx",
+    "sha256": "de286c19127ba56863982b3a7509726246c54d4b26da4b3868c8cc71ad660961",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-word-binade-certified-20261024-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-binade-20261024\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "8c1f2a08dca5da7f33d8dc619feb2b4111c0eaa1e52ce21f80a97bd19b653928",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-binade-20261024\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "8c1f2a08dca5da7f33d8dc619feb2b4111c0eaa1e52ce21f80a97bd19b653928",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-binade-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "8c1f2a08dca5da7f33d8dc619feb2b4111c0eaa1e52ce21f80a97bd19b653928",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-binade-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "8c1f2a08dca5da7f33d8dc619feb2b4111c0eaa1e52ce21f80a97bd19b653928"
+  },
+  "source_fingerprint_sha256": "06ef952d2945178e8d30a86278bbc4852de5f0f2aa8c6f6140a4f34dbf96bb4e",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved T3 certified-check refinement: cache a common positive normal exponent after all six seeds finish; convex exact means preserve it until input leaves. Word and polynomial arithmetic operation text is unchanged, with local unchecked contexts justified by exact UInt64 numerator bounds and existing polynomial products below2^125. All range guards and exact publication/fallback remain. The hot loop uses its immutable six-element array length to expose its index bound. Existing exact word/independent polynomial-boundary cases and focused original-state transitions/reset regressions required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

@@ -1,0 +1,34 @@
+{
+  "qualified_commit": "c02f77369bf5d98d53f431efef70a78bcb033da0",
+  "qualified_code": "c25cda06db62c6dc04a9b958c05e51a82376adec",
+  "matched_paths": [
+    "src",
+    "tests",
+    "examples",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "06ef952d2945178e8d30a86278bbc4852de5f0f2aa8c6f6140a4f34dbf96bb4e",
+  "qualification_reused": {
+    "unit": 46,
+    "parity": 26,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-binade-20261024\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "8c1f2a08dca5da7f33d8dc619feb2b4111c0eaa1e52ce21f80a97bd19b653928",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-binade-20261024\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "8c1f2a08dca5da7f33d8dc619feb2b4111c0eaa1e52ce21f80a97bd19b653928",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-binade-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "8c1f2a08dca5da7f33d8dc619feb2b4111c0eaa1e52ce21f80a97bd19b653928",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-binade-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "8c1f2a08dca5da7f33d8dc619feb2b4111c0eaa1e52ce21f80a97bd19b653928"
+  },
+  "control": "local-t3-word-binade-control-20261024",
+  "note": "Integrated executable sources and build inputs exactly match qualified candidate. Publishing checkout binaries remain older; preserved candidate DLL supplied the new measurement arm. No redundant production rebuild."
+}

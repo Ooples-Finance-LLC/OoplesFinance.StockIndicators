@@ -1,0 +1,17 @@
+{
+  "kind": "Additional local comparator checks using unchanged authenticated CI binaries; no rebuild",
+  "compiled_source": "cde573b62a445a3fb5f59f90e3fa6ca84eb985b8",
+  "source_fingerprint": "666e0f363648dc4add3c19c3a37f081cc127006c059da07b3204164d42a45de1",
+  "production_sha256": "ade3b413c047d2dddca9d62036c6905458cb7ae0bfd0779807109d232ea45e48",
+  "test_assembly_sha256": "cf5905af61e124c5d5bc61733f7078b827866f4fdf82ae8c14c95968dc88ea88",
+  "origin_run": "42532729322",
+  "origin_workflow": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+  "primary_ci_comparator_passed": 18,
+  "additional_local_comparator_passed": 121,
+  "total_comparator_passed": 139,
+  "classes": {
+    "SharedSkenderEmaFamilyBenchmarkTests": 81,
+    "SharedTaAdaptiveRateNativeBenchmarkTests": 40
+  },
+  "trx_sha256": "9f3b4b245595153c61b1ece85549c92b3929723d489382b9987e2ad207b5bb8f"
+}

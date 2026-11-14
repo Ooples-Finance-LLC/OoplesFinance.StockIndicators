@@ -1,0 +1,29 @@
+{
+  "source_integration_commit": "236701ec0085d95a5a4babd5cb3a4a928dbe0e69",
+  "qualified_source": "e06863ee1eee4f863c23352e700c530722db0478",
+  "compiled_source": "e2ae9254658f0cdd4e721e5323e8910e0eda18e8",
+  "source_fingerprint": "ff38dec90ef09701295784c817d38cb6b7aa0de2e52744b5f7234cca718912cc",
+  "unit": 197,
+  "comparator": 302,
+  "actual_gpu": 100,
+  "production_sha256": "8ba263e42bc643b9ea41f5f56468f465be7c14d966624073e6294a3e728e01f0",
+  "run_id": "43132150094",
+  "cases": 360,
+  "decisions": 72,
+  "verdicts": {
+    "faster": 55,
+    "inconclusive": 17
+  },
+  "integrated_paths": [
+    "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "src/Indicators/HilbertPhaseState.Scalar.cs",
+    "src/Indicators/HilbertPhaseState.cs",
+    "src/Indicators/SeededTrueStrength.cs",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs",
+    "src/Indicators/ValuesBarExecution.IdentityAdl.cs",
+    "tests/ModelsTests/CompactIdentityAdlPrefixTests.cs",
+    "tests/ModelsTests/ScalarHilbertPhaseTests.cs",
+    "tests/ModelsTests/TsiFiniteDifferenceTests.cs"
+  ],
+  "verified_utc": "2026-11-12T02:42:15.386874+00:00"
+}

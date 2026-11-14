@@ -361,7 +361,11 @@ internal sealed class StarReversalState(
         _short1 = _short;
         _doji1 = _doji;
         Accumulate(_longs, ref _long, bar, longPeriod, false);
-        Accumulate(_shorts, ref _short, bar, shortPeriod, false);
+        // Equal body windows have identical exact sums and eviction order.
+        if (shortPeriod == longPeriod)
+            _short = _long;
+        else
+            Accumulate(_shorts, ref _short, bar, shortPeriod, false);
         if (dojiPeriod > 0)
             Accumulate(_dojis, ref _doji, bar, dojiPeriod, true);
         _first = _second;
@@ -387,8 +391,19 @@ internal sealed class StarReversalState(
 
     private static void Add(ref ExactMeanAccumulator sum, in Bar bar, bool range, int sign)
     {
-        sum.Add(range ? bar.High : Math.Max(bar.Open, bar.Close), sign);
-        sum.Add(range ? bar.Low : Math.Min(bar.Open, bar.Close), -sign);
+        double left = range ? bar.High : Math.Max(bar.Open, bar.Close);
+        double right = range ? bar.Low : Math.Min(bar.Open, bar.Close);
+#if !NETFRAMEWORK
+        // A certified difference is the exact endpoint difference, so a single
+        // accumulator update preserves the unrounded rolling sum on eviction too.
+        if (Binary64ArithmeticCertificate.TryDifference(left, right, out double difference))
+        {
+            sum.Add(difference, sign);
+            return;
+        }
+#endif
+        sum.Add(left, sign);
+        sum.Add(right, -sign);
     }
 
     private static int BodyMargin(in Bar bar, ExactMeanAccumulator sum, BigInteger divisor)

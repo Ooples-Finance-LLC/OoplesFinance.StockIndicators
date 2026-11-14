@@ -1,0 +1,22 @@
+{
+  "source_integration_commit": "dd4e2a77f0d70b8e679007ece83fa313d21731ad",
+  "qualified_source": "410310890c78db353dec94cb5609926f48bf9247",
+  "compiled_source": "cbbde32feafcb9d696b1f32a20ff9473eddddb42",
+  "source_fingerprint": "1d36a35fcabe36db04cb1aafbffe9ec1d9662b76b5918f3aad8ee54f3f88fc90",
+  "unit": 17,
+  "comparator": 25,
+  "actual_gpu": 100,
+  "production_sha256": "2f16f5c5e4b5a2e5f3d258471632a7e4c2dbf66c500a115a438b6db9b19b563b",
+  "run_id": "42601193547",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 2,
+    "faster": 4
+  },
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.AccumulationDistribution.cs",
+    "tests/ModelsTests/BoundedAccumulationDifferenceTests.cs"
+  ],
+  "verified_utc": "2026-11-09T11:15:16.364014+00:00"
+}

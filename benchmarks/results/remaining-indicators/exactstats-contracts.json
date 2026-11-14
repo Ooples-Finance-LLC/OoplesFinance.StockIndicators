@@ -1,0 +1,40 @@
+{
+  "batch": "generated-exact-statistics",
+  "types": [
+    "Variance",
+    "CoefficientOfVariation",
+    "StandardError"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact rolling variance, signed-mean coefficient and regression residual RMS windows. Periods beyond finite owned input return startup zeros without allocating unused windows; raw validation and warmup remain unchanged.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 51,
+    "fixture_passed": 12,
+    "gpu_passed": 100,
+    "contract_methods": 1347,
+    "hosted_methods": 1335,
+    "unit_trx_sha256": "0be89282bb03f1de594b135109760f7d5c22a728d4d399998ee182c72d257716",
+    "fixture_trx_sha256": "cc6300db508d8396677c2aa9283f5f90c364cb62572dfcb315509f71267fee73",
+    "discovery_passed": 16,
+    "selected_comparator_passed": 28
+  },
+  "benchmark_fixture": {
+    "type": "RemainingExactStatisticsBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

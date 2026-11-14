@@ -1,0 +1,26 @@
+{
+  "source_integration_commit": "0ebf3e96fdf2a635f7de6ca6d946363741b60929",
+  "qualified_source": "4afeb8bb2dd87011c470699479ddee96b431ba68",
+  "compiled_source": "4432c94c5c4f6d155833d1701265f504561576d4",
+  "source_fingerprint": "160f39a2a0642abd6ab26de9cc0684e2b752b4940d3f777f8fa8874de540aeff",
+  "unit": 46,
+  "comparator": 51,
+  "actual_gpu": 100,
+  "inventory_tests": 8,
+  "production_sha256": "7d51d5067c6dccdefb8a6c58cadafc205c0d8be0a3bec46106085ec2804ad3e9",
+  "run_id": "41921264799",
+  "cases": 60,
+  "decisions": 12,
+  "verdicts": {
+    "inconclusive": 6,
+    "faster": 6
+  },
+  "integrated_paths": [
+    "src/Indicators/ClassicPriceOscillator.cs",
+    "tests/ModelsTests/ClassicPpoNormalizationTests.cs"
+  ],
+  "excluded": [
+    "Historical0.144.0 timings remain on original sources; only this complete fresh0.146.0 run imported; no pooling"
+  ],
+  "verified_utc": "2026-11-04T22:52:29.316397+00:00"
+}

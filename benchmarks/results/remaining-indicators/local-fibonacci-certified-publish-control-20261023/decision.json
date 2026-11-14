@@ -1,0 +1,112 @@
+{
+  "status": "candidate-rejected-or-inconclusive",
+  "sources": {
+    "old": "c879ac3f9c6a3e71a9ffd54341f5ec55385abbb0",
+    "new": "22fecdc22ff36c64320a2e56e39922b59cc05eee"
+  },
+  "candidate_code_source": "6c22eb5a7e6e948c2397746c482a060e7a36b3e6",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Fwma",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.58423,
+        0.58424
+      ],
+      "new_means_ms": [
+        0.63937,
+        0.6468
+      ],
+      "verdict": "slower"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Fwma",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.7918722222222222,
+        0.82936
+      ],
+      "new_means_ms": [
+        0.72091,
+        0.7194222222222223
+      ],
+      "verdict": "faster"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "57f2394955dc080c8cbc674a3494b826982a4e178a8e5ed32a66bd34744112ba",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-publish-control-20261023/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "a9d1f48d8a8262d9c6f1e92914a279730ba737e7439979c4064fcbe2d39c2a98",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-publish-control-20261023/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "309f9de1801d8990ab04a329c8b816faeccb02991f60aee538728b4aeab627af",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-publish-control-20261023/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "81907005d46ef85a558d8f760186899caba5900900b5634e8456bdd9c72083d1",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-publish-control-20261023/verified-summary.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "84f5bedfe0763dd99ddf2d0e1596bea39bd9b62010f6ffabaf5fbea18c13acc8",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-publish-control-20261023/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "88c5762fdeff470d784cd2e12f326dbc3160df5121c0de1da0db77a8ebc491a4",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-publish-control-20261023/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "38babb24a4a27f5b3cdcddfbd8ebf44a6b7fa874aaac7ab49e3eaec70a079174",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-publish-control-20261023/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "2d5696ed81c8509b12ba7f70b898cd06a3f809b90c93fa7a8d3d01b07b791b4c",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-publish-control-20261023/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "5d4cf8a5731d99ef5377da8e0c3f83401e7113bef6e1804edb6764eb52931a12",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-publish-control-20261023/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "bc9f011964b7cc493a16d17072c7c3913172a265e2638a61653fb065a176c8ce",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-publish-control-20261023/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "0ee720ecdd889402717652befd267f5084f5bc7833b1444fb60a4e7805f9c912",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-publish-control-20261023/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "c1b7f94a37650d327e7de1ed9af055c04fa8513da513f75d61ba8803d0b3dc63",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-publish-control-20261023/round3-old-LibraryPairBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-fibonacci-certified-publish-control.py": "1541a49e578a1f17c6dfefddd71a5e48d531967194096d6453916c73f498a4d5",
+    "verify-fibonacci-certified-publish-control.py": "56ae88d677ca01a712d6f11365491ca7c94272fca665af10a0d3d43f0f1f0a17"
+  },
+  "report_imported": false,
+  "production_integrated": false,
+  "candidate_evidence": {
+    "rejected-candidate.patch": {
+      "sha256": "ebda459cf1a1b382aa0ae77fdabc3b5226b6de5f37f1fc1d95ec1eeb3cee7bef"
+    },
+    "publication-fibonacci-certified-publish-certified-20261023-parity.trx.gz": {
+      "sha256": "a7dd398cf7b7673fe1f9e29c83cdb5df5a33d1e828ad1b1114aca0e45666b192"
+    },
+    "publication-fibonacci-certified-publish-certified-20261023-unit.trx.gz": {
+      "sha256": "c247f4d4372abdf59950a1642e8cf408e77d9e2686b80a5675666828f1d078d3"
+    },
+    "publication-fibonacci-certified-publish-certified-20261023-verification.json": {
+      "sha256": "7b759140ba15865928fb17fea760d494d0254d555e0edff12941e9229b8212d2"
+    }
+  },
+  "reason": "The 10,000-bar improvement does not offset the controlled 1,000-bar regression. Candidate source is not integrated and no report row is imported."
+}

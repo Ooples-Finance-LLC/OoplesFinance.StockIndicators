@@ -1,0 +1,56 @@
+{
+  "integration": "Wilson1115d493 into remaining0261ffd0",
+  "case_mapping": {
+    "original_trx_sha256": "69303d1925e87e6de9a3640a2fa8e6a498717b5570117226241fe93994b4e1e5",
+    "listing_sha256": "6fd997b2b66db182fe409c6468bf9813e2a1c22cce456490db95b0320539924a",
+    "same_four_cases": [
+      [
+        1000,
+        "Full"
+      ],
+      [
+        1000,
+        "LatestOnly"
+      ],
+      [
+        10000,
+        "Full"
+      ],
+      [
+        10000,
+        "LatestOnly"
+      ]
+    ]
+  },
+  "scheduling": {
+    "hosted_methods": 1429,
+    "runners": 20,
+    "heavy_methods": {
+      "OoplesFinance.StockIndicators.CompetitorTests.RemainingAdaptivePairBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit": 4,
+      "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.KlingerFull10000": 9,
+      "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.KlingerLatest10000": 6,
+      "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.KvoFull10000": 8,
+      "OoplesFinance.StockIndicators.CompetitorTests.RemainingPressureFlowBenchmarkTests.KvoLatest10000": 7,
+      "OoplesFinance.StockIndicators.CompetitorTests.RemainingVariableLengthBenchmarkTests.BothMeasuredArmsPreserveEveryOutputBit": 5,
+      "OoplesFinance.StockIndicators.CompetitorTests.RemainingVolumeVortexBenchmarkTests.VortexFull10000": 3,
+      "OoplesFinance.StockIndicators.CompetitorTests.RemainingVolumeVortexBenchmarkTests.VortexLatest10000": 2,
+      "OoplesFinance.StockIndicators.CompetitorTests.RemainingWilsonBenchmarkTests.WilsonFull10000": 0,
+      "OoplesFinance.StockIndicators.CompetitorTests.RemainingWilsonBenchmarkTests.WilsonLatest10000": 1
+    }
+  },
+  "verification": [
+    {
+      "kind": "unit",
+      "passed": 84,
+      "file": "wilsonintegration-unit.trx.gz",
+      "trx_sha256": "c848fd6963714fd2773c5648cec9f2e29b0830810be6b06ff3468e74f393136e"
+    },
+    {
+      "kind": "fixture",
+      "passed": 103,
+      "file": "wilsonintegration-fixture.trx.gz",
+      "trx_sha256": "de03eedaf4b4ea71f08637cb38d7124ef12b327aac5135841c24eb1532df4e94"
+    }
+  ],
+  "limitation": "The two long Wilson facts reuse completed original local parity evidence; hosted validation under the new method names remains pending. No performance claim."
+}

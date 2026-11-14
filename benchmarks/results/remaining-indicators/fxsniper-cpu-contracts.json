@@ -1,0 +1,37 @@
+{
+  "batch": "fxsniper-shared-execution",
+  "types": [
+    "FXSniperIndicator"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 35,
+    "parity_passed": 4,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "fxsniper-unit-verified.trx.gz",
+        "passed_cases": 35,
+        "trx_sha256": "9e158175ca3ef742c6197f25b0ec12c10cef26d28621d65bcce6182a5dbe78c4"
+      },
+      {
+        "file": "fxsniper-parity-verified.trx.gz",
+        "passed_cases": 4,
+        "trx_sha256": "b8723072cba367a801120eb1e41f3b27b6126d2a74ce83a0b91c93f5e4dc6903"
+      }
+    ],
+    "context": "Executed in the 9-facade fifth-stage working candidate with inherited unresolved MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "69b813a74e4ac37a8aba106d6c14848816525342e496eeff5f5ed8da16e63343",
+    "test_execution_input_sha256": {
+      "unit": "69b813a74e4ac37a8aba106d6c14848816525342e496eeff5f5ed8da16e63343",
+      "parity": "69b813a74e4ac37a8aba106d6c14848816525342e496eeff5f5ed8da16e63343"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "fc0e396cc6f1d5c805f524bd25c994da7e48c5ec"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

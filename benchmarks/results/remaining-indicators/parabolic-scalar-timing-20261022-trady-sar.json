@@ -1,0 +1,55 @@
+{
+  "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+  "rows": [
+    {
+      "pair": "Trady.Indicator.ParabolicStopAndReverse",
+      "bars": 1000,
+      "ooples": {
+        "mean_ns": 397256,
+        "lower_ns": 375212.2630913918,
+        "upper_ns": 419299.7369086082,
+        "allocated_bytes": 41992,
+        "samples": 9
+      },
+      "competitor": {
+        "mean_ns": 2589873.8,
+        "lower_ns": 2525074.908338703,
+        "upper_ns": 2654672.6916612964,
+        "allocated_bytes": 960392,
+        "samples": 10
+      },
+      "competitor_over_ooples": 6.519407636385605,
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Indicator.ParabolicStopAndReverse",
+      "bars": 10000,
+      "ooples": {
+        "mean_ns": 1588568.5,
+        "lower_ns": 1568441.7102070258,
+        "upper_ns": 1608695.2897929742,
+        "allocated_bytes": 420352,
+        "samples": 10
+      },
+      "competitor": {
+        "mean_ns": 19349999.777777776,
+        "lower_ns": 18940275.05826066,
+        "upper_ns": 19759724.49729489,
+        "allocated_bytes": 9344976,
+        "samples": 9
+      },
+      "competitor_over_ooples": 12.180777711365783,
+      "verdict": "faster"
+    }
+  ],
+  "source_sha": "67a1ab318edccd9e4d0b175425346df4385266de",
+  "binary_run": 39715346146,
+  "workflow_sha": "8b93566d0b198f8521ed638debf60fe91b26aebc",
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/39715382663",
+  "report_sha256": "9e5968b53a4d31e46e9e90a8acbc84480229b94d843e4f32cb54da14c8b9c444",
+  "benchmark_binary_sha256": "b5b4f9f2a19d21d41a75d62340418f56cb591c80119e64ae998fde1eadef549c",
+  "production_binary_sha256": "609354e36aa9ade79e8d47769fe65185ed998130879817260a16a005464f8729",
+  "note": "Source-pinned direct Parabolic comparison at both sizes. Retained confidence intervals determine the verdict; cross-run times are not controlled speedup evidence.",
+  "raw_evidence": "benchmarks/results/remaining-indicators/parabolic-scalar-timing-20261022-trady-sar-raw.json.gz",
+  "report_import": "Actual eight Parabolic rows replaced; all802table/CSV comparisons verified and794other rows preserved. Skender1000 comparison is inconclusive despite lower observed mean."
+}

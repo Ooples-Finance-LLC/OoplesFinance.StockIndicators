@@ -126,10 +126,30 @@ public sealed class SumSeededDirectionalIndex
 
         private JurikDyadic Smooth(JurikDyadic previous, JurikDyadic current)
         {
+#if !NETFRAMEWORK
+            if (previous.TryDouble(out var prior) && current.TryDouble(out var input)
+                && WeightedCertificate.TrySum(prior, input, period, period, out var rounded))
+                return JurikDyadic.FromDouble(rounded);
+#endif
             previous.Multiply(period - 1);
             current.Multiply(period);
             previous.AddExact(current);
             return DivideRounded(previous, _divisor);
+        }
+
+        private static JurikDyadic RoundedRange(double high, double low, double previous)
+        {
+#if !NETFRAMEWORK
+            // Binary64 rounding is monotone: max(round(a), round(b)) equals
+            // round(max(a,b)). Absolute differences preserve that identity.
+            // Overflow still needs the original unpublished extended exponent.
+            double value = Math.Max(high - low, Math.Max(Math.Abs(high - previous), Math.Abs(low - previous)));
+            if (double.IsFinite(value)) return JurikDyadic.FromDouble(value == 0 ? 0 : value); // NOSONAR: exact zero identity canonicalizes the dyadic zero sign.
+#endif
+            var wide = FearGreedWindow.TrueRange(high, low, previous);
+            var result = JurikDyadic.FromDouble(wide.Mantissa);
+            if (wide.UpperShift != 0) result.ScaleByPowerOfTwo(wide.UpperShift);
+            return result;
         }
 
         private static void Publish(double? value, int slot, Span<double> output)
@@ -141,6 +161,19 @@ public sealed class SumSeededDirectionalIndex
             }
         }
 
+        private JurikDyadic Direction(JurikDyadic movement)
+        {
+#if !NETFRAMEWORK
+            // DI is rounded before DX. Certify that same exact scaled ratio;
+            // extended stages and uncertain rounding cells retain the original path.
+            if (movement.TryDouble(out var value) && _range.TryDouble(out var range)
+                && AwesomeWithDetails.Arithmetic.TryNormalize(value, range, out var rounded))
+                return JurikDyadic.FromDouble(rounded);
+#endif
+            movement.Multiply(100);
+            return DivideRounded(movement, _range);
+        }
+
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
@@ -148,15 +181,27 @@ public sealed class SumSeededDirectionalIndex
             double? averageOutput = null;
             if (++_index > 0)
             {
-                var up = Difference(bar.High, _previous.High);
-                var down = Difference(_previous.Low, bar.Low);
-                var dominance = up;
-                dominance.Subtract(down);
-                var positive = up.Sign > 0 && dominance.Sign > 0 ? up.Rounded() : default;
-                var negative = down.Sign > 0 && dominance.Sign < 0 ? down.Rounded() : default;
-                var trueRange = FearGreedWindow.TrueRange(bar.High, bar.Low, _previous.Close);
-                var range = JurikDyadic.FromDouble(trueRange.Mantissa);
-                if (trueRange.UpperShift != 0) range.ScaleByPowerOfTwo(trueRange.UpperShift);
+                JurikDyadic positive, negative;
+#if !NETFRAMEWORK
+                if (Binary64ArithmeticCertificate.TryDifference(bar.High, _previous.High, out double upward)
+                    && Binary64ArithmeticCertificate.TryDifference(_previous.Low, bar.Low, out double downward))
+                {
+                    // Both differences are exact, so direct ordering preserves
+                    // strict dominance and ties without a third exact wrapper.
+                    positive = upward > 0 && upward > downward ? JurikDyadic.FromDouble(upward) : default;
+                    negative = downward > 0 && downward > upward ? JurikDyadic.FromDouble(downward) : default;
+                }
+                else
+#endif
+                {
+                    var up = Difference(bar.High, _previous.High);
+                    var down = Difference(_previous.Low, bar.Low);
+                    var dominance = up;
+                    dominance.Subtract(down);
+                    positive = up.Sign > 0 && dominance.Sign > 0 ? up.Rounded() : default;
+                    negative = down.Sign > 0 && dominance.Sign < 0 ? down.Rounded() : default;
+                }
+                var range = RoundedRange(bar.High, bar.Low, _previous.Close);
                 if (_index <= period)
                 {
                     _positive.AddExact(positive);
@@ -177,12 +222,8 @@ public sealed class SumSeededDirectionalIndex
                 }
                 if (_index >= period && _range.Sign != 0)
                 {
-                    var pdi = _positive;
-                    var mdi = _negative;
-                    pdi.Multiply(100);
-                    mdi.Multiply(100);
-                    pdi = DivideRounded(pdi, _range);
-                    mdi = DivideRounded(mdi, _range);
+                    var pdi = Direction(_positive);
+                    var mdi = Direction(_negative);
                     var total = pdi;
                     total.AddExact(mdi);
                     var delta = pdi;
@@ -201,10 +242,17 @@ public sealed class SumSeededDirectionalIndex
                     }
                     else if (_average.HasValue)
                     {
-                        var sum = JurikDyadic.FromDouble(_average.Value);
-                        sum.Multiply(period - 1);
-                        sum.Add(dx);
-                        _average = sum.Ratio(_divisor);
+#if !NETFRAMEWORK
+                        if (WeightedCertificate.TrySum(_average.Value, dx, period, 1, out var rounded))
+                            _average = rounded;
+                        else
+#endif
+                        {
+                            var sum = JurikDyadic.FromDouble(_average.Value);
+                            sum.Multiply(period - 1);
+                            sum.Add(dx);
+                            _average = sum.Ratio(_divisor);
+                        }
                     }
                     averageOutput = _average;
                     Publish(averageOutput, 3, output);
@@ -220,4 +268,45 @@ public sealed class SumSeededDirectionalIndex
             _history.Enqueue(averageOutput);
         }
     }
+
+#if !NETFRAMEWORK
+    internal static class WeightedCertificate
+    {
+        // Certify the once-rounded (previous*(period-1)+input*weight)/period.
+        // Both callers supply already-rounded stages; extended values stay on
+        // the original dyadic path. This does not change DI-before-DX rounding.
+        internal static bool TrySum(double previous, double input, int period, int weight, out double rounded)
+        {
+            double a = period - 1, denominator = period;
+            double p = previous * a, q = input * weight;
+            rounded = 0;
+            static bool Safe(double x, double y, double product) => product == 0
+                ? x == 0 || y == 0
+                : Math.Abs(product) >= 3.4395525670743494e-136
+                    && Math.Abs(product) <= 2.9073548971824276e135;
+            if (!Safe(previous, a, p) || !Safe(input, weight, q)) return false;
+            double total = p + q, candidate = total / denominator;
+            if (candidate == 0 || !double.IsFinite(candidate)) return false;
+            double virtualTerm = total - p;
+            double sumError = (p - (total - virtualTerm)) + (q - virtualTerm);
+            double residual = Math.FusedMultiplyAdd(-candidate, denominator, total);
+            double previousError = Math.FusedMultiplyAdd(previous, a, -p);
+            double inputError = Math.FusedMultiplyAdd(input, weight, -q);
+            // Integer weights have at most 31 bits. Under the normal-product
+            // guard both product residuals and the division residual are exact,
+            // as is TwoSum. 64 unit roundoffs enclose the three tail additions,
+            // absolute-term sum, bound multiplication and endpoint additions.
+            double error = ((residual + sumError) + previousError) + inputError;
+            double bound = (Math.Abs(residual) + Math.Abs(sumError) + Math.Abs(previousError) + Math.Abs(inputError))
+                * 7.105427357601002e-15; // 2^-47 = 64 * binary64 unit roundoff.
+            double low = error - bound, high = error + bound;
+            double below = (candidate - Math.BitDecrement(candidate)) * .5 * denominator;
+            double above = (Math.BitIncrement(candidate) - candidate) * .5 * denominator;
+            // Strict containment rejects midpoint ties and uncertain cells.
+            if (low <= -below || high >= above) return false;
+            rounded = candidate;
+            return true;
+        }
+    }
+#endif
 }

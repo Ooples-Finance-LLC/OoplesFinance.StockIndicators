@@ -8,6 +8,26 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 public sealed class ComparisonFrameworkCompatibilityTests
 {
     [Fact]
+    public void PortableAdjacentValuesMatchRuntimeBitsAcrossBinary64Boundaries()
+    {
+        void Check(double value)
+        {
+            Assert.Equal(BitConverter.DoubleToInt64Bits(Math.BitIncrement(value)), BitConverter.DoubleToInt64Bits(FrameworkCompatibility.BitIncrementPortable(value)));
+            Assert.Equal(BitConverter.DoubleToInt64Bits(Math.BitDecrement(value)), BitConverter.DoubleToInt64Bits(FrameworkCompatibility.BitDecrementPortable(value)));
+        }
+        foreach (var value in new[] { 0d, -0d, double.Epsilon, -double.Epsilon, double.MaxValue, -double.MaxValue,
+            double.PositiveInfinity, double.NegativeInfinity, double.NaN }) Check(value);
+        for (var exponent = 1; exponent < 2047; exponent++)
+        foreach (var offset in new[] { -1L, 0L, 1L })
+        {
+            var value = BitConverter.Int64BitsToDouble(((long)exponent << 52) + offset);
+            Check(value); Check(-value);
+        }
+        var random = new Random(271828); var bytes = new byte[8];
+        for (var i = 0; i < 10000; i++) { random.NextBytes(bytes); Check(BitConverter.ToDouble(bytes, 0)); }
+    }
+
+    [Fact]
     public void PortableBitLengthMatchesRuntimeAcrossSignedPowerBoundaries()
     {
         for (var exponent = 0; exponent <= 2048; exponent++)

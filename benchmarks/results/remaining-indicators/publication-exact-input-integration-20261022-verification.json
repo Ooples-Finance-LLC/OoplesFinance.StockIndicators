@@ -1,0 +1,153 @@
+{
+  "input_head": "b960b54cbea6cdac429e8938ad101875162c02ea",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/MacZWindow.cs",
+    "tests/ValidationTests/MacZInputNormalizationTests.cs"
+  ],
+  "reused_exact_input_checks": {
+    "source": "4d9106f24b0a70309834eae24fc47d41acd02359",
+    "note": "Compact arithmetic source and regressions byte-identical; published eighteen-family dispatch is checked on integrated binaries.",
+    "unit": {
+      "passed": 860,
+      "class_counts": {
+        "SharedGeneratedAdaptiveQFilterTests": 47,
+        "MacZVwapNumericalTests": 128,
+        "SharedGeneratedMacZTests": 62,
+        "MacZNumericalTests": 111,
+        "VervoortModifiedCertifiedTests": 15,
+        "SharedGeneratedVortexTests": 43,
+        "RelativeSpreadCertifiedTests": 14,
+        "SharedGeneratedVolatilityMomentumTests": 13,
+        "SharedGeneratedRmoQqeTests": 20,
+        "SharedGeneratedVervoortModifiedTests": 11,
+        "SharedGeneratedVervoortCandlesTests": 31,
+        "SharedGeneratedMultiDepthTests": 20,
+        "SharedGeneratedWaddahTests": 31,
+        "RmoQqeCertifiedTests": 14,
+        "SharedGeneratedWilsonTests": 29,
+        "SharedGeneratedVolumePositiveNegativeTests": 13,
+        "VolatilityMomentumCertifiedTests": 16,
+        "SharedGeneratedMacZVwapTests": 69,
+        "VervoortSmoothedCertifiedTests": 11,
+        "ComparisonFrameworkCompatibilityTests": 4,
+        "TrueRangeAdjustedCertifiedTests": 16,
+        "MacZInputNormalizationTests": 6,
+        "VolumePositiveNegativeCertifiedTests": 11,
+        "SharedGeneratedTrueRangeAdjustedTests": 23,
+        "SharedGeneratedSwamiTdiTests": 20,
+        "SharedGeneratedMobilityTests": 20,
+        "WaveTrendCertifiedTests": 16,
+        "MultiDepthCertifiedTests": 12,
+        "SharedGeneratedWaveTrendTests": 18,
+        "SwamiCertifiedTests": 7,
+        "MacZProductArithmeticTests": 5,
+        "MacZScalarArithmeticTests": 2,
+        "MacZAdditionArithmeticTests": 2
+      },
+      "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\exact-input-normalization\\unit\\unit.trx",
+      "sha256": "cbf8053f4ebec263d2299e825593e94928e81a89e0ab88b1efcbe9f3d47c68ca"
+    },
+    "parity": {
+      "passed": 60,
+      "class_counts": {
+        "RemainingMultiDepthBenchmarkTests": 4,
+        "RemainingMacZVwapBenchmarkTests": 4,
+        "RemainingTrueRangeAdjustedBenchmarkTests": 4,
+        "RemainingRmoQqeBenchmarkTests": 8,
+        "RemainingVervoortModifiedBenchmarkTests": 4,
+        "RemainingSwamiTdiBenchmarkTests": 8,
+        "RemainingVervoortCandlesBenchmarkTests": 12,
+        "RemainingVolumePositiveNegativeBenchmarkTests": 4,
+        "RemainingVolatilityMomentumBenchmarkTests": 4,
+        "RemainingMacZBenchmarkTests": 4,
+        "RemainingWaveTrendBenchmarkTests": 4
+      },
+      "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\exact-input-normalization\\parity\\parity.trx",
+      "sha256": "1a4bc832ec69689e1cc94576e5693a411b70a3f35a2f259912e62e41de8f85fd"
+    }
+  },
+  "parallel_batch_note": "Approved compact exact inputs, integrated with published eighteen formulas; repeat affected generated routes, arithmetic regressions, discovery and GPU contracts; preserve complete independent numerical and long-history evidence.",
+  "hosted_build": {
+    "run_id": 39712352837,
+    "workflow_sha": "f413c791d11ab901c669f107e60ca2f27bbd7811",
+    "source_sha": "b960b54cbea6cdac429e8938ad101875162c02ea",
+    "provenance_file": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\exact-input-integration\\hosted-build-provenance.json",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-exact-input-integration-20261022-hosted-build-provenance.json.gz",
+    "sha256": "97f00e98805c3425d1598fc695100ca24d463faf5352270f3110e2f729f1093f"
+  },
+  "step": "complete",
+  "updated_utc": "2026-10-22T02:55:09.351472+00:00",
+  "unit": {
+    "passed": 403,
+    "class_counts": {
+      "SharedGeneratedKalmanSmootherTests": 10,
+      "PairedBatchAllocationTests": 14,
+      "SharedGeneratedVolumePositiveNegativeTests": 13,
+      "SharedGeneratedVervoortCandlesTests": 31,
+      "SharedGeneratedTradingVanillaTests": 12,
+      "SharedGeneratedTotalPowerTests": 12,
+      "SharedGeneratedSupportResistanceLevelsTests": 12,
+      "SharedGeneratedTechnicalRatingsTests": 11,
+      "SharedGeneratedVolumeFlowTests": 54,
+      "SharedGeneratedRmoQqeTests": 20,
+      "SharedGeneratedVervoortModifiedTests": 11,
+      "MeanDiagnosticsCertifiedTests": 18,
+      "RegressionWithChannelsBuilderTests": 12,
+      "SharedGeneratedObvVixTests": 22,
+      "RollingStatisticsSharedExecutionTests": 17,
+      "SharedGeneratedSwamiTdiTests": 20,
+      "SharedGeneratedVolatilityMomentumTests": 13,
+      "SharedGeneratedZigZagTests": 10,
+      "SharedGeneratedSpearmanTests": 13,
+      "SharedGeneratedQuasiNoiseTests": 14,
+      "PairedInputContractTests": 8,
+      "RegressionWithFinalLineBuilderTests": 10,
+      "MeanDiagnosticsScaleReductionTests": 2,
+      "SharedGeneratedSvamaProjectedTests": 19,
+      "MacZInputNormalizationTests": 6,
+      "SharedGeneratedSupportResistanceTests": 15,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\exact-input-integration\\unit\\unit.trx",
+    "sha256": "d20cefd914de655ff617fdd7cde7ee0a5b820d080f3164585855c1dcee0b5d77",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-exact-input-integration-20261022-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 418,
+    "class_counts": {
+      "RemainingBenchmarkDiscoveryTests": 418
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\exact-input-integration\\parity\\parity.trx",
+    "sha256": "698459f5b9f9cd28a610189b6f729cc0a35b270c67655fb1131df259fcd32b06",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-exact-input-integration-20261022-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-exact-input-normalization-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "5373796ae0d9391b118754cd9a8859208bde2a4483abea24c3d51243e488668f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-exact-input-normalization-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "5373796ae0d9391b118754cd9a8859208bde2a4483abea24c3d51243e488668f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-exact-input-normalization-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "5373796ae0d9391b118754cd9a8859208bde2a4483abea24c3d51243e488668f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-exact-input-normalization-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "5373796ae0d9391b118754cd9a8859208bde2a4483abea24c3d51243e488668f"
+  },
+  "source_fingerprint_sha256": "cb9e68f2f0389c41aa9105edc5022169e8416bb3c5d3ac289b2f1c132bf48e4b",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Exact binary64 input significands replace expanded fixed-grid inputs without changing their rational value. Finite-exponent, legacy mixed arithmetic and root/recursive rounding, smoother preview/reset, affected indicator, and long-history checks are preserved. Performance remains separately measured."
+}

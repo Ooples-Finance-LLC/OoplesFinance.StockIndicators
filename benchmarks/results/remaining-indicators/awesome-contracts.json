@@ -1,0 +1,39 @@
+{
+  "batch": "awesome-accelerator-shared-execution",
+  "types": [
+    "AwesomeOscillator",
+    "AcceleratorOscillator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse rounded SMA stages over exact median price; retain fixed slow34 and Accelerator signal5, binary differences, startup zero and first-nonfinite Awesome prefix. Unfillable fast windows use no period-sized storage; custom/source fallback retained.",
+  "verification": {
+    "unit_passed": 47,
+    "fixture_passed": 8,
+    "discovery_passed": 95,
+    "gpu_passed": 100,
+    "contract_methods": 1430,
+    "hosted_methods": 1418,
+    "evidence": [
+      {
+        "file": "awesome-unit.trx.gz",
+        "passed_cases": 47,
+        "trx_sha256": "607d8560e49d9fbc4dfe22af081bca8f029885715d0026955ae375bb5ea3350a"
+      },
+      {
+        "file": "awesome-fixture.trx.gz",
+        "passed_cases": 103,
+        "trx_sha256": "ef0ac296e9b52bd5be769752942e70099cbb9fb4acd5acda3fc906489fd83f29"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAwesomeBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "AwesomeOscillator",
+      "AcceleratorOscillator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}
