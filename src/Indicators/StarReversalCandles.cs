@@ -415,20 +415,29 @@ internal sealed class StarReversalState(
 
     private bool IsMorning => morning ?? _first.Close < _first.Open;
 
-    private bool Matches(in Bar c)
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    internal static bool HasStructure(in Bar a, in Bar b, in Bar c, bool? morningDirection, bool requireFullGaps)
     {
-        var a = _first;
-        var b = _second;
+        bool up = morningDirection ?? a.Close < a.Open;
         if (
-            IsMorning
+            up
                 ? a.Close >= a.Open || c.Close < c.Open || Math.Max(b.Open, b.Close) >= a.Close
                 : a.Close < a.Open || c.Close >= c.Open || Math.Min(b.Open, b.Close) <= a.Close
         )
             return false;
         if (
-            fullGaps
-            && (IsMorning ? b.High >= a.Low || b.High >= c.Low : b.Low <= a.High || b.Low <= c.High)
+            requireFullGaps
+            && (up ? b.High >= a.Low || b.High >= c.Low : b.Low <= a.High || b.Low <= c.High)
         )
+            return false;
+        return true;
+    }
+
+    private bool Matches(in Bar c)
+    {
+        var a = _first;
+        var b = _second;
+        if (!HasStructure(in a, in b, in c, morning, fullGaps))
             return false;
         if (BodyMargin(a, _long2, longPeriod) >= 0 || BodyMargin(c, _short, shortPeriod) >= 0)
             return false;
