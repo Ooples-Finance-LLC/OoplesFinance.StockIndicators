@@ -110,7 +110,16 @@ public sealed class SmoothedAccumulationOscillator
             );
 
 #if !NETFRAMEWORK
-    private sealed class CompactMean(int period, bool first)
+    internal bool TryBatchFlow(in Bar bar, out double multiplier, out double flow)
+    {
+        multiplier = flow = 0;
+        if (FirstValue ? bar.High <= bar.Low : bar.High == bar.Low) return true; // NOSONAR: Native flat-range conventions use exact equality.
+        return CompactState.TryOrdinaryFlow(in bar, IncludeDetails, out multiplier, out flow);
+    }
+
+    internal readonly record struct MeanContinuation(bool Ready, int Period, bool First, int Count, long ValueBits);
+
+    internal sealed class CompactMean(int period, bool first)
     {
         private readonly double _weight = ((long)period - 1) * .5;
         private readonly double _denominator = ((long)period + 1) * .5;
@@ -122,6 +131,11 @@ public sealed class SmoothedAccumulationOscillator
         internal JurikDyadic Value { get; private set; }
 
         internal void Reset() { _count = 0; _sum = Value = default; }
+
+        internal MeanContinuation CaptureContinuation() =>
+            _count == (first ? 1 : period) && _sum.Sign == 0 && Value.TryDouble(out var value)
+                ? new(true, period, first, _count, BitConverter.DoubleToInt64Bits(value))
+                : default;
 
         internal void Add(JurikDyadic value)
         {
@@ -252,7 +266,7 @@ public sealed class SmoothedAccumulationOscillator
             }
         }
 
-        private static bool TryOrdinaryFlow(in Bar bar, bool details, out double multiplier, out double flow)
+        internal static bool TryOrdinaryFlow(in Bar bar, bool details, out double multiplier, out double flow)
         {
             multiplier = flow = 0;
             if (!Binary64ArithmeticCertificate.TryDifference(bar.Close, bar.Low, out var buying)
