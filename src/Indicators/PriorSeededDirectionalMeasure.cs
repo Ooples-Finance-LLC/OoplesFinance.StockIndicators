@@ -102,6 +102,84 @@ public sealed class PriorSeededDirectionalMeasure
                 )
             );
 
+#if !NETFRAMEWORK
+    // Only this indicator's movement/range sums opt in. DI, DX and average
+    // arithmetic retain their original implementations.
+    internal readonly struct WordSmoothing
+    {
+        private const ulong FractionMask = (1UL << 52) - 1;
+        private readonly ExactMeanAccumulator.WordMeanDivisor _divisor;
+
+        internal WordSmoothing(int period)
+        {
+            _divisor = period is >= 1 and <= 2047 ? new(period) : default;
+        }
+
+        internal bool TrySum(double previous, double current, out double rounded)
+        {
+            rounded = 0;
+            int period = _divisor.Count;
+            if (period == 0 || !Parts(previous, out ulong a, out int ae)
+                || !Parts(current, out ulong b, out int be)) return false;
+            if (a == 0) ae = be;
+            if (b == 0) be = ae;
+            int common = Math.Min(ae, be), left = ae - common, right = be - common;
+            if (left > 62 || right > 62) return false;
+            // Significands are <2^53 and weights <2^11, so these unshifted
+            // products fit in a word. Guard alignment and addition BEFORE
+            // performing them; positivity makes these guards equivalent to
+            // requiring the full exact aligned numerator to fit in a word.
+            ulong first = unchecked(a * (uint)(period - 1)), second = unchecked(b * (uint)period);
+            if (first > (ulong.MaxValue >> left) || second > (ulong.MaxValue >> right)) return false;
+            first <<= left;
+            second <<= right;
+            if (first > ulong.MaxValue - second) return false;
+            ulong top = unchecked(first + second), denominator = (ulong)period;
+            if (top == 0) return true; // Canonical zero, as in RocBankValue.
+            int topBits = 64 - System.Numerics.BitOperations.LeadingZeroCount(top);
+            int power = topBits - _divisor.Bits;
+            // The compared shifted operand has at most 64 bits in either arm.
+            if (power >= 0 ? top < (denominator << power) : (top << -power) < denominator) power--;
+            int exponent = common + power;
+            if (exponent is < -1022 or > 1023) return false;
+            int shift = power - 52;
+            if (shift < 0 && topBits - shift > 64) return false;
+            ulong scaled = shift < 0 ? top << -shift : top >> shift;
+            ulong quotient = _divisor.Divide(scaled);
+            // Divide returns the exact floor quotient, hence q*d <= scaled.
+            ulong remainder = scaled - quotient * denominator;
+            if (shift > 0)
+            {
+                // Restore every discarded bit before the half comparison.
+                // shift <=11; denominator/remainder use <=22 bits after this.
+                remainder = (remainder << shift) | (top & ((1UL << shift) - 1));
+                denominator <<= shift;
+            }
+            ulong twiceRemainder = remainder << 1;
+            if (twiceRemainder > denominator
+                || twiceRemainder == denominator && (quotient & 1) != 0) quotient++;
+            if (quotient == (1UL << 53)) { quotient >>= 1; exponent++; }
+            if (exponent > 1023 || quotient < (1UL << 52) || quotient >= (1UL << 53)) return false;
+            ulong bits = ((ulong)(exponent + 1023) << 52) | (quotient & FractionMask);
+            rounded = BitConverter.Int64BitsToDouble(unchecked((long)bits));
+            return true;
+        }
+
+        private static bool Parts(double value, out ulong mantissa, out int exponent)
+        {
+            ulong bits = unchecked((ulong)BitConverter.DoubleToInt64Bits(value));
+            int encoded = (int)((bits >> 52) & 2047);
+            ulong fraction = bits & FractionMask;
+            mantissa = 0; exponent = 0;
+            if (encoded == 0) return fraction == 0;
+            if ((bits >> 63) != 0 || encoded == 2047) return false;
+            mantissa = fraction | (1UL << 52);
+            exponent = encoded - 1075;
+            return true;
+        }
+    }
+#endif
+
     internal sealed class State(PriorDirectionalMeasure measure, int period, int unstable)
         : IMultiOutputState
     {
@@ -111,6 +189,9 @@ public sealed class PriorSeededDirectionalMeasure
         private readonly bool _needsRange = measure >= PriorDirectionalMeasure.PositiveIndicator;
         private readonly ExactMeanAccumulator.ProductCoefficient _priorCoefficient = new(period - 1);
         private readonly ExactMeanAccumulator.ProductCoefficient _currentCoefficient = new(period);
+#if !NETFRAMEWORK
+        private readonly WordSmoothing _wordSmoothing = new(period);
+#endif
         private RocBankValue _positive, _negative, _range;
         private ExactMeanAccumulator _positiveSeed, _negativeSeed, _rangeSeed, _seedDx;
 #if NETFRAMEWORK
@@ -206,6 +287,9 @@ public sealed class PriorSeededDirectionalMeasure
         private RocBankValue Smooth(RocBankValue previous, RocBankValue current)
         {
 #if !NETFRAMEWORK
+            if (previous.UpperShift == 0 && current.UpperShift == 0
+                && _wordSmoothing.TrySum(previous.Mantissa, current.Mantissa, out double word))
+                return new RocBankValue(word);
             if (previous.UpperShift == 0 && current.UpperShift == 0
                 && SumSeededDirectionalIndex.WeightedCertificate.TrySum(
                     previous.Mantissa, current.Mantissa, period, period, out var rounded))
