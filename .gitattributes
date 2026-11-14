@@ -204,3 +204,4 @@ benchmarks/plans/hosted-doji-region-pool-20261113.json text eol=lf
 benchmarks/plans/hosted-skender-adl-pair-prefix-20261113.json text eol=lf
 benchmarks/plans/hosted-t3-state-checked-regions-20261113.json text eol=lf
 benchmarks/plans/hosted-prior-directional-typed-writer-20261113.json text eol=lf
+benchmarks/plans/hosted-prior-directional-word-guards-20261114.json text eol=lf
