@@ -1,0 +1,68 @@
+{
+  "source": "7f5290b20498bb562cdd2511482857baa0b293e8",
+  "hashes": {
+    "old": "186c441ad23620cfaae3a94e9d10df7f0b46cacc66cdb8fb03860536b00ce7e5",
+    "new": "d5899d56753e01945dd47b3803909bf6f10c11c97dc1887d7bbf787e03c573a9"
+  },
+  "warmups": 1000,
+  "calls": 10,
+  "workers": 4,
+  "rows": [
+    {
+      "pair": "TaLib.Candles.InvertedHammer",
+      "bars": 1000,
+      "label": "old",
+      "optimized_headers_before_measurement": [
+        "; Assembly listing for method TALib.Candles:InvertedHammerImpl[double](System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.Range,System.Span`1[int],byref):ushort (Tier1-OSR)",
+        "; Assembly listing for method TALib.Candles:InvertedHammerImpl[double](System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.Range,System.Span`1[int],byref):ushort (Tier1-OSR)",
+        "; Assembly listing for method TALib.Candles:IsInvertedHammerPattern[double](System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],int,double,double,double):bool (Tier1)",
+        "; Assembly listing for method TALib.Candles:InvertedHammer[double](System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.Range,System.Span`1[int],byref):ushort (Tier1)"
+      ],
+      "optimized_headers_after_measurement_marker": [],
+      "measured_call_us": [
+        89.0,
+        86.5,
+        86.0,
+        86.6,
+        86.3,
+        86.8,
+        88.6,
+        89.7,
+        86.3,
+        105.8
+      ],
+      "log_sha256": "64d35baedd9d3d4e998cc96029568f2b6c13efabfaab13983c6d274d7d2f4bb5"
+    },
+    {
+      "pair": "TaLib.Candles.ShootingStar",
+      "bars": 1000,
+      "label": "old",
+      "optimized_headers_before_measurement": [
+        "; Assembly listing for method TALib.Candles:ShootingStarImpl[double](System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.Range,System.Span`1[int],byref):ushort (Tier1-OSR)",
+        "; Assembly listing for method TALib.Candles:ShootingStarImpl[double](System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.Range,System.Span`1[int],byref):ushort (Tier1-OSR)",
+        "; Assembly listing for method TALib.Candles:IsShootingStarPattern[double](System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],int,double,double,double):bool (Tier1)",
+        "; Assembly listing for method TALib.Candles:ShootingStar[double](System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.ReadOnlySpan`1[double],System.Range,System.Span`1[int],byref):ushort (Tier1)"
+      ],
+      "optimized_headers_after_measurement_marker": [],
+      "measured_call_us": [
+        114.8,
+        113.6,
+        132.4,
+        88.7,
+        89.6,
+        86.5,
+        96.2,
+        102.6,
+        92.9,
+        99.7
+      ],
+      "log_sha256": "71f6f431de36f7b18c4ed79b6ee9d4cf763723f4f824d1d6b6f8801456a18550"
+    }
+  ],
+  "production_changed": false,
+  "qualification": false,
+  "interpretation": "Diagnostic stdout ordering only. A compiled optimized header is not proof every worker invocation used it. These external-loop timings are not BDN measurements, native comparisons, or policy adoption evidence.",
+  "candidate_source_not_executed": "cbe4cc28c547dea0281419712d7c5697c1d998d1",
+  "role": "native Competitor delegate",
+  "native_win_evidence": false
+}
