@@ -1,0 +1,11 @@
+{
+  "reason": "External concurrent builds and CPU readings up to96.2%; no valid idle measurement screen. Only exact matching diagnostic root and its descendants stopped.",
+  "local_partial_timings_excluded": true,
+  "qualification": false,
+  "hosted_run_43610765565_untouched": true,
+  "owned_stopped_pids": [
+    18672,
+    50144
+  ],
+  "time_unix": 1794678190.8623047
+}

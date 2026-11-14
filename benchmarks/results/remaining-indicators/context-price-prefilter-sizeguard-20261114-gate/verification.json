@@ -1,0 +1,19 @@
+{
+  "source": "2a86e21e2fe89592f4ecef36589ee9a6548e9ab4",
+  "baseline": "7f5290b20498bb562cdd2511482857baa0b293e8",
+  "production_sha256": "999d194617c48827f10f43adae9a9e63a18bfd865fdf3c9e96bc7c3fee4151cf",
+  "source_fingerprint": "fecad355a359041360a265f7e0bad2e12baaa4d83715214dc82e9398692d76c5",
+  "unit_passed": 16,
+  "comparator_passed": 147,
+  "actual_gpu_passed": 100,
+  "compiled_factory_configurations_verified": 16,
+  "optimized_large_batch_matches_observed": true,
+  "small_streaming_predicate_order_original": true,
+  "partial_local_throughput_excluded": true,
+  "local_screen_interrupted_reason": "External3-6builds andCPU readings up to99.1%; onlyowneddiagnosticprocessstopped. Allpartialtimings excluded; sourcecode correctness/JIT/configuration evidence retained.",
+  "measurement_policy_changed": false,
+  "qualification_accepted": false,
+  "performance_qualification_dispatched": false,
+  "source_or_report_imported": false,
+  "next": "Use isolatedCI for fullfour-consumer decision after active180-case qualification/baselinecloses. Any sourcecomposition needsfreshsource-bound verification; no oldreceipt substitution."
+}

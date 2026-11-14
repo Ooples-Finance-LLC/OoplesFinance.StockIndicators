@@ -1,0 +1,187 @@
+{
+  "source": "2a86e21e2fe89592f4ecef36589ee9a6548e9ab4",
+  "hashes": {
+    "old": "186c441ad23620cfaae3a94e9d10df7f0b46cacc66cdb8fb03860536b00ce7e5",
+    "new": "999d194617c48827f10f43adae9a9e63a18bfd865fdf3c9e96bc7c3fee4151cf"
+  },
+  "warmups": 1000,
+  "calls": 10,
+  "workers": 4,
+  "rows": [
+    {
+      "pair": "TaLib.Candles.Hammer",
+      "bars": 1000,
+      "label": "old",
+      "optimized_headers_before_measurement": [],
+      "optimized_headers_after_measurement_marker": [],
+      "measured_call_us": [
+        308.7,
+        299.1,
+        292.8,
+        306.8,
+        287.5,
+        298.6,
+        292.6,
+        302.3,
+        302.3,
+        304.7
+      ],
+      "log_sha256": "4cbde5d7b04d563df4b30c849d073a81861488a0961c83f5c81347f2f36cd4ad"
+    },
+    {
+      "pair": "TaLib.Candles.Hammer",
+      "bars": 1000,
+      "label": "new",
+      "optimized_headers_before_measurement": [],
+      "optimized_headers_after_measurement_marker": [],
+      "measured_call_us": [
+        294.8,
+        324.5,
+        283.1,
+        292.9,
+        289.0,
+        307.0,
+        297.0,
+        323.0,
+        316.4,
+        292.5
+      ],
+      "log_sha256": "c64080e17092b5049b47f7ae8a2e259ee35b57f29a6b37af33c9f4efaed2ec6d"
+    },
+    {
+      "pair": "TaLib.Candles.Hammer",
+      "bars": 10000,
+      "label": "old",
+      "optimized_headers_before_measurement": [
+        "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ContextReversalState:Update(byref):double:this (Tier1)",
+        "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ContextReversalState:Matches(byref):bool:this (Tier1)"
+      ],
+      "optimized_headers_after_measurement_marker": [],
+      "measured_call_us": [
+        668.5,
+        642.1,
+        635.5,
+        661.8,
+        653.0,
+        673.3,
+        652.9,
+        1277.8,
+        654.8,
+        660.4
+      ],
+      "log_sha256": "16a4fefe9bcc6f48fd54be92621a7a74079e9eab469e17c620db89fd97986856"
+    },
+    {
+      "pair": "TaLib.Candles.Hammer",
+      "bars": 10000,
+      "label": "new",
+      "optimized_headers_before_measurement": [
+        "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ContextReversalState:Update(byref):double:this (Tier1)",
+        "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ContextReversalState:Matches(byref):bool:this (Tier1)"
+      ],
+      "optimized_headers_after_measurement_marker": [],
+      "measured_call_us": [
+        672.2,
+        711.1,
+        647.0,
+        666.2,
+        686.5,
+        695.0,
+        685.2,
+        1307.4,
+        688.2,
+        654.2
+      ],
+      "log_sha256": "dd111de872a1a6d1a67427bb76a520228de227d0e7df5986b86d3cd62cf80424"
+    },
+    {
+      "pair": "TaLib.Candles.HangingMan",
+      "bars": 1000,
+      "label": "old",
+      "optimized_headers_before_measurement": [],
+      "optimized_headers_after_measurement_marker": [],
+      "measured_call_us": [
+        322.1,
+        315.3,
+        329.8,
+        307.9,
+        324.4,
+        328.6,
+        309.3,
+        900.7,
+        383.4,
+        308.1
+      ],
+      "log_sha256": "33ef1b250c950fff77a3e285e49171c4b423a0270987c1d333445c1c3895bf7d"
+    },
+    {
+      "pair": "TaLib.Candles.HangingMan",
+      "bars": 1000,
+      "label": "new",
+      "optimized_headers_before_measurement": [],
+      "optimized_headers_after_measurement_marker": [],
+      "measured_call_us": [
+        200.9,
+        208.3,
+        203.6,
+        195.6,
+        196.6,
+        191.8,
+        194.0,
+        216.9,
+        198.9,
+        198.8
+      ],
+      "log_sha256": "609724aa8e8617f7d9627de5703e66bd9597e1749b9380d07b958696b0cc7e0a"
+    },
+    {
+      "pair": "TaLib.Candles.HangingMan",
+      "bars": 10000,
+      "label": "old",
+      "optimized_headers_before_measurement": [
+        "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ContextReversalState:Update(byref):double:this (Tier1)",
+        "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ContextReversalState:Matches(byref):bool:this (Tier1)"
+      ],
+      "optimized_headers_after_measurement_marker": [],
+      "measured_call_us": [
+        894.1,
+        717.1,
+        1571.3,
+        657.1,
+        614.7,
+        654.5,
+        633.1,
+        681.3,
+        665.8,
+        686.6
+      ],
+      "log_sha256": "16194980537436bab0019545d810c74e02d231ccda857c082975845b4277901e"
+    },
+    {
+      "pair": "TaLib.Candles.HangingMan",
+      "bars": 10000,
+      "label": "new",
+      "optimized_headers_before_measurement": [
+        "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ContextReversalState:Update(byref):double:this (Tier1)",
+        "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ContextReversalState:Matches(byref):bool:this (Tier1)"
+      ],
+      "optimized_headers_after_measurement_marker": [],
+      "measured_call_us": [
+        674.4,
+        688.1,
+        671.0,
+        668.4,
+        680.8,
+        672.3,
+        673.3,
+        1330.8,
+        669.3,
+        673.7
+      ],
+      "log_sha256": "b8ea4638e5986b4557db0f9d2bf84052c66e64569d7186382c74a2b80357cb75"
+    }
+  ],
+  "production_changed": false,
+  "qualification": false,
+  "interpretation": "Diagnostic stdout ordering only. A compiled optimized header is not proof every worker invocation used it. These external-loop timings are not BDN measurements, native comparisons, or policy adoption evidence."
+}
