@@ -180,8 +180,8 @@ def warmup_context(plan, fixture, task=None):
         from .arithmetic_warmup_policy import SHA
         context['arithmetic_warmup_policy_sha256']=SHA
     if fixture == 'LibraryPairBenchmarks' and count == 20000 and plan.get('star_warmup_approval'):
-        from .star_warmup_policy import SHA
-        context['star_warmup_policy_sha256']=SHA
+        from .star_warmup_policy import approval_identity
+        context['star_warmup_policy_sha256']=approval_identity(plan)[1]
     return context
 
 

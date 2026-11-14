@@ -522,6 +522,12 @@ def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
 
+# Separately approved correction; retain original frozen scope for historical proofs.
+import copy as _copy
+SCOPES['abandoned-inventory-repair-20261114'] = _copy.deepcopy(SCOPES['abandoned-certified-blocks-20261114'])
+SCOPES['abandoned-inventory-repair-20261114']['methods']['SharedCrowSoldierBenchmarks'] = ['BuilderFull', 'BuilderLatestOnly']
+SCOPES['abandoned-inventory-repair-20261114']['totals'] = (176, 36)
+
 def verify_reference(plan):
     reference = plan.get('targeted_reference')
     if reference is None:

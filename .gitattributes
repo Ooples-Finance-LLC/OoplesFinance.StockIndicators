@@ -209,3 +209,7 @@ benchmarks/plans/hosted-star-reversal-certified-difference-20261114.json text eo
 benchmarks/plans/hosted-abandoned-certified-blocks-20261114.json text eol=lf
 benchmarks/plans/evidence/star-warmup-diagnostic-20261114.json -text
 benchmarks/plans/evidence/star-warmup-combined-qualification-20261114.json -text
+
+# Preserve the separately approved retry plan and approval bytes.
+benchmarks/plans/hosted-abandoned-inventory-repair-20261114.json -text
+benchmarks/plans/evidence/star-warmup-inventory-repair-20261114.json -text
