@@ -1,5 +1,6 @@
 using AiDotNet.Tensors.Helpers;
 using OoplesFinance.StockIndicators.Builder;
+using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -117,6 +118,53 @@ public sealed class StarReversalSharedExecutionTests
         {
             CpuParallelSettings.MaxDegreeOfParallelism = 8;
             foreach (var mode in Enum.GetValues<IndicatorHistoryMode>()) await CheckOwned(bars, owner, expected, mode);
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(4)]
+    public async Task CertifiedAndFallbackEvictionsPreserveIndependentDecisionsAcrossReset(int kind)
+    {
+        // Exercise both certificate rejections and gradual-underflow acceptance.
+        Assert.False(Binary64ArithmeticCertificate.TryDifference(1, double.Epsilon, out _));
+        Assert.False(Binary64ArithmeticCertificate.TryDifference(double.MaxValue, -double.MaxValue, out _));
+        Assert.True(Binary64ArithmeticCertificate.TryDifference(double.Epsilon, -double.Epsilon, out _));
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            foreach (var (longPeriod, shortPeriod, dojiPeriod) in new[] { (1, 3, 5), (3, 5, 7), (10, 10, 10) })
+            {
+                var owner = Create(kind, longPeriod, shortPeriod, dojiPeriod);
+                var state = (IIndicatorState)owner.CreateState();
+                var ordinary = Data(513, kind);
+                var stressed = ordinary.ToArray();
+                stressed[29] = new(ordinary[29].Time, 1, 2, -1, double.Epsilon, 1);
+                stressed[30] = new(ordinary[30].Time, -double.MaxValue, double.MaxValue, -double.MaxValue, double.MaxValue, 1);
+                stressed[31] = new(ordinary[31].Time, double.Epsilon, 2 * double.Epsilon, -double.Epsilon, -double.Epsilon, 1);
+                stressed[32] = new(ordinary[32].Time, -0d, 0, -0d, 0, 1);
+                stressed[33] = new(ordinary[33].Time, 1, -1, 1, -1, 1);
+                foreach (var bars in new[] { stressed, ordinary, stressed })
+                {
+                    state.Reset();
+                    var expected = bars.Select(b => state.Update(b)).ToArray();
+                    foreach (var rule in ((IIndicatorValidationContract)owner).ValidationRules)
+                        rule.Check(new IndicatorValidationContext("Certified star-reversal eviction/reset", bars, [expected], 0));
+                    // The wide/nonexact bars must leave their windows and signals
+                    // must recover; an all-zero result cannot pass this fixture.
+                    if (longPeriod == 10)
+                    {
+                        Assert.Contains(kind is 1 or 3 ? -100d : 100d, expected.Skip(128));
+                        if (kind == 4) Assert.Contains(-100d, expected.Skip(128));
+                    }
+                    foreach (int workers in new[] { 1, 4 })
+                    foreach (var mode in Enum.GetValues<IndicatorHistoryMode>())
+                    {
+                        CpuParallelSettings.MaxDegreeOfParallelism = workers;
+                        await CheckOwned(bars, owner, expected, mode);
+                    }
+                }
+            }
         }
         finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
     }
