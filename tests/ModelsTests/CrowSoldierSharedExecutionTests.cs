@@ -1,5 +1,6 @@
 using AiDotNet.Tensors.Helpers;
 using OoplesFinance.StockIndicators.Builder;
+using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -116,6 +117,47 @@ public sealed class CrowSoldierSharedExecutionTests
             state.Reset();
             Assert.Equal(0d, state.Update(bars[0]));
         }
+    }
+
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(2)]
+    public async Task CertifiedAndFallbackEvictionsRecoverSignalsAcrossReset(int kind)
+    {
+        Assert.False(Binary64ArithmeticCertificate.TryDifference(1, double.Epsilon, out _));
+        Assert.False(Binary64ArithmeticCertificate.TryDifference(double.MaxValue, -double.MaxValue, out _));
+        Assert.True(Binary64ArithmeticCertificate.TryDifference(double.Epsilon, -double.Epsilon, out _));
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            foreach (var (period, near, far, body) in new[] { (1, 3, 5, 7), (3, 3, 3, 3), (3, 5, 7, 1), (10, 5, 5, 10) })
+            {
+                var owner = Create(kind, period, near, far, body);
+                var state = (IIndicatorState)owner.CreateState();
+                var ordinary = Data(513, kind);
+                var stressed = ordinary.ToArray();
+                stressed[29] = new(ordinary[29].Time, 1, 2, -1, double.Epsilon, 1);
+                stressed[30] = new(ordinary[30].Time, -double.MaxValue, double.MaxValue, -double.MaxValue, double.MaxValue, 1);
+                stressed[31] = new(ordinary[31].Time, double.Epsilon, 2 * double.Epsilon, -double.Epsilon, -double.Epsilon, 1);
+                stressed[32] = new(ordinary[32].Time, -0d, 0, -0d, 0, 1);
+                stressed[33] = new(ordinary[33].Time, 1, -1, 1, -1, 1);
+                foreach (var bars in new[] { stressed, ordinary, stressed })
+                {
+                    state.Reset();
+                    var expected = bars.Select(b => state.Update(b)).ToArray();
+                    foreach (var rule in ((IIndicatorValidationContract)owner).ValidationRules)
+                        rule.Check(new IndicatorValidationContext("Certified Crow/Soldier eviction/reset", bars, [expected], 0));
+                    if (period == 10)
+                        Assert.Contains(kind == 2 ? 100d : -100d, expected.Skip(128));
+                    foreach (int workers in new[] { 1, 4 })
+                    foreach (var mode in Enum.GetValues<IndicatorHistoryMode>())
+                    {
+                        CpuParallelSettings.MaxDegreeOfParallelism = workers;
+                        await CheckOwned(bars, owner, expected, mode);
+                    }
+                }
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
     }
 
     private static async Task CheckReference(Bar[] bars, IndicatorBase owner)

@@ -270,8 +270,19 @@ internal sealed class CrowSoldierState(
 
     private static void Add(ref ExactMeanAccumulator sum, in Bar bar, bool body, int sign)
     {
-        sum.Add(body ? Math.Max(bar.Open, bar.Close) : bar.High, sign);
-        sum.Add(body ? Math.Min(bar.Open, bar.Close) : bar.Low, -sign);
+        double left = body ? Math.Max(bar.Open, bar.Close) : bar.High;
+        double right = body ? Math.Min(bar.Open, bar.Close) : bar.Low;
+#if !NETFRAMEWORK
+        // The certificate preserves the exact endpoint difference, including
+        // eviction; rejected differences retain the original ordered additions.
+        if (Binary64ArithmeticCertificate.TryDifference(left, right, out double difference))
+        {
+            sum.Add(difference, sign);
+            return;
+        }
+#endif
+        sum.Add(left, sign);
+        sum.Add(right, -sign);
     }
 
     private bool Shadow(in Bar b, ExactMeanAccumulator sum)
