@@ -125,13 +125,17 @@ public sealed class PriorSeededDirectionalMeasure
             if (b == 0) be = ae;
             int common = Math.Min(ae, be), left = ae - common, right = be - common;
             if (left > 62 || right > 62) return false;
-            // Each significand has <=53 bits, alignment <=62 and weight <=11
-            // bits. Each product is <2^126 and their sum is <2^127.
-            UInt128 numerator = ((UInt128)a << left) * (uint)(period - 1)
-                + ((UInt128)b << right) * (uint)period;
-            if (numerator == 0) return true; // Canonical zero, as in RocBankValue.
-            if (numerator > ulong.MaxValue) return false;
-            ulong top = (ulong)numerator, denominator = (ulong)period;
+            // Significands are <2^53 and weights <2^11, so these unshifted
+            // products fit in a word. Guard alignment and addition BEFORE
+            // performing them; positivity makes these guards equivalent to
+            // requiring the full exact aligned numerator to fit in a word.
+            ulong first = unchecked(a * (uint)(period - 1)), second = unchecked(b * (uint)period);
+            if (first > (ulong.MaxValue >> left) || second > (ulong.MaxValue >> right)) return false;
+            first <<= left;
+            second <<= right;
+            if (first > ulong.MaxValue - second) return false;
+            ulong top = unchecked(first + second), denominator = (ulong)period;
+            if (top == 0) return true; // Canonical zero, as in RocBankValue.
             int topBits = 64 - System.Numerics.BitOperations.LeadingZeroCount(top);
             int power = topBits - _divisor.Bits;
             // The compared shifted operand has at most 64 bits in either arm.
