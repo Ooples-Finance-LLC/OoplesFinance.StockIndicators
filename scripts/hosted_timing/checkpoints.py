@@ -51,6 +51,9 @@ def run_checkpointed(*, out, index, arm, fixture, pairs, methods, runtime, env,
         if pairs == ['TaLib.Candles.Harami']:
             assert set(methods) in ({'Ooples'}, {'Ooples', 'Competitor'}) and len(methods) == len(set(methods))
             assert context and context.get('warmup_count') == 20000
+        elif context and context.get('star_warmup_policy_sha256'):
+            from .star_warmup_policy import permits_context
+            assert permits_context(pairs,methods,context), 'Unapproved longer star batch warmups'
         else:
             from .arithmetic_warmup_policy import permits_context
             assert permits_context(pairs,methods,context), 'Unapproved longer arithmetic warmups'

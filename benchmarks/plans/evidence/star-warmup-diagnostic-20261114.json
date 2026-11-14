@@ -1,0 +1,261 @@
+{
+  "diagnostic_only": true,
+  "same_binary": true,
+  "all_cases_verified": true,
+  "case_count": 20,
+  "comparison_count": 5,
+  "comparisons": [
+    {
+      "pair": "TaLib.Candles.MorningStar",
+      "bars": 1000,
+      "method": "Ooples",
+      "A": [
+        {
+          "mean_ns": 84288.88888888889,
+          "lower_ns": 76642.24217549988,
+          "upper_ns": 91935.5356022779,
+          "samples": 9,
+          "allocated_bytes": 75392
+        },
+        {
+          "mean_ns": 289333.3333333333,
+          "lower_ns": 269987.51760553516,
+          "upper_ns": 308679.14906113147,
+          "samples": 9,
+          "allocated_bytes": 75392
+        }
+      ],
+      "B": [
+        {
+          "mean_ns": 60744.444444444445,
+          "lower_ns": 51027.62297551728,
+          "upper_ns": 70461.26591337161,
+          "samples": 9,
+          "allocated_bytes": 75352
+        },
+        {
+          "mean_ns": 58811.11111111111,
+          "lower_ns": 56132.352481679845,
+          "upper_ns": 61489.86974054237,
+          "samples": 9,
+          "allocated_bytes": 75352
+        }
+      ],
+      "separation": "B_below_A",
+      "host": {
+        "machine": "runnervmm7ud1",
+        "instance_nonce": "fd3af0db78dd46bd9f69b107d73df09a",
+        "run_id": "43601699975",
+        "run_attempt": "1",
+        "runner_image": "20261103.298.1",
+        "logical_cpus": 4
+      }
+    },
+    {
+      "pair": "TaLib.Candles.EveningStar",
+      "bars": 1000,
+      "method": "Ooples",
+      "A": [
+        {
+          "mean_ns": 304788.8888888889,
+          "lower_ns": 277278.02477999,
+          "upper_ns": 332299.7529977877,
+          "samples": 9,
+          "allocated_bytes": 75392
+        },
+        {
+          "mean_ns": 89900,
+          "lower_ns": 62278.257142073315,
+          "upper_ns": 117521.74285792669,
+          "samples": 10,
+          "allocated_bytes": 75392
+        }
+      ],
+      "B": [
+        {
+          "mean_ns": 58577.77777777778,
+          "lower_ns": 54061.049304608154,
+          "upper_ns": 63094.50625094741,
+          "samples": 9,
+          "allocated_bytes": 75352
+        },
+        {
+          "mean_ns": 58487.5,
+          "lower_ns": 55479.22972138007,
+          "upper_ns": 61495.77027861993,
+          "samples": 8,
+          "allocated_bytes": 75352
+        }
+      ],
+      "separation": "overlap",
+      "host": {
+        "machine": "runnervmm7ud1",
+        "instance_nonce": "fd3af0db78dd46bd9f69b107d73df09a",
+        "run_id": "43601699975",
+        "run_attempt": "1",
+        "runner_image": "20261103.298.1",
+        "logical_cpus": 4
+      }
+    },
+    {
+      "pair": "TaLib.Candles.MorningDojiStar",
+      "bars": 1000,
+      "method": "Ooples",
+      "A": [
+        {
+          "mean_ns": 144050,
+          "lower_ns": 141930.74868923548,
+          "upper_ns": 146169.25131076452,
+          "samples": 8,
+          "allocated_bytes": 74872
+        },
+        {
+          "mean_ns": 122875,
+          "lower_ns": 119902.86018300954,
+          "upper_ns": 125847.13981699046,
+          "samples": 8,
+          "allocated_bytes": 74872
+        }
+      ],
+      "B": [
+        {
+          "mean_ns": 66325,
+          "lower_ns": 63815.906518406504,
+          "upper_ns": 68834.09348159349,
+          "samples": 8,
+          "allocated_bytes": 74832
+        },
+        {
+          "mean_ns": 65112.5,
+          "lower_ns": 61634.05984026929,
+          "upper_ns": 68590.9401597307,
+          "samples": 8,
+          "allocated_bytes": 74832
+        }
+      ],
+      "separation": "B_below_A",
+      "host": {
+        "machine": "runnervmm7ud1",
+        "instance_nonce": "fd3af0db78dd46bd9f69b107d73df09a",
+        "run_id": "43601699975",
+        "run_attempt": "1",
+        "runner_image": "20261103.298.1",
+        "logical_cpus": 4
+      }
+    },
+    {
+      "pair": "TaLib.Candles.EveningDojiStar",
+      "bars": 1000,
+      "method": "Ooples",
+      "A": [
+        {
+          "mean_ns": 61233.333333333336,
+          "lower_ns": 46043.74259145847,
+          "upper_ns": 76422.9240752082,
+          "samples": 9,
+          "allocated_bytes": 74352
+        },
+        {
+          "mean_ns": 64100,
+          "lower_ns": 60873.02343252555,
+          "upper_ns": 67326.97656747446,
+          "samples": 8,
+          "allocated_bytes": 74392
+        }
+      ],
+      "B": [
+        {
+          "mean_ns": 71000,
+          "lower_ns": 61255.2871494276,
+          "upper_ns": 80744.71285057241,
+          "samples": 9,
+          "allocated_bytes": 74352
+        },
+        {
+          "mean_ns": 47187.5,
+          "lower_ns": 45632.73377609694,
+          "upper_ns": 48742.26622390306,
+          "samples": 8,
+          "allocated_bytes": 74352
+        }
+      ],
+      "separation": "overlap",
+      "host": {
+        "machine": "runnervmm7ud1",
+        "instance_nonce": "c367d1dfafd545e68f8a3539dfdd6f48",
+        "run_id": "43601699975",
+        "run_attempt": "1",
+        "runner_image": "20261103.298.1",
+        "logical_cpus": 4
+      }
+    },
+    {
+      "pair": "TaLib.Candles.AbandonedBaby",
+      "bars": 1000,
+      "method": "Ooples",
+      "A": [
+        {
+          "mean_ns": 283477.77777777775,
+          "lower_ns": 257938.51117329748,
+          "upper_ns": 309017.044382258,
+          "samples": 9,
+          "allocated_bytes": 73432
+        },
+        {
+          "mean_ns": 283888.8888888889,
+          "lower_ns": 274449.821546429,
+          "upper_ns": 293327.95623134874,
+          "samples": 9,
+          "allocated_bytes": 73432
+        }
+      ],
+      "B": [
+        {
+          "mean_ns": 45811.11111111111,
+          "lower_ns": 41815.486114282496,
+          "upper_ns": 49806.73610793972,
+          "samples": 9,
+          "allocated_bytes": 73392
+        },
+        {
+          "mean_ns": 44911.11111111111,
+          "lower_ns": 41868.3580452021,
+          "upper_ns": 47953.86417702012,
+          "samples": 9,
+          "allocated_bytes": 73392
+        }
+      ],
+      "separation": "B_below_A",
+      "host": {
+        "machine": "runnervmm7ud1",
+        "instance_nonce": "c367d1dfafd545e68f8a3539dfdd6f48",
+        "run_id": "43601699975",
+        "run_attempt": "1",
+        "runner_image": "20261103.298.1",
+        "logical_cpus": 4
+      }
+    }
+  ],
+  "diagnostic_plan_sha256": "8fa57e2a62d1539ca1ebff23d03f57b4a03ecde2f056a2798732dd2f26bca4f0",
+  "original_input": {
+    "run_id": "43590354236",
+    "run_attempt": "1",
+    "workflow_head": "931d403e7a1d0d57e149859ba3565a7346d419f8",
+    "artifact_id": 14112787163,
+    "artifact_digest": "sha256:5f1cffbf744627a182a70878e1282d72e42ece5d0a60ea78155f26417d733649",
+    "provenance_sha256": "f4280d2ec38c1db1ce2b590a1a0d56c3c76565cb6438adaeec21a1b193b4e3ea"
+  },
+  "measurement_run": [
+    "43601699975",
+    "1",
+    "cadda039ceca28616e3675f15df07e8caf9ef762"
+  ],
+  "warmups": {
+    "A": 1000,
+    "B": 20000
+  },
+  "iterations": 10,
+  "production_integrated": false,
+  "report_imported": false,
+  "policy_changed": false
+}

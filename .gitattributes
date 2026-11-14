@@ -206,3 +206,6 @@ benchmarks/plans/hosted-t3-state-checked-regions-20261113.json text eol=lf
 benchmarks/plans/hosted-prior-directional-typed-writer-20261113.json text eol=lf
 benchmarks/plans/hosted-prior-directional-word-guards-20261114.json text eol=lf
 benchmarks/plans/hosted-star-reversal-certified-difference-20261114.json text eol=lf
+benchmarks/plans/hosted-abandoned-certified-blocks-20261114.json text eol=lf
+benchmarks/plans/evidence/star-warmup-diagnostic-20261114.json -text
+benchmarks/plans/evidence/star-warmup-combined-qualification-20261114.json -text

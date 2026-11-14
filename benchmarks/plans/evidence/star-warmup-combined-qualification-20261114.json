@@ -1,0 +1,30 @@
+{
+  "approved": true,
+  "trial_only": true,
+  "one_cycle": true,
+  "authorization": "User selected Approve one combined cycle (Recommended). Maxone180case36decision cycle forpromisingprototype plusStar-only20000warmups;fallbackone150case30decisionpolicy-onlyifprototypefails. Allothergates/runtime/builders/Crowunchanged,max1runner.",
+  "sources": {
+    "published": "7f5290b20498bb562cdd2511482857baa0b293e8",
+    "old": "7f5290b20498bb562cdd2511482857baa0b293e8",
+    "successor": "89dcced08b6e62225130c438d797ea10ebfe65fd",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.150.0"
+  },
+  "runtime_policy_overrides": {},
+  "diagnostic_run": "43601699975",
+  "diagnostic_evidence": {
+    "path": "benchmarks/plans/evidence/star-warmup-diagnostic-20261114.json",
+    "sha256": "2a9f46f262496535d52a8a2bd07d66c2f4a1bd8c9aeabd60e2b0461159141a58"
+  },
+  "source_gate": {
+    "compiled_source": "b6cf7f9dc2698d6aadb93d0ed26eac57e7454758",
+    "qualified_source": "89dcced08b6e62225130c438d797ea10ebfe65fd",
+    "source_fingerprint": "3b7bd152fb256a08a793e7e613b3b853eae5e2c4c512d577beaa0fe324b2c9c7"
+  },
+  "cases": 180,
+  "decisions": 36,
+  "max_parallel": 1,
+  "scope": "20000 unmeasured warmups only for all five star LibraryPair Ooples/Competitor pairs at both report sizes. Builder and Crow controls unchanged. Ten measured iterations and default runtime/CPU/acceptance gates unchanged. No adoption unless complete qualification passes."
+}
