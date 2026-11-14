@@ -5,6 +5,10 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 internal static partial class ValuesBarExecution
 {
+    internal readonly record struct TillsonContinuation(bool IsSeeded, int Period,
+        long FactorBits, long First, long Index, ulong WordExponent,
+        long Stage0, long Stage1, long Stage2, long Stage3, long Stage4, long Stage5);
+
     internal sealed class TillsonValueState : IMultiOutputState
     {
         private readonly int _period;
@@ -34,6 +38,25 @@ internal static partial class ValuesBarExecution
             Array.Clear(_sums);
             _index = -1;
             _wordExponent = 0;
+        }
+
+        // Once all cascaded seeds finish, every sum has been cleared and is
+        // never read again. The six rounded stages and cached binade carry the
+        // recurrence; the logical index and immutable parameters carry presence.
+        internal TillsonContinuation CaptureContinuation() =>
+            _seed != TillsonSeed.CascadedMeans || _index < 6L * (_period - 1)
+                ? default
+                : new(true, _period, BitConverter.DoubleToInt64Bits(_factor), _first, _index, _wordExponent,
+                    BitConverter.DoubleToInt64Bits(_stages[0]), BitConverter.DoubleToInt64Bits(_stages[1]),
+                    BitConverter.DoubleToInt64Bits(_stages[2]), BitConverter.DoubleToInt64Bits(_stages[3]),
+                    BitConverter.DoubleToInt64Bits(_stages[4]), BitConverter.DoubleToInt64Bits(_stages[5]));
+
+        internal bool TrySetContinuationIndex(long index)
+        {
+            if (_seed != TillsonSeed.CascadedMeans || _index < 6L * (_period - 1)
+                || index < _index) return false;
+            _index = index;
+            return true;
         }
 
         public void Update(in Bar bar, Span<double> output)
