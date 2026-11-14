@@ -1,0 +1,65 @@
+{
+  "status": "frozen",
+  "diagnostic_only": true,
+  "approval": "User selected Approve bounded diagnostic (Recommended) on20261114 whilepublication/Crowcontinue.",
+  "original_plan": "benchmarks/plans/hosted-star-reversal-certified-difference-20261114.json",
+  "original_plan_sha256": "7dfe39ee54caaf5d7424de9871b7549cf3250b3422f8121429553ac131002bec",
+  "original_input": {
+    "run_id": "43590354236",
+    "run_attempt": "1",
+    "workflow_head": "931d403e7a1d0d57e149859ba3565a7346d419f8",
+    "artifact_id": 14112787163,
+    "artifact_digest": "sha256:5f1cffbf744627a182a70878e1282d72e42ece5d0a60ea78155f26417d733649",
+    "provenance_sha256": "f4280d2ec38c1db1ce2b590a1a0d56c3c76565cb6438adaeec21a1b193b4e3ea"
+  },
+  "sources": {
+    "published": "e6ceba9b5c7436961db0a0f0348b2fed9a24e6d2",
+    "old": "e6ceba9b5c7436961db0a0f0348b2fed9a24e6d2",
+    "successor": "e3db0fa7a5ad96edb8e33ac9f2f94b0da419d3fc",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "production_sha256": {
+    "old": "5d31bc247c12e4662e2edb05c895c314fd92053945824848802a5d5d33bdc397",
+    "successor": "d64031e90144b6f40435ff5d36fb7a46050bf8cee143eb12f220c9690fccd2fb",
+    "variants": "d7f577baf6e8c3bb474dc9394ed04d1a4a4d71dd0b06cd52936fcfb7acfd2dbd"
+  },
+  "profile": "successor",
+  "bars": [
+    1000
+  ],
+  "methods": [
+    "Ooples"
+  ],
+  "order": [
+    "A",
+    "B",
+    "B",
+    "A"
+  ],
+  "warmups": {
+    "A": 1000,
+    "B": 20000
+  },
+  "iterations": 10,
+  "quiet_samples": 12,
+  "max_cpu_percent": 15,
+  "runtime_policy_overrides": {},
+  "sdk": "10.0.403",
+  "tensor_version": "0.150.0",
+  "jobs": [
+    [
+      "TaLib.Candles.MorningStar",
+      "TaLib.Candles.EveningStar",
+      "TaLib.Candles.MorningDojiStar"
+    ],
+    [
+      "TaLib.Candles.EveningDojiStar",
+      "TaLib.Candles.AbandonedBaby"
+    ]
+  ],
+  "cases": 20,
+  "comparisons": 5,
+  "max_parallel": 2,
+  "published_source": "7f5290b20498bb562cdd2511482857baa0b293e8",
+  "published_src_tree": "3eb4bcfbb36bcd9a1e802caf7adbfb676a2c7ac6"
+}
