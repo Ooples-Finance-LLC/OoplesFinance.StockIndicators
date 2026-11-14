@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "3744e8cb387d3859ea2da247cbe23821a2dd381607e805b907b77e795892683d",
+    "archive": "benchmarks/results/remaining-indicators/star-reversal-certified-difference-20261114-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "209e46fba4f06752856ab88fc0f04d978354c68ca8f48ef1b6fc195114d10e86",
+    "archive": "benchmarks/results/remaining-indicators/star-reversal-certified-difference-20261114-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "9a062a43f03a7a452710e9e1f39198f1453582c9d7624fceb8b8d21e8e72e5aa",
+    "archive": "benchmarks/results/remaining-indicators/star-reversal-certified-difference-20261114-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "e2b04b7cebbd5810b4875a2564306de833d0bbf1a6738cdcccbc40dbb913e6b2",
+    "archive": "benchmarks/results/remaining-indicators/star-reversal-certified-difference-20261114-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "a83bbbd84b1fe7ebb34290d7eae4664677ac56305ed6bdb75b65d7c56948c612",
+    "archive": "benchmarks/results/remaining-indicators/star-reversal-certified-difference-20261114-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "35f47cac17b1a2a9df53f2a6cc7a312322bfd63aa988c8d02b8ec5dfa6bf776c",
+    "archive": "benchmarks/results/remaining-indicators/star-reversal-certified-difference-20261114-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "a553d7b4c0449206729245484f39d031c63c1f0d4150e9e09aed8d8c27bb45ca",
+    "archive": "benchmarks/results/remaining-indicators/star-reversal-certified-difference-20261114-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "540cc68b7074a9f2d3d1835c638c7e8ff38222d801f6d7b3c689b77320e45a95",
+    "archive": "benchmarks/results/remaining-indicators/star-reversal-certified-difference-20261114-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "99d8af838817960694a6588c54a1ce7e03ae63cb4a4647c7e44a83e458362097",
+    "archive": "benchmarks/results/remaining-indicators/star-reversal-certified-difference-20261114-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "730e78767e7daceed01c122496121ac0a953f23fa8418976cb6028747d265513",
+    "archive": "benchmarks/results/remaining-indicators/star-reversal-certified-difference-20261114-report-integration/updated-pair-details.png.gz"
+  }
+}

@@ -1639,7 +1639,14 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-43590354236-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "4b107ec6e53b6a24774f3ec2872c62ae4cf23c11",
+  "integrated_paths": [
+    "src/Indicators/StarReversalCandles.cs",
+    "tests/ModelsTests/StarReversalSharedExecutionTests.cs"
+  ],
+  "report_sha256": "e2b04b7cebbd5810b4875a2564306de833d0bbf1a6738cdcccbc40dbb913e6b2",
+  "report_archive": "benchmarks/results/remaining-indicators/star-reversal-certified-difference-20261114-report-integration"
 }
