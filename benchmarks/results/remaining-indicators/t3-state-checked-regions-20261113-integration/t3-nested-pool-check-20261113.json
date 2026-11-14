@@ -1,0 +1,18 @@
+{
+  "productionSha256": "8c5f517a7076c17469d1fcb85f88335559fd41344bbe8e54be362befa4d4eff7",
+  "bars": 10003,
+  "period": 20,
+  "outerPoolCalls": 4,
+  "workerLimit": 8,
+  "outerThreadIds": [
+    22,
+    25,
+    26,
+    27
+  ],
+  "referenceSha256": "813b6153177e5cc737ab761ab77245bcb86dad4f1427f1851850d628923eec47",
+  "independentReferenceMatched": true,
+  "allNestedResultsMatched": true,
+  "completedWithinSeconds": 20,
+  "performanceEvidence": false
+}

@@ -455,7 +455,16 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-43530847086-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "92364663ae932400f31f354f8225941b9b0b2930",
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.Tillson.cs",
+    "src/Indicators/ValuesBarExecution.TillsonRegions.cs",
+    "src/Indicators/ValuesBarExecution.cs",
+    "tests/ModelsTests/TillsonCheckedRegionTests.cs"
+  ],
+  "report_sha256": "fe7248780365eecefe7fb69f14d603d00ab5d961b2f4ee7aeb92e5da8330f9ad",
+  "report_archive": "benchmarks/results/remaining-indicators/t3-state-checked-regions-20261113-report-integration"
 }
