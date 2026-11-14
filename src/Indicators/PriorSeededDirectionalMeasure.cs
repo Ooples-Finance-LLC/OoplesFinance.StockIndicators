@@ -102,7 +102,7 @@ public sealed class PriorSeededDirectionalMeasure
                 )
             );
 
-    private sealed class State(PriorDirectionalMeasure measure, int period, int unstable)
+    internal sealed class State(PriorDirectionalMeasure measure, int period, int unstable)
         : IMultiOutputState
     {
         private readonly Queue<double?>? _history = measure == PriorDirectionalMeasure.Rating ? new() : null;
