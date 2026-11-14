@@ -19,6 +19,8 @@ def original_inputs(root):
     plan.pop('reuse_inputs', None)
     plan.pop('coverage_harness', None)
     plan.pop('coverage_shards', None)
+    plan.pop('require_fixture_inventory', None)
+    plan.pop('targeted_reference', None)
     plan['measurement_policy'].pop('fixed_invocation_warmups', None)
     plan['gpu_sources'] = {label:pipeline.original_gpu_source(plan, label) for label in ('old','successor','variants')}
     plan['cpu_test_classes'] = {label:['SyntheticTests'] for label in ('old','successor','variants')}

@@ -209,3 +209,4 @@ benchmarks/plans/hosted-star-reversal-certified-difference-20261114.json text eo
 benchmarks/plans/hosted-abandoned-certified-blocks-20261114.json text eol=lf
 benchmarks/plans/evidence/star-warmup-diagnostic-20261114.json -text
 benchmarks/plans/evidence/star-warmup-combined-qualification-20261114.json -text
+benchmarks/plans/hosted-context-price-prefilter-20261114.json text eol=lf
