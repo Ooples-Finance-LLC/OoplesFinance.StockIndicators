@@ -124,6 +124,7 @@ internal sealed class ContextReversalState(int period, int nearPeriod, int warmu
     private ExactMeanAccumulator _bodySum, _rangeSum, _nearSum;
     private Bar _previous;
     private int _seen;
+    internal bool PreferPriceContext { get; set; }
     public void Reset()
     {
         _history.Clear(); _nearHistory.Clear(); _bodySum = _rangeSum = _nearSum = default;
@@ -162,8 +163,9 @@ internal sealed class ContextReversalState(int period, int nearPeriod, int warmu
         var bottom = Math.Min(bar.Open, bar.Close);
         // These necessary price-only predicates can reject upper-shadow
         // patterns before constructing their exact threshold comparisons.
-        if (kind == ContextReversalKind.InvertedHammer && top >= Math.Min(_previous.Open, _previous.Close)
-            || kind == ContextReversalKind.ShootingStar && bottom <= Math.Max(_previous.Open, _previous.Close))
+        if (PreferPriceContext &&
+            (kind == ContextReversalKind.InvertedHammer && top >= Math.Min(_previous.Open, _previous.Close)
+            || kind == ContextReversalKind.ShootingStar && bottom <= Math.Max(_previous.Open, _previous.Close)))
             return false;
         if (Margin(_bodySum, _period, top, bottom) <= 0) return false;
         var lowerPattern = kind is ContextReversalKind.Hammer or ContextReversalKind.HangingMan;
