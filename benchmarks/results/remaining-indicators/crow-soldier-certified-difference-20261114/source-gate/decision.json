@@ -1,0 +1,16 @@
+{
+  "status": "Screened out: final-baseline local ROI gate not promising",
+  "source": "81f46c47e7d7a7cedca8a9ff5ecdd5d14f7599fe",
+  "correctness_qualified_source": "f4b7fb8d7228c59dd06c570088b117cdfe5522bb",
+  "baseline": "7f5290b20498bb562cdd2511482857baa0b293e8",
+  "unit": 11,
+  "comparator": 58,
+  "actual_gpu": 100,
+  "accepted_for_hosted_qualification": false,
+  "source_accepted": false,
+  "production_integrated": false,
+  "report_imported": false,
+  "hosted_timing_dispatched": false,
+  "final_diagnostic_mean_reduction": -0.05411558213770706,
+  "limits": "Unisolated local diagnostic is a conservative go/no-go screen,not proof of regression or native performance. Preliminary6.18%gain not reproduced on finalbaseline; no selected result import or unchanged retry."
+}

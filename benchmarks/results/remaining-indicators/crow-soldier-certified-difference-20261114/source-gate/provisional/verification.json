@@ -1,0 +1,85 @@
+{
+  "source": "81f46c47e7d7a7cedca8a9ff5ecdd5d14f7599fe",
+  "qualified_source": "f4b7fb8d7228c59dd06c570088b117cdfe5522bb",
+  "baseline": "e6ceba9b5c7436961db0a0f0348b2fed9a24e6d2",
+  "production_sha256": "4e7209aafebf86acbef24b4773bed7b272ac9f0e33e0184cc0dad0a7413df711",
+  "baseline_production_sha256": "892145210cac0449ca4767f42db18cfbc205099109679e12c8f5c690c1a46ec8",
+  "source_fingerprint": "de2664e4817cab68a780ee68a21be75b15c838e55183cdcc7bdcf444590d4855",
+  "pair": "TaLib.Candles.ThreeBlackCrows",
+  "workers": 4,
+  "optimized_kernel_observed": true,
+  "certificate_path_observed": true,
+  "optimized_callers": [
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:FillBoundedWindow[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+CrowSoldierKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.IIndicator,int,System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer):OoplesFinance.StockIndicators.Indicators.Bar (Tier0-FullOpts)",
+      "code_bytes": [
+        "1951"
+      ]
+    },
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeBoundedRegion[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+CrowSoldierKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.IIndicator):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier1-OSR)",
+      "code_bytes": [
+        "4138"
+      ]
+    },
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeBoundedRegion[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+CrowSoldierKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.IIndicator):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier1-OSR)",
+      "code_bytes": [
+        "3514"
+      ]
+    },
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+<>c__DisplayClass142_0`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+CrowSoldierKernel]:<FillBoundedWindow>b__0(int):this (Tier1)",
+      "code_bytes": [
+        "5474"
+      ]
+    },
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeBoundedRegion[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+CrowSoldierKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.IIndicator):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier1)",
+      "code_bytes": [
+        "5225"
+      ]
+    }
+  ],
+  "diagnostic_rounds": [
+    {
+      "label": "old1",
+      "batches": 12918,
+      "seconds": 5.0002302,
+      "allocated_bytes": 8336600928,
+      "mean_batch_ms": 0.38707464003715747
+    },
+    {
+      "label": "new1",
+      "batches": 13864,
+      "seconds": 5.0000063,
+      "allocated_bytes": 8947679064,
+      "mean_batch_ms": 0.3606467325447201
+    },
+    {
+      "label": "new2",
+      "batches": 14631,
+      "seconds": 5.0002389,
+      "allocated_bytes": 9442301696,
+      "mean_batch_ms": 0.3417564691408653
+    },
+    {
+      "label": "old2",
+      "batches": 13829,
+      "seconds": 5.0000901,
+      "allocated_bytes": 8924297344,
+      "mean_batch_ms": 0.36156555788560274
+    }
+  ],
+  "roi_promising": true,
+  "diagnostic_mean_reduction": 0.06176130585222084,
+  "disassembly_sha256": "297fbc4b44a4d032fcfccc0ef8d22092c30c7008113ec88555ed451a76e58769",
+  "performance_qualified": false,
+  "local_timing_usable_for_acceptance": false,
+  "provisional_baseline": true,
+  "limits": [
+    "Unisolated local diagnostic,100warmups,five-second paired windows,four diagnostic workers,default runtime.",
+    "Only a go/no-go gate for approved complete90case qualification; no native win or source acceptance.",
+    "The unchanged certificate accepted all20k authenticated fixture endpoint differences in the retained independent oracle model."
+  ]
+}
