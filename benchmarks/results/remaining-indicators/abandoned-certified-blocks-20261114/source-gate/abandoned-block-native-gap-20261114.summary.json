@@ -1,0 +1,12 @@
+{
+  "source": "b6cf7f9dc2698d6aadb93d0ed26eac57e7454758",
+  "production_sha256": "9d62f5f3d2893ac2c9e10b36098982c10abe660ac541d992d2863375ba3d6006",
+  "actual_block_helper_observed": true,
+  "actual_tensor_worker_block_stacks_observed": true,
+  "matching_evented_intervals": 6724,
+  "sampled_thread_weight_by_unit": {
+    "milliseconds": 20291.05781612491
+  },
+  "trace_sha256": "30ee80d0dd23067f24b1aa1ce063632a381064266ede217f2e4202814e02f27e",
+  "limits": "PerfView evented export of sampled thread-time stacks,not processCPUpercentages or qualification. Intrusive local profiling only."
+}
