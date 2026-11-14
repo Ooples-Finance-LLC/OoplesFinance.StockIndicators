@@ -1,0 +1,3447 @@
+; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ContextReversalState:Update(byref):double:this (Tier0)
+; Emitting BLENDED_CODE for generic X64 + VEX on Windows
+; Tier0 code
+; rbp based frame
+; partially interruptible
+; compiling with minopt
+
+G_M000_IG01:                ;; offset=0x0000
+       push     rbp
+       sub      rsp, 224
+       lea      rbp, [rsp+0xE0]
+       vxorps   xmm4, xmm4, xmm4
+       mov      rax, -192
+       vmovdqa  xmmword ptr [rax+rbp], xmm4
+       vmovdqa  xmmword ptr [rbp+rax+0x10], xmm4
+       vmovdqa  xmmword ptr [rbp+rax+0x20], xmm4
+       add      rax, 48
+       jne      SHORT  -5 instr
+       mov      gword ptr [rbp+0x10], rcx
+       mov      bword ptr [rbp+0x18], rdx
+ 
+G_M000_IG02:                ;; offset=0x003D
+       xor      eax, eax
+       mov      qword ptr [rbp-0x08], rax
+       mov      rax, gword ptr [rbp+0x10]
+       mov      eax, dword ptr [rax+0x28]
+       mov      rcx, gword ptr [rbp+0x10]
+       cmp      eax, dword ptr [rcx+0x20]
+       jl       SHORT G_M000_IG08
+       mov      rcx, gword ptr [rbp+0x10]
+       mov      rdx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Matches(byref):bool:this]
+       test     eax, eax
+       je       SHORT G_M000_IG08
+       mov      rax, gword ptr [rbp+0x10]
+       mov      eax, dword ptr [rax+0x24]
+       mov      dword ptr [rbp-0x0C], eax
+       cmp      dword ptr [rbp-0x0C], 0
+       je       SHORT G_M000_IG03
+       cmp      dword ptr [rbp-0x0C], 2
+       jne      SHORT G_M000_IG04
+ 
+G_M000_IG03:                ;; offset=0x007B
+       mov      dword ptr [rbp-0x10], 1
+       jmp      SHORT G_M000_IG05
+ 
+G_M000_IG04:                ;; offset=0x0084
+       xor      eax, eax
+       mov      dword ptr [rbp-0x10], eax
+ 
+G_M000_IG05:                ;; offset=0x0089
+       cmp      dword ptr [rbp-0x10], 0
+       jne      SHORT G_M000_IG06
+       mov      dword ptr [rbp-0x4C], -100
+       jmp      SHORT G_M000_IG07
+ 
+G_M000_IG06:                ;; offset=0x0098
+       mov      dword ptr [rbp-0x4C], 100
+ 
+G_M000_IG07:                ;; offset=0x009F
+       vxorps   xmm0, xmm0, xmm0
+       vcvtsi2sd xmm0, xmm0, dword ptr [rbp-0x4C]
+       vmovsd   qword ptr [rbp-0x08], xmm0
+ 
+G_M000_IG08:                ;; offset=0x00AD
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      dword ptr [rax+0x1C], 0
+       jle      G_M000_IG09
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      dword ptr [rax+0x28], 0
+       jle      G_M000_IG09
+       mov      rax, gword ptr [rbp+0x10]
+       mov      rax, gword ptr [rax+0x10]
+       mov      gword ptr [rbp-0x88], rax
+       mov      rax, gword ptr [rbp+0x10]
+       vmovdqu  ymm0, ymmword ptr [rax+0xC0]
+       vmovdqu  ymmword ptr [rbp-0x80], ymm0
+       vmovdqu  xmm0, xmmword ptr [rax+0xE0]
+       vmovdqu  xmmword ptr [rbp-0x60], xmm0
+       mov      rcx, gword ptr [rbp-0x88]
+       lea      rdx, [rbp-0x80]
+       cmp      dword ptr [rcx], ecx
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:Enqueue(OoplesFinance.StockIndicators.Indicators.Bar):this]
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rdx, bword ptr [rax+0xC0]
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xA0]
+       mov      r8d, 1
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:AddRange(byref,byref,int)]
+       mov      rax, gword ptr [rbp+0x10]
+       mov      rcx, gword ptr [rax+0x10]
+       cmp      dword ptr [rcx], ecx
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:get_Count():int:this]
+       mov      rcx, gword ptr [rbp+0x10]
+       cmp      eax, dword ptr [rcx+0x1C]
+       jle      SHORT G_M000_IG09
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       add      rax, 160
+       mov      bword ptr [rbp-0x48], rax
+       lea      rdx, [rbp-0x40]
+       mov      rax, gword ptr [rbp+0x10]
+       mov      rcx, gword ptr [rax+0x10]
+       cmp      dword ptr [rcx], ecx
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:Dequeue():OoplesFinance.StockIndicators.Indicators.Bar:this]
+       lea      rdx, [rbp-0x40]
+       mov      rcx, bword ptr [rbp-0x48]
+       mov      r8d, -1
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:AddRange(byref,byref,int)]
+ 
+G_M000_IG09:                ;; offset=0x018C
+       mov      rax, gword ptr [rbp+0x10]
+       mov      rax, gword ptr [rax+0x08]
+       mov      gword ptr [rbp-0xC0], rax
+       mov      rax, bword ptr [rbp+0x18]
+       vmovdqu  ymm0, ymmword ptr [rax]
+       vmovdqu  ymmword ptr [rbp-0xB8], ymm0
+       vmovdqu  xmm0, xmmword ptr [rax+0x20]
+       vmovdqu  xmmword ptr [rbp-0x98], xmm0
+       mov      rcx, gword ptr [rbp-0xC0]
+       lea      rdx, [rbp-0xB8]
+       cmp      dword ptr [rcx], ecx
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:Enqueue(OoplesFinance.StockIndicators.Indicators.Bar):this]
+       mov      rcx, gword ptr [rbp+0x10]
+       mov      rdx, bword ptr [rbp+0x18]
+       mov      r8d, 1
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Accumulate(byref,int):this]
+       mov      rax, gword ptr [rbp+0x10]
+       mov      rcx, gword ptr [rax+0x08]
+       cmp      dword ptr [rcx], ecx
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:get_Count():int:this]
+       mov      rcx, gword ptr [rbp+0x10]
+       cmp      eax, dword ptr [rcx+0x18]
+       jle      SHORT G_M000_IG10
+       lea      rdx, [rbp-0x40]
+       mov      rax, gword ptr [rbp+0x10]
+       mov      rcx, gword ptr [rax+0x08]
+       cmp      dword ptr [rcx], ecx
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:Dequeue():OoplesFinance.StockIndicators.Indicators.Bar:this]
+       lea      rdx, [rbp-0x40]
+       mov      rcx, gword ptr [rbp+0x10]
+       mov      r8d, -1
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Accumulate(byref,int):this]
+ 
+G_M000_IG10:                ;; offset=0x0223
+       mov      rax, bword ptr [rbp+0x18]
+       mov      rcx, gword ptr [rbp+0x10]
+       vmovdqu  ymm0, ymmword ptr [rax]
+       vmovdqu  ymmword ptr [rcx+0xC0], ymm0
+       vmovdqu  xmm0, xmmword ptr [rax+0x20]
+       vmovdqu  xmmword ptr [rcx+0xE0], xmm0
+       mov      rax, gword ptr [rbp+0x10]
+       mov      eax, dword ptr [rax+0x28]
+       mov      rcx, gword ptr [rbp+0x10]
+       cmp      eax, dword ptr [rcx+0x20]
+       jge      SHORT G_M000_IG11
+       mov      rax, gword ptr [rbp+0x10]
+       mov      eax, dword ptr [rax+0x28]
+       add      eax, 1
+       jo       SHORT G_M000_IG13
+       mov      rcx, gword ptr [rbp+0x10]
+       mov      dword ptr [rcx+0x28], eax
+ 
+G_M000_IG11:                ;; offset=0x0267
+       vmovsd   xmm0, qword ptr [rbp-0x08]
+ 
+G_M000_IG12:                ;; offset=0x026C
+       vzeroupper 
+       add      rsp, 224
+       pop      rbp
+       ret      
+ 
+G_M000_IG13:                ;; offset=0x0278
+       call     CORINFO_HELP_OVERFLOW
+       int3     
+ 
+; Total bytes of code 638
+
+; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ContextReversalState:Matches(byref):bool:this (Tier0)
+; Emitting BLENDED_CODE for generic X64 + VEX on Windows
+; Tier0 code
+; rbp based frame
+; partially interruptible
+; compiling with minopt
+
+G_M000_IG01:                ;; offset=0x0000
+       push     rbp
+       sub      rsp, 992
+       lea      rbp, [rsp+0x3E0]
+       vxorps   xmm4, xmm4, xmm4
+       vmovdqa  xmmword ptr [rbp-0x3A0], xmm4
+       mov      rax, -912
+       vmovdqa  xmmword ptr [rax+rbp], xmm4
+       vmovdqa  xmmword ptr [rbp+rax+0x10], xmm4
+       vmovdqa  xmmword ptr [rbp+rax+0x20], xmm4
+       add      rax, 48
+       jne      SHORT  -5 instr
+       mov      gword ptr [rbp+0x10], rcx
+       mov      bword ptr [rbp+0x18], rdx
+ 
+G_M000_IG02:                ;; offset=0x0045
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Open():double:this]
+       vmovsd   qword ptr [rbp-0x48], xmm0
+       vmovsd   xmm0, qword ptr [rbp-0x48]
+       vmovaps  xmmword ptr [rbp-0x60], xmm0
+       vmovaps  xmm0, xmmword ptr [rbp-0x60]
+       vmovups  xmmword ptr [rbp-0x3B8], xmm0
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Close():double:this]
+       vmovaps  xmmword ptr [rbp-0x70], xmm0
+       vmovups  xmm0, xmmword ptr [rbp-0x3B8]
+       vcmpeqpd xmm0, xmm0, xmmword ptr [rbp-0x70]
+       vxorps   xmm1, xmm1, xmm1
+       vpcmpgtq xmm1, xmm1, xmmword ptr [rbp-0x70]
+       vandpd   xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x60]
+       vcmpneqpd xmm1, xmm1, xmmword ptr [rbp-0x60]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x70]
+       vcmpltpd xmm1, xmm1, xmmword ptr [rbp-0x60]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x70]
+       vblendvpd xmm0, xmm1, xmmword ptr [rbp-0x60], xmm0
+       vmovsd   qword ptr [rbp-0x08], xmm0
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Open():double:this]
+       vmovsd   qword ptr [rbp-0x78], xmm0
+       vmovsd   xmm0, qword ptr [rbp-0x78]
+       vmovaps  xmmword ptr [rbp-0x90], xmm0
+       vmovaps  xmm0, xmmword ptr [rbp-0x90]
+       vmovups  xmmword ptr [rbp-0x3B8], xmm0
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Close():double:this]
+       vmovaps  xmmword ptr [rbp-0xA0], xmm0
+       vmovups  xmm0, xmmword ptr [rbp-0x3B8]
+       vcmpeqpd xmm0, xmm0, xmmword ptr [rbp-0xA0]
+       vxorps   xmm1, xmm1, xmm1
+       vpcmpgtq xmm1, xmm1, xmmword ptr [rbp-0x90]
+       vandpd   xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x90]
+       vcmpneqpd xmm1, xmm1, xmmword ptr [rbp-0x90]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x90]
+       vcmpltpd xmm1, xmm1, xmmword ptr [rbp-0xA0]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0xA0]
+       vblendvpd xmm0, xmm1, xmmword ptr [rbp-0x90], xmm0
+       vmovsd   qword ptr [rbp-0x10], xmm0
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      dword ptr [rax+0x24], 2
+       jne      G_M000_IG04
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Open():double:this]
+       vmovsd   qword ptr [rbp-0x2A8], xmm0
+ 
+G_M000_IG03:                ;; offset=0x0193
+       vmovsd   xmm0, qword ptr [rbp-0x2A8]
+       vmovaps  xmmword ptr [rbp-0x2C0], xmm0
+       vmovaps  xmm0, xmmword ptr [rbp-0x2C0]
+       vmovups  xmmword ptr [rbp-0x3B8], xmm0
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Close():double:this]
+       vmovaps  xmmword ptr [rbp-0x2D0], xmm0
+       vmovups  xmm0, xmmword ptr [rbp-0x3B8]
+       vcmpeqpd xmm0, xmm0, xmmword ptr [rbp-0x2D0]
+       vxorps   xmm1, xmm1, xmm1
+       vpcmpgtq xmm1, xmm1, xmmword ptr [rbp-0x2C0]
+       vandpd   xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x2C0]
+       vcmpneqpd xmm1, xmm1, xmmword ptr [rbp-0x2C0]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x2C0]
+       vcmpltpd xmm1, xmm1, xmmword ptr [rbp-0x2D0]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x2D0]
+       vblendvpd xmm0, xmm1, xmmword ptr [rbp-0x2C0], xmm0
+       vmovsd   xmm1, qword ptr [rbp-0x08]
+       vucomisd xmm1, xmm0
+       jae      G_M000_IG05
+ 
+G_M000_IG04:                ;; offset=0x023F
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      dword ptr [rax+0x24], 3
+       jne      G_M000_IG06
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Open():double:this]
+       vmovsd   qword ptr [rbp-0x278], xmm0
+       vmovsd   xmm0, qword ptr [rbp-0x278]
+       vmovaps  xmmword ptr [rbp-0x290], xmm0
+       vmovaps  xmm0, xmmword ptr [rbp-0x290]
+       vmovups  xmmword ptr [rbp-0x3B8], xmm0
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Close():double:this]
+       vmovaps  xmmword ptr [rbp-0x2A0], xmm0
+       vmovups  xmm0, xmmword ptr [rbp-0x3B8]
+       vcmpeqpd xmm0, xmm0, xmmword ptr [rbp-0x2A0]
+       vxorps   xmm1, xmm1, xmm1
+       vpcmpgtq xmm1, xmm1, xmmword ptr [rbp-0x2A0]
+       vandpd   xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x290]
+       vcmpneqpd xmm1, xmm1, xmmword ptr [rbp-0x290]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x2A0]
+       vcmpltpd xmm1, xmm1, xmmword ptr [rbp-0x290]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x2A0]
+       vblendvpd xmm0, xmm1, xmmword ptr [rbp-0x290], xmm0
+       vucomisd xmm0, qword ptr [rbp-0x10]
+       jb       SHORT G_M000_IG06
+ 
+G_M000_IG05:                ;; offset=0x0310
+       jmp      G_M000_IG41
+ 
+G_M000_IG06:                ;; offset=0x0315
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG07:                ;; offset=0x0319
+       vmovdqu  ymm0, ymmword ptr [rax+0x60]
+       vmovdqu  ymmword ptr [rbp-0x2F8], ymm0
+ 
+G_M000_IG08:                ;; offset=0x0326
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG09:                ;; offset=0x032A
+       vmovdqu  xmm0, xmmword ptr [rax+0x30]
+       vmovdqu  xmmword ptr [rbp-0x308], xmm0
+ 
+G_M000_IG10:                ;; offset=0x0337
+       lea      rcx, [rbp-0x2F8]
+       lea      rdx, [rbp-0x308]
+       vmovsd   xmm2, qword ptr [rbp-0x08]
+       vmovsd   xmm3, qword ptr [rbp-0x10]
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Margin(OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator,System.Numerics.BigInteger,double,double):int]
+       test     eax, eax
+       jg       SHORT G_M000_IG11
+       jmp      G_M000_IG41
+ 
+G_M000_IG11:                ;; offset=0x035E
+       mov      rax, gword ptr [rbp+0x10]
+       mov      eax, dword ptr [rax+0x24]
+       mov      dword ptr [rbp-0x3C], eax
+       cmp      dword ptr [rbp-0x3C], 1
+       ja       SHORT G_M000_IG12
+       mov      dword ptr [rbp-0x40], 1
+       jmp      SHORT G_M000_IG13
+ 
+G_M000_IG12:                ;; offset=0x0377
+       xor      eax, eax
+       mov      dword ptr [rbp-0x40], eax
+ 
+G_M000_IG13:                ;; offset=0x037C
+       mov      eax, dword ptr [rbp-0x40]
+       mov      dword ptr [rbp-0x14], eax
+       vxorps   ymm0, ymm0, ymm0
+       vmovdqu  ymmword ptr [rbp-0x38], ymm0
+       lea      rax, bword ptr [rbp-0x38]
+       mov      bword ptr [rbp-0xA8], rax
+       cmp      dword ptr [rbp-0x14], 0
+       jne      SHORT G_M000_IG14
+       mov      rax, bword ptr [rbp-0xA8]
+       mov      bword ptr [rbp-0xB0], rax
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_High():double:this]
+       vmovsd   qword ptr [rbp-0xB8], xmm0
+       jmp      SHORT G_M000_IG15
+ 
+G_M000_IG14:                ;; offset=0x03BE
+       mov      rax, bword ptr [rbp-0xA8]
+       mov      bword ptr [rbp-0xB0], rax
+       vmovsd   xmm0, qword ptr [rbp-0x10]
+       vmovsd   qword ptr [rbp-0xB8], xmm0
+ 
+G_M000_IG15:                ;; offset=0x03D9
+       mov      rcx, bword ptr [rbp-0xB0]
+       vmovsd   xmm1, qword ptr [rbp-0xB8]
+       mov      r8d, 1
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,int):this]
+       lea      rax, bword ptr [rbp-0x38]
+       mov      bword ptr [rbp-0xC0], rax
+       cmp      dword ptr [rbp-0x14], 0
+       jne      SHORT G_M000_IG16
+       mov      rax, bword ptr [rbp-0xC0]
+       mov      bword ptr [rbp-0xC8], rax
+       vmovsd   xmm0, qword ptr [rbp-0x08]
+       vmovsd   qword ptr [rbp-0xD0], xmm0
+       jmp      SHORT G_M000_IG17
+ 
+G_M000_IG16:                ;; offset=0x0422
+       mov      rax, bword ptr [rbp-0xC0]
+       mov      bword ptr [rbp-0xC8], rax
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Low():double:this]
+       vmovsd   qword ptr [rbp-0xD0], xmm0
+ 
+G_M000_IG17:                ;; offset=0x0442
+       mov      rcx, bword ptr [rbp-0xC8]
+       vmovsd   xmm1, qword ptr [rbp-0xD0]
+       mov      r8d, -1
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,int):this]
+       lea      rcx, [rbp-0x38]
+       vmovsd   xmm1, qword ptr [rbp-0x08]
+       mov      r8d, -1
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,int):this]
+       lea      rcx, [rbp-0x38]
+       vmovsd   xmm1, qword ptr [rbp-0x10]
+       mov      r8d, 1
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,int):this]
+       lea      rcx, [rbp-0x38]
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:get_Sign():int:this]
+       test     eax, eax
+       jg       SHORT G_M000_IG18
+       jmp      G_M000_IG41
+ 
+G_M000_IG18:                ;; offset=0x049A
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG19:                ;; offset=0x049E
+       vmovdqu  ymm0, ymmword ptr [rax+0x80]
+       vmovdqu  ymmword ptr [rbp-0xF0], ymm0
+ 
+G_M000_IG20:                ;; offset=0x04AE
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG21:                ;; offset=0x04B2
+       vmovdqu  xmm0, xmmword ptr [rax+0x40]
+       vmovdqu  xmmword ptr [rbp-0x100], xmm0
+ 
+G_M000_IG22:                ;; offset=0x04BF
+       cmp      dword ptr [rbp-0x14], 0
+       jne      SHORT G_M000_IG26
+ 
+G_M000_IG23:                ;; offset=0x04C5
+       vmovdqu  ymm0, ymmword ptr [rbp-0xF0]
+       vmovdqu  ymmword ptr [rbp-0x120], ymm0
+ 
+G_M000_IG24:                ;; offset=0x04D5
+       vmovdqu  xmm0, xmmword ptr [rbp-0x100]
+       vmovdqu  xmmword ptr [rbp-0x130], xmm0
+ 
+G_M000_IG25:                ;; offset=0x04E5
+       vmovsd   xmm0, qword ptr [rbp-0x10]
+       vmovsd   qword ptr [rbp-0x138], xmm0
+       jmp      SHORT G_M000_IG29
+ 
+G_M000_IG26:                ;; offset=0x04F4
+       vmovdqu  ymm0, ymmword ptr [rbp-0xF0]
+       vmovdqu  ymmword ptr [rbp-0x120], ymm0
+ 
+G_M000_IG27:                ;; offset=0x0504
+       vmovdqu  xmm0, xmmword ptr [rbp-0x100]
+       vmovdqu  xmmword ptr [rbp-0x130], xmm0
+ 
+G_M000_IG28:                ;; offset=0x0514
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_High():double:this]
+       vmovsd   qword ptr [rbp-0x138], xmm0
+ 
+G_M000_IG29:                ;; offset=0x0526
+       vmovdqu  ymm0, ymmword ptr [rbp-0x120]
+       vmovdqu  ymmword ptr [rbp-0x158], ymm0
+ 
+G_M000_IG30:                ;; offset=0x0536
+       vmovdqu  xmm0, xmmword ptr [rbp-0x130]
+       vmovdqu  xmmword ptr [rbp-0x168], xmm0
+ 
+G_M000_IG31:                ;; offset=0x0546
+       vmovsd   xmm0, qword ptr [rbp-0x138]
+       vmovsd   qword ptr [rbp-0x170], xmm0
+       cmp      dword ptr [rbp-0x14], 0
+       jne      SHORT G_M000_IG35
+ 
+G_M000_IG32:                ;; offset=0x055C
+       vmovdqu  ymm0, ymmword ptr [rbp-0x158]
+       vmovdqu  ymmword ptr [rbp-0x190], ymm0
+ 
+G_M000_IG33:                ;; offset=0x056C
+       vmovdqu  xmm0, xmmword ptr [rbp-0x168]
+       vmovdqu  xmmword ptr [rbp-0x1A0], xmm0
+ 
+G_M000_IG34:                ;; offset=0x057C
+       vmovsd   xmm0, qword ptr [rbp-0x170]
+       vmovsd   qword ptr [rbp-0x1A8], xmm0
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Low():double:this]
+       vmovsd   qword ptr [rbp-0x1B0], xmm0
+       jmp      SHORT G_M000_IG38
+ 
+G_M000_IG35:                ;; offset=0x05A0
+       vmovdqu  ymm0, ymmword ptr [rbp-0x158]
+       vmovdqu  ymmword ptr [rbp-0x190], ymm0
+ 
+G_M000_IG36:                ;; offset=0x05B0
+       vmovdqu  xmm0, xmmword ptr [rbp-0x168]
+       vmovdqu  xmmword ptr [rbp-0x1A0], xmm0
+ 
+G_M000_IG37:                ;; offset=0x05C0
+       vmovsd   xmm0, qword ptr [rbp-0x170]
+       vmovsd   qword ptr [rbp-0x1A8], xmm0
+       vmovsd   xmm0, qword ptr [rbp-0x08]
+       vmovsd   qword ptr [rbp-0x1B0], xmm0
+ 
+G_M000_IG38:                ;; offset=0x05DD
+       vmovdqu  ymm0, ymmword ptr [rbp-0x190]
+       vmovdqu  ymmword ptr [rbp-0x328], ymm0
+ 
+G_M000_IG39:                ;; offset=0x05ED
+       vmovdqu  xmm0, xmmword ptr [rbp-0x1A0]
+       vmovdqu  xmmword ptr [rbp-0x338], xmm0
+ 
+G_M000_IG40:                ;; offset=0x05FD
+       lea      rcx, [rbp-0x328]
+       lea      rdx, [rbp-0x338]
+       vmovsd   xmm2, qword ptr [rbp-0x1A8]
+       vmovsd   xmm3, qword ptr [rbp-0x1B0]
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Margin(OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator,System.Numerics.BigInteger,double,double):int]
+       test     eax, eax
+       jg       SHORT G_M000_IG43
+ 
+G_M000_IG41:                ;; offset=0x0625
+       xor      eax, eax
+ 
+G_M000_IG42:                ;; offset=0x0627
+       vzeroupper 
+       add      rsp, 992
+       pop      rbp
+       ret      
+ 
+G_M000_IG43:                ;; offset=0x0633
+       mov      rax, gword ptr [rbp+0x10]
+       mov      eax, dword ptr [rax+0x24]
+       mov      dword ptr [rbp-0x3C], eax
+       cmp      dword ptr [rbp-0x3C], 2
+       ja       SHORT G_M000_IG45
+ 
+G_M000_IG44:                ;; offset=0x0643
+       mov      eax, dword ptr [rbp-0x3C]
+       lea      rcx, [reloc @RWD00]
+       mov      ecx, dword ptr [rcx+4*rax]
+       lea      rdx, G_M000_IG02
+       add      rcx, rdx
+       jmp      rcx
+ 
+G_M000_IG45:                ;; offset=0x065C
+       jmp      G_M000_IG61
+ 
+G_M000_IG46:                ;; offset=0x0661
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG47:                ;; offset=0x0665
+       vmovdqu  ymm0, ymmword ptr [rax+0xA0]
+       vmovdqu  ymmword ptr [rbp-0x260], ymm0
+ 
+G_M000_IG48:                ;; offset=0x0675
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG49:                ;; offset=0x0679
+       vmovdqu  xmm0, xmmword ptr [rax+0x50]
+       vmovdqu  xmmword ptr [rbp-0x270], xmm0
+ 
+G_M000_IG50:                ;; offset=0x0686
+       vmovdqu  ymm0, ymmword ptr [rbp-0x260]
+       vmovdqu  ymmword ptr [rbp-0x358], ymm0
+ 
+G_M000_IG51:                ;; offset=0x0696
+       vmovdqu  xmm0, xmmword ptr [rbp-0x270]
+       vmovdqu  xmmword ptr [rbp-0x368], xmm0
+ 
+G_M000_IG52:                ;; offset=0x06A6
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Low():double:this]
+       vmovsd   qword ptr [rbp-0x370], xmm0
+       vmovsd   xmm3, qword ptr [rbp-0x370]
+       lea      rdx, [rbp-0x368]
+       lea      rcx, [rbp-0x358]
+       vmovsd   xmm2, qword ptr [rbp-0x10]
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Margin(OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator,System.Numerics.BigInteger,double,double):int]
+       test     eax, eax
+       setge    al
+       movzx    rax, al
+       mov      dword ptr [rbp-0x40], eax
+       jmp      G_M000_IG62
+ 
+G_M000_IG53:                ;; offset=0x06F6
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG54:                ;; offset=0x06FA
+       vmovdqu  ymm0, ymmword ptr [rax+0xA0]
+       vmovdqu  ymmword ptr [rbp-0x230], ymm0
+ 
+G_M000_IG55:                ;; offset=0x070A
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG56:                ;; offset=0x070E
+       vmovdqu  xmm0, xmmword ptr [rax+0x50]
+       vmovdqu  xmmword ptr [rbp-0x240], xmm0
+ 
+G_M000_IG57:                ;; offset=0x071B
+       vmovdqu  ymm0, ymmword ptr [rbp-0x230]
+       vmovdqu  ymmword ptr [rbp-0x390], ymm0
+ 
+G_M000_IG58:                ;; offset=0x072B
+       vmovdqu  xmm0, xmmword ptr [rbp-0x240]
+       vmovdqu  xmmword ptr [rbp-0x3A0], xmm0
+ 
+G_M000_IG59:                ;; offset=0x073B
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_High():double:this]
+       vmovsd   qword ptr [rbp-0x3A8], xmm0
+       vmovsd   xmm2, qword ptr [rbp-0x3A8]
+       lea      rdx, [rbp-0x3A0]
+       lea      rcx, [rbp-0x390]
+       vmovsd   xmm3, qword ptr [rbp-0x10]
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Margin(OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator,System.Numerics.BigInteger,double,double):int]
+       test     eax, eax
+       setge    al
+       movzx    rax, al
+       mov      dword ptr [rbp-0x40], eax
+       jmp      G_M000_IG62
+ 
+G_M000_IG60:                ;; offset=0x078B
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Open():double:this]
+       vmovsd   qword ptr [rbp-0x1E8], xmm0
+       vmovsd   xmm0, qword ptr [rbp-0x1E8]
+       vmovaps  xmmword ptr [rbp-0x200], xmm0
+       vmovaps  xmm0, xmmword ptr [rbp-0x200]
+       vmovups  xmmword ptr [rbp-0x3B8], xmm0
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Close():double:this]
+       vmovaps  xmmword ptr [rbp-0x210], xmm0
+       vmovups  xmm0, xmmword ptr [rbp-0x3B8]
+       vcmpeqpd xmm0, xmm0, xmmword ptr [rbp-0x210]
+       vxorps   xmm1, xmm1, xmm1
+       vpcmpgtq xmm1, xmm1, xmmword ptr [rbp-0x200]
+       vandpd   xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x200]
+       vcmpneqpd xmm1, xmm1, xmmword ptr [rbp-0x200]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x200]
+       vcmpltpd xmm1, xmm1, xmmword ptr [rbp-0x210]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x210]
+       vblendvpd xmm0, xmm1, xmmword ptr [rbp-0x200], xmm0
+       vucomisd xmm0, qword ptr [rbp-0x08]
+       seta     al
+       movzx    rax, al
+       mov      dword ptr [rbp-0x40], eax
+       jmp      G_M000_IG62
+ 
+G_M000_IG61:                ;; offset=0x085A
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Open():double:this]
+       vmovsd   qword ptr [rbp-0x1B8], xmm0
+       vmovsd   xmm0, qword ptr [rbp-0x1B8]
+       vmovaps  xmmword ptr [rbp-0x1D0], xmm0
+       vmovaps  xmm0, xmmword ptr [rbp-0x1D0]
+       vmovups  xmmword ptr [rbp-0x3B8], xmm0
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Close():double:this]
+       vmovaps  xmmword ptr [rbp-0x1E0], xmm0
+       vmovups  xmm0, xmmword ptr [rbp-0x3B8]
+       vcmpeqpd xmm0, xmm0, xmmword ptr [rbp-0x1E0]
+       vxorps   xmm1, xmm1, xmm1
+       vpcmpgtq xmm1, xmm1, xmmword ptr [rbp-0x1E0]
+       vandpd   xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x1D0]
+       vcmpneqpd xmm1, xmm1, xmmword ptr [rbp-0x1D0]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x1E0]
+       vcmpltpd xmm1, xmm1, xmmword ptr [rbp-0x1D0]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x1E0]
+       vblendvpd xmm0, xmm1, xmmword ptr [rbp-0x1D0], xmm0
+       vmovsd   xmm1, qword ptr [rbp-0x10]
+       vucomisd xmm1, xmm0
+       seta     al
+       movzx    rax, al
+       mov      dword ptr [rbp-0x40], eax
+ 
+G_M000_IG62:                ;; offset=0x0928
+       mov      eax, dword ptr [rbp-0x40]
+       mov      dword ptr [rbp-0x2D4], eax
+       movzx    rax, byte  ptr [rbp-0x2D4]
+ 
+G_M000_IG63:                ;; offset=0x0938
+       vzeroupper 
+       add      rsp, 992
+       pop      rbp
+       ret      
+ 
+RWD00  	dd	0000061Ch ; case G_M000_IG46
+       	dd	000006B1h ; case G_M000_IG53
+       	dd	00000746h ; case G_M000_IG60
+
+; Total bytes of code 2372
+
+; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ContextReversalState:Update(byref):double:this (Instrumented Tier0)
+; Emitting BLENDED_CODE for generic X64 + VEX on Windows
+; Instrumented Tier0 code
+; rbp based frame
+; partially interruptible
+; compiling with minopt
+
+G_M000_IG01:                ;; offset=0x0000
+       push     rbp
+       sub      rsp, 224
+       lea      rbp, [rsp+0xE0]
+       vxorps   xmm4, xmm4, xmm4
+       mov      rax, -192
+       vmovdqa  xmmword ptr [rax+rbp], xmm4
+       vmovdqa  xmmword ptr [rbp+rax+0x10], xmm4
+       vmovdqa  xmmword ptr [rbp+rax+0x20], xmm4
+       add      rax, 48
+       jne      SHORT  -5 instr
+       mov      gword ptr [rbp+0x10], rcx
+       mov      bword ptr [rbp+0x18], rdx
+ 
+G_M000_IG02:                ;; offset=0x003D
+       xor      eax, eax
+       mov      qword ptr [rbp-0x08], rax
+       mov      rax, gword ptr [rbp+0x10]
+       mov      eax, dword ptr [rax+0x28]
+       mov      rcx, gword ptr [rbp+0x10]
+       cmp      eax, dword ptr [rcx+0x20]
+       jl       G_M000_IG10
+       mov      rcx, gword ptr [rbp+0x10]
+       mov      rdx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Matches(byref):bool:this]
+       test     eax, eax
+       je       SHORT G_M000_IG05
+       mov      rax, gword ptr [rbp+0x10]
+       mov      eax, dword ptr [rax+0x24]
+       mov      dword ptr [rbp-0x0C], eax
+       cmp      dword ptr [rbp-0x0C], 0
+       je       SHORT G_M000_IG04
+       cmp      dword ptr [rbp-0x0C], 2
+       jne      SHORT G_M000_IG06
+ 
+G_M000_IG03:                ;; offset=0x007F
+       mov      rcx, 0x7FFEC7B75AE0
+       call     CORINFO_HELP_COUNTPROFILE32
+ 
+G_M000_IG04:                ;; offset=0x008E
+       mov      dword ptr [rbp-0x10], 1
+       jmp      SHORT G_M000_IG07
+ 
+G_M000_IG05:                ;; offset=0x0097
+       mov      rcx, 0x7FFEC7B75AE4
+       call     CORINFO_HELP_COUNTPROFILE32
+       jmp      SHORT G_M000_IG10
+ 
+G_M000_IG06:                ;; offset=0x00A8
+       mov      rcx, 0x7FFEC7B75AE8
+       call     CORINFO_HELP_COUNTPROFILE32
+       xor      eax, eax
+       mov      dword ptr [rbp-0x10], eax
+ 
+G_M000_IG07:                ;; offset=0x00BC
+       cmp      dword ptr [rbp-0x10], 0
+       jne      SHORT G_M000_IG08
+       mov      dword ptr [rbp-0x4C], -100
+       jmp      SHORT G_M000_IG09
+ 
+G_M000_IG08:                ;; offset=0x00CB
+       mov      rcx, 0x7FFEC7B75AEC
+       call     CORINFO_HELP_COUNTPROFILE32
+       mov      dword ptr [rbp-0x4C], 100
+ 
+G_M000_IG09:                ;; offset=0x00E1
+       mov      rcx, 0x7FFEC7B75AF0
+       call     CORINFO_HELP_COUNTPROFILE32
+       vxorps   xmm0, xmm0, xmm0
+       vcvtsi2sd xmm0, xmm0, dword ptr [rbp-0x4C]
+       vmovsd   qword ptr [rbp-0x08], xmm0
+ 
+G_M000_IG10:                ;; offset=0x00FE
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      dword ptr [rax+0x1C], 0
+       jle      G_M000_IG11
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      dword ptr [rax+0x28], 0
+       jle      G_M000_IG16
+       mov      rax, gword ptr [rbp+0x10]
+       mov      rax, gword ptr [rax+0x10]
+       mov      gword ptr [rbp-0x88], rax
+       mov      rax, gword ptr [rbp+0x10]
+       vmovdqu  ymm0, ymmword ptr [rax+0xC0]
+       vmovdqu  ymmword ptr [rbp-0x80], ymm0
+       vmovdqu  xmm0, xmmword ptr [rax+0xE0]
+       vmovdqu  xmmword ptr [rbp-0x60], xmm0
+       mov      rcx, gword ptr [rbp-0x88]
+       lea      rdx, [rbp-0x80]
+       cmp      dword ptr [rcx], ecx
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:Enqueue(OoplesFinance.StockIndicators.Indicators.Bar):this]
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rdx, bword ptr [rax+0xC0]
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xA0]
+       mov      r8d, 1
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:AddRange(byref,byref,int)]
+       mov      rax, gword ptr [rbp+0x10]
+       mov      rcx, gword ptr [rax+0x10]
+       cmp      dword ptr [rcx], ecx
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:get_Count():int:this]
+       mov      rcx, gword ptr [rbp+0x10]
+       cmp      eax, dword ptr [rcx+0x1C]
+       jle      G_M000_IG15
+       mov      rcx, 0x7FFEC7B75AF4
+       call     CORINFO_HELP_COUNTPROFILE32
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       add      rax, 160
+       mov      bword ptr [rbp-0x48], rax
+       lea      rdx, [rbp-0x40]
+       mov      rax, gword ptr [rbp+0x10]
+       mov      rcx, gword ptr [rax+0x10]
+       cmp      dword ptr [rcx], ecx
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:Dequeue():OoplesFinance.StockIndicators.Indicators.Bar:this]
+       lea      rdx, [rbp-0x40]
+       mov      rcx, bword ptr [rbp-0x48]
+       mov      r8d, -1
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:AddRange(byref,byref,int)]
+ 
+G_M000_IG11:                ;; offset=0x01F0
+       mov      rax, gword ptr [rbp+0x10]
+       mov      rax, gword ptr [rax+0x08]
+       mov      gword ptr [rbp-0xC0], rax
+       mov      rax, bword ptr [rbp+0x18]
+       vmovdqu  ymm0, ymmword ptr [rax]
+       vmovdqu  ymmword ptr [rbp-0xB8], ymm0
+       vmovdqu  xmm0, xmmword ptr [rax+0x20]
+       vmovdqu  xmmword ptr [rbp-0x98], xmm0
+       mov      rcx, gword ptr [rbp-0xC0]
+       lea      rdx, [rbp-0xB8]
+       cmp      dword ptr [rcx], ecx
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:Enqueue(OoplesFinance.StockIndicators.Indicators.Bar):this]
+       mov      rcx, gword ptr [rbp+0x10]
+       mov      rdx, bword ptr [rbp+0x18]
+       mov      r8d, 1
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Accumulate(byref,int):this]
+       mov      rax, gword ptr [rbp+0x10]
+       mov      rcx, gword ptr [rax+0x08]
+       cmp      dword ptr [rcx], ecx
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:get_Count():int:this]
+       mov      rcx, gword ptr [rbp+0x10]
+       cmp      eax, dword ptr [rcx+0x18]
+       jle      SHORT G_M000_IG12
+       mov      rcx, 0x7FFEC7B75AF8
+       call     CORINFO_HELP_COUNTPROFILE32
+       lea      rdx, [rbp-0x40]
+       mov      rax, gword ptr [rbp+0x10]
+       mov      rcx, gword ptr [rax+0x08]
+       cmp      dword ptr [rcx], ecx
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:Dequeue():OoplesFinance.StockIndicators.Indicators.Bar:this]
+       lea      rdx, [rbp-0x40]
+       mov      rcx, gword ptr [rbp+0x10]
+       mov      r8d, -1
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Accumulate(byref,int):this]
+ 
+G_M000_IG12:                ;; offset=0x0296
+       mov      rax, bword ptr [rbp+0x18]
+       mov      rcx, gword ptr [rbp+0x10]
+       vmovdqu  ymm0, ymmword ptr [rax]
+       vmovdqu  ymmword ptr [rcx+0xC0], ymm0
+       vmovdqu  xmm0, xmmword ptr [rax+0x20]
+       vmovdqu  xmmword ptr [rcx+0xE0], xmm0
+       mov      rax, gword ptr [rbp+0x10]
+       mov      eax, dword ptr [rax+0x28]
+       mov      rcx, gword ptr [rbp+0x10]
+       cmp      eax, dword ptr [rcx+0x20]
+       jge      SHORT G_M000_IG13
+       mov      rcx, 0x7FFEC7B75AFC
+       call     CORINFO_HELP_COUNTPROFILE32
+       mov      rax, gword ptr [rbp+0x10]
+       mov      eax, dword ptr [rax+0x28]
+       add      eax, 1
+       jo       SHORT G_M000_IG17
+       mov      rcx, gword ptr [rbp+0x10]
+       mov      dword ptr [rcx+0x28], eax
+ 
+G_M000_IG13:                ;; offset=0x02E9
+       mov      rcx, 0x7FFEC7B75B00
+       call     CORINFO_HELP_COUNTPROFILE32
+       vmovsd   xmm0, qword ptr [rbp-0x08]
+ 
+G_M000_IG14:                ;; offset=0x02FD
+       vzeroupper 
+       add      rsp, 224
+       pop      rbp
+       ret      
+ 
+G_M000_IG15:                ;; offset=0x0309
+       mov      rcx, 0x7FFEC7B75B04
+       call     CORINFO_HELP_COUNTPROFILE32
+       jmp      G_M000_IG11
+ 
+G_M000_IG16:                ;; offset=0x031D
+       mov      rcx, 0x7FFEC7B75B08
+       call     CORINFO_HELP_COUNTPROFILE32
+       jmp      G_M000_IG11
+ 
+G_M000_IG17:                ;; offset=0x0331
+       call     CORINFO_HELP_OVERFLOW
+       int3     
+ 
+; Total bytes of code 823
+
+; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ContextReversalState:Matches(byref):bool:this (Instrumented Tier0)
+; Emitting BLENDED_CODE for generic X64 + VEX on Windows
+; Instrumented Tier0 code
+; rbp based frame
+; partially interruptible
+; compiling with minopt
+
+G_M000_IG01:                ;; offset=0x0000
+       push     rbp
+       sub      rsp, 992
+       lea      rbp, [rsp+0x3E0]
+       vxorps   xmm4, xmm4, xmm4
+       vmovdqa  xmmword ptr [rbp-0x3A0], xmm4
+       mov      rax, -912
+       vmovdqa  xmmword ptr [rax+rbp], xmm4
+       vmovdqa  xmmword ptr [rbp+rax+0x10], xmm4
+       vmovdqa  xmmword ptr [rbp+rax+0x20], xmm4
+       add      rax, 48
+       jne      SHORT  -5 instr
+       mov      gword ptr [rbp+0x10], rcx
+       mov      bword ptr [rbp+0x18], rdx
+ 
+G_M000_IG02:                ;; offset=0x0045
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Open():double:this]
+       vmovsd   qword ptr [rbp-0x48], xmm0
+       vmovsd   xmm0, qword ptr [rbp-0x48]
+       vmovaps  xmmword ptr [rbp-0x60], xmm0
+       vmovaps  xmm0, xmmword ptr [rbp-0x60]
+       vmovups  xmmword ptr [rbp-0x3B8], xmm0
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Close():double:this]
+       vmovaps  xmmword ptr [rbp-0x70], xmm0
+       vmovups  xmm0, xmmword ptr [rbp-0x3B8]
+       vcmpeqpd xmm0, xmm0, xmmword ptr [rbp-0x70]
+       vxorps   xmm1, xmm1, xmm1
+       vpcmpgtq xmm1, xmm1, xmmword ptr [rbp-0x70]
+       vandpd   xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x60]
+       vcmpneqpd xmm1, xmm1, xmmword ptr [rbp-0x60]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x70]
+       vcmpltpd xmm1, xmm1, xmmword ptr [rbp-0x60]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x70]
+       vblendvpd xmm0, xmm1, xmmword ptr [rbp-0x60], xmm0
+       vmovsd   qword ptr [rbp-0x08], xmm0
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Open():double:this]
+       vmovsd   qword ptr [rbp-0x78], xmm0
+       vmovsd   xmm0, qword ptr [rbp-0x78]
+       vmovaps  xmmword ptr [rbp-0x90], xmm0
+       vmovaps  xmm0, xmmword ptr [rbp-0x90]
+       vmovups  xmmword ptr [rbp-0x3B8], xmm0
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Close():double:this]
+       vmovaps  xmmword ptr [rbp-0xA0], xmm0
+       vmovups  xmm0, xmmword ptr [rbp-0x3B8]
+       vcmpeqpd xmm0, xmm0, xmmword ptr [rbp-0xA0]
+       vxorps   xmm1, xmm1, xmm1
+       vpcmpgtq xmm1, xmm1, xmmword ptr [rbp-0x90]
+       vandpd   xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x90]
+       vcmpneqpd xmm1, xmm1, xmmword ptr [rbp-0x90]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x90]
+       vcmpltpd xmm1, xmm1, xmmword ptr [rbp-0xA0]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0xA0]
+       vblendvpd xmm0, xmm1, xmmword ptr [rbp-0x90], xmm0
+       vmovsd   qword ptr [rbp-0x10], xmm0
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      dword ptr [rax+0x24], 2
+       jne      G_M000_IG05
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Open():double:this]
+       vmovsd   qword ptr [rbp-0x2A8], xmm0
+ 
+G_M000_IG03:                ;; offset=0x0193
+       vmovsd   xmm0, qword ptr [rbp-0x2A8]
+       vmovaps  xmmword ptr [rbp-0x2C0], xmm0
+       vmovaps  xmm0, xmmword ptr [rbp-0x2C0]
+       vmovups  xmmword ptr [rbp-0x3B8], xmm0
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Close():double:this]
+       vmovaps  xmmword ptr [rbp-0x2D0], xmm0
+       vmovups  xmm0, xmmword ptr [rbp-0x3B8]
+       vcmpeqpd xmm0, xmm0, xmmword ptr [rbp-0x2D0]
+       vxorps   xmm1, xmm1, xmm1
+       vpcmpgtq xmm1, xmm1, xmmword ptr [rbp-0x2C0]
+       vandpd   xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x2C0]
+       vcmpneqpd xmm1, xmm1, xmmword ptr [rbp-0x2C0]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x2C0]
+       vcmpltpd xmm1, xmm1, xmmword ptr [rbp-0x2D0]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x2D0]
+       vblendvpd xmm0, xmm1, xmmword ptr [rbp-0x2C0], xmm0
+       vmovsd   xmm1, qword ptr [rbp-0x08]
+       vucomisd xmm1, xmm0
+       jae      G_M000_IG08
+ 
+G_M000_IG04:                ;; offset=0x023F
+       mov      rcx, 0x7FFEC7B75B78
+       call     CORINFO_HELP_COUNTPROFILE32
+ 
+G_M000_IG05:                ;; offset=0x024E
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      dword ptr [rax+0x24], 3
+       jne      G_M000_IG09
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Open():double:this]
+       vmovsd   qword ptr [rbp-0x278], xmm0
+       vmovsd   xmm0, qword ptr [rbp-0x278]
+       vmovaps  xmmword ptr [rbp-0x290], xmm0
+       vmovaps  xmm0, xmmword ptr [rbp-0x290]
+       vmovups  xmmword ptr [rbp-0x3B8], xmm0
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Close():double:this]
+       vmovaps  xmmword ptr [rbp-0x2A0], xmm0
+       vmovups  xmm0, xmmword ptr [rbp-0x3B8]
+       vcmpeqpd xmm0, xmm0, xmmword ptr [rbp-0x2A0]
+       vxorps   xmm1, xmm1, xmm1
+       vpcmpgtq xmm1, xmm1, xmmword ptr [rbp-0x2A0]
+       vandpd   xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x290]
+       vcmpneqpd xmm1, xmm1, xmmword ptr [rbp-0x290]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x2A0]
+       vcmpltpd xmm1, xmm1, xmmword ptr [rbp-0x290]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x2A0]
+       vblendvpd xmm0, xmm1, xmmword ptr [rbp-0x290], xmm0
+       vucomisd xmm0, qword ptr [rbp-0x10]
+       jb       SHORT G_M000_IG07
+ 
+G_M000_IG06:                ;; offset=0x031F
+       mov      rcx, 0x7FFEC7B75B7C
+       call     CORINFO_HELP_COUNTPROFILE32
+       jmp      G_M000_IG46
+ 
+G_M000_IG07:                ;; offset=0x0333
+       mov      rcx, 0x7FFEC7B75B80
+       call     CORINFO_HELP_COUNTPROFILE32
+       jmp      SHORT G_M000_IG09
+ 
+G_M000_IG08:                ;; offset=0x0344
+       mov      rcx, 0x7FFEC7B75B84
+       call     CORINFO_HELP_COUNTPROFILE32
+       jmp      SHORT G_M000_IG06
+ 
+G_M000_IG09:                ;; offset=0x0355
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG10:                ;; offset=0x0359
+       vmovdqu  ymm0, ymmword ptr [rax+0x60]
+       vmovdqu  ymmword ptr [rbp-0x2F8], ymm0
+ 
+G_M000_IG11:                ;; offset=0x0366
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG12:                ;; offset=0x036A
+       vmovdqu  xmm0, xmmword ptr [rax+0x30]
+       vmovdqu  xmmword ptr [rbp-0x308], xmm0
+ 
+G_M000_IG13:                ;; offset=0x0377
+       lea      rcx, [rbp-0x2F8]
+       lea      rdx, [rbp-0x308]
+       vmovsd   xmm2, qword ptr [rbp-0x08]
+       vmovsd   xmm3, qword ptr [rbp-0x10]
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Margin(OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator,System.Numerics.BigInteger,double,double):int]
+       test     eax, eax
+       jg       SHORT G_M000_IG14
+       mov      rcx, 0x7FFEC7B75B88
+       call     CORINFO_HELP_COUNTPROFILE32
+       jmp      G_M000_IG46
+ 
+G_M000_IG14:                ;; offset=0x03AD
+       mov      rax, gword ptr [rbp+0x10]
+       mov      eax, dword ptr [rax+0x24]
+       mov      dword ptr [rbp-0x3C], eax
+       cmp      dword ptr [rbp-0x3C], 1
+       ja       SHORT G_M000_IG15
+       mov      dword ptr [rbp-0x40], 1
+       jmp      SHORT G_M000_IG16
+ 
+G_M000_IG15:                ;; offset=0x03C6
+       mov      rcx, 0x7FFEC7B75B8C
+       call     CORINFO_HELP_COUNTPROFILE32
+       xor      eax, eax
+       mov      dword ptr [rbp-0x40], eax
+ 
+G_M000_IG16:                ;; offset=0x03DA
+       mov      eax, dword ptr [rbp-0x40]
+       mov      dword ptr [rbp-0x14], eax
+       vxorps   ymm0, ymm0, ymm0
+       vmovdqu  ymmword ptr [rbp-0x38], ymm0
+       lea      rax, bword ptr [rbp-0x38]
+       mov      bword ptr [rbp-0xA8], rax
+       cmp      dword ptr [rbp-0x14], 0
+       jne      SHORT G_M000_IG17
+       mov      rax, bword ptr [rbp-0xA8]
+       mov      bword ptr [rbp-0xB0], rax
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_High():double:this]
+       vmovsd   qword ptr [rbp-0xB8], xmm0
+       jmp      SHORT G_M000_IG18
+ 
+G_M000_IG17:                ;; offset=0x041C
+       mov      rcx, 0x7FFEC7B75B90
+       call     CORINFO_HELP_COUNTPROFILE32
+       mov      rax, bword ptr [rbp-0xA8]
+       mov      bword ptr [rbp-0xB0], rax
+       vmovsd   xmm0, qword ptr [rbp-0x10]
+       vmovsd   qword ptr [rbp-0xB8], xmm0
+ 
+G_M000_IG18:                ;; offset=0x0446
+       mov      rcx, bword ptr [rbp-0xB0]
+       vmovsd   xmm1, qword ptr [rbp-0xB8]
+       mov      r8d, 1
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,int):this]
+       lea      rax, bword ptr [rbp-0x38]
+       mov      bword ptr [rbp-0xC0], rax
+       cmp      dword ptr [rbp-0x14], 0
+       jne      SHORT G_M000_IG19
+       mov      rax, bword ptr [rbp-0xC0]
+       mov      bword ptr [rbp-0xC8], rax
+       vmovsd   xmm0, qword ptr [rbp-0x08]
+       vmovsd   qword ptr [rbp-0xD0], xmm0
+       jmp      SHORT G_M000_IG20
+ 
+G_M000_IG19:                ;; offset=0x048F
+       mov      rcx, 0x7FFEC7B75B94
+       call     CORINFO_HELP_COUNTPROFILE32
+       mov      rax, bword ptr [rbp-0xC0]
+       mov      bword ptr [rbp-0xC8], rax
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Low():double:this]
+       vmovsd   qword ptr [rbp-0xD0], xmm0
+ 
+G_M000_IG20:                ;; offset=0x04BE
+       mov      rcx, bword ptr [rbp-0xC8]
+       vmovsd   xmm1, qword ptr [rbp-0xD0]
+       mov      r8d, -1
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,int):this]
+       lea      rcx, [rbp-0x38]
+       vmovsd   xmm1, qword ptr [rbp-0x08]
+       mov      r8d, -1
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,int):this]
+       lea      rcx, [rbp-0x38]
+       vmovsd   xmm1, qword ptr [rbp-0x10]
+       mov      r8d, 1
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,int):this]
+       lea      rcx, [rbp-0x38]
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:get_Sign():int:this]
+       test     eax, eax
+       jg       SHORT G_M000_IG21
+       mov      rcx, 0x7FFEC7B75B98
+       call     CORINFO_HELP_COUNTPROFILE32
+       jmp      G_M000_IG46
+ 
+G_M000_IG21:                ;; offset=0x0525
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG22:                ;; offset=0x0529
+       vmovdqu  ymm0, ymmword ptr [rax+0x80]
+       vmovdqu  ymmword ptr [rbp-0xF0], ymm0
+ 
+G_M000_IG23:                ;; offset=0x0539
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG24:                ;; offset=0x053D
+       vmovdqu  xmm0, xmmword ptr [rax+0x40]
+       vmovdqu  xmmword ptr [rbp-0x100], xmm0
+ 
+G_M000_IG25:                ;; offset=0x054A
+       cmp      dword ptr [rbp-0x14], 0
+       jne      SHORT G_M000_IG29
+ 
+G_M000_IG26:                ;; offset=0x0550
+       vmovdqu  ymm0, ymmword ptr [rbp-0xF0]
+       vmovdqu  ymmword ptr [rbp-0x120], ymm0
+ 
+G_M000_IG27:                ;; offset=0x0560
+       vmovdqu  xmm0, xmmword ptr [rbp-0x100]
+       vmovdqu  xmmword ptr [rbp-0x130], xmm0
+ 
+G_M000_IG28:                ;; offset=0x0570
+       vmovsd   xmm0, qword ptr [rbp-0x10]
+       vmovsd   qword ptr [rbp-0x138], xmm0
+       jmp      SHORT G_M000_IG33
+ 
+G_M000_IG29:                ;; offset=0x057F
+       mov      rcx, 0x7FFEC7B75B9C
+       call     CORINFO_HELP_COUNTPROFILE32
+ 
+G_M000_IG30:                ;; offset=0x058E
+       vmovdqu  ymm0, ymmword ptr [rbp-0xF0]
+       vmovdqu  ymmword ptr [rbp-0x120], ymm0
+ 
+G_M000_IG31:                ;; offset=0x059E
+       vmovdqu  xmm0, xmmword ptr [rbp-0x100]
+       vmovdqu  xmmword ptr [rbp-0x130], xmm0
+ 
+G_M000_IG32:                ;; offset=0x05AE
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_High():double:this]
+       vmovsd   qword ptr [rbp-0x138], xmm0
+ 
+G_M000_IG33:                ;; offset=0x05C0
+       vmovdqu  ymm0, ymmword ptr [rbp-0x120]
+       vmovdqu  ymmword ptr [rbp-0x158], ymm0
+ 
+G_M000_IG34:                ;; offset=0x05D0
+       vmovdqu  xmm0, xmmword ptr [rbp-0x130]
+       vmovdqu  xmmword ptr [rbp-0x168], xmm0
+ 
+G_M000_IG35:                ;; offset=0x05E0
+       vmovsd   xmm0, qword ptr [rbp-0x138]
+       vmovsd   qword ptr [rbp-0x170], xmm0
+       cmp      dword ptr [rbp-0x14], 0
+       jne      SHORT G_M000_IG39
+ 
+G_M000_IG36:                ;; offset=0x05F6
+       vmovdqu  ymm0, ymmword ptr [rbp-0x158]
+       vmovdqu  ymmword ptr [rbp-0x190], ymm0
+ 
+G_M000_IG37:                ;; offset=0x0606
+       vmovdqu  xmm0, xmmword ptr [rbp-0x168]
+       vmovdqu  xmmword ptr [rbp-0x1A0], xmm0
+ 
+G_M000_IG38:                ;; offset=0x0616
+       vmovsd   xmm0, qword ptr [rbp-0x170]
+       vmovsd   qword ptr [rbp-0x1A8], xmm0
+       mov      rcx, bword ptr [rbp+0x18]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Low():double:this]
+       vmovsd   qword ptr [rbp-0x1B0], xmm0
+       jmp      SHORT G_M000_IG43
+ 
+G_M000_IG39:                ;; offset=0x063A
+       mov      rcx, 0x7FFEC7B75BA0
+       call     CORINFO_HELP_COUNTPROFILE32
+ 
+G_M000_IG40:                ;; offset=0x0649
+       vmovdqu  ymm0, ymmword ptr [rbp-0x158]
+       vmovdqu  ymmword ptr [rbp-0x190], ymm0
+ 
+G_M000_IG41:                ;; offset=0x0659
+       vmovdqu  xmm0, xmmword ptr [rbp-0x168]
+       vmovdqu  xmmword ptr [rbp-0x1A0], xmm0
+ 
+G_M000_IG42:                ;; offset=0x0669
+       vmovsd   xmm0, qword ptr [rbp-0x170]
+       vmovsd   qword ptr [rbp-0x1A8], xmm0
+       vmovsd   xmm0, qword ptr [rbp-0x08]
+       vmovsd   qword ptr [rbp-0x1B0], xmm0
+ 
+G_M000_IG43:                ;; offset=0x0686
+       vmovdqu  ymm0, ymmword ptr [rbp-0x190]
+       vmovdqu  ymmword ptr [rbp-0x328], ymm0
+ 
+G_M000_IG44:                ;; offset=0x0696
+       vmovdqu  xmm0, xmmword ptr [rbp-0x1A0]
+       vmovdqu  xmmword ptr [rbp-0x338], xmm0
+ 
+G_M000_IG45:                ;; offset=0x06A6
+       lea      rcx, [rbp-0x328]
+       lea      rdx, [rbp-0x338]
+       vmovsd   xmm2, qword ptr [rbp-0x1A8]
+       vmovsd   xmm3, qword ptr [rbp-0x1B0]
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Margin(OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator,System.Numerics.BigInteger,double,double):int]
+       test     eax, eax
+       jg       SHORT G_M000_IG48
+       mov      rcx, 0x7FFEC7B75BA4
+       call     CORINFO_HELP_COUNTPROFILE32
+ 
+G_M000_IG46:                ;; offset=0x06DD
+       xor      eax, eax
+ 
+G_M000_IG47:                ;; offset=0x06DF
+       vzeroupper 
+       add      rsp, 992
+       pop      rbp
+       ret      
+ 
+G_M000_IG48:                ;; offset=0x06EB
+       mov      rax, gword ptr [rbp+0x10]
+       mov      eax, dword ptr [rax+0x24]
+       mov      dword ptr [rbp-0x3C], eax
+       cmp      dword ptr [rbp-0x3C], 2
+       ja       SHORT G_M000_IG50
+ 
+G_M000_IG49:                ;; offset=0x06FB
+       mov      eax, dword ptr [rbp-0x3C]
+       lea      rcx, [reloc @RWD00]
+       mov      ecx, dword ptr [rcx+4*rax]
+       lea      rdx, G_M000_IG02
+       add      rcx, rdx
+       jmp      rcx
+ 
+G_M000_IG50:                ;; offset=0x0714
+       jmp      G_M000_IG66
+ 
+G_M000_IG51:                ;; offset=0x0719
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG52:                ;; offset=0x071D
+       vmovdqu  ymm0, ymmword ptr [rax+0xA0]
+       vmovdqu  ymmword ptr [rbp-0x260], ymm0
+ 
+G_M000_IG53:                ;; offset=0x072D
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG54:                ;; offset=0x0731
+       vmovdqu  xmm0, xmmword ptr [rax+0x50]
+       vmovdqu  xmmword ptr [rbp-0x270], xmm0
+ 
+G_M000_IG55:                ;; offset=0x073E
+       vmovdqu  ymm0, ymmword ptr [rbp-0x260]
+       vmovdqu  ymmword ptr [rbp-0x358], ymm0
+ 
+G_M000_IG56:                ;; offset=0x074E
+       vmovdqu  xmm0, xmmword ptr [rbp-0x270]
+       vmovdqu  xmmword ptr [rbp-0x368], xmm0
+ 
+G_M000_IG57:                ;; offset=0x075E
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Low():double:this]
+       vmovsd   qword ptr [rbp-0x370], xmm0
+       vmovsd   xmm3, qword ptr [rbp-0x370]
+       lea      rdx, [rbp-0x368]
+       lea      rcx, [rbp-0x358]
+       vmovsd   xmm2, qword ptr [rbp-0x10]
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Margin(OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator,System.Numerics.BigInteger,double,double):int]
+       test     eax, eax
+       setge    al
+       movzx    rax, al
+       mov      dword ptr [rbp-0x40], eax
+       jmp      G_M000_IG67
+ 
+G_M000_IG58:                ;; offset=0x07AE
+       mov      rcx, 0x7FFEC7B75BA8
+       call     CORINFO_HELP_COUNTPROFILE32
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG59:                ;; offset=0x07C1
+       vmovdqu  ymm0, ymmword ptr [rax+0xA0]
+       vmovdqu  ymmword ptr [rbp-0x230], ymm0
+ 
+G_M000_IG60:                ;; offset=0x07D1
+       mov      rax, gword ptr [rbp+0x10]
+ 
+G_M000_IG61:                ;; offset=0x07D5
+       vmovdqu  xmm0, xmmword ptr [rax+0x50]
+       vmovdqu  xmmword ptr [rbp-0x240], xmm0
+ 
+G_M000_IG62:                ;; offset=0x07E2
+       vmovdqu  ymm0, ymmword ptr [rbp-0x230]
+       vmovdqu  ymmword ptr [rbp-0x390], ymm0
+ 
+G_M000_IG63:                ;; offset=0x07F2
+       vmovdqu  xmm0, xmmword ptr [rbp-0x240]
+       vmovdqu  xmmword ptr [rbp-0x3A0], xmm0
+ 
+G_M000_IG64:                ;; offset=0x0802
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_High():double:this]
+       vmovsd   qword ptr [rbp-0x3A8], xmm0
+       vmovsd   xmm2, qword ptr [rbp-0x3A8]
+       lea      rdx, [rbp-0x3A0]
+       lea      rcx, [rbp-0x390]
+       vmovsd   xmm3, qword ptr [rbp-0x10]
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Margin(OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator,System.Numerics.BigInteger,double,double):int]
+       test     eax, eax
+       setge    al
+       movzx    rax, al
+       mov      dword ptr [rbp-0x40], eax
+       jmp      G_M000_IG67
+ 
+G_M000_IG65:                ;; offset=0x0852
+       mov      rcx, 0x7FFEC7B75BAC
+       call     CORINFO_HELP_COUNTPROFILE32
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Open():double:this]
+       vmovsd   qword ptr [rbp-0x1E8], xmm0
+       vmovsd   xmm0, qword ptr [rbp-0x1E8]
+       vmovaps  xmmword ptr [rbp-0x200], xmm0
+       vmovaps  xmm0, xmmword ptr [rbp-0x200]
+       vmovups  xmmword ptr [rbp-0x3B8], xmm0
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Close():double:this]
+       vmovaps  xmmword ptr [rbp-0x210], xmm0
+       vmovups  xmm0, xmmword ptr [rbp-0x3B8]
+       vcmpeqpd xmm0, xmm0, xmmword ptr [rbp-0x210]
+       vxorps   xmm1, xmm1, xmm1
+       vpcmpgtq xmm1, xmm1, xmmword ptr [rbp-0x200]
+       vandpd   xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x200]
+       vcmpneqpd xmm1, xmm1, xmmword ptr [rbp-0x200]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x200]
+       vcmpltpd xmm1, xmm1, xmmword ptr [rbp-0x210]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x210]
+       vblendvpd xmm0, xmm1, xmmword ptr [rbp-0x200], xmm0
+       vucomisd xmm0, qword ptr [rbp-0x08]
+       seta     al
+       movzx    rax, al
+       mov      dword ptr [rbp-0x40], eax
+       jmp      G_M000_IG67
+ 
+G_M000_IG66:                ;; offset=0x0930
+       mov      rcx, 0x7FFEC7B75BB0
+       call     CORINFO_HELP_COUNTPROFILE32
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Open():double:this]
+       vmovsd   qword ptr [rbp-0x1B8], xmm0
+       vmovsd   xmm0, qword ptr [rbp-0x1B8]
+       vmovaps  xmmword ptr [rbp-0x1D0], xmm0
+       vmovaps  xmm0, xmmword ptr [rbp-0x1D0]
+       vmovups  xmmword ptr [rbp-0x3B8], xmm0
+       mov      rax, gword ptr [rbp+0x10]
+       cmp      byte  ptr [rax], al
+       mov      rax, gword ptr [rbp+0x10]
+       lea      rcx, bword ptr [rax+0xC0]
+       call     [OoplesFinance.StockIndicators.Indicators.Bar:get_Close():double:this]
+       vmovaps  xmmword ptr [rbp-0x1E0], xmm0
+       vmovups  xmm0, xmmword ptr [rbp-0x3B8]
+       vcmpeqpd xmm0, xmm0, xmmword ptr [rbp-0x1E0]
+       vxorps   xmm1, xmm1, xmm1
+       vpcmpgtq xmm1, xmm1, xmmword ptr [rbp-0x1E0]
+       vandpd   xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x1D0]
+       vcmpneqpd xmm1, xmm1, xmmword ptr [rbp-0x1D0]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x1E0]
+       vcmpltpd xmm1, xmm1, xmmword ptr [rbp-0x1D0]
+       vorpd    xmm0, xmm1, xmm0
+       vmovaps  xmm1, xmmword ptr [rbp-0x1E0]
+       vblendvpd xmm0, xmm1, xmmword ptr [rbp-0x1D0], xmm0
+       vmovsd   xmm1, qword ptr [rbp-0x10]
+       vucomisd xmm1, xmm0
+       seta     al
+       movzx    rax, al
+       mov      dword ptr [rbp-0x40], eax
+ 
+G_M000_IG67:                ;; offset=0x0A0D
+       mov      rcx, 0x7FFEC7B75BB4
+       call     CORINFO_HELP_COUNTPROFILE32
+       mov      eax, dword ptr [rbp-0x40]
+       mov      dword ptr [rbp-0x2D4], eax
+       movzx    rax, byte  ptr [rbp-0x2D4]
+ 
+G_M000_IG68:                ;; offset=0x0A2C
+       vzeroupper 
+       add      rsp, 992
+       pop      rbp
+       ret      
+ 
+RWD00  	dd	000006D4h ; case G_M000_IG51
+       	dd	00000769h ; case G_M000_IG58
+       	dd	0000080Dh ; case G_M000_IG65
+
+; Total bytes of code 2616
+
+; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ContextReversalState:Update(byref):double:this (Tier1)
+; Emitting BLENDED_CODE for generic X64 + VEX on Windows
+; Tier1 code
+; optimized code
+; optimized using Synthesized PGO
+; rsp based frame
+; partially interruptible
+; with Synthesized PGO: fgCalledCount is 68384
+; 68 inlinees with PGO data; 34 single block inlinees; 0 inlinees without PGO data
+
+G_M000_IG01:                ;; offset=0x0000
+       push     r14
+       push     rdi
+       push     rsi
+       push     rbp
+       push     rbx
+       sub      rsp, 384
+       xor      eax, eax
+       mov      qword ptr [rsp+0x28], rax
+       vxorps   xmm4, xmm4, xmm4
+       vmovdqa  xmmword ptr [rsp+0x30], xmm4
+       vmovdqa  xmmword ptr [rsp+0x40], xmm4
+       mov      rax, -288
+       vmovdqa  xmmword ptr [rsp+rax+0x170], xmm4
+       vmovdqa  xmmword ptr [rsp+rax+0x180], xmm4
+       vmovdqa  xmmword ptr [rsp+rax+0x190], xmm4
+       add      rax, 48
+       jne      SHORT  -5 instr
+       mov      qword ptr [rsp+0x170], rax
+       mov      rbx, rcx
+       mov      rsi, rdx
+ 
+G_M000_IG02:                ;; offset=0x005D
+       vxorps   xmm0, xmm0, xmm0
+       vmovsd   qword ptr [rsp+0x178], xmm0
+       mov      ecx, dword ptr [rbx+0x28]
+       cmp      ecx, dword ptr [rbx+0x20]
+       jl       SHORT G_M000_IG04
+ 
+G_M000_IG03:                ;; offset=0x0072
+       mov      rcx, rbx
+       mov      rdx, rsi
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Matches(byref):bool:this]
+       test     eax, eax
+       jne      G_M000_IG98
+ 
+G_M000_IG04:                ;; offset=0x0086
+       cmp      dword ptr [rbx+0x1C], 0
+       jg       G_M000_IG110
+ 
+G_M000_IG05:                ;; offset=0x0090
+       mov      rdi, gword ptr [rbx+0x08]
+       vmovdqu  ymm1, ymmword ptr [rsi]
+       vmovdqu  ymmword ptr [rsp+0x118], ymm1
+       vmovdqu  xmm1, xmmword ptr [rsi+0x20]
+       vmovdqu  xmmword ptr [rsp+0x138], xmm1
+       mov      edx, dword ptr [rdi+0x18]
+       mov      rcx, gword ptr [rdi+0x08]
+       cmp      edx, dword ptr [rcx+0x08]
+       je       G_M000_IG111
+ 
+G_M000_IG06:                ;; offset=0x00BF
+       mov      rcx, gword ptr [rdi+0x08]
+       mov      rdx, rcx
+       mov      eax, dword ptr [rdi+0x14]
+       cmp      eax, dword ptr [rdx+0x08]
+       jae      G_M000_IG170
+       imul     rax, rax, 48
+       vmovdqu  ymm1, ymmword ptr [rsp+0x118]
+       vmovdqu  ymmword ptr [rdx+rax+0x10], ymm1
+       vmovdqu  xmm1, xmmword ptr [rsp+0x138]
+       vmovdqu  xmmword ptr [rdx+rax+0x30], xmm1
+       lea      rdx, bword ptr [rdi+0x14]
+       mov      eax, dword ptr [rdx]
+       inc      eax
+       xor      r8d, r8d
+       cmp      dword ptr [rcx+0x08], eax
+       cmove    eax, r8d
+       mov      dword ptr [rdx], eax
+       inc      dword ptr [rdi+0x18]
+       inc      dword ptr [rdi+0x1C]
+       lea      rdi, bword ptr [rbx+0x60]
+       vmovsd   xmm1, qword ptr [rsi+0x08]
+       vmovsd   xmm2, qword ptr [rsi+0x20]
+       vcmpeqpd xmm3, xmm1, xmm2
+       vxorps   xmm4, xmm4, xmm4
+       vpcmpgtq xmm4, xmm4, xmm2
+       vandpd   xmm3, xmm4, xmm3
+       vcmpneqpd xmm4, xmm1, xmm1
+       vorpd    xmm3, xmm4, xmm3
+       vcmpltpd xmm4, xmm2, xmm1
+       vorpd    xmm3, xmm4, xmm3
+       vblendvpd xmm1, xmm2, xmm1, xmm3
+       vmovq    rcx, xmm1
+       mov      rdx, rcx
+       shr      rdx, 52
+       and      edx, 0x7FF
+       cmp      edx, 0x7FF
+       je       G_M000_IG112
+       mov      rax, 0xFFFFFFFFFFFFF
+       and      rax, rcx
+       test     rax, rax
+       jl       G_M000_IG171
+       test     edx, edx
+       je       SHORT G_M000_IG08
+ 
+G_M000_IG07:                ;; offset=0x017E
+       mov      r8, 0x10000000000000
+       add      rax, r8
+       jo       G_M000_IG171
+ 
+G_M000_IG08:                ;; offset=0x0191
+       test     rax, rax
+       je       G_M000_IG17
+       xor      ebp, ebp
+       tzcnt    rbp, rax
+       sarx     rax, rax, rbp
+       shr      rcx, 63
+       jne      G_M000_IG113
+ 
+G_M000_IG09:                ;; offset=0x01B0
+       mov      r8, rax
+ 
+G_M000_IG10:                ;; offset=0x01B3
+       sub      edx, 1
+       jo       G_M000_IG171
+       xor      r14d, r14d
+       test     edx, edx
+       cmovg    r14d, edx
+       add      ebp, r14d
+       jo       G_M000_IG171
+       test     r8, r8
+       je       G_M000_IG17
+       movzx    rcx, byte  ptr [rdi+0x0C]
+       test     ecx, ecx
+       jne      G_M000_IG114
+       cmp      qword ptr [rdi], 0
+       je       G_M000_IG101
+ 
+G_M000_IG11:                ;; offset=0x01ED
+       mov      ecx, dword ptr [rdi+0x08]
+       cmp      ecx, ebp
+       cmovg    ecx, ebp
+       mov      rdx, qword ptr [rdi]
+       mov      eax, dword ptr [rdi+0x08]
+       sub      eax, ecx
+       jo       G_M000_IG171
+       cmp      eax, 64
+       jge      G_M000_IG118
+       shlx     r10, rdx, rax
+       sarx     rax, r10, rax
+       cmp      rax, rdx
+       jne      G_M000_IG115
+ 
+G_M000_IG12:                ;; offset=0x021F
+       mov      edx, ebp
+       sub      edx, ecx
+       jo       G_M000_IG171
+       cmp      edx, 64
+       jge      G_M000_IG115
+       shlx     rax, r8, rdx
+       sarx     rdx, rax, rdx
+       cmp      rdx, r8
+       jne      G_M000_IG115
+       test     rax, rax
+       jle      SHORT G_M000_IG14
+ 
+G_M000_IG13:                ;; offset=0x024A
+       mov      rdx, 0x7FFFFFFFFFFFFFFF
+       sub      rdx, rax
+       jo       G_M000_IG171
+       cmp      r10, rdx
+       jg       G_M000_IG115
+ 
+G_M000_IG14:                ;; offset=0x0266
+       test     rax, rax
+       jge      SHORT G_M000_IG16
+ 
+G_M000_IG15:                ;; offset=0x026B
+       mov      rdx, 0x8000000000000000
+       sub      rdx, rax
+       jo       G_M000_IG171
+       cmp      r10, rdx
+       jl       G_M000_IG115
+ 
+G_M000_IG16:                ;; offset=0x0287
+       add      rax, r10
+       jo       G_M000_IG171
+       mov      qword ptr [rdi], rax
+       mov      dword ptr [rdi+0x08], ecx
+ 
+G_M000_IG17:                ;; offset=0x0296
+       lea      rdi, bword ptr [rbx+0x60]
+       vmovsd   xmm1, qword ptr [rsi+0x08]
+       vmovsd   xmm2, qword ptr [rsi+0x20]
+       vcmpeqpd xmm3, xmm1, xmm2
+       vxorps   xmm4, xmm4, xmm4
+       vpcmpgtq xmm4, xmm4, xmm1
+       vandpd   xmm3, xmm4, xmm3
+       vcmpneqpd xmm4, xmm1, xmm1
+       vorpd    xmm3, xmm4, xmm3
+       vcmpltpd xmm4, xmm1, xmm2
+       vorpd    xmm3, xmm4, xmm3
+       vblendvpd xmm1, xmm2, xmm1, xmm3
+       vmovq    rcx, xmm1
+       mov      rdx, rcx
+       shr      rdx, 52
+       and      edx, 0x7FF
+       cmp      edx, 0x7FF
+       je       G_M000_IG119
+       mov      rax, 0xFFFFFFFFFFFFF
+       and      rax, rcx
+       test     rax, rax
+       jl       G_M000_IG171
+       test     edx, edx
+       je       SHORT G_M000_IG19
+ 
+G_M000_IG18:                ;; offset=0x0306
+       mov      r8, 0x10000000000000
+       add      rax, r8
+       jo       G_M000_IG171
+ 
+G_M000_IG19:                ;; offset=0x0319
+       test     rax, rax
+       je       G_M000_IG28
+       xor      ebp, ebp
+       tzcnt    rbp, rax
+       sarx     rax, rax, rbp
+       shr      rcx, 63
+       jne      G_M000_IG120
+ 
+G_M000_IG20:                ;; offset=0x0338
+       mov      rcx, rax
+ 
+G_M000_IG21:                ;; offset=0x033B
+       sub      edx, 1
+       jo       G_M000_IG171
+       xor      r14d, r14d
+       test     edx, edx
+       cmovg    r14d, edx
+       add      ebp, r14d
+       jo       G_M000_IG171
+       imul     rdx, rcx, -1
+       jo       G_M000_IG171
+       test     rdx, rdx
+       je       G_M000_IG28
+       movzx    rcx, byte  ptr [rdi+0x0C]
+       test     ecx, ecx
+       jne      G_M000_IG121
+       cmp      qword ptr [rdi], 0
+       je       G_M000_IG102
+ 
+G_M000_IG22:                ;; offset=0x037F
+       mov      ecx, dword ptr [rdi+0x08]
+       cmp      ecx, ebp
+       cmovg    ecx, ebp
+       mov      rax, qword ptr [rdi]
+       mov      r8d, dword ptr [rdi+0x08]
+       sub      r8d, ecx
+       jo       G_M000_IG171
+       cmp      r8d, 64
+       jge      G_M000_IG125
+       shlx     r10, rax, r8
+       sarx     r8, r10, r8
+       cmp      r8, rax
+       jne      G_M000_IG122
+ 
+G_M000_IG23:                ;; offset=0x03B4
+       mov      eax, ebp
+       sub      eax, ecx
+       jo       G_M000_IG171
+       cmp      eax, 64
+       jge      G_M000_IG122
+       shlx     r8, rdx, rax
+       sarx     rax, r8, rax
+       cmp      rax, rdx
+       jne      G_M000_IG122
+       test     r8, r8
+       jle      SHORT G_M000_IG25
+ 
+G_M000_IG24:                ;; offset=0x03DF
+       mov      rax, 0x7FFFFFFFFFFFFFFF
+       sub      rax, r8
+       jo       G_M000_IG171
+       cmp      r10, rax
+       jg       G_M000_IG122
+ 
+G_M000_IG25:                ;; offset=0x03FB
+       test     r8, r8
+       jge      SHORT G_M000_IG27
+ 
+G_M000_IG26:                ;; offset=0x0400
+       mov      rax, 0x8000000000000000
+       sub      rax, r8
+       jo       G_M000_IG171
+       cmp      r10, rax
+       jl       G_M000_IG122
+ 
+G_M000_IG27:                ;; offset=0x041C
+       add      r8, r10
+       jo       G_M000_IG171
+       mov      qword ptr [rdi], r8
+       mov      dword ptr [rdi+0x08], ecx
+ 
+G_M000_IG28:                ;; offset=0x042B
+       lea      rdi, bword ptr [rbx+0x80]
+       mov      rcx, qword ptr [rsi+0x10]
+       mov      rdx, rcx
+       shr      rdx, 52
+       and      edx, 0x7FF
+       cmp      edx, 0x7FF
+       je       G_M000_IG126
+       mov      rax, 0xFFFFFFFFFFFFF
+       and      rax, rcx
+       test     rax, rax
+       jl       G_M000_IG171
+       test     edx, edx
+       je       SHORT G_M000_IG30
+ 
+G_M000_IG29:                ;; offset=0x0469
+       mov      r8, 0x10000000000000
+       add      rax, r8
+       jo       G_M000_IG171
+ 
+G_M000_IG30:                ;; offset=0x047C
+       test     rax, rax
+       je       G_M000_IG39
+       xor      ebp, ebp
+       tzcnt    rbp, rax
+       sarx     rax, rax, rbp
+       shr      rcx, 63
+       jne      G_M000_IG127
+ 
+G_M000_IG31:                ;; offset=0x049B
+       mov      r8, rax
+ 
+G_M000_IG32:                ;; offset=0x049E
+       sub      edx, 1
+       jo       G_M000_IG171
+       xor      r14d, r14d
+       test     edx, edx
+       cmovg    r14d, edx
+       add      ebp, r14d
+       jo       G_M000_IG171
+       test     r8, r8
+       je       G_M000_IG39
+       movzx    rcx, byte  ptr [rdi+0x0C]
+       test     ecx, ecx
+       jne      G_M000_IG128
+       cmp      qword ptr [rdi], 0
+       je       G_M000_IG103
+ 
+G_M000_IG33:                ;; offset=0x04D8
+       mov      ecx, dword ptr [rdi+0x08]
+       cmp      ecx, ebp
+       cmovg    ecx, ebp
+       mov      rdx, qword ptr [rdi]
+       mov      eax, dword ptr [rdi+0x08]
+       sub      eax, ecx
+       jo       G_M000_IG171
+       cmp      eax, 64
+       jge      G_M000_IG129
+       shlx     r10, rdx, rax
+       sarx     rax, r10, rax
+       cmp      rax, rdx
+       jne      G_M000_IG130
+ 
+G_M000_IG34:                ;; offset=0x050A
+       mov      edx, ebp
+       sub      edx, ecx
+       jo       G_M000_IG171
+       cmp      edx, 64
+       jge      G_M000_IG130
+       shlx     rax, r8, rdx
+       sarx     rdx, rax, rdx
+       cmp      rdx, r8
+       jne      G_M000_IG130
+       test     rax, rax
+       jle      SHORT G_M000_IG36
+ 
+G_M000_IG35:                ;; offset=0x0535
+       mov      rdx, 0x7FFFFFFFFFFFFFFF
+       sub      rdx, rax
+       jo       G_M000_IG171
+       cmp      r10, rdx
+       jg       G_M000_IG130
+ 
+G_M000_IG36:                ;; offset=0x0551
+       test     rax, rax
+       jge      SHORT G_M000_IG38
+ 
+G_M000_IG37:                ;; offset=0x0556
+       mov      rdx, 0x8000000000000000
+       sub      rdx, rax
+       jo       G_M000_IG171
+       cmp      r10, rdx
+       jl       G_M000_IG130
+ 
+G_M000_IG38:                ;; offset=0x0572
+       add      rax, r10
+       jo       G_M000_IG171
+       mov      qword ptr [rdi], rax
+       mov      dword ptr [rdi+0x08], ecx
+ 
+G_M000_IG39:                ;; offset=0x0581
+       mov      rcx, qword ptr [rsi+0x18]
+       mov      rdx, rcx
+       shr      rdx, 52
+       and      edx, 0x7FF
+       cmp      edx, 0x7FF
+       je       G_M000_IG133
+       mov      rax, 0xFFFFFFFFFFFFF
+       and      rax, rcx
+       test     rax, rax
+       jl       G_M000_IG171
+       test     edx, edx
+       je       SHORT G_M000_IG41
+ 
+G_M000_IG40:                ;; offset=0x05B8
+       mov      r8, 0x10000000000000
+       add      rax, r8
+       jo       G_M000_IG171
+ 
+G_M000_IG41:                ;; offset=0x05CB
+       test     rax, rax
+       je       G_M000_IG50
+       xor      ebp, ebp
+       tzcnt    rbp, rax
+       sarx     rax, rax, rbp
+       shr      rcx, 63
+       jne      G_M000_IG134
+ 
+G_M000_IG42:                ;; offset=0x05EA
+       mov      rcx, rax
+ 
+G_M000_IG43:                ;; offset=0x05ED
+       sub      edx, 1
+       jo       G_M000_IG171
+       xor      r14d, r14d
+       test     edx, edx
+       cmovg    r14d, edx
+       add      ebp, r14d
+       jo       G_M000_IG171
+       imul     rdx, rcx, -1
+       jo       G_M000_IG171
+       test     rdx, rdx
+       je       G_M000_IG50
+       movzx    rcx, byte  ptr [rdi+0x0C]
+       test     ecx, ecx
+       jne      G_M000_IG135
+       cmp      qword ptr [rdi], 0
+       je       G_M000_IG104
+ 
+G_M000_IG44:                ;; offset=0x0631
+       mov      ecx, dword ptr [rdi+0x08]
+       cmp      ecx, ebp
+       cmovg    ecx, ebp
+       mov      rax, qword ptr [rdi]
+       mov      r8d, dword ptr [rdi+0x08]
+       sub      r8d, ecx
+       jo       G_M000_IG171
+       cmp      r8d, 64
+       jge      G_M000_IG136
+       shlx     r10, rax, r8
+       sarx     r8, r10, r8
+       cmp      r8, rax
+       jne      G_M000_IG137
+ 
+G_M000_IG45:                ;; offset=0x0666
+       mov      eax, ebp
+       sub      eax, ecx
+       jo       G_M000_IG171
+       cmp      eax, 64
+       jge      G_M000_IG137
+       shlx     r8, rdx, rax
+       sarx     rax, r8, rax
+       cmp      rax, rdx
+       jne      G_M000_IG137
+       test     r8, r8
+       jle      SHORT G_M000_IG47
+ 
+G_M000_IG46:                ;; offset=0x0691
+       mov      rax, 0x7FFFFFFFFFFFFFFF
+       sub      rax, r8
+       jo       G_M000_IG171
+       cmp      r10, rax
+       jg       G_M000_IG137
+ 
+G_M000_IG47:                ;; offset=0x06AD
+       test     r8, r8
+       jge      SHORT G_M000_IG49
+ 
+G_M000_IG48:                ;; offset=0x06B2
+       mov      rax, 0x8000000000000000
+       sub      rax, r8
+       jo       G_M000_IG171
+       cmp      r10, rax
+       jl       G_M000_IG137
+ 
+G_M000_IG49:                ;; offset=0x06CE
+       add      r8, r10
+       jo       G_M000_IG171
+       mov      qword ptr [rdi], r8
+       mov      dword ptr [rdi+0x08], ecx
+ 
+G_M000_IG50:                ;; offset=0x06DD
+       mov      rcx, gword ptr [rbx+0x08]
+       mov      ecx, dword ptr [rcx+0x18]
+       cmp      ecx, dword ptr [rbx+0x18]
+       jle      G_M000_IG95
+ 
+G_M000_IG51:                ;; offset=0x06ED
+       mov      rax, gword ptr [rbx+0x08]
+       mov      edx, dword ptr [rax+0x10]
+       mov      r8, gword ptr [rax+0x08]
+       mov      r10, r8
+       test     ecx, ecx
+       je       G_M000_IG140
+       cmp      edx, dword ptr [r10+0x08]
+       jae      G_M000_IG170
+       mov      ecx, edx
+       imul     rcx, rcx, 48
+       vmovdqu  ymm1, ymmword ptr [r10+rcx+0x10]
+       vmovdqu  ymmword ptr [rsp+0xA8], ymm1
+       vmovdqu  xmm1, xmmword ptr [r10+rcx+0x30]
+       vmovdqu  xmmword ptr [rsp+0xC8], xmm1
+       lea      rcx, bword ptr [rax+0x10]
+       mov      edx, dword ptr [rcx]
+       inc      edx
+       xor      r10d, r10d
+       cmp      dword ptr [r8+0x08], edx
+       cmove    edx, r10d
+       mov      dword ptr [rcx], edx
+       dec      dword ptr [rax+0x18]
+       inc      dword ptr [rax+0x1C]
+       vmovdqu  ymm1, ymmword ptr [rsp+0xA8]
+       vmovdqu  ymmword ptr [rsp+0x148], ymm1
+       vmovdqu  xmm1, xmmword ptr [rsp+0xC8]
+       vmovdqu  xmmword ptr [rsp+0x168], xmm1
+       lea      rdi, bword ptr [rbx+0x60]
+       vmovsd   xmm1, qword ptr [rsp+0x150]
+       vmovsd   xmm2, qword ptr [rsp+0x168]
+       vcmpeqpd xmm3, xmm1, xmm2
+       vxorps   xmm4, xmm4, xmm4
+       vpcmpgtq xmm4, xmm4, xmm2
+       vandpd   xmm3, xmm4, xmm3
+       vcmpneqpd xmm4, xmm1, xmm1
+       vorpd    xmm3, xmm4, xmm3
+       vcmpltpd xmm4, xmm2, xmm1
+       vorpd    xmm3, xmm4, xmm3
+       vblendvpd xmm1, xmm2, xmm1, xmm3
+       vmovq    rcx, xmm1
+       mov      rdx, rcx
+       shr      rdx, 52
+       and      edx, 0x7FF
+       cmp      edx, 0x7FF
+       je       G_M000_IG141
+       mov      rax, 0xFFFFFFFFFFFFF
+       and      rax, rcx
+       test     rax, rax
+       jl       G_M000_IG171
+       test     edx, edx
+       je       SHORT G_M000_IG53
+ 
+G_M000_IG52:                ;; offset=0x07EA
+       mov      r8, 0x10000000000000
+       add      rax, r8
+       jo       G_M000_IG171
+ 
+G_M000_IG53:                ;; offset=0x07FD
+       test     rax, rax
+       je       G_M000_IG62
+       xor      ebp, ebp
+       tzcnt    rbp, rax
+       sarx     rax, rax, rbp
+       shr      rcx, 63
+       jne      G_M000_IG142
+ 
+G_M000_IG54:                ;; offset=0x081C
+       mov      rcx, rax
+ 
+G_M000_IG55:                ;; offset=0x081F
+       sub      edx, 1
+       jo       G_M000_IG171
+       xor      r14d, r14d
+       test     edx, edx
+       cmovg    r14d, edx
+       add      ebp, r14d
+       jo       G_M000_IG171
+       imul     rdx, rcx, -1
+       jo       G_M000_IG171
+       test     rdx, rdx
+       je       G_M000_IG62
+       movzx    rcx, byte  ptr [rdi+0x0C]
+       test     ecx, ecx
+       jne      G_M000_IG143
+       cmp      qword ptr [rdi], 0
+       je       G_M000_IG105
+ 
+G_M000_IG56:                ;; offset=0x0863
+       mov      ecx, dword ptr [rdi+0x08]
+       cmp      ecx, ebp
+       cmovg    ecx, ebp
+       mov      rax, qword ptr [rdi]
+       mov      r8d, dword ptr [rdi+0x08]
+       sub      r8d, ecx
+       jo       G_M000_IG171
+       cmp      r8d, 64
+       jge      G_M000_IG144
+       shlx     r10, rax, r8
+       sarx     r8, r10, r8
+       cmp      r8, rax
+       jne      G_M000_IG145
+ 
+G_M000_IG57:                ;; offset=0x0898
+       mov      eax, ebp
+       sub      eax, ecx
+       jo       G_M000_IG171
+       cmp      eax, 64
+       jge      G_M000_IG145
+       shlx     r8, rdx, rax
+       sarx     rax, r8, rax
+       cmp      rax, rdx
+       jne      G_M000_IG145
+       test     r8, r8
+       jle      SHORT G_M000_IG59
+ 
+G_M000_IG58:                ;; offset=0x08C3
+       mov      rax, 0x7FFFFFFFFFFFFFFF
+       sub      rax, r8
+       jo       G_M000_IG171
+       cmp      r10, rax
+       jg       G_M000_IG145
+ 
+G_M000_IG59:                ;; offset=0x08DF
+       test     r8, r8
+       jge      SHORT G_M000_IG61
+ 
+G_M000_IG60:                ;; offset=0x08E4
+       mov      rax, 0x8000000000000000
+       sub      rax, r8
+       jo       G_M000_IG171
+       cmp      r10, rax
+       jl       G_M000_IG145
+ 
+G_M000_IG61:                ;; offset=0x0900
+       add      r8, r10
+       jo       G_M000_IG171
+       mov      qword ptr [rdi], r8
+       mov      dword ptr [rdi+0x08], ecx
+ 
+G_M000_IG62:                ;; offset=0x090F
+       lea      rdi, bword ptr [rbx+0x60]
+       vmovsd   xmm1, qword ptr [rsp+0x150]
+       vmovsd   xmm2, qword ptr [rsp+0x168]
+       vcmpeqpd xmm3, xmm1, xmm2
+       vxorps   xmm4, xmm4, xmm4
+       vpcmpgtq xmm4, xmm4, xmm1
+       vandpd   xmm3, xmm4, xmm3
+       vcmpneqpd xmm4, xmm1, xmm1
+       vorpd    xmm3, xmm4, xmm3
+       vcmpltpd xmm4, xmm1, xmm2
+       vorpd    xmm3, xmm4, xmm3
+       vblendvpd xmm1, xmm2, xmm1, xmm3
+       vmovq    rcx, xmm1
+       mov      rdx, rcx
+       shr      rdx, 52
+       and      edx, 0x7FF
+       cmp      edx, 0x7FF
+       je       G_M000_IG148
+       mov      rax, 0xFFFFFFFFFFFFF
+       and      rax, rcx
+       test     rax, rax
+       jl       G_M000_IG171
+       test     edx, edx
+       je       SHORT G_M000_IG64
+ 
+G_M000_IG63:                ;; offset=0x0987
+       mov      r8, 0x10000000000000
+       add      rax, r8
+       jo       G_M000_IG171
+ 
+G_M000_IG64:                ;; offset=0x099A
+       test     rax, rax
+       je       G_M000_IG73
+       xor      ebp, ebp
+       tzcnt    rbp, rax
+       sarx     rax, rax, rbp
+       shr      rcx, 63
+       jne      G_M000_IG149
+ 
+G_M000_IG65:                ;; offset=0x09B9
+       mov      r8, rax
+ 
+G_M000_IG66:                ;; offset=0x09BC
+       sub      edx, 1
+       jo       G_M000_IG171
+       xor      r14d, r14d
+       test     edx, edx
+       cmovg    r14d, edx
+       add      ebp, r14d
+       jo       G_M000_IG171
+       test     r8, r8
+       je       G_M000_IG73
+       movzx    rcx, byte  ptr [rdi+0x0C]
+       test     ecx, ecx
+       jne      G_M000_IG150
+       cmp      qword ptr [rdi], 0
+       je       G_M000_IG106
+ 
+G_M000_IG67:                ;; offset=0x09F6
+       mov      ecx, dword ptr [rdi+0x08]
+       cmp      ecx, ebp
+       cmovg    ecx, ebp
+       mov      rdx, qword ptr [rdi]
+       mov      eax, dword ptr [rdi+0x08]
+       sub      eax, ecx
+       jo       G_M000_IG171
+       cmp      eax, 64
+       jge      G_M000_IG151
+       shlx     r10, rdx, rax
+       sarx     rax, r10, rax
+       cmp      rax, rdx
+       jne      G_M000_IG152
+ 
+G_M000_IG68:                ;; offset=0x0A28
+       mov      edx, ebp
+       sub      edx, ecx
+       jo       G_M000_IG171
+       cmp      edx, 64
+       jge      G_M000_IG152
+       shlx     rax, r8, rdx
+       sarx     rdx, rax, rdx
+       cmp      rdx, r8
+       jne      G_M000_IG152
+       test     rax, rax
+       jle      SHORT G_M000_IG70
+ 
+G_M000_IG69:                ;; offset=0x0A53
+       mov      rdx, 0x7FFFFFFFFFFFFFFF
+       sub      rdx, rax
+       jo       G_M000_IG171
+       cmp      r10, rdx
+       jg       G_M000_IG152
+ 
+G_M000_IG70:                ;; offset=0x0A6F
+       test     rax, rax
+       jge      SHORT G_M000_IG72
+ 
+G_M000_IG71:                ;; offset=0x0A74
+       mov      rdx, 0x8000000000000000
+       sub      rdx, rax
+       jo       G_M000_IG171
+       cmp      r10, rdx
+       jl       G_M000_IG152
+ 
+G_M000_IG72:                ;; offset=0x0A90
+       add      rax, r10
+       jo       G_M000_IG171
+       mov      qword ptr [rdi], rax
+       mov      dword ptr [rdi+0x08], ecx
+ 
+G_M000_IG73:                ;; offset=0x0A9F
+       lea      rdi, bword ptr [rbx+0x80]
+       mov      rcx, qword ptr [rsp+0x158]
+       mov      rdx, rcx
+       shr      rdx, 52
+       and      edx, 0x7FF
+       cmp      edx, 0x7FF
+       je       G_M000_IG155
+       mov      rax, 0xFFFFFFFFFFFFF
+       and      rax, rcx
+       test     rax, rax
+       jl       G_M000_IG171
+       test     edx, edx
+       je       SHORT G_M000_IG75
+ 
+G_M000_IG74:                ;; offset=0x0AE1
+       mov      r8, 0x10000000000000
+       add      rax, r8
+       jo       G_M000_IG171
+ 
+G_M000_IG75:                ;; offset=0x0AF4
+       test     rax, rax
+       je       G_M000_IG84
+       xor      ebp, ebp
+       tzcnt    rbp, rax
+       sarx     rax, rax, rbp
+       shr      rcx, 63
+       jne      G_M000_IG156
+ 
+G_M000_IG76:                ;; offset=0x0B13
+       mov      rcx, rax
+ 
+G_M000_IG77:                ;; offset=0x0B16
+       sub      edx, 1
+       jo       G_M000_IG171
+       xor      r14d, r14d
+       test     edx, edx
+       cmovg    r14d, edx
+       add      ebp, r14d
+       jo       G_M000_IG171
+       imul     rdx, rcx, -1
+       jo       G_M000_IG171
+       test     rdx, rdx
+       je       G_M000_IG84
+       movzx    rcx, byte  ptr [rdi+0x0C]
+       test     ecx, ecx
+       jne      G_M000_IG157
+       cmp      qword ptr [rdi], 0
+       je       G_M000_IG107
+ 
+G_M000_IG78:                ;; offset=0x0B5A
+       mov      ecx, dword ptr [rdi+0x08]
+       cmp      ecx, ebp
+       cmovg    ecx, ebp
+       mov      rax, qword ptr [rdi]
+       mov      r8d, dword ptr [rdi+0x08]
+       sub      r8d, ecx
+       jo       G_M000_IG171
+       cmp      r8d, 64
+       jge      G_M000_IG158
+       shlx     r10, rax, r8
+       sarx     r8, r10, r8
+       cmp      r8, rax
+       jne      G_M000_IG159
+ 
+G_M000_IG79:                ;; offset=0x0B8F
+       mov      eax, ebp
+       sub      eax, ecx
+       jo       G_M000_IG171
+       cmp      eax, 64
+       jge      G_M000_IG159
+       shlx     r8, rdx, rax
+       sarx     rax, r8, rax
+       cmp      rax, rdx
+       jne      G_M000_IG159
+       test     r8, r8
+       jle      SHORT G_M000_IG81
+ 
+G_M000_IG80:                ;; offset=0x0BBA
+       mov      rax, 0x7FFFFFFFFFFFFFFF
+       sub      rax, r8
+       jo       G_M000_IG171
+       cmp      r10, rax
+       jg       G_M000_IG159
+ 
+G_M000_IG81:                ;; offset=0x0BD6
+       test     r8, r8
+       jge      SHORT G_M000_IG83
+ 
+G_M000_IG82:                ;; offset=0x0BDB
+       mov      rax, 0x8000000000000000
+       sub      rax, r8
+       jo       G_M000_IG171
+       cmp      r10, rax
+       jl       G_M000_IG159
+ 
+G_M000_IG83:                ;; offset=0x0BF7
+       add      r8, r10
+       jo       G_M000_IG171
+       mov      qword ptr [rdi], r8
+       mov      dword ptr [rdi+0x08], ecx
+ 
+G_M000_IG84:                ;; offset=0x0C06
+       mov      rcx, qword ptr [rsp+0x160]
+       mov      rdx, rcx
+       shr      rdx, 52
+       and      edx, 0x7FF
+       cmp      edx, 0x7FF
+       je       G_M000_IG162
+       mov      rax, 0xFFFFFFFFFFFFF
+       and      rax, rcx
+       test     rax, rax
+       jl       G_M000_IG171
+       test     edx, edx
+       je       SHORT G_M000_IG86
+ 
+G_M000_IG85:                ;; offset=0x0C41
+       mov      r8, 0x10000000000000
+       add      rax, r8
+       jo       G_M000_IG171
+ 
+G_M000_IG86:                ;; offset=0x0C54
+       test     rax, rax
+       je       G_M000_IG95
+       xor      ebp, ebp
+       tzcnt    rbp, rax
+       sarx     rax, rax, rbp
+       shr      rcx, 63
+       jne      G_M000_IG163
+ 
+G_M000_IG87:                ;; offset=0x0C73
+       mov      r8, rax
+ 
+G_M000_IG88:                ;; offset=0x0C76
+       sub      edx, 1
+       jo       G_M000_IG171
+       xor      r14d, r14d
+       test     edx, edx
+       cmovg    r14d, edx
+       add      ebp, r14d
+       jo       G_M000_IG171
+       test     r8, r8
+       je       G_M000_IG95
+       movzx    rcx, byte  ptr [rdi+0x0C]
+       test     ecx, ecx
+       jne      G_M000_IG164
+       cmp      qword ptr [rdi], 0
+       je       G_M000_IG108
+ 
+G_M000_IG89:                ;; offset=0x0CB0
+       mov      ecx, dword ptr [rdi+0x08]
+       cmp      ecx, ebp
+       cmovg    ecx, ebp
+       mov      rdx, qword ptr [rdi]
+       mov      eax, dword ptr [rdi+0x08]
+       sub      eax, ecx
+       jo       G_M000_IG171
+       cmp      eax, 64
+       jge      G_M000_IG165
+       shlx     r10, rdx, rax
+       sarx     rax, r10, rax
+       cmp      rax, rdx
+       jne      G_M000_IG166
+ 
+G_M000_IG90:                ;; offset=0x0CE2
+       mov      edx, ebp
+       sub      edx, ecx
+       jo       G_M000_IG171
+       cmp      edx, 64
+       jge      G_M000_IG166
+       shlx     rax, r8, rdx
+       sarx     rdx, rax, rdx
+       cmp      rdx, r8
+       jne      G_M000_IG166
+       test     rax, rax
+       jle      SHORT G_M000_IG92
+ 
+G_M000_IG91:                ;; offset=0x0D0D
+       mov      rdx, 0x7FFFFFFFFFFFFFFF
+       sub      rdx, rax
+       jo       G_M000_IG171
+       cmp      r10, rdx
+       jg       G_M000_IG166
+ 
+G_M000_IG92:                ;; offset=0x0D29
+       test     rax, rax
+       jge      SHORT G_M000_IG94
+ 
+G_M000_IG93:                ;; offset=0x0D2E
+       mov      rdx, 0x8000000000000000
+       sub      rdx, rax
+       jo       G_M000_IG171
+       cmp      r10, rdx
+       jl       G_M000_IG166
+ 
+G_M000_IG94:                ;; offset=0x0D4A
+       add      rax, r10
+       jo       G_M000_IG171
+       mov      qword ptr [rdi], rax
+       mov      dword ptr [rdi+0x08], ecx
+ 
+G_M000_IG95:                ;; offset=0x0D59
+       vmovdqu  ymm1, ymmword ptr [rsi]
+       vmovdqu  ymmword ptr [rbx+0xC0], ymm1
+       vmovdqu  xmm1, xmmword ptr [rsi+0x20]
+       vmovdqu  xmmword ptr [rbx+0xE0], xmm1
+       mov      ecx, dword ptr [rbx+0x28]
+       cmp      ecx, dword ptr [rbx+0x20]
+       jl       G_M000_IG169
+ 
+G_M000_IG96:                ;; offset=0x0D7E
+       vmovsd   xmm0, qword ptr [rsp+0x178]
+ 
+G_M000_IG97:                ;; offset=0x0D87
+       vzeroupper 
+       add      rsp, 384
+       pop      rbx
+       pop      rbp
+       pop      rsi
+       pop      rdi
+       pop      r14
+       ret      
+ 
+G_M000_IG98:                ;; offset=0x0D98
+       mov      ecx, dword ptr [rbx+0x24]
+       test     ecx, ecx
+       je       SHORT G_M000_IG99
+       cmp      ecx, 2
+       jne      G_M000_IG109
+ 
+G_M000_IG99:                ;; offset=0x0DA8
+       mov      ecx, 100
+ 
+G_M000_IG100:                ;; offset=0x0DAD
+       vxorps   xmm0, xmm0, xmm0
+       vcvtsi2sd xmm0, xmm0, ecx
+       vmovsd   qword ptr [rsp+0x178], xmm0
+       jmp      G_M000_IG04
+ 
+G_M000_IG101:                ;; offset=0x0DC3
+       mov      qword ptr [rdi], r8
+       mov      dword ptr [rdi+0x08], ebp
+       mov      byte  ptr [rdi+0x0C], 0
+       xor      ecx, ecx
+       mov      qword ptr [rdi+0x10], rcx
+       mov      qword ptr [rdi+0x18], rcx
+       jmp      G_M000_IG17
+ 
+G_M000_IG102:                ;; offset=0x0DDC
+       mov      qword ptr [rdi], rdx
+       mov      dword ptr [rdi+0x08], ebp
+       mov      byte  ptr [rdi+0x0C], 0
+       xor      ecx, ecx
+       mov      qword ptr [rdi+0x10], rcx
+       mov      qword ptr [rdi+0x18], rcx
+       jmp      G_M000_IG28
+ 
+G_M000_IG103:                ;; offset=0x0DF5
+       mov      qword ptr [rdi], r8
+       mov      dword ptr [rdi+0x08], ebp
+       mov      byte  ptr [rdi+0x0C], 0
+       xor      ecx, ecx
+       mov      qword ptr [rdi+0x10], rcx
+       mov      qword ptr [rdi+0x18], rcx
+       jmp      G_M000_IG39
+ 
+G_M000_IG104:                ;; offset=0x0E0E
+       mov      qword ptr [rdi], rdx
+       mov      dword ptr [rdi+0x08], ebp
+       mov      byte  ptr [rdi+0x0C], 0
+       xor      ecx, ecx
+       mov      qword ptr [rdi+0x10], rcx
+       mov      qword ptr [rdi+0x18], rcx
+       jmp      G_M000_IG50
+ 
+G_M000_IG105:                ;; offset=0x0E27
+       mov      qword ptr [rdi], rdx
+       mov      dword ptr [rdi+0x08], ebp
+       mov      byte  ptr [rdi+0x0C], 0
+       xor      ecx, ecx
+       mov      qword ptr [rdi+0x10], rcx
+       mov      qword ptr [rdi+0x18], rcx
+       jmp      G_M000_IG62
+ 
+G_M000_IG106:                ;; offset=0x0E40
+       mov      qword ptr [rdi], r8
+       mov      dword ptr [rdi+0x08], ebp
+       mov      byte  ptr [rdi+0x0C], 0
+       xor      ecx, ecx
+       mov      qword ptr [rdi+0x10], rcx
+       mov      qword ptr [rdi+0x18], rcx
+       jmp      G_M000_IG73
+ 
+G_M000_IG107:                ;; offset=0x0E59
+       mov      qword ptr [rdi], rdx
+       mov      dword ptr [rdi+0x08], ebp
+       mov      byte  ptr [rdi+0x0C], 0
+       xor      ecx, ecx
+       mov      qword ptr [rdi+0x10], rcx
+       mov      qword ptr [rdi+0x18], rcx
+       jmp      G_M000_IG84
+ 
+G_M000_IG108:                ;; offset=0x0E72
+       mov      qword ptr [rdi], r8
+       mov      dword ptr [rdi+0x08], ebp
+       mov      byte  ptr [rdi+0x0C], 0
+       xor      ecx, ecx
+       mov      qword ptr [rdi+0x10], rcx
+       mov      qword ptr [rdi+0x18], rcx
+       jmp      G_M000_IG95
+ 
+G_M000_IG109:                ;; offset=0x0E8B
+       mov      ecx, -100
+       jmp      G_M000_IG100
+ 
+G_M000_IG110:                ;; offset=0x0E95
+       cmp      dword ptr [rbx+0x28], 0
+       jle      G_M000_IG05
+       mov      rcx, gword ptr [rbx+0x10]
+       vmovdqu  ymm1, ymmword ptr [rbx+0xC0]
+       vmovdqu  ymmword ptr [rsp+0x38], ymm1
+       vmovdqu  xmm1, xmmword ptr [rbx+0xE0]
+       vmovdqu  xmmword ptr [rsp+0x58], xmm1
+       lea      rdx, [rsp+0x38]
+       cmp      dword ptr [rcx], ecx
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:Enqueue(OoplesFinance.StockIndicators.Indicators.Bar):this]
+       lea      rcx, bword ptr [rbx+0xA0]
+       lea      rdx, bword ptr [rbx+0xC0]
+       mov      r8d, 1
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:AddRange(byref,byref,int)]
+       mov      rcx, gword ptr [rbx+0x10]
+       mov      ecx, dword ptr [rcx+0x18]
+       cmp      ecx, dword ptr [rbx+0x1C]
+       jle      G_M000_IG05
+       lea      rdi, bword ptr [rbx+0xA0]
+       mov      rcx, gword ptr [rbx+0x10]
+       lea      rdx, [rsp+0x148]
+       cmp      dword ptr [rcx], ecx
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:Dequeue():OoplesFinance.StockIndicators.Indicators.Bar:this]
+       lea      rdx, [rsp+0x148]
+       mov      rcx, rdi
+       mov      r8d, -1
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:AddRange(byref,byref,int)]
+       jmp      G_M000_IG05
+ 
+G_M000_IG111:                ;; offset=0x0F2D
+       mov      edx, dword ptr [rdi+0x18]
+       inc      edx
+       mov      rcx, rdi
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:Grow(int):this]
+       jmp      G_M000_IG06
+ 
+G_M000_IG112:                ;; offset=0x0F40
+       mov      rcx, 0x7FFEC537E410
+       call     CORINFO_HELP_NEWSFAST
+       mov      rbx, rax
+       mov      ecx, 0x2E6D9
+       mov      rdx, 0x7FFEC74A58E0
+       call     [CORINFO_HELP_STRCNS]
+       mov      rdx, rax
+       mov      rcx, rbx
+       call     [System.ArithmeticException:.ctor(System.String):this]
+       mov      rcx, rbx
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG113:                ;; offset=0x0F7C
+       xor      r8d, r8d
+       sub      r8, rax
+       jo       G_M000_IG171
+       jmp      G_M000_IG10
+ 
+G_M000_IG114:                ;; offset=0x0F8D
+       cmp      dword ptr [rdi+0x18], 0
+       je       G_M000_IG101
+ 
+G_M000_IG115:                ;; offset=0x0F97
+       lea      rcx, [rsp+0x108]
+       mov      rdx, r8
+       call     [System.Numerics.BigInteger:.ctor(long):this]
+ 
+G_M000_IG116:                ;; offset=0x0FA8
+       vmovdqu  xmm0, xmmword ptr [rsp+0x108]
+       vmovdqu  xmmword ptr [rsp+0x28], xmm0
+ 
+G_M000_IG117:                ;; offset=0x0FB7
+       lea      rdx, [rsp+0x28]
+       mov      rcx, rdi
+       mov      r8d, ebp
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:AddLarge(System.Numerics.BigInteger,int):this]
+       jmp      G_M000_IG17
+ 
+G_M000_IG118:                ;; offset=0x0FCD
+       xor      r10d, r10d
+       test     rdx, rdx
+       jne      SHORT G_M000_IG115
+       jmp      G_M000_IG12
+ 
+G_M000_IG119:                ;; offset=0x0FDA
+       mov      rcx, 0x7FFEC537E410
+       call     CORINFO_HELP_NEWSFAST
+       mov      rbx, rax
+       mov      ecx, 0x2E6D9
+       mov      rdx, 0x7FFEC74A58E0
+       call     [CORINFO_HELP_STRCNS]
+       mov      rdx, rax
+       mov      rcx, rbx
+       call     [System.ArithmeticException:.ctor(System.String):this]
+       mov      rcx, rbx
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG120:                ;; offset=0x1016
+       xor      ecx, ecx
+       sub      rcx, rax
+       jo       G_M000_IG171
+       jmp      G_M000_IG21
+ 
+G_M000_IG121:                ;; offset=0x1026
+       cmp      dword ptr [rdi+0x18], 0
+       je       G_M000_IG102
+ 
+G_M000_IG122:                ;; offset=0x1030
+       lea      rcx, [rsp+0xF8]
+       call     [System.Numerics.BigInteger:.ctor(long):this]
+ 
+G_M000_IG123:                ;; offset=0x103E
+       vmovdqu  xmm0, xmmword ptr [rsp+0xF8]
+       vmovdqu  xmmword ptr [rsp+0x28], xmm0
+ 
+G_M000_IG124:                ;; offset=0x104D
+       lea      rdx, [rsp+0x28]
+       mov      rcx, rdi
+       mov      r8d, ebp
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:AddLarge(System.Numerics.BigInteger,int):this]
+       jmp      G_M000_IG28
+ 
+G_M000_IG125:                ;; offset=0x1063
+       xor      r10d, r10d
+       test     rax, rax
+       jne      SHORT G_M000_IG122
+       jmp      G_M000_IG23
+ 
+G_M000_IG126:                ;; offset=0x1070
+       mov      rcx, 0x7FFEC537E410
+       call     CORINFO_HELP_NEWSFAST
+       mov      rbx, rax
+       mov      ecx, 0x2E6D9
+       mov      rdx, 0x7FFEC74A58E0
+       call     [CORINFO_HELP_STRCNS]
+       mov      rdx, rax
+       mov      rcx, rbx
+       call     [System.ArithmeticException:.ctor(System.String):this]
+       mov      rcx, rbx
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG127:                ;; offset=0x10AC
+       xor      r8d, r8d
+       sub      r8, rax
+       jo       G_M000_IG171
+       jmp      G_M000_IG32
+ 
+G_M000_IG128:                ;; offset=0x10BD
+       cmp      dword ptr [rdi+0x18], 0
+       jne      SHORT G_M000_IG130
+       jmp      G_M000_IG103
+ 
+G_M000_IG129:                ;; offset=0x10C8
+       xor      r10d, r10d
+       test     rdx, rdx
+       je       G_M000_IG34
+ 
+G_M000_IG130:                ;; offset=0x10D4
+       lea      rcx, [rsp+0xE8]
+       mov      rdx, r8
+       call     [System.Numerics.BigInteger:.ctor(long):this]
+ 
+G_M000_IG131:                ;; offset=0x10E5
+       vmovdqu  xmm0, xmmword ptr [rsp+0xE8]
+       vmovdqu  xmmword ptr [rsp+0x28], xmm0
+ 
+G_M000_IG132:                ;; offset=0x10F4
+       lea      rdx, [rsp+0x28]
+       mov      rcx, rdi
+       mov      r8d, ebp
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:AddLarge(System.Numerics.BigInteger,int):this]
+       jmp      G_M000_IG39
+ 
+G_M000_IG133:                ;; offset=0x110A
+       mov      rcx, 0x7FFEC537E410
+       call     CORINFO_HELP_NEWSFAST
+       mov      rbx, rax
+       mov      ecx, 0x2E6D9
+       mov      rdx, 0x7FFEC74A58E0
+       call     [CORINFO_HELP_STRCNS]
+       mov      rdx, rax
+       mov      rcx, rbx
+       call     [System.ArithmeticException:.ctor(System.String):this]
+       mov      rcx, rbx
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG134:                ;; offset=0x1146
+       xor      ecx, ecx
+       sub      rcx, rax
+       jo       G_M000_IG171
+       jmp      G_M000_IG43
+ 
+G_M000_IG135:                ;; offset=0x1156
+       cmp      dword ptr [rdi+0x18], 0
+       jne      SHORT G_M000_IG137
+       jmp      G_M000_IG104
+ 
+G_M000_IG136:                ;; offset=0x1161
+       xor      r10d, r10d
+       test     rax, rax
+       je       G_M000_IG45
+ 
+G_M000_IG137:                ;; offset=0x116D
+       lea      rcx, [rsp+0xD8]
+       call     [System.Numerics.BigInteger:.ctor(long):this]
+ 
+G_M000_IG138:                ;; offset=0x117B
+       vmovdqu  xmm0, xmmword ptr [rsp+0xD8]
+       vmovdqu  xmmword ptr [rsp+0x28], xmm0
+ 
+G_M000_IG139:                ;; offset=0x118A
+       lea      rdx, [rsp+0x28]
+       mov      rcx, rdi
+       mov      r8d, ebp
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:AddLarge(System.Numerics.BigInteger,int):this]
+       jmp      G_M000_IG50
+ 
+G_M000_IG140:                ;; offset=0x11A0
+       mov      rcx, rax
+       call     [System.Collections.Generic.Queue`1[OoplesFinance.StockIndicators.Indicators.Bar]:ThrowForEmptyQueue():this]
+       int3     
+ 
+G_M000_IG141:                ;; offset=0x11AA
+       mov      rcx, 0x7FFEC537E410
+       call     CORINFO_HELP_NEWSFAST
+       mov      rbx, rax
+       mov      ecx, 0x2E6D9
+       mov      rdx, 0x7FFEC74A58E0
+       call     [CORINFO_HELP_STRCNS]
+       mov      rdx, rax
+       mov      rcx, rbx
+       call     [System.ArithmeticException:.ctor(System.String):this]
+       mov      rcx, rbx
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG142:                ;; offset=0x11E6
+       xor      ecx, ecx
+       sub      rcx, rax
+       jo       G_M000_IG171
+       jmp      G_M000_IG55
+ 
+G_M000_IG143:                ;; offset=0x11F6
+       cmp      dword ptr [rdi+0x18], 0
+       jne      SHORT G_M000_IG145
+       jmp      G_M000_IG105
+ 
+G_M000_IG144:                ;; offset=0x1201
+       xor      r10d, r10d
+       test     rax, rax
+       je       G_M000_IG57
+ 
+G_M000_IG145:                ;; offset=0x120D
+       lea      rcx, [rsp+0x98]
+       call     [System.Numerics.BigInteger:.ctor(long):this]
+ 
+G_M000_IG146:                ;; offset=0x121B
+       vmovdqu  xmm0, xmmword ptr [rsp+0x98]
+       vmovdqu  xmmword ptr [rsp+0x28], xmm0
+ 
+G_M000_IG147:                ;; offset=0x122A
+       lea      rdx, [rsp+0x28]
+       mov      rcx, rdi
+       mov      r8d, ebp
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:AddLarge(System.Numerics.BigInteger,int):this]
+       jmp      G_M000_IG62
+ 
+G_M000_IG148:                ;; offset=0x1240
+       mov      rcx, 0x7FFEC537E410
+       call     CORINFO_HELP_NEWSFAST
+       mov      rbx, rax
+       mov      ecx, 0x2E6D9
+       mov      rdx, 0x7FFEC74A58E0
+       call     [CORINFO_HELP_STRCNS]
+       mov      rdx, rax
+       mov      rcx, rbx
+       call     [System.ArithmeticException:.ctor(System.String):this]
+       mov      rcx, rbx
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG149:                ;; offset=0x127C
+       xor      r8d, r8d
+       sub      r8, rax
+       jo       G_M000_IG171
+       jmp      G_M000_IG66
+ 
+G_M000_IG150:                ;; offset=0x128D
+       cmp      dword ptr [rdi+0x18], 0
+       jne      SHORT G_M000_IG152
+       jmp      G_M000_IG106
+ 
+G_M000_IG151:                ;; offset=0x1298
+       xor      r10d, r10d
+       test     rdx, rdx
+       je       G_M000_IG68
+ 
+G_M000_IG152:                ;; offset=0x12A4
+       lea      rcx, [rsp+0x88]
+       mov      rdx, r8
+       call     [System.Numerics.BigInteger:.ctor(long):this]
+ 
+G_M000_IG153:                ;; offset=0x12B5
+       vmovdqu  xmm0, xmmword ptr [rsp+0x88]
+       vmovdqu  xmmword ptr [rsp+0x28], xmm0
+ 
+G_M000_IG154:                ;; offset=0x12C4
+       lea      rdx, [rsp+0x28]
+       mov      rcx, rdi
+       mov      r8d, ebp
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:AddLarge(System.Numerics.BigInteger,int):this]
+       jmp      G_M000_IG73
+ 
+G_M000_IG155:                ;; offset=0x12DA
+       mov      rcx, 0x7FFEC537E410
+       call     CORINFO_HELP_NEWSFAST
+       mov      rsi, rax
+       mov      ecx, 0x2E6D9
+       mov      rdx, 0x7FFEC74A58E0
+       call     [CORINFO_HELP_STRCNS]
+       mov      rdx, rax
+       mov      rcx, rsi
+       call     [System.ArithmeticException:.ctor(System.String):this]
+       mov      rcx, rsi
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG156:                ;; offset=0x1316
+       xor      ecx, ecx
+       sub      rcx, rax
+       jo       G_M000_IG171
+       jmp      G_M000_IG77
+ 
+G_M000_IG157:                ;; offset=0x1326
+       cmp      dword ptr [rdi+0x18], 0
+       jne      SHORT G_M000_IG159
+       jmp      G_M000_IG107
+ 
+G_M000_IG158:                ;; offset=0x1331
+       xor      r10d, r10d
+       test     rax, rax
+       je       G_M000_IG79
+ 
+G_M000_IG159:                ;; offset=0x133D
+       lea      rcx, [rsp+0x78]
+       call     [System.Numerics.BigInteger:.ctor(long):this]
+ 
+G_M000_IG160:                ;; offset=0x1348
+       vmovdqu  xmm0, xmmword ptr [rsp+0x78]
+       vmovdqu  xmmword ptr [rsp+0x28], xmm0
+ 
+G_M000_IG161:                ;; offset=0x1354
+       lea      rdx, [rsp+0x28]
+       mov      rcx, rdi
+       mov      r8d, ebp
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:AddLarge(System.Numerics.BigInteger,int):this]
+       jmp      G_M000_IG84
+ 
+G_M000_IG162:                ;; offset=0x136A
+       mov      rcx, 0x7FFEC537E410
+       call     CORINFO_HELP_NEWSFAST
+       mov      rbx, rax
+       mov      ecx, 0x2E6D9
+       mov      rdx, 0x7FFEC74A58E0
+       call     [CORINFO_HELP_STRCNS]
+       mov      rdx, rax
+       mov      rcx, rbx
+       call     [System.ArithmeticException:.ctor(System.String):this]
+       mov      rcx, rbx
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG163:                ;; offset=0x13A6
+       xor      r8d, r8d
+       sub      r8, rax
+       jo       SHORT G_M000_IG171
+       jmp      G_M000_IG88
+ 
+G_M000_IG164:                ;; offset=0x13B3
+       cmp      dword ptr [rdi+0x18], 0
+       jne      SHORT G_M000_IG166
+       jmp      G_M000_IG108
+ 
+G_M000_IG165:                ;; offset=0x13BE
+       xor      r10d, r10d
+       test     rdx, rdx
+       je       G_M000_IG90
+ 
+G_M000_IG166:                ;; offset=0x13CA
+       lea      rcx, [rsp+0x68]
+       mov      rdx, r8
+       call     [System.Numerics.BigInteger:.ctor(long):this]
+ 
+G_M000_IG167:                ;; offset=0x13D8
+       vmovdqu  xmm0, xmmword ptr [rsp+0x68]
+       vmovdqu  xmmword ptr [rsp+0x28], xmm0
+ 
+G_M000_IG168:                ;; offset=0x13E4
+       lea      rdx, [rsp+0x28]
+       mov      rcx, rdi
+       mov      r8d, ebp
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:AddLarge(System.Numerics.BigInteger,int):this]
+       jmp      G_M000_IG95
+ 
+G_M000_IG169:                ;; offset=0x13FA
+       mov      ecx, dword ptr [rbx+0x28]
+       add      ecx, 1
+       jo       SHORT G_M000_IG171
+       mov      dword ptr [rbx+0x28], ecx
+       jmp      G_M000_IG96
+ 
+G_M000_IG170:                ;; offset=0x140A
+       call     CORINFO_HELP_RNGCHKFAIL
+       int3     
+ 
+G_M000_IG171:                ;; offset=0x1410
+       call     CORINFO_HELP_OVERFLOW
+       int3     
+ 
+; Total bytes of code 5142
+
+; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ContextReversalState:Matches(byref):bool:this (Tier1)
+; Emitting BLENDED_CODE for generic X64 + VEX on Windows
+; Tier1 code
+; optimized code
+; optimized using Synthesized PGO
+; rsp based frame
+; partially interruptible
+; with Synthesized PGO: fgCalledCount is 250607
+; 3 inlinees with PGO data; 29 single block inlinees; 2 inlinees without PGO data
+
+G_M000_IG01:                ;; offset=0x0000
+       push     r14
+       push     rdi
+       push     rsi
+       push     rbp
+       push     rbx
+       sub      rsp, 256
+       vmovaps  xmmword ptr [rsp+0xF0], xmm6
+       xor      eax, eax
+       mov      qword ptr [rsp+0x28], rax
+       vxorps   xmm4, xmm4, xmm4
+       vmovdqu  ymmword ptr [rsp+0x30], ymm4
+       vmovdqu  ymmword ptr [rsp+0x50], ymm4
+       vmovdqu  ymmword ptr [rsp+0x70], ymm4
+       vmovdqu  ymmword ptr [rsp+0x90], ymm4
+       vmovdqu  ymmword ptr [rsp+0xB0], ymm4
+       vmovdqa  xmmword ptr [rsp+0xD0], xmm4
+       mov      rbx, rcx
+       mov      rsi, rdx
+ 
+G_M000_IG02:                ;; offset=0x0054
+       vmovsd   xmm1, qword ptr [rsi+0x08]
+       vmovaps  xmm0, xmm1
+       vmovsd   xmm2, qword ptr [rsi+0x20]
+       vmovaps  xmm3, xmm2
+       vcmpeqpd xmm4, xmm0, xmm3
+       vxorps   xmm5, xmm5, xmm5
+       vpcmpgtq xmm5, xmm5, xmm3
+       vandpd   xmm4, xmm5, xmm4
+       vcmpneqpd xmm5, xmm0, xmm0
+       vorpd    xmm4, xmm4, xmm5
+       vcmpltpd xmm6, xmm3, xmm0
+       vorpd    xmm4, xmm6, xmm4
+       vandpd   xmm0, xmm0, xmm4
+       vandnpd  xmm3, xmm4, xmm3
+       vorpd    xmm0, xmm3, xmm0
+       vmovsd   qword ptr [rsp+0xE8], xmm0
+       vcmpeqpd xmm3, xmm1, xmm2
+       vxorps   xmm4, xmm4, xmm4
+       vpcmpgtq xmm4, xmm4, xmm1
+       vandpd   xmm3, xmm4, xmm3
+       vorpd    xmm3, xmm3, xmm5
+       vcmpltpd xmm4, xmm1, xmm2
+       vorpd    xmm3, xmm4, xmm3
+       vandpd   xmm1, xmm1, xmm3
+       vandnpd  xmm2, xmm3, xmm2
+       vorpd    xmm1, xmm2, xmm1
+       vmovsd   qword ptr [rsp+0xE0], xmm1
+       cmp      dword ptr [rbx+0x24], 2
+       jne      SHORT G_M000_IG06
+ 
+G_M000_IG03:                ;; offset=0x00D9
+       vmovsd   xmm2, qword ptr [rbx+0xC8]
+       lea      r8, bword ptr [rbx+0xC0]
+       vmovsd   xmm3, qword ptr [r8+0x20]
+       vcmpeqpd xmm4, xmm2, xmm3
+       vxorps   xmm5, xmm5, xmm5
+       vpcmpgtq xmm5, xmm5, xmm2
+       vandpd   xmm4, xmm5, xmm4
+       vcmpneqpd xmm5, xmm2, xmm2
+       vorpd    xmm4, xmm5, xmm4
+       vcmpltpd xmm5, xmm2, xmm3
+       vorpd    xmm4, xmm5, xmm4
+       vblendvpd xmm2, xmm3, xmm2, xmm4
+       vucomisd xmm0, xmm2
+       jb       SHORT G_M000_IG06
+ 
+G_M000_IG04:                ;; offset=0x011E
+       xor      eax, eax
+ 
+G_M000_IG05:                ;; offset=0x0120
+       vzeroupper 
+       vmovaps  xmm6, xmmword ptr [rsp+0xF0]
+       add      rsp, 256
+       pop      rbx
+       pop      rbp
+       pop      rsi
+       pop      rdi
+       pop      r14
+       ret      
+ 
+G_M000_IG06:                ;; offset=0x013A
+       cmp      dword ptr [rbx+0x24], 3
+       je       G_M000_IG29
+ 
+G_M000_IG07:                ;; offset=0x0144
+       vmovdqu  ymm2, ymmword ptr [rbx+0x60]
+       vmovdqu  ymmword ptr [rsp+0x78], ymm2
+ 
+G_M000_IG08:                ;; offset=0x014F
+       mov      rdi, gword ptr [rbx+0x30]
+       mov      ebp, dword ptr [rbx+0x38]
+       test     rdi, rdi
+       je       G_M000_IG27
+ 
+G_M000_IG09:                ;; offset=0x015F
+       cmp      dword ptr [rdi+0x08], 0x3FFFFFE
+       jg       G_M000_IG35
+ 
+G_M000_IG10:                ;; offset=0x016C
+       mov      r8d, ebp
+       neg      r8d
+       mov      gword ptr [rsp+0x48], rdi
+       mov      dword ptr [rsp+0x50], r8d
+       lea      r8, [rsp+0x48]
+       lea      rcx, [rsp+0x78]
+       vmovaps  xmm1, xmm0
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,System.Numerics.BigInteger):this]
+       mov      gword ptr [rsp+0x48], rdi
+       mov      dword ptr [rsp+0x50], ebp
+       lea      r8, [rsp+0x48]
+       lea      rcx, [rsp+0x78]
+       vmovsd   xmm1, qword ptr [rsp+0xE0]
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,System.Numerics.BigInteger):this]
+       cmp      byte  ptr [rsp+0x84], 0
+       jne      G_M000_IG30
+       mov      rax, qword ptr [rsp+0x78]
+       mov      rdx, rax
+       neg      rdx
+       shr      rdx, 63
+       sar      rax, 63
+       or       eax, edx
+ 
+G_M000_IG11:                ;; offset=0x01D5
+       test     eax, eax
+       jle      G_M000_IG04
+ 
+G_M000_IG12:                ;; offset=0x01DD
+       cmp      dword ptr [rbx+0x24], 1
+       setbe    dil
+       movzx    rdi, dil
+       vxorps   ymm1, ymm1, ymm1
+       vmovdqu  ymmword ptr [rsp+0xC0], ymm1
+       test     edi, edi
+       jne      G_M000_IG31
+       vmovsd   xmm1, qword ptr [rsi+0x10]
+ 
+G_M000_IG13:                ;; offset=0x0203
+       lea      rcx, [rsp+0xC0]
+       mov      r8d, 1
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,int):this]
+       test     edi, edi
+       jne      G_M000_IG32
+       vmovsd   xmm1, qword ptr [rsp+0xE8]
+       vmovaps  xmm0, xmm1
+ 
+G_M000_IG14:                ;; offset=0x022C
+       lea      rcx, [rsp+0xC0]
+       vmovaps  xmm1, xmm0
+       mov      r8d, -1
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,int):this]
+       lea      rcx, [rsp+0xC0]
+       vmovsd   xmm1, qword ptr [rsp+0xE8]
+       mov      r8d, -1
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,int):this]
+       lea      rcx, [rsp+0xC0]
+       vmovsd   xmm1, qword ptr [rsp+0xE0]
+       mov      r8d, 1
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,int):this]
+       cmp      byte  ptr [rsp+0xCC], 0
+       jne      G_M000_IG33
+       mov      rax, qword ptr [rsp+0xC0]
+       mov      rdx, rax
+       neg      rdx
+       shr      rdx, 63
+       sar      rax, 63
+       or       eax, edx
+ 
+G_M000_IG15:                ;; offset=0x02A4
+       test     eax, eax
+       jle      G_M000_IG04
+ 
+G_M000_IG16:                ;; offset=0x02AC
+       vmovdqu  ymm0, ymmword ptr [rbx+0x80]
+       vmovdqu  ymmword ptr [rsp+0xA0], ymm0
+ 
+G_M000_IG17:                ;; offset=0x02BD
+       mov      rbp, gword ptr [rbx+0x40]
+       mov      r14d, dword ptr [rbx+0x48]
+       test     edi, edi
+       jne      G_M000_IG34
+       vmovsd   xmm1, qword ptr [rsp+0xE0]
+       vmovaps  xmm0, xmm1
+       vmovsd   xmm2, qword ptr [rsi+0x18]
+ 
+G_M000_IG18:                ;; offset=0x02DF
+       vmovdqu  ymm4, ymmword ptr [rsp+0xA0]
+       vmovdqu  ymmword ptr [rsp+0x58], ymm4
+ 
+G_M000_IG19:                ;; offset=0x02EE
+       test     rbp, rbp
+       je       G_M000_IG28
+ 
+G_M000_IG20:                ;; offset=0x02F7
+       cmp      dword ptr [rbp+0x08], 0x3FFFFFE
+       vmovsd   qword ptr [rsp+0x98], xmm2
+       jg       G_M000_IG35
+ 
+G_M000_IG21:                ;; offset=0x030D
+       mov      r8d, r14d
+       neg      r8d
+       mov      gword ptr [rsp+0x48], rbp
+       mov      dword ptr [rsp+0x50], r8d
+       lea      r8, [rsp+0x48]
+       lea      rcx, [rsp+0x58]
+       vmovaps  xmm1, xmm0
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,System.Numerics.BigInteger):this]
+       mov      gword ptr [rsp+0x48], rbp
+       mov      dword ptr [rsp+0x50], r14d
+       lea      r8, [rsp+0x48]
+       lea      rcx, [rsp+0x58]
+       vmovsd   xmm1, qword ptr [rsp+0x98]
+       call     [OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator:Add(double,System.Numerics.BigInteger):this]
+       cmp      byte  ptr [rsp+0x64], 0
+       jne      G_M000_IG36
+       mov      rax, qword ptr [rsp+0x58]
+       mov      rdx, rax
+       neg      rdx
+       shr      rdx, 63
+       sar      rax, 63
+       or       eax, edx
+ 
+G_M000_IG22:                ;; offset=0x0374
+       test     eax, eax
+       jle      G_M000_IG04
+ 
+G_M000_IG23:                ;; offset=0x037C
+       mov      ecx, dword ptr [rbx+0x24]
+       cmp      ecx, 2
+       jne      G_M000_IG37
+ 
+G_M000_IG24:                ;; offset=0x0388
+       vmovsd   xmm2, qword ptr [rbx+0xC8]
+       add      rbx, 192
+       vmovsd   xmm3, qword ptr [rbx+0x20]
+       vcmpeqpd xmm0, xmm2, xmm3
+       vxorps   xmm1, xmm1, xmm1
+       vpcmpgtq xmm1, xmm1, xmm2
+       vandpd   xmm0, xmm1, xmm0
+       vcmpneqpd xmm1, xmm2, xmm2
+       vorpd    xmm0, xmm1, xmm0
+       vcmpltpd xmm1, xmm2, xmm3
+       vorpd    xmm0, xmm1, xmm0
+       vblendvpd xmm2, xmm3, xmm2, xmm0
+       vucomisd xmm2, qword ptr [rsp+0xE8]
+       seta     dil
+       movzx    rdi, dil
+ 
+G_M000_IG25:                ;; offset=0x03D7
+       movzx    rax, dil
+ 
+G_M000_IG26:                ;; offset=0x03DB
+       vzeroupper 
+       vmovaps  xmm6, xmmword ptr [rsp+0xF0]
+       add      rsp, 256
+       pop      rbx
+       pop      rbp
+       pop      rsi
+       pop      rdi
+       pop      r14
+       ret      
+ 
+G_M000_IG27:                ;; offset=0x03F5
+       jmp      G_M000_IG10
+ 
+G_M000_IG28:                ;; offset=0x03FA
+       vmovsd   qword ptr [rsp+0x98], xmm2
+       jmp      G_M000_IG21
+ 
+G_M000_IG29:                ;; offset=0x0408
+       vmovsd   xmm2, qword ptr [rbx+0xC8]
+       lea      r8, bword ptr [rbx+0xC0]
+       vmovsd   xmm3, qword ptr [r8+0x20]
+       vcmpeqpd xmm4, xmm2, xmm3
+       vxorps   xmm5, xmm5, xmm5
+       vpcmpgtq xmm5, xmm5, xmm3
+       vandpd   xmm4, xmm5, xmm4
+       vcmpneqpd xmm5, xmm2, xmm2
+       vorpd    xmm4, xmm5, xmm4
+       vcmpltpd xmm5, xmm3, xmm2
+       vorpd    xmm4, xmm5, xmm4
+       vblendvpd xmm2, xmm3, xmm2, xmm4
+       vucomisd xmm2, xmm1
+       vmovsd   xmm1, qword ptr [rsp+0xE0]
+       jae      G_M000_IG04
+       jmp      G_M000_IG07
+ 
+G_M000_IG30:                ;; offset=0x045F
+       lea      rcx, [rsp+0x88]
+       call     [System.Numerics.BigInteger:get_Sign():int:this]
+       jmp      G_M000_IG11
+ 
+G_M000_IG31:                ;; offset=0x0472
+       vmovsd   xmm1, qword ptr [rsp+0xE0]
+       vmovaps  xmm0, xmm1
+       vmovaps  xmm1, xmm0
+       jmp      G_M000_IG13
+ 
+G_M000_IG32:                ;; offset=0x0488
+       vmovsd   xmm0, qword ptr [rsi+0x18]
+       jmp      G_M000_IG14
+ 
+G_M000_IG33:                ;; offset=0x0492
+       lea      rcx, [rsp+0xD0]
+       call     [System.Numerics.BigInteger:get_Sign():int:this]
+       jmp      G_M000_IG15
+ 
+G_M000_IG34:                ;; offset=0x04A5
+       vmovsd   xmm0, qword ptr [rsi+0x10]
+       vmovsd   xmm3, qword ptr [rsp+0xE8]
+       vmovsd   qword ptr [rsp+0x98], xmm3
+       vmovsd   xmm2, qword ptr [rsp+0x98]
+       jmp      G_M000_IG18
+ 
+G_M000_IG35:                ;; offset=0x04CA
+       call     [System.ThrowHelper:ThrowOverflowException()]
+       int3     
+ 
+G_M000_IG36:                ;; offset=0x04D1
+       lea      rcx, [rsp+0x68]
+       call     [System.Numerics.BigInteger:get_Sign():int:this]
+       jmp      G_M000_IG22
+ 
+G_M000_IG37:                ;; offset=0x04E1
+       cmp      ecx, 2
+       ja       SHORT G_M000_IG38
+       mov      ecx, ecx
+       lea      rdx, [reloc @RWD00]
+       mov      edx, dword ptr [rdx+4*rcx]
+       lea      rax, G_M000_IG02
+       add      rdx, rax
+       jmp      rdx
+ 
+G_M000_IG38:                ;; offset=0x04FE
+       vmovsd   xmm0, qword ptr [rbx+0xC8]
+       lea      rax, bword ptr [rbx+0xC0]
+       vmovsd   xmm1, qword ptr [rax+0x20]
+       vcmpeqpd xmm2, xmm0, xmm1
+       vxorps   xmm3, xmm3, xmm3
+       vpcmpgtq xmm3, xmm3, xmm1
+       vandpd   xmm2, xmm3, xmm2
+       vcmpneqpd xmm3, xmm0, xmm0
+       vorpd    xmm2, xmm3, xmm2
+       vcmpltpd xmm3, xmm1, xmm0
+       vorpd    xmm2, xmm3, xmm2
+       vblendvpd xmm0, xmm1, xmm0, xmm2
+       vmovsd   xmm1, qword ptr [rsp+0xE0]
+       vucomisd xmm1, xmm0
+       seta     dil
+       movzx    rdi, dil
+       jmp      G_M000_IG25
+ 
+G_M000_IG39:                ;; offset=0x0556
+       vmovdqu  ymm3, ymmword ptr [rbx+0xA0]
+       vmovdqu  ymmword ptr [rsp+0x28], ymm3
+ 
+G_M000_IG40:                ;; offset=0x0564
+       vmovdqu  xmm3, xmmword ptr [rbx+0x50]
+       vmovdqu  xmmword ptr [rsp+0x48], xmm3
+ 
+G_M000_IG41:                ;; offset=0x056F
+       lea      rcx, [rsp+0x28]
+       lea      rdx, [rsp+0x48]
+       vmovsd   xmm3, qword ptr [rbx+0xD8]
+       vmovsd   xmm2, qword ptr [rsp+0xE0]
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Margin(OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator,System.Numerics.BigInteger,double,double):int]
+       mov      edi, eax
+       not      edi
+       shr      edi, 31
+       jmp      G_M000_IG25
+ 
+G_M000_IG42:                ;; offset=0x059C
+       vmovdqu  ymm2, ymmword ptr [rbx+0xA0]
+       vmovdqu  ymmword ptr [rsp+0x28], ymm2
+ 
+G_M000_IG43:                ;; offset=0x05AA
+       vmovdqu  xmm2, xmmword ptr [rbx+0x50]
+       vmovdqu  xmmword ptr [rsp+0x48], xmm2
+ 
+G_M000_IG44:                ;; offset=0x05B5
+       lea      rcx, [rsp+0x28]
+       lea      rdx, [rsp+0x48]
+       vmovsd   xmm2, qword ptr [rbx+0xD0]
+       vmovsd   xmm3, qword ptr [rsp+0xE0]
+       call     [OoplesFinance.StockIndicators.Indicators.ContextReversalState:Margin(OoplesFinance.StockIndicators.Helpers.ExactMeanAccumulator,System.Numerics.BigInteger,double,double):int]
+       mov      edi, eax
+       not      edi
+       shr      edi, 31
+       jmp      G_M000_IG25
+ 
+RWD00  	dd	00000502h ; case G_M000_IG39
+       	dd	00000548h ; case G_M000_IG42
+       	dd	00000334h ; case G_M000_IG24
+
+; Total bytes of code 1506
+
