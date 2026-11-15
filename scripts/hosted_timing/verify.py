@@ -65,7 +65,7 @@ def _collect(folder, phase, *, preflight, diagnostic=False):
     plan = read(PLAN)
     if phase == 'diagnostic':
         assert diagnostic and not preflight, 'Diagnostic evidence cannot qualify production'
-        from .roi_followup import validate_scope
+        from .roi_scope_dispatch import validate_scope
         validate_scope(plan)
     else:
         assert not diagnostic and not plan.get('diagnostic_only'), 'Diagnostic evidence cannot qualify production'
@@ -182,7 +182,7 @@ def _collect(folder, phase, *, preflight, diagnostic=False):
                     verdict=verdict, provenance=provenance))
             candidates[fixture].extend(dict(**row, provenance=provenance) for row in rounds[fixture, 2].values())
     assert shards == expected_shards and len(input_hashes) == len(run_ids) == 1
-    expected_cases, expected_decisions = ((20, 4) if phase == 'diagnostic' else (48, 12) if preflight else (1860, 372) if phase == 'successor'
+    expected_cases, expected_decisions = ((plan['cases'], plan['decisions']) if phase == 'diagnostic' else (48, 12) if preflight else (1860, 372) if phase == 'successor'
                                           else targeted_totals if phase == 'targeted'
                                           else (40, 8) if phase == 'coverage' else (32, 8))
     assert case_count == expected_cases and len(decisions) == expected_decisions

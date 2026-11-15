@@ -521,6 +521,9 @@ SCOPES['abandoned-certified-blocks-20261114'] = {'fixtures': {'SharedTaStarRever
 SCOPES['context-after-stars-20261115'] = {'fixtures': {'SharedContextReversalBenchmarks': {'TaLib.Candles.Hammer': 'TaLib.Candles.Hammer', 'TaLib.Candles.HangingMan': 'TaLib.Candles.HangingMan', 'TaLib.Candles.InvertedHammer': 'TaLib.Candles.InvertedHammer', 'TaLib.Candles.ShootingStar': 'TaLib.Candles.ShootingStar'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/ContextReversalSharedExecutionTests.cs', 'src/Indicators/ContextReversalCandles.cs', 'src/Indicators/ValuesBarExecution.BoundedWindows.cs'}, 'methods': {'SharedContextReversalBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (120, 24), 'shards': 4, 'baseline_phase': 'targeted', 'baseline_totals': (176, 36)}
 
 
+SCOPES['window-log-positive-regions-20261115'] = {'fixtures': {'SharedLogVolatilityBenchmarks': {'QuanTAlib.Historical': 'QuanTAlib.Historical', 'QuanTAlib.Realized': 'QuanTAlib.Realized'}, 'SharedRecursiveStateBenchmarks': {'TaLib.Functions.Ema': 'Ema'}, 'SharedTillsonBenchmarks': {'TaLib.Functions.T3': 'TaLib.Functions.T3'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/WindowLogVolatilityRegionTests.cs', 'src/Indicators/ValuesBarExecution.LogVolatility.cs', 'src/Indicators/ValuesBarExecution.cs'}, 'methods': {'SharedLogVolatilityBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedRecursiveStateBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedTillsonBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (120, 24), 'shards': 4, 'baseline_phase': 'targeted', 'baseline_totals': (120, 24)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 

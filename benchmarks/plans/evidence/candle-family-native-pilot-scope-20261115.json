@@ -1,0 +1,20 @@
+{
+  "approved": true,
+  "diagnostic_only": true,
+  "qualification": false,
+  "publication": false,
+  "source": "e71d4bc6577e117e78c3c4e099cd2c5a4a3fe0e8",
+  "baseline": "ce02581b1f55400fd674b5496ee659fa0e8654fa",
+  "pairs": [
+    "TaLib.Candles.UpsideGapTwoCrows",
+    "TaLib.Candles.SeparatingLines",
+    "TaLib.Candles.UniqueThreeRiver"
+  ],
+  "cases": 30,
+  "decisions": 6,
+  "max_parallel": 1,
+  "authorization": "User approved the new family-closure strategy and continued work. First bounded shared-family native pilot: existing arithmetic certificate, fresh correctness/GPU100, three representative pairs on one runner. Full17-consumer qualification remains deferred until native crossover and a bounded verification scope.",
+  "history_policy_change": false,
+  "warmup_policy_change": false,
+  "runtime_policy_change": false
+}

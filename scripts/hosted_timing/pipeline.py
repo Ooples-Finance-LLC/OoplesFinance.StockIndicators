@@ -73,7 +73,7 @@ def operation_timeout_for(plan, phase):
 
 def phase_shards(plan, phase):
     if phase == 'diagnostic':
-        from .roi_followup import validate_scope
+        from .roi_scope_dispatch import validate_scope
         validate_scope(plan)
         return range(1)
     if phase == 'successor':

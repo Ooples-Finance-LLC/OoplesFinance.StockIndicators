@@ -1,0 +1,177 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "sources": {
+    "published": "ce02581b1f55400fd674b5496ee659fa0e8654fa",
+    "old": "ce02581b1f55400fd674b5496ee659fa0e8654fa",
+    "successor": "e71d4bc6577e117e78c3c4e099cd2c5a4a3fe0e8",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "gpu_sources": {
+    "old": "67c1866712e5d1bec8f2cbcaca42a6641b03c19c",
+    "successor": "e71d4bc6577e117e78c3c4e099cd2c5a4a3fe0e8",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "WindowLogVolatilityRegionTests",
+      "CompactLogVolatilityTests",
+      "SharedRecursiveStateTests"
+    ],
+    "successor": [
+      "CandleDifferenceUpdateTests",
+      "GapContinuationSharedExecutionTests",
+      "MatchedLinesSharedExecutionTests",
+      "MatchedLinesParallelExecutionTests",
+      "MultiBarCandleSharedExecutionTests",
+      "NeckParallelExecutionTests",
+      "NeckSharedExecutionTests",
+      "SequenceParallelExecutionTests",
+      "SequenceSharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodySharedExecutionTests"
+    ],
+    "variants": [
+      "CompactMacdWordEmaTests",
+      "CompactClassicalWindowTests",
+      "ExactMeanUnitWeightTests"
+    ]
+  },
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.150.0"
+  },
+  "diagnostic_only": true,
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "cases": 30,
+  "decisions": 6,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 60
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.UpsideGapTwoCrows",
+              "pair": "TaLib.Candles.UpsideGapTwoCrows"
+            },
+            {
+              "raw": "TaLib.Candles.SeparatingLines",
+              "pair": "TaLib.Candles.SeparatingLines"
+            },
+            {
+              "raw": "TaLib.Candles.UniqueThreeRiver",
+              "pair": "TaLib.Candles.UniqueThreeRiver"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 30,
+          "decisions": 6
+        }
+      ],
+      "cases": 30,
+      "decisions": 6
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.UpsideGapTwoCrows",
+              "pair": "TaLib.Candles.UpsideGapTwoCrows"
+            },
+            {
+              "raw": "TaLib.Candles.SeparatingLines",
+              "pair": "TaLib.Candles.SeparatingLines"
+            },
+            {
+              "raw": "TaLib.Candles.UniqueThreeRiver",
+              "pair": "TaLib.Candles.UniqueThreeRiver"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 30,
+          "decisions": 6
+        }
+      ],
+      "cases": 30,
+      "decisions": 6
+    }
+  ],
+  "roi_approval": {
+    "path": "benchmarks/plans/evidence/candle-family-native-pilot-scope-20261115.json",
+    "sha256": "8ddced7b05eb420bee3d3ee170a2f66647e6e3eb97e421a3b8f92fe6fdcf1d8b"
+  },
+  "baseline_inputs": {
+    "run_id": "43673961720",
+    "plan": "benchmarks/plans/hosted-window-log-positive-regions-20261115.json",
+    "plan_sha256": "65c79d85a2ac395a0478d6e0a0c173cb2714d161fb6dafa6732addd26b261503",
+    "provenance_sha256": "59d94305c3e64aaa0946438d078b7d91c14557aa217d52f151042cd0cd8a8cd7",
+    "label": "successor"
+  },
+  "candidate": {
+    "ci_run": "43759123590",
+    "producer": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "e71d4bc6577e117e78c3c4e099cd2c5a4a3fe0e8",
+    "evidence_source": "84896063fa604f2bce42d9f70cb6f427294c10ec",
+    "manifest_sha256": "416147fc8c74c6cb75724b30809b445f9b7927f27cc05753be7e03d52a860c7d",
+    "gpu_receipt_sha256": "821f1788d77a61ad01e05f2eefff79c06f31084db3cff10572ab8553307d0a84",
+    "unit_classes": [
+      "CandleDifferenceUpdateTests",
+      "GapContinuationSharedExecutionTests",
+      "MatchedLinesSharedExecutionTests",
+      "MatchedLinesParallelExecutionTests",
+      "MultiBarCandleSharedExecutionTests",
+      "NeckParallelExecutionTests",
+      "NeckSharedExecutionTests",
+      "SequenceParallelExecutionTests",
+      "SequenceSharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodySharedExecutionTests"
+    ],
+    "parity_classes": [
+      "SequenceCandleTests",
+      "MatchedLinesTests",
+      "NeckCandleTests",
+      "GapContinuationTests",
+      "TripleBodyTests",
+      "SharedMatchedLinesBenchmarkTests",
+      "SharedSequenceCandleBenchmarkTests",
+      "SharedNeckCandleBenchmarkTests",
+      "SharedGapContinuationBenchmarkTests",
+      "SharedTripleBodyBenchmarkTests"
+    ]
+  },
+  "diagnostic_kind": "candle-family-native-pilot"
+}
