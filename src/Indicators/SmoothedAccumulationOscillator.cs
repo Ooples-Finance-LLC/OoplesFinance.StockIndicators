@@ -110,7 +110,16 @@ public sealed class SmoothedAccumulationOscillator
             );
 
 #if !NETFRAMEWORK
-    private sealed class CompactMean(int period, bool first)
+    internal bool TryBatchFlow(in Bar bar, out double multiplier, out double flow)
+    {
+        multiplier = flow = 0;
+        if (FirstValue ? bar.High <= bar.Low : bar.High == bar.Low) return true; // NOSONAR: Native flat-range conventions use exact equality.
+        return CompactState.TryOrdinaryFlow(in bar, IncludeDetails, out multiplier, out flow);
+    }
+
+    internal readonly record struct MeanContinuation(bool Ready, int Period, bool First, int Count, long ValueBits);
+
+    internal sealed class CompactMean(int period, bool first)
     {
         private readonly double _weight = ((long)period - 1) * .5;
         private readonly double _denominator = ((long)period + 1) * .5;
@@ -122,6 +131,11 @@ public sealed class SmoothedAccumulationOscillator
         internal JurikDyadic Value { get; private set; }
 
         internal void Reset() { _count = 0; _sum = Value = default; }
+
+        internal MeanContinuation CaptureContinuation() =>
+            _count == (first ? 1 : period) && _sum.Sign == 0 && Value.TryDouble(out var value)
+                ? new(true, period, first, _count, BitConverter.DoubleToInt64Bits(value))
+                : default;
 
         internal void Add(JurikDyadic value)
         {
@@ -181,6 +195,94 @@ public sealed class SmoothedAccumulationOscillator
                 next.AddExact(value);
                 Value = SeededDyadicEma.RoundedRatio(next, _divisor);
             }
+        }
+    }
+
+    // Guarded batch prefixes are finite. Keep already-rounded EMA state in
+    // binary64, reusing the original seed and exact smoothing certificates.
+    internal sealed class BatchMean(int period, bool first)
+    {
+        private CompactMean? _seed = new(period, first);
+        private readonly double _weight = ((long)period - 1) * .5;
+        private readonly double _denominator = ((long)period + 1) * .5;
+        private readonly double _powerOfTwoScale = 2d / ((long)period + 1);
+        private readonly ulong _sameBinadeReciprocal = period is >= 1 and <= 2047
+            ? (ulong)(((UInt128)1 << 64) / (ulong)((long)period + 1)) : 0;
+        private readonly bool _powerOfTwoDivisor = (((long)period + 1) & period) == 0;
+        private readonly JurikDyadic _divisor = JurikDyadic.FromDouble(((long)period + 1) * .5);
+        private readonly TsiWordEmaRecurrence _wordBlend = new(period);
+        internal double Value { get; private set; }
+
+        internal MeanContinuation CaptureContinuation() => _seed is null
+            ? new(true, period, first, first ? 1 : period, BitConverter.DoubleToInt64Bits(Value)) : default;
+
+        internal void Add(double input)
+        {
+            if (_seed is not null)
+            {
+                _seed.Add(JurikDyadic.FromDouble(input));
+                Value = _seed.Value.Mean(1);
+                if (_seed.CaptureContinuation().Ready) _seed = null;
+                return;
+            }
+            double mean;
+            if (_powerOfTwoDivisor)
+            {
+                double numerator = Math.FusedMultiplyAdd(Value, _weight, input);
+                mean = numerator * _powerOfTwoScale;
+                if (double.IsNormal(mean) || numerator == 0)
+                {
+                    Value = mean == 0 ? 0 : mean; // NOSONAR: Original state canonicalizes zero.
+                    return;
+                }
+            }
+            if (TrySameBinade(Value, input, out mean)
+                || _wordBlend.TryAdvance(Value, input, out mean)
+                || EmaDifferenceSignal.VolumeAverage.TryBlend(Value, input, period, out mean))
+            {
+                Value = mean == 0 ? 0 : mean; // NOSONAR: Original state canonicalizes zero.
+                return;
+            }
+            if (Binary64ArithmeticCertificate.TryProduct(Value, _weight, out var weighted)
+                && Binary64ArithmeticCertificate.TryDifference(weighted, -input, out var exactNumerator))
+            {
+                mean = exactNumerator / _denominator;
+                if (double.IsFinite(mean))
+                {
+                    Value = mean == 0 ? 0 : mean; // NOSONAR: Original state canonicalizes zero.
+                    return;
+                }
+            }
+            var next = JurikDyadic.FromDouble(Value);
+            next.Multiply(_weight);
+            next.AddExact(JurikDyadic.FromDouble(input));
+            var rounded = SeededDyadicEma.RoundedRatio(next, _divisor);
+            Value = rounded.Sign == 0 ? 0 : rounded.Mean(1);
+        }
+
+        private bool TrySameBinade(double previous, double input, out double rounded)
+        {
+            rounded = 0;
+            if (_sameBinadeReciprocal == 0) return false;
+            ulong a = unchecked((ulong)BitConverter.DoubleToInt64Bits(previous));
+            ulong b = unchecked((ulong)BitConverter.DoubleToInt64Bits(input));
+            const ulong fraction = (1UL << 52) - 1, exponent = 0x7ff0000000000000UL;
+            ulong encoded = a & exponent;
+            if (encoded is 0 or exponent || ((a ^ b) & 0xfff0000000000000UL) != 0) return false;
+            ulong am = (a & fraction) | (1UL << 52), bm = (b & fraction) | (1UL << 52);
+            ulong divisor = (ulong)((long)period + 1);
+            // Convex, same-sign normal means stay in this binade. With
+            // divisor <=2048 the exact numerator fits one word, as in the
+            // unchanged CompactMacdValue.EmaRecurrence certificate.
+            ulong numerator = checked(am * (ulong)(period - 1) + 2 * bm);
+            ulong quotient = Math.BigMul(numerator, _sameBinadeReciprocal, out _);
+            ulong remainder = numerator - quotient * divisor;
+            if (remainder >= divisor) { quotient++; remainder -= divisor; }
+            ulong complement = divisor - remainder;
+            if (remainder > complement || remainder == complement && (quotient & 1) != 0) quotient++;
+            ulong bits = (a & 0xfff0000000000000UL) | (quotient - (1UL << 52));
+            rounded = BitConverter.Int64BitsToDouble(unchecked((long)bits));
+            return true;
         }
     }
 
@@ -252,7 +354,7 @@ public sealed class SmoothedAccumulationOscillator
             }
         }
 
-        private static bool TryOrdinaryFlow(in Bar bar, bool details, out double multiplier, out double flow)
+        internal static bool TryOrdinaryFlow(in Bar bar, bool details, out double multiplier, out double flow)
         {
             multiplier = flow = 0;
             if (!Binary64ArithmeticCertificate.TryDifference(bar.Close, bar.Low, out var buying)
