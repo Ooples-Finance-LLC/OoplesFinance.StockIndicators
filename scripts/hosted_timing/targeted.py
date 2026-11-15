@@ -518,6 +518,9 @@ SCOPES['star-reversal-certified-difference-20261114'] = {'fixtures': {'SharedTaS
 SCOPES['abandoned-certified-blocks-20261114'] = {'fixtures': {'SharedTaStarReversalBenchmarks': {'TaLib.Candles.MorningStar': 'MorningStar', 'TaLib.Candles.EveningStar': 'EveningStar', 'TaLib.Candles.MorningDojiStar': 'MorningDojiStar', 'TaLib.Candles.EveningDojiStar': 'EveningDojiStar', 'TaLib.Candles.AbandonedBaby': 'AbandonedBaby'}, 'SharedCrowSoldierBenchmarks': {'TaLib.Candles.ThreeBlackCrows': 'TaLib.Candles.ThreeBlackCrows'}}, 'implicit_fixtures': set(), 'paths': {'src/Indicators/ValuesBarExecution.BoundedWindows.cs', 'src/Indicators/StarReversalCandles.cs', 'src/Indicators/ValuesBarExecution.AbandonedBlocks.cs', 'tests/ModelsTests/AbandonedBabyBlockExecutionTests.cs'}, 'methods': {'SharedTaStarReversalBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedCrowSoldierBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (180, 36), 'shards': 6, 'baseline_phase': 'targeted', 'baseline_totals': (150, 30)}
 
 
+SCOPES['context-after-stars-20261115'] = {'fixtures': {'SharedContextReversalBenchmarks': {'TaLib.Candles.Hammer': 'TaLib.Candles.Hammer', 'TaLib.Candles.HangingMan': 'TaLib.Candles.HangingMan', 'TaLib.Candles.InvertedHammer': 'TaLib.Candles.InvertedHammer', 'TaLib.Candles.ShootingStar': 'TaLib.Candles.ShootingStar'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/ContextReversalSharedExecutionTests.cs', 'src/Indicators/ContextReversalCandles.cs', 'src/Indicators/ValuesBarExecution.BoundedWindows.cs'}, 'methods': {'SharedContextReversalBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (120, 24), 'shards': 4, 'baseline_phase': 'targeted', 'baseline_totals': (176, 36)}
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
