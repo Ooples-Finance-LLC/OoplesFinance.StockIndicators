@@ -37,9 +37,9 @@ public sealed class SmoothedAccumulationPublisherTests
     public void SkenderPublisherRetainsEveryDetailColumnAndIndependentReferenceBit()
     {
         var data = CompetitorData.Create(137);
-        var actual = SmoothedAccumulationComparison.Owned(data.IndicatorBars, false, 3, 10, 2);
+        var actual = SmoothedAccumulationComparison.Owned(data.IndicatorBars, false, 3, 10, 0);
         Assert.Equal(SmoothedAccumulationComparison.Names, actual.Outputs.Keys);
-        Equal(SmoothedAccumulationComparison.Reference(data, false, 3, 10, 2, false), actual);
+        Equal(SmoothedAccumulationComparison.Reference(data, false, 3, 10, 0, false), actual);
     }
 
     private static void Equal(ComparisonSeries expected, ComparisonSeries actual)
