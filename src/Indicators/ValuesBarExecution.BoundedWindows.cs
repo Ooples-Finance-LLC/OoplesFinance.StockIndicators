@@ -1361,6 +1361,11 @@ internal static partial class ValuesBarExecution
     {
         cancellation.ThrowIfCancellationRequested();
         int chunks = period <= 4096 ? Math.Min(WorkerCount(), source.Length / period) : 1;
+        // Keep certified candle regions large enough to use their block kernel.
+        // Underfilled regions would otherwise fall back to the old state loop.
+        if ((typeof(T) == typeof(SequenceKernel) || typeof(T) == typeof(NeckKernel))
+            && TryCandleIntegerConfiguration(indicator, out _, out _, out _))
+            chunks = Math.Min(chunks, Math.Max(1, source.Length / 512));
         bool lockTaken = false;
         Bar[][]? tails = null;
         try
@@ -1413,8 +1418,8 @@ internal static partial class ValuesBarExecution
         int start, int end, int period, ReadOnlySpan<Bar> seed, ReadOnlySpan<Bar> tail,
         CancellationToken cancellation, IIndicator indicator) where T : struct, IBoundedKernel<T>
     {
-        if ((typeof(T) == typeof(SequenceKernel) && indicator is MatchingLowCandle { Period: <= 64 }
-                || typeof(T) == typeof(NeckKernel) && indicator is OnNeckCandle { BodyPeriod: <= 64, EqualPeriod: <= 64 })
+        if ((typeof(T) == typeof(SequenceKernel) || typeof(T) == typeof(NeckKernel))
+            && TryCandleIntegerConfiguration(indicator, out _, out _, out _)
             && end - start + seed.Length >= 512)
             return ComputeCandleIntegerWindows(source, output[0], owned, start, end, seed, tail, cancellation, indicator);
         if (typeof(T) == typeof(StarReversalKernel) && indicator is AbandonedBabyCandle baby
