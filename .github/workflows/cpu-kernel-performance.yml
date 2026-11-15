@@ -7,7 +7,7 @@ on:
       suite:
         description: Public builder comparisons, diagnostic kernels, or both
         type: choice
-        options: [builder, kernel, all, qualified-rollout, trix-diagnostic, trix-library-diagnostic]
+        options: [builder, kernel, all, qualified-rollout, trix-diagnostic, trix-library-diagnostic, family-cpu-screen]
         default: builder
       qualification_plan:
         description: Immutable source and measurement plan for qualified-rollout
@@ -22,6 +22,40 @@ concurrency:
   group: cpu-kernels-${{ github.ref }}-${{ github.event.label.name || 'dispatch' }}
   cancel-in-progress: true
 jobs:
+  family-cpu-screen:
+    if: github.event_name == 'workflow_dispatch' && inputs.suite == 'family-cpu-screen'
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.403
+      - uses: actions/download-artifact@v8
+        with:
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 43671778311
+          name: candidate-correctness-inputs
+          path: family-inputs
+      - name: Profile twelve immutable-binary CPU arms without builds or qualification
+        shell: pwsh
+        run: python scripts/profile-family-cpu.py --inputs family-inputs --out family-cpu-screen
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: family-cpu-screen
+          path: |
+            family-cpu-screen/**/*.json
+            family-cpu-screen/**/*.log
+            family-cpu-screen/**/*.etl.zip
+            family-cpu-screen/**/*.perfView.csv
+          retention-days: 14
   build:
     if: (github.event_name == 'workflow_dispatch' && contains(fromJSON('["builder", "kernel", "all"]'), inputs.suite)) || github.event.label.name == 'run-builder-benchmarks'
     runs-on: ubuntu-latest
