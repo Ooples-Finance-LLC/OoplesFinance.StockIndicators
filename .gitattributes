@@ -214,3 +214,5 @@ benchmarks/plans/evidence/star-warmup-combined-qualification-20261114.json -text
 benchmarks/plans/hosted-abandoned-inventory-repair-20261114.json -text
 benchmarks/plans/evidence/star-warmup-inventory-repair-20261114.json -text
 benchmarks/plans/hosted-context-after-stars-20261115.json text eol=lf
+benchmarks/plans/hosted-adosc-published-columns-roi-20261115.json text eol=lf
+benchmarks/plans/evidence/adosc-published-columns-scope-20261115.json text eol=lf

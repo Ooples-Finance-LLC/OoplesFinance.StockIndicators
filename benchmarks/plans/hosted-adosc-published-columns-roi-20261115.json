@@ -1,0 +1,151 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "sources": {
+    "published": "e7112835a8f3f29fc27363bcd0c553e77bc7c2c5",
+    "old": "a458350088fff173c3cba1f74f627b16bf1b8a7a",
+    "successor": "1edfc5a9f7a2a0f466e5d96e62501522e4bfdeee",
+    "variants": "ac91ae98890678982fac7efb88a49be08e53699b"
+  },
+  "gpu_sources": {
+    "old": "a458350088fff173c3cba1f74f627b16bf1b8a7a",
+    "successor": "1edfc5a9f7a2a0f466e5d96e62501522e4bfdeee",
+    "variants": "ac91ae98890678982fac7efb88a49be08e53699b"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "CompactSmoothedAccumulationTests"
+    ],
+    "successor": [
+      "SmoothedCheckedRegionTests",
+      "CompactSmoothedAccumulationTests"
+    ],
+    "variants": [
+      "CompactMacdWordEmaTests",
+      "CompactClassicalWindowTests",
+      "ExactMeanUnitWeightTests"
+    ]
+  },
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.150.0"
+  },
+  "diagnostic_only": true,
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "cases": 20,
+  "decisions": 4,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 60
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetChaikinOsc",
+              "pair": "Skender.GetChaikinOsc"
+            },
+            {
+              "raw": "TaLib.Functions.AdOsc",
+              "pair": "TaLib.Functions.AdOsc"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        }
+      ],
+      "cases": 20,
+      "decisions": 4
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetChaikinOsc",
+              "pair": "Skender.GetChaikinOsc"
+            },
+            {
+              "raw": "TaLib.Functions.AdOsc",
+              "pair": "TaLib.Functions.AdOsc"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        }
+      ],
+      "cases": 20,
+      "decisions": 4
+    }
+  ],
+  "ci_inputs": {
+    "old": {
+      "run_id": "43676943941",
+      "source": "a458350088fff173c3cba1f74f627b16bf1b8a7a",
+      "producer": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+      "evidence_source": "23afffaa04ec6eba0892d18d0071d8b7c0b773f6",
+      "manifest_sha256": "b70173168023236081fff48665ee73a7f14d2c8f886c1419287c3d33a8adf4c4",
+      "gpu_receipt_sha256": "d2d51f066c382333e2a547e8ef75f4596351bbf45fa29b21471ac3af75068968"
+    },
+    "successor": {
+      "run_id": "43676961401",
+      "source": "1edfc5a9f7a2a0f466e5d96e62501522e4bfdeee",
+      "producer": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+      "evidence_source": "f96e88fce07b9c030f064d049dfb8a3a419cac18",
+      "manifest_sha256": "94c02818ff0ad1c212f0d5e78596a81fbfcd1677d33ce733348ff91ff27e4f88",
+      "gpu_receipt_sha256": "e0bc7d20c0f44cf8579071734f5722ce8796f5d983527be3a058d0708ed3110a"
+    },
+    "variants": {
+      "run_id": "43676924926",
+      "source": "ac91ae98890678982fac7efb88a49be08e53699b",
+      "producer": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+      "evidence_source": "a08537f800420b8191309fd5112b6a6b21419e89",
+      "manifest_sha256": "516e9bf355bc065bd10823876b7cfb1fa2a23de217bc20013cc9507553bd6b77",
+      "gpu_receipt_sha256": "a39661fbc265f52eb48f5a69c2c4888c673fe6901d036cbe76c655a34c3d27bc"
+    }
+  },
+  "diagnostic_kind": "adosc-published-columns",
+  "aligned_roi_approval": {
+    "path": "benchmarks/plans/evidence/adosc-published-columns-scope-20261115.json",
+    "sha256": "b823bbf24a9ae5ccf87c5c30bef9ac0576b03c68669906254b2e78d0b8f84027"
+  },
+  "cpu_diagnostic": {
+    "after_measurement": true,
+    "optional": true,
+    "tool": "PerfView4.0.0",
+    "sha256": "270e2ba419b0b2d93c4b15b0851f257edf655c92fe0ad95add3d0b5f6d6aad48",
+    "measured_cases": 0
+  }
+}

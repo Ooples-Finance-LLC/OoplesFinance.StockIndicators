@@ -1,0 +1,17 @@
+{
+  "approved": true,
+  "diagnostic_only": true,
+  "qualification": false,
+  "publication": false,
+  "sources": {
+    "published": "e7112835a8f3f29fc27363bcd0c553e77bc7c2c5",
+    "old": "a458350088fff173c3cba1f74f627b16bf1b8a7a",
+    "successor": "1edfc5a9f7a2a0f466e5d96e62501522e4bfdeee",
+    "variants": "ac91ae98890678982fac7efb88a49be08e53699b"
+  },
+  "cases": 20,
+  "comparisons": 4,
+  "max_parallel": 1,
+  "authorization": "User:Approve bounded aligned-harness repair. Same TA-only column limit in baseline/candidate/frozen harness; fresh correctness/GPU receipts;20caseROI,one measurement runner,unchanged gates;no production qualification/publication.",
+  "cpu_diagnostic": "User separately requested installed PerfView. Pinned identical4.0.0 executable may collect kernel CPU samples after all timing cases on the elevated hosted runner; optional diagnostic only, no timing gate or policy change."
+}

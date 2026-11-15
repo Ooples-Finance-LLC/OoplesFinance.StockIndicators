@@ -61,8 +61,14 @@ def collect_preflight(folder):
     return _collect(folder, 'successor', preflight=True)
 
 
-def _collect(folder, phase, *, preflight):
+def _collect(folder, phase, *, preflight, diagnostic=False):
     plan = read(PLAN)
+    if phase == 'diagnostic':
+        assert diagnostic and not preflight, 'Diagnostic evidence cannot qualify production'
+        from .aligned_roi import validate_scope
+        validate_scope(plan)
+    else:
+        assert not diagnostic and not plan.get('diagnostic_only'), 'Diagnostic evidence cannot qualify production'
     if phase == 'coverage':
         from .coverage import verify_reference
         assert plan.get('coverage_reference') and not preflight
@@ -176,7 +182,7 @@ def _collect(folder, phase, *, preflight):
                     verdict=verdict, provenance=provenance))
             candidates[fixture].extend(dict(**row, provenance=provenance) for row in rounds[fixture, 2].values())
     assert shards == expected_shards and len(input_hashes) == len(run_ids) == 1
-    expected_cases, expected_decisions = ((48, 12) if preflight else (1860, 372) if phase == 'successor'
+    expected_cases, expected_decisions = ((20, 4) if phase == 'diagnostic' else (48, 12) if preflight else (1860, 372) if phase == 'successor'
                                           else targeted_totals if phase == 'targeted'
                                           else (40, 8) if phase == 'coverage' else (32, 8))
     assert case_count == expected_cases and len(decisions) == expected_decisions
@@ -185,6 +191,6 @@ def _collect(folder, phase, *, preflight):
     return dict(all_cases_verified=True, phase='trix-preflight' if preflight else phase, case_count=case_count, decision_count=len(decisions),
         input_provenance_sha256=next(iter(input_hashes)),
         sources=phase_sources(plan, phase), decisions=decisions, verdicts=dict(counts),
-        accepted=phase != 'coverage' and counts['faster'] > 0 and counts['slower'] == 0,
+        accepted=phase not in ('coverage', 'diagnostic') and counts['faster'] > 0 and counts['slower'] == 0,
         final_candidate_round=2, final_candidate_rows=dict(candidates),
         **({'coverage_complete': True} if phase == 'coverage' else {}))
