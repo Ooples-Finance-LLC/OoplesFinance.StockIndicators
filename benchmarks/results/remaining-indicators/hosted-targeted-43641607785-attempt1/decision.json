@@ -1951,7 +1951,16 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-43641607785-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "8e7e6afb9f8fcadf4093fa7031ef2ab8acdba9bb",
+  "integrated_paths": [
+    "src/Indicators/StarReversalCandles.cs",
+    "src/Indicators/ValuesBarExecution.AbandonedBlocks.cs",
+    "src/Indicators/ValuesBarExecution.BoundedWindows.cs",
+    "tests/ModelsTests/AbandonedBabyBlockExecutionTests.cs"
+  ],
+  "report_sha256": "3542cbbeeccafb1946e612103054dc98d526e6c599f13c67b2e15b6b17215f7f",
+  "report_archive": "benchmarks/results/remaining-indicators/abandoned-inventory-repair-20261114-report-integration"
 }
