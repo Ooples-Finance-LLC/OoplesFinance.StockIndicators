@@ -1,5 +1,6 @@
 """One-runner, immutable-binary CPU screen; never source/timing qualification."""
 import argparse,ctypes,hashlib,json,subprocess,urllib.request
+from datetime import datetime
 from pathlib import Path,PurePosixPath
 
 MANIFEST='00aa40384d25287226a6c0165a5e55cdb6b3156327f2b919da05b194cd566733'
@@ -12,6 +13,11 @@ def digest(path):
     with path.open('rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest()
 def valid_log(path):
     text=path.read_text(errors='replace');assert ' SUCCESS:' in text and '[Error:' not in text,path
+def validate_probe(data,pair,role,seconds=10):
+    assert data['production_sha256']==PRODUCTION and data['pair']==pair and data['role']==role
+    assert data['bars']==10000 and data['profile_seconds']==seconds and data['iterations']>0
+    assert isinstance(data['process_id'],int) and data['process_id']>0
+    assert datetime.fromisoformat(data['profile_start_utc'])<datetime.fromisoformat(data['profile_end_utc'])
 def authenticate(inputs,out):
     path=inputs/'manifest.json';assert digest(path)==MANIFEST
     manifest=json.loads(path.read_text())
@@ -48,8 +54,7 @@ def main():
                  'run','pwsh','-NoProfile','-File',str(probe),'-Runtime',str(runtime),'-Production',str(runtime/'OoplesFinance.StockIndicators.dll'),
                  '-Expected',PRODUCTION,'-Pair',pair,'-Role',role,'-Bars','10000','-Workers','8','-Warmups','1000','-ProfileSeconds','10','-Out',str(record)]
             with (folder/'launcher.log').open('wb') as output:subprocess.run(cmd,stdout=output,stderr=subprocess.STDOUT,check=True,timeout=110)
-            valid_log(log);data=json.loads(record.read_text());assert data['production_sha256']==PRODUCTION and data['pair']==pair and data['role']==role
-            assert data['iterations']>0 and data['profile_start_utc']<data['profile_end_utc']
+            valid_log(log);data=json.loads(record.read_text());validate_probe(data,pair,role)
             archive=trace.with_suffix('.etl.zip');assert archive.is_file()
             export=folder/'export.log'
             subprocess.run([str(tool),'/AcceptEula','/NoGui','/LogFile:'+str(export),'userCommand','SaveCPUStacksAsCsv',str(archive),'pwsh','1000000000'],check=True,timeout=110)

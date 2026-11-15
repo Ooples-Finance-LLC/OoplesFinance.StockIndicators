@@ -31,11 +31,13 @@ public static class ExactWorkerProbe {
    object last=null;Action once=()=>{last=call();if(last is IDisposable d)d.Dispose();};
    for(int i=0;i<warmups;i++)once();
    var samples=new List<double>();int iterations=0;
+   var profileStartUtc=DateTime.UtcNow;
    Console.WriteLine("PROFILE START ExactWorkerProbe PID="+Environment.ProcessId+" pair="+pair+" role="+role+" bars="+bars);
    if(seconds>0) {var timer=Stopwatch.StartNew();while(timer.Elapsed.TotalSeconds<seconds){once();iterations++;}}
    else for(int i=0;i<10;i++){var timer=Stopwatch.StartNew();for(int j=0;j<10;j++)once();samples.Add(timer.Elapsed.TotalMilliseconds/10);iterations+=10;}
+   var profileEndUtc=DateTime.UtcNow;
    Console.WriteLine("PROFILE END iterations="+iterations);GC.KeepAlive(last);
-   return JsonSerializer.Serialize(new{diagnostic_only=true,qualification=false,performance_claim=false,production_sha256=sha,pair,role,bars,workers,warmups,profile_seconds=seconds,samples_ms=samples,iterations});
+   return JsonSerializer.Serialize(new{diagnostic_only=true,qualification=false,performance_claim=false,process_id=Environment.ProcessId,profile_start_utc=profileStartUtc,profile_end_utc=profileEndUtc,production_sha256=sha,pair,role,bars,workers,warmups,profile_seconds=seconds,samples_ms=samples,iterations});
   } finally {if(fixture!=null&&cleanup!=null)cleanup.Invoke(fixture,null);policy.Dispose();degree.SetValue(null,previous);}
  }
 }
