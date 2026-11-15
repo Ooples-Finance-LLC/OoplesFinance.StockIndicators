@@ -153,8 +153,7 @@ internal sealed class GapContinuationState(int period, GapContinuationKind kind)
 
     private void Add(in Bar b, int sign)
     {
-        _range.Add(b.High, sign);
-        _range.Add(b.Low, -sign);
+        CandleDifferenceUpdate.Add(ref _range, b.High, b.Low, sign);
     }
 
     private bool Doji(in Bar b)

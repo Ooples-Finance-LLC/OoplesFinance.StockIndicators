@@ -196,14 +196,12 @@ internal sealed class NeckCandleState(int bodyPeriod, int equalPeriod, NeckCandl
 
     private void AddBody(in Bar bar, int sign)
     {
-        _body.Add(Math.Max(bar.Open, bar.Close), sign);
-        _body.Add(Math.Min(bar.Open, bar.Close), -sign);
+        CandleDifferenceUpdate.Add(ref _body, Math.Max(bar.Open, bar.Close), Math.Min(bar.Open, bar.Close), sign);
     }
 
     private void AddRange(in Bar bar, int sign)
     {
-        _range.Add(bar.High, sign);
-        _range.Add(bar.Low, -sign);
+        CandleDifferenceUpdate.Add(ref _range, bar.High, bar.Low, sign);
     }
 
     private bool Matches(in Bar bar)

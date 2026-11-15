@@ -235,14 +235,12 @@ internal sealed class MatchedLinesState(
 
     private static void Body(ref ExactMeanAccumulator sum, in Bar b, int sign)
     {
-        sum.Add(Math.Max(b.Open, b.Close), sign);
-        sum.Add(Math.Min(b.Open, b.Close), -sign);
+        CandleDifferenceUpdate.Add(ref sum, Math.Max(b.Open, b.Close), Math.Min(b.Open, b.Close), sign);
     }
 
     private static void Range(ref ExactMeanAccumulator sum, in Bar b, int sign)
     {
-        sum.Add(b.High, sign);
-        sum.Add(b.Low, -sign);
+        CandleDifferenceUpdate.Add(ref sum, b.High, b.Low, sign);
     }
 
     private bool Equal(double a, double b)

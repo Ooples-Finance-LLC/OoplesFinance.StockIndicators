@@ -212,8 +212,7 @@ internal sealed class SequenceCandleState(int period, int warmup, SequenceCandle
 
     private void Add(in Bar bar, int sign)
     {
-        _range.Add(bar.High, sign);
-        _range.Add(bar.Low, -sign);
+        CandleDifferenceUpdate.Add(ref _range, bar.High, bar.Low, sign);
     }
 
     private static bool White(Bar bar) => bar.Close >= bar.Open;

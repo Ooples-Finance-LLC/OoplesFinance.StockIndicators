@@ -257,8 +257,7 @@ internal sealed class TripleBodyCandleState(
 
     private static void Add(ref ExactMeanAccumulator sum, in Bar bar, int weight)
     {
-        sum.Add(Math.Max(bar.Open, bar.Close), weight);
-        sum.Add(Math.Min(bar.Open, bar.Close), -weight);
+        CandleDifferenceUpdate.Add(ref sum, Math.Max(bar.Open, bar.Close), Math.Min(bar.Open, bar.Close), weight);
     }
 
     private bool Matches(in Bar c)
