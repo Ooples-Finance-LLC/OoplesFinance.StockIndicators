@@ -1351,7 +1351,15 @@
       "archive": "benchmarks/results/remaining-indicators/hosted-targeted-43673961720-attempt1/scripts/verify.py.gz"
     }
   },
-  "production_integrated": false,
-  "report_imported": false,
-  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows."
+  "production_integrated": true,
+  "report_imported": true,
+  "note": "Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity. WMA/TRIMA results do not replace default SMA rows.",
+  "source_integration_commit": "c23109697ad3beca51b45cc1ba8a188379b45b20",
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.LogVolatility.cs",
+    "src/Indicators/ValuesBarExecution.cs",
+    "tests/ModelsTests/WindowLogVolatilityRegionTests.cs"
+  ],
+  "report_sha256": "66a6be4a6aadbc420e9ae2e90bbc0cbddb4efa6880c6990089a6b04e1179ba24",
+  "report_archive": "benchmarks/results/remaining-indicators/window-log-positive-regions-20261115-report-integration"
 }
