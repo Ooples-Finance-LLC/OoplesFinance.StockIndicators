@@ -187,7 +187,14 @@ internal static partial class ValuesBarExecution
     private readonly struct ContextReversalKernel(ContextReversalState state) : IBoundedKernel<ContextReversalKernel>
     {
         public static ContextReversalKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
-            new((ContextReversalState)((IndicatorBase)indicator).CreateState()!);
+            new(CreateState(target.Values[0].Length, indicator));
+        private static ContextReversalState CreateState(int count, IIndicator indicator)
+        {
+            var state = (ContextReversalState)((IndicatorBase)indicator).CreateState()!;
+            // The output length is the full batch, not a worker's short replay slice.
+            state.PreferPriceContext = count >= 8192 && (indicator is InvertedHammerCandle or ShootingStarCandle);
+            return state;
+        }
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
