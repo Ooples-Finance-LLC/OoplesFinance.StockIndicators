@@ -17,6 +17,15 @@ PLAN = p.REPO / 'benchmarks/plans/hosted-candle-family-native-pilot-20261115.jso
 
 
 class RoiDiagnosticTests(unittest.TestCase):
+    def test_pinned_json_hashes_survive_windows_checkout_filters(self):
+        for path, expected in ((PLAN, 'e1af08c6716f03021a46644db9ad3b8d32377c5c2f3149e820c72061e30e13c7'),
+                               (p.REPO / roi.APPROVAL, roi.APPROVAL_SHA),
+                               (p.REPO / roi.BASE_PLAN, roi.BASE_PLAN_SHA)):
+            raw = subprocess.check_output(['git', '-c', 'core.autocrlf=true', '-c', 'core.eol=crlf',
+                'cat-file', '--filters', 'HEAD:' + path.relative_to(p.REPO).as_posix()], cwd=p.REPO)
+            self.assertEqual(hashlib.sha256(raw).hexdigest(), expected)
+            self.assertNotIn(b'\r\n', raw)
+
     def test_relative_cli_measure_paths_are_absolute_before_runtime_changes_cwd(self):
         expected_inputs=(Path.cwd()/'relative-inputs').resolve()
         expected_out=(Path.cwd()/'relative-output/shard0').resolve()
