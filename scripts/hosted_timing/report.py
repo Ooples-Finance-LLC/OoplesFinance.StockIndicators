@@ -16,12 +16,26 @@ from .verify import archived, collect
 
 
 
-def pair_warmup_disclosure(plan):
-    grouped=defaultdict(list)
-    for pair,count in sorted(plan['measurement_policy'].get('fixed_invocation_pair_warmups',{}).items()):
-        grouped[count].append(pair)
-    return ''.join(' Batch timings for '+', '.join(names)+f' use the approved {count:,} unmeasured warmups for both libraries at both bar counts; builder policies are unchanged.'
-                   for count,names in sorted(grouped.items()))
+def pair_warmup_disclosure(plan,rows=None):
+    grouped=defaultdict(dict)
+    if rows is None:
+        for pair,count in plan['measurement_policy'].get('fixed_invocation_pair_warmups',{}).items():
+            grouped[count][pair]={1000,10000}
+    else:
+        # A mixed report retains policies from earlier accepted batches. Use
+        # measured row provenance, not only the plan currently being imported.
+        for row in rows:
+            count=row.get('warmup_count',1000)
+            if count != 1000:
+                grouped[count].setdefault(row['pair'],set()).add(row['bars'])
+    result=''
+    for count,pairs in sorted(grouped.items()):
+        both=all(bars=={1000,10000} for bars in pairs.values())
+        names=[pair if bars=={1000,10000} else pair+' at '+', '.join(f'{n:,}' for n in sorted(bars))+' bars'
+               for pair,bars in sorted(pairs.items())]
+        result += ' Batch timings for '+', '.join(names)+f' use the approved {count:,} unmeasured warmups for both libraries'+(' at both bar counts' if both else ' at the listed bar counts')+'; builder policies are unchanged.'
+    return result
+
 
 
 def stage(live, raw, repo, out, phase='successor'):
@@ -184,7 +198,7 @@ def stage(live, raw, repo, out, phase='successor'):
     disclosure=' Each row identifies its measured source and run. Results combine earlier measurements and GitHub-hosted Windows measurements; absolute timings are compared only within the same runner.'
     if read(PLAN)['measurement_policy'].get('fixed_invocation_warmups') == 1000:
         disclosure += ' Latest fixed-invocation batch timings use 1,000 unmeasured warmups; builder timings retain ten warmups. Both use ten measured iterations.'
-    disclosure += pair_warmup_disclosure(read(PLAN))
+    disclosure += pair_warmup_disclosure(read(PLAN),data['rows'])
     if builder_control_receipts:
         names=sorted({row['pair'] for receipt in builder_control_receipts for row in receipt['rows']})
         disclosure += ' Fresh builder-only source controls for '+', '.join(names)+' contain no native timings; their existing builder/native comparisons retain their original source and run provenance.'
