@@ -56,7 +56,7 @@ internal static class SmoothedAccumulationComparison
             .GetAwaiter()
             .GetResult();
         var rows = new double?[4][];
-        for (var j = 0; j < 4; j++)
+        for (var j = 0; j < (first ? 1 : 4); j++)
         {
             var values = run[indicator.Outputs[j]].ToArray();
             var flags = run[indicator.Outputs[j + 4]].ToArray();
