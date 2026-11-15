@@ -59,6 +59,23 @@ class HostedReportTests(unittest.TestCase):
         self.assertNotIn('Harami',disclosure)
         self.assertEqual(pair_warmup_disclosure(dict(measurement_policy={})), '')
 
+    def test_new_plan_retains_earlier_row_warmup_disclosures(self):
+        plan=dict(measurement_policy=dict(fixed_invocation_warmups=1000))
+        pairs=['TaLib.Candles.Harami','TaLib.Candles.AbandonedBaby','TaLib.Functions.Add']
+        rows=[dict(pair=pair,bars=n,warmup_count=20000) for pair in pairs for n in (1000,10000)]
+        rows += [dict(pair='TaLib.Candles.Hammer',bars=n,warmup_count=1000) for n in (1000,10000)]
+        disclosure=pair_warmup_disclosure(plan,rows)
+        for pair in pairs:self.assertIn(pair,disclosure)
+        self.assertNotIn('TaLib.Candles.Hammer',disclosure)
+        self.assertIn('20,000 unmeasured warmups for both libraries at both bar counts',disclosure)
+
+    def test_single_size_warmup_provenance_does_not_claim_both_sizes(self):
+        disclosure=pair_warmup_disclosure(dict(measurement_policy={}),[
+            dict(pair='TaLib.Functions.Add',bars=1000,warmup_count=20000),
+            dict(pair='TaLib.Functions.Add',bars=10000,warmup_count=1000)])
+        self.assertIn('TaLib.Functions.Add at 1,000 bars',disclosure)
+        self.assertNotIn('at both bar counts',disclosure)
+
     def check_report(self,phase,snapshot=False,builder_only=False):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp); raw=root/'raw'; raw.mkdir()
@@ -95,6 +112,8 @@ class HostedReportTests(unittest.TestCase):
                    if t['fixture']=='LibraryPairBenchmarks' for op in t['operations']}
             data=dict(evidence=dict(sourceSha='old'),rows=[dict(pair=p,bars=n,source_sha='old',measurement_run_url='old-url',
                 competitor_over_ooples=1,raw={}) for p in sorted(pairs|{'unchanged'}) for n in (1000,10000)])
+            for row in data['rows']:
+                if row['pair']=='unchanged': row['warmup_count']=20000
             original=copy.deepcopy(data['rows'][-2:])
             # Explicit sentinel indexing avoids relying on lexical order.
             original=[copy.deepcopy(r) for r in data['rows'] if r['pair']=='unchanged']
@@ -167,6 +186,7 @@ const detail=`${esc(r.raw.Ooples.host.ProcessorName)}`;
                 self.assertGreater(len({c['measurement_shard'] for r in receipts[1:] for c in r['comparisons']}),1)
             self.assertIn('D.rows.flatMap',result)
             self.assertIn('absolute timings are compared only within the same runner',result)
+            self.assertIn('Batch timings for unchanged use the approved 20,000 unmeasured warmups',result)
             self.assertIn('<section id="ema-constructor-results"><p>Independent constructor measurements</p></section>',result)
             self.assertNotIn('Previous summary',result)
             self.assertEqual(live.read_text(encoding='utf-8'),document)
