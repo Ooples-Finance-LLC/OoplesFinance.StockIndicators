@@ -214,3 +214,4 @@ benchmarks/plans/evidence/star-warmup-combined-qualification-20261114.json -text
 benchmarks/plans/hosted-abandoned-inventory-repair-20261114.json -text
 benchmarks/plans/evidence/star-warmup-inventory-repair-20261114.json -text
 benchmarks/plans/hosted-context-after-stars-20261115.json text eol=lf
+benchmarks/plans/hosted-window-log-positive-regions-20261115.json text eol=lf
