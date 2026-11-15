@@ -695,7 +695,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/download-artifact@v8
         with:
-          name: hosted-inputs
+          name: candidate-correctness-inputs
           path: baseline-inputs
           run-id: 43676943941
           github-token: ${{ github.token }}

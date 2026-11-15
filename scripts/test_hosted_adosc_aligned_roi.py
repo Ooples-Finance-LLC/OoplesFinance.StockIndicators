@@ -3,6 +3,7 @@ import hashlib
 import importlib.util
 import json
 import runpy
+import re
 import sys
 from pathlib import Path
 import subprocess
@@ -17,6 +18,13 @@ PLAN = p.REPO / 'benchmarks/plans/hosted-adosc-published-columns-roi-20261115.js
 
 
 class RoiDiagnosticTests(unittest.TestCase):
+    def test_downloads_use_correct_artifact_type_for_all_three_pinned_ci_views(self):
+        text=(p.REPO/'.github/workflows/cpu-kernel-performance.yml').read_text().split('  bounded-roi-diagnostic:\n')[1]
+        downloads=re.findall(r'name: ([^\n]+)\n\s+path: ([^\n]+)\n\s+run-id: (\d+)',text)
+        self.assertEqual(set(downloads),{('candidate-correctness-inputs',path,roi.RUNS[label])
+            for label,path in [('old','baseline-inputs'),('successor','candidate-inputs'),('variants','variant-inputs')]})
+        self.assertEqual(len(downloads),3)
+
     def test_all_three_roles_reject_missing_required_parity_classes_before_source_reads(self):
         for label in roi.UNITS:
             with self.subTest(label=label), tempfile.TemporaryDirectory() as work, patch.object(roi,'source_fingerprint') as fingerprint:
