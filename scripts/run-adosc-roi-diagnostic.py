@@ -4,10 +4,10 @@ from hosted_timing import pipeline as p, roi_diagnostic as roi
 
 parser = argparse.ArgumentParser()
 parser.add_argument('mode', choices=['prepare', 'measure', 'verify'])
-parser.add_argument('--baseline', type=Path)
-parser.add_argument('--candidate', type=Path)
-parser.add_argument('--inputs', type=Path)
-parser.add_argument('--out', type=Path, required=True)
+parser.add_argument('--baseline', type=lambda value: Path(value).resolve())
+parser.add_argument('--candidate', type=lambda value: Path(value).resolve())
+parser.add_argument('--inputs', type=lambda value: Path(value).resolve())
+parser.add_argument('--out', type=lambda value: Path(value).resolve(), required=True)
 args = parser.parse_args()
 roi.validate_scope(p.read(p.PLAN))
 if args.mode == 'prepare':

@@ -2,6 +2,8 @@ import copy
 import hashlib
 import importlib.util
 import json
+import runpy
+import sys
 from pathlib import Path
 import subprocess
 import tempfile
@@ -15,6 +17,31 @@ PLAN = p.REPO / 'benchmarks/plans/hosted-adosc-roi-diagnostic-20261114.json'
 
 
 class RoiDiagnosticTests(unittest.TestCase):
+    def test_relative_cli_measure_paths_are_absolute_before_runtime_changes_cwd(self):
+        expected_inputs=(Path.cwd()/'relative-inputs').resolve()
+        expected_out=(Path.cwd()/'relative-output/shard0').resolve()
+        with patch.object(sys,'argv',['run-adosc-roi-diagnostic.py','measure','--inputs','relative-inputs','--out','relative-output/shard0']), \
+             patch.object(roi,'validate_scope'),patch.object(p,'verify_inputs') as inputs,patch.object(p,'measure') as measure:
+            runpy.run_path(str(p.REPO/'scripts/run-adosc-roi-diagnostic.py'),run_name='__main__')
+        inputs.assert_called_once_with(expected_inputs)
+        measure.assert_called_once_with(expected_inputs,expected_out,'diagnostic',0)
+
+    def test_partial_clone_prefetches_exact_blobs_with_binary_lf_stdin(self):
+        a,b='1'*40,'2'*40
+        entries=f'100644 blob {b}\tsrc/b.cs\n100644 blob {a}\tsrc/a.cs\n100644 blob {b}\tsrc/c.cs'
+        promisor=subprocess.CompletedProcess([],0,stdout='true\n')
+        with patch.object(p,'git',return_value=entries),patch.object(roi.subprocess,'run',return_value=promisor) as run:
+            roi.prefetch_source_blobs('source')
+        self.assertEqual(run.call_count,2)
+        self.assertEqual(run.call_args.kwargs['input'],(a+'\n'+b+'\n').encode())
+        self.assertTrue(run.call_args.kwargs['check'])
+        self.assertIn('--no-write-fetch-head',run.call_args.args[0])
+
+    def test_complete_clone_does_not_need_network_prefetch(self):
+        with patch.object(roi.subprocess,'run',return_value=subprocess.CompletedProcess([],1,stdout='')) as run:
+            roi.prefetch_source_blobs('source')
+        self.assertEqual(run.call_count,1)
+
     def evidence(self, root):
         with patch.object(test_hosted_timing, 'PLAN', PLAN):
             test_hosted_timing.make_evidence(root, 'diagnostic')

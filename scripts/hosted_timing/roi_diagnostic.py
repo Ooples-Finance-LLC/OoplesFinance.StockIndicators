@@ -73,8 +73,25 @@ def selected_plan(path):
         p.PLAN = previous
 
 
+def prefetch_source_blobs(source):
+    # Sparse checkout uses blob:none. Reading a historical tree one blob at a
+    # time otherwise makes thousands of separate authenticated network fetches.
+    promisor = subprocess.run(['git','config','--get','remote.origin.promisor'],
+                              cwd=p.REPO,capture_output=True,text=True)
+    if promisor.returncode or promisor.stdout.strip() != 'true': return
+    entries = p.git('ls-tree','-r',source,'--',*PATHS).splitlines()
+    blobs = sorted({line.split()[2] for line in entries if line.split()[1] == 'blob'})
+    assert blobs and all(re.fullmatch('[a-f0-9]{40}', blob) for blob in blobs)
+    print(f'Prefetching {len(blobs)} exact source blobs in one request',flush=True)
+    # Binary stdin preserves LF on Windows; text-mode CRLF corrupts refspecs.
+    subprocess.run(['git','-c','fetch.negotiationAlgorithm=noop','fetch','--no-tags',
+                    '--no-write-fetch-head','origin','--stdin'],cwd=p.REPO,
+                   input=('\n'.join(blobs)+'\n').encode(),check=True,timeout=180)
+
+
 def source_fingerprint(source):
     """Use the GPU verifier's canonical algorithm without checking out source."""
+    prefetch_source_blobs(source)
     names = sorted(set(p.git('ls-tree', '-r', '--name-only', source, '--', *PATHS).splitlines()))
     assert names
     raw = subprocess.check_output(['git', 'cat-file', '--batch'], cwd=p.REPO,
