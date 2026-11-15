@@ -1,0 +1,141 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "sources": {
+    "published": "e7112835a8f3f29fc27363bcd0c553e77bc7c2c5",
+    "old": "e7112835a8f3f29fc27363bcd0c553e77bc7c2c5",
+    "successor": "719c849c10b2c59cc8f173ef521e58207a42bddd",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "gpu_sources": {
+    "old": "83561cd5065071ff3a3deb67d9174cc144fcfc60",
+    "successor": "719c849c10b2c59cc8f173ef521e58207a42bddd",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "ContextReversalSharedExecutionTests",
+      "ContextReversalParallelExecutionTests"
+    ],
+    "successor": [
+      "SmoothedCheckedRegionTests",
+      "CompactSmoothedAccumulationTests"
+    ],
+    "variants": [
+      "CompactMacdWordEmaTests",
+      "CompactClassicalWindowTests",
+      "ExactMeanUnitWeightTests"
+    ]
+  },
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.150.0"
+  },
+  "diagnostic_only": true,
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "cases": 20,
+  "decisions": 4,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 60
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetChaikinOsc",
+              "pair": "Skender.GetChaikinOsc"
+            },
+            {
+              "raw": "TaLib.Functions.AdOsc",
+              "pair": "TaLib.Functions.AdOsc"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        }
+      ],
+      "cases": 20,
+      "decisions": 4
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetChaikinOsc",
+              "pair": "Skender.GetChaikinOsc"
+            },
+            {
+              "raw": "TaLib.Functions.AdOsc",
+              "pair": "TaLib.Functions.AdOsc"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        }
+      ],
+      "cases": 20,
+      "decisions": 4
+    }
+  ],
+  "roi_approval": {
+    "path": "benchmarks/plans/evidence/adosc-word-flow-roi-scope-20261115.json",
+    "sha256": "b64432acfbdf27ebabc8a0b379d941c08dd505df7f19e41d26af9da13eca072b"
+  },
+  "baseline_inputs": {
+    "run_id": "43661486051",
+    "plan": "benchmarks/plans/hosted-context-after-stars-20261115.json",
+    "plan_sha256": "8de236a680f5a0a47ff3fc0d02496062da33d7fc232b06622bc5f69571ba7c28",
+    "provenance_sha256": "41545efda7e5e0b62e585f73238e69f952c303ff6186ac5a2f4876b0db2411c1",
+    "label": "successor"
+  },
+  "candidate": {
+    "ci_run": "43670475643",
+    "producer": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "719c849c10b2c59cc8f173ef521e58207a42bddd",
+    "evidence_source": "5d3b5125c56cec671a1ca7fe0547b1b1a3b7f6eb",
+    "manifest_sha256": "365247b861e758c7d017a5883c4b84ab59d9457ed2afc8f7dd1e45b21e1a0618",
+    "gpu_receipt_sha256": "810cf9a5e878fdcd20b2e331d89e74dad578b8cff6c74ab98151a25e2d4dc6e8",
+    "unit_classes": [
+      "SmoothedCheckedRegionTests",
+      "CompactSmoothedAccumulationTests"
+    ],
+    "parity_classes": [
+      "SmoothedAccumulationComparisonTests",
+      "SharedSmoothedAccumulationFixtureTests"
+    ]
+  }
+}

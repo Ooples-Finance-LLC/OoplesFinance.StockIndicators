@@ -1,0 +1,24 @@
+{
+  "approved": true,
+  "diagnostic_only": true,
+  "qualification": false,
+  "source_imported": false,
+  "report_imported": false,
+  "policy_changed": false,
+  "source": "719c849c10b2c59cc8f173ef521e58207a42bddd",
+  "initial_prototype": "64f3fb9fb9a2fdc0a48283dbf028385c5a95b727",
+  "baseline": "e7112835a8f3f29fc27363bcd0c553e77bc7c2c5",
+  "pairs": [
+    "Skender.GetChaikinOsc",
+    "TaLib.Functions.AdOsc"
+  ],
+  "cases": 20,
+  "comparisons": 4,
+  "max_parallel": 1,
+  "warmups": 1000,
+  "measured_iterations": 10,
+  "quiet_samples": 12,
+  "max_cpu_percent": 15,
+  "runtime_policy_overrides": {},
+  "authorization": "User approved bounded AdOsc follow-up:90minute study/prototype, conditional correctness/GPU100 and20case4comparison ROI,max1runner. No qualification/publication."
+}

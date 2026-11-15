@@ -72,6 +72,10 @@ def operation_timeout_for(plan, phase):
 
 
 def phase_shards(plan, phase):
+    if phase == 'diagnostic':
+        from .roi_followup import validate_scope
+        validate_scope(plan)
+        return range(1)
     if phase == 'successor':
         return range(8)
     if phase == 'targeted':
@@ -83,6 +87,9 @@ def phase_shards(plan, phase):
 
 
 def phase_tasks(plan, phase, shard):
+    if phase == 'diagnostic':
+        assert shard in phase_shards(plan, phase)
+        return copy.deepcopy(plan['diagnostic_shards'][shard]['tasks'])
     if phase == 'targeted':
         assert plan.get('targeted_reference') and shard in phase_shards(plan, phase)
         return copy.deepcopy(plan['targeted_shards'][shard]['tasks'])
@@ -116,10 +123,10 @@ def methods_for(task, index):
 
 
 def phase_labels(phase):
-    assert phase in ('successor', 'variants', 'coverage', 'targeted')
+    assert phase in ('successor', 'variants', 'coverage', 'targeted', 'diagnostic')
     if phase == 'coverage':
         return ('successor', 'successor')
-    return ('old', 'successor') if phase in ('successor', 'targeted') else ('successor', 'variants')
+    return ('old', 'successor') if phase in ('successor', 'targeted', 'diagnostic') else ('successor', 'variants')
 
 
 def phase_sources(plan, phase):
