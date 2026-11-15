@@ -1413,6 +1413,10 @@ internal static partial class ValuesBarExecution
         int start, int end, int period, ReadOnlySpan<Bar> seed, ReadOnlySpan<Bar> tail,
         CancellationToken cancellation, IIndicator indicator) where T : struct, IBoundedKernel<T>
     {
+        if ((typeof(T) == typeof(SequenceKernel) && indicator is MatchingLowCandle { Period: <= 64 }
+                || typeof(T) == typeof(NeckKernel) && indicator is OnNeckCandle { BodyPeriod: <= 64, EqualPeriod: <= 64 })
+            && end - start + seed.Length >= 512)
+            return ComputeCandleIntegerWindows(source, output[0], owned, start, end, seed, tail, cancellation, indicator);
         if (typeof(T) == typeof(StarReversalKernel) && indicator is AbandonedBabyCandle baby
             && baby.LongPeriod <= 64 && baby.ShortPeriod <= 64 && baby.DojiPeriod <= 64)
             return ComputeAbandonedBlocks(source, output[0], owned, start, end, period, seed, tail, cancellation, baby);
