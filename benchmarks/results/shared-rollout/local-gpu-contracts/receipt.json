@@ -1,5 +1,5 @@
 {
-  "source_sha256": "2cfc0cb9ec476ec6232dbbaf1e545f6d313758cfb54d4f3ca6fc7cc08361ed83",
+  "source_sha256": "11290bd77a912dcafb004d271d9747582f496db04a9ff142f7bad7aadfde18e9",
   "methods": [
     "OoplesFinance.StockIndicators.CompetitorTests.ScaledTrueRangeFixtureTests.AllocationProbeRetainsEagerCpuAndOptionalGpuArms",
     "OoplesFinance.StockIndicators.CompetitorTests.ScaledTrueRangeFixtureTests.EveryArmMatchesItsIndependentArithmeticAndRestoresSettings",
@@ -15,17 +15,17 @@
     "OoplesFinance.StockIndicators.CompetitorTests.SharedGpuVolumeWeightedPriceFixtureTests.DeviceColumnsMatchIndependentCpuAndNativeReferences"
   ],
   "passed_cases": 100,
-  "trx_sha256": "a00260fdc9a218a529ed41a4a560f6032b1cf2a6b26ed57ac942d580bac4e824",
+  "trx_sha256": "0a04f599bb3b4f0048d3e358083f349573aeb5af6e64c2a58f4c8400e5859c41",
   "host": "Windows-11-10.0.26220-SP0",
   "device": "Radeon RX 5500 XT; RequiredGPU fixtures; CI-built verified binaries",
   "dotnet_info": ".NET SDK:\r\n Version:           10.0.101\r\n Commit:            fad253f51b\r\n Workload version:  10.0.102\r\n MSBuild version:   18.0.6+fad253f51\r\n\r\nRuntime Environment:\r\n OS Name:     Windows\r\n OS Version:  10.0.26220\r\n OS Platform: Windows\r\n RID:         win-x64\r\n Base Path:   C:\\Program Files\\dotnet\\sdk\\10.0.101\\\r\n\r\n.NET workloads installed:\r\n [maui]\r\n   Installation Source: SDK 10.0.100\r\n   Manifest Version:    10.0.1/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.maui\\10.0.1\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [wasm-tools]\r\n   Installation Source: SDK 10.0.100\r\n   Manifest Version:    10.0.102/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.workload.mono.toolchain.current\\10.0.102\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [tvos]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    26.2.10191/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.tvos\\26.2.10191\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [macos]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    26.2.10191/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.macos\\26.2.10191\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [android]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    36.1.12/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.android\\36.1.12\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [maccatalyst]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    26.2.10191/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.maccatalyst\\26.2.10191\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [ios]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    26.2.10191/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.ios\\26.2.10191\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [maui-windows]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    10.0.1/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.maui\\10.0.1\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\nConfigured to use workload sets when installing new manifests.\r\n",
-  "test_assembly_sha256": "baf20c7f031b6d95ae7560b3f6639a0ff206dbee760426f9374aac2696934907",
+  "test_assembly_sha256": "165250e5cf26e7ee61e39f4b1f9643997a3ed3d0353eafac75fc68414662d763",
   "build_origin": {
-    "run_id": "43671778311",
+    "run_id": "43759123590",
     "workflow_head": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
-    "source": "719c8c86c9e7f55a2be04484086dd6941c01e2fd",
-    "artifact_id": 14145400415,
-    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/43671778311"
+    "source": "e71d4bc6577e117e78c3c4e099cd2c5a4a3fe0e8",
+    "artifact_id": 14179698297,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/43759123590"
   },
   "note": "Actual local RequiredGPU execution using source-bound CI build; correctness evidence, not timing.",
   "local_dotnet_launcher": [

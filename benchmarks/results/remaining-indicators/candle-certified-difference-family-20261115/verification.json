@@ -1,0 +1,75 @@
+{
+  "source": "e71d4bc6577e117e78c3c4e099cd2c5a4a3fe0e8",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115",
+  "status": "correctness-complete",
+  "active": null,
+  "unit": {
+    "passed": 70,
+    "classes": {
+      "CandleDifferenceUpdateTests": 2,
+      "GapContinuationSharedExecutionTests": 7,
+      "MatchedLinesSharedExecutionTests": 7,
+      "MatchedLinesParallelExecutionTests": 4,
+      "MultiBarCandleSharedExecutionTests": 11,
+      "NeckParallelExecutionTests": 4,
+      "NeckSharedExecutionTests": 7,
+      "SequenceParallelExecutionTests": 5,
+      "SequenceSharedExecutionTests": 9,
+      "TripleBodyParallelExecutionTests": 5,
+      "TripleBodySharedExecutionTests": 9
+    },
+    "sha256": "5ccb5b2a5e47eb4b8524b246cfcdd8e53eaa4c636d7778e5bca7f05cf5435a58"
+  },
+  "parity": {
+    "passed": 393,
+    "classes": {
+      "SequenceCandleTests": 46,
+      "MatchedLinesTests": 43,
+      "NeckCandleTests": 17,
+      "GapContinuationTests": 91,
+      "TripleBodyTests": 53,
+      "SharedMatchedLinesBenchmarkTests": 33,
+      "SharedSequenceCandleBenchmarkTests": 48,
+      "SharedNeckCandleBenchmarkTests": 24,
+      "SharedGapContinuationBenchmarkTests": 6,
+      "SharedTripleBodyBenchmarkTests": 32
+    },
+    "sha256": "6d32ccda1d1e73221bf543b4acca3626f35d86c49c6f603f4a6a32f0cd784555"
+  },
+  "build_origin": {
+    "run_id": "43759123590",
+    "workflow_head": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "e71d4bc6577e117e78c3c4e099cd2c5a4a3fe0e8",
+    "artifact_id": 14179698297,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/43759123590"
+  },
+  "compiler_process_isolation": true,
+  "dependency_copy_mode": "Verified immutable CI artifacts; changed binaries installed without local compilation",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "build-and-gpu": {
+      "exit_code": 0,
+      "location": "CI build and actual local GPU"
+    },
+    "unit": {
+      "exit_code": 0,
+      "location": "CI"
+    },
+    "parity": {
+      "exit_code": 0,
+      "location": "CI"
+    }
+  },
+  "gpu_passed": 100,
+  "source_fingerprint": "11290bd77a912dcafb004d271d9747582f496db04a9ff142f7bad7aadfde18e9",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "747ddc1b3dab6d89b3813cbe34cc89da648a20dd8c445326038f6840cabeff9c",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "747ddc1b3dab6d89b3813cbe34cc89da648a20dd8c445326038f6840cabeff9c",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "747ddc1b3dab6d89b3813cbe34cc89da648a20dd8c445326038f6840cabeff9c",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "747ddc1b3dab6d89b3813cbe34cc89da648a20dd8c445326038f6840cabeff9c"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}
