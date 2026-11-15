@@ -9,6 +9,8 @@ parser.add_argument('--candidate', type=lambda value: Path(value).resolve())
 parser.add_argument('--inputs', type=lambda value: Path(value).resolve())
 parser.add_argument('--out', type=lambda value: Path(value).resolve(), required=True)
 args = parser.parse_args()
+if p.read(p.PLAN).get('diagnostic_kind') == 'candle-integer-window-native-pilot':
+    from hosted_timing import candle_integer_roi as roi
 roi.validate_scope(p.read(p.PLAN))
 if args.mode == 'prepare':
     roi.prepare(args.baseline, args.candidate, args.out)

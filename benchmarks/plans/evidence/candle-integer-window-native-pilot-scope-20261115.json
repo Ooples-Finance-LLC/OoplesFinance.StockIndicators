@@ -1,0 +1,19 @@
+{
+  "approved": true,
+  "diagnostic_only": true,
+  "qualification": false,
+  "publication": false,
+  "source": "8eeeb8d003a4f73009beb69f63d9577975bc0344",
+  "baseline": "ce02581b1f55400fd674b5496ee659fa0e8654fa",
+  "pairs": [
+    "TaLib.Candles.MatchingLow",
+    "TaLib.Candles.OnNeck"
+  ],
+  "cases": 20,
+  "decisions": 4,
+  "max_parallel": 1,
+  "authorization": "User: keep going until all work is completed and use the loop mode. Prepared bounded correctness/GPU100 and20-case native pilot; no full qualification or publication.",
+  "history_policy_change": false,
+  "warmup_policy_change": false,
+  "runtime_policy_change": false
+}

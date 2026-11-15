@@ -212,6 +212,8 @@ benchmarks/plans/evidence/star-warmup-combined-qualification-20261114.json -text
 
 # Preserve the separately approved retry plan and approval bytes.
 benchmarks/plans/hosted-candle-family-native-pilot-20261115.json text eol=lf
+benchmarks/plans/hosted-candle-integer-window-native-pilot-20261115.json text eol=lf
+benchmarks/plans/evidence/candle-integer-window-native-pilot-scope-20261115.json text eol=lf
 benchmarks/plans/evidence/candle-family-native-pilot-scope-20261115.json text eol=lf
 benchmarks/plans/hosted-window-log-positive-regions-20261115.json text eol=lf
 benchmarks/plans/hosted-abandoned-inventory-repair-20261114.json -text

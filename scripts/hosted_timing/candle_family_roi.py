@@ -109,6 +109,10 @@ def source_fingerprint(source):
 
 
 def candidate_inputs(folder, plan):
+    return _candidate_inputs(folder, plan, NEW, UNIT, PARITY, 70, 393, '43759123590')
+
+
+def _candidate_inputs(folder, plan, NEW, UNIT, PARITY, expected_unit, expected_parity, ci_run):
     folder = Path(folder).resolve()
     def read(name):
         path = (folder / name).resolve()
@@ -121,10 +125,10 @@ def candidate_inputs(folder, plan):
     raw = read('manifest.json')
     assert hashlib.sha256(raw).hexdigest() == plan['candidate']['manifest_sha256']
     manifest = json.loads(raw)
-    assert (manifest['run_id'], manifest['workflow_head']) == ('43759123590', PRODUCER)
+    assert (manifest['run_id'], manifest['workflow_head']) == (ci_run, PRODUCER)
     assert manifest['classes'] == dict(unit=UNIT, parity=PARITY)
     production = ci.validate_layout(manifest, read, NEW, fingerprint)
-    for label, classes, expected in [('unit', UNIT, 70), ('parity', PARITY, 393)]:
+    for label, classes, expected in [('unit', UNIT, expected_unit), ('parity', PARITY, expected_parity)]:
         with tempfile.TemporaryDirectory(prefix='si-roi-trx-') as work:
             path = Path(work) / 'cases.trx'
             path.write_bytes(read('evidence/' + label + '.trx'))
@@ -140,7 +144,7 @@ def candidate_inputs(folder, plan):
     receipt, trx = json.loads(receipt_raw), gzip.decompress(trx_raw)
     methods = json.loads(p.git('show', NEW + ':scripts/competitor-gpu-methods.json'))
     assert gpu.verify_evidence(receipt, trx, methods, fingerprint) == receipt['passed_cases'] == 100
-    assert receipt['build_origin']['source'] == NEW and receipt['build_origin']['run_id'] == '43759123590'
+    assert receipt['build_origin']['source'] == NEW and receipt['build_origin']['run_id'] == ci_run
     assert receipt['build_origin']['workflow_head'] == PRODUCER
     assert receipt['test_assembly_sha256'] == manifest['runtime_files'][ci.ROOTS[-1] + '/OoplesFinance.StockIndicators.CompetitorTests.dll']
     # Verify the whole tested tensor closure before using the frozen harness.
@@ -161,6 +165,10 @@ def candidate_inputs(folder, plan):
 
 
 def prepare(baseline, candidate, out):
+    return _prepare(baseline, candidate, out, validate_scope, candidate_inputs, NEW)
+
+
+def _prepare(baseline, candidate, out, validate_scope, candidate_inputs, NEW):
     plan = p.read(p.PLAN)
     validate_scope(plan)
     baseline, out = Path(baseline).resolve(), Path(out).resolve()
