@@ -15,6 +15,15 @@ from .checkpoints import case_key
 from .verify import archived, collect
 
 
+
+def pair_warmup_disclosure(plan):
+    grouped=defaultdict(list)
+    for pair,count in sorted(plan['measurement_policy'].get('fixed_invocation_pair_warmups',{}).items()):
+        grouped[count].append(pair)
+    return ''.join(' Batch timings for '+', '.join(names)+f' use the approved {count:,} unmeasured warmups for both libraries at both bar counts; builder policies are unchanged.'
+                   for count,names in sorted(grouped.items()))
+
+
 def stage(live, raw, repo, out, phase='successor'):
     assert phase in ('successor','targeted')
     live, raw, repo, out = (Path(p).resolve() for p in (live, raw, repo, out))
@@ -41,6 +50,7 @@ def stage(live, raw, repo, out, phase='successor'):
     baseline = {}
     builder_receipts = []
     snapshot_receipts = []
+    builder_control_receipts = []
     run_ids = set()
     for root in sorted(p.parent for p in raw.glob('*/provenance.json')):
         proof, state = read(root/'provenance.json'),read(root/'status.json')
@@ -77,6 +87,16 @@ def stage(live, raw, repo, out, phase='successor'):
                     measurement_url=url,round=2,report_file=report_file,report_sha256=record['sha256'],
                     complete=True,selection='Chronologically final candidate round.',
                     rows=list(cases.values()),**record_provenance))
+                continue
+            if task['methods'] == ['BuilderFull','BuilderLatestOnly']:
+                assert set(cases)=={(p,n,m) for p in pairs for n in (1000,10000)
+                                   for m in task['methods']}
+                # Source comparisons qualify the control, but cannot establish
+                # fresh builder/native comparisons without native measurements.
+                builder_control_receipts.append(dict(fixture=fixture,source_sha=source,run_id=host['run_id'],
+                    measurement_url=url,round=2,report_file=report_file,report_sha256=record['sha256'],
+                    complete=True,selection='Chronologically final candidate round.',
+                    comparison_kind='source-control-only',rows=list(cases.values()),**record_provenance))
                 continue
             assert set(cases)=={(p,n,m) for p in pairs for n in (1000,10000)
                                 for m in ('BuilderFull','BuilderLatestOnly','NativeSingle','NativeParallel')}
@@ -124,6 +144,12 @@ def stage(live, raw, repo, out, phase='successor'):
         for receipt in previous:
             receipt['rows']=[row for row in receipt['rows'] if row['pair'] not in snapshot_pairs]
         data['evidence']['snapshotMeasurements']=[r for r in previous if r['rows']]+snapshot_receipts
+    if builder_control_receipts:
+        control_pairs={row['pair'] for receipt in builder_control_receipts for row in receipt['rows']}
+        previous=data['evidence'].get('builderControlMeasurements',[])
+        for receipt in previous:
+            receipt['rows']=[row for row in receipt['rows'] if row['pair'] not in control_pairs]
+        data['evidence']['builderControlMeasurements']=[r for r in previous if r['rows']]+builder_control_receipts
     replace('dataset',data)
     builder_pairs={c['pair'] for r in builder_receipts for c in r['comparisons']}
     replaced=0
@@ -158,8 +184,10 @@ def stage(live, raw, repo, out, phase='successor'):
     disclosure=' Each row identifies its measured source and run. Results combine earlier measurements and GitHub-hosted Windows measurements; absolute timings are compared only within the same runner.'
     if read(PLAN)['measurement_policy'].get('fixed_invocation_warmups') == 1000:
         disclosure += ' Latest fixed-invocation batch timings use 1,000 unmeasured warmups; builder timings retain ten warmups. Both use ten measured iterations.'
-    if read(PLAN)['measurement_policy'].get('fixed_invocation_pair_warmups'):
-        disclosure += ' Harami batch timings alone use the approved 20,000 unmeasured warmups for both libraries at both bar counts; its builder policy is unchanged.'
+    disclosure += pair_warmup_disclosure(read(PLAN))
+    if builder_control_receipts:
+        names=sorted({row['pair'] for receipt in builder_control_receipts for row in receipt['rows']})
+        disclosure += ' Fresh builder-only source controls for '+', '.join(names)+' contain no native timings; their existing builder/native comparisons retain their original source and run provenance.'
     document=re.sub(r'Measured builds: [^<]*?\.',lambda _:caption,document)
     document=re.sub(r'(<section id="explorer"[^>]*>.*?<p class="sub">).*?(</p>)',lambda m:m[1]+caption+disclosure+m[2],document,count=1,flags=re.S)
     oldwins=sum(r['competitor_over_ooples']>1 for r in before['rows'] if r['bars']==10000)
@@ -213,6 +241,7 @@ def stage(live, raw, repo, out, phase='successor'):
     write(out/'staged.json',dict(before_sha256=hashlib.sha256(original).hexdigest(),candidate_sha256=digest(out/'candidate.html'),
         changed_baseline_rows=2*len(pairs),unchanged_baseline_rows=unchanged,changed_builder_slots=4*len(builder_pairs),
         added_builder_slots=added,replaced_builder_slots=replaced,builder_rows=rows,verdicts=counts,run_id=run,
+        builder_control_receipts=builder_control_receipts,changed_builder_control_rows=sum(len(r['rows']) for r in builder_control_receipts),
         snapshot_receipts=snapshot_receipts,changed_snapshot_rows=len({(row['pair'],row['bars'])
             for receipt in snapshot_receipts for row in receipt['rows'] if row['method']=='Snapshot'})))
     return out/'candidate.html'

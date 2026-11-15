@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 from test_hosted_timing import make_evidence
 from hosted_timing.pipeline import PLAN, REPO, read, write, phase_shards, phase_tasks
-from hosted_timing.report import stage
+from hosted_timing.report import stage, pair_warmup_disclosure
 from hosted_timing.archive import archive
 
 
@@ -47,7 +47,19 @@ class HostedReportTests(unittest.TestCase):
     def test_single_native_snapshot_preserves_complete_rows_without_parallel_invention(self):
         self.check_report('targeted',snapshot='single')
 
-    def check_report(self,phase,snapshot=False):
+    def test_builder_only_control_retains_native_comparisons_and_archives_fresh_source_rows(self):
+        self.check_report('targeted',builder_only=True)
+
+    def test_pair_warmup_disclosure_names_actual_pairs(self):
+        plan=read(REPO/'benchmarks/plans/hosted-abandoned-inventory-repair-20261114.json')
+        disclosure=pair_warmup_disclosure(plan)
+        for pair in plan['measurement_policy']['fixed_invocation_pair_warmups']:
+            self.assertIn(pair,disclosure)
+        self.assertIn('20,000 unmeasured warmups',disclosure)
+        self.assertNotIn('Harami',disclosure)
+        self.assertEqual(pair_warmup_disclosure(dict(measurement_policy={})), '')
+
+    def check_report(self,phase,snapshot=False,builder_only=False):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp); raw=root/'raw'; raw.mkdir()
             selected=PLAN
@@ -66,6 +78,14 @@ class HostedReportTests(unittest.TestCase):
                                 cases=10 if snapshot=='single' else 12,decisions=2)]))
                     plan['targeted_reference']['scope']='snapshot-test'
                     self.enterContext(patch.dict('hosted_timing.targeted.SCOPES',{'snapshot-test':dict(totals=(20,4) if snapshot=='single' else (44,8))}))
+                if builder_only:
+                    for shard in plan['targeted_shards']:
+                        for task in shard['tasks']:
+                            if 'BuilderFull' in task['methods']:
+                                task['methods']=['BuilderFull','BuilderLatestOnly']
+                    plan['targeted_reference']['scope']='builder-control-test'
+                    # Ten batch pairs: 100 batch + 160 builder-only cases.
+                    self.enterContext(patch.dict('hosted_timing.targeted.SCOPES',{'builder-control-test':dict(totals=(260,60))}))
                 write(selected,plan)
                 for module in ('hosted_timing.pipeline','hosted_timing.verify','hosted_timing.report','test_hosted_timing'):
                     self.enterContext(patch(module+'.PLAN',selected))
@@ -79,7 +99,7 @@ class HostedReportTests(unittest.TestCase):
             # Explicit sentinel indexing avoids relying on lexical order.
             original=[copy.deepcopy(r) for r in data['rows'] if r['pair']=='unchanged']
             stats=dict(mean_ns=100,lower_ns=99,upper_ns=101,samples=10,allocated_bytes=8)
-            untouched=dict(pair='unchanged-builder',bars=1000,mode='BuilderFull',ooples=stats,
+            untouched=dict(pair=sorted(pairs)[0] if builder_only else 'unchanged-builder',bars=1000,mode='BuilderFull',ooples=stats,
                 native=dict(NativeSingle=stats,NativeParallel=stats),verdict='inconclusive')
             builder=dict(full_comparisons=1,receipts=[dict(run_id='old-run',source_sha='old',comparisons=[untouched])],
                          status=dict(completed=[]))
@@ -119,6 +139,17 @@ const detail=`${esc(r.raw.Ooples.host.ProcessorName)}`;
             receipts=embedded('current-competitor-data')['receipts']
             self.assertEqual(receipts[0]['comparisons'],[untouched])
             self.assertTrue(all(c['measurement_machine']=='runner' for r in receipts[1:] for c in r['comparisons']))
+            if builder_only:
+                self.assertEqual(receipts,[dict(run_id='old-run',source_sha='old',comparisons=[untouched])])
+                controls=after['evidence']['builderControlMeasurements']
+                self.assertEqual(sum(len(r['rows']) for r in controls),40)
+                self.assertTrue(all(r['complete'] and r['comparison_kind']=='source-control-only' for r in controls))
+                self.assertEqual({row['method'] for r in controls for row in r['rows']},{'BuilderFull','BuilderLatestOnly'})
+                staged=read(root/'staged/staged.json')
+                self.assertEqual(staged['changed_builder_slots'],0)
+                self.assertEqual(staged['changed_builder_control_rows'],40)
+                self.assertEqual(staged['builder_control_receipts'],controls)
+                self.assertIn('contain no native timings',result)
             if snapshot:
                 self.assertEqual(receipts,[dict(run_id='old-run',source_sha='old',comparisons=[untouched])])
                 self.assertEqual(embedded('current-competitor-data')['status'],dict(completed=[]))
@@ -132,7 +163,7 @@ const detail=`${esc(r.raw.Ooples.host.ProcessorName)}`;
                     self.assertEqual({(row['bars'],row['method']) for row in receipt['rows']},
                         {(n,m) for n in (1000,10000) for m in snapshot_methods})
                 self.assertEqual(read(root/'staged/staged.json')['changed_snapshot_rows'],2*len(snapshot_pairs))
-            else:
+            elif not builder_only:
                 self.assertGreater(len({c['measurement_shard'] for r in receipts[1:] for c in r['comparisons']}),1)
             self.assertIn('D.rows.flatMap',result)
             self.assertIn('absolute timings are compared only within the same runner',result)
