@@ -67,6 +67,12 @@ public sealed class WilderMovingAverage
     private sealed class State(int period, bool seedWithAverage) : IIndicatorState
     {
         private readonly ExactMeanAccumulator.ProductCoefficient _previousWeight = new(period - 1);
+#if !NETFRAMEWORK
+        // EMA(2N-1) is exactly ((N-1)*previous+input)/N before its one rounding.
+        // Bound N before mapping it; unsupported periods retain the original path.
+        private readonly TsiWordEmaRecurrence _wordRecurrence = period is >= 1 and <= 1024
+            ? new(2 * period - 1) : default;
+#endif
         private int _seedCount;
         private ExactMeanAccumulator _seedSum;
         private double _previous;
@@ -91,6 +97,10 @@ public sealed class WilderMovingAverage
             }
             else if (!_started)
                 _previous = bar.Close;
+#if !NETFRAMEWORK
+            else if (_wordRecurrence.TryAdvance(_previous, bar.Close, out var rounded))
+                _previous = rounded;
+#endif
             else
             {
                 var numerator = new ExactMeanAccumulator();
