@@ -46,7 +46,27 @@ def archive(raw, prepared, repo, phase):
         refresh=implementation(read(PLAN))
         from .pipeline import BENCH,TESTS
         blobs['harness-source.patch']=subprocess.check_output(['git','diff','--binary',refresh.PUBLISHED,refresh.CANONICAL,'--',BENCH,TESTS],cwd=repo)
-        assert blobs['harness-source.patch']
+        if read(PLAN).get('current_baseline_ten_refresh'):
+            assert not blobs['harness-source.patch'], 'Current baseline refresh cannot change the harness'
+            plan = read(PLAN)
+            original = prepared/'origin-provenance.json'
+            assert digest(original) == plan['baseline_inputs']['provenance_sha256']
+            blobs['prepared/origin-provenance.json'] = original.read_bytes()
+            base_plan = REPO/plan['baseline_inputs']['plan']
+            assert digest(base_plan) == plan['baseline_inputs']['plan_sha256']
+            blobs['original-plan.json'] = base_plan.read_bytes()
+            for key, approval in [('scope-approval.json', plan['refresh_approval']),
+                    ('original-scope-approval.json', read(base_plan)['refresh_approval'])]:
+                path = REPO/approval['path']
+                assert digest(path) == approval['sha256']
+                blobs[key] = path.read_bytes()
+            preflight = (prepared/'consumer-preflight').resolve()
+            for relative, sha in plan['consumer_preflight']['files'].items():
+                path = (preflight/relative).resolve()
+                assert path.is_relative_to(preflight) and digest(path) == sha
+                blobs['prepared/consumer-preflight/'+relative] = path.read_bytes()
+        else:
+            assert blobs['harness-source.patch']
     manifest = {}
     for relative, content in sorted(blobs.items()):
         target = destination/(relative+'.gz')
@@ -64,7 +84,8 @@ def archive(raw, prepared, repo, phase):
         **({'baseline_refresh_verified':True,'report_refresh_only':True,'production_qualification':False,'production_optimization':False,
             'confirmed_native_wins':summary['native_review']['confirmed_native_wins']} if phase=='baseline-refresh' else {}),
         **({'coverage_complete': True, 'source_qualification_claimed': False} if phase == 'coverage' else {}),
-        note=('Hosted CPU harness baseline refresh with fresh canonical correctness/GPU100 and authenticated frozen-variant evidence. Identical-binary A/A outcomes describe timing variability; no production qualification or optimization is claimed.' if phase == 'baseline-refresh' else
+        note=('Hosted CPU current-baseline A/A refresh. Original authenticated canonical/frozen GPU receipts are reused; fresh consumer validation passed 303 canonical cases and 20 frozen/canonical alignment cases, without new compilation or GPU execution. A/A admission is not equivalence; no production qualification or optimization is claimed.' if phase == 'baseline-refresh' and read(PLAN).get('current_baseline_ten_refresh') else
+             'Hosted CPU harness baseline refresh with fresh canonical correctness/GPU100 and authenticated frozen-variant evidence. Identical-binary A/A outcomes describe timing variability; no production qualification or optimization is claimed.' if phase == 'baseline-refresh' else
              'Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity.' +
              (' Unchanged qualified production; no source qualification claimed.' if phase == 'coverage' else
               ' WMA/TRIMA results do not replace default SMA rows.'))))
