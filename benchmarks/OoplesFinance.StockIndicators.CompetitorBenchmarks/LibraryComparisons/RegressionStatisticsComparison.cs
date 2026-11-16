@@ -68,16 +68,7 @@ internal static class RegressionStatisticsComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = Enumerable
-            .Range(0, 5)
-            .Select(slot =>
-            {
-                var output = run[indicator.Outputs[slot]].ToArray();
-                var present = run[indicator.Outputs[slot + 5]].ToArray();
-                return output.Select((v, i) => present[i] > 0 ? (double?)v : null).ToArray();
-            })
-            .ToArray();
-        return Series(values);
+        return PublishOwned(run, indicator);
     }
 
     private static ComparisonSeries Skender(CompetitorData data, int period)
@@ -97,12 +88,16 @@ internal static class RegressionStatisticsComparison
         var indicator = new RegressionWithFinalLine(period);
         using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
-        return Series(Enumerable.Range(0, 5).Select(slot =>
-        {
-            var output = run[indicator.Outputs[slot]].ToArray();
-            var presence = run[indicator.Outputs[slot + 5]].ToArray();
-            return output.Select((value, i) => presence[i] > 0 ? (double?)value : null).ToArray();
-        }).ToArray());
+        return PublishOwned(run, indicator);
+    }
+
+    private static ComparisonSeries PublishOwned(IIndicatorRun run, IIndicator indicator)
+    {
+        var outputs = new Dictionary<string, ComparisonOutput>(Names.Length);
+        for (int slot = 0; slot < Names.Length; slot++)
+            outputs.Add(Names[slot], NamedComparisonPublisher.Column(
+                run[indicator.Outputs[slot]], run[indicator.Outputs[slot + Names.Length]]));
+        return new(outputs);
     }
 
     // Independent centered batch regression. Decimal moments keep fixture subtraction,
