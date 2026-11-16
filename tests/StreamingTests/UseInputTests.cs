@@ -128,4 +128,47 @@ public sealed class UseInputTests : GlobalTestData
         input.Should().Equal(tickers.Select(t => t.Close / 3));
         input.Should().Contain(v => v != Math.Round(v, 2), "the control: a third of a price is not a whole cent");
     }
+
+    [Fact]
+    public void UseInputAndWithBaseInputDoNotMaterializeZeroCopyColumnViews()
+    {
+        var tickers = Tickers();
+        var opens = tickers.Select(t => t.Open).ToArray();
+        var highs = tickers.Select(t => t.High).ToArray();
+        var lows = tickers.Select(t => t.Low).ToArray();
+        var closes = tickers.Select(t => t.Close).ToArray();
+        var volumes = tickers.Select(t => t.Volume).ToArray();
+        var dates = tickers.Select(t => t.Date).ToArray();
+
+        var adoptedForUse = StockData.FromColumns(opens, highs, lows, closes, volumes, dates);
+        adoptedForUse.UseInput(InputSeries.MedianPrice);
+        adoptedForUse.HasAnyMaterializedColumn.Should().BeFalse(
+            "UseInput reads OpenSpan/HighSpan/LowSpan/CloseSpan/VolumeSpan/DateSpan without copying the 6 columns into List<T>");
+
+        var adoptedBase = StockData.FromColumns(opens, highs, lows, closes, volumes, dates)
+            .WithBaseInput(InputSeries.TypicalPrice);
+        adoptedBase.HasAnyMaterializedColumn.Should().BeFalse(
+            "WithBaseInput derives a persistent base input view without materializing any of the 6 OHLCV+Date lists");
+        using (var context = new OoplesFinance.StockIndicators.Builder.Compute.ComputeContext())
+        {
+            using var fastBuffer = OoplesFinance.StockIndicators.Builder.Compute.IndicatorCompute.ComputeSmaFast(adoptedBase, context, 20);
+            adoptedBase.HasAnyMaterializedColumn.Should().BeFalse(
+                "Span-based IndicatorCompute over WithBaseInput never materializes the 6 OHLCV+Date lists");
+        }
+
+        var expectedSma = new StockData(tickers).UseInput(InputSeries.TypicalPrice)
+            .CalculateSimpleMovingAverage(20).CustomValuesList.ToArray();
+        var expectedRsi = new StockData(tickers).UseInput(InputSeries.TypicalPrice)
+            .CalculateRelativeStrengthIndex().CustomValuesList.ToArray();
+        var closeRsi = new StockData(tickers).CalculateRelativeStrengthIndex().CustomValuesList.ToArray();
+
+        adoptedBase.CalculateSimpleMovingAverage(20).CustomValuesList.Should().Equal(expectedSma);
+
+        // Resetting transient outputs/signals between harvested grid cells must keep TypicalPrice as the base input,
+        // never silently reverting to ClosePrices.
+        adoptedBase.ResetOutputs();
+        var actualRsi = adoptedBase.CalculateRelativeStrengthIndex().CustomValuesList.ToArray();
+        actualRsi.Should().Equal(expectedRsi);
+        actualRsi.Should().NotEqual(closeRsi);
+    }
 }

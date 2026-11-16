@@ -8,7 +8,7 @@ namespace OoplesFinance.StockIndicators.Compatibility;
 
 internal static class SpanCompat
 {
-    internal static ReadOnlySpan<double> AsReadOnlySpan(List<double> list)
+    internal static ReadOnlySpan<T> AsReadOnlySpan<T>(List<T> list)
     {
 #if NET8_0_OR_GREATER
         return CollectionsMarshal.AsSpan(list);
