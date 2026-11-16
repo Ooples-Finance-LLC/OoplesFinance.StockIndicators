@@ -59,19 +59,13 @@ internal static class AwesomeComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return Series(
-            Enumerable
-                .Range(0, 2)
-                .Select(slot =>
-                {
-                    var flags = run[indicator.Outputs[slot + 2]].ToArray();
-                    return run[indicator.Outputs[slot]]
-                        .ToArray()
-                        .Select((v, i) => flags[i] > 0 ? (double?)v : null)
-                        .ToArray();
-                })
-                .ToArray()
-        );
+        var outputs = new Dictionary<string, ComparisonOutput>(Names.Length);
+        for (int slot = 0; slot < Names.Length; slot++)
+        {
+            var flags = run[indicator.Outputs[slot + Names.Length]];
+            outputs.Add(Names[slot], NamedComparisonPublisher.Column(run[indicator.Outputs[slot]], flags));
+        }
+        return new(outputs);
     }
 
     private static ComparisonSeries Reference(CompetitorData data, int fast, int slow, bool native)
