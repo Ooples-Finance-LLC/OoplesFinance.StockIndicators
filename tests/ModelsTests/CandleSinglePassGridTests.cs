@@ -86,7 +86,7 @@ public sealed class CandleSinglePassGridTests
             {
                 var bars = Data(count, kind);
                 if (wide)
-                    foreach (int i in new[] { 0, 255, 256, 511, 1023, count - 1 })
+                    foreach (int i in new[] { 0, 255, 256, 511, 1023, count - 1 }.Where(index => index >= 0 && index < count))
                         bars[i] = new(bars[i].Time, double.MaxValue, double.MaxValue, -double.MaxValue, double.Epsilon, i);
                 var owner = Owner(kind);
                 var expected = Original(owner, bars);
