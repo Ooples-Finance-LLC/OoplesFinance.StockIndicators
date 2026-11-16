@@ -202,6 +202,7 @@ const detail=`${esc(r.raw.Ooples.host.ProcessorName)}`;
                     repeated=stage(refreshed,raw,repo,root/'repeated',phase=phase)
                     self.assertEqual(repeated.read_text(encoding='utf-8').count("r.measurement_machine ? esc"),1)
             result=candidate.read_text(encoding='utf-8')
+            self.assertNotIn(b'\r\r\n',candidate.read_bytes())
             def embedded(key): return json.loads(re.search(r'<script[^>]*id="'+key+r'"[^>]*>(.*?)</script>',result,re.S)[1])
             after=embedded('dataset')
             self.assertEqual([r for r in after['rows'] if r['pair']=='unchanged'],original)

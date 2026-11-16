@@ -284,7 +284,7 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
     out.mkdir(parents=True,exist_ok=True)
     assert not (out/'before.html').exists() or (out/'before.html').read_bytes()==original
     (out/'before.html').write_bytes(original)
-    (out/'candidate.html').write_text(document,encoding='utf-8')
+    (out/'candidate.html').write_bytes(document.encode('utf-8'))
     from .pipeline import write
     write(out/'measurement.json',dict(source_sha=source,run_id=run,measurement_url=url))
     write(out/'staged.json',dict(before_sha256=hashlib.sha256(original).hexdigest(),candidate_sha256=digest(out/'candidate.html'),
