@@ -1,0 +1,142 @@
+{
+  "approved": true,
+  "diagnostic_only": true,
+  "qualification": false,
+  "publication": false,
+  "source": "e5630baa575cbc866dc4cfe39d25c0bef3c50c31",
+  "baseline": "ab61b7eba91debdf481130c91a14e33d1a3e5888",
+  "pairs": [
+    "TaLib.Candles.ThreeStarsInSouth",
+    "TaLib.Candles.AdvanceBlock",
+    "TaLib.Functions.Ema",
+    "TaLib.Functions.T3"
+  ],
+  "cases": 40,
+  "decisions": 8,
+  "max_parallel": 1,
+  "initial_prototype_pairs": [
+    "TaLib.Candles.ThreeStarsInSouth"
+  ],
+  "authorization": "User: yes I already approved so continue",
+  "original_verification_scope": {
+    "approved": true,
+    "proposal_only": false,
+    "scope": "Separate bounded ThreeStarsInSouth private batch implementation and conditional diagnostic; Stalled remains excluded",
+    "baseline_source": "ab61b7eba91debdf481130c91a14e33d1a3e5888",
+    "model_evidence": {
+      "summary": "C:\\Users\\cheat\\source\\stock-indicators-operations\\exhaustion-screening-20261116\\screening-summary.json",
+      "sha256": "29dfb047d2ce16a6a46854489ee7177072bab4ae2e773f8eab04e3a7ebecbc94",
+      "cases": 38,
+      "comparisons": 398426,
+      "ten_thousand_bar_64_block_state_updates": 684,
+      "limitation": "Exact output and work-count model only; no production route, GPU or latency evidence."
+    },
+    "implementation": {
+      "files": [
+        {
+          "path": "src/Indicators/ValuesBarExecution.ThreeStarsBlocks.cs",
+          "owner": "assigned implementation agent",
+          "purpose": "Private 64-bar capture/necessary-predicate/original-state-replay helper"
+        },
+        {
+          "path": "tests/ModelsTests/ThreeStarsBlockExecutionTests.cs",
+          "owner": "same implementation agent",
+          "purpose": "Production-route regression coverage"
+        },
+        {
+          "path": "src/Indicators/ValuesBarExecution.BoundedWindows.cs",
+          "owner": "parent only",
+          "purpose": "Narrow ThreeStars-only guarded hook; preserve other dispatch paths"
+        }
+      ],
+      "eligibility": "Only ThreeStarsInSouthCandle, source length>=8192, all three periods<=64; region/stack bounds must be explicit and original route retained elsewhere.",
+      "algorithm": [
+        "Reuse existing worker capture, tail ownership and validation boundary; 64-bar stack blocks with maxperiod+2 preceding bars (at most66).",
+        "Reject a block only when every eligible row fails existing raw necessary predicates: three strict black candles; a.Close<b.Open<=a.High; a.Low<=b.Low<a.Close; b.Low<c.Low and c.High<b.High. No rounded body/length/threshold substitute.",
+        "Write canonical positive zero for proven-zero blocks. Validate every input field and retain all requested history even when thresholds/state updates are skipped.",
+        "Before the next possible block, reset/replay the unchanged original ExhaustionCandleState from the complete retained halo; preserve original global warmup.",
+        "After four consecutive possible blocks, continue the current original state through the remainder without further block scanning. Reseed after every skipped region."
+      ],
+      "unchanged": [
+        "ExhaustionWindow and ExhaustionCandleState arithmetic/queues/threshold strictness",
+        "Stalled and AdvanceBlock algorithm routes",
+        "Streaming behavior and public APIs",
+        "Dependencies, benchmark harness, measurement policy"
+      ],
+      "review": "Parent reviews design and entire completed diff adversarially before grouped verification; no per-edit builds."
+    },
+    "production_verification_required": [
+      "Independent-reference positive and negative signals, strict/inclusive raw boundaries and exact threshold ties; unequal periods and periods1/2/64, original-route65 fallback.",
+      "Block/worker/halo seams and counts8191/8192/8193/10000, worker caps1/2/8, forced sparse-to-dense and dense-to-sparse data; verify dirty replay and four-block escape on actual production route.",
+      "Full and LatestOnly owned outputs/history, latest bar, single-read source/tail capture, input mutation and result disposal retention.",
+      "Nonfinite price and volume in proven-zero blocks, seeds and tails must preserve original exception type/message; cancellation before and during capture/scan/replay must propagate.",
+      "Finite malformed OHLC, signedzero history/canonical signalzero, subnormals/extreme exponents and exact-state fallback semantics.",
+      "Fresh focused correctness and actual source-bound GPU100; source-bound actual ThreeStars route/worker execution proof. Model did not verify these production properties."
+    ],
+    "conditional_roi": {
+      "diagnostic_only": true,
+      "cases": 40,
+      "decisions": 8,
+      "pairs": [
+        "TaLib.Candles.ThreeStarsInSouth",
+        "TaLib.Candles.AdvanceBlock",
+        "TaLib.Functions.Ema",
+        "TaLib.Functions.T3"
+      ],
+      "fixture": "LibraryPairBenchmarks",
+      "sizes": [
+        1000,
+        10000
+      ],
+      "methods": [
+        "Ooples",
+        "Competitor"
+      ],
+      "max_measurement_runners": 1,
+      "policy": {
+        "source_order": [
+          "old",
+          "new",
+          "new",
+          "old"
+        ],
+        "unmeasured_batch_warmups": 1000,
+        "measured_iterations": 10,
+        "runtime": "default unchanged",
+        "quiet_cpu_samples": 12,
+        "max_cpu_percent": 15,
+        "concurrent_builds_tests_on_measurement_host": false
+      },
+      "dispatch_gate": "Only after parent review, all fresh focused correctness/GPU100 pass and source-bound production route/worker proof; freeze source, harness and complete approved plan before dispatch.",
+      "native_crossover_gate": "Do not propose full qualification unless fresh measured baseline10k South does not already win and both candidate rounds beat their fresh native controls with separated confidence intervals and at least10percent mean margin in each round. Historical report gaps or baseline wins do not count as new closures.",
+      "regression_gate": "Reject the candidate if any of the eight source comparisons is slower under unchanged separated-interval gates; preserve inconclusive outcomes and all sentinel results. Never remove a control or change policy to obtain acceptance.",
+      "result_limit": "Diagnostic cannot qualify, publish, import source or update the report; any later full qualification/publication requires a separate scope decision."
+    },
+    "effort": "Implementation/design cap60-90minutes; only if correct and promising, one focused CI/GPU cycle and40case diagnostic, roughly1.5-2.5hours additional elapsed verification.",
+    "excluded": [
+      "No Stalled work under this proposal",
+      "No AdvanceBlock redesign",
+      "No full qualification/publication/merge/release",
+      "No production implementation or CI dispatched while this is only a proposal"
+    ],
+    "approval": "User: yes I already approved so continue"
+  },
+  "actual_correctness": {
+    "unit": 53,
+    "comparator": 148,
+    "actual_gpu": 100
+  },
+  "route_proof": {
+    "path": "benchmarks/plans/evidence/three-stars-blocks-route-proof-20261116.json",
+    "sha256": "d3a550894a8454d380d45d12392d81f29710a768f8692c60e71b2bf0225acfcc",
+    "source": "e5630baa575cbc866dc4cfe39d25c0bef3c50c31",
+    "ci_run": "43929457736",
+    "production_sha256": "7a48f241314f8b73a7df5373e7729e8af8ec449fe9da28a0f9ff424742388f62"
+  },
+  "launch_gate": "Do not propose full qualification unless fresh measured baseline10k South does not already win and both candidate rounds beat their fresh native controls with separated confidence intervals and at least10percent mean margin in each round. Historical report gaps or baseline wins do not count as new closures.",
+  "regression_gate": "Reject the candidate if any of the eight source comparisons is slower under unchanged separated-interval gates; preserve inconclusive outcomes and all sentinel results. Never remove a control or change policy to obtain acceptance.",
+  "route_worker_proof_required_before_dispatch": true,
+  "history_policy_change": false,
+  "warmup_policy_change": false,
+  "runtime_policy_change": false
+}

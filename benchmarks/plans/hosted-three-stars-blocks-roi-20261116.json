@@ -1,0 +1,163 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "sources": {
+    "published": "ab61b7eba91debdf481130c91a14e33d1a3e5888",
+    "old": "ab61b7eba91debdf481130c91a14e33d1a3e5888",
+    "successor": "e5630baa575cbc866dc4cfe39d25c0bef3c50c31",
+    "variants": "9a45372530e49718b01b6524f9a0db993514e1e8"
+  },
+  "gpu_sources": {
+    "old": "5be1a81d02ad01393f3fa8ede764e914252d0e96",
+    "successor": "e5630baa575cbc866dc4cfe39d25c0bef3c50c31",
+    "variants": "9a45372530e49718b01b6524f9a0db993514e1e8"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "OwnedHistoryBatchTests"
+    ],
+    "successor": [
+      "ThreeStarsBlockExecutionTests",
+      "OwnedHistoryBatchTests"
+    ],
+    "variants": [
+      "OwnedHistoryBatchTests"
+    ]
+  },
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.150.0"
+  },
+  "diagnostic_only": true,
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "cases": 40,
+  "decisions": 8,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 60
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.ThreeStarsInSouth",
+              "pair": "TaLib.Candles.ThreeStarsInSouth"
+            },
+            {
+              "raw": "TaLib.Candles.AdvanceBlock",
+              "pair": "TaLib.Candles.AdvanceBlock"
+            },
+            {
+              "raw": "TaLib.Functions.Ema",
+              "pair": "TaLib.Functions.Ema"
+            },
+            {
+              "raw": "TaLib.Functions.T3",
+              "pair": "TaLib.Functions.T3"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 40,
+          "decisions": 8
+        }
+      ],
+      "cases": 40,
+      "decisions": 8
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.ThreeStarsInSouth",
+              "pair": "TaLib.Candles.ThreeStarsInSouth"
+            },
+            {
+              "raw": "TaLib.Candles.AdvanceBlock",
+              "pair": "TaLib.Candles.AdvanceBlock"
+            },
+            {
+              "raw": "TaLib.Functions.Ema",
+              "pair": "TaLib.Functions.Ema"
+            },
+            {
+              "raw": "TaLib.Functions.T3",
+              "pair": "TaLib.Functions.T3"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 40,
+          "decisions": 8
+        }
+      ],
+      "cases": 40,
+      "decisions": 8
+    }
+  ],
+  "roi_approval": {
+    "path": "benchmarks/plans/evidence/three-stars-blocks-roi-scope-20261116.json",
+    "sha256": "a4c19a7e3b842ef837ac056ed0e4ed901cd8e61e5aa336bce3e25eafac3ccc93"
+  },
+  "baseline_inputs": {
+    "run_id": "43880487485",
+    "plan": "benchmarks/plans/hosted-named-projection-refresh-20261116.json",
+    "plan_sha256": "03e891d5220a12f0983a2f8d8d1b0de2cdc4f751cea0a07625a91dc6e21661b8",
+    "provenance_sha256": "92977e9786050146dbe97748c8a28d59e8eb47be5f4b5f85ae064ec4fcacef3a",
+    "label": "successor"
+  },
+  "candidate": {
+    "ci_run": "43929457736",
+    "producer": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "e5630baa575cbc866dc4cfe39d25c0bef3c50c31",
+    "evidence_source": "a6457ee71de0c860840d2b124fc88435819a8455",
+    "manifest_sha256": "ab898ca6854776b3209635f96496aaeca782afed78f700a12fd529cf70d35939",
+    "gpu_receipt_sha256": "fe7fa1f6b34948ecdcce69ce5f6d3df27f583bbd3336f63de551292f5b79ed8a",
+    "unit_classes": [
+      "ThreeStarsBlockExecutionTests",
+      "OwnedHistoryBatchTests"
+    ],
+    "parity_classes": [
+      "ExhaustionTests",
+      "ExponentialAverageComparisonTests",
+      "TillsonComparisonTests"
+    ]
+  },
+  "diagnostic_kind": "three-stars-blocks-native-pilot",
+  "route_proof": {
+    "path": "benchmarks/plans/evidence/three-stars-blocks-route-proof-20261116.json",
+    "sha256": "d3a550894a8454d380d45d12392d81f29710a768f8692c60e71b2bf0225acfcc",
+    "source": "e5630baa575cbc866dc4cfe39d25c0bef3c50c31",
+    "ci_run": "43929457736",
+    "production_sha256": "7a48f241314f8b73a7df5373e7729e8af8ec449fe9da28a0f9ff424742388f62"
+  }
+}

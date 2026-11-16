@@ -1,0 +1,44 @@
+{
+  "source": "e5630baa575cbc866dc4cfe39d25c0bef3c50c31",
+  "ci_run": "43929457736",
+  "production_sha256": "7a48f241314f8b73a7df5373e7729e8af8ec449fe9da28a0f9ff424742388f62",
+  "probe_sha256": "e4b9ee632ae905454c5f92f2f2fad8807f32de0090681e77fa7760a6fe2d052a",
+  "profiles": [
+    {
+      "pair": "TaLib.Candles.ThreeStarsInSouth",
+      "probe": {
+        "diagnostic_only": true,
+        "qualification": false,
+        "performance_claim": false,
+        "process_id": 64376,
+        "profile_start_utc": "2026-11-16T18:51:05.0068219Z",
+        "profile_end_utc": "2026-11-16T18:51:25.0073312Z",
+        "production_sha256": "7a48f241314f8b73a7df5373e7729e8af8ec449fe9da28a0f9ff424742388f62",
+        "pair": "TaLib.Candles.ThreeStarsInSouth",
+        "role": "Pair",
+        "bars": 10000,
+        "workers": 8,
+        "warmups": 1000,
+        "profile_seconds": 20,
+        "samples_ms": [],
+        "iterations": 36448
+      },
+      "route_frames": [
+        "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.ComputeThreeStarsBlocks(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[],class OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int32,int32,value class System.ReadOnlySpan`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.ReadOnlySpan`1<value class OoplesFinance.StockIndicators.Indicators.Bar>,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.ThreeStarsInSouthCandle)"
+      ],
+      "route_threads": [
+        "Thread (17196)",
+        "Thread (18360)",
+        "Thread (33264)",
+        "Thread (39704)",
+        "Thread (42244)",
+        "Thread (45904)",
+        "Thread (46668)",
+        "Thread (54628)"
+      ],
+      "trace_sha256": "dadc440e1cc6a02785fff906704d1e9f8c7015ca79092aecc2e352863a90e52f",
+      "speedscope_sha256": "d0281474d2c44163004eafcde20dcef4afce3b3d281204cb55fea515725ab056"
+    }
+  ],
+  "limitation": "Actual route/worker samples only, not acceptance-rate, CPU-percentage or latency evidence; benchmark qualification remains pending."
+}
