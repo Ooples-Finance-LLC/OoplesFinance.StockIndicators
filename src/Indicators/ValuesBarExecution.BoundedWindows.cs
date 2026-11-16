@@ -1361,6 +1361,9 @@ internal static partial class ValuesBarExecution
     {
         cancellation.ThrowIfCancellationRequested();
         int chunks = period <= 4096 ? Math.Min(WorkerCount(), source.Length / period) : 1;
+        if (typeof(T) == typeof(SequenceKernel) && MatchingLowGridEligible(indicator, source.Length))
+            chunks = Math.Min(chunks, Math.Max(1, source.Length / 512));
+
         bool lockTaken = false;
         Bar[][]? tails = null;
         try
@@ -1413,6 +1416,10 @@ internal static partial class ValuesBarExecution
         int start, int end, int period, ReadOnlySpan<Bar> seed, ReadOnlySpan<Bar> tail,
         CancellationToken cancellation, IIndicator indicator) where T : struct, IBoundedKernel<T>
     {
+        if (typeof(T) == typeof(SequenceKernel) && MatchingLowGridEligible(indicator, source.Length)
+            && end - start + seed.Length >= 512)
+            return ComputeMatchingLowGrid(source, output[0], owned, start, end, seed, tail, cancellation, (MatchingLowCandle)indicator);
+
         if (typeof(T) == typeof(StarReversalKernel) && indicator is AbandonedBabyCandle baby
             && baby.LongPeriod <= 64 && baby.ShortPeriod <= 64 && baby.DojiPeriod <= 64)
             return ComputeAbandonedBlocks(source, output[0], owned, start, end, period, seed, tail, cancellation, baby);
