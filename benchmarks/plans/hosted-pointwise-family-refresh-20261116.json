@@ -1,0 +1,1014 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "sources": {
+    "published": "ce02581b1f55400fd674b5496ee659fa0e8654fa",
+    "old": "2ea1fa379b0c7d05fdf881768b4b92908adcf9bc",
+    "successor": "2ea1fa379b0c7d05fdf881768b4b92908adcf9bc",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "gpu_sources": {
+    "old": "2ea1fa379b0c7d05fdf881768b4b92908adcf9bc",
+    "successor": "2ea1fa379b0c7d05fdf881768b4b92908adcf9bc",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "SharedPointwiseExecutionTests",
+      "SharedArithmeticExecutionTests"
+    ],
+    "successor": [
+      "SharedPointwiseExecutionTests",
+      "SharedArithmeticExecutionTests"
+    ],
+    "variants": [
+      "CompactMacdWordEmaTests",
+      "CompactClassicalWindowTests",
+      "ExactMeanUnitWeightTests"
+    ]
+  },
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.150.0"
+  },
+  "runtime_policy_overrides": {},
+  "pointwise_family_refresh": true,
+  "report_refresh_only": true,
+  "production_qualification": false,
+  "diagnostic_only": false,
+  "require_fixture_inventory": true,
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000,
+    "fixed_invocation_pair_warmups": {
+      "TaLib.Functions.Add": 20000,
+      "TaLib.Functions.Div": 20000,
+      "TaLib.Functions.Mult": 20000,
+      "TaLib.Functions.Sub": 20000
+    }
+  },
+  "arithmetic_warmup_approval": {
+    "approved": true,
+    "proposal": "benchmarks/plans/arithmetic-warmup-policy-proposal-20261112.json",
+    "sha256": "f37b0b9e2f22a3175202ec8fe8cb751913ba8665e5d6cc4a81df0843480baa46",
+    "diagnostic_run": "43230319639"
+  },
+  "cases": 190,
+  "decisions": 38,
+  "matrix": {
+    "shards": 19,
+    "max_parallel": 2,
+    "timeout_minutes_per_shard": 45
+  },
+  "affected_pairs": [
+    "TaLib.Functions.Add",
+    "TaLib.Functions.Sub",
+    "TaLib.Functions.Mult",
+    "TaLib.Functions.Div",
+    "TaLib.Functions.Ceil",
+    "TaLib.Functions.Floor",
+    "TaLib.Functions.Sqrt",
+    "TaLib.Functions.Sin",
+    "TaLib.Functions.Cos",
+    "TaLib.Functions.Tan",
+    "TaLib.Functions.Asin",
+    "TaLib.Functions.Acos",
+    "TaLib.Functions.Atan",
+    "TaLib.Functions.Ln",
+    "TaLib.Functions.Log10",
+    "TaLib.Functions.Exp",
+    "TaLib.Functions.Sinh",
+    "TaLib.Functions.Cosh",
+    "TaLib.Functions.Tanh"
+  ],
+  "refresh_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Add",
+              "pair": "TaLib.Functions.Add"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 1,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Sub",
+              "pair": "TaLib.Functions.Sub"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 2,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Mult",
+              "pair": "TaLib.Functions.Mult"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 3,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Div",
+              "pair": "TaLib.Functions.Div"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 4,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Ceil",
+              "pair": "TaLib.Functions.Ceil"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 5,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Floor",
+              "pair": "TaLib.Functions.Floor"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 6,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Sqrt",
+              "pair": "TaLib.Functions.Sqrt"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 7,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Sin",
+              "pair": "TaLib.Functions.Sin"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 8,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Cos",
+              "pair": "TaLib.Functions.Cos"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 9,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Tan",
+              "pair": "TaLib.Functions.Tan"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 10,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Asin",
+              "pair": "TaLib.Functions.Asin"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 11,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Acos",
+              "pair": "TaLib.Functions.Acos"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 12,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Atan",
+              "pair": "TaLib.Functions.Atan"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 13,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Ln",
+              "pair": "TaLib.Functions.Ln"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 14,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Log10",
+              "pair": "TaLib.Functions.Log10"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 15,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Exp",
+              "pair": "TaLib.Functions.Exp"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 16,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Sinh",
+              "pair": "TaLib.Functions.Sinh"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 17,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Cosh",
+              "pair": "TaLib.Functions.Cosh"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 18,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Tanh",
+              "pair": "TaLib.Functions.Tanh"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Add",
+              "pair": "TaLib.Functions.Add"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 1,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Sub",
+              "pair": "TaLib.Functions.Sub"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 2,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Mult",
+              "pair": "TaLib.Functions.Mult"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 3,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Div",
+              "pair": "TaLib.Functions.Div"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 4,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Ceil",
+              "pair": "TaLib.Functions.Ceil"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 5,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Floor",
+              "pair": "TaLib.Functions.Floor"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 6,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Sqrt",
+              "pair": "TaLib.Functions.Sqrt"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 7,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Sin",
+              "pair": "TaLib.Functions.Sin"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 8,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Cos",
+              "pair": "TaLib.Functions.Cos"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 9,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Tan",
+              "pair": "TaLib.Functions.Tan"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 10,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Asin",
+              "pair": "TaLib.Functions.Asin"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 11,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Acos",
+              "pair": "TaLib.Functions.Acos"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 12,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Atan",
+              "pair": "TaLib.Functions.Atan"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 13,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Ln",
+              "pair": "TaLib.Functions.Ln"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 14,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Log10",
+              "pair": "TaLib.Functions.Log10"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 15,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Exp",
+              "pair": "TaLib.Functions.Exp"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 16,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Sinh",
+              "pair": "TaLib.Functions.Sinh"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 17,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Cosh",
+              "pair": "TaLib.Functions.Cosh"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 18,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Tanh",
+              "pair": "TaLib.Functions.Tanh"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    }
+  ],
+  "refresh_approval": {
+    "path": "benchmarks/plans/evidence/pointwise-family-refresh-scope-20261116.json",
+    "sha256": "b0327e65bcf1b6591de2454893d59a26560372982525348962481ca0a3a1781f"
+  },
+  "frozen_harness_inputs": {
+    "plan": "benchmarks/plans/hosted-pointwise-projection-native-pilot-20261116.json",
+    "plan_sha256": "4811e70ccecf412e50cd644883e8ddac7334cd769bb6b04addc8e827d0ccf436",
+    "run_id": "43791556704",
+    "workflow_head": "2a3a90e14232f6c212e29ebc67c5650fcff78534",
+    "provenance_sha256": "026d56b6ede5f32f3a949053ac24c03a51dfd8a893fc60d66cad2d2426a1857f"
+  },
+  "candidate": {
+    "source": "2ea1fa379b0c7d05fdf881768b4b92908adcf9bc",
+    "ci_run": "43795309989",
+    "producer": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "unit_classes": [
+      "SharedPointwiseExecutionTests",
+      "SharedArithmeticExecutionTests"
+    ],
+    "parity_classes": [
+      "PointwiseComparisonPublisherTests",
+      "ElementaryMathComparisonTests",
+      "CircularComparisonTests",
+      "TranscendentalComparisonTests"
+    ],
+    "evidence_source": "eb8456bf985881871d138e72823b8f2021b65fcb",
+    "manifest_sha256": "60b964b8d3ee295817602101a1e3f795456fb01f5be4f36c36c03fec3a00400c",
+    "gpu_receipt_sha256": "88fc06f53183b6a05c5b6e28e926a0aae74234c28324b7df91bb25d6ce4edadb"
+  },
+  "source_correctness": {
+    "unit": 111,
+    "comparator": 73,
+    "actual_gpu": 100,
+    "production_sha256": "975b5f77568e440225567f6d2acc6e2b4e38e238b232bd1e9ae017513187147a",
+    "source_fingerprint": "8ef43639eb269f75b8f5bc5fd982e676aa2b0bd2badadf6894d51eccd06f3aaf"
+  },
+  "scope": "Full nineteen-pair pointwise harness baseline refresh. Identical canonical production and frozen repaired harness under both labels; no production optimization acceptance.",
+  "limits": [
+    "Complete190cases38A/A comparisons; no partial/pilot pooling or selected imports.",
+    "Existing arithmetic20k warmups and other1k policies retained at both report sizes for both arms.",
+    "Two measurement runners maximum; all four owned rounds and fresh native controls retained.",
+    "A/A faster/slower results are variability warnings, not source improvements/regressions.",
+    "Only complete verified baseline refresh can update report; no merge/release or dependency changes."
+  ]
+}

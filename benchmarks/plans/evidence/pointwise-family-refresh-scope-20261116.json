@@ -1,0 +1,15 @@
+{
+  "approved": true,
+  "approval": "User: yes I approve the scope so continue",
+  "report_refresh_only": true,
+  "production_qualification": false,
+  "cases": 190,
+  "comparisons": 38,
+  "max_parallel": 2,
+  "bars": [
+    1000,
+    10000
+  ],
+  "conditional_publication": "Verified harness/report batch to draftPR266; no merge/release",
+  "scope": "All nineteen pointwise pairs. Preserve existing arithmetic20k/other1k warmups, ten measured iterations, default runtime, CPU gates, Full history and output bits. New canonical111unit/73comparator/freshGPU100; no pilot pooling. Retain A/A variability and all1000bar losses."
+}

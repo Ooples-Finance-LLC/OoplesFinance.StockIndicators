@@ -72,6 +72,10 @@ def operation_timeout_for(plan, phase):
 
 
 def phase_shards(plan, phase):
+    if phase == 'baseline-refresh':
+        from .pointwise_family_refresh import validate_scope
+        validate_scope(plan)
+        return range(19)
     if phase == 'diagnostic':
         from .roi_scope_dispatch import validate_scope
         validate_scope(plan)
@@ -87,6 +91,9 @@ def phase_shards(plan, phase):
 
 
 def phase_tasks(plan, phase, shard):
+    if phase == 'baseline-refresh':
+        assert shard in phase_shards(plan, phase)
+        return copy.deepcopy(plan['refresh_shards'][shard]['tasks'])
     if phase == 'diagnostic':
         assert shard in phase_shards(plan, phase)
         return copy.deepcopy(plan['diagnostic_shards'][shard]['tasks'])
@@ -123,10 +130,10 @@ def methods_for(task, index):
 
 
 def phase_labels(phase):
-    assert phase in ('successor', 'variants', 'coverage', 'targeted', 'diagnostic')
+    assert phase in ('successor', 'variants', 'coverage', 'targeted', 'diagnostic', 'baseline-refresh')
     if phase == 'coverage':
         return ('successor', 'successor')
-    return ('old', 'successor') if phase in ('successor', 'targeted', 'diagnostic') else ('successor', 'variants')
+    return ('old', 'successor') if phase in ('successor', 'targeted', 'diagnostic', 'baseline-refresh') else ('successor', 'variants')
 
 
 def phase_sources(plan, phase):
@@ -157,7 +164,10 @@ def warmups_for(plan, fixture, task=None):
     assert count in (10, 1000)
     overrides = plan['measurement_policy'].get('fixed_invocation_pair_warmups')
     if overrides is not None:
-        if plan.get('star_warmup_approval'):
+        if plan.get('pointwise_family_refresh'):
+            from .pointwise_family_refresh import validate_scope
+            validate_scope(plan)
+        elif plan.get('star_warmup_approval'):
             from .star_warmup_policy import validate
             validate(plan)
         elif overrides == {'TaLib.Candles.Harami': 20000}:
@@ -195,6 +205,9 @@ def warmup_context(plan, fixture, task=None):
 def verify_inputs(folder):
     proof, plan = read(folder/'provenance.json'), read(PLAN)
     _verify_input_contents(folder, plan, proof, digest(PLAN))
+    if plan.get('pointwise_family_refresh'):
+        from .pointwise_family_refresh import verify_authentication
+        verify_authentication(folder,plan,proof)
     if plan.get('diagnostic_kind') == 'pointwise-projection-native-pilot':
         from .pointwise_projection_roi import verify_authentication
         verify_authentication(folder, plan, proof)
@@ -432,6 +445,10 @@ def measure(inputs, out, phase, shard, diagnostic=None):
         manifests[arm] = manifest(runtime)
     assert manifests['old'].keys() == manifests['new'].keys()
     expected_changes = [] if phase == 'coverage' else [DLL]
+    if phase == 'baseline-refresh':
+        from .pointwise_family_refresh import verify_runtime_identity
+        verify_runtime_identity(plan,manifests)
+        expected_changes = []
     if phase == 'diagnostic' and plan.get('diagnostic_kind') == 'pointwise-projection-native-pilot':
         from .pointwise_projection_roi import verify_runtime_identity
         verify_runtime_identity(plan, manifests)

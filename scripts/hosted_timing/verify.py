@@ -63,6 +63,10 @@ def collect_preflight(folder):
 
 def _collect(folder, phase, *, preflight, diagnostic=False):
     plan = read(PLAN)
+    if plan.get('pointwise_family_refresh') or phase == 'baseline-refresh':
+        assert phase == 'baseline-refresh' and not preflight and not diagnostic, 'Harness baseline refresh cannot qualify production'
+        from .pointwise_family_refresh import validate_scope
+        validate_scope(plan)
     if phase == 'diagnostic':
         assert diagnostic and not preflight, 'Diagnostic evidence cannot qualify production'
         from .roi_scope_dispatch import validate_scope
@@ -109,6 +113,9 @@ def _collect(folder, phase, *, preflight, diagnostic=False):
         input_hashes.add(proof['input_provenance_sha256'])
         run_ids.add((host['run_id'], host['run_attempt'], inputs['workflow_head']))
         manifests = proof['binary_manifest']
+        if phase == 'baseline-refresh':
+            from .pointwise_family_refresh import verify_runtime_identity
+            verify_runtime_identity(plan,manifests)
         if phase == 'diagnostic' and plan.get('diagnostic_kind') == 'pointwise-projection-native-pilot':
             from .pointwise_projection_roi import verify_runtime_identity
             verify_runtime_identity(plan, manifests)
@@ -185,7 +192,7 @@ def _collect(folder, phase, *, preflight, diagnostic=False):
                     verdict=verdict, provenance=provenance))
             candidates[fixture].extend(dict(**row, provenance=provenance) for row in rounds[fixture, 2].values())
     assert shards == expected_shards and len(input_hashes) == len(run_ids) == 1
-    expected_cases, expected_decisions = ((plan['cases'], plan['decisions']) if phase == 'diagnostic' else (48, 12) if preflight else (1860, 372) if phase == 'successor'
+    expected_cases, expected_decisions = ((plan['cases'], plan['decisions']) if phase in ('diagnostic', 'baseline-refresh') else (48, 12) if preflight else (1860, 372) if phase == 'successor'
                                           else targeted_totals if phase == 'targeted'
                                           else (40, 8) if phase == 'coverage' else (32, 8))
     assert case_count == expected_cases and len(decisions) == expected_decisions
@@ -194,6 +201,6 @@ def _collect(folder, phase, *, preflight, diagnostic=False):
     return dict(all_cases_verified=True, phase='trix-preflight' if preflight else phase, case_count=case_count, decision_count=len(decisions),
         input_provenance_sha256=next(iter(input_hashes)),
         sources=phase_sources(plan, phase), decisions=decisions, verdicts=dict(counts),
-        accepted=phase not in ('coverage', 'diagnostic') and counts['faster'] > 0 and counts['slower'] == 0,
+        accepted=phase not in ('coverage', 'diagnostic', 'baseline-refresh') and counts['faster'] > 0 and counts['slower'] == 0,
         final_candidate_round=2, final_candidate_rows=dict(candidates),
         **({'coverage_complete': True} if phase == 'coverage' else {}))
