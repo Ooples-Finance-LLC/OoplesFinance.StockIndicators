@@ -1,0 +1,3 @@
+# These immutable identities are hashed as bytes on Windows and Unix hosts.
+hosted-named-projection-refresh-20261116.json text eol=lf
+evidence/named-output-projection-refresh-scope-20261116.json text eol=lf

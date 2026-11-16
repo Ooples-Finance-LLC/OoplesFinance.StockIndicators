@@ -1,5 +1,7 @@
 import copy
+import hashlib
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -12,6 +14,16 @@ PLAN = p.REPO/'benchmarks/plans/hosted-named-projection-refresh-20261116.json'
 
 
 class NamedProjectionRefreshTests(unittest.TestCase):
+    def test_immutable_hashes_survive_windows_and_unix_checkout(self):
+        for path in (PLAN, p.REPO/refresh.APPROVAL):
+            relative = path.relative_to(p.REPO).as_posix()
+            for autocrlf in ('true', 'false'):
+                raw = subprocess.check_output(['git', '-c', 'core.autocrlf='+autocrlf,
+                    'cat-file', '--filters', 'HEAD:'+relative], cwd=p.REPO)
+                with self.subTest(path=relative, autocrlf=autocrlf):
+                    self.assertNotIn(b'\r\n', raw)
+                    self.assertEqual(p.digest(path), hashlib.sha256(raw).hexdigest())
+
     def test_all_eight_pairs_both_sizes_and_unchanged_warmups(self):
         plan = p.read(PLAN)
         refresh.validate_scope(plan)
