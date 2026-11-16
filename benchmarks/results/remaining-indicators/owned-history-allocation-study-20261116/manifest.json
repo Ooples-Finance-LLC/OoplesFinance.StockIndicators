@@ -1,0 +1,26 @@
+{
+  "component-results.json": {
+    "sha256": "48a3d577556e6cfee815cab886a62432f9f94957541e7e87170815feea503d97",
+    "archive": "component-results.json.gz"
+  },
+  "decision.json": {
+    "sha256": "da8f6f6a5b2500a0f816a605c5de6d748dd496a7a69862d893443f5862f3628b",
+    "archive": "decision.json.gz"
+  },
+  "scope.json": {
+    "sha256": "8718de1a38496b9a177a13bc85d64946407da7a55bdcaceec1e2cbccc3ed3a68",
+    "archive": "scope.json.gz"
+  },
+  "StudyOwnedHistoryAllocation20261116.cs": {
+    "sha256": "4a43de28b4752c3d18f0dfcb09a9071fbc2f6b6fc09f36b62364e5242cb08d06",
+    "archive": "StudyOwnedHistoryAllocation20261116.cs.gz"
+  },
+  "study-owned-history-allocation-20261116.ps1": {
+    "sha256": "9d89b009e4408bfefe971c79b901a91683325ccc58283c96ecf11da9f0ee12fd",
+    "archive": "study-owned-history-allocation-20261116.ps1.gz"
+  },
+  "archive-study.py": {
+    "sha256": "626de9fc30f0f3261646b08d663bca7cfecdaf06b17189bd6053e586598e659f",
+    "archive": "archive-study.py.gz"
+  }
+}
