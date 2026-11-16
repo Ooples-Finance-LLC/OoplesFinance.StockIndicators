@@ -1,0 +1,415 @@
+{
+  "run_id": "43779540029",
+  "diagnostic_only": true,
+  "qualification": false,
+  "full_qualification_started": false,
+  "source_imported": false,
+  "report_imported": false,
+  "decision": "Stop this candidate at the native pilot gate: marginal possible new crossovers and one source regression; do not launch 180-case qualification.",
+  "verdicts": {
+    "faster": 8,
+    "inconclusive": 3,
+    "slower": 1
+  },
+  "qualified_native_closures": 0,
+  "source_regression": "OnNeck at 1000 bars: old 0.050825/0.057775 ms; new 0.140225/0.317825 ms.",
+  "possible_new_10000_crossovers": [
+    "MatchingLow",
+    "StickSandwich"
+  ],
+  "possible_new_crossovers_have_separated_intervals": false,
+  "baseline_already_wins_10000": [
+    "ThreeLineStrike",
+    "OnNeck",
+    "InNeck",
+    "Thrusting"
+  ],
+  "limitation": "One native control per pair/size in round2; no cross-round native drift claim. Diagnostic cannot qualify source or refresh report.",
+  "policy_changed": false,
+  "candidate_round_checks": [
+    {
+      "round": "round0-old-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)ngLow [25]",
+      "mean_ms": 0.22528888888888887,
+      "native_mean_ms": 0.02866,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round0-old-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)ngLow [25]",
+      "mean_ms": 0.38336,
+      "native_mean_ms": 0.23339,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round0-old-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)dwich [27]",
+      "mean_ms": 0.21528888888888886,
+      "native_mean_ms": 0.02448,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round0-old-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)dwich [27]",
+      "mean_ms": 0.28692222222222225,
+      "native_mean_ms": 0.2045125,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round0-old-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)trike [29]",
+      "mean_ms": 0.24855,
+      "native_mean_ms": 0.0422,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round0-old-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)trike [29]",
+      "mean_ms": 0.54367,
+      "native_mean_ms": 0.40454,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round0-old-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib.Candles.OnNeck",
+      "mean_ms": 0.050825,
+      "native_mean_ms": 0.05054,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round0-old-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib.Candles.OnNeck",
+      "mean_ms": 0.34167777777777775,
+      "native_mean_ms": 0.4357125,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round0-old-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib.Candles.InNeck",
+      "mean_ms": 0.3209333333333333,
+      "native_mean_ms": 0.05913,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round0-old-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib.Candles.InNeck",
+      "mean_ms": 0.3535125,
+      "native_mean_ms": 0.48265,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round0-old-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)sting [23]",
+      "mean_ms": 0.36862,
+      "native_mean_ms": 0.07011,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round0-old-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)sting [23]",
+      "mean_ms": 0.41572222222222227,
+      "native_mean_ms": 0.5563,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round1-new-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)ngLow [25]",
+      "mean_ms": 0.051366666666666665,
+      "native_mean_ms": 0.02866,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round1-new-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)ngLow [25]",
+      "mean_ms": 0.1943625,
+      "native_mean_ms": 0.23339,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round1-new-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)dwich [27]",
+      "mean_ms": 0.05216666666666667,
+      "native_mean_ms": 0.02448,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round1-new-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)dwich [27]",
+      "mean_ms": 0.19144444444444444,
+      "native_mean_ms": 0.2045125,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round1-new-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)trike [29]",
+      "mean_ms": 0.05787777777777778,
+      "native_mean_ms": 0.0422,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round1-new-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)trike [29]",
+      "mean_ms": 0.239375,
+      "native_mean_ms": 0.40454,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round1-new-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib.Candles.OnNeck",
+      "mean_ms": 0.140225,
+      "native_mean_ms": 0.05054,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round1-new-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib.Candles.OnNeck",
+      "mean_ms": 0.1980625,
+      "native_mean_ms": 0.4357125,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round1-new-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib.Candles.InNeck",
+      "mean_ms": 0.0523375,
+      "native_mean_ms": 0.05913,
+      "native_mean_win": true,
+      "separated_native_win": false
+    },
+    {
+      "round": "round1-new-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib.Candles.InNeck",
+      "mean_ms": 0.20197777777777778,
+      "native_mean_ms": 0.48265,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round1-new-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)sting [23]",
+      "mean_ms": 0.14113333333333333,
+      "native_mean_ms": 0.07011,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round1-new-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)sting [23]",
+      "mean_ms": 0.1953,
+      "native_mean_ms": 0.5563,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round2-new-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)ngLow [25]",
+      "mean_ms": 0.050825,
+      "native_mean_ms": 0.02866,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round2-new-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)ngLow [25]",
+      "mean_ms": 0.21115555555555557,
+      "native_mean_ms": 0.23339,
+      "native_mean_win": true,
+      "separated_native_win": false
+    },
+    {
+      "round": "round2-new-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)dwich [27]",
+      "mean_ms": 0.0510625,
+      "native_mean_ms": 0.02448,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round2-new-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)dwich [27]",
+      "mean_ms": 0.2032375,
+      "native_mean_ms": 0.2045125,
+      "native_mean_win": true,
+      "separated_native_win": false
+    },
+    {
+      "round": "round2-new-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)trike [29]",
+      "mean_ms": 0.061,
+      "native_mean_ms": 0.0422,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round2-new-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)trike [29]",
+      "mean_ms": 0.248575,
+      "native_mean_ms": 0.40454,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round2-new-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib.Candles.OnNeck",
+      "mean_ms": 0.317825,
+      "native_mean_ms": 0.05054,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round2-new-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib.Candles.OnNeck",
+      "mean_ms": 0.2089,
+      "native_mean_ms": 0.4357125,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round2-new-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib.Candles.InNeck",
+      "mean_ms": 0.1432125,
+      "native_mean_ms": 0.05913,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round2-new-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib.Candles.InNeck",
+      "mean_ms": 0.20657777777777778,
+      "native_mean_ms": 0.48265,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round2-new-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)sting [23]",
+      "mean_ms": 0.06152,
+      "native_mean_ms": 0.07011,
+      "native_mean_win": true,
+      "separated_native_win": false
+    },
+    {
+      "round": "round2-new-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)sting [23]",
+      "mean_ms": 0.30314444444444444,
+      "native_mean_ms": 0.5563,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round3-old-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)ngLow [25]",
+      "mean_ms": 0.22541111111111112,
+      "native_mean_ms": 0.02866,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round3-old-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)ngLow [25]",
+      "mean_ms": 0.31606666666666666,
+      "native_mean_ms": 0.23339,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round3-old-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)dwich [27]",
+      "mean_ms": 0.2037125,
+      "native_mean_ms": 0.02448,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round3-old-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)dwich [27]",
+      "mean_ms": 0.3998555555555556,
+      "native_mean_ms": 0.2045125,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round3-old-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)trike [29]",
+      "mean_ms": 0.0619875,
+      "native_mean_ms": 0.0422,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round3-old-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)trike [29]",
+      "mean_ms": 0.3401666666666667,
+      "native_mean_ms": 0.40454,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round3-old-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib.Candles.OnNeck",
+      "mean_ms": 0.057775,
+      "native_mean_ms": 0.05054,
+      "native_mean_win": false,
+      "separated_native_win": false
+    },
+    {
+      "round": "round3-old-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib.Candles.OnNeck",
+      "mean_ms": 0.3416666666666667,
+      "native_mean_ms": 0.4357125,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round3-old-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib.Candles.InNeck",
+      "mean_ms": 0.05715,
+      "native_mean_ms": 0.05913,
+      "native_mean_win": true,
+      "separated_native_win": false
+    },
+    {
+      "round": "round3-old-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib.Candles.InNeck",
+      "mean_ms": 0.3341375,
+      "native_mean_ms": 0.48265,
+      "native_mean_win": true,
+      "separated_native_win": true
+    },
+    {
+      "round": "round3-old-LibraryPairBenchmarks",
+      "parameters": "Bars=1000&PairId=TaLib(...)sting [23]",
+      "mean_ms": 0.057975,
+      "native_mean_ms": 0.07011,
+      "native_mean_win": true,
+      "separated_native_win": false
+    },
+    {
+      "round": "round3-old-LibraryPairBenchmarks",
+      "parameters": "Bars=10000&PairId=TaLib(...)sting [23]",
+      "mean_ms": 0.4324388888888889,
+      "native_mean_ms": 0.5563,
+      "native_mean_win": true,
+      "separated_native_win": true
+    }
+  ]
+}

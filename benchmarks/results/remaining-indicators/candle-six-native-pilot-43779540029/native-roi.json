@@ -1,0 +1,210 @@
+{
+  "diagnostic_only": true,
+  "qualification": false,
+  "rows": [
+    {
+      "pair": "TaLib.Candles.MatchingLow",
+      "bars": 1000,
+      "candidate_ms": 0.050825,
+      "native_ms": 0.02866,
+      "native_over_candidate": 0.5638957206099361,
+      "native_intervals_separated": false,
+      "old_means_ms": [
+        0.22528888888888887,
+        0.22541111111111112
+      ],
+      "new_means_ms": [
+        0.051366666666666665,
+        0.050825
+      ],
+      "verdict": "faster"
+    },
+    {
+      "pair": "TaLib.Candles.MatchingLow",
+      "bars": 10000,
+      "candidate_ms": 0.21115555555555557,
+      "native_ms": 0.23339,
+      "native_over_candidate": 1.10529888444538,
+      "native_intervals_separated": false,
+      "old_means_ms": [
+        0.38336,
+        0.31606666666666666
+      ],
+      "new_means_ms": [
+        0.1943625,
+        0.21115555555555557
+      ],
+      "verdict": "faster"
+    },
+    {
+      "pair": "TaLib.Candles.StickSandwich",
+      "bars": 1000,
+      "candidate_ms": 0.0510625,
+      "native_ms": 0.02448,
+      "native_over_candidate": 0.4794124847001224,
+      "native_intervals_separated": false,
+      "old_means_ms": [
+        0.21528888888888886,
+        0.2037125
+      ],
+      "new_means_ms": [
+        0.05216666666666667,
+        0.0510625
+      ],
+      "verdict": "faster"
+    },
+    {
+      "pair": "TaLib.Candles.StickSandwich",
+      "bars": 10000,
+      "candidate_ms": 0.2032375,
+      "native_ms": 0.2045125,
+      "native_over_candidate": 1.0062734485515714,
+      "native_intervals_separated": false,
+      "old_means_ms": [
+        0.28692222222222225,
+        0.3998555555555556
+      ],
+      "new_means_ms": [
+        0.19144444444444444,
+        0.2032375
+      ],
+      "verdict": "faster"
+    },
+    {
+      "pair": "TaLib.Candles.ThreeLineStrike",
+      "bars": 1000,
+      "candidate_ms": 0.061,
+      "native_ms": 0.0422,
+      "native_over_candidate": 0.6918032786885245,
+      "native_intervals_separated": false,
+      "old_means_ms": [
+        0.24855,
+        0.0619875
+      ],
+      "new_means_ms": [
+        0.05787777777777778,
+        0.061
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "pair": "TaLib.Candles.ThreeLineStrike",
+      "bars": 10000,
+      "candidate_ms": 0.248575,
+      "native_ms": 0.40454,
+      "native_over_candidate": 1.627436387408227,
+      "native_intervals_separated": true,
+      "old_means_ms": [
+        0.54367,
+        0.3401666666666667
+      ],
+      "new_means_ms": [
+        0.239375,
+        0.248575
+      ],
+      "verdict": "faster"
+    },
+    {
+      "pair": "TaLib.Candles.OnNeck",
+      "bars": 1000,
+      "candidate_ms": 0.317825,
+      "native_ms": 0.05054,
+      "native_over_candidate": 0.15901832769605914,
+      "native_intervals_separated": false,
+      "old_means_ms": [
+        0.050825,
+        0.057775
+      ],
+      "new_means_ms": [
+        0.140225,
+        0.317825
+      ],
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Candles.OnNeck",
+      "bars": 10000,
+      "candidate_ms": 0.2089,
+      "native_ms": 0.4357125,
+      "native_over_candidate": 2.085746768788894,
+      "native_intervals_separated": true,
+      "old_means_ms": [
+        0.34167777777777775,
+        0.3416666666666667
+      ],
+      "new_means_ms": [
+        0.1980625,
+        0.2089
+      ],
+      "verdict": "faster"
+    },
+    {
+      "pair": "TaLib.Candles.InNeck",
+      "bars": 1000,
+      "candidate_ms": 0.1432125,
+      "native_ms": 0.05913,
+      "native_over_candidate": 0.4128829536527887,
+      "native_intervals_separated": false,
+      "old_means_ms": [
+        0.3209333333333333,
+        0.05715
+      ],
+      "new_means_ms": [
+        0.0523375,
+        0.1432125
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "pair": "TaLib.Candles.InNeck",
+      "bars": 10000,
+      "candidate_ms": 0.20657777777777778,
+      "native_ms": 0.48265,
+      "native_over_candidate": 2.3364081325301203,
+      "native_intervals_separated": true,
+      "old_means_ms": [
+        0.3535125,
+        0.3341375
+      ],
+      "new_means_ms": [
+        0.20197777777777778,
+        0.20657777777777778
+      ],
+      "verdict": "faster"
+    },
+    {
+      "pair": "TaLib.Candles.Thrusting",
+      "bars": 1000,
+      "candidate_ms": 0.06152,
+      "native_ms": 0.07011,
+      "native_over_candidate": 1.1396293888166449,
+      "native_intervals_separated": false,
+      "old_means_ms": [
+        0.36862,
+        0.057975
+      ],
+      "new_means_ms": [
+        0.14113333333333333,
+        0.06152
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "pair": "TaLib.Candles.Thrusting",
+      "bars": 10000,
+      "candidate_ms": 0.30314444444444444,
+      "native_ms": 0.5563,
+      "native_over_candidate": 1.8350987794597369,
+      "native_intervals_separated": true,
+      "old_means_ms": [
+        0.41572222222222227,
+        0.4324388888888889
+      ],
+      "new_means_ms": [
+        0.1953,
+        0.30314444444444444
+      ],
+      "verdict": "faster"
+    }
+  ]
+}
