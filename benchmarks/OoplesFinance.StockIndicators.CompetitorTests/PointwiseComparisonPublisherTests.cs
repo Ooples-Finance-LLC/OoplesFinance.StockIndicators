@@ -13,7 +13,7 @@ public sealed class PointwiseComparisonPublisherTests
 
     [Theory]
     [MemberData(nameof(Pairs))]
-    public void EveryAdapterPreservesOriginalFullProjectionAfterDisposal(string id)
+    public async Task EveryAdapterPreservesOriginalFullProjectionAfterDisposal(string id)
     {
         var pair = ComparisonPairs.All.Single(p => p.Id == id);
         var data = CompetitorData.FromCloses(Enumerable.Range(0, 257)
@@ -43,8 +43,8 @@ public sealed class PointwiseComparisonPublisherTests
             _ => throw new InvalidOperationException(id)
         };
         ComparisonSeries expected;
-        using (var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(data.IndicatorBars))
-            .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult())
+        using (var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureIndicators(indicator).BuildAsync())
         {
             // Retain the original multi-array publisher as the regression oracle.
             var values = run[indicator.Outputs[0]].ToArray();
