@@ -1,0 +1,38 @@
+{
+  "status": "Approved read-only study and standalone prototype completed; no new production/harness implementation or hosted dispatch",
+  "objective": "Find a shared cause for nineteen nonwinning pointwise rows before another production qualification",
+  "production_baseline": "ce02581b1f55400fd674b5496ee659fa0e8654fa",
+  "pinned_tensor_sha256": "4679eed71749ed6ebdd7d7e5674b79dd6f2610884f8fe909e900c43dcfe59cf4",
+  "findings": [
+    "Production already uses CpuParallelSettings.LightweightParallel and vectorized raw OHLC finite checks. Do not redo those integrations.",
+    "The pinned tensor span API exists. Add/Subtract/Multiply/Divide had no bit mismatches in the deterministic numerical screen; capture, overflow, presence, history, runtime and worker integration are not thereby verified.",
+    "Pinned SIMD Sin/Cos fail the existing accuracy contract even at input1. Sin(1) returns0.8414710097001764 versus Math.Sin0.8414709848078965. Do not adopt these approximate kernels.",
+    "The available tensor source uses scalar Math calls inside several vector wrappers. Its current source revision is not assumed equal to the pinned package. No performance conclusion follows from a vector method signature.",
+    "All nineteen owned benchmark adapters copy values, copy presence, create a nullable intermediate, then project values and bool presence. Three intermediate arrays account for roughly320KB payload at10000bars. Final owned arrays and builder Full history remain necessary.",
+    "A standalone direct span-projection prototype matched the actual frozen publisher for111824 values/presence pairs and111824 ownership checks, including signed zero, NaN payloads, infinities and missing flags. This validates projection only.",
+    "Retained CPU profiles show substantial LINQ/GC cost in representative adapters. Spin CPU samples do not bound end-to-end savings. Earlier ungated component medians are not qualification or native-win evidence."
+  ],
+  "proposed_next_bounded_scope": {
+    "approval": "Not yet approved as a separate hosted harness repair cycle",
+    "change": "One private direct-span publisher and its calls in only ElementaryMathComparison, CircularComparison and TranscendentalComparison; original nullable publisher retained for other consumers and reference/native paths",
+    "affected_pairs": 19,
+    "production_changes": false,
+    "history": "Retain Full builder history, source construction, validation, exception behavior, output ownership and indicator creation inside each invocation",
+    "verification": "Focused adapter correctness and ownership cases; authenticate unchanged production and GPU100 receipts; align old/new roles to the same repaired harness; fresh native controls",
+    "pilot": "Add, Floor and Sin at1000/10000bars;30cases6comparisons; one runner; unchanged warmups, ten measured iterations, default runtime and CPU gates",
+    "budget": "45-90minutes including focused harness build and one diagnostic runner",
+    "excluded": "No production qualification, report refresh, publication, dependency update, accuracy-policy change or automatic further cycle",
+    "result_classification": "Harness diagnostic. Any later native crossover is not a production-source optimization or a qualified closure."
+  },
+  "adversarial_review": [
+    "A harness repair changes the measured workload. Both source labels must use exactly the same repaired harness and fresh native controls. Historical results cannot establish improvement across harness versions.",
+    "Apply the helper only to the three named owned adapters; changing the common nullable publisher would extend to unrelated consumers.",
+    "Preserve flags>0 exactly, including NaN/negative/zero behavior. Preserve all published NaN bits and independently owned outputs after run disposal.",
+    "Do not reuse indicator metadata or switch to LatestOnly to make the adapter faster.",
+    "Do not start the190case full batch-family refresh merely because this prototype is correct. A representative end-to-end native pilot and separate bounded report-methodology decision are required.",
+    "A future production SIMD study should begin with arithmetic and include capture/validation/history cost. Passing a raw numerical model does not establish arbitrary-input safety or speed."
+  ],
+  "overall_nonwinning_10000_rows": 193,
+  "qualified_closures_this_study": 0,
+  "overall_goal_complete": false
+}

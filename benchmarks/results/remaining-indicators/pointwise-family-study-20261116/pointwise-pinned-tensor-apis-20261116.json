@@ -1,0 +1,61 @@
+{
+  "sha256": "4679eed71749ed6ebdd7d7e5674b79dd6f2610884f8fe909e900c43dcfe59cf4",
+  "assembly": "AiDotNet.Tensors, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+  "path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\active-performance-evidence\\hosted-runs\\43779540029\\artifact\\roi-inputs\\common\\AiDotNet.Tensors.dll",
+  "apis": [
+    {
+      "methods": [
+        "Void LightweightParallel(Int32, System.Action`1[System.Int32])",
+        "Void LightweightParallel(Int32, Int64, System.Action`1[System.Int32])",
+        "Void LightweightParallel(Int32, Int32, System.Action`1[System.Int32])",
+        "Void LightweightParallel[TLocal](Int32, Int32, System.Func`1[TLocal], System.Action`2[System.Int32,TLocal], System.Action`1[TLocal])"
+      ],
+      "type": "AiDotNet.Tensors.Helpers.CpuParallelSettings"
+    },
+    {
+      "methods": [
+        "Void InvokeSpanIntoSpan[TOperator](System.ReadOnlySpan`1[System.Single], System.Span`1[System.Single])",
+        "Void InvokeSpanIntoSpan[TOperator](System.ReadOnlySpan`1[System.Double], System.Span`1[System.Double])",
+        "Void InvokeSpanSpanIntoSpan[TOperator](System.ReadOnlySpan`1[System.Double], System.ReadOnlySpan`1[System.Double], System.Span`1[System.Double])",
+        "Void InvokeSpanSpanIntoSpan[TOperator](System.ReadOnlySpan`1[System.Single], System.ReadOnlySpan`1[System.Single], System.Span`1[System.Single])",
+        "Void InvokeSpanSpanIntoSpan[TOperator](System.ReadOnlySpan`1[System.Int32], System.ReadOnlySpan`1[System.Int32], System.Span`1[System.Int32])",
+        "Void InvokeSpanSpanIntoSpan[TOperator](System.ReadOnlySpan`1[System.Int64], System.ReadOnlySpan`1[System.Int64], System.Span`1[System.Int64])",
+        "Void InvokeSpanSpanIntoSpan[TOperator](System.ReadOnlySpan`1[System.Int16], System.ReadOnlySpan`1[System.Int16], System.Span`1[System.Int16])",
+        "Void InvokeSpanSpanIntoSpan[TOperator](System.ReadOnlySpan`1[System.UInt16], System.ReadOnlySpan`1[System.UInt16], System.Span`1[System.UInt16])",
+        "Void InvokeSpanSpanIntoSpan[TOperator](System.ReadOnlySpan`1[System.UInt32], System.ReadOnlySpan`1[System.UInt32], System.Span`1[System.UInt32])",
+        "Void InvokeSpanSpanIntoSpan[TOperator](System.ReadOnlySpan`1[System.UInt64], System.ReadOnlySpan`1[System.UInt64], System.Span`1[System.UInt64])",
+        "Void InvokeSpanSpanIntoSpan[TOperator](System.ReadOnlySpan`1[System.Byte], System.ReadOnlySpan`1[System.Byte], System.Span`1[System.Byte])",
+        "Void InvokeSpanSpanIntoSpan[TOperator](System.ReadOnlySpan`1[System.SByte], System.ReadOnlySpan`1[System.SByte], System.Span`1[System.SByte])"
+      ],
+      "type": "AiDotNet.Tensors.Helpers.TensorPrimitivesCore"
+    },
+    {
+      "methods": [
+        "Double Invoke(Double, Double)",
+        "System.Runtime.Intrinsics.Vector128`1[System.Double] Invoke(System.Runtime.Intrinsics.Vector128`1[System.Double], System.Runtime.Intrinsics.Vector128`1[System.Double])",
+        "System.Runtime.Intrinsics.Vector256`1[System.Double] Invoke(System.Runtime.Intrinsics.Vector256`1[System.Double], System.Runtime.Intrinsics.Vector256`1[System.Double])",
+        "System.Runtime.Intrinsics.Vector512`1[System.Double] Invoke(System.Runtime.Intrinsics.Vector512`1[System.Double], System.Runtime.Intrinsics.Vector512`1[System.Double])"
+      ],
+      "type": "AiDotNet.Tensors.Operators.AddOperatorDouble"
+    },
+    {
+      "methods": [
+        "Double Invoke(Double)",
+        "System.Runtime.Intrinsics.Vector128`1[System.Double] Invoke(System.Runtime.Intrinsics.Vector128`1[System.Double])",
+        "System.Runtime.Intrinsics.Vector256`1[System.Double] Invoke(System.Runtime.Intrinsics.Vector256`1[System.Double])",
+        "System.Runtime.Intrinsics.Vector512`1[System.Double] Invoke(System.Runtime.Intrinsics.Vector512`1[System.Double])"
+      ],
+      "type": "AiDotNet.Tensors.Operators.FloorOperatorDouble"
+    },
+    {
+      "methods": [
+        "Double Invoke(Double)",
+        "System.Runtime.Intrinsics.Vector128`1[System.Double] Invoke(System.Runtime.Intrinsics.Vector128`1[System.Double])",
+        "System.Runtime.Intrinsics.Vector256`1[System.Double] Invoke(System.Runtime.Intrinsics.Vector256`1[System.Double])",
+        "System.Runtime.Intrinsics.Vector512`1[System.Double] Invoke(System.Runtime.Intrinsics.Vector512`1[System.Double])"
+      ],
+      "type": "AiDotNet.Tensors.Operators.SinOperatorDouble"
+    }
+  ],
+  "diagnostic_only": true
+}
