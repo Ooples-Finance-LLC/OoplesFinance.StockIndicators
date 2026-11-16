@@ -1,0 +1,491 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "sources": {
+    "published": "bde045026cb0a490dfdbd2f73a727547dc48cf29",
+    "old": "5be1a81d02ad01393f3fa8ede764e914252d0e96",
+    "successor": "5be1a81d02ad01393f3fa8ede764e914252d0e96",
+    "variants": "9a45372530e49718b01b6524f9a0db993514e1e8"
+  },
+  "gpu_sources": {
+    "old": "5be1a81d02ad01393f3fa8ede764e914252d0e96",
+    "successor": "5be1a81d02ad01393f3fa8ede764e914252d0e96",
+    "variants": "9a45372530e49718b01b6524f9a0db993514e1e8"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "OwnedHistoryBatchTests"
+    ],
+    "successor": [
+      "OwnedHistoryBatchTests"
+    ],
+    "variants": [
+      "OwnedHistoryBatchTests"
+    ]
+  },
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.150.0"
+  },
+  "runtime_policy_overrides": {},
+  "named_output_projection_refresh": true,
+  "report_refresh_only": true,
+  "production_qualification": false,
+  "diagnostic_only": false,
+  "require_fixture_inventory": true,
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "cases": 80,
+  "decisions": 16,
+  "matrix": {
+    "shards": 8,
+    "max_parallel": 2,
+    "timeout_minutes_per_shard": 45
+  },
+  "affected_pairs": [
+    "Skender.GetAwesome",
+    "QuanTAlib.Historical",
+    "QuanTAlib.Realized",
+    "QuanTAlib.Mgdi",
+    "Skender.GetDynamic",
+    "Skender.GetElderRay",
+    "QuanTAlib.Slope",
+    "Skender.GetSlope"
+  ],
+  "refresh_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetAwesome",
+              "pair": "Skender.GetAwesome"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 1,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Historical",
+              "pair": "QuanTAlib.Historical"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 2,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Realized",
+              "pair": "QuanTAlib.Realized"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 3,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Mgdi",
+              "pair": "QuanTAlib.Mgdi"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 4,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetDynamic",
+              "pair": "Skender.GetDynamic"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 5,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetElderRay",
+              "pair": "Skender.GetElderRay"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 6,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Slope",
+              "pair": "QuanTAlib.Slope"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 7,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetSlope",
+              "pair": "Skender.GetSlope"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetAwesome",
+              "pair": "Skender.GetAwesome"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 1,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Historical",
+              "pair": "QuanTAlib.Historical"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 2,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Realized",
+              "pair": "QuanTAlib.Realized"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 3,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Mgdi",
+              "pair": "QuanTAlib.Mgdi"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 4,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetDynamic",
+              "pair": "Skender.GetDynamic"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 5,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetElderRay",
+              "pair": "Skender.GetElderRay"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 6,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Slope",
+              "pair": "QuanTAlib.Slope"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    },
+    {
+      "index": 7,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetSlope",
+              "pair": "Skender.GetSlope"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    }
+  ],
+  "refresh_approval": {
+    "path": "benchmarks/plans/evidence/named-output-projection-refresh-scope-20261116.json",
+    "sha256": "06502ecc00e007662e429dfceea6d57b10a7df092c4b3fee96a1aafe6be04d07"
+  },
+  "frozen_harness_sha256": "48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723",
+  "source_correctness": {
+    "unit": 37,
+    "comparator": 84,
+    "actual_gpu": 100,
+    "production_sha256": "c63770e43fceda43a2286cb5272643ac3850adcc23962cc01eee2c7a9032c6fe",
+    "source_fingerprint": "baa78e2eb12116e886c8590b8fd951556040690c180cff61c519f2e57131225f"
+  },
+  "scope": "Eight-pair named-output harness baseline refresh; every required column retained; no production qualification.",
+  "candidate": {
+    "source": "5be1a81d02ad01393f3fa8ede764e914252d0e96",
+    "ci_run": "43869376457",
+    "producer": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "unit_classes": [
+      "OwnedHistoryBatchTests"
+    ],
+    "parity_classes": [
+      "NamedComparisonPublisherTests",
+      "PointwiseComparisonPublisherTests",
+      "AwesomeComparisonTests",
+      "ElderRayComparisonTests",
+      "LogVolatilityComparisonTests",
+      "McGinleyComparisonTests",
+      "RegressionStatisticsComparisonTests"
+    ],
+    "evidence_source": "f6a9587b7959250acb84791a8cba9ec9b9c14aa7",
+    "manifest_sha256": "8f77a62b0e3c7426569d8f6eb43f025bfe6fed544f127da9c8a9b4cbdc146776",
+    "gpu_receipt_sha256": "47202954242c0a3bf83ce4fab38f49b8aed00aba058ede4f2b62d543497bc2db"
+  },
+  "frozen_candidate": {
+    "source": "9a45372530e49718b01b6524f9a0db993514e1e8",
+    "ci_run": "43871304806",
+    "producer": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "unit_classes": [
+      "OwnedHistoryBatchTests"
+    ],
+    "parity_classes": [
+      "SharedClassicalWindowVariantBenchmarkTests",
+      "NamedComparisonPublisherTests",
+      "PointwiseComparisonPublisherTests",
+      "AwesomeComparisonTests",
+      "ElderRayComparisonTests",
+      "LogVolatilityComparisonTests",
+      "McGinleyComparisonTests",
+      "RegressionStatisticsComparisonTests"
+    ],
+    "evidence_source": "8153fe646f7cb753b1ebf38573705815f5ce3515",
+    "manifest_sha256": "a141d5485070d24a09c6bce2ee995fd3392073f3ff9c745cc3591c4ae46241d3",
+    "gpu_receipt_sha256": "86108756faec06c273e9aebbc8835f4aab6c693af4f689647073ae8fe81fbd20"
+  }
+}

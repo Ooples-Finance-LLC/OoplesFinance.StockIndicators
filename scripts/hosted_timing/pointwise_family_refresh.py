@@ -160,9 +160,11 @@ def collect(folder):
     return result
 
 
-def native_review(folder):
+def native_review(folder, pairs=None):
     from .checkpoints import case_key
     from .verify import sample,archived
+    pairs = PAIRS if pairs is None else pairs
+    assert pairs and len(pairs) == len(set(pairs))
     controls={};owned={}
     for root in sorted(path.parent for path in Path(folder).glob('*/provenance.json')):
         proof=p.read(root/'provenance.json');records=p.read(root/'status.json')['rounds']
@@ -173,7 +175,7 @@ def native_review(folder):
             for case in p.read(path)['Benchmarks']:
                 pair,bars,method=case_key(case,None)
                 key=pair,bars
-                assert pair in PAIRS and bars in (1000,10000)
+                assert pair in pairs and bars in (1000,10000)
                 row=dict(round=index,**sample(case))
                 if method=='Competitor':
                     assert index==2 and key not in controls
@@ -181,7 +183,7 @@ def native_review(folder):
                 else:
                     assert method=='Ooples'
                     owned.setdefault(key,[]).append(row)
-    assert len(controls)==len(owned)==38
+    assert set(controls)==set(owned)=={(pair,bars) for pair in pairs for bars in (1000,10000)}
     rows=[]
     for key in sorted(owned):
         rounds=sorted(owned[key],key=lambda row:row['round']);native=controls[key]

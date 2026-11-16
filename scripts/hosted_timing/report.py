@@ -43,8 +43,10 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
     live, raw, repo, out = (Path(p).resolve() for p in (live, raw, repo, out))
     refreshing=phase=='baseline-refresh'
     if refreshing:
-        from . import pipeline,pointwise_family_refresh as refresh
+        from . import pipeline
+        from .baseline_refresh_dispatch import implementation
         assert inputs is not None, 'A baseline refresh requires authenticated canonical inputs'
+        refresh = implementation(read(PLAN))
         verified_inputs=pipeline.verify_inputs(Path(inputs).resolve())
         summary=refresh.collect(raw)
         assert summary['baseline_refresh_verified'] and not summary['accepted'] and not summary['production_qualification']
@@ -160,7 +162,7 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
             native=next(item for item in summary['native_review']['rows'] if (item['pair'],item['bars'])==(row['pair'],row['bars']))
             aa=next(item for item in summary['decisions'] if (item['pair'],item['bars'])==(row['pair'],row['bars']))
             row.update(measurement_kind='harness-baseline-refresh',production_optimization=False,
-                benchmark_source_sha=refresh.HARNESS,benchmark_assembly_sha256=refresh.HARNESS_SHA,
+                benchmark_source_sha=refresh.HARNESS,benchmark_assembly_sha256=(read(PLAN)['frozen_harness_sha256'] if read(PLAN).get('named_output_projection_refresh') else refresh.HARNESS_SHA),
                 production_assembly_sha256=verified_inputs['production_sha256']['successor'],
                 canonical_gpu_source_sha=refresh.CANONICAL,
                 canonical_gpu_receipt_sha256=read(PLAN)['candidate']['gpu_receipt_sha256'],
@@ -175,11 +177,11 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
     data['evidence']['sourceSha']=None
     data['evidence']['rowOverrides']=[r for r in data['evidence'].get('rowOverrides',[]) if r['pair'] not in pairs]+overrides
     if refreshing:
-        assert pairs==set(refresh.PAIRS) and len(baseline)==76
+        assert pairs==set(refresh.PAIRS) and len(baseline)==4*len(refresh.PAIRS)
         data['evidence'].setdefault('harnessBaselineRefreshes',[]).append(dict(
             production_source_sha=refresh.CANONICAL,benchmark_source_sha=refresh.HARNESS,
-            benchmark_assembly_sha256=refresh.HARNESS_SHA,run_id=run,url=url,pairs=sorted(pairs),
-            cases=190,same_binary_comparisons=38,production_optimization=False,
+            benchmark_assembly_sha256=(read(PLAN)['frozen_harness_sha256'] if read(PLAN).get('named_output_projection_refresh') else refresh.HARNESS_SHA),run_id=run,url=url,pairs=sorted(pairs),
+            cases=read(PLAN)['cases'],same_binary_comparisons=read(PLAN)['decisions'],production_optimization=False,
             aa_verdicts=summary['verdicts'],native_review=summary['native_review']))
     if snapshot_receipts:
         snapshot_pairs={row['pair'] for receipt in snapshot_receipts for row in receipt['rows']}
@@ -229,7 +231,7 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
         disclosure += ' Latest fixed-invocation batch timings use 1,000 unmeasured warmups; builder timings retain ten warmups. Both use ten measured iterations.'
     disclosure += pair_warmup_disclosure(read(PLAN),data['rows'])
     if data['evidence'].get('harnessBaselineRefreshes'):
-        disclosure += ' Pointwise harness baseline refreshes remove three intermediate projection arrays while retaining Full history and owned outputs; they are not production algorithm speedups. Their rows identify the canonical production and benchmark builds. Identical-binary A/A verdicts are timing-variability warnings. Four owned rounds are compared with the native control measured in round two; mixed or inconclusive outcomes remain uncertain.'
+        disclosure += ' Harness baseline refreshes remove intermediate projection copies while retaining every required named column, Full history and owned outputs; they are not production algorithm speedups. Their rows identify the canonical production and benchmark builds. Identical-binary A/A verdicts are timing-variability warnings. Four owned rounds are compared with the native control measured in round two; mixed or inconclusive outcomes remain uncertain.'
     if builder_control_receipts:
         names=sorted({row['pair'] for receipt in builder_control_receipts for row in receipt['rows']})
         disclosure += ' Fresh builder-only source controls for '+', '.join(names)+' contain no native timings; their existing builder/native comparisons retain their original source and run provenance.'

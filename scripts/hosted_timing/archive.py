@@ -18,8 +18,8 @@ def write(path, value):
 def archive(raw, prepared, repo, phase):
     inputs = verify_inputs(prepared)
     if phase == 'baseline-refresh':
-        from .pointwise_family_refresh import collect as collect_refresh
-        summary=collect_refresh(raw)
+        from .baseline_refresh_dispatch import implementation
+        summary=implementation(read(PLAN)).collect(raw)
         assert summary['baseline_refresh_verified'] and not summary['accepted'] and not summary['production_qualification']
     else:
         summary = collect(raw, phase)
@@ -42,9 +42,10 @@ def archive(raw, prepared, repo, phase):
         summary['sources']['old'],summary['sources']['new'],'--','src','tests'],cwd=repo)
     assert bool(blobs['candidate-source.patch']) == (phase not in ('coverage','baseline-refresh'))
     if phase == 'baseline-refresh':
-        from .pointwise_family_refresh import PUBLISHED,CANONICAL
+        from .baseline_refresh_dispatch import implementation
+        refresh=implementation(read(PLAN))
         from .pipeline import BENCH,TESTS
-        blobs['harness-source.patch']=subprocess.check_output(['git','diff','--binary',PUBLISHED,CANONICAL,'--',BENCH,TESTS],cwd=repo)
+        blobs['harness-source.patch']=subprocess.check_output(['git','diff','--binary',refresh.PUBLISHED,refresh.CANONICAL,'--',BENCH,TESTS],cwd=repo)
         assert blobs['harness-source.patch']
     manifest = {}
     for relative, content in sorted(blobs.items()):
@@ -63,7 +64,7 @@ def archive(raw, prepared, repo, phase):
         **({'baseline_refresh_verified':True,'report_refresh_only':True,'production_qualification':False,'production_optimization':False,
             'confirmed_native_wins':summary['native_review']['confirmed_native_wins']} if phase=='baseline-refresh' else {}),
         **({'coverage_complete': True, 'source_qualification_claimed': False} if phase == 'coverage' else {}),
-        note=('Hosted CPU harness baseline refresh with fresh canonical correctness/GPU100 and unchanged frozen-variant evidence. Identical-binary A/A outcomes describe timing variability; no production qualification or optimization is claimed.' if phase == 'baseline-refresh' else
+        note=('Hosted CPU harness baseline refresh with fresh canonical correctness/GPU100 and authenticated frozen-variant evidence. Identical-binary A/A outcomes describe timing variability; no production qualification or optimization is claimed.' if phase == 'baseline-refresh' else
              'Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity.' +
              (' Unchanged qualified production; no source qualification claimed.' if phase == 'coverage' else
               ' WMA/TRIMA results do not replace default SMA rows.'))))

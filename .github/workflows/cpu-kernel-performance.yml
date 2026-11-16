@@ -12,7 +12,7 @@ on:
       qualification_plan:
         description: Immutable source and measurement plan for qualified-rollout
         type: choice
-        options: [benchmarks/plans/hosted-abandoned-inventory-repair-20261114.json, benchmarks/plans/hosted-rollout-20261101.json, benchmarks/plans/hosted-repair-20261101.json, benchmarks/plans/hosted-trix-20261102.json, benchmarks/plans/hosted-trix-eager-20261102.json, benchmarks/plans/hosted-trix-shared-jit-20261102.json, benchmarks/plans/hosted-trix-direct-fill-20261102.json, benchmarks/plans/hosted-trix-settled-20261102.json, benchmarks/plans/hosted-trix-word-settled-20261102.json, benchmarks/plans/hosted-classical-final-20261102.json, benchmarks/plans/hosted-builder-coverage-20261102.json, benchmarks/plans/hosted-builder-coverage-repair-20261103.json, benchmarks/plans/hosted-hilbert-fir-20261102.json, benchmarks/plans/hosted-ad-cumulative-20261103.json, benchmarks/plans/hosted-klinger-schaff-20261103.json, benchmarks/plans/hosted-dispersion-20261103.json, benchmarks/plans/hosted-builder-coverage-native-one-20261103.json, benchmarks/plans/hosted-ad-small-first-20261103.json, benchmarks/plans/hosted-combined-accepted-20261103.json, benchmarks/plans/hosted-tsi-compact-ema-20261103.json, benchmarks/plans/hosted-pmo-compact-ema-20261103.json, benchmarks/plans/hosted-quartic-interval-20261103.json, benchmarks/plans/hosted-combined-compact-kernels-20261103.json, benchmarks/plans/hosted-stoch-compact-smoothing-20261103.json, benchmarks/plans/hosted-sum-directional-range-20261103.json, benchmarks/plans/hosted-trend-star-compact-ranks-20261103.json, benchmarks/plans/hosted-stoch-raw-certificate-20261103.json, benchmarks/plans/hosted-trend-star-certified-bodies-20261103.json, benchmarks/plans/hosted-combined-local-certificates-20261103.json, benchmarks/plans/hosted-curvature-wide-slope-20261103.json, benchmarks/plans/hosted-curvature-packed-statistics-20261103.json, benchmarks/plans/hosted-envelope-coefficient-cache-20261103.json, benchmarks/plans/hosted-pvo-certified-ema-20261103.json, benchmarks/plans/hosted-envelope-band-certificate-20261103.json, benchmarks/plans/hosted-pvo-volume-dispatch-20261103.json, benchmarks/plans/hosted-adx-weighted-certificate-20261104.json, benchmarks/plans/hosted-fisher-exact-inputs-20261104.json, benchmarks/plans/hosted-combined-private-inputs-20261104.json, benchmarks/plans/hosted-awesome-private-arithmetic-20261104.json, benchmarks/plans/hosted-crow-soldier-active-snapshots-20261104.json, benchmarks/plans/hosted-prior-directional-weighted-certificate-20261104.json, benchmarks/plans/hosted-smoothed-accumulation-certified-ema-20261104.json, benchmarks/plans/hosted-combined-directional-accumulation-20261104.json, benchmarks/plans/hosted-combined-directional-accumulation-cap-20261104.json, benchmarks/plans/hosted-prior-directional-raw-stages-20261104.json, benchmarks/plans/hosted-prior-directional-ratios-20261104.json, benchmarks/plans/hosted-klinger-private-blend-20261104.json, benchmarks/plans/hosted-combined-ratio-klinger-20261104.json, benchmarks/plans/hosted-klinger-after-directional-ratios-20261104.json, benchmarks/plans/hosted-classic-ppo-normalization-20261104.json, benchmarks/plans/hosted-log-return-short-certificate-20261104.json, benchmarks/plans/hosted-classic-oscillator-finite-inputs-20261104.json, benchmarks/plans/hosted-sum-directional-normalization-20261104.json, benchmarks/plans/hosted-pvo-normalization-20261105.json, benchmarks/plans/hosted-seeded-hilbert-midpoint-20261105.json, benchmarks/plans/hosted-pvo-adjacent-certificate-20261105.json, benchmarks/plans/hosted-beta-derived-ratio-20261105.json, benchmarks/plans/hosted-beta-derived-ratio-v2-20261105.json, benchmarks/plans/hosted-atr-published-width-20261105.json, benchmarks/plans/hosted-deviation-position-certificate-20261105.json, benchmarks/plans/hosted-doji-shadow-comparison-20261105.json, benchmarks/plans/hosted-renko-price-grid-20261105.json, benchmarks/plans/hosted-price-relative-compact-mean-20261105.json, benchmarks/plans/hosted-volatility-stop-finite-stages-20261105.json, benchmarks/plans/hosted-combined-renko-mean-stop-20261105.json, benchmarks/plans/hosted-renko-direct-coordinates-20261105.json, benchmarks/plans/hosted-renko-compact-volume-20261105.json, benchmarks/plans/hosted-renko-price-normalization-20261105.json, benchmarks/plans/hosted-renko-endpoint-cache-20261105.json, benchmarks/plans/hosted-adl-component-sharing-zero-20261105.json, benchmarks/plans/hosted-adl-exact-product-fallback-20261106.json, benchmarks/plans/hosted-zigzag-coordinate-normalization-20261106.json, benchmarks/plans/hosted-combined-containment-mfi-20261106.json, benchmarks/plans/hosted-hilbert-variable-window-20261107.json, benchmarks/plans/hosted-hilbert-coefficient-certificates-20261107.json, benchmarks/plans/hosted-hilbert-phase-only-trigonometry-20261107.json, benchmarks/plans/hosted-hilbert-followup-composition-20261107.json, benchmarks/plans/hosted-hilbert-finite-bit-steps-20261107.json, benchmarks/plans/hosted-hilbert-residual-bound-20261107.json, benchmarks/plans/hosted-body-shadow-retained-differences-20261107.json, benchmarks/plans/hosted-sum-directional-exact-movement-20261107.json, benchmarks/plans/hosted-hilbert-accumulation-directional-composition-20261107.json, benchmarks/plans/hosted-body-shadow-compact-slot-20261108.json, benchmarks/plans/hosted-adl-batch-wide-publication-20261108.json, benchmarks/plans/hosted-hilbert-lag-zero-seed-20261108.json, benchmarks/plans/hosted-hilbert-ordered-sum-20261108.json, benchmarks/plans/hosted-hilbert-floating-grid-guard-20261108.json, benchmarks/plans/hosted-prior-directional-single-loop-20261108.json, benchmarks/plans/hosted-prior-directional-lazy-factors-20261108.json, benchmarks/plans/hosted-prior-directional-dx-ratio-20261108.json, benchmarks/plans/hosted-trix-scalar-stage-storage-20261108.json, benchmarks/plans/hosted-trix-rate-certificate-20261109.json, benchmarks/plans/hosted-adl-batch-balanced-product-20261109.json, benchmarks/plans/hosted-trix-private-update-work-20261109.json, benchmarks/plans/hosted-adl-price-bounds-20261109.json, benchmarks/plans/hosted-adl-direct-prefix-publication-20261109.json, benchmarks/plans/hosted-beta-return-bounds-20261109.json, benchmarks/plans/hosted-adl-fixed-grid-20261109.json, benchmarks/plans/hosted-adl-four-difference-bounds-20261109.json, benchmarks/plans/hosted-adl-cached-word-mean-20261109.json, benchmarks/plans/hosted-adl-direct-binary-publication-20261109.json, benchmarks/plans/hosted-adl-identity-column-20261109.json, benchmarks/plans/hosted-exp-parallel-minimum-20261109.json, benchmarks/plans/hosted-log-parallel-minimum-20261109.json, benchmarks/plans/hosted-log-physical-fanout-threshold-20261110.json, benchmarks/plans/hosted-circular-physical-fanout-threshold-20261110.json, benchmarks/plans/hosted-inverse-circular-fanout-threshold-20261110.json, benchmarks/plans/hosted-word-log-tsi-composition-20261110.json, benchmarks/plans/hosted-hilbert-scalar-state-0150-20261111.json, benchmarks/plans/hosted-tsi-finite-change-20261111.json, benchmarks/plans/hosted-ta-ad-compact-prefix-20261111.json, benchmarks/plans/hosted-hilbert-tsi-taad-composition-20261111.json, benchmarks/plans/hosted-beta-fixed-grid-20261112.json, benchmarks/plans/hosted-arithmetic-field-selection-20261112.json, benchmarks/plans/hosted-arithmetic-warmup-policy-20261112.json, benchmarks/plans/hosted-hilbert-word-blend-20261112.json, benchmarks/plans/hosted-adosc-word-ema-20261112.json, benchmarks/plans/hosted-identity-adl-fixed-grid-20261112.json, benchmarks/plans/hosted-acceleration-word-mean-20261112.json, benchmarks/plans/hosted-identity-adl-size-guard-20261112.json, benchmarks/plans/hosted-hyperbolic-fanout-threshold-20261112.json, benchmarks/plans/hosted-qema-difference-combination-20261113.json, benchmarks/plans/hosted-qema-harness-aligned-combination-20261113.json, benchmarks/plans/hosted-awesome-region-scratch-20261113.json, benchmarks/plans/hosted-awesome-native-fixture-repair-20261113.json, benchmarks/plans/hosted-qema-common-binade-20261113.json, benchmarks/plans/hosted-doji-region-pool-20261113.json, benchmarks/plans/hosted-skender-adl-pair-prefix-20261113.json, benchmarks/plans/hosted-t3-state-checked-regions-20261113.json, benchmarks/plans/hosted-prior-directional-typed-writer-20261113.json, benchmarks/plans/hosted-prior-directional-word-guards-20261114.json, benchmarks/plans/hosted-star-reversal-certified-difference-20261114.json, benchmarks/plans/hosted-abandoned-certified-blocks-20261114.json, benchmarks/plans/hosted-context-after-stars-20261115.json, benchmarks/plans/hosted-adosc-word-flow-roi-20261115.json, benchmarks/plans/hosted-candle-family-native-pilot-20261115.json, benchmarks/plans/hosted-candle-integer-window-native-pilot-20261115.json, benchmarks/plans/hosted-candle-six-api-native-pilot-20261115.json, benchmarks/plans/hosted-pointwise-projection-native-pilot-20261116.json, benchmarks/plans/hosted-pointwise-family-refresh-20261116.json]
+        options: [benchmarks/plans/hosted-named-projection-refresh-20261116.json, benchmarks/plans/hosted-abandoned-inventory-repair-20261114.json, benchmarks/plans/hosted-rollout-20261101.json, benchmarks/plans/hosted-repair-20261101.json, benchmarks/plans/hosted-trix-20261102.json, benchmarks/plans/hosted-trix-eager-20261102.json, benchmarks/plans/hosted-trix-shared-jit-20261102.json, benchmarks/plans/hosted-trix-direct-fill-20261102.json, benchmarks/plans/hosted-trix-settled-20261102.json, benchmarks/plans/hosted-trix-word-settled-20261102.json, benchmarks/plans/hosted-classical-final-20261102.json, benchmarks/plans/hosted-builder-coverage-20261102.json, benchmarks/plans/hosted-builder-coverage-repair-20261103.json, benchmarks/plans/hosted-hilbert-fir-20261102.json, benchmarks/plans/hosted-ad-cumulative-20261103.json, benchmarks/plans/hosted-klinger-schaff-20261103.json, benchmarks/plans/hosted-dispersion-20261103.json, benchmarks/plans/hosted-builder-coverage-native-one-20261103.json, benchmarks/plans/hosted-ad-small-first-20261103.json, benchmarks/plans/hosted-combined-accepted-20261103.json, benchmarks/plans/hosted-tsi-compact-ema-20261103.json, benchmarks/plans/hosted-pmo-compact-ema-20261103.json, benchmarks/plans/hosted-quartic-interval-20261103.json, benchmarks/plans/hosted-combined-compact-kernels-20261103.json, benchmarks/plans/hosted-stoch-compact-smoothing-20261103.json, benchmarks/plans/hosted-sum-directional-range-20261103.json, benchmarks/plans/hosted-trend-star-compact-ranks-20261103.json, benchmarks/plans/hosted-stoch-raw-certificate-20261103.json, benchmarks/plans/hosted-trend-star-certified-bodies-20261103.json, benchmarks/plans/hosted-combined-local-certificates-20261103.json, benchmarks/plans/hosted-curvature-wide-slope-20261103.json, benchmarks/plans/hosted-curvature-packed-statistics-20261103.json, benchmarks/plans/hosted-envelope-coefficient-cache-20261103.json, benchmarks/plans/hosted-pvo-certified-ema-20261103.json, benchmarks/plans/hosted-envelope-band-certificate-20261103.json, benchmarks/plans/hosted-pvo-volume-dispatch-20261103.json, benchmarks/plans/hosted-adx-weighted-certificate-20261104.json, benchmarks/plans/hosted-fisher-exact-inputs-20261104.json, benchmarks/plans/hosted-combined-private-inputs-20261104.json, benchmarks/plans/hosted-awesome-private-arithmetic-20261104.json, benchmarks/plans/hosted-crow-soldier-active-snapshots-20261104.json, benchmarks/plans/hosted-prior-directional-weighted-certificate-20261104.json, benchmarks/plans/hosted-smoothed-accumulation-certified-ema-20261104.json, benchmarks/plans/hosted-combined-directional-accumulation-20261104.json, benchmarks/plans/hosted-combined-directional-accumulation-cap-20261104.json, benchmarks/plans/hosted-prior-directional-raw-stages-20261104.json, benchmarks/plans/hosted-prior-directional-ratios-20261104.json, benchmarks/plans/hosted-klinger-private-blend-20261104.json, benchmarks/plans/hosted-combined-ratio-klinger-20261104.json, benchmarks/plans/hosted-klinger-after-directional-ratios-20261104.json, benchmarks/plans/hosted-classic-ppo-normalization-20261104.json, benchmarks/plans/hosted-log-return-short-certificate-20261104.json, benchmarks/plans/hosted-classic-oscillator-finite-inputs-20261104.json, benchmarks/plans/hosted-sum-directional-normalization-20261104.json, benchmarks/plans/hosted-pvo-normalization-20261105.json, benchmarks/plans/hosted-seeded-hilbert-midpoint-20261105.json, benchmarks/plans/hosted-pvo-adjacent-certificate-20261105.json, benchmarks/plans/hosted-beta-derived-ratio-20261105.json, benchmarks/plans/hosted-beta-derived-ratio-v2-20261105.json, benchmarks/plans/hosted-atr-published-width-20261105.json, benchmarks/plans/hosted-deviation-position-certificate-20261105.json, benchmarks/plans/hosted-doji-shadow-comparison-20261105.json, benchmarks/plans/hosted-renko-price-grid-20261105.json, benchmarks/plans/hosted-price-relative-compact-mean-20261105.json, benchmarks/plans/hosted-volatility-stop-finite-stages-20261105.json, benchmarks/plans/hosted-combined-renko-mean-stop-20261105.json, benchmarks/plans/hosted-renko-direct-coordinates-20261105.json, benchmarks/plans/hosted-renko-compact-volume-20261105.json, benchmarks/plans/hosted-renko-price-normalization-20261105.json, benchmarks/plans/hosted-renko-endpoint-cache-20261105.json, benchmarks/plans/hosted-adl-component-sharing-zero-20261105.json, benchmarks/plans/hosted-adl-exact-product-fallback-20261106.json, benchmarks/plans/hosted-zigzag-coordinate-normalization-20261106.json, benchmarks/plans/hosted-combined-containment-mfi-20261106.json, benchmarks/plans/hosted-hilbert-variable-window-20261107.json, benchmarks/plans/hosted-hilbert-coefficient-certificates-20261107.json, benchmarks/plans/hosted-hilbert-phase-only-trigonometry-20261107.json, benchmarks/plans/hosted-hilbert-followup-composition-20261107.json, benchmarks/plans/hosted-hilbert-finite-bit-steps-20261107.json, benchmarks/plans/hosted-hilbert-residual-bound-20261107.json, benchmarks/plans/hosted-body-shadow-retained-differences-20261107.json, benchmarks/plans/hosted-sum-directional-exact-movement-20261107.json, benchmarks/plans/hosted-hilbert-accumulation-directional-composition-20261107.json, benchmarks/plans/hosted-body-shadow-compact-slot-20261108.json, benchmarks/plans/hosted-adl-batch-wide-publication-20261108.json, benchmarks/plans/hosted-hilbert-lag-zero-seed-20261108.json, benchmarks/plans/hosted-hilbert-ordered-sum-20261108.json, benchmarks/plans/hosted-hilbert-floating-grid-guard-20261108.json, benchmarks/plans/hosted-prior-directional-single-loop-20261108.json, benchmarks/plans/hosted-prior-directional-lazy-factors-20261108.json, benchmarks/plans/hosted-prior-directional-dx-ratio-20261108.json, benchmarks/plans/hosted-trix-scalar-stage-storage-20261108.json, benchmarks/plans/hosted-trix-rate-certificate-20261109.json, benchmarks/plans/hosted-adl-batch-balanced-product-20261109.json, benchmarks/plans/hosted-trix-private-update-work-20261109.json, benchmarks/plans/hosted-adl-price-bounds-20261109.json, benchmarks/plans/hosted-adl-direct-prefix-publication-20261109.json, benchmarks/plans/hosted-beta-return-bounds-20261109.json, benchmarks/plans/hosted-adl-fixed-grid-20261109.json, benchmarks/plans/hosted-adl-four-difference-bounds-20261109.json, benchmarks/plans/hosted-adl-cached-word-mean-20261109.json, benchmarks/plans/hosted-adl-direct-binary-publication-20261109.json, benchmarks/plans/hosted-adl-identity-column-20261109.json, benchmarks/plans/hosted-exp-parallel-minimum-20261109.json, benchmarks/plans/hosted-log-parallel-minimum-20261109.json, benchmarks/plans/hosted-log-physical-fanout-threshold-20261110.json, benchmarks/plans/hosted-circular-physical-fanout-threshold-20261110.json, benchmarks/plans/hosted-inverse-circular-fanout-threshold-20261110.json, benchmarks/plans/hosted-word-log-tsi-composition-20261110.json, benchmarks/plans/hosted-hilbert-scalar-state-0150-20261111.json, benchmarks/plans/hosted-tsi-finite-change-20261111.json, benchmarks/plans/hosted-ta-ad-compact-prefix-20261111.json, benchmarks/plans/hosted-hilbert-tsi-taad-composition-20261111.json, benchmarks/plans/hosted-beta-fixed-grid-20261112.json, benchmarks/plans/hosted-arithmetic-field-selection-20261112.json, benchmarks/plans/hosted-arithmetic-warmup-policy-20261112.json, benchmarks/plans/hosted-hilbert-word-blend-20261112.json, benchmarks/plans/hosted-adosc-word-ema-20261112.json, benchmarks/plans/hosted-identity-adl-fixed-grid-20261112.json, benchmarks/plans/hosted-acceleration-word-mean-20261112.json, benchmarks/plans/hosted-identity-adl-size-guard-20261112.json, benchmarks/plans/hosted-hyperbolic-fanout-threshold-20261112.json, benchmarks/plans/hosted-qema-difference-combination-20261113.json, benchmarks/plans/hosted-qema-harness-aligned-combination-20261113.json, benchmarks/plans/hosted-awesome-region-scratch-20261113.json, benchmarks/plans/hosted-awesome-native-fixture-repair-20261113.json, benchmarks/plans/hosted-qema-common-binade-20261113.json, benchmarks/plans/hosted-doji-region-pool-20261113.json, benchmarks/plans/hosted-skender-adl-pair-prefix-20261113.json, benchmarks/plans/hosted-t3-state-checked-regions-20261113.json, benchmarks/plans/hosted-prior-directional-typed-writer-20261113.json, benchmarks/plans/hosted-prior-directional-word-guards-20261114.json, benchmarks/plans/hosted-star-reversal-certified-difference-20261114.json, benchmarks/plans/hosted-abandoned-certified-blocks-20261114.json, benchmarks/plans/hosted-context-after-stars-20261115.json, benchmarks/plans/hosted-adosc-word-flow-roi-20261115.json, benchmarks/plans/hosted-candle-family-native-pilot-20261115.json, benchmarks/plans/hosted-candle-integer-window-native-pilot-20261115.json, benchmarks/plans/hosted-candle-six-api-native-pilot-20261115.json, benchmarks/plans/hosted-pointwise-projection-native-pilot-20261116.json, benchmarks/plans/hosted-pointwise-family-refresh-20261116.json]
         default: benchmarks/plans/hosted-rollout-20261101.json
       evidence_run:
         description: Original measurement run for verification-only recovery
@@ -213,6 +213,126 @@ jobs:
           path: pointwise-family-refresh-summary.json
           retention-days: 14
           if-no-files-found: error
+  named-projection-prepare:
+    if: github.event_name == 'workflow_dispatch' && inputs.suite == 'bounded-roi-diagnostic' && inputs.qualification_plan == 'benchmarks/plans/hosted-named-projection-refresh-20261116.json'
+    runs-on: windows-2025
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            .github
+            benchmarks/plans
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install psutil==7.2.2
+      - name: Verify bounded refresh and legacy gates
+        env:
+          HOSTED_TIMING_PLAN: benchmarks/plans/hosted-window-log-positive-regions-20261115.json
+        run: |
+          Push-Location scripts
+          python -m unittest -v test_hosted_named_projection_refresh test_hosted_pointwise_family_refresh test_hosted_pointwise_projection_roi test_hosted_timing test_hosted_fixture_inventory test_hosted_runtime_dependencies
+          $testExit = $LASTEXITCODE
+          Pop-Location
+          if ($testExit -ne 0) { exit $testExit }
+      - uses: actions/download-artifact@v8
+        with:
+          name: candidate-correctness-inputs
+          path: canonical-inputs
+          run-id: 43869376457
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v8
+        with:
+          name: candidate-correctness-inputs
+          path: frozen-inputs
+          run-id: 43871304806
+          github-token: ${{ github.token }}
+      - name: Authenticate both fresh builds and run variant binding checks
+        run: python scripts/run-named-projection-refresh.py prepare --candidate canonical-inputs --frozen frozen-inputs --out refresh-inputs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: named-projection-inputs
+          path: refresh-inputs/
+          retention-days: 14
+          if-no-files-found: error
+
+  named-projection-measure:
+    needs: named-projection-prepare
+    runs-on: windows-2025
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install psutil==7.2.2
+      - uses: actions/download-artifact@v8
+        with:
+          name: named-projection-inputs
+          path: refresh-inputs
+      - name: Measure complete pair with identical binaries under both labels
+        run: python scripts/run-named-projection-refresh.py measure --inputs refresh-inputs --out refresh-evidence/shard${{ matrix.shard }} --shard ${{ matrix.shard }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: named-projection-shard-${{ matrix.shard }}
+          path: refresh-evidence/shard${{ matrix.shard }}/
+          retention-days: 14
+          if-no-files-found: error
+
+  named-projection-collect:
+    needs: [named-projection-prepare, named-projection-measure]
+    runs-on: windows-2025
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts
+            benchmarks/plans
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install psutil==7.2.2
+      - uses: actions/download-artifact@v8
+        with:
+          name: named-projection-inputs
+          path: refresh-inputs
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: named-projection-shard-*
+          path: refresh-evidence
+      - name: Independently collect all80cases and retain every outcome
+        run: python scripts/run-named-projection-refresh.py collect --inputs refresh-inputs --evidence refresh-evidence --out named-projection-refresh-summary.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: named-projection-refresh-summary
+          path: named-projection-refresh-summary.json
+          retention-days: 14
+          if-no-files-found: error
+
   build:
     if: (github.event_name == 'workflow_dispatch' && contains(fromJSON('["builder", "kernel", "all"]'), inputs.suite)) || github.event.label.name == 'run-builder-benchmarks'
     runs-on: ubuntu-latest

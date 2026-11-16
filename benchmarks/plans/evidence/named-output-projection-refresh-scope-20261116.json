@@ -1,0 +1,52 @@
+{
+  "status": "Approved bounded8-pair refresh including correctness/GPU100,80cases,report and conditional draft publication",
+  "approved": true,
+  "outcome": "Repair avoidable masked-output projection copies for all eight consumers of five inspected adapters. Preserve every named output, presence mask, bits, Full history, validation and producer calculations.",
+  "pairs": [
+    "Skender.GetAwesome",
+    "QuanTAlib.Historical",
+    "QuanTAlib.Realized",
+    "QuanTAlib.Mgdi",
+    "Skender.GetDynamic",
+    "Skender.GetElderRay",
+    "QuanTAlib.Slope",
+    "Skender.GetSlope"
+  ],
+  "files": [
+    "AwesomeComparison.cs",
+    "LogVolatilityComparison.cs",
+    "McGinleyComparison.cs",
+    "ElderRayComparison.cs",
+    "RegressionStatisticsComparison.cs"
+  ],
+  "evidence": "Actual compiled401-route map and source read: Awesome2columns, ElderRay3, regression5; all are required and must remain. Historical/McGinley single-output adapters have the same extra values/flags/nullable copies repaired in the published19-pair batch. Price/candle/BOP-TA direct adapters excluded because they do not have this overhead.",
+  "source_changes": "Benchmark/test code and narrowly scoped measurement/report support only. No production algorithm, dependency, history policy, arithmetic, output pruning or warmup-policy changes.",
+  "verification": [
+    "Independent bit/shape/ownership checks including all named outputs and actual adapter routes.",
+    "Fresh source-bound focused CI correctness and actualGPU100; authenticate new canonical and frozen benchmark harness inputs.",
+    "Complete80-case/16A-A baseline refresh:8pairs,bothsizes,old/new/new/old same binaries;one fresh native round2control perpair/size;at most2measurement runners. Preserve existing1000warmups,tenmeasurediterations,default runtime andCPU gates.",
+    "Preserve all A/A variability and native mixed/inconclusive results. No production-source qualification or acceptance claim.",
+    "Update all16 affected report rows only after complete independent collection, preserve all1544builder comparisons, verify802table/CSV values and provenance, publish to draftPR266 conditional on verification; finish publicationCI/Sonar/review. No merge/release."
+  ],
+  "estimated_effort": "Roughly2-3hours including frozen-input builds,measurement,report andpublication; no new numerical design.",
+  "adversarial_review": [
+    "Required named columns cannot be removed even if another native API exposes fewer fields.",
+    "The original typed run and Full history remain intact; only post-build projection changes.",
+    "Baseline mean gaps do not predict closures; complete scope and all four owned rounds must be retained.",
+    "A/A faster/slower outcomes are timing warnings, not source gains/regressions.",
+    "Do not reuse old GPU/harness receipts for changed benchmark/test fingerprints.",
+    "Previous19pair timing evidence remains identified by its original benchmark build."
+  ],
+  "approval_reason": "Additional hosted verification/report cycle is outside the just-completed allocation study; request under suppliedAGENTS material-effort/cost rule.",
+  "local_model": {
+    "receipt": "C:\\Users\\cheat\\source\\stock-indicators-operations\\named-projection-model-20261116.json",
+    "actual_adapter_cases": 16,
+    "actual_values_checked": 209000,
+    "fuzz_values": 20552,
+    "column_cases": 38,
+    "production_or_benchmark_source_changes": false,
+    "qualification": false
+  },
+  "approved_user_reply": "Approve bounded 8-pair refresh",
+  "approved_utc": "2026-11-16T12:30:23.209729+00:00"
+}

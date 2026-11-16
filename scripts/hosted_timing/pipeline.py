@@ -73,9 +73,9 @@ def operation_timeout_for(plan, phase):
 
 def phase_shards(plan, phase):
     if phase == 'baseline-refresh':
-        from .pointwise_family_refresh import validate_scope
+        from .baseline_refresh_dispatch import validate_scope
         validate_scope(plan)
-        return range(19)
+        return range(len(plan['refresh_shards']))
     if phase == 'diagnostic':
         from .roi_scope_dispatch import validate_scope
         validate_scope(plan)
@@ -205,9 +205,9 @@ def warmup_context(plan, fixture, task=None):
 def verify_inputs(folder):
     proof, plan = read(folder/'provenance.json'), read(PLAN)
     _verify_input_contents(folder, plan, proof, digest(PLAN))
-    if plan.get('pointwise_family_refresh'):
-        from .pointwise_family_refresh import verify_authentication
-        verify_authentication(folder,plan,proof)
+    if plan.get('pointwise_family_refresh') or plan.get('named_output_projection_refresh'):
+        from .baseline_refresh_dispatch import implementation
+        implementation(plan).verify_authentication(folder,plan,proof)
     if plan.get('diagnostic_kind') == 'pointwise-projection-native-pilot':
         from .pointwise_projection_roi import verify_authentication
         verify_authentication(folder, plan, proof)
@@ -446,7 +446,7 @@ def measure(inputs, out, phase, shard, diagnostic=None):
     assert manifests['old'].keys() == manifests['new'].keys()
     expected_changes = [] if phase == 'coverage' else [DLL]
     if phase == 'baseline-refresh':
-        from .pointwise_family_refresh import verify_runtime_identity
+        from .baseline_refresh_dispatch import verify_runtime_identity
         verify_runtime_identity(plan,manifests)
         expected_changes = []
     if phase == 'diagnostic' and plan.get('diagnostic_kind') == 'pointwise-projection-native-pilot':
