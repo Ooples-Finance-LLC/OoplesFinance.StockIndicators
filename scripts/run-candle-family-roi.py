@@ -11,6 +11,8 @@ parser.add_argument('--out', type=lambda value: Path(value).resolve(), required=
 args = parser.parse_args()
 if p.read(p.PLAN).get('diagnostic_kind') == 'candle-integer-window-native-pilot':
     from hosted_timing import candle_integer_roi as roi
+elif p.read(p.PLAN).get('diagnostic_kind') == 'candle-six-api-native-pilot':
+    from hosted_timing import candle_six_roi as roi
 roi.validate_scope(p.read(p.PLAN))
 if args.mode == 'prepare':
     roi.prepare(args.baseline, args.candidate, args.out)

@@ -1,0 +1,179 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "sources": {
+    "published": "ce02581b1f55400fd674b5496ee659fa0e8654fa",
+    "old": "ce02581b1f55400fd674b5496ee659fa0e8654fa",
+    "successor": "55cfd038b6c0a12138387ae7b7790039a3fd98e1",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "gpu_sources": {
+    "old": "67c1866712e5d1bec8f2cbcaca42a6641b03c19c",
+    "successor": "55cfd038b6c0a12138387ae7b7790039a3fd98e1",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "WindowLogVolatilityRegionTests",
+      "CompactLogVolatilityTests",
+      "SharedRecursiveStateTests"
+    ],
+    "successor": [
+      "CandleIntegerWindowTests",
+      "SequenceParallelExecutionTests",
+      "NeckParallelExecutionTests"
+    ],
+    "variants": [
+      "CompactMacdWordEmaTests",
+      "CompactClassicalWindowTests",
+      "ExactMeanUnitWeightTests"
+    ]
+  },
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.150.0"
+  },
+  "diagnostic_only": true,
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "cases": 60,
+  "decisions": 12,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 60
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.MatchingLow",
+              "pair": "TaLib.Candles.MatchingLow"
+            },
+            {
+              "raw": "TaLib.Candles.StickSandwich",
+              "pair": "TaLib.Candles.StickSandwich"
+            },
+            {
+              "raw": "TaLib.Candles.ThreeLineStrike",
+              "pair": "TaLib.Candles.ThreeLineStrike"
+            },
+            {
+              "raw": "TaLib.Candles.OnNeck",
+              "pair": "TaLib.Candles.OnNeck"
+            },
+            {
+              "raw": "TaLib.Candles.InNeck",
+              "pair": "TaLib.Candles.InNeck"
+            },
+            {
+              "raw": "TaLib.Candles.Thrusting",
+              "pair": "TaLib.Candles.Thrusting"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 60,
+          "decisions": 12
+        }
+      ],
+      "cases": 60,
+      "decisions": 12
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.MatchingLow",
+              "pair": "TaLib.Candles.MatchingLow"
+            },
+            {
+              "raw": "TaLib.Candles.StickSandwich",
+              "pair": "TaLib.Candles.StickSandwich"
+            },
+            {
+              "raw": "TaLib.Candles.ThreeLineStrike",
+              "pair": "TaLib.Candles.ThreeLineStrike"
+            },
+            {
+              "raw": "TaLib.Candles.OnNeck",
+              "pair": "TaLib.Candles.OnNeck"
+            },
+            {
+              "raw": "TaLib.Candles.InNeck",
+              "pair": "TaLib.Candles.InNeck"
+            },
+            {
+              "raw": "TaLib.Candles.Thrusting",
+              "pair": "TaLib.Candles.Thrusting"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 60,
+          "decisions": 12
+        }
+      ],
+      "cases": 60,
+      "decisions": 12
+    }
+  ],
+  "roi_approval": {
+    "path": "benchmarks/plans/evidence/candle-six-api-native-pilot-scope-20261115.json",
+    "sha256": "ad9869f0bbb8401fec5e5f00bebf4d502913bb3e07e2006ad6d6d13dc22907d8"
+  },
+  "baseline_inputs": {
+    "run_id": "43673961720",
+    "plan": "benchmarks/plans/hosted-window-log-positive-regions-20261115.json",
+    "plan_sha256": "65c79d85a2ac395a0478d6e0a0c173cb2714d161fb6dafa6732addd26b261503",
+    "provenance_sha256": "59d94305c3e64aaa0946438d078b7d91c14557aa217d52f151042cd0cd8a8cd7",
+    "label": "successor"
+  },
+  "candidate": {
+    "ci_run": "43777283855",
+    "producer": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "55cfd038b6c0a12138387ae7b7790039a3fd98e1",
+    "evidence_source": "39d67be49c928811ee72f48c70c04809a3d50a7d",
+    "manifest_sha256": "a6bde0215c8139779830711ed674233290d860e77b7e128e8cdf2f59f1592ebb",
+    "gpu_receipt_sha256": "fe7a7ac21ca255823e2a704cfedc6e4531a7787c64c829c780723d8b59f25049",
+    "unit_classes": [
+      "CandleIntegerWindowTests",
+      "SequenceParallelExecutionTests",
+      "NeckParallelExecutionTests"
+    ],
+    "parity_classes": [
+      "SequenceCandleTests",
+      "NeckCandleTests",
+      "SharedSequenceCandleBenchmarkTests",
+      "SharedNeckCandleBenchmarkTests"
+    ]
+  },
+  "diagnostic_kind": "candle-six-api-native-pilot"
+}

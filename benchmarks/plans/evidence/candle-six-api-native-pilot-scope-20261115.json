@@ -1,0 +1,23 @@
+{
+  "approved": true,
+  "diagnostic_only": true,
+  "qualification": false,
+  "publication": false,
+  "source": "55cfd038b6c0a12138387ae7b7790039a3fd98e1",
+  "baseline": "ce02581b1f55400fd674b5496ee659fa0e8654fa",
+  "pairs": [
+    "TaLib.Candles.MatchingLow",
+    "TaLib.Candles.StickSandwich",
+    "TaLib.Candles.ThreeLineStrike",
+    "TaLib.Candles.OnNeck",
+    "TaLib.Candles.InNeck",
+    "TaLib.Candles.Thrusting"
+  ],
+  "cases": 60,
+  "decisions": 12,
+  "max_parallel": 1,
+  "authorization": "User explicitly reaffirmed recommended six-API scope: implementation, correctness/GPU100,60-case pilot, conditional complete qualification up to180cases36decisions on at most2runners and accepted-source publication to draftPR266; no merge/release. This plan authorizes the diagnostic stage only.",
+  "history_policy_change": false,
+  "warmup_policy_change": false,
+  "runtime_policy_change": false
+}
