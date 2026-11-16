@@ -1,0 +1,67 @@
+{
+  "approved": true,
+  "baseline": "ab61b7eba91debdf481130c91a14e33d1a3e5888",
+  "scope": "Bounded candle grid study and conditional native ROI; separate from completed eight-pair harness publication",
+  "objective": "Test a reusable reduction in finite-window candle work before another full qualification.",
+  "initial_prototype_pairs": [
+    "TaLib.Candles.MatchingLow",
+    "TaLib.Candles.SeparatingLines",
+    "TaLib.Candles.TasukiGap"
+  ],
+  "potential_family_consumers": 17,
+  "evidence": {
+    "rejected_source": "55cfd038b6c0a12138387ae7b7790039a3fd98e1",
+    "rejected_native_pilot": "43779540029",
+    "code": "src/Indicators/ValuesBarExecution.CandleIntegerWindows.cs",
+    "finding": "The rejected kernel already uses 256-bar stack blocks and existing workers. It first scans four prices per bar to discover a grid, then converts them in another pass; it also constructs a body prefix for range-only consumers.",
+    "width_receipt": "Z:\\StockIndicators-Archives\\hosted-runs-20261115\\candle-range-widths-20261115.json",
+    "limitation": "The width receipt is not CPU/timing evidence. Historical report ratios are not current-head measurements. No latency or closure is promised."
+  },
+  "included": [
+    "Cap design/model/prototype at 90 minutes. Reuse unchanged existing worker/capture/block machinery; initial production draft supports only the three named consumers.",
+    "Try a power-of-two grid selected from an anchor price and certify exact integer conversion, price bounds and prefix bounds in one conversion pass. Retain the original resolver and original-state fallback on rejection.",
+    "Avoid constructing unused prefix/price fields for each selected kind. Preserve all threshold arithmetic, required outputs, warmup, canonical zero and signal ranks.",
+    "Keep the existing route below 8,192 bars. Preserve Full history, owned results, source single-read behavior, validation/cancellation and deferred errors.",
+    "Implement and adversarially review the whole bounded diff before one grouped focused correctness build. Independent references cover dense positive signals, block boundaries, periods 1/2/64, exponent changes, signed zero, subnormals, extremes and rejected grids.",
+    "Only if the model/design is promising: fresh source-bound focused correctness/GPU100, actual route/worker execution evidence, then 50 fresh diagnostic cases / 10 source comparisons:three candle pairs plus EMA/T3 batch sentinels, both sizes, one measurement runner.",
+    "Retain 1,000 unmeasured batch warmups, ten measured iterations, default runtime and existing quiet-CPU/build gates. Diagnostic data cannot qualify or publish source or update the report."
+  ],
+  "launch_gate": [
+    "Stop at 90 minutes if no promising correct prototype.",
+    "Do not propose full qualification unless at least two candle pairs produce new 10k native crossovers relative to the measured baseline, with separated intervals in both candidate rounds and at least 10% mean margin in each candidate round.",
+    "Reject source regressions across both sizes and both sentinels; preserve all results and native uncertainty. Baseline rows already winning are not new source closures."
+  ],
+  "excluded": [
+    "No full qualification or publication under this approval.",
+    "No automatic expansion to all 17 consumers.",
+    "No history-layout change, public API, dependency update, shared arithmetic change, benchmark output pruning or measurement-policy change.",
+    "No blind import of the rejected six-API draft; new source and evidence remain separate."
+  ],
+  "adversarial_review": [
+    "Do not propose chunking/threading as new; those were already present in the rejected draft.",
+    "One-pass scaling must prove exactness; an unchecked floating-to-integer cast is insufficient.",
+    "A finer chosen grid may reject otherwise valid blocks; preserve fallbacks and measure acceptance and end-to-end cost.",
+    "Unused-field removal must follow actual predicate dependencies; near/equal/body thresholds can need different windows.",
+    "Rare zero-signal fixtures cannot prove correctness; require dense positives and boundaries.",
+    "Primitive call-count reduction is not timing evidence. Only fresh end-to-end native ROI can justify qualification.",
+    "EMA/T3 cover the known shared-dispatch risk; caller/worker samples must not be mislabeled CPU or latency."
+  ],
+  "added_effort": "90-minute study cap; if promising, one focused CI/GPU cycle and 50-case native ROI, roughly 2-3 hours total.",
+  "approval_reason": "Supplied AGENTS.md requires approval before substantial redesign or material added verification cost.",
+  "approved_user_reply": "Approve study and conditional ROI (Recommended)",
+  "approved_utc": "2026-11-16T15:34:51.294999+00:00",
+  "diagnostic_only": true,
+  "qualification": false,
+  "publication": false,
+  "cases": 50,
+  "decisions": 10,
+  "max_parallel": 1,
+  "pairs": [
+    "TaLib.Candles.MatchingLow",
+    "TaLib.Candles.SeparatingLines",
+    "TaLib.Candles.TasukiGap",
+    "TaLib.Functions.Ema",
+    "TaLib.Functions.T3"
+  ],
+  "source": "f5cf0195e9a305cc08e9c8bf0bbd9503b455bcf5"
+}

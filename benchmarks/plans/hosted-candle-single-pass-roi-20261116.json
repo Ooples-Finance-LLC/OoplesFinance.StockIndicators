@@ -1,0 +1,166 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "sources": {
+    "published": "ab61b7eba91debdf481130c91a14e33d1a3e5888",
+    "old": "ab61b7eba91debdf481130c91a14e33d1a3e5888",
+    "successor": "f5cf0195e9a305cc08e9c8bf0bbd9503b455bcf5",
+    "variants": "9a45372530e49718b01b6524f9a0db993514e1e8"
+  },
+  "gpu_sources": {
+    "old": "5be1a81d02ad01393f3fa8ede764e914252d0e96",
+    "successor": "f5cf0195e9a305cc08e9c8bf0bbd9503b455bcf5",
+    "variants": "9a45372530e49718b01b6524f9a0db993514e1e8"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "OwnedHistoryBatchTests"
+    ],
+    "successor": [
+      "CandleSinglePassGridTests",
+      "OwnedHistoryBatchTests"
+    ],
+    "variants": [
+      "OwnedHistoryBatchTests"
+    ]
+  },
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.150.0"
+  },
+  "diagnostic_only": true,
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "cases": 50,
+  "decisions": 10,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 60
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.MatchingLow",
+              "pair": "TaLib.Candles.MatchingLow"
+            },
+            {
+              "raw": "TaLib.Candles.SeparatingLines",
+              "pair": "TaLib.Candles.SeparatingLines"
+            },
+            {
+              "raw": "TaLib.Candles.TasukiGap",
+              "pair": "TaLib.Candles.TasukiGap"
+            },
+            {
+              "raw": "TaLib.Functions.Ema",
+              "pair": "TaLib.Functions.Ema"
+            },
+            {
+              "raw": "TaLib.Functions.T3",
+              "pair": "TaLib.Functions.T3"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 50,
+          "decisions": 10
+        }
+      ],
+      "cases": 50,
+      "decisions": 10
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.MatchingLow",
+              "pair": "TaLib.Candles.MatchingLow"
+            },
+            {
+              "raw": "TaLib.Candles.SeparatingLines",
+              "pair": "TaLib.Candles.SeparatingLines"
+            },
+            {
+              "raw": "TaLib.Candles.TasukiGap",
+              "pair": "TaLib.Candles.TasukiGap"
+            },
+            {
+              "raw": "TaLib.Functions.Ema",
+              "pair": "TaLib.Functions.Ema"
+            },
+            {
+              "raw": "TaLib.Functions.T3",
+              "pair": "TaLib.Functions.T3"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 50,
+          "decisions": 10
+        }
+      ],
+      "cases": 50,
+      "decisions": 10
+    }
+  ],
+  "roi_approval": {
+    "path": "benchmarks/plans/evidence/candle-single-pass-roi-scope-20261116.json",
+    "sha256": "e4a1b5c9beab2805033b1093dcbb921ca8e8beb5365b689f6d776eef95ee11bc"
+  },
+  "baseline_inputs": {
+    "run_id": "43880487485",
+    "plan": "benchmarks/plans/hosted-named-projection-refresh-20261116.json",
+    "plan_sha256": "03e891d5220a12f0983a2f8d8d1b0de2cdc4f751cea0a07625a91dc6e21661b8",
+    "provenance_sha256": "92977e9786050146dbe97748c8a28d59e8eb47be5f4b5f85ae064ec4fcacef3a",
+    "label": "successor"
+  },
+  "candidate": {
+    "ci_run": "43909481425",
+    "producer": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "f5cf0195e9a305cc08e9c8bf0bbd9503b455bcf5",
+    "evidence_source": "dd8d5a6af4c0b2ce67946b5ffb728b894e3d26b5",
+    "manifest_sha256": "7ff025770c8c3d028c84f270743d5d2a85e3ce0ab6dbe5a24a08709da37aa6d8",
+    "gpu_receipt_sha256": "66c1a6a7a6889b2a242d3c32b9311bc787708076631fe0a73ff92658be917b0f",
+    "unit_classes": [
+      "CandleSinglePassGridTests",
+      "OwnedHistoryBatchTests"
+    ],
+    "parity_classes": [
+      "SequenceCandleTests",
+      "MatchedLinesTests",
+      "GapContinuationTests",
+      "ExponentialAverageComparisonTests",
+      "TillsonComparisonTests"
+    ]
+  },
+  "diagnostic_kind": "candle-single-pass-native-pilot"
+}
