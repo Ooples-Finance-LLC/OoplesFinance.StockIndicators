@@ -44,6 +44,11 @@ class CurrentBaselineReportAdmissionTests(unittest.TestCase):
             document += '<section id="explorer"><p class="sub">old</p></section>'
             document += '<section id="rollout-status"><p class="sub">Rollout published <code>old</code>. old</p></section>'
             document += '<table id="builder-current-results"><tbody></tbody></table>'
+            document += """<script>
+$('source').innerHTML='old';
+const keys=Object.keys(D.rows[0]).filter(k=>k!=='raw');
+const detail=`${esc(r.raw.Ooples.host.ProcessorName)}`;
+</script>"""
             live = root/'live.html'; live.write_bytes(document.encode())
             plan = p.read(p.REPO/refresh.BASE_PLAN)
             plan.pop('named_output_projection_refresh')
