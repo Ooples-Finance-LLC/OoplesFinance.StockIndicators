@@ -22,6 +22,10 @@ CHANGES = {p.BENCH+'/LibraryComparisons/'+name+'.cs' for name in
            ('CircularComparison', 'ElementaryMathComparison', 'TranscendentalComparison', 'PointwiseComparisonPublisher')}
 CHANGES.add(p.TESTS+'/PointwiseComparisonPublisherTests.cs')
 APPROVAL = 'benchmarks/plans/evidence/pointwise-projection-pilot-scope-20261116.json'
+PREPARED = dict(run_id='43790197468', workflow_head='12a4c84373e095d104936ca465adfe5dbd2b3abe',
+    plan='benchmarks/plans/evidence/pointwise-projection-verified-preparation-plan-20261116.json',
+    plan_sha256='ce6408b8b933a476da13cfab3c9860b3945c13d70868dcb912cba89b3a28e509',
+    provenance_sha256='72a71a6fcc069f9447e071a10ed6dfecc5593c746cfebda67ef27cf3007110ee')
 
 
 def validate_scope(plan):
@@ -42,6 +46,14 @@ def validate_scope(plan):
     assert plan['baseline_inputs']['run_id'] == '43673961720'
     assert plan['baseline_inputs']['plan'] == BASE_PLAN and plan['baseline_inputs']['plan_sha256'] == BASE_PLAN_SHA
     assert not any(plan.get(k) for k in ('targeted_reference', 'coverage_reference', 'reuse_inputs', 'qualify_variants', 'trix_preflight'))
+    if plan.get('prepared_harness_reuse'):
+        assert plan['prepared_harness_reuse'] == PREPARED
+
+
+def verify_runtime_identity(plan, manifests):
+    validate_scope(plan)
+    assert plan['sources']['old'] == plan['sources']['successor'] == PUBLISHED
+    assert manifests['old'] == manifests['new'], 'This diagnostic requires byte-identical production and harness under both labels'
 
 
 def publisher_checks(path):
@@ -70,6 +82,48 @@ def verify_authentication(folder, plan, proof):
         for suffix in ('-original-gpu-receipt.json', '-original-gpu-gpu.trx.gz'):
             assert p.digest(folder/'evidence'/(label+suffix)) == original['evidence_manifest'][original_label+suffix]
     assert proof['checks']['variant-harness']['passed'] == 13
+    if plan.get('prepared_harness_reuse'):
+        assert proof['harness_input_reuse'] == PREPARED
+        path=folder/'evidence/projection-verified-preparation.json'
+        assert p.digest(path) == PREPARED['provenance_sha256']
+        previous=p.read(path)
+        assert (previous['run_id'],previous['workflow_head'],previous['plan_sha256']) == (
+            PREPARED['run_id'],PREPARED['workflow_head'],PREPARED['plan_sha256'])
+        for key in ('sources','sdk','checks','common_manifest','production_sha256','harness_authentication','tested_runtime_dependencies'):
+            assert proof[key] == previous[key], key
+        for name,sha in previous['evidence_manifest'].items():
+            assert p.digest(folder/'evidence'/name) == sha
+        assert p.digest(folder/'evidence/projection-original-fixture-inventory.json') == previous['fixture_inventory_sha256']
+    else:
+        assert not proof.get('harness_input_reuse')
+
+
+def rebind(source, out):
+    plan=p.read(p.PLAN);validate_scope(plan)
+    assert plan['prepared_harness_reuse'] == PREPARED
+    source,out=Path(source).resolve(),Path(out).resolve()
+    assert not out.exists() and not out.is_relative_to(source)
+    assert p.digest(p.REPO/PREPARED['plan']) == PREPARED['plan_sha256']
+    assert p.digest(source/'provenance.json') == PREPARED['provenance_sha256']
+    with selected_plan(p.REPO/PREPARED['plan']):
+        previous=p.verify_inputs(source)
+        original_plan=p.read(p.REPO/PREPARED['plan'])
+    assert original_plan['sources'] == plan['sources']
+    assert original_plan['measurement_policy'] == plan['measurement_policy']
+    assert previous['run_id'] == PREPARED['run_id'] and previous['workflow_head'] == PREPARED['workflow_head']
+    shutil.copytree(source,out)
+    shutil.copy2(source/'provenance.json',out/'evidence/projection-verified-preparation.json')
+    shutil.copy2(source/'fixture-method-inventory.json',out/'evidence/projection-original-fixture-inventory.json')
+    proof=copy.deepcopy(previous)
+    proof.update(plan_sha256=p.digest(p.PLAN),workflow_head=p.git('rev-parse','HEAD'),
+        run_id=os.environ['GITHUB_RUN_ID'],run_attempt=os.environ['GITHUB_RUN_ATTEMPT'],
+        preparation_mode='authenticated-projection-harness-reused',harness_input_reuse=PREPARED,
+        evidence_manifest=p.manifest(out/'evidence'))
+    from .fixture_inventory import record_inventory
+    proof['fixture_inventory_sha256']=record_inventory(out,plan,p.digest(p.PLAN))
+    p.write(out/'provenance.json',proof)
+    p.verify_inputs(out)
+    return proof
 
 
 def prepare(baseline, source, out):

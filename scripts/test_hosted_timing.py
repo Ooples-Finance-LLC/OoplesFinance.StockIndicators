@@ -13,12 +13,14 @@ from hosted_timing.checkpoints import case_key, combine_reports
 from hosted_timing.verify import collect, collect_preflight, archived, check_log, sample
 
 
-def make_evidence(folder, phase, new_mean=50, preflight=False):
+def make_evidence(folder, phase, new_mean=50, preflight=False, same_production=False):
     plan = read(PLAN)
     inputs = dict(sources=plan['sources'], plan_sha256=digest(PLAN), sdk=plan['proposed_dotnet_sdk'],
         common_manifest={DLL: 'variant', 'harness.dll': 'common'},
         production_sha256=dict(old='old', successor='successor', variants='variant'),
         run_id='100', run_attempt='1', workflow_head='workflow')
+    if same_production:
+        inputs['production_sha256']['successor'] = inputs['production_sha256']['old']
     input_path = folder/'input.json'
     write(input_path, inputs)
     for shard in ([0] if preflight else phase_shards(plan, phase)):

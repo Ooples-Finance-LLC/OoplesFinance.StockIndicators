@@ -109,6 +109,9 @@ def _collect(folder, phase, *, preflight, diagnostic=False):
         input_hashes.add(proof['input_provenance_sha256'])
         run_ids.add((host['run_id'], host['run_attempt'], inputs['workflow_head']))
         manifests = proof['binary_manifest']
+        if phase == 'diagnostic' and plan.get('diagnostic_kind') == 'pointwise-projection-native-pilot':
+            from .pointwise_projection_roi import verify_runtime_identity
+            verify_runtime_identity(plan, manifests)
         labels = phase_labels(phase)
         for arm, label in zip(('old', 'new'), labels):
             expected = dict(inputs['common_manifest'])

@@ -12,6 +12,25 @@ PLAN = p.REPO/'benchmarks/plans/hosted-pointwise-projection-native-pilot-2026111
 
 
 class ProjectionRoiTests(unittest.TestCase):
+    def evidence(self, root):
+        test_hosted_timing.make_evidence(root,'diagnostic',same_production=True)
+
+    def test_identical_runtime_is_required_for_this_diagnostic(self):
+        plan=p.read(PLAN)
+        manifests=dict(old={p.DLL:'production','harness.dll':'harness'},new={p.DLL:'production','harness.dll':'harness'})
+        roi.verify_runtime_identity(plan,manifests)
+        for name in (p.DLL,'harness.dll'):
+            broken=copy.deepcopy(manifests);broken['new'][name]='different'
+            with self.subTest(name=name),self.assertRaises(AssertionError):roi.verify_runtime_identity(plan,broken)
+
+    def test_reuse_rejects_changed_preparation_before_copying(self):
+        with tempfile.TemporaryDirectory() as tmp,patch.object(p,'PLAN',PLAN):
+            source=Path(tmp)/'source';source.mkdir()
+            (source/'provenance.json').write_text('{}')
+            out=Path(tmp)/'out'
+            with self.assertRaises(AssertionError):roi.rebind(source,out)
+            self.assertFalse(out.exists())
+
     def test_publisher_count_is_a_subset_of_the_complete_trx(self):
         with tempfile.TemporaryDirectory() as tmp:
             path=Path(tmp)/'cases.trx'
@@ -30,7 +49,7 @@ class ProjectionRoiTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp, patch.object(p,'PLAN',PLAN), patch.object(verify,'PLAN',PLAN), \
                 patch.object(test_hosted_timing,'PLAN',PLAN):
             root=Path(tmp)
-            test_hosted_timing.make_evidence(root,'diagnostic')
+            self.evidence(root)
             result=roi.collect(root)
             self.assertEqual((30,6),(result['case_count'],result['decision_count']))
             self.assertFalse(result['accepted'] or result['qualification'] or result['report_imported'] or result['production_optimization'])
@@ -57,7 +76,7 @@ class ProjectionRoiTests(unittest.TestCase):
         for invalid in ('missing','cpu'):
             with tempfile.TemporaryDirectory() as tmp,patch.object(p,'PLAN',PLAN),patch.object(verify,'PLAN',PLAN), \
                     patch.object(test_hosted_timing,'PLAN',PLAN):
-                root=Path(tmp);test_hosted_timing.make_evidence(root,'diagnostic')
+                root=Path(tmp);self.evidence(root)
                 path=root/'shard0/status.json';state=p.read(path)
                 if invalid=='missing':state['rounds'].pop()
                 else:state['rounds'][0]['operation_checkpoints'][0]['quiet_cpu_samples'][0]=15.01

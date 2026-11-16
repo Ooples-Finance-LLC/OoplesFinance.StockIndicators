@@ -679,15 +679,6 @@ jobs:
             scripts
             .github
             benchmarks/plans
-      - uses: actions/checkout@v7
-        with:
-          ref: 01f83663a8e7580a2941cc8bf2b0e92c1dd4a296
-          path: harness-source
-          fetch-depth: 1
-          sparse-checkout: |
-            src
-            benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks
-            benchmarks/OoplesFinance.StockIndicators.CompetitorTests
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.403'
@@ -707,12 +698,12 @@ jobs:
           if ($testExit -ne 0) { exit $testExit }
       - uses: actions/download-artifact@v8
         with:
-          name: hosted-inputs
-          path: baseline-inputs
-          run-id: 43673961720
+          name: pointwise-projection-roi-diagnostic
+          path: verified-inputs
+          run-id: 43790197468
           github-token: ${{ github.token }}
-      - name: Build only harness, verify outputs and authenticate unchanged production/GPU evidence
-        run: python scripts/run-pointwise-projection-roi.py prepare --baseline baseline-inputs --source harness-source --out projection-inputs
+      - name: Authenticate and reuse verified harness without rebuilding
+        run: python scripts/run-pointwise-projection-roi.py rebind --inputs verified-inputs/projection-inputs --out projection-inputs
       - name: Measure thirty approved diagnostic cases
         run: python scripts/run-pointwise-projection-roi.py measure --inputs projection-inputs --out projection-diagnostic/evidence/shard0
       - name: Independently check complete diagnostic
@@ -723,6 +714,7 @@ jobs:
           name: pointwise-projection-roi-diagnostic
           path: |
             projection-inputs/
-            projection-diagnostic/
+            projection-diagnostic/evidence/shard0/
+            projection-diagnostic/summary.json
           retention-days: 14
           if-no-files-found: error

@@ -432,6 +432,10 @@ def measure(inputs, out, phase, shard, diagnostic=None):
         manifests[arm] = manifest(runtime)
     assert manifests['old'].keys() == manifests['new'].keys()
     expected_changes = [] if phase == 'coverage' else [DLL]
+    if phase == 'diagnostic' and plan.get('diagnostic_kind') == 'pointwise-projection-native-pilot':
+        from .pointwise_projection_roi import verify_runtime_identity
+        verify_runtime_identity(plan, manifests)
+        expected_changes = []
     assert [p for p in manifests['old'] if manifests['old'][p] != manifests['new'][p]] == expected_changes
     identity = dict(machine=platform.node(), platform=platform.platform(), cpu=platform.processor(),
                     logical_cpus=psutil.cpu_count(), runner_image=os.environ.get('ImageVersion'),

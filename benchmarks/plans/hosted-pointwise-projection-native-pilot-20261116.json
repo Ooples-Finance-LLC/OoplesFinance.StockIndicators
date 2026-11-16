@@ -152,5 +152,17 @@
     "run_id": "43789411806",
     "measured_cases": 0,
     "reason": "All73CPUchecks passed; orchestration compared total73 to publisher subset22. Class-scoped count gate corrected, with a regression test; oracle test now awaits builder. No timing samples exist or are reused."
+  },
+  "prepared_harness_reuse": {
+    "run_id": "43790197468",
+    "workflow_head": "12a4c84373e095d104936ca465adfe5dbd2b3abe",
+    "plan": "benchmarks/plans/evidence/pointwise-projection-verified-preparation-plan-20261116.json",
+    "plan_sha256": "ce6408b8b933a476da13cfab3c9860b3945c13d70868dcb912cba89b3a28e509",
+    "provenance_sha256": "72a71a6fcc069f9447e071a10ed6dfecc5593c746cfebda67ef27cf3007110ee"
+  },
+  "prior_runner_failure": {
+    "run_id": "43790197468",
+    "measured_cases": 0,
+    "reason": "Complete73adapter+13variant+GPUauthenticationpassed. GenericrunnerrejectedidenticalDLLlabels. Restrictsame-runtimeguardtothisdiagnosticandreuseverifiedinputswithoutrebuilding."
   }
 }
