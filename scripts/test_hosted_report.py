@@ -38,6 +38,36 @@ class HostedReportTests(unittest.TestCase):
     def test_sharded_provenance_and_unchanged_rows(self):
         self.check_report('successor')
 
+    def test_full_family_refresh_preserves_builders_and_identifies_identical_binaries(self):
+        self.check_report('baseline-refresh')
+
+    def test_refresh_requires_authenticated_inputs(self):
+        with self.assertRaisesRegex(AssertionError,'authenticated canonical inputs'):
+            stage('missing','missing','missing','missing',phase='baseline-refresh')
+
+    def test_refresh_archive_never_claims_source_qualification(self):
+        selected=REPO/'benchmarks/plans/hosted-pointwise-family-refresh-20261116.json'
+        for module in ('hosted_timing.pipeline','hosted_timing.verify','hosted_timing.archive','test_hosted_timing'):
+            self.enterContext(patch(module+'.PLAN',selected))
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); raw=root/'raw'; raw.mkdir()
+            make_evidence(raw,'baseline-refresh',same_production=True)
+            prepared=root/'prepared'; prepared.mkdir()
+            (prepared/'provenance.json').write_bytes((raw/'input.json').read_bytes())
+            write(prepared/'evidence/check.json',{'fresh_gpu':True})
+            def source_diff(args,**kwargs):
+                return b'' if args[-2:]==['src','tests'] else b'harness patch'
+            with patch('hosted_timing.archive.verify_inputs',return_value=read(prepared/'provenance.json')), \
+                 patch('hosted_timing.archive.subprocess.check_output',side_effect=source_diff):
+                destination=archive(raw,prepared,root/'repo','baseline-refresh')
+            decision=read(destination/'decision.json')
+            self.assertEqual(decision['status'],'baseline-refresh-verified')
+            self.assertEqual((decision['case_count'],decision['decision_count']),(190,38))
+            for key in ('accepted','production_integrated','production_qualification','production_optimization'):
+                self.assertFalse(decision[key])
+            self.assertEqual(gzip.decompress((destination/'candidate-source.patch.gz').read_bytes()),b'')
+            self.assertEqual(gzip.decompress((destination/'harness-source.patch.gz').read_bytes()),b'harness patch')
+
     def test_targeted_report_preserves_other_pairs_and_supports_subsequent_updates(self):
         self.check_report('targeted')
 
@@ -59,10 +89,32 @@ class HostedReportTests(unittest.TestCase):
         self.assertNotIn('Harami',disclosure)
         self.assertEqual(pair_warmup_disclosure(dict(measurement_policy={})), '')
 
+    def test_new_plan_retains_earlier_row_warmup_disclosures(self):
+        plan=dict(measurement_policy=dict(fixed_invocation_warmups=1000))
+        pairs=['TaLib.Candles.Harami','TaLib.Candles.AbandonedBaby','TaLib.Functions.Add']
+        rows=[dict(pair=pair,bars=n,warmup_count=20000) for pair in pairs for n in (1000,10000)]
+        rows += [dict(pair='TaLib.Candles.Hammer',bars=n,warmup_count=1000) for n in (1000,10000)]
+        disclosure=pair_warmup_disclosure(plan,rows)
+        for pair in pairs:self.assertIn(pair,disclosure)
+        self.assertNotIn('TaLib.Candles.Hammer',disclosure)
+        self.assertIn('20,000 unmeasured warmups for both libraries at both bar counts',disclosure)
+
+    def test_single_size_warmup_provenance_does_not_claim_both_sizes(self):
+        disclosure=pair_warmup_disclosure(dict(measurement_policy={}),[
+            dict(pair='TaLib.Functions.Add',bars=1000,warmup_count=20000),
+            dict(pair='TaLib.Functions.Add',bars=10000,warmup_count=1000)])
+        self.assertIn('TaLib.Functions.Add at 1,000 bars',disclosure)
+        self.assertNotIn('at both bar counts',disclosure)
+
     def check_report(self,phase,snapshot=False,builder_only=False):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp); raw=root/'raw'; raw.mkdir()
             selected=PLAN
+            refreshing=phase=='baseline-refresh'
+            if refreshing:
+                selected=REPO/'benchmarks/plans/hosted-pointwise-family-refresh-20261116.json'
+                for module in ('hosted_timing.pipeline','hosted_timing.verify','hosted_timing.report','test_hosted_timing'):
+                    self.enterContext(patch(module+'.PLAN',selected))
             if phase=='targeted':
                 selected=root/'plan.json';plan=read(REPO/'benchmarks/plans/hosted-hilbert-fir-20261102.json')
                 if snapshot:
@@ -90,11 +142,18 @@ class HostedReportTests(unittest.TestCase):
                 for module in ('hosted_timing.pipeline','hosted_timing.verify','hosted_timing.report','test_hosted_timing'):
                     self.enterContext(patch(module+'.PLAN',selected))
                 self.enterContext(patch('hosted_timing.targeted.verify_reference'))
-            make_evidence(raw,phase)
+            make_evidence(raw,phase,same_production=refreshing)
+            prepared=root/'prepared'; prepared.mkdir()
+            (prepared/'provenance.json').write_bytes((raw/'input.json').read_bytes())
+            inputs=read(prepared/'provenance.json')
+            if refreshing:
+                self.enterContext(patch('hosted_timing.pipeline.verify_inputs',return_value=inputs))
             pairs={op['pair'] for shard in phase_shards(read(selected),phase) for t in phase_tasks(read(selected),phase,shard)
                    if t['fixture']=='LibraryPairBenchmarks' for op in t['operations']}
             data=dict(evidence=dict(sourceSha='old'),rows=[dict(pair=p,bars=n,source_sha='old',measurement_run_url='old-url',
                 competitor_over_ooples=1,raw={}) for p in sorted(pairs|{'unchanged'}) for n in (1000,10000)])
+            for row in data['rows']:
+                if row['pair']=='unchanged': row['warmup_count']=20000
             original=copy.deepcopy(data['rows'][-2:])
             # Explicit sentinel indexing avoids relying on lexical order.
             original=[copy.deepcopy(r) for r in data['rows'] if r['pair']=='unchanged']
@@ -123,7 +182,7 @@ const detail=`${esc(r.raw.Ooples.host.ProcessorName)}`;
                  patch('hosted_timing.report.subprocess.run'),patch.dict('sys.modules',{'primary_baseline_report':primary}):
                 # Equivalent paths must work even when archived() canonicalizes
                 # short Windows names or parent-directory components.
-                candidate=stage(live,raw/'..'/'raw',repo,root/'staged',phase=phase)
+                candidate=stage(live,raw/'..'/'raw',repo,root/'staged',phase=phase,inputs=prepared if refreshing else None)
                 if phase=='targeted':
                     refreshed=root/'refreshed.html';refreshed.write_bytes(candidate.read_bytes())
                     repeated=stage(refreshed,raw,repo,root/'repeated',phase=phase)
@@ -133,6 +192,16 @@ const detail=`${esc(r.raw.Ooples.host.ProcessorName)}`;
             after=embedded('dataset')
             self.assertEqual([r for r in after['rows'] if r['pair']=='unchanged'],original)
             changed=[r for r in after['rows'] if r['pair']!='unchanged']
+            if refreshing:
+                self.assertEqual(len(changed),38)
+                self.assertEqual(embedded('current-competitor-data')['receipts'],builder['receipts'])
+                self.assertEqual(read(root/'staged/staged.json')['changed_builder_slots'],0)
+                self.assertTrue(all(r['measurement_kind']=='harness-baseline-refresh' and not r['production_optimization'] for r in changed))
+                self.assertTrue(all(r['same_binary_verdict'] in ('faster','slower','inconclusive') and len(r['native_round_classifications'])==4 for r in changed))
+                self.assertTrue(all(r['benchmark_assembly_sha256'] and r['production_assembly_sha256'] and r['canonical_gpu_receipt_sha256'] for r in changed))
+                self.assertEqual(after['evidence']['harnessBaselineRefreshes'][0]['cases'],190)
+                self.assertIn('identical binaries',result)
+                self.assertIn('not production algorithm speedups',result)
             self.assertEqual(len(changed),2*len(pairs))
             self.assertGreater(len({r['measurement_shard'] for r in changed}),1 if phase=='successor' else 0)
             self.assertTrue(all(r['measurement_run_id']=='100' and r['measurement_host_nonce'] for r in changed))
@@ -163,10 +232,11 @@ const detail=`${esc(r.raw.Ooples.host.ProcessorName)}`;
                     self.assertEqual({(row['bars'],row['method']) for row in receipt['rows']},
                         {(n,m) for n in (1000,10000) for m in snapshot_methods})
                 self.assertEqual(read(root/'staged/staged.json')['changed_snapshot_rows'],2*len(snapshot_pairs))
-            elif not builder_only:
+            elif not builder_only and not refreshing:
                 self.assertGreater(len({c['measurement_shard'] for r in receipts[1:] for c in r['comparisons']}),1)
             self.assertIn('D.rows.flatMap',result)
             self.assertIn('absolute timings are compared only within the same runner',result)
+            self.assertIn(('unchanged use the approved' if refreshing else 'Batch timings for unchanged use the approved')+' 20,000 unmeasured warmups',result)
             self.assertIn('<section id="ema-constructor-results"><p>Independent constructor measurements</p></section>',result)
             self.assertNotIn('Previous summary',result)
             self.assertEqual(live.read_text(encoding='utf-8'),document)

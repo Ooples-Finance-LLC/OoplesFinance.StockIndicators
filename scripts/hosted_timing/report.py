@@ -16,22 +16,48 @@ from .verify import archived, collect
 
 
 
-def pair_warmup_disclosure(plan):
-    grouped=defaultdict(list)
-    for pair,count in sorted(plan['measurement_policy'].get('fixed_invocation_pair_warmups',{}).items()):
-        grouped[count].append(pair)
-    return ''.join(' Batch timings for '+', '.join(names)+f' use the approved {count:,} unmeasured warmups for both libraries at both bar counts; builder policies are unchanged.'
-                   for count,names in sorted(grouped.items()))
+def pair_warmup_disclosure(plan,rows=None):
+    grouped=defaultdict(dict)
+    if rows is None:
+        for pair,count in plan['measurement_policy'].get('fixed_invocation_pair_warmups',{}).items():
+            grouped[count][pair]={1000,10000}
+    else:
+        # A mixed report retains policies from earlier accepted batches. Use
+        # measured row provenance, not only the plan currently being imported.
+        for row in rows:
+            count=row.get('warmup_count',1000)
+            if count != 1000:
+                grouped[count].setdefault(row['pair'],set()).add(row['bars'])
+    result=''
+    for count,pairs in sorted(grouped.items()):
+        both=all(bars=={1000,10000} for bars in pairs.values())
+        names=[pair if bars=={1000,10000} else pair+' at '+', '.join(f'{n:,}' for n in sorted(bars))+' bars'
+               for pair,bars in sorted(pairs.items())]
+        result += ' Batch timings for '+', '.join(names)+f' use the approved {count:,} unmeasured warmups for both libraries'+(' at both bar counts' if both else ' at the listed bar counts')+'; builder policies are unchanged.'
+    return result
 
 
-def stage(live, raw, repo, out, phase='successor'):
-    assert phase in ('successor','targeted')
+
+def stage(live, raw, repo, out, phase='successor', inputs=None):
+    assert phase in ('successor','targeted','baseline-refresh')
     live, raw, repo, out = (Path(p).resolve() for p in (live, raw, repo, out))
-    summary = collect(raw, phase)
-    assert summary['accepted'], 'Only the complete accepted successor can replace report rows'
+    refreshing=phase=='baseline-refresh'
+    if refreshing:
+        from . import pipeline,pointwise_family_refresh as refresh
+        assert inputs is not None, 'A baseline refresh requires authenticated canonical inputs'
+        verified_inputs=pipeline.verify_inputs(Path(inputs).resolve())
+        summary=refresh.collect(raw)
+        assert summary['baseline_refresh_verified'] and not summary['accepted'] and not summary['production_qualification']
+        assert summary['input_provenance_sha256'] == digest(Path(inputs).resolve()/'provenance.json')
+
+    else:
+        summary = collect(raw, phase)
+        assert summary['accepted'], 'Only the complete accepted successor can replace report rows'
     source = summary['sources']['new']
     head = subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip()
     subprocess.run(['git','diff','--exit-code',source,head,'--','src','tests'],cwd=repo,check=True)
+    if refreshing:
+        subprocess.run(['git','diff','--exit-code',source,head,'--',pipeline.BENCH,pipeline.TESTS],cwd=repo,check=True)
     original = live.read_bytes()
     document = original.decode('utf-8')
     def embedded(name):
@@ -130,6 +156,16 @@ def stage(live, raw, repo, out, phase='successor'):
             row['raw'][method]=dict(samples=stats['OriginalValues'],host=host,report=file,confidence_interval=stats['ConfidenceInterval'])
         row.update(competitor_over_ooples=row['competitor_mean_ns']/row['ooples_mean_ns'],source_sha=source,
                    measurement_run_url=link,**provenance)
+        if refreshing:
+            native=next(item for item in summary['native_review']['rows'] if (item['pair'],item['bars'])==(row['pair'],row['bars']))
+            aa=next(item for item in summary['decisions'] if (item['pair'],item['bars'])==(row['pair'],row['bars']))
+            row.update(measurement_kind='harness-baseline-refresh',production_optimization=False,
+                benchmark_source_sha=refresh.HARNESS,benchmark_assembly_sha256=refresh.HARNESS_SHA,
+                production_assembly_sha256=verified_inputs['production_sha256']['successor'],
+                canonical_gpu_source_sha=refresh.CANONICAL,
+                canonical_gpu_receipt_sha256=read(PLAN)['candidate']['gpu_receipt_sha256'],
+                same_binary_verdict=aa['verdict'],native_round_classifications=native['round_classifications'],
+                native_consensus=native['native_classification'],native_control_round=2,native_control_count=1)
         if row['bars']==1000:
             overrides.append(dict(pair=row['pair'],sourceSha=source,runUrl=link,reportSha256=sha,
                 round=2,selection='Chronologically final candidate round.',measurementLocation='GitHub-hosted Windows',**provenance))
@@ -138,6 +174,13 @@ def stage(live, raw, repo, out, phase='successor'):
     data['evidence'].setdefault('baseSourceSha',data['evidence']['sourceSha'])
     data['evidence']['sourceSha']=None
     data['evidence']['rowOverrides']=[r for r in data['evidence'].get('rowOverrides',[]) if r['pair'] not in pairs]+overrides
+    if refreshing:
+        assert pairs==set(refresh.PAIRS) and len(baseline)==76
+        data['evidence'].setdefault('harnessBaselineRefreshes',[]).append(dict(
+            production_source_sha=refresh.CANONICAL,benchmark_source_sha=refresh.HARNESS,
+            benchmark_assembly_sha256=refresh.HARNESS_SHA,run_id=run,url=url,pairs=sorted(pairs),
+            cases=190,same_binary_comparisons=38,production_optimization=False,
+            aa_verdicts=summary['verdicts'],native_review=summary['native_review']))
     if snapshot_receipts:
         snapshot_pairs={row['pair'] for receipt in snapshot_receipts for row in receipt['rows']}
         previous=data['evidence'].get('snapshotMeasurements',[])
@@ -184,7 +227,9 @@ def stage(live, raw, repo, out, phase='successor'):
     disclosure=' Each row identifies its measured source and run. Results combine earlier measurements and GitHub-hosted Windows measurements; absolute timings are compared only within the same runner.'
     if read(PLAN)['measurement_policy'].get('fixed_invocation_warmups') == 1000:
         disclosure += ' Latest fixed-invocation batch timings use 1,000 unmeasured warmups; builder timings retain ten warmups. Both use ten measured iterations.'
-    disclosure += pair_warmup_disclosure(read(PLAN))
+    disclosure += pair_warmup_disclosure(read(PLAN),data['rows'])
+    if data['evidence'].get('harnessBaselineRefreshes'):
+        disclosure += ' Pointwise harness baseline refreshes remove three intermediate projection arrays while retaining Full history and owned outputs; they are not production algorithm speedups. Their rows identify the canonical production and benchmark builds. Identical-binary A/A verdicts are timing-variability warnings. Four owned rounds are compared with the native control measured in round two; mixed or inconclusive outcomes remain uncertain.'
     if builder_control_receipts:
         names=sorted({row['pair'] for receipt in builder_control_receipts for row in receipt['rows']})
         disclosure += ' Fresh builder-only source controls for '+', '.join(names)+' contain no native timings; their existing builder/native comparisons retain their original source and run provenance.'
@@ -194,7 +239,8 @@ def stage(live, raw, repo, out, phase='successor'):
     wins=sum(r['competitor_over_ooples']>1 for r in data['rows'] if r['bars']==10000)
     document=document.replace(f'{oldwins} / 401 APIs at 10,000 bars',f'{wins} / 401 APIs at 10,000 bars').replace('published <code>'+oldhead[:8]+'</code>','published <code>'+head[:8]+'</code>')
     refreshed=sum(r['source_sha']!=data['evidence']['baseSourceSha'] for r in data['rows'])
-    intro=f"The table contains {len(data['rows'])} measured comparisons across {len({r['pair'] for r in data['rows']})} API pairs. {refreshed} comparison rows use separately qualified updates."+disclosure
+    label='later verified measurement updates' if data['evidence'].get('harnessBaselineRefreshes') else 'separately qualified updates'
+    intro=f"The table contains {len(data['rows'])} measured comparisons across {len({r['pair'] for r in data['rows']})} API pairs. {refreshed} comparison rows use {label}."+disclosure
     document,n=re.subn(r'(<section id="rollout-status".*?<p class="sub">.*?published <code>[^<]+</code>\. ).*?(</p>)',
                     lambda m:m[1]+intro+m[2],document,count=1,flags=re.S)
     assert n==1
@@ -226,6 +272,9 @@ def stage(live, raw, repo, out, phase='successor'):
     assert old in document
     replacement="${r.measurement_machine ? esc(r.measurement_location+' / '+r.measurement_machine+' / shard '+r.measurement_shard+' / attempt '+r.measurement_run_attempt)+' · ' : ''}"+old
     if replacement not in document:document=document.replace(old,replacement)
+    if data['evidence'].get('harnessBaselineRefreshes'):
+        detail="${r.measurement_kind==='harness-baseline-refresh' ? ' · harness '+esc(r.benchmark_source_sha.slice(0,9))+' · canonical '+esc(r.source_sha.slice(0,9))+' · native consensus '+esc(r.native_consensus)+' · A/A '+esc(r.same_binary_verdict)+' (identical binaries)' : ''}"
+        if detail not in document:document=document.replace(old,old+detail)
     sys.path.insert(0,str(repo/'benchmarks'))
     from primary_baseline_report import replace_primary
     document=replace_primary(document,data)
