@@ -45,6 +45,20 @@ class HostedReportTests(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError,'authenticated canonical inputs'):
             stage('missing','missing','missing','missing',phase='baseline-refresh')
 
+    def test_refresh_rejects_evidence_for_other_authenticated_inputs(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);write(root/'provenance.json',{'identity':'authenticated'})
+            summary=dict(baseline_refresh_verified=True,accepted=False,production_qualification=False,input_provenance_sha256='other')
+            with patch('hosted_timing.pipeline.verify_inputs',return_value={}), \
+                 patch('hosted_timing.pointwise_family_refresh.collect',return_value=summary), \
+                 self.assertRaises(AssertionError):
+                stage('missing','missing','missing','missing',phase='baseline-refresh',inputs=root)
+
+    def test_source_update_still_requires_accepted_qualification(self):
+        with patch('hosted_timing.report.collect',return_value={'accepted':False}), \
+             self.assertRaisesRegex(AssertionError,'complete accepted successor'):
+            stage('missing','missing','missing','missing',phase='targeted')
+
     def test_refresh_archive_never_claims_source_qualification(self):
         selected=REPO/'benchmarks/plans/hosted-pointwise-family-refresh-20261116.json'
         for module in ('hosted_timing.pipeline','hosted_timing.verify','hosted_timing.archive','test_hosted_timing'):
