@@ -42,6 +42,7 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
     assert phase in ('successor','targeted','baseline-refresh')
     live, raw, repo, out = (Path(p).resolve() for p in (live, raw, repo, out))
     refreshing=phase=='baseline-refresh'
+    admitted_pairs = None
     if refreshing:
         from . import pipeline
         from .baseline_refresh_dispatch import implementation
@@ -51,6 +52,13 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
         summary=refresh.collect(raw)
         assert summary['baseline_refresh_verified'] and not summary['accepted'] and not summary['production_qualification']
         assert summary['input_provenance_sha256'] == digest(Path(inputs).resolve()/'provenance.json')
+        if read(PLAN).get('current_baseline_ten_refresh'):
+            admitted_pairs = set(summary['admitted_pairs'])
+            quarantined_pairs = {row['pair'] for row in summary['quarantined_pairs']}
+            assert admitted_pairs, 'No A/A-admitted pairs; do not stage or publish a report'
+            assert admitted_pairs <= set(refresh.PAIRS)
+            assert admitted_pairs.isdisjoint(quarantined_pairs)
+            assert admitted_pairs | quarantined_pairs == set(refresh.PAIRS)
 
     else:
         summary = collect(raw, phase)
@@ -61,6 +69,8 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
     if refreshing:
         subprocess.run(['git','diff','--exit-code',source,head,'--',pipeline.BENCH,pipeline.TESTS],cwd=repo,check=True)
     original = live.read_bytes()
+    if admitted_pairs is not None:
+        assert hashlib.sha256(original).hexdigest() == read(PLAN)['report_before_sha256'], 'Frozen report changed'
     document = original.decode('utf-8')
     def embedded(name):
         return json.loads(re.search(r'<script[^>]*id="'+name+r'"[^>]*>(.*?)</script>',document,re.S)[1])
@@ -71,6 +81,9 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
         assert n == 1
     data, builder, status = (embedded(k) for k in ('dataset','current-competitor-data','rollout-status-data'))
     before = copy.deepcopy(data)
+    original_builder = copy.deepcopy(builder)
+    if admitted_pairs is not None:
+        assert len(before['rows']) == 802 and original_builder['full_comparisons'] == 1544
     oldcounts = status['measurement_totals'].copy()
     oldhead = status['published_head']
     old_builder_count = builder['full_comparisons']
@@ -102,6 +115,8 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
                 for case in report['Benchmarks']:
                     pair,bars,method=case_key(case,implicit)
                     key=mapping[pair],bars,method
+                    if admitted_pairs is not None and key[0] not in admitted_pairs:
+                        continue
                     assert key not in baseline
                     baseline[key]=(case,report['HostEnvironmentInfo'],report_file,record['sha256'],record_provenance,url)
                 continue
@@ -168,6 +183,8 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
                 canonical_gpu_receipt_sha256=read(PLAN)['candidate']['gpu_receipt_sha256'],
                 same_binary_verdict=aa['verdict'],native_round_classifications=native['round_classifications'],
                 native_consensus=native['native_classification'],native_control_round=2,native_control_count=1)
+            if admitted_pairs is not None:
+                row.update(baseline_refresh_reason='current-source-remeasurement', harness_changed=False)
         if row['bars']==1000:
             overrides.append(dict(pair=row['pair'],sourceSha=source,runUrl=link,reportSha256=sha,
                 round=2,selection='Chronologically final candidate round.',measurementLocation='GitHub-hosted Windows',**provenance))
@@ -177,12 +194,20 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
     data['evidence']['sourceSha']=None
     data['evidence']['rowOverrides']=[r for r in data['evidence'].get('rowOverrides',[]) if r['pair'] not in pairs]+overrides
     if refreshing:
-        assert pairs==set(refresh.PAIRS) and len(baseline)==4*len(refresh.PAIRS)
+        expected_pairs = admitted_pairs if admitted_pairs is not None else set(refresh.PAIRS)
+        assert pairs==expected_pairs and len(baseline)==4*len(expected_pairs)
+        if admitted_pairs is not None:
+            assert not builder_receipts and not builder_control_receipts and not snapshot_receipts
         data['evidence'].setdefault('harnessBaselineRefreshes',[]).append(dict(
             production_source_sha=refresh.CANONICAL,benchmark_source_sha=refresh.HARNESS,
             benchmark_assembly_sha256=(read(PLAN)['frozen_harness_sha256'] if read(PLAN).get('named_output_projection_refresh') else refresh.HARNESS_SHA),run_id=run,url=url,pairs=sorted(pairs),
             cases=read(PLAN)['cases'],same_binary_comparisons=read(PLAN)['decisions'],production_optimization=False,
             aa_verdicts=summary['verdicts'],native_review=summary['native_review']))
+        if admitted_pairs is not None:
+            data['evidence']['harnessBaselineRefreshes'][-1].update(
+                refresh_reason='current-source-remeasurement', harness_changed=False,
+                measured_pairs=list(refresh.PAIRS), admitted_pairs=sorted(admitted_pairs),
+                quarantined_pairs=summary['quarantined_pairs'], admission_is_not_equivalence=True)
     if snapshot_receipts:
         snapshot_pairs={row['pair'] for receipt in snapshot_receipts for row in receipt['rows']}
         previous=data['evidence'].get('snapshotMeasurements',[])
@@ -214,6 +239,10 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
     if builder_receipts:
         builder['status'].update(commit=source,updated_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),run_url=url)
         builder['status']['completed']=sorted(set(builder['status']['completed'])|{r['fixture'] for r in builder_receipts})
+    if admitted_pairs is not None:
+        assert len(data['rows']) == len(before['rows']) == 802
+        assert builder == original_builder, 'A current-baseline refresh cannot change builder evidence'
+        assert len(rows) == builder['full_comparisons'] == 1544
     replace('current-competitor-data',builder)
     status.update(published_head=head,inventory_commit=head,row_overrides=data['evidence']['rowOverrides'],
         inventory_sha256=digest(repo/'benchmarks/results/remaining-indicators/inventory.json'),
@@ -231,7 +260,9 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
         disclosure += ' Latest fixed-invocation batch timings use 1,000 unmeasured warmups; builder timings retain ten warmups. Both use ten measured iterations.'
     disclosure += pair_warmup_disclosure(read(PLAN),data['rows'])
     if data['evidence'].get('harnessBaselineRefreshes'):
-        disclosure += ' Harness baseline refreshes remove intermediate projection copies while retaining every required named column, Full history and owned outputs; they are not production algorithm speedups. Their rows identify the canonical production and benchmark builds. Identical-binary A/A verdicts are timing-variability warnings. Four owned rounds are compared with the native control measured in round two; mixed or inconclusive outcomes remain uncertain.'
+        disclosure += ' Historical harness baseline refreshes removed intermediate projection copies while retaining every required named column, Full history and owned outputs; they are not production algorithm speedups. Their rows identify the canonical production and benchmark builds. Identical-binary A/A verdicts are timing-variability warnings. Four owned rounds are compared with the native control measured in round two; mixed or inconclusive outcomes remain uncertain.'
+    if admitted_pairs is not None:
+        disclosure += ' The current-baseline remeasurement reuses unchanged production and harness binaries. A/A-inconclusive pairs are admitted for this refresh, not proved equivalent; quarantined pairs retain their earlier rows. This subset does not establish a current-source gap count for all 401 pairs.'
     if builder_control_receipts:
         names=sorted({row['pair'] for receipt in builder_control_receipts for row in receipt['rows']})
         disclosure += ' Fresh builder-only source controls for '+', '.join(names)+' contain no native timings; their existing builder/native comparisons retain their original source and run provenance.'

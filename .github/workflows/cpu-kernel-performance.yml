@@ -1054,7 +1054,7 @@ jobs:
           HOSTED_TIMING_PLAN: benchmarks/plans/hosted-rollout-20261101.json
         run: |
           Push-Location scripts
-          python -m unittest -v test_hosted_current_baseline_ten_refresh test_hosted_named_projection_refresh test_hosted_pointwise_family_refresh test_hosted_timing test_hosted_fixture_inventory test_hosted_runtime_dependencies
+          python -m unittest -v test_hosted_current_baseline_ten_refresh test_current_baseline_report_admission test_hosted_report test_hosted_named_projection_refresh test_hosted_pointwise_family_refresh test_hosted_timing test_hosted_fixture_inventory test_hosted_runtime_dependencies
           $baselineTestExit = $LASTEXITCODE
           Pop-Location
           if ($baselineTestExit -ne 0) { exit $baselineTestExit }
