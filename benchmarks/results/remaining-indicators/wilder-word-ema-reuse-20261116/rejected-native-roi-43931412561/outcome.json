@@ -1,0 +1,28 @@
+{
+  "status": "rejected-native-roi",
+  "source": "07dd8befc5e03a5cbc044546ae5bb36e2a53d597",
+  "run_id": "43931412561",
+  "cases": 30,
+  "decisions": 6,
+  "new_10k_crossovers": [],
+  "source_slower": [
+    {
+      "pair": "QuanTAlib.Smma",
+      "bars": 10000
+    },
+    {
+      "pair": "Skender.GetSmma",
+      "bars": 10000
+    },
+    {
+      "pair": "Trady.Indicator.ModifiedMovingAverage",
+      "bars": 10000
+    }
+  ],
+  "qualification_launched": false,
+  "production_imported": false,
+  "report_updated": false,
+  "raw_archive": "\\\\192.168.4.73\\E\\StockIndicators-Archives\\hosted-runs-20261116\\43931412561\\wilder-word-ema-roi-diagnostic-attempt1-artifact14259248183.zip",
+  "raw_archive_sha256": "b49872097ba5f9a4bda6de5cf501ba5bf88a3087388c87745dfece2972b198b4",
+  "note": "Diagnostic preserved; failed approved launch gate. No policy or acceptance gates changed."
+}
