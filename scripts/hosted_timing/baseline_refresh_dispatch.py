@@ -2,6 +2,10 @@
 
 
 def implementation(plan):
+    if plan.get("current_baseline_ten_refresh"):
+        assert not plan.get("named_output_projection_refresh") and not plan.get("pointwise_family_refresh")
+        from . import current_baseline_ten_refresh
+        return current_baseline_ten_refresh
     named = plan.get('named_output_projection_refresh', False)
     pointwise = plan.get('pointwise_family_refresh', False)
     assert bool(named) != bool(pointwise), 'Exactly one authenticated refresh scope is required'

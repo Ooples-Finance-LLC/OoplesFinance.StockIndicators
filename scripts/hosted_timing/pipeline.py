@@ -205,7 +205,7 @@ def warmup_context(plan, fixture, task=None):
 def verify_inputs(folder):
     proof, plan = read(folder/'provenance.json'), read(PLAN)
     _verify_input_contents(folder, plan, proof, digest(PLAN))
-    if plan.get('pointwise_family_refresh') or plan.get('named_output_projection_refresh'):
+    if plan.get('pointwise_family_refresh') or plan.get('named_output_projection_refresh') or plan.get('current_baseline_ten_refresh'):
         from .baseline_refresh_dispatch import implementation
         implementation(plan).verify_authentication(folder,plan,proof)
     if plan.get('diagnostic_kind') == 'pointwise-projection-native-pilot':

@@ -63,7 +63,7 @@ def collect_preflight(folder):
 
 def _collect(folder, phase, *, preflight, diagnostic=False):
     plan = read(PLAN)
-    if plan.get('pointwise_family_refresh') or plan.get('named_output_projection_refresh') or phase == 'baseline-refresh':
+    if plan.get('pointwise_family_refresh') or plan.get('named_output_projection_refresh') or plan.get('current_baseline_ten_refresh') or phase == 'baseline-refresh':
         assert phase == 'baseline-refresh' and not preflight and not diagnostic, 'Harness baseline refresh cannot qualify production'
         from .baseline_refresh_dispatch import validate_scope
         validate_scope(plan)
