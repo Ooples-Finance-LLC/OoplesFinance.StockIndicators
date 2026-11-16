@@ -681,7 +681,7 @@ jobs:
             benchmarks/plans
       - uses: actions/checkout@v7
         with:
-          ref: 4765572c25cae6b4758e3f133a22ae84aaa7710e
+          ref: 01f83663a8e7580a2941cc8bf2b0e92c1dd4a296
           path: harness-source
           fetch-depth: 1
           sparse-checkout: |

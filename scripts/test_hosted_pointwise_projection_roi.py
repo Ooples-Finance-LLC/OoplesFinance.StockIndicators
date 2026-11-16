@@ -12,6 +12,20 @@ PLAN = p.REPO/'benchmarks/plans/hosted-pointwise-projection-native-pilot-2026111
 
 
 class ProjectionRoiTests(unittest.TestCase):
+    def test_publisher_count_is_a_subset_of_the_complete_trx(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'cases.trx'
+            for publisher_count in (22,21):
+                results=''.join(f'<UnitTestResult testName="{name}.Case{i}" outcome="Passed"/>'
+                    for name in roi.CLASSES for i in range(publisher_count if name==roi.CLASSES[0] else 1))
+                path.write_text('<TestRun><Results>'+results+'</Results></TestRun>')
+                if publisher_count==22:
+                    checks=roi.publisher_checks(path)
+                    self.assertEqual(25,checks['passed'])
+                    self.assertEqual(22,checks['classes'][roi.CLASSES[0]])
+                else:
+                    with self.assertRaises(AssertionError):roi.publisher_checks(path)
+
     def test_complete_thirty_cases_remain_diagnostic_even_if_all_faster(self):
         with tempfile.TemporaryDirectory() as tmp, patch.object(p,'PLAN',PLAN), patch.object(verify,'PLAN',PLAN), \
                 patch.object(test_hosted_timing,'PLAN',PLAN):

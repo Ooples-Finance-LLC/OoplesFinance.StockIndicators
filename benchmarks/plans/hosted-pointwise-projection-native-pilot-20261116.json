@@ -129,8 +129,8 @@
     "label": "successor"
   },
   "diagnostic_kind": "pointwise-projection-native-pilot",
-  "harness_source": "4765572c25cae6b4758e3f133a22ae84aaa7710e",
-  "adapter_source": "286f614b82a4753f7302cb37d42a6b0b4adc3ed5",
+  "harness_source": "01f83663a8e7580a2941cc8bf2b0e92c1dd4a296",
+  "adapter_source": "a9de5f4f233e55d1671939f3ecc18b60dede516c",
   "roi_approval": {
     "path": "benchmarks/plans/evidence/pointwise-projection-pilot-scope-20261116.json",
     "sha256": "3cd4ae71ef12aaf585a31aca8f03960409a2d4f16b12cbe093532a79167d4b1c"
@@ -147,5 +147,10 @@
     "OriginalGPU100 is reused only for byte-identical production and tensor closure; no freshGPU claim.",
     "Historical Add timings retain their20000warmup policy; this diagnostic cannot alter that policy or compare across harness versions.",
     "No production qualification, report import, publication or automatic further cycle."
-  ]
+  ],
+  "prior_failed_preparation": {
+    "run_id": "43789411806",
+    "measured_cases": 0,
+    "reason": "All73CPUchecks passed; orchestration compared total73 to publisher subset22. Class-scoped count gate corrected, with a regression test; oracle test now awaits builder. No timing samples exist or are reused."
+  }
 }

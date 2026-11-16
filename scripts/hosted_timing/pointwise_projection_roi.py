@@ -10,8 +10,8 @@ from .candle_family_roi import BASE_PLAN, BASE_PLAN_SHA, selected_plan
 
 PUBLISHED = 'ce02581b1f55400fd674b5496ee659fa0e8654fa'
 VARIANTS = 'ce994435f670a1c2c8d5424e167316914cfe9b51'
-HARNESS = '4765572c25cae6b4758e3f133a22ae84aaa7710e'
-ADAPTER = '286f614b82a4753f7302cb37d42a6b0b4adc3ed5'
+HARNESS = '01f83663a8e7580a2941cc8bf2b0e92c1dd4a296'
+ADAPTER = 'a9de5f4f233e55d1671939f3ecc18b60dede516c'
 ASSEMBLY = 'OoplesFinance.StockIndicators.CompetitorBenchmarks.dll'
 PAIRS = ['TaLib.Functions.Add', 'TaLib.Functions.Floor', 'TaLib.Functions.Sin']
 CLASSES = ['PointwiseComparisonPublisherTests', 'ElementaryMathComparisonTests',
@@ -44,6 +44,12 @@ def validate_scope(plan):
     assert not any(plan.get(k) for k in ('targeted_reference', 'coverage_reference', 'reuse_inputs', 'qualify_variants', 'trix_preflight'))
 
 
+def publisher_checks(path):
+    checks = p.verify_trx(path, CLASSES)
+    assert checks['classes']['PointwiseComparisonPublisherTests'] == 22
+    return checks
+
+
 def verify_authentication(folder, plan, proof):
     validate_scope(plan)
     original = p.read(folder/'evidence/projection-original-preparation.json')
@@ -56,9 +62,8 @@ def verify_authentication(folder, plan, proof):
     assert proof['harness_authentication']['test_classes'] == CLASSES
     assert proof['harness_authentication']['tested_production_sha256'] == original['production_sha256']['successor']
     assert p.digest(folder/'evidence/projection-test-runtime/OoplesFinance.StockIndicators.CompetitorTests.dll') == proof['harness_authentication']['test_assembly_sha256']
-    actual = p.verify_trx(folder/'evidence/projection-tests.trx', CLASSES)
+    actual = publisher_checks(folder/'evidence/projection-tests.trx')
     assert actual == proof['harness_authentication']['checks']
-    assert p.verify_trx(folder/'evidence/projection-tests.trx', ['PointwiseComparisonPublisherTests'])['passed'] == 22
     assert p.digest(folder/'common'/ASSEMBLY) == proof['harness_authentication']['assembly_sha256']
     for label, original_label in [('old', 'successor'), ('successor', 'successor'), ('variants', 'variants')]:
         assert proof['checks'][label] == original['checks'][original_label]
@@ -112,8 +117,7 @@ def prepare(baseline, source, out):
     run('projection-tests.log', ['dotnet','vstest',str(tests/'OoplesFinance.StockIndicators.CompetitorTests.dll'),
         '/TestCaseFilter:'+'|'.join('FullyQualifiedName~'+c for c in CLASSES),
         '/Logger:trx;LogFileName=projection-tests.trx','/ResultsDirectory:'+str(out/'evidence')])
-    checks = p.verify_trx(out/'evidence/projection-tests.trx', CLASSES)
-    assert p.verify_trx(out/'evidence/projection-tests.trx', ['PointwiseComparisonPublisherTests'])['passed'] == 22
+    checks = publisher_checks(out/'evidence/projection-tests.trx')
     assert p.digest(tests/p.DLL) == original['production_sha256']['successor']
     retained = out/'evidence/projection-test-runtime'; retained.mkdir()
     for suffix in ('.dll','.pdb','.deps.json','.runtimeconfig.json'):
