@@ -1,0 +1,22 @@
+{
+  "status": "rejected-native-roi",
+  "source": "f5cf0195e9a305cc08e9c8bf0bbd9503b455bcf5",
+  "run_id": "43929478851",
+  "cases": 50,
+  "decisions": 10,
+  "new_10k_crossovers": [
+    "TaLib.Candles.MatchingLow"
+  ],
+  "source_slower": [
+    {
+      "pair": "TaLib.Candles.SeparatingLines",
+      "bars": 1000
+    }
+  ],
+  "qualification_launched": false,
+  "production_imported": false,
+  "report_updated": false,
+  "raw_archive": "\\\\192.168.4.73\\E\\StockIndicators-Archives\\hosted-runs-20261116\\43929478851\\candle-single-pass-roi-diagnostic-attempt1-artifact14257734732.zip",
+  "raw_archive_sha256": "ab34058f4f3cb6e3d93753b6687c87a16b1292cfc2c2db92020d72a0c80db58d",
+  "note": "Diagnostic preserved; failed approved launch gate. No policy or acceptance gates changed."
+}
