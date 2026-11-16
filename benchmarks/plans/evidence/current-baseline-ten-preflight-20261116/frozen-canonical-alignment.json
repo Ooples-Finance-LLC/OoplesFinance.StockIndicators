@@ -1,0 +1,172 @@
+{
+  "status": "passed",
+  "source": "5be1a81d02ad01393f3fa8ede764e914252d0e96",
+  "frozen_source": "9a45372530e49718b01b6524f9a0db993514e1e8",
+  "production_sha256": "c63770e43fceda43a2286cb5272643ac3850adcc23962cc01eee2c7a9032c6fe",
+  "frozen_benchmark_sha256": "48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723",
+  "rows": [
+    {
+      "pair": "QuanTAlib.Smma",
+      "bars": 1000,
+      "period": 20,
+      "compared_values": 1000,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "QuanTAlib.Smma",
+      "bars": 10000,
+      "period": 20,
+      "compared_values": 10000,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "TaLib.Candles.Stalled",
+      "bars": 1000,
+      "period": 20,
+      "compared_values": 988,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "TaLib.Candles.Stalled",
+      "bars": 10000,
+      "period": 20,
+      "compared_values": 9988,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "TaLib.Candles.ThreeStarsInSouth",
+      "bars": 1000,
+      "period": 20,
+      "compared_values": 988,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "TaLib.Candles.ThreeStarsInSouth",
+      "bars": 10000,
+      "period": 20,
+      "compared_values": 9988,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "TaLib.Candles.SeparatingLines",
+      "bars": 1000,
+      "period": 20,
+      "compared_values": 989,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "TaLib.Candles.SeparatingLines",
+      "bars": 10000,
+      "period": 20,
+      "compared_values": 9989,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "TaLib.Candles.UpsideGapTwoCrows",
+      "bars": 1000,
+      "period": 20,
+      "compared_values": 988,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "TaLib.Candles.UpsideGapTwoCrows",
+      "bars": 10000,
+      "period": 20,
+      "compared_values": 9988,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "Skender.GetDynamic",
+      "bars": 1000,
+      "period": 20,
+      "compared_values": 999,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "Skender.GetDynamic",
+      "bars": 10000,
+      "period": 20,
+      "compared_values": 9999,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "QuanTAlib.Qema",
+      "bars": 1000,
+      "period": 20,
+      "compared_values": 1000,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "QuanTAlib.Qema",
+      "bars": 10000,
+      "period": 20,
+      "compared_values": 10000,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "QuanTAlib.Skew",
+      "bars": 1000,
+      "period": 20,
+      "compared_values": 1000,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "QuanTAlib.Skew",
+      "bars": 10000,
+      "period": 20,
+      "compared_values": 10000,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "TaLib.Candles.LongLeggedDoji",
+      "bars": 1000,
+      "period": 20,
+      "compared_values": 990,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "TaLib.Candles.LongLeggedDoji",
+      "bars": 10000,
+      "period": 20,
+      "compared_values": 9990,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "Skender.GetSmma",
+      "bars": 1000,
+      "period": 20,
+      "compared_values": 981,
+      "verify_isolation": true,
+      "passed": true
+    },
+    {
+      "pair": "Skender.GetSmma",
+      "bars": 10000,
+      "period": 20,
+      "compared_values": 9981,
+      "verify_isolation": true,
+      "passed": true
+    }
+  ],
+  "fresh_gpu_execution": false,
+  "new_compilation": false,
+  "performance_claim": false
+}

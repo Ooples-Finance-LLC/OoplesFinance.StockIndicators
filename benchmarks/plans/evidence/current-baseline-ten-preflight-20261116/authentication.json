@@ -1,0 +1,1449 @@
+{
+  "status": "authenticated",
+  "source": "5be1a81d02ad01393f3fa8ede764e914252d0e96",
+  "frozen_source": "9a45372530e49718b01b6524f9a0db993514e1e8",
+  "canonical_ci": "43869376457",
+  "canonical_manifest_sha256": "8f77a62b0e3c7426569d8f6eb43f025bfe6fed544f127da9c8a9b4cbdc146776",
+  "source_fingerprint": "baa78e2eb12116e886c8590b8fd951556040690c180cff61c519f2e57131225f",
+  "production_sha256": "c63770e43fceda43a2286cb5272643ac3850adcc23962cc01eee2c7a9032c6fe",
+  "canonical_test_sha256": "0560474677efa9c9ffb1190a8dc52e595b06438de7b6ab651727a0d24ceb78d3",
+  "frozen_benchmark_sha256": "48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723",
+  "classes": [
+    "WilderAverageComparisonTests",
+    "MassNormalizedComparisonTests",
+    "SampleShapeComparisonTests",
+    "McGinleyComparisonTests",
+    "ExhaustionTests",
+    "MatchedLinesTests",
+    "TripleBodyTests",
+    "AverageRangeDojiTests"
+  ],
+  "pairs": [
+    "QuanTAlib.Smma",
+    "TaLib.Candles.Stalled",
+    "TaLib.Candles.ThreeStarsInSouth",
+    "TaLib.Candles.SeparatingLines",
+    "TaLib.Candles.UpsideGapTwoCrows",
+    "Skender.GetDynamic",
+    "QuanTAlib.Qema",
+    "QuanTAlib.Skew",
+    "TaLib.Candles.LongLeggedDoji",
+    "Skender.GetSmma"
+  ],
+  "canonical_runtime": {
+    ".msCoverageSourceRootsMapping_OoplesFinance.StockIndicators.CompetitorTests": "ce58d9cf39fcb20068cc942ef9bf33941dd647dc9480a29a96ee8d6fad527ec8",
+    "AiDotNet.Evolution.dll": "cbdfb8cca25727b967b75b51f15da2832f275c56d4204ce434af2e96c7e166e6",
+    "AiDotNet.Tensors.dll": "4679eed71749ed6ebdd7d7e5674b79dd6f2610884f8fe909e900c43dcfe59cf4",
+    "BenchmarkDotNet.Annotations.dll": "4b5d273032cae7c8fc97e16713b8d4f1ee3a2aa28a0e2bd0695232fb9dd7d558",
+    "BenchmarkDotNet.dll": "d460626b2e1a9fa2f786e09e6c85cdf4d7b73deca636450a0e23892c8ce6192b",
+    "BouncyCastle.Cryptography.dll": "e5eeaf6d263c493619982fd3638e6135077311d08c961e1fe128f9107d29ebc6",
+    "CommandLine.dll": "8a55501cd1a1590a4bd93a17c6fdd2c01a0ed5bff1aea9036bdc78d98c9a3fad",
+    "Dia2Lib.dll": "6c4cac68010fe032218efe5e9fcf46eef9f77bfaa5f3bd33f03c5ff77d5a8fac",
+    "Gee.External.Capstone.dll": "6dfda67784598de9677173b89d0692593935f1a4024d36040c95dea48c1b5965",
+    "Iced.dll": "f058c01321b4cdfc9b9151879e88e59571c8d0ba176fbcf95bc936a8f3d073ed",
+    "JetBrains.Annotations.dll": "288e2dc80cfed580d51586321df26381590182619ed2bfea595e1b154fdd2eca",
+    "K4os.Compression.LZ4.dll": "e282aadc2353b864fe95cd5fb525a1a093d99a30a5bf2530b7ab831d56179816",
+    "Microsoft.AspNetCore.Html.Abstractions.dll": "c886039e64b4cafac80929bf7f153fde9966b088facb38d89ce1ae490bc3bb1c",
+    "Microsoft.CodeAnalysis.CSharp.dll": "53302acca07700e9bb10dcf21034435d6e0454c8eebf2481164ec13e520004c9",
+    "Microsoft.CodeAnalysis.CSharp.Scripting.dll": "6a1a6797944431e747e8cc49c8d938341214be56c92939d20990bc70313414f2",
+    "Microsoft.CodeAnalysis.dll": "395736b2d0e02be77bedc3847b269da7a93bf8e49cd3431a4a8e68d2c52d5846",
+    "Microsoft.CodeAnalysis.Scripting.dll": "3d3b8eef0bdf99f46b2280257d19bf69fd0c826a8afbbc03d2589ec5e0217ff0",
+    "Microsoft.Diagnostics.FastSerialization.dll": "83e89baf0bbecca8cfa194cff13365f716849e22efc374b669206f26998a019f",
+    "Microsoft.Diagnostics.NETCore.Client.dll": "baed2d25ca5bc53a3447c237d5572c92eac1fd842807b3e72602a711749b1b22",
+    "Microsoft.Diagnostics.Runtime.dll": "06f9910c8a37f8d4d758538e6dd307de58bcfb3bb13e83658142c08087a25382",
+    "Microsoft.Diagnostics.Tracing.TraceEvent.dll": "401e948dac99d0f9756ef96d5a8b8e4736e19e9f82ce8cdd744495951e3a94bb",
+    "Microsoft.DotNet.Interactive.Formatting.dll": "ec41df3311be1f10b8cfeefa94afaefc354581ef8a9974e1ec8cb0aebe95ed26",
+    "Microsoft.DotNet.PlatformAbstractions.dll": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3",
+    "Microsoft.Extensions.Caching.Abstractions.dll": "62347619a8470e0aac5e9b16ca09b443e592c3ea74a498542500875e39ee9b9b",
+    "Microsoft.Extensions.Caching.Memory.dll": "80628cfa9f2d7f5a91ed89fd5397bace231ab9d0f81cf703f6de0936da3994f6",
+    "Microsoft.Extensions.DependencyInjection.Abstractions.dll": "7c97c4463fe0fc11d1f22f4d160b2bd2288981adf1de2717a6ff3fb993ddf294",
+    "Microsoft.Extensions.DependencyInjection.dll": "2aa8182b5356a8cc5c35fc3641a87e814857d8d9be399ac78f260343754d09e0",
+    "Microsoft.Extensions.Logging.Abstractions.dll": "a76a735b63e6ef3b0bf41ff92423cbd16103b8952e8306140a9bd650346034dc",
+    "Microsoft.Extensions.Logging.dll": "183650081b551dfad967a7cbf79946a229cb79458b8d04a12db7c44b03bb9ab7",
+    "Microsoft.Extensions.Options.dll": "786112cb2f6646ef1170219a8c0bb813c9f14a6781e67c6266414f55a679565d",
+    "Microsoft.Extensions.Primitives.dll": "8ce9a85927ec7507b11ffe90080e7a811d51304a9e8b1da20c350159ba403902",
+    "Microsoft.TestPlatform.CommunicationUtilities.dll": "24c3b9f2710340c328db8bc9c37797d15e2cf32e4fca37f60f6f01bd35b6e0ff",
+    "Microsoft.TestPlatform.CoreUtilities.dll": "ca8cd4a0c394af3cc03c8e83b0377ecf14e6a8c68e4b0b50f732b1370950d7df",
+    "Microsoft.TestPlatform.CrossPlatEngine.dll": "9cde8a3ed9b3d2bc95f6c351af59ac943ee3495d3c1312950eedf6176a489b5a",
+    "Microsoft.TestPlatform.PlatformAbstractions.dll": "8bc7faec348a71336af3bfbeecad564ad0f97a8216835ed90cd2ceff621a3697",
+    "Microsoft.TestPlatform.Utilities.dll": "29d176ae1f87dac87c8064dddf30a5e2439e4f48e28417e8604d71cc9d920ce8",
+    "Microsoft.VisualStudio.CodeCoverage.Shim.dll": "8d4e1668a9f141d80a2615b946e43a2d64fe3528a1f54c79624a6c217019a646",
+    "Microsoft.VisualStudio.TestPlatform.Common.dll": "c38efb5cfcceb4cdf0f1fb04eea0b1d17310c6eda839dd3ae31e658e91cc7de6",
+    "Microsoft.VisualStudio.TestPlatform.ObjectModel.dll": "ff730c68bebe827f74e2bdcfb571400ab328c00be11c7fe3a1fe01143b483bc6",
+    "NuGet.Frameworks.dll": "bdef879f0a4ab2ad97fe934f54e30aee0d06ad06a3ef292933308fca34906ef8",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.deps.json": "44b91eb02ef601214183108fb0eb4461514fbfe50f086e704c1a8d895b2d83de",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "db8bb565d924abbeb643402bc801caa567f543d58f296340d6922d89309cab61",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.exe": "b77d22008fb3a2c02354a03d98c8b47913646b33cf1911066680994e88a2d686",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.pdb": "5dfb85ee430f475f52576bf8f218519ba2d0aaa94d476cbfcaf4eef8ac7989de",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json": "c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097",
+    "OoplesFinance.StockIndicators.CompetitorTests.deps.json": "1d294d32504ed0afa1ec576a79b715fa5f4a8a8dd8eb9e48cf61f52d3cbaf3e8",
+    "OoplesFinance.StockIndicators.CompetitorTests.dll": "0560474677efa9c9ffb1190a8dc52e595b06438de7b6ab651727a0d24ceb78d3",
+    "OoplesFinance.StockIndicators.CompetitorTests.pdb": "9d3edae873795ad9063a878f391c1e346f26f0f645ce7ff39f5e9ac66fd2fde5",
+    "OoplesFinance.StockIndicators.CompetitorTests.runtimeconfig.json": "a217d17be0661abf2717a26937c6e379c33542cb6f292fd3fc5a2d5113a9d6dc",
+    "OoplesFinance.StockIndicators.dll": "c63770e43fceda43a2286cb5272643ac3850adcc23962cc01eee2c7a9032c6fe",
+    "OoplesFinance.StockIndicators.pdb": "103a08df84ccf240f6b6acd55646bee3e51afe7aed8b148940d0c0e35cf603ab",
+    "Perfolizer.dll": "22a4a336db943465cbdfc8d0a8e23e89df3024d39f1c5954d97554b3da39e300",
+    "Pragmastat.dll": "e9b3fc36000e7fe3fb11d3ea6a65f3c9c7b17e03c9f5034306437d65972e8c51",
+    "QuanTAlib.dll": "71a83a3cc9331db0661bd5d1349481b178a10309c838793a055c41387623cfc6",
+    "Skender.Stock.Indicators.dll": "0408495cde22e3795c6efcb16d88da9e82d0aa0dbd88e5d39b41db9fb171bf93",
+    "System.CodeDom.dll": "8d0cf191c86feea81c9875652c06e454abe8dbff66bea9e4cb5f8aa2dc02f32a",
+    "System.CommandLine.dll": "68234d41239b528a72d9899bffb8d338a6054c28bbd6a7afd1691242b50ae184",
+    "System.CommandLine.Rendering.dll": "a767150ce81014ca69ed968f0081f4ba224ea49deafef24b6f5f7ca8615ec1c4",
+    "System.Management.dll": "0be24b09da5abad0b20efcb58fab14b0dedc79b09d4fbdcb894be268105a2195",
+    "TALib.NETCore.dll": "980edcda5db3ab7b0cdd9ef877aa784aa93728129f134c023a1e08acedeefcbe",
+    "testhost.dll": "ad339a6279013d6af52dde6bcb8b90a19a395a54c6fcf085ff5a42435c60c4c5",
+    "testhost.exe": "9620b96c776dc786824ea167dc1a4991c8e0e2dc093dc63f78cb44c0bd4c8cc0",
+    "TraceReloggerLib.dll": "6830c0f1d3f3c17719181e73dd5cfa8ccbb3f3c575329d2120576545103467b5",
+    "Trady.Analysis.dll": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+    "Trady.Core.dll": "eddc81389f75c0b47910b631ea7d9bcfae670c2ce44ffc6aff60a966e1312b7d",
+    "xunit.abstractions.dll": "3166dc70323fb30ccf1cedb0fe86f2ad122c46d254542342d90386efc4c9285c",
+    "xunit.assert.dll": "bcd9711b22d227ac8cd4c1568e72433a0f576d2ec8aae64ac508081892015b1d",
+    "xunit.core.dll": "2f7feeec8c6dec7df684c25fb80aadb292b963d09723460f03d53c5ad2088acc",
+    "xunit.execution.dotnet.dll": "e70febe547c15f8155db3e2d95c3ba4445a59cbc21a3e7541ab22ed49d3dcf7b",
+    "xunit.runner.visualstudio.testadapter.dll": "a5dd2a0765f3891208189261cfe09171f875ff44fd5af99ea56e890085fb7f30",
+    "amd64/KernelTraceControl.dll": "98de2f1de4fb1711688c04e2cb0187bf8c47e627771e8f51329671f296bfc688",
+    "amd64/msdia140.dll": "52b87b5cacbad5a32362ef467693dd559f380b626af310d3875b05cb5ed81a98",
+    "arm64/KernelTraceControl.dll": "45b6d97a6c64229976b71a0fe709617190267fd02147a5c7e1e4fb9b17fa2956",
+    "arm64/msdia140.dll": "4c330ab3b24cf8d1aca253014fdfba33dc24198aa0d9b6c3a4ede06486546c17",
+    "cs/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "27124fd265633dbbb0bb32c61cf5a52d8e98a3c766f53df074cb76ae52244d25",
+    "cs/Microsoft.CodeAnalysis.Scripting.resources.dll": "4e30f57fc909fd730cb57ca134ba1d6bb1b99897575ae96db346defed996cea1",
+    "cs/Microsoft.TestPlatform.CommunicationUtilities.resources.dll": "7a2f0d7b97536a3853064193ec92ce9f1200ae669b82a84281de44471dafb21c",
+    "cs/Microsoft.TestPlatform.CoreUtilities.resources.dll": "5f5501b18f65687cebd354196f563c520b4575e58eca474f3b3d1bd3247b9b46",
+    "cs/Microsoft.TestPlatform.CrossPlatEngine.resources.dll": "15f05b004d8f9a90650efa62f29f1ac576b91a3f21ae65beb80a6fb318fbeab2",
+    "cs/Microsoft.VisualStudio.TestPlatform.Common.resources.dll": "6b2deb5bd9ac08a364bd64bb503104725c2bdc562fa5a19d99463b9dfedc0544",
+    "cs/Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll": "a24d277e98d3dc7986741ff0c72e628aca9814556d6d64b5e3992bacf07c6f17",
+    "de/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "8daa5eb5a38ef75bfeeba6b7363b0324b8be16022bc7fa5a9568bb5128a07bd2",
+    "de/Microsoft.CodeAnalysis.Scripting.resources.dll": "88f7088332ec3497fa94567b6f99e153cad6fc7c6aa56bec94a13a780c6a2a85",
+    "de/Microsoft.TestPlatform.CommunicationUtilities.resources.dll": "45572aefbfd158340f1ea4ed40d2d2f9300ebddf024060cdda3bebb35854b2e2",
+    "de/Microsoft.TestPlatform.CoreUtilities.resources.dll": "cf94a0635173d6d868a90161757cb9484e559fedfde6e7ea50dd935e1d9b6666",
+    "de/Microsoft.TestPlatform.CrossPlatEngine.resources.dll": "417e53c758220679b7c850d893ec5754b168e8b95f2e9547eab9233a27799b85",
+    "de/Microsoft.VisualStudio.TestPlatform.Common.resources.dll": "f44082da024f2dbb37936b1a8f8c5683564716089b6389b892cc90088acb48ff",
+    "de/Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll": "edfdf3cb64553da8e229463948aa7b962e96e4037d510fb7fad4f26da9e7c8b5",
+    "es/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "6cb57aeeaf19e3a8824f56c2d5bebfcb8a5d5b6f24bfa01023ff7e9e7b9a3a8a",
+    "es/Microsoft.CodeAnalysis.Scripting.resources.dll": "3b244dd084db040f26a666f6f71eb0d14d71ee1fb91203c65440b98822d61834",
+    "es/Microsoft.TestPlatform.CommunicationUtilities.resources.dll": "91ffbfdbe6b9d134565fd001c8b432ed0570e4f1b64e56b812dac5a1f931c7c0",
+    "es/Microsoft.TestPlatform.CoreUtilities.resources.dll": "6de8b0fd082756f612d4c8b3b06e3558e2321bcb910d5a70769050f308b96641",
+    "es/Microsoft.TestPlatform.CrossPlatEngine.resources.dll": "b4ff391fe91eae0d4eba06bc9c09b4ef3fb583fdbcee0b8a49ef7d5d358a6af8",
+    "es/Microsoft.VisualStudio.TestPlatform.Common.resources.dll": "7afd57a2f8e63f9d0a7c39d6c467aa45a791e29815f806b5751fb5ab375cacca",
+    "es/Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll": "eb966be23882a9e11459d283241a67e7c0265f271e98603f13cabaadd8f7ee64",
+    "fr/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "f8c8b6e5eb6b8bb4386e545faea50be7bb3fc8bbbe8bccae930645411c1a1793",
+    "fr/Microsoft.CodeAnalysis.Scripting.resources.dll": "36fc265402f7d968246acf0ded7fad5df1b74c409f38455f38cc56dd1ada997a",
+    "fr/Microsoft.TestPlatform.CommunicationUtilities.resources.dll": "6d4123a175657dec7e6a82f787be5adbe459656bdfb874cb622fe9ea39daf7e3",
+    "fr/Microsoft.TestPlatform.CoreUtilities.resources.dll": "bec57046f616616913fd1416f013635a41a06c1c4d8ad67a8ee31f6098a3444b",
+    "fr/Microsoft.TestPlatform.CrossPlatEngine.resources.dll": "522befbf13ace67d8d17f6b77715cf01c59e21688b84be3c8373065f6e485de5",
+    "fr/Microsoft.VisualStudio.TestPlatform.Common.resources.dll": "67ab307dd61f2bbb841051e7f68318b5b75c510040f50bf6f3174287c1af3d33",
+    "fr/Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll": "07614b2d790a3b6ad93b41961566b84e4ad56cc86f5bf39658c06a13f2613db4",
+    "Images/Favicon.jpg": "f4389ae10788328843689312a54aad54076333a19d9e0a4288a9b0d89c5f782d",
+    "it/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "c90b4c0b4566df060ba7aefdc6084df54d35a32926fe6978037e82e562c66a82",
+    "it/Microsoft.CodeAnalysis.Scripting.resources.dll": "1b4efd447169acf38c3a85fcc15728ef975e68d8e8ad35d00cf419f89b954d4d",
+    "it/Microsoft.TestPlatform.CommunicationUtilities.resources.dll": "3a9b5440682910f99a4d3b51b3ac32f4d0c0f9cfeb959a9e26de085d45ad7cac",
+    "it/Microsoft.TestPlatform.CoreUtilities.resources.dll": "2af9b70d68f3ab2bbaa609e5e556811c7f68869ce2c3cc6d7209b3d6722e0968",
+    "it/Microsoft.TestPlatform.CrossPlatEngine.resources.dll": "63abe8199bd651d7c9418148c9cec7d09877a13a2b95927bc62f476f1fb796ec",
+    "it/Microsoft.VisualStudio.TestPlatform.Common.resources.dll": "fa43b5a74e50b89b243dcb10d9ac32a6a2db3ff1cdc4b884c01223f2f78c96c7",
+    "it/Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll": "5202a294a2b02c741ba292ba802f12b9473836a81ce61cb42f462eead6dc4dfa",
+    "ja/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "05655b512402c85e69e6f77e04c726868ff9ab3414f66b17a30f6e814e8459a2",
+    "ja/Microsoft.CodeAnalysis.Scripting.resources.dll": "23bed3b5b5621e8d078013c9703c8820e9092db18b316e726a53fd0bdb94158a",
+    "ja/Microsoft.TestPlatform.CommunicationUtilities.resources.dll": "eff24e7eeef7e342289b5953b470225ff6eec51db64f3fbe1f62c44ed80da824",
+    "ja/Microsoft.TestPlatform.CoreUtilities.resources.dll": "63d61001cdf7c501e253adeace734b32023cf617c04785937525fc0f202c3e21",
+    "ja/Microsoft.TestPlatform.CrossPlatEngine.resources.dll": "7b52b294fe2a7aed68b8b772cf63bce00e994e3a82d275419ee97eeb76543e36",
+    "ja/Microsoft.VisualStudio.TestPlatform.Common.resources.dll": "3ad8c259cf7b1b82b1402100f2b5b1530e4d4cefae3a91e1ab4783a803c4dcf1",
+    "ja/Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll": "d2a679cc9cf0b0e5c865bd937ec90e45ecb434289c6b017992f417e34bae646c",
+    "ko/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "cb58785c30551eaf97db5e63d9278f4b4b51da3e755c019063149a01589fb596",
+    "ko/Microsoft.CodeAnalysis.Scripting.resources.dll": "dc73366bee4f18839bbacbcd5b0ff8804bfeafe58c7967cd7774ee42edba805c",
+    "ko/Microsoft.TestPlatform.CommunicationUtilities.resources.dll": "9c4d8a39201e8071fabfc83391ee90d4947b8df91d06f173eb50ac70b53cbd55",
+    "ko/Microsoft.TestPlatform.CoreUtilities.resources.dll": "e7528a92a6ec0e1684537dd550cdb016ecc8df62a55c85294e608358e28a560d",
+    "ko/Microsoft.TestPlatform.CrossPlatEngine.resources.dll": "e25583d01cb6e19de1c8daf050cfc5df71b3e6792bafda95a68529ce24e18005",
+    "ko/Microsoft.VisualStudio.TestPlatform.Common.resources.dll": "3850eb61e6d5cb46e3daa9666c099e2a1e11dc5223d792eb4c7f4a143e0302a9",
+    "ko/Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll": "dc7b27e609e842eeea5da50ea172f288479b652ea779072e5dbbde045418819d",
+    "pl/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "ae252641248285be49550fb0fa0371122bf85ffbe5fdedad0908dfbe292262b2",
+    "pl/Microsoft.CodeAnalysis.Scripting.resources.dll": "f7af384c6516fe42165aff36ce37b223d4b7e16e91a17c2ce0f05145b03086d1",
+    "pl/Microsoft.TestPlatform.CommunicationUtilities.resources.dll": "8cee907bab9068f30a6c0740b49ce3d4c9be887b7c5f6a8240954afe46e233a3",
+    "pl/Microsoft.TestPlatform.CoreUtilities.resources.dll": "cb997c46356be42b346682b3a1b6825cb6f70a30c92403048f7dbdf25065f6ab",
+    "pl/Microsoft.TestPlatform.CrossPlatEngine.resources.dll": "1e084c594a6f9d405bd817d7e21b1d7e50d472d5d09a853e99b9732da5b6a7be",
+    "pl/Microsoft.VisualStudio.TestPlatform.Common.resources.dll": "687771c2ad91e5b705e5bb9f15d4d485c60ff93c56de869886b1f6d2831606c3",
+    "pl/Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll": "48f6bb8c551179da07d5e136a0c781dd6433f23312f3ce9241dcec29d8412f3e",
+    "pt-BR/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "bf822dd4695826fae55d1f2ad7056c26dddbdbf691f0d992a055069d14adfbb7",
+    "pt-BR/Microsoft.CodeAnalysis.Scripting.resources.dll": "e91fb30d165853ea29e667a10e4200597c667a91701d3103c1acb5e400054e4e",
+    "pt-BR/Microsoft.TestPlatform.CommunicationUtilities.resources.dll": "436dc88d1317cdedf7f82795a42af0929c8310b6228b4ff8eb1a82432821a3c5",
+    "pt-BR/Microsoft.TestPlatform.CoreUtilities.resources.dll": "2bb0340569343f0c3288f35a5cfa947d9495de55d04e93f2c380b75b45d681a9",
+    "pt-BR/Microsoft.TestPlatform.CrossPlatEngine.resources.dll": "d1865dd55afbd39ea0902a49e243f7c85e4a587134d31737b7fd764157fa74fb",
+    "pt-BR/Microsoft.VisualStudio.TestPlatform.Common.resources.dll": "e0e34b02d8496f5466f85a1580e9113118eee9d1c0a71dad1e372d87465f157f",
+    "pt-BR/Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll": "3944adc8b9c09a7007aaea3c86ee7666ddf3e7328b16edcc72f7e6dcc1ff1de8",
+    "ru/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "72a2df33b22e2715cd4d2d2139dc23ea00224ff01d17c59c336da5ac5b33075d",
+    "ru/Microsoft.CodeAnalysis.Scripting.resources.dll": "8f51645e119bd588042bbea139ab5f5130e36631ca4c9d72cea296c80f5018f2",
+    "ru/Microsoft.TestPlatform.CommunicationUtilities.resources.dll": "f3fcd583ff53d3f2145a7a4418a8145db1f1f088908fb92cbab848b815e91dc2",
+    "ru/Microsoft.TestPlatform.CoreUtilities.resources.dll": "089d9052b2fa1ef63f2bd1f0f0f8161fe6d1d02721fc39d4b48c333d26826306",
+    "ru/Microsoft.TestPlatform.CrossPlatEngine.resources.dll": "945c4a1304189209c1cada1b8279608df188595b09bd012e28473ab329080aa1",
+    "ru/Microsoft.VisualStudio.TestPlatform.Common.resources.dll": "0a616270492b4d944980509c794e819825c9217a050520994aa5ed9583702b7c",
+    "ru/Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll": "515c96257715a3ccd56af8acd9460e72e57dda825ff16824d2912271beca0749",
+    "tr/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "e851cc875e5264ba5a07d506b3e64c524efde83977caefa25ca4af7bee84c7dd",
+    "tr/Microsoft.CodeAnalysis.Scripting.resources.dll": "138d228976e10aef027f18a919ebc33cad28d0de2c7dcc5fa7336ef524bf03f2",
+    "tr/Microsoft.TestPlatform.CommunicationUtilities.resources.dll": "ecc813c1626c6d2a7ff4166a9ba1b390022069c7b6894ad387c9e8870f831099",
+    "tr/Microsoft.TestPlatform.CoreUtilities.resources.dll": "1fee9a7a6af5ef00d7fdd4f3bf265645c7984224352e95347c2f082f64d8ade2",
+    "tr/Microsoft.TestPlatform.CrossPlatEngine.resources.dll": "aa9ab1c2a40b4eb91b1535121310d9ef379f3ac89efa5a15513a8af3eb1e2cc8",
+    "tr/Microsoft.VisualStudio.TestPlatform.Common.resources.dll": "29fad6dbd21edfe8d8bfc9878bdd18d330c5a258ae8d13e695d0cd9854f64bba",
+    "tr/Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll": "5b39c999ccf72eb01ba387c8a0d72814d68a7120e623accbd2da544ee04ba5dc",
+    "x86/KernelTraceControl.dll": "7a4b8319f36304a7686576ea130a351818f73fabf90c511e243b957fdfa8cbb0",
+    "x86/KernelTraceControl.Win61.dll": "b7a83f51eae2824e9259ffe567f0fb42177d7b02674be760eb88df270459d8bf",
+    "x86/msdia140.dll": "6d05dd14282dcb59b9d347f8ed0c81bf2cb46a43a17295f8352f3e213f8844c2",
+    "zh-Hans/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "c50c1f8cb6c860b0ac37ec08d2352e3286d9be7d1a5f00a34c2495e5ca1acb33",
+    "zh-Hans/Microsoft.CodeAnalysis.Scripting.resources.dll": "ddee52594e7781e07d64c9eb3d95f6881d3fac33f9808a482b9b1f7bc36c5d3d",
+    "zh-Hans/Microsoft.TestPlatform.CommunicationUtilities.resources.dll": "64c3d59ac2ff9780732c1eb5bad7c18bd2ac03c722a9fed5511de8f25d316f23",
+    "zh-Hans/Microsoft.TestPlatform.CoreUtilities.resources.dll": "db896ac2579f5d5773f940bd278852c689799a3e0acc51bb30e46eef99fc76fb",
+    "zh-Hans/Microsoft.TestPlatform.CrossPlatEngine.resources.dll": "abc3c11d9779f4f19a3feedce14c138c3143d189ba1055e034c48a90187075c5",
+    "zh-Hans/Microsoft.VisualStudio.TestPlatform.Common.resources.dll": "1f034335ddc71adce1aa1df8c7254b97c77bddbaf5d862bab75b520fdd293d45",
+    "zh-Hans/Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll": "3f370c15663359c40bcee2a7d15cd386f01980be753f7ab1505783649d70dcaf",
+    "zh-Hant/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "ef11f6c38f005b7abff3c6a9e1133a08045ee69abfd859475725053149f70548",
+    "zh-Hant/Microsoft.CodeAnalysis.Scripting.resources.dll": "c5509918a0b8b95afa5f71fbb2ca837aca12fc26eb2da0d6988a313a58e983cd",
+    "zh-Hant/Microsoft.TestPlatform.CommunicationUtilities.resources.dll": "a159e3fd80ab34839b62b2cdf0a3f7ae4b188dc7155769379e94e1333b84ce0f",
+    "zh-Hant/Microsoft.TestPlatform.CoreUtilities.resources.dll": "fe732572a93c216282c0ef0a8762246735c8885873e03ffe9fd287d202f0d806",
+    "zh-Hant/Microsoft.TestPlatform.CrossPlatEngine.resources.dll": "2c3d9a8e06973943d45dcd5cbb9c18dec563f42e2ac0c16ebd7d98fa91f6ca70",
+    "zh-Hant/Microsoft.VisualStudio.TestPlatform.Common.resources.dll": "d2b8fd8f98eda57c047e1cef1cb43d8cb0d066cc052cb172d696973c8b92cc06",
+    "zh-Hant/Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll": "335d5fa4c5575ceb8f4ffb58fda53c1813a0c725a17f68219d012d390ddf978f",
+    "runtimes/linux-arm/native/libshaderc_shared.so": "c417c58fd11517ead6f2c5e719cec939207177c3ff50d5d560662e8bd685891d",
+    "runtimes/linux-arm64/native/libshaderc_shared.so": "098442f2b2e6d9b5eb82fef44228c7a01d00364e2caee529334226cda8ec515f",
+    "runtimes/linux-x64/native/libshaderc_shared.so": "9f2d5c6f53c191e59376251c614043019c6a7e325809703cad186da9b9dce6d3",
+    "runtimes/osx-arm64/native/libshaderc_shared.dylib": "1a4b2d850e6d967346565ae3c5c5a3d60e543eccd5d643543ce7572312e50965",
+    "runtimes/osx-x64/native/libshaderc_shared.dylib": "25248b7c357f87e18e2d34de29607c9dbfccfe28c85ab3176b49ecb9cd0eb97e",
+    "runtimes/win/lib/net9.0/System.Management.dll": "6cfb974d66ad8d17398d5aa3898309e446c239152f7525b141c86c3172206caf",
+    "runtimes/win-arm64/native/shaderc_shared.dll": "cae601b38a3389d3a5cc4b956a06e53d7e383f043e64c55640ce329c62c2dbea",
+    "runtimes/win-x64/native/capstone.dll": "f03321188a1615d044314b1183dcd9a7ffda09286c31c369d109165d4892dcbb",
+    "runtimes/win-x64/native/shaderc_shared.dll": "8e13592eac48b94755e4aa4c41552b210b41ca906d0bfe35b0a6d47a97d0b7c6",
+    "runtimes/win-x86/native/shaderc_shared.dll": "1882e7c8f08d747e55e98d833a5cc1b37e252e1f7cdbd7a87ba4aaa37a02686e"
+  },
+  "frozen_runtime": {
+    "AiDotNet.Evolution.dll": "cbdfb8cca25727b967b75b51f15da2832f275c56d4204ce434af2e96c7e166e6",
+    "AiDotNet.Tensors.dll": "4679eed71749ed6ebdd7d7e5674b79dd6f2610884f8fe909e900c43dcfe59cf4",
+    "amd64/KernelTraceControl.dll": "98de2f1de4fb1711688c04e2cb0187bf8c47e627771e8f51329671f296bfc688",
+    "amd64/msdia140.dll": "52b87b5cacbad5a32362ef467693dd559f380b626af310d3875b05cb5ed81a98",
+    "arm64/KernelTraceControl.dll": "45b6d97a6c64229976b71a0fe709617190267fd02147a5c7e1e4fb9b17fa2956",
+    "arm64/msdia140.dll": "4c330ab3b24cf8d1aca253014fdfba33dc24198aa0d9b6c3a4ede06486546c17",
+    "BenchmarkDotNet.Annotations.dll": "4b5d273032cae7c8fc97e16713b8d4f1ee3a2aa28a0e2bd0695232fb9dd7d558",
+    "BenchmarkDotNet.dll": "d460626b2e1a9fa2f786e09e6c85cdf4d7b73deca636450a0e23892c8ce6192b",
+    "BouncyCastle.Cryptography.dll": "e5eeaf6d263c493619982fd3638e6135077311d08c961e1fe128f9107d29ebc6",
+    "CommandLine.dll": "8a55501cd1a1590a4bd93a17c6fdd2c01a0ed5bff1aea9036bdc78d98c9a3fad",
+    "cs/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "27124fd265633dbbb0bb32c61cf5a52d8e98a3c766f53df074cb76ae52244d25",
+    "cs/Microsoft.CodeAnalysis.Scripting.resources.dll": "4e30f57fc909fd730cb57ca134ba1d6bb1b99897575ae96db346defed996cea1",
+    "de/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "8daa5eb5a38ef75bfeeba6b7363b0324b8be16022bc7fa5a9568bb5128a07bd2",
+    "de/Microsoft.CodeAnalysis.Scripting.resources.dll": "88f7088332ec3497fa94567b6f99e153cad6fc7c6aa56bec94a13a780c6a2a85",
+    "Dia2Lib.dll": "6c4cac68010fe032218efe5e9fcf46eef9f77bfaa5f3bd33f03c5ff77d5a8fac",
+    "es/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "6cb57aeeaf19e3a8824f56c2d5bebfcb8a5d5b6f24bfa01023ff7e9e7b9a3a8a",
+    "es/Microsoft.CodeAnalysis.Scripting.resources.dll": "3b244dd084db040f26a666f6f71eb0d14d71ee1fb91203c65440b98822d61834",
+    "fr/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "f8c8b6e5eb6b8bb4386e545faea50be7bb3fc8bbbe8bccae930645411c1a1793",
+    "fr/Microsoft.CodeAnalysis.Scripting.resources.dll": "36fc265402f7d968246acf0ded7fad5df1b74c409f38455f38cc56dd1ada997a",
+    "Gee.External.Capstone.dll": "6dfda67784598de9677173b89d0692593935f1a4024d36040c95dea48c1b5965",
+    "Iced.dll": "f058c01321b4cdfc9b9151879e88e59571c8d0ba176fbcf95bc936a8f3d073ed",
+    "Images/Favicon.jpg": "f4389ae10788328843689312a54aad54076333a19d9e0a4288a9b0d89c5f782d",
+    "it/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "c90b4c0b4566df060ba7aefdc6084df54d35a32926fe6978037e82e562c66a82",
+    "it/Microsoft.CodeAnalysis.Scripting.resources.dll": "1b4efd447169acf38c3a85fcc15728ef975e68d8e8ad35d00cf419f89b954d4d",
+    "ja/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "05655b512402c85e69e6f77e04c726868ff9ab3414f66b17a30f6e814e8459a2",
+    "ja/Microsoft.CodeAnalysis.Scripting.resources.dll": "23bed3b5b5621e8d078013c9703c8820e9092db18b316e726a53fd0bdb94158a",
+    "JetBrains.Annotations.dll": "288e2dc80cfed580d51586321df26381590182619ed2bfea595e1b154fdd2eca",
+    "K4os.Compression.LZ4.dll": "e282aadc2353b864fe95cd5fb525a1a093d99a30a5bf2530b7ab831d56179816",
+    "ko/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "cb58785c30551eaf97db5e63d9278f4b4b51da3e755c019063149a01589fb596",
+    "ko/Microsoft.CodeAnalysis.Scripting.resources.dll": "dc73366bee4f18839bbacbcd5b0ff8804bfeafe58c7967cd7774ee42edba805c",
+    "Microsoft.AspNetCore.Html.Abstractions.dll": "c886039e64b4cafac80929bf7f153fde9966b088facb38d89ce1ae490bc3bb1c",
+    "Microsoft.CodeAnalysis.CSharp.dll": "53302acca07700e9bb10dcf21034435d6e0454c8eebf2481164ec13e520004c9",
+    "Microsoft.CodeAnalysis.CSharp.Scripting.dll": "6a1a6797944431e747e8cc49c8d938341214be56c92939d20990bc70313414f2",
+    "Microsoft.CodeAnalysis.dll": "395736b2d0e02be77bedc3847b269da7a93bf8e49cd3431a4a8e68d2c52d5846",
+    "Microsoft.CodeAnalysis.Scripting.dll": "3d3b8eef0bdf99f46b2280257d19bf69fd0c826a8afbbc03d2589ec5e0217ff0",
+    "Microsoft.Diagnostics.FastSerialization.dll": "83e89baf0bbecca8cfa194cff13365f716849e22efc374b669206f26998a019f",
+    "Microsoft.Diagnostics.NETCore.Client.dll": "baed2d25ca5bc53a3447c237d5572c92eac1fd842807b3e72602a711749b1b22",
+    "Microsoft.Diagnostics.Runtime.dll": "06f9910c8a37f8d4d758538e6dd307de58bcfb3bb13e83658142c08087a25382",
+    "Microsoft.Diagnostics.Tracing.TraceEvent.dll": "401e948dac99d0f9756ef96d5a8b8e4736e19e9f82ce8cdd744495951e3a94bb",
+    "Microsoft.DotNet.Interactive.Formatting.dll": "ec41df3311be1f10b8cfeefa94afaefc354581ef8a9974e1ec8cb0aebe95ed26",
+    "Microsoft.DotNet.PlatformAbstractions.dll": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3",
+    "Microsoft.Extensions.Caching.Abstractions.dll": "62347619a8470e0aac5e9b16ca09b443e592c3ea74a498542500875e39ee9b9b",
+    "Microsoft.Extensions.Caching.Memory.dll": "80628cfa9f2d7f5a91ed89fd5397bace231ab9d0f81cf703f6de0936da3994f6",
+    "Microsoft.Extensions.DependencyInjection.Abstractions.dll": "7c97c4463fe0fc11d1f22f4d160b2bd2288981adf1de2717a6ff3fb993ddf294",
+    "Microsoft.Extensions.DependencyInjection.dll": "2aa8182b5356a8cc5c35fc3641a87e814857d8d9be399ac78f260343754d09e0",
+    "Microsoft.Extensions.Logging.Abstractions.dll": "a76a735b63e6ef3b0bf41ff92423cbd16103b8952e8306140a9bd650346034dc",
+    "Microsoft.Extensions.Logging.dll": "183650081b551dfad967a7cbf79946a229cb79458b8d04a12db7c44b03bb9ab7",
+    "Microsoft.Extensions.Options.dll": "786112cb2f6646ef1170219a8c0bb813c9f14a6781e67c6266414f55a679565d",
+    "Microsoft.Extensions.Primitives.dll": "8ce9a85927ec7507b11ffe90080e7a811d51304a9e8b1da20c350159ba403902",
+    "NuGet.Frameworks.dll": "bdef879f0a4ab2ad97fe934f54e30aee0d06ad06a3ef292933308fca34906ef8",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.deps.json": "44b91eb02ef601214183108fb0eb4461514fbfe50f086e704c1a8d895b2d83de",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.exe": "94fecaa698438f40382e6f58b6bf8173683c85668e66ea1896fb2e174ac4e2dd",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.pdb": "07ed11e677a0d12dae716a52a70d5dcdd8595531c62b4cc8c07fbccb8c949915",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json": "c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097",
+    "OoplesFinance.StockIndicators.dll": "c63770e43fceda43a2286cb5272643ac3850adcc23962cc01eee2c7a9032c6fe",
+    "OoplesFinance.StockIndicators.pdb": "9af31f167ecfed4b4b23f0d4406047df8722b75b50d752a34072a1fad348747d",
+    "Perfolizer.dll": "22a4a336db943465cbdfc8d0a8e23e89df3024d39f1c5954d97554b3da39e300",
+    "pl/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "ae252641248285be49550fb0fa0371122bf85ffbe5fdedad0908dfbe292262b2",
+    "pl/Microsoft.CodeAnalysis.Scripting.resources.dll": "f7af384c6516fe42165aff36ce37b223d4b7e16e91a17c2ce0f05145b03086d1",
+    "Pragmastat.dll": "e9b3fc36000e7fe3fb11d3ea6a65f3c9c7b17e03c9f5034306437d65972e8c51",
+    "pt-BR/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "bf822dd4695826fae55d1f2ad7056c26dddbdbf691f0d992a055069d14adfbb7",
+    "pt-BR/Microsoft.CodeAnalysis.Scripting.resources.dll": "e91fb30d165853ea29e667a10e4200597c667a91701d3103c1acb5e400054e4e",
+    "QuanTAlib.dll": "71a83a3cc9331db0661bd5d1349481b178a10309c838793a055c41387623cfc6",
+    "ru/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "72a2df33b22e2715cd4d2d2139dc23ea00224ff01d17c59c336da5ac5b33075d",
+    "ru/Microsoft.CodeAnalysis.Scripting.resources.dll": "8f51645e119bd588042bbea139ab5f5130e36631ca4c9d72cea296c80f5018f2",
+    "runtimes/linux-arm/native/libshaderc_shared.so": "c417c58fd11517ead6f2c5e719cec939207177c3ff50d5d560662e8bd685891d",
+    "runtimes/linux-arm64/native/libshaderc_shared.so": "098442f2b2e6d9b5eb82fef44228c7a01d00364e2caee529334226cda8ec515f",
+    "runtimes/linux-x64/native/libshaderc_shared.so": "9f2d5c6f53c191e59376251c614043019c6a7e325809703cad186da9b9dce6d3",
+    "runtimes/osx-arm64/native/libshaderc_shared.dylib": "1a4b2d850e6d967346565ae3c5c5a3d60e543eccd5d643543ce7572312e50965",
+    "runtimes/osx-x64/native/libshaderc_shared.dylib": "25248b7c357f87e18e2d34de29607c9dbfccfe28c85ab3176b49ecb9cd0eb97e",
+    "runtimes/win/lib/net9.0/System.Management.dll": "6cfb974d66ad8d17398d5aa3898309e446c239152f7525b141c86c3172206caf",
+    "runtimes/win-arm64/native/shaderc_shared.dll": "cae601b38a3389d3a5cc4b956a06e53d7e383f043e64c55640ce329c62c2dbea",
+    "runtimes/win-x64/native/capstone.dll": "f03321188a1615d044314b1183dcd9a7ffda09286c31c369d109165d4892dcbb",
+    "runtimes/win-x64/native/shaderc_shared.dll": "8e13592eac48b94755e4aa4c41552b210b41ca906d0bfe35b0a6d47a97d0b7c6",
+    "runtimes/win-x86/native/shaderc_shared.dll": "1882e7c8f08d747e55e98d833a5cc1b37e252e1f7cdbd7a87ba4aaa37a02686e",
+    "Skender.Stock.Indicators.dll": "0408495cde22e3795c6efcb16d88da9e82d0aa0dbd88e5d39b41db9fb171bf93",
+    "System.CodeDom.dll": "8d0cf191c86feea81c9875652c06e454abe8dbff66bea9e4cb5f8aa2dc02f32a",
+    "System.CommandLine.dll": "68234d41239b528a72d9899bffb8d338a6054c28bbd6a7afd1691242b50ae184",
+    "System.CommandLine.Rendering.dll": "a767150ce81014ca69ed968f0081f4ba224ea49deafef24b6f5f7ca8615ec1c4",
+    "System.Management.dll": "0be24b09da5abad0b20efcb58fab14b0dedc79b09d4fbdcb894be268105a2195",
+    "TALib.NETCore.dll": "980edcda5db3ab7b0cdd9ef877aa784aa93728129f134c023a1e08acedeefcbe",
+    "tr/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "e851cc875e5264ba5a07d506b3e64c524efde83977caefa25ca4af7bee84c7dd",
+    "tr/Microsoft.CodeAnalysis.Scripting.resources.dll": "138d228976e10aef027f18a919ebc33cad28d0de2c7dcc5fa7336ef524bf03f2",
+    "TraceReloggerLib.dll": "6830c0f1d3f3c17719181e73dd5cfa8ccbb3f3c575329d2120576545103467b5",
+    "Trady.Analysis.dll": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+    "Trady.Core.dll": "eddc81389f75c0b47910b631ea7d9bcfae670c2ce44ffc6aff60a966e1312b7d",
+    "x86/KernelTraceControl.dll": "7a4b8319f36304a7686576ea130a351818f73fabf90c511e243b957fdfa8cbb0",
+    "x86/KernelTraceControl.Win61.dll": "b7a83f51eae2824e9259ffe567f0fb42177d7b02674be760eb88df270459d8bf",
+    "x86/msdia140.dll": "6d05dd14282dcb59b9d347f8ed0c81bf2cb46a43a17295f8352f3e213f8844c2",
+    "zh-Hans/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "c50c1f8cb6c860b0ac37ec08d2352e3286d9be7d1a5f00a34c2495e5ca1acb33",
+    "zh-Hans/Microsoft.CodeAnalysis.Scripting.resources.dll": "ddee52594e7781e07d64c9eb3d95f6881d3fac33f9808a482b9b1f7bc36c5d3d",
+    "zh-Hant/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "ef11f6c38f005b7abff3c6a9e1133a08045ee69abfd859475725053149f70548",
+    "zh-Hant/Microsoft.CodeAnalysis.Scripting.resources.dll": "c5509918a0b8b95afa5f71fbb2ca837aca12fc26eb2da0d6988a313a58e983cd"
+  },
+  "tensor_closure": {
+    "packages": {
+      "AiDotNet.Tensors": "0.150.0",
+      "Silk.NET.Shaderc.Native": "2.23.0",
+      "Microsoft.Extensions.Logging.Abstractions": "10.0.0",
+      "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
+      "K4os.Compression.LZ4": "1.3.8",
+      "BouncyCastle.Cryptography": "2.6.2",
+      "AiDotNet.Evolution": "0.7.0"
+    },
+    "files": {
+      "AiDotNet.Tensors.dll": "4679eed71749ed6ebdd7d7e5674b79dd6f2610884f8fe909e900c43dcfe59cf4",
+      "runtimes/linux-arm/native/libshaderc_shared.so": "c417c58fd11517ead6f2c5e719cec939207177c3ff50d5d560662e8bd685891d",
+      "runtimes/linux-arm64/native/libshaderc_shared.so": "098442f2b2e6d9b5eb82fef44228c7a01d00364e2caee529334226cda8ec515f",
+      "runtimes/linux-x64/native/libshaderc_shared.so": "9f2d5c6f53c191e59376251c614043019c6a7e325809703cad186da9b9dce6d3",
+      "runtimes/osx-arm64/native/libshaderc_shared.dylib": "1a4b2d850e6d967346565ae3c5c5a3d60e543eccd5d643543ce7572312e50965",
+      "runtimes/osx-x64/native/libshaderc_shared.dylib": "25248b7c357f87e18e2d34de29607c9dbfccfe28c85ab3176b49ecb9cd0eb97e",
+      "runtimes/win-arm64/native/shaderc_shared.dll": "cae601b38a3389d3a5cc4b956a06e53d7e383f043e64c55640ce329c62c2dbea",
+      "runtimes/win-x64/native/shaderc_shared.dll": "8e13592eac48b94755e4aa4c41552b210b41ca906d0bfe35b0a6d47a97d0b7c6",
+      "runtimes/win-x86/native/shaderc_shared.dll": "1882e7c8f08d747e55e98d833a5cc1b37e252e1f7cdbd7a87ba4aaa37a02686e",
+      "Microsoft.Extensions.Logging.Abstractions.dll": "a76a735b63e6ef3b0bf41ff92423cbd16103b8952e8306140a9bd650346034dc",
+      "Microsoft.Extensions.DependencyInjection.Abstractions.dll": "7c97c4463fe0fc11d1f22f4d160b2bd2288981adf1de2717a6ff3fb993ddf294",
+      "K4os.Compression.LZ4.dll": "e282aadc2353b864fe95cd5fb525a1a093d99a30a5bf2530b7ab831d56179816",
+      "BouncyCastle.Cryptography.dll": "e5eeaf6d263c493619982fd3638e6135077311d08c961e1fe128f9107d29ebc6",
+      "AiDotNet.Evolution.dll": "cbdfb8cca25727b967b75b51f15da2832f275c56d4204ce434af2e96c7e166e6"
+    }
+  },
+  "protected_links": [
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\.msCoverageSourceRootsMapping_OoplesFinance.StockIndicators.CompetitorTests",
+      "sha256": "ce58d9cf39fcb20068cc942ef9bf33941dd647dc9480a29a96ee8d6fad527ec8"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\AiDotNet.Evolution.dll",
+      "sha256": "cbdfb8cca25727b967b75b51f15da2832f275c56d4204ce434af2e96c7e166e6"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\AiDotNet.Tensors.dll",
+      "sha256": "4679eed71749ed6ebdd7d7e5674b79dd6f2610884f8fe909e900c43dcfe59cf4"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\BenchmarkDotNet.Annotations.dll",
+      "sha256": "4b5d273032cae7c8fc97e16713b8d4f1ee3a2aa28a0e2bd0695232fb9dd7d558"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\BenchmarkDotNet.dll",
+      "sha256": "d460626b2e1a9fa2f786e09e6c85cdf4d7b73deca636450a0e23892c8ce6192b"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\BouncyCastle.Cryptography.dll",
+      "sha256": "e5eeaf6d263c493619982fd3638e6135077311d08c961e1fe128f9107d29ebc6"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\CommandLine.dll",
+      "sha256": "8a55501cd1a1590a4bd93a17c6fdd2c01a0ed5bff1aea9036bdc78d98c9a3fad"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Dia2Lib.dll",
+      "sha256": "6c4cac68010fe032218efe5e9fcf46eef9f77bfaa5f3bd33f03c5ff77d5a8fac"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Gee.External.Capstone.dll",
+      "sha256": "6dfda67784598de9677173b89d0692593935f1a4024d36040c95dea48c1b5965"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Iced.dll",
+      "sha256": "f058c01321b4cdfc9b9151879e88e59571c8d0ba176fbcf95bc936a8f3d073ed"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\JetBrains.Annotations.dll",
+      "sha256": "288e2dc80cfed580d51586321df26381590182619ed2bfea595e1b154fdd2eca"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\K4os.Compression.LZ4.dll",
+      "sha256": "e282aadc2353b864fe95cd5fb525a1a093d99a30a5bf2530b7ab831d56179816"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.AspNetCore.Html.Abstractions.dll",
+      "sha256": "c886039e64b4cafac80929bf7f153fde9966b088facb38d89ce1ae490bc3bb1c"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.CodeAnalysis.CSharp.dll",
+      "sha256": "53302acca07700e9bb10dcf21034435d6e0454c8eebf2481164ec13e520004c9"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.CodeAnalysis.CSharp.Scripting.dll",
+      "sha256": "6a1a6797944431e747e8cc49c8d938341214be56c92939d20990bc70313414f2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.CodeAnalysis.dll",
+      "sha256": "395736b2d0e02be77bedc3847b269da7a93bf8e49cd3431a4a8e68d2c52d5846"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.CodeAnalysis.Scripting.dll",
+      "sha256": "3d3b8eef0bdf99f46b2280257d19bf69fd0c826a8afbbc03d2589ec5e0217ff0"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Diagnostics.FastSerialization.dll",
+      "sha256": "83e89baf0bbecca8cfa194cff13365f716849e22efc374b669206f26998a019f"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Diagnostics.NETCore.Client.dll",
+      "sha256": "baed2d25ca5bc53a3447c237d5572c92eac1fd842807b3e72602a711749b1b22"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Diagnostics.Runtime.dll",
+      "sha256": "06f9910c8a37f8d4d758538e6dd307de58bcfb3bb13e83658142c08087a25382"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Diagnostics.Tracing.TraceEvent.dll",
+      "sha256": "401e948dac99d0f9756ef96d5a8b8e4736e19e9f82ce8cdd744495951e3a94bb"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.DotNet.Interactive.Formatting.dll",
+      "sha256": "ec41df3311be1f10b8cfeefa94afaefc354581ef8a9974e1ec8cb0aebe95ed26"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.DotNet.PlatformAbstractions.dll",
+      "sha256": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.Caching.Abstractions.dll",
+      "sha256": "62347619a8470e0aac5e9b16ca09b443e592c3ea74a498542500875e39ee9b9b"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.Caching.Memory.dll",
+      "sha256": "80628cfa9f2d7f5a91ed89fd5397bace231ab9d0f81cf703f6de0936da3994f6"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+      "sha256": "7c97c4463fe0fc11d1f22f4d160b2bd2288981adf1de2717a6ff3fb993ddf294"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.DependencyInjection.dll",
+      "sha256": "2aa8182b5356a8cc5c35fc3641a87e814857d8d9be399ac78f260343754d09e0"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.Logging.Abstractions.dll",
+      "sha256": "a76a735b63e6ef3b0bf41ff92423cbd16103b8952e8306140a9bd650346034dc"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.Logging.dll",
+      "sha256": "183650081b551dfad967a7cbf79946a229cb79458b8d04a12db7c44b03bb9ab7"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.Options.dll",
+      "sha256": "786112cb2f6646ef1170219a8c0bb813c9f14a6781e67c6266414f55a679565d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.Primitives.dll",
+      "sha256": "8ce9a85927ec7507b11ffe90080e7a811d51304a9e8b1da20c350159ba403902"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.TestPlatform.CommunicationUtilities.dll",
+      "sha256": "24c3b9f2710340c328db8bc9c37797d15e2cf32e4fca37f60f6f01bd35b6e0ff"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.TestPlatform.CoreUtilities.dll",
+      "sha256": "ca8cd4a0c394af3cc03c8e83b0377ecf14e6a8c68e4b0b50f732b1370950d7df"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.TestPlatform.CrossPlatEngine.dll",
+      "sha256": "9cde8a3ed9b3d2bc95f6c351af59ac943ee3495d3c1312950eedf6176a489b5a"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.TestPlatform.PlatformAbstractions.dll",
+      "sha256": "8bc7faec348a71336af3bfbeecad564ad0f97a8216835ed90cd2ceff621a3697"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.TestPlatform.Utilities.dll",
+      "sha256": "29d176ae1f87dac87c8064dddf30a5e2439e4f48e28417e8604d71cc9d920ce8"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.VisualStudio.CodeCoverage.Shim.dll",
+      "sha256": "8d4e1668a9f141d80a2615b946e43a2d64fe3528a1f54c79624a6c217019a646"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.VisualStudio.TestPlatform.Common.dll",
+      "sha256": "c38efb5cfcceb4cdf0f1fb04eea0b1d17310c6eda839dd3ae31e658e91cc7de6"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll",
+      "sha256": "ff730c68bebe827f74e2bdcfb571400ab328c00be11c7fe3a1fe01143b483bc6"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\NuGet.Frameworks.dll",
+      "sha256": "bdef879f0a4ab2ad97fe934f54e30aee0d06ad06a3ef292933308fca34906ef8"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.CompetitorBenchmarks.deps.json",
+      "sha256": "44b91eb02ef601214183108fb0eb4461514fbfe50f086e704c1a8d895b2d83de"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json",
+      "sha256": "c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.CompetitorTests.deps.json",
+      "sha256": "1d294d32504ed0afa1ec576a79b715fa5f4a8a8dd8eb9e48cf61f52d3cbaf3e8"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.CompetitorTests.runtimeconfig.json",
+      "sha256": "a217d17be0661abf2717a26937c6e379c33542cb6f292fd3fc5a2d5113a9d6dc"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Perfolizer.dll",
+      "sha256": "22a4a336db943465cbdfc8d0a8e23e89df3024d39f1c5954d97554b3da39e300"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Pragmastat.dll",
+      "sha256": "e9b3fc36000e7fe3fb11d3ea6a65f3c9c7b17e03c9f5034306437d65972e8c51"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\QuanTAlib.dll",
+      "sha256": "71a83a3cc9331db0661bd5d1349481b178a10309c838793a055c41387623cfc6"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Skender.Stock.Indicators.dll",
+      "sha256": "0408495cde22e3795c6efcb16d88da9e82d0aa0dbd88e5d39b41db9fb171bf93"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\System.CodeDom.dll",
+      "sha256": "8d0cf191c86feea81c9875652c06e454abe8dbff66bea9e4cb5f8aa2dc02f32a"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\System.CommandLine.dll",
+      "sha256": "68234d41239b528a72d9899bffb8d338a6054c28bbd6a7afd1691242b50ae184"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\System.CommandLine.Rendering.dll",
+      "sha256": "a767150ce81014ca69ed968f0081f4ba224ea49deafef24b6f5f7ca8615ec1c4"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\System.Management.dll",
+      "sha256": "0be24b09da5abad0b20efcb58fab14b0dedc79b09d4fbdcb894be268105a2195"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\TALib.NETCore.dll",
+      "sha256": "980edcda5db3ab7b0cdd9ef877aa784aa93728129f134c023a1e08acedeefcbe"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\testhost.dll",
+      "sha256": "ad339a6279013d6af52dde6bcb8b90a19a395a54c6fcf085ff5a42435c60c4c5"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\testhost.exe",
+      "sha256": "9620b96c776dc786824ea167dc1a4991c8e0e2dc093dc63f78cb44c0bd4c8cc0"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\TraceReloggerLib.dll",
+      "sha256": "6830c0f1d3f3c17719181e73dd5cfa8ccbb3f3c575329d2120576545103467b5"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Trady.Analysis.dll",
+      "sha256": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Trady.Core.dll",
+      "sha256": "eddc81389f75c0b47910b631ea7d9bcfae670c2ce44ffc6aff60a966e1312b7d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\xunit.abstractions.dll",
+      "sha256": "3166dc70323fb30ccf1cedb0fe86f2ad122c46d254542342d90386efc4c9285c"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\xunit.assert.dll",
+      "sha256": "bcd9711b22d227ac8cd4c1568e72433a0f576d2ec8aae64ac508081892015b1d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\xunit.core.dll",
+      "sha256": "2f7feeec8c6dec7df684c25fb80aadb292b963d09723460f03d53c5ad2088acc"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\xunit.execution.dotnet.dll",
+      "sha256": "e70febe547c15f8155db3e2d95c3ba4445a59cbc21a3e7541ab22ed49d3dcf7b"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\xunit.runner.visualstudio.testadapter.dll",
+      "sha256": "a5dd2a0765f3891208189261cfe09171f875ff44fd5af99ea56e890085fb7f30"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\amd64\\KernelTraceControl.dll",
+      "sha256": "98de2f1de4fb1711688c04e2cb0187bf8c47e627771e8f51329671f296bfc688"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\amd64\\msdia140.dll",
+      "sha256": "52b87b5cacbad5a32362ef467693dd559f380b626af310d3875b05cb5ed81a98"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\arm64\\KernelTraceControl.dll",
+      "sha256": "45b6d97a6c64229976b71a0fe709617190267fd02147a5c7e1e4fb9b17fa2956"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\arm64\\msdia140.dll",
+      "sha256": "4c330ab3b24cf8d1aca253014fdfba33dc24198aa0d9b6c3a4ede06486546c17"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\cs\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "27124fd265633dbbb0bb32c61cf5a52d8e98a3c766f53df074cb76ae52244d25"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\cs\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "4e30f57fc909fd730cb57ca134ba1d6bb1b99897575ae96db346defed996cea1"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\cs\\Microsoft.TestPlatform.CommunicationUtilities.resources.dll",
+      "sha256": "7a2f0d7b97536a3853064193ec92ce9f1200ae669b82a84281de44471dafb21c"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\cs\\Microsoft.TestPlatform.CoreUtilities.resources.dll",
+      "sha256": "5f5501b18f65687cebd354196f563c520b4575e58eca474f3b3d1bd3247b9b46"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\cs\\Microsoft.TestPlatform.CrossPlatEngine.resources.dll",
+      "sha256": "15f05b004d8f9a90650efa62f29f1ac576b91a3f21ae65beb80a6fb318fbeab2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\cs\\Microsoft.VisualStudio.TestPlatform.Common.resources.dll",
+      "sha256": "6b2deb5bd9ac08a364bd64bb503104725c2bdc562fa5a19d99463b9dfedc0544"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\cs\\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll",
+      "sha256": "a24d277e98d3dc7986741ff0c72e628aca9814556d6d64b5e3992bacf07c6f17"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\de\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "8daa5eb5a38ef75bfeeba6b7363b0324b8be16022bc7fa5a9568bb5128a07bd2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\de\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "88f7088332ec3497fa94567b6f99e153cad6fc7c6aa56bec94a13a780c6a2a85"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\de\\Microsoft.TestPlatform.CommunicationUtilities.resources.dll",
+      "sha256": "45572aefbfd158340f1ea4ed40d2d2f9300ebddf024060cdda3bebb35854b2e2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\de\\Microsoft.TestPlatform.CoreUtilities.resources.dll",
+      "sha256": "cf94a0635173d6d868a90161757cb9484e559fedfde6e7ea50dd935e1d9b6666"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\de\\Microsoft.TestPlatform.CrossPlatEngine.resources.dll",
+      "sha256": "417e53c758220679b7c850d893ec5754b168e8b95f2e9547eab9233a27799b85"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\de\\Microsoft.VisualStudio.TestPlatform.Common.resources.dll",
+      "sha256": "f44082da024f2dbb37936b1a8f8c5683564716089b6389b892cc90088acb48ff"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\de\\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll",
+      "sha256": "edfdf3cb64553da8e229463948aa7b962e96e4037d510fb7fad4f26da9e7c8b5"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\es\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "6cb57aeeaf19e3a8824f56c2d5bebfcb8a5d5b6f24bfa01023ff7e9e7b9a3a8a"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\es\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "3b244dd084db040f26a666f6f71eb0d14d71ee1fb91203c65440b98822d61834"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\es\\Microsoft.TestPlatform.CommunicationUtilities.resources.dll",
+      "sha256": "91ffbfdbe6b9d134565fd001c8b432ed0570e4f1b64e56b812dac5a1f931c7c0"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\es\\Microsoft.TestPlatform.CoreUtilities.resources.dll",
+      "sha256": "6de8b0fd082756f612d4c8b3b06e3558e2321bcb910d5a70769050f308b96641"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\es\\Microsoft.TestPlatform.CrossPlatEngine.resources.dll",
+      "sha256": "b4ff391fe91eae0d4eba06bc9c09b4ef3fb583fdbcee0b8a49ef7d5d358a6af8"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\es\\Microsoft.VisualStudio.TestPlatform.Common.resources.dll",
+      "sha256": "7afd57a2f8e63f9d0a7c39d6c467aa45a791e29815f806b5751fb5ab375cacca"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\es\\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll",
+      "sha256": "eb966be23882a9e11459d283241a67e7c0265f271e98603f13cabaadd8f7ee64"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\fr\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "f8c8b6e5eb6b8bb4386e545faea50be7bb3fc8bbbe8bccae930645411c1a1793"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\fr\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "36fc265402f7d968246acf0ded7fad5df1b74c409f38455f38cc56dd1ada997a"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\fr\\Microsoft.TestPlatform.CommunicationUtilities.resources.dll",
+      "sha256": "6d4123a175657dec7e6a82f787be5adbe459656bdfb874cb622fe9ea39daf7e3"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\fr\\Microsoft.TestPlatform.CoreUtilities.resources.dll",
+      "sha256": "bec57046f616616913fd1416f013635a41a06c1c4d8ad67a8ee31f6098a3444b"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\fr\\Microsoft.TestPlatform.CrossPlatEngine.resources.dll",
+      "sha256": "522befbf13ace67d8d17f6b77715cf01c59e21688b84be3c8373065f6e485de5"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\fr\\Microsoft.VisualStudio.TestPlatform.Common.resources.dll",
+      "sha256": "67ab307dd61f2bbb841051e7f68318b5b75c510040f50bf6f3174287c1af3d33"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\fr\\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll",
+      "sha256": "07614b2d790a3b6ad93b41961566b84e4ad56cc86f5bf39658c06a13f2613db4"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Images\\Favicon.jpg",
+      "sha256": "f4389ae10788328843689312a54aad54076333a19d9e0a4288a9b0d89c5f782d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\it\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "c90b4c0b4566df060ba7aefdc6084df54d35a32926fe6978037e82e562c66a82"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\it\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "1b4efd447169acf38c3a85fcc15728ef975e68d8e8ad35d00cf419f89b954d4d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\it\\Microsoft.TestPlatform.CommunicationUtilities.resources.dll",
+      "sha256": "3a9b5440682910f99a4d3b51b3ac32f4d0c0f9cfeb959a9e26de085d45ad7cac"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\it\\Microsoft.TestPlatform.CoreUtilities.resources.dll",
+      "sha256": "2af9b70d68f3ab2bbaa609e5e556811c7f68869ce2c3cc6d7209b3d6722e0968"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\it\\Microsoft.TestPlatform.CrossPlatEngine.resources.dll",
+      "sha256": "63abe8199bd651d7c9418148c9cec7d09877a13a2b95927bc62f476f1fb796ec"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\it\\Microsoft.VisualStudio.TestPlatform.Common.resources.dll",
+      "sha256": "fa43b5a74e50b89b243dcb10d9ac32a6a2db3ff1cdc4b884c01223f2f78c96c7"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\it\\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll",
+      "sha256": "5202a294a2b02c741ba292ba802f12b9473836a81ce61cb42f462eead6dc4dfa"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ja\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "05655b512402c85e69e6f77e04c726868ff9ab3414f66b17a30f6e814e8459a2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ja\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "23bed3b5b5621e8d078013c9703c8820e9092db18b316e726a53fd0bdb94158a"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ja\\Microsoft.TestPlatform.CommunicationUtilities.resources.dll",
+      "sha256": "eff24e7eeef7e342289b5953b470225ff6eec51db64f3fbe1f62c44ed80da824"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ja\\Microsoft.TestPlatform.CoreUtilities.resources.dll",
+      "sha256": "63d61001cdf7c501e253adeace734b32023cf617c04785937525fc0f202c3e21"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ja\\Microsoft.TestPlatform.CrossPlatEngine.resources.dll",
+      "sha256": "7b52b294fe2a7aed68b8b772cf63bce00e994e3a82d275419ee97eeb76543e36"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ja\\Microsoft.VisualStudio.TestPlatform.Common.resources.dll",
+      "sha256": "3ad8c259cf7b1b82b1402100f2b5b1530e4d4cefae3a91e1ab4783a803c4dcf1"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ja\\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll",
+      "sha256": "d2a679cc9cf0b0e5c865bd937ec90e45ecb434289c6b017992f417e34bae646c"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ko\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "cb58785c30551eaf97db5e63d9278f4b4b51da3e755c019063149a01589fb596"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ko\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "dc73366bee4f18839bbacbcd5b0ff8804bfeafe58c7967cd7774ee42edba805c"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ko\\Microsoft.TestPlatform.CommunicationUtilities.resources.dll",
+      "sha256": "9c4d8a39201e8071fabfc83391ee90d4947b8df91d06f173eb50ac70b53cbd55"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ko\\Microsoft.TestPlatform.CoreUtilities.resources.dll",
+      "sha256": "e7528a92a6ec0e1684537dd550cdb016ecc8df62a55c85294e608358e28a560d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ko\\Microsoft.TestPlatform.CrossPlatEngine.resources.dll",
+      "sha256": "e25583d01cb6e19de1c8daf050cfc5df71b3e6792bafda95a68529ce24e18005"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ko\\Microsoft.VisualStudio.TestPlatform.Common.resources.dll",
+      "sha256": "3850eb61e6d5cb46e3daa9666c099e2a1e11dc5223d792eb4c7f4a143e0302a9"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ko\\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll",
+      "sha256": "dc7b27e609e842eeea5da50ea172f288479b652ea779072e5dbbde045418819d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pl\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "ae252641248285be49550fb0fa0371122bf85ffbe5fdedad0908dfbe292262b2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pl\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "f7af384c6516fe42165aff36ce37b223d4b7e16e91a17c2ce0f05145b03086d1"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pl\\Microsoft.TestPlatform.CommunicationUtilities.resources.dll",
+      "sha256": "8cee907bab9068f30a6c0740b49ce3d4c9be887b7c5f6a8240954afe46e233a3"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pl\\Microsoft.TestPlatform.CoreUtilities.resources.dll",
+      "sha256": "cb997c46356be42b346682b3a1b6825cb6f70a30c92403048f7dbdf25065f6ab"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pl\\Microsoft.TestPlatform.CrossPlatEngine.resources.dll",
+      "sha256": "1e084c594a6f9d405bd817d7e21b1d7e50d472d5d09a853e99b9732da5b6a7be"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pl\\Microsoft.VisualStudio.TestPlatform.Common.resources.dll",
+      "sha256": "687771c2ad91e5b705e5bb9f15d4d485c60ff93c56de869886b1f6d2831606c3"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pl\\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll",
+      "sha256": "48f6bb8c551179da07d5e136a0c781dd6433f23312f3ce9241dcec29d8412f3e"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pt-BR\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "bf822dd4695826fae55d1f2ad7056c26dddbdbf691f0d992a055069d14adfbb7"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pt-BR\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "e91fb30d165853ea29e667a10e4200597c667a91701d3103c1acb5e400054e4e"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pt-BR\\Microsoft.TestPlatform.CommunicationUtilities.resources.dll",
+      "sha256": "436dc88d1317cdedf7f82795a42af0929c8310b6228b4ff8eb1a82432821a3c5"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pt-BR\\Microsoft.TestPlatform.CoreUtilities.resources.dll",
+      "sha256": "2bb0340569343f0c3288f35a5cfa947d9495de55d04e93f2c380b75b45d681a9"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pt-BR\\Microsoft.TestPlatform.CrossPlatEngine.resources.dll",
+      "sha256": "d1865dd55afbd39ea0902a49e243f7c85e4a587134d31737b7fd764157fa74fb"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pt-BR\\Microsoft.VisualStudio.TestPlatform.Common.resources.dll",
+      "sha256": "e0e34b02d8496f5466f85a1580e9113118eee9d1c0a71dad1e372d87465f157f"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pt-BR\\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll",
+      "sha256": "3944adc8b9c09a7007aaea3c86ee7666ddf3e7328b16edcc72f7e6dcc1ff1de8"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ru\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "72a2df33b22e2715cd4d2d2139dc23ea00224ff01d17c59c336da5ac5b33075d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ru\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "8f51645e119bd588042bbea139ab5f5130e36631ca4c9d72cea296c80f5018f2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ru\\Microsoft.TestPlatform.CommunicationUtilities.resources.dll",
+      "sha256": "f3fcd583ff53d3f2145a7a4418a8145db1f1f088908fb92cbab848b815e91dc2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ru\\Microsoft.TestPlatform.CoreUtilities.resources.dll",
+      "sha256": "089d9052b2fa1ef63f2bd1f0f0f8161fe6d1d02721fc39d4b48c333d26826306"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ru\\Microsoft.TestPlatform.CrossPlatEngine.resources.dll",
+      "sha256": "945c4a1304189209c1cada1b8279608df188595b09bd012e28473ab329080aa1"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ru\\Microsoft.VisualStudio.TestPlatform.Common.resources.dll",
+      "sha256": "0a616270492b4d944980509c794e819825c9217a050520994aa5ed9583702b7c"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ru\\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll",
+      "sha256": "515c96257715a3ccd56af8acd9460e72e57dda825ff16824d2912271beca0749"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\tr\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "e851cc875e5264ba5a07d506b3e64c524efde83977caefa25ca4af7bee84c7dd"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\tr\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "138d228976e10aef027f18a919ebc33cad28d0de2c7dcc5fa7336ef524bf03f2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\tr\\Microsoft.TestPlatform.CommunicationUtilities.resources.dll",
+      "sha256": "ecc813c1626c6d2a7ff4166a9ba1b390022069c7b6894ad387c9e8870f831099"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\tr\\Microsoft.TestPlatform.CoreUtilities.resources.dll",
+      "sha256": "1fee9a7a6af5ef00d7fdd4f3bf265645c7984224352e95347c2f082f64d8ade2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\tr\\Microsoft.TestPlatform.CrossPlatEngine.resources.dll",
+      "sha256": "aa9ab1c2a40b4eb91b1535121310d9ef379f3ac89efa5a15513a8af3eb1e2cc8"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\tr\\Microsoft.VisualStudio.TestPlatform.Common.resources.dll",
+      "sha256": "29fad6dbd21edfe8d8bfc9878bdd18d330c5a258ae8d13e695d0cd9854f64bba"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\tr\\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll",
+      "sha256": "5b39c999ccf72eb01ba387c8a0d72814d68a7120e623accbd2da544ee04ba5dc"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\x86\\KernelTraceControl.dll",
+      "sha256": "7a4b8319f36304a7686576ea130a351818f73fabf90c511e243b957fdfa8cbb0"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\x86\\KernelTraceControl.Win61.dll",
+      "sha256": "b7a83f51eae2824e9259ffe567f0fb42177d7b02674be760eb88df270459d8bf"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\x86\\msdia140.dll",
+      "sha256": "6d05dd14282dcb59b9d347f8ed0c81bf2cb46a43a17295f8352f3e213f8844c2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hans\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "c50c1f8cb6c860b0ac37ec08d2352e3286d9be7d1a5f00a34c2495e5ca1acb33"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hans\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "ddee52594e7781e07d64c9eb3d95f6881d3fac33f9808a482b9b1f7bc36c5d3d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hans\\Microsoft.TestPlatform.CommunicationUtilities.resources.dll",
+      "sha256": "64c3d59ac2ff9780732c1eb5bad7c18bd2ac03c722a9fed5511de8f25d316f23"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hans\\Microsoft.TestPlatform.CoreUtilities.resources.dll",
+      "sha256": "db896ac2579f5d5773f940bd278852c689799a3e0acc51bb30e46eef99fc76fb"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hans\\Microsoft.TestPlatform.CrossPlatEngine.resources.dll",
+      "sha256": "abc3c11d9779f4f19a3feedce14c138c3143d189ba1055e034c48a90187075c5"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hans\\Microsoft.VisualStudio.TestPlatform.Common.resources.dll",
+      "sha256": "1f034335ddc71adce1aa1df8c7254b97c77bddbaf5d862bab75b520fdd293d45"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hans\\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll",
+      "sha256": "3f370c15663359c40bcee2a7d15cd386f01980be753f7ab1505783649d70dcaf"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hant\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "ef11f6c38f005b7abff3c6a9e1133a08045ee69abfd859475725053149f70548"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hant\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "c5509918a0b8b95afa5f71fbb2ca837aca12fc26eb2da0d6988a313a58e983cd"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hant\\Microsoft.TestPlatform.CommunicationUtilities.resources.dll",
+      "sha256": "a159e3fd80ab34839b62b2cdf0a3f7ae4b188dc7155769379e94e1333b84ce0f"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hant\\Microsoft.TestPlatform.CoreUtilities.resources.dll",
+      "sha256": "fe732572a93c216282c0ef0a8762246735c8885873e03ffe9fd287d202f0d806"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hant\\Microsoft.TestPlatform.CrossPlatEngine.resources.dll",
+      "sha256": "2c3d9a8e06973943d45dcd5cbb9c18dec563f42e2ac0c16ebd7d98fa91f6ca70"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hant\\Microsoft.VisualStudio.TestPlatform.Common.resources.dll",
+      "sha256": "d2b8fd8f98eda57c047e1cef1cb43d8cb0d066cc052cb172d696973c8b92cc06"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hant\\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll",
+      "sha256": "335d5fa4c5575ceb8f4ffb58fda53c1813a0c725a17f68219d012d390ddf978f"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\linux-arm\\native\\libshaderc_shared.so",
+      "sha256": "c417c58fd11517ead6f2c5e719cec939207177c3ff50d5d560662e8bd685891d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\linux-arm64\\native\\libshaderc_shared.so",
+      "sha256": "098442f2b2e6d9b5eb82fef44228c7a01d00364e2caee529334226cda8ec515f"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\linux-x64\\native\\libshaderc_shared.so",
+      "sha256": "9f2d5c6f53c191e59376251c614043019c6a7e325809703cad186da9b9dce6d3"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\osx-arm64\\native\\libshaderc_shared.dylib",
+      "sha256": "1a4b2d850e6d967346565ae3c5c5a3d60e543eccd5d643543ce7572312e50965"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\osx-x64\\native\\libshaderc_shared.dylib",
+      "sha256": "25248b7c357f87e18e2d34de29607c9dbfccfe28c85ab3176b49ecb9cd0eb97e"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\win\\lib\\net9.0\\System.Management.dll",
+      "sha256": "6cfb974d66ad8d17398d5aa3898309e446c239152f7525b141c86c3172206caf"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\win-arm64\\native\\shaderc_shared.dll",
+      "sha256": "cae601b38a3389d3a5cc4b956a06e53d7e383f043e64c55640ce329c62c2dbea"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\win-x64\\native\\capstone.dll",
+      "sha256": "f03321188a1615d044314b1183dcd9a7ffda09286c31c369d109165d4892dcbb"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\win-x64\\native\\shaderc_shared.dll",
+      "sha256": "8e13592eac48b94755e4aa4c41552b210b41ca906d0bfe35b0a6d47a97d0b7c6"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\win-x86\\native\\shaderc_shared.dll",
+      "sha256": "1882e7c8f08d747e55e98d833a5cc1b37e252e1f7cdbd7a87ba4aaa37a02686e"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\AiDotNet.Evolution.dll",
+      "sha256": "cbdfb8cca25727b967b75b51f15da2832f275c56d4204ce434af2e96c7e166e6"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\AiDotNet.Tensors.dll",
+      "sha256": "4679eed71749ed6ebdd7d7e5674b79dd6f2610884f8fe909e900c43dcfe59cf4"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\amd64\\KernelTraceControl.dll",
+      "sha256": "98de2f1de4fb1711688c04e2cb0187bf8c47e627771e8f51329671f296bfc688"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\amd64\\msdia140.dll",
+      "sha256": "52b87b5cacbad5a32362ef467693dd559f380b626af310d3875b05cb5ed81a98"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\arm64\\KernelTraceControl.dll",
+      "sha256": "45b6d97a6c64229976b71a0fe709617190267fd02147a5c7e1e4fb9b17fa2956"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\arm64\\msdia140.dll",
+      "sha256": "4c330ab3b24cf8d1aca253014fdfba33dc24198aa0d9b6c3a4ede06486546c17"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\BenchmarkDotNet.Annotations.dll",
+      "sha256": "4b5d273032cae7c8fc97e16713b8d4f1ee3a2aa28a0e2bd0695232fb9dd7d558"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\BenchmarkDotNet.dll",
+      "sha256": "d460626b2e1a9fa2f786e09e6c85cdf4d7b73deca636450a0e23892c8ce6192b"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\BouncyCastle.Cryptography.dll",
+      "sha256": "e5eeaf6d263c493619982fd3638e6135077311d08c961e1fe128f9107d29ebc6"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\CommandLine.dll",
+      "sha256": "8a55501cd1a1590a4bd93a17c6fdd2c01a0ed5bff1aea9036bdc78d98c9a3fad"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\cs\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "27124fd265633dbbb0bb32c61cf5a52d8e98a3c766f53df074cb76ae52244d25"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\cs\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "4e30f57fc909fd730cb57ca134ba1d6bb1b99897575ae96db346defed996cea1"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\de\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "8daa5eb5a38ef75bfeeba6b7363b0324b8be16022bc7fa5a9568bb5128a07bd2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\de\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "88f7088332ec3497fa94567b6f99e153cad6fc7c6aa56bec94a13a780c6a2a85"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Dia2Lib.dll",
+      "sha256": "6c4cac68010fe032218efe5e9fcf46eef9f77bfaa5f3bd33f03c5ff77d5a8fac"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\es\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "6cb57aeeaf19e3a8824f56c2d5bebfcb8a5d5b6f24bfa01023ff7e9e7b9a3a8a"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\es\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "3b244dd084db040f26a666f6f71eb0d14d71ee1fb91203c65440b98822d61834"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\fr\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "f8c8b6e5eb6b8bb4386e545faea50be7bb3fc8bbbe8bccae930645411c1a1793"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\fr\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "36fc265402f7d968246acf0ded7fad5df1b74c409f38455f38cc56dd1ada997a"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Gee.External.Capstone.dll",
+      "sha256": "6dfda67784598de9677173b89d0692593935f1a4024d36040c95dea48c1b5965"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Iced.dll",
+      "sha256": "f058c01321b4cdfc9b9151879e88e59571c8d0ba176fbcf95bc936a8f3d073ed"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Images\\Favicon.jpg",
+      "sha256": "f4389ae10788328843689312a54aad54076333a19d9e0a4288a9b0d89c5f782d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\it\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "c90b4c0b4566df060ba7aefdc6084df54d35a32926fe6978037e82e562c66a82"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\it\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "1b4efd447169acf38c3a85fcc15728ef975e68d8e8ad35d00cf419f89b954d4d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ja\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "05655b512402c85e69e6f77e04c726868ff9ab3414f66b17a30f6e814e8459a2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ja\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "23bed3b5b5621e8d078013c9703c8820e9092db18b316e726a53fd0bdb94158a"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\JetBrains.Annotations.dll",
+      "sha256": "288e2dc80cfed580d51586321df26381590182619ed2bfea595e1b154fdd2eca"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\K4os.Compression.LZ4.dll",
+      "sha256": "e282aadc2353b864fe95cd5fb525a1a093d99a30a5bf2530b7ab831d56179816"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ko\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "cb58785c30551eaf97db5e63d9278f4b4b51da3e755c019063149a01589fb596"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ko\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "dc73366bee4f18839bbacbcd5b0ff8804bfeafe58c7967cd7774ee42edba805c"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.AspNetCore.Html.Abstractions.dll",
+      "sha256": "c886039e64b4cafac80929bf7f153fde9966b088facb38d89ce1ae490bc3bb1c"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.CodeAnalysis.CSharp.dll",
+      "sha256": "53302acca07700e9bb10dcf21034435d6e0454c8eebf2481164ec13e520004c9"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.CodeAnalysis.CSharp.Scripting.dll",
+      "sha256": "6a1a6797944431e747e8cc49c8d938341214be56c92939d20990bc70313414f2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.CodeAnalysis.dll",
+      "sha256": "395736b2d0e02be77bedc3847b269da7a93bf8e49cd3431a4a8e68d2c52d5846"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.CodeAnalysis.Scripting.dll",
+      "sha256": "3d3b8eef0bdf99f46b2280257d19bf69fd0c826a8afbbc03d2589ec5e0217ff0"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Diagnostics.FastSerialization.dll",
+      "sha256": "83e89baf0bbecca8cfa194cff13365f716849e22efc374b669206f26998a019f"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Diagnostics.NETCore.Client.dll",
+      "sha256": "baed2d25ca5bc53a3447c237d5572c92eac1fd842807b3e72602a711749b1b22"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Diagnostics.Runtime.dll",
+      "sha256": "06f9910c8a37f8d4d758538e6dd307de58bcfb3bb13e83658142c08087a25382"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Diagnostics.Tracing.TraceEvent.dll",
+      "sha256": "401e948dac99d0f9756ef96d5a8b8e4736e19e9f82ce8cdd744495951e3a94bb"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.DotNet.Interactive.Formatting.dll",
+      "sha256": "ec41df3311be1f10b8cfeefa94afaefc354581ef8a9974e1ec8cb0aebe95ed26"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.DotNet.PlatformAbstractions.dll",
+      "sha256": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.Caching.Abstractions.dll",
+      "sha256": "62347619a8470e0aac5e9b16ca09b443e592c3ea74a498542500875e39ee9b9b"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.Caching.Memory.dll",
+      "sha256": "80628cfa9f2d7f5a91ed89fd5397bace231ab9d0f81cf703f6de0936da3994f6"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+      "sha256": "7c97c4463fe0fc11d1f22f4d160b2bd2288981adf1de2717a6ff3fb993ddf294"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.DependencyInjection.dll",
+      "sha256": "2aa8182b5356a8cc5c35fc3641a87e814857d8d9be399ac78f260343754d09e0"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.Logging.Abstractions.dll",
+      "sha256": "a76a735b63e6ef3b0bf41ff92423cbd16103b8952e8306140a9bd650346034dc"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.Logging.dll",
+      "sha256": "183650081b551dfad967a7cbf79946a229cb79458b8d04a12db7c44b03bb9ab7"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.Options.dll",
+      "sha256": "786112cb2f6646ef1170219a8c0bb813c9f14a6781e67c6266414f55a679565d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Microsoft.Extensions.Primitives.dll",
+      "sha256": "8ce9a85927ec7507b11ffe90080e7a811d51304a9e8b1da20c350159ba403902"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\NuGet.Frameworks.dll",
+      "sha256": "bdef879f0a4ab2ad97fe934f54e30aee0d06ad06a3ef292933308fca34906ef8"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.CompetitorBenchmarks.deps.json",
+      "sha256": "44b91eb02ef601214183108fb0eb4461514fbfe50f086e704c1a8d895b2d83de"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\active-performance-evidence\\hosted-runs\\43880487485\\inputs\\common\\OoplesFinance.StockIndicators.CompetitorBenchmarks.dll",
+      "sha256": "48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\active-performance-evidence\\hosted-runs\\43880487485\\inputs\\common\\OoplesFinance.StockIndicators.CompetitorBenchmarks.exe",
+      "sha256": "94fecaa698438f40382e6f58b6bf8173683c85668e66ea1896fb2e174ac4e2dd"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\active-performance-evidence\\hosted-runs\\43880487485\\inputs\\common\\OoplesFinance.StockIndicators.CompetitorBenchmarks.pdb",
+      "sha256": "07ed11e677a0d12dae716a52a70d5dcdd8595531c62b4cc8c07fbccb8c949915"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json",
+      "sha256": "c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\current-baseline-ten-preflight-20261116\\canonical-runtime\\OoplesFinance.StockIndicators.dll",
+      "sha256": "c63770e43fceda43a2286cb5272643ac3850adcc23962cc01eee2c7a9032c6fe"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\active-performance-evidence\\hosted-runs\\43880487485\\inputs\\common\\OoplesFinance.StockIndicators.pdb",
+      "sha256": "9af31f167ecfed4b4b23f0d4406047df8722b75b50d752a34072a1fad348747d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Perfolizer.dll",
+      "sha256": "22a4a336db943465cbdfc8d0a8e23e89df3024d39f1c5954d97554b3da39e300"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pl\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "ae252641248285be49550fb0fa0371122bf85ffbe5fdedad0908dfbe292262b2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pl\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "f7af384c6516fe42165aff36ce37b223d4b7e16e91a17c2ce0f05145b03086d1"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Pragmastat.dll",
+      "sha256": "e9b3fc36000e7fe3fb11d3ea6a65f3c9c7b17e03c9f5034306437d65972e8c51"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pt-BR\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "bf822dd4695826fae55d1f2ad7056c26dddbdbf691f0d992a055069d14adfbb7"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\pt-BR\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "e91fb30d165853ea29e667a10e4200597c667a91701d3103c1acb5e400054e4e"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\QuanTAlib.dll",
+      "sha256": "71a83a3cc9331db0661bd5d1349481b178a10309c838793a055c41387623cfc6"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ru\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "72a2df33b22e2715cd4d2d2139dc23ea00224ff01d17c59c336da5ac5b33075d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\ru\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "8f51645e119bd588042bbea139ab5f5130e36631ca4c9d72cea296c80f5018f2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\linux-arm\\native\\libshaderc_shared.so",
+      "sha256": "c417c58fd11517ead6f2c5e719cec939207177c3ff50d5d560662e8bd685891d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\linux-arm64\\native\\libshaderc_shared.so",
+      "sha256": "098442f2b2e6d9b5eb82fef44228c7a01d00364e2caee529334226cda8ec515f"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\linux-x64\\native\\libshaderc_shared.so",
+      "sha256": "9f2d5c6f53c191e59376251c614043019c6a7e325809703cad186da9b9dce6d3"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\osx-arm64\\native\\libshaderc_shared.dylib",
+      "sha256": "1a4b2d850e6d967346565ae3c5c5a3d60e543eccd5d643543ce7572312e50965"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\osx-x64\\native\\libshaderc_shared.dylib",
+      "sha256": "25248b7c357f87e18e2d34de29607c9dbfccfe28c85ab3176b49ecb9cd0eb97e"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\win\\lib\\net9.0\\System.Management.dll",
+      "sha256": "6cfb974d66ad8d17398d5aa3898309e446c239152f7525b141c86c3172206caf"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\win-arm64\\native\\shaderc_shared.dll",
+      "sha256": "cae601b38a3389d3a5cc4b956a06e53d7e383f043e64c55640ce329c62c2dbea"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\win-x64\\native\\capstone.dll",
+      "sha256": "f03321188a1615d044314b1183dcd9a7ffda09286c31c369d109165d4892dcbb"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\win-x64\\native\\shaderc_shared.dll",
+      "sha256": "8e13592eac48b94755e4aa4c41552b210b41ca906d0bfe35b0a6d47a97d0b7c6"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\runtimes\\win-x86\\native\\shaderc_shared.dll",
+      "sha256": "1882e7c8f08d747e55e98d833a5cc1b37e252e1f7cdbd7a87ba4aaa37a02686e"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Skender.Stock.Indicators.dll",
+      "sha256": "0408495cde22e3795c6efcb16d88da9e82d0aa0dbd88e5d39b41db9fb171bf93"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\System.CodeDom.dll",
+      "sha256": "8d0cf191c86feea81c9875652c06e454abe8dbff66bea9e4cb5f8aa2dc02f32a"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\System.CommandLine.dll",
+      "sha256": "68234d41239b528a72d9899bffb8d338a6054c28bbd6a7afd1691242b50ae184"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\System.CommandLine.Rendering.dll",
+      "sha256": "a767150ce81014ca69ed968f0081f4ba224ea49deafef24b6f5f7ca8615ec1c4"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\System.Management.dll",
+      "sha256": "0be24b09da5abad0b20efcb58fab14b0dedc79b09d4fbdcb894be268105a2195"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\TALib.NETCore.dll",
+      "sha256": "980edcda5db3ab7b0cdd9ef877aa784aa93728129f134c023a1e08acedeefcbe"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\tr\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "e851cc875e5264ba5a07d506b3e64c524efde83977caefa25ca4af7bee84c7dd"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\tr\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "138d228976e10aef027f18a919ebc33cad28d0de2c7dcc5fa7336ef524bf03f2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\TraceReloggerLib.dll",
+      "sha256": "6830c0f1d3f3c17719181e73dd5cfa8ccbb3f3c575329d2120576545103467b5"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Trady.Analysis.dll",
+      "sha256": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\Trady.Core.dll",
+      "sha256": "eddc81389f75c0b47910b631ea7d9bcfae670c2ce44ffc6aff60a966e1312b7d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\x86\\KernelTraceControl.dll",
+      "sha256": "7a4b8319f36304a7686576ea130a351818f73fabf90c511e243b957fdfa8cbb0"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\x86\\KernelTraceControl.Win61.dll",
+      "sha256": "b7a83f51eae2824e9259ffe567f0fb42177d7b02674be760eb88df270459d8bf"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\x86\\msdia140.dll",
+      "sha256": "6d05dd14282dcb59b9d347f8ed0c81bf2cb46a43a17295f8352f3e213f8844c2"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hans\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "c50c1f8cb6c860b0ac37ec08d2352e3286d9be7d1a5f00a34c2495e5ca1acb33"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hans\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "ddee52594e7781e07d64c9eb3d95f6881d3fac33f9808a482b9b1f7bc36c5d3d"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hant\\Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll",
+      "sha256": "ef11f6c38f005b7abff3c6a9e1133a08045ee69abfd859475725053149f70548"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pointwise-source-study-20261115\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\zh-Hant\\Microsoft.CodeAnalysis.Scripting.resources.dll",
+      "sha256": "c5509918a0b8b95afa5f71fbb2ca837aca12fc26eb2da0d6988a313a58e983cd"
+    }
+  ],
+  "original_artifact": {
+    "id": 14228485851,
+    "node_id": "MDg6QXJ0aWZhY3QxNDIyODQ4NTg1MQ==",
+    "name": "candidate-correctness-inputs",
+    "size_in_bytes": 68667574,
+    "url": "https://api.github.com/repos/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/artifacts/14228485851",
+    "archive_download_url": "https://api.github.com/repos/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/artifacts/14228485851/zip",
+    "expired": false,
+    "digest": "sha256:874bb16f3db1e997fbb9c2e3f6f9935a3cbe7c9a98f7c0ebe3dcfe4d108b8746",
+    "created_at": "2026-11-16T12:56:20Z",
+    "updated_at": "2026-11-16T12:56:20Z",
+    "expires_at": "2027-02-14T12:44:58Z",
+    "workflow_run": {
+      "id": 43869376457,
+      "repository_id": 440341534,
+      "head_repository_id": 440341534,
+      "head_branch": "perf/named-projection-ci-producer-20261116",
+      "head_sha": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a"
+    }
+  },
+  "archive": "Z:\\StockIndicators-Archives\\hosted-runs-20261116\\current-baseline-ten-preflight\\canonical-43869376457-artifact14228485851.zip",
+  "archive_sha256": "874bb16f3db1e997fbb9c2e3f6f9935a3cbe7c9a98f7c0ebe3dcfe4d108b8746",
+  "source_harness_diff": [
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedClassicalWindowVariantBenchmarks.cs",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedClassicalWindowVariantBenchmarkTests.cs"
+  ],
+  "reused_gpu_receipts": [
+    {
+      "source": "5be1a81d02ad01393f3fa8ede764e914252d0e96",
+      "run_id": "43869376457",
+      "receipt_sha256": "47202954242c0a3bf83ce4fab38f49b8aed00aba058ede4f2b62d543497bc2db",
+      "trx_sha256": "a4875837a59de41f3ca0cfcba31f1c83624e246c24c1e23daae2e1156826f1ea"
+    },
+    {
+      "source": "9a45372530e49718b01b6524f9a0db993514e1e8",
+      "run_id": "43871304806",
+      "receipt_sha256": "86108756faec06c273e9aebbc8835f4aab6c693af4f689647073ae8fe81fbd20",
+      "trx_sha256": "8760b54281d03c3c98f6e8f86975584d7aa7f83b2cf86b15ec67fe874a5fa570"
+    }
+  ],
+  "gpu_verification_helpers": {
+    "verified-gpu-helpers/scripts/verify-competitor-local-gpu.py": "77359a9ea5107442aa429a4cd3f0150482f67cc25c41698e35e226996dd04370",
+    "verified-gpu-helpers/scripts/run-competitor-contracts.py": "8b371f19f83542abc169ec7fc1298b4d4391ad35574f48783faaa3a83d669836"
+  },
+  "fresh_gpu_execution": false,
+  "new_compilation": false
+}

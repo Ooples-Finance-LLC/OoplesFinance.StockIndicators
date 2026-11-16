@@ -1,0 +1,57 @@
+{
+  "status": "passed",
+  "source": "5be1a81d02ad01393f3fa8ede764e914252d0e96",
+  "frozen_source": "9a45372530e49718b01b6524f9a0db993514e1e8",
+  "canonical_ci": "43869376457",
+  "canonical_manifest_sha256": "8f77a62b0e3c7426569d8f6eb43f025bfe6fed544f127da9c8a9b4cbdc146776",
+  "production_sha256": "c63770e43fceda43a2286cb5272643ac3850adcc23962cc01eee2c7a9032c6fe",
+  "canonical_test_sha256": "0560474677efa9c9ffb1190a8dc52e595b06438de7b6ab651727a0d24ceb78d3",
+  "frozen_benchmark_sha256": "48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723",
+  "classes": [
+    "WilderAverageComparisonTests",
+    "MassNormalizedComparisonTests",
+    "SampleShapeComparisonTests",
+    "McGinleyComparisonTests",
+    "ExhaustionTests",
+    "MatchedLinesTests",
+    "TripleBodyTests",
+    "AverageRangeDojiTests"
+  ],
+  "class_counts": {
+    "WilderAverageComparisonTests": 10,
+    "MassNormalizedComparisonTests": 16,
+    "SampleShapeComparisonTests": 11,
+    "McGinleyComparisonTests": 8,
+    "ExhaustionTests": 133,
+    "MatchedLinesTests": 43,
+    "TripleBodyTests": 53,
+    "AverageRangeDojiTests": 29
+  },
+  "passed_cases": 303,
+  "pairs": [
+    "QuanTAlib.Smma",
+    "TaLib.Candles.Stalled",
+    "TaLib.Candles.ThreeStarsInSouth",
+    "TaLib.Candles.SeparatingLines",
+    "TaLib.Candles.UpsideGapTwoCrows",
+    "Skender.GetDynamic",
+    "QuanTAlib.Qema",
+    "QuanTAlib.Skew",
+    "TaLib.Candles.LongLeggedDoji",
+    "Skender.GetSmma"
+  ],
+  "alignment_cases": 20,
+  "authentication_sha256": "a8c30c9d0f63eb571cd1d953552d2ad17f069d6e90f6fa2426536640743db6dc",
+  "comparator_trx_sha256": "6f501d8188d164d84f8f58e62b458256f7278e47c1dc11bbc4a3cb3d7c260659",
+  "comparator_trx_gz_sha256": "96e930a0e597a1b64d9223da9e4489a1e8a00a43336ba85ce226aa414b0192f7",
+  "frozen_alignment_sha256": "01a42de224e1d3947cf8a55c5be09da795a3f4fd1fed2b4176eb9392436796ee",
+  "scripts": {
+    "preflight.py": "4d0945c17b0a171b4ff960d5b74a4582c30b7250f51d825f1e6ddf2d2aea9720",
+    "frozen-alignment.ps1": "73e092552b64170d0e9479ff0dd61032fcb2cadf062553407b9a3d3327531a66",
+    "runtime-dependencies.py": "da83b2e38a477743006b9a9ebde4344375437556c9ad82904881c1d62133eaf6"
+  },
+  "fresh_gpu_execution": false,
+  "new_compilation": false,
+  "measurement": false,
+  "report_changed": false
+}

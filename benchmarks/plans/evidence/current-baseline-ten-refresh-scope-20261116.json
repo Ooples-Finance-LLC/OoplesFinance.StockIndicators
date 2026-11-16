@@ -1,0 +1,108 @@
+{
+  "approved": true,
+  "proposal_only": false,
+  "scope": "Ten-pair current-baseline A/A refresh before selecting further optimization work",
+  "reason": "Freshdiagnosticsfoundhistoricalgapsalreadywinningoruncertain;139of168historicalgaprowsuseolderTensors/runtime. Currentofficialcountisnotacoherentcurrent-sourceinventory.",
+  "published_pr_head": "ab61b7eba91debdf481130c91a14e33d1a3e5888",
+  "canonical_production_source": "5be1a81d02ad01393f3fa8ede764e914252d0e96",
+  "frozen_harness_source": "9a45372530e49718b01b6524f9a0db993514e1e8",
+  "baseline_input_run": "43880487485",
+  "tensor_version": "0.150.0",
+  "pairs": [
+    "QuanTAlib.Smma",
+    "TaLib.Candles.Stalled",
+    "TaLib.Candles.ThreeStarsInSouth",
+    "TaLib.Candles.SeparatingLines",
+    "TaLib.Candles.UpsideGapTwoCrows",
+    "Skender.GetDynamic",
+    "QuanTAlib.Qema",
+    "QuanTAlib.Skew",
+    "TaLib.Candles.LongLeggedDoji",
+    "Skender.GetSmma"
+  ],
+  "pair_selection": "Ninehistoricalgapsrequiring<=20percentpoint-estimatereductionplusSkenderSMMA,anexistingwinnerwithfreshuncertainbaseline. Do not inferunmeasured233historicalwinnersremaincurrentwins.",
+  "cases": 100,
+  "decisions": 20,
+  "sizes": [
+    1000,
+    10000
+  ],
+  "fixture": "LibraryPairBenchmarks",
+  "methods": [
+    "Ooples",
+    "Competitor"
+  ],
+  "max_measurement_runners": 2,
+  "production_code_changes": false,
+  "harness_changes": false,
+  "source_qualification": false,
+  "implementation": [
+    "Reuseunchangedsource-boundpublishedcanonicalandfrozenruntime/GPUreceipts; proveab61and5be src/tests/fingerprintpaths unchanged. Resolveconsumer-correctnessevidencegapsbeforelaunchwithoutautomaticbroadbuilds.",
+    "Freezeindependentbaseline-refresh-onlyplanandapproval;botharmsuseIDENTICALproductionandwholeruntimehashes.",
+    "RunfreshA/Ameasurementswithoriginalold/new/new/oldorder; nativeonlyround2asexistingprotocol.",
+    "Preservepair-levelA/Ainstabilityandquarantineunstablepairsratherthanmaskingorpoolingrounds.",
+    "ConditionallyrefreshonlyA/A-admittedpairreportrowsusingexistingnativepoint/CIpresentation,withcurrent-sourceprovenanceandnooptimizationcredit. Independentlyverifyall802UI/CSVrowsandunchanged1544buildercomparisons.",
+    "Ifreportupdateisvalid,publishtoreviewabledraftPRwithnormalpublicationchecks;nomerge/release."
+  ],
+  "admission_gate": "BothsizeA/Adecisionsmustbeinconclusiveforpairadmission(notproofofequivalence);quarantineentirepairifonesizefails;retainallfourmeans/CIsandnativeuncertainty.",
+  "policy": {
+    "batch_unmeasured_warmups": 1000,
+    "measured_iterations": 10,
+    "runtime": "default unchanged",
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "no_concurrent_build_tests_on_measurement_host": true
+  },
+  "effort": "Approximately1-2hoursmeasurement/reportverificationexcludingqueue; onebounded100casecycle; nonewproductionalgorithm. Estimateuseexisting5pair50caseelapsed19minutesandallowsetup/verification/headroom.",
+  "exclusions": [
+    "Noofficialreportupdatefrompreviousdiagnostic-onlyevidence",
+    "Nofull401paircurrentgap-countclaimfrom10pairsubset",
+    "Noautomatic159/233paircoverageexpansion",
+    "NoMatchingLowrepair,SMMAsourcechange,dependencyupdateorpolicychange",
+    "Nobaselinewinscountedasoptimizationclosures"
+  ],
+  "possible_followup": "Separatelyproposebroadercoveragebasedonpilotcostandstability; retainMatchingLow-onlysalvageleadforaseparateboundeddecision.",
+  "adversarial_review": {
+    "reviewed": true,
+    "reviewer": "Independentagent+parent",
+    "constraints": [
+      "Mapcanonicalconsumercoverage;neverreuseWilder/Southcandidateproofascanonicalbaseline",
+      "A/Ainconclusiveisadmissionnotstatisticalequivalence;quarantinewholepairifonesizefails",
+      "For kadmittedpairs changeexactly2krows;802-2kbaseline rowsandall1544builderentriesdeepidentical;zero-admittedmeansnopublication",
+      "FreezecompleteCI/manifest/GPU/provenance/wholeruntime/harness/reportidentities;neverpoolhosts"
+    ]
+  },
+  "consumer_preflight": {
+    "classes": [
+      "WilderAverageComparisonTests",
+      "MassNormalizedComparisonTests",
+      "SampleShapeComparisonTests",
+      "McGinleyComparisonTests",
+      "ExhaustionTests",
+      "MatchedLinesTests",
+      "TripleBodyTests",
+      "AverageRangeDojiTests"
+    ],
+    "existing_canonical_coverage": "McGinley8casesinold84receipt;sevenotherclassesneedfocusedexisting-binaryvalidation",
+    "canonical_ci_run": "43869376457",
+    "producer": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "canonical_evidence_source": "f6a9587b7959250acb84791a8cba9ec9b9c14aa7",
+    "frozen_ci_run": "43871304806",
+    "frozen_evidence_source": "8153fe646f7cb753b1ebf38573705815f5ce3515",
+    "canonical_manifest_sha256": "8f77a62b0e3c7426569d8f6eb43f025bfe6fed544f127da9c8a9b4cbdc146776",
+    "canonical_comparator_dll_sha256": "0560474677efa9c9ffb1190a8dc52e595b06438de7b6ab651727a0d24ceb78d3",
+    "policy": "AuthenticateoriginalCIpayloadandfullclosure,runfocusedexisting-binaryparityusingexactnamespace/classprefixfilters,validatefrozenfixturealignment/consumerABI;recordactualcounts. Nonewcompilation/dependency/GPUcycleforunchangedsource. Stopbeforehostedmeasurementsifproofcannotbeestablished; noautomaticbroadbuild."
+  },
+  "freeze_requirements": {
+    "baseline_provenance_sha256": "92977e9786050146dbe97748c8a28d59e8eb47be5f4b5f85ae064ec4fcacef3a",
+    "frozen_benchmark_dll_sha256": "48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723",
+    "report_before_sha256": "2e454a8bd0f51b83e827c7d44ed47d1c1597faa3bdc5e53b5c0afbb848752311",
+    "sdk": "10.0.403",
+    "runtime": ".NET10.0.15",
+    "tensor_version": "0.150.0",
+    "other_identities": "PinbothGPUreceiptSHAs,bothCI-manifestSHAs,all94common-runtimehashes,andnewpreflightTRX/provenanceintheimmutableplanbeforeanydispatch"
+  },
+  "partial_import_rule": "For kadmittedpairs updateexactly2krows;preserve802-2kotherbaseline rowsanddeep-equalityofall1544builderentries. Zero-admittedmeansnoreportpublication;overallcountsremainmixedhistoricalinventory.",
+  "user_approval": "again I approve and keep going with the work and use agents to split up the work",
+  "approved_utc": "2026-11-16T19:42:37.678799+00:00"
+}

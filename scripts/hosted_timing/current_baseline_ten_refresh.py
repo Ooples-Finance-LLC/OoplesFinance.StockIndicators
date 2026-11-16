@@ -25,8 +25,8 @@ BASE_RUN = '43880487485'
 BASE_PROVENANCE_SHA = '92977e9786050146dbe97748c8a28d59e8eb47be5f4b5f85ae064ec4fcacef3a'
 REPORT_SHA = '2e454a8bd0f51b83e827c7d44ed47d1c1597faa3bdc5e53b5c0afbb848752311'
 APPROVAL = 'benchmarks/plans/evidence/current-baseline-ten-refresh-scope-20261116.json'
-APPROVAL_SHA = None  # Freeze only after the authenticated consumer preflight passes.
-PREFLIGHT = None
+APPROVAL_SHA = '2569da5586635ed52a30bfb78db5de36e41b119bf572b19c460289e61749e3ad'
+PREFLIGHT = {'files': {'receipt.json': '3b04d56edc384140d5760d17cbbe4344fcdee699ecc51f864b3dba3b3c33e39a', 'authentication.json': 'a8c30c9d0f63eb571cd1d953552d2ad17f069d6e90f6fa2426536640743db6dc', 'frozen-canonical-alignment.json': '01a42de224e1d3947cf8a55c5be09da795a3f4fd1fed2b4176eb9392436796ee', 'canonical-comparators.trx.gz': '96e930a0e597a1b64d9223da9e4489a1e8a00a43336ba85ce226aa414b0192f7', 'preflight.py': '4d0945c17b0a171b4ff960d5b74a4582c30b7250f51d825f1e6ddf2d2aea9720', 'frozen-alignment.ps1': '73e092552b64170d0e9479ff0dd61032fcb2cadf062553407b9a3d3327531a66', 'runtime-dependencies.py': 'da83b2e38a477743006b9a9ebde4344375437556c9ad82904881c1d62133eaf6'}, 'receipt': 'receipt.json', 'trx': {'path': 'canonical-comparators.trx.gz', 'gzip': True, 'sha256': '6f501d8188d164d84f8f58e62b458256f7278e47c1dc11bbc4a3cb3d7c260659', 'passed': 303, 'classes': {'WilderAverageComparisonTests': 10, 'MassNormalizedComparisonTests': 16, 'SampleShapeComparisonTests': 11, 'McGinleyComparisonTests': 8, 'ExhaustionTests': 133, 'MatchedLinesTests': 43, 'TripleBodyTests': 53, 'AverageRangeDojiTests': 29}}}
 PAIRS = ['QuanTAlib.Smma', 'TaLib.Candles.Stalled', 'TaLib.Candles.ThreeStarsInSouth',
     'TaLib.Candles.SeparatingLines', 'TaLib.Candles.UpsideGapTwoCrows', 'Skender.GetDynamic',
     'QuanTAlib.Qema', 'QuanTAlib.Skew', 'TaLib.Candles.LongLeggedDoji', 'Skender.GetSmma']
