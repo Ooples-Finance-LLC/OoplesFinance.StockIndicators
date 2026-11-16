@@ -1,0 +1,151 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "sources": {
+    "published": "ce02581b1f55400fd674b5496ee659fa0e8654fa",
+    "old": "ce02581b1f55400fd674b5496ee659fa0e8654fa",
+    "successor": "ce02581b1f55400fd674b5496ee659fa0e8654fa",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "gpu_sources": {
+    "old": "67c1866712e5d1bec8f2cbcaca42a6641b03c19c",
+    "successor": "67c1866712e5d1bec8f2cbcaca42a6641b03c19c",
+    "variants": "ce994435f670a1c2c8d5424e167316914cfe9b51"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "WindowLogVolatilityRegionTests",
+      "CompactLogVolatilityTests",
+      "SharedRecursiveStateTests"
+    ],
+    "successor": [
+      "WindowLogVolatilityRegionTests",
+      "CompactLogVolatilityTests",
+      "SharedRecursiveStateTests"
+    ],
+    "variants": [
+      "CompactMacdWordEmaTests",
+      "CompactClassicalWindowTests",
+      "ExactMeanUnitWeightTests"
+    ]
+  },
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.150.0"
+  },
+  "diagnostic_only": true,
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "cases": 30,
+  "decisions": 6,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 35
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Add",
+              "pair": "TaLib.Functions.Add"
+            },
+            {
+              "raw": "TaLib.Functions.Floor",
+              "pair": "TaLib.Functions.Floor"
+            },
+            {
+              "raw": "TaLib.Functions.Sin",
+              "pair": "TaLib.Functions.Sin"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 30,
+          "decisions": 6
+        }
+      ],
+      "cases": 30,
+      "decisions": 6
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.Add",
+              "pair": "TaLib.Functions.Add"
+            },
+            {
+              "raw": "TaLib.Functions.Floor",
+              "pair": "TaLib.Functions.Floor"
+            },
+            {
+              "raw": "TaLib.Functions.Sin",
+              "pair": "TaLib.Functions.Sin"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 30,
+          "decisions": 6
+        }
+      ],
+      "cases": 30,
+      "decisions": 6
+    }
+  ],
+  "baseline_inputs": {
+    "run_id": "43673961720",
+    "plan": "benchmarks/plans/hosted-window-log-positive-regions-20261115.json",
+    "plan_sha256": "65c79d85a2ac395a0478d6e0a0c173cb2714d161fb6dafa6732addd26b261503",
+    "provenance_sha256": "59d94305c3e64aaa0946438d078b7d91c14557aa217d52f151042cd0cd8a8cd7",
+    "label": "successor"
+  },
+  "diagnostic_kind": "pointwise-projection-native-pilot",
+  "harness_source": "4765572c25cae6b4758e3f133a22ae84aaa7710e",
+  "adapter_source": "286f614b82a4753f7302cb37d42a6b0b4adc3ed5",
+  "roi_approval": {
+    "path": "benchmarks/plans/evidence/pointwise-projection-pilot-scope-20261116.json",
+    "sha256": "3cd4ae71ef12aaf585a31aca8f03960409a2d4f16b12cbe093532a79167d4b1c"
+  },
+  "affected_pairs": [
+    "TaLib.Functions.Add",
+    "TaLib.Functions.Floor",
+    "TaLib.Functions.Sin"
+  ],
+  "scope": "Aligned direct-span pointwise publisher. Same published production under both labels. Native pilot only; zero production optimization or qualified closure claims.",
+  "limits": [
+    "Both labels use the same new harness and identical published production.",
+    "30cases6comparisons,1000unmeasuredwarmups,10measurediterations,default runtime,CPU<15 and12quiet samples.",
+    "OriginalGPU100 is reused only for byte-identical production and tensor closure; no freshGPU claim.",
+    "Historical Add timings retain their20000warmup policy; this diagnostic cannot alter that policy or compare across harness versions.",
+    "No production qualification, report import, publication or automatic further cycle."
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "approved": true,
+  "approval": "User: yes I approve so continue",
+  "diagnostic_only": true,
+  "qualification": false,
+  "source_import": false,
+  "report_import": false,
+  "publication": false,
+  "cases": 30,
+  "decisions": 6,
+  "max_parallel": 1,
+  "scope": "Pointwise publisher plus only ElementaryMath/Circular/Transcendental owned adapters. Preserve Full history, outputs, validation, cancellation and exceptions; authenticate unchanged production/GPU100; fresh native controls. No production qualification or report methodology adoption.",
+  "budget": "45-90minutes; focused harness build and one diagnostic runner"
+}

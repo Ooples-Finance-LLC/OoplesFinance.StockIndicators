@@ -195,6 +195,9 @@ def warmup_context(plan, fixture, task=None):
 def verify_inputs(folder):
     proof, plan = read(folder/'provenance.json'), read(PLAN)
     _verify_input_contents(folder, plan, proof, digest(PLAN))
+    if plan.get('diagnostic_kind') == 'pointwise-projection-native-pilot':
+        from .pointwise_projection_roi import verify_authentication
+        verify_authentication(folder, plan, proof)
     if plan.get('require_fixture_inventory'):
         from .fixture_inventory import verify_inventory
         verify_inventory(folder, plan, proof)
