@@ -928,6 +928,9 @@ jobs:
           python-version: '3.13'
       - run: python -m pip install psutil==7.2.2
       - name: Verify bounded orchestration
+        env:
+          HOSTED_TIMING_PLAN: benchmarks/plans/hosted-rollout-20261101.json
+
         run: |
           Push-Location scripts
           python -m unittest -v test_hosted_candle_single_pass_roi test_hosted_candle_family_roi test_hosted_timing test_hosted_fixture_inventory test_hosted_runtime_dependencies test_candidate_correctness_inputs

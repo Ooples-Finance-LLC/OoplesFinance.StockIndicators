@@ -17,6 +17,14 @@ PLAN = p.REPO / 'benchmarks/plans/hosted-candle-single-pass-roi-20261116.json'
 
 
 class RoiDiagnosticTests(unittest.TestCase):
+    def test_legacy_checks_pin_their_plan_without_changing_measurement_plan(self):
+        workflow = (p.REPO / '.github/workflows/cpu-kernel-performance.yml').read_text()
+        job = workflow.split('  bounded-roi-diagnostic:\n', 1)[1]
+        check = job.split('      - name: Verify bounded orchestration\n', 1)[1].split('      - uses:', 1)[0]
+        self.assertIn('        env:\n          HOSTED_TIMING_PLAN: benchmarks/plans/hosted-rollout-20261101.json\n', check)
+        measurement = job.split('      - name: Measure fifty approved diagnostic cases\n', 1)[1].split('      - name:', 1)[0]
+        self.assertNotIn('HOSTED_TIMING_PLAN:', measurement)
+
     def test_pinned_json_hashes_survive_windows_checkout_filters(self):
         for path, expected in ((PLAN, 'abfb0b21fa9a72e09db721180453f6c25e3bcf21947441581b26d844553c44ad'),
                                (p.REPO / roi.APPROVAL, roi.APPROVAL_SHA),
