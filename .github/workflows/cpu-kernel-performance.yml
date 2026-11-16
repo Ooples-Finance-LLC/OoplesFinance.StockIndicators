@@ -662,7 +662,7 @@ jobs:
           retention-days: 14
 
   bounded-roi-diagnostic:
-    if: github.event_name == 'workflow_dispatch' && inputs.suite == 'bounded-roi-diagnostic' && inputs.hosted_plan == 'benchmarks/plans/hosted-pointwise-projection-native-pilot-20261116.json'
+    if: github.event_name == 'workflow_dispatch' && inputs.suite == 'bounded-roi-diagnostic' && inputs.qualification_plan == 'benchmarks/plans/hosted-pointwise-projection-native-pilot-20261116.json'
     permissions:
       contents: read
       actions: read
@@ -726,4 +726,3 @@ jobs:
             projection-diagnostic/
           retention-days: 14
           if-no-files-found: error
-
