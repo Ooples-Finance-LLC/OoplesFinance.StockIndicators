@@ -1,0 +1,19 @@
+{
+  "status": "parked-no-new-native-crossover",
+  "source": "e5630baa575cbc866dc4cfe39d25c0bef3c50c31",
+  "run_id": "43935167824",
+  "cases": 40,
+  "decisions": 8,
+  "source_verdicts": {
+    "faster": 1,
+    "inconclusive": 7,
+    "slower": 0
+  },
+  "native_crossover_gate": false,
+  "reason": "Southbaselinealreadybeatnativeinboth10koldrounds;sourcegainisnotnewgapclosure.",
+  "qualification_launched": false,
+  "production_imported": false,
+  "report_updated": false,
+  "raw_archive": "\\\\192.168.4.73\\E\\StockIndicators-Archives\\hosted-runs-20261116\\43935167824\\three-stars-blocks-roi-diagnostic-attempt1-artifact14262615591.zip",
+  "raw_archive_sha256": "b9bee5d6633a7732a5a90359d9823281b54a709b9554f0cd857d9026ace959a6"
+}
