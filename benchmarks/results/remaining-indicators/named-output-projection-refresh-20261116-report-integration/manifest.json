@@ -1,0 +1,94 @@
+{
+  "before.html": {
+    "sha256": "5cd3199ce27910854319a70ffdf28ef0bde1319b9528b462019af4019c2e3c8f",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "b374a1e99a8736fb5bc0131e6057411fe1ba4388e1e82945d58e2d6776db19d7",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "9085e7276dc7541968fa10f7bebcbb615159a349d82514c1dcb4623cc3b18bcc",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "2e454a8bd0f51b83e827c7d44ed47d1c1597faa3bdc5e53b5c0afbb848752311",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/candidate.html.gz"
+  },
+  "delivery-tooling/archive.py": {
+    "sha256": "5e6ea6da3d0fa137573778b33eb3748e64e55aeafc0171a00bdac23ba5da224e",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/delivery-tooling/archive.py.gz"
+  },
+  "delivery-tooling/import-hosted-certified-report-20261101.py": {
+    "sha256": "380745f04a0b07f71a33dd049bdf1f3392ff9a388f5cda9849c0ae3bda66be75",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/delivery-tooling/import-hosted-certified-report-20261101.py.gz"
+  },
+  "delivery-tooling/import-named-projection-refresh-20261116.py": {
+    "sha256": "07d61f82d07eaeb2236a798e57e11830b89dd3dc9b07d9525bfcb0bfd889f796",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/delivery-tooling/import-named-projection-refresh-20261116.py.gz"
+  },
+  "delivery-tooling/named-refresh-.gitattributes": {
+    "sha256": "2daa4df1a5f4aee4cb7d713b3df3595dbdacfcd565f0d4c75cdabfc4c3c29100",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/delivery-tooling/named-refresh-.gitattributes.gz"
+  },
+  "delivery-tooling/named-refresh-failed-preparation-43873579130.log.gz": {
+    "sha256": "5bb135f6ff4c083fcb7b5302568e64391ad5be36ef095abd09800f75a76f5038",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/delivery-tooling/named-refresh-failed-preparation-43873579130.log.gz.gz"
+  },
+  "delivery-tooling/named-refresh-test_hosted_named_projection_refresh.py": {
+    "sha256": "f074b92eabb25013b2da40cbbcf731a8e7064ab9ef68fccc59ccced36aa200d1",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/delivery-tooling/named-refresh-test_hosted_named_projection_refresh.py.gz"
+  },
+  "delivery-tooling/origin.json": {
+    "sha256": "4f7c5a253bc55a8533c183dab8bf77c4ec349273622f4da5dba1c6aa52c6b559",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/delivery-tooling/origin.json.gz"
+  },
+  "delivery-tooling/publish-named-projection-refresh-20261116.py": {
+    "sha256": "4d9fb1b4be81414eedc6fbc8b9fbe26ca6f5553a52855912f80de7ff3a4c5220",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/delivery-tooling/publish-named-projection-refresh-20261116.py.gz"
+  },
+  "delivery-tooling/report.py": {
+    "sha256": "1cdb12fbe7bf610601d3780563ea59a5e38f0dfe247800e1460dd53aa2f8c604",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/delivery-tooling/report.py.gz"
+  },
+  "delivery-tooling/stage-named-projection-refresh-20261116.py": {
+    "sha256": "595174e5bbdfcd31aa6df72497b3706f6dff6b48658ce3f25f7a7a8a4d785cf4",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/delivery-tooling/stage-named-projection-refresh-20261116.py.gz"
+  },
+  "delivery-tooling/superseded-preparation-runs.json": {
+    "sha256": "f6d49a5714fe313611e1ec14be686de46cbf076e21e5359a946b02c69718e10b",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/delivery-tooling/superseded-preparation-runs.json.gz"
+  },
+  "delivery-tooling/test_hosted_report.py": {
+    "sha256": "0a16953dbe1f3b5c2594f39e7542408ec3ed0f61944cd9bf5785ee6d2e21f9f3",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/delivery-tooling/test_hosted_report.py.gz"
+  },
+  "delivery-tooling/verify-hosted-certified-report-20261101.py": {
+    "sha256": "6eba237c743b83e827969d644fc1502f4b1a038bccf6bb858be832ee46c99c7f",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/delivery-tooling/verify-hosted-certified-report-20261101.py.gz"
+  },
+  "import.log": {
+    "sha256": "1ab41c434de93f0bd5f2cb6b03ed1b2101f7c2e3cf1328d73c4ef727c3492271",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "3e64aaf44365ed07bce286d0d5cfc617cc380b5b90d9c3210bc7b44453caf636",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "f3975276f4537684631aa2dddd499abe89bf7ebd3a774e612dac77909a87de06",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "67c0f91c7d6dbf8015ce062742d398fc5cbc5bb82cd74cbcd9185e5c633d586c",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "cb2c80cfd6063b13c490c1ee5386101a473b2b35fa71ce23a748dda93d0208e1",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "6959c89426a84059dff5bf2b34f756e025b7ad4fc23d79ac97dd65fa06130a5c",
+    "archive": "benchmarks/results/remaining-indicators/named-output-projection-refresh-20261116-report-integration/updated-pair-details.png.gz"
+  }
+}
