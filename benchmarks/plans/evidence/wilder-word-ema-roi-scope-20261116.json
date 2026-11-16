@@ -1,0 +1,99 @@
+{
+  "approved": true,
+  "diagnostic_only": true,
+  "qualification": false,
+  "publication": false,
+  "source": "07dd8befc5e03a5cbc044546ae5bb36e2a53d597",
+  "baseline": "ab61b7eba91debdf481130c91a14e33d1a3e5888",
+  "pairs": [
+    "QuanTAlib.Smma",
+    "Skender.GetSmma",
+    "Trady.Indicator.ModifiedMovingAverage"
+  ],
+  "cases": 30,
+  "decisions": 6,
+  "max_parallel": 1,
+  "authorization": "User: yes I already approved so continue",
+  "original_verification_scope": {
+    "approved": true,
+    "proposal_only": false,
+    "scope": "Verify parent-reviewed two-file Wilder draft; conditional native ROI then full three-pair qualification",
+    "baseline": "ab61b7eba91debdf481130c91a14e33d1a3e5888",
+    "source": "07dd8befc5e03a5cbc044546ae5bb36e2a53d597",
+    "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-wilder-word-ema-reuse-20261116",
+    "production_change": "10lines reuse existing exact TryAdvance postseed only;1..1024guard;originalseed/reset/fallback and NETFRAMEWORKpath preserved",
+    "parent_adversarial_review_complete": true,
+    "tests_run": false,
+    "verification": {
+      "unit_classes": [
+        "WilderWordEmaReuseTests",
+        "AlligatorSharedExecutionTests",
+        "EnvelopeSharedExecutionTests"
+      ],
+      "expected_unit_cases": 51,
+      "parity_classes": [
+        "WilderAverageComparisonTests",
+        "WilderBenchmarkTests",
+        "AlligatorComparisonTests",
+        "EnvelopeComparisonTests"
+      ],
+      "expected_comparator_cases": 60,
+      "actual_gpu": 100,
+      "counts": "Static current class/memberdata enumeration; actual results must be checked"
+    },
+    "pairs": [
+      "QuanTAlib.Smma",
+      "Skender.GetSmma",
+      "Trady.Indicator.ModifiedMovingAverage"
+    ],
+    "roi": {
+      "cases": 30,
+      "decisions": 6,
+      "sizes": [
+        1000,
+        10000
+      ],
+      "batch_only": true,
+      "max_measurement_runners": 1,
+      "gate": "Fresh native crossover for at least1previously nonwinning pair; separated native intervals in both candidate rounds with>=10percent mean margin; no source regression across6comparisons; baselinewins not new closures"
+    },
+    "conditional_qualification": {
+      "cases": 90,
+      "decisions": 18,
+      "profiles": [
+        "Batch",
+        "BuilderFull",
+        "BuilderLatestOnly"
+      ],
+      "max_measurement_runners": 1,
+      "gate": "Only after correctness/GPU100 and nativeROI gate; preserve both existing direct-family winners"
+    },
+    "policy": {
+      "batch_unmeasured_warmups": 1000,
+      "measured_iterations": 10,
+      "runtime": "default unchanged",
+      "quiet_samples": 12,
+      "max_cpu_percent": 15,
+      "concurrent_build_tests_on_measurement_host": false
+    },
+    "publication": "Only if qualification accepted, source/base reconciliation reviewed and publication checks pass; no merge/release. No combination with other unpublished candidates without affected-union verification approval.",
+    "added_effort": "Approximately1.5-2.5hours elapsed verification, queue time excluded; one measurement runner",
+    "exclusions": [
+      "No shared helper/dispatcher/dependency/harness changes",
+      "No extra platforms or unrelated test families",
+      "No policy relaxation or reportimport from diagnostic",
+      "No baselinewins counted as sourceclosures"
+    ],
+    "approval": "User: yes I already approved so continue"
+  },
+  "actual_correctness": {
+    "unit": 51,
+    "comparator": 91,
+    "actual_gpu": 100,
+    "counts": "Actual canonical manifest; original static parity forecast60 superseded by91 substring-filter matches with unchanged requested classes."
+  },
+  "launch_gate": "Fresh native crossover for at least1previously nonwinning pair; separated native intervals in both candidate rounds with>=10percent mean margin; no source regression across6comparisons; baselinewins not new closures",
+  "history_policy_change": false,
+  "warmup_policy_change": false,
+  "runtime_policy_change": false
+}

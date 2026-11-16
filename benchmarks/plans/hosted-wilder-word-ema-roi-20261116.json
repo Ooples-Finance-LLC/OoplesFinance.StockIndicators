@@ -1,0 +1,151 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "sources": {
+    "published": "ab61b7eba91debdf481130c91a14e33d1a3e5888",
+    "old": "ab61b7eba91debdf481130c91a14e33d1a3e5888",
+    "successor": "07dd8befc5e03a5cbc044546ae5bb36e2a53d597",
+    "variants": "9a45372530e49718b01b6524f9a0db993514e1e8"
+  },
+  "gpu_sources": {
+    "old": "5be1a81d02ad01393f3fa8ede764e914252d0e96",
+    "successor": "07dd8befc5e03a5cbc044546ae5bb36e2a53d597",
+    "variants": "9a45372530e49718b01b6524f9a0db993514e1e8"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "OwnedHistoryBatchTests"
+    ],
+    "successor": [
+      "WilderWordEmaReuseTests",
+      "AlligatorSharedExecutionTests",
+      "EnvelopeSharedExecutionTests"
+    ],
+    "variants": [
+      "OwnedHistoryBatchTests"
+    ]
+  },
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.150.0"
+  },
+  "diagnostic_only": true,
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "cases": 30,
+  "decisions": 6,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 60
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Smma",
+              "pair": "QuanTAlib.Smma"
+            },
+            {
+              "raw": "Skender.GetSmma",
+              "pair": "Skender.GetSmma"
+            },
+            {
+              "raw": "Trady.Indicator.ModifiedMovingAverage",
+              "pair": "Trady.Indicator.ModifiedMovingAverage"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 30,
+          "decisions": 6
+        }
+      ],
+      "cases": 30,
+      "decisions": 6
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Smma",
+              "pair": "QuanTAlib.Smma"
+            },
+            {
+              "raw": "Skender.GetSmma",
+              "pair": "Skender.GetSmma"
+            },
+            {
+              "raw": "Trady.Indicator.ModifiedMovingAverage",
+              "pair": "Trady.Indicator.ModifiedMovingAverage"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 30,
+          "decisions": 6
+        }
+      ],
+      "cases": 30,
+      "decisions": 6
+    }
+  ],
+  "roi_approval": {
+    "path": "benchmarks/plans/evidence/wilder-word-ema-roi-scope-20261116.json",
+    "sha256": "12d3ab4bf0e7ee03f7acdbede608bd67570333138468b4f8ab2fcf125db4c5c5"
+  },
+  "baseline_inputs": {
+    "run_id": "43880487485",
+    "plan": "benchmarks/plans/hosted-named-projection-refresh-20261116.json",
+    "plan_sha256": "03e891d5220a12f0983a2f8d8d1b0de2cdc4f751cea0a07625a91dc6e21661b8",
+    "provenance_sha256": "92977e9786050146dbe97748c8a28d59e8eb47be5f4b5f85ae064ec4fcacef3a",
+    "label": "successor"
+  },
+  "candidate": {
+    "ci_run": "43927309986",
+    "producer": "0857eefc242585a9f44bfa3c134ea0bd3eb1b30a",
+    "source": "07dd8befc5e03a5cbc044546ae5bb36e2a53d597",
+    "evidence_source": "fc909978d9aff7eca04fed411dd415fae10d6383",
+    "manifest_sha256": "d092e82a074fb06b1e3d5df06ccb190e8b4f518363e548c41bad57c0dc51cd38",
+    "gpu_receipt_sha256": "3953368583a8850f26711f5670c593733fe1bc2a7b3495be01ecc9fe301d5da9",
+    "unit_classes": [
+      "WilderWordEmaReuseTests",
+      "AlligatorSharedExecutionTests",
+      "EnvelopeSharedExecutionTests"
+    ],
+    "parity_classes": [
+      "WilderAverageComparisonTests",
+      "WilderBenchmarkTests",
+      "AlligatorComparisonTests",
+      "EnvelopeComparisonTests"
+    ]
+  },
+  "diagnostic_kind": "wilder-word-ema-native-pilot"
+}
