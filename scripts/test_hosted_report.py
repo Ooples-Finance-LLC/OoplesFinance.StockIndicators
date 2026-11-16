@@ -28,6 +28,7 @@ class HostedReportTests(unittest.TestCase):
                  patch('hosted_timing.archive.subprocess.check_output',return_value=b'source patch'):
                 destination=archive(raw,prepared,root/'repo','variants')
             decision=read(destination/'decision.json')
+            self.assertNotIn(b'\r\n',(destination/'decision.json').read_bytes())
             self.assertFalse(decision['accepted'])
             self.assertFalse(decision['production_integrated'])
             self.assertFalse(decision['report_imported'])

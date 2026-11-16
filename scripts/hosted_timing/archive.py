@@ -2,10 +2,17 @@
 from pathlib import Path
 import gzip
 import hashlib
+import json
 import subprocess
 
-from .pipeline import PLAN, REPO, read, write, digest, verify_inputs
+from .pipeline import PLAN, REPO, read, digest, verify_inputs
 from .verify import collect
+
+
+def write(path, value):
+    # Archives disable Git text conversion; emit LF bytes on Windows too.
+    path.parent.mkdir(parents=True,exist_ok=True)
+    path.write_bytes((json.dumps(value,indent=2)+'\n').encode('utf-8'))
 
 
 def archive(raw, prepared, repo, phase):
