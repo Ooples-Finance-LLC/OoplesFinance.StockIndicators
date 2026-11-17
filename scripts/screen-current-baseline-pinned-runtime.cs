@@ -35,7 +35,7 @@ internal static class Program
         string input = Path.GetFullPath(args[0]), runtime = Path.GetFullPath(args[1]);
         string arm = args[2], pair = args[3], output = Path.GetFullPath(args[4]);
         Require(arm is "old" or "new" or "native", "Unknown arm.");
-        Require(pair is "Skender.GetMacd" or "TaLib.Functions.Stoch" or "TaLib.Functions.StdDev", "Unknown pair.");
+        Require(pair is "TaLib.Functions.LinearReg" or "TaLib.Functions.LinearRegSlope" or "TaLib.Functions.LinearRegIntercept" or "TaLib.Functions.LinearRegAngle" or "TaLib.Functions.Tsf" or "Skender.GetEpma", "Unknown pair.");
         Require(!Directory.Exists(output), "Fresh output required."); Directory.CreateDirectory(output);
         var receipt = new Dictionary<string,object?> {
             ["diagnostic_only"] = true, ["qualification"] = false, ["native_win_claim"] = false,
@@ -94,7 +94,14 @@ internal static class Program
             receipt["settings_before"] = Settings(); receipt["runtime_files"] = files; receipt["protected_input_hashes"] = protectedFiles; receipt["selected_managed_assets"] = selected;
             var type = Find("OoplesFinance.StockIndicators.CompetitorBenchmarks.dll").GetType("OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks", true)!;
             var fixture = Activator.CreateInstance(type)!; type.GetProperty("PairId")!.SetValue(fixture, pair); type.GetProperty("Bars")!.SetValue(fixture, 10000);
-            type.GetMethod("Setup")!.Invoke(fixture, null); var invoke = type.GetMethod(arm == "native" ? "Competitor" : "Ooples")!;
+            type.GetMethod("Setup")!.Invoke(fixture, null);
+            int period = (int)type.GetField("Period", flags)!.GetRawConstantValue()!;
+            Require(period == 20, "Unexpected actual benchmark period.");
+            receipt["benchmark_period_constant"] = period;
+            object selectedPair = type.GetField("_pair", flags)!.GetValue(fixture)!;
+            Require((string)selectedPair.GetType().GetProperty("Id", flags)!.GetValue(selectedPair)! == pair, "Wrong actual factory pair.");
+            receipt["actual_factory_pair"] = pair;
+            var invoke = type.GetMethod(arm == "native" ? "Competitor" : "Ooples")!;
             receipt["settings_after_setup"] = Settings(); receipt["closure_before"] = Closure(); Save();
             for (int i = 0; i < 1000; i++) GC.KeepAlive(invoke.Invoke(fixture, null));
             var samples = new List<double>(); var retained = new List<object>(); receipt["measurement_start_utc"] = DateTime.UtcNow;
@@ -110,7 +117,7 @@ internal static class Program
         }
         catch (Exception error) { receipt["status"] = "failed"; receipt["error"] = error.ToString(); Save(); Console.Error.WriteLine(error); return 1; }
     }
-    sealed class AuthenticatedContext(Dictionary<string,string> selected, Dictionary<string,string> framework, Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedBaselineScreen", false)
+    sealed class AuthenticatedContext(Dictionary<string,string> selected, Dictionary<string,string> framework, Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedRegressionBaselineScreen", false)
     {
         protected override Assembly? Load(AssemblyName name)
         {
