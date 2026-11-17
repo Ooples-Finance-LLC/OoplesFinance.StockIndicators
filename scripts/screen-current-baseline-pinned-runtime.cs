@@ -106,13 +106,13 @@ internal static class Program
             Delegate invoke = Select(selectedPair, arm == "native" ? "Competitor" : "Library");
             Delegate normal = Select(normalPair, "Library");
             object[] callArgs = { data, 20 };
-            var expected = Snapshot(normal.DynamicInvoke(callArgs)!);
-            receipt["normal_reference_outputs"] = expected;
+            var normalReference = Snapshot(normal.DynamicInvoke(callArgs)!);
+            receipt["normal_reference_outputs"] = normalReference;
             receipt["invocation"] = "DispersionComparison.Create; frozen Library/Competitor delegate DynamicInvoke with unchanged fixture._data and period20";
             void Validate(object result)
             {
-                var actual = Snapshot(result); Require(actual.Count == expected.Count, "Column count changed.");
-                foreach (var entry in expected)
+                var actual = Snapshot(result); Require(actual.Count == normalReference.Count, "Column count changed.");
+                foreach (var entry in normalReference)
                 {
                     Require(actual.TryGetValue(entry.Key, out var column), "Column missing."); var reference = entry.Value;
                     Require(column!.FirstValid == reference.FirstValid && column.Values.Length == reference.Values.Length, "Startup/length changed.");
