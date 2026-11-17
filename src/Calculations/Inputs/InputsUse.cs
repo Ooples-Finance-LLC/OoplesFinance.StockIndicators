@@ -30,6 +30,24 @@ public static partial class Calculations
     /// <exception cref="ArgumentNullException">Either argument is null.</exception>
     public static StockData UseInput(this StockData stockData, IInputSeries series)
     {
+        var values = ComputeInputSeries(stockData, series);
+        stockData.SetInputSeries(values);
+        return stockData;
+    }
+
+    /// <summary>
+    /// Computes <paramref name="series"/> over the bar spans without materializing zero-copy OHLCV column views,
+    /// and returns a <see cref="StockData"/> view whose persistent base input is that series across repeated
+    /// calculations and <see cref="StockData.CustomValuesList"/> resets.
+    /// </summary>
+    public static StockData WithBaseInput(this StockData stockData, IInputSeries series)
+    {
+        var values = ComputeInputSeries(stockData, series);
+        return stockData.WithBaseInput(values);
+    }
+
+    private static List<double> ComputeInputSeries(StockData stockData, IInputSeries series)
+    {
         if (stockData is null)
         {
             throw new ArgumentNullException(nameof(stockData));
@@ -42,24 +60,22 @@ public static partial class Calculations
 
         series.Reset();
 
-        var opens = stockData.OpenPrices;
-        var highs = stockData.HighPrices;
-        var lows = stockData.LowPrices;
-        var closes = stockData.ClosePrices;
-        var volumes = stockData.Volumes;
-        var dates = stockData.Dates;
+        var opens = stockData.OpenSpan;
+        var highs = stockData.HighSpan;
+        var lows = stockData.LowSpan;
+        var closes = stockData.CloseSpan;
+        var volumes = stockData.VolumeSpan;
+        var dates = stockData.DateSpan;
 
         var values = new List<double>(stockData.Count);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var date = i < dates.Count ? dates[i] : default;
+            var date = i < dates.Length ? dates[i] : default;
             var bar = new OhlcvBar("BATCH", BarTimeframe.Tick, date, date,
                 opens[i], highs[i], lows[i], closes[i], volumes[i], isFinal: true);
             values.Add(series.Next(bar, isFinal: true));
         }
 
-        stockData.SetInputSeries(values);
-
-        return stockData;
+        return values;
     }
 }

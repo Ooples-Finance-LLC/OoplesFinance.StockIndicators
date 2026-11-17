@@ -7,57 +7,53 @@ public class GlobalTestData
 
     public static List<T> GetCsvData<T>(string fileName)
     {
-        using var reader = new StreamReader($"TestData/{fileName}.csv");
-        using var csvReader = new CsvReader(reader, CultureInfo.InvariantCulture);
-
-        List<T> result;
+        using var csvReader = CsvReader.FromFile($"TestData/{fileName}.csv");
+        var result = new List<T>();
+        csvReader.ReadHeader();
         if (typeof(T) == typeof(TickerData))
         {
-            csvReader.Context.TypeConverterCache.AddConverter<DateTime>(new CustomDateConverter());
-            result = new List<T>(csvReader.GetRecords<T>());
-        }
-        else
-        {
-            if (typeof(T) == typeof(double))
-            {
-                csvReader.Context.TypeConverterCache.AddConverter<double>(new CustomDoubleConverter());
-            }
-            
-            result = new List<T>();
-            var count = 0;
             while (csvReader.Read())
             {
-                if (count == 0)
+                var ticker = new TickerData
                 {
-                    csvReader.ReadHeader();
+                    Date = DateTime.ParseExact(csvReader.GetString("Date"), "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None),
+                    Open = double.Parse(csvReader.GetString("Open"), CultureInfo.InvariantCulture),
+                    High = double.Parse(csvReader.GetString("High"), CultureInfo.InvariantCulture),
+                    Low = double.Parse(csvReader.GetString("Low"), CultureInfo.InvariantCulture),
+                    Close = double.Parse(csvReader.GetString("Close"), CultureInfo.InvariantCulture),
+                    Volume = double.Parse(csvReader.GetString("Volume"), CultureInfo.InvariantCulture),
+                };
+                result.Add((T)(object)ticker);
+            }
+        }
+        else if (typeof(T) == typeof(double))
+        {
+            while (csvReader.Read())
+            {
+                var text = csvReader.GetString("Output");
+                double value;
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    value = 0d;
+                }
+                else if (double.TryParse(text, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var parsed)
+                    && !double.IsNaN(parsed) && !double.IsInfinity(parsed))
+                {
+                    value = Math.Round(parsed, 4);
                 }
                 else
                 {
-                    result.Add(csvReader.GetField<T>("Output")!);
+                    throw new FormatException($"Invalid numeric Output '{text}' in fixture 'TestData/{fileName}.csv' at row {result.Count + 1}.");
                 }
-                
-                count++;
+
+                result.Add((T)(object)value);
             }
+        }
+        else
+        {
+            throw new NotSupportedException($"Unsupported CSV fixture record type {typeof(T).FullName}.");
         }
 
         return result;
-    }
-}
-
-public class CustomDoubleConverter : DefaultTypeConverter
-{
-    public override object? ConvertFromString(string? text, IReaderRow row, MemberMapData memberMapData)
-    {
-        var isSuccess = double.TryParse(text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var result);
-        return isSuccess ? Math.Round(result, 4) : string.IsNullOrWhiteSpace(text) ? 0d : base.ConvertFromString(text, row, memberMapData);
-    }
-}
-
-public class CustomDateConverter : DefaultTypeConverter
-{
-    public override object? ConvertFromString(string? text, IReaderRow row, MemberMapData memberMapData)
-    {
-        var isSuccess = DateTime.TryParseExact(text, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var result);
-        return isSuccess ? result : base.ConvertFromString(text, row, memberMapData);
     }
 }
