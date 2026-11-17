@@ -1,35 +1,46 @@
-name: Pinned current regression native-gap diagnostic
+name: Pinned baseline warmup diagnostic
 
 on:
   push:
     branches:
-      - perf/hosted-regression-current-gap-screen-20261117
+      - perf/hosted-baseline-warmup-study-20261117
 
 permissions:
   contents: read
   actions: read
 
 concurrency:
-  group: pinned-regression-current-gap-screen
+  group: pinned-baseline-warmup-study
   cancel-in-progress: false
 
 jobs:
   screen:
     runs-on: windows-2025
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - id: regression
+            pair: TaLib.Functions.LinearReg
+          - id: candle
+            pair: TaLib.Candles.UpsideGapTwoCrows
+    env:
+      STUDY_PAIR: ${{ matrix.pair }}
     steps:
       - name: Initialize fresh diagnostic paths
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
           foreach ($name in @('SCREEN_ROOT','OLD_INPUT')) {
-            $value=Join-Path $env:RUNNER_TEMP ('regression6-'+$name.ToLowerInvariant())
+            $value=Join-Path $env:RUNNER_TEMP ('warmup-study-'+$name.ToLowerInvariant())
             if (Test-Path -LiteralPath $value) { throw 'Fresh job paths required' }
             [Environment]::SetEnvironmentVariable($name,$value)
             "$name=$value" | Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8
           }
           [IO.Directory]::CreateDirectory($env:SCREEN_ROOT) | Out-Null
-          [ordered]@{workflow_head=$env:GITHUB_SHA;run_id=$env:GITHUB_RUN_ID;diagnostic_only=$true;baseline_aa=$true;qualification=$false;native_win_claim=$false;production_builds=0;tests=0;timed_benchmark_cases=0;diagnostic_cases=30;helper_compiler_sdk='10.0.403';driver_builds=1;combined_workload_cap_seconds=120;aggregate_output_cap_bytes=104857600;individual_process_cap_seconds=60;runner_image=$env:ImageVersion} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'provenance.json') -Encoding utf8
+          [ordered]@{workflow_head=$env:GITHUB_SHA;run_id=$env:GITHUB_RUN_ID;diagnostic_only=$true;baseline_aa=$true;qualification=$false;native_win_claim=$false;production_builds=0;tests=0;timed_benchmark_cases=0;diagnostic_cases=10;study_pair=$env:STUDY_PAIR;warmup_counts=@(1000,20000);policy_change=$false;helper_compiler_sdk='10.0.403';driver_builds=1;combined_workload_cap_seconds=120;aggregate_output_cap_bytes=104857600;individual_process_cap_seconds=60;runner_image=$env:ImageVersion} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'provenance.json') -Encoding utf8
       - uses: actions/checkout@v7
         with:
           sparse-checkout: |
@@ -58,7 +69,7 @@ jobs:
           if ((Get-FileHash $oldCore).Hash.ToLowerInvariant() -ne '4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173') { throw 'Wrong production bytes' }
           $common=[IO.Path]::GetFullPath((Join-Path $inputs 'common'))
           foreach ($label in @('old','new')) {
-            $view=Join-Path $env:RUNNER_TEMP ('regression6-'+$label+'-runtime')
+            $view=Join-Path $env:RUNNER_TEMP ('warmup-study-'+$label+'-runtime')
             if (Test-Path -LiteralPath $view) { throw 'Fresh runtime view required' }
             foreach ($entry in $manifest.common_manifest.PSObject.Properties) {
               $source=[IO.Path]::GetFullPath((Join-Path $common $entry.Name))
@@ -72,7 +83,7 @@ jobs:
           }
           $config=Join-Path $common 'OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json'
           if ((Get-FileHash $config).Hash.ToLowerInvariant() -ne 'c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097') { throw 'Wrong runtime configuration' }
-          $helper=Join-Path $env:RUNNER_TEMP 'regression6-diagnostic-helper'
+          $helper=Join-Path $env:RUNNER_TEMP 'warmup-study-diagnostic-helper'
           [IO.Directory]::CreateDirectory($helper) | Out-Null
           @('<Project Sdk="Microsoft.NET.Sdk">','<PropertyGroup>','<OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>','<ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>','<UseSharedCompilation>false</UseSharedCompilation>','</PropertyGroup>','</Project>') | Set-Content (Join-Path $helper 'DiagnosticScreen.csproj') -Encoding utf8
           Copy-Item (Join-Path $env:GITHUB_WORKSPACE 'scripts/screen-current-baseline-pinned-runtime.cs') (Join-Path $helper 'Program.cs')
@@ -112,16 +123,29 @@ jobs:
             $clock=[Diagnostics.Stopwatch]::StartNew()
             $inputs=Join-Path $env:OLD_INPUT 'predicate-inputs'
             $config=Join-Path $inputs 'common/OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json'
-            $driver=Join-Path $env:RUNNER_TEMP 'regression6-diagnostic-helper/out/DiagnosticScreen.dll'
+            $driver=Join-Path $env:RUNNER_TEMP 'warmup-study-diagnostic-helper/out/DiagnosticScreen.dll'
             $index=0
-            foreach ($pair in @('TaLib.Functions.LinearReg','TaLib.Functions.LinearRegSlope','TaLib.Functions.LinearRegIntercept','TaLib.Functions.LinearRegAngle','TaLib.Functions.Tsf','Skender.GetEpma')) {
-              foreach ($arm in @('old','new','new','old','native')) {
+            $pair=$env:STUDY_PAIR
+            if ($pair -notin @('TaLib.Functions.LinearReg','TaLib.Candles.UpsideGapTwoCrows')) { throw 'Unexpected study pair' }
+            $specifications=@(
+              [pscustomobject]@{arm='old';warmups=1000},
+              [pscustomobject]@{arm='old';warmups=20000},
+              [pscustomobject]@{arm='new';warmups=20000},
+              [pscustomobject]@{arm='new';warmups=1000},
+              [pscustomobject]@{arm='new';warmups=1000},
+              [pscustomobject]@{arm='new';warmups=20000},
+              [pscustomobject]@{arm='old';warmups=20000},
+              [pscustomobject]@{arm='old';warmups=1000},
+              [pscustomobject]@{arm='native';warmups=1000},
+              [pscustomobject]@{arm='native';warmups=20000})
+            foreach ($specification in $specifications) {
+                $arm=$specification.arm;$warmups=$specification.warmups
                 CheckBudget
                 if ($clock.Elapsed.TotalSeconds -ge 105) { throw 'Insufficient shared budget reserved for mandatory post-gate' }
                 $label=if ($arm -eq 'new') { 'new' } else { 'old' }
-                $view=Join-Path $env:RUNNER_TEMP ('regression6-'+$label+'-runtime')
+                $view=Join-Path $env:RUNNER_TEMP ('warmup-study-'+$label+'-runtime')
                 $out=Join-Path $env:SCREEN_ROOT ('case-'+$index)
-                $argsList=@('exec','--runtimeconfig',$config,$driver,$inputs,$view,$arm,$pair,$out)
+                $argsList=@('exec','--runtimeconfig',$config,$driver,$inputs,$view,$arm,$pair,$out,[string]$warmups)
                 $start=[Diagnostics.ProcessStartInfo]::new((Get-Command dotnet).Source)
                 $start.UseShellExecute=$false;$start.CreateNoWindow=$true;$start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
                 foreach ($argument in $argsList) { $start.ArgumentList.Add([string]$argument) }
@@ -134,22 +158,21 @@ jobs:
                   if ($timedOut) { $process.Kill($true);$process.WaitForExit() }
                   $stdout.GetAwaiter().GetResult() | Set-Content (Join-Path $env:SCREEN_ROOT ('case-'+$index+'-stdout.log')) -Encoding utf8
                   $stderr.GetAwaiter().GetResult() | Set-Content (Join-Path $env:SCREEN_ROOT ('case-'+$index+'-stderr.log')) -Encoding utf8
-                  [ordered]@{exit_code=$process.ExitCode;timed_out=$timedOut;arm=$arm;pair=$pair;arguments=$argsList} | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $env:SCREEN_ROOT ('case-'+$index+'-exit.json')) -Encoding utf8
+                  [ordered]@{exit_code=$process.ExitCode;timed_out=$timedOut;arm=$arm;pair=$pair;warmups=$warmups;arguments=$argsList} | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $env:SCREEN_ROOT ('case-'+$index+'-exit.json')) -Encoding utf8
                   if ($timedOut) { throw 'Individual or combined child cap reached; partial logs preserved' }
                   if ($process.ExitCode -ne 0) { throw 'Case failed; no reduced samples or retry' }
                 } finally { if ($started -and !$process.HasExited) { $process.Kill($true);$process.WaitForExit() };$process.Dispose() }
                 CheckBudget
                 $case=Get-Content (Join-Path $out 'case.json') -Raw | ConvertFrom-Json
-                if ($case.status -ne 'complete' -or $case.actual_clr -ne '10.0.15' -or $case.arm -ne $arm -or $case.pair -ne $pair -or @($case.samples_ms).Count -ne 10 -or $case.warmups -ne 1000 -or $case.benchmark_period_constant -ne 20 -or !$case.runtime_unchanged -or !$case.protected_inputs_unchanged) { throw 'Incomplete or mismatched case' }
+                if ($case.status -ne 'complete' -or $case.actual_clr -ne '10.0.15' -or $case.arm -ne $arm -or $case.pair -ne $pair -or @($case.samples_ms).Count -ne 10 -or $case.warmups -ne $warmups -or ![double]::IsFinite($case.warmup_elapsed_ms) -or $case.warmup_elapsed_ms -lt 0 -or $case.benchmark_period_constant -ne 20 -or !$case.runtime_unchanged -or !$case.protected_inputs_unchanged) { throw 'Incomplete or mismatched case' }
                 $settings=$case.settings_before | ConvertTo-Json -Compress
                 if ($case.settings_before.dop -ne 2 -or $case.settings_before.effective_workers -ne 2 -or $case.processor_count -ne 4 -or $settings -cne ($case.settings_after_setup | ConvertTo-Json -Compress) -or $settings -cne ($case.settings_after | ConvertTo-Json -Compress)) { throw 'Worker settings changed or unavailable within case' }
                 if ($cases.Count -eq 0) { $settingsReference=$settings;$processorReference=$case.processor_count;$envReference=$case.env_aidotnet_cpu_threads }
                 elseif ($settings -cne $settingsReference -or $case.processor_count -ne $processorReference -or $case.env_aidotnet_cpu_threads -cne $envReference) { throw 'Worker, CPU or environment settings differ between isolated cases' }
                 $cases.Add($case);$index++
-              }
             }
             $compared=0
-            foreach ($pair in @('TaLib.Functions.LinearReg','TaLib.Functions.LinearRegSlope','TaLib.Functions.LinearRegIntercept','TaLib.Functions.LinearRegAngle','TaLib.Functions.Tsf','Skender.GetEpma')) {
+            foreach ($pair in @($env:STUDY_PAIR)) {
               $group=@($cases | Where-Object pair -eq $pair)
               $reference=$group[0].source_outputs[0]
               foreach ($case in @($group | Where-Object arm -ne 'native')) {
@@ -165,8 +188,8 @@ jobs:
                 }
               }
             }
-            if ($cases.Count -ne 30 -or $compared -ne 240) { throw 'Incomplete diagnostic scope' }
-            [ordered]@{cases=30;measured_source_outputs_compared=240;bitwise_equal=$true;outside_timing=$true;baseline_aa=$true;qualification=$false} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'output-comparison.json') -Encoding utf8
+            if ($cases.Count -ne 10 -or $compared -ne 80) { throw 'Incomplete diagnostic scope' }
+            [ordered]@{cases=10;measured_source_outputs_compared=80;study_pair=$env:STUDY_PAIR;warmup_policy_change=$false;bitwise_equal=$true;outside_timing=$true;baseline_aa=$true;qualification=$false} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'output-comparison.json') -Encoding utf8
             CheckBudget;$workloadComplete=$true
           } catch { $failure=$_.Exception.ToString() }
           finally {
@@ -188,7 +211,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: regression-current-gap-screen
+          name: baseline-warmup-study-${{ matrix.id }}
           path: ${{ env.SCREEN_ROOT }}/
           retention-days: 14
           if-no-files-found: error
