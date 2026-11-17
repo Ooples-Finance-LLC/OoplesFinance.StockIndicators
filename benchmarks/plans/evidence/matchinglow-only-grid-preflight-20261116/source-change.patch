@@ -1,0 +1,373 @@
+diff --git a/src/Indicators/ValuesBarExecution.BoundedWindows.cs b/src/Indicators/ValuesBarExecution.BoundedWindows.cs
+index 9b564262b..62ee92139 100644
+--- a/src/Indicators/ValuesBarExecution.BoundedWindows.cs
++++ b/src/Indicators/ValuesBarExecution.BoundedWindows.cs
+@@ -1361,6 +1361,9 @@ internal static partial class ValuesBarExecution
+     {
+         cancellation.ThrowIfCancellationRequested();
+         int chunks = period <= 4096 ? Math.Min(WorkerCount(), source.Length / period) : 1;
++        if (typeof(T) == typeof(SequenceKernel) && MatchingLowGridEligible(indicator, source.Length))
++            chunks = Math.Min(chunks, Math.Max(1, source.Length / 512));
++
+         bool lockTaken = false;
+         Bar[][]? tails = null;
+         try
+@@ -1413,6 +1416,10 @@ internal static partial class ValuesBarExecution
+         int start, int end, int period, ReadOnlySpan<Bar> seed, ReadOnlySpan<Bar> tail,
+         CancellationToken cancellation, IIndicator indicator) where T : struct, IBoundedKernel<T>
+     {
++        if (typeof(T) == typeof(SequenceKernel) && MatchingLowGridEligible(indicator, source.Length)
++            && end - start + seed.Length >= 512)
++            return ComputeMatchingLowGrid(source, output[0], owned, start, end, seed, tail, cancellation, (MatchingLowCandle)indicator);
++
+         if (typeof(T) == typeof(StarReversalKernel) && indicator is AbandonedBabyCandle baby
+             && baby.LongPeriod <= 64 && baby.ShortPeriod <= 64 && baby.DojiPeriod <= 64)
+             return ComputeAbandonedBlocks(source, output[0], owned, start, end, period, seed, tail, cancellation, baby);
+diff --git a/src/Indicators/ValuesBarExecution.MatchingLowGrid.cs b/src/Indicators/ValuesBarExecution.MatchingLowGrid.cs
+new file mode 100644
+index 000000000..fa2a707ab
+--- /dev/null
++++ b/src/Indicators/ValuesBarExecution.MatchingLowGrid.cs
+@@ -0,0 +1,146 @@
++#if !NETFRAMEWORK
++using OoplesFinance.StockIndicators.Helpers;
++
++namespace OoplesFinance.StockIndicators.Indicators;
++
++internal static partial class ValuesBarExecution
++{
++    internal static bool MatchingLowGridEligible(IIndicator indicator, int count) =>
++        count >= 8192 && indicator is MatchingLowCandle { Period: >= 1 and <= 64 };
++
++    // MatchingLow only: reuse the existing worker ownership and validation
++    // boundary, with the complete threshold window and anchor in each halo.
++    private static PointwiseRegion ComputeMatchingLowGrid(Bar[] source, double[] output,
++        OwnedBarBuffer? owned, int start, int end, ReadOnlySpan<Bar> seed,
++        ReadOnlySpan<Bar> tail, CancellationToken cancellation, MatchingLowCandle indicator)
++    {
++        const int blockSize = 256;
++        int halo = indicator.WarmupBars; // Configured period <=64, plus one anchor.
++        Span<Bar> captured = stackalloc Bar[blockSize + 65];
++        Span<long> storage = stackalloc long[3 * (blockSize + 66)];
++        var region = new PointwiseRegion { InvalidOutputIndex = -1 };
++        seed.CopyTo(captured);
++        foreach (ref readonly var bar in seed)
++            if (!AllFieldsFinite(in bar))
++                return new PointwiseRegion { InvalidInput = true, Last = bar, InvalidOutputIndex = -1 };
++        int prefix = seed.Length;
++        int tailStart = end - tail.Length;
++        for (int first = start; first < end;)
++        {
++            if (cancellation.IsCancellationRequested) return region;
++            int count = Math.Min(blockSize, end - first);
++            for (int j = 0; j < count; j++)
++            {
++                if (cancellation.IsCancellationRequested) return region;
++                int index = first + j;
++                var bar = index >= tailStart ? tail[index - tailStart] : source[index];
++                region.Last = bar;
++                if (!AllFieldsFinite(in bar)) { region.InvalidInput = true; return region; }
++                captured[prefix + j] = bar;
++                if (owned is not null) owned[index] = bar;
++            }
++            var block = captured[..(prefix + count)];
++            var destination = output.AsSpan(first, count);
++            if (!TryMatchingLowGridBlock(block, prefix, indicator, storage, destination, out _))
++            {
++                // No source reread or state translation: replay the captured
++                // halo through the unchanged recognizer and exact arithmetic.
++                var state = (IIndicatorState)indicator.CreateState()!;
++                for (int j = 0; j < block.Length; j++)
++                {
++                    if (cancellation.IsCancellationRequested) return region;
++                    double value = state.Update(in block[j]);
++                    if (j >= prefix) destination[j - prefix] = value;
++                }
++            }
++            first += count;
++            prefix = Math.Min(halo, block.Length);
++            block[^prefix..].CopyTo(captured);
++        }
++        return region;
++    }
++
++    // An accepted grid changes binary units exactly. Prices are bounded by
++    // 2^60 and each prefix by Int64; period<=64 threshold products fit Int128.
++    internal static bool TryMatchingLowGridBlock(ReadOnlySpan<Bar> bars, int prefix,
++        MatchingLowCandle indicator, Span<long> storage, Span<double> output, out bool usedSinglePass)
++    {
++        usedSinglePass = false;
++        int period = indicator.Period;
++        if (period is < 1 or > 64) return false;
++        int n = bars.Length;
++        if (prefix < 0 || prefix > n || output.Length != n - prefix || storage.Length < 3 * n + 1) return false;
++        var open = storage[..n];
++        var close = storage.Slice(n, n);
++        var range = storage.Slice(2 * n, n + 1);
++
++        double anchor = n == 0 ? 0 : Math.Max(Math.Max(Math.Abs(bars[0].Open), Math.Abs(bars[0].Close)),
++            Math.Max(Math.Abs(bars[0].High), Math.Abs(bars[0].Low)));
++        int grid = anchor > 0 && double.IsFinite(anchor) ? Math.ILogB(anchor) - 56 : 0;
++        if (TryMatchingLowGridPrefixes(bars, grid, true, open, close, range))
++            usedSinglePass = true;
++        else
++        {
++            // Preserve the previous exact resolver, then original-state replay,
++            // when exponent spread or prefix bounds reject the first grid.
++            grid = int.MaxValue;
++            foreach (ref readonly var bar in bars)
++            {
++                if (!AllFieldsFinite(in bar)) return false;
++                Include(bar.Open); Include(bar.High); Include(bar.Low); Include(bar.Close);
++            }
++            if (grid == int.MaxValue) grid = 0;
++            if (!TryMatchingLowGridPrefixes(bars, grid, false, open, close, range)) return false;
++        }
++        int warmup = indicator.WarmupBars;
++        for (int i = prefix; i < n; i++)
++        {
++            double value = 0;
++            if (i >= warmup)
++            {
++                int b = i - 1;
++                if (close[b] < open[b] && close[i] < open[i]
++                    && (Int128)Math.Abs(close[i] - close[b]) * (period * 20)
++                        <= (Int128)range[b] - range[b - period]) value = 100;
++            }
++            output[i - prefix] = value;
++        }
++        return true;
++
++        void Include(double value)
++        {
++            var part = ExactMeanAccumulator.DecomposeFinite(value);
++            if (part.Integer != 0) grid = Math.Min(grid, part.Exponent);
++        }
++    }
++
++    private static bool TryMatchingLowGridPrefixes(ReadOnlySpan<Bar> bars, int grid, bool certify,
++        Span<long> open, Span<long> close, Span<long> range)
++    {
++        double factor = grid >= -1023 ? Math.ScaleB(1, -grid) : double.PositiveInfinity;
++        bool useFactor = double.IsFinite(factor) && factor > 0;
++        range[0] = 0;
++        const double limit = 1L << 60;
++        for (int i = 0; i < bars.Length; i++)
++        {
++            ref readonly var bar = ref bars[i];
++            if (!AllFieldsFinite(in bar)) return false;
++            double o, h, l, v;
++            if (useFactor) { o = bar.Open * factor; h = bar.High * factor; l = bar.Low * factor; v = bar.Close * factor; }
++            else { o = Math.ScaleB(bar.Open, -grid); h = Math.ScaleB(bar.High, -grid); l = Math.ScaleB(bar.Low, -grid); v = Math.ScaleB(bar.Close, -grid); }
++            if (!(Math.Abs(o) <= limit && Math.Abs(h) <= limit && Math.Abs(l) <= limit && Math.Abs(v) <= limit)) return false;
++            long oi = (long)o, hi = (long)h, li = (long)l, ci = (long)v;
++            if (certify && ((double)oi != o || (double)hi != h || (double)li != l || (double)ci != v)) return false;
++            // A power-of-two shift is exact for a nonzero integral result;
++            // reject any smaller nonzero input that underflowed to scaled zero.
++            if (certify && ((oi == 0 && bar.Open != 0) || (hi == 0 && bar.High != 0)
++                || (li == 0 && bar.Low != 0) || (ci == 0 && bar.Close != 0))) return false;
++            open[i] = oi; close[i] = ci;
++            Int128 nextRange = (Int128)range[i] + hi - li;
++            if (nextRange < long.MinValue || nextRange > long.MaxValue) return false;
++            range[i + 1] = (long)nextRange;
++        }
++        return true;
++    }
++}
++#endif
+diff --git a/tests/ModelsTests/MatchingLowGridTests.cs b/tests/ModelsTests/MatchingLowGridTests.cs
+new file mode 100644
+index 000000000..635f928de
+--- /dev/null
++++ b/tests/ModelsTests/MatchingLowGridTests.cs
+@@ -0,0 +1,190 @@
++using AiDotNet.Tensors.Helpers;
++using OoplesFinance.StockIndicators.Builder;
++using OoplesFinance.StockIndicators.Indicators;
++
++namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
++
++[Collection("IndicatorValuesDispatch")]
++public sealed class MatchingLowGridTests
++{
++    private static double[] Reference(MatchingLowCandle owner, Bar[] bars) =>
++        SequenceCandleReference.Evaluate(bars, owner.Period, owner.WarmupBars, SequenceCandleKind.MatchingLow).ToArray();
++
++    private static double[] Original(MatchingLowCandle owner, Bar[] bars)
++    {
++        var state = (IIndicatorState)owner.CreateState()!;
++        return bars.Select(b => state.Update(in b)).ToArray();
++    }
++
++    private static Bar[] Data(int count, int exponent = 0) => Enumerable.Range(0, count).Select(i =>
++    {
++        double open = i % 16 >= 14 ? 8 : 4;
++        double close = i % 16 >= 14 ? 4 : 6;
++        double high = 10, low = 0;
++        if (i / 16 % 2 != 0) (open, high, low, close) = (-open, -low, -high, -close);
++        double Scale(double value) => Math.ScaleB(1000 + Math.ScaleB(value, -20), exponent);
++        return new Bar(DateTime.UnixEpoch.AddMinutes(i), Scale(open), Scale(high), Scale(low), Scale(close), i);
++    }).ToArray();
++
++    [Theory]
++    [InlineData(0)]
++    [InlineData(-1000)]
++    [InlineData(-1074)]
++    [InlineData(900)]
++    public void CertifiedBlocksMatchIndependentReferencesWithPositiveSignals(int exponent)
++    {
++        foreach (int period in new[] { 1, 2, 5, 64 })
++        {
++            var owner = new MatchingLowCandle(period);
++            var bars = Data(323, exponent);
++            var actual = new double[bars.Length];
++            Assert.True(ValuesBarExecution.TryMatchingLowGridBlock(bars, 0, owner,
++                new long[3 * bars.Length + 1], actual, out bool single));
++            Assert.True(single);
++            Assert.Equal(Reference(owner, bars), actual);
++            Assert.Equal(Original(owner, bars), actual);
++            if (exponent != -1074) Assert.Contains(100d, actual);
++        }
++    }
++
++    [Theory]
++    [InlineData(8191, 1)] [InlineData(8191, 64)] [InlineData(8191, 65)]
++    [InlineData(8192, 1)] [InlineData(8192, 64)] [InlineData(8192, 65)]
++    [InlineData(8193, 1)] [InlineData(8193, 64)] [InlineData(8193, 65)]
++    public async Task SizePeriodAndWorkerBoundariesRetainValuesAndOwnedHistory(int count, int period)
++    {
++        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
++        try
++        {
++            foreach (bool wide in new[] { false, true })
++            {
++                var bars = Data(count);
++                if (wide)
++                    foreach (int i in new[] { 0, 255, 256, 511, 1023, count - 1 })
++                        bars[i] = new(bars[i].Time, double.MaxValue, double.MaxValue, -double.MaxValue, double.Epsilon, i);
++                var owner = new MatchingLowCandle(period);
++                var expected = Original(owner, bars);
++                Assert.Equal(count >= 8192 && period <= 64,
++                    ValuesBarExecution.MatchingLowGridEligible(owner, count));
++                foreach (int workers in new[] { 1, 2, 8 })
++                foreach (var mode in new[] { IndicatorHistoryMode.Full, IndicatorHistoryMode.LatestOnly })
++                {
++                    CpuParallelSettings.MaxDegreeOfParallelism = workers;
++                    var input = bars.ToArray();
++                    using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(input))
++                        .ConfigureIndicators(owner).ConfigureHistory(mode).BuildAsync();
++                    Array.Clear(input);
++                    run.Dispose();
++                    Assert.Equal(expected, run[owner].ToArray());
++                    Assert.Equal(bars[^1], run.Latest.Bar);
++                    if (mode == IndicatorHistoryMode.Full)
++                    {
++                        int i = 0;
++                        await foreach (var snapshot in run) Assert.Equal(bars[i++], snapshot.Bar);
++                        Assert.Equal(count, i);
++                    }
++                }
++            }
++        }
++        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
++    }
++
++    [Fact]
++    public void TinyPricesCannotDisappearDuringGridScaling()
++    {
++        Bar[] bars = [new(default, double.MaxValue, double.MaxValue, 0, double.MaxValue, 0),
++            new(default, double.Epsilon, double.Epsilon, 0, double.Epsilon, 0)];
++        double[] output = [99, 99];
++        Assert.False(ValuesBarExecution.TryMatchingLowGridBlock(bars, 0, new MatchingLowCandle(1),
++            new long[7], output, out bool single));
++        Assert.False(single);
++        Assert.Equal(new[] { 99d, 99d }, output);
++    }
++
++    [Fact]
++    public void OriginalGridResolverRetainsWiderExponentCoverage()
++    {
++        Bar[] bars = [new(default, .125, .25, 0, .125, 0),
++            new(default, 500, 600, 400, 450, 0), new(default, 500, 600, 400, 450, 0)];
++        var actual = new double[bars.Length];
++        var owner = new MatchingLowCandle(1);
++        Assert.True(ValuesBarExecution.TryMatchingLowGridBlock(bars, 0, owner,
++            new long[10], actual, out bool single));
++        Assert.False(single);
++        Assert.Equal(Reference(owner, bars), actual);
++    }
++
++    [Fact]
++    public void RangeOnlyKernelDoesNotRequireAnUnusedBodyPrefixToFit()
++    {
++        var bars = Enumerable.Range(0, 323).Select(i => new Bar(default, 1e200, 0, 0, -1e200, i)).ToArray();
++        var owner = new MatchingLowCandle(1);
++        var actual = new double[bars.Length];
++        Assert.True(ValuesBarExecution.TryMatchingLowGridBlock(bars, 0, owner,
++            new long[3 * bars.Length + 1], actual, out bool single));
++        Assert.True(single);
++        Assert.Contains(100d, actual);
++        Assert.Equal(Reference(owner, bars), actual);
++    }
++
++    [Theory]
++    [InlineData(-1, 100d)]
++    [InlineData(0, 100d)]
++    [InlineData(1, 0d)]
++    public void ExactAndAdjacentEqualityThresholdsRetainOriginalStrictness(int step, double expected)
++    {
++        double close = step < 0 ? Math.BitDecrement(4.5) : step > 0 ? Math.BitIncrement(4.5) : 4.5;
++        Bar[] bars = [new(default, 4, 10, 0, 6, 0), new(default, 8, 10, 0, 4, 0),
++            new(default, 8, 10, 0, close, 0)];
++        var owner = new MatchingLowCandle(1);
++        var actual = new double[bars.Length];
++        Assert.True(ValuesBarExecution.TryMatchingLowGridBlock(bars, 0, owner,
++            new long[3 * bars.Length + 1], actual, out _));
++        Assert.Equal(expected, actual[^1]);
++        Assert.Equal(Reference(owner, bars), actual);
++    }
++
++    [Fact]
++    public async Task SignedZeroHistoryAndCanonicalSignalsRemainDistinctContracts()
++    {
++        var bars = Enumerable.Range(0, 8193).Select(i => new Bar(DateTime.UnixEpoch.AddMinutes(i),
++            i % 2 == 0 ? -0d : 0d, 0, -0d, 0, -0d)).ToArray();
++        var owner = new MatchingLowCandle(64);
++        using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(owner).BuildAsync();
++        Assert.All(run[owner].ToArray(), value => Assert.Equal(0L, BitConverter.DoubleToInt64Bits(value)));
++        int i = 0;
++        await foreach (var snapshot in run)
++        {
++            var expected = bars[i++];
++            Assert.Equal(expected.Time, snapshot.Bar.Time);
++            foreach (var (before, after) in new[] { (expected.Open, snapshot.Bar.Open), (expected.High, snapshot.Bar.High),
++                (expected.Low, snapshot.Bar.Low), (expected.Close, snapshot.Bar.Close), (expected.Volume, snapshot.Bar.Volume) })
++                Assert.Equal(BitConverter.DoubleToInt64Bits(before), BitConverter.DoubleToInt64Bits(after));
++        }
++        Assert.Equal(bars.Length, i);
++    }
++
++    [Fact]
++    public async Task InvalidInputAndCancellationPreserveErrorsAndBuilderRecovery()
++    {
++        var bars = Data(8193);
++        var owner = new MatchingLowCandle(64);
++        var expected = Original(owner, bars);
++        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(owner);
++        using var cancelled = new CancellationTokenSource();
++        cancelled.Cancel();
++        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(cancelled.Token));
++        foreach (int index in new[] { 0, 255, 8192 })
++        {
++            var valid = bars[index];
++            bars[index] = new(valid.Time, valid.Open, valid.High, valid.Low, valid.Close, double.NaN);
++            var originalError = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
++                new StockIndicatorBuilder().ConfigureSource(Bars.From(bars, b => b)).ConfigureIndicators(owner).BuildAsync());
++            var actualError = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => builder.BuildAsync());
++            Assert.Equal(originalError.Message, actualError.Message);
++            bars[index] = valid;
++        }
++        using var run = await builder.BuildAsync();
++        Assert.Equal(expected, run[owner].ToArray());
++    }
++}

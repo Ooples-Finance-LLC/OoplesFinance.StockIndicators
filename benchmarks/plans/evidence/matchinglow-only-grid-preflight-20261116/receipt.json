@@ -1,0 +1,53 @@
+{
+  "baseline_source": "5be1a81d02ad01393f3fa8ede764e914252d0e96",
+  "candidate_source": "a1f0028c601e1c6e7be5eabfe0d5da5cfe1f0758",
+  "baseline_production_sha256": "c63770e43fceda43a2286cb5272643ac3850adcc23962cc01eee2c7a9032c6fe",
+  "candidate_production_sha256": "4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173",
+  "frozen_harness_source": "9a45372530e49718b01b6524f9a0db993514e1e8",
+  "frozen_harness_sha256": "48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723",
+  "comparison_calls": [
+    {
+      "pair": "TaLib.Candles.MatchingLow",
+      "bars": 1000,
+      "passed": true
+    },
+    {
+      "pair": "TaLib.Candles.MatchingLow",
+      "bars": 10000,
+      "passed": true
+    },
+    {
+      "pair": "TaLib.Candles.SeparatingLines",
+      "bars": 1000,
+      "passed": true
+    },
+    {
+      "pair": "TaLib.Candles.SeparatingLines",
+      "bars": 10000,
+      "passed": true
+    },
+    {
+      "pair": "TaLib.Candles.StickSandwich",
+      "bars": 1000,
+      "passed": true
+    },
+    {
+      "pair": "TaLib.Candles.StickSandwich",
+      "bars": 10000,
+      "passed": true
+    }
+  ],
+  "jit_gate_passed": true,
+  "worker_ownership_unchanged": true,
+  "separating_hooks_eliminated": [
+    "FillBoundedWindow<MatchedLinesKernel>",
+    "ComputeBoundedRegion<MatchedLinesKernel>"
+  ],
+  "diagnostic_settings_used_for_timing": false,
+  "source_review": "Parent and independent reviewer inspected complete source diff; only two typed guards alter shared methods; gate, halo, tails and cleanup retained.",
+  "jit_adjudication": "Complete actual optimized Tier0-FullOpts wrapper and Tier1 region bodies inspected; original narrow parser result preserved.",
+  "baseline_receipt_sha256": "1985497f165ad758bbc1e95e04e4340e231b5b50509104d2d8ea980caf09dfe7",
+  "jit_adjudication_sha256": "15a499970a22e437dfedb76e93236223089d1e56998ba8e87b374eeacb25e864",
+  "qualification": false,
+  "performance_claim": false
+}

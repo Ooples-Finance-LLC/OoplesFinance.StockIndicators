@@ -38,6 +38,38 @@ def archive(raw, prepared, repo, phase):
         blobs['original-plan.json'] = (REPO/read(PLAN)['reuse_inputs']['plan']).read_bytes()
     blobs['plan.json'] = PLAN.read_bytes()
     blobs.update({'scripts/'+p.name:p.read_bytes() for p in Path(__file__).parent.glob('*.py')})
+    if read(PLAN).get('matchinglow_grid_qualification'):
+        plan = read(PLAN)
+        assert phase == 'targeted'
+        from .matchinglow_grid_qualification import BASE_PLAN, BASE_PLAN_SHA, QUALIFIED, OLD
+        base_plan = REPO/BASE_PLAN
+        assert digest(base_plan) == BASE_PLAN_SHA
+        blobs['original-plan.json'] = base_plan.read_bytes()
+        for name, approval in [('scope-approval.json', plan['scope_approval']),
+                ('original-scope-approval.json', read(base_plan)['refresh_approval'])]:
+            path = REPO/approval['path']
+            assert digest(path) == approval['sha256']
+            blobs[name] = path.read_bytes()
+        # Preserve replayable authentication documents, never runtime/blob files.
+        for name in ('baseline-authentication', 'candidate-authentication'):
+            folder = prepared/name
+            root = folder/('provenance.json' if name == 'baseline-authentication' else 'manifest.json')
+            blobs['prepared/'+root.relative_to(prepared).as_posix()] = root.read_bytes()
+            for path in (folder/'evidence').rglob('*'):
+                if path.is_file():
+                    assert path.suffix.lower() not in ('.dll', '.exe', '.pdb'), 'No runtime in source evidence archive'
+                    blobs['prepared/'+path.relative_to(prepared).as_posix()] = path.read_bytes()
+        preflight = (prepared/'consumer-preflight').resolve()
+        for relative, expected in plan['preflight']['files'].items():
+            path = (preflight/relative).resolve()
+            assert path.is_relative_to(preflight) and digest(path) == expected
+            assert path.suffix.lower() not in ('.dll', '.exe', '.pdb'), 'No preflight runtime in Git'
+            blobs['prepared/consumer-preflight/'+relative] = path.read_bytes()
+        for name in ('run-matchinglow-grid-qualification.py', 'test_hosted_matchinglow_grid_qualification.py'):
+            blobs['scripts/root/'+name] = (REPO/'scripts'/name).read_bytes()
+        from .pipeline import BENCH, TESTS
+        blobs['harness-continuation.patch'] = subprocess.check_output(['git', 'diff', '--binary',
+            QUALIFIED, OLD, '--', BENCH, TESTS], cwd=REPO)
     blobs['candidate-source.patch'] = subprocess.check_output(['git','diff','--binary',
         summary['sources']['old'],summary['sources']['new'],'--','src','tests'],cwd=repo)
     assert bool(blobs['candidate-source.patch']) == (phase not in ('coverage','baseline-refresh'))
@@ -84,7 +116,10 @@ def archive(raw, prepared, repo, phase):
         **({'baseline_refresh_verified':True,'report_refresh_only':True,'production_qualification':False,'production_optimization':False,
             'confirmed_native_wins':summary['native_review']['confirmed_native_wins']} if phase=='baseline-refresh' else {}),
         **({'coverage_complete': True, 'source_qualification_claimed': False} if phase == 'coverage' else {}),
-        note=('Hosted CPU current-baseline A/A refresh. Original authenticated canonical/frozen GPU receipts are reused; fresh consumer validation passed 303 canonical cases and 20 frozen/canonical alignment cases, without new compilation or GPU execution. A/A admission is not equivalence; no production qualification or optimization is claimed.' if phase == 'baseline-refresh' and read(PLAN).get('current_baseline_ten_refresh') else
+        **({'native_crossover_gate_passed':summary['native_crossover_gate_passed'],
+            'native_crossover_samples':summary['native_crossover_samples']} if read(PLAN).get('matchinglow_grid_qualification') else {}),
+        note=('Fresh 90-case MatchingLow-only qualification with SeparatingLines and StickSandwich sentinels. Accepted source requires zero slower decisions, at least one faster decision, and both MatchingLow 10,000-bar candidate rounds newly beating the measured native control with separated intervals and at least 10% lower means. Historical harness continuation carries no timing-equivalence claim; original baseline/frozen GPU evidence and fresh source-bound candidate GPU100 are retained.' if read(PLAN).get('matchinglow_grid_qualification') else
+             'Hosted CPU current-baseline A/A refresh. Original authenticated canonical/frozen GPU receipts are reused; fresh consumer validation passed 303 canonical cases and 20 frozen/canonical alignment cases, without new compilation or GPU execution. A/A admission is not equivalence; no production qualification or optimization is claimed.' if phase == 'baseline-refresh' and read(PLAN).get('current_baseline_ten_refresh') else
              'Hosted CPU harness baseline refresh with fresh canonical correctness/GPU100 and authenticated frozen-variant evidence. Identical-binary A/A outcomes describe timing variability; no production qualification or optimization is claimed.' if phase == 'baseline-refresh' else
              'Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity.' +
              (' Unchanged qualified production; no source qualification claimed.' if phase == 'coverage' else

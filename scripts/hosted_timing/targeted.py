@@ -524,6 +524,18 @@ SCOPES['context-after-stars-20261115'] = {'fixtures': {'SharedContextReversalBen
 SCOPES['window-log-positive-regions-20261115'] = {'fixtures': {'SharedLogVolatilityBenchmarks': {'QuanTAlib.Historical': 'QuanTAlib.Historical', 'QuanTAlib.Realized': 'QuanTAlib.Realized'}, 'SharedRecursiveStateBenchmarks': {'TaLib.Functions.Ema': 'Ema'}, 'SharedTillsonBenchmarks': {'TaLib.Functions.T3': 'TaLib.Functions.T3'}}, 'implicit_fixtures': set(), 'paths': {'tests/ModelsTests/WindowLogVolatilityRegionTests.cs', 'src/Indicators/ValuesBarExecution.LogVolatility.cs', 'src/Indicators/ValuesBarExecution.cs'}, 'methods': {'SharedLogVolatilityBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedRecursiveStateBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel'], 'SharedTillsonBenchmarks': ['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']}, 'totals': (120, 24), 'shards': 4, 'baseline_phase': 'targeted', 'baseline_totals': (120, 24)}
 
 
+SCOPES['matchinglow-only-grid-20261116'] = dict(
+    fixtures={'SharedSequenceCandleBenchmarks': {p:p for p in
+        ('TaLib.Candles.MatchingLow', 'TaLib.Candles.StickSandwich')},
+        'SharedMatchedLinesBenchmarks': {'TaLib.Candles.SeparatingLines':'TaLib.Candles.SeparatingLines'}},
+    implicit_fixtures=set(),
+    paths={'src/Indicators/ValuesBarExecution.BoundedWindows.cs',
+           'src/Indicators/ValuesBarExecution.MatchingLowGrid.cs', 'tests/ModelsTests/MatchingLowGridTests.cs'},
+    methods={f:['BuilderFull', 'BuilderLatestOnly', 'NativeSingle', 'NativeParallel']
+             for f in ('SharedSequenceCandleBenchmarks', 'SharedMatchedLinesBenchmarks')},
+    totals=(90,18), shards=1, baseline_phase='targeted', baseline_totals=(120,24))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
@@ -553,7 +565,10 @@ def verify_reference(plan):
     assert not decision['verdicts'].get('slower', 0)
     assert str(decision['run_id']) == str(reference['run_id'])
     assert decision['sources']['new'] == reference['qualified_source']
-    if reference.get('dependency_reconciliation'):
+    if reference['scope'] == 'matchinglow-only-grid-20261116':
+        from .matchinglow_grid_qualification import verify_continuation
+        verify_continuation(reference, plan['sources']['old'])
+    elif reference.get('dependency_reconciliation'):
         from .reconciled_baseline import verify_reconciliation
         verify_reconciliation(reference, plan['sources']['old'])
     else:

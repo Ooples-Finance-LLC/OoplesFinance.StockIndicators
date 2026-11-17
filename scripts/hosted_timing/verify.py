@@ -54,6 +54,10 @@ def sample(case):
 
 
 def collect(folder, phase):
+    if read(PLAN).get('matchinglow_grid_qualification'):
+        assert phase == 'targeted'
+        from .matchinglow_grid_qualification import collect as matchinglow_collect
+        return matchinglow_collect(folder)
     return _collect(folder, phase, preflight=False)
 
 
@@ -61,8 +65,12 @@ def collect_preflight(folder):
     return _collect(folder, 'successor', preflight=True)
 
 
-def _collect(folder, phase, *, preflight, diagnostic=False):
+def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=False):
     plan = read(PLAN)
+    if plan.get('matchinglow_grid_qualification'):
+        assert phase == 'targeted' and matchinglow_gate, 'MatchingLow native crossover gate is required'
+    else:
+        assert not matchinglow_gate
     if plan.get('pointwise_family_refresh') or plan.get('named_output_projection_refresh') or plan.get('current_baseline_ten_refresh') or phase == 'baseline-refresh':
         assert phase == 'baseline-refresh' and not preflight and not diagnostic, 'Harness baseline refresh cannot qualify production'
         from .baseline_refresh_dispatch import validate_scope

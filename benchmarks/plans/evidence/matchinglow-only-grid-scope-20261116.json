@@ -1,0 +1,15 @@
+{
+  "approved": true,
+  "scope": "matchinglow-only-grid-20261116",
+  "cases": 90,
+  "decisions": 18,
+  "measurement_runners": 1,
+  "source_scope": [
+    "src/Indicators/ValuesBarExecution.BoundedWindows.cs",
+    "src/Indicators/ValuesBarExecution.MatchingLowGrid.cs",
+    "tests/ModelsTests/MatchingLowGridTests.cs"
+  ],
+  "approval": "User approved MatchingLow-only 90-case repair; parent authorized bounded tooling implementation. No additional API optimization or timing policy change.",
+  "requires_jit_gate": true,
+  "requires_fresh_candidate_correctness_gpu100": true
+}

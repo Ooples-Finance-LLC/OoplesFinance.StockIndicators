@@ -1,0 +1,264 @@
+{
+  "kind": "matchinglow-default-runtime-jit-manual-adjudication",
+  "checked_utc": "2026-11-17T00:29:03.157957+00:00",
+  "original_parser_proof": {
+    "path": "jit-proof.json",
+    "sha256": "8e6f0ddf6ca7eacf451dda94854aed3bfdd4683e5e9d48e4d03178d1c6a07452",
+    "accepted": false,
+    "structural_candidate_for_parent_review": false,
+    "preserved_unchanged": true
+  },
+  "source": "a1f0028c601e1c6e7be5eabfe0d5da5cfe1f0758",
+  "source_fingerprint": "b78614b84af822560e8b9ddfca5391c30576f4f38950fef4ee3ca8b1fed20007",
+  "compiled_source": "a1f0028c601e1c6e7be5eabfe0d5da5cfe1f0758",
+  "production_sha256": "4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173",
+  "ci_run_id": "43984038209",
+  "producer_workflow_head": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
+  "manifest_sha256": "f2541e7d0621187f35160c9fcd94627f7fc70169bd185a5a6bc73cae594c1508",
+  "source_capture": {
+    "path": "bounded-windows-source.cs",
+    "sha256": "1acd4bfa61fda674da7494dc89fa75727218c882e772c35df7f7b722e8f3fb8f"
+  },
+  "child_capture": {
+    "path": "reflection-child.ps1",
+    "sha256": "aa46f929006ab8d05533e065b9b2a638a975e7ae79d334e0c2831d5e02faacc4"
+  },
+  "diagnostic_settings": [
+    "DOTNET_JitDisasm",
+    "DOTNET_JitDisasmAssemblies",
+    "DOTNET_JitDisasmDiffable",
+    "DOTNET_JitStdOutFile"
+  ],
+  "runtime_overrides_added": false,
+  "no_rerun_for_tier_label": true,
+  "both_concrete_matched_lines_bodies_reviewed": true,
+  "separating_hooks_eliminated": [
+    "FillBoundedWindow<MatchedLinesKernel>",
+    "ComputeBoundedRegion<MatchedLinesKernel>"
+  ],
+  "records": [
+    {
+      "operation": "SeparatingLines",
+      "configured_worker_limit": 1,
+      "replay": {
+        "path": "SeparatingLines-workers1/replay.json",
+        "sha256": "3d4758a8d5a354062145de73e6ac2d2bd75b650c0e84cc18dda659518362ddf2",
+        "host": {
+          "runtime_version": "10.0.15",
+          "framework_description": ".NET 10.0.15",
+          "corelib_product": "10.0.15-servicing.26529.108+8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
+          "host_path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+          "pwsh_version": "7.6.10"
+        }
+      },
+      "fill": {
+        "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:FillBoundedWindow[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+MatchedLinesKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.IIndicator,int,System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer):OoplesFinance.StockIndicators.Indicators.Bar (Tier0-FullOpts)",
+        "optimizer_label": "Tier0-FullOpts",
+        "code_bytes": 1914,
+        "complete_end_marker": "; Total bytes of code 1914",
+        "capture": "adjudicated-bodies/FillBoundedWindow-MatchedLines-workers1-Tier0-FullOpts.asm",
+        "capture_sha256": "31932ab2aad2de4496686eaff6365f7e5fa50486b4048747db5ebc335d1d3af2",
+        "raw_log": "SeparatingLines-workers1/jit.log",
+        "raw_log_sha256": "577e47aee39f2aab9b81ce082f3c9cfb8039eb4af1ada5fca4e093dcc9ebb76f",
+        "normalized_full_section_sha256": "06b4bb12c49a464fb80ef2b98d49f940b8b933ba8dad6e0b6e43a1ce988fe4bd",
+        "explicit_optimized_code_header": true,
+        "matchinglow_symbols_present": []
+      },
+      "compute": {
+        "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeBoundedRegion[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+MatchedLinesKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.IIndicator):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier1)",
+        "optimizer_label": "Tier1",
+        "code_bytes": 2435,
+        "complete_end_marker": "; Total bytes of code 2435",
+        "capture": "adjudicated-bodies/ComputeBoundedRegion-MatchedLines-workers1-Tier1.asm",
+        "capture_sha256": "d665b706268f2a2c5a706942c6f78e10b45fb4fb5fbf2c830ae14c5a566a6740",
+        "raw_log": "SeparatingLines-workers1/jit.log",
+        "raw_log_sha256": "577e47aee39f2aab9b81ce082f3c9cfb8039eb4af1ada5fca4e093dcc9ebb76f",
+        "normalized_full_section_sha256": "f91cbff63aa01c46ac39474a3a01d6bef380802e5b801b4c63076f8db6fd3abe",
+        "explicit_optimized_code_header": true,
+        "matchinglow_symbols_present": []
+      }
+    },
+    {
+      "operation": "SeparatingLines",
+      "configured_worker_limit": 2,
+      "replay": {
+        "path": "SeparatingLines-workers2/replay.json",
+        "sha256": "d60b635e2d7c3c5d145e129d4498a00e3774bc46676264653666b500f081389a",
+        "host": {
+          "runtime_version": "10.0.15",
+          "framework_description": ".NET 10.0.15",
+          "corelib_product": "10.0.15-servicing.26529.108+8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
+          "host_path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+          "pwsh_version": "7.6.10"
+        }
+      },
+      "fill": {
+        "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:FillBoundedWindow[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+MatchedLinesKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.IIndicator,int,System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer):OoplesFinance.StockIndicators.Indicators.Bar (Tier0-FullOpts)",
+        "optimizer_label": "Tier0-FullOpts",
+        "code_bytes": 1914,
+        "complete_end_marker": "; Total bytes of code 1914",
+        "capture": "adjudicated-bodies/FillBoundedWindow-MatchedLines-workers2-Tier0-FullOpts.asm",
+        "capture_sha256": "31932ab2aad2de4496686eaff6365f7e5fa50486b4048747db5ebc335d1d3af2",
+        "raw_log": "SeparatingLines-workers2/jit.log",
+        "raw_log_sha256": "0bf43ee91fb956c25858e13f7966087ac4b802fcaecbfeacbba90e9c331b9a49",
+        "normalized_full_section_sha256": "06b4bb12c49a464fb80ef2b98d49f940b8b933ba8dad6e0b6e43a1ce988fe4bd",
+        "explicit_optimized_code_header": true,
+        "matchinglow_symbols_present": []
+      },
+      "compute": {
+        "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeBoundedRegion[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+MatchedLinesKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.IIndicator):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier1)",
+        "optimizer_label": "Tier1",
+        "code_bytes": 2431,
+        "complete_end_marker": "; Total bytes of code 2431",
+        "capture": "adjudicated-bodies/ComputeBoundedRegion-MatchedLines-workers2-Tier1.asm",
+        "capture_sha256": "6fe6b5b96b9b6e91caf29cc353f4c74e995a9865945f937b15283b37680aeb15",
+        "raw_log": "SeparatingLines-workers2/jit.log",
+        "raw_log_sha256": "0bf43ee91fb956c25858e13f7966087ac4b802fcaecbfeacbba90e9c331b9a49",
+        "normalized_full_section_sha256": "a2f50f125aadb088e1f30d0057229a4d559f9bd4572a83739935374b222fa4f0",
+        "explicit_optimized_code_header": true,
+        "matchinglow_symbols_present": []
+      }
+    },
+    {
+      "operation": "SeparatingLines",
+      "configured_worker_limit": 8,
+      "replay": {
+        "path": "SeparatingLines-workers8/replay.json",
+        "sha256": "177ac526382cbcd4f8ec61f73f38abb3b5217cb5bdbf279e9cfe79bbf57039e3",
+        "host": {
+          "runtime_version": "10.0.15",
+          "framework_description": ".NET 10.0.15",
+          "corelib_product": "10.0.15-servicing.26529.108+8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
+          "host_path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+          "pwsh_version": "7.6.10"
+        }
+      },
+      "fill": {
+        "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:FillBoundedWindow[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+MatchedLinesKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.IIndicator,int,System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer):OoplesFinance.StockIndicators.Indicators.Bar (Tier0-FullOpts)",
+        "optimizer_label": "Tier0-FullOpts",
+        "code_bytes": 1914,
+        "complete_end_marker": "; Total bytes of code 1914",
+        "capture": "adjudicated-bodies/FillBoundedWindow-MatchedLines-workers8-Tier0-FullOpts.asm",
+        "capture_sha256": "31932ab2aad2de4496686eaff6365f7e5fa50486b4048747db5ebc335d1d3af2",
+        "raw_log": "SeparatingLines-workers8/jit.log",
+        "raw_log_sha256": "871cb491aeb04aca86a8452f9efc0f1be08e0f9d2dcac8628ebe8156f3ba0d89",
+        "normalized_full_section_sha256": "06b4bb12c49a464fb80ef2b98d49f940b8b933ba8dad6e0b6e43a1ce988fe4bd",
+        "explicit_optimized_code_header": true,
+        "matchinglow_symbols_present": []
+      },
+      "compute": {
+        "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeBoundedRegion[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+MatchedLinesKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.IIndicator):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier1)",
+        "optimizer_label": "Tier1",
+        "code_bytes": 2431,
+        "complete_end_marker": "; Total bytes of code 2431",
+        "capture": "adjudicated-bodies/ComputeBoundedRegion-MatchedLines-workers8-Tier1.asm",
+        "capture_sha256": "551851982fe9ea7c9c21335f40406eff412f4418cb7004402d5b673d7c5383c4",
+        "raw_log": "SeparatingLines-workers8/jit.log",
+        "raw_log_sha256": "871cb491aeb04aca86a8452f9efc0f1be08e0f9d2dcac8628ebe8156f3ba0d89",
+        "normalized_full_section_sha256": "7069153780e38a832c6cb37f71f23e0a577bfb24e49e085539e28293b4391f8e",
+        "explicit_optimized_code_header": true,
+        "matchinglow_symbols_present": []
+      }
+    }
+  ],
+  "matchinglow_route_and_stick_negative_control": [
+    {
+      "configured_worker_limit": 1,
+      "actual_matchinglow_private_body": {
+        "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeMatchingLowGrid(OoplesFinance.StockIndicators.Indicators.Bar[],double[],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.MatchingLowCandle):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier0-FullOpts)",
+        "optimizer_label": "Tier0-FullOpts",
+        "code_bytes": 2333,
+        "complete_end_marker": "; Total bytes of code 2333",
+        "capture": "adjudicated-bodies/ComputeMatchingLowGrid-workers1-Tier0-FullOpts.asm",
+        "capture_sha256": "2e68928e0f01623e191ebf2d95ed0fc8e4eb4f2169e29def36a4fea6a89db7a5",
+        "raw_log": "MatchingLow-workers1/jit.log",
+        "raw_log_sha256": "bf080eed29bd06849fdfb1ae859ccbbe34b1535026c80b954b4f417a3c84d75a",
+        "normalized_full_section_sha256": "778a44e62d1025c9ad4a07601b834620d77556f0428299675ce32610fee4ecf4",
+        "explicit_optimized_code_header": true,
+        "matchinglow_symbols_present": [
+          "ComputeMatchingLowGrid",
+          "MatchingLowCandle",
+          "TryMatchingLowGridBlock"
+        ]
+      },
+      "stick_raw_log": "StickSandwich-workers1/jit.log",
+      "stick_raw_log_sha256": "d268fed5ad55aefba593723c3a2d18bb76a2903d89127f15b2297d24472ae778",
+      "stick_private_matchinglow_body_emitted": false,
+      "distinction": "Shared SequenceKernel code may retain a guarded ComputeMatchingLowGrid call target; the negative control is absence of actual private-method compilation, not absence of all MatchingLow text."
+    },
+    {
+      "configured_worker_limit": 2,
+      "actual_matchinglow_private_body": {
+        "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeMatchingLowGrid(OoplesFinance.StockIndicators.Indicators.Bar[],double[],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.MatchingLowCandle):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier0-FullOpts)",
+        "optimizer_label": "Tier0-FullOpts",
+        "code_bytes": 2333,
+        "complete_end_marker": "; Total bytes of code 2333",
+        "capture": "adjudicated-bodies/ComputeMatchingLowGrid-workers2-Tier0-FullOpts.asm",
+        "capture_sha256": "2e68928e0f01623e191ebf2d95ed0fc8e4eb4f2169e29def36a4fea6a89db7a5",
+        "raw_log": "MatchingLow-workers2/jit.log",
+        "raw_log_sha256": "00abffdb75c33faf2d7af60fa5eb70cdc798f5b77b71b89baf4f0c5d2940830a",
+        "normalized_full_section_sha256": "778a44e62d1025c9ad4a07601b834620d77556f0428299675ce32610fee4ecf4",
+        "explicit_optimized_code_header": true,
+        "matchinglow_symbols_present": [
+          "ComputeMatchingLowGrid",
+          "MatchingLowCandle",
+          "TryMatchingLowGridBlock"
+        ]
+      },
+      "stick_raw_log": "StickSandwich-workers2/jit.log",
+      "stick_raw_log_sha256": "0fb720621bbc916a533e00ab1ccf70d0cf4341f11070ef98640df1d46e95359f",
+      "stick_private_matchinglow_body_emitted": false,
+      "distinction": "Shared SequenceKernel code may retain a guarded ComputeMatchingLowGrid call target; the negative control is absence of actual private-method compilation, not absence of all MatchingLow text."
+    },
+    {
+      "configured_worker_limit": 8,
+      "actual_matchinglow_private_body": {
+        "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeMatchingLowGrid(OoplesFinance.StockIndicators.Indicators.Bar[],double[],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.MatchingLowCandle):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier0-FullOpts)",
+        "optimizer_label": "Tier0-FullOpts",
+        "code_bytes": 2333,
+        "complete_end_marker": "; Total bytes of code 2333",
+        "capture": "adjudicated-bodies/ComputeMatchingLowGrid-workers8-Tier0-FullOpts.asm",
+        "capture_sha256": "2e68928e0f01623e191ebf2d95ed0fc8e4eb4f2169e29def36a4fea6a89db7a5",
+        "raw_log": "MatchingLow-workers8/jit.log",
+        "raw_log_sha256": "88bb7751492b71d24f68372318db0b8520f59b2ccca85c7277980176d4b9bcb5",
+        "normalized_full_section_sha256": "778a44e62d1025c9ad4a07601b834620d77556f0428299675ce32610fee4ecf4",
+        "explicit_optimized_code_header": true,
+        "matchinglow_symbols_present": [
+          "ComputeMatchingLowGrid",
+          "MatchingLowCandle",
+          "TryMatchingLowGridBlock"
+        ]
+      },
+      "stick_raw_log": "StickSandwich-workers8/jit.log",
+      "stick_raw_log_sha256": "813b303f76852dd0bd8bbde4dd49d39d3d5be6675c6a049ddfad69374d74674f",
+      "stick_private_matchinglow_body_emitted": false,
+      "distinction": "Shared SequenceKernel code may retain a guarded ComputeMatchingLowGrid call target; the negative control is absence of actual private-method compilation, not absence of all MatchingLow text."
+    }
+  ],
+  "control_flow_findings": [
+    "Both source hooks begin with typeof(T)==typeof(SequenceKernel), false for concrete MatchedLinesKernel.",
+    "Full FillBoundedWindow matched-lines body proceeds from ordinary period/chunk calculation to existing worker/gate logic with no added MatchingLow eligibility/config/chunk-limit branch.",
+    "Fill body retains original serial ComputeBoundedRegion<MatchedLinesKernel> call, tensor PersistentParallelExecutor, tail ArrayPool capture, input/output validation and finally gate/pool cleanup.",
+    "Complete ComputeBoundedRegion matched-lines Tier1 entries create/use MatchedLinesState and retain seed/main Update/finite/owned-output paths; the MatchingLow region branch is eliminated.",
+    "Complete default-runtime Fill body has Tier0-FullOpts label plus explicit Tier-0 switched to FullOpts code and optimized code headers and total-code-size end marker. This is not generic acceptance of Tier0 or instrumented/minopts code.",
+    "ComputeMatched optimized bodies vary across configured worker runs; no cross-worker or baseline machine-code identity is claimed."
+  ],
+  "fill_body_identical_across_configured_workers": true,
+  "parent_reviewed": true,
+  "independent_peer_reviewed": true,
+  "review_agents": [
+    "/root",
+    "/root/tensor_kernel_opportunities"
+  ],
+  "jit_gate_passed": true,
+  "worker_ownership_unchanged": true,
+  "causal_non_tierable_reason_proven": false,
+  "causal_limitation": "Source EH/finally and private stackalloc/localloc are consistent with full-optimization fallback, but logs do not prove the runtime causal NonTierable reason.",
+  "worker_thread_execution_proven": false,
+  "baseline_machine_code_identity_proven": false,
+  "performance_claim": false,
+  "qualification": false,
+  "production_accepted": false,
+  "new_compilation": false,
+  "diagnostic_settings_used_for_timing": false
+}

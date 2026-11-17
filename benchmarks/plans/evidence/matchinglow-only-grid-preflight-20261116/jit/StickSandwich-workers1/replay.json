@@ -1,0 +1,33 @@
+{
+  "status": "replayed",
+  "host": {
+    "runtime_version": "10.0.15",
+    "framework_description": ".NET 10.0.15",
+    "corelib_product": "10.0.15-servicing.26529.108+8e0f8ed2312954727f8919d7d1c2f78b483b4ee7",
+    "host_path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+    "pwsh_version": "7.6.10"
+  },
+  "fixture": "OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSequenceCandleBenchmarks",
+  "operation": "StickSandwich",
+  "count": 8193,
+  "configured_worker_limit": 1,
+  "rows": [
+    {
+      "method": "BuilderFull",
+      "warmup_calls": 1000,
+      "promotion_calls": 8062,
+      "configured_worker_limit": 1
+    },
+    {
+      "method": "BuilderLatestOnly",
+      "warmup_calls": 1000,
+      "promotion_calls": 9256,
+      "configured_worker_limit": 1
+    }
+  ],
+  "production_sha256": "4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173",
+  "qualification": false,
+  "performance_claim": false,
+  "new_compilation": false,
+  "worker_thread_execution_proven": false
+}
