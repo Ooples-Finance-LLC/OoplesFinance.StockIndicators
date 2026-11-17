@@ -1,0 +1,22 @@
+{
+  "independently-collected.json": {
+    "sha256": "4a28ca5234178937e4ed46abf8acd6c11dbf83c78eabfbb7de399725e3c63a6f",
+    "archive": "benchmarks/results/remaining-indicators/hosted-targeted-44026051597-attempt1/independent/independently-collected.json.gz"
+  },
+  "collection-receipt.json": {
+    "sha256": "904cf6b29755eafbdcfe31c1d25e00b075174fe5bf7b3a0ab9043a58e71e54f8",
+    "archive": "benchmarks/results/remaining-indicators/hosted-targeted-44026051597-attempt1/independent/collection-receipt.json.gz"
+  },
+  "collector.py": {
+    "sha256": "fa20369fcc6b686bfc8c725a7782b00d9be121528240418ea3580f8f0f8f9d36",
+    "archive": "benchmarks/results/remaining-indicators/hosted-targeted-44026051597-attempt1/independent/collector.py.gz"
+  },
+  "collector-tests.py": {
+    "sha256": "a3db211945b81d1e914fdcffaae57c87ac057617e243f9d5a9f32c04209f5f5f",
+    "archive": "benchmarks/results/remaining-indicators/hosted-targeted-44026051597-attempt1/independent/collector-tests.py.gz"
+  },
+  "collector-review-receipt.json": {
+    "sha256": "f5d23036681767c6176a8bef5eb70ef99bc3115962a1792cba046ffceff612cf",
+    "archive": "benchmarks/results/remaining-indicators/hosted-targeted-44026051597-attempt1/independent/collector-review-receipt.json.gz"
+  }
+}
