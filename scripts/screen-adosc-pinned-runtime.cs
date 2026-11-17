@@ -10,15 +10,15 @@ using System.Text.Json;
 internal static class Program
 {
     const string Old = "4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173";
-    const string New = "9e900e9a761e801aed5e8b639f14d7aade0aed71e4046900fd19465be7d16e54";
-    const string CandidateManifestSha = "ef929ff3a361490761512eff6e912e15762e760d2f14f402eb4f7f6abb78e130";
-    const string CandidateFingerprint = "09ed55d6f67e394f50e849e6a86aae66ec4a9374565ed866cec87d13ac8d7656";
-    const string GpuReceiptSha = "f384b49ab93e114fabcfd0dce49ed29f319d39499f7c6ad01f53e00a75f4cfed";
-    const string GpuTrxGzSha = "a0c11f4fe364e9b1163f2c84da65698f7c9db2eae93e99f84e566c52d7a467f4";
-    const string CandidateArtifactId = "14368759004";
-    const string CandidateSource = "15b0bdb743c1045ce43e69965b4f039ad70f8b2e";
+    const string New = "fde8306dcc2ad2cb4deb72be8b90a97d0f6b444156b51c94adf4abaf799bd5e6";
+    const string CandidateManifestSha = "d74b0340a7d254855e854f55e22004b23dd65c0b0c5f0ce33736b90839492f27";
+    const string CandidateFingerprint = "c31265a72b8dcd267c40c268fd2f9c98e6419d8439d6882fd5e973e35082d0fb";
+    const string GpuReceiptSha = "8b72192de6d8994b50ca70a47b4c21b8e78b46700cb4c04b8aa5bc2372d943c8";
+    const string GpuTrxGzSha = "c52c6a39987ebd2a623431bb3f54125ac45437ea6fde8d7f7b9cdbc2ed9850cf";
+    const string CandidateArtifactId = "14376872997";
+    const string CandidateSource = "7c9f23365eb08ce20c68554aafc75c8b7ff2f7d5";
     const string CandidateWorkflowHead = "2a1737f30e5e1164189d0209b39ea46bf38c1239";
-    const string CandidateRunId = "44173490828";
+    const string CandidateRunId = "44191188801";
     const string Bench = "48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723";
     static string Hash(string path) => Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(path)));
     static void Require(bool condition, string message) { if (!condition) throw new InvalidOperationException(message); }
@@ -48,10 +48,12 @@ internal static class Program
         Require(gpuEvidenceCommit.Length == 40 && gpuEvidenceCommit.All(Uri.IsHexDigit), "UNBOUND GPU-only commit; stop before I/O.");
         Require(new[] { CandidateSource, CandidateWorkflowHead }.All(value => value.Length == 40 && value.All(Uri.IsHexDigit))
             && CandidateRunId.Length > 0 && CandidateRunId.All(char.IsDigit), "UNBOUND candidate source/workflow/run; stop before I/O.");
-        if (args.Length != 7) throw new ArgumentException("Expected original inputs, runtime view, candidate artifact, GPU receipt, arm, pair, fresh output.");
+        if (args.Length != 8) throw new ArgumentException("Expected original inputs, runtime view, candidate artifact, GPU receipt, arm, pair, fresh output, bars.");
         string input = Path.GetFullPath(args[0]), runtime = Path.GetFullPath(args[1]), candidate = Path.GetFullPath(args[2]);
         string gpuReceiptPath = Path.GetFullPath(args[3]);
         string arm = args[4], pair = args[5], output = Path.GetFullPath(args[6]);
+        int bars = int.Parse(args[7], System.Globalization.CultureInfo.InvariantCulture);
+        Require(bars is 1000 or 10000, "Unexpected diagnostic bars.");
         Require(arm is "old" or "new" or "native", "Unknown arm.");
         Require(pair is "TaLib.Candles.ThreeInside" or "TaLib.Candles.TwoCrows" or "TaLib.Candles.UpsideGapTwoCrows" or "TaLib.Candles.UniqueThreeRiver", "Unknown pair.");
         Require(!Directory.Exists(output), "Fresh output required."); Directory.CreateDirectory(output);
@@ -59,7 +61,7 @@ internal static class Program
             ["diagnostic_only"] = true, ["qualification"] = false, ["native_win_claim"] = false,
             ["status"] = "running", ["process_id"] = Environment.ProcessId,
             ["process_start_utc"] = Process.GetCurrentProcess().StartTime.ToUniversalTime(),
-            ["actual_clr"] = Environment.Version.ToString(), ["pair"] = pair, ["bars"] = 10000, ["arm"] = arm,
+            ["actual_clr"] = Environment.Version.ToString(), ["pair"] = pair, ["bars"] = bars, ["arm"] = arm,
             ["warmups"] = 1000, ["single_call_samples"] = 10, ["production_builds"] = 0,
             ["timed_benchmark_cases"] = 0, ["processor_count"] = Environment.ProcessorCount,
             ["env_aidotnet_cpu_threads"] = Environment.GetEnvironmentVariable("AIDOTNET_CPU_THREADS"),
@@ -85,12 +87,12 @@ internal static class Program
             var cp = candidateProof.RootElement;
             Require(cp.GetProperty("source").GetString() == CandidateSource && cp.GetProperty("run_id").GetString() == CandidateRunId && cp.GetProperty("workflow_head").GetString() == CandidateWorkflowHead, "Wrong candidate identities.");
             Require(cp.GetProperty("status").GetString() == "cpu-correctness-complete"
-                && cp.GetProperty("checks").GetProperty("unit").GetProperty("passed").GetInt32() == 21
+                && cp.GetProperty("checks").GetProperty("unit").GetProperty("passed").GetInt32() == 24
                 && cp.GetProperty("checks").GetProperty("parity").GetProperty("passed").GetInt32() == 85,
                 "Candidate focused CPU correctness counts mismatch.");
             var unitClasses = cp.GetProperty("classes").GetProperty("unit").EnumerateArray().Select(value => value.GetString()!).ToHashSet(StringComparer.Ordinal);
             var parityClasses = cp.GetProperty("classes").GetProperty("parity").EnumerateArray().Select(value => value.GetString()!).ToHashSet(StringComparer.Ordinal);
-            Require(unitClasses.SetEquals(new[] { "TripleBodySharedExecutionTests", "TripleBodyParallelExecutionTests", "TripleBodyFactorCacheTests" })
+            Require(unitClasses.SetEquals(new[] { "TripleBodySharedExecutionTests", "TripleBodyParallelExecutionTests", "TripleBodyZeroBlockReplayTests" })
                 && parityClasses.SetEquals(new[] { "TripleBodyTests", "SharedTripleBodyBenchmarkTests" }), "Candidate focused CPU class inventory mismatch.");
             Require(cp.GetProperty("source_sha256").GetString() == CandidateFingerprint
                 && cp.GetProperty("runtime_files").GetProperty("src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll").GetString() == New,
@@ -157,7 +159,7 @@ internal static class Program
             object Settings() => new { dop = degree.GetValue(null), effective_workers = workers?.Invoke(null, new object[] { 8 }) };
             receipt["settings_before"] = Settings(); receipt["runtime_files"] = files; receipt["protected_input_hashes"] = protectedFiles; receipt["selected_managed_assets"] = selected;
             var type = Find("OoplesFinance.StockIndicators.CompetitorBenchmarks.dll").GetType("OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks", true)!;
-            var fixture = Activator.CreateInstance(type)!; type.GetProperty("PairId")!.SetValue(fixture, pair); type.GetProperty("Bars")!.SetValue(fixture, 10000);
+            var fixture = Activator.CreateInstance(type)!; type.GetProperty("PairId")!.SetValue(fixture, pair); type.GetProperty("Bars")!.SetValue(fixture, bars);
             type.GetMethod("Setup")!.Invoke(fixture, null); var invoke = type.GetMethod(arm == "native" ? "Competitor" : "Ooples")!;
             object selectedPair = type.GetField("_pair", flags)!.GetValue(fixture)!;
             Require((string)selectedPair.GetType().GetProperty("Id", flags)!.GetValue(selectedPair)! == pair, "Frozen candle factory pair changed.");
@@ -185,7 +187,7 @@ internal static class Program
         }
         catch (Exception error) { receipt["status"] = "failed"; receipt["error"] = error.ToString(); Save(); Console.Error.WriteLine(error); return 1; }
     }
-    sealed class AuthenticatedContext(Dictionary<string,string> selected, Dictionary<string,string> framework, Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedTripleBodyRoiScreen", false)
+    sealed class AuthenticatedContext(Dictionary<string,string> selected, Dictionary<string,string> framework, Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedTripleBodyMacroRoiScreen", false)
     {
         protected override Assembly? Load(AssemblyName name)
         {
