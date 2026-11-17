@@ -1,16 +1,16 @@
-name: Pinned Stoch kernel CPU diagnostic
+name: Pinned Macd kernel CPU diagnostic
 
 on:
   push:
     branches:
-      - perf/hosted-stoch-cpu-profile-20261117
+      - perf/hosted-macd-cpu-profile-20261117
 
 permissions:
   contents: read
   actions: read
 
 concurrency:
-  group: pinned-stoch-cpu-profile
+  group: pinned-macd-cpu-profile
   cancel-in-progress: false
 
 jobs:
@@ -22,9 +22,9 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
-          $env:PROFILE_OUTPUT=Join-Path $env:RUNNER_TEMP 'stoch-cpu-profile-output'
-          $env:INPUT_ARTIFACT=Join-Path $env:RUNNER_TEMP 'stoch-source-artifact'
-          $env:PROFILE_RUNTIME=Join-Path $env:RUNNER_TEMP 'stoch-profile-runtime'
+          $env:PROFILE_OUTPUT=Join-Path $env:RUNNER_TEMP 'macd-cpu-profile-output'
+          $env:INPUT_ARTIFACT=Join-Path $env:RUNNER_TEMP 'macd-source-artifact'
+          $env:PROFILE_RUNTIME=Join-Path $env:RUNNER_TEMP 'macd-profile-runtime'
           foreach ($name in @('PROFILE_OUTPUT','INPUT_ARTIFACT','PROFILE_RUNTIME')) {
             $value=[Environment]::GetEnvironmentVariable($name)
             "$name=$value" | Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8
@@ -38,7 +38,7 @@ jobs:
             source='6051a95220eefa36e6f837a9a54e036164b76ebe'
             production_sha256='4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173'
             frozen_benchmark_sha256='48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723'
-            pair='TaLib.Functions.Stoch';warmups=1000;profile_seconds=10
+            pair='Skender.GetMacd';warmups=1000;profile_seconds=10
             merge_on_runner=$false;zip_on_runner=$false;full_managed_rundown=$true
             runner_image=$env:ImageVersion; outer_shell_clr=[Environment]::Version.ToString()
             limits='Diagnostic kernel CPU samples only; not qualified latency, native closure or evidence import. Attribute only resolved stacks within recorded fixture boundaries.'
@@ -59,7 +59,7 @@ jobs:
           $identity=[Security.Principal.WindowsIdentity]::GetCurrent()
           $principal=[Security.Principal.WindowsPrincipal]::new($identity)
           if (!$principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Kernel CPU capture requires elevated runner' }
-          $tool=Join-Path $env:RUNNER_TEMP 'stoch-PerfView-4.0.0.exe'
+          $tool=Join-Path $env:RUNNER_TEMP 'macd-PerfView-4.0.0.exe'
           if (Test-Path -LiteralPath $tool) { throw 'Fresh collector path required' }
           Invoke-WebRequest -Uri 'https://github.com/microsoft/perfview/releases/download/v4.0.0/PerfView.exe' -OutFile $tool
           $hash=(Get-FileHash -LiteralPath $tool -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -85,7 +85,7 @@ jobs:
           if ((Get-FileHash -LiteralPath $config -Algorithm SHA256).Hash.ToLowerInvariant() -ne 'c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097') { throw 'Wrong app runtime configuration before launch' }
           Copy-Item -LiteralPath $proof -Destination (Join-Path $env:PROFILE_OUTPUT 'input-provenance.json')
           $dotnet=(Get-Command dotnet).Source
-          $driverRoot=Join-Path $env:RUNNER_TEMP 'stoch-diagnostic-driver'
+          $driverRoot=Join-Path $env:RUNNER_TEMP 'macd-diagnostic-driver'
           if (Test-Path -LiteralPath $driverRoot) { throw 'Fresh diagnostic driver directory required' }
           [IO.Directory]::CreateDirectory($driverRoot) | Out-Null
           @('<Project Sdk="Microsoft.NET.Sdk">','<PropertyGroup>','<OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>',
@@ -189,7 +189,10 @@ jobs:
             if ($collectorText -notmatch ' SUCCESS:' -or $collectorText -match '\[Error:' -or $collectorText -match '\[Merging data files') { throw 'Collector did not report clean raw-only success' }
             if ((Get-FileHash -LiteralPath (Join-Path $symbols 'OoplesFinance.StockIndicators.pdb') -Algorithm SHA256).Hash.ToLowerInvariant() -ne $pdbHash) { throw 'Symbol bytes changed' }
             $receipt=Get-Content -LiteralPath (Join-Path $replay 'replay.json') -Raw | ConvertFrom-Json
-            if ($receipt.status -ne 'complete' -or $receipt.pair -ne 'TaLib.Functions.Stoch' -or $receipt.warmups -ne 1000 -or $receipt.profile_seconds -ne 10 -or $receipt.host_clr -ne '10.0.15' -or !$receipt.protected_inputs_unchanged -or !$receipt.runtime_unchanged) { throw 'Replay incomplete, mismatched or runtime changed' }
+            if ($receipt.status -ne 'complete' -or $receipt.pair -ne 'Skender.GetMacd' -or $receipt.warmups -ne 1000 -or $receipt.profile_seconds -ne 10 -or $receipt.host_clr -ne '10.0.15' -or !$receipt.protected_inputs_unchanged -or !$receipt.runtime_unchanged) { throw 'Replay incomplete, mismatched or runtime changed' }
+            if ($receipt.environment_processor_count -ne 4 -or $receipt.worker_policy_before_setup -ne 2 -or $receipt.worker_policy_after_setup -ne 2 -or $receipt.worker_policy_after_profile -ne 2 -or !$receipt.effective_workers_before_setup.available -or $receipt.effective_workers_before_setup.value -ne 2 -or $receipt.effective_workers_after_setup.value -ne 2 -or $receipt.effective_workers_after_profile.value -ne 2) { throw 'MACD runtime/worker settings changed' }
+            if ($receipt.factory_parameters.variant -ne 0 -or $receipt.factory_parameters.fast -ne 12 -or $receipt.factory_parameters.slow -ne 26 -or $receipt.factory_parameters.signal -ne 9) { throw 'MACD factory parameters changed' }
+            if ($receipt.symbol_identity.guid -ne '73be8da336c04136b9b4b3bb140df441' -or $receipt.symbol_identity.stamp -ne 'bf4018fc' -or $receipt.symbol_identity.age -ne 1 -or $receipt.symbol_identity.pdb_sha256 -ne $pdbHash -or $receipt.symbol_identity.protected_runtime_pdb_replaced) { throw 'MACD PE/PDB identity mismatch' }
             $capturePassed=$true
           } catch {
             $validationFailure=$_.Exception.ToString()
@@ -223,7 +226,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: stoch-cpu-profile
+          name: macd-cpu-profile
           path: ${{ env.PROFILE_OUTPUT }}/
           retention-days: 14
           if-no-files-found: error

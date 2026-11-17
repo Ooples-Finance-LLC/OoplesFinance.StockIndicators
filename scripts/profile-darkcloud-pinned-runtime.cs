@@ -1,4 +1,7 @@
 using System.Diagnostics;
+using System.Buffers.Binary;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Security.Cryptography;
@@ -14,7 +17,7 @@ internal static class Program
         string input=Path.GetFullPath(args[0]), runtime=Path.GetFullPath(args[1]), output=Path.GetFullPath(args[2]);
         Require(!Directory.Exists(output), "Output must be fresh.");
         Directory.CreateDirectory(output);
-        var receipt=new Dictionary<string,object?> { ["diagnostic_only"]=true,["qualification"]=false,["performance_claim"]=false,["status"]="running",["stage"]="start",["host_clr"]=Environment.Version.ToString(),["process_id"]=Environment.ProcessId,["environment_processor_count"]=Environment.ProcessorCount,["env_aidotnet_cpu_threads"]=Environment.GetEnvironmentVariable("AIDOTNET_CPU_THREADS"),["production_builds"]=0,["diagnostic_driver_builds"]=1,["tests"]=0,["timed_benchmark_cases"]=0,["warmups"]=1000,["profile_seconds"]=10,["pair"]="TaLib.Functions.Stoch",["bars"]=10000,["workflow_commit"]=Environment.GetEnvironmentVariable("GITHUB_SHA"),["workflow_run"]=Environment.GetEnvironmentVariable("GITHUB_RUN_ID"),["attribution"]="Fixture boundaries and observed settings only; sampling semantics come from the collector. No qualification or latency claim.",["symbol_fidelity"]="Frozen PDB retained; no source/PDB match claimed." };
+        var receipt=new Dictionary<string,object?> { ["diagnostic_only"]=true,["qualification"]=false,["performance_claim"]=false,["status"]="running",["stage"]="start",["host_clr"]=Environment.Version.ToString(),["process_id"]=Environment.ProcessId,["environment_processor_count"]=Environment.ProcessorCount,["env_aidotnet_cpu_threads"]=Environment.GetEnvironmentVariable("AIDOTNET_CPU_THREADS"),["production_builds"]=0,["diagnostic_driver_builds"]=1,["tests"]=0,["timed_benchmark_cases"]=0,["warmups"]=1000,["profile_seconds"]=10,["pair"]="Skender.GetMacd",["bars"]=10000,["workflow_commit"]=Environment.GetEnvironmentVariable("GITHUB_SHA"),["workflow_run"]=Environment.GetEnvironmentVariable("GITHUB_RUN_ID"),["attribution"]="Fixture boundaries and observed settings only; sampling semantics come from the collector. No qualification or latency claim.",["symbol_fidelity"]="External matching old4d/PDB5c identity verified; frozen runtime PDB retained." };
         void Save() { string temp=Path.Combine(output,"replay.json.new"); File.WriteAllText(temp,JsonSerializer.Serialize(receipt,new JsonSerializerOptions {WriteIndented=true})); File.Move(temp,Path.Combine(output,"replay.json"),true); }
         Save();
         try
@@ -35,6 +38,23 @@ internal static class Program
             string core=Path.Combine(runtime,"OoplesFinance.StockIndicators.dll"), benchmark=Path.Combine(runtime,"OoplesFinance.StockIndicators.CompetitorBenchmarks.dll");
             Require(runtimeFiles[benchmark]==benchHash,"Wrong frozen harness.");sourceFiles.Add(Path.Combine(input,"production","old.dll"),coreHash);runtimeFiles[core]=coreHash;
             void CheckFiles(Dictionary<string,string> files) { foreach(var item in files) Require(Hash(item.Key)==item.Value,"Changed protected file: "+item.Key); }
+            const string matchingPdbHash="5c0cbf0fd670fce8a396794a86aaff7043a9d0a9e9fc516eb679e8dd5180c76f";
+            string matchingPdb=Path.Combine(Environment.GetEnvironmentVariable("_NT_SYMBOL_PATH")??"","OoplesFinance.StockIndicators.pdb");
+            Require(Hash(matchingPdb)==matchingPdbHash && !Path.GetFullPath(matchingPdb).StartsWith(runtime+Path.DirectorySeparatorChar,StringComparison.OrdinalIgnoreCase),"External matching PDB required.");
+            sourceFiles.Add(matchingPdb,matchingPdbHash);
+            using(var peStream=File.OpenRead(core))
+            using(var pe=new PEReader(peStream))
+            using(var pdbStream=File.OpenRead(matchingPdb))
+            using(var provider=MetadataReaderProvider.FromPortablePdbStream(pdbStream))
+            {
+                var entries=pe.ReadDebugDirectory().Where(entry=>entry.Type==DebugDirectoryEntryType.CodeView).ToArray();
+                Require(entries.Length==1,"Expected one CodeView entry.");
+                var cv=pe.ReadCodeViewDebugDirectoryData(entries[0]);var id=provider.GetMetadataReader().DebugMetadataHeader!.Id;
+                Require(id.Length==20,"Expected portable PDB ID.");
+                var guid=new Guid(id.AsSpan().Slice(0,16));uint stamp=BinaryPrimitives.ReadUInt32LittleEndian(id.AsSpan().Slice(16,4));
+                Require(cv.Guid==guid && guid.ToString("N")=="73be8da336c04136b9b4b3bb140df441" && entries[0].Stamp==stamp && stamp==0xbf4018fc && cv.Age==1,"Old PE/PDB identity mismatch.");
+                receipt["symbol_identity"]=new {guid=guid.ToString("N"),stamp=stamp.ToString("x8"),age=cv.Age,pdb_sha256=matchingPdbHash,production_sha256=coreHash,protected_runtime_pdb_replaced=false};
+            }
             CheckFiles(sourceFiles);CheckFiles(runtimeFiles);
             receipt["protected_input_hashes"]=sourceFiles;receipt["runtime_files"]=runtimeFiles;receipt["protected_input_files"]=sourceFiles.Count;receipt["runtime_file_count"]=runtimeFiles.Count;receipt["production_sha256"]=coreHash;receipt["frozen_benchmark_sha256"]=benchHash;receipt["input_provenance_sha256"]=Hash(proofPath);receipt["source"]="6051a95220eefa36e6f837a9a54e036164b76ebe";receipt["compiled_source"]="a1f0028c601e1c6e7be5eabfe0d5da5cfe1f0758";receipt["frozen_harness_source"]="9a45372530e49718b01b6524f9a0db993514e1e8";
             string framework=Path.GetDirectoryName(typeof(object).Assembly.Location)!;
@@ -59,23 +79,29 @@ internal static class Program
             const BindingFlags flags=BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Static|BindingFlags.Instance;
             var degree=tensor.GetType("AiDotNet.Tensors.Helpers.CpuParallelSettings",true)!.GetProperty("MaxDegreeOfParallelism",flags)!;
             var workers=production.GetType("OoplesFinance.StockIndicators.Indicators.ValuesBarExecution",true)!.GetMethod("WorkerCount",flags);
-            object Workers()=> workers==null ? new {available=false} : (object)new {available=true,maximum_argument=8,value=workers.Invoke(null,new object[]{8})};
+            object Workers() { Require(workers!=null && Convert.ToInt32(degree.GetValue(null))==2 && Environment.ProcessorCount==4,"Expected unchanged DOP2/CPU4."); int value=Convert.ToInt32(workers!.Invoke(null,new object[]{8}));Require(value==2,"Expected two effective workers.");return new {available=true,maximum_argument=8,value}; }
             receipt["worker_policy_before_setup"]=degree.GetValue(null);receipt["effective_workers_before_setup"]=Workers();
             var type=bench.GetType("OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks",true)!;var fixture=Activator.CreateInstance(type)!;
-            type.GetProperty("PairId")!.SetValue(fixture,"TaLib.Functions.Stoch");type.GetProperty("Bars")!.SetValue(fixture,10000);
+            type.GetProperty("PairId")!.SetValue(fixture,"Skender.GetMacd");type.GetProperty("Bars")!.SetValue(fixture,10000);
             var setup=type.GetMethod("Setup")!;var invoke=type.GetMethod("Ooples")!;receipt["stage"]="fixture-setup";Save();setup.Invoke(fixture,null);
+            object pair=type.GetField("_pair",flags)!.GetValue(fixture)!;
+            var library=(Delegate)pair.GetType().GetProperty("Library",flags)!.GetValue(pair)!;
+            object factory=library.Target??throw new InvalidOperationException("Frozen MACD factory closure missing.");
+            int Parameter(string name)=>Convert.ToInt32(factory.GetType().GetField(name,flags)!.GetValue(factory));
+            Require(Parameter("variant")==0 && Parameter("fast")==12 && Parameter("slow")==26 && Parameter("signal")==9,"Frozen MACD factory parameters changed.");
+            receipt["factory_parameters"]=new {variant=0,fast=12,slow=26,signal=9,selection="Macd,Signal,Histogram,FastEma,SlowEma"};
             receipt["worker_policy_after_setup"]=degree.GetValue(null);receipt["effective_workers_after_setup"]=Workers();receipt["loaded_closure_after_setup"]=Closure();receipt["stage"]="warmup";Save();
             object? last=null;for(int i=0;i<1000;i++) last=invoke.Invoke(fixture,null);
-            receipt["stage"]="profile-ready";Save();Console.WriteLine($"PROFILE START Stoch PID={Environment.ProcessId} bars=10000");receipt["profile_start_utc"]=DateTime.UtcNow;receipt["profile_start_timestamp"]=Stopwatch.GetTimestamp();receipt["timestamp_frequency"]=Stopwatch.Frequency;
+            receipt["stage"]="profile-ready";Save();Console.WriteLine($"PROFILE START Macd PID={Environment.ProcessId} bars=10000");receipt["profile_start_utc"]=DateTime.UtcNow;receipt["profile_start_timestamp"]=Stopwatch.GetTimestamp();receipt["timestamp_frequency"]=Stopwatch.Frequency;
             var timer=Stopwatch.StartNew();int iterations=0;do {last=invoke.Invoke(fixture,null);iterations++;}while(timer.Elapsed.TotalSeconds<10);
-            receipt["profile_end_timestamp"]=Stopwatch.GetTimestamp();receipt["profile_end_utc"]=DateTime.UtcNow;receipt["iterations"]=iterations;Console.WriteLine($"PROFILE END Stoch PID={Environment.ProcessId} iterations={iterations}");GC.KeepAlive(last);
+            receipt["profile_end_timestamp"]=Stopwatch.GetTimestamp();receipt["profile_end_utc"]=DateTime.UtcNow;receipt["iterations"]=iterations;Console.WriteLine($"PROFILE END Macd PID={Environment.ProcessId} iterations={iterations}");GC.KeepAlive(last);
             receipt["worker_policy_after_profile"]=degree.GetValue(null);receipt["effective_workers_after_profile"]=Workers();receipt["loaded_closure_after_profile"]=Closure();
             receipt["actual_default_framework_assemblies"]=AssemblyLoadContext.Default.Assemblies.Where(a=>!a.IsDynamic && frameworkIdentities.ContainsKey(a.FullName!)).Select(a=>new {name=a.FullName,location=a.Location,sha256=Hash(a.Location)}).ToArray();
             CheckFiles(sourceFiles);CheckFiles(runtimeFiles);receipt["protected_inputs_unchanged"]=true;receipt["runtime_unchanged"]=true;receipt["status"]="complete";receipt["stage"]="complete";Save();return 0;
         }
         catch(Exception error) {receipt["status"]="failed";receipt["error"]=error.ToString();Save();Console.Error.WriteLine(error);return 1;}
     }
-    sealed class AuthenticatedContext(Dictionary<string,string> selected,Dictionary<string,string> framework,Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedStoch6051Frozen482",false)
+    sealed class AuthenticatedContext(Dictionary<string,string> selected,Dictionary<string,string> framework,Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedMacd6051Frozen482",false)
     {
         protected override Assembly? Load(AssemblyName name)
         {
