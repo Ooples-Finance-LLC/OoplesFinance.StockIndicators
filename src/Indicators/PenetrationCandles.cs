@@ -116,21 +116,30 @@ internal sealed class PenetrationCandleState(int period, bool piercing, double p
 
     private bool Matches(in Bar bar)
     {
+        var rejected = piercing
+            ? _previous.Close >= _previous.Open
+                || bar.Close < bar.Open
+                || bar.Open >= _previous.Low
+                || bar.Close >= _previous.Open
+            : _previous.Close < _previous.Open
+                || bar.Close >= bar.Open
+                || bar.Open <= _previous.High
+                || bar.Close <= _previous.Open;
+        // Keep the original comparisons for unordered inputs. Nonfinite cached
+        // prices must still reach the original arithmetic rejection first.
+        if (rejected && FrameworkCompatibility.IsFinite(_previous.Open)
+            && FrameworkCompatibility.IsFinite(_previous.Close))
+            return false;
         var priorLong = _lagSum;
         priorLong.Add(Math.Max(_previous.Open, _previous.Close), -period);
         priorLong.Add(Math.Min(_previous.Open, _previous.Close), period);
         if (priorLong.Sign >= 0)
             return false;
+        if (rejected)
+            return false;
         var margin = new ExactMeanAccumulator();
         if (piercing)
         {
-            if (
-                _previous.Close >= _previous.Open
-                || bar.Close < bar.Open
-                || bar.Open >= _previous.Low
-                || bar.Close >= _previous.Open
-            )
-                return false;
             var currentLong = _sum;
             currentLong.Add(bar.Close, -period);
             currentLong.Add(bar.Open, period);
@@ -142,13 +151,6 @@ internal sealed class PenetrationCandleState(int period, bool piercing, double p
         }
         else
         {
-            if (
-                _previous.Close < _previous.Open
-                || bar.Close >= bar.Open
-                || bar.Open <= _previous.High
-                || bar.Close <= _previous.Open
-            )
-                return false;
             margin.Add(_previous.Close);
             margin.Add(bar.Close, -1);
             margin.AddProduct(_previous.Close, penetration, -1);

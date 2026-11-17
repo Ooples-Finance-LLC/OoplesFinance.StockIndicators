@@ -85,6 +85,26 @@ public sealed class PenetrationSharedExecutionTests
         }
     }
 
+    [Theory]
+    [InlineData(true)] [InlineData(false)]
+    public void FailedCurrentArithmeticRetainsStateForTheNextValidSignal(bool piercing)
+    {
+        var owner = Create(piercing, 1);
+        var state = (IIndicatorState)owner.CreateState();
+        Bar seed = new(default, 4, 6, 3, 5, 1);
+        Bar previous = piercing ? new(default, 10, 11, 1, 2, 1) : new(default, 2, 11, 1, 10, 1);
+        Bar invalid = new(default, piercing ? 0 : 12, 13, -3, double.NaN, 1);
+        Bar next = piercing ? new(default, -2, 11, -3, 7, 1) : new(default, 12, 13, 1, 5, 1);
+        Assert.Equal(0d, state.Update(seed));
+        Assert.Equal(0d, state.Update(previous));
+        // All four original rejection comparisons are false with this NaN close.
+        // Arithmetic rejects before Update can evict or append any rolling input.
+        Assert.Throws<ArithmeticException>(() => state.Update(invalid));
+        double expected = piercing ? 100d : -100d;
+        Assert.Equal(expected, PenetrationCandleReference.Evaluate([seed, previous, next], 1, piercing, .5)[^1]);
+        Assert.Equal(expected, state.Update(next));
+    }
+
     private static async Task CheckReference(Bar[] bars, IndicatorBase owner)
     {
         var state = (IIndicatorState)owner.CreateState();
