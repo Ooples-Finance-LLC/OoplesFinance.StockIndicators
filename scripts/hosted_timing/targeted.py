@@ -549,6 +549,20 @@ SCOPES['candle-predicate-order-20261116'] = dict(
     totals=(180,36),shards=1,baseline_phase='targeted',baseline_totals=(90,18))
 
 
+# Dedicated fixed32 zero-block/replay batch; retain the older predicate scope unchanged.
+SCOPES['triple-body-macro-20261117'] = dict(
+    fixtures={'SharedTripleBodyBenchmarks': {pair:pair for pair in
+        ('TaLib.Candles.ThreeInside','TaLib.Candles.TwoCrows',
+         'TaLib.Candles.UpsideGapTwoCrows','TaLib.Candles.UniqueThreeRiver')}},
+    implicit_fixtures=set(),
+    paths={'src/Indicators/ValuesBarExecution.BoundedWindows.cs',
+        'src/Indicators/ValuesBarExecution.TripleBodyBlocks.cs',
+        'tests/ModelsTests/TripleBodyZeroBlockReplayTests.cs'},
+    methods={'SharedTripleBodyBenchmarks':
+        ['BuilderFull','BuilderLatestOnly','NativeSingle','NativeParallel']},
+    totals=(120,24),shards=1,baseline_phase='targeted',baseline_totals=(90,18))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 

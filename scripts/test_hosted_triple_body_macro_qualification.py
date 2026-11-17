@@ -64,4 +64,19 @@ class MacroQualificationTests(unittest.TestCase):
                 for value in row['old_rounds'].values():value.update(mean_ns=70,lower_ns=69,upper_ns=71)
         self.assertFalse(q.adjudicate_native(rows,decisions)['passed'])
 
+    def test_real_registered_scope_reaches_preparation_reference_boundary(self):
+        # This was the first hosted prepare failure: adapter-only validation did
+        # not exercise the shared targeted registry used by verify_inputs.
+        from hosted_timing import targeted
+        plan=self.plan()
+        q.validate_scope(plan)
+        targeted.verify_reference(plan)
+        self.assertEqual(targeted.expected_totals(plan),(120,24))
+        scope=targeted.SCOPES[q.SCOPE]
+        self.assertEqual(scope['paths'],q.PATHS)
+        self.assertEqual(set(scope['fixtures']['SharedTripleBodyBenchmarks']),set(q.PAIRS))
+        self.assertEqual(q.p.phase_tasks(plan,'targeted',0),q.shards()[0]['tasks'])
+        for label in ('old','successor','variants'):
+            self.assertEqual(q.p.cpu_test_classes(plan,label),q.cpu_classes(plan,label))
+
 if __name__=='__main__':unittest.main()
