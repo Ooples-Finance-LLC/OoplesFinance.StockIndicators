@@ -14,7 +14,7 @@ internal static class Program
         string input=Path.GetFullPath(args[0]), runtime=Path.GetFullPath(args[1]), output=Path.GetFullPath(args[2]);
         Require(!Directory.Exists(output), "Output must be fresh.");
         Directory.CreateDirectory(output);
-        var receipt=new Dictionary<string,object?> { ["diagnostic_only"]=true,["qualification"]=false,["performance_claim"]=false,["status"]="running",["stage"]="start",["host_clr"]=Environment.Version.ToString(),["process_id"]=Environment.ProcessId,["environment_processor_count"]=Environment.ProcessorCount,["env_aidotnet_cpu_threads"]=Environment.GetEnvironmentVariable("AIDOTNET_CPU_THREADS"),["production_builds"]=0,["diagnostic_driver_builds"]=1,["tests"]=0,["timed_benchmark_cases"]=0,["warmups"]=1000,["profile_seconds"]=10,["pair"]="TaLib.Functions.StdDev",["bars"]=10000,["workflow_commit"]=Environment.GetEnvironmentVariable("GITHUB_SHA"),["workflow_run"]=Environment.GetEnvironmentVariable("GITHUB_RUN_ID"),["attribution"]="Fixture boundaries and observed settings only; sampling semantics come from the collector. No qualification or latency claim.",["symbol_fidelity"]="Frozen PDB retained; no source/PDB match claimed." };
+        var receipt=new Dictionary<string,object?> { ["diagnostic_only"]=true,["qualification"]=false,["performance_claim"]=false,["status"]="running",["stage"]="start",["host_clr"]=Environment.Version.ToString(),["process_id"]=Environment.ProcessId,["environment_processor_count"]=Environment.ProcessorCount,["env_aidotnet_cpu_threads"]=Environment.GetEnvironmentVariable("AIDOTNET_CPU_THREADS"),["production_builds"]=0,["diagnostic_driver_builds"]=1,["tests"]=0,["timed_benchmark_cases"]=0,["warmups"]=1000,["profile_seconds"]=10,["pair"]="TaLib.Functions.Stoch",["bars"]=10000,["workflow_commit"]=Environment.GetEnvironmentVariable("GITHUB_SHA"),["workflow_run"]=Environment.GetEnvironmentVariable("GITHUB_RUN_ID"),["attribution"]="Fixture boundaries and observed settings only; sampling semantics come from the collector. No qualification or latency claim.",["symbol_fidelity"]="Frozen PDB retained; no source/PDB match claimed." };
         void Save() { string temp=Path.Combine(output,"replay.json.new"); File.WriteAllText(temp,JsonSerializer.Serialize(receipt,new JsonSerializerOptions {WriteIndented=true})); File.Move(temp,Path.Combine(output,"replay.json"),true); }
         Save();
         try
@@ -62,20 +62,20 @@ internal static class Program
             object Workers()=> workers==null ? new {available=false} : (object)new {available=true,maximum_argument=8,value=workers.Invoke(null,new object[]{8})};
             receipt["worker_policy_before_setup"]=degree.GetValue(null);receipt["effective_workers_before_setup"]=Workers();
             var type=bench.GetType("OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks",true)!;var fixture=Activator.CreateInstance(type)!;
-            type.GetProperty("PairId")!.SetValue(fixture,"TaLib.Functions.StdDev");type.GetProperty("Bars")!.SetValue(fixture,10000);
+            type.GetProperty("PairId")!.SetValue(fixture,"TaLib.Functions.Stoch");type.GetProperty("Bars")!.SetValue(fixture,10000);
             var setup=type.GetMethod("Setup")!;var invoke=type.GetMethod("Ooples")!;receipt["stage"]="fixture-setup";Save();setup.Invoke(fixture,null);
             receipt["worker_policy_after_setup"]=degree.GetValue(null);receipt["effective_workers_after_setup"]=Workers();receipt["loaded_closure_after_setup"]=Closure();receipt["stage"]="warmup";Save();
             object? last=null;for(int i=0;i<1000;i++) last=invoke.Invoke(fixture,null);
-            receipt["stage"]="profile-ready";Save();Console.WriteLine($"PROFILE START StdDev PID={Environment.ProcessId} bars=10000");receipt["profile_start_utc"]=DateTime.UtcNow;receipt["profile_start_timestamp"]=Stopwatch.GetTimestamp();receipt["timestamp_frequency"]=Stopwatch.Frequency;
+            receipt["stage"]="profile-ready";Save();Console.WriteLine($"PROFILE START Stoch PID={Environment.ProcessId} bars=10000");receipt["profile_start_utc"]=DateTime.UtcNow;receipt["profile_start_timestamp"]=Stopwatch.GetTimestamp();receipt["timestamp_frequency"]=Stopwatch.Frequency;
             var timer=Stopwatch.StartNew();int iterations=0;do {last=invoke.Invoke(fixture,null);iterations++;}while(timer.Elapsed.TotalSeconds<10);
-            receipt["profile_end_timestamp"]=Stopwatch.GetTimestamp();receipt["profile_end_utc"]=DateTime.UtcNow;receipt["iterations"]=iterations;Console.WriteLine($"PROFILE END StdDev PID={Environment.ProcessId} iterations={iterations}");GC.KeepAlive(last);
+            receipt["profile_end_timestamp"]=Stopwatch.GetTimestamp();receipt["profile_end_utc"]=DateTime.UtcNow;receipt["iterations"]=iterations;Console.WriteLine($"PROFILE END Stoch PID={Environment.ProcessId} iterations={iterations}");GC.KeepAlive(last);
             receipt["worker_policy_after_profile"]=degree.GetValue(null);receipt["effective_workers_after_profile"]=Workers();receipt["loaded_closure_after_profile"]=Closure();
             receipt["actual_default_framework_assemblies"]=AssemblyLoadContext.Default.Assemblies.Where(a=>!a.IsDynamic && frameworkIdentities.ContainsKey(a.FullName!)).Select(a=>new {name=a.FullName,location=a.Location,sha256=Hash(a.Location)}).ToArray();
             CheckFiles(sourceFiles);CheckFiles(runtimeFiles);receipt["protected_inputs_unchanged"]=true;receipt["runtime_unchanged"]=true;receipt["status"]="complete";receipt["stage"]="complete";Save();return 0;
         }
         catch(Exception error) {receipt["status"]="failed";receipt["error"]=error.ToString();Save();Console.Error.WriteLine(error);return 1;}
     }
-    sealed class AuthenticatedContext(Dictionary<string,string> selected,Dictionary<string,string> framework,Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedStdDev6051Frozen482",false)
+    sealed class AuthenticatedContext(Dictionary<string,string> selected,Dictionary<string,string> framework,Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedStoch6051Frozen482",false)
     {
         protected override Assembly? Load(AssemblyName name)
         {
