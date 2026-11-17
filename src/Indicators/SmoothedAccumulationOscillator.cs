@@ -184,7 +184,7 @@ public sealed class SmoothedAccumulationOscillator
         }
     }
 
-    private sealed class CompactState(SmoothedAccumulationOscillator owner) : IMultiOutputState
+    internal sealed class CompactState(SmoothedAccumulationOscillator owner) : IMultiOutputState
     {
         private readonly CompactMean _fast = new(owner.FastPeriod, owner.FirstValue),
             _slow = new(owner.SlowPeriod, owner.FirstValue);

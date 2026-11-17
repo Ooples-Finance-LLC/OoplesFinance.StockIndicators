@@ -66,6 +66,27 @@ public sealed class CompactSmoothedAccumulationTests
         }
     }
 
+    [Fact]
+    public async Task MixedStateGraphRetainsAllSmoothedColumnsAndOtherRootValues()
+    {
+        var bars = OrdinaryBars()[..33];
+        SmoothedAccumulationOscillator[] indicators =
+            [new(3, 10, true, includeDetails: false), new(3, 10, false, includeDetails: true)];
+        var other = new MatchingLowCandle(2);
+        var expected = indicators.Select(i => SmoothedAccumulationReference.Values(bars, i)).ToArray();
+        foreach (var mode in new[] { IndicatorHistoryMode.Full, IndicatorHistoryMode.LatestOnly })
+        {
+            using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                .ConfigureIndicators(indicators[0], other, indicators[1]).ConfigureHistory(mode).BuildAsync();
+            for (int owner = 0; owner < indicators.Length; owner++)
+            for (int slot = 0; slot < 8; slot++)
+                Assert.Equal(expected[owner][slot % 4].Select(v => Bits(slot < 4 ? v ?? 0 : v.HasValue ? 1 : 0)),
+                    run[indicators[owner].Outputs[slot]].ToArray().Select(Bits));
+            Assert.Equal(SequenceCandleReference.Evaluate(bars, other.Period, other.WarmupBars,
+                SequenceCandleKind.MatchingLow), run[other].ToArray());
+        }
+    }
+
     [Theory]
     [InlineData(false)] [InlineData(true)]
     public void ExactStagesMatchIndependentFractionsAcrossScalesAndReset(bool first)
