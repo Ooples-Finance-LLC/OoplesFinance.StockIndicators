@@ -1,0 +1,141 @@
+name: Pinned DarkCloud worker diagnostic
+
+on:
+  push:
+    branches:
+      - perf/hosted-darkcloud-worker-profile-20261117
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: pinned-darkcloud-worker-profile
+  cancel-in-progress: false
+
+jobs:
+  profile:
+    runs-on: windows-2025
+    timeout-minutes: 10
+    steps:
+      - name: Initialize diagnostic provenance
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $env:PROFILE_OUTPUT=Join-Path $env:RUNNER_TEMP 'darkcloud-worker-profile-output'
+          $env:INPUT_ARTIFACT=Join-Path $env:RUNNER_TEMP 'darkcloud-source-artifact'
+          $env:PROFILE_RUNTIME=Join-Path $env:RUNNER_TEMP 'darkcloud-profile-runtime'
+          foreach ($name in @('PROFILE_OUTPUT','INPUT_ARTIFACT','PROFILE_RUNTIME')) {
+            $value=[Environment]::GetEnvironmentVariable($name)
+            "$name=$value" | Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8
+          }
+          if (Test-Path -LiteralPath $env:PROFILE_OUTPUT) { throw 'Fresh diagnostic output required' }
+          [IO.Directory]::CreateDirectory($env:PROFILE_OUTPUT) | Out-Null
+          [ordered]@{
+            diagnostic_only=$true; qualification=$false; production_builds=0; timed_benchmark_cases=0
+            workflow_commit=$env:GITHUB_SHA; workflow_run=$env:GITHUB_RUN_ID
+            source_run='44010931924'; source_artifact='candle-predicate-qualification'
+            source='6051a95220eefa36e6f837a9a54e036164b76ebe'
+            production_sha256='4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173'
+            frozen_benchmark_sha256='48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723'
+            runner_image=$env:ImageVersion; outer_shell_clr=[Environment]::Version.ToString()
+            limits='Managed sampled thread time only. No CPU-share, latency, native closure or evidence-import claim.'
+          } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'workflow-provenance.json') -Encoding utf8
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts
+            .github/workflows
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - name: Pin existing or temporary diagnostic tool
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          if ((dotnet --version).Trim() -ne '10.0.403') { throw 'Wrong SDK' }
+          $tool=$null
+          $existing=Get-Command dotnet-trace -ErrorAction SilentlyContinue
+          if ($null -ne $existing) {
+            $version=(& $existing.Source --version | Out-String).Trim()
+            if ($LASTEXITCODE -eq 0 -and $version -match '^10[.]0[.]750501(?:[+]|$)') { $tool=$existing.Source }
+          }
+          if ($null -eq $tool) {
+            $toolRoot=Join-Path $env:RUNNER_TEMP 'darkcloud-dotnet-tools'
+            dotnet tool install dotnet-trace --version 10.0.750501 --tool-path $toolRoot
+            if ($LASTEXITCODE -ne 0) { throw 'Pinned tool install failed' }
+            $tool=Join-Path $toolRoot 'dotnet-trace.exe'
+          }
+          $version=(& $tool --version | Out-String).Trim()
+          if ($LASTEXITCODE -ne 0 -or $version -notmatch '^10[.]0[.]750501(?:[+]|$)') { throw 'Wrong diagnostic tool version' }
+          [ordered]@{path=$tool;version=$version;sha256=(Get-FileHash -LiteralPath $tool -Algorithm SHA256).Hash.ToLowerInvariant()} |
+            ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'tool.json') -Encoding utf8
+          $tool | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'tool-path.txt') -Encoding utf8
+          dotnet --info | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'dotnet-info.txt') -Encoding utf8
+      - uses: actions/download-artifact@v8
+        with:
+          name: candle-predicate-qualification
+          path: ${{ env.INPUT_ARTIFACT }}
+          run-id: 44010931924
+          github-token: ${{ github.token }}
+      - name: Capture one source-bound worker diagnostic
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $inputs=Join-Path $env:INPUT_ARTIFACT 'predicate-inputs'
+          $proof=Join-Path $inputs 'provenance.json'
+          $config=Join-Path $inputs 'common/OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json'
+          if ((Get-FileHash -LiteralPath $proof -Algorithm SHA256).Hash.ToLowerInvariant() -ne '9013cb468cec2d505c0eb2fb6050517d2a1a5e28b441ade2cd55523be298bf78') { throw 'Wrong input proof' }
+          if ((Get-FileHash -LiteralPath $config -Algorithm SHA256).Hash.ToLowerInvariant() -ne 'c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097') { throw 'Wrong app runtime configuration before launch' }
+          Copy-Item -LiteralPath $proof -Destination (Join-Path $env:PROFILE_OUTPUT 'input-provenance.json')
+          $dotnet=(Get-Command dotnet).Source
+          $pwshDll=Join-Path (Split-Path -Parent (Get-Command pwsh).Source) 'pwsh.dll'
+          if (!(Test-Path -LiteralPath $pwshDll)) { throw 'Existing installed pwsh.dll unavailable; do not install a replacement' }
+          $script=Join-Path $env:GITHUB_WORKSPACE 'scripts/profile-darkcloud-pinned-runtime.ps1'
+          $tool=(Get-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'tool-path.txt') -Raw).Trim()
+          $trace=Join-Path $env:PROFILE_OUTPUT 'sample.nettrace'
+          $replay=Join-Path $env:PROFILE_OUTPUT 'replay'
+          $arguments=@('collect','--profile','dotnet-sampled-thread-time,dotnet-common','--buffersize','32',
+            '--format','Speedscope','--output',$trace,'--show-child-io','--',$dotnet,'exec','--runtimeconfig',$config,
+            $pwshDll,'-NoProfile','-File',$script,'-InputRoot',$inputs,'-OutputRoot',$replay,'-RuntimeRoot',$env:PROFILE_RUNTIME)
+          $launch=[ordered]@{command=$tool;arguments=$arguments;pwsh_dll_sha256=(Get-FileHash -LiteralPath $pwshDll -Algorithm SHA256).Hash.ToLowerInvariant();runtimeconfig_sha256=(Get-FileHash -LiteralPath $config -Algorithm SHA256).Hash.ToLowerInvariant();script_sha256=(Get-FileHash -LiteralPath $script -Algorithm SHA256).Hash.ToLowerInvariant();child_timeout_seconds=60;output_cap_bytes=104857600;runtime_payload_copy_bytes=0;diagnostic_only=$true;qualification=$false}
+          $launch | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'capture-launch.json') -Encoding utf8
+          $startInfo=[Diagnostics.ProcessStartInfo]::new()
+          $startInfo.FileName=$tool; $startInfo.UseShellExecute=$false; $startInfo.CreateNoWindow=$true
+          $startInfo.RedirectStandardOutput=$true; $startInfo.RedirectStandardError=$true
+          foreach ($argument in $arguments) { $startInfo.ArgumentList.Add([string]$argument) }
+          $process=[Diagnostics.Process]::new();$process.StartInfo=$startInfo
+          $clock=[Diagnostics.Stopwatch]::StartNew();$failure=$null;$started=$false
+          try {
+            if (!$process.Start()) { throw 'Cannot start existing diagnostic tool' }
+            $started=$true
+            $stdout=$process.StandardOutput.ReadToEndAsync();$stderr=$process.StandardError.ReadToEndAsync()
+            while (!$process.WaitForExit(250)) {
+              $bytes=(Get-ChildItem -LiteralPath $env:PROFILE_OUTPUT -Recurse -File | Measure-Object Length -Sum).Sum
+              if ($clock.Elapsed.TotalSeconds -gt 60) { $failure='60 second child watchdog'; break }
+              if ($bytes -gt 104857600) { $failure='100MiB output cap'; break }
+            }
+            if ($failure) { $process.Kill($true);$process.WaitForExit() }
+            $stdout.GetAwaiter().GetResult() | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'capture.log') -Encoding utf8
+            $stderr.GetAwaiter().GetResult() | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'capture-error.log') -Encoding utf8
+            $bytes=(Get-ChildItem -LiteralPath $env:PROFILE_OUTPUT -Recurse -File | Measure-Object Length -Sum).Sum
+            if ($bytes -gt 104857600) { $failure='100MiB output cap after exit' }
+            [ordered]@{exit_code=$process.ExitCode;elapsed_seconds=$clock.Elapsed.TotalSeconds;limit_failure=$failure;output_bytes=$bytes;diagnostic_only=$true;qualification=$false} |
+              ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'capture.json') -Encoding utf8
+            if ($failure -or $process.ExitCode -ne 0) { throw 'Capture failed; preserve all existing output' }
+            $receipt=Get-Content -LiteralPath (Join-Path $replay 'replay.json') -Raw | ConvertFrom-Json
+            if ($receipt.status -ne 'complete' -or !$receipt.protected_inputs_unchanged -or !$receipt.runtime_unchanged) { throw 'Replay incomplete or runtime changed' }
+            Get-ChildItem -LiteralPath $env:PROFILE_OUTPUT -Recurse -File | ForEach-Object {
+              [ordered]@{path=$_.FullName.Substring($env:PROFILE_OUTPUT.Length);bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}
+            } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'output-manifest.json') -Encoding utf8
+          } finally {
+            if ($started -and !$process.HasExited) { $process.Kill($true);$process.WaitForExit() }
+            $process.Dispose()
+          }
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: darkcloud-worker-profile
+          path: ${{ env.PROFILE_OUTPUT }}/
+          retention-days: 14
+          if-no-files-found: error
