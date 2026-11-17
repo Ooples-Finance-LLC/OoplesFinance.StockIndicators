@@ -39,7 +39,7 @@ jobs:
             production_sha256='4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173'
             frozen_benchmark_sha256='48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723'
             runner_image=$env:ImageVersion; outer_shell_clr=[Environment]::Version.ToString()
-            limits='Managed sampled thread time only. No CPU-share, latency, native closure or evidence-import claim.'
+            limits='Diagnostic kernel CPU samples only; not qualified latency, native closure or evidence import. Attribute only resolved stacks within recorded fixture boundaries.'
           } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'workflow-provenance.json') -Encoding utf8
       - uses: actions/checkout@v7
         with:
@@ -49,26 +49,20 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.403'
-      - name: Pin existing or temporary diagnostic tool
+      - name: Pin kernel CPU collector
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
           if ((dotnet --version).Trim() -ne '10.0.403') { throw 'Wrong SDK' }
-          $tool=$null
-          $existing=Get-Command dotnet-trace -ErrorAction SilentlyContinue
-          if ($null -ne $existing) {
-            $version=(& $existing.Source --version | Out-String).Trim()
-            if ($LASTEXITCODE -eq 0 -and $version -match '^10[.]0[.]750501(?:[+]|$)') { $tool=$existing.Source }
-          }
-          if ($null -eq $tool) {
-            $toolRoot=Join-Path $env:RUNNER_TEMP 'darkcloud-dotnet-tools'
-            dotnet tool install dotnet-trace --version 10.0.750501 --tool-path $toolRoot
-            if ($LASTEXITCODE -ne 0) { throw 'Pinned tool install failed' }
-            $tool=Join-Path $toolRoot 'dotnet-trace.exe'
-          }
-          $version=(& $tool --version | Out-String).Trim()
-          if ($LASTEXITCODE -ne 0 -or $version -notmatch '^10[.]0[.]750501(?:[+]|$)') { throw 'Wrong diagnostic tool version' }
-          [ordered]@{path=$tool;version=$version;sha256=(Get-FileHash -LiteralPath $tool -Algorithm SHA256).Hash.ToLowerInvariant()} |
+          $identity=[Security.Principal.WindowsIdentity]::GetCurrent()
+          $principal=[Security.Principal.WindowsPrincipal]::new($identity)
+          if (!$principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Kernel CPU capture requires elevated runner' }
+          $tool=Join-Path $env:RUNNER_TEMP 'darkcloud-PerfView-4.0.0.exe'
+          if (Test-Path -LiteralPath $tool) { throw 'Fresh collector path required' }
+          Invoke-WebRequest -Uri 'https://github.com/microsoft/perfview/releases/download/v4.0.0/PerfView.exe' -OutFile $tool
+          $hash=(Get-FileHash -LiteralPath $tool -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($hash -ne '270e2ba419b0b2d93c4b15b0851f257edf655c92fe0ad95add3d0b5f6d6aad48') { throw 'Wrong PerfView bytes' }
+          [ordered]@{path=$tool;version='4.0.0';sha256=$hash;administrator=$true;collector='Kernel Process,Thread,ImageLoad,Profile';diagnostic_only=$true} |
             ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'tool.json') -Encoding utf8
           $tool | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'tool-path.txt') -Encoding utf8
           dotnet --info | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'dotnet-info.txt') -Encoding utf8
@@ -122,11 +116,26 @@ jobs:
           $cim=[ordered]@{processors=@(Get-CimInstance Win32_Processor | ForEach-Object { @{name=$_.Name;cores=$_.NumberOfCores;enabled_cores=$_.NumberOfEnabledCore;logical_processors=$_.NumberOfLogicalProcessors} });computer_logical_processors=(Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors}
           $cim | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'cim.json') -Encoding utf8
           $tool=(Get-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'tool-path.txt') -Raw).Trim()
-          $trace=Join-Path $env:PROFILE_OUTPUT 'sample.nettrace'
+          $authentication=Join-Path $inputs 'old-candidate-authentication'
+          $authManifest=Join-Path $authentication 'manifest.json'
+          if ((Get-FileHash -LiteralPath $authManifest -Algorithm SHA256).Hash.ToLowerInvariant() -ne 'f2541e7d0621187f35160c9fcd94627f7fc70169bd185a5a6bc73cae594c1508') { throw 'Wrong old authentication manifest' }
+          $auth=Get-Content -LiteralPath $authManifest -Raw | ConvertFrom-Json
+          $pdbHash='5c0cbf0fd670fce8a396794a86aaff7043a9d0a9e9fc516eb679e8dd5180c76f'
+          if ($auth.source -ne 'a1f0028c601e1c6e7be5eabfe0d5da5cfe1f0758' -or $auth.runtime_files.'src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll' -ne '4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173' -or $auth.runtime_files.'src/bin/Release/net10.0/OoplesFinance.StockIndicators.pdb' -ne $pdbHash) { throw 'Wrong production/PDB authentication binding' }
+          $pdbSource=Join-Path $authentication ('blobs/'+$pdbHash)
+          if ((Get-FileHash -LiteralPath $pdbSource -Algorithm SHA256).Hash.ToLowerInvariant() -ne $pdbHash) { throw 'Wrong production PDB bytes' }
+          $symbols=Join-Path $env:PROFILE_OUTPUT 'symbols'
+          [IO.Directory]::CreateDirectory($symbols) | Out-Null
+          Copy-Item -LiteralPath $pdbSource -Destination (Join-Path $symbols 'OoplesFinance.StockIndicators.pdb')
+          Copy-Item -LiteralPath $authManifest -Destination (Join-Path $symbols 'authentication-manifest.json')
+          $env:_NT_SYMBOL_PATH=$symbols
+          [ordered]@{separate_symbol_root=$symbols;symbol_path=$env:_NT_SYMBOL_PATH;pdb_sha256=$pdbHash;manifest_sha256='f2541e7d0621187f35160c9fcd94627f7fc70169bd185a5a6bc73cae594c1508';protected_runtime_pdb_replaced=$false;source_pdb_binding='Authenticated old production DLL4d and PDB5c from compiled a1f manifest; frozen runtime PDB untouched';diagnostic_only=$true} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'symbols.json') -Encoding utf8
+          $trace=Join-Path $env:PROFILE_OUTPUT 'cpu.etl'
+          $collectionLog=Join-Path $env:PROFILE_OUTPUT 'cpu.log'
           $replay=Join-Path $env:PROFILE_OUTPUT 'replay'
-          $arguments=@('collect','--profile','dotnet-sampled-thread-time,dotnet-common','--buffersize','32',
-            '--format','Speedscope','--output',$trace,'--show-child-io','--',$dotnet,'exec','--runtimeconfig',$config,
-            $driver,$inputs,$env:PROFILE_RUNTIME,$replay)
+          $arguments=@('/AcceptEula','/NoGui','/NoView','/KernelEvents:Process,Thread,ImageLoad,Profile',
+            '/BufferSizeMB:16','/CircularMB:32','/MaxCollectSec:40','/Zip:true',('/DataFile:'+$trace),('/LogFile:'+$collectionLog),
+            'run',$dotnet,'exec','--runtimeconfig',$config,$driver,$inputs,$env:PROFILE_RUNTIME,$replay)
           $launch=[ordered]@{command=$tool;arguments=$arguments;diagnostic_driver_sha256=(Get-FileHash -LiteralPath $driver -Algorithm SHA256).Hash.ToLowerInvariant();diagnostic_driver_builds=1;production_builds=0;tests=0;timed_benchmark_cases=0;runtimeconfig_sha256=(Get-FileHash -LiteralPath $config -Algorithm SHA256).Hash.ToLowerInvariant();script_sha256=(Get-FileHash -LiteralPath $script -Algorithm SHA256).Hash.ToLowerInvariant();child_timeout_seconds=60;output_cap_bytes=104857600;runtime_payload_copy_bytes=0;diagnostic_only=$true;qualification=$false}
           $launch | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'capture-launch.json') -Encoding utf8
           $startInfo=[Diagnostics.ProcessStartInfo]::new()
@@ -152,6 +161,10 @@ jobs:
             [ordered]@{exit_code=$process.ExitCode;elapsed_seconds=$clock.Elapsed.TotalSeconds;limit_failure=$failure;output_bytes=$bytes;diagnostic_only=$true;qualification=$false} |
               ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'capture.json') -Encoding utf8
             if ($failure -or $process.ExitCode -ne 0) { throw 'Capture failed; preserve all existing output' }
+            if (!(Test-Path -LiteralPath ($trace+'.zip'))) { throw 'Kernel CPU archive missing' }
+            $collectorText=Get-Content -LiteralPath $collectionLog -Raw
+            if ($collectorText -notmatch ' SUCCESS:' -or $collectorText -match '\[Error:') { throw 'Collector did not report clean success' }
+            if ((Get-FileHash -LiteralPath (Join-Path $symbols 'OoplesFinance.StockIndicators.pdb') -Algorithm SHA256).Hash.ToLowerInvariant() -ne $pdbHash) { throw 'Symbol bytes changed' }
             $receipt=Get-Content -LiteralPath (Join-Path $replay 'replay.json') -Raw | ConvertFrom-Json
             if ($receipt.status -ne 'complete' -or !$receipt.protected_inputs_unchanged -or !$receipt.runtime_unchanged) { throw 'Replay incomplete or runtime changed' }
             Get-ChildItem -LiteralPath $env:PROFILE_OUTPUT -Recurse -File | ForEach-Object {
