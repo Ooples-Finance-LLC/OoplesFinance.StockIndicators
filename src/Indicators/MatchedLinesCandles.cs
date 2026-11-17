@@ -264,7 +264,7 @@ internal sealed class MatchedLinesState(
         var b = _previous;
         if (kind == MatchedLinesKind.GapSideBySideWhiteLines)
         {
-            if (b.Close < b.Open || c.Close < c.Open || !Equal(b.Open, c.Open))
+            if (b.Close < b.Open || c.Close < c.Open)
                 return 0;
             var up =
                 b.Open > Math.Max(_first.Open, _first.Close)
@@ -272,7 +272,11 @@ internal sealed class MatchedLinesState(
             var down =
                 b.Close < Math.Min(_first.Open, _first.Close)
                 && c.Close < Math.Min(_first.Open, _first.Close);
-            if (!up && !down)
+            // Only these opens enter the skipped equality margin. Retain
+            // nonfinite failures before Update changes lagged state/history.
+            if (!up && !down && FrameworkCompatibility.IsFinite(b.Open) && FrameworkCompatibility.IsFinite(c.Open))
+                return 0;
+            if (!Equal(b.Open, c.Open) || (!up && !down))
                 return 0;
             var difference = new ExactMeanAccumulator();
             difference.Add(c.Close, _rangeDen);

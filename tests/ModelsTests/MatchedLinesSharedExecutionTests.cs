@@ -74,6 +74,64 @@ public sealed class MatchedLinesSharedExecutionTests(ITestOutputHelper log)
                 rule.Check(new IndicatorValidationContext("Mixed matched-lines", bars, [run[root].ToArray()], 0));
         }
     }
+    [Theory]
+    [InlineData(false, double.NaN)]
+    [InlineData(false, double.NegativeInfinity)]
+    [InlineData(true, double.NaN)]
+    [InlineData(true, double.NegativeInfinity)]
+    public void GapSideNonfiniteOpenRetainsEqualityErrorBeforeStateChanges(bool previous, double invalid)
+    {
+        var owner = new GapSideBySideWhiteLinesCandle(1, 1);
+        var state = (IIndicatorState)owner.CreateState();
+        var seed = new Bar(default, 5, 20, -10, 6, 1);
+        var bars = new List<Bar> { seed, seed, previous ? new(default, invalid, 20, -10, 6, 1) : seed };
+        // GapSide windows accumulate ranges only, so a nonfinite previous
+        // open can legitimately survive warmup in direct-state execution.
+        foreach (var bar in bars) Assert.Equal(0d, state.Update(bar));
+        var attempt = previous ? seed : new Bar(default, invalid, 20, -10, 6, 1);
+        for (int repeat = 0; repeat < 2; repeat++)
+        {
+            var error = Assert.Throws<ArithmeticException>(() => state.Update(attempt));
+            Assert.Equal("An exact finite mean requires finite inputs.", error.Message);
+        }
+        // The failed attempt must not enter either range queue or shift the
+        // retained candles. Continue with both independent positive signals.
+        Bar[] continuation = [
+            new(default, 6, 20, -10, 5, 1),
+            seed, new(default, 8, 20, -10, 9, 1), new(default, 8, 20, -10, 9, 1),
+            new(default, 8, 20, -10, 9, 1), seed, seed
+        ];
+        var values = new List<double> { 0, 0, 0 };
+        foreach (var bar in continuation) { bars.Add(bar); values.Add(state.Update(bar)); }
+        Assert.Contains(100d, values); Assert.Contains(-100d, values);
+        foreach (var rule in owner.ValidationRules)
+            rule.Check(new IndicatorValidationContext("GapSide equality error continuation", bars.ToArray(), [values.ToArray()], 0));
+    }
+
+    [Fact]
+    public async Task GapSideStrictGapBoundariesKeepBothSignalDirections()
+    {
+        var bars = Enumerable.Repeat(new Bar(default, 5, 20, -10, 6, 1), 3).ToList();
+        void Triple(double anchorOpen, double anchorClose, double open, double close)
+        {
+            bars.Add(new(default, anchorOpen, 20, -10, anchorClose, 1));
+            bars.Add(new(default, open, 20, -10, close, 1));
+            bars.Add(new(default, open, 20, -10, close, 1));
+        }
+        Triple(5, 6, 6, 7); // Touching the upper body edge is not a gap.
+        Triple(5, 6, Math.BitIncrement(6d), 7);
+        Triple(8, 9, 6, 8); // Touching the lower body edge is not a gap.
+        Triple(8, 9, 6, Math.BitDecrement(8d));
+        Triple(-0d, +0d, +0d, 1);
+        var owner = new GapSideBySideWhiteLinesCandle(1, 1);
+        var state = (IIndicatorState)owner.CreateState();
+        var values = bars.Select(bar => state.Update(bar)).ToArray();
+        Assert.Equal(0d, values[5]); Assert.Equal(100d, values[8]);
+        Assert.Equal(0d, values[11]); Assert.Equal(-100d, values[14]);
+        Assert.Equal(0d, values[17]);
+        await Check(bars.ToArray(), owner);
+    }
+
     private static async Task Check(Bar[] bars, IndicatorBase owner)
     {
         var state = (IIndicatorState)owner.CreateState();
