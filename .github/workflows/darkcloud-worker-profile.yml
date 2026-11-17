@@ -32,7 +32,7 @@ jobs:
           if (Test-Path -LiteralPath $env:PROFILE_OUTPUT) { throw 'Fresh diagnostic output required' }
           [IO.Directory]::CreateDirectory($env:PROFILE_OUTPUT) | Out-Null
           [ordered]@{
-            diagnostic_only=$true; qualification=$false; production_builds=0; timed_benchmark_cases=0
+            diagnostic_only=$true; qualification=$false; production_builds=0; diagnostic_driver_builds=1; tests=0; timed_benchmark_cases=0
             workflow_commit=$env:GITHUB_SHA; workflow_run=$env:GITHUB_RUN_ID
             source_run='44010931924'; source_artifact='candle-predicate-qualification'
             source='6051a95220eefa36e6f837a9a54e036164b76ebe'
@@ -89,16 +89,45 @@ jobs:
           if ((Get-FileHash -LiteralPath $config -Algorithm SHA256).Hash.ToLowerInvariant() -ne 'c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097') { throw 'Wrong app runtime configuration before launch' }
           Copy-Item -LiteralPath $proof -Destination (Join-Path $env:PROFILE_OUTPUT 'input-provenance.json')
           $dotnet=(Get-Command dotnet).Source
-          $pwshDll=Join-Path (Split-Path -Parent (Get-Command pwsh).Source) 'pwsh.dll'
-          if (!(Test-Path -LiteralPath $pwshDll)) { throw 'Existing installed pwsh.dll unavailable; do not install a replacement' }
-          $script=Join-Path $env:GITHUB_WORKSPACE 'scripts/profile-darkcloud-pinned-runtime.ps1'
+          $driverRoot=Join-Path $env:RUNNER_TEMP 'darkcloud-diagnostic-driver'
+          if (Test-Path -LiteralPath $driverRoot) { throw 'Fresh diagnostic driver directory required' }
+          [IO.Directory]::CreateDirectory($driverRoot) | Out-Null
+          @('<Project Sdk="Microsoft.NET.Sdk">','<PropertyGroup>','<OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>',
+            '<ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>',
+            '</PropertyGroup>','</Project>') | Set-Content -LiteralPath (Join-Path $driverRoot 'DiagnosticDriver.csproj') -Encoding utf8
+          $script=Join-Path $env:GITHUB_WORKSPACE 'scripts/profile-darkcloud-pinned-runtime.cs'
+          Copy-Item -LiteralPath $script -Destination (Join-Path $driverRoot 'Program.cs')
+          dotnet build (Join-Path $driverRoot 'DiagnosticDriver.csproj') -c Release -o (Join-Path $driverRoot 'out') --nologo *> (Join-Path $env:PROFILE_OUTPUT 'driver-build.log')
+          if ($LASTEXITCODE -ne 0) { throw 'Diagnostic-only driver build failed' }
+          $driver=Join-Path $driverRoot 'out/DiagnosticDriver.dll'
+          $manifest=Get-Content -LiteralPath $proof -Raw | ConvertFrom-Json
+          if (@($manifest.common_manifest.PSObject.Properties).Count -ne 94) { throw 'Expected 94 common assets' }
+          if ((Test-Path -LiteralPath $env:PROFILE_RUNTIME) -or !$env:PROFILE_RUNTIME.StartsWith($env:RUNNER_TEMP+'\',[StringComparison]::OrdinalIgnoreCase)) { throw 'Fresh runtime under job temp required' }
+          $common=[IO.Path]::GetFullPath((Join-Path $inputs 'common'))
+          $links=@{}
+          foreach ($entry in $manifest.common_manifest.PSObject.Properties) {
+            $source=[IO.Path]::GetFullPath((Join-Path $common $entry.Name))
+            $target=[IO.Path]::GetFullPath((Join-Path $env:PROFILE_RUNTIME $entry.Name))
+            if (!$source.StartsWith($common+'\',[StringComparison]::OrdinalIgnoreCase) -or !$target.StartsWith($env:PROFILE_RUNTIME+'\',[StringComparison]::OrdinalIgnoreCase)) { throw 'Escaped runtime member' }
+            if ((Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash.ToLowerInvariant() -ne $entry.Value) { throw 'Changed common input' }
+            $links[$target]=$source
+          }
+          $old=Join-Path $inputs 'production/old.dll'
+          if ((Get-FileHash -LiteralPath $old -Algorithm SHA256).Hash.ToLowerInvariant() -ne '4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173') { throw 'Wrong old production' }
+          $links[(Join-Path $env:PROFILE_RUNTIME 'OoplesFinance.StockIndicators.dll')]=$old
+          foreach ($entry in $links.GetEnumerator()) {
+            [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($entry.Key)) | Out-Null
+            $null=New-Item -ItemType HardLink -Path $entry.Key -Target $entry.Value -ErrorAction Stop
+          }
+          $cim=[ordered]@{processors=@(Get-CimInstance Win32_Processor | ForEach-Object { @{name=$_.Name;cores=$_.NumberOfCores;enabled_cores=$_.NumberOfEnabledCore;logical_processors=$_.NumberOfLogicalProcessors} });computer_logical_processors=(Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors}
+          $cim | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'cim.json') -Encoding utf8
           $tool=(Get-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'tool-path.txt') -Raw).Trim()
           $trace=Join-Path $env:PROFILE_OUTPUT 'sample.nettrace'
           $replay=Join-Path $env:PROFILE_OUTPUT 'replay'
           $arguments=@('collect','--profile','dotnet-sampled-thread-time,dotnet-common','--buffersize','32',
             '--format','Speedscope','--output',$trace,'--show-child-io','--',$dotnet,'exec','--runtimeconfig',$config,
-            $pwshDll,'-NoProfile','-File',$script,'-InputRoot',$inputs,'-OutputRoot',$replay,'-RuntimeRoot',$env:PROFILE_RUNTIME)
-          $launch=[ordered]@{command=$tool;arguments=$arguments;pwsh_dll_sha256=(Get-FileHash -LiteralPath $pwshDll -Algorithm SHA256).Hash.ToLowerInvariant();runtimeconfig_sha256=(Get-FileHash -LiteralPath $config -Algorithm SHA256).Hash.ToLowerInvariant();script_sha256=(Get-FileHash -LiteralPath $script -Algorithm SHA256).Hash.ToLowerInvariant();child_timeout_seconds=60;output_cap_bytes=104857600;runtime_payload_copy_bytes=0;diagnostic_only=$true;qualification=$false}
+            $driver,$inputs,$env:PROFILE_RUNTIME,$replay)
+          $launch=[ordered]@{command=$tool;arguments=$arguments;diagnostic_driver_sha256=(Get-FileHash -LiteralPath $driver -Algorithm SHA256).Hash.ToLowerInvariant();diagnostic_driver_builds=1;production_builds=0;tests=0;timed_benchmark_cases=0;runtimeconfig_sha256=(Get-FileHash -LiteralPath $config -Algorithm SHA256).Hash.ToLowerInvariant();script_sha256=(Get-FileHash -LiteralPath $script -Algorithm SHA256).Hash.ToLowerInvariant();child_timeout_seconds=60;output_cap_bytes=104857600;runtime_payload_copy_bytes=0;diagnostic_only=$true;qualification=$false}
           $launch | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'capture-launch.json') -Encoding utf8
           $startInfo=[Diagnostics.ProcessStartInfo]::new()
           $startInfo.FileName=$tool; $startInfo.UseShellExecute=$false; $startInfo.CreateNoWindow=$true
