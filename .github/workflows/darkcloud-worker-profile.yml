@@ -1,16 +1,16 @@
-name: Pinned DarkCloud worker diagnostic
+name: Pinned StdDev kernel CPU diagnostic
 
 on:
   push:
     branches:
-      - perf/hosted-darkcloud-worker-profile-20261117
+      - perf/hosted-stddev-cpu-profile-20261117
 
 permissions:
   contents: read
   actions: read
 
 concurrency:
-  group: pinned-darkcloud-worker-profile
+  group: pinned-stddev-cpu-profile
   cancel-in-progress: false
 
 jobs:
@@ -22,9 +22,9 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
-          $env:PROFILE_OUTPUT=Join-Path $env:RUNNER_TEMP 'darkcloud-worker-profile-output'
-          $env:INPUT_ARTIFACT=Join-Path $env:RUNNER_TEMP 'darkcloud-source-artifact'
-          $env:PROFILE_RUNTIME=Join-Path $env:RUNNER_TEMP 'darkcloud-profile-runtime'
+          $env:PROFILE_OUTPUT=Join-Path $env:RUNNER_TEMP 'stddev-cpu-profile-output'
+          $env:INPUT_ARTIFACT=Join-Path $env:RUNNER_TEMP 'stddev-source-artifact'
+          $env:PROFILE_RUNTIME=Join-Path $env:RUNNER_TEMP 'stddev-profile-runtime'
           foreach ($name in @('PROFILE_OUTPUT','INPUT_ARTIFACT','PROFILE_RUNTIME')) {
             $value=[Environment]::GetEnvironmentVariable($name)
             "$name=$value" | Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8
@@ -38,6 +38,8 @@ jobs:
             source='6051a95220eefa36e6f837a9a54e036164b76ebe'
             production_sha256='4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173'
             frozen_benchmark_sha256='48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723'
+            pair='TaLib.Functions.StdDev';warmups=1000;profile_seconds=10
+            merge_on_runner=$false;zip_on_runner=$false;full_managed_rundown=$true
             runner_image=$env:ImageVersion; outer_shell_clr=[Environment]::Version.ToString()
             limits='Diagnostic kernel CPU samples only; not qualified latency, native closure or evidence import. Attribute only resolved stacks within recorded fixture boundaries.'
           } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'workflow-provenance.json') -Encoding utf8
@@ -57,7 +59,7 @@ jobs:
           $identity=[Security.Principal.WindowsIdentity]::GetCurrent()
           $principal=[Security.Principal.WindowsPrincipal]::new($identity)
           if (!$principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Kernel CPU capture requires elevated runner' }
-          $tool=Join-Path $env:RUNNER_TEMP 'darkcloud-PerfView-4.0.0.exe'
+          $tool=Join-Path $env:RUNNER_TEMP 'stddev-PerfView-4.0.0.exe'
           if (Test-Path -LiteralPath $tool) { throw 'Fresh collector path required' }
           Invoke-WebRequest -Uri 'https://github.com/microsoft/perfview/releases/download/v4.0.0/PerfView.exe' -OutFile $tool
           $hash=(Get-FileHash -LiteralPath $tool -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -83,15 +85,15 @@ jobs:
           if ((Get-FileHash -LiteralPath $config -Algorithm SHA256).Hash.ToLowerInvariant() -ne 'c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097') { throw 'Wrong app runtime configuration before launch' }
           Copy-Item -LiteralPath $proof -Destination (Join-Path $env:PROFILE_OUTPUT 'input-provenance.json')
           $dotnet=(Get-Command dotnet).Source
-          $driverRoot=Join-Path $env:RUNNER_TEMP 'darkcloud-diagnostic-driver'
+          $driverRoot=Join-Path $env:RUNNER_TEMP 'stddev-diagnostic-driver'
           if (Test-Path -LiteralPath $driverRoot) { throw 'Fresh diagnostic driver directory required' }
           [IO.Directory]::CreateDirectory($driverRoot) | Out-Null
           @('<Project Sdk="Microsoft.NET.Sdk">','<PropertyGroup>','<OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>',
-            '<ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>',
+            '<ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><UseSharedCompilation>false</UseSharedCompilation>',
             '</PropertyGroup>','</Project>') | Set-Content -LiteralPath (Join-Path $driverRoot 'DiagnosticDriver.csproj') -Encoding utf8
           $script=Join-Path $env:GITHUB_WORKSPACE 'scripts/profile-darkcloud-pinned-runtime.cs'
           Copy-Item -LiteralPath $script -Destination (Join-Path $driverRoot 'Program.cs')
-          dotnet build (Join-Path $driverRoot 'DiagnosticDriver.csproj') -c Release -o (Join-Path $driverRoot 'out') --nologo *> (Join-Path $env:PROFILE_OUTPUT 'driver-build.log')
+          dotnet build (Join-Path $driverRoot 'DiagnosticDriver.csproj') -c Release -o (Join-Path $driverRoot 'out') --disable-build-servers --nologo *> (Join-Path $env:PROFILE_OUTPUT 'driver-build.log')
           if ($LASTEXITCODE -ne 0) { throw 'Diagnostic-only driver build failed' }
           $driver=Join-Path $driverRoot 'out/DiagnosticDriver.dll'
           $manifest=Get-Content -LiteralPath $proof -Raw | ConvertFrom-Json
@@ -130,11 +132,24 @@ jobs:
           Copy-Item -LiteralPath $authManifest -Destination (Join-Path $symbols 'authentication-manifest.json')
           $env:_NT_SYMBOL_PATH=$symbols
           [ordered]@{separate_symbol_root=$symbols;symbol_path=$env:_NT_SYMBOL_PATH;pdb_sha256=$pdbHash;manifest_sha256='f2541e7d0621187f35160c9fcd94627f7fc70169bd185a5a6bc73cae594c1508';protected_runtime_pdb_replaced=$false;source_pdb_binding='Authenticated old production DLL4d and PDB5c from compiled a1f manifest; frozen runtime PDB untouched';diagnostic_only=$true} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'symbols.json') -Encoding utf8
+          function IdleGate($name) {
+            $samples=[Collections.Generic.List[double]]::new()
+            for ($i=0;$i -lt 12;$i++) {
+              $samples.Add((Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1).CounterSamples[0].CookedValue)
+            }
+            $busy=@(Get-CimInstance Win32_Process | Where-Object { $_.Name -match '^(dotnet|MSBuild|testhost|VBCSCompiler)(\.exe)?$' -and $_.CommandLine -match '(?i)(\s(build|test|vstest)\s|MSBuild\.(exe|dll)|testhost|VBCSCompiler)' } | Select-Object ProcessId,Name,CommandLine)
+            $passed=$samples.Count -eq 12 -and @($samples | Where-Object { ![double]::IsFinite($_) -or $_ -lt 0 -or $_ -ge 15 }).Count -eq 0 -and $busy.Count -eq 0
+            [ordered]@{cpu_percent=$samples.ToArray();build_test_processes=$busy;passed=$passed;utc=[DateTime]::UtcNow.ToString('O')} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT ($name+'.json')) -Encoding utf8
+            return $passed
+          }
+          $prePassed=IdleGate 'idle-before'
+          if (!$prePassed) { throw 'Pre-capture idle gate failed; no capture' }
           $trace=Join-Path $env:PROFILE_OUTPUT 'cpu.etl'
           $collectionLog=Join-Path $env:PROFILE_OUTPUT 'cpu.log'
           $replay=Join-Path $env:PROFILE_OUTPUT 'replay'
           $arguments=@('/AcceptEula','/NoGui','/NoView','/KernelEvents:Process,Thread,ImageLoad,Profile',
-            '/BufferSizeMB:16','/CircularMB:32','/MaxCollectSec:40','/Zip:true',('/DataFile:'+$trace),('/LogFile:'+$collectionLog),
+            '/ClrEvents:Jit,Loader,JittedMethodILToNativeMap','/FocusProcess:dotnet.exe',
+            '/BufferSizeMB:16','/CircularMB:32','/MaxCollectSec:40','/Merge:false','/Zip:false',('/DataFile:'+$trace),('/LogFile:'+$collectionLog),
             'run',$dotnet,'exec','--runtimeconfig',$config,$driver,$inputs,$env:PROFILE_RUNTIME,$replay)
           $launch=[ordered]@{command=$tool;arguments=$arguments;diagnostic_driver_sha256=(Get-FileHash -LiteralPath $driver -Algorithm SHA256).Hash.ToLowerInvariant();diagnostic_driver_builds=1;production_builds=0;tests=0;timed_benchmark_cases=0;runtimeconfig_sha256=(Get-FileHash -LiteralPath $config -Algorithm SHA256).Hash.ToLowerInvariant();script_sha256=(Get-FileHash -LiteralPath $script -Algorithm SHA256).Hash.ToLowerInvariant();child_timeout_seconds=60;output_cap_bytes=104857600;runtime_payload_copy_bytes=0;diagnostic_only=$true;qualification=$false}
           $launch | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'capture-launch.json') -Encoding utf8
@@ -143,7 +158,7 @@ jobs:
           $startInfo.RedirectStandardOutput=$true; $startInfo.RedirectStandardError=$true
           foreach ($argument in $arguments) { $startInfo.ArgumentList.Add([string]$argument) }
           $process=[Diagnostics.Process]::new();$process.StartInfo=$startInfo
-          $clock=[Diagnostics.Stopwatch]::StartNew();$failure=$null;$started=$false
+          $clock=[Diagnostics.Stopwatch]::StartNew();$failure=$null;$started=$false;$capturePassed=$false;$postPassed=$false;$validationFailure=$null
           try {
             if (!$process.Start()) { throw 'Cannot start existing diagnostic tool' }
             $started=$true
@@ -161,23 +176,50 @@ jobs:
             [ordered]@{exit_code=$process.ExitCode;elapsed_seconds=$clock.Elapsed.TotalSeconds;limit_failure=$failure;output_bytes=$bytes;diagnostic_only=$true;qualification=$false} |
               ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'capture.json') -Encoding utf8
             if ($failure -or $process.ExitCode -ne 0) { throw 'Capture failed; preserve all existing output' }
-            if (!(Test-Path -LiteralPath ($trace+'.zip'))) { throw 'Kernel CPU archive missing' }
+            foreach ($rawName in @('cpu.etl','cpu.kernel.etl','cpu.clrRundown.etl')) {
+              $rawPath=Join-Path $env:PROFILE_OUTPUT $rawName
+              if (!(Test-Path -LiteralPath $rawPath -PathType Leaf) -or (Get-Item -LiteralPath $rawPath).Length -le 0) { throw 'Required raw ETL missing or empty' }
+            }
+            if (Test-Path -LiteralPath ($trace+'.zip')) { throw 'Unexpected runner ZIP; raw-only capture required' }
             $collectorText=Get-Content -LiteralPath $collectionLog -Raw
-            if ($collectorText -notmatch ' SUCCESS:' -or $collectorText -match '\[Error:') { throw 'Collector did not report clean success' }
+            if ($collectorText -notmatch ' SUCCESS:' -or $collectorText -match '\[Error:' -or $collectorText -match '\[Merging data files') { throw 'Collector did not report clean raw-only success' }
             if ((Get-FileHash -LiteralPath (Join-Path $symbols 'OoplesFinance.StockIndicators.pdb') -Algorithm SHA256).Hash.ToLowerInvariant() -ne $pdbHash) { throw 'Symbol bytes changed' }
             $receipt=Get-Content -LiteralPath (Join-Path $replay 'replay.json') -Raw | ConvertFrom-Json
-            if ($receipt.status -ne 'complete' -or !$receipt.protected_inputs_unchanged -or !$receipt.runtime_unchanged) { throw 'Replay incomplete or runtime changed' }
-            Get-ChildItem -LiteralPath $env:PROFILE_OUTPUT -Recurse -File | ForEach-Object {
-              [ordered]@{path=$_.FullName.Substring($env:PROFILE_OUTPUT.Length);bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}
-            } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'output-manifest.json') -Encoding utf8
+            if ($receipt.status -ne 'complete' -or $receipt.pair -ne 'TaLib.Functions.StdDev' -or $receipt.warmups -ne 1000 -or $receipt.profile_seconds -ne 10 -or $receipt.host_clr -ne '10.0.15' -or !$receipt.protected_inputs_unchanged -or !$receipt.runtime_unchanged) { throw 'Replay incomplete, mismatched or runtime changed' }
+            $capturePassed=$true
+          } catch {
+            $validationFailure=$_.Exception.ToString()
+            throw
           } finally {
             if ($started -and !$process.HasExited) { $process.Kill($true);$process.WaitForExit() }
             $process.Dispose()
+            if ($started) {
+              try { $postPassed=IdleGate 'idle-after' }
+              catch { $validationFailure=([string]$validationFailure)+' Post-gate error: '+$_.Exception.ToString() }
+            }
+            $finalBytes=(Get-ChildItem -LiteralPath $env:PROFILE_OUTPUT -Recurse -File | Measure-Object Length -Sum).Sum
+            if ($finalBytes -gt 104857600) { $capturePassed=$false;$validationFailure=([string]$validationFailure)+' 100MiB final output cap' }
+            $valid=$capturePassed -and $prePassed -and $postPassed -and $null -eq $validationFailure
+            $profileValidation=[ordered]@{profile_valid_for_diagnostic_only=$valid;pre_idle_passed=$prePassed;post_idle_passed=$postPassed;raw_capture_complete=$capturePassed;failure=$validationFailure;output_bytes=$finalBytes;qualification=$false;native_win_claim=$false;source_imported=$false;report_imported=$false}
+            $profileValidation | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'profile-validation.json') -Encoding utf8
+            Get-ChildItem -LiteralPath $env:PROFILE_OUTPUT -Recurse -File | ForEach-Object {
+              [ordered]@{path=$_.FullName.Substring($env:PROFILE_OUTPUT.Length);bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}
+            } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'output-manifest.json') -Encoding utf8
+            $sealedBytes=(Get-ChildItem -LiteralPath $env:PROFILE_OUTPUT -Recurse -File | Measure-Object Length -Sum).Sum
+            if ($sealedBytes -gt 104857600) {
+              $valid=$false;$profileValidation.profile_valid_for_diagnostic_only=$false;$profileValidation.output_bytes=$sealedBytes
+              $profileValidation.failure=([string]$profileValidation.failure)+' 100MiB output cap including final metadata'
+              $profileValidation | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'profile-validation.json') -Encoding utf8
+              Get-ChildItem -LiteralPath $env:PROFILE_OUTPUT -Recurse -File | Where-Object { $_.FullName -ne (Join-Path $env:PROFILE_OUTPUT 'output-manifest.json') } | ForEach-Object {
+                [ordered]@{path=$_.FullName.Substring($env:PROFILE_OUTPUT.Length);bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}
+              } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'output-manifest.json') -Encoding utf8
+            }
+            if (!$valid) { throw 'Capture invalid, incomplete or idle gate failed; preserve all evidence' }
           }
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: darkcloud-worker-profile
+          name: stddev-cpu-profile
           path: ${{ env.PROFILE_OUTPUT }}/
           retention-days: 14
           if-no-files-found: error
