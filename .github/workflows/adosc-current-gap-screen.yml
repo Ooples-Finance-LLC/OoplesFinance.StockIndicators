@@ -1,17 +1,27 @@
-name: Pinned AdOsc current-gap diagnostic
+name: Pinned Stoch fixed-grid whole-pipeline ROI diagnostic
 
 on:
   push:
     branches:
-      - perf/hosted-adosc-current-gap-screen-20261117
+      - perf/hosted-stoch-fixed-grid-roi-20261117
 
 permissions:
   contents: read
   actions: read
 
 concurrency:
-  group: pinned-adosc-current-gap-screen
+  group: pinned-stoch-fixed-grid-roi
   cancel-in-progress: false
+
+env:
+  EXPECTED_NEW_CORE_SHA: 7bbfb63d3794034d88047d11d40682938d8076ff58aa64d53a0ba2096089317b
+  EXPECTED_MANIFEST_SHA: c0be31608e8df96ad275e31604b6916e7d027e782eb1bcd8a48659d77a658c2d
+  EXPECTED_SOURCE_FINGERPRINT: 7075fdf54f314f89e9b08e423b444e9850456525cb0f636d5ebbe410c12f0d81
+  EXPECTED_GPU_RECEIPT_SHA: 71112bcbc23d5ca4190edbc6735f0bddb0f9d3f79f7f34dbbce92f0eec3b29b7
+  EXPECTED_GPU_TRX_GZ_SHA: 9358f2957b525771e9bdf6f650444422c4a787741debc696a9ba5ff97aa88fd5
+  EXPECTED_CANDIDATE_ARTIFACT_ID: '14352708612'
+  EXPECTED_CANDIDATE_ZIP_SHA: d6f67dcb83a94e3252ca0e41fe488915d417575592887578622c9a28e27895ee
+  GPU_RECEIPT_COMMIT: f1f875f6c7b54478fbd7a6d634231f6715d3fcf2
 
 jobs:
   screen:
@@ -22,8 +32,12 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
-          foreach ($name in @('SCREEN_ROOT','OLD_INPUT','NEW_INPUT')) {
-            $value=Join-Path $env:RUNNER_TEMP ('adosc-'+$name.ToLowerInvariant())
+          foreach ($pin in @($env:EXPECTED_NEW_CORE_SHA,$env:EXPECTED_MANIFEST_SHA,$env:EXPECTED_SOURCE_FINGERPRINT,$env:EXPECTED_GPU_RECEIPT_SHA,$env:EXPECTED_GPU_TRX_GZ_SHA,$env:EXPECTED_CANDIDATE_ZIP_SHA)) {
+            if ($pin -notmatch '^[0-9a-f]{64}$') { throw 'UNBOUND candidate/GPU pins; no diagnostic input/output I/O permitted' }
+          }
+          if ($env:GPU_RECEIPT_COMMIT -notmatch '^[0-9a-f]{40}$' -or $env:EXPECTED_CANDIDATE_ARTIFACT_ID -notmatch '^\d+$') { throw 'UNBOUND GPU-only commit or candidate artifact ID' }
+          foreach ($name in @('SCREEN_ROOT','OLD_INPUT','NEW_INPUT','GPU_INPUT')) {
+            $value=if ($name -eq 'GPU_INPUT') { Join-Path $env:GITHUB_WORKSPACE 'gpu-proof/benchmarks/results/shared-rollout/local-gpu-contracts' } else { Join-Path $env:RUNNER_TEMP ('stoch-grid-roi-'+$name.ToLowerInvariant()) }
             if (Test-Path -LiteralPath $value) { throw 'Fresh job paths required' }
             [Environment]::SetEnvironmentVariable($name,$value)
             "$name=$value" | Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8
@@ -46,10 +60,17 @@ jobs:
           github-token: ${{ github.token }}
       - uses: actions/download-artifact@v8
         with:
-          name: candidate-correctness-inputs
+          artifact-ids: ${{ env.EXPECTED_CANDIDATE_ARTIFACT_ID }}
+          merge-multiple: true
           path: ${{ env.NEW_INPUT }}
-          run-id: 44026807633
+          run-id: 44136637430
           github-token: ${{ github.token }}
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.GPU_RECEIPT_COMMIT }}
+          path: gpu-proof
+          sparse-checkout: benchmarks/results/shared-rollout/local-gpu-contracts
+          persist-credentials: false
       - name: Authenticate binaries and build only diagnostic helper
         shell: pwsh
         env:
@@ -57,22 +78,29 @@ jobs:
         run: |
           $ErrorActionPreference='Stop'
           if ((dotnet --version).Trim() -ne '10.0.403') { throw 'Wrong SDK' }
-          $artifact=Invoke-RestMethod -Uri 'https://api.github.com/repos/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/artifacts/14303502811' -Headers @{Authorization=('Bearer '+$env:GH_TOKEN);'X-GitHub-Api-Version'='2022-11-28'}
-          if ($artifact.id -ne 14303502811 -or $artifact.name -ne 'candidate-correctness-inputs' -or $artifact.expired -or $artifact.workflow_run.id -ne 44026807633 -or $artifact.workflow_run.head_sha -ne '2a1737f30e5e1164189d0209b39ea46bf38c1239') { throw 'Wrong candidate artifact metadata' }
+          $artifact=Invoke-RestMethod -Uri ('https://api.github.com/repos/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/artifacts/'+$env:EXPECTED_CANDIDATE_ARTIFACT_ID) -Headers @{Authorization=('Bearer '+$env:GH_TOKEN);'X-GitHub-Api-Version'='2022-11-28'}
+          if ($artifact.digest -ne ('sha256:'+$env:EXPECTED_CANDIDATE_ZIP_SHA) -or $artifact.id -ne [long]$env:EXPECTED_CANDIDATE_ARTIFACT_ID -or $artifact.name -ne 'candidate-correctness-inputs' -or $artifact.expired -or $artifact.workflow_run.id -ne 44136637430 -or $artifact.workflow_run.head_sha -ne '2a1737f30e5e1164189d0209b39ea46bf38c1239') { throw 'Wrong candidate artifact metadata' }
           $artifact | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $env:SCREEN_ROOT 'candidate-artifact.json') -Encoding utf8
           $inputs=Join-Path $env:OLD_INPUT 'predicate-inputs'
           $proof=Join-Path $inputs 'provenance.json'
           if ((Get-FileHash $proof).Hash.ToLowerInvariant() -ne '9013cb468cec2d505c0eb2fb6050517d2a1a5e28b441ade2cd55523be298bf78') { throw 'Wrong frozen input proof' }
           $newManifest=Join-Path $env:NEW_INPUT 'manifest.json'
-          if ((Get-FileHash $newManifest).Hash.ToLowerInvariant() -ne '5030f066c0249d2367a8c6b20658e773f9fd9f06e4960e60e8060327ed369545') { throw 'Wrong candidate manifest' }
+          if ((Get-FileHash $newManifest).Hash.ToLowerInvariant() -ne $env:EXPECTED_MANIFEST_SHA) { throw 'Wrong candidate manifest' }
           $manifest=Get-Content $proof -Raw | ConvertFrom-Json
           if (@($manifest.common_manifest.PSObject.Properties).Count -ne 94) { throw 'Expected 94 common assets' }
           $oldCore=Join-Path $inputs 'production/old.dll'
-          $newCore=Join-Path $env:NEW_INPUT 'blobs/d33a23fab2752be4c9b2dcf3e1a6d817f90d0ab6ed94a4bb220fe780ed0948cd'
-          if ((Get-FileHash $oldCore).Hash.ToLowerInvariant() -ne '4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173' -or (Get-FileHash $newCore).Hash.ToLowerInvariant() -ne 'd33a23fab2752be4c9b2dcf3e1a6d817f90d0ab6ed94a4bb220fe780ed0948cd') { throw 'Wrong production bytes' }
+          $newCore=Join-Path $env:NEW_INPUT ('blobs/'+$env:EXPECTED_NEW_CORE_SHA)
+          if ((Get-FileHash $oldCore).Hash.ToLowerInvariant() -ne '4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173' -or (Get-FileHash $newCore).Hash.ToLowerInvariant() -ne $env:EXPECTED_NEW_CORE_SHA) { throw 'Wrong production bytes' }
+          $gpuReceipt=Join-Path $env:GPU_INPUT 'receipt.json'
+          if ((Get-FileHash $gpuReceipt).Hash.ToLowerInvariant() -ne $env:EXPECTED_GPU_RECEIPT_SHA) { throw 'Wrong approved candidate GPU100 receipt' }
+          $gpuTrx=Join-Path $env:GPU_INPUT 'gpu.trx.gz'
+          if ((Get-FileHash $gpuTrx).Hash.ToLowerInvariant() -ne $env:EXPECTED_GPU_TRX_GZ_SHA) { throw 'Wrong approved GPU100 compressed TRX' }
+          Copy-Item -LiteralPath $gpuTrx -Destination (Join-Path $env:SCREEN_ROOT 'candidate-gpu100.trx.gz')
+          Copy-Item -LiteralPath $gpuReceipt -Destination (Join-Path $env:SCREEN_ROOT 'candidate-gpu100-receipt.json')
+          Copy-Item -LiteralPath $newManifest -Destination (Join-Path $env:SCREEN_ROOT 'candidate-manifest.json')
           $common=[IO.Path]::GetFullPath((Join-Path $inputs 'common'))
           foreach ($label in @('old','new')) {
-            $view=Join-Path $env:RUNNER_TEMP ('adosc-'+$label+'-runtime')
+            $view=Join-Path $env:RUNNER_TEMP ('stoch-grid-roi-'+$label+'-runtime')
             if (Test-Path -LiteralPath $view) { throw 'Fresh runtime view required' }
             foreach ($entry in $manifest.common_manifest.PSObject.Properties) {
               $source=[IO.Path]::GetFullPath((Join-Path $common $entry.Name))
@@ -86,7 +114,7 @@ jobs:
           }
           $config=Join-Path $common 'OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json'
           if ((Get-FileHash $config).Hash.ToLowerInvariant() -ne 'c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097') { throw 'Wrong runtime configuration' }
-          $helper=Join-Path $env:RUNNER_TEMP 'adosc-diagnostic-helper'
+          $helper=Join-Path $env:RUNNER_TEMP 'stoch-grid-roi-diagnostic-helper'
           [IO.Directory]::CreateDirectory($helper) | Out-Null
           @('<Project Sdk="Microsoft.NET.Sdk">','<PropertyGroup>','<OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>','<ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>','<UseSharedCompilation>false</UseSharedCompilation>','</PropertyGroup>','</Project>') | Set-Content (Join-Path $helper 'DiagnosticScreen.csproj') -Encoding utf8
           Copy-Item (Join-Path $env:GITHUB_WORKSPACE 'scripts/screen-adosc-pinned-runtime.cs') (Join-Path $helper 'Program.cs')
@@ -101,6 +129,7 @@ jobs:
           $ErrorActionPreference='Stop'
           $clock=$null
           function CheckBudget {
+            if ((Get-ChildItem -LiteralPath $env:SCREEN_ROOT -Recurse -File | Measure-Object Length -Sum).Sum -gt 104857600) { throw 'Aggregate100MiB evidence cap exceeded' }
             if ($null -ne $clock -and $clock.Elapsed.TotalSeconds -ge 120) { throw 'Combined 120 second workload/verification cap reached' }
           }
           function IdleGate($name) {
@@ -117,19 +146,22 @@ jobs:
           $valid=$false;$workloadComplete=$false;$failure=$null;$postPassed=$false;$cases=[Collections.Generic.List[object]]::new()
           $settingsReference=$null;$processorReference=$null;$envReference=$null
           try {
+            $initializationProbes=(Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 2).CounterSamples.CookedValue
+            [ordered]@{preparation_only=$true;cpu_percent=@($initializationProbes);mandatory_gate_samples=12;settle_seconds=5} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'cpu-probe-preparation.json') -Encoding utf8
+            Start-Sleep -Seconds 5
             if (!(IdleGate 'idle-before')) { throw 'Pre-workload idle gate failed; no workload' }
             $clock=[Diagnostics.Stopwatch]::StartNew()
             $inputs=Join-Path $env:OLD_INPUT 'predicate-inputs'
             $config=Join-Path $inputs 'common/OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json'
-            $driver=Join-Path $env:RUNNER_TEMP 'adosc-diagnostic-helper/out/DiagnosticScreen.dll'
+            $driver=Join-Path $env:RUNNER_TEMP 'stoch-grid-roi-diagnostic-helper/out/DiagnosticScreen.dll'
             $index=0
-            foreach ($pair in @('TaLib.Functions.AdOsc','Skender.GetChaikinOsc')) {
+            foreach ($pair in @('TaLib.Functions.Stoch','TaLib.Functions.StochF')) {
               foreach ($arm in @('old','new','new','old','native')) {
                 CheckBudget
                 $label=if ($arm -eq 'new') { 'new' } else { 'old' }
-                $view=Join-Path $env:RUNNER_TEMP ('adosc-'+$label+'-runtime')
+                $view=Join-Path $env:RUNNER_TEMP ('stoch-grid-roi-'+$label+'-runtime')
                 $out=Join-Path $env:SCREEN_ROOT ('case-'+$index)
-                $argsList=@('exec','--runtimeconfig',$config,$driver,$inputs,$view,$env:NEW_INPUT,$arm,$pair,$out)
+                $argsList=@('exec','--runtimeconfig',$config,$driver,$inputs,$view,$env:NEW_INPUT,(Join-Path $env:GPU_INPUT 'receipt.json'),$arm,$pair,$out)
                 $start=[Diagnostics.ProcessStartInfo]::new((Get-Command dotnet).Source)
                 $start.UseShellExecute=$false;$start.CreateNoWindow=$true;$start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
                 foreach ($argument in $argsList) { $start.ArgumentList.Add([string]$argument) }
@@ -138,11 +170,16 @@ jobs:
                   if (!$process.Start()) { throw 'Cannot launch isolated case' };$started=$true
                   $stdout=$process.StandardOutput.ReadToEndAsync();$stderr=$process.StandardError.ReadToEndAsync()
                   $remaining=[Math]::Min(60000,[Math]::Max(1,[int]((120-$clock.Elapsed.TotalSeconds)*1000)))
-                  $timedOut=!$process.WaitForExit($remaining)
+                  $childClock=[Diagnostics.Stopwatch]::StartNew();$limitFailure=$null
+                  while (!$process.WaitForExit(250)) {
+                    if ($childClock.ElapsedMilliseconds -ge $remaining) { $limitFailure='Individual or combined time cap';break }
+                    if ((Get-ChildItem -LiteralPath $env:SCREEN_ROOT -Recurse -File | Measure-Object Length -Sum).Sum -gt 104857600) { $limitFailure='Aggregate100MiB evidence cap';break }
+                  }
+                  $timedOut=$null -ne $limitFailure
                   if ($timedOut) { $process.Kill($true);$process.WaitForExit() }
                   $stdout.GetAwaiter().GetResult() | Set-Content (Join-Path $env:SCREEN_ROOT ('case-'+$index+'-stdout.log')) -Encoding utf8
                   $stderr.GetAwaiter().GetResult() | Set-Content (Join-Path $env:SCREEN_ROOT ('case-'+$index+'-stderr.log')) -Encoding utf8
-                  [ordered]@{exit_code=$process.ExitCode;timed_out=$timedOut;arm=$arm;pair=$pair;arguments=$argsList} | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $env:SCREEN_ROOT ('case-'+$index+'-exit.json')) -Encoding utf8
+                  [ordered]@{exit_code=$process.ExitCode;timed_out=$timedOut;limit_failure=$limitFailure;arm=$arm;pair=$pair;arguments=$argsList} | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $env:SCREEN_ROOT ('case-'+$index+'-exit.json')) -Encoding utf8
                   if ($timedOut) { throw 'Individual or combined child cap reached; partial logs preserved' }
                   if ($process.ExitCode -ne 0) { throw 'Case failed; no reduced samples or retry' }
                 } finally { if ($started -and !$process.HasExited) { $process.Kill($true);$process.WaitForExit() };$process.Dispose() }
@@ -150,14 +187,14 @@ jobs:
                 $case=Get-Content (Join-Path $out 'case.json') -Raw | ConvertFrom-Json
                 if ($case.status -ne 'complete' -or $case.actual_clr -ne '10.0.15' -or $case.arm -ne $arm -or $case.pair -ne $pair -or @($case.samples_ms).Count -ne 10 -or $case.warmups -ne 1000 -or !$case.runtime_unchanged -or !$case.protected_inputs_unchanged) { throw 'Incomplete or mismatched case' }
                 $settings=$case.settings_before | ConvertTo-Json -Compress
-                if ($case.settings_before.dop -lt 1 -or $case.settings_before.effective_workers -lt 1 -or $case.processor_count -lt 1 -or $settings -cne ($case.settings_after_setup | ConvertTo-Json -Compress) -or $settings -cne ($case.settings_after | ConvertTo-Json -Compress)) { throw 'Worker settings changed or unavailable within case' }
+                if ($case.settings_before.dop -ne 2 -or $case.settings_before.effective_workers -ne 2 -or $case.processor_count -ne 4 -or $settings -cne ($case.settings_after_setup | ConvertTo-Json -Compress) -or $settings -cne ($case.settings_after | ConvertTo-Json -Compress)) { throw 'Worker settings changed or unavailable within case' }
                 if ($cases.Count -eq 0) { $settingsReference=$settings;$processorReference=$case.processor_count;$envReference=$case.env_aidotnet_cpu_threads }
                 elseif ($settings -cne $settingsReference -or $case.processor_count -ne $processorReference -or $case.env_aidotnet_cpu_threads -cne $envReference) { throw 'Worker, CPU or environment settings differ between isolated cases' }
                 $cases.Add($case);$index++
               }
             }
             $compared=0
-            foreach ($pair in @('TaLib.Functions.AdOsc','Skender.GetChaikinOsc')) {
+            foreach ($pair in @('TaLib.Functions.Stoch','TaLib.Functions.StochF')) {
               $group=@($cases | Where-Object pair -eq $pair)
               $reference=$group[0].source_outputs[0]
               foreach ($case in @($group | Where-Object arm -ne 'native')) {
@@ -187,11 +224,12 @@ jobs:
             $valid=$workloadComplete -and $postPassed -and $null -eq $failure
             [ordered]@{timings_valid_for_diagnostic_only=$valid;failure=$failure;post_idle_passed=$postPassed;completed_cases=$cases.Count;elapsed_workload_and_verification_seconds=$(if ($null -ne $clock) { $clock.Elapsed.TotalSeconds } else { 0 });qualification=$false;native_win_claim=$false;source_imported=$false;report_imported=$false} | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $env:SCREEN_ROOT 'controller.json') -Encoding utf8
           }
+          try { CheckBudget } catch { $valid=$false;[ordered]@{timings_valid_for_diagnostic_only=$false;failure=$_.Exception.ToString();qualification=$false;native_win_claim=$false} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'controller.json') -Encoding utf8 }
           if (!$valid) { throw 'Diagnostic invalid or incomplete; preserve all evidence' }
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: adosc-current-gap-screen
+          name: stoch-fixed-grid-roi
           path: ${{ env.SCREEN_ROOT }}/
           retention-days: 14
           if-no-files-found: error
