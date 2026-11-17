@@ -1,16 +1,16 @@
-name: Pinned Stoch fixed-grid whole-pipeline ROI diagnostic
+name: Pinned Stoch fixed-grid candidate kernel CPU profile
 
 on:
   push:
     branches:
-      - perf/hosted-stoch-fixed-grid-roi-20261117
+      - perf/hosted-stoch-grid-cpu-profile-20261117
 
 permissions:
   contents: read
   actions: read
 
 concurrency:
-  group: pinned-stoch-fixed-grid-roi
+  group: pinned-stoch-grid-cpu-profile
   cancel-in-progress: false
 
 env:
@@ -43,7 +43,7 @@ jobs:
             "$name=$value" | Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8
           }
           [IO.Directory]::CreateDirectory($env:SCREEN_ROOT) | Out-Null
-          [ordered]@{workflow_head=$env:GITHUB_SHA;run_id=$env:GITHUB_RUN_ID;diagnostic_only=$true;qualification=$false;native_win_claim=$false;production_builds=0;tests=0;timed_benchmark_cases=0;diagnostic_cases=10;helper_compiler_sdk='10.0.403';driver_builds=1;combined_workload_cap_seconds=120;individual_process_cap_seconds=60;runner_image=$env:ImageVersion} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'provenance.json') -Encoding utf8
+          [ordered]@{workflow_head=$env:GITHUB_SHA;run_id=$env:GITHUB_RUN_ID;diagnostic_only=$true;qualification=$false;native_win_claim=$false;production_builds=0;tests=0;timed_benchmark_cases=0;profile_seconds=10;helper_compiler_sdk='10.0.403';driver_builds=1;individual_process_cap_seconds=60;runner_image=$env:ImageVersion} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'provenance.json') -Encoding utf8
       - uses: actions/checkout@v7
         with:
           sparse-checkout: |
@@ -117,7 +117,7 @@ jobs:
           Copy-Item -LiteralPath $gpuReceipt -Destination (Join-Path $env:SCREEN_ROOT 'candidate-gpu100-receipt.json')
           Copy-Item -LiteralPath $newManifest -Destination (Join-Path $env:SCREEN_ROOT 'candidate-manifest.json')
           $common=[IO.Path]::GetFullPath((Join-Path $inputs 'common'))
-          foreach ($label in @('old','new')) {
+          foreach ($label in @('new')) {
             $view=Join-Path $env:RUNNER_TEMP ('stoch-grid-roi-'+$label+'-runtime')
             if (Test-Path -LiteralPath $view) { throw 'Fresh runtime view required' }
             foreach ($entry in $manifest.common_manifest.PSObject.Properties) {
@@ -139,115 +139,131 @@ jobs:
           dotnet build (Join-Path $helper 'DiagnosticScreen.csproj') -c Release -o (Join-Path $helper 'out') --disable-build-servers --nologo *> (Join-Path $env:SCREEN_ROOT 'helper-build.log')
           if ($LASTEXITCODE -ne 0) { throw 'Diagnostic helper build failed; no workload' }
           $driver=Join-Path $helper 'out/DiagnosticScreen.dll'
-          [ordered]@{helper_sha256=(Get-FileHash $driver).Hash.ToLowerInvariant();helper_source_sha256=(Get-FileHash (Join-Path $helper 'Program.cs')).Hash.ToLowerInvariant();sdk='10.0.403';production_builds=0;diagnostic_driver_builds=1;hardlinks=188;payload_copies=0;runtimeconfig_sha256=(Get-FileHash $config).Hash.ToLowerInvariant();qualification=$false} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'launch.json') -Encoding utf8
+          [ordered]@{helper_sha256=(Get-FileHash $driver).Hash.ToLowerInvariant();helper_source_sha256=(Get-FileHash (Join-Path $helper 'Program.cs')).Hash.ToLowerInvariant();sdk='10.0.403';production_builds=0;diagnostic_driver_builds=1;hardlinks=94;payload_copies=0;runtimeconfig_sha256=(Get-FileHash $config).Hash.ToLowerInvariant();qualification=$false} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'launch.json') -Encoding utf8
           dotnet --info | Set-Content (Join-Path $env:SCREEN_ROOT 'dotnet-info.txt') -Encoding utf8
-      - name: Run one bounded screen with mandatory idle gates
+      - name: Capture one authenticated candidate CPU profile
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
-          $clock=$null
-          function CheckBudget {
-            if ((Get-ChildItem -LiteralPath $env:SCREEN_ROOT -Recurse -File | Measure-Object Length -Sum).Sum -gt 104857600) { throw 'Aggregate100MiB evidence cap exceeded' }
-            if ($null -ne $clock -and $clock.Elapsed.TotalSeconds -ge 120) { throw 'Combined 120 second workload/verification cap reached' }
-          }
+          $inputs=Join-Path $env:OLD_INPUT 'predicate-inputs'
+          $runtime=Join-Path $env:RUNNER_TEMP 'stoch-grid-roi-new-runtime'
+          $config=Join-Path $inputs 'common/OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json'
+          $driver=Join-Path $env:RUNNER_TEMP 'stoch-grid-roi-diagnostic-helper/out/DiagnosticScreen.dll'
+          $script=Join-Path $env:GITHUB_WORKSPACE 'scripts/screen-adosc-pinned-runtime.cs'
+          $dotnet=(Get-Command dotnet).Source
+          $identity=[Security.Principal.WindowsIdentity]::GetCurrent()
+          $principal=[Security.Principal.WindowsPrincipal]::new($identity)
+          if (!$principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Kernel capture requires administrator' }
+          $tool=Join-Path $env:RUNNER_TEMP 'stoch-grid-PerfView-4.0.0.exe'
+          Invoke-WebRequest -Uri 'https://github.com/microsoft/perfview/releases/download/v4.0.0/PerfView.exe' -OutFile $tool
+          if ((Get-FileHash -LiteralPath $tool -Algorithm SHA256).Hash.ToLowerInvariant() -ne '270e2ba419b0b2d93c4b15b0851f257edf655c92fe0ad95add3d0b5f6d6aad48') { throw 'Wrong PerfView bytes' }
+          $pdbHash='a0a72191f46e8c56f6cb18938a0c9da144651da3a735df723126b65ccf144fb6'
+          $candidateManifest=Join-Path $env:NEW_INPUT 'manifest.json'
+          $candidateProof=Get-Content -LiteralPath $candidateManifest -Raw | ConvertFrom-Json
+          if ($candidateProof.runtime_files.'src/bin/Release/net10.0/OoplesFinance.StockIndicators.pdb' -ne $pdbHash) { throw 'PDB manifest binding mismatch' }
+          $pdbSource=Join-Path $env:NEW_INPUT ('blobs/'+$pdbHash)
+          if ((Get-FileHash -LiteralPath $pdbSource -Algorithm SHA256).Hash.ToLowerInvariant() -ne $pdbHash) { throw 'Wrong candidate PDB bytes' }
+          $symbols=Join-Path $env:SCREEN_ROOT 'symbols'
+          [IO.Directory]::CreateDirectory($symbols) | Out-Null
+          Copy-Item -LiteralPath $pdbSource -Destination (Join-Path $symbols 'OoplesFinance.StockIndicators.pdb')
+          $env:_NT_SYMBOL_PATH=$symbols
+          [ordered]@{pdb_sha256=$pdbHash;production_sha256=$env:EXPECTED_NEW_CORE_SHA;source='0129b49e750feaee5bbc0ff4391ec90692a9f596';manifest_sha256=$env:EXPECTED_MANIFEST_SHA;protected_runtime_pdb_replaced=$false;separate_symbol_root=$symbols} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:SCREEN_ROOT 'symbols.json') -Encoding utf8
           function IdleGate($name) {
             $samples=[Collections.Generic.List[double]]::new()
             for ($i=0;$i -lt 12;$i++) {
-              if ($null -ne $clock -and $clock.Elapsed.TotalSeconds -ge 120) { break }
               $samples.Add((Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1).CounterSamples[0].CookedValue)
             }
             $busy=@(Get-CimInstance Win32_Process | Where-Object { $_.Name -match '^(dotnet|MSBuild|testhost|VBCSCompiler)(\.exe)?$' -and $_.CommandLine -match '(?i)(\s(build|test|vstest)\s|MSBuild\.(exe|dll)|testhost|VBCSCompiler)' } | Select-Object ProcessId,Name,CommandLine)
-            $passed=$samples.Count -eq 12 -and @($samples | Where-Object { ![double]::IsFinite($_) -or $_ -lt 0 -or $_ -gt 100 -or $_ -ge 15 }).Count -eq 0 -and $busy.Count -eq 0
-            [ordered]@{cpu_percent=$samples.ToArray();build_test_processes=$busy;passed=$passed;utc=[DateTime]::UtcNow.ToString('O')} | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $env:SCREEN_ROOT ($name+'.json')) -Encoding utf8
+            $passed=$samples.Count -eq 12 -and @($samples | Where-Object { ![double]::IsFinite($_) -or $_ -lt 0 -or $_ -ge 15 }).Count -eq 0 -and $busy.Count -eq 0
+            [ordered]@{cpu_percent=$samples.ToArray();build_test_processes=$busy;passed=$passed;utc=[DateTime]::UtcNow.ToString('O')} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:SCREEN_ROOT ($name+'.json')) -Encoding utf8
             return $passed
           }
-          $valid=$false;$workloadComplete=$false;$failure=$null;$postPassed=$false;$cases=[Collections.Generic.List[object]]::new()
-          $settingsReference=$null;$processorReference=$null;$envReference=$null
+          # Fixed preparation only: these probes never replace mandatory gate samples.
+          $initializationProbes=(Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 2).CounterSamples.CookedValue
+          [ordered]@{cpu_percent=@($initializationProbes);preparation_only=$true;mandatory_gate_samples=12;settle_seconds=5;utc=[DateTime]::UtcNow.ToString('O')} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:SCREEN_ROOT 'cpu-probe-preparation.json') -Encoding utf8
+          Start-Sleep -Seconds 5
+          $prePassed=IdleGate 'idle-before'
+          if (!$prePassed) { throw 'Pre-capture idle gate failed; no capture' }
+          $trace=Join-Path $env:SCREEN_ROOT 'cpu.etl'
+          $collectionLog=Join-Path $env:SCREEN_ROOT 'cpu.log'
+          $replay=Join-Path $env:SCREEN_ROOT 'replay'
+          $arguments=@('/AcceptEula','/NoGui','/NoView','/KernelEvents:Process,Thread,ImageLoad,Profile',
+            '/ClrEvents:Jit,Loader,JittedMethodILToNativeMap','/FocusProcess:dotnet.exe',
+            '/BufferSizeMB:16','/CircularMB:32','/MaxCollectSec:40','/Merge:false','/Zip:false',('/DataFile:'+$trace),('/LogFile:'+$collectionLog),
+            'run',$dotnet,'exec','--runtimeconfig',$config,$driver,$inputs,$runtime,$env:NEW_INPUT,(Join-Path $env:GPU_INPUT 'receipt.json'),'new','TaLib.Functions.Stoch',$replay)
+          $launch=[ordered]@{command=$tool;arguments=$arguments;diagnostic_driver_sha256=(Get-FileHash -LiteralPath $driver -Algorithm SHA256).Hash.ToLowerInvariant();diagnostic_driver_builds=1;production_builds=0;tests=0;timed_benchmark_cases=0;runtimeconfig_sha256=(Get-FileHash -LiteralPath $config -Algorithm SHA256).Hash.ToLowerInvariant();script_sha256=(Get-FileHash -LiteralPath $script -Algorithm SHA256).Hash.ToLowerInvariant();child_timeout_seconds=60;output_cap_bytes=104857600;runtime_payload_copy_bytes=0;diagnostic_only=$true;qualification=$false}
+          $launch | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:SCREEN_ROOT 'capture-launch.json') -Encoding utf8
+          $startInfo=[Diagnostics.ProcessStartInfo]::new()
+          $startInfo.FileName=$tool; $startInfo.UseShellExecute=$false; $startInfo.CreateNoWindow=$true
+          $startInfo.RedirectStandardOutput=$true; $startInfo.RedirectStandardError=$true
+          foreach ($argument in $arguments) { $startInfo.ArgumentList.Add([string]$argument) }
+          $process=[Diagnostics.Process]::new();$process.StartInfo=$startInfo
+          $clock=[Diagnostics.Stopwatch]::StartNew();$failure=$null;$started=$false;$capturePassed=$false;$postPassed=$false;$validationFailure=$null
           try {
-            $initializationProbes=(Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 2).CounterSamples.CookedValue
-            [ordered]@{preparation_only=$true;cpu_percent=@($initializationProbes);mandatory_gate_samples=12;settle_seconds=5} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'cpu-probe-preparation.json') -Encoding utf8
-            Start-Sleep -Seconds 5
-            if (!(IdleGate 'idle-before')) { throw 'Pre-workload idle gate failed; no workload' }
-            $clock=[Diagnostics.Stopwatch]::StartNew()
-            $inputs=Join-Path $env:OLD_INPUT 'predicate-inputs'
-            $config=Join-Path $inputs 'common/OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json'
-            $driver=Join-Path $env:RUNNER_TEMP 'stoch-grid-roi-diagnostic-helper/out/DiagnosticScreen.dll'
-            $index=0
-            foreach ($pair in @('TaLib.Functions.Stoch','TaLib.Functions.StochF')) {
-              foreach ($arm in @('old','new','new','old','native')) {
-                CheckBudget
-                $label=if ($arm -eq 'new') { 'new' } else { 'old' }
-                $view=Join-Path $env:RUNNER_TEMP ('stoch-grid-roi-'+$label+'-runtime')
-                $out=Join-Path $env:SCREEN_ROOT ('case-'+$index)
-                $argsList=@('exec','--runtimeconfig',$config,$driver,$inputs,$view,$env:NEW_INPUT,(Join-Path $env:GPU_INPUT 'receipt.json'),$arm,$pair,$out)
-                $start=[Diagnostics.ProcessStartInfo]::new((Get-Command dotnet).Source)
-                $start.UseShellExecute=$false;$start.CreateNoWindow=$true;$start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
-                foreach ($argument in $argsList) { $start.ArgumentList.Add([string]$argument) }
-                $process=[Diagnostics.Process]::new();$process.StartInfo=$start;$started=$false
-                try {
-                  if (!$process.Start()) { throw 'Cannot launch isolated case' };$started=$true
-                  $stdout=$process.StandardOutput.ReadToEndAsync();$stderr=$process.StandardError.ReadToEndAsync()
-                  $remaining=[Math]::Min(60000,[Math]::Max(1,[int]((120-$clock.Elapsed.TotalSeconds)*1000)))
-                  $childClock=[Diagnostics.Stopwatch]::StartNew();$limitFailure=$null
-                  while (!$process.WaitForExit(250)) {
-                    if ($childClock.ElapsedMilliseconds -ge $remaining) { $limitFailure='Individual or combined time cap';break }
-                    if ((Get-ChildItem -LiteralPath $env:SCREEN_ROOT -Recurse -File | Measure-Object Length -Sum).Sum -gt 104857600) { $limitFailure='Aggregate100MiB evidence cap';break }
-                  }
-                  $timedOut=$null -ne $limitFailure
-                  if ($timedOut) { $process.Kill($true);$process.WaitForExit() }
-                  $stdout.GetAwaiter().GetResult() | Set-Content (Join-Path $env:SCREEN_ROOT ('case-'+$index+'-stdout.log')) -Encoding utf8
-                  $stderr.GetAwaiter().GetResult() | Set-Content (Join-Path $env:SCREEN_ROOT ('case-'+$index+'-stderr.log')) -Encoding utf8
-                  [ordered]@{exit_code=$process.ExitCode;timed_out=$timedOut;limit_failure=$limitFailure;arm=$arm;pair=$pair;arguments=$argsList} | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $env:SCREEN_ROOT ('case-'+$index+'-exit.json')) -Encoding utf8
-                  if ($timedOut) { throw 'Individual or combined child cap reached; partial logs preserved' }
-                  if ($process.ExitCode -ne 0) { throw 'Case failed; no reduced samples or retry' }
-                } finally { if ($started -and !$process.HasExited) { $process.Kill($true);$process.WaitForExit() };$process.Dispose() }
-                CheckBudget
-                $case=Get-Content (Join-Path $out 'case.json') -Raw | ConvertFrom-Json
-                if ($case.status -ne 'complete' -or $case.actual_clr -ne '10.0.15' -or $case.arm -ne $arm -or $case.pair -ne $pair -or @($case.samples_ms).Count -ne 10 -or $case.warmups -ne 1000 -or !$case.runtime_unchanged -or !$case.protected_inputs_unchanged) { throw 'Incomplete or mismatched case' }
-                $settings=$case.settings_before | ConvertTo-Json -Compress
-                if ($case.settings_before.dop -ne 2 -or $case.settings_before.effective_workers -ne 2 -or $case.processor_count -ne 4 -or $settings -cne ($case.settings_after_setup | ConvertTo-Json -Compress) -or $settings -cne ($case.settings_after | ConvertTo-Json -Compress)) { throw 'Worker settings changed or unavailable within case' }
-                if ($cases.Count -eq 0) { $settingsReference=$settings;$processorReference=$case.processor_count;$envReference=$case.env_aidotnet_cpu_threads }
-                elseif ($settings -cne $settingsReference -or $case.processor_count -ne $processorReference -or $case.env_aidotnet_cpu_threads -cne $envReference) { throw 'Worker, CPU or environment settings differ between isolated cases' }
-                $cases.Add($case);$index++
-              }
+            if (!$process.Start()) { throw 'Cannot start existing diagnostic tool' }
+            $started=$true
+            $stdout=$process.StandardOutput.ReadToEndAsync();$stderr=$process.StandardError.ReadToEndAsync()
+            while (!$process.WaitForExit(250)) {
+              $bytes=(Get-ChildItem -LiteralPath $env:SCREEN_ROOT -Recurse -File | Measure-Object Length -Sum).Sum
+              if ($clock.Elapsed.TotalSeconds -gt 60) { $failure='60 second child watchdog'; break }
+              if ($bytes -gt 104857600) { $failure='100MiB output cap'; break }
             }
-            $compared=0
-            foreach ($pair in @('TaLib.Functions.Stoch','TaLib.Functions.StochF')) {
-              $group=@($cases | Where-Object pair -eq $pair)
-              $reference=$group[0].source_outputs[0]
-              foreach ($case in @($group | Where-Object arm -ne 'native')) {
-                if (@($case.source_outputs).Count -ne 10) { throw 'Missing retained source outputs' }
-                foreach ($result in $case.source_outputs) {
-                  CheckBudget
-                  if (@($result.PSObject.Properties).Count -ne @($reference.PSObject.Properties).Count) { throw 'Output column count differs' }
-                  foreach ($column in $reference.PSObject.Properties) {
-                    $actual=$result.PSObject.Properties[$column.Name].Value
-                    if ($null -eq $actual -or $actual.FirstValid -ne $column.Value.FirstValid -or $actual.Values -cne $column.Value.Values -or $actual.Present -cne $column.Value.Present) { throw 'Source output bits or validity differ' }
-                  }
-                  $compared++
-                }
-              }
+            if ($failure) { $process.Kill($true);$process.WaitForExit() }
+            $stdout.GetAwaiter().GetResult() | Set-Content -LiteralPath (Join-Path $env:SCREEN_ROOT 'capture.log') -Encoding utf8
+            $stderr.GetAwaiter().GetResult() | Set-Content -LiteralPath (Join-Path $env:SCREEN_ROOT 'capture-error.log') -Encoding utf8
+            $bytes=(Get-ChildItem -LiteralPath $env:SCREEN_ROOT -Recurse -File | Measure-Object Length -Sum).Sum
+            if ($bytes -gt 104857600) { $failure='100MiB output cap after exit' }
+            [ordered]@{exit_code=$process.ExitCode;elapsed_seconds=$clock.Elapsed.TotalSeconds;limit_failure=$failure;output_bytes=$bytes;diagnostic_only=$true;qualification=$false} |
+              ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:SCREEN_ROOT 'capture.json') -Encoding utf8
+            if ($failure -or $process.ExitCode -ne 0) { throw 'Capture failed; preserve all existing output' }
+            foreach ($rawName in @('cpu.etl','cpu.kernel.etl','cpu.clrRundown.etl')) {
+              $rawPath=Join-Path $env:SCREEN_ROOT $rawName
+              if (!(Test-Path -LiteralPath $rawPath -PathType Leaf) -or (Get-Item -LiteralPath $rawPath).Length -le 0) { throw 'Required raw ETL missing or empty' }
             }
-            if ($cases.Count -ne 10 -or $compared -ne 80) { throw 'Incomplete diagnostic scope' }
-            [ordered]@{cases=10;measured_source_outputs_compared=80;bitwise_equal=$true;outside_timing=$true;qualification=$false} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'output-comparison.json') -Encoding utf8
-            CheckBudget;$workloadComplete=$true
-          } catch { $failure=$_.Exception.ToString() }
-          finally {
-            if ($null -ne $clock) {
-              try {
-                $postPassed=IdleGate 'idle-after';CheckBudget
-                if (!$postPassed) { throw 'Post-workload idle gate failed; all timings invalid' }
-              } catch { $postPassed=$false;$failure=([string]$failure)+' Post-gate failure: '+$_.Exception.ToString() }
+            if (Test-Path -LiteralPath ($trace+'.zip')) { throw 'Unexpected runner ZIP; raw-only capture required' }
+            $collectorText=Get-Content -LiteralPath $collectionLog -Raw
+            if ($collectorText -notmatch ' SUCCESS:' -or $collectorText -match '\[Error:' -or $collectorText -match '\[Merging data files') { throw 'Collector did not report clean raw-only success' }
+            if ((Get-FileHash -LiteralPath (Join-Path $symbols 'OoplesFinance.StockIndicators.pdb') -Algorithm SHA256).Hash.ToLowerInvariant() -ne $pdbHash) { throw 'Symbol bytes changed' }
+            $receipt=Get-Content -LiteralPath (Join-Path $replay 'replay.json') -Raw | ConvertFrom-Json
+            if ($receipt.status -ne 'complete' -or $receipt.pair -ne 'TaLib.Functions.Stoch' -or $receipt.warmups -ne 1000 -or $receipt.profile_seconds -ne 10 -or $receipt.actual_clr -ne '10.0.15' -or $receipt.arm -ne 'new' -or $receipt.new_production_sha256 -ne $env:EXPECTED_NEW_CORE_SHA -or !$receipt.protected_inputs_unchanged -or !$receipt.runtime_unchanged) { throw 'Replay incomplete, mismatched or runtime changed' }
+            $settings=$receipt.settings_before | ConvertTo-Json -Compress
+            if ($receipt.processor_count -ne 4 -or $receipt.settings_before.dop -ne 2 -or $receipt.settings_before.effective_workers -ne 2 -or $settings -cne ($receipt.settings_after_setup | ConvertTo-Json -Compress) -or $settings -cne ($receipt.settings_after | ConvertTo-Json -Compress)) { throw 'Candidate worker settings changed' }
+            if ($receipt.factory_parameters.window -ne 5 -or $receipt.factory_parameters.k -ne 3 -or $receipt.factory_parameters.d -ne 3 -or $receipt.factory_parameters.fast -or $receipt.factory_parameters.km -ne 'Sma' -or $receipt.factory_parameters.dm -ne 'Sma' -or $receipt.factory_parameters.first -or $receipt.factory_parameters.suppression -ne 0) { throw 'Candidate Stoch parameters changed' }
+            if ($receipt.candidate_symbol_identity.guid -ne '9615e644223546ecbb276030fe50f7bf' -or $receipt.candidate_symbol_identity.stamp -ne 'bf3c3403' -or $receipt.candidate_symbol_identity.age -ne 1 -or $receipt.candidate_symbol_identity.pdb_sha256 -ne $pdbHash -or $receipt.candidate_symbol_identity.protected_runtime_pdb_replaced) { throw 'Candidate PE/PDB identity missing or mismatched' }
+            $capturePassed=$true
+          } catch {
+            $validationFailure=$_.Exception.ToString()
+            throw
+          } finally {
+            if ($started -and !$process.HasExited) { $process.Kill($true);$process.WaitForExit() }
+            $process.Dispose()
+            if ($started) {
+              try { $postPassed=IdleGate 'idle-after' }
+              catch { $validationFailure=([string]$validationFailure)+' Post-gate error: '+$_.Exception.ToString() }
             }
-            $valid=$workloadComplete -and $postPassed -and $null -eq $failure
-            [ordered]@{timings_valid_for_diagnostic_only=$valid;failure=$failure;post_idle_passed=$postPassed;completed_cases=$cases.Count;elapsed_workload_and_verification_seconds=$(if ($null -ne $clock) { $clock.Elapsed.TotalSeconds } else { 0 });qualification=$false;native_win_claim=$false;source_imported=$false;report_imported=$false} | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $env:SCREEN_ROOT 'controller.json') -Encoding utf8
+            $finalBytes=(Get-ChildItem -LiteralPath $env:SCREEN_ROOT -Recurse -File | Measure-Object Length -Sum).Sum
+            if ($finalBytes -gt 104857600) { $capturePassed=$false;$validationFailure=([string]$validationFailure)+' 100MiB final output cap' }
+            $valid=$capturePassed -and $prePassed -and $postPassed -and $null -eq $validationFailure
+            $profileValidation=[ordered]@{profile_valid_for_diagnostic_only=$valid;pre_idle_passed=$prePassed;post_idle_passed=$postPassed;raw_capture_complete=$capturePassed;failure=$validationFailure;output_bytes=$finalBytes;qualification=$false;native_win_claim=$false;source_imported=$false;report_imported=$false}
+            $profileValidation | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:SCREEN_ROOT 'profile-validation.json') -Encoding utf8
+            Get-ChildItem -LiteralPath $env:SCREEN_ROOT -Recurse -File | ForEach-Object {
+              [ordered]@{path=$_.FullName.Substring($env:SCREEN_ROOT.Length);bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}
+            } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $env:SCREEN_ROOT 'output-manifest.json') -Encoding utf8
+            $sealedBytes=(Get-ChildItem -LiteralPath $env:SCREEN_ROOT -Recurse -File | Measure-Object Length -Sum).Sum
+            if ($sealedBytes -gt 104857600) {
+              $valid=$false;$profileValidation.profile_valid_for_diagnostic_only=$false;$profileValidation.output_bytes=$sealedBytes
+              $profileValidation.failure=([string]$profileValidation.failure)+' 100MiB output cap including final metadata'
+              $profileValidation | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:SCREEN_ROOT 'profile-validation.json') -Encoding utf8
+              Get-ChildItem -LiteralPath $env:SCREEN_ROOT -Recurse -File | Where-Object { $_.FullName -ne (Join-Path $env:SCREEN_ROOT 'output-manifest.json') } | ForEach-Object {
+                [ordered]@{path=$_.FullName.Substring($env:SCREEN_ROOT.Length);bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}
+              } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $env:SCREEN_ROOT 'output-manifest.json') -Encoding utf8
+            }
+            if (!$valid) { throw 'Capture invalid, incomplete or idle gate failed; preserve all evidence' }
           }
-          try { CheckBudget } catch { $valid=$false;[ordered]@{timings_valid_for_diagnostic_only=$false;failure=$_.Exception.ToString();qualification=$false;native_win_claim=$false} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'controller.json') -Encoding utf8 }
-          if (!$valid) { throw 'Diagnostic invalid or incomplete; preserve all evidence' }
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: stoch-fixed-grid-roi
+          name: stoch-grid-cpu-profile
           path: ${{ env.SCREEN_ROOT }}/
           retention-days: 14
           if-no-files-found: error
