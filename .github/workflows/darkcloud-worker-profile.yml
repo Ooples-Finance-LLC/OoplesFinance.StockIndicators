@@ -1,16 +1,16 @@
-name: Pinned Macd kernel CPU diagnostic
+name: Pinned candle CPU and GC phase diagnostic
 
 on:
   push:
     branches:
-      - perf/hosted-macd-cpu-profile-20261117
+      - perf/hosted-candle-cpu-gc-phase-profile-20261117
 
 permissions:
   contents: read
   actions: read
 
 concurrency:
-  group: pinned-macd-cpu-profile
+  group: pinned-candle-cpu-gc-phase-profile
   cancel-in-progress: false
 
 jobs:
@@ -22,9 +22,9 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
-          $env:PROFILE_OUTPUT=Join-Path $env:RUNNER_TEMP 'macd-cpu-profile-output'
-          $env:INPUT_ARTIFACT=Join-Path $env:RUNNER_TEMP 'macd-source-artifact'
-          $env:PROFILE_RUNTIME=Join-Path $env:RUNNER_TEMP 'macd-profile-runtime'
+          $env:PROFILE_OUTPUT=Join-Path $env:RUNNER_TEMP 'candle-phase-cpu-profile-output'
+          $env:INPUT_ARTIFACT=Join-Path $env:RUNNER_TEMP 'candle-phase-source-artifact'
+          $env:PROFILE_RUNTIME=Join-Path $env:RUNNER_TEMP 'candle-phase-profile-runtime'
           foreach ($name in @('PROFILE_OUTPUT','INPUT_ARTIFACT','PROFILE_RUNTIME')) {
             $value=[Environment]::GetEnvironmentVariable($name)
             "$name=$value" | Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8
@@ -38,7 +38,7 @@ jobs:
             source='6051a95220eefa36e6f837a9a54e036164b76ebe'
             production_sha256='4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173'
             frozen_benchmark_sha256='48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723'
-            pair='Skender.GetMacd';warmups=1000;profile_seconds=10
+            pair='TaLib.Candles.UpsideGapTwoCrows';warmups=20000;profile_seconds=10;phase_invocations=@(1,64,64,1);phase_target_seconds=2.5;causal_profile_only=$true;native_controls=0;policy_change=$false
             merge_on_runner=$false;zip_on_runner=$false;full_managed_rundown=$true
             runner_image=$env:ImageVersion; outer_shell_clr=[Environment]::Version.ToString()
             limits='Diagnostic kernel CPU samples only; not qualified latency, native closure or evidence import. Attribute only resolved stacks within recorded fixture boundaries.'
@@ -59,7 +59,7 @@ jobs:
           $identity=[Security.Principal.WindowsIdentity]::GetCurrent()
           $principal=[Security.Principal.WindowsPrincipal]::new($identity)
           if (!$principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Kernel CPU capture requires elevated runner' }
-          $tool=Join-Path $env:RUNNER_TEMP 'macd-PerfView-4.0.0.exe'
+          $tool=Join-Path $env:RUNNER_TEMP 'candle-phase-PerfView-4.0.0.exe'
           if (Test-Path -LiteralPath $tool) { throw 'Fresh collector path required' }
           Invoke-WebRequest -Uri 'https://github.com/microsoft/perfview/releases/download/v4.0.0/PerfView.exe' -OutFile $tool
           $hash=(Get-FileHash -LiteralPath $tool -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -85,7 +85,7 @@ jobs:
           if ((Get-FileHash -LiteralPath $config -Algorithm SHA256).Hash.ToLowerInvariant() -ne 'c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097') { throw 'Wrong app runtime configuration before launch' }
           Copy-Item -LiteralPath $proof -Destination (Join-Path $env:PROFILE_OUTPUT 'input-provenance.json')
           $dotnet=(Get-Command dotnet).Source
-          $driverRoot=Join-Path $env:RUNNER_TEMP 'macd-diagnostic-driver'
+          $driverRoot=Join-Path $env:RUNNER_TEMP 'candle-phase-diagnostic-driver'
           if (Test-Path -LiteralPath $driverRoot) { throw 'Fresh diagnostic driver directory required' }
           [IO.Directory]::CreateDirectory($driverRoot) | Out-Null
           @('<Project Sdk="Microsoft.NET.Sdk">','<PropertyGroup>','<OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>',
@@ -152,8 +152,8 @@ jobs:
           $collectionLog=Join-Path $env:PROFILE_OUTPUT 'cpu.log'
           $replay=Join-Path $env:PROFILE_OUTPUT 'replay'
           $arguments=@('/AcceptEula','/NoGui','/NoView','/KernelEvents:Process,Thread,ImageLoad,Profile',
-            '/ClrEvents:Jit,Loader,JittedMethodILToNativeMap','/FocusProcess:dotnet.exe',
-            '/BufferSizeMB:16','/CircularMB:32','/MaxCollectSec:40','/Merge:false','/Zip:false',('/DataFile:'+$trace),('/LogFile:'+$collectionLog),
+            '/ClrEvents:GC,Jit,Loader,JittedMethodILToNativeMap','/ClrEventLevel:Informational','/FocusProcess:dotnet.exe',
+            '/BufferSizeMB:16','/MaxCollectSec:40','/Merge:false','/Zip:false',('/DataFile:'+$trace),('/LogFile:'+$collectionLog),
             'run',$dotnet,'exec','--runtimeconfig',$config,$driver,$inputs,$env:PROFILE_RUNTIME,$replay)
           $launch=[ordered]@{command=$tool;arguments=$arguments;diagnostic_driver_sha256=(Get-FileHash -LiteralPath $driver -Algorithm SHA256).Hash.ToLowerInvariant();diagnostic_driver_builds=1;production_builds=0;tests=0;timed_benchmark_cases=0;runtimeconfig_sha256=(Get-FileHash -LiteralPath $config -Algorithm SHA256).Hash.ToLowerInvariant();script_sha256=(Get-FileHash -LiteralPath $script -Algorithm SHA256).Hash.ToLowerInvariant();child_timeout_seconds=60;output_cap_bytes=104857600;runtime_payload_copy_bytes=0;diagnostic_only=$true;qualification=$false}
           $launch | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'capture-launch.json') -Encoding utf8
@@ -189,10 +189,18 @@ jobs:
             if ($collectorText -notmatch ' SUCCESS:' -or $collectorText -match '\[Error:' -or $collectorText -match '\[Merging data files') { throw 'Collector did not report clean raw-only success' }
             if ((Get-FileHash -LiteralPath (Join-Path $symbols 'OoplesFinance.StockIndicators.pdb') -Algorithm SHA256).Hash.ToLowerInvariant() -ne $pdbHash) { throw 'Symbol bytes changed' }
             $receipt=Get-Content -LiteralPath (Join-Path $replay 'replay.json') -Raw | ConvertFrom-Json
-            if ($receipt.status -ne 'complete' -or $receipt.pair -ne 'Skender.GetMacd' -or $receipt.warmups -ne 1000 -or $receipt.profile_seconds -ne 10 -or $receipt.host_clr -ne '10.0.15' -or !$receipt.protected_inputs_unchanged -or !$receipt.runtime_unchanged) { throw 'Replay incomplete, mismatched or runtime changed' }
-            if ($receipt.environment_processor_count -ne 4 -or $receipt.worker_policy_before_setup -ne 2 -or $receipt.worker_policy_after_setup -ne 2 -or $receipt.worker_policy_after_profile -ne 2 -or !$receipt.effective_workers_before_setup.available -or $receipt.effective_workers_before_setup.value -ne 2 -or $receipt.effective_workers_after_setup.value -ne 2 -or $receipt.effective_workers_after_profile.value -ne 2) { throw 'MACD runtime/worker settings changed' }
-            if ($receipt.factory_parameters.variant -ne 0 -or $receipt.factory_parameters.fast -ne 12 -or $receipt.factory_parameters.slow -ne 26 -or $receipt.factory_parameters.signal -ne 9) { throw 'MACD factory parameters changed' }
-            if ($receipt.symbol_identity.guid -ne '73be8da336c04136b9b4b3bb140df441' -or $receipt.symbol_identity.stamp -ne 'bf4018fc' -or $receipt.symbol_identity.age -ne 1 -or $receipt.symbol_identity.pdb_sha256 -ne $pdbHash -or $receipt.symbol_identity.protected_runtime_pdb_replaced) { throw 'MACD PE/PDB identity mismatch' }
+            if ($receipt.status -ne 'complete' -or $receipt.pair -ne 'TaLib.Candles.UpsideGapTwoCrows' -or $receipt.warmups -ne 20000 -or $receipt.profile_seconds -ne 10 -or $receipt.host_clr -ne '10.0.15' -or !$receipt.protected_inputs_unchanged -or !$receipt.runtime_unchanged) { throw 'Replay incomplete, mismatched or runtime changed' }
+            if ($receipt.environment_processor_count -ne 4 -or $receipt.worker_policy_before_setup -ne 2 -or $receipt.worker_policy_after_setup -ne 2 -or $receipt.worker_policy_after_profile -ne 2 -or !$receipt.effective_workers_before_setup.available -or $receipt.effective_workers_before_setup.value -ne 2 -or $receipt.effective_workers_after_setup.value -ne 2 -or $receipt.effective_workers_after_profile.value -ne 2) { throw 'Candle phase runtime/worker settings changed' }
+            if ($receipt.factory_parameters.name -ne 'UpsideGapTwoCrows' -or $receipt.factory_parameters.long_period -ne 10 -or $receipt.factory_parameters.short_period -ne 10) { throw 'Candle factory parameters changed' }
+            if ($receipt.symbol_identity.guid -ne '73be8da336c04136b9b4b3bb140df441' -or $receipt.symbol_identity.stamp -ne 'bf4018fc' -or $receipt.symbol_identity.age -ne 1 -or $receipt.symbol_identity.pdb_sha256 -ne $pdbHash -or $receipt.symbol_identity.protected_runtime_pdb_replaced) { throw 'Candle PE/PDB identity mismatch' }
+            if (@($receipt.phases).Count -ne 4 -or $receipt.endpoint_outputs_verified -ne 4 -or $receipt.all_underlying_outputs_verified -ne $false -or $receipt.block_record_capacity -ne 65536) { throw 'Phase recording scope mismatch' }
+            $expectedInvocations=@(1,64,64,1);$recordTotal=0;$callTotal=0
+            for ($phase=0;$phase -lt 4;$phase++) {
+              $record=$receipt.phases[$phase]
+              if ($record.phase -ne $phase -or $record.invocation_count -ne $expectedInvocations[$phase] -or $record.record_count -le 0 -or $record.observer_gap_ticks -lt 0 -or $record.end_qpc -le $record.start_qpc -or $record.underlying_calls -ne $record.record_count*$record.invocation_count) { throw 'Phase metadata invalid' }
+              $recordTotal+=$record.record_count;$callTotal+=$record.underlying_calls
+            }
+            if ($recordTotal -ne @($receipt.block_records).Count -or $recordTotal -ne $receipt.iterations -or $callTotal -ne $receipt.measured_underlying_calls) { throw 'Phase call/record totals mismatch' }
             $capturePassed=$true
           } catch {
             $validationFailure=$_.Exception.ToString()
@@ -226,7 +234,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: macd-cpu-profile
+          name: candle-phase-cpu-profile
           path: ${{ env.PROFILE_OUTPUT }}/
           retention-days: 14
           if-no-files-found: error

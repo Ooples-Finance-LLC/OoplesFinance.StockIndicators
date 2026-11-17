@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Collections;
 using System.Buffers.Binary;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
@@ -17,8 +18,8 @@ internal static class Program
         string input=Path.GetFullPath(args[0]), runtime=Path.GetFullPath(args[1]), output=Path.GetFullPath(args[2]);
         Require(!Directory.Exists(output), "Output must be fresh.");
         Directory.CreateDirectory(output);
-        var receipt=new Dictionary<string,object?> { ["diagnostic_only"]=true,["qualification"]=false,["performance_claim"]=false,["status"]="running",["stage"]="start",["host_clr"]=Environment.Version.ToString(),["process_id"]=Environment.ProcessId,["environment_processor_count"]=Environment.ProcessorCount,["env_aidotnet_cpu_threads"]=Environment.GetEnvironmentVariable("AIDOTNET_CPU_THREADS"),["production_builds"]=0,["diagnostic_driver_builds"]=1,["tests"]=0,["timed_benchmark_cases"]=0,["warmups"]=1000,["profile_seconds"]=10,["pair"]="Skender.GetMacd",["bars"]=10000,["workflow_commit"]=Environment.GetEnvironmentVariable("GITHUB_SHA"),["workflow_run"]=Environment.GetEnvironmentVariable("GITHUB_RUN_ID"),["attribution"]="Fixture boundaries and observed settings only; sampling semantics come from the collector. No qualification or latency claim.",["symbol_fidelity"]="External matching old4d/PDB5c identity verified; frozen runtime PDB retained." };
-        void Save() { string temp=Path.Combine(output,"replay.json.new"); File.WriteAllText(temp,JsonSerializer.Serialize(receipt,new JsonSerializerOptions {WriteIndented=true})); File.Move(temp,Path.Combine(output,"replay.json"),true); }
+        var receipt=new Dictionary<string,object?> { ["diagnostic_only"]=true,["qualification"]=false,["performance_claim"]=false,["status"]="running",["stage"]="start",["host_clr"]=Environment.Version.ToString(),["process_id"]=Environment.ProcessId,["environment_processor_count"]=Environment.ProcessorCount,["env_aidotnet_cpu_threads"]=Environment.GetEnvironmentVariable("AIDOTNET_CPU_THREADS"),["production_builds"]=0,["diagnostic_driver_builds"]=1,["tests"]=0,["timed_benchmark_cases"]=0,["warmups"]=20000,["profile_seconds"]=10,["phase_target_seconds"]=2.5,["phase_invocation_counts"]=new[]{1,64,64,1},["all_underlying_outputs_verified"]=false,["pair"]="TaLib.Candles.UpsideGapTwoCrows",["bars"]=10000,["workflow_commit"]=Environment.GetEnvironmentVariable("GITHUB_SHA"),["workflow_run"]=Environment.GetEnvironmentVariable("GITHUB_RUN_ID"),["attribution"]="Fixture boundaries and observed settings only; sampling semantics come from the collector. No qualification or latency claim.",["symbol_fidelity"]="External matching old4d/PDB5c identity verified; frozen runtime PDB retained." };
+        void Save() { string temp=Path.Combine(output,"replay.json.new"); File.WriteAllText(temp,JsonSerializer.Serialize(receipt,new JsonSerializerOptions {WriteIndented=true,IncludeFields=true})); File.Move(temp,Path.Combine(output,"replay.json"),true); }
         Save();
         try
         {
@@ -82,26 +83,98 @@ internal static class Program
             object Workers() { Require(workers!=null && Convert.ToInt32(degree.GetValue(null))==2 && Environment.ProcessorCount==4,"Expected unchanged DOP2/CPU4."); int value=Convert.ToInt32(workers!.Invoke(null,new object[]{8}));Require(value==2,"Expected two effective workers.");return new {available=true,maximum_argument=8,value}; }
             receipt["worker_policy_before_setup"]=degree.GetValue(null);receipt["effective_workers_before_setup"]=Workers();
             var type=bench.GetType("OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks",true)!;var fixture=Activator.CreateInstance(type)!;
-            type.GetProperty("PairId")!.SetValue(fixture,"Skender.GetMacd");type.GetProperty("Bars")!.SetValue(fixture,10000);
+            type.GetProperty("PairId")!.SetValue(fixture,"TaLib.Candles.UpsideGapTwoCrows");type.GetProperty("Bars")!.SetValue(fixture,10000);
             var setup=type.GetMethod("Setup")!;var invoke=type.GetMethod("Ooples")!;receipt["stage"]="fixture-setup";Save();setup.Invoke(fixture,null);
             object pair=type.GetField("_pair",flags)!.GetValue(fixture)!;
             var library=(Delegate)pair.GetType().GetProperty("Library",flags)!.GetValue(pair)!;
-            object factory=library.Target??throw new InvalidOperationException("Frozen MACD factory closure missing.");
-            int Parameter(string name)=>Convert.ToInt32(factory.GetType().GetField(name,flags)!.GetValue(factory));
-            Require(Parameter("variant")==0 && Parameter("fast")==12 && Parameter("slow")==26 && Parameter("signal")==9,"Frozen MACD factory parameters changed.");
-            receipt["factory_parameters"]=new {variant=0,fast=12,slow=26,signal=9,selection="Macd,Signal,Histogram,FastEma,SlowEma"};
+            object factory=library.Target??throw new InvalidOperationException("Frozen candle factory closure missing.");
+            string name=(string)factory.GetType().GetField("n",flags)!.GetValue(factory)!;
+            Require(name=="UpsideGapTwoCrows","Frozen candle factory changed.");
+            var factoryType=bench.GetType("OoplesFinance.StockIndicators.CompetitorBenchmarks.TripleBodyComparison",true)!;
+            var parameters=factoryType.GetMethod("Create",flags)!.GetParameters();
+            Require(parameters.Length==3 && Convert.ToInt32(parameters[1].DefaultValue)==10 && Convert.ToInt32(parameters[2].DefaultValue)==10,"Frozen candle body periods changed.");
+            receipt["factory_parameters"]=new {name,long_period=10,short_period=10};
             receipt["worker_policy_after_setup"]=degree.GetValue(null);receipt["effective_workers_after_setup"]=Workers();receipt["loaded_closure_after_setup"]=Closure();receipt["stage"]="warmup";Save();
-            object? last=null;for(int i=0;i<1000;i++) last=invoke.Invoke(fixture,null);
-            receipt["stage"]="profile-ready";Save();Console.WriteLine($"PROFILE START Macd PID={Environment.ProcessId} bars=10000");receipt["profile_start_utc"]=DateTime.UtcNow;receipt["profile_start_timestamp"]=Stopwatch.GetTimestamp();receipt["timestamp_frequency"]=Stopwatch.Frequency;
-            var timer=Stopwatch.StartNew();int iterations=0;do {last=invoke.Invoke(fixture,null);iterations++;}while(timer.Elapsed.TotalSeconds<10);
-            receipt["profile_end_timestamp"]=Stopwatch.GetTimestamp();receipt["profile_end_utc"]=DateTime.UtcNow;receipt["iterations"]=iterations;Console.WriteLine($"PROFILE END Macd PID={Environment.ProcessId} iterations={iterations}");GC.KeepAlive(last);
+            const int capacity=65536;
+            var records=new BlockRecord[capacity];var phases=new PhaseRecord[4];var endpoints=new object[4];
+            int[] invocationCounts={1,64,64,1};
+            object? last=null;for(int i=0;i<20000;i++) last=invoke.Invoke(fixture,null);
+            object warmReference=last!;
+            receipt["stage"]="profile-ready";Save();
+            Console.WriteLine($"PROFILE START CandlePhase PID={Environment.ProcessId} bars=10000");
+            receipt["profile_start_utc"]=DateTime.UtcNow;receipt["profile_start_timestamp"]=Stopwatch.GetTimestamp();receipt["timestamp_frequency"]=Stopwatch.Frequency;
+            int used=0;long totalCalls=0;long targetTicks=(long)(Stopwatch.Frequency*2.5);
+            for(int phase=0;phase<4;phase++)
+            {
+                int invocationsPerBlock=invocationCounts[phase],firstRecord=used;long calls=0,timedTicks=0;
+                long phaseStart=Stopwatch.GetTimestamp();
+                do
+                {
+                    if(used>=capacity)
+                    {
+                        receipt["record_capacity_exceeded"]=true;receipt["block_records"]=records;receipt["phases"]=phases;
+                        receipt["completed_phase_count"]=phase;receipt["partial_phase_underlying_calls"]=calls;
+                        throw new InvalidOperationException("Fixed preallocated block-record capacity exhausted; no retry.");
+                    }
+                    long start=Stopwatch.GetTimestamp();
+                    for(int call=0;call<invocationsPerBlock;call++) last=invoke.Invoke(fixture,null);
+                    long end=Stopwatch.GetTimestamp();
+                    records[used++]=new BlockRecord {start_qpc=start,end_qpc=end,phase=phase};
+                    timedTicks+=end-start;calls+=invocationsPerBlock;
+                }while(Stopwatch.GetTimestamp()-phaseStart<targetTicks);
+                long phaseEnd=Stopwatch.GetTimestamp();
+                endpoints[phase]=last!;totalCalls+=calls;
+                phases[phase]=new PhaseRecord {phase=phase,invocation_count=invocationsPerBlock,start_qpc=phaseStart,end_qpc=phaseEnd,
+                    first_record=firstRecord,record_count=used-firstRecord,underlying_calls=calls,timed_block_ticks=timedTicks,
+                    observer_gap_ticks=phaseEnd-phaseStart-timedTicks};
+            }
+            receipt["profile_end_timestamp"]=Stopwatch.GetTimestamp();receipt["profile_end_utc"]=DateTime.UtcNow;
+            Console.WriteLine($"PROFILE END CandlePhase PID={Environment.ProcessId} calls={totalCalls}");
+            receipt["iterations"]=used;receipt["measured_underlying_calls"]=totalCalls;receipt["block_record_capacity"]=capacity;
+            receipt["realized_profile_seconds"]=(Convert.ToInt64(receipt["profile_end_timestamp"])-Convert.ToInt64(receipt["profile_start_timestamp"]))/(double)Stopwatch.Frequency;
+            receipt["phases"]=phases;
+            receipt["block_records"]=records.Take(used).ToArray();
+            receipt["observer_limit"]="Record writes and phase bookkeeping are outside invocation block timers but inside CPU phase windows; observer_gap_ticks is reported, never subtracted as a correction.";
+            var warmSnapshot=Snapshot(warmReference);var snapshots=endpoints.Select(Snapshot).ToArray();
+            foreach(var snapshot in snapshots)
+            {
+                Require(snapshot.Count==warmSnapshot.Count,"Endpoint column count changed.");
+                foreach(var entry in warmSnapshot)
+                    Require(snapshot.TryGetValue(entry.Key,out var actual) && actual.FirstValid==entry.Value.FirstValid
+                        && actual.Values.AsSpan().SequenceEqual(entry.Value.Values)
+                        && ((actual.Present==null && entry.Value.Present==null) || (actual.Present!=null && entry.Value.Present!=null && actual.Present.AsSpan().SequenceEqual(entry.Value.Present))),
+                        "Phase endpoint output differs from warm reference.");
+            }
+            receipt["source_outputs"]=snapshots;receipt["endpoint_outputs_verified"]=4;
+            GC.KeepAlive(warmReference);GC.KeepAlive(endpoints);
             receipt["worker_policy_after_profile"]=degree.GetValue(null);receipt["effective_workers_after_profile"]=Workers();receipt["loaded_closure_after_profile"]=Closure();
             receipt["actual_default_framework_assemblies"]=AssemblyLoadContext.Default.Assemblies.Where(a=>!a.IsDynamic && frameworkIdentities.ContainsKey(a.FullName!)).Select(a=>new {name=a.FullName,location=a.Location,sha256=Hash(a.Location)}).ToArray();
             CheckFiles(sourceFiles);CheckFiles(runtimeFiles);receipt["protected_inputs_unchanged"]=true;receipt["runtime_unchanged"]=true;receipt["status"]="complete";receipt["stage"]="complete";Save();return 0;
         }
         catch(Exception error) {receipt["status"]="failed";receipt["error"]=error.ToString();Save();Console.Error.WriteLine(error);return 1;}
     }
-    sealed class AuthenticatedContext(Dictionary<string,string> selected,Dictionary<string,string> framework,Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedMacd6051Frozen482",false)
+    struct BlockRecord { public long start_qpc,end_qpc; public int phase; }
+    struct PhaseRecord
+    {
+        public int phase,invocation_count,first_record,record_count;
+        public long start_qpc,end_qpc,underlying_calls,timed_block_ticks,observer_gap_ticks;
+    }
+    record Column(int FirstValid,byte[] Values,byte[]? Present);
+    static Dictionary<string,Column> Snapshot(object result)
+    {
+        var outputs=(IDictionary)result.GetType().GetProperty("Outputs")!.GetValue(result)!;
+        var snapshot=new Dictionary<string,Column>();
+        foreach(DictionaryEntry entry in outputs)
+        {
+            object column=entry.Value!;var type=column.GetType();var values=(double[])type.GetProperty("Values")!.GetValue(column)!;
+            byte[] bytes=new byte[values.Length*8];Buffer.BlockCopy(values,0,bytes,0,bytes.Length);
+            var present=(bool[]?)type.GetProperty("Present")!.GetValue(column);byte[]? mask=present==null?null:new byte[present.Length];
+            if(present!=null) Buffer.BlockCopy(present,0,mask!,0,mask!.Length);
+            snapshot.Add((string)entry.Key,new Column((int)type.GetProperty("FirstValid")!.GetValue(column)!,bytes,mask));
+        }
+        return snapshot;
+    }
+    sealed class AuthenticatedContext(Dictionary<string,string> selected,Dictionary<string,string> framework,Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedCandlePhase6051Frozen482",false)
     {
         protected override Assembly? Load(AssemblyName name)
         {
