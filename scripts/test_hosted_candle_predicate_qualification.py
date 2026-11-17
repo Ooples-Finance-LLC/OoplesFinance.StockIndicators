@@ -296,4 +296,51 @@ class BreakawayReuseTests(unittest.TestCase):
         self.assertTrue(result['accepted'])
 
 
+class GapSideReadyScopeTests(unittest.TestCase):
+    def plan(self):
+        return p.read(p.REPO/'benchmarks/plans/hosted-gapside-predicate-order-20261117.json')
+
+    def test_exact_matched_lines_scope_binds_actual_receipts(self):
+        from hosted_timing import targeted
+        plan=self.plan();q.validate_scope(plan)
+        scope=q._scope(plan)
+        self.assertEqual(q.GAPSIDE_SCOPE,scope)
+        self.assertEqual(['MatchedLinesSharedExecutionTests'],plan['candidate']['unit_classes'])
+        self.assertEqual(['MatchedLinesTests','SharedMatchedLinesBenchmarkTests'],plan['candidate']['parity_classes'])
+        self.assertEqual('44027927822',scope.ci_run)
+        tasks=plan['targeted_shards'][0]['tasks']
+        self.assertEqual(['LibraryPairBenchmarks','SharedMatchedLinesBenchmarks'],[task['fixture'] for task in tasks])
+        self.assertEqual(['TaLib.Candles.GapSideBySideWhiteLines','TaLib.Candles.Counterattack','TaLib.Candles.SeparatingLines'],[op['raw'] for op in tasks[1]['operations']])
+        self.assertEqual(q.METHODS,tasks[1]['methods'])
+        self.assertEqual((90,18),targeted.expected_totals(plan))
+        self.assertEqual(scope.paths,targeted.SCOPES[scope.name]['paths'])
+        self.assertEqual(q.NATIVE_POLICY,plan['native_progress_gate'])
+        self.assertTrue(plan['inputs_ready'])
+        self.assertEqual((12,76),(plan['candidate']['unit_passed'],plan['candidate']['parity_passed']))
+        self.assertEqual('591e16719b627d450adf10107af44d212f7cf600',plan['candidate']['evidence_source'])
+        self.assertEqual('912e359bf07a0ddfb26a48e7f4c4e994c7a07beecf311c3ceb667da49340aea2',plan['candidate']['production_sha256'])
+        self.assertIn('1637b717e 12/76/GPU100',q.archive_note(plan))
+
+    def test_unbound_or_not_ready_correctness_still_refuses_runtime_access(self):
+        for key in ('inputs_ready','evidence_source','manifest_sha256','gpu_receipt_sha256','production_sha256','unit_passed','parity_passed'):
+            plan=self.plan()
+            if key=='inputs_ready':plan[key]=False
+            else:plan['candidate'][key]=None
+            with self.subTest(field=key):
+                with mock.patch.object(p,'digest') as digest, mock.patch.object(p,'read') as read:
+                    with self.assertRaises(AssertionError):q.candidate_inputs(Path('must-not-be-opened'),plan)
+                    digest.assert_not_called();read.assert_not_called()
+
+    def test_cross_scope_classes_and_proofs_reject_before_io(self):
+        for other in (q.SIX_SCOPE,q.BREAKAWAY_SCOPE):
+            for key,value in q._candidate_identity(other).items():
+                plan=self.plan()
+                if plan['candidate'][key] == value:continue
+                plan['candidate'][key]=value
+                with self.subTest(other=other.name,field=key):
+                    with mock.patch.object(p,'digest') as digest, mock.patch.object(p,'read') as read:
+                        with self.assertRaises(AssertionError):q.validate_scope(plan,require_ready=False)
+                        digest.assert_not_called();read.assert_not_called()
+
+
 if __name__=='__main__':unittest.main()

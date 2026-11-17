@@ -558,6 +558,15 @@ SCOPES['breakaway-predicate-order-20261116'] = dict(
     totals=(90,18),shards=1,baseline_phase='targeted',baseline_totals=(90,18))
 
 
+SCOPES['gapside-predicate-order-20261117'] = dict(
+    fixtures={'SharedMatchedLinesBenchmarks': {p:p for p in
+        ('TaLib.Candles.GapSideBySideWhiteLines','TaLib.Candles.Counterattack','TaLib.Candles.SeparatingLines')}},
+    implicit_fixtures=set(),
+    paths={'src/Indicators/MatchedLinesCandles.cs','tests/ModelsTests/MatchedLinesSharedExecutionTests.cs'},
+    methods={'SharedMatchedLinesBenchmarks':['BuilderFull','BuilderLatestOnly','NativeSingle','NativeParallel']},
+    totals=(90,18),shards=1,baseline_phase='targeted',baseline_totals=(90,18))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 

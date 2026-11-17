@@ -1,4 +1,4 @@
-"""Authenticated inputs for the two bounded predicate-order qualifications."""
+"""Authenticated inputs for the three bounded predicate-order qualifications."""
 import copy
 import json
 import os
@@ -53,17 +53,19 @@ class QualificationScope:
     cases: int
     decisions: int
     ci_run: str
-    evidence_source: str
-    manifest_sha256: str
-    gpu_receipt_sha256: str
-    production_sha256: str
+    evidence_source: str | None
+    manifest_sha256: str | None
+    gpu_receipt_sha256: str | None
+    production_sha256: str | None
+    unit_passed: int | None
+    parity_passed: int | None
 
 
 SIX_SCOPE = QualificationScope(SCOPE, NEW, tuple(PAIRS), tuple(UNIT), tuple(PARITY), frozenset(PATHS), 180, 36,
     '44005551788','f63b014560a4978b7b47755fcd73f5d39c531e12',
     '9a211abdc551bfa6f0b900ef17e5f305ea417d8546f9f3ba2ec8d9c643391156',
     '4f0abd4a553fe0ab1985e1b8faa610d4c680a84084e199d5ae27600ad1366eb9',
-    '8bac548a15cf862067fffcaab85b0abbabadd2964948ceb0d160db29c3f85f52')
+    '8bac548a15cf862067fffcaab85b0abbabadd2964948ceb0d160db29c3f85f52',24,65)
 BREAKAWAY_SCOPE = QualificationScope('breakaway-predicate-order-20261116',
     '65a15739817b34b097d7094389c992b2d6c2ae2a',
     tuple('TaLib.Candles.'+name for name in ('Breakaway','ConcealingBabySwallow','LadderBottom')),
@@ -73,15 +75,29 @@ BREAKAWAY_SCOPE = QualificationScope('breakaway-predicate-order-20261116',
     90,18,'44016516588','d160e8875ad63f5b7c8c7506b75c11b66813bae0',
     '8a6ee07000bfd7bb07046321e50d58e04c575769cd9cce3a80228c41547b5f01',
     'e2c2db508df8f3f9f22b7d40274bbf0c263202614c43ca7d381df20e4e8ca31d',
-    '69c07d39e30a185ef583bc15a9cedd4480b20bd9adf5ff90699755ccab07df44')
+    '69c07d39e30a185ef583bc15a9cedd4480b20bd9adf5ff90699755ccab07df44',13,91)
+
+
+GAPSIDE_SCOPE = QualificationScope('gapside-predicate-order-20261117',
+    '1637b717e18a0e0bb8c70dd8e79fc447a95633f1',
+    tuple('TaLib.Candles.'+name for name in ('GapSideBySideWhiteLines','Counterattack','SeparatingLines')),
+    ('MatchedLinesSharedExecutionTests',),
+    ('MatchedLinesTests',
+     'SharedMatchedLinesBenchmarkTests'),
+    frozenset(('src/Indicators/MatchedLinesCandles.cs','tests/ModelsTests/MatchedLinesSharedExecutionTests.cs')),
+    90,18,'44027927822','591e16719b627d450adf10107af44d212f7cf600',
+    'e3330f2126b0109cebf6f818d82d8d819ead7e98cb4366ef191c2064fdfc944d',
+    '72d8213d3d8f4c94dab5194bf625278bbeec00e9a76f4e900d7801e7226aef1e',
+    '912e359bf07a0ddfb26a48e7f4c4e994c7a07beecf311c3ceb667da49340aea2',12,76)
 
 
 def _scope(plan):
-    """Select only the two reviewed immutable identities, without filesystem access."""
+    """Select only the three reviewed scope descriptors, without filesystem access."""
     assert plan.get('candle_predicate_order_qualification') is True
     name = plan['targeted_reference']['scope']
-    assert name in (SIX_SCOPE.name,BREAKAWAY_SCOPE.name), 'Unknown predicate qualification scope'
-    return SIX_SCOPE if name == SIX_SCOPE.name else BREAKAWAY_SCOPE
+    for scope in (SIX_SCOPE,BREAKAWAY_SCOPE,GAPSIDE_SCOPE):
+        if name == scope.name:return scope
+    raise AssertionError('Unknown predicate qualification scope')
 
 
 def _candidate_identity(scope):
@@ -89,7 +105,7 @@ def _candidate_identity(scope):
         producer='2a1737f30e5e1164189d0209b39ea46bf38c1239',evidence_source=scope.evidence_source,
         manifest_sha256=scope.manifest_sha256,gpu_receipt_sha256=scope.gpu_receipt_sha256,
         production_sha256=scope.production_sha256,unit_classes=list(scope.unit),parity_classes=list(scope.parity),
-        unit_passed=24 if scope == SIX_SCOPE else 13,parity_passed=65 if scope == SIX_SCOPE else 91)
+        unit_passed=scope.unit_passed,parity_passed=scope.parity_passed)
 
 
 def cpu_classes(plan, label):
@@ -104,6 +120,10 @@ def shards(*, scope=SIX_SCOPE):
     def task(fixture, pairs, methods, cases, decisions, short=False):
         return dict(fixture=fixture, operations=[dict(raw=x.rsplit('.',1)[1] if short else x,pair=x) for x in pairs],
             methods=methods,implicit_pair=False,cases=cases,decisions=decisions)
+    if scope == GAPSIDE_SCOPE:
+        return [dict(index=0,cases=90,decisions=18,tasks=[
+            task('LibraryPairBenchmarks',scope.pairs,['Ooples','Competitor'],30,6),
+            task('SharedMatchedLinesBenchmarks',scope.pairs,METHODS,60,12)])]
     if scope == BREAKAWAY_SCOPE:
         return [dict(index=0,cases=90,decisions=18,tasks=[
             task('LibraryPairBenchmarks',scope.pairs,['Ooples','Competitor'],30,6),
@@ -120,6 +140,15 @@ def validate_scope(plan, *, require_ready=True):
     # Reject source, class, receipt and cross-scope substitutions before any I/O.
     c = plan['candidate']
     assert {key:c[key] for key in _candidate_identity(scope)} == _candidate_identity(scope)
+    if require_ready:
+        assert plan['inputs_ready'] is True, 'Freeze actual CI/GPU identities before preparation'
+        assert type(c['unit_passed']) is int and c['unit_passed'] > 0
+        assert type(c['parity_passed']) is int and c['parity_passed'] > 0
+        assert all(isinstance(c[key],str) for key in ('evidence_source','manifest_sha256','gpu_receipt_sha256','production_sha256')), 'CI/GPU identities remain unbound'
+        assert re.fullmatch(r'\d+',c['ci_run'])
+        for key in ('producer','evidence_source'): assert re.fullmatch('[a-f0-9]{40}',c[key])
+        for key in ('manifest_sha256','gpu_receipt_sha256','production_sha256'): assert re.fullmatch('[a-f0-9]{64}',c[key])
+
     assert plan['sources'] == dict(published=OLD,old=OLD,successor=scope.source,variants=VARIANTS)
     assert plan['gpu_sources'] == dict(old=OLD_COMPILED,successor=scope.source,variants=VARIANTS)
     assert (plan['cases'],plan['decisions']) == (scope.cases,scope.decisions)
@@ -146,11 +175,6 @@ def validate_scope(plan, *, require_ready=True):
     assert p.digest(p.REPO/approval['path']) == approval['sha256']
     approved = p.read(p.REPO/approval['path'])
     assert approved['approved'] and approved['scope'] == scope.name and approved['cases'] == scope.cases
-    if require_ready:
-        assert plan['inputs_ready'] is True, 'Freeze actual CI/GPU identities before preparation'
-        assert re.fullmatch(r'\d+',c['ci_run'])
-        for key in ('producer','evidence_source'): assert re.fullmatch('[a-f0-9]{40}',c[key])
-        for key in ('manifest_sha256','gpu_receipt_sha256','production_sha256'): assert re.fullmatch('[a-f0-9]{64}',c[key])
 
 
 def candidate_inputs(folder, plan):
@@ -369,7 +393,8 @@ def collect(folder, inputs=None):
 def archive_note(plan):
     scope = _scope(plan)
     candidate = _candidate_identity(scope)
-    name = 'six-candle' if scope == SIX_SCOPE else 'three-consumer Breakaway'
+    assert type(candidate['unit_passed']) is int and type(candidate['parity_passed']) is int, 'Cannot archive unbound correctness counts'
+    name = 'six-candle' if scope == SIX_SCOPE else 'three-consumer Breakaway' if scope == BREAKAWAY_SCOPE else 'three-consumer GapSide'
     source = scope.source[:4] if scope == SIX_SCOPE else scope.source[:9]
     return (f'Fresh {scope.cases}-case {name} predicate-order qualification. The unchanged standard '
         f'{scope.decisions}-decision source gate and the predeclared LibraryPair native-progress gate must both pass; '
