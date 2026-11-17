@@ -34,21 +34,23 @@ internal static class Program
         if (args.Length != 5) throw new ArgumentException("Expected original inputs, runtime view, arm, pair, fresh output.");
         string input = Path.GetFullPath(args[0]), runtime = Path.GetFullPath(args[1]);
         string arm = args[2], pair = args[3], output = Path.GetFullPath(args[4]);
-        Require(arm is "old" or "new" or "native", "Unknown arm.");
-        Require(pair is "Skender.GetMacd" or "TaLib.Functions.Stoch" or "TaLib.Functions.StdDev", "Unknown pair.");
+        Require(arm is "normal" or "zero" or "native", "Unknown arm.");
+        Require(pair == "TaLib.Functions.StdDev", "Unknown pair.");
         Require(!Directory.Exists(output), "Fresh output required."); Directory.CreateDirectory(output);
         var receipt = new Dictionary<string,object?> {
             ["diagnostic_only"] = true, ["qualification"] = false, ["native_win_claim"] = false,
             ["status"] = "running", ["process_id"] = Environment.ProcessId,
             ["process_start_utc"] = Process.GetCurrentProcess().StartTime.ToUniversalTime(),
             ["actual_clr"] = Environment.Version.ToString(), ["pair"] = pair, ["bars"] = 10000, ["arm"] = arm,
+            ["counterfactual"] = arm == "zero", ["multiplier"] = arm == "zero" ? 0d : 1d, ["period"] = 20,
+            ["intentional_output_difference"] = arm == "zero", ["algorithm_candidate"] = false,
             ["warmups"] = 1000, ["single_call_samples"] = 10, ["production_builds"] = 0,
             ["timed_benchmark_cases"] = 0, ["processor_count"] = Environment.ProcessorCount,
             ["env_aidotnet_cpu_threads"] = Environment.GetEnvironmentVariable("AIDOTNET_CPU_THREADS"),
             ["source_old"] = "6051a95220eefa36e6f837a9a54e036164b76ebe",
             ["source_new"] = "6051a95220eefa36e6f837a9a54e036164b76ebe",
             ["old_production_sha256"] = Old, ["new_production_sha256"] = Old, ["frozen_harness_sha256"] = Bench,
-            ["limits"] = "Baseline A/A diagnostic: both labels use the same existing binary. Isolated-process MethodInfo/Stopwatch screen only, not BenchmarkDotNet qualification or native-win evidence. All timings require both outer idle gates. No runtime or worker assignments. Native follows source rounds and may have different runtime warmth."
+            ["limits"] = "Existing-binary multiplier counterfactual, not an algorithm candidate: zero scale bypasses Reading arithmetic while retaining normal state updates and capture. Normal and native use multiplier one. Isolated-process Delegate.DynamicInvoke/Stopwatch screen, not qualification, native-win evidence, or proof that all removed cost can be eliminated in correct production. Both outer idle gates required. No runtime or worker assignments."
         };
         void Save() { string temporary = Path.Combine(output, "case.json.new"); File.WriteAllText(temporary, JsonSerializer.Serialize(receipt, new JsonSerializerOptions { WriteIndented = true })); File.Move(temporary, Path.Combine(output, "case.json"), true); }
         Save();
@@ -90,27 +92,58 @@ internal static class Program
             var production = Find("OoplesFinance.StockIndicators.dll");
             var degree = Find("AiDotNet.Tensors.dll").GetType("AiDotNet.Tensors.Helpers.CpuParallelSettings", true)!.GetProperty("MaxDegreeOfParallelism", flags)!;
             var workers = production.GetType("OoplesFinance.StockIndicators.Indicators.ValuesBarExecution", true)!.GetMethod("WorkerCount", flags);
-            object Settings() => new { dop = degree.GetValue(null), effective_workers = workers?.Invoke(null, new object[] { 8 }) };
+            object Settings() { int dop = Convert.ToInt32(degree.GetValue(null)); int count = Convert.ToInt32(workers!.Invoke(null, new object[] { 8 })); Require(dop == 2 && count == 2, "Expected unchanged two-worker settings."); return new { dop, effective_workers = count }; }
             receipt["settings_before"] = Settings(); receipt["runtime_files"] = files; receipt["protected_input_hashes"] = protectedFiles; receipt["selected_managed_assets"] = selected;
             var type = Find("OoplesFinance.StockIndicators.CompetitorBenchmarks.dll").GetType("OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks", true)!;
             var fixture = Activator.CreateInstance(type)!; type.GetProperty("PairId")!.SetValue(fixture, pair); type.GetProperty("Bars")!.SetValue(fixture, 10000);
-            type.GetMethod("Setup")!.Invoke(fixture, null); var invoke = type.GetMethod(arm == "native" ? "Competitor" : "Ooples")!;
+            type.GetMethod("Setup")!.Invoke(fixture, null);
+            object data = type.GetField("_data", flags)!.GetValue(fixture)!;
+            var factory = Find("OoplesFinance.StockIndicators.CompetitorBenchmarks.dll").GetType("OoplesFinance.StockIndicators.CompetitorBenchmarks.DispersionComparison", true)!;
+            var create = factory.GetMethod("Create", flags)!;
+            object normalPair = create.Invoke(null, new object?[] { pair, null, 1d })!;
+            object selectedPair = arm == "zero" ? create.Invoke(null, new object?[] { pair, null, 0d })! : normalPair;
+            Delegate Select(object value, string property) => (Delegate)value.GetType().GetProperty(property, flags)!.GetValue(value)!;
+            Delegate invoke = Select(selectedPair, arm == "native" ? "Competitor" : "Library");
+            Delegate normal = Select(normalPair, "Library");
+            object[] callArgs = { data, 20 };
+            var expected = Snapshot(normal.DynamicInvoke(callArgs)!);
+            receipt["normal_reference_outputs"] = expected;
+            receipt["invocation"] = "DispersionComparison.Create; frozen Library/Competitor delegate DynamicInvoke with unchanged fixture._data and period20";
+            void Validate(object result)
+            {
+                var actual = Snapshot(result); Require(actual.Count == expected.Count, "Column count changed.");
+                foreach (var entry in expected)
+                {
+                    Require(actual.TryGetValue(entry.Key, out var column), "Column missing."); var reference = entry.Value;
+                    Require(column!.FirstValid == reference.FirstValid && column.Values.Length == reference.Values.Length, "Startup/length changed.");
+                    Require((column.Present == null && reference.Present == null) || (column.Present != null && reference.Present != null && column.Present.AsSpan().SequenceEqual(reference.Present)), "Presence changed.");
+                    if (arm == "normal") Require(column.Values.AsSpan().SequenceEqual(reference.Values), "Normal output bits changed.");
+                    else for (int i = 0; i < column.Values.Length / 8; i++)
+                    {
+                        bool defined = i >= column.FirstValid && (column.Present == null || column.Present[i] != 0);
+                        long bits = BitConverter.ToInt64(column.Values, i * 8);
+                        if (defined) Require(bits == 0, "Zero counterfactual defined output mismatch.");
+                    }
+                }
+            }
             receipt["settings_after_setup"] = Settings(); receipt["closure_before"] = Closure(); Save();
-            for (int i = 0; i < 1000; i++) GC.KeepAlive(invoke.Invoke(fixture, null));
+            for (int i = 0; i < 1000; i++) GC.KeepAlive(invoke.DynamicInvoke(callArgs));
             var samples = new List<double>(); var retained = new List<object>(); receipt["measurement_start_utc"] = DateTime.UtcNow;
             for (int i = 0; i < 10; i++)
             {
-                long start = Stopwatch.GetTimestamp(); object result = invoke.Invoke(fixture, null)!; long end = Stopwatch.GetTimestamp();
+                long start = Stopwatch.GetTimestamp(); object result = invoke.DynamicInvoke(callArgs)!; long end = Stopwatch.GetTimestamp();
                 samples.Add((end - start) * 1000.0 / Stopwatch.Frequency); if (arm != "native") retained.Add(result); GC.KeepAlive(result);
             }
             receipt["measurement_end_utc"] = DateTime.UtcNow; receipt["samples_ms"] = samples;
+            foreach (object result in retained) Validate(result);
+            receipt["source_output_validation"] = arm == "native" ? "not_applied_native_control" : "all10_snapshots_match_normal_metadata_and_expected_values";
             receipt["source_outputs"] = retained.Select(Snapshot).ToArray(); receipt["source_outputs_compared_outer"] = false;
             receipt["settings_after"] = Settings(); receipt["closure_after"] = Closure(); Check(files); Check(protectedFiles);
             receipt["runtime_unchanged"] = true; receipt["protected_inputs_unchanged"] = true; receipt["status"] = "complete"; Save(); return 0;
         }
         catch (Exception error) { receipt["status"] = "failed"; receipt["error"] = error.ToString(); Save(); Console.Error.WriteLine(error); return 1; }
     }
-    sealed class AuthenticatedContext(Dictionary<string,string> selected, Dictionary<string,string> framework, Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedBaselineScreen", false)
+    sealed class AuthenticatedContext(Dictionary<string,string> selected, Dictionary<string,string> framework, Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedStdDevReadingCounterfactual", false)
     {
         protected override Assembly? Load(AssemblyName name)
         {
