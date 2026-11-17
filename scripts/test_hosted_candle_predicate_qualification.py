@@ -175,7 +175,8 @@ class NativeProgressTests(unittest.TestCase):
             standard=dict(case_count=180,decision_count=36,accepted=source_accepted,decisions=decisions,
                 verdicts=dict(faster=1,slower=0 if source_accepted else 1))
             with (mock.patch.object(verify,'_collect',return_value=copy.deepcopy(standard)) as original,
-                  mock.patch.object(q,'native_rows',return_value=r)):
+                  mock.patch.object(q,'native_rows',return_value=r),
+                  mock.patch.object(q.p,'read',return_value=PredicateQualificationTests().plan())):
                 result=q.collect(Path('unused'))
             original.assert_called_once_with(Path('unused'),'targeted',preflight=False,candle_predicate_gate=True)
             self.assertEqual(source_accepted,result['source_gate_accepted'])
@@ -211,6 +212,88 @@ class NativeProgressTests(unittest.TestCase):
         for key,value in [('minimum_margin',0),('new_closure_bars',1000),('require_own_source_faster',False),('protect_prior_confident_wins_both_sizes',False)]:
             plan=helper.plan();plan['native_progress_gate'][key]=value
             with self.assertRaises(AssertionError):helper.validate(plan)
+
+
+class BreakawayReuseTests(unittest.TestCase):
+    def plan(self):
+        return p.read(p.REPO/'benchmarks/plans/hosted-breakaway-predicate-order-20261116.json')
+
+    def test_exact_three_consumer_matrix_and_ready_identity(self):
+        from hosted_timing import targeted
+        plan=self.plan();q.validate_scope(plan)
+        scope=q._scope(plan)
+        self.assertEqual((90,18),(scope.cases,scope.decisions))
+        tasks=plan['targeted_shards'][0]['tasks']
+        self.assertEqual(['LibraryPairBenchmarks','SharedTaMultiBarNativeBenchmarks'],[t['fixture'] for t in tasks])
+        self.assertEqual(['Breakaway','ConcealingBabySwallow','LadderBottom'],[op['raw'] for op in tasks[1]['operations']])
+        self.assertEqual(q.METHODS,tasks[1]['methods'])
+        self.assertEqual((60,12),(tasks[1]['cases'],tasks[1]['decisions']))
+        self.assertEqual(list(scope.pairs),[op['pair'] for op in tasks[1]['operations']])
+        self.assertEqual(list(scope.unit),p.cpu_test_classes(plan,'successor'))
+        self.assertEqual(scope.paths,targeted.SCOPES[scope.name]['paths'])
+        self.assertEqual((90,18),targeted.expected_totals(plan))
+        self.assertEqual(p.read(p.REPO/'benchmarks/plans/hosted-candle-predicate-order-20261116.json')['measurement_policy'],plan['measurement_policy'])
+        self.assertEqual({},plan['runtime_policy_overrides'])
+        self.assertEqual(q.NATIVE_POLICY,plan['native_progress_gate'])
+
+    def test_unknown_and_cross_scope_substitution_reject_before_io(self):
+        six=PredicateQualificationTests().plan();three=self.plan()
+        for original,other in ((six,three),(three,six)):
+            for key in ('source','unit_classes','parity_classes','unit_passed','parity_passed','ci_run',
+                        'evidence_source','manifest_sha256','gpu_receipt_sha256','production_sha256'):
+                bad=copy.deepcopy(original);bad['candidate'][key]=copy.deepcopy(other['candidate'][key])
+                with self.subTest(scope=original['targeted_reference']['scope'],field=key):
+                    with mock.patch.object(p,'digest') as digest, mock.patch.object(p,'read') as read:
+                        with self.assertRaises(AssertionError):q.candidate_inputs(Path('must-not-be-opened'),bad)
+                        digest.assert_not_called();read.assert_not_called()
+        bad=copy.deepcopy(three);bad['targeted_reference']['scope']='unreviewed-scope'
+        with mock.patch.object(p,'digest') as digest, mock.patch.object(p,'read') as read:
+            with self.assertRaises(AssertionError):q.candidate_inputs(Path('must-not-be-opened'),bad)
+            digest.assert_not_called();read.assert_not_called()
+
+    def test_six_scope_defaults_and_archive_note_are_preserved(self):
+        import ast
+        import re
+        six=p.read(p.REPO/'benchmarks/plans/hosted-candle-predicate-order-20261116.json')
+        self.assertEqual(six['targeted_shards'],q.shards())
+        self.assertEqual(q.shards(),q.shards(scope=q.SIX_SCOPE))
+        rows,decisions=native_fixture()
+        self.assertEqual(q.adjudicate_native(rows,decisions),q.adjudicate_native(rows,decisions,pairs=q.SIX_SCOPE.pairs))
+        original=p.subprocess.check_output(['git','show','938ab3b76e9552c4460e939d6cb968051291150a:scripts/hosted_timing/archive.py'],cwd=p.REPO,text=True)
+        note=re.search(r"note=\(('Fresh 180-case[^\n]+?') if read",original).group(1)
+        self.assertEqual(ast.literal_eval(note),q.archive_note(six))
+        note=q.archive_note(self.plan())
+        for expected in ('90-case','18-decision','65a157398 13/91/GPU100','frozen 9a'):
+            self.assertIn(expected,note)
+        self.assertNotIn('180-case',note);self.assertNotIn('new caef',note)
+
+    def test_three_pair_native_gate_keeps_strict_requirements(self):
+        scope=q.BREAKAWAY_SCOPE
+        rows,decisions=native_fixture()
+        mapping=dict(zip(q.PAIRS,scope.pairs))
+        rows=[dict(row,pair=mapping[row['pair']]) for row in rows if row['pair'] in mapping]
+        decisions=[dict(row,pair=mapping[row['pair']]) for row in decisions if row['pair'] in mapping]
+        result=q.adjudicate_native(rows,decisions,pairs=scope.pairs)
+        self.assertTrue(result['passed']);self.assertEqual(6,len(result['rows']))
+        self.assertEqual(q.NATIVE_POLICY,result['policy'])
+        next(row for row in rows if row['bars']==10000)['candidate_rounds']['1']['upper_ns']=95
+        self.assertFalse(q.adjudicate_native(rows,decisions,pairs=scope.pairs)['passed'])
+        with self.assertRaises(AssertionError):q.adjudicate_native(rows,decisions)
+
+    def test_three_pair_collection_retains_both_gate_results(self):
+        from hosted_timing import verify
+        scope=q.BREAKAWAY_SCOPE
+        rows,decisions=native_fixture();mapping=dict(zip(q.PAIRS,scope.pairs))
+        rows=[dict(row,pair=mapping[row['pair']]) for row in rows if row['pair'] in mapping]
+        decisions=[dict(row,pair=mapping[row['pair']]) for row in decisions if row['pair'] in mapping]
+        standard=dict(case_count=90,decision_count=18,accepted=True,decisions=decisions,verdicts=dict(faster=1))
+        with (mock.patch.object(verify,'_collect',return_value=copy.deepcopy(standard)),
+              mock.patch.object(q,'native_rows',return_value=rows) as native,
+              mock.patch.object(q.p,'read',return_value=self.plan())):
+            result=q.collect(Path('unused'))
+        native.assert_called_once_with(Path('unused'),pairs=scope.pairs)
+        self.assertTrue(result['source_gate_accepted']);self.assertTrue(result['native_progress_gate_passed'])
+        self.assertTrue(result['accepted'])
 
 
 if __name__=='__main__':unittest.main()

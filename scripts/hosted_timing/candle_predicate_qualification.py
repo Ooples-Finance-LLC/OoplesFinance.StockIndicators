@@ -1,8 +1,9 @@
-"""Authenticated inputs for the bounded six-candle predicate-order qualification."""
+"""Authenticated inputs for the two bounded predicate-order qualifications."""
 import copy
 import json
 import os
 from pathlib import Path
+from dataclasses import dataclass
 import re
 import shutil
 import subprocess
@@ -41,19 +42,73 @@ NATIVE_POLICY = dict(fixture='LibraryPairBenchmarks',method='Ooples',native_meth
 blob, sha = previous.blob, previous.sha
 
 
-def cpu_classes(plan, label):
+@dataclass(frozen=True)
+class QualificationScope:
+    name: str
+    source: str
+    pairs: tuple
+    unit: tuple
+    parity: tuple
+    paths: frozenset
+    cases: int
+    decisions: int
+    ci_run: str
+    evidence_source: str
+    manifest_sha256: str
+    gpu_receipt_sha256: str
+    production_sha256: str
+
+
+SIX_SCOPE = QualificationScope(SCOPE, NEW, tuple(PAIRS), tuple(UNIT), tuple(PARITY), frozenset(PATHS), 180, 36,
+    '44005551788','f63b014560a4978b7b47755fcd73f5d39c531e12',
+    '9a211abdc551bfa6f0b900ef17e5f305ea417d8546f9f3ba2ec8d9c643391156',
+    '4f0abd4a553fe0ab1985e1b8faa610d4c680a84084e199d5ae27600ad1366eb9',
+    '8bac548a15cf862067fffcaab85b0abbabadd2964948ceb0d160db29c3f85f52')
+BREAKAWAY_SCOPE = QualificationScope('breakaway-predicate-order-20261116',
+    '65a15739817b34b097d7094389c992b2d6c2ae2a',
+    tuple('TaLib.Candles.'+name for name in ('Breakaway','ConcealingBabySwallow','LadderBottom')),
+    ('OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.MultiBarCandleSharedExecutionTests',),
+    ('OoplesFinance.StockIndicators.CompetitorTests.ExtendedReversalTests',),
+    frozenset(('src/Indicators/ExtendedReversalCandles.cs','tests/ModelsTests/MultiBarCandleSharedExecutionTests.cs')),
+    90,18,'44016516588','d160e8875ad63f5b7c8c7506b75c11b66813bae0',
+    '8a6ee07000bfd7bb07046321e50d58e04c575769cd9cce3a80228c41547b5f01',
+    'e2c2db508df8f3f9f22b7d40274bbf0c263202614c43ca7d381df20e4e8ca31d',
+    '69c07d39e30a185ef583bc15a9cedd4480b20bd9adf5ff90699755ccab07df44')
+
+
+def _scope(plan):
+    """Select only the two reviewed immutable identities, without filesystem access."""
     assert plan.get('candle_predicate_order_qualification') is True
-    assert plan['targeted_reference']['scope'] == SCOPE
-    expected = dict(old=previous.UNIT, successor=UNIT, variants=['OwnedHistoryBatchTests'])
+    name = plan['targeted_reference']['scope']
+    assert name in (SIX_SCOPE.name,BREAKAWAY_SCOPE.name), 'Unknown predicate qualification scope'
+    return SIX_SCOPE if name == SIX_SCOPE.name else BREAKAWAY_SCOPE
+
+
+def _candidate_identity(scope):
+    return dict(source=scope.source,ci_run=scope.ci_run,
+        producer='2a1737f30e5e1164189d0209b39ea46bf38c1239',evidence_source=scope.evidence_source,
+        manifest_sha256=scope.manifest_sha256,gpu_receipt_sha256=scope.gpu_receipt_sha256,
+        production_sha256=scope.production_sha256,unit_classes=list(scope.unit),parity_classes=list(scope.parity),
+        unit_passed=24 if scope == SIX_SCOPE else 13,parity_passed=65 if scope == SIX_SCOPE else 91)
+
+
+def cpu_classes(plan, label):
+    scope = _scope(plan)
+    expected = dict(old=previous.UNIT, successor=list(scope.unit), variants=['OwnedHistoryBatchTests'])
     selected = plan['cpu_test_classes'][label]
     assert selected == expected[label]
     return selected
 
 
-def shards():
+def shards(*, scope=SIX_SCOPE):
     def task(fixture, pairs, methods, cases, decisions, short=False):
         return dict(fixture=fixture, operations=[dict(raw=x.rsplit('.',1)[1] if short else x,pair=x) for x in pairs],
             methods=methods,implicit_pair=False,cases=cases,decisions=decisions)
+    if scope == BREAKAWAY_SCOPE:
+        return [dict(index=0,cases=90,decisions=18,tasks=[
+            task('LibraryPairBenchmarks',scope.pairs,['Ooples','Competitor'],30,6),
+            task('SharedTaMultiBarNativeBenchmarks',scope.pairs,METHODS,60,12,short=True)])]
+    assert scope == SIX_SCOPE
     return [dict(index=0,cases=180,decisions=36,tasks=[
         task('LibraryPairBenchmarks',PAIRS,['Ooples','Competitor'],60,12),
         task('SharedTripleBodyBenchmarks',TRIPLE,METHODS,80,16),
@@ -61,50 +116,47 @@ def shards():
 
 
 def validate_scope(plan, *, require_ready=True):
-    assert plan.get('candle_predicate_order_qualification') is True
-    assert plan['sources'] == dict(published=OLD,old=OLD,successor=NEW,variants=VARIANTS)
-    assert plan['gpu_sources'] == dict(old=OLD_COMPILED,successor=NEW,variants=VARIANTS)
-    assert (plan['cases'],plan['decisions']) == (180,36)
+    scope = _scope(plan)
+    # Reject source, class, receipt and cross-scope substitutions before any I/O.
+    c = plan['candidate']
+    assert {key:c[key] for key in _candidate_identity(scope)} == _candidate_identity(scope)
+    assert plan['sources'] == dict(published=OLD,old=OLD,successor=scope.source,variants=VARIANTS)
+    assert plan['gpu_sources'] == dict(old=OLD_COMPILED,successor=scope.source,variants=VARIANTS)
+    assert (plan['cases'],plan['decisions']) == (scope.cases,scope.decisions)
     assert plan['matrix'] == dict(shards=1,max_parallel=1,timeout_minutes_per_shard=180)
-    assert plan['targeted_shards'] == shards()
+    assert plan['targeted_shards'] == shards(scope=scope)
     assert plan['native_progress_gate'] == NATIVE_POLICY
     assert plan['measurement_policy'] == common.POLICY and plan['runtime_policy_overrides'] == {}
     assert plan['proposed_dotnet_sdk'] == '10.0.403' and plan['expected_runtime_version'] == '.NET 10.0.15'
     assert plan['runtime_dependency_alignment'] == dict(tensor_version='0.150.0') and plan['require_fixture_inventory']
     assert sha(json.dumps(plan['baseline_common_manifest'],sort_keys=True,separators=(',',':')).encode()) == previous.COMMON_MANIFEST_SHA
     reference = plan['targeted_reference']
-    assert reference['scope'] == SCOPE and reference['decision'] == REFERENCE
+    assert reference['scope'] == scope.name and reference['decision'] == REFERENCE
     assert str(reference['run_id']) == '43992359476' and reference['qualified_source'] == OLD_COMPILED
     assert plan['baseline_inputs'] == dict(run_id='43880487485',plan=BASE_PLAN,
         plan_sha256=BASE_PLAN_SHA,provenance_sha256=BASE_PROVENANCE)
+    for label in ('old','successor','variants'): cpu_classes(plan,label)
     assert p.digest(p.REPO/OLD_PLAN) == OLD_PLAN_SHA
     assert plan['old_candidate'] == p.read(p.REPO/OLD_PLAN)['candidate']
     assert plan['old_candidate']['production_sha256'] == OLD_DLL
     assert not any(plan.get(k) for k in ('matchinglow_grid_qualification','diagnostic_only','reuse_inputs',
         'qualify_variants','standalone_variants','coverage_reference','trix_preflight','current_baseline_ten_refresh',
         'native_crossover_gate','baseline_continuation','preflight'))
-    for label in ('old','successor','variants'): cpu_classes(plan,label)
-    c = plan['candidate']
-    assert c['source'] == NEW and c['unit_classes'] == UNIT and c['parity_classes'] == PARITY
-    assert c['unit_passed'] == 24 and c['parity_passed'] == 65
     approval = plan['scope_approval']
     assert p.digest(p.REPO/approval['path']) == approval['sha256']
     approved = p.read(p.REPO/approval['path'])
-    assert approved['approved'] and approved['scope'] == SCOPE and approved['cases'] == 180
+    assert approved['approved'] and approved['scope'] == scope.name and approved['cases'] == scope.cases
     if require_ready:
         assert plan['inputs_ready'] is True, 'Freeze actual CI/GPU identities before preparation'
-        assert c['ci_run'] == '44005551788' and c['producer'] == '2a1737f30e5e1164189d0209b39ea46bf38c1239'
-        assert c['evidence_source'] == 'f63b014560a4978b7b47755fcd73f5d39c531e12'
-        assert c['manifest_sha256'] == '9a211abdc551bfa6f0b900ef17e5f305ea417d8546f9f3ba2ec8d9c643391156'
-        assert c['gpu_receipt_sha256'] == '4f0abd4a553fe0ab1985e1b8faa610d4c680a84084e199d5ae27600ad1366eb9'
-        assert c['production_sha256'] == '8bac548a15cf862067fffcaab85b0abbabadd2964948ceb0d160db29c3f85f52'
         assert re.fullmatch(r'\d+',c['ci_run'])
         for key in ('producer','evidence_source'): assert re.fullmatch('[a-f0-9]{40}',c[key])
         for key in ('manifest_sha256','gpu_receipt_sha256','production_sha256'): assert re.fullmatch('[a-f0-9]{64}',c[key])
 
 
 def candidate_inputs(folder, plan):
-    """The reviewed CI layout/GPU checks for this scope's exact24/65 source."""
+    """Authenticate the exact reviewed CI layout/GPU identity for the selected scope."""
+    validate_scope(plan)
+    scope = _scope(plan)
     c = plan['candidate']; folder = Path(folder).resolve()
     def read(name):
         path = (folder/name).resolve()
@@ -115,26 +167,26 @@ def candidate_inputs(folder, plan):
     import gzip
     spec = importlib.util.spec_from_file_location('predicate_ci',p.REPO/'scripts/build-candidate-correctness.py')
     ci = importlib.util.module_from_spec(spec); spec.loader.exec_module(ci)
-    fingerprint = common.source_fingerprint(NEW)
+    fingerprint = common.source_fingerprint(scope.source)
     assert sha(read('manifest.json')) == c['manifest_sha256']
     manifest = json.loads(read('manifest.json'))
-    assert (manifest['source'],manifest['run_id'],manifest['workflow_head']) == (NEW,c['ci_run'],c['producer'])
-    assert manifest['classes'] == dict(unit=UNIT,parity=PARITY)
-    production = ci.validate_layout(manifest,read,NEW,fingerprint)
+    assert (manifest['source'],manifest['run_id'],manifest['workflow_head']) == (scope.source,c['ci_run'],c['producer'])
+    assert manifest['classes'] == dict(unit=list(scope.unit),parity=list(scope.parity))
+    production = ci.validate_layout(manifest,read,scope.source,fingerprint)
     assert production == c['production_sha256']
-    for label,classes in [('unit',UNIT),('parity',PARITY)]:
+    for label,classes in [('unit',list(scope.unit)),('parity',list(scope.parity))]:
         with tempfile.TemporaryDirectory(prefix='predicate-trx-') as temp:
             path = Path(temp)/'checks.trx'; path.write_bytes(read('evidence/'+label+'.trx'))
             checks = p.verify_trx(path,classes)
         assert checks == manifest['checks'][label] and checks['passed'] == c[label+'_passed']
-    assert not p.git('diff','--name-only',NEW,c['evidence_source'],'--',*previous.SOURCE_IDENTITY_PATHS)
+    assert not p.git('diff','--name-only',scope.source,c['evidence_source'],'--',*previous.SOURCE_IDENTITY_PATHS)
     base = 'benchmarks/results/shared-rollout/local-gpu-contracts/'
     receipt_raw,trx_raw = (blob(c['evidence_source'],base+n) for n in ('receipt.json','gpu.trx.gz'))
     assert sha(receipt_raw) == c['gpu_receipt_sha256']
     receipt = json.loads(receipt_raw); gpu = ci.gpu_module(p.REPO)
-    assert gpu.verify_evidence(receipt,gzip.decompress(trx_raw),json.loads(blob(NEW,
+    assert gpu.verify_evidence(receipt,gzip.decompress(trx_raw),json.loads(blob(scope.source,
         'scripts/competitor-gpu-methods.json')),fingerprint) == 100
-    assert receipt['build_origin']['source'] == NEW and receipt['build_origin']['run_id'] == c['ci_run']
+    assert receipt['build_origin']['source'] == scope.source and receipt['build_origin']['run_id'] == c['ci_run']
     assert receipt['build_origin']['workflow_head'] == c['producer']
     assert receipt['test_assembly_sha256'] == manifest['runtime_files'][ci.ROOTS[-1]+'/OoplesFinance.StockIndicators.CompetitorTests.dll']
     from .runtime_dependencies import tensor_closure
@@ -160,6 +212,7 @@ def source_authentication(plan):
 
 def verify_authentication(folder, plan, proof):
     validate_scope(plan)
+    scope = _scope(plan)
     assert proof['preparation_mode'] == 'authenticated-candle-predicate-qualification'
     assert proof['source_authentication'] == source_authentication(plan)
     original_path = folder/'baseline-authentication/provenance.json'
@@ -175,7 +228,7 @@ def verify_authentication(folder, plan, proof):
     for suffix in ('.trx','-original-gpu-receipt.json','-original-gpu-gpu.trx.gz'):
         assert (folder/'evidence'/('variants'+suffix)).read_bytes() == (folder/'baseline-authentication/evidence'/('variants'+suffix)).read_bytes()
     for label,compiled,authenticated in [('old',OLD_COMPILED,old_inputs(folder/'old-candidate-authentication',plan)),
-        ('successor',NEW,candidate_inputs(folder/'candidate-authentication',plan))]:
+        ('successor',scope.source,candidate_inputs(folder/'candidate-authentication',plan))]:
         assert proof['production_sha256'][label] == authenticated['production']
         assert proof['checks'][label] == dict(authenticated['manifest']['checks']['unit'],original_gpu_source=compiled)
         assert proof['tested_runtime_dependencies'][label] == authenticated['closure']
@@ -188,7 +241,7 @@ def verify_authentication(folder, plan, proof):
 
 
 def prepare(baseline, old_candidate, candidate, out):
-    plan = p.read(p.PLAN); validate_scope(plan)
+    plan = p.read(p.PLAN); validate_scope(plan); scope = _scope(plan)
     assert subprocess.check_output(['dotnet','--version'],text=True).strip() == plan['proposed_dotnet_sdk']
     dotnet_info = subprocess.check_output(['dotnet','--info'],text=True)
     baseline,old_candidate,candidate,out = map(lambda x:Path(x).resolve(),(baseline,old_candidate,candidate,out))
@@ -207,7 +260,7 @@ def prepare(baseline, old_candidate, candidate, out):
     shutil.copytree(old_candidate,out/'old-candidate-authentication')
     shutil.copytree(candidate,out/'candidate-authentication')
     proof = copy.deepcopy(original)
-    for label,compiled,authenticated in [('old',OLD_COMPILED,old),('successor',NEW,new)]:
+    for label,compiled,authenticated in [('old',OLD_COMPILED,old),('successor',scope.source,new)]:
         (out/'production'/(label+'.dll')).write_bytes(authenticated['read']('blobs/'+authenticated['production']))
         for suffix,raw in [('.trx',authenticated['read']('evidence/unit.trx')),
             ('-parity.trx',authenticated['read']('evidence/parity.trx')),
@@ -239,7 +292,7 @@ def verify_runtime(folder, expected):
 
 
 
-def native_rows(folder):
+def native_rows(folder, *, pairs=PAIRS):
     """Retain separate owned rounds and the sole round2 native control; never pool."""
     from .verify import archived, sample
     from .checkpoints import case_key
@@ -256,19 +309,19 @@ def native_rows(folder):
             key = case_key(case);assert key not in rows
             rows[key] = sample(case)
         methods = ('Ooples','Competitor') if index == '2' else ('Ooples',)
-        assert set(rows) == {(pair,bars,method) for pair in PAIRS for bars in (1000,10000) for method in methods}
+        assert set(rows) == {(pair,bars,method) for pair in pairs for bars in (1000,10000) for method in methods}
         rounds[index] = rows
     assert set(rounds) == {'0','1','2','3'}
     return [dict(pair=pair,bars=bars,
         old_rounds={index:rounds[index][pair,bars,'Ooples'] for index in ('0','3')},
         candidate_rounds={index:rounds[index][pair,bars,'Ooples'] for index in ('1','2')},
-        native_control=rounds['2'][pair,bars,'Competitor']) for pair in PAIRS for bars in (1000,10000)]
+        native_control=rounds['2'][pair,bars,'Competitor']) for pair in pairs for bars in (1000,10000)]
 
 
-def adjudicate_native(rows, decisions):
-    expected = {(pair,bars) for pair in PAIRS for bars in (1000,10000)}
+def adjudicate_native(rows, decisions, *, pairs=PAIRS):
+    expected = {(pair,bars) for pair in pairs for bars in (1000,10000)}
     indexed = {(row['pair'],row['bars']):row for row in rows}
-    assert len(indexed) == len(rows) == 12 and indexed.keys() == expected
+    assert len(indexed) == len(rows) == 2*len(pairs) and indexed.keys() == expected
     own = {}
     for decision in decisions:
         if decision['fixture'] != 'LibraryPairBenchmarks' or decision['method'] != 'Ooples': continue
@@ -301,12 +354,27 @@ def adjudicate_native(rows, decisions):
 
 def collect(folder, inputs=None):
     from .verify import _collect
+    scope = _scope(p.read(p.PLAN))
     if inputs is not None:p.verify_inputs(Path(inputs))
     result = _collect(Path(folder),'targeted',preflight=False,candle_predicate_gate=True)
-    assert (result['case_count'],result['decision_count']) == (180,36)
+    assert (result['case_count'],result['decision_count']) == (scope.cases,scope.decisions)
     if inputs is not None:assert result['input_provenance_sha256'] == p.digest(Path(inputs)/'provenance.json')
     source_accepted = result['accepted']
-    native = adjudicate_native(native_rows(folder),result['decisions'])
+    native = adjudicate_native(native_rows(folder,pairs=scope.pairs),result['decisions'],pairs=scope.pairs)
     result.update(source_gate_accepted=source_accepted,native_progress_gate_passed=native['passed'],
         native_progress_gate=native,accepted=source_accepted and native['passed'])
     return result
+
+
+def archive_note(plan):
+    scope = _scope(plan)
+    candidate = _candidate_identity(scope)
+    name = 'six-candle' if scope == SIX_SCOPE else 'three-consumer Breakaway'
+    source = scope.source[:4] if scope == SIX_SCOPE else scope.source[:9]
+    return (f'Fresh {scope.cases}-case {name} predicate-order qualification. The unchanged standard '
+        f'{scope.decisions}-decision source gate and the predeclared LibraryPair native-progress gate must both pass; '
+        'the native gate requires a new 10,000-bar closure with its own source Faster verdict, robust net '
+        '10,000-bar point-win progress, and preservation of prior confident native wins at both sizes. '
+        'One round-two native control per pair/size is retained without pooling. Authenticated old a1f '
+        f"30/89/GPU100 and new {source} {candidate['unit_passed']}/{candidate['parity_passed']}/GPU100 inputs "
+        'are preserved separately from frozen 9a. No acceptance or publication follows from source improvements alone.')

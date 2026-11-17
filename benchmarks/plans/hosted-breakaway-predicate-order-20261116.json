@@ -1,0 +1,286 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "inputs_ready": true,
+  "proposed_dotnet_sdk": "10.0.403",
+  "sources": {
+    "published": "6051a95220eefa36e6f837a9a54e036164b76ebe",
+    "old": "6051a95220eefa36e6f837a9a54e036164b76ebe",
+    "successor": "65a15739817b34b097d7094389c992b2d6c2ae2a",
+    "variants": "9a45372530e49718b01b6524f9a0db993514e1e8"
+  },
+  "gpu_sources": {
+    "old": "a1f0028c601e1c6e7be5eabfe0d5da5cfe1f0758",
+    "successor": "65a15739817b34b097d7094389c992b2d6c2ae2a",
+    "variants": "9a45372530e49718b01b6524f9a0db993514e1e8"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.MatchingLowGridTests",
+      "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SequenceParallelExecutionTests",
+      "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.MatchedLinesParallelExecutionTests"
+    ],
+    "successor": [
+      "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.MultiBarCandleSharedExecutionTests"
+    ],
+    "variants": [
+      "OwnedHistoryBatchTests"
+    ]
+  },
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.150.0"
+  },
+  "require_fixture_inventory": true,
+  "cases": 90,
+  "decisions": 18,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 180
+  },
+  "targeted_shards": [
+    {
+      "index": 0,
+      "cases": 90,
+      "decisions": 18,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.Breakaway",
+              "pair": "TaLib.Candles.Breakaway"
+            },
+            {
+              "raw": "TaLib.Candles.ConcealingBabySwallow",
+              "pair": "TaLib.Candles.ConcealingBabySwallow"
+            },
+            {
+              "raw": "TaLib.Candles.LadderBottom",
+              "pair": "TaLib.Candles.LadderBottom"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 30,
+          "decisions": 6
+        },
+        {
+          "fixture": "SharedTaMultiBarNativeBenchmarks",
+          "operations": [
+            {
+              "raw": "Breakaway",
+              "pair": "TaLib.Candles.Breakaway"
+            },
+            {
+              "raw": "ConcealingBabySwallow",
+              "pair": "TaLib.Candles.ConcealingBabySwallow"
+            },
+            {
+              "raw": "LadderBottom",
+              "pair": "TaLib.Candles.LadderBottom"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 60,
+          "decisions": 12
+        }
+      ]
+    }
+  ],
+  "targeted_reference": {
+    "scope": "breakaway-predicate-order-20261116",
+    "decision": "benchmarks/results/remaining-indicators/hosted-targeted-43992359476-attempt1/decision.json",
+    "run_id": "43992359476",
+    "qualified_source": "a1f0028c601e1c6e7be5eabfe0d5da5cfe1f0758",
+    "sha256": "090d5ba24f315dc4e79e8f8f037c093f1828a7a2f048990ff95f63cce21803d2"
+  },
+  "baseline_inputs": {
+    "run_id": "43880487485",
+    "plan": "benchmarks/plans/hosted-named-projection-refresh-20261116.json",
+    "plan_sha256": "03e891d5220a12f0983a2f8d8d1b0de2cdc4f751cea0a07625a91dc6e21661b8",
+    "provenance_sha256": "92977e9786050146dbe97748c8a28d59e8eb47be5f4b5f85ae064ec4fcacef3a"
+  },
+  "candidate": {
+    "source": "65a15739817b34b097d7094389c992b2d6c2ae2a",
+    "ci_run": "44016516588",
+    "producer": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
+    "evidence_source": "d160e8875ad63f5b7c8c7506b75c11b66813bae0",
+    "manifest_sha256": "8a6ee07000bfd7bb07046321e50d58e04c575769cd9cce3a80228c41547b5f01",
+    "gpu_receipt_sha256": "e2c2db508df8f3f9f22b7d40274bbf0c263202614c43ca7d381df20e4e8ca31d",
+    "unit_passed": 13,
+    "parity_passed": 91,
+    "unit_classes": [
+      "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.MultiBarCandleSharedExecutionTests"
+    ],
+    "parity_classes": [
+      "OoplesFinance.StockIndicators.CompetitorTests.ExtendedReversalTests"
+    ],
+    "production_sha256": "69c07d39e30a185ef583bc15a9cedd4480b20bd9adf5ff90699755ccab07df44"
+  },
+  "scope_approval": {
+    "path": "benchmarks/plans/hosted-breakaway-predicate-order-20261116-approval.json",
+    "sha256": "76ca4e1e08f9a01d53be1b9dd5b48152d647066473291e8f8860b1d827c999db"
+  },
+  "baseline_common_manifest": {
+    "AiDotNet.Evolution.dll": "cbdfb8cca25727b967b75b51f15da2832f275c56d4204ce434af2e96c7e166e6",
+    "AiDotNet.Tensors.dll": "4679eed71749ed6ebdd7d7e5674b79dd6f2610884f8fe909e900c43dcfe59cf4",
+    "amd64/KernelTraceControl.dll": "98de2f1de4fb1711688c04e2cb0187bf8c47e627771e8f51329671f296bfc688",
+    "amd64/msdia140.dll": "52b87b5cacbad5a32362ef467693dd559f380b626af310d3875b05cb5ed81a98",
+    "arm64/KernelTraceControl.dll": "45b6d97a6c64229976b71a0fe709617190267fd02147a5c7e1e4fb9b17fa2956",
+    "arm64/msdia140.dll": "4c330ab3b24cf8d1aca253014fdfba33dc24198aa0d9b6c3a4ede06486546c17",
+    "BenchmarkDotNet.Annotations.dll": "4b5d273032cae7c8fc97e16713b8d4f1ee3a2aa28a0e2bd0695232fb9dd7d558",
+    "BenchmarkDotNet.dll": "d460626b2e1a9fa2f786e09e6c85cdf4d7b73deca636450a0e23892c8ce6192b",
+    "BouncyCastle.Cryptography.dll": "e5eeaf6d263c493619982fd3638e6135077311d08c961e1fe128f9107d29ebc6",
+    "CommandLine.dll": "8a55501cd1a1590a4bd93a17c6fdd2c01a0ed5bff1aea9036bdc78d98c9a3fad",
+    "cs/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "27124fd265633dbbb0bb32c61cf5a52d8e98a3c766f53df074cb76ae52244d25",
+    "cs/Microsoft.CodeAnalysis.Scripting.resources.dll": "4e30f57fc909fd730cb57ca134ba1d6bb1b99897575ae96db346defed996cea1",
+    "de/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "8daa5eb5a38ef75bfeeba6b7363b0324b8be16022bc7fa5a9568bb5128a07bd2",
+    "de/Microsoft.CodeAnalysis.Scripting.resources.dll": "88f7088332ec3497fa94567b6f99e153cad6fc7c6aa56bec94a13a780c6a2a85",
+    "Dia2Lib.dll": "6c4cac68010fe032218efe5e9fcf46eef9f77bfaa5f3bd33f03c5ff77d5a8fac",
+    "es/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "6cb57aeeaf19e3a8824f56c2d5bebfcb8a5d5b6f24bfa01023ff7e9e7b9a3a8a",
+    "es/Microsoft.CodeAnalysis.Scripting.resources.dll": "3b244dd084db040f26a666f6f71eb0d14d71ee1fb91203c65440b98822d61834",
+    "fr/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "f8c8b6e5eb6b8bb4386e545faea50be7bb3fc8bbbe8bccae930645411c1a1793",
+    "fr/Microsoft.CodeAnalysis.Scripting.resources.dll": "36fc265402f7d968246acf0ded7fad5df1b74c409f38455f38cc56dd1ada997a",
+    "Gee.External.Capstone.dll": "6dfda67784598de9677173b89d0692593935f1a4024d36040c95dea48c1b5965",
+    "Iced.dll": "f058c01321b4cdfc9b9151879e88e59571c8d0ba176fbcf95bc936a8f3d073ed",
+    "Images/Favicon.jpg": "f4389ae10788328843689312a54aad54076333a19d9e0a4288a9b0d89c5f782d",
+    "it/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "c90b4c0b4566df060ba7aefdc6084df54d35a32926fe6978037e82e562c66a82",
+    "it/Microsoft.CodeAnalysis.Scripting.resources.dll": "1b4efd447169acf38c3a85fcc15728ef975e68d8e8ad35d00cf419f89b954d4d",
+    "ja/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "05655b512402c85e69e6f77e04c726868ff9ab3414f66b17a30f6e814e8459a2",
+    "ja/Microsoft.CodeAnalysis.Scripting.resources.dll": "23bed3b5b5621e8d078013c9703c8820e9092db18b316e726a53fd0bdb94158a",
+    "JetBrains.Annotations.dll": "288e2dc80cfed580d51586321df26381590182619ed2bfea595e1b154fdd2eca",
+    "K4os.Compression.LZ4.dll": "e282aadc2353b864fe95cd5fb525a1a093d99a30a5bf2530b7ab831d56179816",
+    "ko/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "cb58785c30551eaf97db5e63d9278f4b4b51da3e755c019063149a01589fb596",
+    "ko/Microsoft.CodeAnalysis.Scripting.resources.dll": "dc73366bee4f18839bbacbcd5b0ff8804bfeafe58c7967cd7774ee42edba805c",
+    "Microsoft.AspNetCore.Html.Abstractions.dll": "c886039e64b4cafac80929bf7f153fde9966b088facb38d89ce1ae490bc3bb1c",
+    "Microsoft.CodeAnalysis.CSharp.dll": "53302acca07700e9bb10dcf21034435d6e0454c8eebf2481164ec13e520004c9",
+    "Microsoft.CodeAnalysis.CSharp.Scripting.dll": "6a1a6797944431e747e8cc49c8d938341214be56c92939d20990bc70313414f2",
+    "Microsoft.CodeAnalysis.dll": "395736b2d0e02be77bedc3847b269da7a93bf8e49cd3431a4a8e68d2c52d5846",
+    "Microsoft.CodeAnalysis.Scripting.dll": "3d3b8eef0bdf99f46b2280257d19bf69fd0c826a8afbbc03d2589ec5e0217ff0",
+    "Microsoft.Diagnostics.FastSerialization.dll": "83e89baf0bbecca8cfa194cff13365f716849e22efc374b669206f26998a019f",
+    "Microsoft.Diagnostics.NETCore.Client.dll": "baed2d25ca5bc53a3447c237d5572c92eac1fd842807b3e72602a711749b1b22",
+    "Microsoft.Diagnostics.Runtime.dll": "06f9910c8a37f8d4d758538e6dd307de58bcfb3bb13e83658142c08087a25382",
+    "Microsoft.Diagnostics.Tracing.TraceEvent.dll": "401e948dac99d0f9756ef96d5a8b8e4736e19e9f82ce8cdd744495951e3a94bb",
+    "Microsoft.DotNet.Interactive.Formatting.dll": "ec41df3311be1f10b8cfeefa94afaefc354581ef8a9974e1ec8cb0aebe95ed26",
+    "Microsoft.DotNet.PlatformAbstractions.dll": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3",
+    "Microsoft.Extensions.Caching.Abstractions.dll": "62347619a8470e0aac5e9b16ca09b443e592c3ea74a498542500875e39ee9b9b",
+    "Microsoft.Extensions.Caching.Memory.dll": "80628cfa9f2d7f5a91ed89fd5397bace231ab9d0f81cf703f6de0936da3994f6",
+    "Microsoft.Extensions.DependencyInjection.Abstractions.dll": "7c97c4463fe0fc11d1f22f4d160b2bd2288981adf1de2717a6ff3fb993ddf294",
+    "Microsoft.Extensions.DependencyInjection.dll": "2aa8182b5356a8cc5c35fc3641a87e814857d8d9be399ac78f260343754d09e0",
+    "Microsoft.Extensions.Logging.Abstractions.dll": "a76a735b63e6ef3b0bf41ff92423cbd16103b8952e8306140a9bd650346034dc",
+    "Microsoft.Extensions.Logging.dll": "183650081b551dfad967a7cbf79946a229cb79458b8d04a12db7c44b03bb9ab7",
+    "Microsoft.Extensions.Options.dll": "786112cb2f6646ef1170219a8c0bb813c9f14a6781e67c6266414f55a679565d",
+    "Microsoft.Extensions.Primitives.dll": "8ce9a85927ec7507b11ffe90080e7a811d51304a9e8b1da20c350159ba403902",
+    "NuGet.Frameworks.dll": "bdef879f0a4ab2ad97fe934f54e30aee0d06ad06a3ef292933308fca34906ef8",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.deps.json": "44b91eb02ef601214183108fb0eb4461514fbfe50f086e704c1a8d895b2d83de",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.exe": "94fecaa698438f40382e6f58b6bf8173683c85668e66ea1896fb2e174ac4e2dd",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.pdb": "07ed11e677a0d12dae716a52a70d5dcdd8595531c62b4cc8c07fbccb8c949915",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json": "c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097",
+    "OoplesFinance.StockIndicators.dll": "a1825bc99a35b53573fde9d7baa92b3216c8fd44553e78ec5dac684682d74cc5",
+    "OoplesFinance.StockIndicators.pdb": "9af31f167ecfed4b4b23f0d4406047df8722b75b50d752a34072a1fad348747d",
+    "Perfolizer.dll": "22a4a336db943465cbdfc8d0a8e23e89df3024d39f1c5954d97554b3da39e300",
+    "pl/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "ae252641248285be49550fb0fa0371122bf85ffbe5fdedad0908dfbe292262b2",
+    "pl/Microsoft.CodeAnalysis.Scripting.resources.dll": "f7af384c6516fe42165aff36ce37b223d4b7e16e91a17c2ce0f05145b03086d1",
+    "Pragmastat.dll": "e9b3fc36000e7fe3fb11d3ea6a65f3c9c7b17e03c9f5034306437d65972e8c51",
+    "pt-BR/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "bf822dd4695826fae55d1f2ad7056c26dddbdbf691f0d992a055069d14adfbb7",
+    "pt-BR/Microsoft.CodeAnalysis.Scripting.resources.dll": "e91fb30d165853ea29e667a10e4200597c667a91701d3103c1acb5e400054e4e",
+    "QuanTAlib.dll": "71a83a3cc9331db0661bd5d1349481b178a10309c838793a055c41387623cfc6",
+    "ru/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "72a2df33b22e2715cd4d2d2139dc23ea00224ff01d17c59c336da5ac5b33075d",
+    "ru/Microsoft.CodeAnalysis.Scripting.resources.dll": "8f51645e119bd588042bbea139ab5f5130e36631ca4c9d72cea296c80f5018f2",
+    "runtimes/linux-arm/native/libshaderc_shared.so": "c417c58fd11517ead6f2c5e719cec939207177c3ff50d5d560662e8bd685891d",
+    "runtimes/linux-arm64/native/libshaderc_shared.so": "098442f2b2e6d9b5eb82fef44228c7a01d00364e2caee529334226cda8ec515f",
+    "runtimes/linux-x64/native/libshaderc_shared.so": "9f2d5c6f53c191e59376251c614043019c6a7e325809703cad186da9b9dce6d3",
+    "runtimes/osx-arm64/native/libshaderc_shared.dylib": "1a4b2d850e6d967346565ae3c5c5a3d60e543eccd5d643543ce7572312e50965",
+    "runtimes/osx-x64/native/libshaderc_shared.dylib": "25248b7c357f87e18e2d34de29607c9dbfccfe28c85ab3176b49ecb9cd0eb97e",
+    "runtimes/win/lib/net9.0/System.Management.dll": "6cfb974d66ad8d17398d5aa3898309e446c239152f7525b141c86c3172206caf",
+    "runtimes/win-arm64/native/shaderc_shared.dll": "cae601b38a3389d3a5cc4b956a06e53d7e383f043e64c55640ce329c62c2dbea",
+    "runtimes/win-x64/native/capstone.dll": "f03321188a1615d044314b1183dcd9a7ffda09286c31c369d109165d4892dcbb",
+    "runtimes/win-x64/native/shaderc_shared.dll": "8e13592eac48b94755e4aa4c41552b210b41ca906d0bfe35b0a6d47a97d0b7c6",
+    "runtimes/win-x86/native/shaderc_shared.dll": "1882e7c8f08d747e55e98d833a5cc1b37e252e1f7cdbd7a87ba4aaa37a02686e",
+    "Skender.Stock.Indicators.dll": "0408495cde22e3795c6efcb16d88da9e82d0aa0dbd88e5d39b41db9fb171bf93",
+    "System.CodeDom.dll": "8d0cf191c86feea81c9875652c06e454abe8dbff66bea9e4cb5f8aa2dc02f32a",
+    "System.CommandLine.dll": "68234d41239b528a72d9899bffb8d338a6054c28bbd6a7afd1691242b50ae184",
+    "System.CommandLine.Rendering.dll": "a767150ce81014ca69ed968f0081f4ba224ea49deafef24b6f5f7ca8615ec1c4",
+    "System.Management.dll": "0be24b09da5abad0b20efcb58fab14b0dedc79b09d4fbdcb894be268105a2195",
+    "TALib.NETCore.dll": "980edcda5db3ab7b0cdd9ef877aa784aa93728129f134c023a1e08acedeefcbe",
+    "tr/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "e851cc875e5264ba5a07d506b3e64c524efde83977caefa25ca4af7bee84c7dd",
+    "tr/Microsoft.CodeAnalysis.Scripting.resources.dll": "138d228976e10aef027f18a919ebc33cad28d0de2c7dcc5fa7336ef524bf03f2",
+    "TraceReloggerLib.dll": "6830c0f1d3f3c17719181e73dd5cfa8ccbb3f3c575329d2120576545103467b5",
+    "Trady.Analysis.dll": "85f3242954735ea3dd4f1766e4125276280606dd37fde7ff31c084cfe495ba8c",
+    "Trady.Core.dll": "eddc81389f75c0b47910b631ea7d9bcfae670c2ce44ffc6aff60a966e1312b7d",
+    "x86/KernelTraceControl.dll": "7a4b8319f36304a7686576ea130a351818f73fabf90c511e243b957fdfa8cbb0",
+    "x86/KernelTraceControl.Win61.dll": "b7a83f51eae2824e9259ffe567f0fb42177d7b02674be760eb88df270459d8bf",
+    "x86/msdia140.dll": "6d05dd14282dcb59b9d347f8ed0c81bf2cb46a43a17295f8352f3e213f8844c2",
+    "zh-Hans/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "c50c1f8cb6c860b0ac37ec08d2352e3286d9be7d1a5f00a34c2495e5ca1acb33",
+    "zh-Hans/Microsoft.CodeAnalysis.Scripting.resources.dll": "ddee52594e7781e07d64c9eb3d95f6881d3fac33f9808a482b9b1f7bc36c5d3d",
+    "zh-Hant/Microsoft.CodeAnalysis.CSharp.Scripting.resources.dll": "ef11f6c38f005b7abff3c6a9e1133a08045ee69abfd859475725053149f70548",
+    "zh-Hant/Microsoft.CodeAnalysis.Scripting.resources.dll": "c5509918a0b8b95afa5f71fbb2ca837aca12fc26eb2da0d6988a313a58e983cd"
+  },
+  "expected_runtime_version": ".NET 10.0.15",
+  "candle_predicate_order_qualification": true,
+  "native_progress_gate": {
+    "fixture": "LibraryPairBenchmarks",
+    "method": "Ooples",
+    "native_method": "Competitor",
+    "native_round": 2,
+    "old_rounds": [
+      0,
+      3
+    ],
+    "candidate_rounds": [
+      1,
+      2
+    ],
+    "minimum_margin": 0.1,
+    "new_closure_bars": 10000,
+    "minimum_new_closures": 1,
+    "require_own_source_faster": true,
+    "require_net_10000_point_progress": true,
+    "protect_prior_confident_wins_both_sizes": true,
+    "point_win_comparison": "strict-less-than"
+  },
+  "old_candidate": {
+    "source": "a1f0028c601e1c6e7be5eabfe0d5da5cfe1f0758",
+    "ci_run": "43984038209",
+    "producer": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
+    "evidence_source": "a921574e878c82392a6ce26122f5f2adaa2f430e",
+    "manifest_sha256": "f2541e7d0621187f35160c9fcd94627f7fc70169bd185a5a6bc73cae594c1508",
+    "gpu_receipt_sha256": "c41d3565f89350caceb25992e978ebbfb3c4f49f8bbad369f7c93d1794fd3bf2",
+    "unit_passed": 30,
+    "parity_passed": 89,
+    "unit_classes": [
+      "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.MatchingLowGridTests",
+      "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SequenceParallelExecutionTests",
+      "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.MatchedLinesParallelExecutionTests"
+    ],
+    "parity_classes": [
+      "OoplesFinance.StockIndicators.CompetitorTests.SequenceCandleTests",
+      "OoplesFinance.StockIndicators.CompetitorTests.MatchedLinesTests"
+    ],
+    "production_sha256": "4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173"
+  }
+}

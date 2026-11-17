@@ -549,6 +549,15 @@ SCOPES['candle-predicate-order-20261116'] = dict(
     totals=(180,36),shards=1,baseline_phase='targeted',baseline_totals=(90,18))
 
 
+SCOPES['breakaway-predicate-order-20261116'] = dict(
+    fixtures={'SharedTaMultiBarNativeBenchmarks': {'TaLib.Candles.'+name:name for name in
+        ('Breakaway','ConcealingBabySwallow','LadderBottom')}},
+    implicit_fixtures=set(),
+    paths={'src/Indicators/ExtendedReversalCandles.cs','tests/ModelsTests/MultiBarCandleSharedExecutionTests.cs'},
+    methods={'SharedTaMultiBarNativeBenchmarks':['BuilderFull','BuilderLatestOnly','NativeSingle','NativeParallel']},
+    totals=(90,18),shards=1,baseline_phase='targeted',baseline_totals=(90,18))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 

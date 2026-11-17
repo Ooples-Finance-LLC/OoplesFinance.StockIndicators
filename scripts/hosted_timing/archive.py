@@ -7,6 +7,7 @@ import subprocess
 
 from .pipeline import PLAN, REPO, read, digest, verify_inputs
 from .verify import collect
+from .candle_predicate_qualification import archive_note as predicate_archive_note
 
 
 def write(path, value):
@@ -145,7 +146,7 @@ def archive(raw, prepared, repo, phase):
             'native_progress_gate':summary['native_progress_gate']} if read(PLAN).get('candle_predicate_order_qualification') else {}),
         **({'native_crossover_gate_passed':summary['native_crossover_gate_passed'],
             'native_crossover_samples':summary['native_crossover_samples']} if read(PLAN).get('matchinglow_grid_qualification') else {}),
-        note=('Fresh 180-case six-candle predicate-order qualification. The unchanged standard 36-decision source gate and the predeclared LibraryPair native-progress gate must both pass; the native gate requires a new 10,000-bar closure with its own source Faster verdict, robust net 10,000-bar point-win progress, and preservation of prior confident native wins at both sizes. One round-two native control per pair/size is retained without pooling. Authenticated old a1f 30/89/GPU100 and new caef 24/65/GPU100 inputs are preserved separately from frozen 9a. No acceptance or publication follows from source improvements alone.' if read(PLAN).get('candle_predicate_order_qualification') else
+        note=(predicate_archive_note(read(PLAN)) if read(PLAN).get('candle_predicate_order_qualification') else
               'Fresh 90-case MatchingLow-only qualification with SeparatingLines and StickSandwich sentinels. Accepted source requires zero slower decisions, at least one faster decision, and both MatchingLow 10,000-bar candidate rounds newly beating the measured native control with separated intervals and at least 10% lower means. Historical harness continuation carries no timing-equivalence claim; original baseline/frozen GPU evidence and fresh source-bound candidate GPU100 are retained.' if read(PLAN).get('matchinglow_grid_qualification') else
              'Hosted CPU current-baseline A/A refresh. Original authenticated canonical/frozen GPU receipts are reused; fresh consumer validation passed 303 canonical cases and 20 frozen/canonical alignment cases, without new compilation or GPU execution. A/A admission is not equivalence; no production qualification or optimization is claimed.' if phase == 'baseline-refresh' and read(PLAN).get('current_baseline_ten_refresh') else
              'Hosted CPU harness baseline refresh with fresh canonical correctness/GPU100 and authenticated frozen-variant evidence. Identical-binary A/A outcomes describe timing variability; no production qualification or optimization is claimed.' if phase == 'baseline-refresh' else
