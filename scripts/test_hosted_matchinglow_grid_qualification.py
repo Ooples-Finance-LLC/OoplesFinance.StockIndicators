@@ -102,6 +102,22 @@ class MatchingLowQualificationTests(unittest.TestCase):
             with self.subTest(actual=actual), self.assertRaises(AssertionError):
                 q.verify_runtime_version(actual, '.NET 10.0.15')
 
+    def test_fully_qualified_cpu_classes_are_supported_only_for_this_scope(self):
+        from hosted_timing import pipeline as p
+        plan = self.plan()
+        self.assertEqual(q.UNIT, p.cpu_test_classes(plan, 'successor'))
+        for label in ('old', 'variants'):
+            self.assertEqual(['OwnedHistoryBatchTests'], p.cpu_test_classes(plan, label))
+        legacy = copy.deepcopy(plan); legacy.pop('matchinglow_grid_qualification')
+        with self.assertRaises(AssertionError): p.cpu_test_classes(legacy, 'successor')
+        for malformed in ('Namespace..Class', '.Namespace.Class', 'Namespace.Class.', '',
+                          'Namespace.Class|Other', 'Namespace.1Class'):
+            with self.subTest(malformed=malformed):
+                bad = copy.deepcopy(plan); bad['cpu_test_classes']['successor'] = [malformed]
+                with self.assertRaises(AssertionError): p.cpu_test_classes(bad, 'successor')
+        altered = copy.deepcopy(plan); altered['cpu_test_classes']['successor'] = ['Wrong.Namespace.ValidClass']
+        with self.assertRaises(AssertionError): q.validate_scope(altered, require_ready=False)
+
     def test_runtime_pin_checks_nonlibrary_original_operation_reports(self):
         from hosted_timing import verify
         with tempfile.TemporaryDirectory() as temp:

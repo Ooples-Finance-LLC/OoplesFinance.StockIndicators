@@ -90,6 +90,8 @@ def validate_scope(plan, *, require_ready=True):
         'qualify_variants', 'standalone_variants', 'coverage_reference', 'trix_preflight'))
     c = plan['candidate']
     assert c['source'] == NEW and c['unit_classes'] == UNIT and c['parity_classes'] == PARITY
+    assert plan['cpu_test_classes'] == dict(old=['OwnedHistoryBatchTests'],
+        successor=UNIT, variants=['OwnedHistoryBatchTests'])
     assert plan['native_crossover_gate'] == dict(pair=PAIRS[0], bars=10000,
         fixture='LibraryPairBenchmarks', method='Ooples', native_method='Competitor',
         minimum_margin=0.10, candidate_rounds=[1, 2], native_round=2,

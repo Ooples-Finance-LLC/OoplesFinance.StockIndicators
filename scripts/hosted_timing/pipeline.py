@@ -152,7 +152,10 @@ def cpu_test_classes(plan, label):
         defaults.append('ExactMeanUnitWeightTests')
     selected = plan.get('cpu_test_classes', {}).get(label, defaults)
     assert selected and len(selected) == len(set(selected))
-    assert all(isinstance(c, str) and c.isidentifier() for c in selected)
+    if plan.get('matchinglow_grid_qualification') is True:
+        assert all(isinstance(c, str) and all(part.isidentifier() for part in c.split('.')) for c in selected)
+    else:
+        assert all(isinstance(c, str) and c.isidentifier() for c in selected)
     return selected
 
 
