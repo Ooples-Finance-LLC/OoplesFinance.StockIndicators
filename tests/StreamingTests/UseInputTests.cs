@@ -192,9 +192,11 @@ public sealed class UseInputTests : GlobalTestData
             OoplesFinance.StockIndicators.Builder.IndicatorDataSource.FromBatch(adoptedBaseOpen));
         OoplesFinance.StockIndicators.Builder.SeriesHandle smaHandle = default;
         OoplesFinance.StockIndicators.Builder.SeriesHandle cciHandle = default;
-        builder.ConfigureIndicators(
-            smaHandle = new OoplesFinance.StockIndicators.Indicators.Sma(20),
-            cciHandle = new OoplesFinance.StockIndicators.Indicators.CommodityChannelIndex());
+        builder.ConfigureIndicators(c =>
+        {
+            smaHandle = c.Sma(20);
+            cciHandle = c.Cci(20);
+        });
         using (var runtime = builder.Build())
         {
             runtime.Start();
