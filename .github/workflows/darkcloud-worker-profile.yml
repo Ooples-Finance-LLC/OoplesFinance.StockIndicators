@@ -142,6 +142,10 @@ jobs:
             [ordered]@{cpu_percent=$samples.ToArray();build_test_processes=$busy;passed=$passed;utc=[DateTime]::UtcNow.ToString('O')} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT ($name+'.json')) -Encoding utf8
             return $passed
           }
+          # Fixed preparation only: these probes never replace mandatory gate samples.
+          $initializationProbes=(Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 2).CounterSamples.CookedValue
+          [ordered]@{cpu_percent=@($initializationProbes);preparation_only=$true;mandatory_gate_samples=12;settle_seconds=5;utc=[DateTime]::UtcNow.ToString('O')} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'cpu-probe-preparation.json') -Encoding utf8
+          Start-Sleep -Seconds 5
           $prePassed=IdleGate 'idle-before'
           if (!$prePassed) { throw 'Pre-capture idle gate failed; no capture' }
           $trace=Join-Path $env:PROFILE_OUTPUT 'cpu.etl'
