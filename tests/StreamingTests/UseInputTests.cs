@@ -170,5 +170,51 @@ public sealed class UseInputTests : GlobalTestData
         var actualRsi = adoptedBase.CalculateRelativeStrengthIndex().CustomValuesList.ToArray();
         actualRsi.Should().Equal(expectedRsi);
         actualRsi.Should().NotEqual(closeRsi);
+
+        // Named-input indicators (e.g., CCI defaults to TypicalPrice) and V2 StockIndicatorBuilder must also honor
+        // WithBaseInput(InputSeries.Open) across ResetOutputs() without materializing zero-copy column views.
+        var adoptedBaseOpen = StockData.FromColumns(opens, highs, lows, closes, volumes, dates)
+            .WithBaseInput(InputSeries.Open);
+        adoptedBaseOpen.HasAnyMaterializedColumn.Should().BeFalse();
+
+        var expectedOpenCci = new StockData(tickers).UseInput(InputSeries.Open)
+            .CalculateCommodityChannelIndex().CustomValuesList.ToArray();
+        var defaultTypicalCci = new StockData(tickers)
+            .CalculateCommodityChannelIndex().CustomValuesList.ToArray();
+        var closeCci = new StockData(tickers).UseInput(InputSeries.Close)
+            .CalculateCommodityChannelIndex().CustomValuesList.ToArray();
+        var expectedOpenSma = new StockData(tickers).UseInput(InputSeries.Open)
+            .CalculateSimpleMovingAverage(20).CustomValuesList.ToArray();
+        var closeSma = new StockData(tickers)
+            .CalculateSimpleMovingAverage(20).CustomValuesList.ToArray();
+
+        var builder = new OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder(
+            OoplesFinance.StockIndicators.Builder.IndicatorDataSource.FromBatch(adoptedBaseOpen));
+        OoplesFinance.StockIndicators.Builder.SeriesHandle smaHandle = default;
+        OoplesFinance.StockIndicators.Builder.SeriesHandle cciHandle = default;
+        builder.ConfigureIndicators(
+            smaHandle = new OoplesFinance.StockIndicators.Indicators.Sma(20),
+            cciHandle = new OoplesFinance.StockIndicators.Indicators.CommodityChannelIndex());
+        using (var runtime = builder.Build())
+        {
+            runtime.Start();
+            runtime.Subscribe(smaHandle);
+            runtime.Subscribe(cciHandle);
+            runtime.GetSeries(smaHandle).ToArray().Should().Equal(expectedOpenSma);
+            runtime.GetSeries(smaHandle).ToArray().Should().NotEqual(closeSma);
+            runtime.GetSeries(cciHandle).ToArray().Should().Equal(expectedOpenCci);
+            runtime.GetSeries(cciHandle).ToArray().Should().NotEqual(defaultTypicalCci);
+            runtime.GetSeries(cciHandle).ToArray().Should().NotEqual(closeCci);
+        }
+
+        adoptedBaseOpen.HasAnyMaterializedColumn.Should().BeFalse(
+            "V2 StockIndicatorBuilder evaluation over FromColumns + WithBaseInput must not materialize OHLCV+Date lists");
+
+        adoptedBaseOpen.CalculateSimpleMovingAverage(20).CustomValuesList.Should().Equal(expectedOpenSma);
+        adoptedBaseOpen.ResetOutputs();
+        var actualOpenCci = adoptedBaseOpen.CalculateCommodityChannelIndex().CustomValuesList.ToArray();
+        actualOpenCci.Should().Equal(expectedOpenCci);
+        actualOpenCci.Should().NotEqual(defaultTypicalCci);
+        actualOpenCci.Should().NotEqual(closeCci);
     }
 }

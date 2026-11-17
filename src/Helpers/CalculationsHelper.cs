@@ -374,14 +374,14 @@ public static class CalculationsHelper
             return false;
         }
 
-        return stockData.ChainedValues.Count == 0;
+        return stockData.ActiveCustomInput is null;
     }
 
     private static IReadOnlyList<double> GetDerivedCloseList(StockData stockData)
     {
-        if (stockData.ChainedValues.Count > 0)
+        if (stockData.ActiveCustomInput is { Count: > 0 } custom)
         {
-            return stockData.ChainedValues;
+            return custom;
         }
 
         return stockData.ClosePrices;
@@ -1776,8 +1776,8 @@ public static class CalculationsHelper
         // (a three-arm control against master: TechnicalRatings, UltimateMomentumIndicator and
         // WoodieCommodityChannelIndex differed; InsyncIndex happened not to). Found by auditing every
         // call site of these methods, not just their bodies.
-        var inputList = stockData.ChainedValues is { Count: > 0 } chained
-            ? chained
+        var inputList = stockData.ActiveCustomInput is { Count: > 0 } customInput
+            ? customInput
             : inputName switch
         {
             InputName.Close => stockData.ClosePrices,
@@ -1810,7 +1810,7 @@ public static class CalculationsHelper
         openList = stockData.OpenPrices;
         // A chained series stands in for the close, as it does in the bar CustomInputState hands a streaming
         // state; the named input only decides what is read when nothing was chained.
-        closeList = stockData.ChainedValues is { Count: > 0 } ? inputList : stockData.ClosePrices;
+        closeList = stockData.ActiveCustomInput is { Count: > 0 } ? inputList : stockData.ClosePrices;
         volumeList = stockData.Volumes;
 
         return (inputList, highList, lowList, openList, closeList, volumeList);
@@ -1973,7 +1973,7 @@ public static class CalculationsHelper
         // they are built from the real ones - open first, high the max, low the min, close last. This
         // used to rebuild from TickerDataList whatever was chained in front, so every pivot point
         // silently ignored a custom series.
-        var chained = stockData.ChainedValues is { Count: > 0 } custom && custom.Count == tickerDataList.Count
+        var chained = stockData.ActiveCustomInput is { Count: > 0 } custom && custom.Count == tickerDataList.Count
             ? custom
             : null;
         List<double>? customHighs = null;

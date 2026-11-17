@@ -31,9 +31,21 @@ public class GlobalTestData
             while (csvReader.Read())
             {
                 var text = csvReader.GetString("Output");
-                var value = double.TryParse(text, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var parsed)
-                    ? Math.Round(parsed, 4)
-                    : 0d;
+                double value;
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    value = 0d;
+                }
+                else if (double.TryParse(text, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var parsed)
+                    && !double.IsNaN(parsed) && !double.IsInfinity(parsed))
+                {
+                    value = Math.Round(parsed, 4);
+                }
+                else
+                {
+                    throw new FormatException($"Invalid numeric Output '{text}' in fixture 'TestData/{fileName}.csv' at row {result.Count + 1}.");
+                }
+
                 result.Add((T)(object)value);
             }
         }

@@ -16,6 +16,7 @@ namespace OoplesFinance.StockIndicators.Models;
 
 public class StockData : IStockData
 {
+    private readonly List<double>? _baseInputValues;
     private List<double>? _inputValues;
     private List<double> _customValues = new List<double>();
     private Dictionary<string, List<double>> _outputValues = new Dictionary<string, List<double>>();
@@ -225,6 +226,10 @@ public class StockData : IStockData
     /// compute on the close instead of their own components.
     /// </remarks>
     internal List<double> ChainedValues { get; private set; } = new List<double>();
+
+    internal List<double>? ActiveCustomInput => ChainedValues.Count > 0 ? ChainedValues : _baseInputValues;
+
+    internal List<double>? ExplicitInputValues => _inputValues;
 
     /// <summary>
     /// The series the compute layer reads, as a span over whatever is backing it.
@@ -565,7 +570,7 @@ public class StockData : IStockData
     /// Private constructor for <see cref="WithValues"/> and <see cref="WithBaseInput"/>. Shares both
     /// materialized lists and zero-copy memory views by reference rather than copying them.
     /// </summary>
-    private StockData(StockData source, List<double>? baseInput, List<double> chainedValues)
+    private StockData(StockData source, List<double>? baseInput, List<double>? inputValues, List<double> chainedValues)
     {
         source.EnsureColumns();
 
@@ -581,18 +586,32 @@ public class StockData : IStockData
         _closeMemory = source._closeMemory;
         _volumeMemory = source._volumeMemory;
         _dateMemory = source._dateMemory;
-        _inputValues = baseInput;
+        _baseInputValues = baseInput;
+        _inputValues = inputValues;
         _columnsInitialized = true;
         _rowsInitialized = false;
         _tickerDataList = null;
 
         CustomValuesList = chainedValues;
+        if (chainedValues.Count == 0 && baseInput is not null)
+        {
+            ChainedValues = new List<double>(baseInput);
+        }
+
         OutputValues = new Dictionary<string, List<double>>();
         SignalsList = new List<Signal>();
         IndicatorName = IndicatorName.None;
         Options = source.Options;
         Count = source.Count;
     }
+
+    internal StockData CloneBarsForScratch() =>
+        !HasAnyMaterializedColumn
+        && _openMemory.HasValue && _highMemory.HasValue && _lowMemory.HasValue
+        && _closeMemory.HasValue && _volumeMemory.HasValue && _dateMemory.HasValue
+            ? FromColumnViews(_openMemory.Value, _highMemory.Value, _lowMemory.Value,
+                _closeMemory.Value, _volumeMemory.Value, _dateMemory.Value)
+            : new StockData(OpenPrices, HighPrices, LowPrices, ClosePrices, Volumes, Dates);
 
     /// <summary>
     /// Returns a new <see cref="StockData"/> over the same bars, but with <paramref name="values"/> as
@@ -630,7 +649,7 @@ public class StockData : IStockData
         // copying a long series on every derivation is exactly the cost this is meant to avoid.
         var list = values as List<double> ?? new List<double>(values);
 
-        return new StockData(this, _inputValues, list);
+        return new StockData(this, _baseInputValues, _inputValues, list);
     }
 
     /// <summary>
@@ -656,7 +675,7 @@ public class StockData : IStockData
         }
 
         var list = values as List<double> ?? new List<double>(values);
-        return new StockData(this, list, new List<double>());
+        return new StockData(this, list, list, new List<double>());
     }
 
     /// <summary>
@@ -665,7 +684,13 @@ public class StockData : IStockData
     /// </summary>
     public void ResetOutputs()
     {
-        CustomValuesList = new List<double>();
+        _customValues = new List<double>();
+        ChainedValues = _baseInputValues is not null ? new List<double>(_baseInputValues) : new List<double>();
+        if (_baseInputValues is not null)
+        {
+            _inputValues = _baseInputValues;
+        }
+
         OutputValues = new Dictionary<string, List<double>>();
         SignalsList = new List<Signal>();
         IndicatorName = IndicatorName.None;

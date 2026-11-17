@@ -15,7 +15,7 @@ internal static class BatchInputValidation
         if (data.DateSpan.Length != data.Count)
             throw new ArgumentException("Dates must contain exactly Count observations.", nameof(data));
         Check(data.ChainedSpanOrInput,
-            data.CustomValuesList.Count > 0 ? nameof(data.CustomValuesList) : nameof(data.InputValues));
+            data.ChainedValues.Count > 0 ? nameof(data.CustomValuesList) : nameof(data.InputValues));
 
         void Check(ReadOnlySpan<double> values, string field)
         {
