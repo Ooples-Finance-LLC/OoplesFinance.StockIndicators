@@ -233,14 +233,10 @@ internal sealed class ExtendedReversalState(int period, ExtendedReversalKind kin
                 ? 100
                 : 0;
         var white = a.Close >= a.Open;
-        if (
-            Margin(Math.Max(a.Open, a.Close), Math.Min(a.Open, a.Close), _s4) >= 0
-            || white != (b.Close >= b.Open)
+        var colorsRejected = white != (b.Close >= b.Open)
             || white != (d.Close >= d.Open)
-            || white == (last.Close >= last.Open)
-        )
-            return 0;
-        var match = white
+            || white == (last.Close >= last.Open);
+        var match = !colorsRejected && (white
             ? b.Open > a.Close
                 && c.High > b.High
                 && c.Low > b.Low
@@ -254,7 +250,13 @@ internal sealed class ExtendedReversalState(int period, ExtendedReversalKind kin
                 && d.High < c.High
                 && d.Low < c.Low
                 && last.Close > b.Open
-                && last.Close < a.Close;
+                && last.Close < a.Close);
+        // Only the anchor's open/close enter the skipped exact margin. Keep
+        // nonfinite anchor failures before Update changes lagged state/history.
+        if (!match && FrameworkCompatibility.IsFinite(a.Open) && FrameworkCompatibility.IsFinite(a.Close))
+            return 0;
+        if (Margin(Math.Max(a.Open, a.Close), Math.Min(a.Open, a.Close), _s4) >= 0)
+            return 0;
         return match
             ? white
                 ? -100

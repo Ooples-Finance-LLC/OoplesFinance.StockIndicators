@@ -103,6 +103,42 @@ public sealed class MultiBarCandleSharedExecutionTests
         }
     }
 
+    [Fact]
+    public void DefaultReversalNonfiniteAnchorRetainsMarginErrorBeforeStateChanges()
+    {
+        // Unknown kinds use range accumulation but the Breakaway signal
+        // branch, so nonfinite open/close can reach a retained anchor.
+        var state = new ExtendedReversalState(1, (ExtendedReversalKind)123);
+        for (int i = 0; i < 5; i++)
+        {
+            var bar = new Bar(default, i == 1 ? double.NaN : 2, 3, 0, 1, 1);
+            Assert.Equal(0d, state.Update(bar));
+        }
+        var next = new Bar(default, 0, 3, 0, 0, 1);
+        // Geometry rejects this bar, but the original anchor margin must
+        // still throw. Repeating proves the anchor was not shifted.
+        for (int repeat = 0; repeat < 2; repeat++)
+        {
+            var error = Assert.Throws<ArithmeticException>(() => state.Update(next));
+            Assert.Equal("An exact finite mean requires finite inputs.", error.Message);
+        }
+    }
+
+    [Fact]
+    public void BreakawayInvalidCurrentPriceRetainsUpdateAndNextDequeueErrors()
+    {
+        var state = (IIndicatorState)new BreakawayCandle(1).CreateState();
+        var bar = new Bar(default, 2, 3, 0, 1, 1);
+        for (int i = 0; i < 5; i++) Assert.Equal(0d, state.Update(bar));
+        var bad = new Bar(default, double.NaN, 3, 0, 1, 1);
+        var updateError = Assert.Throws<ArithmeticException>(() => state.Update(bad));
+        Assert.Equal("An exact finite mean requires finite inputs.", updateError.Message);
+        // The old Update enqueues before accumulating. Keep the caught-error
+        // queue state: the next valid bar still fails when dequeuing bad data.
+        var dequeueError = Assert.Throws<ArithmeticException>(() => state.Update(bar));
+        Assert.Equal(updateError.Message, dequeueError.Message);
+    }
+
     private static async Task CheckReference(Bar[] bars, IndicatorBase owner)
     {
         var state = (IIndicatorState)owner.CreateState();
