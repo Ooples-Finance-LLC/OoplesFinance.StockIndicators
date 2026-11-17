@@ -96,12 +96,20 @@ jobs:
           $receiptBefore=(Get-FileHash -LiteralPath $gpuReceipt -Algorithm SHA256).Hash.ToLowerInvariant()
           $gpuCheckout=Join-Path $env:GITHUB_WORKSPACE 'gpu-proof'
           $receiptRelative='benchmarks/results/shared-rollout/local-gpu-contracts/receipt.json'
-          Remove-Item -LiteralPath $gpuReceipt
-          git -C $gpuCheckout -c core.autocrlf=false restore ('--source='+$env:GPU_RECEIPT_COMMIT) --worktree -- $receiptRelative
-          $restoreExit=$LASTEXITCODE
-          $receiptAfter=if (Test-Path -LiteralPath $gpuReceipt -PathType Leaf) { (Get-FileHash -LiteralPath $gpuReceipt -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
-          [ordered]@{commit=$env:GPU_RECEIPT_COMMIT;restored_path=$receiptRelative;checkout_before_sha256=$receiptBefore;restored_after_sha256=$receiptAfter;expected_sha256=$env:EXPECTED_GPU_RECEIPT_SHA;git_restore_exit_code=$restoreExit;command_scoped_autocrlf=$false;global_git_configuration_changed=$false} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:SCREEN_ROOT 'gpu-receipt-restoration.json') -Encoding utf8
-          if ($restoreExit -ne 0) { throw 'Pinned GPU receipt byte restoration failed; preserve checkout evidence' }
+          $blobStart=[Diagnostics.ProcessStartInfo]::new((Get-Command git).Source)
+          $blobStart.UseShellExecute=$false;$blobStart.CreateNoWindow=$true;$blobStart.RedirectStandardOutput=$true;$blobStart.RedirectStandardError=$true
+          foreach ($argument in @('-C',$gpuCheckout,'cat-file','blob',($env:GPU_RECEIPT_COMMIT+':'+$receiptRelative))) { $blobStart.ArgumentList.Add([string]$argument) }
+          $blobProcess=[Diagnostics.Process]::new();$blobProcess.StartInfo=$blobStart
+          try {
+            if (!$blobProcess.Start()) { throw 'Cannot read pinned GPU receipt blob' }
+            $blobError=$blobProcess.StandardError.ReadToEndAsync()
+            $blobFile=[IO.File]::Open($gpuReceipt,[IO.FileMode]::Create,[IO.FileAccess]::Write,[IO.FileShare]::None)
+            try { $blobProcess.StandardOutput.BaseStream.CopyTo($blobFile);$blobFile.Flush($true) } finally { $blobFile.Dispose() }
+            $blobProcess.WaitForExit();$restoreExit=$blobProcess.ExitCode;$blobErrorText=$blobError.GetAwaiter().GetResult()
+          } finally { $blobProcess.Dispose() }
+          $receiptAfter=(Get-FileHash -LiteralPath $gpuReceipt -Algorithm SHA256).Hash.ToLowerInvariant()
+          [ordered]@{commit=$env:GPU_RECEIPT_COMMIT;restored_path=$receiptRelative;checkout_before_sha256=$receiptBefore;restored_after_sha256=$receiptAfter;expected_sha256=$env:EXPECTED_GPU_RECEIPT_SHA;git_cat_file_exit_code=$restoreExit;transport='git cat-file blob stdout BaseStream to FileStream';git_stderr=$blobErrorText;global_git_configuration_changed=$false} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:SCREEN_ROOT 'gpu-receipt-restoration.json') -Encoding utf8
+          if ($restoreExit -ne 0) { throw 'Pinned GPU receipt blob read failed; preserve checkout evidence' }
           if ((Get-FileHash $gpuReceipt).Hash.ToLowerInvariant() -ne $env:EXPECTED_GPU_RECEIPT_SHA) { throw 'Wrong approved candidate GPU100 receipt' }
           $gpuTrx=Join-Path $env:GPU_INPUT 'gpu.trx.gz'
           if ((Get-FileHash $gpuTrx).Hash.ToLowerInvariant() -ne $env:EXPECTED_GPU_TRX_GZ_SHA) { throw 'Wrong approved GPU100 compressed TRX' }
