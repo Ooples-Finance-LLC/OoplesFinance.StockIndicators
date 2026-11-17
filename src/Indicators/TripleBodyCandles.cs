@@ -199,7 +199,7 @@ internal sealed class TripleBodyCandleState(
     TripleBodyCandleKind kind
 ) : IIndicatorState
 {
-    private readonly Queue<Bar> _longHistory = new(),
+    private readonly Queue<BodyFactors> _longHistory = new(),
         _shortHistory = new();
     private readonly int _warmup = Math.Max(longPeriod, shortPeriod) + 2;
     private ExactMeanAccumulator _longSum,
@@ -209,7 +209,29 @@ internal sealed class TripleBodyCandleState(
         _lagShort;
     private Bar _first,
         _second;
+    private BodyFactors _firstBody, _secondBody;
     private int _seen;
+
+    private readonly struct BodyFactors
+    {
+        private readonly ExactMeanAccumulator.ProductFactor _top, _bottom;
+
+        internal BodyFactors(in Bar bar)
+        {
+            var top = Math.Max(bar.Open, bar.Close);
+            var bottom = Math.Min(bar.Open, bar.Close);
+            if (double.IsNaN(top) || double.IsInfinity(top) || double.IsNaN(bottom) || double.IsInfinity(bottom))
+                throw new ArithmeticException("An exact finite mean requires finite inputs.");
+            _top = new(top);
+            _bottom = new(bottom);
+        }
+
+        internal void AddTo(ref ExactMeanAccumulator sum, int weight)
+        {
+            sum.AddFactor(_top, weight);
+            sum.AddFactor(_bottom, -weight);
+        }
+    }
 
     public void Reset()
     {
@@ -217,6 +239,7 @@ internal sealed class TripleBodyCandleState(
         _shortHistory.Clear();
         _longSum = _shortSum = _lagLong = _lagLong2 = _lagShort = default;
         _first = _second = default;
+        _firstBody = _secondBody = default;
         _seen = 0;
     }
 
@@ -233,9 +256,11 @@ internal sealed class TripleBodyCandleState(
         _lagLong = _longSum;
         _lagShort = _shortSum;
         if (_longHistory.Count == longPeriod)
-            Add(ref _longSum, _longHistory.Dequeue(), -1);
-        _longHistory.Enqueue(bar);
-        Add(ref _longSum, bar, 1);
+            _longHistory.Dequeue().AddTo(ref _longSum, -1);
+        // Construct only at the original first body-add point, after matching.
+        var body = new BodyFactors(bar);
+        _longHistory.Enqueue(body);
+        body.AddTo(ref _longSum, 1);
         if (kind != TripleBodyCandleKind.TwoCrows)
         {
             if (shortPeriod == longPeriod)
@@ -243,13 +268,15 @@ internal sealed class TripleBodyCandleState(
             else
             {
                 if (_shortHistory.Count == shortPeriod)
-                    Add(ref _shortSum, _shortHistory.Dequeue(), -1);
-                _shortHistory.Enqueue(bar);
-                Add(ref _shortSum, bar, 1);
+                    _shortHistory.Dequeue().AddTo(ref _shortSum, -1);
+                _shortHistory.Enqueue(body);
+                body.AddTo(ref _shortSum, 1);
             }
         }
         _first = _second;
         _second = bar;
+        _firstBody = _secondBody;
+        _secondBody = body;
         if (_seen < _warmup)
             _seen++;
         return signal;
@@ -264,14 +291,17 @@ internal sealed class TripleBodyCandleState(
     private bool Matches(in Bar c)
     {
         var longMargin = _lagLong2;
-        Add(ref longMargin, _first, -longPeriod);
+        _firstBody.AddTo(ref longMargin, -longPeriod);
         if (longMargin.Sign >= 0)
             return false;
         if (kind != TripleBodyCandleKind.TwoCrows)
         {
             var river = kind == TripleBodyCandleKind.UniqueThreeRiver;
             var shortMargin = river ? _shortSum : _lagShort;
-            Add(ref shortMargin, river ? c : _second, -shortPeriod);
+            // The current river body is not retained yet; preserve its original
+            // arithmetic/exception point instead of eagerly decoding it.
+            if (river) Add(ref shortMargin, c, -shortPeriod);
+            else _secondBody.AddTo(ref shortMargin, -shortPeriod);
             if (river ? shortMargin.Sign <= 0 : shortMargin.Sign < 0)
                 return false;
         }
