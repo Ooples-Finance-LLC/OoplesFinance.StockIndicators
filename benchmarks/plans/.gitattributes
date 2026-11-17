@@ -10,4 +10,4 @@ evidence/current-baseline-ten-refresh-scope-20261116.json text eol=lf
 evidence/current-baseline-ten-preflight-20261116/** -text
 hosted-matchinglow-only-grid-20261116.json text eol=lf
 evidence/matchinglow-only-grid-scope-20261116.json text eol=lf
-evidence/matchinglow-only-grid-preflight-20261116/** -text
+evidence/matchinglow-only-grid-preflight-20261116/** -text -diff

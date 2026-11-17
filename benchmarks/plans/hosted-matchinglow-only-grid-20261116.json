@@ -244,7 +244,7 @@
   },
   "scope_approval": {
     "path": "benchmarks/plans/evidence/matchinglow-only-grid-scope-20261116.json",
-    "sha256": "fe4a6af82946f9ee5242b1150f87872e705c6beba4d2c93a24f5e8baf7d45028"
+    "sha256": "8d73d7ae1cda7fbb602d27b49d677f8763265751e4a357196a09a1a08a570e8e"
   },
   "preflight": {
     "receipt": "receipt.json",

@@ -1,0 +1,6 @@
+TaLib.Candles.MatchingLow 1000 independent frozen/canonical parity passed; compared_values=994
+TaLib.Candles.MatchingLow 10000 independent frozen/canonical parity passed; compared_values=9994
+TaLib.Candles.SeparatingLines 1000 independent frozen/canonical parity passed; compared_values=989
+TaLib.Candles.SeparatingLines 10000 independent frozen/canonical parity passed; compared_values=9989
+TaLib.Candles.StickSandwich 1000 independent frozen/canonical parity passed; compared_values=993
+TaLib.Candles.StickSandwich 10000 independent frozen/canonical parity passed; compared_values=9993
