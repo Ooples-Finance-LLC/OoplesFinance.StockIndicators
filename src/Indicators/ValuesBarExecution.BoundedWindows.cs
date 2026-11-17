@@ -1423,6 +1423,8 @@ internal static partial class ValuesBarExecution
         if (typeof(T) == typeof(StarReversalKernel) && indicator is AbandonedBabyCandle baby
             && baby.LongPeriod <= 64 && baby.ShortPeriod <= 64 && baby.DojiPeriod <= 64)
             return ComputeAbandonedBlocks(source, output[0], owned, start, end, period, seed, tail, cancellation, baby);
+        if (typeof(T) == typeof(TripleBodyKernel) && UsesTripleBodyBlocks(indicator))
+            return ComputeTripleBodyBlocks(source, output[0], owned, start, end, period, seed, tail, cancellation, indicator);
         if (typeof(T) == typeof(MoneyFlowKernel))
             return ComputeMoneyFlowColumn(source, output, owned, start, end, (WindowMoneyFlowIndex)indicator, seed, tail, cancellation);
         if (typeof(T) == typeof(UltimateKernel))
