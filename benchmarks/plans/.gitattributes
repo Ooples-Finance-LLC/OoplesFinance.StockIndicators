@@ -13,3 +13,6 @@ evidence/matchinglow-only-grid-scope-20261116.json text eol=lf
 evidence/matchinglow-only-grid-preflight-20261116/** -text -diff
 hosted-candle-predicate-order-20261116.json text eol=lf
 hosted-candle-predicate-order-20261116-approval.json text eol=lf
+hosted-triple-body-macro-20261117.json text eol=lf
+hosted-triple-body-macro-20261117-approval.json text eol=lf
+evidence/triple-body-macro-roi-20261117.json text eol=lf

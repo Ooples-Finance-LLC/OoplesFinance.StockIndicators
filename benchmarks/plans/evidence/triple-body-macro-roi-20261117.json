@@ -1,0 +1,488 @@
+{
+  "schema": 1,
+  "source": "7c9f23365eb08ce20c68554aafc75c8b7ff2f7d5",
+  "production_sha256": "fde8306dcc2ad2cb4deb72be8b90a97d0f6b444156b51c94adf4abaf799bd5e6",
+  "source_fingerprint": "c31265a72b8dcd267c40c268fd2f9c98e6419d8439d6882fd5e973e35082d0fb",
+  "diagnostic_only": true,
+  "qualification": false,
+  "caps_auth_and_outputs_verified": true,
+  "approved_for_conditional_qualification": true,
+  "new_native_closure_pairs": [
+    "TaLib.Candles.TwoCrows",
+    "TaLib.Candles.UpsideGapTwoCrows",
+    "TaLib.Candles.UniqueThreeRiver"
+  ],
+  "strongest_native_context_candidate": "TaLib.Candles.UniqueThreeRiver",
+  "run_id": "44196625592",
+  "workflow_head": "a1370713f8c9db3ba5d1bfeb828d17b08bf2aea7",
+  "workflow_path": ".github/workflows/adosc-current-gap-screen.yml",
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/44196625592",
+  "cases": 40,
+  "raw_samples": 400,
+  "full_byte_source_snapshots_verified": 320,
+  "sizes": [
+    {
+      "bars": 1000,
+      "artifact_id": 14379771025,
+      "artifact_name": "triple-body-macro-roi-1000",
+      "artifact_zip_sha256": "5ab523504c96ff18bc4e6c1793fa0e25beeaf541f5a1d91a05e7a8fa2324324a",
+      "artifact_api_url": "https://api.github.com/repos/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/artifacts/14379771025",
+      "artifact_run_id": 44196625592,
+      "artifact_head_sha": "a1370713f8c9db3ba5d1bfeb828d17b08bf2aea7",
+      "summary_sha256": "3513f6eda34a4c5820866fe54dcc4fa05d6347c262f173179ba1b6e62addf417",
+      "summary_path": "Z:\\StockIndicators-Archives\\active-performance-evidence\\triple-body-macro-roi-44196625592\\1000\\collection-summary.json",
+      "controller_sha256": "c46b56a4bc664f4f8be4681032758043a1590b3113e259723665aea32239d603",
+      "controller_path": "Z:\\StockIndicators-Archives\\active-performance-evidence\\triple-body-macro-roi-44196625592\\1000\\raw\\controller.json",
+      "provenance_sha256": "cf7450fe9eab9c7e2f8ab03778306d0ef81b5ab885fa8c9931a6263c00ab7ea2",
+      "provenance_path": "Z:\\StockIndicators-Archives\\active-performance-evidence\\triple-body-macro-roi-44196625592\\1000\\raw\\provenance.json",
+      "raw_zip_path": "Z:\\StockIndicators-Archives\\active-performance-evidence\\triple-body-macro-roi-44196625592\\1000\\raw-artifact.zip",
+      "cases": 20,
+      "raw_samples": 200,
+      "full_byte_source_snapshots_verified": 160,
+      "runtime_assets_per_case": 94,
+      "protected_assets_per_case": 99,
+      "gates": {
+        "idle-before": {
+          "passed": true,
+          "samples": 12,
+          "max_cpu_percent": 9.528700573002535,
+          "build_test_processes": [],
+          "sha256": "23279e633d428d019a5c3e74fffd44601df2f30cfe18bac08c1f590de8c69e8d"
+        },
+        "idle-after": {
+          "passed": true,
+          "samples": 12,
+          "max_cpu_percent": 4.362410876067724,
+          "build_test_processes": [],
+          "sha256": "aedd4a9b844f46bae6cd082b3d9fdf28e63ee68660de7d1436d32bc65d7dbeed"
+        }
+      },
+      "controller_status": {
+        "timings_valid_for_diagnostic_only": true,
+        "failure": null,
+        "completed_cases": 20,
+        "elapsed_seconds": 55.9700155
+      },
+      "runtime": {
+        "clr": "10.0.15",
+        "logical_processors": 4,
+        "dop": 2,
+        "effective_workers": 2,
+        "warmups": 1000,
+        "measured_iterations": 10,
+        "invocations_per_iteration": 1
+      },
+      "round_medians_and_ranges": [
+        {
+          "pair": "TaLib.Candles.ThreeInside",
+          "bars": 1000,
+          "rounds": [
+            {
+              "round_index": 0,
+              "arm": "old",
+              "median_ms": 0.3003,
+              "min_ms": 0.273,
+              "max_ms": 0.4214
+            },
+            {
+              "round_index": 1,
+              "arm": "new",
+              "median_ms": 0.4037,
+              "min_ms": 0.4006,
+              "max_ms": 0.4642
+            },
+            {
+              "round_index": 2,
+              "arm": "new",
+              "median_ms": 0.42215,
+              "min_ms": 0.4014,
+              "max_ms": 0.4661
+            },
+            {
+              "round_index": 3,
+              "arm": "old",
+              "median_ms": 0.26890000000000003,
+              "min_ms": 0.2659,
+              "max_ms": 0.3086
+            },
+            {
+              "round_index": 4,
+              "arm": "native",
+              "median_ms": 0.06745000000000001,
+              "min_ms": 0.0671,
+              "max_ms": 0.0756
+            }
+          ]
+        },
+        {
+          "pair": "TaLib.Candles.TwoCrows",
+          "bars": 1000,
+          "rounds": [
+            {
+              "round_index": 0,
+              "arm": "old",
+              "median_ms": 0.3077,
+              "min_ms": 0.2531,
+              "max_ms": 0.4236
+            },
+            {
+              "round_index": 1,
+              "arm": "new",
+              "median_ms": 0.020900000000000002,
+              "min_ms": 0.0197,
+              "max_ms": 0.0492
+            },
+            {
+              "round_index": 2,
+              "arm": "new",
+              "median_ms": 0.0314,
+              "min_ms": 0.0297,
+              "max_ms": 0.059
+            },
+            {
+              "round_index": 3,
+              "arm": "old",
+              "median_ms": 0.5397000000000001,
+              "min_ms": 0.5326,
+              "max_ms": 0.5659
+            },
+            {
+              "round_index": 4,
+              "arm": "native",
+              "median_ms": 0.4042,
+              "min_ms": 0.3979,
+              "max_ms": 0.4359
+            }
+          ]
+        },
+        {
+          "pair": "TaLib.Candles.UpsideGapTwoCrows",
+          "bars": 1000,
+          "rounds": [
+            {
+              "round_index": 0,
+              "arm": "old",
+              "median_ms": 0.30595,
+              "min_ms": 0.2725,
+              "max_ms": 0.4303
+            },
+            {
+              "round_index": 1,
+              "arm": "new",
+              "median_ms": 0.020999999999999998,
+              "min_ms": 0.0198,
+              "max_ms": 0.0463
+            },
+            {
+              "round_index": 2,
+              "arm": "new",
+              "median_ms": 0.02095,
+              "min_ms": 0.0204,
+              "max_ms": 0.0497
+            },
+            {
+              "round_index": 3,
+              "arm": "old",
+              "median_ms": 0.26835,
+              "min_ms": 0.2634,
+              "max_ms": 0.2995
+            },
+            {
+              "round_index": 4,
+              "arm": "native",
+              "median_ms": 0.066,
+              "min_ms": 0.0633,
+              "max_ms": 0.0755
+            }
+          ]
+        },
+        {
+          "pair": "TaLib.Candles.UniqueThreeRiver",
+          "bars": 1000,
+          "rounds": [
+            {
+              "round_index": 0,
+              "arm": "old",
+              "median_ms": 0.2892,
+              "min_ms": 0.284,
+              "max_ms": 0.3222
+            },
+            {
+              "round_index": 1,
+              "arm": "new",
+              "median_ms": 0.0617,
+              "min_ms": 0.0604,
+              "max_ms": 0.1055
+            },
+            {
+              "round_index": 2,
+              "arm": "new",
+              "median_ms": 0.0625,
+              "min_ms": 0.0604,
+              "max_ms": 0.09
+            },
+            {
+              "round_index": 3,
+              "arm": "old",
+              "median_ms": 0.4043,
+              "min_ms": 0.3987,
+              "max_ms": 0.4304
+            },
+            {
+              "round_index": 4,
+              "arm": "native",
+              "median_ms": 0.0601,
+              "min_ms": 0.059,
+              "max_ms": 0.0836
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "bars": 10000,
+      "artifact_id": 14380121172,
+      "artifact_name": "triple-body-macro-roi-10000",
+      "artifact_zip_sha256": "0ad67fd8df58c41b2d220549020d97b6730bf4dcef46877ad12c18293ee6037a",
+      "artifact_api_url": "https://api.github.com/repos/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/artifacts/14380121172",
+      "artifact_run_id": 44196625592,
+      "artifact_head_sha": "a1370713f8c9db3ba5d1bfeb828d17b08bf2aea7",
+      "summary_sha256": "15c406af6e53750b584b87b9555a9c52f4eb5280cf4e072c14bc8b9bf0fd486f",
+      "summary_path": "Z:\\StockIndicators-Archives\\active-performance-evidence\\triple-body-macro-roi-44196625592\\10000\\collection-summary.json",
+      "controller_sha256": "10849d58627daa42f89222805ff974ea64a4c96c974e5351fd060c5e752933a0",
+      "controller_path": "Z:\\StockIndicators-Archives\\active-performance-evidence\\triple-body-macro-roi-44196625592\\10000\\raw\\controller.json",
+      "provenance_sha256": "903fc6b0fc5e6d557dfc537957040dbb97927e52afd1b4741d4c53b0d3a9e53a",
+      "provenance_path": "Z:\\StockIndicators-Archives\\active-performance-evidence\\triple-body-macro-roi-44196625592\\10000\\raw\\provenance.json",
+      "raw_zip_path": "Z:\\StockIndicators-Archives\\active-performance-evidence\\triple-body-macro-roi-44196625592\\10000\\raw-artifact.zip",
+      "cases": 20,
+      "raw_samples": 200,
+      "full_byte_source_snapshots_verified": 160,
+      "runtime_assets_per_case": 94,
+      "protected_assets_per_case": 99,
+      "gates": {
+        "idle-before": {
+          "passed": true,
+          "samples": 12,
+          "max_cpu_percent": 13.37724928894457,
+          "build_test_processes": [],
+          "sha256": "abfced52bdb9618b35a69880128e14487a8450ef48a597c511369c52ff9b018a"
+        },
+        "idle-after": {
+          "passed": true,
+          "samples": 12,
+          "max_cpu_percent": 5.12892938388635,
+          "build_test_processes": [],
+          "sha256": "0a4500efc6c1cea0f5c506fbf0c4c7f0258e54ea38e9eaeccb88395e2b09f7b6"
+        }
+      },
+      "controller_status": {
+        "timings_valid_for_diagnostic_only": true,
+        "failure": null,
+        "completed_cases": 20,
+        "elapsed_seconds": 55.34818
+      },
+      "runtime": {
+        "clr": "10.0.15",
+        "logical_processors": 4,
+        "dop": 2,
+        "effective_workers": 2,
+        "warmups": 1000,
+        "measured_iterations": 10,
+        "invocations_per_iteration": 1
+      },
+      "round_medians_and_ranges": [
+        {
+          "pair": "TaLib.Candles.ThreeInside",
+          "bars": 10000,
+          "rounds": [
+            {
+              "round_index": 0,
+              "arm": "old",
+              "median_ms": 0.36265000000000003,
+              "min_ms": 0.3388,
+              "max_ms": 0.5934
+            },
+            {
+              "round_index": 1,
+              "arm": "new",
+              "median_ms": 0.3618,
+              "min_ms": 0.3421,
+              "max_ms": 0.6649
+            },
+            {
+              "round_index": 2,
+              "arm": "new",
+              "median_ms": 0.396,
+              "min_ms": 0.3681,
+              "max_ms": 0.6189
+            },
+            {
+              "round_index": 3,
+              "arm": "old",
+              "median_ms": 0.3798,
+              "min_ms": 0.3521,
+              "max_ms": 0.6574
+            },
+            {
+              "round_index": 4,
+              "arm": "native",
+              "median_ms": 0.4011,
+              "min_ms": 0.3978,
+              "max_ms": 0.5024
+            }
+          ]
+        },
+        {
+          "pair": "TaLib.Candles.TwoCrows",
+          "bars": 10000,
+          "rounds": [
+            {
+              "round_index": 0,
+              "arm": "old",
+              "median_ms": 0.28735,
+              "min_ms": 0.2803,
+              "max_ms": 0.5255
+            },
+            {
+              "round_index": 1,
+              "arm": "new",
+              "median_ms": 0.1298,
+              "min_ms": 0.1268,
+              "max_ms": 0.3812
+            },
+            {
+              "round_index": 2,
+              "arm": "new",
+              "median_ms": 0.14905000000000002,
+              "min_ms": 0.1419,
+              "max_ms": 0.3706
+            },
+            {
+              "round_index": 3,
+              "arm": "old",
+              "median_ms": 0.51635,
+              "min_ms": 0.5055,
+              "max_ms": 0.897
+            },
+            {
+              "round_index": 4,
+              "arm": "native",
+              "median_ms": 0.1824,
+              "min_ms": 0.181,
+              "max_ms": 0.2696
+            }
+          ]
+        },
+        {
+          "pair": "TaLib.Candles.UpsideGapTwoCrows",
+          "bars": 10000,
+          "rounds": [
+            {
+              "round_index": 0,
+              "arm": "old",
+              "median_ms": 0.37475,
+              "min_ms": 0.3473,
+              "max_ms": 0.6253
+            },
+            {
+              "round_index": 1,
+              "arm": "new",
+              "median_ms": 0.1225,
+              "min_ms": 0.1047,
+              "max_ms": 0.3483
+            },
+            {
+              "round_index": 2,
+              "arm": "new",
+              "median_ms": 0.29615,
+              "min_ms": 0.2813,
+              "max_ms": 0.5326
+            },
+            {
+              "round_index": 3,
+              "arm": "old",
+              "median_ms": 0.58665,
+              "min_ms": 0.5777,
+              "max_ms": 0.8556
+            },
+            {
+              "round_index": 4,
+              "arm": "native",
+              "median_ms": 0.34014999999999995,
+              "min_ms": 0.3281,
+              "max_ms": 0.4043
+            }
+          ]
+        },
+        {
+          "pair": "TaLib.Candles.UniqueThreeRiver",
+          "bars": 10000,
+          "rounds": [
+            {
+              "round_index": 0,
+              "arm": "old",
+              "median_ms": 0.59655,
+              "min_ms": 0.3628,
+              "max_ms": 0.6529
+            },
+            {
+              "round_index": 1,
+              "arm": "new",
+              "median_ms": 0.1085,
+              "min_ms": 0.0969,
+              "max_ms": 0.3118
+            },
+            {
+              "round_index": 2,
+              "arm": "new",
+              "median_ms": 0.10735,
+              "min_ms": 0.1011,
+              "max_ms": 0.3155
+            },
+            {
+              "round_index": 3,
+              "arm": "old",
+              "median_ms": 0.5952999999999999,
+              "min_ms": 0.5744,
+              "max_ms": 0.849
+            },
+            {
+              "round_index": 4,
+              "arm": "native",
+              "median_ms": 0.38234999999999997,
+              "min_ms": 0.3636,
+              "max_ms": 0.4811
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "control_risk": {
+    "pair": "TaLib.Candles.ThreeInside",
+    "bars": 1000,
+    "old_round_medians_ms": [
+      0.3003,
+      0.2689
+    ],
+    "candidate_round_medians_ms": [
+      0.4037,
+      0.42215
+    ],
+    "native_context_median_ms": 0.06745,
+    "disposition": "Adverse unchanged-control timing retained. All source decisions and prior-native-win protections remain required; this observation is not dismissed or exempted."
+  },
+  "independent_parent_authentication": true,
+  "scope_disposition": "Authorize only the bounded120-case24-decision qualification under unchanged gates. Diagnostic native-context observations do not qualify source or count report wins.",
+  "source_accepted": false,
+  "report_imported": false,
+  "new_winning_rows_counted": 0,
+  "measurement_policy_changed": false,
+  "pooled_with_other_runs": false,
+  "limits": [
+    "Only this complete fresh run supplies qualification setup evidence; no prior timings are pooled.",
+    "All raw samples and outliers are retained; no native confidence or source acceptance follows from these diagnostic medians.",
+    "ThreeInside cannot supply a new closure and remains a protected control.",
+    "Qualification must pass every unchanged source/native/runtime/sampling gate."
+  ]
+}

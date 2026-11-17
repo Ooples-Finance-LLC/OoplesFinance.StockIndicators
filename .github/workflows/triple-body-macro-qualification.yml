@@ -1,0 +1,115 @@
+name: Conditional TripleBody macro qualification
+on:
+  push:
+    branches:
+      - perf/hosted-triple-body-macro-qualification-20261117
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: triple-body-macro-qualification
+  cancel-in-progress: false
+env:
+  HOSTED_TIMING_PLAN: benchmarks/plans/hosted-triple-body-macro-20261117.json
+jobs:
+  qualify:
+    runs-on: windows-2025
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /scripts/
+            /.github/
+            /benchmarks/plans/
+            /benchmarks/results/remaining-indicators/hosted-targeted-43992359476-attempt1/decision.json
+      - name: Fail closed before SDK or package setup unless conditional evidence is frozen
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          function RequireBoolean($value,[bool]$expected,[string]$message) { if ($value -isnot [bool] -or $value -ne $expected) { throw $message } }
+          $plan=Get-Content -LiteralPath $env:HOSTED_TIMING_PLAN -Raw | ConvertFrom-Json
+          RequireBoolean $plan.inputs_ready $true 'Conditional plan readiness must be Boolean true'
+          if (!$plan.inputs_ready -or $plan.sources.successor -ne '7c9f23365eb08ce20c68554aafc75c8b7ff2f7d5') { throw 'Conditional qualification remains UNBOUND; no SDK/package/input setup permitted' }
+          $approval=$plan.scope_approval
+          if ((Get-FileHash -LiteralPath $approval.path -Algorithm SHA256).Hash.ToLowerInvariant() -ne $approval.sha256) { throw 'Approval hash mismatch' }
+          $approved=Get-Content -LiteralPath $approval.path -Raw | ConvertFrom-Json
+          RequireBoolean $approved.approved $true 'Conditional approval must be Boolean true'
+          if (!$approved.approved -or $approved.scope -ne 'triple-body-macro-20261117' -or $approved.cases -ne 120 -or $approved.decisions -ne 24) { throw 'Conditional qualification is not approved' }
+          foreach ($key in @('manifest_sha256','gpu_receipt_sha256','production_sha256','source_fingerprint','artifact_zip_sha256')) {
+            if ($plan.candidate.$key -notmatch '^[a-f0-9]{64}$') { throw 'Actual CI/GPU hash pins remain UNBOUND' }
+          }
+          foreach ($key in @('producer','evidence_source')) { if ($plan.candidate.$key -notmatch '^[a-f0-9]{40}$') { throw 'Actual CI/GPU commit pins remain UNBOUND' } }
+          if ($plan.candidate.ci_run -notmatch '^\d+$' -or $plan.candidate.artifact_id -notmatch '^\d+$') { throw 'Actual CI artifact/run pins remain UNBOUND' }
+          $roi=$plan.roi_evidence
+          if ($roi.sha256 -notmatch '^[a-f0-9]{64}$' -or (Get-FileHash -LiteralPath $roi.path -Algorithm SHA256).Hash.ToLowerInvariant() -ne $roi.sha256) { throw 'Authenticated ROI evidence remains UNBOUND' }
+          $evidence=Get-Content -LiteralPath $roi.path -Raw | ConvertFrom-Json
+          RequireBoolean $evidence.diagnostic_only $true 'ROI diagnostic flag must be Boolean true'
+          RequireBoolean $evidence.qualification $false 'ROI cannot claim qualification'
+          RequireBoolean $evidence.caps_auth_and_outputs_verified $true 'ROI caps/auth/output proof must be Boolean true'
+          RequireBoolean $evidence.approved_for_conditional_qualification $true 'Conditional ROI disposition must be Boolean true'
+          $eligible=@('TaLib.Candles.TwoCrows','TaLib.Candles.UpsideGapTwoCrows','TaLib.Candles.UniqueThreeRiver')
+          if ($evidence.source -ne $plan.sources.successor -or !$evidence.diagnostic_only -or $evidence.qualification -or !$evidence.caps_auth_and_outputs_verified -or !$evidence.approved_for_conditional_qualification -or @($evidence.new_native_closure_pairs).Count -lt 1 -or @($evidence.new_native_closure_pairs | Where-Object { $_ -notin $eligible }).Count -gt 0) { throw 'Actual new native closure beyond ThreeInside is required' }
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install psutil==7.2.2
+      - name: Enforce frozen source, ROI and conditional approval before downloading inputs
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          Push-Location scripts
+          try {
+            python -m unittest -v test_hosted_triple_body_macro_qualification test_hosted_candle_predicate_qualification
+            if ($LASTEXITCODE -ne 0) { throw 'Scoped qualification orchestration tests failed' }
+            python -c "from hosted_timing import triple_body_macro_qualification as q; q.validate_scope(q.p.read(q.p.PLAN))"
+            if ($LASTEXITCODE -ne 0) { throw 'Conditional plan is UNBOUND or not approved; no downloads or qualification' }
+          } finally { Pop-Location }
+          $plan=Get-Content -LiteralPath $env:HOSTED_TIMING_PLAN -Raw | ConvertFrom-Json
+          $artifact=Invoke-RestMethod -Uri ('https://api.github.com/repos/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/artifacts/'+$plan.candidate.artifact_id) -Headers @{Authorization=('Bearer '+$env:GH_TOKEN);'X-GitHub-Api-Version'='2022-11-28'}
+          if ($artifact.id -ne [long]$plan.candidate.artifact_id -or $artifact.name -ne 'candidate-correctness-inputs' -or $artifact.expired -or $artifact.workflow_run.id -ne [long]$plan.candidate.ci_run -or $artifact.workflow_run.head_sha -ne $plan.candidate.producer -or $artifact.digest -ne ('sha256:'+$plan.candidate.artifact_zip_sha256)) { throw 'Candidate artifact API identity/digest mismatch' }
+          $artifact | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath 'macro-artifact-authentication.json' -Encoding utf8
+          ('NEW_CI_RUN='+$plan.candidate.ci_run) | Add-Content -LiteralPath $env:GITHUB_ENV
+          ('NEW_ARTIFACT_ID='+$plan.candidate.artifact_id) | Add-Content -LiteralPath $env:GITHUB_ENV
+      - uses: actions/download-artifact@v8
+        with:
+          name: named-projection-inputs
+          path: baseline
+          run-id: 43880487485
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v8
+        with:
+          name: candidate-correctness-inputs
+          path: old-candidate
+          run-id: 43984038209
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ env.NEW_ARTIFACT_ID }}
+          merge-multiple: true
+          path: candidate
+          run-id: ${{ env.NEW_CI_RUN }}
+          github-token: ${{ github.token }}
+      - name: Authenticate existing CI and GPU blobs without production rebuild
+        run: python scripts/prepare-triple-body-macro-qualification.py --baseline baseline --old-candidate old-candidate --candidate candidate --out macro-inputs
+      - name: Measure all120cases on one isolated runner under unchanged policy
+        run: python scripts/run-hosted-timing.py measure --inputs macro-inputs --out macro-qualification/evidence/shard0 --phase targeted --shard 0
+      - name: Verify all24source decisions and native progress
+        run: python scripts/run-hosted-timing.py collect --inputs macro-qualification/evidence --prepared macro-inputs --out macro-qualification/summary.json --phase targeted
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: triple-body-macro-qualification
+          path: |
+            macro-artifact-authentication.json
+            macro-inputs/
+            macro-qualification/
+          if-no-files-found: error

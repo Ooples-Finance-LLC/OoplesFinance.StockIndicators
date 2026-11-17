@@ -54,6 +54,10 @@ def sample(case):
 
 
 def collect(folder, phase):
+    if read(PLAN).get('triple_body_macro_qualification'):
+        assert phase == 'targeted'
+        from .triple_body_macro_qualification import collect as macro_collect
+        return macro_collect(folder)
     if read(PLAN).get('candle_predicate_order_qualification'):
         assert phase == 'targeted'
         from .candle_predicate_qualification import collect as predicate_collect
@@ -71,7 +75,12 @@ def collect_preflight(folder):
 
 def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=False, candle_predicate_gate=False):
     plan = read(PLAN)
-    if plan.get('candle_predicate_order_qualification'):
+    if plan.get('triple_body_macro_qualification'):
+        assert phase == 'targeted' and not preflight and not diagnostic and candle_predicate_gate
+        from .triple_body_macro_qualification import validate_scope, verify_runtime
+        validate_scope(plan)
+        verify_runtime(folder, plan['expected_runtime_version'])
+    elif plan.get('candle_predicate_order_qualification'):
         assert phase == 'targeted' and not preflight and not diagnostic and candle_predicate_gate
         from .candle_predicate_qualification import validate_scope, verify_runtime
         validate_scope(plan)

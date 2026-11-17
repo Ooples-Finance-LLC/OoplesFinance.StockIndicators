@@ -1,0 +1,17 @@
+{
+  "approved": true,
+  "scope": "triple-body-macro-20261117",
+  "cases": 120,
+  "decisions": 24,
+  "conditional_only": true,
+  "condition": "Complete fresh authenticated40-case ROI demonstrates target native-context potential beyond ThreeInside; retain the adverse1kcontrol and all unchanged qualification gates.",
+  "source": "7c9f23365eb08ce20c68554aafc75c8b7ff2f7d5",
+  "roi_evidence": {
+    "path": "benchmarks/plans/evidence/triple-body-macro-roi-20261117.json",
+    "sha256": "06e4fce76d95f4c17d8327782eca777bfaa88e45874f1a58a3096e5419324c22"
+  },
+  "max_measurement_runners": 1,
+  "source_acceptance": false,
+  "report_import": false,
+  "execution_requires_parent_complete_diff_review": true
+}
