@@ -173,6 +173,13 @@ internal sealed class GapContinuationState(int period, GapContinuationKind kind)
         var downGap = Math.Max(b.Open, b.Close) < Math.Min(a.Open, a.Close);
         if (kind == GapContinuationKind.Tristar)
         {
+            // Without either strict gap no Tristar can match. Nonfinite
+            // prices retain the original Doji exception and update order.
+            if (!upGap && !downGap
+                && FrameworkCompatibility.IsFinite(a.Open) && FrameworkCompatibility.IsFinite(a.Close)
+                && FrameworkCompatibility.IsFinite(b.Open) && FrameworkCompatibility.IsFinite(b.Close)
+                && FrameworkCompatibility.IsFinite(c.Open) && FrameworkCompatibility.IsFinite(c.Close))
+                return 0;
             if (!Doji(a) || !Doji(b) || !Doji(c))
                 return 0;
             if (upGap && Math.Max(c.Open, c.Close) < Math.Max(b.Open, b.Close))

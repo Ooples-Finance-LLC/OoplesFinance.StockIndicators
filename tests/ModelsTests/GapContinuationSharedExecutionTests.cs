@@ -89,6 +89,65 @@ public sealed class GapContinuationSharedExecutionTests
         }
     }
 
+    [Theory]
+    [InlineData(-1, 100d)] [InlineData(0, 0d)] [InlineData(1, -100d)]
+    public async Task TristarGapMustBeStrictAtAdjacentBinaryPrices(int step, double expected)
+    {
+        double middle = step < 0 ? Math.BitDecrement(5d) : step > 0 ? Math.BitIncrement(5d) : 5d;
+        Bar[] bars = [new(default, 5, 10, 0, 5, 1), new(default, 5, 10, 0, 5, 1),
+            new(default, middle, 10, 0, middle, 1), new(default, 5, 10, 0, 5, 1)];
+        Assert.Equal(expected, GapContinuationReference.Evaluate(bars, 1, GapContinuationKind.Tristar)[^1]);
+        await CheckReference(bars, new TristarCandle(1));
+    }
+
+    [Theory]
+    [InlineData(0, false)] [InlineData(0, true)]
+    [InlineData(1, false)] [InlineData(1, true)]
+    [InlineData(2, false)] [InlineData(2, true)]
+    public void TristarNonfiniteDojiOperandsThrowBeforeChangingState(int position, bool close)
+    {
+        foreach (double invalid in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+        {
+            var state = (IIndicatorState)new TristarCandle(1).CreateState();
+            Bar[] pattern = [new(default, 5, 10, 0, 5, 1), new(default, 5, 10, 0, 5, 1),
+                new(default, 5, 10, 0, 5, 1), new(default, 5, 10, 0, 5, 1)];
+            int index = position + 1;
+            pattern[index] = new(default, close ? 5 : invalid, 10, 0, close ? invalid : 5, 1);
+            for (int i = 0; i < 3; i++) Assert.Equal(0d, state.Update(pattern[i]));
+            // Range accumulation accepts these finite high/low prices. With
+            // no strict gap, the original Doji still rejects its nonfinite O/C.
+            for (int repeat = 0; repeat < 2; repeat++)
+            {
+                var error = Assert.Throws<ArithmeticException>(() => state.Update(pattern[3]));
+                Assert.Equal("An exact finite mean requires finite inputs.", error.Message);
+            }
+            if (position == 2)
+            {
+                Bar[] continuation = [new(default, 5, 10, 0, 5, 1),
+                    new(default, 3, 10, 0, 3, 1), new(default, 4, 10, 0, 4, 1)];
+                var valid = pattern[..3].Concat(continuation).ToArray();
+                var expected = GapContinuationReference.Evaluate(valid, 1, GapContinuationKind.Tristar);
+                for (int i = 0; i < continuation.Length; i++)
+                    Assert.Equal(expected[i + 3], state.Update(continuation[i]));
+                Assert.Equal(100d, expected[^1]);
+            }
+        }
+    }
+
+    [Fact]
+    public void TristarInvalidRangeRetainsUpdateAndNextDequeueErrors()
+    {
+        var state = (IIndicatorState)new TristarCandle(1).CreateState();
+        var bar = new Bar(default, 5, 10, 0, 5, 1);
+        for (int i = 0; i < 3; i++) Assert.Equal(0d, state.Update(bar));
+        var bad = new Bar(default, 5, double.NaN, 0, 5, 1);
+        var error = Assert.Throws<ArithmeticException>(() => state.Update(bad));
+        Assert.Equal("An exact finite mean requires finite inputs.", error.Message);
+        // Update enqueues before accumulating, so the next valid bar still
+        // rejects the retained invalid high when removing that history entry.
+        Assert.Equal(error.Message, Assert.Throws<ArithmeticException>(() => state.Update(bar)).Message);
+    }
+
     private static async Task CheckReference(Bar[] bars, IndicatorBase owner)
     {
         var state = (IIndicatorState)owner.CreateState();
