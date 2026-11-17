@@ -1,4 +1,6 @@
+using System.Numerics;
 using AiDotNet.Tensors.Helpers;
+using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
@@ -122,6 +124,116 @@ public sealed class ClassicStochasticSharedExecutionTests
             foreach(var mode in Enum.GetValues<IndicatorHistoryMode>()) await CheckOwned(bars,root,root.Outputs.Select(o => ordinary[o].ToArray()).ToArray(),mode);
         }
     }
+    [Fact]
+    public async Task ShortSmaStagesPreserveExactReadinessAndChunkBoundaries()
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 2;
+            foreach (var (price, k, d) in new[] { (5, 3, 3), (5, 1, 3), (1, 1, 1), (7, 61, 61) })
+            {
+                var bars = Data(1027);
+                var owner = new ClassicStochastic(price, k, d);
+                await CheckGridReferenceAndOwnership(bars, owner);
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
+    [Fact]
+    public async Task ShortSmaStagesPreserveMixedGridFallbackAndSignedZeroRecovery()
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 2;
+            var bars = Data(1539);
+            foreach (int index in new[] { 255, 769 })
+            {
+                double scale = Math.ScaleB(1d, index == 255 ? 400 : -400);
+                var bar = bars[index];
+                bars[index] = new(bar.Time, bar.Open * scale, bar.High * scale,
+                    bar.Low * scale, bar.Close * scale, bar.Volume);
+            }
+            for (int i = 500; i < 530; i++)
+                bars[i] = new(bars[i].Time, -0d, i % 2 == 0 ? 0d : double.Epsilon,
+                    -0d, i % 3 == 0 ? double.Epsilon : -0d, 1);
+            // Finite inputs need not be ordered OHLC ranges. They retain the
+            // original signed denominator rather than being clamped or rejected.
+            for (int i = 700; i < 731; i++) bars[i] = new(bars[i].Time, 0, -1, 1, -.25, 1);
+            await CheckGridReferenceAndOwnership(bars, new ClassicStochastic(5, 3, 3));
+            await CheckGridReferenceAndOwnership(Data(513), new ClassicStochastic(8, 64, 64));
+            await CheckGridReferenceAndOwnership(Data(513), new ClassicStochastic(5, 3, 3,
+                ClassicAverageMethod.Wma, ClassicAverageMethod.Sma, true, 2));
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
+    [Fact]
+    public async Task ShortSmaFallbackKeepsDeferredInputPriorityCancellationAndRecovery()
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = 2;
+            var bars = Enumerable.Range(0, 1027).Select(i =>
+                new Bar(DateTime.UnixEpoch.AddMinutes(i), 0, 1, 0, .5, 1)).ToArray();
+            bars[255] = new(bars[255].Time, 0, 1, 0, double.MaxValue, 1);
+            var owner = new ClassicStochastic(1, 1, 1);
+            foreach (var mode in Enum.GetValues<IndicatorHistoryMode>())
+            {
+                var shared = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                    .ConfigureIndicators(owner).ConfigureHistory(mode);
+                var ordinary = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                    .ConfigureIndicators(owner).ConfigureHistory(mode).ConfigureBehavior(_ => { });
+                var expected = await Assert.ThrowsAsync<IndicatorOutputException>(() => ordinary.BuildAsync());
+                var actual = await Assert.ThrowsAsync<IndicatorOutputException>(() => shared.BuildAsync());
+                Assert.Equal(expected.Message, actual.Message);
+                var valid = bars[900];
+                bars[900] = new(valid.Time, valid.Open, valid.High, valid.Low, valid.Close, double.NaN);
+                await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => shared.BuildAsync());
+                bars[900] = valid;
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => shared.BuildAsync(new CancellationToken(true)));
+            }
+            bars[255] = new(bars[255].Time, 0, 1, 0, .5, 1);
+            await CheckGridReferenceAndOwnership(bars, owner);
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
+    }
+
+    [Fact]
+    public void FixedGridMeanAdapterPreservesIndependentRoundingAndScaleBoundaries()
+    {
+        foreach (long coefficient in new[] { long.MinValue, -((1L << 53) + 1), -1L, 0L,
+            (1L << 53) + 1, long.MaxValue })
+        foreach (int exponent in new[] { -1076, -1074, -1022, -55, 0, 970, 1023 })
+        foreach (int count in new[] { 1, 3, 64 })
+        {
+            var divisor = new ExactMeanAccumulator.WordMeanDivisor(count);
+            var exact = new ReferenceFraction(coefficient) / new ReferenceFraction(count);
+            var scale = new ReferenceFraction(BigInteger.One << Math.Abs(exponent));
+            exact = exponent < 0 ? exact / scale : exact * scale;
+            double actual = ExactMeanAccumulator.MeanScaledWord(coefficient, exponent, in divisor);
+            Assert.Equal(BitConverter.DoubleToInt64Bits(exact.ToDouble()), BitConverter.DoubleToInt64Bits(actual));
+        }
+    }
+
+    private static async Task CheckGridReferenceAndOwnership(Bar[] bars, ClassicStochastic owner)
+    {
+        var expected = Expected(bars, owner);
+        var reference = ClassicStochasticReference.Values(bars, owner);
+        for (int i = 0; i < bars.Length; i++)
+        {
+            Assert.Equal(reference[0][i] ?? 0, expected[0][i]);
+            Assert.Equal(reference[1][i] ?? 0, expected[1][i]);
+            Assert.Equal(reference[0][i].HasValue ? 1d : 0d, expected[2][i]);
+            Assert.Equal(reference[1][i].HasValue ? 1d : 0d, expected[3][i]);
+        }
+        foreach (var mode in Enum.GetValues<IndicatorHistoryMode>())
+            await CheckOwned(bars, owner, expected, mode);
+    }
+
     private static double[][] Expected(Bar[] bars,IIndicator owner)
     {
         object state=owner is IndicatorBase scalar ? scalar.CreateState() : ((MultiOutputIndicatorBase)owner).CreateState();

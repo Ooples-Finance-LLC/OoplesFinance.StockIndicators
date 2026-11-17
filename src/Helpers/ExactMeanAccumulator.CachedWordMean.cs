@@ -29,8 +29,19 @@ internal partial struct ExactMeanAccumulator
         }
     }
 
-    // Only the private captured A/D mean opts in. The original Mean method
-    // and every existing consumer retain their original implementation.
+    // A bounded grid already supplies an exact signed word and binary exponent.
+    // Reuse the same accumulator representation and cached publisher without
+    // first rounding that word to binary64.
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    internal static double MeanScaledWord(long coefficient, int binaryExponent, in WordMeanDivisor divisor)
+    {
+        var accumulator = default(ExactMeanAccumulator);
+        accumulator.AddSmall(coefficient, checked(binaryExponent + 1074));
+        return accumulator.MeanCachedWord(in divisor);
+    }
+
+    // Private captured consumers opt in. The original Mean method and its
+    // callers retain their original implementation.
     internal double MeanCachedWord(in WordMeanDivisor divisor)
     {
         int count = divisor.Count;

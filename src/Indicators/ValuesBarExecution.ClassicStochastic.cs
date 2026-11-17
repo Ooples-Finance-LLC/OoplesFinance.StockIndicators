@@ -37,10 +37,8 @@ internal static partial class ValuesBarExecution
             }
             if (chunks >= 2 && CanParallelize(source.Length, 512)) locked = Monitor.TryEnter(ParallelBarGate);
             if (!locked) chunks = 1;
-            void Fill(int chunk)
+            void ReplayRange(int start, int end)
             {
-                int start = (int)((long)source.Length * chunk / chunks);
-                int end = (int)((long)source.Length * (chunk + 1) / chunks);
                 using var state = new ClassicStochastic.State(owner);
                 Span<double> values = stackalloc double[4];
                 for (int i = Math.Max(0, start - period + 1); i < end; i++)
@@ -50,6 +48,26 @@ internal static partial class ValuesBarExecution
                     if (i >= start)
                         for (int slot = 0; slot < 4; slot++) output[slot][i] = values[slot];
                 }
+            }
+            void Fill(int chunk)
+            {
+                int start = (int)((long)source.Length * chunk / chunks);
+                int end = (int)((long)source.Length * (chunk + 1) / chunks);
+#if NET10_0
+                if (CanUseClassicStochasticGrid(owner))
+                {
+                    for (int block = start; block < end;)
+                    {
+                        if (cancellation.IsCancellationRequested) return;
+                        int blockEnd = block + Math.Min(256, end - block);
+                        if (!TryFillClassicStochasticGrid(captured, output, owner, block, blockEnd, cancellation))
+                            ReplayRange(block, blockEnd);
+                        block = blockEnd;
+                    }
+                    return;
+                }
+#endif
+                ReplayRange(start, end);
             }
             if (chunks == 1) Fill(0);
             else CpuParallelSettings.LightweightParallel(chunks, chunks, Fill);
