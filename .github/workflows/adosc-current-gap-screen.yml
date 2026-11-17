@@ -92,6 +92,16 @@ jobs:
           $newCore=Join-Path $env:NEW_INPUT ('blobs/'+$env:EXPECTED_NEW_CORE_SHA)
           if ((Get-FileHash $oldCore).Hash.ToLowerInvariant() -ne '4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173' -or (Get-FileHash $newCore).Hash.ToLowerInvariant() -ne $env:EXPECTED_NEW_CORE_SHA) { throw 'Wrong production bytes' }
           $gpuReceipt=Join-Path $env:GPU_INPUT 'receipt.json'
+          Copy-Item -LiteralPath $gpuReceipt -Destination (Join-Path $env:SCREEN_ROOT 'gpu-receipt-checkout-before.bin')
+          $receiptBefore=(Get-FileHash -LiteralPath $gpuReceipt -Algorithm SHA256).Hash.ToLowerInvariant()
+          $gpuCheckout=Join-Path $env:GITHUB_WORKSPACE 'gpu-proof'
+          $receiptRelative='benchmarks/results/shared-rollout/local-gpu-contracts/receipt.json'
+          Remove-Item -LiteralPath $gpuReceipt
+          git -C $gpuCheckout -c core.autocrlf=false restore ('--source='+$env:GPU_RECEIPT_COMMIT) --worktree -- $receiptRelative
+          $restoreExit=$LASTEXITCODE
+          $receiptAfter=if (Test-Path -LiteralPath $gpuReceipt -PathType Leaf) { (Get-FileHash -LiteralPath $gpuReceipt -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
+          [ordered]@{commit=$env:GPU_RECEIPT_COMMIT;restored_path=$receiptRelative;checkout_before_sha256=$receiptBefore;restored_after_sha256=$receiptAfter;expected_sha256=$env:EXPECTED_GPU_RECEIPT_SHA;git_restore_exit_code=$restoreExit;command_scoped_autocrlf=$false;global_git_configuration_changed=$false} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:SCREEN_ROOT 'gpu-receipt-restoration.json') -Encoding utf8
+          if ($restoreExit -ne 0) { throw 'Pinned GPU receipt byte restoration failed; preserve checkout evidence' }
           if ((Get-FileHash $gpuReceipt).Hash.ToLowerInvariant() -ne $env:EXPECTED_GPU_RECEIPT_SHA) { throw 'Wrong approved candidate GPU100 receipt' }
           $gpuTrx=Join-Path $env:GPU_INPUT 'gpu.trx.gz'
           if ((Get-FileHash $gpuTrx).Hash.ToLowerInvariant() -ne $env:EXPECTED_GPU_TRX_GZ_SHA) { throw 'Wrong approved GPU100 compressed TRX' }
