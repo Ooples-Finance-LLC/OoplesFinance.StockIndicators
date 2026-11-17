@@ -1,0 +1,31 @@
+{
+  "scope": "candle-predicate-order-20261116",
+  "approved": true,
+  "authorization_basis": "Existing remaining_rows_continuation_authorization_20261114 authorizes ordinary bounded performance fixes and necessary verification; current user instruction is to continue. This batch reorders existing predicates without new arithmetic, workers, dispatcher behavior or dependencies.",
+  "base": "6051a95220eefa36e6f837a9a54e036164b76ebe",
+  "compiled_source": "caefc553fd01ec4ad1def3d18f205e46f32cf1cd",
+  "gpu_evidence_source": "f63b014560a4978b7b47755fcd73f5d39c531e12",
+  "source_paths": [
+    "src/Indicators/TripleBodyCandles.cs",
+    "src/Indicators/PenetrationCandles.cs",
+    "tests/ModelsTests/TripleBodySharedExecutionTests.cs",
+    "tests/ModelsTests/PenetrationSharedExecutionTests.cs"
+  ],
+  "affected_pairs": [
+    "TaLib.Candles.ThreeInside",
+    "TaLib.Candles.TwoCrows",
+    "TaLib.Candles.UpsideGapTwoCrows",
+    "TaLib.Candles.UniqueThreeRiver",
+    "TaLib.Candles.PiercingLine",
+    "TaLib.Candles.DarkCloudCover"
+  ],
+  "correctness_passed": {"unit": 24, "comparator": 65, "actual_gpu": 100},
+  "cases": 180,
+  "decisions": 36,
+  "measurement_runners": 1,
+  "runtime_sampling_and_cpu_policy": "Unchanged default runtime, ten measured iterations, existing warmups and CPU quiet gates.",
+  "source_gate": "All 36 decisions: zero slower and at least one faster.",
+  "native_progress_gate": "At least one attributable new 10,000-bar native crossover; both candidate rounds must have more 10,000-bar point wins than either baseline round; preserve confident native wins at both sizes. Exact definitions are frozen in the qualification plan and validator.",
+  "publication": "Conditional on correctness, source qualification, native progress, parent review and publication checks; draft only, no merge or release.",
+  "overall_goal_complete": false
+}
