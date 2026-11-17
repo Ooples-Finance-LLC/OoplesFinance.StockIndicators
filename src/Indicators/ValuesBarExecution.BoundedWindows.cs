@@ -1416,6 +1416,28 @@ internal static partial class ValuesBarExecution
         int start, int end, int period, ReadOnlySpan<Bar> seed, ReadOnlySpan<Bar> tail,
         CancellationToken cancellation, IIndicator indicator) where T : struct, IBoundedKernel<T>
     {
+        // Keep small inputs and mixed bounded batches on their original routes.
+        // Eligibility is based on the complete input, not a worker's region.
+        if (source.Length >= 8192)
+        {
+            if (typeof(T) == typeof(FiveContinuationKernel)
+                && indicator is MatHoldCandle { LongPeriod: <= 64, ShortPeriod: <= 64 })
+                return ComputeCertifiedCandleBlocks<FiveContinuationBlockState>(source, output[0], owned,
+                    start, end, period, seed, tail, cancellation, indicator, CertifiedCandleBlockKind.MatHold);
+            if (typeof(T) == typeof(ExtendedReversalKernel)
+                && indicator is BreakawayCandle { Period: <= 64 } or ConcealingBabySwallowCandle { Period: <= 64 } or LadderBottomCandle { Period: <= 64 })
+                return ComputeCertifiedCandleBlocks<ExtendedReversalBlockState>(source, output[0], owned,
+                    start, end, period, seed, tail, cancellation, indicator, indicator switch
+                    {
+                        BreakawayCandle => CertifiedCandleBlockKind.Breakaway,
+                        ConcealingBabySwallowCandle => CertifiedCandleBlockKind.ConcealingBabySwallow,
+                        _ => CertifiedCandleBlockKind.LadderBottom
+                    });
+            if (typeof(T) == typeof(ExhaustionKernel)
+                && indicator is ThreeStarsInSouthCandle { LongPeriod: <= 64, ShortPeriod: <= 64, ShadowPeriod: <= 64 })
+                return ComputeCertifiedCandleBlocks<SouthBlockState>(source, output[0], owned,
+                    start, end, period, seed, tail, cancellation, indicator, CertifiedCandleBlockKind.ThreeStarsInSouth);
+        }
         if (typeof(T) == typeof(SequenceKernel) && MatchingLowGridEligible(indicator, source.Length)
             && end - start + seed.Length >= 512)
             return ComputeMatchingLowGrid(source, output[0], owned, start, end, seed, tail, cancellation, (MatchingLowCandle)indicator);
