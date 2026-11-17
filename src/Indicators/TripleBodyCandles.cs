@@ -263,21 +263,9 @@ internal sealed class TripleBodyCandleState(
 
     private bool Matches(in Bar c)
     {
-        var longMargin = _lagLong2;
-        Add(ref longMargin, _first, -longPeriod);
-        if (longMargin.Sign >= 0)
-            return false;
-        if (kind != TripleBodyCandleKind.TwoCrows)
-        {
-            var river = kind == TripleBodyCandleKind.UniqueThreeRiver;
-            var shortMargin = river ? _shortSum : _lagShort;
-            Add(ref shortMargin, river ? c : _second, -shortPeriod);
-            if (river ? shortMargin.Sign <= 0 : shortMargin.Sign < 0)
-                return false;
-        }
         var a = _first;
         var b = _second;
-        return kind switch
+        var structural = kind switch
         {
             TripleBodyCandleKind.ThreeInside => Math.Max(b.Open, b.Close)
                 < Math.Max(a.Open, a.Close)
@@ -310,6 +298,26 @@ internal sealed class TripleBodyCandleState(
                 && c.Close >= c.Open
                 && c.Open > b.Low,
         };
+        // Reject impossible finite patterns before copying and changing exact margins.
+        // Nonfinite prices retain the original margin/Update exception order.
+        if (!structural
+            && FrameworkCompatibility.IsFinite(a.Open) && FrameworkCompatibility.IsFinite(a.Close)
+            && FrameworkCompatibility.IsFinite(b.Open) && FrameworkCompatibility.IsFinite(b.Close)
+            && FrameworkCompatibility.IsFinite(c.Open) && FrameworkCompatibility.IsFinite(c.Close))
+            return false;
+        var longMargin = _lagLong2;
+        Add(ref longMargin, _first, -longPeriod);
+        if (longMargin.Sign >= 0)
+            return false;
+        if (kind != TripleBodyCandleKind.TwoCrows)
+        {
+            var river = kind == TripleBodyCandleKind.UniqueThreeRiver;
+            var shortMargin = river ? _shortSum : _lagShort;
+            Add(ref shortMargin, river ? c : _second, -shortPeriod);
+            if (river ? shortMargin.Sign <= 0 : shortMargin.Sign < 0)
+                return false;
+        }
+        return structural;
     }
 }
 

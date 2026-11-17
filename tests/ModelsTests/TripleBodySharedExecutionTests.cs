@@ -70,6 +70,31 @@ public sealed class TripleBodySharedExecutionTests(ITestOutputHelper log)
                 rule.Check(new IndicatorValidationContext("Mixed triple-body", bars, [run[root].ToArray()], 0));
         }
     }
+    [Theory]
+    [InlineData(double.NaN)]
+    [InlineData(double.PositiveInfinity)]
+    [InlineData(double.NegativeInfinity)]
+    public void UniqueRiverNonfiniteCurrentPriceThrowsBeforeChangingContinuation(double invalid)
+    {
+        var state = (IIndicatorState)new UniqueThreeRiverCandle(1, 1).CreateState();
+        var untouched = (IIndicatorState)new UniqueThreeRiverCandle(1, 1).CreateState();
+        Bar[] seed = [new(default, 2, 3, 0, 1, 1),
+            new(default, 10, 11, 0, 1, 1), new(default, 8, 9, -1, 3, 1)];
+        foreach (var bar in seed)
+        {
+            state.Update(bar);
+            untouched.Update(bar);
+        }
+        // Bodies 1, 9, 5 pass the prior-long test. The invalid current body
+        // must fail its exact short test before Update shifts lags/history.
+        var bad = new Bar(default, invalid, 3, -1, 2, 1);
+        var error = Assert.Throws<ArithmeticException>(() => state.Update(bad));
+        Assert.Equal("An exact finite mean requires finite inputs.", error.Message);
+        var next = new Bar(default, 0, 2, -1, 1, 1);
+        Assert.Equal(100d, untouched.Update(next));
+        Assert.Equal(100d, state.Update(next));
+    }
+
     private static async Task Check(Bar[] bars, IndicatorBase owner)
     {
         var state = (IIndicatorState)owner.CreateState();
