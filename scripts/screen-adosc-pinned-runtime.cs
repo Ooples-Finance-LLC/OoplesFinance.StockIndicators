@@ -10,12 +10,15 @@ using System.Text.Json;
 internal static class Program
 {
     const string Old = "4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173";
-    const string New = "7bbfb63d3794034d88047d11d40682938d8076ff58aa64d53a0ba2096089317b";
-    const string CandidateManifestSha = "c0be31608e8df96ad275e31604b6916e7d027e782eb1bcd8a48659d77a658c2d";
-    const string CandidateFingerprint = "7075fdf54f314f89e9b08e423b444e9850456525cb0f636d5ebbe410c12f0d81";
-    const string GpuReceiptSha = "71112bcbc23d5ca4190edbc6735f0bddb0f9d3f79f7f34dbbce92f0eec3b29b7";
-    const string GpuTrxGzSha = "9358f2957b525771e9bdf6f650444422c4a787741debc696a9ba5ff97aa88fd5";
-    const string CandidateArtifactId = "14352708612";
+    const string New = "9e900e9a761e801aed5e8b639f14d7aade0aed71e4046900fd19465be7d16e54";
+    const string CandidateManifestSha = "ef929ff3a361490761512eff6e912e15762e760d2f14f402eb4f7f6abb78e130";
+    const string CandidateFingerprint = "09ed55d6f67e394f50e849e6a86aae66ec4a9374565ed866cec87d13ac8d7656";
+    const string GpuReceiptSha = "f384b49ab93e114fabcfd0dce49ed29f319d39499f7c6ad01f53e00a75f4cfed";
+    const string GpuTrxGzSha = "a0c11f4fe364e9b1163f2c84da65698f7c9db2eae93e99f84e566c52d7a467f4";
+    const string CandidateArtifactId = "14368759004";
+    const string CandidateSource = "15b0bdb743c1045ce43e69965b4f039ad70f8b2e";
+    const string CandidateWorkflowHead = "2a1737f30e5e1164189d0209b39ea46bf38c1239";
+    const string CandidateRunId = "44173490828";
     const string Bench = "48229494a1ff1e4e59bddd5a018cbd590cae24523d52dd2f3effdd20bd802723";
     static string Hash(string path) => Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(path)));
     static void Require(bool condition, string message) { if (!condition) throw new InvalidOperationException(message); }
@@ -43,12 +46,14 @@ internal static class Program
         Require(CandidateArtifactId.All(char.IsDigit) && CandidateArtifactId.Length > 0, "UNBOUND candidate artifact ID; stop before I/O.");
         string gpuEvidenceCommit = Environment.GetEnvironmentVariable("GPU_RECEIPT_COMMIT") ?? "";
         Require(gpuEvidenceCommit.Length == 40 && gpuEvidenceCommit.All(Uri.IsHexDigit), "UNBOUND GPU-only commit; stop before I/O.");
+        Require(new[] { CandidateSource, CandidateWorkflowHead }.All(value => value.Length == 40 && value.All(Uri.IsHexDigit))
+            && CandidateRunId.Length > 0 && CandidateRunId.All(char.IsDigit), "UNBOUND candidate source/workflow/run; stop before I/O.");
         if (args.Length != 7) throw new ArgumentException("Expected original inputs, runtime view, candidate artifact, GPU receipt, arm, pair, fresh output.");
         string input = Path.GetFullPath(args[0]), runtime = Path.GetFullPath(args[1]), candidate = Path.GetFullPath(args[2]);
         string gpuReceiptPath = Path.GetFullPath(args[3]);
         string arm = args[4], pair = args[5], output = Path.GetFullPath(args[6]);
         Require(arm is "old" or "new" or "native", "Unknown arm.");
-        Require(pair is "TaLib.Functions.Stoch" or "TaLib.Functions.StochF", "Unknown pair.");
+        Require(pair is "TaLib.Candles.ThreeInside" or "TaLib.Candles.TwoCrows" or "TaLib.Candles.UpsideGapTwoCrows" or "TaLib.Candles.UniqueThreeRiver", "Unknown pair.");
         Require(!Directory.Exists(output), "Fresh output required."); Directory.CreateDirectory(output);
         var receipt = new Dictionary<string,object?> {
             ["diagnostic_only"] = true, ["qualification"] = false, ["native_win_claim"] = false,
@@ -59,7 +64,7 @@ internal static class Program
             ["timed_benchmark_cases"] = 0, ["processor_count"] = Environment.ProcessorCount,
             ["env_aidotnet_cpu_threads"] = Environment.GetEnvironmentVariable("AIDOTNET_CPU_THREADS"),
             ["source_old"] = "6051a95220eefa36e6f837a9a54e036164b76ebe",
-            ["source_new"] = "0129b49e750feaee5bbc0ff4391ec90692a9f596",
+            ["source_new"] = CandidateSource,
             ["old_production_sha256"] = Old, ["new_production_sha256"] = New, ["frozen_harness_sha256"] = Bench,
             ["candidate_source_fingerprint"] = CandidateFingerprint, ["gpu100_receipt_sha256"] = GpuReceiptSha, ["gpu100_trx_gz_sha256"] = GpuTrxGzSha, ["gpu_evidence_commit"] = gpuEvidenceCommit, ["candidate_artifact_id"] = CandidateArtifactId,
             ["limits"] = "Isolated-process MethodInfo/Stopwatch screen only, not BenchmarkDotNet qualification or native-win evidence. All timings require both outer idle gates. No runtime or worker assignments. Native follows source rounds and may have different runtime warmth."
@@ -78,7 +83,15 @@ internal static class Program
             using var proof = JsonDocument.Parse(File.ReadAllText(proofPath));
             using var candidateProof = JsonDocument.Parse(File.ReadAllText(candidateManifest));
             var cp = candidateProof.RootElement;
-            Require(cp.GetProperty("source").GetString() == "0129b49e750feaee5bbc0ff4391ec90692a9f596" && cp.GetProperty("run_id").GetString() == "44136637430" && cp.GetProperty("workflow_head").GetString() == "2a1737f30e5e1164189d0209b39ea46bf38c1239", "Wrong candidate identities.");
+            Require(cp.GetProperty("source").GetString() == CandidateSource && cp.GetProperty("run_id").GetString() == CandidateRunId && cp.GetProperty("workflow_head").GetString() == CandidateWorkflowHead, "Wrong candidate identities.");
+            Require(cp.GetProperty("status").GetString() == "cpu-correctness-complete"
+                && cp.GetProperty("checks").GetProperty("unit").GetProperty("passed").GetInt32() == 21
+                && cp.GetProperty("checks").GetProperty("parity").GetProperty("passed").GetInt32() == 85,
+                "Candidate focused CPU correctness counts mismatch.");
+            var unitClasses = cp.GetProperty("classes").GetProperty("unit").EnumerateArray().Select(value => value.GetString()!).ToHashSet(StringComparer.Ordinal);
+            var parityClasses = cp.GetProperty("classes").GetProperty("parity").EnumerateArray().Select(value => value.GetString()!).ToHashSet(StringComparer.Ordinal);
+            Require(unitClasses.SetEquals(new[] { "TripleBodySharedExecutionTests", "TripleBodyParallelExecutionTests", "TripleBodyFactorCacheTests" })
+                && parityClasses.SetEquals(new[] { "TripleBodyTests", "SharedTripleBodyBenchmarkTests" }), "Candidate focused CPU class inventory mismatch.");
             Require(cp.GetProperty("source_sha256").GetString() == CandidateFingerprint
                 && cp.GetProperty("runtime_files").GetProperty("src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll").GetString() == New,
                 "Candidate fingerprint/core binding mismatch.");
@@ -87,9 +100,9 @@ internal static class Program
             var gp = gpuProof.RootElement; var buildOrigin = gp.GetProperty("build_origin");
             Require(gp.GetProperty("source_sha256").GetString() == CandidateFingerprint && gp.GetProperty("passed_cases").GetInt32() == 100,
                 "GPU100 fingerprint/count mismatch.");
-            Require(buildOrigin.GetProperty("run_id").ToString() == "44136637430"
-                && buildOrigin.GetProperty("workflow_head").GetString() == "2a1737f30e5e1164189d0209b39ea46bf38c1239"
-                && buildOrigin.GetProperty("source").GetString() == "0129b49e750feaee5bbc0ff4391ec90692a9f596"
+            Require(buildOrigin.GetProperty("run_id").ToString() == CandidateRunId
+                && buildOrigin.GetProperty("workflow_head").GetString() == CandidateWorkflowHead
+                && buildOrigin.GetProperty("source").GetString() == CandidateSource
                 && buildOrigin.GetProperty("artifact_id").ToString() == CandidateArtifactId, "GPU receipt build origin mismatch.");
             var manifestFiles = cp.GetProperty("runtime_files");
             var coreEntries = manifestFiles.EnumerateObject().Where(entry => entry.Name.EndsWith("/OoplesFinance.StockIndicators.dll", StringComparison.Ordinal)).ToArray();
@@ -146,6 +159,17 @@ internal static class Program
             var type = Find("OoplesFinance.StockIndicators.CompetitorBenchmarks.dll").GetType("OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks", true)!;
             var fixture = Activator.CreateInstance(type)!; type.GetProperty("PairId")!.SetValue(fixture, pair); type.GetProperty("Bars")!.SetValue(fixture, 10000);
             type.GetMethod("Setup")!.Invoke(fixture, null); var invoke = type.GetMethod(arm == "native" ? "Competitor" : "Ooples")!;
+            object selectedPair = type.GetField("_pair", flags)!.GetValue(fixture)!;
+            Require((string)selectedPair.GetType().GetProperty("Id", flags)!.GetValue(selectedPair)! == pair, "Frozen candle factory pair changed.");
+            var library = (Delegate)selectedPair.GetType().GetProperty("Library", flags)!.GetValue(selectedPair)!;
+            object factory = library.Target ?? throw new InvalidOperationException("Frozen candle factory closure missing.");
+            string name = (string)factory.GetType().GetField("n", flags)!.GetValue(factory)!;
+            Require(pair == "TaLib.Candles." + name, "Frozen candle factory name changed.");
+            var factoryType = Find("OoplesFinance.StockIndicators.CompetitorBenchmarks.dll").GetType("OoplesFinance.StockIndicators.CompetitorBenchmarks.TripleBodyComparison", true)!;
+            var parameters = factoryType.GetMethod("Create", flags)!.GetParameters();
+            Require(parameters.Length == 3 && Convert.ToInt32(parameters[1].DefaultValue) == 10 && Convert.ToInt32(parameters[2].DefaultValue) == 10,
+                "Frozen candle default body periods changed.");
+            receipt["factory_parameters"] = new { name, long_period = 10, short_period = 10, benchmark_period_argument_ignored = true };
             receipt["settings_after_setup"] = Settings(); receipt["closure_before"] = Closure(); Save();
             for (int i = 0; i < 1000; i++) GC.KeepAlive(invoke.Invoke(fixture, null));
             var samples = new List<double>(); var retained = new List<object>(); receipt["measurement_start_utc"] = DateTime.UtcNow;
@@ -161,7 +185,7 @@ internal static class Program
         }
         catch (Exception error) { receipt["status"] = "failed"; receipt["error"] = error.ToString(); Save(); Console.Error.WriteLine(error); return 1; }
     }
-    sealed class AuthenticatedContext(Dictionary<string,string> selected, Dictionary<string,string> framework, Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedStochGridRoiScreen", false)
+    sealed class AuthenticatedContext(Dictionary<string,string> selected, Dictionary<string,string> framework, Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedTripleBodyRoiScreen", false)
     {
         protected override Assembly? Load(AssemblyName name)
         {

@@ -1,27 +1,30 @@
-name: Pinned Stoch fixed-grid whole-pipeline ROI diagnostic
+name: Pinned TripleBody factor-cache whole-pipeline ROI diagnostic
 
 on:
   push:
     branches:
-      - perf/hosted-stoch-fixed-grid-roi-20261117
+      - perf/hosted-triple-body-factor-roi-20261117
 
 permissions:
   contents: read
   actions: read
 
 concurrency:
-  group: pinned-stoch-fixed-grid-roi
+  group: pinned-triple-body-factor-roi
   cancel-in-progress: false
 
 env:
-  EXPECTED_NEW_CORE_SHA: 7bbfb63d3794034d88047d11d40682938d8076ff58aa64d53a0ba2096089317b
-  EXPECTED_MANIFEST_SHA: c0be31608e8df96ad275e31604b6916e7d027e782eb1bcd8a48659d77a658c2d
-  EXPECTED_SOURCE_FINGERPRINT: 7075fdf54f314f89e9b08e423b444e9850456525cb0f636d5ebbe410c12f0d81
-  EXPECTED_GPU_RECEIPT_SHA: 71112bcbc23d5ca4190edbc6735f0bddb0f9d3f79f7f34dbbce92f0eec3b29b7
-  EXPECTED_GPU_TRX_GZ_SHA: 9358f2957b525771e9bdf6f650444422c4a787741debc696a9ba5ff97aa88fd5
-  EXPECTED_CANDIDATE_ARTIFACT_ID: '14352708612'
-  EXPECTED_CANDIDATE_ZIP_SHA: d6f67dcb83a94e3252ca0e41fe488915d417575592887578622c9a28e27895ee
-  GPU_RECEIPT_COMMIT: f1f875f6c7b54478fbd7a6d634231f6715d3fcf2
+  EXPECTED_NEW_CORE_SHA: 9e900e9a761e801aed5e8b639f14d7aade0aed71e4046900fd19465be7d16e54
+  EXPECTED_MANIFEST_SHA: ef929ff3a361490761512eff6e912e15762e760d2f14f402eb4f7f6abb78e130
+  EXPECTED_SOURCE_FINGERPRINT: 09ed55d6f67e394f50e849e6a86aae66ec4a9374565ed866cec87d13ac8d7656
+  EXPECTED_GPU_RECEIPT_SHA: f384b49ab93e114fabcfd0dce49ed29f319d39499f7c6ad01f53e00a75f4cfed
+  EXPECTED_GPU_TRX_GZ_SHA: a0c11f4fe364e9b1163f2c84da65698f7c9db2eae93e99f84e566c52d7a467f4
+  EXPECTED_CANDIDATE_ARTIFACT_ID: '14368759004'
+  EXPECTED_CANDIDATE_ZIP_SHA: d9633e00c8ff64a222ae66eb5290799485721036724abd513ab28d0688255265
+  EXPECTED_CANDIDATE_SOURCE: 15b0bdb743c1045ce43e69965b4f039ad70f8b2e
+  EXPECTED_CANDIDATE_WORKFLOW_HEAD: 2a1737f30e5e1164189d0209b39ea46bf38c1239
+  EXPECTED_CANDIDATE_RUN_ID: '44173490828'
+  GPU_RECEIPT_COMMIT: 425367b021ae39995e1f63a6737b3c34dba1f595
 
 jobs:
   screen:
@@ -36,14 +39,15 @@ jobs:
             if ($pin -notmatch '^[0-9a-f]{64}$') { throw 'UNBOUND candidate/GPU pins; no diagnostic input/output I/O permitted' }
           }
           if ($env:GPU_RECEIPT_COMMIT -notmatch '^[0-9a-f]{40}$' -or $env:EXPECTED_CANDIDATE_ARTIFACT_ID -notmatch '^\d+$') { throw 'UNBOUND GPU-only commit or candidate artifact ID' }
+          if ($env:EXPECTED_CANDIDATE_SOURCE -notmatch '^[0-9a-f]{40}$' -or $env:EXPECTED_CANDIDATE_WORKFLOW_HEAD -notmatch '^[0-9a-f]{40}$' -or $env:EXPECTED_CANDIDATE_RUN_ID -notmatch '^\d+$') { throw 'UNBOUND candidate source/head/run; no I/O permitted' }
           foreach ($name in @('SCREEN_ROOT','OLD_INPUT','NEW_INPUT','GPU_INPUT')) {
-            $value=if ($name -eq 'GPU_INPUT') { Join-Path $env:GITHUB_WORKSPACE 'gpu-proof/benchmarks/results/shared-rollout/local-gpu-contracts' } else { Join-Path $env:RUNNER_TEMP ('stoch-grid-roi-'+$name.ToLowerInvariant()) }
+            $value=if ($name -eq 'GPU_INPUT') { Join-Path $env:GITHUB_WORKSPACE 'gpu-proof/benchmarks/results/shared-rollout/local-gpu-contracts' } else { Join-Path $env:RUNNER_TEMP ('triple-body-factor-roi-'+$name.ToLowerInvariant()) }
             if (Test-Path -LiteralPath $value) { throw 'Fresh job paths required' }
             [Environment]::SetEnvironmentVariable($name,$value)
             "$name=$value" | Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8
           }
           [IO.Directory]::CreateDirectory($env:SCREEN_ROOT) | Out-Null
-          [ordered]@{workflow_head=$env:GITHUB_SHA;run_id=$env:GITHUB_RUN_ID;diagnostic_only=$true;qualification=$false;native_win_claim=$false;production_builds=0;tests=0;timed_benchmark_cases=0;diagnostic_cases=10;helper_compiler_sdk='10.0.403';driver_builds=1;combined_workload_cap_seconds=120;individual_process_cap_seconds=60;runner_image=$env:ImageVersion} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'provenance.json') -Encoding utf8
+          [ordered]@{workflow_head=$env:GITHUB_SHA;run_id=$env:GITHUB_RUN_ID;diagnostic_only=$true;qualification=$false;native_win_claim=$false;production_builds=0;tests=0;timed_benchmark_cases=0;diagnostic_cases=20;helper_compiler_sdk='10.0.403';driver_builds=1;combined_workload_cap_seconds=120;individual_process_cap_seconds=60;runner_image=$env:ImageVersion} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'provenance.json') -Encoding utf8
       - uses: actions/checkout@v7
         with:
           sparse-checkout: |
@@ -63,7 +67,7 @@ jobs:
           artifact-ids: ${{ env.EXPECTED_CANDIDATE_ARTIFACT_ID }}
           merge-multiple: true
           path: ${{ env.NEW_INPUT }}
-          run-id: 44136637430
+          run-id: ${{ env.EXPECTED_CANDIDATE_RUN_ID }}
           github-token: ${{ github.token }}
       - uses: actions/checkout@v7
         with:
@@ -79,7 +83,7 @@ jobs:
           $ErrorActionPreference='Stop'
           if ((dotnet --version).Trim() -ne '10.0.403') { throw 'Wrong SDK' }
           $artifact=Invoke-RestMethod -Uri ('https://api.github.com/repos/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/artifacts/'+$env:EXPECTED_CANDIDATE_ARTIFACT_ID) -Headers @{Authorization=('Bearer '+$env:GH_TOKEN);'X-GitHub-Api-Version'='2022-11-28'}
-          if ($artifact.digest -ne ('sha256:'+$env:EXPECTED_CANDIDATE_ZIP_SHA) -or $artifact.id -ne [long]$env:EXPECTED_CANDIDATE_ARTIFACT_ID -or $artifact.name -ne 'candidate-correctness-inputs' -or $artifact.expired -or $artifact.workflow_run.id -ne 44136637430 -or $artifact.workflow_run.head_sha -ne '2a1737f30e5e1164189d0209b39ea46bf38c1239') { throw 'Wrong candidate artifact metadata' }
+          if ($artifact.digest -ne ('sha256:'+$env:EXPECTED_CANDIDATE_ZIP_SHA) -or $artifact.id -ne [long]$env:EXPECTED_CANDIDATE_ARTIFACT_ID -or $artifact.name -ne 'candidate-correctness-inputs' -or $artifact.expired -or $artifact.workflow_run.id -ne [long]$env:EXPECTED_CANDIDATE_RUN_ID -or $artifact.workflow_run.head_sha -ne $env:EXPECTED_CANDIDATE_WORKFLOW_HEAD) { throw 'Wrong candidate artifact metadata' }
           $artifact | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $env:SCREEN_ROOT 'candidate-artifact.json') -Encoding utf8
           $inputs=Join-Path $env:OLD_INPUT 'predicate-inputs'
           $proof=Join-Path $inputs 'provenance.json'
@@ -118,7 +122,7 @@ jobs:
           Copy-Item -LiteralPath $newManifest -Destination (Join-Path $env:SCREEN_ROOT 'candidate-manifest.json')
           $common=[IO.Path]::GetFullPath((Join-Path $inputs 'common'))
           foreach ($label in @('old','new')) {
-            $view=Join-Path $env:RUNNER_TEMP ('stoch-grid-roi-'+$label+'-runtime')
+            $view=Join-Path $env:RUNNER_TEMP ('triple-body-factor-roi-'+$label+'-runtime')
             if (Test-Path -LiteralPath $view) { throw 'Fresh runtime view required' }
             foreach ($entry in $manifest.common_manifest.PSObject.Properties) {
               $source=[IO.Path]::GetFullPath((Join-Path $common $entry.Name))
@@ -132,7 +136,7 @@ jobs:
           }
           $config=Join-Path $common 'OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json'
           if ((Get-FileHash $config).Hash.ToLowerInvariant() -ne 'c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097') { throw 'Wrong runtime configuration' }
-          $helper=Join-Path $env:RUNNER_TEMP 'stoch-grid-roi-diagnostic-helper'
+          $helper=Join-Path $env:RUNNER_TEMP 'triple-body-factor-roi-diagnostic-helper'
           [IO.Directory]::CreateDirectory($helper) | Out-Null
           @('<Project Sdk="Microsoft.NET.Sdk">','<PropertyGroup>','<OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>','<ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>','<UseSharedCompilation>false</UseSharedCompilation>','</PropertyGroup>','</Project>') | Set-Content (Join-Path $helper 'DiagnosticScreen.csproj') -Encoding utf8
           Copy-Item (Join-Path $env:GITHUB_WORKSPACE 'scripts/screen-adosc-pinned-runtime.cs') (Join-Path $helper 'Program.cs')
@@ -171,13 +175,13 @@ jobs:
             $clock=[Diagnostics.Stopwatch]::StartNew()
             $inputs=Join-Path $env:OLD_INPUT 'predicate-inputs'
             $config=Join-Path $inputs 'common/OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json'
-            $driver=Join-Path $env:RUNNER_TEMP 'stoch-grid-roi-diagnostic-helper/out/DiagnosticScreen.dll'
+            $driver=Join-Path $env:RUNNER_TEMP 'triple-body-factor-roi-diagnostic-helper/out/DiagnosticScreen.dll'
             $index=0
-            foreach ($pair in @('TaLib.Functions.Stoch','TaLib.Functions.StochF')) {
+            foreach ($pair in @('TaLib.Candles.ThreeInside','TaLib.Candles.TwoCrows','TaLib.Candles.UpsideGapTwoCrows','TaLib.Candles.UniqueThreeRiver')) {
               foreach ($arm in @('old','new','new','old','native')) {
                 CheckBudget
                 $label=if ($arm -eq 'new') { 'new' } else { 'old' }
-                $view=Join-Path $env:RUNNER_TEMP ('stoch-grid-roi-'+$label+'-runtime')
+                $view=Join-Path $env:RUNNER_TEMP ('triple-body-factor-roi-'+$label+'-runtime')
                 $out=Join-Path $env:SCREEN_ROOT ('case-'+$index)
                 $argsList=@('exec','--runtimeconfig',$config,$driver,$inputs,$view,$env:NEW_INPUT,(Join-Path $env:GPU_INPUT 'receipt.json'),$arm,$pair,$out)
                 $start=[Diagnostics.ProcessStartInfo]::new((Get-Command dotnet).Source)
@@ -204,6 +208,7 @@ jobs:
                 CheckBudget
                 $case=Get-Content (Join-Path $out 'case.json') -Raw | ConvertFrom-Json
                 if ($case.status -ne 'complete' -or $case.actual_clr -ne '10.0.15' -or $case.arm -ne $arm -or $case.pair -ne $pair -or @($case.samples_ms).Count -ne 10 -or $case.warmups -ne 1000 -or !$case.runtime_unchanged -or !$case.protected_inputs_unchanged) { throw 'Incomplete or mismatched case' }
+                if ($case.factory_parameters.long_period -ne 10 -or $case.factory_parameters.short_period -ne 10 -or ('TaLib.Candles.'+$case.factory_parameters.name) -ne $pair) { throw 'Candle factory metadata mismatch' }
                 $settings=$case.settings_before | ConvertTo-Json -Compress
                 if ($case.settings_before.dop -ne 2 -or $case.settings_before.effective_workers -ne 2 -or $case.processor_count -ne 4 -or $settings -cne ($case.settings_after_setup | ConvertTo-Json -Compress) -or $settings -cne ($case.settings_after | ConvertTo-Json -Compress)) { throw 'Worker settings changed or unavailable within case' }
                 if ($cases.Count -eq 0) { $settingsReference=$settings;$processorReference=$case.processor_count;$envReference=$case.env_aidotnet_cpu_threads }
@@ -212,7 +217,7 @@ jobs:
               }
             }
             $compared=0
-            foreach ($pair in @('TaLib.Functions.Stoch','TaLib.Functions.StochF')) {
+            foreach ($pair in @('TaLib.Candles.ThreeInside','TaLib.Candles.TwoCrows','TaLib.Candles.UpsideGapTwoCrows','TaLib.Candles.UniqueThreeRiver')) {
               $group=@($cases | Where-Object pair -eq $pair)
               $reference=$group[0].source_outputs[0]
               foreach ($case in @($group | Where-Object arm -ne 'native')) {
@@ -228,8 +233,8 @@ jobs:
                 }
               }
             }
-            if ($cases.Count -ne 10 -or $compared -ne 80) { throw 'Incomplete diagnostic scope' }
-            [ordered]@{cases=10;measured_source_outputs_compared=80;bitwise_equal=$true;outside_timing=$true;qualification=$false} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'output-comparison.json') -Encoding utf8
+            if ($cases.Count -ne 20 -or $compared -ne 160) { throw 'Incomplete diagnostic scope' }
+            [ordered]@{cases=20;measured_source_outputs_compared=160;bitwise_equal=$true;outside_timing=$true;qualification=$false} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'output-comparison.json') -Encoding utf8
             CheckBudget;$workloadComplete=$true
           } catch { $failure=$_.Exception.ToString() }
           finally {
@@ -247,7 +252,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: stoch-fixed-grid-roi
+          name: triple-body-factor-roi
           path: ${{ env.SCREEN_ROOT }}/
           retention-days: 14
           if-no-files-found: error
