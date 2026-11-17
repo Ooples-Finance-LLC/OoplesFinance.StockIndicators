@@ -152,6 +152,9 @@ def cpu_test_classes(plan, label):
         defaults.append('ExactMeanUnitWeightTests')
     selected = plan.get('cpu_test_classes', {}).get(label, defaults)
     assert selected and len(selected) == len(set(selected))
+    if plan.get('candle_predicate_order_qualification') is True:
+        from .candle_predicate_qualification import cpu_classes
+        return cpu_classes(plan, label)
     if plan.get('matchinglow_grid_qualification') is True:
         assert all(isinstance(c, str) and all(part.isidentifier() for part in c.split('.')) for c in selected)
     else:
@@ -208,6 +211,9 @@ def warmup_context(plan, fixture, task=None):
 def verify_inputs(folder):
     proof, plan = read(folder/'provenance.json'), read(PLAN)
     _verify_input_contents(folder, plan, proof, digest(PLAN))
+    if plan.get('candle_predicate_order_qualification'):
+        from .candle_predicate_qualification import verify_authentication
+        verify_authentication(folder, plan, proof)
     if plan.get('matchinglow_grid_qualification'):
         from .matchinglow_grid_qualification import verify_authentication
         verify_authentication(folder, plan, proof)

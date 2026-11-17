@@ -67,6 +67,11 @@ def collect_preflight(folder):
 
 def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=False):
     plan = read(PLAN)
+    if plan.get('candle_predicate_order_qualification'):
+        assert phase == 'targeted' and not preflight and not diagnostic
+        from .candle_predicate_qualification import validate_scope, verify_runtime
+        validate_scope(plan)
+        verify_runtime(folder, plan['expected_runtime_version'])
     if plan.get('matchinglow_grid_qualification'):
         assert phase == 'targeted' and matchinglow_gate, 'MatchingLow native crossover gate is required'
     else:

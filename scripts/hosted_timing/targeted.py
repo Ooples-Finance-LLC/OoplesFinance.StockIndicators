@@ -536,6 +536,19 @@ SCOPES['matchinglow-only-grid-20261116'] = dict(
     totals=(90,18), shards=1, baseline_phase='targeted', baseline_totals=(120,24))
 
 
+SCOPES['candle-predicate-order-20261116'] = dict(
+    fixtures={'SharedTripleBodyBenchmarks': {p:p for p in
+        ('TaLib.Candles.ThreeInside','TaLib.Candles.TwoCrows','TaLib.Candles.UpsideGapTwoCrows','TaLib.Candles.UniqueThreeRiver')},
+        'SharedTaReversalContinuationBenchmarks': {'TaLib.Candles.PiercingLine':'PiercingLine',
+            'TaLib.Candles.DarkCloudCover':'DarkCloudCover'}},
+    implicit_fixtures=set(),
+    paths={'src/Indicators/TripleBodyCandles.cs','src/Indicators/PenetrationCandles.cs',
+        'tests/ModelsTests/TripleBodySharedExecutionTests.cs','tests/ModelsTests/PenetrationSharedExecutionTests.cs'},
+    methods={f:['BuilderFull','BuilderLatestOnly','NativeSingle','NativeParallel'] for f in
+        ('SharedTripleBodyBenchmarks','SharedTaReversalContinuationBenchmarks')},
+    totals=(180,36),shards=1,baseline_phase='targeted',baseline_totals=(90,18))
+
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 

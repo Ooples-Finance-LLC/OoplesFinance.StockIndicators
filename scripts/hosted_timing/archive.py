@@ -70,6 +70,30 @@ def archive(raw, prepared, repo, phase):
         from .pipeline import BENCH, TESTS
         blobs['harness-continuation.patch'] = subprocess.check_output(['git', 'diff', '--binary',
             QUALIFIED, OLD, '--', BENCH, TESTS], cwd=REPO)
+    if read(PLAN).get('candle_predicate_order_qualification'):
+        plan = read(PLAN)
+        assert phase == 'targeted'
+        from .candle_predicate_qualification import BASE_PLAN, BASE_PLAN_SHA, OLD_PLAN, OLD_PLAN_SHA
+        assert digest(REPO/OLD_PLAN) == OLD_PLAN_SHA
+        blobs['old-candidate-plan.json'] = (REPO/OLD_PLAN).read_bytes()
+        original_approval = read(REPO/BASE_PLAN)['refresh_approval']
+        assert digest(REPO/original_approval['path']) == original_approval['sha256']
+        blobs['original-scope-approval.json'] = (REPO/original_approval['path']).read_bytes()
+        assert digest(REPO/BASE_PLAN) == BASE_PLAN_SHA
+        blobs['original-plan.json'] = (REPO/BASE_PLAN).read_bytes()
+        approval = REPO/plan['scope_approval']['path']
+        assert digest(approval) == plan['scope_approval']['sha256']
+        blobs['scope-approval.json'] = approval.read_bytes()
+        for name in ('baseline-authentication','old-candidate-authentication','candidate-authentication'):
+            folder = prepared/name
+            root = folder/('provenance.json' if name == 'baseline-authentication' else 'manifest.json')
+            blobs['prepared/'+root.relative_to(prepared).as_posix()] = root.read_bytes()
+            for path in (folder/'evidence').rglob('*'):
+                if path.is_file():
+                    assert path.suffix.lower() not in ('.dll','.exe','.pdb'), 'No runtime in source evidence archive'
+                    blobs['prepared/'+path.relative_to(prepared).as_posix()] = path.read_bytes()
+        for name in ('prepare-candle-predicate-qualification.py','test_hosted_candle_predicate_qualification.py'):
+            blobs['scripts/root/'+name] = (REPO/'scripts'/name).read_bytes()
     blobs['candidate-source.patch'] = subprocess.check_output(['git','diff','--binary',
         summary['sources']['old'],summary['sources']['new'],'--','src','tests'],cwd=repo)
     assert bool(blobs['candidate-source.patch']) == (phase not in ('coverage','baseline-refresh'))
