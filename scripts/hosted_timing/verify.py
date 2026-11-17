@@ -54,6 +54,10 @@ def sample(case):
 
 
 def collect(folder, phase):
+    if read(PLAN).get('candle_predicate_order_qualification'):
+        assert phase == 'targeted'
+        from .candle_predicate_qualification import collect as predicate_collect
+        return predicate_collect(folder)
     if read(PLAN).get('matchinglow_grid_qualification'):
         assert phase == 'targeted'
         from .matchinglow_grid_qualification import collect as matchinglow_collect
@@ -65,13 +69,15 @@ def collect_preflight(folder):
     return _collect(folder, 'successor', preflight=True)
 
 
-def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=False):
+def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=False, candle_predicate_gate=False):
     plan = read(PLAN)
     if plan.get('candle_predicate_order_qualification'):
-        assert phase == 'targeted' and not preflight and not diagnostic
+        assert phase == 'targeted' and not preflight and not diagnostic and candle_predicate_gate
         from .candle_predicate_qualification import validate_scope, verify_runtime
         validate_scope(plan)
         verify_runtime(folder, plan['expected_runtime_version'])
+    else:
+        assert not candle_predicate_gate
     if plan.get('matchinglow_grid_qualification'):
         assert phase == 'targeted' and matchinglow_gate, 'MatchingLow native crossover gate is required'
     else:

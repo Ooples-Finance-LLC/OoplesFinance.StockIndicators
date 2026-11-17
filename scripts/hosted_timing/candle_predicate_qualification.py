@@ -33,6 +33,11 @@ PARITY = ['OoplesFinance.StockIndicators.CompetitorTests.'+name for name in ('Tr
 PATHS = {'src/Indicators/TripleBodyCandles.cs','src/Indicators/PenetrationCandles.cs',
     'tests/ModelsTests/TripleBodySharedExecutionTests.cs','tests/ModelsTests/PenetrationSharedExecutionTests.cs'}
 METHODS = ['BuilderFull','BuilderLatestOnly','NativeSingle','NativeParallel']
+NATIVE_POLICY = dict(fixture='LibraryPairBenchmarks',method='Ooples',native_method='Competitor',
+    native_round=2,old_rounds=[0,3],candidate_rounds=[1,2],minimum_margin=0.10,
+    new_closure_bars=10000,minimum_new_closures=1,require_own_source_faster=True,
+    require_net_10000_point_progress=True,protect_prior_confident_wins_both_sizes=True,
+    point_win_comparison='strict-less-than')
 blob, sha = previous.blob, previous.sha
 
 
@@ -62,6 +67,7 @@ def validate_scope(plan, *, require_ready=True):
     assert (plan['cases'],plan['decisions']) == (180,36)
     assert plan['matrix'] == dict(shards=1,max_parallel=1,timeout_minutes_per_shard=180)
     assert plan['targeted_shards'] == shards()
+    assert plan['native_progress_gate'] == NATIVE_POLICY
     assert plan['measurement_policy'] == common.POLICY and plan['runtime_policy_overrides'] == {}
     assert plan['proposed_dotnet_sdk'] == '10.0.403' and plan['expected_runtime_version'] == '.NET 10.0.15'
     assert plan['runtime_dependency_alignment'] == dict(tensor_version='0.150.0') and plan['require_fixture_inventory']
@@ -230,3 +236,77 @@ def prepare(baseline, old_candidate, candidate, out):
 def verify_runtime(folder, expected):
     assert expected == '.NET 10.0.15'
     previous._verify_runtime(folder,expected)
+
+
+
+def native_rows(folder):
+    """Retain separate owned rounds and the sole round2 native control; never pool."""
+    from .verify import archived, sample
+    from .checkpoints import case_key
+    roots = [x.parent for x in Path(folder).glob('*/provenance.json')]
+    assert len(roots) == 1
+    root = roots[0];proof = p.read(root/'provenance.json');state = p.read(root/'status.json')
+    rounds = {}
+    for record in state['rounds']:
+        if record['fixture'] != 'LibraryPairBenchmarks': continue
+        index = str(record['index']);assert index in ('0','1','2','3') and index not in rounds
+        report = p.read(archived(root,proof['raw_root'],record['report']))
+        rows = {}
+        for case in report['Benchmarks']:
+            key = case_key(case);assert key not in rows
+            rows[key] = sample(case)
+        methods = ('Ooples','Competitor') if index == '2' else ('Ooples',)
+        assert set(rows) == {(pair,bars,method) for pair in PAIRS for bars in (1000,10000) for method in methods}
+        rounds[index] = rows
+    assert set(rounds) == {'0','1','2','3'}
+    return [dict(pair=pair,bars=bars,
+        old_rounds={index:rounds[index][pair,bars,'Ooples'] for index in ('0','3')},
+        candidate_rounds={index:rounds[index][pair,bars,'Ooples'] for index in ('1','2')},
+        native_control=rounds['2'][pair,bars,'Competitor']) for pair in PAIRS for bars in (1000,10000)]
+
+
+def adjudicate_native(rows, decisions):
+    expected = {(pair,bars) for pair in PAIRS for bars in (1000,10000)}
+    indexed = {(row['pair'],row['bars']):row for row in rows}
+    assert len(indexed) == len(rows) == 12 and indexed.keys() == expected
+    own = {}
+    for decision in decisions:
+        if decision['fixture'] != 'LibraryPairBenchmarks' or decision['method'] != 'Ooples': continue
+        key = decision['pair'],decision['bars'];assert key not in own
+        own[key] = decision['verdict']
+    assert own.keys() == expected
+    old_counts = {'0':0,'3':0};new_counts = {'1':0,'2':0}
+    closures = [];protected = [];reopened = []
+    for key,row in indexed.items():
+        assert set(row['old_rounds']) == {'0','3'} and set(row['candidate_rounds']) == {'1','2'}
+        old = list(row['old_rounds'].values());new = list(row['candidate_rounds'].values());native = row['native_control']
+        if key[1] == 10000:
+            for index,value in row['old_rounds'].items():old_counts[index] += int(value['mean_ns'] < native['mean_ns'])
+            for index,value in row['candidate_rounds'].items():new_counts[index] += int(value['mean_ns'] < native['mean_ns'])
+            if own[key] == 'faster' and all(value['mean_ns'] >= native['mean_ns'] for value in old) and all(
+                value['upper_ns'] < native['lower_ns'] and value['mean_ns'] <= 0.90*native['mean_ns'] for value in new):
+                closures.append(dict(pair=key[0],bars=10000,own_source_verdict=own[key]))
+        if all(value['upper_ns'] < native['lower_ns'] for value in old):
+            check = dict(pair=key[0],bars=key[1],preserved=all(value['mean_ns'] < native['mean_ns'] for value in new))
+            protected.append(check)
+            if not check['preserved']:reopened.append(check)
+    net_progress = min(new_counts.values()) > max(old_counts.values())
+    passed = bool(closures) and net_progress and not reopened
+    return dict(passed=passed,policy=NATIVE_POLICY,new_10000_closures=closures,
+        old_10000_point_win_counts=old_counts,candidate_10000_point_win_counts=new_counts,
+        net_10000_point_progress=net_progress,prior_confident_win_checks=protected,
+        prior_confident_win_reopenings=reopened,native_control_round=2,native_controls_per_pair_size=1,
+        rows=rows,limitation='Separate owned rounds share one LibraryPair round2 Competitor control. No builder controls or pooled timings are used.')
+
+
+def collect(folder, inputs=None):
+    from .verify import _collect
+    if inputs is not None:p.verify_inputs(Path(inputs))
+    result = _collect(Path(folder),'targeted',preflight=False,candle_predicate_gate=True)
+    assert (result['case_count'],result['decision_count']) == (180,36)
+    if inputs is not None:assert result['input_provenance_sha256'] == p.digest(Path(inputs)/'provenance.json')
+    source_accepted = result['accepted']
+    native = adjudicate_native(native_rows(folder),result['decisions'])
+    result.update(source_gate_accepted=source_accepted,native_progress_gate_passed=native['passed'],
+        native_progress_gate=native,accepted=source_accepted and native['passed'])
+    return result
