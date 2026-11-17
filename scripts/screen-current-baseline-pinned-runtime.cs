@@ -31,26 +31,27 @@ internal static class Program
     }
     static int Main(string[] args)
     {
-        if (args.Length != 6) throw new ArgumentException("Expected original inputs, runtime view, arm, pair, fresh output, warmups.");
+        if (args.Length != 6) throw new ArgumentException("Expected original inputs, runtime view, arm, pair, fresh output, invocation count.");
         string input = Path.GetFullPath(args[0]), runtime = Path.GetFullPath(args[1]);
         string arm = args[2], pair = args[3], output = Path.GetFullPath(args[4]);
-        int warmups = int.Parse(args[5], System.Globalization.CultureInfo.InvariantCulture);
-        Require(warmups is 1000 or 20000, "Unexpected diagnostic warmups.");
+        int invocationCount = int.Parse(args[5], System.Globalization.CultureInfo.InvariantCulture);
+        Require(invocationCount is 1 or 64, "Unexpected diagnostic invocation count.");
+        const int warmups = 20000;
         Require(arm is "old" or "new" or "native", "Unknown arm.");
-        Require(pair is "TaLib.Functions.LinearReg" or "TaLib.Candles.UpsideGapTwoCrows", "Unknown pair.");
+        Require(pair == "TaLib.Candles.UpsideGapTwoCrows", "Unknown pair.");
         Require(!Directory.Exists(output), "Fresh output required."); Directory.CreateDirectory(output);
         var receipt = new Dictionary<string,object?> {
             ["diagnostic_only"] = true, ["qualification"] = false, ["native_win_claim"] = false,
             ["status"] = "running", ["process_id"] = Environment.ProcessId,
             ["process_start_utc"] = Process.GetCurrentProcess().StartTime.ToUniversalTime(),
             ["actual_clr"] = Environment.Version.ToString(), ["pair"] = pair, ["bars"] = 10000, ["arm"] = arm,
-            ["warmups"] = warmups, ["single_call_samples"] = 10, ["production_builds"] = 0,
+            ["warmups"] = warmups, ["warmup_invocation_count"] = 1, ["iteration_samples"] = 10, ["invocation_count"] = invocationCount, ["all_underlying_outputs_verified"] = false, ["verified_output_scope"] = "last source result per iteration only", ["production_builds"] = 0,
             ["timed_benchmark_cases"] = 0, ["processor_count"] = Environment.ProcessorCount,
             ["env_aidotnet_cpu_threads"] = Environment.GetEnvironmentVariable("AIDOTNET_CPU_THREADS"),
             ["source_old"] = "6051a95220eefa36e6f837a9a54e036164b76ebe",
             ["source_new"] = "6051a95220eefa36e6f837a9a54e036164b76ebe",
             ["old_production_sha256"] = Old, ["new_production_sha256"] = Old, ["frozen_harness_sha256"] = Bench,
-            ["limits"] = "Baseline A/A diagnostic: both labels use the same existing binary. Isolated-process MethodInfo/Stopwatch screen only, not BenchmarkDotNet qualification or native-win evidence. All timings require both outer idle gates. Warmup policy comparison only; no automatic report or policy change. Warmup stopwatch and GC counters are outside measured calls. No runtime or worker assignments. Native follows source rounds and may have different runtime warmth."
+            ["limits"] = "Baseline A/A diagnostic: both labels use the same existing binary. Isolated-process MethodInfo/Stopwatch screen only, not BenchmarkDotNet qualification or native-win evidence. All timings require both outer idle gates. Iteration-window comparison only; no automatic report or policy change. Both counts use 20000 warmup calls. Raw blocks and normalized samples retained; GC/UTC brackets outside Stopwatch. Only iteration endpoints retained/verified; all_underlying_outputs_verified=false. No runtime or worker assignments. Native follows source rounds and may have different runtime warmth."
         };
         void Save() { string temporary = Path.Combine(output, "case.json.new"); File.WriteAllText(temporary, JsonSerializer.Serialize(receipt, new JsonSerializerOptions { WriteIndented = true })); File.Move(temporary, Path.Combine(output, "case.json"), true); }
         Save();
@@ -112,20 +113,37 @@ internal static class Program
             warmupWatch.Stop();
             receipt["warmup_elapsed_ms"] = warmupWatch.Elapsed.TotalMilliseconds;
             receipt["gc_counts_after_warmup"] = GcCounts();
-            var samples = new List<double>(); var retained = new List<object>(); receipt["measurement_start_utc"] = DateTime.UtcNow;
+            var samples = new List<double>(); var rawBlocks = new List<double>();
+            var iterations = new List<object>(); var retained = new List<object>();
+            receipt["measurement_start_utc"] = DateTime.UtcNow;
+            receipt["timestamp_frequency"] = Stopwatch.Frequency;
             for (int i = 0; i < 10; i++)
             {
-                long start = Stopwatch.GetTimestamp(); object result = invoke.Invoke(fixture, null)!; long end = Stopwatch.GetTimestamp();
-                samples.Add((end - start) * 1000.0 / Stopwatch.Frequency); if (arm != "native") retained.Add(result); GC.KeepAlive(result);
+                int[] gcBefore = GcCounts(); DateTime utcBefore = DateTime.UtcNow;
+                object result = null!;
+                long start = Stopwatch.GetTimestamp();
+                for (int call = 0; call < invocationCount; call++) result = invoke.Invoke(fixture, null)!;
+                long end = Stopwatch.GetTimestamp();
+                DateTime utcAfter = DateTime.UtcNow; int[] gcAfter = GcCounts();
+                double blockMs = (end - start) * 1000.0 / Stopwatch.Frequency;
+                double normalizedMs = blockMs / invocationCount;
+                rawBlocks.Add(blockMs); samples.Add(normalizedMs);
+                iterations.Add(new { index = i, invocation_count = invocationCount, raw_block_ms = blockMs,
+                    normalized_ms = normalizedMs, qpc_start = start, qpc_end = end,
+                    utc_before = utcBefore, utc_after = utcAfter, gc_before = gcBefore, gc_after = gcAfter });
+                if (arm != "native") retained.Add(result);
+                GC.KeepAlive(result);
             }
             receipt["measurement_end_utc"] = DateTime.UtcNow; receipt["samples_ms"] = samples;
+            receipt["raw_block_ms"] = rawBlocks; receipt["iteration_details"] = iterations;
+            receipt["measured_underlying_calls"] = 10 * invocationCount;
             receipt["source_outputs"] = retained.Select(Snapshot).ToArray(); receipt["source_outputs_compared_outer"] = false;
             receipt["settings_after"] = Settings(); receipt["closure_after"] = Closure(); Check(files); Check(protectedFiles);
             receipt["runtime_unchanged"] = true; receipt["protected_inputs_unchanged"] = true; receipt["status"] = "complete"; Save(); return 0;
         }
         catch (Exception error) { receipt["status"] = "failed"; receipt["error"] = error.ToString(); Save(); Console.Error.WriteLine(error); return 1; }
     }
-    sealed class AuthenticatedContext(Dictionary<string,string> selected, Dictionary<string,string> framework, Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedBaselineWarmupStudy", false)
+    sealed class AuthenticatedContext(Dictionary<string,string> selected, Dictionary<string,string> framework, Dictionary<string,string> hashes) : AssemblyLoadContext("AuthenticatedIterationWindowStudy", false)
     {
         protected override Assembly? Load(AssemblyName name)
         {
