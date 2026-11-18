@@ -149,14 +149,14 @@
     "ci_run": "44261583827",
     "producer": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
     "evidence_source": "UNBOUND",
-    "manifest_sha256": "UNBOUND",
+    "manifest_sha256": "0228a5e9ede72ce849af495ae7cbf939ffb04a02bce5ec3cd0950958161013a9",
     "gpu_receipt_sha256": "UNBOUND",
-    "production_sha256": "UNBOUND",
-    "source_fingerprint": "UNBOUND",
-    "artifact_id": "UNBOUND",
-    "artifact_zip_sha256": "UNBOUND",
-    "unit_passed": "UNBOUND",
-    "parity_passed": "UNBOUND",
+    "production_sha256": "3ff0d240ac985c8d50e429659a92e25e8cf46a4cca079af06555eaecdc20ab7a",
+    "source_fingerprint": "f6f403b46d3fe7de4e3c92d1bade56a20b7c55ee5213b95d46ea74c35a9fa9d9",
+    "artifact_id": "14408497855",
+    "artifact_zip_sha256": "af2441c308c350bdfcdffb0f8ce2c5a3f92dd20a7f3986e94552e31d351cd6b7",
+    "unit_passed": 82,
+    "parity_passed": 244,
     "unit_classes": [
       "MultiBarCandleSharedExecutionTests",
       "LadderWordExecutionTests",
@@ -168,7 +168,7 @@
       "ExtendedReversalTests",
       "SharedTaReversalContinuationBenchmarkTests"
     ],
-    "actual_harness_sha256": "UNBOUND"
+    "actual_harness_sha256": "86273961f76541d0174f87132b634fe36310b905f013578d8b75dead62760027"
   },
   "harness_sha256": "07e764bd27110b4452e1f181f466a6ea0e60b4ae4667d01b6c75f468ae8aee07",
   "closure_ledger_new_rows": 0,
