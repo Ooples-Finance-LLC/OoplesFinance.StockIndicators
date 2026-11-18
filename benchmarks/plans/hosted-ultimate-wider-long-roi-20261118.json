@@ -1,0 +1,190 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "expected_runtime_version": ".NET 10.0.15",
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "diagnostic_kind": "ultimate-wider-long-native-pilot",
+  "diagnostic_only": true,
+  "cases": 20,
+  "decisions": 4,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 120
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.UltOsc",
+              "pair": "TaLib.Functions.UltOsc"
+            },
+            {
+              "raw": "Skender.GetUltimate",
+              "pair": "Skender.GetUltimate"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        }
+      ],
+      "cases": 20,
+      "decisions": 4
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.UltOsc",
+              "pair": "TaLib.Functions.UltOsc"
+            },
+            {
+              "raw": "Skender.GetUltimate",
+              "pair": "Skender.GetUltimate"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        }
+      ],
+      "cases": 20,
+      "decisions": 4
+    }
+  ],
+  "inputs_ready": true,
+  "parent_review_approved": true,
+  "sources": {
+    "published": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "old": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "successor": "e8bd1b53506bcbd2f57a1be4851a88e2780d9f8a",
+    "variants": "9e914007c3438d9f251f3fab9ef321d49c22de83"
+  },
+  "gpu_sources": {
+    "old": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "successor": "e8bd1b53506bcbd2f57a1be4851a88e2780d9f8a",
+    "variants": "9e914007c3438d9f251f3fab9ef321d49c22de83"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests"
+    ],
+    "successor": [
+      "WiderUltimateExecutionTests",
+      "BoundedUltimateExecutionTests",
+      "CertifiedUltimateRatioTests"
+    ],
+    "variants": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests"
+    ]
+  },
+  "old_candidate": {
+    "source": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "ci_run": "44217513798",
+    "producer": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
+    "evidence_source": "08ff12fb7333e3f76808672b05a2c62e85e5ae80",
+    "manifest_sha256": "192cba71853935788aba889e0d4cb9bbd6b75545e007e7871824ef4c0348536c",
+    "gpu_receipt_sha256": "d7482cc795d9ebfec37cc482474360bef8ec932677f7c69f572269df4d7c8544",
+    "production_sha256": "ed8a61ad920d1745a426b572db2e0dfb67764e4328304dbf9c5ad4b3583f80b7",
+    "source_fingerprint": "79ccf727c22cb156a0cb75cdd0f764da037603d7b74c8cd9cb075da2c6498815",
+    "artifact_id": "14389198881",
+    "artifact_zip_sha256": "5abfd9a7b9ff19e37999540639d963a374f5bdeb5e191da367ec111bf0dbd675",
+    "unit_passed": 73,
+    "parity_passed": 85,
+    "unit_classes": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests"
+    ],
+    "parity_classes": [
+      "TripleBodyTests",
+      "SharedTripleBodyBenchmarkTests"
+    ],
+    "actual_harness_sha256": "07e764bd27110b4452e1f181f466a6ea0e60b4ae4667d01b6c75f468ae8aee07"
+  },
+  "candidate": {
+    "source": "e8bd1b53506bcbd2f57a1be4851a88e2780d9f8a",
+    "ci_run": "44326730212",
+    "producer": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
+    "evidence_source": "2e724409bf1c62cda445bfc0f06d72636eb30850",
+    "manifest_sha256": "17157787d3dd2cc0127c99657731557806c566f16ef8aaed0f53ce4917c018b8",
+    "gpu_receipt_sha256": "51ea7cfa9192c6884eaab01d881fff0dc97a2a0410e47b8db16ea8decfb83e96",
+    "production_sha256": "0207552d161aa64cce39669d7a8e011ce210a1d8e413fe833cfbd6eaff149da8",
+    "source_fingerprint": "ddc5d6aae9954fd387d8e06c64c4d8d13ea01191f2cc188a146d06a9c170ef7b",
+    "artifact_id": "14437429672",
+    "artifact_zip_sha256": "720d2aa28448565d4973107d8d6e0cd115df288a080c7953e7e7339f5758b1a3",
+    "unit_passed": 30,
+    "parity_passed": 15,
+    "unit_classes": [
+      "WiderUltimateExecutionTests",
+      "BoundedUltimateExecutionTests",
+      "CertifiedUltimateRatioTests"
+    ],
+    "parity_classes": [
+      "TrueRangeRatioComparisonTests"
+    ],
+    "actual_harness_sha256": "7015404b8e63a2c2574e29eb1085e2ef356405b9ea4289e31a7f2ae36c22f798"
+  },
+  "harness_sha256": "07e764bd27110b4452e1f181f466a6ea0e60b4ae4667d01b6c75f468ae8aee07",
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "harness_alias_policy": {
+    "common_artifact_role": "old",
+    "variants_artifact_role": "old",
+    "baseline_source": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "candidate_source": "e8bd1b53506bcbd2f57a1be4851a88e2780d9f8a",
+    "require_scoped_source_identity": true,
+    "claim_artifact_binary_identity": false
+  },
+  "automatic_qualification": false,
+  "future_builder_fixture": "SharedUltimateBenchmarks",
+  "require_net_10000_point_progress": true
+}
