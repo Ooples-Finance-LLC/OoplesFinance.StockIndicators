@@ -1286,6 +1286,10 @@ internal static partial class ValuesBarExecution
         WindowExtremeIndex { Period: <= 32 } index => FillBoundedWindow<SmallExtremeIndexKernel>(source, output, indicator, index.Period, cancellation, owned),
         WindowExtremeIndex index => FillBoundedWindow<ExtremeIndexKernel>(source, output, indicator, index.Period, cancellation, owned),
         DecayingWindowExtreme { Decay: 0 } extreme => FillBoundedWindow<CloseExtremeKernel>(source, output, indicator, extreme.Period, cancellation, owned),
+        LaggedPriceChange { Period: <= 4096, Kind: PriceChangeKind.Difference or PriceChangeKind.Fraction
+            or PriceChangeKind.Percent or PriceChangeKind.Ratio or PriceChangeKind.RatioPercent } change
+            when source.Length >= 8192 =>
+            FillLaggedBlocks(source, output, change, change.Period + 1, cancellation, owned),
         LaggedPriceChange change => FillBoundedWindow<LaggedKernel>(source, output, indicator, change.Period + 1, cancellation, owned),
         // Two seed bars preserve the pattern's two-bar startup in every worker.
         EngulfingPattern => FillBoundedWindow<EngulfingKernel>(source, output, indicator, 3, cancellation, owned),
