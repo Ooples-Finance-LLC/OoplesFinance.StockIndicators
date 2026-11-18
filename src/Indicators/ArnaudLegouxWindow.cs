@@ -140,6 +140,15 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
             _denominator = default;
         }
 
+#if !NETFRAMEWORK
+        internal static ExactMeanAccumulator.ProductFactor[] PrepareBatchWeights(int period, double offset, double sigma)
+        {
+            var state = new State(period, offset, sigma, true);
+            state.PrepareWeights(period);
+            return state._weights;
+        }
+#endif
+
         private void PrepareWeights(int n)
         {
             if (_weights.Length == n)
