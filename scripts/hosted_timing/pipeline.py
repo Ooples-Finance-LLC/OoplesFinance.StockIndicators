@@ -238,6 +238,9 @@ def verify_inputs(folder):
     if plan.get('ultimate_direct_long_qualification'):
         from .ultimate_direct_long_qualification import verify_authentication
         verify_authentication(folder, plan, proof)
+    if plan.get('diagnostic_kind') == 'renko-normalized-grid-native-pilot':
+        from .renko_normalized_grid_roi import verify_authentication
+        verify_authentication(folder,plan,proof)
     if plan.get('diagnostic_kind') == 'sample-shape-fixed-grid-native-pilot':
         from .sample_shape_fixed_grid_roi import verify_authentication
         verify_authentication(folder,plan,proof)
@@ -307,6 +310,9 @@ def _verify_input_contents(folder, plan, proof, plan_sha256):
         verify_harness_alias(folder,plan,proof)
     elif plan.get('ultimate_direct_long_qualification'):
         from .ultimate_direct_long_qualification import verify_harness_alias
+        verify_harness_alias(folder,plan,proof)
+    elif plan.get('diagnostic_kind') == 'renko-normalized-grid-native-pilot':
+        from .renko_normalized_grid_roi import verify_harness_alias
         verify_harness_alias(folder,plan,proof)
     elif plan.get('diagnostic_kind') == 'sample-shape-fixed-grid-native-pilot':
         from .sample_shape_fixed_grid_roi import verify_harness_alias

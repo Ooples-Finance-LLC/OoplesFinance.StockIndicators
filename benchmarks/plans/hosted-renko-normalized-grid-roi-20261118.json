@@ -1,0 +1,193 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "expected_runtime_version": ".NET 10.0.15",
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "diagnostic_kind": "renko-normalized-grid-native-pilot",
+  "diagnostic_only": true,
+  "cases": 20,
+  "decisions": 4,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 120
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetRenko",
+              "pair": "Skender.GetRenko"
+            },
+            {
+              "raw": "Skender.GetRenkoAtr",
+              "pair": "Skender.GetRenkoAtr"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        }
+      ],
+      "cases": 20,
+      "decisions": 4
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetRenko",
+              "pair": "Skender.GetRenko"
+            },
+            {
+              "raw": "Skender.GetRenkoAtr",
+              "pair": "Skender.GetRenkoAtr"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        }
+      ],
+      "cases": 20,
+      "decisions": 4
+    }
+  ],
+  "inputs_ready": true,
+  "parent_review_approved": true,
+  "sources": {
+    "published": "c5bfd4950982aa80dddbfd2db6358ad43ddb9e4c",
+    "old": "c5bfd4950982aa80dddbfd2db6358ad43ddb9e4c",
+    "successor": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "variants": "c5bfd4950982aa80dddbfd2db6358ad43ddb9e4c"
+  },
+  "gpu_sources": {
+    "old": "c5bfd4950982aa80dddbfd2db6358ad43ddb9e4c",
+    "successor": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "variants": "c5bfd4950982aa80dddbfd2db6358ad43ddb9e4c"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "WiderUltimateExecutionTests",
+      "BoundedUltimateExecutionTests",
+      "CertifiedUltimateRatioTests"
+    ],
+    "successor": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests"
+    ],
+    "variants": [
+      "WiderUltimateExecutionTests",
+      "BoundedUltimateExecutionTests",
+      "CertifiedUltimateRatioTests"
+    ]
+  },
+  "old_candidate": {
+    "source": "c5bfd4950982aa80dddbfd2db6358ad43ddb9e4c",
+    "ci_run": "44341191246",
+    "producer": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
+    "evidence_source": "f29e9de871dd2ac40bce3627b434118dd22df8b7",
+    "manifest_sha256": "1aee6aff8542e81894a280b14fef370e334087fff2730beef8448c3f7be382eb",
+    "gpu_receipt_sha256": "597cbf384a25243db4928bdeac05b2dae771ba3f09e13bcef7f24be046a9b2a7",
+    "production_sha256": "e6aa9aacff74acd49eeebb322cc3f8714d7c40488f450a7d31e215947638d7a8",
+    "source_fingerprint": "4b348074bcf3350f0af46261beb830cfe0cd50001ad2c06756c54cb5a1b054f4",
+    "artifact_id": "14444392764",
+    "artifact_zip_sha256": "3b65c9b13d0cb43559f2cf607cca176bf8593d27399c67797fc7093ef406f6bc",
+    "unit_passed": 31,
+    "parity_passed": 15,
+    "unit_classes": [
+      "WiderUltimateExecutionTests",
+      "BoundedUltimateExecutionTests",
+      "CertifiedUltimateRatioTests"
+    ],
+    "parity_classes": [
+      "TrueRangeRatioComparisonTests"
+    ],
+    "actual_harness_sha256": "f70c2d7489af5cbf0855721e8eb075de47fc2db6af72ce22e571032a86bd1379"
+  },
+  "candidate": {
+    "source": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "ci_run": "44388147138",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "aaf895d4e7b5b9a2e70810c87227db08ddaad9f6",
+    "manifest_sha256": "291f8660e56d5f056ad47881891e92742522704f5cac8f9016f11ba1a2c4c332",
+    "gpu_receipt_sha256": "8c5fa1866814f4cd6a60666470c7a75c5171142d943a669c4d824532e6a2ca82",
+    "production_sha256": "ebc789ea23a9145d85705d53ce35fedb707e803c6c80cadfeafc431dbec1a3d7",
+    "source_fingerprint": "c526951d5a65c7aeaa1cdcbcaaf56035cc96b241095704f6bf278513753935e3",
+    "artifact_id": "14467645201",
+    "artifact_zip_sha256": "07f1bab22ccdb4e7a3a7084a5706ca79f9c4839227485168a1d55df6d32b19a7",
+    "unit_passed": 55,
+    "parity_passed": 8,
+    "unit_classes": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests"
+    ],
+    "parity_classes": [
+      "RenkoComparisonTests"
+    ],
+    "actual_harness_sha256": "32e9b2a5e92bdd4aabec6b9749a5b891befab3e02a922022c93a4d0c95784e5f"
+  },
+  "harness_sha256": "f70c2d7489af5cbf0855721e8eb075de47fc2db6af72ce22e571032a86bd1379",
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "harness_alias_policy": {
+    "common_artifact_role": "old",
+    "variants_artifact_role": "old",
+    "baseline_source": "c5bfd4950982aa80dddbfd2db6358ad43ddb9e4c",
+    "candidate_source": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "require_scoped_source_identity": true,
+    "claim_artifact_binary_identity": false
+  },
+  "automatic_qualification": false,
+  "future_builder_fixture": "SharedRenkoSnapshotBenchmarks",
+  "require_net_10000_point_progress": true,
+  "frozen_baseline_feasibility_only": true,
+  "current_combined_source_qualified": false,
+  "report_import_permitted": false,
+  "followup_requires_current_published_baseline": true,
+  "actual_input_provenance": {
+    "path": "benchmarks/plans/evidence/renko-normalized-actual-lp-setup-proof-20261118.json",
+    "sha256": "835d3861b93fd8d98175cd6c4a8c9abbad4abf0a76f2aaff53b3fc257affe9fd",
+    "actual_setup_export_sha256": "57f4d67aee400fbdce65f886cecd8ebb82a093aa90552ef85019795c636eddf4",
+    "source": "409c5f5eea78724f83c999469b76bacbbb193911",
+    "harness_sha256": "148921163c52c848959ed8fff76eacff0b49e93743ee2a7f0671ed84c0280f49"
+  }
+}

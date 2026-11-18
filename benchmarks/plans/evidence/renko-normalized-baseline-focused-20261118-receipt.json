@@ -1,0 +1,55 @@
+{
+  "status": "actual-supplemental-baseline-focused-checks-passed",
+  "source": "c5bfd4950982aa80dddbfd2db6358ad43ddb9e4c",
+  "source_fingerprint": "4b348074bcf3350f0af46261beb830cfe0cd50001ad2c06756c54cb5a1b054f4",
+  "ci_run": "44341191246",
+  "manifest_sha256": "1aee6aff8542e81894a280b14fef370e334087fff2730beef8448c3f7be382eb",
+  "core_sha256": "e6aa9aacff74acd49eeebb322cc3f8714d7c40488f450a7d31e215947638d7a8",
+  "actual_harness_sha256": "f70c2d7489af5cbf0855721e8eb075de47fc2db6af72ce22e571032a86bd1379",
+  "checks": {
+    "unit": {
+      "passed": 45,
+      "classes": {
+        "RenkoPriceGridTests": 26,
+        "RenkoPriceNormalizationTests": 10,
+        "RenkoCompactVolumeTests": 9
+      },
+      "trx_sha256": "d88e93da679b2eb2c738517f1308a75f7c6fff92481178b3dd5b16c2aba83263",
+      "assembly_sha256": "79e09405113fef43625292dcbc0ae7c0299b0e1cab100b3da1c6c4ba4902c4c5",
+      "invocation": [
+        "C:\\Program Files\\dotnet\\dotnet.exe",
+        "exec",
+        "C:\\Program Files\\dotnet\\sdk\\10.0.404\\dotnet.dll",
+        "vstest",
+        "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-ultimate-direct-long-gpu-only-20261118\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.Tests.Unit.dll",
+        "/Settings:C:\\Users\\cheat\\source\\stock-indicators-operations\\renko-normalized-baseline-focused-20261118\\serial.runsettings",
+        "/TestCaseFilter:FullyQualifiedName~RenkoPriceGridTests|FullyQualifiedName~RenkoPriceNormalizationTests|FullyQualifiedName~RenkoCompactVolumeTests",
+        "/Logger:trx;LogFileName=unit.trx",
+        "/ResultsDirectory:C:\\Users\\cheat\\source\\stock-indicators-operations\\renko-normalized-baseline-focused-20261118"
+      ]
+    },
+    "parity": {
+      "passed": 8,
+      "classes": {
+        "RenkoComparisonTests": 8
+      },
+      "trx_sha256": "151ba6e2affb29fb7f805ba67b93a87df85aba03147e1fc25765a132733da20b",
+      "assembly_sha256": "264511a27ae04e709bf6e58d49056363f3fb7aeb1810b41231632d5cf11628a1",
+      "invocation": [
+        "C:\\Program Files\\dotnet\\dotnet.exe",
+        "exec",
+        "C:\\Program Files\\dotnet\\sdk\\10.0.404\\dotnet.dll",
+        "vstest",
+        "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-ultimate-direct-long-gpu-only-20261118\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.CompetitorTests.dll",
+        "/Settings:C:\\Users\\cheat\\source\\stock-indicators-operations\\renko-normalized-baseline-focused-20261118\\serial.runsettings",
+        "/TestCaseFilter:FullyQualifiedName~RenkoComparisonTests",
+        "/Logger:trx;LogFileName=parity.trx",
+        "/ResultsDirectory:C:\\Users\\cheat\\source\\stock-indicators-operations\\renko-normalized-baseline-focused-20261118"
+      ]
+    }
+  },
+  "verified_runtime_entries": 444,
+  "new_builds": 0,
+  "new_measurements": 0,
+  "original_manifest_unchanged": true
+}

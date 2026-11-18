@@ -1,0 +1,78 @@
+{
+  "actual_setup_export_sha256": "57f4d67aee400fbdce65f886cecd8ebb82a093aa90552ef85019795c636eddf4",
+  "harness_sha256": "148921163c52c848959ed8fff76eacff0b49e93743ee2a7f0671ed84c0280f49",
+  "source": "409c5f5eea78724f83c999469b76bacbbb193911",
+  "rows": [
+    {
+      "pair": "Skender.GetRenko",
+      "bars": 1000,
+      "period": 20,
+      "actual_setup_arrays_equal_prior_authenticated_model": true,
+      "closes_bits_sha256": "7c76532e5d6a9a10039cd77623582c5c6e72b6aa55a6973531207a1589f1e518"
+    },
+    {
+      "pair": "Skender.GetRenko",
+      "bars": 10000,
+      "period": 20,
+      "actual_setup_arrays_equal_prior_authenticated_model": true,
+      "closes_bits_sha256": "2514304ca43cdca9c200b4d0afb36b16a586d583f887dc85efc0dbdd144b7b31"
+    },
+    {
+      "pair": "Skender.GetRenkoAtr",
+      "bars": 1000,
+      "period": 20,
+      "actual_setup_arrays_equal_prior_authenticated_model": true,
+      "closes_bits_sha256": "7c76532e5d6a9a10039cd77623582c5c6e72b6aa55a6973531207a1589f1e518"
+    },
+    {
+      "pair": "Skender.GetRenkoAtr",
+      "bars": 10000,
+      "period": 20,
+      "actual_setup_arrays_equal_prior_authenticated_model": true,
+      "closes_bits_sha256": "2514304ca43cdca9c200b4d0afb36b16a586d583f887dc85efc0dbdd144b7b31"
+    },
+    {
+      "pair": "QuanTAlib.Skew",
+      "bars": 1000,
+      "period": 20,
+      "grid": -4,
+      "maximum_integer": 1318,
+      "old_whole_region_guard": true,
+      "proposed_whole_region_guard": true,
+      "actual_custom_fixture_proven": true
+    },
+    {
+      "pair": "QuanTAlib.Skew",
+      "bars": 10000,
+      "period": 20,
+      "grid": -4,
+      "maximum_integer": 10318,
+      "old_whole_region_guard": false,
+      "proposed_whole_region_guard": true,
+      "actual_custom_fixture_proven": true
+    },
+    {
+      "pair": "QuanTAlib.Kurtosis",
+      "bars": 1000,
+      "period": 20,
+      "grid": -4,
+      "maximum_integer": 1318,
+      "old_whole_region_guard": true,
+      "proposed_whole_region_guard": true,
+      "actual_custom_fixture_proven": true
+    },
+    {
+      "pair": "QuanTAlib.Kurtosis",
+      "bars": 10000,
+      "period": 20,
+      "grid": -4,
+      "maximum_integer": 10318,
+      "old_whole_region_guard": false,
+      "proposed_whole_region_guard": true,
+      "actual_custom_fixture_proven": true
+    }
+  ],
+  "new_builds": 0,
+  "new_profiles": 0,
+  "new_timings": 0
+}

@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="258c0f6c-498e-4563-ad87-bb0caf2297d5" name="cheat@SUPER-SERVER 2026-11-18 15:15:37" runUser="SUPER-SERVER\cheat" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-18T15:15:37.8174112-05:00" queuing="2026-11-18T15:15:37.8174114-05:00" start="2026-11-18T15:15:33.9180280-05:00" finish="2026-11-18T15:15:37.8240545-05:00" />
+  <TestSettings name="default" id="71bebdcd-b6ea-405d-b529-bb5f878e001b">
+    <Deployment runDeploymentRoot="cheat_SUPER-SERVER_2026-11-18_15_15_37" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="d8dad903-e36b-494e-a7be-a939fc8cee98" testId="56ca0936-06bd-40e5-72fd-03d08347b473" testName="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.MultiBrickCandleSharesTimestampRangeAndVolume" computerName="SUPER-SERVER" duration="00:00:00.0049401" startTime="2026-11-18T15:15:37.5916717-05:00" endTime="2026-11-18T15:15:37.5968818-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d8dad903-e36b-494e-a7be-a939fc8cee98" />
+    <UnitTestResult executionId="3b4650ab-e802-4647-a165-3b5b26e2087e" testId="f0868220-8600-77e6-178b-04fb24a258ba" testName="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.BothModesAndPriceSourcesHaveIndependentReferences(atr: True, highLow: False)" computerName="SUPER-SERVER" duration="00:00:00.0204392" startTime="2026-11-18T15:15:37.6430588-05:00" endTime="2026-11-18T15:15:37.6636875-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3b4650ab-e802-4647-a165-3b5b26e2087e" />
+    <UnitTestResult executionId="771f5ea9-e8ff-42d1-90c3-734269eb511c" testId="85ec5c6d-0632-77d3-93a8-12450e82d414" testName="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.EveryBrickFieldAndTimestampWordMutationFails" computerName="SUPER-SERVER" duration="00:00:00.0019226" startTime="2026-11-18T15:15:37.6679872-05:00" endTime="2026-11-18T15:15:37.6700114-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="771f5ea9-e8ff-42d1-90c3-734269eb511c" />
+    <UnitTestResult executionId="b4e872b7-f1a2-4d0a-91b7-e0ca3acc4fb3" testId="91464e08-e793-e47b-d39e-991cb801f833" testName="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.BothModesAndPriceSourcesHaveIndependentReferences(atr: False, highLow: True)" computerName="SUPER-SERVER" duration="00:00:00.0293245" startTime="2026-11-18T15:15:37.5982111-05:00" endTime="2026-11-18T15:15:37.6277364-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b4e872b7-f1a2-4d0a-91b7-e0ca3acc4fb3" />
+    <UnitTestResult executionId="e9fce37c-5192-42c6-981a-5c23703ec080" testId="fac49a5a-025e-472a-4cee-665a809eb39d" testName="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.HugeCountsAreLazyAndVolumesUseWideSums" computerName="SUPER-SERVER" duration="00:00:00.0183339" startTime="2026-11-18T15:15:37.5459054-05:00" endTime="2026-11-18T15:15:37.5782063-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e9fce37c-5192-42c6-981a-5c23703ec080" />
+    <UnitTestResult executionId="9e44fdd0-17ac-4658-b823-f5ab5992202a" testId="65a1d5ff-b47e-146b-4cbb-55726e642595" testName="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.BothModesAndPriceSourcesHaveIndependentReferences(atr: False, highLow: False)" computerName="SUPER-SERVER" duration="00:00:00.0020630" startTime="2026-11-18T15:15:37.6279695-05:00" endTime="2026-11-18T15:15:37.6301338-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9e44fdd0-17ac-4658-b823-f5ab5992202a" />
+    <UnitTestResult executionId="e07ce2fe-00eb-4208-a04e-ce0a84d45fce" testId="d79f939e-f514-4625-7e7b-5b04f21ef342" testName="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.BothModesAndPriceSourcesHaveIndependentReferences(atr: True, highLow: True)" computerName="SUPER-SERVER" duration="00:00:00.0124026" startTime="2026-11-18T15:15:37.6302939-05:00" endTime="2026-11-18T15:15:37.6428381-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e07ce2fe-00eb-4208-a04e-ce0a84d45fce" />
+    <UnitTestResult executionId="915780fc-5e86-42fe-8112-d64d09235687" testId="fbbc8916-2105-0e67-7ce6-4f6f0d49f4db" testName="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.AtrStartupAndZeroRangesProduceNoBricks" computerName="SUPER-SERVER" duration="00:00:00.0036450" startTime="2026-11-18T15:15:37.6639649-05:00" endTime="2026-11-18T15:15:37.6677411-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="915780fc-5e86-42fe-8112-d64d09235687" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.AtrStartupAndZeroRangesProduceNoBricks" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="fbbc8916-2105-0e67-7ce6-4f6f0d49f4db">
+      <Execution id="915780fc-5e86-42fe-8112-d64d09235687" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests" name="AtrStartupAndZeroRangesProduceNoBricks" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.BothModesAndPriceSourcesHaveIndependentReferences(atr: True, highLow: True)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="d79f939e-f514-4625-7e7b-5b04f21ef342">
+      <Execution id="e07ce2fe-00eb-4208-a04e-ce0a84d45fce" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests" name="BothModesAndPriceSourcesHaveIndependentReferences" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.MultiBrickCandleSharesTimestampRangeAndVolume" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="56ca0936-06bd-40e5-72fd-03d08347b473">
+      <Execution id="d8dad903-e36b-494e-a7be-a939fc8cee98" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests" name="MultiBrickCandleSharesTimestampRangeAndVolume" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.EveryBrickFieldAndTimestampWordMutationFails" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="85ec5c6d-0632-77d3-93a8-12450e82d414">
+      <Execution id="771f5ea9-e8ff-42d1-90c3-734269eb511c" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests" name="EveryBrickFieldAndTimestampWordMutationFails" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.BothModesAndPriceSourcesHaveIndependentReferences(atr: False, highLow: False)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="65a1d5ff-b47e-146b-4cbb-55726e642595">
+      <Execution id="9e44fdd0-17ac-4658-b823-f5ab5992202a" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests" name="BothModesAndPriceSourcesHaveIndependentReferences" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.BothModesAndPriceSourcesHaveIndependentReferences(atr: False, highLow: True)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="91464e08-e793-e47b-d39e-991cb801f833">
+      <Execution id="b4e872b7-f1a2-4d0a-91b7-e0ca3acc4fb3" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests" name="BothModesAndPriceSourcesHaveIndependentReferences" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.HugeCountsAreLazyAndVolumesUseWideSums" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="fac49a5a-025e-472a-4cee-665a809eb39d">
+      <Execution id="e9fce37c-5192-42c6-981a-5c23703ec080" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests" name="HugeCountsAreLazyAndVolumesUseWideSums" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests.BothModesAndPriceSourcesHaveIndependentReferences(atr: True, highLow: False)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="f0868220-8600-77e6-178b-04fb24a258ba">
+      <Execution id="3b4650ab-e802-4647-a165-3b5b26e2087e" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.RenkoComparisonTests" name="BothModesAndPriceSourcesHaveIndependentReferences" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="56ca0936-06bd-40e5-72fd-03d08347b473" executionId="d8dad903-e36b-494e-a7be-a939fc8cee98" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f0868220-8600-77e6-178b-04fb24a258ba" executionId="3b4650ab-e802-4647-a165-3b5b26e2087e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="85ec5c6d-0632-77d3-93a8-12450e82d414" executionId="771f5ea9-e8ff-42d1-90c3-734269eb511c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="91464e08-e793-e47b-d39e-991cb801f833" executionId="b4e872b7-f1a2-4d0a-91b7-e0ca3acc4fb3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fac49a5a-025e-472a-4cee-665a809eb39d" executionId="e9fce37c-5192-42c6-981a-5c23703ec080" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="65a1d5ff-b47e-146b-4cbb-55726e642595" executionId="9e44fdd0-17ac-4658-b823-f5ab5992202a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d79f939e-f514-4625-7e7b-5b04f21ef342" executionId="e07ce2fe-00eb-4208-a04e-ce0a84d45fce" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fbbc8916-2105-0e67-7ce6-4f6f0d49f4db" executionId="915780fc-5e86-42fe-8112-d64d09235687" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="8" executed="8" passed="8" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.0+05679a7ab5 (64-bit .NET 10.0.15)&#xD;
+[xUnit.net 00:00:00.22]   Discovering: OoplesFinance.StockIndicators.CompetitorTests&#xD;
+[xUnit.net 00:00:03.05]   Discovered:  OoplesFinance.StockIndicators.CompetitorTests&#xD;
+[xUnit.net 00:00:03.10]   Starting:    OoplesFinance.StockIndicators.CompetitorTests&#xD;
+[xUnit.net 00:00:03.29]   Finished:    OoplesFinance.StockIndicators.CompetitorTests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

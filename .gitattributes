@@ -249,3 +249,9 @@ benchmarks/plans/hosted-sample-shape-fixed-grid-roi-20261118.json text eol=lf
 benchmarks/plans/evidence/sample-shape-baseline-focused-20261118-receipt.json -text
 benchmarks/plans/evidence/sample-shape-baseline-focused-20261118-unit.trx -text
 benchmarks/plans/evidence/sample-shape-baseline-focused-20261118-parity.trx -text
+
+benchmarks/plans/hosted-renko-normalized-grid-roi-20261118.json text eol=lf
+benchmarks/plans/evidence/renko-normalized-baseline-focused-20261118-receipt.json -text
+benchmarks/plans/evidence/renko-normalized-baseline-focused-20261118-unit.trx -text
+benchmarks/plans/evidence/renko-normalized-baseline-focused-20261118-parity.trx -text
+benchmarks/plans/evidence/renko-normalized-actual-lp-setup-proof-20261118.json -text
