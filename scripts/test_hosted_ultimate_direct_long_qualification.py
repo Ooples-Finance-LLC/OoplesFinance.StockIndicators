@@ -23,6 +23,28 @@ class UltimateDirectLongQualificationTests(unittest.TestCase):
         rel=PLAN.relative_to(q.p.REPO).as_posix()
         self.assertEqual(q.p.git('check-attr','text','eol','--',rel).splitlines(),[rel+': text: set',rel+': eol: lf'])
         self.assertEqual(q.PAIRS,['TaLib.Functions.UltOsc','Skender.GetUltimate'])
+    def test_workflow_selects_and_checks_exact_sdk_before_artifact_downloads(self):
+        workflow=(q.p.REPO/'.github/workflows/ultimate-direct-long-qualification.yml').read_text()
+        selector=workflow.index('Select the installed qualification SDK before input downloads')
+        self.assertLess(workflow.index('uses: actions/setup-dotnet@v6'),selector)
+        self.assertLess(selector,workflow.index('uses: actions/download-artifact@v8'))
+        self.assertIn('{"sdk":{"version":"10.0.403","rollForward":"disable","allowPrerelease":false}}',workflow)
+        self.assertIn("$actualSdk -ne '10.0.403'",workflow)
+        self.assertIn('$actualInfo=(& dotnet --info | Out-String)',workflow)
+        self.assertIn('Wrong actual qualification host runtime:',workflow)
+        self.assertIn(r'Version:\s+10\.0\.15',workflow)
+    def test_actual_ready_preparation_checks_sdk_before_artifact_authentication(self):
+        plan=self.plan();plan.update(inputs_ready=True,parent_review_approved=True)
+        real_check_output=q.subprocess.check_output
+        for sdk in ('10.0.404','10.0.403'):
+            query=lambda args,**kwargs:sdk if args==['dotnet','--version'] else real_check_output(args,**kwargs)
+            with mock.patch.object(q.p,'read',return_value=plan),mock.patch.object(q.subprocess,'check_output',side_effect=query),mock.patch.object(q,'checked_inputs',side_effect=RuntimeError('artifact boundary reached')) as inputs:
+                if sdk=='10.0.404':
+                    with self.assertRaises(AssertionError):q.prepare('missing-old','missing-new','missing-out')
+                    inputs.assert_not_called()
+                else:
+                    with self.assertRaisesRegex(RuntimeError,'artifact boundary reached'):q.prepare('missing-old','missing-new','missing-out')
+                    inputs.assert_called_once()
     def test_unbound_or_unreviewed_stops_before_sdk_and_artifact_io(self):
         for change in ({},{'inputs_ready':True}):
             plan=self.plan();plan.update(inputs_ready=False,parent_review_approved=False);plan.update(change)

@@ -40,6 +40,18 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.403'
+      - name: Select the installed qualification SDK before input downloads
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          # This runner-only selector is not committed source or a build input.
+          if (Test-Path -LiteralPath global.json) { throw 'Unexpected existing SDK selector' }
+          [IO.File]::WriteAllText((Join-Path $PWD 'global.json'), '{"sdk":{"version":"10.0.403","rollForward":"disable","allowPrerelease":false}}')
+          $actualSdk=(& dotnet --version).Trim()
+          if ($LASTEXITCODE -ne 0 -or $actualSdk -ne '10.0.403') { throw ('Wrong actual qualification SDK: '+$actualSdk) }
+          $actualInfo=(& dotnet --info | Out-String)
+          if ($LASTEXITCODE -ne 0 -or $actualInfo -notmatch '(?m)^Host:\s*\r?\n\s*Version:\s+10\.0\.15\s*\r?$') { throw ('Wrong actual qualification host runtime: '+$actualInfo) }
+          Write-Output $actualInfo
       - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
