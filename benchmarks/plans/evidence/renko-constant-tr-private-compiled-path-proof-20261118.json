@@ -1,0 +1,74 @@
+{
+  "status": "actual-compiled-renko-fixture-and-atr-path-verified",
+  "source": "20e0e93445bd83bf467575938c705b5f485b67c5",
+  "source_fingerprint": "fde0b55c85d99b4188c60b90f06cf742936ab441759d2b31cb1f430f4d7e8c2d",
+  "ci_run": "44403794727",
+  "manifest_sha256": "68ed3264cc142e3707a62bfa4afc74f0582dc10b65101bf405fb1205b81431b4",
+  "production_sha256": "17b7ba5f697c047f78a28c5acc78ae62a59bf945bd50b3ece0ee23b86aae0f60",
+  "candidate_harness_sha256": "e8f0c7b2cf76754c1c1a00badb97a4ff1e188b2b8c6f1477d1bae9907a29746e",
+  "baseline_harness_sha256": "f70c2d7489af5cbf0855721e8eb075de47fc2db6af72ce22e571032a86bd1379",
+  "bitwise_full_chart_equality": true,
+  "certificate_il_sha256": "ebd9e6985680ab0c5409ac47675c59366cdf1de2e29716c1499406b2561661ca",
+  "rows": [
+    {
+      "bars": 1000,
+      "period": 20,
+      "certified_ranges": 999,
+      "span": 2.0,
+      "seed_count": 20
+    },
+    {
+      "bars": 10000,
+      "period": 20,
+      "certified_ranges": 9999,
+      "span": 2.0,
+      "seed_count": 20
+    }
+  ],
+  "output_comparisons": [
+    {
+      "pair": "Skender.GetRenko",
+      "bars": 1000,
+      "brick_count": 145,
+      "fully_returned_output_sha256": "a3051b68bb9b7f07dd6f5b0e8c9ec4e9ebc0025d7a40835f2fb684ce769604de"
+    },
+    {
+      "pair": "Skender.GetRenko",
+      "bars": 10000,
+      "brick_count": 1475,
+      "fully_returned_output_sha256": "665bb52c29a130dfd6fa7131b36b55e7690622accb07c4eb2f26abf2c82c1f1e"
+    },
+    {
+      "pair": "Skender.GetRenkoAtr",
+      "bars": 1000,
+      "brick_count": 43,
+      "fully_returned_output_sha256": "5bb6c2e7254ec3b7ec4e31d77d5992a8ddcb89933d9959135df2dcb9cba07897"
+    },
+    {
+      "pair": "Skender.GetRenkoAtr",
+      "bars": 10000,
+      "brick_count": 424,
+      "fully_returned_output_sha256": "d2e17f4c05a63b76bcac7bd2bd652108b8118df194aad8f8e8fcc03b19c87404"
+    }
+  ],
+  "runtime_files_verified_before_and_after_each_process": 100,
+  "fresh_processes": 2,
+  "source_runtime_files_changed": 0,
+  "launcher_pins": {
+    "pwsh.exe": "e94166ed9f376559c1359bafb08bc49e463a494c330f67644ec1d9f1ffeb5ee5",
+    "pwsh.dll": "e54c91d2db5f9a3fba99af20a847036130db7eda16215a9d6028ce682b7d29c8",
+    "System.Management.Automation.dll": "a689b32adcea9a781caa0fbae25ca55ed40f084247fc877d2cbbc8278d283c01",
+    "coreclr.dll": "a6988fc77326c245873986446de4f15218df929664750d333cb2d42486c071da",
+    "hostpolicy.dll": "20405152b719ccb8d4e0361f3259db8875d8d4f3c97d1fbea4e1ca6cc6d21902"
+  },
+  "replay_script_sha256": "8779655a9dbe13e27a43dd14c3007f47e4c36317ac7e37a63de5f900a09bb68e",
+  "role_receipt_sha256": {
+    "baseline": "c3520d2b8b95beb2c12b19150891b20d1bb43535326524711999cbdb1179d625",
+    "candidate": "0f25ca1e0526ad790265771ebb65addbceab9afbbb82121e54395271cb9e1be3"
+  },
+  "new_builds": 0,
+  "new_profiles": 0,
+  "new_measurements": 0,
+  "timing_samples": 0,
+  "qualification": false
+}

@@ -62,6 +62,10 @@ def collect(folder, phase):
         assert phase == 'targeted'
         from .ultimate_direct_long_qualification import collect as ultimate_qualify
         return ultimate_qualify(folder)
+    if read(PLAN).get('diagnostic_kind') == 'renko-constant-tr-private-native-pilot':
+        assert phase == 'diagnostic'
+        from .renko_constant_tr_private_roi import collect as constant_renko_collect
+        return constant_renko_collect(folder)
     if read(PLAN).get('diagnostic_kind') == 'renko-normalized-grid-native-pilot':
         assert phase == 'diagnostic'
         from .renko_normalized_grid_roi import collect as renko_collect
