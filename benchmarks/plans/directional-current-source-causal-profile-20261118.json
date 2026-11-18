@@ -1,0 +1,234 @@
+{
+  "status": "parent-full-diff-review-passed-capture-queued-actual-capture-and-analysis-pending",
+  "objective": "Current-source causal CPU attribution for directional family; no latency qualification or source changes",
+  "source": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+  "source_fingerprint": "79ccf727c22cb156a0cb75cdd0f764da037603d7b74c8cd9cb075da2c6498815",
+  "cpu_run": "44217513798",
+  "producer": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
+  "artifact_id": "14389198881",
+  "artifact_zip_sha256": "5abfd9a7b9ff19e37999540639d963a374f5bdeb5e191da367ec111bf0dbd675",
+  "manifest_sha256": "192cba71853935788aba889e0d4cb9bbd6b75545e007e7871824ef4c0348536c",
+  "production_sha256": "ed8a61ad920d1745a426b572db2e0dfb67764e4328304dbf9c5ad4b3583f80b7",
+  "harness_sha256": "07e764bd27110b4452e1f181f466a6ea0e60b4ae4667d01b6c75f468ae8aee07",
+  "production_pdb_sha256": "00704ff0b4c525d0aeb66f720c59230189ed76609ff664cdfb8d1c5c8d2c17f1",
+  "harness_pdb_sha256": "5183eba372c50881ea1e60f4484342dbc52562db78ab155214a3b8792d774516",
+  "tensor_version": "0.151.1",
+  "cases": [
+    {
+      "pair": "TaLib.Functions.PlusDI",
+      "bars": 1000,
+      "role": "LibraryPairBenchmarks.Ooples"
+    },
+    {
+      "pair": "TaLib.Functions.PlusDI",
+      "bars": 10000,
+      "role": "LibraryPairBenchmarks.Ooples"
+    },
+    {
+      "pair": "TaLib.Functions.Adx",
+      "bars": 1000,
+      "role": "LibraryPairBenchmarks.Ooples"
+    },
+    {
+      "pair": "TaLib.Functions.Adx",
+      "bars": 10000,
+      "role": "LibraryPairBenchmarks.Ooples"
+    }
+  ],
+  "representatives": "PlusDI exercises exact movement/range smoothing and ratio; ADX adds directional DX and average recurrence. Same shared seven-API state; findings limited to measured two APIs.",
+  "factory": {
+    "period": 20,
+    "unstable": 0,
+    "fixture": "Unchanged frozen LibraryPairBenchmarks.Setup/ComparisonVerifier.BenchmarkFixture; use actual pair closure, not synthetic bars"
+  },
+  "reuse_available_probe": "C:\\Users\\cheat\\source\\stock-indicators-operations\\probe-family-cpu-reused-20261116.ps1",
+  "available_probe_can_select": "Arbitrary Pair and Bars via LibraryPairBenchmarks.Ooples, but old probe sets worker policy and uses default ALC: do not execute unchanged.",
+  "reuse_robust_collector": "si-hosted-macd-cpu-profile-20261117/.github/workflows/darkcloud-worker-profile.yml + scripts/profile-darkcloud-pinned-runtime.cs",
+  "necessary_diagnostic_only_adaptation": [
+    "One driver accepts pair/bars arguments with whitelist exactly two APIs/two sizes; hard bind current manifest/core/harness/PDB hashes",
+    "Reuse authenticated isolated ALC and PE/portable-PDB GUID/stamp check, runtime closure allowlist; current runtime PDB already matches canonical core",
+    "Read and preserve default worker policy; require hosted CPU4/defaultDOP2/effective2 rather than force settings; record before setup/after setup/after capture",
+    "Use actual LibraryPairBenchmarks Setup/Ooples; validate actual delegate declaring class/measure/unstable; period20 source bound; no native timing or kernel microvariant",
+    "Build only diagnostic driver once; zero production/benchmark builds/tests; link authenticated benchmark-prefix runtime payload from existing downloaded candidate artifact"
+  ],
+  "runtime_policy": {
+    "sdk": "10.0.403",
+    "clr": "10.0.15",
+    "warmups": 1000,
+    "hot_capture_seconds": 10,
+    "default_runtime": true,
+    "runtime_override_flags": {},
+    "workers": "Observe/defaultDOP2+effective2 onCPU4; no override"
+  },
+  "gates": [
+    "12 finite CPU samples <15% and no builds/tests before and after each capture; failed gate preserves output and stops without automatic retry",
+    "Exact hot PID and UTC/Stopwatch window, JIT/R2R/managed/native attribution, per-thread caller/worker separation",
+    "Verify raw trace event-loss and process identity; include unresolved/compiler frames in denominator; reject unsupported symbol attribution",
+    "Record all loaded selected assets and source/runtime hashes before/after; no mutation of immutable inputs"
+  ],
+  "budget": {
+    "max_measurement_runners": 1,
+    "captures": 4,
+    "single_job_minutes": 15,
+    "child_timeout_seconds": 60,
+    "trace_cap_bytes_each": 104857600,
+    "total_trace_cap_bytes": 419430400,
+    "engineering_prepare_and_analysis_minutes": 45
+  },
+  "rejected_history": [
+    {
+      "path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\active-performance-evidence\\directional-published-source-triage-20261115.json",
+      "reason": "Concrete typed writer and guarded word smoothing already integrated; do not redo or infer rejection from first drafts"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\prior-directional-typed-candidate-20261113.summary.json",
+      "reason": "Pre-word-guard sampled profile is historical, inline attribution conflated; cannot fund current source rewrite"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\prior-directional-word-guards-20261114-native-closure.json",
+      "reason": "Accepted source gains did not close native gaps; source improvement is not a native closure"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\native-closure-strategy-20261115.json",
+      "reason": "Already lightweight tensor workers; no speedup from merely adding parallel loops; exact rounding/certificates required"
+    }
+  ],
+  "interpretation": "Causal profile only. CPU shares are not latency savings; no native-win or new arithmetic/fused-kernel approval follows automatically. No additional pipeline variants or sampling-policy experiment.",
+  "proposed_exact_commands": {
+    "diagnostic_build": [
+      "dotnet",
+      "build",
+      "<RUNNER_TEMP>/directional-diagnostic-driver/DiagnosticDriver.csproj",
+      "-c",
+      "Release",
+      "-o",
+      "<RUNNER_TEMP>/directional-diagnostic-driver/out",
+      "--disable-build-servers",
+      "--nologo"
+    ],
+    "captures": [
+      [
+        "<PINNED_PerfView.exe>",
+        "/AcceptEula",
+        "/NoGui",
+        "/NoView",
+        "/KernelEvents:Process,Thread,ImageLoad,Profile",
+        "/ClrEvents:Jit,Loader,JittedMethodILToNativeMap",
+        "/FocusProcess:dotnet.exe",
+        "/BufferSizeMB:16",
+        "/CircularMB:32",
+        "/MaxCollectSec:40",
+        "/Merge:false",
+        "/Zip:false",
+        "/DataFile:<PROFILE_OUTPUT>/TaLib.Functions.PlusDI-1000/cpu.etl",
+        "/LogFile:<PROFILE_OUTPUT>/TaLib.Functions.PlusDI-1000/cpu.log",
+        "run",
+        "dotnet",
+        "exec",
+        "--runtimeconfig",
+        "<PROFILE_RUNTIME>/OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json",
+        "<DRIVER_OUT>/DiagnosticDriver.dll",
+        "<CANONICAL_CI_INPUTS>",
+        "<PROFILE_RUNTIME>",
+        "<PROFILE_OUTPUT>/TaLib.Functions.PlusDI-1000/replay",
+        "TaLib.Functions.PlusDI",
+        "1000"
+      ],
+      [
+        "<PINNED_PerfView.exe>",
+        "/AcceptEula",
+        "/NoGui",
+        "/NoView",
+        "/KernelEvents:Process,Thread,ImageLoad,Profile",
+        "/ClrEvents:Jit,Loader,JittedMethodILToNativeMap",
+        "/FocusProcess:dotnet.exe",
+        "/BufferSizeMB:16",
+        "/CircularMB:32",
+        "/MaxCollectSec:40",
+        "/Merge:false",
+        "/Zip:false",
+        "/DataFile:<PROFILE_OUTPUT>/TaLib.Functions.PlusDI-10000/cpu.etl",
+        "/LogFile:<PROFILE_OUTPUT>/TaLib.Functions.PlusDI-10000/cpu.log",
+        "run",
+        "dotnet",
+        "exec",
+        "--runtimeconfig",
+        "<PROFILE_RUNTIME>/OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json",
+        "<DRIVER_OUT>/DiagnosticDriver.dll",
+        "<CANONICAL_CI_INPUTS>",
+        "<PROFILE_RUNTIME>",
+        "<PROFILE_OUTPUT>/TaLib.Functions.PlusDI-10000/replay",
+        "TaLib.Functions.PlusDI",
+        "10000"
+      ],
+      [
+        "<PINNED_PerfView.exe>",
+        "/AcceptEula",
+        "/NoGui",
+        "/NoView",
+        "/KernelEvents:Process,Thread,ImageLoad,Profile",
+        "/ClrEvents:Jit,Loader,JittedMethodILToNativeMap",
+        "/FocusProcess:dotnet.exe",
+        "/BufferSizeMB:16",
+        "/CircularMB:32",
+        "/MaxCollectSec:40",
+        "/Merge:false",
+        "/Zip:false",
+        "/DataFile:<PROFILE_OUTPUT>/TaLib.Functions.Adx-1000/cpu.etl",
+        "/LogFile:<PROFILE_OUTPUT>/TaLib.Functions.Adx-1000/cpu.log",
+        "run",
+        "dotnet",
+        "exec",
+        "--runtimeconfig",
+        "<PROFILE_RUNTIME>/OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json",
+        "<DRIVER_OUT>/DiagnosticDriver.dll",
+        "<CANONICAL_CI_INPUTS>",
+        "<PROFILE_RUNTIME>",
+        "<PROFILE_OUTPUT>/TaLib.Functions.Adx-1000/replay",
+        "TaLib.Functions.Adx",
+        "1000"
+      ],
+      [
+        "<PINNED_PerfView.exe>",
+        "/AcceptEula",
+        "/NoGui",
+        "/NoView",
+        "/KernelEvents:Process,Thread,ImageLoad,Profile",
+        "/ClrEvents:Jit,Loader,JittedMethodILToNativeMap",
+        "/FocusProcess:dotnet.exe",
+        "/BufferSizeMB:16",
+        "/CircularMB:32",
+        "/MaxCollectSec:40",
+        "/Merge:false",
+        "/Zip:false",
+        "/DataFile:<PROFILE_OUTPUT>/TaLib.Functions.Adx-10000/cpu.etl",
+        "/LogFile:<PROFILE_OUTPUT>/TaLib.Functions.Adx-10000/cpu.log",
+        "run",
+        "dotnet",
+        "exec",
+        "--runtimeconfig",
+        "<PROFILE_RUNTIME>/OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json",
+        "<DRIVER_OUT>/DiagnosticDriver.dll",
+        "<CANONICAL_CI_INPUTS>",
+        "<PROFILE_RUNTIME>",
+        "<PROFILE_OUTPUT>/TaLib.Functions.Adx-10000/replay",
+        "TaLib.Functions.Adx",
+        "10000"
+      ]
+    ]
+  },
+  "perfview": {
+    "installed_path": "C:\\Users\\cheat\\tools\\PerfView\\PerfView.exe",
+    "sha256": "270e2ba419b0b2d93c4b15b0851f257edf655c92fe0ad95add3d0b5f6d6aad48",
+    "version": "4.0.0",
+    "hosted_same_bytes_url": "https://github.com/microsoft/perfview/releases/download/v4.0.0/PerfView.exe",
+    "installed_hash_rechecked": true
+  },
+  "analysis": "Reuse validated hostedmacd raw ETL+kernel+clrRundown merger/parser, exact hotPID/UTC, actual PDBmethod identity and eventloss validation. Raw profiles retained with separate caller/worker tables and unresolved-inclusive percentages. No nettraceCPUCSV(emptyexport) shortcut.",
+  "parent_full_diff_review_passed": true,
+  "execution_authorization": "ONE hosted diagnostic-driver compilation in reviewed workflow; no local duplicate build; push/capture wait root measurement-slot release",
+  "actual_capture_status": "not started",
+  "causal_analysis_validated": false,
+  "production_changes": false,
+  "benchmark_changes": false
+}

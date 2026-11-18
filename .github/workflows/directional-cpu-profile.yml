@@ -1,0 +1,216 @@
+name: Current directional family CPU causal diagnostic
+on:
+  push:
+    branches: [perf/hosted-directional-cpu-profile-20261118]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: current-directional-cpu-profile
+  cancel-in-progress: false
+jobs:
+  profile:
+    runs-on: windows-2025
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts
+            .github/workflows
+            benchmarks/plans
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - name: Bind existing canonical CPU artifact and collector
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          if ((dotnet --version).Trim() -ne '10.0.403') { throw 'Wrong SDK' }
+          $identity=[Security.Principal.WindowsIdentity]::GetCurrent()
+          if (!([Security.Principal.WindowsPrincipal]::new($identity)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'Elevated kernel capture required' }
+          $env:PROFILE_OUTPUT=Join-Path $env:RUNNER_TEMP 'directional-cpu-profile-output'
+          $env:INPUT_ARTIFACT=Join-Path $env:RUNNER_TEMP 'directional-canonical-artifact'
+          $env:PROFILE_RUNTIME=Join-Path $env:RUNNER_TEMP 'directional-profile-runtime'
+          foreach ($name in @('PROFILE_OUTPUT','INPUT_ARTIFACT','PROFILE_RUNTIME')) {
+            $value=[Environment]::GetEnvironmentVariable($name)
+            if (Test-Path -LiteralPath $value) { throw 'Fresh bounded paths required' }
+            "$name=$value" | Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8
+          }
+          [IO.Directory]::CreateDirectory($env:PROFILE_OUTPUT) | Out-Null
+          $artifact=Invoke-RestMethod -Uri 'https://api.github.com/repos/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/artifacts/14389198881' -Headers @{Authorization=('Bearer '+$env:GH_TOKEN);'X-GitHub-Api-Version'='2022-11-28'}
+          if ($artifact.id -ne 14389198881 -or $artifact.name -ne 'candidate-correctness-inputs' -or $artifact.expired -or $artifact.workflow_run.id -ne 44217513798 -or $artifact.workflow_run.head_sha -ne '2a1737f30e5e1164189d0209b39ea46bf38c1239' -or $artifact.digest -ne 'sha256:5abfd9a7b9ff19e37999540639d963a374f5bdeb5e191da367ec111bf0dbd675') { throw 'Canonical artifact API identity/digest mismatch' }
+          $artifact | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'artifact-api.json') -Encoding utf8
+          $tool=Join-Path $env:RUNNER_TEMP 'directional-PerfView-4.0.0.exe'
+          if (Test-Path -LiteralPath $tool) { throw 'Fresh collector path required' }
+          Invoke-WebRequest -Uri 'https://github.com/microsoft/perfview/releases/download/v4.0.0/PerfView.exe' -OutFile $tool
+          if ((Get-FileHash -LiteralPath $tool -Algorithm SHA256).Hash.ToLowerInvariant() -ne '270e2ba419b0b2d93c4b15b0851f257edf655c92fe0ad95add3d0b5f6d6aad48') { throw 'Wrong PerfView bytes' }
+          $tool | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'tool-path.txt') -Encoding utf8
+          dotnet --info | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'dotnet-info.txt') -Encoding utf8
+          Copy-Item -LiteralPath benchmarks/plans/directional-current-source-causal-profile-20261118.json -Destination (Join-Path $env:PROFILE_OUTPUT 'proposal.json')
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: 14389198881
+          merge-multiple: true
+          path: ${{ env.INPUT_ARTIFACT }}
+          run-id: 44217513798
+          github-token: ${{ github.token }}
+      - name: Authenticate existing runtime and build one diagnostic-only driver
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $inputs=$env:INPUT_ARTIFACT
+          $proof=Join-Path $inputs 'manifest.json'
+          if ((Get-FileHash -LiteralPath $proof -Algorithm SHA256).Hash.ToLowerInvariant() -ne '192cba71853935788aba889e0d4cb9bbd6b75545e007e7871824ef4c0348536c') { throw 'Wrong canonical manifest' }
+          $manifest=Get-Content -LiteralPath $proof -Raw | ConvertFrom-Json -AsHashtable
+          if ($manifest.source -ne '9e914007c3438d9f251f3fab9ef321d49c22de83' -or $manifest.source_sha256 -ne '79ccf727c22cb156a0cb75cdd0f764da037603d7b74c8cd9cb075da2c6498815' -or $manifest.run_id -ne '44217513798' -or $manifest.workflow_head -ne '2a1737f30e5e1164189d0209b39ea46bf38c1239' -or $manifest.sdk -ne '10.0.403' -or $manifest.status -ne 'cpu-correctness-complete' -or $manifest.checks.unit.passed -ne 73 -or $manifest.checks.parity.passed -ne 85) { throw 'Wrong current canonical CPU receipt' }
+          foreach ($sha in @($manifest.runtime_files.Values | Sort-Object -Unique)) {
+            if ((Get-FileHash -LiteralPath (Join-Path $inputs ('blobs/'+$sha)) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $sha) { throw 'Wrong canonical runtime blob' }
+          }
+          foreach ($entry in $manifest.evidence.GetEnumerator()) {
+            if ((Get-FileHash -LiteralPath (Join-Path $inputs $entry.Key) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $entry.Value) { throw 'Wrong existing CPU evidence' }
+          }
+          $prefix='benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/'
+          $count=0
+          foreach ($entry in $manifest.runtime_files.GetEnumerator()) {
+            if (!$entry.Key.StartsWith($prefix)) { continue }
+            $relative=$entry.Key.Substring($prefix.Length)
+            $target=[IO.Path]::GetFullPath((Join-Path $env:PROFILE_RUNTIME $relative))
+            if (!$target.StartsWith($env:PROFILE_RUNTIME+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)) { throw 'Runtime path escaped' }
+            [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($target)) | Out-Null
+            $null=New-Item -ItemType HardLink -Path $target -Target (Join-Path $inputs ('blobs/'+$entry.Value)) -ErrorAction Stop
+            $count++
+          }
+          if ($count -ne 100) { throw 'Wrong benchmark runtime inventory' }
+          $driverRoot=Join-Path $env:RUNNER_TEMP 'directional-diagnostic-driver'
+          if (Test-Path -LiteralPath $driverRoot) { throw 'Fresh driver directory required' }
+          [IO.Directory]::CreateDirectory($driverRoot) | Out-Null
+          @('<Project Sdk="Microsoft.NET.Sdk">','<PropertyGroup>','<OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>',
+            '<ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><UseSharedCompilation>false</UseSharedCompilation>',
+            '</PropertyGroup>','</Project>') | Set-Content -LiteralPath (Join-Path $driverRoot 'DiagnosticDriver.csproj') -Encoding utf8
+          Copy-Item -LiteralPath scripts/profile-directional-pinned-runtime.cs -Destination (Join-Path $driverRoot 'Program.cs')
+          dotnet build (Join-Path $driverRoot 'DiagnosticDriver.csproj') -c Release -o (Join-Path $driverRoot 'out') --disable-build-servers --nologo *> (Join-Path $env:PROFILE_OUTPUT 'driver-build.log')
+          if ($LASTEXITCODE -ne 0) { throw 'Diagnostic-only driver build failed' }
+          [ordered]@{source=$manifest.source;source_sha256=$manifest.source_sha256;cpu_run=$manifest.run_id;diagnostic_only=$true;qualification=$false;production_builds=0;benchmark_builds=0;diagnostic_driver_builds=1;tests=0;captures=4;timed_benchmark_cases=0;workflow_commit=$env:GITHUB_SHA;workflow_run=$env:GITHUB_RUN_ID;warmups=1000;profile_seconds=10;merge_on_runner=$false;zip_on_runner=$false;full_managed_rundown=$true;runner_image=$env:ImageVersion;runtime_payload_copy_bytes=0} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'workflow-provenance.json') -Encoding utf8
+      - name: Capture four current-source causal profiles without policy variants
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $inputs=$env:INPUT_ARTIFACT
+          $rootOutput=$env:PROFILE_OUTPUT
+          $dotnet=(Get-Command dotnet).Source
+          $driver=Join-Path $env:RUNNER_TEMP 'directional-diagnostic-driver/out/DiagnosticDriver.dll'
+          $script=Join-Path $env:GITHUB_WORKSPACE 'scripts/profile-directional-pinned-runtime.cs'
+          $config=Join-Path $env:PROFILE_RUNTIME 'OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json'
+          if ((Get-FileHash -LiteralPath $config -Algorithm SHA256).Hash.ToLowerInvariant() -ne 'c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097') { throw 'Runtime configuration changed' }
+          $pdbHash='00704ff0b4c525d0aeb66f720c59230189ed76609ff664cdfb8d1c5c8d2c17f1'
+          $env:_NT_SYMBOL_PATH=$env:PROFILE_RUNTIME
+          $tool=(Get-Content -LiteralPath (Join-Path $rootOutput 'tool-path.txt') -Raw).Trim()
+          [ordered]@{processors=@(Get-CimInstance Win32_Processor | ForEach-Object { @{name=$_.Name;cores=$_.NumberOfCores;enabled_cores=$_.NumberOfEnabledCore;logical_processors=$_.NumberOfLogicalProcessors} });computer_logical_processors=(Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $rootOutput 'cim.json') -Encoding utf8
+          function IdleGate($name) {
+            $samples=[Collections.Generic.List[double]]::new()
+            for ($i=0;$i -lt 12;$i++) {
+              $samples.Add((Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1).CounterSamples[0].CookedValue)
+            }
+            $busy=@(Get-CimInstance Win32_Process | Where-Object { $_.Name -match '^(dotnet|MSBuild|testhost|VBCSCompiler)(\.exe)?$' -and $_.CommandLine -match '(?i)(\s(build|test|vstest)\s|MSBuild\.(exe|dll)|testhost|VBCSCompiler)' } | Select-Object ProcessId,Name,CommandLine)
+            $passed=$samples.Count -eq 12 -and @($samples | Where-Object { ![double]::IsFinite($_) -or $_ -lt 0 -or $_ -ge 15 }).Count -eq 0 -and $busy.Count -eq 0
+            [ordered]@{cpu_percent=$samples.ToArray();build_test_processes=$busy;passed=$passed;utc=[DateTime]::UtcNow.ToString('O')} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT ($name+'.json')) -Encoding utf8
+            return $passed
+          }
+          $cases=@(@{pair='TaLib.Functions.PlusDI';bars=1000;measure=2},@{pair='TaLib.Functions.PlusDI';bars=10000;measure=2},@{pair='TaLib.Functions.Adx';bars=1000;measure=5},@{pair='TaLib.Functions.Adx';bars=10000;measure=5})
+          try {
+            foreach ($case in $cases) {
+              $env:PROFILE_OUTPUT=Join-Path $rootOutput ($case.pair+'-'+$case.bars)
+              [IO.Directory]::CreateDirectory($env:PROFILE_OUTPUT) | Out-Null
+              # Fixed preparation only: these probes never replace mandatory gate samples.
+              $initializationProbes=(Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 2).CounterSamples.CookedValue
+              [ordered]@{cpu_percent=@($initializationProbes);preparation_only=$true;mandatory_gate_samples=12;settle_seconds=5;utc=[DateTime]::UtcNow.ToString('O')} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'cpu-probe-preparation.json') -Encoding utf8
+              Start-Sleep -Seconds 5
+              $prePassed=IdleGate 'idle-before'
+              if (!$prePassed) { throw 'Pre-capture idle gate failed; no capture' }
+              $trace=Join-Path $env:PROFILE_OUTPUT 'cpu.etl'
+              $collectionLog=Join-Path $env:PROFILE_OUTPUT 'cpu.log'
+              $replay=Join-Path $env:PROFILE_OUTPUT 'replay'
+              $arguments=@('/AcceptEula','/NoGui','/NoView','/KernelEvents:Process,Thread,ImageLoad,Profile',
+                '/ClrEvents:Jit,Loader,JittedMethodILToNativeMap','/FocusProcess:dotnet.exe',
+                '/BufferSizeMB:16','/CircularMB:32','/MaxCollectSec:40','/Merge:false','/Zip:false',('/DataFile:'+$trace),('/LogFile:'+$collectionLog),
+                'run',$dotnet,'exec','--runtimeconfig',$config,$driver,$inputs,$env:PROFILE_RUNTIME,$replay,$case.pair,([string]$case.bars))
+              $launch=[ordered]@{command=$tool;arguments=$arguments;diagnostic_driver_sha256=(Get-FileHash -LiteralPath $driver -Algorithm SHA256).Hash.ToLowerInvariant();diagnostic_driver_builds=1;production_builds=0;tests=0;timed_benchmark_cases=0;runtimeconfig_sha256=(Get-FileHash -LiteralPath $config -Algorithm SHA256).Hash.ToLowerInvariant();script_sha256=(Get-FileHash -LiteralPath $script -Algorithm SHA256).Hash.ToLowerInvariant();child_timeout_seconds=60;output_cap_bytes=104857600;runtime_payload_copy_bytes=0;diagnostic_only=$true;qualification=$false}
+              $launch | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'capture-launch.json') -Encoding utf8
+              $startInfo=[Diagnostics.ProcessStartInfo]::new()
+              $startInfo.FileName=$tool; $startInfo.UseShellExecute=$false; $startInfo.CreateNoWindow=$true
+              $startInfo.RedirectStandardOutput=$true; $startInfo.RedirectStandardError=$true
+              foreach ($argument in $arguments) { $startInfo.ArgumentList.Add([string]$argument) }
+              $process=[Diagnostics.Process]::new();$process.StartInfo=$startInfo
+              $clock=[Diagnostics.Stopwatch]::StartNew();$failure=$null;$started=$false;$capturePassed=$false;$postPassed=$false;$validationFailure=$null
+              try {
+                if (!$process.Start()) { throw 'Cannot start existing diagnostic tool' }
+                $started=$true
+                $stdout=$process.StandardOutput.ReadToEndAsync();$stderr=$process.StandardError.ReadToEndAsync()
+                while (!$process.WaitForExit(250)) {
+                  $bytes=(Get-ChildItem -LiteralPath $env:PROFILE_OUTPUT -Recurse -File | Measure-Object Length -Sum).Sum
+                  if ($clock.Elapsed.TotalSeconds -gt 60) { $failure='60 second child watchdog'; break }
+                  if ($bytes -gt 104857600) { $failure='100MiB output cap'; break }
+                }
+                if ($failure) { $process.Kill($true);$process.WaitForExit() }
+                $stdout.GetAwaiter().GetResult() | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'capture.log') -Encoding utf8
+                $stderr.GetAwaiter().GetResult() | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'capture-error.log') -Encoding utf8
+                $bytes=(Get-ChildItem -LiteralPath $env:PROFILE_OUTPUT -Recurse -File | Measure-Object Length -Sum).Sum
+                if ($bytes -gt 104857600) { $failure='100MiB output cap after exit' }
+                [ordered]@{exit_code=$process.ExitCode;elapsed_seconds=$clock.Elapsed.TotalSeconds;limit_failure=$failure;output_bytes=$bytes;diagnostic_only=$true;qualification=$false} |
+                  ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'capture.json') -Encoding utf8
+                if ($failure -or $process.ExitCode -ne 0) { throw 'Capture failed; preserve all existing output' }
+                foreach ($rawName in @('cpu.etl','cpu.kernel.etl','cpu.clrRundown.etl')) {
+                  $rawPath=Join-Path $env:PROFILE_OUTPUT $rawName
+                  if (!(Test-Path -LiteralPath $rawPath -PathType Leaf) -or (Get-Item -LiteralPath $rawPath).Length -le 0) { throw 'Required raw ETL missing or empty' }
+                }
+                if (Test-Path -LiteralPath ($trace+'.zip')) { throw 'Unexpected runner ZIP; raw-only capture required' }
+                $collectorText=Get-Content -LiteralPath $collectionLog -Raw
+                if ($collectorText -notmatch ' SUCCESS:' -or $collectorText -match '\[Error:' -or $collectorText -match '\[Merging data files') { throw 'Collector did not report clean raw-only success' }
+                if ((Get-FileHash -LiteralPath (Join-Path $env:PROFILE_RUNTIME 'OoplesFinance.StockIndicators.pdb') -Algorithm SHA256).Hash.ToLowerInvariant() -ne $pdbHash) { throw 'Symbol bytes changed' }
+                $receipt=Get-Content -LiteralPath (Join-Path $replay 'replay.json') -Raw | ConvertFrom-Json
+                if ($receipt.status -ne 'complete' -or $receipt.pair -ne $case.pair -or $receipt.bars -ne $case.bars -or $receipt.warmups -ne 1000 -or $receipt.profile_seconds -ne 10 -or $receipt.host_clr -ne '10.0.15' -or !$receipt.protected_inputs_unchanged -or !$receipt.runtime_unchanged) { throw 'Replay incomplete, mismatched or runtime changed' }
+                if ($receipt.environment_processor_count -ne 4 -or $receipt.worker_policy_before_setup -ne 2 -or $receipt.worker_policy_after_setup -ne 2 -or $receipt.worker_policy_after_profile -ne 2 -or !$receipt.effective_workers_before_setup.available -or $receipt.effective_workers_before_setup.value -ne 2 -or $receipt.effective_workers_after_setup.value -ne 2 -or $receipt.effective_workers_after_profile.value -ne 2) { throw 'Directional runtime/worker settings changed' }
+                if ($receipt.factory_parameters.measure -ne $case.measure -or $receipt.factory_parameters.unstable -ne 0 -or $receipt.factory_parameters.period -ne 20 -or $receipt.factory_parameters.adapter -ne 'TaDirectionalComparison') { throw 'Directional factory parameters changed' }
+                if ($receipt.symbol_identity.guid -notmatch '^[a-f0-9]{32}$' -or $receipt.symbol_identity.stamp -notmatch '^[a-f0-9]{8}$' -or $receipt.symbol_identity.age -ne 1 -or $receipt.symbol_identity.pdb_sha256 -ne $pdbHash -or $receipt.symbol_identity.production_sha256 -ne 'ed8a61ad920d1745a426b572db2e0dfb67764e4328304dbf9c5ad4b3583f80b7' -or $receipt.symbol_identity.protected_runtime_pdb_replaced) { throw 'Canonical PE/PDB identity mismatch' }
+                $capturePassed=$true
+              } catch {
+                $validationFailure=$_.Exception.ToString()
+                throw
+              } finally {
+                if ($started -and !$process.HasExited) { $process.Kill($true);$process.WaitForExit() }
+                $process.Dispose()
+                if ($started) {
+                  try { $postPassed=IdleGate 'idle-after' }
+                  catch { $validationFailure=([string]$validationFailure)+' Post-gate error: '+$_.Exception.ToString() }
+                }
+                $finalBytes=(Get-ChildItem -LiteralPath $env:PROFILE_OUTPUT -Recurse -File | Measure-Object Length -Sum).Sum
+                if ($finalBytes -gt 104857600) { $capturePassed=$false;$validationFailure=([string]$validationFailure)+' 100MiB final output cap' }
+                $valid=$capturePassed -and $prePassed -and $postPassed -and $null -eq $validationFailure
+                $profileValidation=[ordered]@{profile_valid_for_diagnostic_only=$valid;causal_attribution_validated=$false;event_loss_verified=$false;analysis_pending='Raw ETL PID/hot-window/event-loss/symbol attribution must pass offline before causal findings';pre_idle_passed=$prePassed;post_idle_passed=$postPassed;raw_capture_complete=$capturePassed;failure=$validationFailure;output_bytes=$finalBytes;qualification=$false;native_win_claim=$false;source_imported=$false;report_imported=$false}
+                $profileValidation | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'profile-validation.json') -Encoding utf8
+                Get-ChildItem -LiteralPath $env:PROFILE_OUTPUT -Recurse -File | ForEach-Object {
+                  [ordered]@{path=$_.FullName.Substring($env:PROFILE_OUTPUT.Length);bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}
+                } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'output-manifest.json') -Encoding utf8
+                $sealedBytes=(Get-ChildItem -LiteralPath $env:PROFILE_OUTPUT -Recurse -File | Measure-Object Length -Sum).Sum
+                if ($sealedBytes -gt 104857600) {
+                  $valid=$false;$profileValidation.profile_valid_for_diagnostic_only=$false;$profileValidation.output_bytes=$sealedBytes
+                  $profileValidation.failure=([string]$profileValidation.failure)+' 100MiB output cap including final metadata'
+                  $profileValidation | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'profile-validation.json') -Encoding utf8
+                  Get-ChildItem -LiteralPath $env:PROFILE_OUTPUT -Recurse -File | Where-Object { $_.FullName -ne (Join-Path $env:PROFILE_OUTPUT 'output-manifest.json') } | ForEach-Object {
+                    [ordered]@{path=$_.FullName.Substring($env:PROFILE_OUTPUT.Length);bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}
+                  } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'output-manifest.json') -Encoding utf8
+                }
+                if (!$valid) { throw 'Capture invalid, incomplete or idle gate failed; preserve all evidence' }
+              }
+            }
+          } finally { $env:PROFILE_OUTPUT=$rootOutput }
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: directional-cpu-profile
+          path: ${{ env.PROFILE_OUTPUT }}/
+          retention-days: 14
+          if-no-files-found: error
