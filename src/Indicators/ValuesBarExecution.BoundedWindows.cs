@@ -1320,6 +1320,9 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<SequenceKernel>(source, output, indicator, SequenceWindow(indicator), cancellation, owned),
         _ when ContextReversalWindow(indicator) > 0 =>
             FillBoundedWindow<ContextReversalKernel>(source, output, indicator, ContextReversalWindow(indicator), cancellation, owned),
+        // Keep the existing generic regions unchanged when selecting private batch kernels.
+        ThreeInsideCandle { LongPeriod: <= 64, ShortPeriod: <= 64 } inside when source.Length >= 8192 =>
+            FillThreeInsideWords(source, output, inside, TripleBodyWindow(indicator), cancellation, owned),
         _ when TripleBodyWindow(indicator) > 0 =>
             FillBoundedWindow<TripleBodyKernel>(source, output, indicator, TripleBodyWindow(indicator), cancellation, owned),
         _ when PenetrationWindow(indicator) > 0 =>
@@ -1334,6 +1337,8 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<ExhaustionKernel>(source, output, indicator, ExhaustionWindowLength(indicator), cancellation, owned),
         _ when FiveContinuationWindow(indicator) > 0 =>
             FillBoundedWindow<FiveContinuationKernel>(source, output, indicator, FiveContinuationWindow(indicator), cancellation, owned),
+        BreakawayCandle { Period: <= 64 } breakaway when source.Length >= 8192 =>
+            FillBreakawayBlocks(source, output, breakaway, ExtendedReversalWindow(indicator), cancellation, owned),
         _ when ExtendedReversalWindow(indicator) > 0 =>
             FillBoundedWindow<ExtendedReversalKernel>(source, output, indicator, ExtendedReversalWindow(indicator), cancellation, owned),
         _ when SmoothedStochasticWindow(indicator) > 0 =>
@@ -1416,12 +1421,6 @@ internal static partial class ValuesBarExecution
         int start, int end, int period, ReadOnlySpan<Bar> seed, ReadOnlySpan<Bar> tail,
         CancellationToken cancellation, IIndicator indicator) where T : struct, IBoundedKernel<T>
     {
-        // Total input size protects the existing small-batch route; mixed
-        // bounded batches and other reversal consumers keep their original path.
-        if (source.Length >= 8192 && typeof(T) == typeof(ExtendedReversalKernel)
-            && indicator is BreakawayCandle { Period: <= 64 } breakaway)
-            return ComputeBreakawayBlocks(source, output[0], owned, start, end, period,
-                seed, tail, cancellation, breakaway);
         if (typeof(T) == typeof(SequenceKernel) && MatchingLowGridEligible(indicator, source.Length)
             && end - start + seed.Length >= 512)
             return ComputeMatchingLowGrid(source, output[0], owned, start, end, seed, tail, cancellation, (MatchingLowCandle)indicator);
