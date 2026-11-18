@@ -1,0 +1,184 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "expected_runtime_version": ".NET 10.0.15",
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "diagnostic_kind": "cmf-fixed-grid-native-pilot",
+  "diagnostic_only": true,
+  "cases": 10,
+  "decisions": 2,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 120
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetCmf",
+              "pair": "Skender.GetCmf"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetCmf",
+              "pair": "Skender.GetCmf"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    }
+  ],
+  "inputs_ready": true,
+  "parent_review_approved": true,
+  "sources": {
+    "published": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "old": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "successor": "aab7273be7cd36891c86480dc28a1c499a141fec",
+    "variants": "9e914007c3438d9f251f3fab9ef321d49c22de83"
+  },
+  "gpu_sources": {
+    "old": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "successor": "aab7273be7cd36891c86480dc28a1c499a141fec",
+    "variants": "9e914007c3438d9f251f3fab9ef321d49c22de83"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests"
+    ],
+    "successor": [
+      "FixedGridCmfExecutionTests",
+      "CompactCmfTests"
+    ],
+    "variants": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests"
+    ]
+  },
+  "old_candidate": {
+    "source": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "ci_run": "44217513798",
+    "producer": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
+    "evidence_source": "08ff12fb7333e3f76808672b05a2c62e85e5ae80",
+    "manifest_sha256": "192cba71853935788aba889e0d4cb9bbd6b75545e007e7871824ef4c0348536c",
+    "gpu_receipt_sha256": "d7482cc795d9ebfec37cc482474360bef8ec932677f7c69f572269df4d7c8544",
+    "production_sha256": "ed8a61ad920d1745a426b572db2e0dfb67764e4328304dbf9c5ad4b3583f80b7",
+    "source_fingerprint": "79ccf727c22cb156a0cb75cdd0f764da037603d7b74c8cd9cb075da2c6498815",
+    "artifact_id": "14389198881",
+    "artifact_zip_sha256": "5abfd9a7b9ff19e37999540639d963a374f5bdeb5e191da367ec111bf0dbd675",
+    "unit_passed": 73,
+    "parity_passed": 85,
+    "unit_classes": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests"
+    ],
+    "parity_classes": [
+      "TripleBodyTests",
+      "SharedTripleBodyBenchmarkTests"
+    ],
+    "actual_harness_sha256": "07e764bd27110b4452e1f181f466a6ea0e60b4ae4667d01b6c75f468ae8aee07"
+  },
+  "candidate": {
+    "source": "aab7273be7cd36891c86480dc28a1c499a141fec",
+    "ci_run": "44358275694",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "b262b7960f36268f8eb17a3e863c92591ae3986e",
+    "manifest_sha256": "4c2484563f90dd17505c9101753e8f31fb622226c85198cddfd5f4ab0c990606",
+    "gpu_receipt_sha256": "8060305f79128aea24da794f3bd436eaa93a012a96975e6825921f19c1e238c1",
+    "production_sha256": "a839c27ab861fe64db69b9c10191be9ff10aaaa09c8d9fb171761901cf5d90ba",
+    "source_fingerprint": "73d76936f7d00dc0f68861e5e874ef3d81c0e99c61c1d1d82a00e8ae38320c05",
+    "artifact_id": "14454740160",
+    "artifact_zip_sha256": "45641a93c401d305eeed3d8c53c792ae98a6e189407710944c8b47d329285441",
+    "unit_passed": 30,
+    "parity_passed": 9,
+    "unit_classes": [
+      "FixedGridCmfExecutionTests",
+      "CompactCmfTests"
+    ],
+    "parity_classes": [
+      "MoneyFlowDetailComparisonTests"
+    ],
+    "actual_harness_sha256": "561d73a61f81407bd07160c9276e0aa4983f22b6836b0dddfb7acf0d12c206ca"
+  },
+  "harness_sha256": "07e764bd27110b4452e1f181f466a6ea0e60b4ae4667d01b6c75f468ae8aee07",
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "harness_alias_policy": {
+    "common_artifact_role": "old",
+    "variants_artifact_role": "old",
+    "baseline_source": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "candidate_source": "aab7273be7cd36891c86480dc28a1c499a141fec",
+    "require_scoped_source_identity": true,
+    "claim_artifact_binary_identity": false
+  },
+  "automatic_qualification": false,
+  "future_builder_fixture": "SharedCmfBenchmarks",
+  "require_net_10000_point_progress": true,
+  "frozen_baseline_feasibility_only": true,
+  "current_combined_source_qualified": false,
+  "report_import_permitted": false,
+  "followup_requires_current_published_baseline": true
+}

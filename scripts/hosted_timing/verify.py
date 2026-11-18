@@ -58,6 +58,10 @@ def collect(folder, phase):
         assert phase == 'targeted'
         from .ultimate_direct_long_qualification import collect as ultimate_qualify
         return ultimate_qualify(folder)
+    if read(PLAN).get('diagnostic_kind') == 'cmf-fixed-grid-native-pilot':
+        assert phase == 'diagnostic'
+        from .cmf_fixed_grid_roi import collect as cmf_collect
+        return cmf_collect(folder)
     if read(PLAN).get('diagnostic_kind') == 'ultimate-direct-long-native-pilot':
         assert phase == 'diagnostic'
         from .ultimate_direct_long_roi import collect as direct_collect
