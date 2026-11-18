@@ -54,6 +54,10 @@ def sample(case):
 
 
 def collect(folder, phase):
+    if read(PLAN).get('diagnostic_kind') == 'ladder-word-native-pilot':
+        assert phase == 'diagnostic'
+        from .ladder_word_roi import collect as ladder_collect
+        return ladder_collect(folder)
     if read(PLAN).get('diagnostic_kind') == 'candle-isolated-native-pilot':
         assert phase == 'diagnostic'
         from .candle_isolated_roi import collect as isolated_collect

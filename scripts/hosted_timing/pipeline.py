@@ -232,6 +232,9 @@ def verify_inputs(folder):
     if plan.get('pointwise_family_refresh') or plan.get('named_output_projection_refresh') or plan.get('current_baseline_ten_refresh'):
         from .baseline_refresh_dispatch import implementation
         implementation(plan).verify_authentication(folder,plan,proof)
+    if plan.get('diagnostic_kind') == 'ladder-word-native-pilot':
+        from .ladder_word_roi import verify_authentication
+        verify_authentication(folder, plan, proof)
     if plan.get('diagnostic_kind') == 'candle-isolated-native-pilot':
         from .candle_isolated_roi import verify_authentication
         verify_authentication(folder, plan, proof)
@@ -275,7 +278,10 @@ def _verify_input_contents(folder, plan, proof, plan_sha256):
         results = ET.fromstring(raw).findall('.//{*}UnitTestResult')
         assert len(results) == receipt['passed_cases'] == 100
         assert all(r.attrib['outcome'] == 'Passed' for r in results)
-    if plan.get('diagnostic_kind') == 'candle-isolated-native-pilot':
+    if plan.get('diagnostic_kind') == 'ladder-word-native-pilot':
+        from .ladder_word_roi import verify_harness_alias
+        verify_harness_alias(folder,plan,proof)
+    elif plan.get('diagnostic_kind') == 'candle-isolated-native-pilot':
         from .candle_isolated_roi import verify_harness_alias
         verify_harness_alias(folder,plan,proof)
     elif plan.get('triple_body_master_reconciliation'):
