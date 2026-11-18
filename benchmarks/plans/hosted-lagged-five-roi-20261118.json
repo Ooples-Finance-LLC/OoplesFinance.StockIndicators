@@ -181,14 +181,14 @@
     "ci_run": "44267489886",
     "producer": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
     "evidence_source": "UNBOUND",
-    "manifest_sha256": "UNBOUND",
+    "manifest_sha256": "d3a4060540a686ac87d5c4f75c59ed9d9f7fa2fe79703bdbfdf0c2f221fa3f96",
     "gpu_receipt_sha256": "UNBOUND",
-    "production_sha256": "UNBOUND",
-    "source_fingerprint": "UNBOUND",
-    "artifact_id": "UNBOUND",
-    "artifact_zip_sha256": "UNBOUND",
-    "unit_passed": "UNBOUND",
-    "parity_passed": "UNBOUND",
+    "production_sha256": "0c1cb43aee3dda9b40b20117b02d34925449dcd99647319fad20faa42d35669e",
+    "source_fingerprint": "def2a609e58bc16697de1689158ddca7aeceb687f6e6f94fc0f07bce77f314b8",
+    "artifact_id": "14412370134",
+    "artifact_zip_sha256": "0777c007fee0bbc70ea53a0830fa071c5c856a6410b2ed71887821a9572d0e0c",
+    "unit_passed": 89,
+    "parity_passed": 39,
     "unit_classes": [
       "LaggedBlockExecutionTests",
       "SharedLaggedChangeTests",
@@ -201,7 +201,7 @@
       "ExponentialAverageComparisonTests",
       "SharedTillsonBenchmarkTests"
     ],
-    "actual_harness_sha256": "UNBOUND"
+    "actual_harness_sha256": "8bf9574e82bae158e2ef3ad6027add75c8f2223c96d72fa05c346bf1991e7bfc"
   },
   "harness_sha256": "07e764bd27110b4452e1f181f466a6ea0e60b4ae4667d01b6c75f468ae8aee07",
   "closure_ledger_new_rows": 0,
