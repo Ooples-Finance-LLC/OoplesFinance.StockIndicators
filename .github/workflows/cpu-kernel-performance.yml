@@ -81,6 +81,19 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
+      - name: Select candidate correctness SDK outside checked out sources
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $sdkSelector=Join-Path $env:GITHUB_WORKSPACE 'global.json'
+          if (Test-Path -LiteralPath $sdkSelector) { throw 'Unexpected runner SDK selector' }
+          [IO.File]::WriteAllText($sdkSelector, '{"sdk":{"version":"10.0.403","rollForward":"disable","allowPrerelease":false}}')
+          Push-Location (Join-Path $env:GITHUB_WORKSPACE 'candidate')
+          try {
+            $actualSdk=(& dotnet --version).Trim()
+            if ($LASTEXITCODE -ne 0 -or $actualSdk -ne '10.0.403') { throw ('Wrong candidate correctness SDK: '+$actualSdk) }
+            if (git status --porcelain) { throw 'SDK selection changed candidate source' }
+          } finally { Pop-Location }
       - name: Verify package identity and integrity gates
         run: python -m unittest discover -s tooling/scripts -p test_candidate_correctness_inputs.py
       - name: Build and run focused CPU checks without claiming GPU validation
