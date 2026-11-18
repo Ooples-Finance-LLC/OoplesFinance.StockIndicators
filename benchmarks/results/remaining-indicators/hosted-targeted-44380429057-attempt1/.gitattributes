@@ -1,0 +1,3 @@
+*.gz -text
+*.json text eol=lf
+root-review.json -text whitespace=cr-at-eol

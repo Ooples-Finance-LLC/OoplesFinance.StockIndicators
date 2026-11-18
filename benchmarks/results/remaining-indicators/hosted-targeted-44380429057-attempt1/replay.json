@@ -1,0 +1,17 @@
+{
+  "status": "retained-rejection-replay-map",
+  "workflow_head": "a76d97c39edae8f49a4fa9729bfdb36a0b802671",
+  "plan_sha256": "79d3d03be390c855e69558937755d22b9fb1f1ec6db47bf07239d94992d79a77",
+  "measurement_run": "44380429057",
+  "raw_root": "raw/",
+  "prepared_metadata_root": "prepared/",
+  "summary": "authenticated-summary.json.gz",
+  "root_review": "root-review.json",
+  "parser_module": "scripts/hosted_timing/cmf_alma_combined_qualification.py",
+  "tooling_snapshot": "tooling/",
+  "compression": "Each .gz restores the exact source bytes recorded in archive-index.json.",
+  "runtime_payload_archived": false,
+  "excluded_prepared_payload_files": 727,
+  "runtime_recovery": "Prepared manifests/provenance retain exact runtime/CAS and original artifact identities. Existing OPS authenticated inputs and CAS remain retained; no DLL or CAS blob payload is copied into this archive.",
+  "scope": "Decompress and replay collection/parsing with the pinned tooling/source refs and retained authenticated inputs. Do not rerun timing, rebuild, change the gate or claim qualification from this rejection."
+}
