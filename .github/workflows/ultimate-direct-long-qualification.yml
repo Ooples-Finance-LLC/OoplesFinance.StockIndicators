@@ -50,7 +50,15 @@ jobs:
           $actualSdk=(& dotnet --version).Trim()
           if ($LASTEXITCODE -ne 0 -or $actualSdk -ne '10.0.403') { throw ('Wrong actual qualification SDK: '+$actualSdk) }
           $actualInfo=(& dotnet --info | Out-String)
-          if ($LASTEXITCODE -ne 0 -or $actualInfo -notmatch '(?m)^Host:\s*\r?\n\s*Version:\s+10\.0\.15\s*\r?$') { throw ('Wrong actual qualification host runtime: '+$actualInfo) }
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to inspect dotnet installation' }
+          # The muxer can be newer than the CLR selected for these net10 inputs.
+          $installedRuntimes=@(& dotnet --list-runtimes)
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to inspect installed runtimes' }
+          $compatibleRuntimes=@($installedRuntimes | ForEach-Object {
+            if ($_ -match '^Microsoft\.NETCore\.App (10\.0\.\d+) \[') { [version]$Matches[1] }
+          } | Sort-Object)
+          if ($compatibleRuntimes.Count -eq 0 -or $compatibleRuntimes[-1].ToString() -ne '10.0.15') { throw ('Wrong installed net10 compatible runtime: '+($installedRuntimes -join '; ')) }
+          Write-Output ('Installed net10 compatible runtime: '+$compatibleRuntimes[-1])
           Write-Output $actualInfo
       - uses: actions/setup-python@v7
         with:

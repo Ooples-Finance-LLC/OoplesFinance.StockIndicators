@@ -1,5 +1,5 @@
 """Bounded Ultimate diagnostic orchestration checks; no production builds."""
-import copy,json,subprocess,unittest,tempfile
+import copy,json,subprocess,unittest,tempfile,textwrap
 from pathlib import Path
 from unittest import mock
 from hosted_timing import ultimate_direct_long_qualification as q
@@ -31,8 +31,18 @@ class UltimateDirectLongQualificationTests(unittest.TestCase):
         self.assertIn('{"sdk":{"version":"10.0.403","rollForward":"disable","allowPrerelease":false}}',workflow)
         self.assertIn("$actualSdk -ne '10.0.403'",workflow)
         self.assertIn('$actualInfo=(& dotnet --info | Out-String)',workflow)
-        self.assertIn('Wrong actual qualification host runtime:',workflow)
-        self.assertIn(r'Version:\s+10\.0\.15',workflow)
+        self.assertIn('& dotnet --list-runtimes',workflow)
+        self.assertIn("$compatibleRuntimes[-1].ToString() -ne '10.0.15'",workflow)
+        self.assertNotIn('Wrong actual qualification host runtime:',workflow)
+    def test_runner_sdk_selector_accepts_new_muxer_and_rejects_net10_runtime_drift(self):
+        workflow=(q.p.REPO/'.github/workflows/ultimate-direct-long-qualification.yml').read_text()
+        section=workflow.split('      - name: Select the installed qualification SDK before input downloads',1)[1].split('      - uses: actions/setup-python',1)[0]
+        command=textwrap.dedent(section.split('        run: |\n',1)[1])
+        for latest in ('10.0.15','10.0.16'):
+            bootstrap="$global:LASTEXITCODE=0; function dotnet { if ($args[0] -eq '--version') { '10.0.403' } elseif ($args[0] -eq '--info') { 'Host: 11.0.0' } elseif ($args[0] -eq '--list-runtimes') { 'Microsoft.NETCore.App 10.0.14 [C:\\dotnet]'; 'Microsoft.NETCore.App "+latest+" [C:\\dotnet]'; 'Microsoft.NETCore.App 11.0.0 [C:\\dotnet]' } }; "
+            with tempfile.TemporaryDirectory() as temp:
+                result=subprocess.run(['pwsh','-NoProfile','-NonInteractive','-Command',bootstrap+command],cwd=temp,capture_output=True,text=True)
+                self.assertEqual(result.returncode==0,latest=='10.0.15',result.stdout+result.stderr)
     def test_actual_ready_preparation_checks_sdk_before_artifact_authentication(self):
         plan=self.plan();plan.update(inputs_ready=True,parent_review_approved=True)
         real_check_output=q.subprocess.check_output
