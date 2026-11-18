@@ -1438,6 +1438,8 @@ internal static partial class ValuesBarExecution
         if ((typeof(T) == typeof(CorrelationKernel) || typeof(T) == typeof(PairStatisticsKernel))
             && period <= 4096 && end - start + seed.Length is >= 512 and <= int.MaxValue / 2)
             return ComputePairColumn(source, output, owned, start, end, period, seed, tail, cancellation, indicator);
+        if (typeof(T) == typeof(SampleShapeKernel) && source.Length >= 8192 && period <= 64)
+            return ComputeSampleShapeColumn(source, output, owned, start, end, (WindowSampleShape)indicator, seed, tail, cancellation);
         var region = new PointwiseRegion { InvalidOutputIndex = -1 };
         var target = new BoundedOutput(output, start - seed.Length, start);
         var kernel = T.Create(period, end - start + seed.Length, indicator, in target);
