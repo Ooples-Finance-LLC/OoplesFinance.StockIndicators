@@ -7,8 +7,10 @@ public class GlobalTestData
 
     public static List<T> GetCsvData<T>(string fileName)
     {
-        using var csvReader = CsvReader.FromFile($"TestData/{fileName}.csv");
+        using var reader = new StreamReader($"TestData/{fileName}.csv");
+        using var csvReader = new CsvReader(reader, CultureInfo.InvariantCulture);
         var result = new List<T>();
+        csvReader.Read();
         csvReader.ReadHeader();
         if (typeof(T) == typeof(TickerData))
         {
@@ -16,12 +18,12 @@ public class GlobalTestData
             {
                 var ticker = new TickerData
                 {
-                    Date = DateTime.ParseExact(csvReader.GetString("Date"), "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None),
-                    Open = double.Parse(csvReader.GetString("Open"), CultureInfo.InvariantCulture),
-                    High = double.Parse(csvReader.GetString("High"), CultureInfo.InvariantCulture),
-                    Low = double.Parse(csvReader.GetString("Low"), CultureInfo.InvariantCulture),
-                    Close = double.Parse(csvReader.GetString("Close"), CultureInfo.InvariantCulture),
-                    Volume = double.Parse(csvReader.GetString("Volume"), CultureInfo.InvariantCulture),
+                    Date = DateTime.ParseExact(csvReader.GetField<string>("Date"), "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None),
+                    Open = double.Parse(csvReader.GetField<string>("Open"), CultureInfo.InvariantCulture),
+                    High = double.Parse(csvReader.GetField<string>("High"), CultureInfo.InvariantCulture),
+                    Low = double.Parse(csvReader.GetField<string>("Low"), CultureInfo.InvariantCulture),
+                    Close = double.Parse(csvReader.GetField<string>("Close"), CultureInfo.InvariantCulture),
+                    Volume = double.Parse(csvReader.GetField<string>("Volume"), CultureInfo.InvariantCulture),
                 };
                 result.Add((T)(object)ticker);
             }
@@ -30,7 +32,7 @@ public class GlobalTestData
         {
             while (csvReader.Read())
             {
-                var text = csvReader.GetString("Output");
+                var text = csvReader.GetField<string>("Output");
                 double value;
                 if (string.IsNullOrWhiteSpace(text))
                 {
