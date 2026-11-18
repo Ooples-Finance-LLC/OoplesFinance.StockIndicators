@@ -1,5 +1,5 @@
 {
-  "source_sha256": "4b348074bcf3350f0af46261beb830cfe0cd50001ad2c06756c54cb5a1b054f4",
+  "source_sha256": "a889cbb94cd20dd461b29e7233a9b8987e366c529f84c016295e8587e4d3f2fe",
   "methods": [
     "OoplesFinance.StockIndicators.CompetitorTests.ScaledTrueRangeFixtureTests.AllocationProbeRetainsEagerCpuAndOptionalGpuArms",
     "OoplesFinance.StockIndicators.CompetitorTests.ScaledTrueRangeFixtureTests.EveryArmMatchesItsIndependentArithmeticAndRestoresSettings",
@@ -15,17 +15,17 @@
     "OoplesFinance.StockIndicators.CompetitorTests.SharedGpuVolumeWeightedPriceFixtureTests.DeviceColumnsMatchIndependentCpuAndNativeReferences"
   ],
   "passed_cases": 100,
-  "trx_sha256": "12c00f6ae5f70b4dfb704a4925d15003bdeefdfb51d9399aa239744837a5499d",
+  "trx_sha256": "da7a5669a61fb8bb99b492f45b5b51bef955107dcafdfabc3b9d5f649ca5e9e8",
   "host": "Windows-11-10.0.26220-SP0",
   "device": "Radeon RX 5500 XT; actual RequiredGPU fixtures using authenticated CI binaries",
   "dotnet_info": ".NET SDK:\r\n Version:           10.0.404\r\n Commit:            2ab2854867\r\n Workload version:  10.0.400-manifests.80e15866\r\n MSBuild version:   18.9.15+2ab285486\r\n\r\nRuntime Environment:\r\n OS Name:     Windows\r\n OS Version:  10.0.26220\r\n OS Platform: Windows\r\n RID:         win-x64\r\n Base Path:   C:\\Program Files\\dotnet\\sdk\\10.0.404\\\r\n\r\n.NET workloads installed:\r\n [tvos]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    27.2.10000/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.tvos\\27.2.10000\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [macos]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    27.2.10000/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.macos\\27.2.10000\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [android]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    36.1.118/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.android\\36.1.118\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [maccatalyst]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    27.2.10000/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.maccatalyst\\27.2.10000\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [ios]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    27.2.10000/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.ios\\27.2.10000\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [maui-windows]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    10.0.110/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.maui\\10.0.110\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\nConfigured to use workload sets when installing new manifests.\r\nNo workload sets are installed. Run \"dotnet workload restore\" to install a workload set.\r\n",
-  "test_assembly_sha256": "264511a27ae04e709bf6e58d49056363f3fb7aeb1810b41231632d5cf11628a1",
+  "test_assembly_sha256": "932107e9cbe15abaec6eef987ae52255821d71eefcbc3f224a173774fb7f75b6",
   "build_origin": {
-    "run_id": "44341191246",
-    "workflow_head": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
-    "source": "c5bfd4950982aa80dddbfd2db6358ad43ddb9e4c",
-    "artifact_id": 14444392764,
-    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/44341191246"
+    "run_id": "44393824051",
+    "workflow_head": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "source": "7bac3b91d52c4d1ccebfcda86c2b23f1bc37b979",
+    "artifact_id": 14471720104,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/44393824051"
   },
   "local_dotnet_launcher": [
     "C:\\Program Files\\dotnet\\dotnet.exe",
