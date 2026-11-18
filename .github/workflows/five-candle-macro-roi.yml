@@ -1,0 +1,272 @@
+name: Pinned five-candle zero-block macro whole-pipeline ROI diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - perf/hosted-five-candle-macro-roi-20261117
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: pinned-five-candle-macro-roi
+  cancel-in-progress: false
+
+env:
+  EXPECTED_NEW_CORE_SHA: c4915d59aef682579cd0a3edfae98fa363f9694e1321687bdf2b48e32b4aa005
+  EXPECTED_MANIFEST_SHA: f6a3bfc7781d4a9ccbfe9281f8f72e1d5c248ff4848ee919507b458ab1106055
+  EXPECTED_SOURCE_FINGERPRINT: 99af80efc2203fe568c5a682724d6f32d39e76dfe66e422f2528c874abf29ac8
+  EXPECTED_GPU_RECEIPT_SHA: 9bd67f81149c6e312f5a149db084d5838a265093a00691639d0eb112cacbbaa6
+  EXPECTED_GPU_TRX_GZ_SHA: f1d4d3a7ef96e4e80e762ef313b7cc65b3341c79cc5f081e6f8aead6ca8e9303
+  EXPECTED_CANDIDATE_ARTIFACT_ID: '14382986862'
+  EXPECTED_CANDIDATE_ZIP_SHA: ca3128bd1dac1bb0b0098dbd16a5634727253a1eb3d9310722ab3c9609ea0b97
+  EXPECTED_CANDIDATE_SOURCE: 093969bb3650c3e2aad384cd0ecb2a991084ab49
+  EXPECTED_CANDIDATE_WORKFLOW_HEAD: 2a1737f30e5e1164189d0209b39ea46bf38c1239
+  EXPECTED_CANDIDATE_RUN_ID: '44201563051'
+  GPU_RECEIPT_COMMIT: 543adf277da70058ae16a85cd6222d98b5f501ec
+  EXPECTED_UNIT_PASSED: '46'
+  EXPECTED_PARITY_PASSED: '597'
+
+jobs:
+  screen:
+    runs-on: windows-2025
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        bars: [1000, 10000]
+        group: [primary, shared]
+    env:
+      STUDY_BARS: ${{ matrix.bars }}
+      STUDY_GROUP: ${{ matrix.group }}
+    steps:
+      - name: Initialize fresh diagnostic paths
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          foreach ($pin in @($env:EXPECTED_NEW_CORE_SHA,$env:EXPECTED_MANIFEST_SHA,$env:EXPECTED_SOURCE_FINGERPRINT,$env:EXPECTED_GPU_RECEIPT_SHA,$env:EXPECTED_GPU_TRX_GZ_SHA,$env:EXPECTED_CANDIDATE_ZIP_SHA)) {
+            if ($pin -notmatch '^[0-9a-f]{64}$') { throw 'UNBOUND candidate/GPU pins; no diagnostic input/output I/O permitted' }
+          }
+          if ($env:GPU_RECEIPT_COMMIT -notmatch '^[0-9a-f]{40}$' -or $env:EXPECTED_CANDIDATE_ARTIFACT_ID -notmatch '^\d+$') { throw 'UNBOUND GPU-only commit or candidate artifact ID' }
+          if ($env:EXPECTED_CANDIDATE_SOURCE -notmatch '^[0-9a-f]{40}$' -or $env:EXPECTED_CANDIDATE_WORKFLOW_HEAD -notmatch '^[0-9a-f]{40}$' -or $env:EXPECTED_CANDIDATE_RUN_ID -notmatch '^\d+$') { throw 'UNBOUND candidate source/head/run; no I/O permitted' }
+          if ($env:EXPECTED_UNIT_PASSED -notmatch '^[1-9][0-9]*$' -or $env:EXPECTED_PARITY_PASSED -notmatch '^[1-9][0-9]*$') { throw 'UNBOUND actual CPU receipt counts; no I/O permitted' }
+          if ($env:STUDY_GROUP -notin @('primary','shared') -or $env:STUDY_BARS -notin @('1000','10000')) { throw 'Unknown fixed matrix scope' }
+          foreach ($name in @('SCREEN_ROOT','OLD_INPUT','NEW_INPUT','GPU_INPUT')) {
+            $value=if ($name -eq 'GPU_INPUT') { Join-Path $env:GITHUB_WORKSPACE 'gpu-proof/benchmarks/results/shared-rollout/local-gpu-contracts' } else { Join-Path $env:RUNNER_TEMP ('five-candle-macro-roi-'+$name.ToLowerInvariant()) }
+            if (Test-Path -LiteralPath $value) { throw 'Fresh job paths required' }
+            [Environment]::SetEnvironmentVariable($name,$value)
+            "$name=$value" | Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8
+          }
+          [IO.Directory]::CreateDirectory($env:SCREEN_ROOT) | Out-Null
+          [ordered]@{workflow_head=$env:GITHUB_SHA;run_id=$env:GITHUB_RUN_ID;diagnostic_only=$true;qualification=$false;native_win_claim=$false;production_builds=0;tests=0;timed_benchmark_cases=0;diagnostic_cases=20;overall_diagnostic_cases=80;group=$env:STUDY_GROUP;bars=[int]$env:STUDY_BARS;helper_compiler_sdk='10.0.403';driver_builds=1;combined_workload_cap_seconds=120;individual_process_cap_seconds=60;runner_image=$env:ImageVersion} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'provenance.json') -Encoding utf8
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts
+            .github/workflows
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - uses: actions/download-artifact@v8
+        with:
+          name: candle-predicate-qualification
+          path: ${{ env.OLD_INPUT }}
+          run-id: 44010931924
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ env.EXPECTED_CANDIDATE_ARTIFACT_ID }}
+          merge-multiple: true
+          path: ${{ env.NEW_INPUT }}
+          run-id: ${{ env.EXPECTED_CANDIDATE_RUN_ID }}
+          github-token: ${{ github.token }}
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.GPU_RECEIPT_COMMIT }}
+          path: gpu-proof
+          sparse-checkout: benchmarks/results/shared-rollout/local-gpu-contracts
+          persist-credentials: false
+      - name: Authenticate binaries and build only diagnostic helper
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          if ((dotnet --version).Trim() -ne '10.0.403') { throw 'Wrong SDK' }
+          $artifact=Invoke-RestMethod -Uri ('https://api.github.com/repos/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/artifacts/'+$env:EXPECTED_CANDIDATE_ARTIFACT_ID) -Headers @{Authorization=('Bearer '+$env:GH_TOKEN);'X-GitHub-Api-Version'='2022-11-28'}
+          if ($artifact.digest -ne ('sha256:'+$env:EXPECTED_CANDIDATE_ZIP_SHA) -or $artifact.id -ne [long]$env:EXPECTED_CANDIDATE_ARTIFACT_ID -or $artifact.name -ne 'candidate-correctness-inputs' -or $artifact.expired -or $artifact.workflow_run.id -ne [long]$env:EXPECTED_CANDIDATE_RUN_ID -or $artifact.workflow_run.head_sha -ne $env:EXPECTED_CANDIDATE_WORKFLOW_HEAD) { throw 'Wrong candidate artifact metadata' }
+          $artifact | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $env:SCREEN_ROOT 'candidate-artifact.json') -Encoding utf8
+          $inputs=Join-Path $env:OLD_INPUT 'predicate-inputs'
+          $proof=Join-Path $inputs 'provenance.json'
+          if ((Get-FileHash $proof).Hash.ToLowerInvariant() -ne '9013cb468cec2d505c0eb2fb6050517d2a1a5e28b441ade2cd55523be298bf78') { throw 'Wrong frozen input proof' }
+          $newManifest=Join-Path $env:NEW_INPUT 'manifest.json'
+          if ((Get-FileHash $newManifest).Hash.ToLowerInvariant() -ne $env:EXPECTED_MANIFEST_SHA) { throw 'Wrong candidate manifest' }
+          $manifest=Get-Content $proof -Raw | ConvertFrom-Json
+          if (@($manifest.common_manifest.PSObject.Properties).Count -ne 94) { throw 'Expected 94 common assets' }
+          $oldCore=Join-Path $inputs 'production/old.dll'
+          $newCore=Join-Path $env:NEW_INPUT ('blobs/'+$env:EXPECTED_NEW_CORE_SHA)
+          if ((Get-FileHash $oldCore).Hash.ToLowerInvariant() -ne '4d571648599e567bb6df0cda1f823d79e95712241078c2ab1721cf7409c10173' -or (Get-FileHash $newCore).Hash.ToLowerInvariant() -ne $env:EXPECTED_NEW_CORE_SHA) { throw 'Wrong production bytes' }
+          $gpuReceipt=Join-Path $env:GPU_INPUT 'receipt.json'
+          Copy-Item -LiteralPath $gpuReceipt -Destination (Join-Path $env:SCREEN_ROOT 'gpu-receipt-checkout-before.bin')
+          $receiptBefore=(Get-FileHash -LiteralPath $gpuReceipt -Algorithm SHA256).Hash.ToLowerInvariant()
+          $gpuCheckout=Join-Path $env:GITHUB_WORKSPACE 'gpu-proof'
+          $receiptRelative='benchmarks/results/shared-rollout/local-gpu-contracts/receipt.json'
+          $blobStart=[Diagnostics.ProcessStartInfo]::new((Get-Command git).Source)
+          $blobStart.UseShellExecute=$false;$blobStart.CreateNoWindow=$true;$blobStart.RedirectStandardOutput=$true;$blobStart.RedirectStandardError=$true
+          foreach ($argument in @('-C',$gpuCheckout,'cat-file','blob',($env:GPU_RECEIPT_COMMIT+':'+$receiptRelative))) { $blobStart.ArgumentList.Add([string]$argument) }
+          $blobProcess=[Diagnostics.Process]::new();$blobProcess.StartInfo=$blobStart
+          try {
+            if (!$blobProcess.Start()) { throw 'Cannot read pinned GPU receipt blob' }
+            $blobError=$blobProcess.StandardError.ReadToEndAsync()
+            $blobFile=[IO.File]::Open($gpuReceipt,[IO.FileMode]::Create,[IO.FileAccess]::Write,[IO.FileShare]::None)
+            try { $blobProcess.StandardOutput.BaseStream.CopyTo($blobFile);$blobFile.Flush($true) } finally { $blobFile.Dispose() }
+            $blobProcess.WaitForExit();$restoreExit=$blobProcess.ExitCode;$blobErrorText=$blobError.GetAwaiter().GetResult()
+          } finally { $blobProcess.Dispose() }
+          $receiptAfter=(Get-FileHash -LiteralPath $gpuReceipt -Algorithm SHA256).Hash.ToLowerInvariant()
+          [ordered]@{commit=$env:GPU_RECEIPT_COMMIT;restored_path=$receiptRelative;checkout_before_sha256=$receiptBefore;restored_after_sha256=$receiptAfter;expected_sha256=$env:EXPECTED_GPU_RECEIPT_SHA;git_cat_file_exit_code=$restoreExit;transport='git cat-file blob stdout BaseStream to FileStream';git_stderr=$blobErrorText;global_git_configuration_changed=$false} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:SCREEN_ROOT 'gpu-receipt-restoration.json') -Encoding utf8
+          if ($restoreExit -ne 0) { throw 'Pinned GPU receipt blob read failed; preserve checkout evidence' }
+          if ((Get-FileHash $gpuReceipt).Hash.ToLowerInvariant() -ne $env:EXPECTED_GPU_RECEIPT_SHA) { throw 'Wrong approved candidate GPU100 receipt' }
+          $gpuTrx=Join-Path $env:GPU_INPUT 'gpu.trx.gz'
+          if ((Get-FileHash $gpuTrx).Hash.ToLowerInvariant() -ne $env:EXPECTED_GPU_TRX_GZ_SHA) { throw 'Wrong approved GPU100 compressed TRX' }
+          Copy-Item -LiteralPath $gpuTrx -Destination (Join-Path $env:SCREEN_ROOT 'candidate-gpu100.trx.gz')
+          Copy-Item -LiteralPath $gpuReceipt -Destination (Join-Path $env:SCREEN_ROOT 'candidate-gpu100-receipt.json')
+          Copy-Item -LiteralPath $newManifest -Destination (Join-Path $env:SCREEN_ROOT 'candidate-manifest.json')
+          $common=[IO.Path]::GetFullPath((Join-Path $inputs 'common'))
+          foreach ($label in @('old','new')) {
+            $view=Join-Path $env:RUNNER_TEMP ('five-candle-macro-roi-'+$label+'-runtime')
+            if (Test-Path -LiteralPath $view) { throw 'Fresh runtime view required' }
+            foreach ($entry in $manifest.common_manifest.PSObject.Properties) {
+              $source=[IO.Path]::GetFullPath((Join-Path $common $entry.Name))
+              $target=[IO.Path]::GetFullPath((Join-Path $view $entry.Name))
+              if (!$source.StartsWith($common+'\',[StringComparison]::OrdinalIgnoreCase) -or !$target.StartsWith($view+'\',[StringComparison]::OrdinalIgnoreCase)) { throw 'Escaped runtime member' }
+              if ((Get-FileHash $source).Hash.ToLowerInvariant() -ne $entry.Value) { throw 'Changed common input' }
+              if ($entry.Name -eq 'OoplesFinance.StockIndicators.dll') { $source=if ($label -eq 'old') { $oldCore } else { $newCore } }
+              [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($target)) | Out-Null
+              $null=New-Item -ItemType HardLink -Path $target -Target $source -ErrorAction Stop
+            }
+          }
+          $config=Join-Path $common 'OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json'
+          if ((Get-FileHash $config).Hash.ToLowerInvariant() -ne 'c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097') { throw 'Wrong runtime configuration' }
+          $helper=Join-Path $env:RUNNER_TEMP 'five-candle-macro-roi-diagnostic-helper'
+          [IO.Directory]::CreateDirectory($helper) | Out-Null
+          @('<Project Sdk="Microsoft.NET.Sdk">','<PropertyGroup>','<OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>','<ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>','<UseSharedCompilation>false</UseSharedCompilation>','</PropertyGroup>','</Project>') | Set-Content (Join-Path $helper 'DiagnosticScreen.csproj') -Encoding utf8
+          Copy-Item (Join-Path $env:GITHUB_WORKSPACE 'scripts/screen-five-candle-pinned-runtime.cs') (Join-Path $helper 'Program.cs')
+          dotnet build (Join-Path $helper 'DiagnosticScreen.csproj') -c Release -o (Join-Path $helper 'out') --disable-build-servers --nologo *> (Join-Path $env:SCREEN_ROOT 'helper-build.log')
+          if ($LASTEXITCODE -ne 0) { throw 'Diagnostic helper build failed; no workload' }
+          $driver=Join-Path $helper 'out/DiagnosticScreen.dll'
+          [ordered]@{helper_sha256=(Get-FileHash $driver).Hash.ToLowerInvariant();helper_source_sha256=(Get-FileHash (Join-Path $helper 'Program.cs')).Hash.ToLowerInvariant();sdk='10.0.403';production_builds=0;diagnostic_driver_builds=1;hardlinks=188;payload_copies=0;runtimeconfig_sha256=(Get-FileHash $config).Hash.ToLowerInvariant();qualification=$false} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'launch.json') -Encoding utf8
+          dotnet --info | Set-Content (Join-Path $env:SCREEN_ROOT 'dotnet-info.txt') -Encoding utf8
+      - name: Run one bounded screen with mandatory idle gates
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $clock=$null
+          function CheckBudget {
+            if ((Get-ChildItem -LiteralPath $env:SCREEN_ROOT -Recurse -File | Measure-Object Length -Sum).Sum -gt 104857600) { throw 'Aggregate100MiB evidence cap exceeded' }
+            if ($null -ne $clock -and $clock.Elapsed.TotalSeconds -ge 120) { throw 'Combined 120 second workload/verification cap reached' }
+          }
+          function IdleGate($name) {
+            $samples=[Collections.Generic.List[double]]::new()
+            for ($i=0;$i -lt 12;$i++) {
+              if ($null -ne $clock -and $clock.Elapsed.TotalSeconds -ge 120) { break }
+              $samples.Add((Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1).CounterSamples[0].CookedValue)
+            }
+            $busy=@(Get-CimInstance Win32_Process | Where-Object { $_.Name -match '^(dotnet|MSBuild|testhost|VBCSCompiler)(\.exe)?$' -and $_.CommandLine -match '(?i)(\s(build|test|vstest)\s|MSBuild\.(exe|dll)|testhost|VBCSCompiler)' } | Select-Object ProcessId,Name,CommandLine)
+            $passed=$samples.Count -eq 12 -and @($samples | Where-Object { ![double]::IsFinite($_) -or $_ -lt 0 -or $_ -gt 100 -or $_ -ge 15 }).Count -eq 0 -and $busy.Count -eq 0
+            [ordered]@{cpu_percent=$samples.ToArray();build_test_processes=$busy;passed=$passed;utc=[DateTime]::UtcNow.ToString('O')} | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $env:SCREEN_ROOT ($name+'.json')) -Encoding utf8
+            return $passed
+          }
+          $valid=$false;$workloadComplete=$false;$failure=$null;$postPassed=$false;$cases=[Collections.Generic.List[object]]::new()
+          $settingsReference=$null;$processorReference=$null;$envReference=$null
+          try {
+            $initializationProbes=(Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 2).CounterSamples.CookedValue
+            [ordered]@{preparation_only=$true;cpu_percent=@($initializationProbes);mandatory_gate_samples=12;settle_seconds=5} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'cpu-probe-preparation.json') -Encoding utf8
+            Start-Sleep -Seconds 5
+            if (!(IdleGate 'idle-before')) { throw 'Pre-workload idle gate failed; no workload' }
+            $clock=[Diagnostics.Stopwatch]::StartNew()
+            $inputs=Join-Path $env:OLD_INPUT 'predicate-inputs'
+            $config=Join-Path $inputs 'common/OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json'
+            $driver=Join-Path $env:RUNNER_TEMP 'five-candle-macro-roi-diagnostic-helper/out/DiagnosticScreen.dll'
+            $index=0
+            foreach ($pair in $(if ($env:STUDY_GROUP -eq 'primary') { @('TaLib.Candles.MatHold','TaLib.Candles.Breakaway','TaLib.Candles.ConcealingBabySwallow','TaLib.Candles.LadderBottom') } else { @('TaLib.Candles.ThreeStarsInSouth','TaLib.Candles.RisingFallingThreeMethods','TaLib.Candles.AdvanceBlock','TaLib.Candles.Stalled') })) {
+              foreach ($arm in @('old','new','new','old','native')) {
+                CheckBudget
+                $label=if ($arm -eq 'new') { 'new' } else { 'old' }
+                $view=Join-Path $env:RUNNER_TEMP ('five-candle-macro-roi-'+$label+'-runtime')
+                $out=Join-Path $env:SCREEN_ROOT ('case-'+$index)
+                $argsList=@('exec','--runtimeconfig',$config,$driver,$inputs,$view,$env:NEW_INPUT,(Join-Path $env:GPU_INPUT 'receipt.json'),$arm,$pair,$out,$env:STUDY_BARS)
+                $start=[Diagnostics.ProcessStartInfo]::new((Get-Command dotnet).Source)
+                $start.UseShellExecute=$false;$start.CreateNoWindow=$true;$start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
+                foreach ($argument in $argsList) { $start.ArgumentList.Add([string]$argument) }
+                $process=[Diagnostics.Process]::new();$process.StartInfo=$start;$started=$false
+                try {
+                  if (!$process.Start()) { throw 'Cannot launch isolated case' };$started=$true
+                  $stdout=$process.StandardOutput.ReadToEndAsync();$stderr=$process.StandardError.ReadToEndAsync()
+                  $remaining=[Math]::Min(60000,[Math]::Max(1,[int]((120-$clock.Elapsed.TotalSeconds)*1000)))
+                  $childClock=[Diagnostics.Stopwatch]::StartNew();$limitFailure=$null
+                  while (!$process.WaitForExit(250)) {
+                    if ($childClock.ElapsedMilliseconds -ge $remaining) { $limitFailure='Individual or combined time cap';break }
+                    if ((Get-ChildItem -LiteralPath $env:SCREEN_ROOT -Recurse -File | Measure-Object Length -Sum).Sum -gt 104857600) { $limitFailure='Aggregate100MiB evidence cap';break }
+                  }
+                  $timedOut=$null -ne $limitFailure
+                  if ($timedOut) { $process.Kill($true);$process.WaitForExit() }
+                  $stdout.GetAwaiter().GetResult() | Set-Content (Join-Path $env:SCREEN_ROOT ('case-'+$index+'-stdout.log')) -Encoding utf8
+                  $stderr.GetAwaiter().GetResult() | Set-Content (Join-Path $env:SCREEN_ROOT ('case-'+$index+'-stderr.log')) -Encoding utf8
+                  [ordered]@{exit_code=$process.ExitCode;timed_out=$timedOut;limit_failure=$limitFailure;arm=$arm;pair=$pair;arguments=$argsList} | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $env:SCREEN_ROOT ('case-'+$index+'-exit.json')) -Encoding utf8
+                  if ($timedOut) { throw 'Individual or combined child cap reached; partial logs preserved' }
+                  if ($process.ExitCode -ne 0) { throw 'Case failed; no reduced samples or retry' }
+                } finally { if ($started -and !$process.HasExited) { $process.Kill($true);$process.WaitForExit() };$process.Dispose() }
+                CheckBudget
+                $case=Get-Content (Join-Path $out 'case.json') -Raw | ConvertFrom-Json
+                if ($case.status -ne 'complete' -or $case.actual_clr -ne '10.0.15' -or $case.arm -ne $arm -or $case.pair -ne $pair -or $case.bars -ne [int]$env:STUDY_BARS -or @($case.samples_ms).Count -ne 10 -or $case.warmups -ne 1000 -or !$case.runtime_unchanged -or !$case.protected_inputs_unchanged) { throw 'Incomplete or mismatched case' }
+                if (('TaLib.Candles.'+$case.factory_parameters.name) -ne $pair -or @($case.factory_parameters.actual_properties.PSObject.Properties).Count -eq 0 -or !$case.factory_parameters.benchmark_period_argument_ignored) { throw 'Candle factory metadata mismatch' }
+                $settings=$case.settings_before | ConvertTo-Json -Compress
+                if ($case.settings_before.dop -ne 2 -or $case.settings_before.effective_workers -ne 2 -or $case.processor_count -ne 4 -or $settings -cne ($case.settings_after_setup | ConvertTo-Json -Compress) -or $settings -cne ($case.settings_after | ConvertTo-Json -Compress)) { throw 'Worker settings changed or unavailable within case' }
+                if ($cases.Count -eq 0) { $settingsReference=$settings;$processorReference=$case.processor_count;$envReference=$case.env_aidotnet_cpu_threads }
+                elseif ($settings -cne $settingsReference -or $case.processor_count -ne $processorReference -or $case.env_aidotnet_cpu_threads -cne $envReference) { throw 'Worker, CPU or environment settings differ between isolated cases' }
+                $cases.Add($case);$index++
+              }
+            }
+            $compared=0
+            foreach ($pair in $(if ($env:STUDY_GROUP -eq 'primary') { @('TaLib.Candles.MatHold','TaLib.Candles.Breakaway','TaLib.Candles.ConcealingBabySwallow','TaLib.Candles.LadderBottom') } else { @('TaLib.Candles.ThreeStarsInSouth','TaLib.Candles.RisingFallingThreeMethods','TaLib.Candles.AdvanceBlock','TaLib.Candles.Stalled') })) {
+              $group=@($cases | Where-Object pair -eq $pair)
+              $reference=$group[0].source_outputs[0]
+              foreach ($case in @($group | Where-Object arm -ne 'native')) {
+                if (@($case.source_outputs).Count -ne 10) { throw 'Missing retained source outputs' }
+                foreach ($result in $case.source_outputs) {
+                  CheckBudget
+                  if (@($result.PSObject.Properties).Count -ne @($reference.PSObject.Properties).Count) { throw 'Output column count differs' }
+                  foreach ($column in $reference.PSObject.Properties) {
+                    $actual=$result.PSObject.Properties[$column.Name].Value
+                    if ($null -eq $actual -or $actual.FirstValid -ne $column.Value.FirstValid -or $actual.Values -cne $column.Value.Values -or $actual.Present -cne $column.Value.Present) { throw 'Source output bits or validity differ' }
+                  }
+                  $compared++
+                }
+              }
+            }
+            if ($cases.Count -ne 20 -or $compared -ne 160) { throw 'Incomplete diagnostic scope' }
+            [ordered]@{cases=20;measured_source_outputs_compared=160;bitwise_equal=$true;outside_timing=$true;qualification=$false} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'output-comparison.json') -Encoding utf8
+            CheckBudget;$workloadComplete=$true
+          } catch { $failure=$_.Exception.ToString() }
+          finally {
+            if ($null -ne $clock) {
+              try {
+                $postPassed=IdleGate 'idle-after';CheckBudget
+                if (!$postPassed) { throw 'Post-workload idle gate failed; all timings invalid' }
+              } catch { $postPassed=$false;$failure=([string]$failure)+' Post-gate failure: '+$_.Exception.ToString() }
+            }
+            $valid=$workloadComplete -and $postPassed -and $null -eq $failure
+            [ordered]@{timings_valid_for_diagnostic_only=$valid;failure=$failure;post_idle_passed=$postPassed;completed_cases=$cases.Count;elapsed_workload_and_verification_seconds=$(if ($null -ne $clock) { $clock.Elapsed.TotalSeconds } else { 0 });qualification=$false;native_win_claim=$false;source_imported=$false;report_imported=$false} | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $env:SCREEN_ROOT 'controller.json') -Encoding utf8
+          }
+          try { CheckBudget } catch { $valid=$false;[ordered]@{timings_valid_for_diagnostic_only=$false;failure=$_.Exception.ToString();qualification=$false;native_win_claim=$false} | ConvertTo-Json | Set-Content (Join-Path $env:SCREEN_ROOT 'controller.json') -Encoding utf8 }
+          if (!$valid) { throw 'Diagnostic invalid or incomplete; preserve all evidence' }
+      - uses: actions/upload-artifact@v7
+        if: ${{ always() && env.SCREEN_ROOT != '' }}
+        with:
+          name: five-candle-macro-roi-${{ matrix.group }}-${{ matrix.bars }}
+          path: ${{ env.SCREEN_ROOT }}/
+          retention-days: 14
+          if-no-files-found: error
