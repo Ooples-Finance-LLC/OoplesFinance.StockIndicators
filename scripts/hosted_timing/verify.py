@@ -54,6 +54,10 @@ def sample(case):
 
 
 def collect(folder, phase):
+    if read(PLAN).get('diagnostic_kind') == 'ultimate-direct-long-native-pilot':
+        assert phase == 'diagnostic'
+        from .ultimate_direct_long_roi import collect as direct_collect
+        return direct_collect(folder)
     if read(PLAN).get('diagnostic_kind') == 'ultimate-wider-long-native-pilot':
         assert phase == 'diagnostic'
         from .ultimate_wider_long_roi import collect as ultimate_collect
