@@ -50,7 +50,7 @@ public class IndicatorSeriesAccessorGenerator : IIncrementalGenerator
         "Equals", "GetHashCode", "GetType", "ToString", "Count", "InputName", "IndicatorName",
         "CustomValuesList", "OutputValues", "SignalsList", "Options", "InputValues", "OpenPrices",
         "HighPrices", "LowPrices", "ClosePrices", "Volumes", "Dates", "TickerDataList", "SeriesView",
-        "WithValues"
+        "WithValues", "FromColumns", "WithBaseInput", "ResetOutputs", "EnsureColumnView", "EnsureRowView"
     };
 
     public void Initialize(IncrementalGeneratorInitializationContext context)

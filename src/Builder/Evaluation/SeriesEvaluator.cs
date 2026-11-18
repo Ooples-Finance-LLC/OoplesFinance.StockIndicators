@@ -554,13 +554,13 @@ internal sealed class SeriesEvaluator
 
             // InputMemory rather than InputValues.ToArray(): the latter builds the column as a list and then
             // copies it out, two arrays the size of the history for a series the caller already holds.
-            _cachedDefaultInput = data.CustomValuesList.Count > 0
-                ? data.CustomValuesList.ToArray()
+            _cachedDefaultInput = data.ActiveCustomInput is { Count: > 0 } custom
+                ? custom.ToArray()
                 : data.InputMemory;
             return _cachedDefaultInput.Value;
         }
 
-        return data.CustomValuesList.Count > 0 ? data.CustomValuesList.ToArray() : data.InputMemory;
+        return data.ActiveCustomInput is { Count: > 0 } activeCustom ? activeCustom.ToArray() : data.InputMemory;
     }
 
     /// <summary>

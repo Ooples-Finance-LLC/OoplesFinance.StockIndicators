@@ -63,7 +63,7 @@
     "id": "future-batch-data",
     "module": "alignment",
     "file": "src/Builder/Evaluation/BatchCompute.cs",
-    "before": "if (stockData.Dates[i] != marketData.Dates[i] || stockData.Dates[i].Kind != marketData.Dates[i].Kind)",
+    "before": "if (primaryDates[i] != marketDates[i] || primaryDates[i].Kind != marketDates[i].Kind)",
     "after": "if (stockData.ChainedValues.Count < 0)",
     "filter": "FullyQualifiedName~BatchRejectsAlignmentBeforeTouchingState"
   },
@@ -2838,7 +2838,7 @@
     "file": "src/Builder/Compute/BuilderArmBinding.cs",
     "filter": "FullyQualifiedName~RangeBandNumericalTests",
     "id": "range-band-discard-selected-input",
-    "before": "bars.InputValues = new List<double>(data.InputValues);",
+    "before": "bars.InputValues = new List<double>(explicitInput);",
     "after": "bars.InputValues = new List<double>(data.ClosePrices);"
   },
   {
