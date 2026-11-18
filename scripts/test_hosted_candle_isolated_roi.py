@@ -56,6 +56,32 @@ class CandleIsolatedRoiTests(unittest.TestCase):
         for bars in (1000,10000):
             broken=copy.deepcopy(decisions);next(d for d in broken if d['pair']==q.PAIRS[2] and d['bars']==bars)['verdict']='slower'
             self.assertFalse(q.adjudicate_promotion(rows,broken)['passed'])
+    def test_any_of_six_source_regressions_blocks_full_qualification(self):
+        rows,decisions=self.rows()
+        for i in range(6):
+            broken=copy.deepcopy(decisions);broken[i]['verdict']='slower'
+            gate=q.adjudicate_promotion(rows,broken)
+            self.assertFalse(gate['passed']);self.assertFalse(gate['all_six_source_comparisons_no_regression'])
+    def test_distinct_actual_harnesses_are_preserved_under_explicit_baseline_alias(self):
+        plan=self.plan();plan['harness_sha256']=plan['old_candidate']['actual_harness_sha256']
+        actual_new='a794b0bce71ea59bcbe08242122ad3721d61bfd8689e4bb3e2cc14e40740cb64'
+        plan['candidate']['actual_harness_sha256']=actual_new
+        old=dict(manifest=dict(runtime_files={q.HARNESS_PATH:plan['harness_sha256']}))
+        new=dict(manifest=dict(runtime_files={q.HARNESS_PATH:actual_new}))
+        alias=q.harness_role_alias(plan,old,new)
+        self.assertEqual(alias['common_artifact_role'],'old')
+        self.assertEqual(alias['common_harness_sha256'],plan['harness_sha256'])
+        self.assertEqual(alias['actual_artifact_harness_sha256'],dict(old=plan['harness_sha256'],successor=actual_new))
+        self.assertEqual(alias['actual_artifact_manifest_sha256'],dict(old=plan['old_candidate']['manifest_sha256'],successor=plan['candidate']['manifest_sha256']))
+        self.assertFalse(alias['actual_artifact_binary_identical']);self.assertTrue(alias['scoped_source_identical'])
+        # A different actual candidate artifact must not be relabeled to its plan pin.
+        new['manifest']['runtime_files'][q.HARNESS_PATH]='f'*64
+        with self.assertRaises(AssertionError):q.harness_role_alias(plan,old,new)
+    def test_candidate_harness_cannot_become_common_by_changing_only_selected_pin(self):
+        plan=self.plan();plan['harness_sha256']='a'*64;plan['candidate']['actual_harness_sha256']='a'*64
+        old=dict(manifest=dict(runtime_files={q.HARNESS_PATH:plan['old_candidate']['actual_harness_sha256']}))
+        new=dict(manifest=dict(runtime_files={q.HARNESS_PATH:'a'*64}))
+        with self.assertRaises(AssertionError):q.harness_role_alias(plan,old,new)
     def test_mean_margin_and_own_source_improvement_are_required(self):
         rows,decisions=self.rows();rows[1]['candidate_rounds']['1'].update(mean_ns=91,upper_ns=92,lower_ns=90)
         self.assertFalse(q.adjudicate_promotion(rows,decisions)['passed'])

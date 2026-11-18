@@ -10,6 +10,8 @@ OLD='9e914007c3438d9f251f3fab9ef321d49c22de83'
 NEW='d1933adf1c979bc19a5fab3f2bb2b26946386386'
 PAIRS=['TaLib.Candles.Breakaway','TaLib.Candles.ThreeInside','TaLib.Candles.LadderBottom']
 TARGETS=PAIRS[:2]
+HARNESS_PATH='benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/'+original.HARNESS_ASSEMBLY
+HARNESS_SCOPES=[p.BENCH,p.TESTS,'Directory.Build.props','Directory.Build.targets','Directory.Packages.props','global.json','NuGet.Config','nuget.config']
 BASE_UNIT=['TripleBodySharedExecutionTests','TripleBodyParallelExecutionTests','TripleBodyZeroBlockReplayTests','AdoptedColumnTests','UseInputTests','OwnedHistoryBatchTests']
 BASE_PARITY=['TripleBodyTests','SharedTripleBodyBenchmarkTests']
 UNIT=BASE_UNIT+['MultiBarCandleSharedExecutionTests','BreakawayZeroBlockReplayTests','ThreeInsideWordExecutionTests']
@@ -33,6 +35,7 @@ def validate_scope(plan,*,require_ready=True):
     assert plan['runtime_dependency_alignment']==dict(tensor_version='0.151.1')
     assert plan['require_fixture_inventory'] is True and plan['proposed_dotnet_sdk']=='10.0.403' and plan['expected_runtime_version']=='.NET 10.0.15'
     assert plan['closure_ledger_new_rows']==0
+    assert plan['harness_alias_policy']==dict(common_artifact_role='old',variants_artifact_role='old',baseline_source=OLD,candidate_source=NEW,require_scoped_source_identity=True,claim_artifact_binary_identity=False)
     assert not any(plan.get(k) for k in ('targeted_reference','coverage_reference','standalone_variants','qualify_variants','trix_preflight','reuse_inputs'))
     for label,key,source in [('old','old_candidate',OLD),('successor','candidate',NEW),('variants','old_candidate',OLD)]:
         c=plan[key];assert c['source']==source and plan['cpu_test_classes'][label]==c['unit_classes']
@@ -47,13 +50,13 @@ def validate_scope(plan,*,require_ready=True):
             c=plan[key]
             for field in ('ci_run','artifact_id'):assert re.fullmatch('[1-9][0-9]*',c[field])
             for field in ('producer','evidence_source'):assert re.fullmatch('[a-f0-9]{40}',c[field])
-            for field in ('manifest_sha256','gpu_receipt_sha256','production_sha256','source_fingerprint','artifact_zip_sha256'):assert re.fullmatch('[a-f0-9]{64}',c[field])
+            for field in ('manifest_sha256','gpu_receipt_sha256','production_sha256','source_fingerprint','artifact_zip_sha256','actual_harness_sha256'):assert re.fullmatch('[a-f0-9]{64}',c[field])
             assert type(c['unit_passed']) is int and c['unit_passed']>0 and type(c['parity_passed']) is int and c['parity_passed']>0
     verify_source_boundary()
 
 def verify_source_boundary():
     assert set(p.git('diff','--name-only',OLD,NEW,'--','src','tests',p.BENCH,p.TESTS).splitlines())==PATHS
-    assert not p.git('diff','--name-only',OLD,NEW,'--',p.BENCH,p.TESTS,'Directory.Build.props','Directory.Build.targets','Directory.Packages.props','global.json','NuGet.Config','nuget.config')
+    assert not p.git('diff','--name-only',OLD,NEW,'--',*HARNESS_SCOPES)
 
 def checked_inputs(folder,c):
     folder=Path(folder).resolve()
@@ -65,6 +68,7 @@ def checked_inputs(folder,c):
     manifest=json.loads(read('manifest.json'));assert (manifest['source'],manifest['run_id'],manifest['workflow_head'])==(source,c['ci_run'],c['producer'])
     assert manifest['classes']==dict(unit=c['unit_classes'],parity=c['parity_classes'])
     production=ci.validate_layout(manifest,read,source,fingerprint);assert production==c['production_sha256']
+    assert manifest['runtime_files'][HARNESS_PATH]==c['actual_harness_sha256']
     for label,classes in [('unit',c['unit_classes']),('parity',c['parity_classes'])]:
         with tempfile.TemporaryDirectory(prefix='master-trx-') as temp:
             path=Path(temp)/'checks.trx';path.write_bytes(read('evidence/'+label+'.trx'));checks=p.verify_trx(path,classes)
@@ -84,6 +88,21 @@ def checked_inputs(folder,c):
         closure=tensor_closure(runtime,'OoplesFinance.StockIndicators.Tests.Unit.deps.json')
     assert closure['packages']['AiDotNet.Tensors']=='0.151.1'
     return dict(manifest=manifest,read=read,production=production,closure=closure,gpu_receipt=receipt_raw,gpu_trx=trx_raw)
+def harness_role_alias(plan,old,new):
+    """Select one authenticated baseline harness, preserving both actual identities."""
+    verify_source_boundary()
+    actual={role:auth['manifest']['runtime_files'][HARNESS_PATH] for role,auth in [('old',old),('successor',new)]}
+    assert actual==dict(old=plan['old_candidate']['actual_harness_sha256'],successor=plan['candidate']['actual_harness_sha256'])
+    assert actual['old']==plan['harness_sha256']
+    trees={role:p.git('rev-parse',source+':'+p.BENCH) for role,source in [('old',OLD),('successor',NEW)]}
+    assert trees['old']==trees['successor']
+    return dict(policy=plan['harness_alias_policy'],actual_artifact_harness_sha256=actual,
+                actual_artifact_manifest_sha256=dict(old=plan['old_candidate']['manifest_sha256'],successor=plan['candidate']['manifest_sha256']),
+                common_harness_sha256=actual['old'],common_artifact_role='old',
+                benchmark_source_trees=trees,
+                source_scopes=HARNESS_SCOPES,scoped_source_identical=True,
+                actual_artifact_binary_identical=actual['old']==actual['successor'])
+
 def source_authentication(plan):return dict(old=plan['old_candidate'],successor=plan['candidate'],variants_alias_of='old',additional_cpu_executions=0,additional_gpu_executions=0)
 
 def verify_harness_alias(folder,plan,proof):
@@ -98,11 +117,14 @@ def verify_authentication(folder,plan,proof):
     validate_scope(plan);assert proof['preparation_mode']=='authenticated-isolated-candle-diagnostic'
     verify_harness_alias(folder,plan,proof)
     assert p.digest(folder/'common'/original.HARNESS_ASSEMBLY)==plan['harness_sha256']
+    authenticated={}
     for label,key in [('old','old_candidate'),('successor','candidate')]:
         auth=checked_inputs(folder/(label+'-authentication'),plan[key])
+        authenticated[label]=auth
         assert proof['production_sha256'][label]==auth['production'] and proof['tested_runtime_dependencies'][label]==auth['closure']
         assert proof['checks'][label]==dict(auth['manifest']['checks']['unit'],original_gpu_source=plan[key]['source'])
         for suffix,raw in [('.trx',auth['read']('evidence/unit.trx')),('-parity.trx',auth['read']('evidence/parity.trx')),('-original-gpu-receipt.json',auth['gpu_receipt']),('-original-gpu-gpu.trx.gz',auth['gpu_trx'])]:assert (folder/'evidence'/(label+suffix)).read_bytes()==raw
+    assert proof['harness_role_alias']==harness_role_alias(plan,authenticated['old'],authenticated['successor'])
     manifest=p.read(folder/'old-authentication/manifest.json');prefix='benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/'
     assert proof['common_manifest']=={name[len(prefix):]:digest for name,digest in manifest['runtime_files'].items() if name.startswith(prefix)}
 
@@ -112,8 +134,7 @@ def prepare(old_candidate,candidate,out):
     old_candidate,candidate,out=map(lambda x:Path(x).resolve(),(old_candidate,candidate,out));assert not out.exists() and not out.is_relative_to(old_candidate) and not out.is_relative_to(candidate)
     old,new=checked_inputs(old_candidate,plan['old_candidate']),checked_inputs(candidate,plan['candidate'])
     assert old['closure']==new['closure']
-    harness='benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/'+original.HARNESS_ASSEMBLY
-    assert old['manifest']['runtime_files'][harness]==new['manifest']['runtime_files'][harness]==plan['harness_sha256']
+    alias=harness_role_alias(plan,old,new)
     out.mkdir();(out/'common').mkdir();(out/'production').mkdir();(out/'evidence').mkdir()
     for label,folder,auth in [('old',old_candidate,old),('successor',candidate,new)]:shutil.copytree(folder,out/(label+'-authentication'))
     prefix='benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/'
@@ -126,7 +147,7 @@ def prepare(old_candidate,candidate,out):
         (out/'production'/(label+'.dll')).write_bytes(auth['read']('blobs/'+auth['production']))
         checks[label]=dict(auth['manifest']['checks']['unit'],original_gpu_source=source);production[label]=auth['production'];dependencies[label]=auth['closure']
         for suffix,raw in [('.trx',auth['read']('evidence/unit.trx')),('-parity.trx',auth['read']('evidence/parity.trx')),('-original-gpu-receipt.json',auth['gpu_receipt']),('-original-gpu-gpu.trx.gz',auth['gpu_trx'])]:(out/'evidence'/(label+suffix)).write_bytes(raw)
-    proof=dict(plan_sha256=p.digest(p.PLAN),sources=plan['sources'],source_trees={label:p.git('rev-parse',plan['sources'][label]+':src') for label in ('old','successor','variants')},sdk=plan['proposed_dotnet_sdk'],dotnet_info=subprocess.check_output(['dotnet','--info'],text=True),workflow_head=p.git('rev-parse','HEAD'),run_id=os.environ['GITHUB_RUN_ID'],run_attempt=os.environ['GITHUB_RUN_ATTEMPT'],preparation_mode='authenticated-isolated-candle-diagnostic',source_authentication=source_authentication(plan),common_manifest=p.manifest(out/'common'),evidence_manifest=p.manifest(out/'evidence'),production_sha256=production,checks=checks,tested_runtime_dependencies=dependencies)
+    proof=dict(plan_sha256=p.digest(p.PLAN),sources=plan['sources'],source_trees={label:p.git('rev-parse',plan['sources'][label]+':src') for label in ('old','successor','variants')},sdk=plan['proposed_dotnet_sdk'],dotnet_info=subprocess.check_output(['dotnet','--info'],text=True),workflow_head=p.git('rev-parse','HEAD'),run_id=os.environ['GITHUB_RUN_ID'],run_attempt=os.environ['GITHUB_RUN_ATTEMPT'],preparation_mode='authenticated-isolated-candle-diagnostic',source_authentication=source_authentication(plan),harness_role_alias=alias,common_manifest=p.manifest(out/'common'),evidence_manifest=p.manifest(out/'evidence'),production_sha256=production,checks=checks,tested_runtime_dependencies=dependencies)
     from .fixture_inventory import record_inventory
     proof['fixture_inventory_sha256']=record_inventory(out,plan,p.digest(p.PLAN));p.write(out/'provenance.json',proof);p.verify_inputs(out);return proof
 def native_rows(folder):
@@ -167,7 +188,8 @@ def adjudicate_promotion(rows,decisions):
         assert set(row['candidate_rounds'])=={'1','2'} and set(row['old_rounds'])=={'0','3'}
         wins.append(dict(pair=pair,bars=10000,passed=own[pair,10000]=='faster' and all(v['upper_ns']<native['lower_ns'] and v['mean_ns']<=.9*native['mean_ns'] for v in row['candidate_rounds'].values())))
     ladder=all(own[PAIRS[2],bars]!='slower' for bars in (1000,10000))
-    return dict(passed=all(r['passed'] for r in wins) and ladder,target_10000_robust_native_wins=wins,ladder_bottom_no_source_regression=ladder,minimum_native_margin=.1,qualification_authorized=False,closure_credit=0)
+    no_regressions=all(d['verdict']!='slower' for d in decisions)
+    return dict(passed=all(r['passed'] for r in wins) and ladder and no_regressions,all_six_source_comparisons_no_regression=no_regressions,target_10000_robust_native_wins=wins,ladder_bottom_no_source_regression=ladder,minimum_native_margin=.1,qualification_authorized=False,closure_credit=0)
 
 def collect(folder):
     from .verify import _collect

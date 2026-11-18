@@ -29,7 +29,7 @@ jobs:
           if ($plan.inputs_ready -isnot [bool] -or !$plan.inputs_ready -or $plan.parent_review_approved -isnot [bool] -or !$plan.parent_review_approved -or $plan.sources.successor -ne 'd1933adf1c979bc19a5fab3f2bb2b26946386386' -or $plan.sources.old -ne '9e914007c3438d9f251f3fab9ef321d49c22de83') { throw 'UNBOUND diagnostic receipts or parent review; no SDK/input I/O permitted' }
           foreach ($role in @('old_candidate','candidate')) {
             $receipt=$plan.$role
-            foreach ($key in @('manifest_sha256','gpu_receipt_sha256','production_sha256','source_fingerprint','artifact_zip_sha256')) { if ($receipt.$key -notmatch '^[a-f0-9]{64}$') { throw 'UNBOUND actual CPU/GPU receipt hashes' } }
+            foreach ($key in @('manifest_sha256','gpu_receipt_sha256','production_sha256','source_fingerprint','artifact_zip_sha256','actual_harness_sha256')) { if ($receipt.$key -notmatch '^[a-f0-9]{64}$') { throw 'UNBOUND actual CPU/GPU receipt hashes' } }
             foreach ($key in @('producer','evidence_source')) { if ($receipt.$key -notmatch '^[a-f0-9]{40}$') { throw 'UNBOUND actual receipt commits' } }
             foreach ($key in @('ci_run','artifact_id','unit_passed','parity_passed')) { if ([string]$receipt.$key -notmatch '^[1-9][0-9]*$') { throw 'UNBOUND actual receipt run/counts' } }
           }

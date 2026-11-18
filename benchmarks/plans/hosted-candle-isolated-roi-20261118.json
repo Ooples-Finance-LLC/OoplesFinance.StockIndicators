@@ -161,7 +161,8 @@
     "parity_classes": [
       "TripleBodyTests",
       "SharedTripleBodyBenchmarkTests"
-    ]
+    ],
+    "actual_harness_sha256": "07e764bd27110b4452e1f181f466a6ea0e60b4ae4667d01b6c75f468ae8aee07"
   },
   "candidate": {
     "source": "d1933adf1c979bc19a5fab3f2bb2b26946386386",
@@ -192,9 +193,18 @@
       "SharedTripleBodyBenchmarkTests",
       "ExtendedReversalTests",
       "SharedTaReversalContinuationBenchmarkTests"
-    ]
+    ],
+    "actual_harness_sha256": "UNBOUND"
   },
   "harness_sha256": "UNBOUND",
   "closure_ledger_new_rows": 0,
-  "qualify_variants": false
+  "qualify_variants": false,
+  "harness_alias_policy": {
+    "common_artifact_role": "old",
+    "variants_artifact_role": "old",
+    "baseline_source": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "candidate_source": "d1933adf1c979bc19a5fab3f2bb2b26946386386",
+    "require_scoped_source_identity": true,
+    "claim_artifact_binary_identity": false
+  }
 }
