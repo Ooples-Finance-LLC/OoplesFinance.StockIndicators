@@ -1,0 +1,65 @@
+{
+  "status": "actual-supplemental-baseline-focused-checks-passed",
+  "source": "d9d00ca56ebb857b87ead45044616970b607019c",
+  "source_fingerprint": "c526951d5a65c7aeaa1cdcbcaaf56035cc96b241095704f6bf278513753935e3",
+  "ci_run": "44388147138",
+  "manifest_sha256": "291f8660e56d5f056ad47881891e92742522704f5cac8f9016f11ba1a2c4c332",
+  "core_sha256": "ebc789ea23a9145d85705d53ce35fedb707e803c6c80cadfeafc431dbec1a3d7",
+  "actual_harness_sha256": "32e9b2a5e92bdd4aabec6b9749a5b891befab3e02a922022c93a4d0c95784e5f",
+  "checks": {
+    "unit": {
+      "passed": 9,
+      "classes": {
+        "HikkakeSharedExecutionTests": 9
+      },
+      "trx_sha256": "39f61c4b4794a6929055baf4e47a9b92a372be437b615d5bbe9fbd432c77a123",
+      "assembly_sha256": "d87054b5efd0c742c957a08144bdf48a45c3411fd41edd013cc6ccba0540f4e3",
+      "invocation": [
+        "C:\\Program Files\\dotnet\\dotnet.exe",
+        "exec",
+        "C:\\Program Files\\dotnet\\sdk\\10.0.404\\dotnet.dll",
+        "vstest",
+        "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-renko-normalized-grid-gpu-only-20261118\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.Tests.Unit.dll",
+        "/Settings:C:\\Users\\cheat\\source\\stock-indicators-operations\\hikkake-d9-baseline-focused-20261118\\serial.runsettings",
+        "/TestCaseFilter:FullyQualifiedName~HikkakeSharedExecutionTests",
+        "/Logger:trx;LogFileName=unit.trx",
+        "/ResultsDirectory:C:\\Users\\cheat\\source\\stock-indicators-operations\\hikkake-d9-baseline-focused-20261118"
+      ]
+    },
+    "parity": {
+      "passed": 55,
+      "classes": {
+        "HikkakeTests": 55
+      },
+      "trx_sha256": "418b1498136f031f97ec39c0c0a2013cbd368d062a107e4e2a05b3b31e336edd",
+      "assembly_sha256": "6625bbf5974090c722930b79ba432cb058798780d23683247469dd006546c24d",
+      "invocation": [
+        "C:\\Program Files\\dotnet\\dotnet.exe",
+        "exec",
+        "C:\\Program Files\\dotnet\\sdk\\10.0.404\\dotnet.dll",
+        "vstest",
+        "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-renko-normalized-grid-gpu-only-20261118\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.CompetitorTests.dll",
+        "/Settings:C:\\Users\\cheat\\source\\stock-indicators-operations\\hikkake-d9-baseline-focused-20261118\\serial.runsettings",
+        "/TestCaseFilter:FullyQualifiedName~HikkakeTests",
+        "/Logger:trx;LogFileName=parity.trx",
+        "/ResultsDirectory:C:\\Users\\cheat\\source\\stock-indicators-operations\\hikkake-d9-baseline-focused-20261118"
+      ]
+    }
+  },
+  "verified_runtime_entries": 444,
+  "new_builds": 0,
+  "new_measurements": 0,
+  "original_manifest_unchanged": true,
+  "original_cpu_classes": {
+    "unit": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests"
+    ],
+    "parity": [
+      "RenkoComparisonTests"
+    ]
+  },
+  "purpose": "Focused Hikkake supplement only; original Renko CPU manifest is unchanged"
+}

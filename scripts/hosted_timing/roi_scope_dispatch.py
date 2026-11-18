@@ -1,7 +1,9 @@
 """Keep legacy and family diagnostic scopes independently pinned."""
 def validate_scope(plan):
     kind = plan.get("diagnostic_kind")
-    if kind == "renko-constant-tr-private-native-pilot":
+    if kind == "modified-hikkake-sparse-replay-native-pilot":
+        from .modified_hikkake_sparse_replay_roi import validate_scope as check
+    elif kind == "renko-constant-tr-private-native-pilot":
         from .renko_constant_tr_private_roi import validate_scope as check
     elif kind == "renko-normalized-grid-native-pilot":
         from .renko_normalized_grid_roi import validate_scope as check

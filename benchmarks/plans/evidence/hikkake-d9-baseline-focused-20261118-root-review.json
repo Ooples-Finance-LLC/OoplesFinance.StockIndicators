@@ -1,0 +1,13 @@
+{
+  "status": "root-independent-baseline-focused-supplement-authenticated",
+  "source": "d9d00ca56ebb857b87ead45044616970b607019c",
+  "source_fingerprint": "c526951d5a65c7aeaa1cdcbcaaf56035cc96b241095704f6bf278513753935e3",
+  "receipt_sha256": "65c58492f1484a43d5b0063866818dd909571f1092de34a09ceb610f8fc549c2",
+  "unit": 9,
+  "parity": 55,
+  "runtime_entries_verified": 444,
+  "original_cpu_manifest_unchanged": true,
+  "new_builds": 0,
+  "new_measurements": 0,
+  "qualified": false
+}

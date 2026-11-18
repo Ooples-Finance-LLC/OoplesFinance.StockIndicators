@@ -1,0 +1,20 @@
+{
+  "status": "user-approved-native-win-rule",
+  "policy_id": "native-separated-confidence-intervals-both-rounds-20261118",
+  "approval_answer": "Count statistically proven native wins (Recommended)",
+  "approval_question_id": "call_912aed9b62b8486194252c4d2133dafc",
+  "rule": "In each of the two candidate qualification rounds, candidate upper confidence bound must be strictly below the same frozen native lower confidence bound. No additional minimum mean-percentage margin.",
+  "removed_only": "minimum10percent native mean margin in every round",
+  "unchanged": [
+    "correctness and GPU source identity",
+    "measurement/runtime/sampling/outlier rules",
+    "source-regression gates",
+    "baseline new-win eligibility",
+    "prior-win protection",
+    "net point progress",
+    "required new-win count",
+    "full affected-consumer scope"
+  ],
+  "original_frozen_plans_and_results_must_remain_unchanged": true,
+  "new_measurements_required_for_re_adjudication": false
+}

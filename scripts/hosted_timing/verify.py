@@ -62,6 +62,10 @@ def collect(folder, phase):
         assert phase == 'targeted'
         from .ultimate_direct_long_qualification import collect as ultimate_qualify
         return ultimate_qualify(folder)
+    if read(PLAN).get('diagnostic_kind') == 'modified-hikkake-sparse-replay-native-pilot':
+        assert phase == 'diagnostic'
+        from .modified_hikkake_sparse_replay_roi import collect as modified_hikkake_collect
+        return modified_hikkake_collect(folder)
     if read(PLAN).get('diagnostic_kind') == 'renko-constant-tr-private-native-pilot':
         assert phase == 'diagnostic'
         from .renko_constant_tr_private_roi import collect as constant_renko_collect
