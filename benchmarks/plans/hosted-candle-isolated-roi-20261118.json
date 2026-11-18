@@ -95,8 +95,8 @@
       "decisions": 6
     }
   ],
-  "inputs_ready": false,
-  "parent_review_approved": false,
+  "inputs_ready": true,
+  "parent_review_approved": true,
   "sources": {
     "published": "9e914007c3438d9f251f3fab9ef321d49c22de83",
     "old": "9e914007c3438d9f251f3fab9ef321d49c22de83",
