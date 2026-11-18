@@ -1,0 +1,24 @@
+{
+  "status": "root-independent-recollection-matched-passed-diagnostic",
+  "run_id": "44411577289",
+  "head": "a32abd63367ed10228e8a12d24c3d22758735e05",
+  "plan_sha256": "6e017d94e832a2ecba65ef844e0611b039ebcaa16ed25cfaaa7f1aba62414711",
+  "summary_sha256": "55c4bc2e31dfc0419fbb8e46b226d578ab67e52f687421945c73190e85703e33",
+  "collection_receipt_sha256": "f58982dbe87925285d4e8cb2787bd8320b83a4b8583f2546930b4c643c88fe90",
+  "source": "20e0e93445bd83bf467575938c705b5f485b67c5",
+  "baseline": "c5bfd4950982aa80dddbfd2db6358ad43ddb9e4c",
+  "verified_files": 1027,
+  "cases": 20,
+  "decisions": 4,
+  "verdicts": {
+    "faster": 4
+  },
+  "original_10percent_screen_passed": true,
+  "new_10000_screen_pair": "Skender.GetRenkoAtr",
+  "original_frozen_plan_unchanged": true,
+  "qualification": false,
+  "production_integrated": false,
+  "closure_credit": 0,
+  "new_measurements": 0,
+  "required_next_baseline": "d9d00ca56ebb857b87ead45044616970b607019c after publication; approved CI-only native policy"
+}

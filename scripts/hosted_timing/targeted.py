@@ -576,6 +576,8 @@ SCOPES['ultimate-direct-long-qualification-20261118'] = dict(
     implicit_fixtures=set(),totals=(60,12),shards=1)
 
 SCOPES['renko-normalized-grid-qualification-20261118']=dict(totals=(44,8))
+SCOPES['renko-constant-tr-private-qualification-20261118']=dict(totals=(44,8))
+
 SCOPES['cmf-alma-combined-qualification-20261118']=dict(totals=(100,20))
 
 def expected_totals(plan):
@@ -589,6 +591,10 @@ SCOPES['abandoned-inventory-repair-20261114']['methods']['SharedCrowSoldierBench
 SCOPES['abandoned-inventory-repair-20261114']['totals'] = (176, 36)
 
 def verify_reference(plan):
+    if plan.get('renko_constant_tr_private_qualification'):
+        from .renko_constant_tr_private_qualification import validate_scope
+        validate_scope(plan)
+        return
     if plan.get('renko_normalized_grid_qualification'):
         from .renko_normalized_grid_qualification import validate_scope
         validate_scope(plan)

@@ -1,0 +1,234 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "expected_runtime_version": ".NET 10.0.15",
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "cases": 44,
+  "decisions": 8,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 120
+  },
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetRenko",
+              "pair": "Skender.GetRenko"
+            },
+            {
+              "raw": "Skender.GetRenkoAtr",
+              "pair": "Skender.GetRenkoAtr"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        },
+        {
+          "fixture": "SharedSkenderRenkoChartNativeBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetRenko",
+              "pair": "Skender.GetRenko"
+            },
+            {
+              "raw": "Skender.GetRenkoAtr",
+              "pair": "Skender.GetRenkoAtr"
+            }
+          ],
+          "methods": [
+            "Snapshot",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 24,
+          "decisions": 4
+        }
+      ],
+      "cases": 44,
+      "decisions": 8
+    }
+  ],
+  "inputs_ready": true,
+  "parent_review_approved": true,
+  "sources": {
+    "published": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "successor": "20e0e93445bd83bf467575938c705b5f485b67c5",
+    "variants": "d9d00ca56ebb857b87ead45044616970b607019c"
+  },
+  "gpu_sources": {
+    "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "successor": "20e0e93445bd83bf467575938c705b5f485b67c5",
+    "variants": "d9d00ca56ebb857b87ead45044616970b607019c"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests"
+    ],
+    "successor": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests",
+      "RenkoConstantAtrTests"
+    ],
+    "variants": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests"
+    ]
+  },
+  "old_candidate": {
+    "source": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "ci_run": "44388147138",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "aaf895d4e7b5b9a2e70810c87227db08ddaad9f6",
+    "manifest_sha256": "291f8660e56d5f056ad47881891e92742522704f5cac8f9016f11ba1a2c4c332",
+    "gpu_receipt_sha256": "8c5fa1866814f4cd6a60666470c7a75c5171142d943a669c4d824532e6a2ca82",
+    "production_sha256": "ebc789ea23a9145d85705d53ce35fedb707e803c6c80cadfeafc431dbec1a3d7",
+    "source_fingerprint": "c526951d5a65c7aeaa1cdcbcaaf56035cc96b241095704f6bf278513753935e3",
+    "artifact_id": "14467645201",
+    "artifact_zip_sha256": "07f1bab22ccdb4e7a3a7084a5706ca79f9c4839227485168a1d55df6d32b19a7",
+    "unit_passed": 55,
+    "parity_passed": 8,
+    "unit_classes": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests"
+    ],
+    "parity_classes": [
+      "RenkoComparisonTests"
+    ],
+    "actual_harness_sha256": "32e9b2a5e92bdd4aabec6b9749a5b891befab3e02a922022c93a4d0c95784e5f"
+  },
+  "candidate": {
+    "source": "20e0e93445bd83bf467575938c705b5f485b67c5",
+    "ci_run": "44403794727",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "af210064303055a10bc3035e403590c0ff71f5ec",
+    "manifest_sha256": "68ed3264cc142e3707a62bfa4afc74f0582dc10b65101bf405fb1205b81431b4",
+    "gpu_receipt_sha256": "a5ba4f26eec0e395f315a88a6b19c0875556726247568ed32d3833217addbdbd",
+    "production_sha256": "17b7ba5f697c047f78a28c5acc78ae62a59bf945bd50b3ece0ee23b86aae0f60",
+    "source_fingerprint": "fde0b55c85d99b4188c60b90f06cf742936ab441759d2b31cb1f430f4d7e8c2d",
+    "artifact_id": "14472544801",
+    "artifact_zip_sha256": "f76bdba407cfbd5ae2e6d45a9d1db035678c4bdbad32536c688a814788c4ce2a",
+    "unit_passed": 84,
+    "parity_passed": 8,
+    "unit_classes": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests",
+      "RenkoConstantAtrTests"
+    ],
+    "parity_classes": [
+      "RenkoComparisonTests"
+    ],
+    "actual_harness_sha256": "e8f0c7b2cf76754c1c1a00badb97a4ff1e188b2b8c6f1477d1bae9907a29746e"
+  },
+  "harness_sha256": "32e9b2a5e92bdd4aabec6b9749a5b891befab3e02a922022c93a4d0c95784e5f",
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "harness_alias_policy": {
+    "common_artifact_role": "old",
+    "variants_artifact_role": "old",
+    "baseline_source": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "candidate_source": "20e0e93445bd83bf467575938c705b5f485b67c5",
+    "require_scoped_source_identity": true,
+    "claim_artifact_binary_identity": false
+  },
+  "automatic_qualification": false,
+  "require_net_10000_point_progress": true,
+  "actual_input_provenance": {
+    "path": "benchmarks/plans/evidence/renko-normalized-actual-lp-setup-proof-20261118.json",
+    "sha256": "835d3861b93fd8d98175cd6c4a8c9abbad4abf0a76f2aaff53b3fc257affe9fd",
+    "actual_setup_export_sha256": "57f4d67aee400fbdce65f886cecd8ebb82a093aa90552ef85019795c636eddf4",
+    "source": "409c5f5eea78724f83c999469b76bacbbb193911",
+    "harness_sha256": "148921163c52c848959ed8fff76eacff0b49e93743ee2a7f0671ed84c0280f49"
+  },
+  "targeted_reference": {
+    "scope": "renko-constant-tr-private-qualification-20261118"
+  },
+  "native_progress_gate": {
+    "fixture": "LibraryPairBenchmarks",
+    "method": "Ooples",
+    "native_method": "Competitor",
+    "native_round": 2,
+    "old_rounds": [
+      0,
+      3
+    ],
+    "candidate_rounds": [
+      1,
+      2
+    ],
+    "minimum_margin": null,
+    "new_closure_bars": 10000,
+    "minimum_new_closures": 1,
+    "require_own_source_faster": true,
+    "require_net_10000_point_progress": true,
+    "protect_prior_confident_wins_both_sizes": true,
+    "target_pairs": [
+      "Skender.GetRenko",
+      "Skender.GetRenkoAtr"
+    ],
+    "require_separated_intervals_both_rounds": true
+  },
+  "screen_gate": {
+    "run": "44411577289",
+    "workflow_head": "a32abd63367ed10228e8a12d24c3d22758735e05",
+    "plan_sha256": "6e017d94e832a2ecba65ef844e0611b039ebcaa16ed25cfaaa7f1aba62414711",
+    "summary_sha256": "55c4bc2e31dfc0419fbb8e46b226d578ab67e52f687421945c73190e85703e33",
+    "path": "benchmarks/plans/evidence/renko-constant-tr-private-screen-20261118.json",
+    "frozen_baseline_source": "c5bfd4950982aa80dddbfd2db6358ad43ddb9e4c",
+    "root_review_path": "benchmarks/plans/evidence/renko-constant-tr-private-screen-root-review-20261118.json",
+    "root_review_sha256": "e5836c5cafd6459496aada2546f94f37c5d531e11d8895b9931a1cb9cd062eca",
+    "independently_authenticated": true
+  },
+  "renko_constant_tr_private_qualification": true,
+  "native_win_policy_approval": {
+    "path": "benchmarks/plans/evidence/native-win-rule-user-approved-20261118.json",
+    "sha256": "414b558eae1deda750c3d169020128986a0e0db9b2acd95f23da035be03bfd7c",
+    "policy_id": "native-separated-confidence-intervals-both-rounds-20261118"
+  },
+  "published_baseline": {
+    "pull_request": 266,
+    "head": "c20d08c731245b4f0b4f4600b38173f0fd6ebf6d",
+    "branch": "perf/remaining-indicator-rollout",
+    "source_fingerprint": "c526951d5a65c7aeaa1cdcbcaaf56035cc96b241095704f6bf278513753935e3"
+  }
+}

@@ -54,6 +54,10 @@ def sample(case):
 
 
 def collect(folder, phase):
+    if read(PLAN).get('renko_constant_tr_private_qualification'):
+        assert phase == 'targeted'
+        from .renko_constant_tr_private_qualification import collect as private_renko_qualify
+        return private_renko_qualify(folder)
     if read(PLAN).get('renko_normalized_grid_qualification'):
         assert phase == 'targeted'
         from .renko_normalized_grid_qualification import collect as renko_qualify
@@ -130,6 +134,10 @@ def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=Fal
     if plan.get('renko_normalized_grid_qualification'):
         assert phase == 'targeted' and renko_gate and not cmf_alma_gate and not ultimate_gate and not preflight and not diagnostic and not matchinglow_gate and not candle_predicate_gate
         from .renko_normalized_grid_qualification import validate_scope
+        validate_scope(plan)
+    elif plan.get('renko_constant_tr_private_qualification'):
+        assert phase == 'targeted' and renko_gate and not cmf_alma_gate and not ultimate_gate and not preflight and not diagnostic and not matchinglow_gate and not candle_predicate_gate
+        from .renko_constant_tr_private_qualification import validate_scope
         validate_scope(plan)
     else:
         assert not renko_gate
@@ -208,6 +216,9 @@ def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=Fal
         encoded = (json.dumps(inputs, indent=2) + '\n').encode()
         assert hashlib.sha256(encoded).hexdigest() == proof['input_provenance_sha256']
         assert inputs['sources'] == plan['sources'] and inputs['plan_sha256'] == digest(PLAN)
+        if plan.get('renko_constant_tr_private_qualification'):
+            from .renko_constant_tr_private_qualification import verify_publication_provenance
+            verify_publication_provenance(plan,inputs)
         assert inputs['sdk'] == plan['proposed_dotnet_sdk']
         assert host['run_id'] and host['run_attempt'] and host['machine'] and host['runner_image']
         assert host['run_id'] == inputs['run_id'] and host['run_attempt'] == inputs['run_attempt']
