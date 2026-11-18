@@ -7,6 +7,13 @@ from hosted_timing import pipeline,roi_scope_dispatch,verify
 PLAN=Path(__file__).resolve().parents[1]/'benchmarks/plans/hosted-small-candle-roi-20261118.json'
 class SmallCandleRoiTests(unittest.TestCase):
     def plan(self):return json.loads(PLAN.read_text())
+    def test_plan_real_worktree_git_blob_and_checkout_filters_are_canonical_lf(self):
+        import subprocess
+        rel=PLAN.relative_to(q.p.REPO).as_posix();raw=PLAN.read_bytes();blob=q.blob('HEAD',rel)
+        self.assertNotIn(b'\r',raw);self.assertEqual(raw,blob)
+        self.assertEqual(q.p.git('check-attr','text','eol','--',rel).splitlines(),[rel+': text: set',rel+': eol: lf'])
+        filtered=subprocess.check_output(['git','-c','core.autocrlf=true','-c','core.eol=crlf','cat-file','--filters','HEAD:'+rel],cwd=q.p.REPO)
+        self.assertEqual(filtered,blob);self.assertNotIn(b'\r',filtered)
     def test_actual_source_boundary_and_diagnostic_tasks(self):
         plan=self.plan();q.validate_scope(plan,require_ready=False)
         real_validate=q.validate_scope
