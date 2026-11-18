@@ -1,0 +1,35 @@
+{
+  "baseline": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+  "candidate": "c5c5b3cb2dd2f37bb5c0d8b5d1d38e368a063b67",
+  "identical_harness_files": 1584,
+  "harness_scopes": [
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "common_artifact_source": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+  "additional_builds": 0,
+  "additional_cpu_executions": 0,
+  "additional_gpu_executions": 0,
+  "selected_fixtures": {
+    "LibraryPairBenchmarks": [
+      "Ooples",
+      "Competitor"
+    ],
+    "SharedMultiBarCandleBenchmarks": [
+      "BuilderFull",
+      "BuilderLatestOnly"
+    ],
+    "SharedTripleBodyBenchmarks": [
+      "BuilderFull",
+      "BuilderLatestOnly",
+      "NativeSingle",
+      "NativeParallel"
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "approved": true,
+  "scope": "breakaway-isolated-qualification-20261118",
+  "cases": 108,
+  "decisions": 24,
+  "only_new_closure_pair": "TaLib.Candles.Breakaway",
+  "condition": "Current master reconciliation44222776323 must pass and be independently authenticated and archived; final root review and measurement-slot ordering remain required."
+}

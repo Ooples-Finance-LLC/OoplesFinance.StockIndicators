@@ -570,6 +570,13 @@ SCOPES['triple-body-master-reconciliation-20261117'] = dict(
     methods={'SharedTripleBodyBenchmarks':['BuilderFull','BuilderLatestOnly','NativeSingle','NativeParallel']},
     totals=(120,24),shards=1,baseline_phase='targeted',baseline_totals=(120,24))
 
+SCOPES['breakaway-isolated-qualification-20261118'] = dict(
+    fixtures={'SharedMultiBarCandleBenchmarks':{pair:pair for pair in ('TaLib.Candles.Breakaway','TaLib.Candles.ConcealingBabySwallow','TaLib.Candles.LadderBottom')},
+              'SharedTripleBodyBenchmarks':{'TaLib.Candles.TwoCrows':'TaLib.Candles.TwoCrows'}},
+    implicit_fixtures=set(),paths={'src/Indicators/ValuesBarExecution.BoundedWindows.cs','src/Indicators/ValuesBarExecution.BreakawayBlocks.cs','tests/ModelsTests/BreakawayZeroBlockReplayTests.cs'},
+    methods={'SharedMultiBarCandleBenchmarks':['BuilderFull','BuilderLatestOnly'],'SharedTripleBodyBenchmarks':['BuilderFull','BuilderLatestOnly','NativeSingle','NativeParallel']},
+    totals=(108,24),shards=1,baseline_phase='targeted',baseline_totals=(120,24))
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
@@ -588,9 +595,13 @@ def verify_reference(plan):
     fixtures = scope['fixtures']
     assert not any(plan.get(k) for k in ('qualify_variants', 'standalone_variants', 'coverage_reference', 'trix_preflight'))
     assert plan['sources']['published'] == plan['sources']['old']
-    raw = subprocess.check_output(['git', 'show', plan['sources']['published'] + ':' + reference['decision']], cwd=REPO)
-    assert hashlib.sha256(raw).hexdigest() == reference['sha256']
-    decision = json.loads(raw)
+    if reference['scope']=='breakaway-isolated-qualification-20261118':
+        from .breakaway_qualification import verify_reference as verify_breakaway_reference
+        decision=verify_breakaway_reference(plan)
+    else:
+        raw = subprocess.check_output(['git', 'show', plan['sources']['published'] + ':' + reference['decision']], cwd=REPO)
+        assert hashlib.sha256(raw).hexdigest() == reference['sha256']
+        decision = json.loads(raw)
     assert decision['accepted'] and decision['phase'] == scope.get('baseline_phase','successor')
     assert (decision['case_count'], decision['decision_count']) == scope.get('baseline_totals',(1860,372))
     if decision['phase'] == 'targeted':
@@ -599,13 +610,16 @@ def verify_reference(plan):
             # under the new exact source proof, without claiming publication.
             from .master_reconciliation import verify_prior_qualification
             verify_prior_qualification(reference,decision)
-        else:
+        elif reference['scope']!='breakaway-isolated-qualification-20261118':
             assert decision['production_integrated'] and decision['report_imported']
     assert decision['verdicts'].get('faster', 0) > 0
     assert not decision['verdicts'].get('slower', 0)
     assert str(decision['run_id']) == str(reference['run_id'])
     assert decision['sources']['new'] == reference['qualified_source']
-    if reference['scope'] == 'matchinglow-only-grid-20261116':
+    if reference['scope']=='breakaway-isolated-qualification-20261118':
+        from .breakaway_qualification import verify_source
+        verify_source(plan)
+    elif reference['scope'] == 'matchinglow-only-grid-20261116':
         from .matchinglow_grid_qualification import verify_continuation
         verify_continuation(reference, plan['sources']['old'])
     elif reference.get('master_reconciliation'):

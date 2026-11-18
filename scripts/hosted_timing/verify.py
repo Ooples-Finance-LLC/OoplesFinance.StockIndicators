@@ -54,6 +54,10 @@ def sample(case):
 
 
 def collect(folder, phase):
+    if read(PLAN).get('breakaway_isolated_qualification'):
+        assert phase == 'targeted'
+        from .breakaway_qualification import collect as breakaway_collect
+        return breakaway_collect(folder)
     if read(PLAN).get('triple_body_master_reconciliation'):
         assert phase == 'targeted'
         from .master_reconciliation import collect as reconciliation_collect
@@ -79,7 +83,13 @@ def collect_preflight(folder):
 
 def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=False, candle_predicate_gate=False):
     plan = read(PLAN)
-    if plan.get('triple_body_master_reconciliation'):
+    if plan.get('breakaway_isolated_qualification'):
+        assert phase == 'targeted' and not preflight and not diagnostic and candle_predicate_gate
+        from .breakaway_qualification import validate_scope
+        from .triple_body_macro_qualification import verify_runtime
+        validate_scope(plan)
+        verify_runtime(folder,plan['expected_runtime_version'])
+    elif plan.get('triple_body_master_reconciliation'):
         assert phase == 'targeted' and not preflight and not diagnostic and candle_predicate_gate
         from .master_reconciliation import validate_scope, verify_runtime
         validate_scope(plan)

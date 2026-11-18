@@ -118,7 +118,7 @@ def validate_scope(plan,*,require_ready=True):
             for field in ('manifest_sha256','gpu_receipt_sha256','production_sha256','source_fingerprint','artifact_zip_sha256'):assert re.fullmatch('[a-f0-9]{64}',c[field])
             assert isinstance(c['unit_passed'],int) and c['unit_passed']>0 and isinstance(c['parity_passed'],int) and c['parity_passed']>0
 
-def checked_inputs(folder,c):
+def checked_inputs(folder,c,*,unit=UNIT,parity=PARITY):
     folder=Path(folder).resolve()
     def read(name):
         path=(folder/name).resolve();assert path.is_relative_to(folder) and path.is_file();return path.read_bytes()
@@ -126,9 +126,9 @@ def checked_inputs(folder,c):
     source=c['source'];fingerprint=common.source_fingerprint(source)
     assert fingerprint==c['source_fingerprint'] and sha(read('manifest.json'))==c['manifest_sha256']
     manifest=json.loads(read('manifest.json'));assert (manifest['source'],manifest['run_id'],manifest['workflow_head'])==(source,c['ci_run'],c['producer'])
-    assert manifest['classes']==dict(unit=UNIT,parity=PARITY)
+    assert manifest['classes']==dict(unit=unit,parity=parity)
     production=ci.validate_layout(manifest,read,source,fingerprint);assert production==c['production_sha256']
-    for label,classes in [('unit',UNIT),('parity',PARITY)]:
+    for label,classes in [('unit',unit),('parity',parity)]:
         with tempfile.TemporaryDirectory(prefix='master-trx-') as temp:
             path=Path(temp)/'checks.trx';path.write_bytes(read('evidence/'+label+'.trx'));checks=p.verify_trx(path,classes)
         assert checks==manifest['checks'][label] and checks['passed']==c[label+'_passed']
