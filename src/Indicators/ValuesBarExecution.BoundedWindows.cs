@@ -1334,6 +1334,8 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<ExhaustionKernel>(source, output, indicator, ExhaustionWindowLength(indicator), cancellation, owned),
         _ when FiveContinuationWindow(indicator) > 0 =>
             FillBoundedWindow<FiveContinuationKernel>(source, output, indicator, FiveContinuationWindow(indicator), cancellation, owned),
+        LadderBottomCandle { Period: <= 64 } ladder when source.Length >= 8192 =>
+            FillLadderWords(source, output, ladder, ExtendedReversalWindow(indicator), cancellation, owned),
         _ when ExtendedReversalWindow(indicator) > 0 =>
             FillBoundedWindow<ExtendedReversalKernel>(source, output, indicator, ExtendedReversalWindow(indicator), cancellation, owned),
         _ when SmoothedStochasticWindow(indicator) > 0 =>
