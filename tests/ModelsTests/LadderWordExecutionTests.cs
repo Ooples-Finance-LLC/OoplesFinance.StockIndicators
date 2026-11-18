@@ -93,6 +93,66 @@ public sealed class LadderWordExecutionTests
     }
 
     [Theory]
+    [InlineData(1)] [InlineData(10)] [InlineData(64)]
+    public async Task FirstEligibleBarPublishesPositiveSignal(int period)
+    {
+        var bars = Data(8192);
+        int end = period + 4;
+        for (int j = 0; j < 4; j++)
+        {
+            int row = end - 4 + j;
+            double open = 110 - 2 * j;
+            bars[row] = new(bars[row].Time, open, j == 3 ? 110 : 105, 95, open - 2, 1);
+        }
+        bars[end] = new(bars[end].Time, 105, 112, 102, 111, 1);
+        var expected = await Check(bars, period, 1, 2, 8);
+        Assert.All(expected.Take(end), value => Assert.Equal(0d, value));
+        Assert.Equal(100d, expected[end]);
+    }
+
+    [Theory]
+    [InlineData(false, false)] [InlineData(false, true)]
+    [InlineData(true, false)] [InlineData(true, true)]
+    public async Task FiveBinadesStressSignedSumAndWideShadow(bool negativeRanges, bool negativeShadow)
+    {
+        double largest = Math.BitDecrement(1024d);
+        double high = negativeRanges ? 32 : largest;
+        double low = negativeRanges ? largest : 32;
+        var bars = Enumerable.Range(0, 8192).Select(i =>
+            new Bar(DateTime.UnixEpoch.AddMinutes(i), 128, high, low, 64, 1)).ToArray();
+        const int end = 68;
+        for (int j = 0; j < 3; j++)
+        {
+            int row = end - 4 + j;
+            double open = 512d / (1 << j);
+            bars[row] = new(bars[row].Time, open, high, low, open / 2, 1);
+        }
+        double dOpen = negativeShadow ? 512 : 64;
+        double dHigh = negativeShadow ? 32 : 512;
+        bars[end - 1] = new(bars[end - 1].Time, dOpen, dHigh, low, dOpen / 2, 1);
+        bars[end] = new(bars[end].Time, negativeShadow ? 768 : 128, largest, low,
+            negativeShadow ? 896 : 768, 1);
+
+        // The first open fixes base exponent 1028: every coordinate stays
+        // within exactly five positive normal binades, so fallback cannot hide
+        // the word arithmetic under test. The prior P64 range sum is 96.875%
+        // of Int64's magnitude limit and the shadow product exceeds that limit.
+        int[] exponents = bars.SelectMany(b => new[] { b.Open, b.High, b.Low, b.Close })
+            .Select(value => (int)(BitConverter.DoubleToUInt64Bits(value) >> 52)).Distinct().Order().ToArray();
+        Assert.Equal(new[] { 1028, 1029, 1030, 1031, 1032 }, exponents);
+        Int128 rangeMagnitude = ((Int128)1 << 57) - 16 - ((Int128)1 << 52);
+        Int128 priorSum = (negativeRanges ? -rangeMagnitude : rangeMagnitude) * 64;
+        Assert.True(Int128.Abs(priorSum) > (Int128)long.MaxValue * 95 / 100);
+        Assert.True(Int128.Abs(priorSum) < long.MaxValue);
+        Int128 weightedShadow = (Int128)(dHigh - dOpen) * ((Int128)1 << 47) * 640;
+        Assert.True(Int128.Abs(weightedShadow) > long.MaxValue);
+        Assert.Equal(!negativeShadow, weightedShadow > priorSum);
+
+        var expected = await Check(bars, 64, 1, 2, 8);
+        Assert.Equal(negativeShadow ? 0d : 100d, expected[end]);
+    }
+
+    [Theory]
     [InlineData(0)] [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(4)]
     public async Task FiniteOutOfGridCoordinatesReplayAndKeepLaterSignals(int kind)
     {

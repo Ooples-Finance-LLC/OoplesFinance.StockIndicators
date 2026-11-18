@@ -69,7 +69,7 @@ internal static partial class ValuesBarExecution
             }
 
             double value = 0;
-            if (_count == _history.Length)
+            if (_count == _history.Length && bar.Close >= bar.Open)
             {
                 ref readonly var a = ref Prior(4);
                 ref readonly var b = ref Prior(3);
@@ -78,7 +78,7 @@ internal static partial class ValuesBarExecution
                 if (a.Close < a.Open && b.Close < b.Open && c.Close < c.Open && d.Close < d.Open
                     && a.Open > b.Open && b.Open > c.Open && a.Close > b.Close && b.Close > c.Close
                     && (Int128)_shadow * (10 * _indicator.Period) > _lag
-                    && bar.Close >= bar.Open && bar.Open > d.Open && bar.Close > d.High)
+                    && bar.Open > d.Open && bar.Close > d.High)
                     value = 100;
             }
 
