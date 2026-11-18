@@ -1416,6 +1416,12 @@ internal static partial class ValuesBarExecution
         int start, int end, int period, ReadOnlySpan<Bar> seed, ReadOnlySpan<Bar> tail,
         CancellationToken cancellation, IIndicator indicator) where T : struct, IBoundedKernel<T>
     {
+        // Total input size protects the existing small-batch route; mixed
+        // bounded batches and other reversal consumers keep their original path.
+        if (source.Length >= 8192 && typeof(T) == typeof(ExtendedReversalKernel)
+            && indicator is BreakawayCandle { Period: <= 64 } breakaway)
+            return ComputeBreakawayBlocks(source, output[0], owned, start, end, period,
+                seed, tail, cancellation, breakaway);
         if (typeof(T) == typeof(SequenceKernel) && MatchingLowGridEligible(indicator, source.Length)
             && end - start + seed.Length >= 512)
             return ComputeMatchingLowGrid(source, output[0], owned, start, end, seed, tail, cancellation, (MatchingLowCandle)indicator);
