@@ -1,0 +1,116 @@
+{
+  "status": "completed-not-timing-or-qualification",
+  "host_clr": ".NET 10.0.15",
+  "powershell_path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+  "powershell_sha256": "e94166ed9f376559c1359bafb08bc49e463a494c330f67644ec1d9f1ffeb5ee5",
+  "script_sha256": "3a08cd3b7de7428cb57e8aab966b92e9e479aa73923818e193a9ea2710c56459",
+  "observations_per_case": 1,
+  "timing_samples": 0,
+  "new_builds": 0,
+  "new_profiles": 0,
+  "automatic_retry": false,
+  "roles": {
+    "baseline": {
+      "manifest_sha256": "1aee6aff8542e81894a280b14fef370e334087fff2730beef8448c3f7be382eb",
+      "source": "c5bfd4950982aa80dddbfd2db6358ad43ddb9e4c",
+      "source_fingerprint": "4b348074bcf3350f0af46261beb830cfe0cd50001ad2c06756c54cb5a1b054f4",
+      "runtime": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-ultimate-direct-long-gpu-only-20261118\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0",
+      "benchmark_closure_before": 100,
+      "command": [
+        "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "-NoProfile",
+        "-File",
+        "C:\\Users\\cheat\\source\\stock-indicators-operations\\replay-sample-shape-actual-lp-allocations-20261118.ps1",
+        "-Role",
+        "baseline",
+        "-Runtime",
+        "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-ultimate-direct-long-gpu-only-20261118\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0",
+        "-ExpectedCore",
+        "e6aa9aacff74acd49eeebb322cc3f8714d7c40488f450a7d31e215947638d7a8",
+        "-ExpectedHarness",
+        "f70c2d7489af5cbf0855721e8eb075de47fc2db6af72ce22e571032a86bd1379",
+        "-SourceFingerprint",
+        "4b348074bcf3350f0af46261beb830cfe0cd50001ad2c06756c54cb5a1b054f4",
+        "-Out",
+        "C:\\Users\\cheat\\source\\stock-indicators-operations\\sample-shape-actual-fixture-allocation-replay-20261118\\baseline.json"
+      ],
+      "status": "completed",
+      "benchmark_closure_after": 100,
+      "output_sha256": "30076816ffa0449401f57c7cfdd361aaedecdb8a0ed6c78f5c369aab8617a82d"
+    },
+    "candidate": {
+      "manifest_sha256": "10efe9be5276801c256e34d55682137c2b4ba0d39649c6a35bca462fa53573cd",
+      "source": "7bac3b91d52c4d1ccebfcda86c2b23f1bc37b979",
+      "source_fingerprint": "a889cbb94cd20dd461b29e7233a9b8987e366c529f84c016295e8587e4d3f2fe",
+      "runtime": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sample-shape-actual-fixture-gpu-only-20261118\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0",
+      "benchmark_closure_before": 100,
+      "command": [
+        "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+        "-NoProfile",
+        "-File",
+        "C:\\Users\\cheat\\source\\stock-indicators-operations\\replay-sample-shape-actual-lp-allocations-20261118.ps1",
+        "-Role",
+        "candidate",
+        "-Runtime",
+        "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sample-shape-actual-fixture-gpu-only-20261118\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0",
+        "-ExpectedCore",
+        "64d551411a51f9092e598d5c4266782039761a855f3511171df6d8481fda3ff1",
+        "-ExpectedHarness",
+        "46e3c20fcbc400ead2da157b72af844d2ba4e4a2a5416c3f742d703bc3c6a655",
+        "-SourceFingerprint",
+        "a889cbb94cd20dd461b29e7233a9b8987e366c529f84c016295e8587e4d3f2fe",
+        "-Out",
+        "C:\\Users\\cheat\\source\\stock-indicators-operations\\sample-shape-actual-fixture-allocation-replay-20261118\\candidate.json"
+      ],
+      "status": "completed",
+      "benchmark_closure_after": 100,
+      "output_sha256": "28b30788d2242e2316ba9617d52cd5c28c828e5346c38e30dc93e924e30ed441"
+    }
+  },
+  "decisions": [
+    {
+      "pair": "QuanTAlib.Skew",
+      "bars": 1000,
+      "baseline_thread_bytes": 1010816,
+      "candidate_thread_bytes": 1011736,
+      "baseline_process_bytes": 969000,
+      "candidate_process_bytes": 969000,
+      "process_allocation_reduction": 0.0,
+      "output_hash_equal": true,
+      "candidate_region_guard_admitted": false
+    },
+    {
+      "pair": "QuanTAlib.Skew",
+      "bars": 10000,
+      "baseline_thread_bytes": 11209880,
+      "candidate_thread_bytes": 5747320,
+      "baseline_process_bytes": 11208856,
+      "candidate_process_bytes": 5746296,
+      "process_allocation_reduction": 0.4873432221807471,
+      "output_hash_equal": true,
+      "candidate_region_guard_admitted": true
+    },
+    {
+      "pair": "QuanTAlib.Kurtosis",
+      "bars": 1000,
+      "baseline_thread_bytes": 774616,
+      "candidate_thread_bytes": 774616,
+      "baseline_process_bytes": 773592,
+      "candidate_process_bytes": 773592,
+      "process_allocation_reduction": 0.0,
+      "output_hash_equal": true,
+      "candidate_region_guard_admitted": false
+    },
+    {
+      "pair": "QuanTAlib.Kurtosis",
+      "bars": 10000,
+      "baseline_thread_bytes": 9528888,
+      "candidate_thread_bytes": 1056056,
+      "baseline_process_bytes": 9527864,
+      "candidate_process_bytes": 1055032,
+      "process_allocation_reduction": 0.8892687804947678,
+      "output_hash_equal": true,
+      "candidate_region_guard_admitted": true
+    }
+  ]
+}

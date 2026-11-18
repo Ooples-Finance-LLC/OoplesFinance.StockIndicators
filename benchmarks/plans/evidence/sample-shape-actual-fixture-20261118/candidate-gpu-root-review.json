@@ -1,0 +1,16 @@
+{
+  "status": "root-independent-actual-gpu-authentication-passed",
+  "source": "7bac3b91d52c4d1ccebfcda86c2b23f1bc37b979",
+  "run_id": "44393824051",
+  "source_fingerprint": "a889cbb94cd20dd461b29e7233a9b8987e366c529f84c016295e8587e4d3f2fe",
+  "passed_cases": 100,
+  "methods": 12,
+  "verified_installed_runtime_entries": 444,
+  "receipt_sha256": "1644e79a4ee3c9298af6cd29bc789e9119e2a114ed11a19bf1a9006c99d48de0",
+  "trx_sha256": "da7a5669a61fb8bb99b492f45b5b51bef955107dcafdfabc3b9d5f649ca5e9e8",
+  "cpu_root_review_sha256": "ee1ca311961485ed2d33d0b0e56d0514a41a8d981bcdfa7694b550f755ecf944",
+  "new_builds": 0,
+  "new_measurements": 0,
+  "qualified": false,
+  "closure_credit": 0
+}

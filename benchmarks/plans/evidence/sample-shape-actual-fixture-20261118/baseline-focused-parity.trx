@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="371ce49a-6442-4a34-9121-5b568f65e2d5" name="cheat@SUPER-SERVER 2026-11-18 15:44:55" runUser="SUPER-SERVER\cheat" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-18T15:44:55.3763667-05:00" queuing="2026-11-18T15:44:55.3763668-05:00" start="2026-11-18T15:44:43.7242686-05:00" finish="2026-11-18T15:45:02.9728518-05:00" />
+  <TestSettings name="default" id="7fa187f7-5148-4289-a315-642e57602dc0">
+    <Deployment runDeploymentRoot="cheat_SUPER-SERVER_2026-11-18_15_44_55" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="d81afccf-8b99-4dc6-b812-c4062e4f55c4" testId="b75c2054-2f6d-66e9-7ef8-fd8a54e8664e" testName="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.SubscriptionRevisionResetAndCloseChaining(kurtosis: False)" computerName="SUPER-SERVER" duration="00:00:00.0014667" startTime="2026-11-18T15:45:02.7014111-05:00" endTime="2026-11-18T15:45:02.7029430-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d81afccf-8b99-4dc6-b812-c4062e4f55c4" />
+    <UnitTestResult executionId="c1bfaea9-2d09-4556-ae41-1a3d075757a3" testId="821c0b28-491e-809d-16ee-247005f9bc6c" testName="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.SubscriptionRevisionResetAndCloseChaining(kurtosis: True)" computerName="SUPER-SERVER" duration="00:00:00.0236590" startTime="2026-11-18T15:45:02.6774138-05:00" endTime="2026-11-18T15:45:02.7011877-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c1bfaea9-2d09-4556-ae41-1a3d075757a3" />
+    <UnitTestResult executionId="7d993d54-26c1-45ca-8528-10c77398855b" testId="ee67d3f5-e885-5cc1-85bf-f149b6923643" testName="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.IndependentLifecycleContracts(kurtosis: True, period: 20)" computerName="SUPER-SERVER" duration="00:00:07.5779316" startTime="2026-11-18T15:44:47.7450298-05:00" endTime="2026-11-18T15:44:55.3393474-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7d993d54-26c1-45ca-8528-10c77398855b" />
+    <UnitTestResult executionId="2830e927-1e5f-4910-aef2-fbde52d4774f" testId="7094edd5-fc45-fa27-df57-c4eca82f29e7" testName="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.IndependentLifecycleContracts(kurtosis: True, period: 4)" computerName="SUPER-SERVER" duration="00:00:01.1788293" startTime="2026-11-18T15:44:55.3576396-05:00" endTime="2026-11-18T15:44:56.5368523-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2830e927-1e5f-4910-aef2-fbde52d4774f" />
+    <UnitTestResult executionId="db90cc19-4636-4daf-9066-25a45e4d4910" testId="37764725-bbe2-2131-0d06-aa023a3895fb" testName="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.TinyWideAdjacentPricesAndMaximumPeriodsUseExactMoments(kurtosis: False)" computerName="SUPER-SERVER" duration="00:00:00.0246460" startTime="2026-11-18T15:45:02.7477545-05:00" endTime="2026-11-18T15:45:02.7725610-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="db90cc19-4636-4daf-9066-25a45e4d4910" />
+    <UnitTestResult executionId="19a27b78-4f5a-41d8-b30e-3c69270c3895" testId="8eb4612d-0d17-1d89-1296-4de2f52f734a" testName="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.TinyWideAdjacentPricesAndMaximumPeriodsUseExactMoments(kurtosis: True)" computerName="SUPER-SERVER" duration="00:00:00.0401046" startTime="2026-11-18T15:45:02.7072569-05:00" endTime="2026-11-18T15:45:02.7475270-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="19a27b78-4f5a-41d8-b30e-3c69270c3895" />
+    <UnitTestResult executionId="31f02551-6740-486a-9c5e-7082dda27176" testId="8ced3f48-db82-3f71-a60e-cdfa11177641" testName="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.InvalidPeriodsAndEveryValuePresenceMutationAreRejected" computerName="SUPER-SERVER" duration="00:00:00.0524873" startTime="2026-11-18T15:45:02.7728350-05:00" endTime="2026-11-18T15:45:02.8255899-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="31f02551-6740-486a-9c5e-7082dda27176" />
+    <UnitTestResult executionId="585ac8c3-385c-4783-aac7-b3d3686f0c92" testId="63f88151-e986-990a-09a6-580804e0ffdf" testName="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.IndependentLifecycleContracts(kurtosis: False, period: 20)" computerName="SUPER-SERVER" duration="00:00:04.1813937" startTime="2026-11-18T15:44:58.4620753-05:00" endTime="2026-11-18T15:45:02.6437739-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="585ac8c3-385c-4783-aac7-b3d3686f0c92" />
+    <UnitTestResult executionId="9a71d520-f2ba-4831-8b09-33049254c921" testId="162459a8-fc2c-5942-75ed-fa275d1e1248" testName="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.NativeFlatAndExtremeFailuresRemainVisible" computerName="SUPER-SERVER" duration="00:00:00.0308648" startTime="2026-11-18T15:45:02.6460986-05:00" endTime="2026-11-18T15:45:02.6770968-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9a71d520-f2ba-4831-8b09-33049254c921" />
+    <UnitTestResult executionId="cccde5ea-dd7f-4b5b-ace0-0738e0fc7d95" testId="a9a9589b-ba11-44dc-e8eb-e2a73a2dd535" testName="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.IndependentLifecycleContracts(kurtosis: False, period: 3)" computerName="SUPER-SERVER" duration="00:00:01.9230911" startTime="2026-11-18T15:44:56.5380212-05:00" endTime="2026-11-18T15:44:58.4613866-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cccde5ea-dd7f-4b5b-ace0-0738e0fc7d95" />
+    <UnitTestResult executionId="183b26cb-42c6-42d7-b640-45014cbe15ba" testId="0e55ea14-7a16-a46c-a215-c13475249105" testName="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.KnownCoefficientsStartupAndFlatRecovery" computerName="SUPER-SERVER" duration="00:00:00.0039039" startTime="2026-11-18T15:45:02.7030860-05:00" endTime="2026-11-18T15:45:02.7070570-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="183b26cb-42c6-42d7-b640-45014cbe15ba" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.IndependentLifecycleContracts(kurtosis: False, period: 20)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="63f88151-e986-990a-09a6-580804e0ffdf">
+      <Execution id="585ac8c3-385c-4783-aac7-b3d3686f0c92" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests" name="IndependentLifecycleContracts" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.KnownCoefficientsStartupAndFlatRecovery" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="0e55ea14-7a16-a46c-a215-c13475249105">
+      <Execution id="183b26cb-42c6-42d7-b640-45014cbe15ba" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests" name="KnownCoefficientsStartupAndFlatRecovery" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.SubscriptionRevisionResetAndCloseChaining(kurtosis: True)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="821c0b28-491e-809d-16ee-247005f9bc6c">
+      <Execution id="c1bfaea9-2d09-4556-ae41-1a3d075757a3" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests" name="SubscriptionRevisionResetAndCloseChaining" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.IndependentLifecycleContracts(kurtosis: True, period: 20)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="ee67d3f5-e885-5cc1-85bf-f149b6923643">
+      <Execution id="7d993d54-26c1-45ca-8528-10c77398855b" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests" name="IndependentLifecycleContracts" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.TinyWideAdjacentPricesAndMaximumPeriodsUseExactMoments(kurtosis: True)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="8eb4612d-0d17-1d89-1296-4de2f52f734a">
+      <Execution id="19a27b78-4f5a-41d8-b30e-3c69270c3895" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests" name="TinyWideAdjacentPricesAndMaximumPeriodsUseExactMoments" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.IndependentLifecycleContracts(kurtosis: True, period: 4)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="7094edd5-fc45-fa27-df57-c4eca82f29e7">
+      <Execution id="2830e927-1e5f-4910-aef2-fbde52d4774f" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests" name="IndependentLifecycleContracts" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.InvalidPeriodsAndEveryValuePresenceMutationAreRejected" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="8ced3f48-db82-3f71-a60e-cdfa11177641">
+      <Execution id="31f02551-6740-486a-9c5e-7082dda27176" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests" name="InvalidPeriodsAndEveryValuePresenceMutationAreRejected" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.TinyWideAdjacentPricesAndMaximumPeriodsUseExactMoments(kurtosis: False)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="37764725-bbe2-2131-0d06-aa023a3895fb">
+      <Execution id="db90cc19-4636-4daf-9066-25a45e4d4910" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests" name="TinyWideAdjacentPricesAndMaximumPeriodsUseExactMoments" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.IndependentLifecycleContracts(kurtosis: False, period: 3)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="a9a9589b-ba11-44dc-e8eb-e2a73a2dd535">
+      <Execution id="cccde5ea-dd7f-4b5b-ace0-0738e0fc7d95" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests" name="IndependentLifecycleContracts" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.SubscriptionRevisionResetAndCloseChaining(kurtosis: False)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="b75c2054-2f6d-66e9-7ef8-fd8a54e8664e">
+      <Execution id="d81afccf-8b99-4dc6-b812-c4062e4f55c4" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests" name="SubscriptionRevisionResetAndCloseChaining" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests.NativeFlatAndExtremeFailuresRemainVisible" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="162459a8-fc2c-5942-75ed-fa275d1e1248">
+      <Execution id="9a71d520-f2ba-4831-8b09-33049254c921" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.SampleShapeComparisonTests" name="NativeFlatAndExtremeFailuresRemainVisible" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="b75c2054-2f6d-66e9-7ef8-fd8a54e8664e" executionId="d81afccf-8b99-4dc6-b812-c4062e4f55c4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="821c0b28-491e-809d-16ee-247005f9bc6c" executionId="c1bfaea9-2d09-4556-ae41-1a3d075757a3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ee67d3f5-e885-5cc1-85bf-f149b6923643" executionId="7d993d54-26c1-45ca-8528-10c77398855b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7094edd5-fc45-fa27-df57-c4eca82f29e7" executionId="2830e927-1e5f-4910-aef2-fbde52d4774f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="37764725-bbe2-2131-0d06-aa023a3895fb" executionId="db90cc19-4636-4daf-9066-25a45e4d4910" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8eb4612d-0d17-1d89-1296-4de2f52f734a" executionId="19a27b78-4f5a-41d8-b30e-3c69270c3895" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8ced3f48-db82-3f71-a60e-cdfa11177641" executionId="31f02551-6740-486a-9c5e-7082dda27176" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="63f88151-e986-990a-09a6-580804e0ffdf" executionId="585ac8c3-385c-4783-aac7-b3d3686f0c92" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="162459a8-fc2c-5942-75ed-fa275d1e1248" executionId="9a71d520-f2ba-4831-8b09-33049254c921" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a9a9589b-ba11-44dc-e8eb-e2a73a2dd535" executionId="cccde5ea-dd7f-4b5b-ace0-0738e0fc7d95" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0e55ea14-7a16-a46c-a215-c13475249105" executionId="183b26cb-42c6-42d7-b640-45014cbe15ba" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="11" executed="11" passed="11" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.0+05679a7ab5 (64-bit .NET 10.0.15)&#xD;
+[xUnit.net 00:00:00.22]   Discovering: OoplesFinance.StockIndicators.CompetitorTests&#xD;
+[xUnit.net 00:00:03.09]   Discovered:  OoplesFinance.StockIndicators.CompetitorTests&#xD;
+[xUnit.net 00:00:03.14]   Starting:    OoplesFinance.StockIndicators.CompetitorTests&#xD;
+[OpenClBackend] Creating DirectOpenClContext for device 0...&#xD;
+[OpenClBackend] Context created: Device=gfx1012:xnack-, Vendor=Advanced Micro Devices, Inc.&#xD;
+[OpenClBackend] GPU Capabilities:&#xD;
+[OpenClBackend]   Compute Units: 11&#xD;
+[OpenClBackend]   Max Work Group Size: 256&#xD;
+[OpenClBackend]   Max Work Item Sizes: [1024, 1024, 1024]&#xD;
+[OpenClBackend]   Local Memory: 64 KB&#xD;
+[OpenClBackend]   Supports FP16: True&#xD;
+[OpenClBackend]   Supports Subgroups: True&#xD;
+[OpenClBackend] Default command queue wrapper initialized.&#xD;
+[OpenClBackend] Compiling kernels...&#xD;
+[OpenClBackend] Compiling GEMM kernels...&#xD;
+[OpenClBackend] GEMM kernels: loaded from cache&#xD;
+[OpenClBackend] GEMM kernels: gemm_double_buffered, gemm_low_register, gemm_tiled_simple, gemm_small, gemm_vectorized, gemm_batched_tiled, gemm_small_tile, gemm_medium_tile, gemm_coalesced, gemm_vectorized_tile, gemm_kreg4, gemm_prefetch, gemm_wide_vec, gemm_clblast_rdna1&#xD;
+[OpenClBackend] Quant dequant-GEMM kernels: loaded from cache&#xD;
+[OpenClBackend] Quant GEMM kernels: dequant_gemm_int8, dequant_gemm_int4, dequant_gemm_fp8_e4m3&#xD;
+[OpenClBackend] Paged attention kernels: loaded from cache&#xD;
+[OpenClBackend] Paged attention kernels: paged_attention_decode, paged_attention_prefill, paged_attention_decode_gqa, paged_attention_prefill_gqa&#xD;
+[OpenClBackend] Flash decode kernels: loaded from cache&#xD;
+[OpenClBackend] Flash decode kernels: flash_decode_partial, flash_decode_reduce&#xD;
+[OpenClBackend] Activation kernels: loaded from cache&#xD;
+[OpenClBackend] Fused kernels: loaded from cache&#xD;
+[OpenClBackend] DotProduct kernels: loaded from cache&#xD;
+[OpenClBackend] Reduction kernels: loaded from cache&#xD;
+[OpenClBackend] Packing kernels: loaded from cache&#xD;
+[OpenClBackend] Sparse GEMM kernels: loaded from cache&#xD;
+[OpenClBackend] CSR sparse kernels: loaded from cache&#xD;
+[OpenClBackend] Convolution kernels: loaded from cache&#xD;
+[OpenClBackend] Fused convolution kernels: loaded from cache&#xD;
+[OpenClBackend] Pooling kernels: loaded from cache&#xD;
+[OpenClBackend] Normalization kernels: loaded from cache&#xD;
+[OpenClBackend] Neural network kernels: loaded from cache&#xD;
+[OpenClBackend] Optimizer kernels: loaded from cache&#xD;
+[OpenClBackend] Optimizer finiteness-guard kernels: loaded from cache&#xD;
+[OpenClBackend] Deterministic norm kernels: loaded from cache&#xD;
+[OpenClBackend] Mixed precision kernels: loaded from cache&#xD;
+[OpenClBackend] Mixed precision kernels compiled: 3 kernels&#xD;
+[OpenClBackend] Attention kernels: loaded from cache&#xD;
+[OpenClBackend] FFT kernels: loaded from cache&#xD;
+[OpenClBackend] Spectral perf kernels: loaded from cache&#xD;
+[OpenClBackend] Spatial transformer kernels: loaded from cache&#xD;
+[OpenClBackend] Spatial transformer kernels compiled: 4 kernels&#xD;
+[OpenClBackend] Locally connected kernels: loaded from cache&#xD;
+[OpenClBackend] Deformable conv kernels: loaded from cache&#xD;
+[OpenClBackend] Random number kernels: loaded from cache&#xD;
+[OpenClBackend] Categorical sampling kernels: loaded from cache&#xD;
+[OpenClBackend] Specialized kernels: loaded from cache&#xD;
+[OpenClBackend] Octonion kernels: loaded from cache&#xD;
+[OpenClBackend] Missing-lookup kernels: loaded from cache&#xD;
+[OpenClBackend] FP16 conversion kernels: loaded from cache&#xD;
+[OpenClBackend] Loss function kernels: loaded from cache&#xD;
+[OpenClBackend] LSTM sequence kernels: loaded from cache&#xD;
+[OpenClBackend] GLA scan kernels: loaded from cache&#xD;
+[OpenClBackend] xLSTM scan kernels: loaded from cache&#xD;
+[OpenClBackend] Gated DeltaNet scan kernels: loaded from cache&#xD;
+[OpenClBackend] RG-LRU scan kernels: loaded from cache&#xD;
+[OpenClBackend] RWKV-4 WKV scan kernels: loaded from cache&#xD;
+[OpenClBackend] Mamba selective scan kernels: loaded from cache&#xD;
+[OpenClBackend] Mamba-2 SSD scan kernels: loaded from cache&#xD;
+[OpenClBackend] Fused linear cross-entropy kernels: loaded from cache&#xD;
+[OpenClBackend] GRU sequence kernels: loaded from cache&#xD;
+[OpenClBackend] Capsule network kernels: loaded from cache&#xD;
+[OpenClBackend] Broadcast kernels: loaded from cache&#xD;
+[OpenClBackend] Gated activation kernels: loaded from cache&#xD;
+[OpenClBackend] Shape kernels: loaded from cache&#xD;
+[OpenClBackend] Loss forward kernels: loaded from cache&#xD;
+[OpenClBackend] Fused linear kernels: loaded from cache&#xD;
+[OpenClBackend] fused-advanced kernels: loaded from cache&#xD;
+[OpenClBackend] IoU loss kernels: loaded from cache&#xD;
+[OpenClBackend] Softmax variant kernels: loaded from cache&#xD;
+[OpenClBackend] Batch execution kernels: loaded from cache&#xD;
+[OpenClBackend] Complex kernels: loaded from cache&#xD;
+[OpenClBackend] Tuned row kernels: loaded from cache&#xD;
+[OpenClBackend] Winograd kernels: loaded from cache&#xD;
+[OpenClBackend] Winograd fused weight-gradient kernels: loaded from cache&#xD;
+[OpenClBackend] register-resident BatchNorm kernels: loaded from cache&#xD;
+[OpenClBackend] Winograd F(4x4,3x3) kernels: loaded from cache&#xD;
+[OpenClBackend] GEMV kernels: loaded from cache&#xD;
+[OpenClBackend] Batched GEMM kernels: loaded from cache&#xD;
+[OpenClBackend] Fused Winograd kernels: loaded from cache&#xD;
+[OpenClBackend] Parity-210 kernels: loaded from cache&#xD;
+[OpenClBackend] Torch parity elementwise kernels: loaded from cache&#xD;
+[OpenClBackend] Torch model-op kernels: loaded from cache&#xD;
+[OpenClBackend] Detection kernels: loaded from cache&#xD;
+[OpenClBackend] ANN kernels: loaded from cache&#xD;
+[OpenClBackend] Geometry kernels: loaded from cache&#xD;
+[OpenClBackend] RoI kernels: loaded from cache&#xD;
+[OpenClBackend] Audio kernels: loaded from cache&#xD;
+[OpenClBackend] Linalg kernels: loaded from cache&#xD;
+[OpenClBackend] sum around a kept axis: loaded from cache&#xD;
+[OpenClBackend] convolution GEMM epilogue: loaded from cache&#xD;
+[OpenClBackend] short-sequence attention: loaded from cache&#xD;
+[OpenClBackend] normalization statistic conversions: loaded from cache&#xD;
+[OpenClBackend] batch-1 MLP forward: loaded from cache&#xD;
+[OpenClBackend] Kernels compiled successfully. Total: 1051&#xD;
+[OpenClBackend] Dynamic GEMM kernel generator initialized.&#xD;
+[OpenClBackend] Half-precision GEMM kernels: loaded from cache&#xD;
+[OpenClBackend] CLBlast MinIndirectSize threshold: 448 (use INDIRECT for M/N &gt;= 448)&#xD;
+[OpenClBackend] CLBlast direct kernels: loaded from cache&#xD;
+[xUnit.net 00:00:18.29]   Finished:    OoplesFinance.StockIndicators.CompetitorTests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

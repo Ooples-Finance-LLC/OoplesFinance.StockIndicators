@@ -1,0 +1,40 @@
+{
+  "status": "root-independent-allocation-reachability-review-passed",
+  "caller_metadata_sha256": "00b045036a12c07b9aae3b6db951769d9a0cb86a834584e04546f3fef4e7163f",
+  "verified_installed_runtime_files": 200,
+  "rows": [
+    {
+      "pair": "QuanTAlib.Skew",
+      "bars": 1000,
+      "old_allocated_process": 969000,
+      "candidate_allocated_process": 969000,
+      "output_hash_equal": true
+    },
+    {
+      "pair": "QuanTAlib.Skew",
+      "bars": 10000,
+      "old_allocated_process": 11208856,
+      "candidate_allocated_process": 5746296,
+      "output_hash_equal": true
+    },
+    {
+      "pair": "QuanTAlib.Kurtosis",
+      "bars": 1000,
+      "old_allocated_process": 773592,
+      "candidate_allocated_process": 773592,
+      "output_hash_equal": true
+    },
+    {
+      "pair": "QuanTAlib.Kurtosis",
+      "bars": 10000,
+      "old_allocated_process": 9527864,
+      "candidate_allocated_process": 1055032,
+      "output_hash_equal": true
+    }
+  ],
+  "source": "7bac3b91d52c4d1ccebfcda86c2b23f1bc37b979",
+  "new_measurements": 0,
+  "timing_samples": 0,
+  "qualified": false,
+  "native_credit": 0
+}

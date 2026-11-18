@@ -1,0 +1,66 @@
+{
+  "status": "actual LP allocation/reachability replay; not timing or qualification",
+  "role": "candidate",
+  "source_fingerprint": "a889cbb94cd20dd461b29e7233a9b8987e366c529f84c016295e8587e4d3f2fe",
+  "core_sha256": "64d551411a51f9092e598d5c4266782039761a855f3511171df6d8481fda3ff1",
+  "harness_sha256": "46e3c20fcbc400ead2da157b72af844d2ba4e4a2a5416c3f742d703bc3c6a655",
+  "compiled_kernel_IL_sha256": "6683f3c23ac2c1be0565ae4f67246d4bdd43d867b7dfde6518ec3a440e09b03f",
+  "new_builds": 0,
+  "new_profiles": 0,
+  "timing_samples": 0,
+  "allocation_observations_per_case": 1,
+  "rows": [
+    {
+      "pair": "QuanTAlib.Skew",
+      "bars": 1000,
+      "period": 20,
+      "workers": 1,
+      "actual_grid": -4,
+      "actual_maximum_grid_integer": 1318.0,
+      "compiled_kernel_present": true,
+      "region_gate_admitted": false,
+      "allocated_current_thread_bytes": 1011736,
+      "allocated_process_bytes": 969000,
+      "fully_returned_output_sha256": "22ded3155cfcf3efee5ff57c4bdba924140492ea6f62fb3f2a6b210d66c7c90c"
+    },
+    {
+      "pair": "QuanTAlib.Skew",
+      "bars": 10000,
+      "period": 20,
+      "workers": 1,
+      "actual_grid": -4,
+      "actual_maximum_grid_integer": 10318.0,
+      "compiled_kernel_present": true,
+      "region_gate_admitted": true,
+      "allocated_current_thread_bytes": 5747320,
+      "allocated_process_bytes": 5746296,
+      "fully_returned_output_sha256": "a94c5bc1212c89660ca15d90aed6635fdb2d45311c32adec3fc712b81b7a65a0"
+    },
+    {
+      "pair": "QuanTAlib.Kurtosis",
+      "bars": 1000,
+      "period": 20,
+      "workers": 1,
+      "actual_grid": -4,
+      "actual_maximum_grid_integer": 1318.0,
+      "compiled_kernel_present": true,
+      "region_gate_admitted": false,
+      "allocated_current_thread_bytes": 774616,
+      "allocated_process_bytes": 773592,
+      "fully_returned_output_sha256": "304f104fbe2d1136e0e09911dd43ad9cc637755b1c98365980e85191fb2a78a1"
+    },
+    {
+      "pair": "QuanTAlib.Kurtosis",
+      "bars": 10000,
+      "period": 20,
+      "workers": 1,
+      "actual_grid": -4,
+      "actual_maximum_grid_integer": 10318.0,
+      "compiled_kernel_present": true,
+      "region_gate_admitted": true,
+      "allocated_current_thread_bytes": 1056056,
+      "allocated_process_bytes": 1055032,
+      "fully_returned_output_sha256": "e4b635ae80cdeb970ede802ec851dc067356674f00d23d4c1f8fbf6e73cf1fdc"
+    }
+  ]
+}

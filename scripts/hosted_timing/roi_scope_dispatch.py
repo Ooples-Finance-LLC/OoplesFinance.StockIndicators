@@ -1,7 +1,9 @@
 """Keep legacy and family diagnostic scopes independently pinned."""
 def validate_scope(plan):
     kind = plan.get("diagnostic_kind")
-    if kind == "sample-shape-fixed-grid-native-pilot":
+    if kind == "sample-shape-actual-fixture-native-pilot":
+        from .sample_shape_actual_fixture_roi import validate_scope as check
+    elif kind == "sample-shape-fixed-grid-native-pilot":
         from .sample_shape_fixed_grid_roi import validate_scope as check
     elif kind == "alma-fixed-grid-native-pilot":
         from .alma_fixed_grid_roi import validate_scope as check

@@ -1,0 +1,41 @@
+{
+  "status": "root-independent-cpu-authentication-passed",
+  "run_id": "44393824051",
+  "source": "7bac3b91d52c4d1ccebfcda86c2b23f1bc37b979",
+  "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+  "source_fingerprint": "a889cbb94cd20dd461b29e7233a9b8987e366c529f84c016295e8587e4d3f2fe",
+  "artifact_id": 14471720104,
+  "zip_sha256": "8063cf36273b28cb4764707888b2a200e07e5bed3dc4e104e0193d4eb66c2201",
+  "zip_verified_in_memory": true,
+  "retained_zip_bytes": 78403254,
+  "manifest_sha256": "10efe9be5276801c256e34d55682137c2b4ba0d39649c6a35bca462fa53573cd",
+  "core_sha256": "64d551411a51f9092e598d5c4266782039761a855f3511171df6d8481fda3ff1",
+  "actual_harness_sha256": "46e3c20fcbc400ead2da157b72af844d2ba4e4a2a5416c3f742d703bc3c6a655",
+  "competitor_test_dll_sha256": "932107e9cbe15abaec6eef987ae52255821d71eefcbc3f224a173774fb7f75b6",
+  "collection_receipt_sha256": "555daa14d4ff9dee35c9cb691eab5022ba1f7f1243905a4e84c2a6f14fd40096",
+  "unit": 30,
+  "parity": 11,
+  "checks": {
+    "unit": {
+      "passed": 30,
+      "classes": {
+        "FixedGridSampleShapeExecutionTests": 21,
+        "SharedSampleShapeTests": 9
+      },
+      "sha256": "fa9a801f6e13ce3e9ae9299c0aa93f4af9f0385903bc3b2ceaf302c4238dc4e3"
+    },
+    "parity": {
+      "passed": 11,
+      "classes": {
+        "SampleShapeComparisonTests": 11
+      },
+      "sha256": "f01465e92c9becb1d0a38d9a30fb81db1155281c75d4dfce2b7dff633da29467"
+    }
+  },
+  "verified_zip_files": 320,
+  "verified_runtime_entries": 444,
+  "verified_unique_blobs": 312,
+  "gpu_executed": false,
+  "qualification": false,
+  "accepted_native_wins": 0
+}
