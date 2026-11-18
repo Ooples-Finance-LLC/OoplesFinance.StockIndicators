@@ -16,6 +16,7 @@ namespace OoplesFinance.StockIndicators.Models;
 
 public class StockData : IStockData
 {
+    private readonly List<double>? _baseInputValues;
     private List<double>? _inputValues;
     private List<double> _customValues = new List<double>();
     private Dictionary<string, List<double>> _outputValues = new Dictionary<string, List<double>>();
@@ -226,6 +227,10 @@ public class StockData : IStockData
     /// </remarks>
     internal List<double> ChainedValues { get; private set; } = new List<double>();
 
+    internal List<double>? ActiveCustomInput => ChainedValues.Count > 0 ? ChainedValues : _baseInputValues;
+
+    internal List<double>? ExplicitInputValues => _inputValues;
+
     /// <summary>
     /// The series the compute layer reads, as a span over whatever is backing it.
     /// </summary>
@@ -362,6 +367,30 @@ public class StockData : IStockData
         }
     }
 
+    /// <summary>The date column, without copying it.</summary>
+    internal ReadOnlySpan<DateTime> DateSpan
+    {
+        get
+        {
+            if (_dates is not null)
+            {
+                return Compatibility.SpanCompat.AsReadOnlySpan(_dates);
+            }
+
+            return _dateMemory.HasValue
+                ? _dateMemory.Value.Span
+                : Compatibility.SpanCompat.AsReadOnlySpan(Dates);
+        }
+    }
+
+    internal bool HasAnyMaterializedColumn =>
+        _openPrices is not null
+        || _highPrices is not null
+        || _lowPrices is not null
+        || _closePrices is not null
+        || _volumes is not null
+        || _dates is not null;
+
     /// <summary>Puts back a published list and a chained series saved by a caller that borrowed both.</summary>
     internal void RestoreSeries(List<double> published, List<double> chained)
     {
@@ -461,6 +490,11 @@ public class StockData : IStockData
     /// existing <c>new StockData(arrays...)</c> call ambiguous - a source-breaking change for callers who are
     /// not asking for any of this.
     /// </remarks>
+    public static StockData FromColumns(ReadOnlyMemory<double> openPrices,
+        ReadOnlyMemory<double> highPrices, ReadOnlyMemory<double> lowPrices, ReadOnlyMemory<double> closePrices,
+        ReadOnlyMemory<double> volumes, ReadOnlyMemory<DateTime> dates) =>
+        FromColumnViews(openPrices, highPrices, lowPrices, closePrices, volumes, dates);
+
     internal static StockData FromColumnViews(ReadOnlyMemory<double> openPrices,
         ReadOnlyMemory<double> highPrices, ReadOnlyMemory<double> lowPrices, ReadOnlyMemory<double> closePrices,
         ReadOnlyMemory<double> volumes, ReadOnlyMemory<DateTime> dates) =>
@@ -533,10 +567,10 @@ public class StockData : IStockData
     }
 
     /// <summary>
-    /// Private constructor for <see cref="WithValues"/>. Shares the price series by reference rather
-    /// than copying them, so deriving a view is cheap enough to do inside a calculation.
+    /// Private constructor for <see cref="WithValues"/> and <see cref="WithBaseInput"/>. Shares both
+    /// materialized lists and zero-copy memory views by reference rather than copying them.
     /// </summary>
-    private StockData(StockData source, List<double> values)
+    private StockData(StockData source, List<double>? baseInput, List<double>? inputValues, List<double> chainedValues)
     {
         source.EnsureColumns();
 
@@ -546,18 +580,38 @@ public class StockData : IStockData
         _closePrices = source._closePrices;
         _volumes = source._volumes;
         _dates = source._dates;
-        _inputValues = source._inputValues;
+        _openMemory = source._openMemory;
+        _highMemory = source._highMemory;
+        _lowMemory = source._lowMemory;
+        _closeMemory = source._closeMemory;
+        _volumeMemory = source._volumeMemory;
+        _dateMemory = source._dateMemory;
+        _baseInputValues = baseInput;
+        _inputValues = inputValues;
         _columnsInitialized = true;
         _rowsInitialized = false;
         _tickerDataList = null;
 
-        CustomValuesList = values;
+        CustomValuesList = chainedValues;
+        if (chainedValues.Count == 0 && baseInput is not null)
+        {
+            ChainedValues = new List<double>(baseInput);
+        }
+
         OutputValues = new Dictionary<string, List<double>>();
         SignalsList = new List<Signal>();
         IndicatorName = IndicatorName.None;
         Options = source.Options;
         Count = source.Count;
     }
+
+    internal StockData CloneBarsForScratch() =>
+        !HasAnyMaterializedColumn
+        && _openMemory.HasValue && _highMemory.HasValue && _lowMemory.HasValue
+        && _closeMemory.HasValue && _volumeMemory.HasValue && _dateMemory.HasValue
+            ? FromColumnViews(_openMemory.Value, _highMemory.Value, _lowMemory.Value,
+                _closeMemory.Value, _volumeMemory.Value, _dateMemory.Value)
+            : new StockData(OpenPrices, HighPrices, LowPrices, ClosePrices, Volumes, Dates);
 
     /// <summary>
     /// Returns a new <see cref="StockData"/> over the same bars, but with <paramref name="values"/> as
@@ -595,7 +649,51 @@ public class StockData : IStockData
         // copying a long series on every derivation is exactly the cost this is meant to avoid.
         var list = values as List<double> ?? new List<double>(values);
 
-        return new StockData(this, list);
+        return new StockData(this, _baseInputValues, _inputValues, list);
+    }
+
+    /// <summary>
+    /// Returns a new <see cref="StockData"/> view over the same bars (preserving zero-copy column views)
+    /// whose persistent base input (<see cref="InputValues"/> / <c>InputSpan</c>) is <paramref name="values"/>.
+    /// Unlike <see cref="WithValues"/> (which chains onto <see cref="CustomValuesList"/> for one calculation),
+    /// <see cref="WithBaseInput"/> persists across <see cref="CustomValuesList"/> resets when sweeping many
+    /// indicators over the same derived input series.
+    /// </summary>
+    /// <param name="values">The persistent base input series, with length matching <see cref="Count"/>.</param>
+    public StockData WithBaseInput(IReadOnlyList<double> values)
+    {
+        if (values is null)
+        {
+            throw new ArgumentNullException(nameof(values));
+        }
+
+        if (values.Count != Count)
+        {
+            throw new ArgumentException(
+                $"Base input series must contain {Count} observations, but received {values.Count}.",
+                nameof(values));
+        }
+
+        var list = values as List<double> ?? new List<double>(values);
+        return new StockData(this, list, list, new List<double>());
+    }
+
+    /// <summary>
+    /// Clears transient calculation outputs, signals, and indicator identity while preserving all OHLCV
+    /// column views and any persistent base input configured via <see cref="WithBaseInput"/>.
+    /// </summary>
+    public void ResetOutputs()
+    {
+        _customValues = new List<double>();
+        ChainedValues = _baseInputValues is not null ? new List<double>(_baseInputValues) : new List<double>();
+        if (_baseInputValues is not null)
+        {
+            _inputValues = _baseInputValues;
+        }
+
+        OutputValues = new Dictionary<string, List<double>>();
+        SignalsList = new List<Signal>();
+        IndicatorName = IndicatorName.None;
     }
 
     /// <summary>

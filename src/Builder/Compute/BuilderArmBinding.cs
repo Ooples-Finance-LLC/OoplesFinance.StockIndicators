@@ -62,14 +62,14 @@ internal static class BuilderArmBinding
 
         // The caller's own series, which is the chained one: the published list is empty or rounded when the
         // publication options say so, and the indicator must compute on what the caller chained.
-        var bars = new StockData(data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, data.Volumes, data.Dates);
-        if (data.ChainedValues.Count > 0)
+        var bars = data.CloneBarsForScratch();
+        if (data.ActiveCustomInput is { Count: > 0 } customInput)
         {
-            bars.SetInputSeries(new List<double>(data.ChainedValues));
+            bars.SetInputSeries(new List<double>(customInput));
         }
-        else
+        else if (data.ExplicitInputValues is { } explicitInput)
         {
-            bars.InputValues = new List<double>(data.InputValues);
+            bars.InputValues = new List<double>(explicitInput);
         }
 
         // A middle-only request must not evaluate unrequested ATR/bands: their range

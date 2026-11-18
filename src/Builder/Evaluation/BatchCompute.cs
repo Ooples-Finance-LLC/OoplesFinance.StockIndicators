@@ -25,13 +25,36 @@ internal static class BatchCompute
     /// </param>
     public static double[] ComputeAll(StockData data, IStreamingIndicatorState state, string? outputKey = null)
     {
-        var count = data.Count;
+        var customInput = data.ActiveCustomInput;
+        var hasCustomInput = customInput is { Count: > 0 };
+        var preserveRange = false;
+        CustomInputRange range = default;
+        if (hasCustomInput)
+        {
+            if (state is ICustomInputConsumer consumer)
+            {
+                consumer.ReadCloseAsInput();
+            }
+
+            preserveRange = state is ICustomInputRangePolicy policy && policy.PreserveOriginalRange;
+        }
+
+        var count = hasCustomInput ? Math.Min(data.Count, customInput!.Count) : data.Count;
         var results = new double[count];
         state.Reset();
+        if (hasCustomInput)
+        {
+            range.Reset();
+        }
 
         for (var i = 0; i < count; i++)
         {
             var bar = CreateBar(data, i);
+            if (hasCustomInput)
+            {
+                bar = range.Next(bar, customInput![i], isFinal: true, preserveRange);
+            }
+
             var result = state.Update(bar, isFinal: true, includeOutputs: outputKey is not null);
 
             // Tested directly rather than through a flag, so the compiler narrows it: after this branch
@@ -90,17 +113,18 @@ internal static class BatchCompute
     /// </summary>
     private static OhlcvBar CreateBar(StockData data, int index)
     {
-        var date = data.Dates[index];
+        var dates = data.DateSpan;
+        var date = index < dates.Length ? dates[index] : default;
         return new OhlcvBar(
             DefaultSymbol,
             DefaultTimeframe,
             date,
             date,
-            data.OpenPrices[index],
-            data.HighPrices[index],
-            data.LowPrices[index],
-            data.ClosePrices[index],
-            data.Volumes[index],
+            data.OpenSpan[index],
+            data.HighSpan[index],
+            data.LowSpan[index],
+            data.CloseSpan[index],
+            data.VolumeSpan[index],
             isFinal: true);
     }
 
@@ -142,14 +166,23 @@ internal static class BatchCompute
         // hands back the list itself, so a mutation never passes through a setter and nothing can record that it
         // happened. Reading the same expression the arm reads makes the head's input identical by construction
         // instead of by a check that a later mutation could invalidate.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var inputSpan = data.ChainedSpanOrInput;
+        var hasCustomBase = data.ActiveCustomInput is { Count: > 0 };
+        var preserveHeadRange = false;
+        CustomInputRange headRange = default;
 
-        var count = Math.Min(data.Count, inputList.Count);
+        var count = Math.Min(data.Count, inputSpan.Length);
         var results = new double[count];
         for (var s = 0; s < chain.Count; s++)
         {
-            if (s > 0 && chain[s] is ICustomInputConsumer consumer) consumer.ReadCloseAsInput();
+            if ((s > 0 || hasCustomBase) && chain[s] is ICustomInputConsumer consumer) consumer.ReadCloseAsInput();
             chain[s].Reset();
+        }
+
+        if (hasCustomBase)
+        {
+            preserveHeadRange = chain[0] is ICustomInputRangePolicy policy && policy.PreserveOriginalRange;
+            headRange.Reset();
         }
 
         for (var i = 0; i < count; i++)
@@ -157,7 +190,10 @@ internal static class BatchCompute
             // Every state reads a bar carrying its input as the close: the head the caller's input series, each
             // later one the value the state before produced, which is the convention ComputeAllWithCustomInput
             // already uses.
-            var value = chain[0].Update(CreateBarWithCustomClose(data, i, inputList[i]), isFinal: true, includeOutputs: false).Value;
+            var headBar = hasCustomBase
+                ? headRange.Next(CreateBar(data, i), inputSpan[i], isFinal: true, preserveHeadRange)
+                : CreateBarWithCustomClose(data, i, inputSpan[i]);
+            var value = chain[0].Update(headBar, isFinal: true, includeOutputs: false).Value;
             for (var s = 1; s < chain.Count; s++)
             {
                 value = chain[s].Update(CreateBarWithCustomClose(data, i, value), isFinal: true, includeOutputs: false).Value;
@@ -174,17 +210,18 @@ internal static class BatchCompute
     /// </summary>
     private static OhlcvBar CreateBarWithCustomClose(StockData data, int index, double customClose)
     {
-        var date = data.Dates[index];
+        var dates = data.DateSpan;
+        var date = index < dates.Length ? dates[index] : default;
         return new OhlcvBar(
             DefaultSymbol,
             DefaultTimeframe,
             date,
             date,
-            data.OpenPrices[index],
-            data.HighPrices[index],
-            data.LowPrices[index],
+            data.OpenSpan[index],
+            data.HighSpan[index],
+            data.LowSpan[index],
             customClose,
-            data.Volumes[index],
+            data.VolumeSpan[index],
             isFinal: true);
     }
 
@@ -211,11 +248,13 @@ internal static class BatchCompute
             throw new ArgumentException("Primary and benchmark batches must have equal counts and aligned timestamps.", nameof(marketData));
         var count = stockData.Count;
         var domains = state as Validation.IMultiSeriesInputDomainContract;
+        var primaryDates = stockData.DateSpan;
+        var marketDates = marketData.DateSpan;
         for (var i = 0; i < count; i++)
         {
-            if (stockData.Dates[i] != marketData.Dates[i] || stockData.Dates[i].Kind != marketData.Dates[i].Kind)
+            if (primaryDates[i] != marketDates[i] || primaryDates[i].Kind != marketDates[i].Kind)
                 throw new ArgumentException($"Primary and benchmark timestamps differ at bar {i}; align inputs explicitly before evaluation.", nameof(marketData));
-            if (i > 0 && (stockData.Dates[i] <= stockData.Dates[i - 1] || stockData.Dates[i].Kind != stockData.Dates[i - 1].Kind))
+            if (i > 0 && (primaryDates[i] <= primaryDates[i - 1] || primaryDates[i].Kind != primaryDates[i - 1].Kind))
                 throw new ArgumentException($"Batch timestamps must be strictly increasing (bar {i}).", nameof(stockData));
             ValidateDomain(stockData, i, domains?.PrimaryInputDomain ?? Validation.IndicatorInputDomain.Finite);
             ValidateDomain(marketData, i, domains?.BenchmarkInputDomain ?? Validation.IndicatorInputDomain.Finite);
@@ -249,8 +288,9 @@ internal static class BatchCompute
 
     private static void ValidateDomain(StockData data, int index, Validation.IndicatorInputDomain domain)
     {
-        var bar = new Indicators.Bar(data.Dates[index], data.OpenPrices[index], data.HighPrices[index],
-            data.LowPrices[index], data.ClosePrices[index], data.Volumes[index]);
+        var dates = data.DateSpan;
+        var bar = new Indicators.Bar(index < dates.Length ? dates[index] : default, data.OpenSpan[index], data.HighSpan[index],
+            data.LowSpan[index], data.CloseSpan[index], data.VolumeSpan[index]);
         Validation.IndicatorInputDomain.Finite.Validate(bar);
         domain.Validate(bar);
     }
@@ -260,17 +300,18 @@ internal static class BatchCompute
     /// </summary>
     private static OhlcvBar CreateBarForSeries(StockData data, int index, string symbol, BarTimeframe timeframe)
     {
-        var date = data.Dates[index];
+        var dates = data.DateSpan;
+        var date = index < dates.Length ? dates[index] : default;
         return new OhlcvBar(
             symbol,
             timeframe,
             date,
             date,
-            data.OpenPrices[index],
-            data.HighPrices[index],
-            data.LowPrices[index],
-            data.ClosePrices[index],
-            data.Volumes[index],
+            data.OpenSpan[index],
+            data.HighSpan[index],
+            data.LowSpan[index],
+            data.CloseSpan[index],
+            data.VolumeSpan[index],
             isFinal: true);
     }
 }

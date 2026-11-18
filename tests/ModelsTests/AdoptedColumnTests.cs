@@ -66,5 +66,22 @@ public sealed class AdoptedColumnTests
         // Nothing has been materialised, so the spans still come straight off the caller's arrays.
         data.HighSpan[3].Should().Be(104);
         data.CloseSpan[1].Should().Be(101.5);
+        data.HasAnyMaterializedColumn.Should().BeFalse();
+    }
+
+    [Fact]
+    public void WithValuesAndWithBaseInputPreserveZeroCopyColumnViewsWithoutMaterializingLists()
+    {
+        var data = Adopted();
+        var chained = data.WithValues(new[] { 1d, 2, 3, 4, 5, 6, 7, 8 });
+        var baseView = data.WithBaseInput(new[] { 10d, 20, 30, 40, 50, 60, 70, 80 });
+
+        chained.HighSpan[3].Should().Be(104);
+        chained.CloseSpan[1].Should().Be(101.5);
+        chained.HasAnyMaterializedColumn.Should().BeFalse();
+
+        baseView.HighSpan[3].Should().Be(104);
+        baseView.InputSpan[2].Should().Be(30);
+        baseView.HasAnyMaterializedColumn.Should().BeFalse();
     }
 }
