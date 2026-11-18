@@ -243,3 +243,9 @@ benchmarks/plans/hosted-alma-fixed-grid-roi-20261118.json text eol=lf
 
 benchmarks/plans/hosted-cmf-alma-combined-qualification-20261118.json text eol=lf
 benchmarks/plans/evidence/cmf-alma-protected-ultimate-20261118.json -text
+
+benchmarks/plans/hosted-sample-shape-fixed-grid-roi-20261118.json text eol=lf
+
+benchmarks/plans/evidence/sample-shape-baseline-focused-20261118-receipt.json -text
+benchmarks/plans/evidence/sample-shape-baseline-focused-20261118-unit.trx -text
+benchmarks/plans/evidence/sample-shape-baseline-focused-20261118-parity.trx -text

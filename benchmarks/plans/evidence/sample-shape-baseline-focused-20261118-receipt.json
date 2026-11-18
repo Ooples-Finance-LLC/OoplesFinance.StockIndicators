@@ -1,0 +1,53 @@
+{
+  "status": "actual-supplemental-baseline-focused-checks-passed",
+  "source": "409c5f5eea78724f83c999469b76bacbbb193911",
+  "source_fingerprint": "3d5c4ed70533fa52c29bb2ad19754857837b4a333855acb610563d149f3b3fac",
+  "ci_run": "44376305889",
+  "manifest_sha256": "546bf1ac0753a9ceb263a9aa45783c01ae5b10e0754d1b9ff9d8f324147a5b69",
+  "core_sha256": "ebe75a61d46f9ae49266c6b38de5ab309c0063337e0be5c9b0bd663f7114571f",
+  "actual_harness_sha256": "148921163c52c848959ed8fff76eacff0b49e93743ee2a7f0671ed84c0280f49",
+  "checks": {
+    "unit": {
+      "passed": 9,
+      "classes": {
+        "SharedSampleShapeTests": 9
+      },
+      "trx_sha256": "8c501361865767e420a3ae3d2a6755c647327debbdb62e557aaf93527761242d",
+      "assembly_sha256": "1da4ca53ff97567047b9ca870ad7ef710e5c0fbca484216909197cecfdca1aa7",
+      "invocation": [
+        "C:\\Program Files\\dotnet\\dotnet.exe",
+        "exec",
+        "C:\\Program Files\\dotnet\\sdk\\10.0.404\\dotnet.dll",
+        "vstest",
+        "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cmf-alma-combined-gpu-only-20261118\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.Tests.Unit.dll",
+        "/Settings:C:\\Users\\cheat\\source\\stock-indicators-operations\\sample-shape-baseline-focused-20261118\\serial.runsettings",
+        "/TestCaseFilter:FullyQualifiedName~SharedSampleShapeTests",
+        "/Logger:trx;LogFileName=unit.trx",
+        "/ResultsDirectory:C:\\Users\\cheat\\source\\stock-indicators-operations\\sample-shape-baseline-focused-20261118"
+      ]
+    },
+    "parity": {
+      "passed": 11,
+      "classes": {
+        "SampleShapeComparisonTests": 11
+      },
+      "trx_sha256": "a37906b5d0be56c64ac3a92344e5c658c5062ad7478856d854eb396eae3b56bb",
+      "assembly_sha256": "661025fd9c388e62df686434136d291ae25563f0b6770471099eab6e63d55402",
+      "invocation": [
+        "C:\\Program Files\\dotnet\\dotnet.exe",
+        "exec",
+        "C:\\Program Files\\dotnet\\sdk\\10.0.404\\dotnet.dll",
+        "vstest",
+        "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cmf-alma-combined-gpu-only-20261118\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.CompetitorTests.dll",
+        "/Settings:C:\\Users\\cheat\\source\\stock-indicators-operations\\sample-shape-baseline-focused-20261118\\serial.runsettings",
+        "/TestCaseFilter:FullyQualifiedName~SampleShapeComparisonTests",
+        "/Logger:trx;LogFileName=parity.trx",
+        "/ResultsDirectory:C:\\Users\\cheat\\source\\stock-indicators-operations\\sample-shape-baseline-focused-20261118"
+      ]
+    }
+  },
+  "verified_runtime_entries": 444,
+  "new_builds": 0,
+  "new_measurements": 0,
+  "original_manifest_unchanged": true
+}

@@ -1,0 +1,190 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "expected_runtime_version": ".NET 10.0.15",
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "diagnostic_kind": "sample-shape-fixed-grid-native-pilot",
+  "diagnostic_only": true,
+  "cases": 20,
+  "decisions": 4,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 120
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Skew",
+              "pair": "QuanTAlib.Skew"
+            },
+            {
+              "raw": "QuanTAlib.Kurtosis",
+              "pair": "QuanTAlib.Kurtosis"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        }
+      ],
+      "cases": 20,
+      "decisions": 4
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Skew",
+              "pair": "QuanTAlib.Skew"
+            },
+            {
+              "raw": "QuanTAlib.Kurtosis",
+              "pair": "QuanTAlib.Kurtosis"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        }
+      ],
+      "cases": 20,
+      "decisions": 4
+    }
+  ],
+  "inputs_ready": true,
+  "parent_review_approved": true,
+  "sources": {
+    "published": "409c5f5eea78724f83c999469b76bacbbb193911",
+    "old": "409c5f5eea78724f83c999469b76bacbbb193911",
+    "successor": "62d7f8b4ec104bc024cc2a20d16329b7ca93884a",
+    "variants": "409c5f5eea78724f83c999469b76bacbbb193911"
+  },
+  "gpu_sources": {
+    "old": "409c5f5eea78724f83c999469b76bacbbb193911",
+    "successor": "62d7f8b4ec104bc024cc2a20d16329b7ca93884a",
+    "variants": "409c5f5eea78724f83c999469b76bacbbb193911"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "FixedGridCmfExecutionTests",
+      "CompactCmfTests",
+      "FixedGridAlmaExecutionTests",
+      "SharedAlmaWindowTests",
+      "WiderUltimateExecutionTests"
+    ],
+    "successor": [
+      "FixedGridSampleShapeExecutionTests",
+      "SharedSampleShapeTests"
+    ],
+    "variants": [
+      "FixedGridCmfExecutionTests",
+      "CompactCmfTests",
+      "FixedGridAlmaExecutionTests",
+      "SharedAlmaWindowTests",
+      "WiderUltimateExecutionTests"
+    ]
+  },
+  "old_candidate": {
+    "source": "409c5f5eea78724f83c999469b76bacbbb193911",
+    "ci_run": "44376305889",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "1d6c4bf2af7e7b2b0943e9d2b3a874c11c973616",
+    "manifest_sha256": "546bf1ac0753a9ceb263a9aa45783c01ae5b10e0754d1b9ff9d8f324147a5b69",
+    "gpu_receipt_sha256": "2e53fd672dd7b8483d833c07876f8753e0e9ddd98dc23b36c3785c17d6edc9f1",
+    "production_sha256": "ebe75a61d46f9ae49266c6b38de5ab309c0063337e0be5c9b0bd663f7114571f",
+    "source_fingerprint": "3d5c4ed70533fa52c29bb2ad19754857837b4a333855acb610563d149f3b3fac",
+    "artifact_id": "14462057639",
+    "artifact_zip_sha256": "1c210085cbfc2d1bf2e8f6bcfb2628e17636c9915f3cb7f0826a8a2a51fc917e",
+    "unit_passed": 74,
+    "parity_passed": 40,
+    "unit_classes": [
+      "FixedGridCmfExecutionTests",
+      "CompactCmfTests",
+      "FixedGridAlmaExecutionTests",
+      "SharedAlmaWindowTests",
+      "WiderUltimateExecutionTests"
+    ],
+    "parity_classes": [
+      "MoneyFlowDetailComparisonTests",
+      "AlmaComparisonTests",
+      "TrueRangeRatioComparisonTests"
+    ],
+    "actual_harness_sha256": "148921163c52c848959ed8fff76eacff0b49e93743ee2a7f0671ed84c0280f49"
+  },
+  "candidate": {
+    "source": "62d7f8b4ec104bc024cc2a20d16329b7ca93884a",
+    "ci_run": "44381122884",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "b4270c7792943aeffbf05d8bce9e19474d35a807",
+    "manifest_sha256": "4ea5fc0b27210aea08de8a20b2735d9cd3320763a544725826fd061c06af8de9",
+    "gpu_receipt_sha256": "01d26a83b2514a0da7120a28d817788a12984df6e80589f3e91eeffdf6c349c7",
+    "production_sha256": "79bf512f92d228f2b0fa650b3b69cb7518e8ed0d2dd28320b5703a6ee7e3999c",
+    "source_fingerprint": "d536eb71785ba1e2e68fbc387be5aeb130dac37e731414823e5f03133586327e",
+    "artifact_id": "14463824169",
+    "artifact_zip_sha256": "216a3e160e3ccf888af45295d7a90fe63ff66e4711d4411abc506ad38a490d17",
+    "unit_passed": 21,
+    "parity_passed": 11,
+    "unit_classes": [
+      "FixedGridSampleShapeExecutionTests",
+      "SharedSampleShapeTests"
+    ],
+    "parity_classes": [
+      "SampleShapeComparisonTests"
+    ],
+    "actual_harness_sha256": "423349307b4e8017ebc829e3104eebcdd87d8105a3b9444e8f32e4b8169b4490"
+  },
+  "harness_sha256": "148921163c52c848959ed8fff76eacff0b49e93743ee2a7f0671ed84c0280f49",
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "harness_alias_policy": {
+    "common_artifact_role": "old",
+    "variants_artifact_role": "old",
+    "baseline_source": "409c5f5eea78724f83c999469b76bacbbb193911",
+    "candidate_source": "62d7f8b4ec104bc024cc2a20d16329b7ca93884a",
+    "require_scoped_source_identity": true,
+    "claim_artifact_binary_identity": false
+  },
+  "automatic_qualification": false,
+  "future_builder_fixture": "SharedSampleShapeBenchmarks",
+  "require_net_10000_point_progress": true,
+  "frozen_baseline_feasibility_only": true,
+  "current_combined_source_qualified": false,
+  "report_import_permitted": false,
+  "followup_requires_current_published_baseline": true
+}
