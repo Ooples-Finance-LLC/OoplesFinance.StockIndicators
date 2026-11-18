@@ -54,6 +54,10 @@ def sample(case):
 
 
 def collect(folder, phase):
+    if read(PLAN).get('diagnostic_kind') == 'candle-isolated-native-pilot':
+        assert phase == 'diagnostic'
+        from .candle_isolated_roi import collect as isolated_collect
+        return isolated_collect(folder)
     if read(PLAN).get('triple_body_master_reconciliation'):
         assert phase == 'targeted'
         from .master_reconciliation import collect as reconciliation_collect
