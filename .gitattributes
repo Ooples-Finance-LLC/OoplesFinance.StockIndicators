@@ -240,3 +240,6 @@ benchmarks/plans/evidence/ultimate-direct-long-shared-*-20261118.trx -text white
 benchmarks/plans/evidence/ultimate-direct-long-shared-*-20261118.receipt.json -text
 benchmarks/plans/hosted-cmf-fixed-grid-roi-20261118.json text eol=lf
 benchmarks/plans/hosted-alma-fixed-grid-roi-20261118.json text eol=lf
+
+benchmarks/plans/hosted-cmf-alma-combined-qualification-20261118.json text eol=lf
+benchmarks/plans/evidence/cmf-alma-protected-ultimate-20261118.json -text
