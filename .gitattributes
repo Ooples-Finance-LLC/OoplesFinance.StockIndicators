@@ -234,3 +234,7 @@ benchmarks/plans/hosted-lagged-five-roi-20261118.json text eol=lf
 benchmarks/plans/hosted-ultimate-wider-long-roi-20261118.json text eol=lf
 
 benchmarks/plans/hosted-ultimate-direct-long-roi-20261118.json text eol=lf
+
+benchmarks/plans/hosted-ultimate-direct-long-qualification-20261118.json text eol=lf
+benchmarks/plans/evidence/ultimate-direct-long-shared-*-20261118.trx -text whitespace=cr-at-eol
+benchmarks/plans/evidence/ultimate-direct-long-shared-*-20261118.receipt.json -text

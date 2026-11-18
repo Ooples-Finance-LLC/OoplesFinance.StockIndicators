@@ -54,6 +54,10 @@ def sample(case):
 
 
 def collect(folder, phase):
+    if read(PLAN).get('ultimate_direct_long_qualification'):
+        assert phase == 'targeted'
+        from .ultimate_direct_long_qualification import collect as ultimate_qualify
+        return ultimate_qualify(folder)
     if read(PLAN).get('diagnostic_kind') == 'ultimate-direct-long-native-pilot':
         assert phase == 'diagnostic'
         from .ultimate_direct_long_roi import collect as direct_collect
@@ -97,8 +101,14 @@ def collect_preflight(folder):
     return _collect(folder, 'successor', preflight=True)
 
 
-def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=False, candle_predicate_gate=False):
+def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=False, candle_predicate_gate=False, ultimate_gate=False):
     plan = read(PLAN)
+    if plan.get('ultimate_direct_long_qualification'):
+        assert phase == 'targeted' and ultimate_gate and not preflight and not diagnostic and not matchinglow_gate and not candle_predicate_gate
+        from .ultimate_direct_long_qualification import validate_scope
+        validate_scope(plan)
+    else:
+        assert not ultimate_gate
     if plan.get('triple_body_master_reconciliation'):
         assert phase == 'targeted' and not preflight and not diagnostic and candle_predicate_gate
         from .master_reconciliation import validate_scope, verify_runtime

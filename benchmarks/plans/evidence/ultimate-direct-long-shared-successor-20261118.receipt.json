@@ -1,0 +1,73 @@
+{
+  "status": "actual-ultimate-shared-fixture-auxiliary-passed",
+  "arm": "new",
+  "source": "c5bfd4950982aa80dddbfd2db6358ad43ddb9e4c",
+  "source_fingerprint": "4b348074bcf3350f0af46261beb830cfe0cd50001ad2c06756c54cb5a1b054f4",
+  "ci_run": "44341191246",
+  "manifest_sha256": "1aee6aff8542e81894a280b14fef370e334087fff2730beef8448c3f7be382eb",
+  "test_method": "OoplesFinance.StockIndicators.CompetitorTests.SharedAllocationProbeTests.UltimateFixtureHandlesSingleOutputAndWorkersAndRestoresSettings",
+  "passed_cases": 4,
+  "cases": [
+    {
+      "count": 29,
+      "operation": "Skender.GetUltimate"
+    },
+    {
+      "count": 29,
+      "operation": "TaLib.Functions.UltOsc"
+    },
+    {
+      "count": 513,
+      "operation": "Skender.GetUltimate"
+    },
+    {
+      "count": 513,
+      "operation": "TaLib.Functions.UltOsc"
+    }
+  ],
+  "trx_sha256": "b2abbe165225c2563ace9ad17400882a834335e1144c194922623cd7f696a8e0",
+  "runtime_closure_files_verified": 185,
+  "runtime_pins": {
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.deps.json": "4e7f3bd67bacb584000fafada20907a71351594c57fc91579f0c069eccd58817",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.dll": "f70c2d7489af5cbf0855721e8eb075de47fc2db6af72ce22e571032a86bd1379",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json": "c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097",
+    "OoplesFinance.StockIndicators.CompetitorTests.deps.json": "f0c93b797011ee68ea0b071dcb3ce0e2d26e947470a2b73939ae1964dff54301",
+    "OoplesFinance.StockIndicators.CompetitorTests.dll": "264511a27ae04e709bf6e58d49056363f3fb7aeb1810b41231632d5cf11628a1",
+    "OoplesFinance.StockIndicators.CompetitorTests.runtimeconfig.json": "a217d17be0661abf2717a26937c6e379c33542cb6f292fd3fc5a2d5113a9d6dc",
+    "OoplesFinance.StockIndicators.dll": "e6aa9aacff74acd49eeebb322cc3f8714d7c40488f450a7d31e215947638d7a8"
+  },
+  "source_files_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedAllocationProbeTests.cs": "4c77fb1bd61febfb19ce0938414754dc106088ce6eee9367bf0b2dcb27ebe945",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedUltimateBenchmarks.cs": "ff750e4dff5e79ac0aeeb25c2d673e81afe86b72814892453dc9d6b6f018bd5c"
+  },
+  "local_sdk": "10.0.404",
+  "host_runtime": "10.0.15",
+  "auxiliary_bootstrap": {
+    "AIDOTNET_DISABLE_GPU": "1"
+  },
+  "vstest_timeout_seconds": 120,
+  "host_info": "\n  Version:      10.0.15\n  Architecture: x64\n  Commit:       8e0f8ed231\n\n",
+  "local_file_pins": {
+    "C:\\Program Files\\dotnet\\dotnet.exe": "0a1b7ca731245de1f267a9c3c4d1ef8705e0821923fcdd6e0d61c31132f51240",
+    "C:\\Program Files\\dotnet\\sdk\\10.0.404\\dotnet.dll": "17b294d599d2417bbc4e9670f85fd299512132f0082ed937a2a17e6901380665",
+    "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\10.0.15\\coreclr.dll": "a6988fc77326c245873986446de4f15218df929664750d333cb2d42486c071da",
+    "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\10.0.15\\hostpolicy.dll": "20405152b719ccb8d4e0361f3259db8875d8d4f3c97d1fbea4e1ca6cc6d21902"
+  },
+  "command": [
+    "C:\\Program Files\\dotnet\\dotnet.exe",
+    "exec",
+    "C:\\Program Files\\dotnet\\sdk\\10.0.404\\dotnet.dll",
+    "vstest",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-ultimate-direct-long-gpu-only-20261118\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.CompetitorTests.dll",
+    "/Settings:C:\\Users\\cheat\\source\\stock-indicators-operations\\ultimate-direct-long-fixture-correctness-20261118\\serial.runsettings",
+    "/TestCaseFilter:FullyQualifiedName=OoplesFinance.StockIndicators.CompetitorTests.SharedAllocationProbeTests.UltimateFixtureHandlesSingleOutputAndWorkersAndRestoresSettings",
+    "/Logger:trx;LogFileName=fixture.trx",
+    "/ResultsDirectory:C:\\Users\\cheat\\source\\stock-indicators-operations\\ultimate-direct-long-fixture-correctness-20261118\\new"
+  ],
+  "new_local_builds": 0,
+  "new_measurements": 0,
+  "gpu_reexecuted": false,
+  "original_cpu_gpu_receipts_changed": false,
+  "auxiliary_only": true,
+  "qualification": false
+}

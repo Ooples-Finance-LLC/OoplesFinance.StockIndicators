@@ -570,6 +570,11 @@ SCOPES['triple-body-master-reconciliation-20261117'] = dict(
     methods={'SharedTripleBodyBenchmarks':['BuilderFull','BuilderLatestOnly','NativeSingle','NativeParallel']},
     totals=(120,24),shards=1,baseline_phase='targeted',baseline_totals=(120,24))
 
+SCOPES['ultimate-direct-long-qualification-20261118'] = dict(
+    fixtures={'SharedUltimateBenchmarks':{p:p for p in ('TaLib.Functions.UltOsc','Skender.GetUltimate')}},
+    paths={'src/Indicators/ValuesBarExecution.Ultimate.cs','tests/ModelsTests/WiderUltimateExecutionTests.cs'},
+    implicit_fixtures=set(),totals=(60,12),shards=1)
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
@@ -581,6 +586,10 @@ SCOPES['abandoned-inventory-repair-20261114']['methods']['SharedCrowSoldierBench
 SCOPES['abandoned-inventory-repair-20261114']['totals'] = (176, 36)
 
 def verify_reference(plan):
+    if plan.get('ultimate_direct_long_qualification'):
+        from .ultimate_direct_long_qualification import validate_scope
+        validate_scope(plan)
+        return
     reference = plan.get('targeted_reference')
     if reference is None:
         return

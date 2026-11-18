@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="d2689623-07b8-47e7-8332-4c319f11035f" name="cheat@SUPER-SERVER 2026-11-18 11:43:10" runUser="SUPER-SERVER\cheat" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-18T11:43:10.2174213-05:00" queuing="2026-11-18T11:43:10.2174215-05:00" start="2026-11-18T11:43:06.1259263-05:00" finish="2026-11-18T11:43:10.2244785-05:00" />
+  <TestSettings name="default" id="d75a8dc0-b8f2-477c-9419-dab53d7c5c7e">
+    <Deployment runDeploymentRoot="cheat_SUPER-SERVER_2026-11-18_11_43_10" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="03a23d54-c9c0-4f04-be75-fea5e90ec701" testId="4a53cdef-8d2c-34e7-c185-ec16d9eb60cf" testName="OoplesFinance.StockIndicators.CompetitorTests.SharedAllocationProbeTests.UltimateFixtureHandlesSingleOutputAndWorkersAndRestoresSettings(count: 513, operation: &quot;Skender.GetUltimate&quot;)" computerName="SUPER-SERVER" duration="00:00:00.0321772" startTime="2026-11-18T11:43:10.0607610-05:00" endTime="2026-11-18T11:43:10.0931448-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="03a23d54-c9c0-4f04-be75-fea5e90ec701" />
+    <UnitTestResult executionId="c662b6a8-4bb3-4267-a683-3d868933c72f" testId="cefcee22-d881-4586-38f3-286fe7731d19" testName="OoplesFinance.StockIndicators.CompetitorTests.SharedAllocationProbeTests.UltimateFixtureHandlesSingleOutputAndWorkersAndRestoresSettings(count: 29, operation: &quot;TaLib.Functions.UltOsc&quot;)" computerName="SUPER-SERVER" duration="00:00:00.0002690" startTime="2026-11-18T11:43:10.0933880-05:00" endTime="2026-11-18T11:43:10.0937729-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c662b6a8-4bb3-4267-a683-3d868933c72f" />
+    <UnitTestResult executionId="90d61d8c-3c2b-4279-9ab1-87ce5d438796" testId="10103f9a-2784-1df0-0302-31db9b4971f8" testName="OoplesFinance.StockIndicators.CompetitorTests.SharedAllocationProbeTests.UltimateFixtureHandlesSingleOutputAndWorkersAndRestoresSettings(count: 513, operation: &quot;TaLib.Functions.UltOsc&quot;)" computerName="SUPER-SERVER" duration="00:00:00.2062189" startTime="2026-11-18T11:43:09.8201231-05:00" endTime="2026-11-18T11:43:10.0418555-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="90d61d8c-3c2b-4279-9ab1-87ce5d438796" />
+    <UnitTestResult executionId="a1311a82-0ea2-45c8-8f27-1a94bffd4fb4" testId="74a80696-90a9-5d21-9452-3a0311b291f5" testName="OoplesFinance.StockIndicators.CompetitorTests.SharedAllocationProbeTests.UltimateFixtureHandlesSingleOutputAndWorkersAndRestoresSettings(count: 29, operation: &quot;Skender.GetUltimate&quot;)" computerName="SUPER-SERVER" duration="00:00:00.0053368" startTime="2026-11-18T11:43:10.0544858-05:00" endTime="2026-11-18T11:43:10.0600026-05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a1311a82-0ea2-45c8-8f27-1a94bffd4fb4" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.SharedAllocationProbeTests.UltimateFixtureHandlesSingleOutputAndWorkersAndRestoresSettings(count: 29, operation: &quot;Skender.GetUltimate&quot;)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="74a80696-90a9-5d21-9452-3a0311b291f5">
+      <Execution id="a1311a82-0ea2-45c8-8f27-1a94bffd4fb4" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.SharedAllocationProbeTests" name="UltimateFixtureHandlesSingleOutputAndWorkersAndRestoresSettings" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.SharedAllocationProbeTests.UltimateFixtureHandlesSingleOutputAndWorkersAndRestoresSettings(count: 29, operation: &quot;TaLib.Functions.UltOsc&quot;)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="cefcee22-d881-4586-38f3-286fe7731d19">
+      <Execution id="c662b6a8-4bb3-4267-a683-3d868933c72f" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.SharedAllocationProbeTests" name="UltimateFixtureHandlesSingleOutputAndWorkersAndRestoresSettings" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.SharedAllocationProbeTests.UltimateFixtureHandlesSingleOutputAndWorkersAndRestoresSettings(count: 513, operation: &quot;TaLib.Functions.UltOsc&quot;)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="10103f9a-2784-1df0-0302-31db9b4971f8">
+      <Execution id="90d61d8c-3c2b-4279-9ab1-87ce5d438796" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.SharedAllocationProbeTests" name="UltimateFixtureHandlesSingleOutputAndWorkersAndRestoresSettings" />
+    </UnitTest>
+    <UnitTest name="OoplesFinance.StockIndicators.CompetitorTests.SharedAllocationProbeTests.UltimateFixtureHandlesSingleOutputAndWorkersAndRestoresSettings(count: 513, operation: &quot;Skender.GetUltimate&quot;)" storage="c:\users\cheat\source\repos\ooples-finance-llc\si-ultimate-direct-long-gpu-only-20261118\benchmarks\ooplesfinance.stockindicators.competitortests\bin\release\net10.0\ooplesfinance.stockindicators.competitortests.dll" id="4a53cdef-8d2c-34e7-c185-ec16d9eb60cf">
+      <Execution id="03a23d54-c9c0-4f04-be75-fea5e90ec701" />
+      <TestMethod codeBase="C:\Users\cheat\source\repos\Ooples-Finance-LLC\si-ultimate-direct-long-gpu-only-20261118\benchmarks\OoplesFinance.StockIndicators.CompetitorTests\bin\Release\net10.0\OoplesFinance.StockIndicators.CompetitorTests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="OoplesFinance.StockIndicators.CompetitorTests.SharedAllocationProbeTests" name="UltimateFixtureHandlesSingleOutputAndWorkersAndRestoresSettings" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="4a53cdef-8d2c-34e7-c185-ec16d9eb60cf" executionId="03a23d54-c9c0-4f04-be75-fea5e90ec701" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cefcee22-d881-4586-38f3-286fe7731d19" executionId="c662b6a8-4bb3-4267-a683-3d868933c72f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="10103f9a-2784-1df0-0302-31db9b4971f8" executionId="90d61d8c-3c2b-4279-9ab1-87ce5d438796" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="74a80696-90a9-5d21-9452-3a0311b291f5" executionId="a1311a82-0ea2-45c8-8f27-1a94bffd4fb4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="4" executed="4" passed="4" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.0+05679a7ab5 (64-bit .NET 10.0.15)&#xD;
+[xUnit.net 00:00:00.22]   Discovering: OoplesFinance.StockIndicators.CompetitorTests&#xD;
+[xUnit.net 00:00:03.07]   Discovered:  OoplesFinance.StockIndicators.CompetitorTests&#xD;
+[xUnit.net 00:00:03.13]   Starting:    OoplesFinance.StockIndicators.CompetitorTests&#xD;
+[xUnit.net 00:00:03.48]   Finished:    OoplesFinance.StockIndicators.CompetitorTests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>
