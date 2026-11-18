@@ -1,0 +1,115 @@
+name: ALMA fixed-grid frozen-baseline BDN feasibility diagnostic
+on:
+  workflow_dispatch:
+  push:
+    branches: [perf/alma-fixed-grid-roi-20261118]
+    paths: [.github/workflows/alma-fixed-grid-roi.yml, scripts/hosted_timing/pipeline.py]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: alma-fixed-grid-roi
+  cancel-in-progress: false
+env:
+  HOSTED_TIMING_PLAN: benchmarks/plans/hosted-alma-fixed-grid-roi-20261118.json
+jobs:
+  qualify:
+    runs-on: windows-2025
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            .github
+            benchmarks/plans
+      - name: Fail closed before SDK or input setup
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $plan=Get-Content -LiteralPath $env:HOSTED_TIMING_PLAN -Raw | ConvertFrom-Json
+          if ($plan.inputs_ready -isnot [bool] -or !$plan.inputs_ready -or $plan.parent_review_approved -isnot [bool] -or !$plan.parent_review_approved -or $plan.sources.successor -ne '9b6e2e41853fa0e2b8962313a23f28550d2320be' -or $plan.sources.old -ne 'c5bfd4950982aa80dddbfd2db6358ad43ddb9e4c') { throw 'UNBOUND diagnostic receipts or parent review; no SDK/input I/O permitted' }
+          foreach ($role in @('old_candidate','candidate')) {
+            $receipt=$plan.$role
+            foreach ($key in @('manifest_sha256','gpu_receipt_sha256','production_sha256','source_fingerprint','artifact_zip_sha256','actual_harness_sha256')) { if ($receipt.$key -notmatch '^[a-f0-9]{64}$') { throw 'UNBOUND actual CPU/GPU receipt hashes' } }
+            foreach ($key in @('producer','evidence_source')) { if ($receipt.$key -notmatch '^[a-f0-9]{40}$') { throw 'UNBOUND actual receipt commits' } }
+            foreach ($key in @('ci_run','artifact_id','unit_passed','parity_passed')) { if ([string]$receipt.$key -notmatch '^[1-9][0-9]*$') { throw 'UNBOUND actual receipt run/counts' } }
+          }
+          if ($plan.harness_sha256 -notmatch '^[a-f0-9]{64}$') { throw 'UNBOUND actual scoped canonical harness' }
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - name: Select the installed diagnostic SDK before input downloads
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          # This runner-only selector is not committed source or a build input.
+          if (Test-Path -LiteralPath global.json) { throw 'Unexpected existing SDK selector' }
+          [IO.File]::WriteAllText((Join-Path $PWD 'global.json'), '{"sdk":{"version":"10.0.403","rollForward":"disable","allowPrerelease":false}}')
+          $actualSdk=(& dotnet --version).Trim()
+          if ($LASTEXITCODE -ne 0 -or $actualSdk -ne '10.0.403') { throw ('Wrong actual diagnostic SDK: '+$actualSdk) }
+          $actualInfo=(& dotnet --info | Out-String)
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to inspect dotnet installation' }
+          # The muxer can be newer than the CLR selected for these net10 inputs.
+          $installedRuntimes=@(& dotnet --list-runtimes)
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to inspect installed runtimes' }
+          $compatibleRuntimes=@($installedRuntimes | ForEach-Object {
+            if ($_ -match '^Microsoft\.NETCore\.App (10\.0\.\d+) \[') { [version]$Matches[1] }
+          } | Sort-Object)
+          if ($compatibleRuntimes.Count -eq 0 -or $compatibleRuntimes[-1].ToString() -ne '10.0.15') { throw ('Wrong installed net10 compatible runtime: '+($installedRuntimes -join '; ')) }
+          Write-Output ('Installed net10 compatible runtime: '+$compatibleRuntimes[-1])
+          Write-Output $actualInfo
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install psutil==7.2.2
+      - name: Validate actual source and registry boundary before input downloads
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          Push-Location scripts
+          try {
+            python -m unittest -v test_hosted_alma_fixed_grid_roi
+            if ($LASTEXITCODE -ne 0) { throw 'Reconciliation orchestration tests failed' }
+            python -c "from hosted_timing import alma_fixed_grid_roi as q; q.validate_scope(q.p.read(q.p.PLAN))"
+            if ($LASTEXITCODE -ne 0) { throw 'Reconciliation evidence is not executable' }
+          } finally { Pop-Location }
+          $plan=Get-Content -LiteralPath $env:HOSTED_TIMING_PLAN -Raw | ConvertFrom-Json
+          foreach ($role in @('old_candidate','candidate')) {
+            $receipt=$plan.$role
+            $artifact=Invoke-RestMethod -Uri ('https://api.github.com/repos/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/artifacts/'+$receipt.artifact_id) -Headers @{Authorization=('Bearer '+$env:GH_TOKEN);'X-GitHub-Api-Version'='2022-11-28'}
+            if ($artifact.id -ne [long]$receipt.artifact_id -or $artifact.name -ne 'candidate-correctness-inputs' -or $artifact.expired -or $artifact.workflow_run.id -ne [long]$receipt.ci_run -or $artifact.workflow_run.head_sha -ne $receipt.producer -or $artifact.digest -ne ('sha256:'+$receipt.artifact_zip_sha256)) { throw 'Actual artifact API identity/digest mismatch' }
+            ($role.ToUpperInvariant()+'_RUN='+$receipt.ci_run) | Add-Content -LiteralPath $env:GITHUB_ENV
+            ($role.ToUpperInvariant()+'_ID='+$receipt.artifact_id) | Add-Content -LiteralPath $env:GITHUB_ENV
+          }
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ env.OLD_CANDIDATE_ID }}
+          merge-multiple: true
+          path: old-candidate
+          run-id: ${{ env.OLD_CANDIDATE_RUN }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ env.CANDIDATE_ID }}
+          merge-multiple: true
+          path: candidate
+          run-id: ${{ env.CANDIDATE_RUN }}
+          github-token: ${{ github.token }}
+      - name: Authenticate two existing builds and explicit baseline native harness role alias
+        run: python scripts/prepare-alma-fixed-grid-roi.py --old-candidate old-candidate --candidate candidate --out reconciled-inputs
+      - name: Measure20cases under unchanged policy
+        run: python scripts/run-hosted-timing.py measure --inputs reconciled-inputs --out reconciled-qualification/evidence/shard0 --phase diagnostic --shard 0
+      - name: Verify4 comparisons and genuinely new10k feasibility screen
+        run: python scripts/run-hosted-timing.py collect --inputs reconciled-qualification/evidence --prepared reconciled-inputs --out reconciled-qualification/summary.json --phase diagnostic
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: alma-fixed-grid-roi
+          path: |
+            reconciled-inputs/
+            reconciled-qualification/
+          if-no-files-found: warn

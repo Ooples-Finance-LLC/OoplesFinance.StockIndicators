@@ -239,3 +239,4 @@ benchmarks/plans/hosted-ultimate-direct-long-qualification-20261118.json text eo
 benchmarks/plans/evidence/ultimate-direct-long-shared-*-20261118.trx -text whitespace=cr-at-eol
 benchmarks/plans/evidence/ultimate-direct-long-shared-*-20261118.receipt.json -text
 benchmarks/plans/hosted-cmf-fixed-grid-roi-20261118.json text eol=lf
+benchmarks/plans/hosted-alma-fixed-grid-roi-20261118.json text eol=lf

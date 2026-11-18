@@ -235,6 +235,9 @@ def verify_inputs(folder):
     if plan.get('ultimate_direct_long_qualification'):
         from .ultimate_direct_long_qualification import verify_authentication
         verify_authentication(folder, plan, proof)
+    if plan.get('diagnostic_kind') == 'alma-fixed-grid-native-pilot':
+        from .alma_fixed_grid_roi import verify_authentication
+        verify_authentication(folder,plan,proof)
     if plan.get('diagnostic_kind') == 'cmf-fixed-grid-native-pilot':
         from .cmf_fixed_grid_roi import verify_authentication
         verify_authentication(folder,plan,proof)
@@ -295,6 +298,9 @@ def _verify_input_contents(folder, plan, proof, plan_sha256):
         assert all(r.attrib['outcome'] == 'Passed' for r in results)
     if plan.get('ultimate_direct_long_qualification'):
         from .ultimate_direct_long_qualification import verify_harness_alias
+        verify_harness_alias(folder,plan,proof)
+    elif plan.get('diagnostic_kind') == 'alma-fixed-grid-native-pilot':
+        from .alma_fixed_grid_roi import verify_harness_alias
         verify_harness_alias(folder,plan,proof)
     elif plan.get('diagnostic_kind') == 'cmf-fixed-grid-native-pilot':
         from .cmf_fixed_grid_roi import verify_harness_alias
