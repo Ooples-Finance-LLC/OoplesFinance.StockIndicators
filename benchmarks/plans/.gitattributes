@@ -1,4 +1,5 @@
 # These immutable identities are hashed as bytes on Windows and Unix hosts.
+hosted-sample-shape-actual-fixture-roi-20261118.json text eol=lf
 hosted-named-projection-refresh-20261116.json text eol=lf
 evidence/named-output-projection-refresh-scope-20261116.json text eol=lf
 hosted-candle-single-pass-roi-20261116.json text eol=lf
