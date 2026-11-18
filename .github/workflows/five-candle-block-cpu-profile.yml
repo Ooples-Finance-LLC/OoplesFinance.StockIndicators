@@ -1,0 +1,58 @@
+name: Pinned five-candle block CPU and GC diagnostic
+on:
+  workflow_dispatch:
+  push:
+    branches: [perf/hosted-five-candle-block-cpu-profile-20261117]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: pinned-five-candle-block-cpu-profile
+  cancel-in-progress: false
+jobs:
+  profile:
+    runs-on: windows-2025
+    timeout-minutes: 10
+    steps:
+      - name: Initialize bounded diagnostic paths
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          foreach ($name in @('PROFILE_OUTPUT','INPUT_ARTIFACT','CANDIDATE_ARTIFACT','PROFILE_RUNTIME')) {
+            $value=Join-Path $env:RUNNER_TEMP ('five-candle-block-profile-'+$name.ToLowerInvariant())
+            if (Test-Path -LiteralPath $value) { throw 'Fresh diagnostic paths required' }
+            [Environment]::SetEnvironmentVariable($name,$value)
+            "$name=$value" | Add-Content -LiteralPath $env:GITHUB_ENV -Encoding utf8
+          }
+          [IO.Directory]::CreateDirectory($env:PROFILE_OUTPUT) | Out-Null
+          [ordered]@{workflow_head=$env:GITHUB_SHA;run_id=$env:GITHUB_RUN_ID;source='093969bb3650c3e2aad384cd0ecb2a991084ab49';diagnostic_only=$true;qualification=$false;production_builds=0;tests=0;driver_builds=1;source_windows=5;seconds_per_window=5;total_source_window_cap_seconds=30;output_cap_bytes=104857600;timing_or_policy_change=$false} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:PROFILE_OUTPUT 'workflow-provenance.json') -Encoding utf8
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts
+            .github/workflows
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - uses: actions/download-artifact@v8
+        with:
+          name: candle-predicate-qualification
+          path: ${{ env.INPUT_ARTIFACT }}
+          run-id: 44010931924
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v8
+        with:
+          name: candidate-correctness-inputs
+          path: ${{ env.CANDIDATE_ARTIFACT }}
+          run-id: 44201563051
+          github-token: ${{ github.token }}
+      - name: Capture five fixed existing-binary source windows
+        shell: pwsh
+        run: ./scripts/capture-five-candle-block-cpu.ps1
+      - uses: actions/upload-artifact@v7
+        if: ${{ always() && env.PROFILE_OUTPUT != '' }}
+        with:
+          name: five-candle-block-cpu-profile
+          path: ${{ env.PROFILE_OUTPUT }}/
+          retention-days: 14
+          if-no-files-found: error
