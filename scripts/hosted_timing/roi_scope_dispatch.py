@@ -1,7 +1,9 @@
 """Keep legacy and family diagnostic scopes independently pinned."""
 def validate_scope(plan):
     kind = plan.get("diagnostic_kind")
-    if kind == "ladder-word-native-pilot":
+    if kind == "lagged-five-native-pilot":
+        from .lagged_five_roi import validate_scope as check
+    elif kind == "ladder-word-native-pilot":
         from .ladder_word_roi import validate_scope as check
     elif kind == "candle-isolated-native-pilot":
         from .candle_isolated_roi import validate_scope as check

@@ -228,3 +228,5 @@ benchmarks/plans/hosted-pointwise-projection-native-pilot-20261116.json text eol
 benchmarks/plans/evidence/pointwise-projection-verified-preparation-plan-20261116.json text eol=lf
 benchmarks/plans/hosted-pointwise-family-refresh-20261116.json text eol=lf
 benchmarks/plans/evidence/pointwise-family-refresh-scope-20261116.json text eol=lf
+
+benchmarks/plans/hosted-lagged-five-roi-20261118.json text eol=lf
