@@ -247,7 +247,7 @@ def verify_runtime(folder, expected):
 
 
 
-def native_rows(folder):
+def native_rows(folder, *, pairs=PAIRS):
     """Retain separate owned rounds and the sole round2 native control; never pool."""
     from .verify import archived, sample
     from .checkpoints import case_key
@@ -264,19 +264,20 @@ def native_rows(folder):
             key = case_key(case);assert key not in rows
             rows[key] = sample(case)
         methods = ('Ooples','Competitor') if index == '2' else ('Ooples',)
-        assert set(rows) == {(pair,bars,method) for pair in PAIRS for bars in (1000,10000) for method in methods}
+        assert set(rows) == {(pair,bars,method) for pair in pairs for bars in (1000,10000) for method in methods}
         rounds[index] = rows
     assert set(rounds) == {'0','1','2','3'}
     return [dict(pair=pair,bars=bars,
         old_rounds={index:rounds[index][pair,bars,'Ooples'] for index in ('0','3')},
         candidate_rounds={index:rounds[index][pair,bars,'Ooples'] for index in ('1','2')},
-        native_control=rounds['2'][pair,bars,'Competitor']) for pair in PAIRS for bars in (1000,10000)]
+        native_control=rounds['2'][pair,bars,'Competitor']) for pair in pairs for bars in (1000,10000)]
 
 
-def adjudicate_native(rows, decisions):
-    expected = {(pair,bars) for pair in PAIRS for bars in (1000,10000)}
+def adjudicate_native(rows, decisions, *, pairs=PAIRS, new_closure_pairs=NEW_CLOSURE_PAIRS):
+    assert pairs and len(pairs)==len(set(pairs)) and set(new_closure_pairs)<=set(pairs)
+    expected = {(pair,bars) for pair in pairs for bars in (1000,10000)}
     indexed = {(row['pair'],row['bars']):row for row in rows}
-    assert len(indexed) == len(rows) == 8 and indexed.keys() == expected
+    assert len(indexed) == len(rows) == 2*len(pairs) and indexed.keys() == expected
     own = {}
     for decision in decisions:
         if decision['fixture'] != 'LibraryPairBenchmarks' or decision['method'] != 'Ooples': continue
@@ -291,7 +292,7 @@ def adjudicate_native(rows, decisions):
         if key[1] == 10000:
             for index,value in row['old_rounds'].items():old_counts[index] += int(value['mean_ns'] < native['mean_ns'])
             for index,value in row['candidate_rounds'].items():new_counts[index] += int(value['mean_ns'] < native['mean_ns'])
-            if key[0] in NEW_CLOSURE_PAIRS and own[key] == 'faster' and all(value['mean_ns'] >= native['mean_ns'] for value in old) and all(
+            if key[0] in new_closure_pairs and own[key] == 'faster' and all(value['mean_ns'] >= native['mean_ns'] for value in old) and all(
                 value['upper_ns'] < native['lower_ns'] and value['mean_ns'] <= 0.90*native['mean_ns'] for value in new):
                 closures.append(dict(pair=key[0],bars=10000,own_source_verdict=own[key]))
         if all(value['upper_ns'] < native['lower_ns'] for value in old):
@@ -300,7 +301,7 @@ def adjudicate_native(rows, decisions):
             if not check['preserved']:reopened.append(check)
     net_progress = min(new_counts.values()) > max(old_counts.values())
     passed = bool(closures) and net_progress and not reopened
-    return dict(passed=passed,policy=NATIVE_POLICY,new_closure_eligible_pairs=NEW_CLOSURE_PAIRS,new_10000_closures=closures,
+    return dict(passed=passed,policy=NATIVE_POLICY,new_closure_eligible_pairs=new_closure_pairs,new_10000_closures=closures,
         old_10000_point_win_counts=old_counts,candidate_10000_point_win_counts=new_counts,
         net_10000_point_progress=net_progress,prior_confident_win_checks=protected,
         prior_confident_win_reopenings=reopened,native_control_round=2,native_controls_per_pair_size=1,

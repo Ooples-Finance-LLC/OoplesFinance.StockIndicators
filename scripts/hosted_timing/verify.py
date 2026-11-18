@@ -54,6 +54,10 @@ def sample(case):
 
 
 def collect(folder, phase):
+    if read(PLAN).get('seven_candle_word_qualification'):
+        assert phase == 'targeted'
+        from .seven_candle_qualification import collect as seven_collect
+        return seven_collect(folder)
     if read(PLAN).get('diagnostic_kind') == 'candle-isolated-native-pilot':
         assert phase == 'diagnostic'
         from .candle_isolated_roi import collect as isolated_collect
@@ -83,7 +87,12 @@ def collect_preflight(folder):
 
 def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=False, candle_predicate_gate=False):
     plan = read(PLAN)
-    if plan.get('triple_body_master_reconciliation'):
+    if plan.get('seven_candle_word_qualification'):
+        assert phase=='targeted' and not preflight and not diagnostic and candle_predicate_gate
+        from .seven_candle_qualification import validate_scope
+        from .triple_body_macro_qualification import verify_runtime
+        validate_scope(plan);verify_runtime(folder,plan['expected_runtime_version'])
+    elif plan.get('triple_body_master_reconciliation'):
         assert phase == 'targeted' and not preflight and not diagnostic and candle_predicate_gate
         from .master_reconciliation import validate_scope, verify_runtime
         validate_scope(plan)

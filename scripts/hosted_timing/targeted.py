@@ -570,6 +570,13 @@ SCOPES['triple-body-master-reconciliation-20261117'] = dict(
     methods={'SharedTripleBodyBenchmarks':['BuilderFull','BuilderLatestOnly','NativeSingle','NativeParallel']},
     totals=(120,24),shards=1,baseline_phase='targeted',baseline_totals=(120,24))
 
+SCOPES['seven-candle-word-qualification-20261118'] = dict(
+    fixtures={'SharedTripleBodyBenchmarks':{pair:pair for pair in ('TaLib.Candles.ThreeInside','TaLib.Candles.TwoCrows','TaLib.Candles.UpsideGapTwoCrows','TaLib.Candles.UniqueThreeRiver')},
+              'SharedMultiBarCandleBenchmarks':{pair:pair for pair in ('TaLib.Candles.Breakaway','TaLib.Candles.ConcealingBabySwallow','TaLib.Candles.LadderBottom')}},
+    implicit_fixtures=set(),paths={'src/Indicators/ValuesBarExecution.BoundedWindows.cs','src/Indicators/ValuesBarExecution.BreakawayBlocks.cs','src/Indicators/ValuesBarExecution.BreakawayDispatch.cs','src/Indicators/ValuesBarExecution.ThreeInsideWord.cs','tests/ModelsTests/BreakawayZeroBlockReplayTests.cs','tests/ModelsTests/ThreeInsideWordExecutionTests.cs'},
+    methods={'SharedTripleBodyBenchmarks':['BuilderFull','BuilderLatestOnly','NativeSingle','NativeParallel'],'SharedMultiBarCandleBenchmarks':['BuilderFull','BuilderLatestOnly']},
+    totals=(198,42),shards=1,baseline_phase='targeted',baseline_totals=(120,24))
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
@@ -588,9 +595,13 @@ def verify_reference(plan):
     fixtures = scope['fixtures']
     assert not any(plan.get(k) for k in ('qualify_variants', 'standalone_variants', 'coverage_reference', 'trix_preflight'))
     assert plan['sources']['published'] == plan['sources']['old']
-    raw = subprocess.check_output(['git', 'show', plan['sources']['published'] + ':' + reference['decision']], cwd=REPO)
-    assert hashlib.sha256(raw).hexdigest() == reference['sha256']
-    decision = json.loads(raw)
+    if reference['scope']=='seven-candle-word-qualification-20261118':
+        from .seven_candle_qualification import verify_reference as verify_seven_reference
+        decision=verify_seven_reference(plan)
+    else:
+        raw = subprocess.check_output(['git', 'show', plan['sources']['published'] + ':' + reference['decision']], cwd=REPO)
+        assert hashlib.sha256(raw).hexdigest() == reference['sha256']
+        decision = json.loads(raw)
     assert decision['accepted'] and decision['phase'] == scope.get('baseline_phase','successor')
     assert (decision['case_count'], decision['decision_count']) == scope.get('baseline_totals',(1860,372))
     if decision['phase'] == 'targeted':
@@ -599,13 +610,16 @@ def verify_reference(plan):
             # under the new exact source proof, without claiming publication.
             from .master_reconciliation import verify_prior_qualification
             verify_prior_qualification(reference,decision)
-        else:
+        elif reference['scope']!='seven-candle-word-qualification-20261118':
             assert decision['production_integrated'] and decision['report_imported']
     assert decision['verdicts'].get('faster', 0) > 0
     assert not decision['verdicts'].get('slower', 0)
     assert str(decision['run_id']) == str(reference['run_id'])
     assert decision['sources']['new'] == reference['qualified_source']
-    if reference['scope'] == 'matchinglow-only-grid-20261116':
+    if reference['scope']=='seven-candle-word-qualification-20261118':
+        from .candle_isolated_roi import verify_source_boundary
+        verify_source_boundary()
+    elif reference['scope'] == 'matchinglow-only-grid-20261116':
         from .matchinglow_grid_qualification import verify_continuation
         verify_continuation(reference, plan['sources']['old'])
     elif reference.get('master_reconciliation'):

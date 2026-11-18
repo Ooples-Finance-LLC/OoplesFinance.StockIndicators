@@ -1,0 +1,13 @@
+{
+  "approved": false,
+  "root_authenticated": false,
+  "scope": "seven-candle-word-qualification-20261118",
+  "baseline": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+  "candidate": "d1933adf1c979bc19a5fab3f2bb2b26946386386",
+  "run_id": "UNBOUND",
+  "workflow_head": "UNBOUND",
+  "summary": {
+    "path": "benchmarks/plans/evidence/seven-candle-word-roi-summary-20261118.json",
+    "sha256": "UNBOUND"
+  }
+}

@@ -113,8 +113,8 @@ def verify_harness_alias(folder,plan,proof):
     assert proof['checks']['variants']==proof['checks']['old']
     assert proof['tested_runtime_dependencies']['variants']==proof['tested_runtime_dependencies']['old']
 
-def verify_authentication(folder,plan,proof):
-    validate_scope(plan);assert proof['preparation_mode']=='authenticated-isolated-candle-diagnostic'
+def verify_authentication(folder,plan,proof,*,validator=validate_scope,preparation_mode='authenticated-isolated-candle-diagnostic'):
+    validator(plan);assert proof['preparation_mode']==preparation_mode
     verify_harness_alias(folder,plan,proof)
     assert p.digest(folder/'common'/original.HARNESS_ASSEMBLY)==plan['harness_sha256']
     authenticated={}
@@ -128,8 +128,8 @@ def verify_authentication(folder,plan,proof):
     manifest=p.read(folder/'old-authentication/manifest.json');prefix='benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/'
     assert proof['common_manifest']=={name[len(prefix):]:digest for name,digest in manifest['runtime_files'].items() if name.startswith(prefix)}
 
-def prepare(old_candidate,candidate,out):
-    plan=p.read(p.PLAN);validate_scope(plan)
+def prepare(old_candidate,candidate,out,*,validator=validate_scope,preparation_mode='authenticated-isolated-candle-diagnostic'):
+    plan=p.read(p.PLAN);validator(plan)
     assert subprocess.check_output(['dotnet','--version'],text=True).strip()==plan['proposed_dotnet_sdk']
     old_candidate,candidate,out=map(lambda x:Path(x).resolve(),(old_candidate,candidate,out));assert not out.exists() and not out.is_relative_to(old_candidate) and not out.is_relative_to(candidate)
     old,new=checked_inputs(old_candidate,plan['old_candidate']),checked_inputs(candidate,plan['candidate'])
@@ -147,7 +147,7 @@ def prepare(old_candidate,candidate,out):
         (out/'production'/(label+'.dll')).write_bytes(auth['read']('blobs/'+auth['production']))
         checks[label]=dict(auth['manifest']['checks']['unit'],original_gpu_source=source);production[label]=auth['production'];dependencies[label]=auth['closure']
         for suffix,raw in [('.trx',auth['read']('evidence/unit.trx')),('-parity.trx',auth['read']('evidence/parity.trx')),('-original-gpu-receipt.json',auth['gpu_receipt']),('-original-gpu-gpu.trx.gz',auth['gpu_trx'])]:(out/'evidence'/(label+suffix)).write_bytes(raw)
-    proof=dict(plan_sha256=p.digest(p.PLAN),sources=plan['sources'],source_trees={label:p.git('rev-parse',plan['sources'][label]+':src') for label in ('old','successor','variants')},sdk=plan['proposed_dotnet_sdk'],dotnet_info=subprocess.check_output(['dotnet','--info'],text=True),workflow_head=p.git('rev-parse','HEAD'),run_id=os.environ['GITHUB_RUN_ID'],run_attempt=os.environ['GITHUB_RUN_ATTEMPT'],preparation_mode='authenticated-isolated-candle-diagnostic',source_authentication=source_authentication(plan),harness_role_alias=alias,common_manifest=p.manifest(out/'common'),evidence_manifest=p.manifest(out/'evidence'),production_sha256=production,checks=checks,tested_runtime_dependencies=dependencies)
+    proof=dict(plan_sha256=p.digest(p.PLAN),sources=plan['sources'],source_trees={label:p.git('rev-parse',plan['sources'][label]+':src') for label in ('old','successor','variants')},sdk=plan['proposed_dotnet_sdk'],dotnet_info=subprocess.check_output(['dotnet','--info'],text=True),workflow_head=p.git('rev-parse','HEAD'),run_id=os.environ['GITHUB_RUN_ID'],run_attempt=os.environ['GITHUB_RUN_ATTEMPT'],preparation_mode=preparation_mode,source_authentication=source_authentication(plan),harness_role_alias=alias,common_manifest=p.manifest(out/'common'),evidence_manifest=p.manifest(out/'evidence'),production_sha256=production,checks=checks,tested_runtime_dependencies=dependencies)
     from .fixture_inventory import record_inventory
     proof['fixture_inventory_sha256']=record_inventory(out,plan,p.digest(p.PLAN));p.write(out/'provenance.json',proof);p.verify_inputs(out);return proof
 def native_rows(folder):

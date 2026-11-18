@@ -1,0 +1,288 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "expected_runtime_version": ".NET 10.0.15",
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "cases": 198,
+  "decisions": 42,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 180
+  },
+  "targeted_shards": [
+    {
+      "index": 0,
+      "cases": 198,
+      "decisions": 42,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.ThreeInside",
+              "pair": "TaLib.Candles.ThreeInside"
+            },
+            {
+              "raw": "TaLib.Candles.TwoCrows",
+              "pair": "TaLib.Candles.TwoCrows"
+            },
+            {
+              "raw": "TaLib.Candles.UpsideGapTwoCrows",
+              "pair": "TaLib.Candles.UpsideGapTwoCrows"
+            },
+            {
+              "raw": "TaLib.Candles.UniqueThreeRiver",
+              "pair": "TaLib.Candles.UniqueThreeRiver"
+            },
+            {
+              "raw": "TaLib.Candles.Breakaway",
+              "pair": "TaLib.Candles.Breakaway"
+            },
+            {
+              "raw": "TaLib.Candles.ConcealingBabySwallow",
+              "pair": "TaLib.Candles.ConcealingBabySwallow"
+            },
+            {
+              "raw": "TaLib.Candles.LadderBottom",
+              "pair": "TaLib.Candles.LadderBottom"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 70,
+          "decisions": 14
+        },
+        {
+          "fixture": "SharedTripleBodyBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.ThreeInside",
+              "pair": "TaLib.Candles.ThreeInside"
+            },
+            {
+              "raw": "TaLib.Candles.TwoCrows",
+              "pair": "TaLib.Candles.TwoCrows"
+            },
+            {
+              "raw": "TaLib.Candles.UpsideGapTwoCrows",
+              "pair": "TaLib.Candles.UpsideGapTwoCrows"
+            },
+            {
+              "raw": "TaLib.Candles.UniqueThreeRiver",
+              "pair": "TaLib.Candles.UniqueThreeRiver"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 80,
+          "decisions": 16
+        },
+        {
+          "fixture": "SharedMultiBarCandleBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.Breakaway",
+              "pair": "TaLib.Candles.Breakaway"
+            },
+            {
+              "raw": "TaLib.Candles.ConcealingBabySwallow",
+              "pair": "TaLib.Candles.ConcealingBabySwallow"
+            },
+            {
+              "raw": "TaLib.Candles.LadderBottom",
+              "pair": "TaLib.Candles.LadderBottom"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly"
+          ],
+          "implicit_pair": false,
+          "cases": 48,
+          "decisions": 12
+        }
+      ]
+    }
+  ],
+  "inputs_ready": false,
+  "parent_review_approved": false,
+  "sources": {
+    "published": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "old": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "successor": "d1933adf1c979bc19a5fab3f2bb2b26946386386",
+    "variants": "9e914007c3438d9f251f3fab9ef321d49c22de83"
+  },
+  "gpu_sources": {
+    "old": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "successor": "d1933adf1c979bc19a5fab3f2bb2b26946386386",
+    "variants": "9e914007c3438d9f251f3fab9ef321d49c22de83"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests"
+    ],
+    "successor": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests",
+      "MultiBarCandleSharedExecutionTests",
+      "BreakawayZeroBlockReplayTests",
+      "ThreeInsideWordExecutionTests"
+    ],
+    "variants": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests"
+    ]
+  },
+  "old_candidate": {
+    "source": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "ci_run": "44217513798",
+    "producer": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
+    "evidence_source": "08ff12fb7333e3f76808672b05a2c62e85e5ae80",
+    "manifest_sha256": "192cba71853935788aba889e0d4cb9bbd6b75545e007e7871824ef4c0348536c",
+    "gpu_receipt_sha256": "d7482cc795d9ebfec37cc482474360bef8ec932677f7c69f572269df4d7c8544",
+    "production_sha256": "ed8a61ad920d1745a426b572db2e0dfb67764e4328304dbf9c5ad4b3583f80b7",
+    "source_fingerprint": "79ccf727c22cb156a0cb75cdd0f764da037603d7b74c8cd9cb075da2c6498815",
+    "artifact_id": "14389198881",
+    "artifact_zip_sha256": "5abfd9a7b9ff19e37999540639d963a374f5bdeb5e191da367ec111bf0dbd675",
+    "unit_passed": 73,
+    "parity_passed": 85,
+    "unit_classes": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests"
+    ],
+    "parity_classes": [
+      "TripleBodyTests",
+      "SharedTripleBodyBenchmarkTests"
+    ],
+    "actual_harness_sha256": "07e764bd27110b4452e1f181f466a6ea0e60b4ae4667d01b6c75f468ae8aee07"
+  },
+  "candidate": {
+    "source": "d1933adf1c979bc19a5fab3f2bb2b26946386386",
+    "ci_run": "44239677318",
+    "producer": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
+    "evidence_source": "3337b5801b98b1355decc28c2ba001bbbc15cc83",
+    "manifest_sha256": "d8b1bca7ad3bca97dd24ab4969c5e11ca209f0a32c8265efaf6f95cd274e53d6",
+    "gpu_receipt_sha256": "722b5b88a5a4af3a202cbcebde10075fa6d5ad562c4663c3fd212bd84a563cba",
+    "production_sha256": "fbb18a2f25201b923cfc050bc8f0e3cc4349f67c1afb7796c5062d542531d641",
+    "source_fingerprint": "8aa53ddcc9e9eb567cc236d23153bc9f64f4a82231949c9c72f5c5fba68f4d12",
+    "artifact_id": "14399302777",
+    "artifact_zip_sha256": "19f682842963a99520e11b411332f35f9207383a2667d78d0777991b696de333",
+    "unit_passed": 117,
+    "parity_passed": 329,
+    "unit_classes": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests",
+      "MultiBarCandleSharedExecutionTests",
+      "BreakawayZeroBlockReplayTests",
+      "ThreeInsideWordExecutionTests"
+    ],
+    "parity_classes": [
+      "TripleBodyTests",
+      "SharedTripleBodyBenchmarkTests",
+      "ExtendedReversalTests",
+      "SharedTaReversalContinuationBenchmarkTests"
+    ],
+    "actual_harness_sha256": "a794b0bce71ea59bcbe08242122ad3721d61bfd8689e4bb3e2cc14e40740cb64"
+  },
+  "harness_sha256": "07e764bd27110b4452e1f181f466a6ea0e60b4ae4667d01b6c75f468ae8aee07",
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "harness_alias_policy": {
+    "common_artifact_role": "old",
+    "variants_artifact_role": "old",
+    "baseline_source": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "candidate_source": "d1933adf1c979bc19a5fab3f2bb2b26946386386",
+    "require_scoped_source_identity": true,
+    "claim_artifact_binary_identity": false
+  },
+  "seven_candle_word_qualification": true,
+  "native_progress_gate": {
+    "fixture": "LibraryPairBenchmarks",
+    "method": "Ooples",
+    "native_method": "Competitor",
+    "native_round": 2,
+    "old_rounds": [
+      0,
+      3
+    ],
+    "candidate_rounds": [
+      1,
+      2
+    ],
+    "minimum_margin": 0.1,
+    "new_closure_bars": 10000,
+    "minimum_new_closures": 1,
+    "require_own_source_faster": true,
+    "require_net_10000_point_progress": true,
+    "protect_prior_confident_wins_both_sizes": true,
+    "point_win_comparison": "strict-less-than"
+  },
+  "required_native_closure_pairs": [
+    "TaLib.Candles.Breakaway",
+    "TaLib.Candles.ThreeInside"
+  ],
+  "existing_two_crows_recounted": false,
+  "targeted_reference": {
+    "scope": "seven-candle-word-qualification-20261118",
+    "decision": "benchmarks/results/remaining-indicators/hosted-targeted-44222776323-attempt1/decision.json",
+    "run_id": "44222776323",
+    "qualified_source": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "archive_source": "510198e84424b4874f7318fbe75611d411286fb9",
+    "sha256": "98ed72c49054ce733d2bcea090f88c05ca8e37f557ea541d8d6280606ba35b3c"
+  },
+  "scope_approval": {
+    "path": "benchmarks/plans/hosted-seven-candle-word-qualification-20261118-approval.json",
+    "sha256": "7d1cf39aa17b5e0a9a1a651b99d1dee232605747bf14c55ccdc64aa16b729b2a"
+  },
+  "roi_approval": {
+    "path": "benchmarks/plans/evidence/seven-candle-word-roi-approval-20261118.json",
+    "sha256": "9c6916c9e0710367bb6ee8234118cf1079468187fb1230ea4341a086c67886d4"
+  }
+}

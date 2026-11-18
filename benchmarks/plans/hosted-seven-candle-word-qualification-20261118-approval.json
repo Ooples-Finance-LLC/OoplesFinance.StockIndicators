@@ -1,0 +1,11 @@
+{
+  "approved": false,
+  "scope": "seven-candle-word-qualification-20261118",
+  "cases": 198,
+  "decisions": 42,
+  "required_native_closure_pairs": [
+    "TaLib.Candles.Breakaway",
+    "TaLib.Candles.ThreeInside"
+  ],
+  "condition": "Only after root-authenticated30case ROI promotion and complete parent review; no qualification or dispatch is authorized by this placeholder."
+}

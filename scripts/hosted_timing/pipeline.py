@@ -152,6 +152,9 @@ def cpu_test_classes(plan, label):
         defaults.append('ExactMeanUnitWeightTests')
     selected = plan.get('cpu_test_classes', {}).get(label, defaults)
     assert selected and len(selected) == len(set(selected))
+    if plan.get('seven_candle_word_qualification'):
+        from .seven_candle_qualification import cpu_classes
+        return cpu_classes(plan,label)
     if plan.get('triple_body_master_reconciliation') is True:
         from .master_reconciliation import cpu_classes
         return cpu_classes(plan,label)
@@ -217,6 +220,9 @@ def warmup_context(plan, fixture, task=None):
 def verify_inputs(folder):
     proof, plan = read(folder/'provenance.json'), read(PLAN)
     _verify_input_contents(folder, plan, proof, digest(PLAN))
+    if plan.get('seven_candle_word_qualification'):
+        from .seven_candle_qualification import verify_authentication
+        verify_authentication(folder,plan,proof)
     if plan.get('triple_body_master_reconciliation'):
         from .master_reconciliation import verify_authentication
         verify_authentication(folder,plan,proof)
@@ -275,7 +281,10 @@ def _verify_input_contents(folder, plan, proof, plan_sha256):
         results = ET.fromstring(raw).findall('.//{*}UnitTestResult')
         assert len(results) == receipt['passed_cases'] == 100
         assert all(r.attrib['outcome'] == 'Passed' for r in results)
-    if plan.get('diagnostic_kind') == 'candle-isolated-native-pilot':
+    if plan.get('seven_candle_word_qualification'):
+        from .candle_isolated_roi import verify_harness_alias
+        verify_harness_alias(folder,plan,proof)
+    elif plan.get('diagnostic_kind') == 'candle-isolated-native-pilot':
         from .candle_isolated_roi import verify_harness_alias
         verify_harness_alias(folder,plan,proof)
     elif plan.get('triple_body_master_reconciliation'):
@@ -570,7 +579,7 @@ def main():
     parser.add_argument('--reuse-from',type=Path)
     parser.add_argument('--prepared',type=Path,default=Path('hosted-inputs'))
     parser.add_argument('--out',type=Path,required=True)
-    parser.add_argument('--phase',choices=['successor','variants','coverage','targeted'],default='successor')
+    parser.add_argument('--phase',choices=['successor','variants','coverage','targeted','diagnostic'],default='successor')
     parser.add_argument('--shard',type=int,default=0)
     parser.add_argument('--diagnostic', choices=['trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering', 'trix-library-warmup', 'trix-preflight'])
     args = parser.parse_args()

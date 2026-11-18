@@ -1,5 +1,5 @@
 """Diagnostic boundaries, real routing, and adversarial promotion cases; no production builds."""
-import copy,json,tempfile,unittest
+import copy,json,os,sys,tempfile,unittest
 from pathlib import Path
 from unittest import mock
 from hosted_timing import candle_isolated_roi as q
@@ -101,6 +101,26 @@ class CandleIsolatedRoiTests(unittest.TestCase):
         rows,decisions=self.rows();result=dict(accepted=False,case_count=30,decision_count=6,decisions=decisions)
         with mock.patch.object(q.p,'read',return_value=self.plan()),mock.patch.object(q.original,'verify_runtime'),mock.patch.object(verify,'_collect',return_value=result),mock.patch.object(q,'native_rows',return_value=rows):
             got=q.collect(Path('unused'));self.assertFalse(got['accepted']);self.assertFalse(got['qualification']);self.assertEqual(got['closure_ledger_new_rows'],0);self.assertTrue(got['promotion_gate']['passed'])
+    def test_actual_cli_accepts_diagnostic_measure_without_argparse_rejection(self):
+        args=['run-hosted-timing.py','measure','--inputs','relative-inputs','--out','relative-output/shard0','--phase','diagnostic','--shard','0']
+        with mock.patch.object(sys,'argv',args),mock.patch.object(pipeline,'measure') as measure:
+            pipeline.main()
+        measure.assert_called_once_with(Path('relative-inputs').resolve(),Path('relative-output/shard0').resolve(),'diagnostic',0,None)
+    def test_actual_cli_collect_verifies_prepared_then_binds_provenance(self):
+        args=['run-hosted-timing.py','collect','--inputs','relative-raw','--prepared','relative-prepared','--out','relative-summary.json','--phase','diagnostic']
+        result=dict(input_provenance_sha256='actual-prepared-hash',accepted=False,case_count=30,decision_count=6,verdicts={})
+        calls=[]
+        with mock.patch.object(sys,'argv',args),mock.patch.dict(os.environ,{},clear=True),mock.patch.object(pipeline,'verify_inputs',side_effect=lambda path:calls.append(('inputs',path))),mock.patch.object(verify,'collect',side_effect=lambda path,phase:(calls.append(('collect',path,phase)) or result)),mock.patch.object(pipeline,'digest',return_value='actual-prepared-hash') as digest,mock.patch.object(pipeline,'write') as write:
+            pipeline.main()
+            self.assertEqual(calls,[('inputs',Path('relative-prepared').resolve()),('collect',Path('relative-raw').resolve(),'diagnostic')])
+            digest.assert_called_once_with(Path('relative-prepared')/'provenance.json')
+            write.assert_called_once_with(Path('relative-summary.json').resolve(),result)
+            result['input_provenance_sha256']='foreign-prepared-hash';write.reset_mock()
+            with self.assertRaises(AssertionError):pipeline.main()
+            write.assert_not_called()
+    def test_unregistered_diagnostic_scope_remains_rejected(self):
+        plan=self.plan();plan['diagnostic_kind']='unregistered-diagnostic'
+        with self.assertRaises(AssertionError):pipeline.phase_tasks(plan,'diagnostic',0)
     def test_alias_cannot_substitute_candidate_receipts(self):
         plan=self.plan()
         with tempfile.TemporaryDirectory() as temp:
