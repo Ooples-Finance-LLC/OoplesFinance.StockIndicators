@@ -166,17 +166,17 @@
   },
   "candidate": {
     "source": "d1933adf1c979bc19a5fab3f2bb2b26946386386",
-    "ci_run": "UNBOUND",
-    "producer": "UNBOUND",
-    "evidence_source": "UNBOUND",
-    "manifest_sha256": "UNBOUND",
-    "gpu_receipt_sha256": "UNBOUND",
-    "production_sha256": "UNBOUND",
-    "source_fingerprint": "UNBOUND",
-    "artifact_id": "UNBOUND",
-    "artifact_zip_sha256": "UNBOUND",
-    "unit_passed": "UNBOUND",
-    "parity_passed": "UNBOUND",
+    "ci_run": "44239677318",
+    "producer": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
+    "evidence_source": "3337b5801b98b1355decc28c2ba001bbbc15cc83",
+    "manifest_sha256": "d8b1bca7ad3bca97dd24ab4969c5e11ca209f0a32c8265efaf6f95cd274e53d6",
+    "gpu_receipt_sha256": "722b5b88a5a4af3a202cbcebde10075fa6d5ad562c4663c3fd212bd84a563cba",
+    "production_sha256": "fbb18a2f25201b923cfc050bc8f0e3cc4349f67c1afb7796c5062d542531d641",
+    "source_fingerprint": "8aa53ddcc9e9eb567cc236d23153bc9f64f4a82231949c9c72f5c5fba68f4d12",
+    "artifact_id": "14399302777",
+    "artifact_zip_sha256": "19f682842963a99520e11b411332f35f9207383a2667d78d0777991b696de333",
+    "unit_passed": 117,
+    "parity_passed": 329,
     "unit_classes": [
       "TripleBodySharedExecutionTests",
       "TripleBodyParallelExecutionTests",
@@ -194,9 +194,9 @@
       "ExtendedReversalTests",
       "SharedTaReversalContinuationBenchmarkTests"
     ],
-    "actual_harness_sha256": "UNBOUND"
+    "actual_harness_sha256": "a794b0bce71ea59bcbe08242122ad3721d61bfd8689e4bb3e2cc14e40740cb64"
   },
-  "harness_sha256": "UNBOUND",
+  "harness_sha256": "07e764bd27110b4452e1f181f466a6ea0e60b4ae4667d01b6c75f468ae8aee07",
   "closure_ledger_new_rows": 0,
   "qualify_variants": false,
   "harness_alias_policy": {

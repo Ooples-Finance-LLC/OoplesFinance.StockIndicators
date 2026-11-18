@@ -16,14 +16,15 @@ class CandleIsolatedRoiTests(unittest.TestCase):
         self.assertEqual(pipeline.warmups_for(plan,'LibraryPairBenchmarks',q.shards()[0]['tasks'][0]),1000)
         self.assertEqual(pipeline.cpu_test_classes(plan,'successor'),q.UNIT)
     def test_unbound_preparation_stops_before_sdk_and_artifact_io(self):
-        with mock.patch.object(q.p,'read',return_value=self.plan()),mock.patch.object(q.subprocess,'check_output',side_effect=RuntimeError('I/O forbidden')) as calls,mock.patch.object(q,'checked_inputs') as inputs:
+        plan=self.plan();plan['inputs_ready']=False
+        with mock.patch.object(q.p,'read',return_value=plan),mock.patch.object(q.subprocess,'check_output',side_effect=RuntimeError('I/O forbidden')) as calls,mock.patch.object(q,'checked_inputs') as inputs:
             with self.assertRaisesRegex(AssertionError,'UNBOUND'):q.prepare('missing-old','missing-new','missing-out')
             calls.assert_not_called();inputs.assert_not_called()
     def test_parent_review_cannot_be_replaced_by_readiness(self):
-        plan=self.plan();plan['inputs_ready']=True
+        plan=self.plan();plan.update(inputs_ready=True,parent_review_approved=False)
         with self.assertRaisesRegex(AssertionError,'UNBOUND'):q.validate_scope(plan)
     def test_receipt_pins_fail_closed_even_with_booleans_true(self):
-        plan=self.plan();plan.update(inputs_ready=True,parent_review_approved=True)
+        plan=self.plan();plan.update(inputs_ready=True,parent_review_approved=True);plan['candidate']['manifest_sha256']='UNBOUND'
         with self.assertRaises(AssertionError):q.validate_scope(plan)
     def test_no_silent_policy_scope_or_role_expansion(self):
         for mutate in [lambda p:p['measurement_policy'].update(fixed_invocation_warmups=20000),lambda p:p['matrix'].update(max_parallel=2),lambda p:p['sources'].update(variants=q.NEW),lambda p:p.update(diagnostic_only=False),lambda p:p.update(cases=40),lambda p:p['candidate']['unit_classes'].pop(),lambda p:p['diagnostic_shards'][0]['tasks'][0]['operations'].pop()]:
