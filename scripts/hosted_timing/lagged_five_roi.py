@@ -34,6 +34,7 @@ def validate_scope(plan,*,require_ready=True):
     assert plan['runtime_dependency_alignment']==dict(tensor_version='0.151.1')
     assert plan['require_fixture_inventory'] is True and plan['proposed_dotnet_sdk']=='10.0.403' and plan['expected_runtime_version']=='.NET 10.0.15'
     assert plan['closure_ledger_new_rows']==0 and plan['automatic_qualification'] is False
+    assert plan['require_net_10000_point_progress'] is True
     assert plan['future_builder_fixture']=='SharedLaggedChangeBenchmarks'
     assert plan['harness_alias_policy']==dict(common_artifact_role='old',variants_artifact_role='old',baseline_source=OLD,candidate_source=NEW,require_scoped_source_identity=True,claim_artifact_binary_identity=False)
     assert not any(plan.get(k) for k in ('targeted_reference','coverage_reference','standalone_variants','qualify_variants','trix_preflight','reuse_inputs'))
@@ -185,10 +186,14 @@ def adjudicate_feasibility(rows,decisions):
     assert len(rows)==len(indexed)==len(decisions)==len(own)==10 and set(indexed)==set(own)==expected
     assert all(verdict in ('faster','slower','inconclusive') for verdict in own.values())
     details=[];new_wins=[];protected=[];reopened=[]
+    old_counts={'0':0,'3':0};new_counts={'1':0,'2':0}
     for pair,bars in sorted(expected):
         row=indexed[pair,bars]
         assert set(row['old_rounds'])=={'0','3'} and set(row['candidate_rounds'])=={'1','2'}
         old=list(row['old_rounds'].values());new=list(row['candidate_rounds'].values());native=row['native_control']
+        if bars==10000:
+            for index,value in row['old_rounds'].items():old_counts[index]+=int(value['mean_ns']<native['mean_ns'])
+            for index,value in row['candidate_rounds'].items():new_counts[index]+=int(value['mean_ns']<native['mean_ns'])
         prior_interval_win=all(v['upper_ns']<native['lower_ns'] for v in old)
         prior_robust_win=prior_interval_win and all(v['mean_ns']<=.9*native['mean_ns'] for v in old)
         eligible=all(v['mean_ns']>=native['mean_ns'] for v in old)
@@ -202,7 +207,9 @@ def adjudicate_feasibility(rows,decisions):
             protected.append(check)
             if not check['preserved']:reopened.append(check)
     no_slower=all(verdict!='slower' for verdict in own.values())
-    return dict(passed=no_slower and bool(new_wins) and not reopened,
+    net_progress=min(new_counts.values())>max(old_counts.values())
+    return dict(passed=no_slower and bool(new_wins) and not reopened and net_progress,
+        old_10000_point_win_counts=old_counts,candidate_10000_point_win_counts=new_counts,net_10000_point_progress=net_progress,
         all_ten_source_comparisons_no_regression=no_slower,at_least_one_new_10000_target_win=bool(new_wins),new_10000_target_wins=new_wins,
         protected_prior_native_wins=protected,prior_native_win_reopenings=reopened,
         per_target_10000=[d for d in details if d['bars']==10000 and d['pair'] in PAIRS],all_pair_size_rows=details,

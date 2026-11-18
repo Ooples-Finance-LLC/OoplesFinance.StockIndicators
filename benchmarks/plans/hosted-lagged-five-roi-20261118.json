@@ -215,5 +215,6 @@
     "claim_artifact_binary_identity": false
   },
   "automatic_qualification": false,
-  "future_builder_fixture": "SharedLaggedChangeBenchmarks"
+  "future_builder_fixture": "SharedLaggedChangeBenchmarks",
+  "require_net_10000_point_progress": true
 }

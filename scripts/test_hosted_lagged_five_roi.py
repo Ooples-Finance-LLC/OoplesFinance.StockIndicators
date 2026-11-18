@@ -59,6 +59,36 @@ class LaggedFiveRoiTests(unittest.TestCase):
             self.assertTrue(gate['passed']);self.assertEqual(len(gate['new_10000_target_wins']),1)
             self.assertEqual(len(gate['per_target_10000']),5);self.assertEqual(len(gate['all_pair_size_rows']),10)
             self.assertFalse(gate['automatic_qualification']);self.assertFalse(gate['qualification']);self.assertEqual(gate['closure_credit'],0)
+    def test_net_progress_requires_strict_roundwise_count_improvement(self):
+        rows,decisions=self.rows();gate=q.adjudicate_feasibility(rows,decisions)
+        self.assertEqual(gate['old_10000_point_win_counts'],{'0':4,'3':4})
+        self.assertEqual(gate['candidate_10000_point_win_counts'],{'1':5,'2':5})
+        self.assertTrue(gate['net_10000_point_progress']);self.assertTrue(gate['passed'])
+    def test_new_closure_offset_by_lost_nonconfident_point_win_fails(self):
+        rows,decisions=self.rows();lost=rows[3]
+        lost['old_rounds']={k:dict(mean_ns=95,lower_ns=80,upper_ns=110) for k in ('0','3')}
+        lost['candidate_rounds']={k:dict(mean_ns=105,lower_ns=90,upper_ns=120) for k in ('1','2')}
+        gate=q.adjudicate_feasibility(rows,decisions)
+        self.assertTrue(gate['at_least_one_new_10000_target_win'])
+        self.assertTrue(gate['all_ten_source_comparisons_no_regression']);self.assertFalse(gate['prior_native_win_reopenings'])
+        self.assertEqual(gate['old_10000_point_win_counts'],{'0':4,'3':4})
+        self.assertEqual(gate['candidate_10000_point_win_counts'],{'1':4,'2':4})
+        self.assertFalse(gate['net_10000_point_progress']);self.assertFalse(gate['passed'])
+    def test_asymmetric_old_new_counts_use_max_old_and_min_new(self):
+        rows,decisions=self.rows();other=rows[3]
+        other['old_rounds']={'0':dict(mean_ns=95,lower_ns=80,upper_ns=110),'3':dict(mean_ns=105,lower_ns=90,upper_ns=120)}
+        other['candidate_rounds']={'1':dict(mean_ns=95,lower_ns=80,upper_ns=110),'2':dict(mean_ns=105,lower_ns=90,upper_ns=120)}
+        gate=q.adjudicate_feasibility(rows,decisions)
+        self.assertTrue(gate['at_least_one_new_10000_target_win'])
+        self.assertEqual(gate['old_10000_point_win_counts'],{'0':4,'3':3})
+        self.assertEqual(gate['candidate_10000_point_win_counts'],{'1':5,'2':4})
+        self.assertFalse(gate['net_10000_point_progress']);self.assertFalse(gate['passed'])
+    def test_net_progress_plan_pin_cannot_be_removed_or_disabled(self):
+        for value in (None,False,1):
+            plan=self.plan()
+            if value is None:plan.pop('require_net_10000_point_progress')
+            else:plan['require_net_10000_point_progress']=value
+            with self.assertRaises((AssertionError,KeyError)):q.validate_scope(plan,require_ready=False)
     def test_no_new_win_or_prior_point_winner_cannot_pass(self):
         for index in ('0','3'):
             rows,decisions=self.rows();rows[1]['old_rounds'][index].update(mean_ns=95,lower_ns=94,upper_ns=96)
