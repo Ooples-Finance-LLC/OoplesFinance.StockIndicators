@@ -1321,6 +1321,15 @@ internal static partial class ValuesBarExecution
         _ when ContextReversalWindow(indicator) > 0 =>
             FillBoundedWindow<ContextReversalKernel>(source, output, indicator, ContextReversalWindow(indicator), cancellation, owned),
         // Keep the existing generic regions unchanged when selecting private batch kernels.
+        ThreeInsideCandle { LongPeriod: <= 64, ShortPeriod: <= 64 } smallInside when source.Length < 8192 =>
+            FillSmallTripleBodyWords(source, output, smallInside, smallInside.LongPeriod, smallInside.ShortPeriod,
+                TripleBodyCandleKind.ThreeInside, TripleBodyWindow(indicator), cancellation, owned),
+        TwoCrowsCandle { LongPeriod: <= 64 } smallCrows when source.Length < 8192 =>
+            FillSmallTripleBodyWords(source, output, smallCrows, smallCrows.LongPeriod, smallCrows.LongPeriod,
+                TripleBodyCandleKind.TwoCrows, TripleBodyWindow(indicator), cancellation, owned),
+        UpsideGapTwoCrowsCandle { LongPeriod: <= 64, ShortPeriod: <= 64 } smallGap when source.Length < 8192 =>
+            FillSmallTripleBodyWords(source, output, smallGap, smallGap.LongPeriod, smallGap.ShortPeriod,
+                TripleBodyCandleKind.UpsideGapTwoCrows, TripleBodyWindow(indicator), cancellation, owned),
         ThreeInsideCandle { LongPeriod: <= 64, ShortPeriod: <= 64 } inside when source.Length >= 8192 =>
             FillThreeInsideWords(source, output, inside, TripleBodyWindow(indicator), cancellation, owned),
         _ when TripleBodyWindow(indicator) > 0 =>
