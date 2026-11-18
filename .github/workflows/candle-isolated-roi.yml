@@ -1,6 +1,9 @@
 name: Isolated candle BDN ROI diagnostic
 on:
   workflow_dispatch:
+  push:
+    branches: [perf/candle-isolated-roi-20261118]
+    paths: [.github/workflows/candle-isolated-roi.yml]
 permissions:
   contents: read
   actions: read
