@@ -54,6 +54,10 @@ def sample(case):
 
 
 def collect(folder, phase):
+    if read(PLAN).get('diagnostic_kind') == 'small-candle-native-pilot':
+        assert phase == 'diagnostic'
+        from .small_candle_roi import collect as small_collect
+        return small_collect(folder)
     if read(PLAN).get('diagnostic_kind') == 'candle-isolated-native-pilot':
         assert phase == 'diagnostic'
         from .candle_isolated_roi import collect as isolated_collect

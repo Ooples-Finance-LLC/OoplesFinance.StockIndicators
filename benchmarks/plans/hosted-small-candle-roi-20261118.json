@@ -1,0 +1,244 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "expected_runtime_version": ".NET 10.0.15",
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "diagnostic_kind": "small-candle-native-pilot",
+  "diagnostic_only": true,
+  "cases": 50,
+  "decisions": 10,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 120
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.Breakaway",
+              "pair": "TaLib.Candles.Breakaway"
+            },
+            {
+              "raw": "TaLib.Candles.ThreeInside",
+              "pair": "TaLib.Candles.ThreeInside"
+            },
+            {
+              "raw": "TaLib.Candles.TwoCrows",
+              "pair": "TaLib.Candles.TwoCrows"
+            },
+            {
+              "raw": "TaLib.Candles.UpsideGapTwoCrows",
+              "pair": "TaLib.Candles.UpsideGapTwoCrows"
+            },
+            {
+              "raw": "TaLib.Candles.LadderBottom",
+              "pair": "TaLib.Candles.LadderBottom"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 50,
+          "decisions": 10
+        }
+      ],
+      "cases": 50,
+      "decisions": 10
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.Breakaway",
+              "pair": "TaLib.Candles.Breakaway"
+            },
+            {
+              "raw": "TaLib.Candles.ThreeInside",
+              "pair": "TaLib.Candles.ThreeInside"
+            },
+            {
+              "raw": "TaLib.Candles.TwoCrows",
+              "pair": "TaLib.Candles.TwoCrows"
+            },
+            {
+              "raw": "TaLib.Candles.UpsideGapTwoCrows",
+              "pair": "TaLib.Candles.UpsideGapTwoCrows"
+            },
+            {
+              "raw": "TaLib.Candles.LadderBottom",
+              "pair": "TaLib.Candles.LadderBottom"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 50,
+          "decisions": 10
+        }
+      ],
+      "cases": 50,
+      "decisions": 10
+    }
+  ],
+  "inputs_ready": false,
+  "parent_review_approved": false,
+  "sources": {
+    "published": "d1933adf1c979bc19a5fab3f2bb2b26946386386",
+    "old": "d1933adf1c979bc19a5fab3f2bb2b26946386386",
+    "successor": "48cfb87a5b4d3038162ca5d771b1bf5f57ed68c3",
+    "variants": "d1933adf1c979bc19a5fab3f2bb2b26946386386"
+  },
+  "gpu_sources": {
+    "old": "d1933adf1c979bc19a5fab3f2bb2b26946386386",
+    "successor": "48cfb87a5b4d3038162ca5d771b1bf5f57ed68c3",
+    "variants": "d1933adf1c979bc19a5fab3f2bb2b26946386386"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests",
+      "MultiBarCandleSharedExecutionTests",
+      "BreakawayZeroBlockReplayTests",
+      "ThreeInsideWordExecutionTests"
+    ],
+    "successor": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests",
+      "MultiBarCandleSharedExecutionTests",
+      "BreakawayZeroBlockReplayTests",
+      "ThreeInsideWordExecutionTests",
+      "SmallTripleBodyWordExecutionTests",
+      "SmallBreakawayBlockExecutionTests"
+    ],
+    "variants": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests",
+      "MultiBarCandleSharedExecutionTests",
+      "BreakawayZeroBlockReplayTests",
+      "ThreeInsideWordExecutionTests"
+    ]
+  },
+  "old_candidate": {
+    "source": "d1933adf1c979bc19a5fab3f2bb2b26946386386",
+    "ci_run": "44239677318",
+    "producer": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
+    "evidence_source": "3337b5801b98b1355decc28c2ba001bbbc15cc83",
+    "manifest_sha256": "d8b1bca7ad3bca97dd24ab4969c5e11ca209f0a32c8265efaf6f95cd274e53d6",
+    "gpu_receipt_sha256": "722b5b88a5a4af3a202cbcebde10075fa6d5ad562c4663c3fd212bd84a563cba",
+    "production_sha256": "fbb18a2f25201b923cfc050bc8f0e3cc4349f67c1afb7796c5062d542531d641",
+    "source_fingerprint": "8aa53ddcc9e9eb567cc236d23153bc9f64f4a82231949c9c72f5c5fba68f4d12",
+    "artifact_id": "14399302777",
+    "artifact_zip_sha256": "19f682842963a99520e11b411332f35f9207383a2667d78d0777991b696de333",
+    "unit_passed": 117,
+    "parity_passed": 329,
+    "unit_classes": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests",
+      "MultiBarCandleSharedExecutionTests",
+      "BreakawayZeroBlockReplayTests",
+      "ThreeInsideWordExecutionTests"
+    ],
+    "parity_classes": [
+      "TripleBodyTests",
+      "SharedTripleBodyBenchmarkTests",
+      "ExtendedReversalTests",
+      "SharedTaReversalContinuationBenchmarkTests"
+    ],
+    "actual_harness_sha256": "a794b0bce71ea59bcbe08242122ad3721d61bfd8689e4bb3e2cc14e40740cb64"
+  },
+  "candidate": {
+    "source": "48cfb87a5b4d3038162ca5d771b1bf5f57ed68c3",
+    "ci_run": "44248577092",
+    "producer": "2a1737f30e5e1164189d0209b39ea46bf38c1239",
+    "evidence_source": "c610fbff4f1843a2d5de94f081e550b83e66c422",
+    "manifest_sha256": "6b1423464e29e04d57da718ecb694ed0ff1b5ce4c199f166ab5eafafb93cc725",
+    "gpu_receipt_sha256": "e95eaa89f8b6010a6d1da0f0ac34424b5763cd520627bb39908e6debe7227710",
+    "production_sha256": "20919254d561647386fcf1c5db4d7b765a25b74eeefce414924bad5516a24ad2",
+    "source_fingerprint": "08425a3194a3ea12bb1abbf0c13570328918f895dc99cef97ec874b520509963",
+    "artifact_id": "14402399474",
+    "artifact_zip_sha256": "5f6fb9550d7b8f83276cdc0be1d9d76861034783548bd5a06557d9060905b92f",
+    "unit_passed": 149,
+    "parity_passed": 329,
+    "unit_classes": [
+      "TripleBodySharedExecutionTests",
+      "TripleBodyParallelExecutionTests",
+      "TripleBodyZeroBlockReplayTests",
+      "AdoptedColumnTests",
+      "UseInputTests",
+      "OwnedHistoryBatchTests",
+      "MultiBarCandleSharedExecutionTests",
+      "BreakawayZeroBlockReplayTests",
+      "ThreeInsideWordExecutionTests",
+      "SmallTripleBodyWordExecutionTests",
+      "SmallBreakawayBlockExecutionTests"
+    ],
+    "parity_classes": [
+      "TripleBodyTests",
+      "SharedTripleBodyBenchmarkTests",
+      "ExtendedReversalTests",
+      "SharedTaReversalContinuationBenchmarkTests"
+    ],
+    "actual_harness_sha256": "75dbbb84c92b0f2cb44d54d4f016d6a5c67068f07792de622be51117d0e7eafa"
+  },
+  "harness_sha256": "a794b0bce71ea59bcbe08242122ad3721d61bfd8689e4bb3e2cc14e40740cb64",
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "harness_alias_policy": {
+    "common_artifact_role": "old",
+    "variants_artifact_role": "old",
+    "baseline_source": "d1933adf1c979bc19a5fab3f2bb2b26946386386",
+    "candidate_source": "48cfb87a5b4d3038162ca5d771b1bf5f57ed68c3",
+    "require_scoped_source_identity": true,
+    "claim_artifact_binary_identity": false
+  },
+  "prospective_1000_acceptance_policy": "UNBOUND",
+  "baseline_reference_status": "diagnostic-reference-not-published-production",
+  "automatic_qualification": false
+}
