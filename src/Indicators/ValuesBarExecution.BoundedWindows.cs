@@ -1346,6 +1346,8 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<ExhaustionKernel>(source, output, indicator, ExhaustionWindowLength(indicator), cancellation, owned),
         _ when FiveContinuationWindow(indicator) > 0 =>
             FillBoundedWindow<FiveContinuationKernel>(source, output, indicator, FiveContinuationWindow(indicator), cancellation, owned),
+        BreakawayCandle { Period: <= 64 } smallBreakaway when source.Length is >= 512 and < 8192 =>
+            FillSmallBreakawayBlocks(source, output, smallBreakaway, ExtendedReversalWindow(indicator), cancellation, owned),
         BreakawayCandle { Period: <= 64 } breakaway when source.Length >= 8192 =>
             FillBreakawayBlocks(source, output, breakaway, ExtendedReversalWindow(indicator), cancellation, owned),
         _ when ExtendedReversalWindow(indicator) > 0 =>
