@@ -187,10 +187,14 @@ def adjudicate_feasibility(rows,decisions):
     assert len(rows)==len(indexed)==len(decisions)==len(own)==10 and set(indexed)==set(own)==expected
     assert all(verdict in ('faster','slower','inconclusive') for verdict in own.values())
     details=[];new_wins=[];protected=[];reopened=[]
+    old_counts={'0':0,'3':0};new_counts={'1':0,'2':0}
     for pair,bars in sorted(expected):
         row=indexed[pair,bars]
         assert set(row['old_rounds'])=={'0','3'} and set(row['candidate_rounds'])=={'1','2'}
         old=list(row['old_rounds'].values());new=list(row['candidate_rounds'].values());native=row['native_control']
+        if bars==1000:
+            for index,value in row['old_rounds'].items():old_counts[index]+=int(value['mean_ns']<native['mean_ns'])
+            for index,value in row['candidate_rounds'].items():new_counts[index]+=int(value['mean_ns']<native['mean_ns'])
         prior_interval_win=all(v['upper_ns']<native['lower_ns'] for v in old)
         prior_robust_win=prior_interval_win and all(v['mean_ns']<=.9*native['mean_ns'] for v in old)
         eligible=all(v['mean_ns']>=native['mean_ns'] for v in old)
@@ -204,7 +208,9 @@ def adjudicate_feasibility(rows,decisions):
             protected.append(check)
             if not check['preserved']:reopened.append(check)
     no_slower=all(verdict!='slower' for verdict in own.values())
-    return dict(passed=no_slower and bool(new_wins) and not reopened,
+    net_progress=min(new_counts.values())>max(old_counts.values())
+    return dict(passed=no_slower and bool(new_wins) and not reopened and net_progress,
+        old_1000_point_win_counts=old_counts,candidate_1000_point_win_counts=new_counts,net_1000_point_progress=net_progress,
         all_ten_source_comparisons_no_regression=no_slower,at_least_one_new_1000_target_win=bool(new_wins),new_1000_target_wins=new_wins,
         protected_prior_native_wins=protected,prior_native_win_reopenings=reopened,
         per_target_1000=[d for d in details if d['bars']==1000 and d['pair'] in TARGETS],all_pair_size_rows=details,

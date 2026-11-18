@@ -83,6 +83,13 @@ class SmallCandleRoiTests(unittest.TestCase):
                 row['old_rounds']={'0':dict(mean_ns=70,lower_ns=40,upper_ns=98),'3':dict(mean_ns=90,lower_ns=80,upper_ns=98)}
                 row['candidate_rounds']={k:dict(mean_ns=110,lower_ns=60,upper_ns=160) for k in ('1','2')}
                 gate=q.adjudicate_feasibility(rows,decisions);self.assertFalse(gate['passed']);self.assertIn(dict(pair=pair,bars=bars,preserved=False),gate['prior_native_win_reopenings'])
+    def test_genuine_new_win_offset_by_lost_mixed_old_point_win_is_net_flat(self):
+        rows,decisions=self.rows(q.TARGETS[0])
+        control=next(r for r in rows if r['pair']==q.PAIRS[-1] and r['bars']==1000)
+        control['old_rounds']['0']=dict(mean_ns=95,lower_ns=94,upper_ns=96)
+        gate=q.adjudicate_feasibility(rows,decisions)
+        self.assertTrue(gate['at_least_one_new_1000_target_win']);self.assertTrue(gate['all_ten_source_comparisons_no_regression']);self.assertFalse(gate['prior_native_win_reopenings'])
+        self.assertEqual(gate['old_1000_point_win_counts'],{'0':1,'3':0});self.assertEqual(gate['candidate_1000_point_win_counts'],{'1':1,'2':1});self.assertFalse(gate['net_1000_point_progress']);self.assertFalse(gate['passed'])
     def test_duplicate_missing_or_unknown_verdicts_fail_closed(self):
         rows,decisions=self.rows(q.TARGETS[0])
         with self.assertRaises(AssertionError):q.adjudicate_feasibility(rows[:-1],decisions)
