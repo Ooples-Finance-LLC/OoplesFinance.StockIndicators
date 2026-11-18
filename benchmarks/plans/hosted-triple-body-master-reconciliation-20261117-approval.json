@@ -1,0 +1,8 @@
+{
+  "approved": true,
+  "scope": "triple-body-master-reconciliation-20261117",
+  "cases": 120,
+  "decisions": 24,
+  "additional_rows_counted": 0,
+  "condition": "Actual fresh source-bound CPU/GPU receipts for both roles and final parent review; unchanged all source/native/runtime/sampling gates and robust TwoCrows10000 closure required."
+}

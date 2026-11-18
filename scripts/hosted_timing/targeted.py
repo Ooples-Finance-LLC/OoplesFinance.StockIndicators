@@ -563,6 +563,13 @@ SCOPES['triple-body-macro-20261117'] = dict(
     totals=(120,24),shards=1,baseline_phase='targeted',baseline_totals=(90,18))
 
 
+SCOPES['triple-body-master-reconciliation-20261117'] = dict(
+    fixtures={'SharedTripleBodyBenchmarks': {pair:pair for pair in
+        ('TaLib.Candles.ThreeInside','TaLib.Candles.TwoCrows','TaLib.Candles.UpsideGapTwoCrows','TaLib.Candles.UniqueThreeRiver')}},
+    implicit_fixtures=set(),paths={'src/Indicators/ValuesBarExecution.BoundedWindows.cs','src/Indicators/ValuesBarExecution.TripleBodyBlocks.cs'},
+    methods={'SharedTripleBodyBenchmarks':['BuilderFull','BuilderLatestOnly','NativeSingle','NativeParallel']},
+    totals=(120,24),shards=1,baseline_phase='targeted',baseline_totals=(120,24))
+
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
 
@@ -587,7 +594,13 @@ def verify_reference(plan):
     assert decision['accepted'] and decision['phase'] == scope.get('baseline_phase','successor')
     assert (decision['case_count'], decision['decision_count']) == scope.get('baseline_totals',(1860,372))
     if decision['phase'] == 'targeted':
-        assert decision['production_integrated'] and decision['report_imported']
+        if reference['scope'] == 'triple-body-master-reconciliation-20261117':
+            # PR266 is still a draft: admit its accepted prior qualification only
+            # under the new exact source proof, without claiming publication.
+            from .master_reconciliation import verify_prior_qualification
+            verify_prior_qualification(reference,decision)
+        else:
+            assert decision['production_integrated'] and decision['report_imported']
     assert decision['verdicts'].get('faster', 0) > 0
     assert not decision['verdicts'].get('slower', 0)
     assert str(decision['run_id']) == str(reference['run_id'])
@@ -595,6 +608,9 @@ def verify_reference(plan):
     if reference['scope'] == 'matchinglow-only-grid-20261116':
         from .matchinglow_grid_qualification import verify_continuation
         verify_continuation(reference, plan['sources']['old'])
+    elif reference.get('master_reconciliation'):
+        from .master_reconciliation import verify_reconciliation
+        verify_reconciliation(reference,plan)
     elif reference.get('dependency_reconciliation'):
         from .reconciled_baseline import verify_reconciliation
         verify_reconciliation(reference, plan['sources']['old'])

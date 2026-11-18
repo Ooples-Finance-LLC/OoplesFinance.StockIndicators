@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "kind": "triple-body-master-inputs-and-scoped-harness-alias-20261117",
+  "canonical": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+  "baseline": "6469c65c50dc2c9211c92a8303734e06ae817c60",
+  "master": "29b0848372435d3ffaaf5c0ea156e65b0b2c59f9",
+  "qualified_source": "7c9f23365eb08ce20c68554aafc75c8b7ff2f7d5",
+  "frozen_reference": "9a45372530e49718b01b6524f9a0db993514e1e8",
+  "production_delta": [
+    "src/Indicators/ValuesBarExecution.BoundedWindows.cs",
+    "src/Indicators/ValuesBarExecution.TripleBodyBlocks.cs"
+  ],
+  "master_inputs": [
+    {
+      "path": "src/Builder/Compute/BuilderArmBinding.cs",
+      "qualified_sha256": "715c9272d744de8e224078f5a57f9e9d8a6dc0a02c17ac08f555d6e9fd0c1559",
+      "canonical_sha256": "7ce173aee225f3c3b2142179d1a6fd3b6cdb922663b2a3c99b8ba98935c31fb8",
+      "master_sha256": "7ce173aee225f3c3b2142179d1a6fd3b6cdb922663b2a3c99b8ba98935c31fb8"
+    },
+    {
+      "path": "src/Builder/Evaluation/BatchCompute.cs",
+      "qualified_sha256": "3bb184c5b115bc2c2cb9ff3f8f0db97dd0ed3cebf8b1a1f09b5d24406cf484bd",
+      "canonical_sha256": "0a6171774427152174a357a21acc9ef94586a1735c44a155f425ad8b1c94fdde",
+      "master_sha256": "0a6171774427152174a357a21acc9ef94586a1735c44a155f425ad8b1c94fdde"
+    },
+    {
+      "path": "src/Builder/Evaluation/SeriesEvaluator.cs",
+      "qualified_sha256": "0f505e642ac05ebef336251a6361489c308fc902ad3eb343de4ad6e0c9ccc940",
+      "canonical_sha256": "8fbf6cf68f5c881fc4bb4bd77237d8963ea803dcecf64b077eb0ec807cca5f2d",
+      "master_sha256": "8fbf6cf68f5c881fc4bb4bd77237d8963ea803dcecf64b077eb0ec807cca5f2d"
+    },
+    {
+      "path": "src/Calculations/Inputs/InputsUse.cs",
+      "qualified_sha256": "e1bf30d9dfee0cf42c6738b77c981e916d7bec2a00632704eb1285b6918b3db6",
+      "canonical_sha256": "e1e4df827ab8735a5961f9728705f5d054eea51505f6eff9817f260da597720b",
+      "master_sha256": "e1e4df827ab8735a5961f9728705f5d054eea51505f6eff9817f260da597720b"
+    },
+    {
+      "path": "src/Compatibility/SpanCompat.cs",
+      "qualified_sha256": "9c13de758b259b34430a01a2c2fe61261bc4ca1a58d12f2fc2653c8de6351e8b",
+      "canonical_sha256": "f75d0a157948c3ff8bfd50313e3f131cce22ac2d41e9348370369ea4f7cfb1fb",
+      "master_sha256": "f75d0a157948c3ff8bfd50313e3f131cce22ac2d41e9348370369ea4f7cfb1fb"
+    },
+    {
+      "path": "src/Helpers/CalculationsHelper.cs",
+      "qualified_sha256": "21469e6ded9e1f1333cc587c6667727595cb0bcbc41cb90c2aaf17ae44c912c3",
+      "canonical_sha256": "a53e936fb75c052a5afb2f4dcbf0fea9cc052829db4372f58976adf3f93d41ea",
+      "master_sha256": "a53e936fb75c052a5afb2f4dcbf0fea9cc052829db4372f58976adf3f93d41ea"
+    },
+    {
+      "path": "src/Models/StockData.cs",
+      "qualified_sha256": "8ffaff42a5012644a11c8afabf61313b3fc5623006dae00e750a0e3cd19786b1",
+      "canonical_sha256": "9f85deaa4d61fa1bf82a258f0a681ede37182d597a2f4d62f4c3bce3e3632da0",
+      "master_sha256": "9f85deaa4d61fa1bf82a258f0a681ede37182d597a2f4d62f4c3bce3e3632da0"
+    },
+    {
+      "path": "src/OoplesFinance.StockIndicators.csproj",
+      "qualified_sha256": "497ebefdff8d31824d54fd29c47b5c8c0e3377406615713a55067a98b19de92a",
+      "canonical_sha256": "253eb4580e02e0246f4db1afc9947597afb37d2f954fd9f0b77c746a410412f1",
+      "master_sha256": "253eb4580e02e0246f4db1afc9947597afb37d2f954fd9f0b77c746a410412f1"
+    },
+    {
+      "path": "src/SourceGeneration/IndicatorSeriesAccessorGenerator.cs",
+      "qualified_sha256": "e5079ae1f5e59849580dc57f6f496479016abcf1eeddb22165e0eb94383eb871",
+      "canonical_sha256": "461b949749b7989d090d8c2a4aec770a8ef493b292f716cb1bc4ebbccacc3e05",
+      "master_sha256": "461b949749b7989d090d8c2a4aec770a8ef493b292f716cb1bc4ebbccacc3e05"
+    },
+    {
+      "path": "src/Validation/BatchInputValidation.cs",
+      "qualified_sha256": "e118b2b10b50c80cfaaaaca33388daa764da3ba390c1491caaaf826b5f4eac70",
+      "canonical_sha256": "5f3174582b3a2d15894f3bc7c60768f04c66fbe9d5f2801e02bc6f369e90e39e",
+      "master_sha256": "5f3174582b3a2d15894f3bc7c60768f04c66fbe9d5f2801e02bc6f369e90e39e"
+    }
+  ],
+  "harness_scopes": [
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "identical_harness_files": 1584,
+  "harness_exceptions": [
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedClassicalWindowVariantBenchmarks.cs",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SharedClassicalWindowVariantBenchmarkTests.cs"
+  ],
+  "role_alias": {
+    "artifact_roles": [
+      "successor",
+      "variants"
+    ],
+    "source": "9e914007c3438d9f251f3fab9ef321d49c22de83",
+    "additional_builds": 0,
+    "additional_cpu_executions": 0,
+    "additional_gpu_executions": 0,
+    "meaning": "Scoped four-pair benchmark/native role shares the actual canonical artifact and receipts; no claim of original482 binary identity."
+  },
+  "runtime_tensor_version": "0.151.1",
+  "timings_reused": false,
+  "closure_ledger_new_rows": 0
+}

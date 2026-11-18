@@ -152,6 +152,9 @@ def cpu_test_classes(plan, label):
         defaults.append('ExactMeanUnitWeightTests')
     selected = plan.get('cpu_test_classes', {}).get(label, defaults)
     assert selected and len(selected) == len(set(selected))
+    if plan.get('triple_body_master_reconciliation') is True:
+        from .master_reconciliation import cpu_classes
+        return cpu_classes(plan,label)
     if plan.get('triple_body_macro_qualification') is True:
         from .triple_body_macro_qualification import cpu_classes
         return cpu_classes(plan, label)
@@ -214,6 +217,9 @@ def warmup_context(plan, fixture, task=None):
 def verify_inputs(folder):
     proof, plan = read(folder/'provenance.json'), read(PLAN)
     _verify_input_contents(folder, plan, proof, digest(PLAN))
+    if plan.get('triple_body_master_reconciliation'):
+        from .master_reconciliation import verify_authentication
+        verify_authentication(folder,plan,proof)
     if plan.get('triple_body_macro_qualification'):
         from .triple_body_macro_qualification import verify_authentication
         verify_authentication(folder, plan, proof)
@@ -266,8 +272,12 @@ def _verify_input_contents(folder, plan, proof, plan_sha256):
         results = ET.fromstring(raw).findall('.//{*}UnitTestResult')
         assert len(results) == receipt['passed_cases'] == 100
         assert all(r.attrib['outcome'] == 'Passed' for r in results)
-    assert verify_trx(folder/'evidence/variant-harness.trx', ['SharedClassicalWindowVariantBenchmarkTests']) == proof['checks']['variant-harness']
-    assert proof['checks']['variant-harness']['passed'] == 13
+    if plan.get('triple_body_master_reconciliation'):
+        from .master_reconciliation import verify_harness_alias
+        verify_harness_alias(folder,plan,proof)
+    else:
+        assert verify_trx(folder/'evidence/variant-harness.trx', ['SharedClassicalWindowVariantBenchmarkTests']) == proof['checks']['variant-harness']
+        assert proof['checks']['variant-harness']['passed'] == 13
     return proof
 
 

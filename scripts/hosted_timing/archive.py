@@ -101,6 +101,13 @@ def archive(raw, prepared, repo, phase):
         if plan.get('triple_body_macro_qualification'):
             roi=plan['roi_evidence'];assert digest(REPO/roi['path']) == roi['sha256']
             blobs['conditional-roi-evidence.json']=(REPO/roi['path']).read_bytes()
+    if read(PLAN).get('triple_body_master_reconciliation'):
+        plan=read(PLAN)
+        for name,binding in [('master-reconciliation-proof.json',plan['targeted_reference']['master_reconciliation']),('scope-approval.json',plan['scope_approval'])]:
+            path=REPO/binding['path'];assert digest(path)==binding['sha256'];blobs[name]=path.read_bytes()
+        for label in ('old','successor'):
+            folder=prepared/(label+'-authentication')
+            blobs['prepared/'+label+'-authentication/manifest.json']=(folder/'manifest.json').read_bytes()
     blobs['candidate-source.patch'] = subprocess.check_output(['git','diff','--binary',
         summary['sources']['old'],summary['sources']['new'],'--','src','tests'],cwd=repo)
     assert bool(blobs['candidate-source.patch']) == (phase not in ('coverage','baseline-refresh'))
@@ -149,10 +156,12 @@ def archive(raw, prepared, repo, phase):
         **({'coverage_complete': True, 'source_qualification_claimed': False} if phase == 'coverage' else {}),
         **({'source_gate_accepted':summary['source_gate_accepted'],
             'native_progress_gate_passed':summary['native_progress_gate_passed'],
-            'native_progress_gate':summary['native_progress_gate']} if (read(PLAN).get('candle_predicate_order_qualification') or read(PLAN).get('triple_body_macro_qualification')) else {}),
+            'native_progress_gate':summary['native_progress_gate']} if (read(PLAN).get('candle_predicate_order_qualification') or read(PLAN).get('triple_body_macro_qualification') or read(PLAN).get('triple_body_master_reconciliation')) else {}),
         **({'native_crossover_gate_passed':summary['native_crossover_gate_passed'],
             'native_crossover_samples':summary['native_crossover_samples']} if read(PLAN).get('matchinglow_grid_qualification') else {}),
-        note=('Fresh four-pair 120-case TripleBody macro qualification; unchanged 24-decision source and native-progress gates, existing CI/GPU binaries reused, no source acceptance from ThreeInside control alone.' if read(PLAN).get('triple_body_macro_qualification') else
+        **({'master_reconciliation':True,'closure_ledger_new_rows':0,'required_native_closure_pair':'TaLib.Candles.TwoCrows'} if read(PLAN).get('triple_body_master_reconciliation') else {}),
+        note=('Fresh120-case master-input reconciliation: all original24source/native/runtime/sampling gates plus preserved TwoCrows10000closure. Canonical actualartifact/GPUreceipt aliases the scoped frozen/native role; no extra execution or new ledger row is claimed.' if read(PLAN).get('triple_body_master_reconciliation') else
+        'Fresh four-pair 120-case TripleBody macro qualification; unchanged 24-decision source and native-progress gates, existing CI/GPU binaries reused, no source acceptance from ThreeInside control alone.' if read(PLAN).get('triple_body_macro_qualification') else
         'Fresh 180-case six-candle predicate-order qualification. The unchanged standard 36-decision source gate and the predeclared LibraryPair native-progress gate must both pass; the native gate requires a new 10,000-bar closure with its own source Faster verdict, robust net 10,000-bar point-win progress, and preservation of prior confident native wins at both sizes. One round-two native control per pair/size is retained without pooling. Authenticated old a1f 30/89/GPU100 and new caef 24/65/GPU100 inputs are preserved separately from frozen 9a. No acceptance or publication follows from source improvements alone.' if read(PLAN).get('candle_predicate_order_qualification') else
               'Fresh 90-case MatchingLow-only qualification with SeparatingLines and StickSandwich sentinels. Accepted source requires zero slower decisions, at least one faster decision, and both MatchingLow 10,000-bar candidate rounds newly beating the measured native control with separated intervals and at least 10% lower means. Historical harness continuation carries no timing-equivalence claim; original baseline/frozen GPU evidence and fresh source-bound candidate GPU100 are retained.' if read(PLAN).get('matchinglow_grid_qualification') else
              'Hosted CPU current-baseline A/A refresh. Original authenticated canonical/frozen GPU receipts are reused; fresh consumer validation passed 303 canonical cases and 20 frozen/canonical alignment cases, without new compilation or GPU execution. A/A admission is not equivalence; no production qualification or optimization is claimed.' if phase == 'baseline-refresh' and read(PLAN).get('current_baseline_ten_refresh') else
