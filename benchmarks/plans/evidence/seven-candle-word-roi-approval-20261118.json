@@ -1,13 +1,17 @@
 {
-  "approved": false,
-  "root_authenticated": false,
+  "approved": true,
+  "root_authenticated": true,
   "scope": "seven-candle-word-qualification-20261118",
   "baseline": "9e914007c3438d9f251f3fab9ef321d49c22de83",
   "candidate": "d1933adf1c979bc19a5fab3f2bb2b26946386386",
-  "run_id": "UNBOUND",
-  "workflow_head": "UNBOUND",
+  "run_id": "44242770814",
+  "workflow_head": "1566336b9ebcb5db0652f01a617a6948cb1b237f",
   "summary": {
     "path": "benchmarks/plans/evidence/seven-candle-word-roi-summary-20261118.json",
-    "sha256": "UNBOUND"
+    "sha256": "cac67c778aa97d59e6b013cb0fbf0ff2744da5afa4a8bf74c084dc24d7f17913"
+  },
+  "root_authentication_receipt": {
+    "path": "Z:/StockIndicators-Archives/active-performance-evidence/candle-isolated-roi-44242770814/root-review.json",
+    "sha256": "f7fb7d6f5b3c72cd934da344290b0d2b16546c3547d44736c7cba5f3ebd674f2"
   }
 }

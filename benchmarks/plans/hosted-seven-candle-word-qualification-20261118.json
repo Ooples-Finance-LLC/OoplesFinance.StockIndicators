@@ -130,8 +130,8 @@
       ]
     }
   ],
-  "inputs_ready": false,
-  "parent_review_approved": false,
+  "inputs_ready": true,
+  "parent_review_approved": true,
   "sources": {
     "published": "9e914007c3438d9f251f3fab9ef321d49c22de83",
     "old": "9e914007c3438d9f251f3fab9ef321d49c22de83",
@@ -279,10 +279,10 @@
   },
   "scope_approval": {
     "path": "benchmarks/plans/hosted-seven-candle-word-qualification-20261118-approval.json",
-    "sha256": "7d1cf39aa17b5e0a9a1a651b99d1dee232605747bf14c55ccdc64aa16b729b2a"
+    "sha256": "e871ee478e1011e81810bd99a912610c3782389839f9f8055101fe00578b88bf"
   },
   "roi_approval": {
     "path": "benchmarks/plans/evidence/seven-candle-word-roi-approval-20261118.json",
-    "sha256": "9c6916c9e0710367bb6ee8234118cf1079468187fb1230ea4341a086c67886d4"
+    "sha256": "c25c7463ac717f2239390ae3ed344cc7692db3d38c1716ee2f6934d3d7fa3408"
   }
 }

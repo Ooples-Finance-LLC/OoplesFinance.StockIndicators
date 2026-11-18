@@ -1,5 +1,5 @@
 {
-  "approved": false,
+  "approved": true,
   "scope": "seven-candle-word-qualification-20261118",
   "cases": 198,
   "decisions": 42,
@@ -7,5 +7,6 @@
     "TaLib.Candles.Breakaway",
     "TaLib.Candles.ThreeInside"
   ],
-  "condition": "Only after root-authenticated30case ROI promotion and complete parent review; no qualification or dispatch is authorized by this placeholder."
+  "condition": "Root-reviewed frozen 198-case / 42-decision scope and independently authenticated 30-case ROI run 44242770814 authorize this qualification only; diagnostic evidence grants no qualification or closure credit.",
+  "reviewed_freeze_commit": "ab953c93caacde156768b54b1d89a83fbb84fe38"
 }
