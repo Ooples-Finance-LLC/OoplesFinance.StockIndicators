@@ -154,14 +154,18 @@ public static class RenkoSnapshot
         return new BigInteger(factor.Mantissa) << (factor.Scale - priceShift);
     }
 
-    // A normal binary64 value is an integer multiple of 2^(exponent-1075).
-    // In 2^-1074 units this proves exponent-1 trailing zero bits. Zero
-    // permits every shift; subnormals retain the original unit grid.
+    // Include the significand's exact trailing zeros, keeping ordinary dyadic
+    // prices in BigInteger's small representation. The integral decimal seed
+    // permits at most 1074 bits of cancellation. Later finer prices still
+    // expand every retained coordinate before they are consumed.
     private static int PriceShift(double value)
     {
         if (value == 0) return 1074;
         int exponent = (int)((BitConverter.DoubleToInt64Bits(value) >> 52) & 0x7ff);
-        return exponent == 0 ? 0 : Math.Min(1074, exponent - 1);
+        // Keep non-finite mutations deferred to the original Units call;
+        // ProductFactor would otherwise throw a different exception early.
+        if (exponent == 2047) return 1074;
+        return Math.Min(1074, new ExactMeanAccumulator.ProductFactor(value).Scale);
     }
 
     /// <summary>Uses the last seeded Wilder ATR as the fixed brick size for the entire chart. Later input repaints earlier bricks.</summary>
