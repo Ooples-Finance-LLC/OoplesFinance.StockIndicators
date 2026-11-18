@@ -54,6 +54,10 @@ def sample(case):
 
 
 def collect(folder, phase):
+    if read(PLAN).get('renko_normalized_grid_qualification'):
+        assert phase == 'targeted'
+        from .renko_normalized_grid_qualification import collect as renko_qualify
+        return renko_qualify(folder)
     if read(PLAN).get('cmf_alma_combined_qualification'):
         assert phase == 'targeted'
         from .cmf_alma_combined_qualification import collect as combined_qualify
@@ -121,8 +125,14 @@ def collect_preflight(folder):
     return _collect(folder, 'successor', preflight=True)
 
 
-def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=False, candle_predicate_gate=False, ultimate_gate=False, cmf_alma_gate=False):
+def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=False, candle_predicate_gate=False, ultimate_gate=False, cmf_alma_gate=False, renko_gate=False):
     plan = read(PLAN)
+    if plan.get('renko_normalized_grid_qualification'):
+        assert phase == 'targeted' and renko_gate and not cmf_alma_gate and not ultimate_gate and not preflight and not diagnostic and not matchinglow_gate and not candle_predicate_gate
+        from .renko_normalized_grid_qualification import validate_scope
+        validate_scope(plan)
+    else:
+        assert not renko_gate
     if plan.get('cmf_alma_combined_qualification'):
         assert phase == 'targeted' and cmf_alma_gate and not ultimate_gate and not preflight and not diagnostic and not matchinglow_gate and not candle_predicate_gate
         from .cmf_alma_combined_qualification import validate_scope

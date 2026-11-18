@@ -255,3 +255,6 @@ benchmarks/plans/evidence/renko-normalized-baseline-focused-20261118-receipt.jso
 benchmarks/plans/evidence/renko-normalized-baseline-focused-20261118-unit.trx -text
 benchmarks/plans/evidence/renko-normalized-baseline-focused-20261118-parity.trx -text
 benchmarks/plans/evidence/renko-normalized-actual-lp-setup-proof-20261118.json -text
+
+benchmarks/plans/hosted-renko-normalized-grid-qualification-20261118.json text eol=lf
+benchmarks/plans/evidence/renko-normalized-grid-screen-20261118.json -text
