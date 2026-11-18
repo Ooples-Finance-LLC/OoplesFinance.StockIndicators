@@ -48,6 +48,22 @@ public sealed class WiderUltimateExecutionTests
     }
 
     [Fact]
+    public async Task WideIntegerHalfwayOutputPreservesExactTiesToEven()
+    {
+        // All prices are exact integers and the close is odd, fixing grid zero.
+        // Pressure = 2^53+1; range = 100*2^47. Thus the exact weighted
+        // result is 64+2^-47, halfway above 64, which rounds to even 64.
+        // The outward 64-fraction-bit enclosure straddles that midpoint,
+        // so this exercises exact publication rather than a certified estimate.
+        long halfRange = 50L << 47;
+        long close = (1L << 53) + 1 - halfRange;
+        var bars = Enumerable.Repeat(new Bar(default, 0, halfRange, -halfRange, close, 1), 8193).ToArray();
+        var reference = TrueRangeRatioReference.Ultimate(bars[..2], [1, 1, 1], true);
+        Assert.Equal(64d, reference[1]);
+        await Check(bars, new WindowUltimateOscillator(1, 1, 1, true));
+    }
+
+    [Fact]
     public void LongWindowGuardUsesTheExactIntegerBoundary()
     {
         var guard = typeof(ValuesBarExecution).GetMethod("FitsUltimateLongWindows",

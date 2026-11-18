@@ -66,10 +66,9 @@ internal static partial class ValuesBarExecution
             Span<int> periods = stackalloc int[] { indicator.ShortPeriod, indicator.MiddlePeriod, indicator.LongPeriod };
             Span<long> pressures = stackalloc long[3]; pressures.Clear();
             Span<long> ranges = stackalloc long[3]; ranges.Clear();
-            // Reuse compact publication scratch across rows. The broader guard
-            // certifies the sums, not the three-ratio Int128 products above.
-            var exactPressures = certified ? null : new JurikDyadic[3];
-            var exactRanges = certified ? null : new JurikDyadic[3];
+            // Only uncertain publication needs dyadic scratch. Retain it after
+            // the first fallback; certified integer rows never construct it.
+            JurikDyadic[]? exactPressures = null, exactRanges = null;
             for (int i = 0; i < count; i++)
             {
                 if (cancellation.IsCancellationRequested) return region;
@@ -143,8 +142,9 @@ internal static partial class ValuesBarExecution
                 else
                 {
                     double value = 0;
-                    if (defined)
-                        defined = PublishUltimateLongWindow(pressures, ranges, exactPressures!, exactRanges!,
+                    if (defined && !TryUltimateLongCertificate(pressures, ranges, indicator.ZeroRangeContribution, out value))
+                        defined = PublishUltimateLongWindow(pressures, ranges,
+                            exactPressures ??= new JurikDyadic[3], exactRanges ??= new JurikDyadic[3],
                             indicator.ZeroRangeContribution, out value);
                     output[0][row] = value;
                 }
@@ -165,6 +165,41 @@ internal static partial class ValuesBarExecution
         return 2 * (UInt128)(ulong)integerMaximum * (uint)longestPeriod <= ((UInt128)1 << 61);
     }
 
+    private static bool TryUltimateLongCertificate(ReadOnlySpan<long> pressures, ReadOnlySpan<long> ranges,
+        bool zero, out double result)
+    {
+        result = 0;
+        // The existing worker guard bounds each signed sum by 2^61. The
+        // shared price grid cancels, so these are the same 64-fractional-bit
+        // enclosures as TryWeightedRatio, without dyadic normalization/copies.
+        UInt128 lower = 0, upper = 0;
+        for (int k = 0; k < 3; k++)
+        {
+            long pressure = pressures[k], range = ranges[k];
+            if (range == 0)
+            {
+                if (!zero) return false;
+                continue;
+            }
+            if (pressure < 0 || range < 0) return false;
+            if (pressure == 0) continue;
+            // Positive pressure << 64 fits within 126 magnitude bits.
+            var divided = UInt128.DivRem((UInt128)pressure << 64, (UInt128)range);
+            UInt128 ceiling = divided.Quotient + (divided.Remainder == 0 ? (UInt128)0 : 1);
+            if (ceiling > (UInt128)1 << 64) return false;
+            uint weight = (uint)(4 >> k);
+            lower = unchecked(lower + divided.Quotient * weight);
+            upper = unchecked(upper + ceiling * weight);
+        }
+        // Accepted bounds are <= 7*2^64; scaling by 100 stays below 2^74.
+        Int128 denominator = (Int128)7 << 64;
+        double low = JurikDyadic.IntegerRatio(unchecked((Int128)(lower * 100)), denominator);
+        double high = JurikDyadic.IntegerRatio(unchecked((Int128)(upper * 100)), denominator);
+        if (BitConverter.DoubleToInt64Bits(low) != BitConverter.DoubleToInt64Bits(high)) return false;
+        result = low;
+        return true;
+    }
+
     private static bool PublishUltimateLongWindow(ReadOnlySpan<long> pressures, ReadOnlySpan<long> ranges,
         Span<JurikDyadic> exactPressures, Span<JurikDyadic> exactRanges, bool zero, out double result)
     {
@@ -176,9 +211,6 @@ internal static partial class ValuesBarExecution
             exactPressures[k] = JurikDyadic.FromInteger(pressures[k]);
             exactRanges[k] = JurikDyadic.FromInteger(ranges[k]);
         }
-        if (WindowUltimateOscillator.TryWeightedRatio(exactPressures, exactRanges, zero, out result))
-            return true;
-
         // Preserve CompactState's exact weighted expression for uncertain
         // rounding, signed pressure, inverted candles and zero denominators.
         var numerator = new JurikDyadic();
