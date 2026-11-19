@@ -87,6 +87,7 @@ internal static partial class FastExecution
             || !FastKernels.SupportsClassic(macd.SlowAverage.Method) || !FastKernels.SupportsClassic(macd.SignalAverage.Method)
             ? null : (c, o) => FastKernels.ClassicMacd(c.Close, o, macd));
         Bind<AlignedEmaMacd>(binders, macd => (c, o) => FastKernels.AlignedMacd(c.Close, o, macd));
+        Bind<TillsonAverage>(binders, tillson => (c, o) => FastKernels.Tillson(c.Close, o[0], o[1], tillson));
     }
 
     private static void BindRange(Dictionary<Type, Func<IIndicator, FastKernel?>> binders)
