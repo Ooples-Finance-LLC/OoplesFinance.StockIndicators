@@ -1,0 +1,37 @@
+{
+  "status": "independent-recollection-and-feasibility-gates-passed",
+  "run_id": "44425075040",
+  "head": "809674bc0aaf27ea230d610e6bb74cb022e272c4",
+  "plan_sha256": "ed01d477ddd6f193a92bb9c1a62705c5e87540762095d7b186d9a9b37c7541a7",
+  "summary_sha256": "0b481749cade409d0ccc11da2430c6d104a1f80b367e5fa06f1659bf13d6c700",
+  "artifact_id": 14483672588,
+  "artifact_zip_sha256": "341be770ae5e1700d0a21586bfa7d42df8379851c843a5846cd5ec18163b31b6",
+  "artifact_files_verified": 1027,
+  "prepared_files_verified": 760,
+  "raw_files_verified": 66,
+  "runtime_payload_files_verified": 200,
+  "source_decisions": {
+    "inconclusive": 3,
+    "faster": 1
+  },
+  "new_eligible_10000_native_win_pairs": [
+    "TaLib.Candles.HikkakeModified"
+  ],
+  "old_10000_point_counts": {
+    "0": 0,
+    "3": 0
+  },
+  "candidate_10000_point_counts": {
+    "1": 1,
+    "2": 1
+  },
+  "no_prior_reopenings": true,
+  "feasibility_passed": true,
+  "independent_authentication_passed": true,
+  "retained_evidence_changed": false,
+  "qualification": false,
+  "production_integrated": false,
+  "report_imported": false,
+  "closure_credit": 0,
+  "approved_next": "52-case/12-decision full qualification against unchanged published c20/d9; no source or GPU rebuild"
+}

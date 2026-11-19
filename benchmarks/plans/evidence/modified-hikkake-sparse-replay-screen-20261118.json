@@ -1,0 +1,792 @@
+{
+  "all_cases_verified": true,
+  "phase": "diagnostic",
+  "case_count": 20,
+  "decision_count": 4,
+  "input_provenance_sha256": "c1253a597cf40cab80ef5acc8418e040c502b5351efbcdc759ab6ac8b877e43f",
+  "sources": {
+    "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "new": "48d238f56c37986b8437e5c31164552cc1362802"
+  },
+  "decisions": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.Hikkake",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.062033333333333336,
+        0.056
+      ],
+      "new_means_ms": [
+        0.07312777777777778,
+        0.0512375
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "44425075040",
+          "run_attempt": "1",
+          "job": "qualify",
+          "instance_nonce": "98856fc8a5e247dd9ec0169785a4b1f8"
+        },
+        "shard": 0,
+        "phase": "diagnostic",
+        "sources": {
+          "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+          "new": "48d238f56c37986b8437e5c31164552cc1362802"
+        },
+        "workflow_head": "809674bc0aaf27ea230d610e6bb74cb022e272c4",
+        "input_provenance_sha256": "c1253a597cf40cab80ef5acc8418e040c502b5351efbcdc759ab6ac8b877e43f",
+        "warmup_count": 1000
+      }
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.Hikkake",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.12605,
+        0.09045
+      ],
+      "new_means_ms": [
+        0.10118888888888888,
+        0.12276666666666668
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "44425075040",
+          "run_attempt": "1",
+          "job": "qualify",
+          "instance_nonce": "98856fc8a5e247dd9ec0169785a4b1f8"
+        },
+        "shard": 0,
+        "phase": "diagnostic",
+        "sources": {
+          "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+          "new": "48d238f56c37986b8437e5c31164552cc1362802"
+        },
+        "workflow_head": "809674bc0aaf27ea230d610e6bb74cb022e272c4",
+        "input_provenance_sha256": "c1253a597cf40cab80ef5acc8418e040c502b5351efbcdc759ab6ac8b877e43f",
+        "warmup_count": 1000
+      }
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.HikkakeModified",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.1160375,
+        0.041025
+      ],
+      "new_means_ms": [
+        0.019955555555555556,
+        0.0520375
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "44425075040",
+          "run_attempt": "1",
+          "job": "qualify",
+          "instance_nonce": "98856fc8a5e247dd9ec0169785a4b1f8"
+        },
+        "shard": 0,
+        "phase": "diagnostic",
+        "sources": {
+          "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+          "new": "48d238f56c37986b8437e5c31164552cc1362802"
+        },
+        "workflow_head": "809674bc0aaf27ea230d610e6bb74cb022e272c4",
+        "input_provenance_sha256": "c1253a597cf40cab80ef5acc8418e040c502b5351efbcdc759ab6ac8b877e43f",
+        "warmup_count": 1000
+      }
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.HikkakeModified",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.1634,
+        0.16178888888888887
+      ],
+      "new_means_ms": [
+        0.09814444444444444,
+        0.1025
+      ],
+      "verdict": "faster",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "44425075040",
+          "run_attempt": "1",
+          "job": "qualify",
+          "instance_nonce": "98856fc8a5e247dd9ec0169785a4b1f8"
+        },
+        "shard": 0,
+        "phase": "diagnostic",
+        "sources": {
+          "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+          "new": "48d238f56c37986b8437e5c31164552cc1362802"
+        },
+        "workflow_head": "809674bc0aaf27ea230d610e6bb74cb022e272c4",
+        "input_provenance_sha256": "c1253a597cf40cab80ef5acc8418e040c502b5351efbcdc759ab6ac8b877e43f",
+        "warmup_count": 1000
+      }
+    }
+  ],
+  "verdicts": {
+    "inconclusive": 3,
+    "faster": 1
+  },
+  "accepted": false,
+  "final_candidate_round": 2,
+  "final_candidate_rows": {
+    "LibraryPairBenchmarks": [
+      {
+        "pair": "TaLib.Candles.Hikkake",
+        "bars": 1000,
+        "method": "Ooples",
+        "mean_ns": 51237.5,
+        "lower_ns": 47902.389000059906,
+        "upper_ns": 54572.610999940094,
+        "samples": 8,
+        "allocated_bytes": 67376,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "44425075040",
+            "run_attempt": "1",
+            "job": "qualify",
+            "instance_nonce": "98856fc8a5e247dd9ec0169785a4b1f8"
+          },
+          "shard": 0,
+          "phase": "diagnostic",
+          "sources": {
+            "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+            "new": "48d238f56c37986b8437e5c31164552cc1362802"
+          },
+          "workflow_head": "809674bc0aaf27ea230d610e6bb74cb022e272c4",
+          "input_provenance_sha256": "c1253a597cf40cab80ef5acc8418e040c502b5351efbcdc759ab6ac8b877e43f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Candles.Hikkake",
+        "bars": 1000,
+        "method": "Competitor",
+        "mean_ns": 8450,
+        "lower_ns": 7169.4455229355635,
+        "upper_ns": 9730.554477064437,
+        "samples": 8,
+        "allocated_bytes": 15392,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "44425075040",
+            "run_attempt": "1",
+            "job": "qualify",
+            "instance_nonce": "98856fc8a5e247dd9ec0169785a4b1f8"
+          },
+          "shard": 0,
+          "phase": "diagnostic",
+          "sources": {
+            "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+            "new": "48d238f56c37986b8437e5c31164552cc1362802"
+          },
+          "workflow_head": "809674bc0aaf27ea230d610e6bb74cb022e272c4",
+          "input_provenance_sha256": "c1253a597cf40cab80ef5acc8418e040c502b5351efbcdc759ab6ac8b877e43f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Candles.Hikkake",
+        "bars": 10000,
+        "method": "Ooples",
+        "mean_ns": 122766.66666666667,
+        "lower_ns": 113249.92758714547,
+        "upper_ns": 132283.40574618787,
+        "samples": 9,
+        "allocated_bytes": 650728,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "44425075040",
+            "run_attempt": "1",
+            "job": "qualify",
+            "instance_nonce": "98856fc8a5e247dd9ec0169785a4b1f8"
+          },
+          "shard": 0,
+          "phase": "diagnostic",
+          "sources": {
+            "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+            "new": "48d238f56c37986b8437e5c31164552cc1362802"
+          },
+          "workflow_head": "809674bc0aaf27ea230d610e6bb74cb022e272c4",
+          "input_provenance_sha256": "c1253a597cf40cab80ef5acc8418e040c502b5351efbcdc759ab6ac8b877e43f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Candles.Hikkake",
+        "bars": 10000,
+        "method": "Competitor",
+        "mean_ns": 81950,
+        "lower_ns": 69335.62659681887,
+        "upper_ns": 94564.37340318113,
+        "samples": 10,
+        "allocated_bytes": 123680,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "44425075040",
+            "run_attempt": "1",
+            "job": "qualify",
+            "instance_nonce": "98856fc8a5e247dd9ec0169785a4b1f8"
+          },
+          "shard": 0,
+          "phase": "diagnostic",
+          "sources": {
+            "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+            "new": "48d238f56c37986b8437e5c31164552cc1362802"
+          },
+          "workflow_head": "809674bc0aaf27ea230d610e6bb74cb022e272c4",
+          "input_provenance_sha256": "c1253a597cf40cab80ef5acc8418e040c502b5351efbcdc759ab6ac8b877e43f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Candles.HikkakeModified",
+        "bars": 1000,
+        "method": "Ooples",
+        "mean_ns": 52037.5,
+        "lower_ns": 46659.69798949553,
+        "upper_ns": 57415.30201050447,
+        "samples": 8,
+        "allocated_bytes": 69736,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "44425075040",
+            "run_attempt": "1",
+            "job": "qualify",
+            "instance_nonce": "98856fc8a5e247dd9ec0169785a4b1f8"
+          },
+          "shard": 0,
+          "phase": "diagnostic",
+          "sources": {
+            "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+            "new": "48d238f56c37986b8437e5c31164552cc1362802"
+          },
+          "workflow_head": "809674bc0aaf27ea230d610e6bb74cb022e272c4",
+          "input_provenance_sha256": "c1253a597cf40cab80ef5acc8418e040c502b5351efbcdc759ab6ac8b877e43f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Candles.HikkakeModified",
+        "bars": 1000,
+        "method": "Competitor",
+        "mean_ns": 16750,
+        "lower_ns": 16069.197749516557,
+        "upper_ns": 17430.802250483444,
+        "samples": 10,
+        "allocated_bytes": 16688,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "44425075040",
+            "run_attempt": "1",
+            "job": "qualify",
+            "instance_nonce": "98856fc8a5e247dd9ec0169785a4b1f8"
+          },
+          "shard": 0,
+          "phase": "diagnostic",
+          "sources": {
+            "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+            "new": "48d238f56c37986b8437e5c31164552cc1362802"
+          },
+          "workflow_head": "809674bc0aaf27ea230d610e6bb74cb022e272c4",
+          "input_provenance_sha256": "c1253a597cf40cab80ef5acc8418e040c502b5351efbcdc759ab6ac8b877e43f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Candles.HikkakeModified",
+        "bars": 10000,
+        "method": "Ooples",
+        "mean_ns": 102500,
+        "lower_ns": 94247.45503879787,
+        "upper_ns": 110752.54496120213,
+        "samples": 9,
+        "allocated_bytes": 652416,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "44425075040",
+            "run_attempt": "1",
+            "job": "qualify",
+            "instance_nonce": "98856fc8a5e247dd9ec0169785a4b1f8"
+          },
+          "shard": 0,
+          "phase": "diagnostic",
+          "sources": {
+            "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+            "new": "48d238f56c37986b8437e5c31164552cc1362802"
+          },
+          "workflow_head": "809674bc0aaf27ea230d610e6bb74cb022e272c4",
+          "input_provenance_sha256": "c1253a597cf40cab80ef5acc8418e040c502b5351efbcdc759ab6ac8b877e43f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Candles.HikkakeModified",
+        "bars": 10000,
+        "method": "Competitor",
+        "mean_ns": 156377.77777777778,
+        "lower_ns": 155214.2121036443,
+        "upper_ns": 157541.34345191126,
+        "samples": 9,
+        "allocated_bytes": 124064,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "44425075040",
+            "run_attempt": "1",
+            "job": "qualify",
+            "instance_nonce": "98856fc8a5e247dd9ec0169785a4b1f8"
+          },
+          "shard": 0,
+          "phase": "diagnostic",
+          "sources": {
+            "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+            "new": "48d238f56c37986b8437e5c31164552cc1362802"
+          },
+          "workflow_head": "809674bc0aaf27ea230d610e6bb74cb022e272c4",
+          "input_provenance_sha256": "c1253a597cf40cab80ef5acc8418e040c502b5351efbcdc759ab6ac8b877e43f",
+          "warmup_count": 1000
+        }
+      }
+    ]
+  },
+  "frozen_baseline_feasibility_only": true,
+  "current_combined_source_qualified": false,
+  "followup_requires_current_published_baseline": true,
+  "diagnostic_only": true,
+  "qualification": false,
+  "production_integrated": false,
+  "report_imported": false,
+  "policy_changed": false,
+  "closure_ledger_new_rows": 0,
+  "automatic_qualification": false,
+  "feasibility_screen": {
+    "passed": true,
+    "old_10000_point_win_counts": {
+      "0": 0,
+      "3": 0
+    },
+    "candidate_10000_point_win_counts": {
+      "1": 1,
+      "2": 1
+    },
+    "net_10000_point_progress": true,
+    "all_four_source_comparisons_no_regression": true,
+    "at_least_one_new_10000_target_win": true,
+    "new_10000_target_wins": [
+      {
+        "pair": "TaLib.Candles.HikkakeModified",
+        "bars": 10000,
+        "source_verdict": "faster"
+      }
+    ],
+    "protected_prior_native_wins": [],
+    "prior_native_win_reopenings": [],
+    "per_target_10000": [
+      {
+        "source_verdict": "inconclusive",
+        "baseline_point_native_wins": {
+          "0": false,
+          "3": false
+        },
+        "baseline_interval_native_winner": false,
+        "baseline_statistical_native_winner": false,
+        "baseline_new_win_eligible": true,
+        "candidate_statistical_native_win": false,
+        "new_10000_target_win": false,
+        "pair": "TaLib.Candles.Hikkake",
+        "bars": 10000,
+        "old_rounds": {
+          "0": {
+            "mean_ns": 126050,
+            "lower_ns": 105157.03839684033,
+            "upper_ns": 146942.96160315967,
+            "samples": 8,
+            "allocated_bytes": 650728
+          },
+          "3": {
+            "mean_ns": 90450,
+            "lower_ns": 89491.28489766725,
+            "upper_ns": 91408.71510233275,
+            "samples": 8,
+            "allocated_bytes": 650680
+          }
+        },
+        "candidate_rounds": {
+          "1": {
+            "mean_ns": 101188.88888888889,
+            "lower_ns": 87964.7492778321,
+            "upper_ns": 114413.02849994568,
+            "samples": 9,
+            "allocated_bytes": 650008
+          },
+          "2": {
+            "mean_ns": 122766.66666666667,
+            "lower_ns": 113249.92758714547,
+            "upper_ns": 132283.40574618787,
+            "samples": 9,
+            "allocated_bytes": 650728
+          }
+        },
+        "native_control": {
+          "mean_ns": 81950,
+          "lower_ns": 69335.62659681887,
+          "upper_ns": 94564.37340318113,
+          "samples": 10,
+          "allocated_bytes": 123680
+        }
+      },
+      {
+        "source_verdict": "faster",
+        "baseline_point_native_wins": {
+          "0": false,
+          "3": false
+        },
+        "baseline_interval_native_winner": false,
+        "baseline_statistical_native_winner": false,
+        "baseline_new_win_eligible": true,
+        "candidate_statistical_native_win": true,
+        "new_10000_target_win": true,
+        "pair": "TaLib.Candles.HikkakeModified",
+        "bars": 10000,
+        "old_rounds": {
+          "0": {
+            "mean_ns": 163400,
+            "lower_ns": 155112.45572546654,
+            "upper_ns": 171687.54427453346,
+            "samples": 9,
+            "allocated_bytes": 652320
+          },
+          "3": {
+            "mean_ns": 161788.88888888888,
+            "lower_ns": 145325.0309744958,
+            "upper_ns": 178252.74680328195,
+            "samples": 9,
+            "allocated_bytes": 652272
+          }
+        },
+        "candidate_rounds": {
+          "1": {
+            "mean_ns": 98144.44444444444,
+            "lower_ns": 97128.8194470458,
+            "upper_ns": 99160.06944184308,
+            "samples": 9,
+            "allocated_bytes": 651360
+          },
+          "2": {
+            "mean_ns": 102500,
+            "lower_ns": 94247.45503879787,
+            "upper_ns": 110752.54496120213,
+            "samples": 9,
+            "allocated_bytes": 652416
+          }
+        },
+        "native_control": {
+          "mean_ns": 156377.77777777778,
+          "lower_ns": 155214.2121036443,
+          "upper_ns": 157541.34345191126,
+          "samples": 9,
+          "allocated_bytes": 124064
+        }
+      }
+    ],
+    "all_pair_size_rows": [
+      {
+        "source_verdict": "inconclusive",
+        "baseline_point_native_wins": {
+          "0": false,
+          "3": false
+        },
+        "baseline_interval_native_winner": false,
+        "baseline_statistical_native_winner": false,
+        "baseline_new_win_eligible": true,
+        "candidate_statistical_native_win": false,
+        "new_10000_target_win": false,
+        "pair": "TaLib.Candles.Hikkake",
+        "bars": 1000,
+        "old_rounds": {
+          "0": {
+            "mean_ns": 62033.333333333336,
+            "lower_ns": 42123.190548936625,
+            "upper_ns": 81943.47611773005,
+            "samples": 9,
+            "allocated_bytes": 67376
+          },
+          "3": {
+            "mean_ns": 56000,
+            "lower_ns": 50545.961175514414,
+            "upper_ns": 61454.038824485586,
+            "samples": 8,
+            "allocated_bytes": 67376
+          }
+        },
+        "candidate_rounds": {
+          "1": {
+            "mean_ns": 73127.77777777778,
+            "lower_ns": 53616.30875720104,
+            "upper_ns": 92639.24679835452,
+            "samples": 9,
+            "allocated_bytes": 67376
+          },
+          "2": {
+            "mean_ns": 51237.5,
+            "lower_ns": 47902.389000059906,
+            "upper_ns": 54572.610999940094,
+            "samples": 8,
+            "allocated_bytes": 67376
+          }
+        },
+        "native_control": {
+          "mean_ns": 8450,
+          "lower_ns": 7169.4455229355635,
+          "upper_ns": 9730.554477064437,
+          "samples": 8,
+          "allocated_bytes": 15392
+        }
+      },
+      {
+        "source_verdict": "inconclusive",
+        "baseline_point_native_wins": {
+          "0": false,
+          "3": false
+        },
+        "baseline_interval_native_winner": false,
+        "baseline_statistical_native_winner": false,
+        "baseline_new_win_eligible": true,
+        "candidate_statistical_native_win": false,
+        "new_10000_target_win": false,
+        "pair": "TaLib.Candles.Hikkake",
+        "bars": 10000,
+        "old_rounds": {
+          "0": {
+            "mean_ns": 126050,
+            "lower_ns": 105157.03839684033,
+            "upper_ns": 146942.96160315967,
+            "samples": 8,
+            "allocated_bytes": 650728
+          },
+          "3": {
+            "mean_ns": 90450,
+            "lower_ns": 89491.28489766725,
+            "upper_ns": 91408.71510233275,
+            "samples": 8,
+            "allocated_bytes": 650680
+          }
+        },
+        "candidate_rounds": {
+          "1": {
+            "mean_ns": 101188.88888888889,
+            "lower_ns": 87964.7492778321,
+            "upper_ns": 114413.02849994568,
+            "samples": 9,
+            "allocated_bytes": 650008
+          },
+          "2": {
+            "mean_ns": 122766.66666666667,
+            "lower_ns": 113249.92758714547,
+            "upper_ns": 132283.40574618787,
+            "samples": 9,
+            "allocated_bytes": 650728
+          }
+        },
+        "native_control": {
+          "mean_ns": 81950,
+          "lower_ns": 69335.62659681887,
+          "upper_ns": 94564.37340318113,
+          "samples": 10,
+          "allocated_bytes": 123680
+        }
+      },
+      {
+        "source_verdict": "inconclusive",
+        "baseline_point_native_wins": {
+          "0": false,
+          "3": false
+        },
+        "baseline_interval_native_winner": false,
+        "baseline_statistical_native_winner": false,
+        "baseline_new_win_eligible": true,
+        "candidate_statistical_native_win": false,
+        "new_10000_target_win": false,
+        "pair": "TaLib.Candles.HikkakeModified",
+        "bars": 1000,
+        "old_rounds": {
+          "0": {
+            "mean_ns": 116037.5,
+            "lower_ns": 113722.8759675467,
+            "upper_ns": 118352.1240324533,
+            "samples": 8,
+            "allocated_bytes": 68632
+          },
+          "3": {
+            "mean_ns": 41025,
+            "lower_ns": 40165.370215081704,
+            "upper_ns": 41884.629784918296,
+            "samples": 8,
+            "allocated_bytes": 68632
+          }
+        },
+        "candidate_rounds": {
+          "1": {
+            "mean_ns": 19955.555555555555,
+            "lower_ns": 16884.320560717566,
+            "upper_ns": 23026.790550393544,
+            "samples": 9,
+            "allocated_bytes": 69736
+          },
+          "2": {
+            "mean_ns": 52037.5,
+            "lower_ns": 46659.69798949553,
+            "upper_ns": 57415.30201050447,
+            "samples": 8,
+            "allocated_bytes": 69736
+          }
+        },
+        "native_control": {
+          "mean_ns": 16750,
+          "lower_ns": 16069.197749516557,
+          "upper_ns": 17430.802250483444,
+          "samples": 10,
+          "allocated_bytes": 16688
+        }
+      },
+      {
+        "source_verdict": "faster",
+        "baseline_point_native_wins": {
+          "0": false,
+          "3": false
+        },
+        "baseline_interval_native_winner": false,
+        "baseline_statistical_native_winner": false,
+        "baseline_new_win_eligible": true,
+        "candidate_statistical_native_win": true,
+        "new_10000_target_win": true,
+        "pair": "TaLib.Candles.HikkakeModified",
+        "bars": 10000,
+        "old_rounds": {
+          "0": {
+            "mean_ns": 163400,
+            "lower_ns": 155112.45572546654,
+            "upper_ns": 171687.54427453346,
+            "samples": 9,
+            "allocated_bytes": 652320
+          },
+          "3": {
+            "mean_ns": 161788.88888888888,
+            "lower_ns": 145325.0309744958,
+            "upper_ns": 178252.74680328195,
+            "samples": 9,
+            "allocated_bytes": 652272
+          }
+        },
+        "candidate_rounds": {
+          "1": {
+            "mean_ns": 98144.44444444444,
+            "lower_ns": 97128.8194470458,
+            "upper_ns": 99160.06944184308,
+            "samples": 9,
+            "allocated_bytes": 651360
+          },
+          "2": {
+            "mean_ns": 102500,
+            "lower_ns": 94247.45503879787,
+            "upper_ns": 110752.54496120213,
+            "samples": 9,
+            "allocated_bytes": 652416
+          }
+        },
+        "native_control": {
+          "mean_ns": 156377.77777777778,
+          "lower_ns": 155214.2121036443,
+          "upper_ns": 157541.34345191126,
+          "samples": 9,
+          "allocated_bytes": 124064
+        }
+      }
+    ],
+    "eligibility_rule": "Both old owned means must be >= the same round2 native mean; a prior point winner in either old round is ineligible for a new-win claim.",
+    "prior_win_protection_rule": "Both old upper intervals below native lower => both candidate means remain strictly below native mean; checked at both sizes.",
+    "minimum_native_margin": null,
+    "native_policy_id": "native-separated-confidence-intervals-both-rounds-20261118",
+    "native_policy_receipt_sha256": "414b558eae1deda750c3d169020128986a0e0db9b2acd95f23da035be03bfd7c",
+    "native_control_round": 2,
+    "native_controls_per_pair_size": 1,
+    "automatic_qualification": false,
+    "qualification": false,
+    "closure_credit": 0
+  }
+}

@@ -1,0 +1,460 @@
+{
+  "status": "actual-hikkake-compiled-path-inspection-complete-pending-root-review",
+  "baseline_source": "d9d00ca56ebb857b87ead45044616970b607019c",
+  "candidate_source": "48d238f56c37986b8437e5c31164552cc1362802",
+  "candidate_source_fingerprint": "eee20a82686be9470cf725dde6dae8107224c99505ac205836822433d24e195e",
+  "candidate_cpu_run": "44419618060",
+  "candidate_manifest_sha256": "da15f6cf7c072d0cc35ec846a4ea2927821b5d9bab231e6b620fe9504e07576c",
+  "candidate_core_sha256": "fdeea3ee60cc5f8e5826933e20dba822477e171ecf1c562eefb7ab00a7ae0258",
+  "candidate_harness_sha256": "b84b24176386b7b5c93b46175a2e18f02b2d66dc5db3724f18ce385d2762bda9",
+  "gpu_evidence_commit": "c398c4d0dad6f7868f84734bca2e42da20e2dbc5",
+  "gpu_receipt_sha256": "8662a14c8f84f5caacdebabc515492ac342324586a8402f8d862aff58e5a76b6",
+  "gpu_root_review_sha256": "3bf22187897a719fb503c3a7d4a0f8434dfb9c743464295f9220decf5ab910e8",
+  "actual_lp_outputs_match_both_roles_every_bit": true,
+  "actual_modified_10k_data_and_output_match_saved_profile": true,
+  "actual_clr": "10.0.15",
+  "cpu_engine": "AiDotNet.Tensors.Engines.CpuEngine",
+  "default_worker_setting": 16,
+  "default_workers_unchanged": true,
+  "actual_full_call_wrapper_update_jit_observed": true,
+  "wrapper_update_not_called_by_factory_probe": true,
+  "actual_scheduler_execution_observed": false,
+  "factory_probe_description": "Computed max-eight-worker region lengths; reflection factory after each case actual calls. This is not observed scheduling. Guard uses actual indicator near5, not LP20/generic11.",
+  "ordinary_and_other_period_original_state_factory": true,
+  "actual_rows": [
+    {
+      "actual_scheduler_execution_observed": false,
+      "present_is_null": true,
+      "computed_factory_probe_regions": [
+        {
+          "start": 0,
+          "factory_count": 125,
+          "sparse_present": false,
+          "end": 125,
+          "generic_halo": 6,
+          "seed": 0
+        },
+        {
+          "start": 125,
+          "factory_count": 130,
+          "sparse_present": false,
+          "end": 250,
+          "generic_halo": 6,
+          "seed": 5
+        },
+        {
+          "start": 250,
+          "factory_count": 130,
+          "sparse_present": false,
+          "end": 375,
+          "generic_halo": 6,
+          "seed": 5
+        },
+        {
+          "start": 375,
+          "factory_count": 130,
+          "sparse_present": false,
+          "end": 500,
+          "generic_halo": 6,
+          "seed": 5
+        },
+        {
+          "start": 500,
+          "factory_count": 130,
+          "sparse_present": false,
+          "end": 625,
+          "generic_halo": 6,
+          "seed": 5
+        },
+        {
+          "start": 625,
+          "factory_count": 130,
+          "sparse_present": false,
+          "end": 750,
+          "generic_halo": 6,
+          "seed": 5
+        },
+        {
+          "start": 750,
+          "factory_count": 130,
+          "sparse_present": false,
+          "end": 875,
+          "generic_halo": 6,
+          "seed": 5
+        },
+        {
+          "start": 875,
+          "factory_count": 130,
+          "sparse_present": false,
+          "end": 1000,
+          "generic_halo": 6,
+          "seed": 5
+        }
+      ],
+      "near_period": 0,
+      "name": "Hikkake",
+      "lp_period": 20,
+      "factory_probe_label": "computed max-eight-worker factory probe; not observed scheduler execution",
+      "warmup": 5,
+      "computed_worker_chunks": 8,
+      "first_valid": 5,
+      "full_returned_output_sha256": "18522dc05f429fe30265b61b260c0a3d27fbe86c4c55e7b2096faa92d99a61b7",
+      "actual_data_bits": {
+        "Closes": "dca2aeeb4476c9629f61abeb2b84dac10797eb30f2ce922d72252f876f781229",
+        "Volumes": "ef2deb7a13ab5457ec3f29f66a6db157026e77ef7f7868737d97de3c145dafb6",
+        "Lows": "315007f3227a4a7270d2a735163b46a7644b08d0b6487fade1cccdc8f26f906e",
+        "Highs": "50d5f48bcae8b1637e9ff736b180779267b8b341f9ec33987eb26cfbc5546128",
+        "Opens": "2584de161fbe7ccf34d4ce2fcb5a81d0829df6501e1fd3a1055350ae91e6cea4"
+      },
+      "bars": 1000
+    },
+    {
+      "actual_scheduler_execution_observed": false,
+      "present_is_null": true,
+      "computed_factory_probe_regions": [
+        {
+          "start": 0,
+          "factory_count": 1250,
+          "sparse_present": false,
+          "end": 1250,
+          "generic_halo": 6,
+          "seed": 0
+        },
+        {
+          "start": 1250,
+          "factory_count": 1255,
+          "sparse_present": false,
+          "end": 2500,
+          "generic_halo": 6,
+          "seed": 5
+        },
+        {
+          "start": 2500,
+          "factory_count": 1255,
+          "sparse_present": false,
+          "end": 3750,
+          "generic_halo": 6,
+          "seed": 5
+        },
+        {
+          "start": 3750,
+          "factory_count": 1255,
+          "sparse_present": false,
+          "end": 5000,
+          "generic_halo": 6,
+          "seed": 5
+        },
+        {
+          "start": 5000,
+          "factory_count": 1255,
+          "sparse_present": false,
+          "end": 6250,
+          "generic_halo": 6,
+          "seed": 5
+        },
+        {
+          "start": 6250,
+          "factory_count": 1255,
+          "sparse_present": false,
+          "end": 7500,
+          "generic_halo": 6,
+          "seed": 5
+        },
+        {
+          "start": 7500,
+          "factory_count": 1255,
+          "sparse_present": false,
+          "end": 8750,
+          "generic_halo": 6,
+          "seed": 5
+        },
+        {
+          "start": 8750,
+          "factory_count": 1255,
+          "sparse_present": false,
+          "end": 10000,
+          "generic_halo": 6,
+          "seed": 5
+        }
+      ],
+      "near_period": 0,
+      "name": "Hikkake",
+      "lp_period": 20,
+      "factory_probe_label": "computed max-eight-worker factory probe; not observed scheduler execution",
+      "warmup": 5,
+      "computed_worker_chunks": 8,
+      "first_valid": 5,
+      "full_returned_output_sha256": "ca1cf5ac65092fc5b32df78334a1ef471f55765b6a49d5f27ca954ea704e28f5",
+      "actual_data_bits": {
+        "Closes": "05a4345921ccb4b2c8048bc5b1f01c67ab84a4e2f9123d5625aeaa9ab66c1ab1",
+        "Volumes": "e16300e4f8c28179376d1842ec0672fdb2432a639af74053577a6d0376581e46",
+        "Lows": "989eb9d2caabc9cfb79fccc3566047a3b931763ecb0ddb2e7030f905e5e732cc",
+        "Highs": "a8596e864a0c377f8dbc0ad7881fe716f2072a4c986f796e8baf798d9958376c",
+        "Opens": "7443c77d6b21e665162fd7e783b8ebc9743d16aa8012a3bba671a0a668ff4d27"
+      },
+      "bars": 10000
+    },
+    {
+      "actual_scheduler_execution_observed": false,
+      "present_is_null": true,
+      "computed_factory_probe_regions": [
+        {
+          "start": 0,
+          "factory_count": 125,
+          "sparse_present": true,
+          "end": 125,
+          "generic_halo": 11,
+          "seed": 0
+        },
+        {
+          "start": 125,
+          "factory_count": 135,
+          "sparse_present": true,
+          "end": 250,
+          "generic_halo": 11,
+          "seed": 10
+        },
+        {
+          "start": 250,
+          "factory_count": 135,
+          "sparse_present": true,
+          "end": 375,
+          "generic_halo": 11,
+          "seed": 10
+        },
+        {
+          "start": 375,
+          "factory_count": 135,
+          "sparse_present": true,
+          "end": 500,
+          "generic_halo": 11,
+          "seed": 10
+        },
+        {
+          "start": 500,
+          "factory_count": 135,
+          "sparse_present": true,
+          "end": 625,
+          "generic_halo": 11,
+          "seed": 10
+        },
+        {
+          "start": 625,
+          "factory_count": 135,
+          "sparse_present": true,
+          "end": 750,
+          "generic_halo": 11,
+          "seed": 10
+        },
+        {
+          "start": 750,
+          "factory_count": 135,
+          "sparse_present": true,
+          "end": 875,
+          "generic_halo": 11,
+          "seed": 10
+        },
+        {
+          "start": 875,
+          "factory_count": 135,
+          "sparse_present": true,
+          "end": 1000,
+          "generic_halo": 11,
+          "seed": 10
+        }
+      ],
+      "near_period": 5,
+      "name": "HikkakeModified",
+      "lp_period": 20,
+      "factory_probe_label": "computed max-eight-worker factory probe; not observed scheduler execution",
+      "warmup": 10,
+      "computed_worker_chunks": 8,
+      "first_valid": 10,
+      "full_returned_output_sha256": "72ed255246eb2bca90fcccade640a26244f9e116be660e7b931464d581fda8b2",
+      "actual_data_bits": {
+        "Closes": "dca2aeeb4476c9629f61abeb2b84dac10797eb30f2ce922d72252f876f781229",
+        "Volumes": "ef2deb7a13ab5457ec3f29f66a6db157026e77ef7f7868737d97de3c145dafb6",
+        "Lows": "315007f3227a4a7270d2a735163b46a7644b08d0b6487fade1cccdc8f26f906e",
+        "Highs": "50d5f48bcae8b1637e9ff736b180779267b8b341f9ec33987eb26cfbc5546128",
+        "Opens": "2584de161fbe7ccf34d4ce2fcb5a81d0829df6501e1fd3a1055350ae91e6cea4"
+      },
+      "bars": 1000
+    },
+    {
+      "actual_scheduler_execution_observed": false,
+      "present_is_null": true,
+      "computed_factory_probe_regions": [
+        {
+          "start": 0,
+          "factory_count": 1250,
+          "sparse_present": true,
+          "end": 1250,
+          "generic_halo": 11,
+          "seed": 0
+        },
+        {
+          "start": 1250,
+          "factory_count": 1260,
+          "sparse_present": true,
+          "end": 2500,
+          "generic_halo": 11,
+          "seed": 10
+        },
+        {
+          "start": 2500,
+          "factory_count": 1260,
+          "sparse_present": true,
+          "end": 3750,
+          "generic_halo": 11,
+          "seed": 10
+        },
+        {
+          "start": 3750,
+          "factory_count": 1260,
+          "sparse_present": true,
+          "end": 5000,
+          "generic_halo": 11,
+          "seed": 10
+        },
+        {
+          "start": 5000,
+          "factory_count": 1260,
+          "sparse_present": true,
+          "end": 6250,
+          "generic_halo": 11,
+          "seed": 10
+        },
+        {
+          "start": 6250,
+          "factory_count": 1260,
+          "sparse_present": true,
+          "end": 7500,
+          "generic_halo": 11,
+          "seed": 10
+        },
+        {
+          "start": 7500,
+          "factory_count": 1260,
+          "sparse_present": true,
+          "end": 8750,
+          "generic_halo": 11,
+          "seed": 10
+        },
+        {
+          "start": 8750,
+          "factory_count": 1260,
+          "sparse_present": true,
+          "end": 10000,
+          "generic_halo": 11,
+          "seed": 10
+        }
+      ],
+      "near_period": 5,
+      "name": "HikkakeModified",
+      "lp_period": 20,
+      "factory_probe_label": "computed max-eight-worker factory probe; not observed scheduler execution",
+      "warmup": 10,
+      "computed_worker_chunks": 8,
+      "first_valid": 10,
+      "full_returned_output_sha256": "9d669c702ccdade4639aa1de1ba5a58ce989c870ae31b0bba13ac5af5e1fe422",
+      "actual_data_bits": {
+        "Closes": "05a4345921ccb4b2c8048bc5b1f01c67ab84a4e2f9123d5625aeaa9ab66c1ab1",
+        "Volumes": "e16300e4f8c28179376d1842ec0672fdb2432a639af74053577a6d0376581e46",
+        "Lows": "989eb9d2caabc9cfb79fccc3566047a3b931763ecb0ddb2e7030f905e5e732cc",
+        "Highs": "a8596e864a0c377f8dbc0ad7881fe716f2072a4c986f796e8baf798d9958376c",
+        "Opens": "7443c77d6b21e665162fd7e783b8ebc9743d16aa8012a3bba671a0a668ff4d27"
+      },
+      "bars": 10000
+    }
+  ],
+  "protected_normalized_il_equal": [
+    {
+      "type": "OoplesFinance.StockIndicators.Indicators.HikkakeState",
+      "method": "Void Reset()",
+      "il_length": 116,
+      "normalized_il_sha256": "5f405ac0e8e743cf4a643d70a4db3184220b71336d589a4fcd74df33cd3fa390",
+      "locals_maxstack_unchanged": true
+    },
+    {
+      "type": "OoplesFinance.StockIndicators.Indicators.HikkakeState",
+      "method": "Double Update(OoplesFinance.StockIndicators.Indicators.Bar ByRef)",
+      "il_length": 398,
+      "normalized_il_sha256": "5101d7b64a7d0ecb6dfe5f99299155e6c04f2a7a1304892c24dba4ff3f146afa",
+      "locals_maxstack_unchanged": true
+    },
+    {
+      "type": "OoplesFinance.StockIndicators.Indicators.HikkakeState",
+      "method": "Void Add(OoplesFinance.StockIndicators.Indicators.Bar ByRef, Int32)",
+      "il_length": 39,
+      "normalized_il_sha256": "6f2f02f0a41410b2cae63b9b3c5671066197641e53a4af51aa29b1ff296b5087",
+      "locals_maxstack_unchanged": true
+    },
+    {
+      "type": "OoplesFinance.StockIndicators.Indicators.HikkakeState",
+      "method": "Int32 Formation(OoplesFinance.StockIndicators.Indicators.Bar ByRef)",
+      "il_length": 305,
+      "normalized_il_sha256": "2406713832a61e628de47d36f2eef7c2184b1262d905873965c38e6ebe345383",
+      "locals_maxstack_unchanged": true
+    },
+    {
+      "type": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution",
+      "method": "OoplesFinance.StockIndicators.Indicators.Bar FillBoundedWindow(OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.IIndicator, System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+      "il_length": 3249,
+      "normalized_il_sha256": "a1f3dc3186614d4b364e223ea5088f5e99b8e71c484eec617171992b7507a769",
+      "locals_maxstack_unchanged": true
+    },
+    {
+      "type": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution",
+      "method": "OoplesFinance.StockIndicators.Indicators.Bar FillBoundedWindow[T](OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.IIndicator, Int32, System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+      "il_length": 808,
+      "normalized_il_sha256": "cc3c37cbab01a8568e143b121df3c092e5cab94b5e6ced59c8504896c56900e0",
+      "locals_maxstack_unchanged": true
+    },
+    {
+      "type": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution",
+      "method": "PointwiseRegion ComputeBoundedRegion[T](OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer, Int32, Int32, Int32, System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar], System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar], System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.IIndicator)",
+      "il_length": 1021,
+      "normalized_il_sha256": "7b953a191c7d291b02bcd65c3009e3184078086c05c99e19a9d17bd132ab77b9",
+      "locals_maxstack_unchanged": true
+    },
+    {
+      "type": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+<>c__DisplayClass143_0`1",
+      "method": "Void <FillBoundedWindow>b__0(Int32)",
+      "il_length": 194,
+      "normalized_il_sha256": "7102686d00aa514b74307b155c0e0d14b057cfea2ed40fb37be11d6b6b9e276d",
+      "locals_maxstack_unchanged": true
+    }
+  ],
+  "jit_risk": "HikkakeKernel Create/Update expected change; ordinary shares this specialization. Native loop/frame/inlining differ and must be covered by ordinary full-call control. No claim of all-native containment or latency benefit. Shared outer and generic scheduler sizes/frame unchanged in observed tiers; not every optimized tier emitted.",
+  "runtime_files_verified_before_and_after_each_process": 100,
+  "process_deadline_seconds": 60,
+  "live_output_limit_bytes": 8388608,
+  "fresh_processes": 2,
+  "failed_prior_observer_output_preserved": true,
+  "prior_failure_sha256": "9db18f3faf25d1802f4fd53543a58626e9d11441c6b384d082040445a1caf564",
+  "builds": 0,
+  "profiles": 0,
+  "timing_samples": 0,
+  "native_measurements": 0,
+  "qualification": false,
+  "closure_credit": 0,
+  "source_instrumentation": false,
+  "files": {
+    "baseline-jit-methods.json": "deefd1c891dc6f476138756761bf2eee637a22f4fb7edd8059921da8152a1f9d",
+    "baseline-jit.txt": "329c95f1cee9663c8db0a1728a70c8131d622a5e380574a7623b46f221dc5c55",
+    "baseline-process.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "baseline-proof.json": "61fd2a75af9e3492923b44ea6015e289d92490f979b0f496a1e92f8bdc6076b7",
+    "candidate-jit-methods.json": "decfe097136cf7e165d806e5efa6283085c6ec69278c704d6504312b19ec7876",
+    "candidate-jit.txt": "f97f9865110e3c829ec054acb310f71b4666592d55c459fb870b0697c56a36cb",
+    "candidate-process.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate-proof.json": "381379bb9d9a4c7aa6c000ded4a4dc5feb84313764f99b4a4321ca49c3877499",
+    "inspection-receipt.json": "ea2af3a17e030d328259aa20edb8d99a470492561b0af6fd003811235b1e86b1",
+    "kernel-create-il.diff": "503884cc8ae671c31ee04a172ea974877fe9b0eca71510edd53eabe0a930ca86",
+    "kernel-update-il.diff": "0acac4612e6ad7fb8e8057c8b2e69139c268ee31158f3453109a1f785e90ea34",
+    "native-comparison.json": "44c6435df3f31ab2fdd5bb385fe49064a9fe9dec5b4ed09c28507dd2c778ce1e"
+  },
+  "reviewed_scripts": {
+    "ps_sha256": "8a213d6d9bfb191c4532df6b1710f1c1f4740cc0f49e8939b1da87bff7393444",
+    "runner_sha256": "8daa2abb5f6f424f5cdaa0f2de9c6e2817900fa394551477aa00537b1cced249"
+  }
+}

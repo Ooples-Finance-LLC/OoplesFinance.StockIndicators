@@ -25,3 +25,8 @@ hosted-renko-constant-tr-private-qualification-20261118.json text eol=lf
 evidence/native-win-rule-user-approved-20261118.json -text
 evidence/renko-constant-tr-private-screen-20261118.json text eol=lf
 evidence/renko-constant-tr-private-screen-root-review-20261118.json -text
+hosted-modified-hikkake-sparse-replay-qualification-20261118.json -text
+evidence/modified-hikkake-sparse-replay-* -text
+evidence/hikkake-d9-baseline-focused-20261118-* -text
+evidence/hikkake-d9-baseline-focused-20261118-unit.trx -text -diff
+evidence/hikkake-d9-baseline-focused-20261118-parity.trx -text -diff

@@ -1,0 +1,240 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "expected_runtime_version": ".NET 10.0.15",
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "cases": 52,
+  "decisions": 12,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 120
+  },
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.Hikkake",
+              "pair": "TaLib.Candles.Hikkake"
+            },
+            {
+              "raw": "TaLib.Candles.HikkakeModified",
+              "pair": "TaLib.Candles.HikkakeModified"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        },
+        {
+          "fixture": "SharedHikkakeBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.Hikkake",
+              "pair": "TaLib.Candles.Hikkake"
+            },
+            {
+              "raw": "TaLib.Candles.HikkakeModified",
+              "pair": "TaLib.Candles.HikkakeModified"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly"
+          ],
+          "implicit_pair": false,
+          "cases": 32,
+          "decisions": 8
+        }
+      ],
+      "cases": 52,
+      "decisions": 12
+    }
+  ],
+  "inputs_ready": true,
+  "parent_review_approved": true,
+  "sources": {
+    "published": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "successor": "48d238f56c37986b8437e5c31164552cc1362802",
+    "variants": "d9d00ca56ebb857b87ead45044616970b607019c"
+  },
+  "gpu_sources": {
+    "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "successor": "48d238f56c37986b8437e5c31164552cc1362802",
+    "variants": "d9d00ca56ebb857b87ead45044616970b607019c"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests"
+    ],
+    "successor": [
+      "ModifiedHikkakeSparseReplayTests",
+      "HikkakeSharedExecutionTests"
+    ],
+    "variants": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests"
+    ]
+  },
+  "old_candidate": {
+    "source": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "ci_run": "44388147138",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "aaf895d4e7b5b9a2e70810c87227db08ddaad9f6",
+    "manifest_sha256": "291f8660e56d5f056ad47881891e92742522704f5cac8f9016f11ba1a2c4c332",
+    "gpu_receipt_sha256": "8c5fa1866814f4cd6a60666470c7a75c5171142d943a669c4d824532e6a2ca82",
+    "production_sha256": "ebc789ea23a9145d85705d53ce35fedb707e803c6c80cadfeafc431dbec1a3d7",
+    "source_fingerprint": "c526951d5a65c7aeaa1cdcbcaaf56035cc96b241095704f6bf278513753935e3",
+    "artifact_id": "14467645201",
+    "artifact_zip_sha256": "07f1bab22ccdb4e7a3a7084a5706ca79f9c4839227485168a1d55df6d32b19a7",
+    "unit_passed": 55,
+    "parity_passed": 8,
+    "unit_classes": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests"
+    ],
+    "parity_classes": [
+      "RenkoComparisonTests"
+    ],
+    "actual_harness_sha256": "32e9b2a5e92bdd4aabec6b9749a5b891befab3e02a922022c93a4d0c95784e5f"
+  },
+  "candidate": {
+    "source": "48d238f56c37986b8437e5c31164552cc1362802",
+    "ci_run": "44419618060",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "c398c4d0dad6f7868f84734bca2e42da20e2dbc5",
+    "manifest_sha256": "da15f6cf7c072d0cc35ec846a4ea2927821b5d9bab231e6b620fe9504e07576c",
+    "gpu_receipt_sha256": "8662a14c8f84f5caacdebabc515492ac342324586a8402f8d862aff58e5a76b6",
+    "production_sha256": "fdeea3ee60cc5f8e5826933e20dba822477e171ecf1c562eefb7ab00a7ae0258",
+    "source_fingerprint": "eee20a82686be9470cf725dde6dae8107224c99505ac205836822433d24e195e",
+    "artifact_id": "14481543267",
+    "artifact_zip_sha256": "be40b9aa9eb08c90b9af196b257c8d32a12f017c982d00f51909d49e619b0f4e",
+    "unit_passed": 18,
+    "parity_passed": 55,
+    "unit_classes": [
+      "ModifiedHikkakeSparseReplayTests",
+      "HikkakeSharedExecutionTests"
+    ],
+    "parity_classes": [
+      "HikkakeTests"
+    ],
+    "actual_harness_sha256": "b84b24176386b7b5c93b46175a2e18f02b2d66dc5db3724f18ce385d2762bda9"
+  },
+  "harness_sha256": "32e9b2a5e92bdd4aabec6b9749a5b891befab3e02a922022c93a4d0c95784e5f",
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "harness_alias_policy": {
+    "common_artifact_role": "old",
+    "variants_artifact_role": "old",
+    "baseline_source": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "candidate_source": "48d238f56c37986b8437e5c31164552cc1362802",
+    "require_scoped_source_identity": true,
+    "claim_artifact_binary_identity": false
+  },
+  "automatic_qualification": false,
+  "require_net_10000_point_progress": true,
+  "actual_input_provenance": {
+    "path": "benchmarks/plans/evidence/modified-hikkake-sparse-replay-compiled-path-proof-20261118.json",
+    "sha256": "c4137c215a819d9ef8eba828974f99a6d1f53592550131e391b9fd81d5036b2e"
+  },
+  "targeted_reference": {
+    "scope": "modified-hikkake-sparse-replay-qualification-20261118"
+  },
+  "native_progress_gate": {
+    "fixture": "LibraryPairBenchmarks",
+    "method": "Ooples",
+    "native_method": "Competitor",
+    "native_round": 2,
+    "old_rounds": [
+      0,
+      3
+    ],
+    "candidate_rounds": [
+      1,
+      2
+    ],
+    "minimum_margin": null,
+    "require_separated_intervals_both_rounds": true,
+    "new_closure_bars": 10000,
+    "minimum_new_closures": 1,
+    "require_own_source_faster": true,
+    "require_net_10000_point_progress": true,
+    "protect_prior_confident_wins_both_sizes": true,
+    "target_pairs": [
+      "TaLib.Candles.Hikkake",
+      "TaLib.Candles.HikkakeModified"
+    ]
+  },
+  "screen_gate": {
+    "run": "44425075040",
+    "workflow_head": "809674bc0aaf27ea230d610e6bb74cb022e272c4",
+    "plan_sha256": "ed01d477ddd6f193a92bb9c1a62705c5e87540762095d7b186d9a9b37c7541a7",
+    "summary_sha256": "0b481749cade409d0ccc11da2430c6d104a1f80b367e5fa06f1659bf13d6c700",
+    "path": "benchmarks/plans/evidence/modified-hikkake-sparse-replay-screen-20261118.json",
+    "frozen_baseline_source": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "root_review_path": "benchmarks/plans/evidence/modified-hikkake-sparse-replay-screen-root-review-20261118.json",
+    "root_review_sha256": "331d1964a888b2de0a75d1b89112d0e05bf82ed6e3683731f4d0dbbbf052bbde",
+    "independently_authenticated": true
+  },
+  "native_win_policy_approval": {
+    "path": "benchmarks/plans/evidence/native-win-rule-user-approved-20261118.json",
+    "sha256": "414b558eae1deda750c3d169020128986a0e0db9b2acd95f23da035be03bfd7c",
+    "policy_id": "native-separated-confidence-intervals-both-rounds-20261118"
+  },
+  "published_baseline": {
+    "pull_request": 266,
+    "head": "c20d08c731245b4f0b4f4600b38173f0fd6ebf6d",
+    "branch": "perf/remaining-indicator-rollout",
+    "source_fingerprint": "c526951d5a65c7aeaa1cdcbcaaf56035cc96b241095704f6bf278513753935e3"
+  },
+  "baseline_focused_receipt": {
+    "path": "benchmarks/plans/evidence/hikkake-d9-baseline-focused-20261118-receipt.json",
+    "sha256": "65c58492f1484a43d5b0063866818dd909571f1092de34a09ceb610f8fc549c2"
+  },
+  "baseline_focused_root_review": {
+    "path": "benchmarks/plans/evidence/hikkake-d9-baseline-focused-20261118-root-review.json",
+    "sha256": "8099383693daf7468d2a92e1589a144712362459ef87322c637160fd79eb7ed8"
+  },
+  "compiled_fixture_path_proof": {
+    "path": "benchmarks/plans/evidence/modified-hikkake-sparse-replay-compiled-path-proof-20261118.json",
+    "sha256": "c4137c215a819d9ef8eba828974f99a6d1f53592550131e391b9fd81d5036b2e"
+  },
+  "compiled_proof_root_review": {
+    "path": "benchmarks/plans/evidence/modified-hikkake-sparse-replay-compiled-path-root-review-20261118.json.gz",
+    "sha256": "79cd9c9f62b1b7d7def5ac32b7cad4feeec279b5b376bf6782bf56d5c5e1b4a1"
+  },
+  "modified_hikkake_sparse_replay_qualification": true
+}

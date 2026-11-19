@@ -54,7 +54,11 @@ def sample(case):
 
 
 def collect(folder, phase):
-    if read(PLAN).get('renko_constant_tr_private_qualification'):
+    if read(PLAN).get('modified_hikkake_sparse_replay_qualification'):
+        assert phase == 'targeted'
+        from .modified_hikkake_sparse_replay_qualification import collect as hikkake_qualify
+        return hikkake_qualify(folder)
+    elif read(PLAN).get('renko_constant_tr_private_qualification'):
         assert phase == 'targeted'
         from .renko_constant_tr_private_qualification import collect as private_renko_qualify
         return private_renko_qualify(folder)
@@ -134,6 +138,10 @@ def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=Fal
     if plan.get('renko_normalized_grid_qualification'):
         assert phase == 'targeted' and renko_gate and not cmf_alma_gate and not ultimate_gate and not preflight and not diagnostic and not matchinglow_gate and not candle_predicate_gate
         from .renko_normalized_grid_qualification import validate_scope
+        validate_scope(plan)
+    elif plan.get('modified_hikkake_sparse_replay_qualification'):
+        assert phase == 'targeted' and renko_gate and not cmf_alma_gate and not ultimate_gate and not preflight and not diagnostic and not matchinglow_gate and not candle_predicate_gate
+        from .modified_hikkake_sparse_replay_qualification import validate_scope
         validate_scope(plan)
     elif plan.get('renko_constant_tr_private_qualification'):
         assert phase == 'targeted' and renko_gate and not cmf_alma_gate and not ultimate_gate and not preflight and not diagnostic and not matchinglow_gate and not candle_predicate_gate
@@ -216,7 +224,10 @@ def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=Fal
         encoded = (json.dumps(inputs, indent=2) + '\n').encode()
         assert hashlib.sha256(encoded).hexdigest() == proof['input_provenance_sha256']
         assert inputs['sources'] == plan['sources'] and inputs['plan_sha256'] == digest(PLAN)
-        if plan.get('renko_constant_tr_private_qualification'):
+        if plan.get('modified_hikkake_sparse_replay_qualification'):
+            from .modified_hikkake_sparse_replay_qualification import verify_publication_provenance
+            verify_publication_provenance(plan,inputs)
+        elif plan.get('renko_constant_tr_private_qualification'):
             from .renko_constant_tr_private_qualification import verify_publication_provenance
             verify_publication_provenance(plan,inputs)
         assert inputs['sdk'] == plan['proposed_dotnet_sdk']

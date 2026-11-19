@@ -577,6 +577,7 @@ SCOPES['ultimate-direct-long-qualification-20261118'] = dict(
 
 SCOPES['renko-normalized-grid-qualification-20261118']=dict(totals=(44,8))
 SCOPES['renko-constant-tr-private-qualification-20261118']=dict(totals=(44,8))
+SCOPES['modified-hikkake-sparse-replay-qualification-20261118']=dict(totals=(52,12))
 
 SCOPES['cmf-alma-combined-qualification-20261118']=dict(totals=(100,20))
 
@@ -591,7 +592,11 @@ SCOPES['abandoned-inventory-repair-20261114']['methods']['SharedCrowSoldierBench
 SCOPES['abandoned-inventory-repair-20261114']['totals'] = (176, 36)
 
 def verify_reference(plan):
-    if plan.get('renko_constant_tr_private_qualification'):
+    if plan.get('modified_hikkake_sparse_replay_qualification'):
+        from .modified_hikkake_sparse_replay_qualification import validate_scope
+        validate_scope(plan)
+        return
+    elif plan.get('renko_constant_tr_private_qualification'):
         from .renko_constant_tr_private_qualification import validate_scope
         validate_scope(plan)
         return
