@@ -178,6 +178,7 @@ public static class RenkoSnapshot
         Validate(bars);
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
+#if NETFRAMEWORK
         var window = new SeededAtrWindow(period);
         foreach (var bar in bars)
             window.Add(bar);
@@ -187,7 +188,99 @@ public static class RenkoSnapshot
         if (size == 0)
             return [];
         return Calculate(bars, size, highLow);
+#else
+        return CalculateAtrModern(bars, period, highLow);
+#endif
     }
+
+#if !NETFRAMEWORK
+    private static IEnumerable<RenkoBrick> CalculateAtrModern(IReadOnlyList<Bar> bars, int period, bool highLow)
+    {
+        // Bound restoration work on a certificate miss. Other periods retain
+        // the original state from the first captured bar.
+        SeededAtrWindow? window = period <= 64 ? null : new(period);
+        bool started = false;
+        double previousClose = 0, constantRange = 0;
+        int seedCount = 0;
+        foreach (var bar in bars)
+        {
+            if (window is not null)
+            {
+                window.Add(bar);
+                continue;
+            }
+            // Original ATR ignores the first bar's high/low and volume.
+            if (!started)
+            {
+                started = true;
+                previousClose = bar.Close;
+                continue;
+            }
+            if (!TryConstantAtrSpan(in bar, previousClose, seedCount, constantRange, out double span))
+            {
+                window = RestoreAtrConstantPrefix(period, seedCount, constantRange, previousClose);
+                window.Add(bar);
+                continue;
+            }
+            constantRange = span;
+            if (seedCount < period) seedCount++;
+            previousClose = bar.Close;
+        }
+        return CompleteAtrChart(bars, period, highLow, window, seedCount, constantRange);
+    }
+
+    private static bool TryConstantAtrSpan(in Bar bar, double previousClose, int seedCount,
+        double constantRange, out double span)
+    {
+        span = bar.High - bar.Low;
+        // Inside the closed interval, exact high-low dominates both gap terms.
+        // TrueRange rounds that span once via RocBankValue.Round, giving this
+        // same finite binary64 result on modern runtimes. Constant ranges seed
+        // to C, and every later exact (C*(P-1)+C)/P stays C.
+#pragma warning disable S1244 // Exact equality certifies an unchanged rounded true range.
+        return bar.Low <= previousClose && previousClose <= bar.High
+            && (seedCount == 0 ? span > 0 && FrameworkCompatibility.IsFinite(span) : span == constantRange);
+#pragma warning restore S1244
+    }
+
+    private static IEnumerable<RenkoBrick> CompleteAtrChart(IReadOnlyList<Bar> bars, int period, bool highLow,
+        SeededAtrWindow? window, int seedCount, double constantRange)
+    {
+        double size;
+        if (window is null)
+        {
+            if (seedCount < period) return [];
+            size = constantRange;
+        }
+        else
+        {
+            if (!window.HasAverage) return [];
+            size = window.Average.Publish();
+        }
+        if (size == 0)
+            return [];
+        return Calculate(bars, size, highLow);
+    }
+
+    private static SeededAtrWindow RestoreAtrConstantPrefix(int period, int seedCount,
+        double range, double previousClose)
+    {
+        var window = new SeededAtrWindow(period);
+        var first = new Bar(default, 0, 0, 0, seedCount == 0 ? previousClose : 0, 0);
+        window.Add(first);
+        for (int i = 0; i < seedCount; i++)
+        {
+            // Synthetic ranges are exactly C. The last captured real close
+            // becomes previousClose only after the final synthetic range.
+            var bar = new Bar(default, 0, range, 0, i == seedCount - 1 ? previousClose : 0, 0);
+            window.Add(bar);
+        }
+        // Before seeding, count and the exact C*count seed match. Once mature,
+        // count is P, seed is cleared, Average/Range are C, and no other state
+        // depends on prefix length. At most P+1 Add calls restore every field.
+        return window;
+    }
+#endif
 
     private static void Validate(IReadOnlyList<Bar> bars)
     {
