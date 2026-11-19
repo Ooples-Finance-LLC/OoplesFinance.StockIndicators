@@ -1,0 +1,153 @@
+{
+  "status": "root-independent-analytic-grid-roi-authentication-passed",
+  "source": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+  "baseline": "48d238f56c37986b8437e5c31164552cc1362802",
+  "run_id": "44439792107",
+  "workflow_head": "28f26a95abc585d38d968159988ef30f917162d7",
+  "plan_sha256": "22a7f87d5acf80c169244f955424f684b765be128d3b5eb8bc09345af80c3388",
+  "artifact_zip_sha256": "0b9be268a517bd47b5ae64f4b6a7d4bf4547b8afebdbe82fbda254fd2da3c722",
+  "summary_sha256": "0d5d480db744637ac1542d14346bbdcd9a77c6bb15419ce27fa07636a2f2ec1f",
+  "zip_files_independently_verified": 1088,
+  "independent_hosted_recollection_matches": true,
+  "independently_recomputed_gates": true,
+  "case_count": 40,
+  "decision_count": 8,
+  "source_no_regressions": true,
+  "old_10000_point_win_counts": {
+    "0": 1,
+    "3": 1
+  },
+  "candidate_10000_point_win_counts": {
+    "1": 3,
+    "2": 3
+  },
+  "new_10000_target_win_pairs": [
+    "QuanTAlib.Gma",
+    "QuanTAlib.Sinema"
+  ],
+  "protected_prior_lp_native_wins": [
+    {
+      "pair": "TaLib.Candles.HikkakeModified",
+      "bars": 10000,
+      "preserved": true
+    }
+  ],
+  "feasibility_screen_passed": true,
+  "per_target_10000": [
+    {
+      "source_verdict": "faster",
+      "baseline_point_native_wins": {
+        "0": false,
+        "3": false
+      },
+      "baseline_interval_native_winner": false,
+      "baseline_statistical_native_winner": false,
+      "baseline_new_win_eligible": true,
+      "candidate_statistical_native_win": true,
+      "new_10000_target_win": true,
+      "pair": "QuanTAlib.Gma",
+      "bars": 10000,
+      "old_rounds": {
+        "0": {
+          "mean_ns": 3611462.5,
+          "lower_ns": 3584534.5771996584,
+          "upper_ns": 3638390.4228003416,
+          "samples": 8,
+          "allocated_bytes": 654856
+        },
+        "3": {
+          "mean_ns": 3713844.4444444445,
+          "lower_ns": 3631362.03053421,
+          "upper_ns": 3796326.858354679,
+          "samples": 9,
+          "allocated_bytes": 654520
+        }
+      },
+      "candidate_rounds": {
+        "1": {
+          "mean_ns": 296412.5,
+          "lower_ns": 275573.2389513574,
+          "upper_ns": 317251.7610486426,
+          "samples": 8,
+          "allocated_bytes": 662856
+        },
+        "2": {
+          "mean_ns": 289794.44444444444,
+          "lower_ns": 279341.20882058545,
+          "upper_ns": 300247.6800683034,
+          "samples": 9,
+          "allocated_bytes": 662520
+        }
+      },
+      "native_control": {
+        "mean_ns": 1080488.888888889,
+        "lower_ns": 1047400.8003976896,
+        "upper_ns": 1113576.9773800883,
+        "samples": 9,
+        "allocated_bytes": 2633384
+      }
+    },
+    {
+      "source_verdict": "faster",
+      "baseline_point_native_wins": {
+        "0": false,
+        "3": false
+      },
+      "baseline_interval_native_winner": false,
+      "baseline_statistical_native_winner": false,
+      "baseline_new_win_eligible": true,
+      "candidate_statistical_native_win": true,
+      "new_10000_target_win": true,
+      "pair": "QuanTAlib.Sinema",
+      "bars": 10000,
+      "old_rounds": {
+        "0": {
+          "mean_ns": 3585422.222222222,
+          "lower_ns": 3539695.3326581777,
+          "upper_ns": 3631149.1117862663,
+          "samples": 9,
+          "allocated_bytes": 654512
+        },
+        "3": {
+          "mean_ns": 3542250,
+          "lower_ns": 3512260.7958909026,
+          "upper_ns": 3572239.2041090974,
+          "samples": 8,
+          "allocated_bytes": 654848
+        }
+      },
+      "candidate_rounds": {
+        "1": {
+          "mean_ns": 325944.44444444444,
+          "lower_ns": 226016.14568366524,
+          "upper_ns": 425872.74320522364,
+          "samples": 9,
+          "allocated_bytes": 662480
+        },
+        "2": {
+          "mean_ns": 305005.55555555556,
+          "lower_ns": 267620.86699838185,
+          "upper_ns": 342390.24411272927,
+          "samples": 9,
+          "allocated_bytes": 662848
+        }
+      },
+      "native_control": {
+        "mean_ns": 1090855.5555555555,
+        "lower_ns": 1062017.1009847643,
+        "upper_ns": 1119694.0101263467,
+        "samples": 9,
+        "allocated_bytes": 2633768
+      }
+    }
+  ],
+  "qualification": false,
+  "accepted": false,
+  "report_imported": false,
+  "closure_credit": 0,
+  "limitations": [
+    "Diagnostic only; full affected-consumer qualification still required.",
+    "Bounded managed buffers add about8KB/call to LP allocations.",
+    "Current mixed-fixture ROI native eligibility/protection is LP-only; Sinc builder is source-regression control. Full qualification protects prior native wins in every measured context."
+  ]
+}

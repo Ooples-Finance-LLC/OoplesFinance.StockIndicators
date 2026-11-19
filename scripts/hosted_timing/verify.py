@@ -62,7 +62,11 @@ def collect(folder, phase):
         assert phase == 'targeted'
         from .ultimate_direct_long_qualification import collect as ultimate_qualify
         return ultimate_qualify(folder)
-    if read(PLAN).get('diagnostic_kind') == 'analytic-grid-native-pilot':
+    if read(PLAN).get('analytic_grid_qualification'):
+        assert phase == 'targeted'
+        from .analytic_grid_qualification import collect as analytic_qualify
+        return analytic_qualify(folder)
+    elif read(PLAN).get('diagnostic_kind') == 'analytic-grid-native-pilot':
         assert phase == 'diagnostic'
         from .analytic_grid_roi import collect as analytic_grid_collect
         return analytic_grid_collect(folder)
