@@ -69,7 +69,7 @@ internal static class DynamicMomentumComparison
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
         var values = run[indicator.Value].ToArray();
         var present = run[indicator.IsDefined].ToArray();
-        return VolumePriceComparison.Mask(values.Select((value, i) => present[i] > 0 ? (double?)value : null).ToArray());
+        return VolumePriceComparison.Mask(values.WherePresent(present));
     }
 
     internal static double?[] Reference(

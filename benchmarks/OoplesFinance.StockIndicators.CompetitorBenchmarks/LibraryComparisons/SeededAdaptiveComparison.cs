@@ -41,7 +41,7 @@ internal static class SeededAdaptiveComparison
         {
             var v = run[indicator.Outputs[j]].ToArray();
             var f = run[indicator.Outputs[j + 2]].ToArray();
-            r[j] = v.Select((x, i) => f[i] > 0 ? (double?)x : null).ToArray();
+            r[j] = v.WherePresent(f);
         }
         return Series(r, quan);
     }

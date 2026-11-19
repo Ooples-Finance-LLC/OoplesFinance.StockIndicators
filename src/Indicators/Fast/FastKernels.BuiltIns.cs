@@ -146,6 +146,8 @@ internal static partial class FastKernels
             double h = high[i], l = low[i];
             value[i] = h == l ? 0 : (close[i] - open[i]) / (h - l);
         }
-        RunningSeedEma(value, signal, length);
+        // An average over one bar is the value itself.
+        if (length <= 1) value.CopyTo(signal);
+        else RunningSeedEma(value, signal, length);
     }
 }

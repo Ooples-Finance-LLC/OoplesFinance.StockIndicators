@@ -57,7 +57,7 @@ public class SharedRegressionStatisticsBenchmarks
                 for (int i = 0; i < values.Length; i++)
                     if (present[i] is not (0 or 1) || present[i] == 0 && values[i] != 0)
                         throw new InvalidOperationException("Builder regression presence or missing placeholder differs.");
-                return values.Select((value, i) => present[i] > 0 ? (double?)value : null).ToArray();
+                return values.WherePresent(present);
             }).ToArray();
             CheckReference(expected, columns);
         }

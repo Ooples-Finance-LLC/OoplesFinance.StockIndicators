@@ -62,7 +62,7 @@ internal static class TaAdaptiveComparison
         var v = run[indicator.Average].ToArray();
         var f = run[indicator.AverageIsDefined].ToArray();
         return TradyAdaptiveComparison.Series(
-            v.Select((x, i) => f[i] > 0 ? (double?)x : null).ToArray()
+            v.WherePresent(f)
         );
     }
 

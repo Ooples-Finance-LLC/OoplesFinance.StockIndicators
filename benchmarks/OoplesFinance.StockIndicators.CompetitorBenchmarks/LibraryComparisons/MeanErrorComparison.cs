@@ -68,7 +68,7 @@ internal static class MeanErrorComparison
                 {
                     var values = run[indicator.Outputs[slot]].ToArray();
                     var present = run[indicator.Outputs[slot + 4]].ToArray();
-                    return values.Select((v, i) => present[i] > 0 ? (double?)v : null).ToArray();
+                    return values.WherePresent(present);
                 })
                 .ToArray()
         );

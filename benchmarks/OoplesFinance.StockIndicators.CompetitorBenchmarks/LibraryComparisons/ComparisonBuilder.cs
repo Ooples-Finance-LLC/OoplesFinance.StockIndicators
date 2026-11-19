@@ -10,7 +10,18 @@ internal static class ComparisonBuilder
 {
     internal static readonly IndicatorNumerics Numerics = Parse(Environment.GetEnvironmentVariable("COMPARISON_NUMERICS"));
 
-    internal static StockIndicatorBuilder Create() => new StockIndicatorBuilder().ConfigureNumerics(Numerics);
+    [ThreadStatic] private static StockIndicatorBuilder? _latest;
+
+    internal static StockIndicatorBuilder Create() => _latest = new StockIndicatorBuilder().ConfigureNumerics(Numerics);
+
+    /// <summary>
+    /// What the most recent build on this thread reported about the route it took, or null when the arm
+    /// did not go through a builder. The scoreboard prints it so a pair that stayed on the exact route in
+    /// fast mode is visible as such.
+    /// </summary>
+    internal static string? LatestRoute => _latest?.LastExecution?.Reason;
+
+    internal static void ForgetLatest() => _latest = null;
 
     private static IndicatorNumerics Parse(string? text) =>
         string.IsNullOrEmpty(text) ? IndicatorNumerics.Exact

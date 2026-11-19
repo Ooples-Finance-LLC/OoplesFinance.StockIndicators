@@ -324,8 +324,15 @@ internal static partial class FastKernels
         for (var i = 1; i < n; i++)
         {
             double current = close[i], previous = close[i - 1];
+#if !NETFRAMEWORK
+            // The direction of a bar is as good as random, so it is taken without a branch.
+            bool up = current > previous, down = current < previous;
+            total += (System.Runtime.CompilerServices.Unsafe.As<bool, byte>(ref up)
+                - System.Runtime.CompilerServices.Unsafe.As<bool, byte>(ref down)) * volume[i];
+#else
             if (current > previous) total += volume[i];
             else if (current < previous) total -= volume[i];
+#endif
             value[i] = total;
         }
         if (owner.AveragePeriod is not int period || n <= period) return;

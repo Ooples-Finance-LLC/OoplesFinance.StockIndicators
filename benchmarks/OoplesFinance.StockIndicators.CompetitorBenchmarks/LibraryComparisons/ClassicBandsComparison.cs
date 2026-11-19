@@ -73,7 +73,7 @@ internal static class ClassicBandsComparison
                 {
                     var v = run[indicator.Outputs[j]].ToArray();
                     var flags = run[indicator.Outputs[j + 3]].ToArray();
-                    return v.Select((x, i) => flags[i] > 0 ? (double?)x : null).ToArray();
+                    return v.WherePresent(flags);
                 })
                 .ToArray()
         );

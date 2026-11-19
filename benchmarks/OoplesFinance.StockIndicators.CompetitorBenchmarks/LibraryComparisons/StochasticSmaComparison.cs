@@ -82,8 +82,7 @@ internal static class StochasticSmaComparison
                             : run[indicator.Outputs[slot + count]].ToArray();
                     return run[indicator.Outputs[slot]]
                         .ToArray()
-                        .Select((v, i) => present[i] > 0 ? (double?)v : null)
-                        .ToArray();
+                        .WherePresent(present);
                 })
                 .ToArray()
         );

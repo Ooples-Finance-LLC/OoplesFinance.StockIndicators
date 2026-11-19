@@ -86,7 +86,7 @@ internal static class VariablePeriodComparison
         var values = run[indicator.Average].ToArray();
         var masks = run[indicator.IsDefined].ToArray();
         return VolumePriceComparison.Mask(
-            values.Select((v, i) => masks[i] > 0 ? (double?)v : null).ToArray()
+            values.WherePresent(masks)
         );
     }
 

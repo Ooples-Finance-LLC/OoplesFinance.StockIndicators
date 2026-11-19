@@ -75,7 +75,7 @@ internal static class DeviationBandsComparison
                 {
                     var v = run[indicator.Outputs[slot]].ToArray();
                     var mask = run[indicator.Outputs[slot + 6]].ToArray();
-                    return v.Select((x, i) => mask[i] > 0 ? (double?)x : null).ToArray();
+                    return v.WherePresent(mask);
                 })
                 .ToArray()
         );

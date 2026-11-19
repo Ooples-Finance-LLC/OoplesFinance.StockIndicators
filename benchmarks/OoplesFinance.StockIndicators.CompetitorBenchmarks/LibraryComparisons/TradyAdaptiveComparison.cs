@@ -65,7 +65,7 @@ internal static class TradyAdaptiveComparison
             .GetResult();
         var v = run[indicator.Average].ToArray();
         var f = run[indicator.AverageIsDefined].ToArray();
-        return Series(v.Select((x, i) => f[i] > 0 ? (double?)x : null).ToArray());
+        return Series(v.WherePresent(f));
     }
 
     internal static decimal?[] DecimalReference(decimal?[] input, int p, int fast, int slow)

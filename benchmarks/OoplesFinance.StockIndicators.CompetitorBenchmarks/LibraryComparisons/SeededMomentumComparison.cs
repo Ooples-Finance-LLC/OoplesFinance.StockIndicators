@@ -67,7 +67,7 @@ internal static class SeededMomentumComparison
         {
             var values = run[indicator.Outputs[j]].ToArray();
             var present = run[indicator.Outputs[j + 2]].ToArray();
-            result[j] = values.Select((v, i) => present[i] > 0 ? (double?)v : null).ToArray();
+            result[j] = values.WherePresent(present);
         }
         return Series(result, pmo);
     }

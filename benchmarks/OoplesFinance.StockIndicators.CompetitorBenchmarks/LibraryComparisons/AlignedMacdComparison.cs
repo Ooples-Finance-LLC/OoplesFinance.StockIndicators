@@ -153,7 +153,7 @@ internal static class AlignedMacdComparison
         {
             var v = run[indicator.Outputs[j]].ToArray();
             var present = run[indicator.Outputs[j + 3]].ToArray();
-            rows[j] = v.Select((x, i) => present[i] > 0 ? (double?)x : null).ToArray();
+            rows[j] = v.WherePresent(present);
         }
         return Series(rows);
     }

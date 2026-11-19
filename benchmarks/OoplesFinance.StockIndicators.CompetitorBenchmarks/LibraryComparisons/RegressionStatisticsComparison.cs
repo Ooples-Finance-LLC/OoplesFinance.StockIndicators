@@ -74,7 +74,7 @@ internal static class RegressionStatisticsComparison
             {
                 var output = run[indicator.Outputs[slot]].ToArray();
                 var present = run[indicator.Outputs[slot + 5]].ToArray();
-                return output.Select((v, i) => present[i] > 0 ? (double?)v : null).ToArray();
+                return output.WherePresent(present);
             })
             .ToArray();
         return Series(values);
@@ -101,7 +101,7 @@ internal static class RegressionStatisticsComparison
         {
             var output = run[indicator.Outputs[slot]].ToArray();
             var presence = run[indicator.Outputs[slot + 5]].ToArray();
-            return output.Select((value, i) => presence[i] > 0 ? (double?)value : null).ToArray();
+            return output.WherePresent(presence);
         }).ToArray());
     }
 

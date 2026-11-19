@@ -41,7 +41,7 @@ internal static class BalanceOfPowerComparison
         if (!missingRanges)
             return new(0, values);
         var present = run[indicator.Outputs[1]].ToArray();
-        return Mask(values.Select((v, i) => present[i] > 0 ? (double?)v : null).ToArray(), period);
+        return Mask(values.WherePresent(present), period);
     }
 
     private static ComparisonSeries Mask(double?[] values, int period) =>

@@ -109,8 +109,7 @@ internal static class AlligatorComparison
                     var presence = run[indicator.Outputs[slot + count]].ToArray();
                     return run[indicator.Outputs[slot]]
                         .ToArray()
-                        .Select((v, i) => presence[i] > 0 ? (double?)v : null)
-                        .ToArray();
+                        .WherePresent(presence);
                 })
                 .ToArray()
         );

@@ -86,8 +86,7 @@ internal static class StochasticMomentumComparison
                     var present = run[indicator.Outputs[slot + flags]].ToArray();
                     return run[indicator.Outputs[slot]]
                         .ToArray()
-                        .Select((v, i) => present[i] > 0 ? (double?)v : null)
-                        .ToArray();
+                        .WherePresent(present);
                 })
                 .ToArray()
         );

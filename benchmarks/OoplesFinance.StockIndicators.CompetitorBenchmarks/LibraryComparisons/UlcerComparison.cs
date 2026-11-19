@@ -34,7 +34,7 @@ internal static class UlcerComparison
         var values = run[indicator.Value].ToArray();
         var present = run[indicator.IsDefined].ToArray();
         return VolumePriceComparison.Mask(
-            values.Select((v, i) => present[i] > 0 ? (double?)v : null).ToArray()
+            values.WherePresent(present)
         );
     }
 

@@ -56,7 +56,7 @@ internal static class ConnorsComparison
         {
             var values = run[indicator.Outputs[slot]].ToArray();
             var present = run[indicator.Outputs[slot + 4]].ToArray();
-            columns[slot] = values.Select((value, i) => present[i] > 0 ? (double?)value : null).ToArray();
+            columns[slot] = values.WherePresent(present);
         }
         return Series(columns);
     }

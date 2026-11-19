@@ -76,8 +76,7 @@ internal static class AverageDifferenceComparison
         return VolumePriceComparison.Mask(
             run[indicator.Value]
                 .ToArray()
-                .Select((v, i) => present[i] > 0 ? (double?)v : null)
-                .ToArray()
+                .WherePresent(present)
         );
     }
 
