@@ -174,4 +174,70 @@ internal static partial class FastKernels
             kDefined[bar] = dDefined[bar] = 1;
         }
     }
+
+
+    /// <summary>
+    /// Ultimate oscillator: buying pressure over true range summed across three windows, weighted 4, 2, 1.
+    /// A window with no range at all either withholds the value or contributes nothing, as configured.
+    /// </summary>
+    internal static void UltimateOscillator(FastColumns columns, Span<double> value, Span<double> defined,
+        WindowUltimateOscillator owner)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        value = value.Slice(0, n);
+        defined = defined.Slice(0, n);
+        value.Clear();
+        defined.Clear();
+        var zero = owner.ZeroRangeContribution;
+        int shortPeriod = owner.ShortPeriod, middlePeriod = owner.MiddlePeriod, longPeriod = owner.LongPeriod;
+        if (n <= longPeriod) return;
+        // Slot j holds the interval that ends at bar j + 1; the first bar only supplies a previous close.
+        double[] pressures = FastMath.Allocate(n - 1), ranges = FastMath.Allocate(n - 1);
+        double shortPressure = 0, shortRange = 0, middlePressure = 0, middleRange = 0, longPressure = 0, longRange = 0;
+        // Consecutive intervals with no range: a window of them sums to exactly zero.
+        var flat = 0;
+        for (var j = 0; j < pressures.Length; j++)
+        {
+            double previous = close[j], floor = Math.Min(low[j + 1], previous);
+            var pressure = close[j + 1] - floor;
+            var range = zero ? TrueRange(high[j + 1], low[j + 1], previous) : Math.Max(high[j + 1], previous) - floor;
+            pressures[j] = pressure;
+            ranges[j] = range;
+            flat = range == 0 ? flat + 1 : 0;
+            if ((j & RebuildMask) == 0 && j >= longPeriod)
+            {
+                shortPressure = Total(pressures, j, shortPeriod);
+                shortRange = Total(ranges, j, shortPeriod);
+                middlePressure = Total(pressures, j, middlePeriod);
+                middleRange = Total(ranges, j, middlePeriod);
+                longPressure = Total(pressures, j, longPeriod);
+                longRange = Total(ranges, j, longPeriod);
+            }
+            else
+            {
+                shortPressure += j >= shortPeriod ? pressure - pressures[j - shortPeriod] : pressure;
+                shortRange += j >= shortPeriod ? range - ranges[j - shortPeriod] : range;
+                middlePressure += j >= middlePeriod ? pressure - pressures[j - middlePeriod] : pressure;
+                middleRange += j >= middlePeriod ? range - ranges[j - middlePeriod] : range;
+                longPressure += j >= longPeriod ? pressure - pressures[j - longPeriod] : pressure;
+                longRange += j >= longPeriod ? range - ranges[j - longPeriod] : range;
+            }
+            if (j < longPeriod - 1) continue;
+            if (flat >= shortPeriod && !zero) continue;
+            var total = (flat >= shortPeriod ? 0 : 4 * shortPressure / shortRange)
+                + (flat >= middlePeriod ? 0 : 2 * middlePressure / middleRange)
+                + (flat >= longPeriod ? 0 : longPressure / longRange);
+            value[j + 1] = 100 * total / 7;
+            defined[j + 1] = 1;
+        }
+    }
+
+    private static double Total(double[] values, int last, int period)
+    {
+        double sum = 0;
+        for (var j = last - period + 1; j <= last; j++) sum += values[j];
+        return sum;
+    }
 }
