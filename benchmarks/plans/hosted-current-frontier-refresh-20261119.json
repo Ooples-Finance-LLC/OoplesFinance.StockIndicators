@@ -5,8 +5,8 @@
   "report_refresh_only": true,
   "production_qualification": false,
   "production_optimization": false,
-  "inputs_ready": true,
-  "parent_review_approved": true,
+  "inputs_ready": false,
+  "parent_review_approved": false,
   "proposed_dotnet_sdk": "10.0.403",
   "expected_runtime_version": ".NET 10.0.15",
   "runtime_dependency_alignment": {
@@ -15872,5 +15872,5 @@
     "automatic_import": false
   },
   "preparation_branch": "perf/current-frontier-prep-repair-20261119",
-  "preparation_revision": "accepted-runtime-alias-v1-20261119"
+  "preparation_revision": "accepted-runtime-alias-cli-v2-20261119"
 }

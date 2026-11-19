@@ -26,7 +26,7 @@ ASSEMBLY = 'OoplesFinance.StockIndicators.CompetitorBenchmarks.dll'
 POLICY = dict(order=['old','new','new','old'], quiet_samples=12, max_cpu_percent=15,
               warmups=10, iterations=10, fixed_invocation_warmups=1000)
 PREPARATION_BRANCH = 'perf/current-frontier-prep-repair-20261119'
-PREPARATION_REVISION = 'accepted-runtime-alias-v1-20261119'
+PREPARATION_REVISION = 'accepted-runtime-alias-cli-v2-20261119'
 
 
 def scope():

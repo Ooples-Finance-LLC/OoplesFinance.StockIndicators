@@ -669,7 +669,7 @@ def main():
     parser.add_argument('--reuse-from',type=Path)
     parser.add_argument('--prepared',type=Path,default=Path('hosted-inputs'))
     parser.add_argument('--out',type=Path,required=True)
-    parser.add_argument('--phase',choices=['successor','variants','coverage','targeted','diagnostic'],default='successor')
+    parser.add_argument('--phase',choices=['successor','variants','coverage','targeted','diagnostic','baseline-refresh'],default='successor')
     parser.add_argument('--shard',type=int,default=0)
     parser.add_argument('--diagnostic', choices=['trix-jit', 'trix-no-pgo', 'trix-library-jit', 'trix-library-no-tiering', 'trix-library-warmup', 'trix-preflight'])
     args = parser.parse_args()
