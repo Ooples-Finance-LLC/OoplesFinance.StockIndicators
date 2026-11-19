@@ -466,4 +466,56 @@ internal static partial class FastKernels
             defined[i] = 1;
         }
     }
+
+
+    /// <summary>
+    /// Deviation-scaled average: an exponential average whose step grows with how large the smoothed
+    /// distance of the price from the average is against its recent root mean square.
+    /// </summary>
+    internal static void DeviationScaled(ReadOnlySpan<double> close, Span<double> output, int period, double scaleFactor)
+    {
+        var n = close.Length;
+        output = output.Slice(0, n);
+        if (n == 0) return;
+        var a = Math.Exp(-1.414 * Math.PI / (.5 * period));
+        var b = 2 * a * Math.Cos(1.414 * Math.PI / (.5 * period));
+        var c = -a * a;
+        var half = (1 - b - c) / 2;
+        var squares = new double[period];
+        var average = close[0];
+        output[0] = average;
+        double previousZero = 0, filter = 0, older = 0, sum = 0, largest = 0;
+        // Consecutive bars whose filter is exactly zero: a window of them has a sum of exactly zero.
+        int flat = 0, slot = 0, count = 0, slid = 0;
+        for (var i = 1; i < n; i++)
+        {
+            var price = close[i];
+            var zero = price - average;
+            var next = half * (zero + previousZero) + b * filter + c * older;
+            var square = next * next;
+            if (count == period) sum -= squares[slot];
+            else count++;
+            squares[slot] = square;
+            slot = slot + 1 == period ? 0 : slot + 1;
+            sum += square;
+            largest = Math.Max(largest, square);
+            flat = square == 0 ? flat + 1 : 0;
+            // The running sum is rebuilt at intervals and whenever it has fallen far enough below what
+            // passed through it that the rounding it kept could matter.
+            if (++slid > RebuildMask || !(sum > largest * (1.0 / 1024)))
+            {
+                sum = 0;
+                for (var j = 0; j < count; j++) sum += squares[j];
+                largest = sum;
+                slid = 0;
+            }
+            var normalized = flat >= count || sum == 0 ? 0 : Math.Sqrt(square * period / sum);
+            var gain = Math.Max(.1, Math.Min(1, scaleFactor * normalized * 5 / period));
+            average = gain * price + (1 - gain) * average;
+            previousZero = zero;
+            older = filter;
+            filter = next;
+            output[i] = average;
+        }
+    }
 }
