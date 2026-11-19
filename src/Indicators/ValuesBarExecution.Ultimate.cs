@@ -1,4 +1,5 @@
 #if !NETFRAMEWORK
+using System.Runtime.CompilerServices;
 using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Indicators;
@@ -185,7 +186,7 @@ internal static partial class ValuesBarExecution
             if (pressure == 0) continue;
             // Positive pressure << 64 fits within 126 magnitude bits.
             var divided = UInt128.DivRem((UInt128)pressure << 64, (UInt128)range);
-            UInt128 ceiling = divided.Quotient + (divided.Remainder == 0 ? (UInt128)0 : 1);
+            UInt128 ceiling = UltimateRatioCeiling(divided.Quotient, divided.Remainder);
             if (ceiling > (UInt128)1 << 64) return false;
             uint weight = (uint)(4 >> k);
             lower = unchecked(lower + divided.Quotient * weight);
@@ -199,6 +200,10 @@ internal static partial class ValuesBarExecution
         result = low;
         return true;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static UInt128 UltimateRatioCeiling(UInt128 quotient, UInt128 remainder) =>
+        quotient + (remainder == 0 ? (UInt128)0 : 1);
 
     private static bool PublishUltimateLongWindow(ReadOnlySpan<long> pressures, ReadOnlySpan<long> ranges,
         Span<JurikDyadic> exactPressures, Span<JurikDyadic> exactRanges, bool zero, out double result)
