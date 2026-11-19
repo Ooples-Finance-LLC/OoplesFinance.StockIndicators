@@ -1,0 +1,49 @@
+{
+  "status": "root-independent-cpu-authentication-passed",
+  "source": "7de04493efa8304cb2a21fea45c21d177ca0903f",
+  "source_fingerprint": "3fd3ec18ed442cb6bcb9241766c13adcbb19718cfe5740df2030b7062cca9dd4",
+  "run_id": "44467491698",
+  "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+  "artifact_id": 14502319613,
+  "zip_sha256": "f0d9ee4b7bbe9e6035519fe8f5e0440f2c15c76e8b3bf0f676e716c9f88afc7a",
+  "zip_verified_in_memory": true,
+  "zip_files_verified": 320,
+  "manifest_sha256": "1bd4853394274a4ef855603ca71ca19918ab1111f0879aeaf353899decbe152b",
+  "core_sha256": "34f5f2f8f01e71a284011378915c2f5a4e4a515063d1cb8e8822bac2e1412d3c",
+  "actual_harness_sha256": "25a4b8834ea5a0334ff4cdc61d10e87048b57e05c28c32c9dfe22f97d8cf9497",
+  "competitor_test_dll_sha256": "4ea466a7b8919d152733d282b851f9d64a26bb6a0e72dcd4075b358404d19ef2",
+  "collection_receipt_sha256": "af577d9de570502f8d92df5397fb51d43fafd3575d573021a1dd8f3f81089029",
+  "runtime_entries_verified": 444,
+  "blob_files_verified": 312,
+  "checks": {
+    "unit": {
+      "passed": 62,
+      "classes": {
+        "SeededAdaptiveBatchTests": 17,
+        "SeededAdaptiveSharedExecutionTests": 14,
+        "EmaRecurrenceTests": 19,
+        "TillsonSharedExecutionTests": 12
+      },
+      "sha256": "8d7e363e0f2d96677f066401e23fc927d266d6751141941df6db4a8286b7bd8d"
+    },
+    "parity": {
+      "passed": 43,
+      "classes": {
+        "SeededAdaptiveBatchParityTests": 4,
+        "SeededAdaptiveComparisonTests": 8,
+        "TaAdaptiveComparisonTests": 5,
+        "TradyAdaptiveComparisonTests": 5,
+        "ExponentialAverageComparisonTests": 5,
+        "SharedTillsonBenchmarkTests": 16
+      },
+      "sha256": "5fe624f4143c3d0618a3a35b42b89aa9f5a71f046f5881998802729a454e1ab6"
+    }
+  },
+  "unit": 62,
+  "parity": 43,
+  "gpu_executed": false,
+  "gpu_verified": false,
+  "qualification": false,
+  "performance_claim": false,
+  "closure_credit": 0
+}

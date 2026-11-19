@@ -1,0 +1,212 @@
+{
+  "status": "four-context-source-bound-actual-dispatch-worker-proof-complete-pending-root-auth",
+  "source": "7de04493efa8304cb2a21fea45c21d177ca0903f",
+  "source_fingerprint": "3fd3ec18ed442cb6bcb9241766c13adcbb19718cfe5740df2030b7062cca9dd4",
+  "cpu_root_review_sha256": "4bb38854991d82bee6722b69ddd1f83ef31eb8c43164990b46b906be1a2d5e25",
+  "gpu_root_review_sha256": "f40dde6951915f372cb61d73b57843267eedeb98dc16b08357d99d272edd0eee",
+  "parent_sha256": "0240beb6257d720054f3069aae09c3d82bbb972de480e43bf269fc4a9524dcea",
+  "child_sha256": "f639a34f5ace0f125b60f0c7672ad02e8a2498bade4c9a071f5a1bca6867d9b4",
+  "contexts": [
+    {
+      "pair": "QuanTAlib.Kama",
+      "local": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-fused-worker-proof-20261119-QuanTAlib-Kama",
+      "archive": "Z:\\StockIndicators-Archives\\diagnostic-profiles\\kama-fused-worker-proof-20261119\\kama-fused-worker-proof-20261119-QuanTAlib-Kama",
+      "hashes": {
+        "profile-status.json": "1304b8d8f73887a5ff931ec41db6d0d090156cfd58fa74fe1e52d1cfe3578287",
+        "dispatch-worker-proof.json": "6be2d68176040772845e0291684e83cc9763f31f01580c3fc13f315fb063b590",
+        "ready.json": "384004e04ed8731a576df76a584ebede2847e89ccfd04e6ede0fe39e21e534a2",
+        "replay.json": "22311e37c6e333341ce933f1b1a5e907a72c485318c0f47e6233c61572563881",
+        "invocation.json": "9130c1c4ea772261fea298010f3d3fd573e8aa34659467e7ca34edf43fad073c",
+        "kama-fused-worker.nettrace": "21ec853b7198e884de97330aa5040094c4e6d53a4bc37011b480d885f1b8377c",
+        "kama-fused-worker.speedscope.json": "0a75bb22a6285eb2a47c92c3fdbe471a0aef34f5bc83ced5de627e0635f63180"
+      },
+      "hot_window_relative_ms": [
+        150.871,
+        2156.4489999999996
+      ],
+      "actual_factory": "ComparisonVerifier.Fixture(walk,10000), Random731",
+      "actual_parameters": "period20;fast2;slow30;publishStartup=true;clampFast=true;resetFlat=false;fastFlat=false;outputDelay=0",
+      "complete_output_hashes": {
+        "Kama": "4a8db4e282019173bb6300623bcb88400790cdfc1e6c5685699a283ff5b38104"
+      },
+      "expected_original_fallback": false,
+      "observed_executing_rate_body_threads": [
+        "Thread (2428)",
+        "Thread (31160)",
+        "Thread (43656)",
+        "Thread (52420)",
+        "Thread (46812)",
+        "Thread (55184)",
+        "Thread (60076)",
+        "Thread (18768)"
+      ],
+      "observed_executing_persistent_worker_threads": [
+        "Thread (31160)",
+        "Thread (43656)",
+        "Thread (52420)",
+        "Thread (46812)",
+        "Thread (55184)",
+        "Thread (60076)",
+        "Thread (18768)"
+      ],
+      "observed_executing_replay_threads": [],
+      "default_workers_before_after": [
+        16,
+        16
+      ],
+      "trace_bytes": 7374146,
+      "output_bytes": 21784090
+    },
+    {
+      "pair": "Skender.GetKama",
+      "local": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-fused-worker-proof-20261119-Skender-GetKama",
+      "archive": "Z:\\StockIndicators-Archives\\diagnostic-profiles\\kama-fused-worker-proof-20261119\\kama-fused-worker-proof-20261119-Skender-GetKama",
+      "hashes": {
+        "profile-status.json": "31aa602416a18a7925a9f88d015d958a5793c9680a2ed17bfd1b4b1fafa2760f",
+        "dispatch-worker-proof.json": "5b4fb4a9a58d9b0a70ce02f6d184339a683ae3c5a96bbd3e5fade410e2710203",
+        "ready.json": "d2091414a4a71e8b72824f48200541ee1e287454f7284bb20a2317ecefc10e64",
+        "replay.json": "71a2c05f7b5319c9b42a64209baf6c7e444be88593b3070a089595268e2a8907",
+        "invocation.json": "eb929e8806b8c5380e465877533ffb1d732b4176026f3fa2ee9cd4b0edc5b1fc",
+        "kama-fused-worker.nettrace": "c24c23a37c73f4d4c32d9119d995587a9d64df7575a9beb223ff83123a0b90d8",
+        "kama-fused-worker.speedscope.json": "0822e5a92dac117ff679af72be74f90ca962bd018e683c86740b1da9c9271fbc"
+      },
+      "hot_window_relative_ms": [
+        146.81900000000002,
+        2152.721
+      ],
+      "actual_factory": "ComparisonVerifier.Fixture(walk,10000), Random731",
+      "actual_parameters": "period20;fast2;slow30;publishStartup=false;clampFast=false;resetFlat=true;fastFlat=false;outputDelay=0",
+      "complete_output_hashes": {
+        "Kama": "8991c4efc6dc23af89c633d9ff4a7c11eedf2ed695bf0f89410a62c4aa14a247",
+        "ER": "a0d594a355f35330fda57265093e02b86786be1ffe9fa41d3f83f24d6217b38f"
+      },
+      "expected_original_fallback": false,
+      "observed_executing_rate_body_threads": [
+        "Thread (61864)",
+        "Thread (51004)",
+        "Thread (10796)",
+        "Thread (60200)",
+        "Thread (20492)",
+        "Thread (41588)",
+        "Thread (36328)",
+        "Thread (46744)"
+      ],
+      "observed_executing_persistent_worker_threads": [
+        "Thread (51004)",
+        "Thread (10796)",
+        "Thread (60200)",
+        "Thread (20492)",
+        "Thread (41588)",
+        "Thread (36328)",
+        "Thread (46744)"
+      ],
+      "observed_executing_replay_threads": [],
+      "default_workers_before_after": [
+        16,
+        16
+      ],
+      "trace_bytes": 7384938,
+      "output_bytes": 21800536
+    },
+    {
+      "pair": "TaLib.Functions.Kama",
+      "local": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-fused-worker-proof-20261119-TaLib-Functions-Kama",
+      "archive": "Z:\\StockIndicators-Archives\\diagnostic-profiles\\kama-fused-worker-proof-20261119\\kama-fused-worker-proof-20261119-TaLib-Functions-Kama",
+      "hashes": {
+        "profile-status.json": "b72c7ce93c82940ee7f4af710b5e8453fc7048db57e5c87a7ae46c0485b63a1c",
+        "dispatch-worker-proof.json": "eb8c204d51bea18d79009fba8a43b75067fdedc8a9efcfd85e90555c44833bfa",
+        "ready.json": "eef25ecd1bfc3c8760506e8f297648c59f7355018eef4ee528d0666107453dda",
+        "replay.json": "c95fd6d30d119758cc34ba397f53563adefb8e70e5363f27c31ae51b89b1ead3",
+        "invocation.json": "3f5fa746727b40819a800348c3449d825726d0ddb97f0c5021c86d1ddb87aa66",
+        "kama-fused-worker.nettrace": "85a2cd708f528306f5ace2b6693de2aae5515fcc499a0a83be96cf685364473b",
+        "kama-fused-worker.speedscope.json": "bc25b20a34f2a0023ebd709be5731c5b331e5688191ae0b281916e2155e7d20b"
+      },
+      "hot_window_relative_ms": [
+        149.872,
+        2156.484
+      ],
+      "actual_factory": "ComparisonVerifier.Fixture(walk,10000), Random731",
+      "actual_parameters": "period20;fast2;slow30;publishStartup=false;clampFast=false;resetFlat=false;fastFlat=true;outputDelay=1;suppression=0",
+      "complete_output_hashes": {
+        "Kama": "6e12cc78e57c3942bc0d669508f7b8f1a07778209f840a35a358a3da1e3640b5"
+      },
+      "expected_original_fallback": false,
+      "observed_executing_rate_body_threads": [
+        "Thread (37876)",
+        "Thread (13324)",
+        "Thread (59636)",
+        "Thread (14728)",
+        "Thread (52796)",
+        "Thread (25564)",
+        "Thread (61748)",
+        "Thread (63104)"
+      ],
+      "observed_executing_persistent_worker_threads": [
+        "Thread (13324)",
+        "Thread (59636)",
+        "Thread (14728)",
+        "Thread (52796)",
+        "Thread (25564)",
+        "Thread (61748)",
+        "Thread (63104)"
+      ],
+      "observed_executing_replay_threads": [],
+      "default_workers_before_after": [
+        16,
+        16
+      ],
+      "trace_bytes": 7375802,
+      "output_bytes": 21831067
+    },
+    {
+      "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "local": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-fused-worker-proof-20261119-Trady-Indicator-KaufmanAdaptiveMovingAverage",
+      "archive": "Z:\\StockIndicators-Archives\\diagnostic-profiles\\kama-fused-worker-proof-20261119\\kama-fused-worker-proof-20261119-Trady-Indicator-KaufmanAdaptiveMovingAverage",
+      "hashes": {
+        "profile-status.json": "380cef4f72c7597e11df02e5d0a2682727fe6577ea66fc5b847c2e5e15ce70ef",
+        "dispatch-worker-proof.json": "fae0c90acb87a30011bd406b0f6a2b8ed671e24c3facd291f146431be776e776",
+        "ready.json": "9dda2532bc1bb9e7f7ad3717e82958ab7eaba59b9c816910e133b312858bcee4",
+        "replay.json": "792f9520bd215589a3c5b39c31fc43ff4ec18a445ae5ed832eeb57766af4c5c0",
+        "invocation.json": "800e9bb67226c1605095e0901f7888bc8c69f5e1728215a61ead76439097ec5c",
+        "kama-fused-worker.nettrace": "121ff44b93cba1c197844170c0b349d7001f4e08f01b63d7ee3de9788adc7c01",
+        "kama-fused-worker.speedscope.json": "a1b825cfda94c867fc38ed9e53e9d261a9521ca350389c591845c8101743873f"
+      },
+      "hot_window_relative_ms": [
+        165.48,
+        2174.297
+      ],
+      "actual_factory": "CompetitorData.Create(10000,42)",
+      "actual_parameters": "period20;fast2;slow30;publishStartup=false;clampFast=false;resetFlat=false;fastFlat=false;outputDelay=0",
+      "complete_output_hashes": {
+        "Kama": "ad5dbb0aa61345624059a4a0cd182a407cf4e15da3c4922f537818c3d7f35d33"
+      },
+      "expected_original_fallback": true,
+      "observed_executing_rate_body_threads": [],
+      "observed_executing_persistent_worker_threads": [],
+      "observed_executing_replay_threads": [
+        "Thread (17188)"
+      ],
+      "default_workers_before_after": [
+        16,
+        16
+      ],
+      "trace_bytes": 6614186,
+      "output_bytes": 13441287
+    }
+  ],
+  "all_four_parents_exit_code": 0,
+  "strictly_sequential": true,
+  "captures_per_context": 1,
+  "retries": 0,
+  "new_builds": 0,
+  "native_timing": false,
+  "performance_claim": false,
+  "qualification": false,
+  "hosted_worker_count_inferred": false,
+  "limits": [
+    "Actual complete returned LP calls at10k and observed rate-worker/replay stack contexts only; fixed1k/hidden4columns/bothhistories remain covered by CPU62/43.",
+    "Sampled thread-context weights are not CPU shares, wall latency, removable time, source qualification or native closure.",
+    "Prefix remains fused scalar certification; no SIMD-prefix claim.",
+    "Observed local threads do not predict hosted worker width or speed."
+  ]
+}

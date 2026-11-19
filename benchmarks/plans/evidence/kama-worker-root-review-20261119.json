@@ -1,0 +1,43 @@
+{
+  "status": "root-independent-kama-four-api-worker-proof-passed",
+  "source": "7de04493efa8304cb2a21fea45c21d177ca0903f",
+  "index_sha256": "465c147020398ef5e2b9eff3ebb5bb13ef8c7ad02ecad4e4eaeee482eb032b65",
+  "context_files_verified_local_and_archive": 28,
+  "raw_speedscope_thread_contexts_independently_recomputed": true,
+  "contexts": [
+    {
+      "pair": "QuanTAlib.Kama",
+      "rate_threads": 8,
+      "persistent_worker_threads": 7,
+      "replay_threads": 0,
+      "output_and_presence_match": true
+    },
+    {
+      "pair": "Skender.GetKama",
+      "rate_threads": 8,
+      "persistent_worker_threads": 7,
+      "replay_threads": 0,
+      "output_and_presence_match": true
+    },
+    {
+      "pair": "TaLib.Functions.Kama",
+      "rate_threads": 8,
+      "persistent_worker_threads": 7,
+      "replay_threads": 0,
+      "output_and_presence_match": true
+    },
+    {
+      "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "rate_threads": 0,
+      "persistent_worker_threads": 0,
+      "replay_threads": 1,
+      "output_and_presence_match": true
+    }
+  ],
+  "new_captures": 0,
+  "new_builds": 0,
+  "new_measurements": 0,
+  "performance_claim": false,
+  "qualified": false,
+  "closure_credit": 0
+}
