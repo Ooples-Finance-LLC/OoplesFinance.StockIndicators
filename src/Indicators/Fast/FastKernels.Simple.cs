@@ -218,4 +218,49 @@ internal static partial class FastKernels
         FastMath.Add(output, highest, output);
         FastMath.Scale(output, 0.5, output);
     }
+
+    /// <summary>Sum of the last <paramref name="period"/> values; zero until the window is full.</summary>
+    internal static void RollingSum(ReadOnlySpan<double> input, Span<double> output, int period)
+    {
+        var n = input.Length;
+        output = output.Slice(0, n);
+        double sum = 0;
+        for (var i = 0; i < n; i++)
+        {
+            if (i >= period && (i & RebuildMask) == 0)
+            {
+                sum = 0;
+                for (var j = i - period + 1; j <= i; j++) sum += input[j];
+            }
+            else
+                sum += i >= period ? input[i] - input[i - period] : input[i];
+            output[i] = i < period - 1 ? 0 : sum;
+        }
+    }
+
+    /// <summary>
+    /// The Wilder recurrence run backwards: the running mean while it seeds, then the previous value moved
+    /// away from the new one by a period-th of their distance.
+    /// </summary>
+    internal static void ReverseWilder(ReadOnlySpan<double> input, Span<double> output, int period)
+    {
+        var n = input.Length;
+        output = output.Slice(0, n);
+        if (n == 0) return;
+        var value = input[0];
+        output[0] = value;
+        var seeded = Math.Min(period, n);
+        for (var i = 1; i < seeded; i++)
+        {
+            // Written as a step from the previous mean, so equal values stay exactly equal.
+            value += (input[i] - value) / (i + 1);
+            output[i] = value;
+        }
+        var scale = 1.0 / period;
+        for (var i = Math.Max(seeded, 1); i < n; i++)
+        {
+            value += (value - input[i]) * scale;
+            output[i] = value;
+        }
+    }
 }

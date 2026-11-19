@@ -209,4 +209,56 @@ internal static partial class FastKernels
             widthDefined[i] = 1;
         }
     }
+
+    /// <summary>
+    /// Trailing stop one multiple of the average true range from the close, the high/low or the midpoint.
+    /// Each band only tightens until the previous close crosses it, and the stop is the lower band while the
+    /// close holds above it and the upper band otherwise.
+    /// </summary>
+    internal static void AtrTrailingStop(FastColumns columns, double[][] outputs, SeededAtrTrailingStop owner)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        var period = owner.Period;
+        var basis = owner.Basis;
+        var multiplier = owner.Multiplier;
+        for (var slot = 0; slot < 6; slot++) outputs[slot].AsSpan().Clear();
+        if (n <= period) return;
+        var range = FastMath.Allocate(n);
+        SeededAverageTrueRange(high, low, close, range, period, false);
+        Span<double> stop = outputs[0], upperOut = outputs[1], lowerOut = outputs[2], upperFlag = outputs[4],
+            lowerFlag = outputs[5];
+        outputs[3].AsSpan(period, n - period).Fill(1);
+        double upperBand = 0, lowerBand = 0;
+        var bullish = false;
+        for (var i = period; i < n; i++)
+        {
+            double price = close[i], previous = close[i - 1];
+            var midpoint = (high[i] + low[i]) * 0.5;
+            var upperBasis = basis == AtrTrailBasis.Close ? price : basis == AtrTrailBasis.HighLow ? high[i] : midpoint;
+            var lowerBasis = basis == AtrTrailBasis.Close ? price : basis == AtrTrailBasis.HighLow ? low[i] : midpoint;
+            var width = range[i] * multiplier;
+            double upper = upperBasis + width, lower = lowerBasis - width;
+            if (i == period)
+            {
+                bullish = price >= (basis == AtrTrailBasis.Midpoint ? midpoint : previous);
+                upperBand = upper;
+                lowerBand = lower;
+            }
+            if (upper < upperBand || previous > upperBand) upperBand = upper;
+            if (lower > lowerBand || previous < lowerBand) lowerBand = lower;
+            bullish = price > (bullish ? lowerBand : upperBand);
+            if (bullish)
+            {
+                stop[i] = lowerOut[i] = lowerBand;
+                lowerFlag[i] = 1;
+            }
+            else
+            {
+                stop[i] = upperOut[i] = upperBand;
+                upperFlag[i] = 1;
+            }
+        }
+    }
 }
