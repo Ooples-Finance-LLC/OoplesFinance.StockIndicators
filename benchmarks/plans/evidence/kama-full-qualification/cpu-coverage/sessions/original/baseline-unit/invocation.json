@@ -1,0 +1,20 @@
+{
+  "command": [
+    "C:/Program Files/dotnet/dotnet.exe",
+    "exec",
+    "C:/Program Files/dotnet/sdk/10.0.404/dotnet.dll",
+    "vstest",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-alma-sinc-combined-gpu-only-20261119\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.Tests.Unit.dll",
+    "/Settings:C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\serial.runsettings",
+    "/TestCaseFilter:FullyQualifiedName~OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.EmaRecurrenceTests.|FullyQualifiedName~OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SeededAdaptiveSharedExecutionTests.|FullyQualifiedName~OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.TillsonSharedExecutionTests.",
+    "/Logger:trx;LogFileName=checks.trx",
+    "/ResultsDirectory:C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\baseline-unit"
+  ],
+  "source": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+  "assembly_sha256": "07ddd42d57015034b43708dbcfccc9e70bc34af2d16a1ce44336effd91048d2d",
+  "ci_compiler_sdk": "10.0.403",
+  "local_launcher_sdk": "10.0.404",
+  "local_execution": true,
+  "build": false,
+  "gpu": false
+}

@@ -1,0 +1,52 @@
+{
+  "role": "baseline",
+  "suite": "unit",
+  "source": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+  "assembly_sha256": "07ddd42d57015034b43708dbcfccc9e70bc34af2d16a1ce44336effd91048d2d",
+  "runtime_inventory_before": {
+    "installed_runtimes": "Microsoft.AspNetCore.App 8.0.20 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.AspNetCore.App 8.0.34 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.AspNetCore.App 9.0.23 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.AspNetCore.App 10.0.1 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.AspNetCore.App 10.0.5 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.AspNetCore.App 10.0.15 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.NETCore.App 5.0.17 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 6.0.36 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 7.0.0-preview.7.22375.6 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 7.0.20 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 8.0.0-rc.1.23419.4 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 8.0.20 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 8.0.34 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 9.0.9 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 9.0.23 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 10.0.1 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 10.0.5 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 10.0.15 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.WindowsDesktop.App 5.0.17 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 7.0.20 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 8.0.0-rc.1.23420.5 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 8.0.20 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 8.0.34 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 9.0.9 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 9.0.23 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 10.0.1 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 10.0.5 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 10.0.15 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\n",
+    "compatible_net10_versions": [
+      "10.0.1",
+      "10.0.5",
+      "10.0.15"
+    ],
+    "selected_latest_patch": "10.0.15"
+  },
+  "runtime_inventory_after": {
+    "installed_runtimes": "Microsoft.AspNetCore.App 8.0.20 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.AspNetCore.App 8.0.34 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.AspNetCore.App 9.0.23 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.AspNetCore.App 10.0.1 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.AspNetCore.App 10.0.5 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.AspNetCore.App 10.0.15 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.NETCore.App 5.0.17 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 6.0.36 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 7.0.0-preview.7.22375.6 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 7.0.20 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 8.0.0-rc.1.23419.4 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 8.0.20 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 8.0.34 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 9.0.9 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 9.0.23 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 10.0.1 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 10.0.5 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 10.0.15 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.WindowsDesktop.App 5.0.17 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 7.0.20 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 8.0.0-rc.1.23420.5 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 8.0.20 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 8.0.34 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 9.0.9 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 9.0.23 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 10.0.1 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 10.0.5 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 10.0.15 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\n",
+    "compatible_net10_versions": [
+      "10.0.1",
+      "10.0.5",
+      "10.0.15"
+    ],
+    "selected_latest_patch": "10.0.15"
+  },
+  "local_execution": true,
+  "passed": 19,
+  "classes": {
+    "ValidationTests.EmaRecurrenceTests": 15,
+    "ModelsTests.TsiWordEmaRecurrenceTests": 4
+  },
+  "trx_sha256": "5fae0ba6331bcde301f941dd0e8fdbd42a05e0c624ef5d140ba8db7122c6f5d2",
+  "test_names": [
+    "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests.RecurrenceMatchesIndependentRationalCorrectionAndPreviewsDoNotCommit(period: 14)",
+    "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests.AutomaticValidationIncludesEveryNumericalClassForEma(period: 3)",
+    "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests.IntegerWeightsAndDenominatorCannotOverflow(period: 2147483647)",
+    "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests.AutomaticValidationIncludesEveryNumericalClassForEma(period: 14)",
+    "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests.ConstantFiniteInputsArePreservedExactlyAfterStartup(period: 31)",
+    "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests.RecurrenceMatchesIndependentRationalCorrectionAndPreviewsDoNotCommit(period: 2)",
+    "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.TsiWordEmaRecurrenceTests.DefinedNegativeZeroPublicationAndRecoverySurviveReset",
+    "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests.ConstantFiniteInputsArePreservedExactlyAfterStartup(period: 14)",
+    "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.TsiWordEmaRecurrenceTests.CancellationGridShiftTiesCarryAndUnsupportedScalesKeepExactBoundaries",
+    "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.TsiWordEmaRecurrenceTests.GeneralWordUpdatesAllocateNoManagedScratch",
+    "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests.IntegerWeightsAndDenominatorCannotOverflow(period: 3)",
+    "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.TsiWordEmaRecurrenceTests.MixedSignsExponentsAndFallbackPeriodsMatchIndependentRationalStages",
+    "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests.AutomaticValidationIncludesEveryNumericalClassForEma(period: 31)",
+    "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests.AutomaticValidationIncludesEveryNumericalClassForEma(period: 1)",
+    "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests.ElderImpulseDiscreteSignsUseTheDocumentedEmaRounding",
+    "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests.RecurrenceMatchesIndependentRationalCorrectionAndPreviewsDoNotCommit(period: 3)",
+    "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests.AutomaticValidationIncludesEveryNumericalClassForEma(period: 2)",
+    "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests.ConstantFiniteInputsArePreservedExactlyAfterStartup(period: 3)",
+    "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests.ConstantFiniteInputsArePreservedExactlyAfterStartup(period: 1)"
+  ]
+}

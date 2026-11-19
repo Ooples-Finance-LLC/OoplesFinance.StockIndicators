@@ -590,6 +590,10 @@ SCOPES['abandoned-inventory-repair-20261114']['methods']['SharedCrowSoldierBench
 SCOPES['abandoned-inventory-repair-20261114']['totals'] = (176, 36)
 
 def verify_reference(plan):
+    if plan.get('kama_full_qualification'):
+        from .kama_full_qualification import validate_scope
+        validate_scope(plan)
+        return
     if plan.get('analytic_grid_qualification'):
         from .analytic_grid_qualification import validate_scope
         validate_scope(plan)

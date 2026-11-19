@@ -1,0 +1,73 @@
+{
+  "status": "stopped-on-first-inventory-mismatch-no-retry",
+  "qualification": false,
+  "source_acceptance": false,
+  "original_packet_sha256": "73fcc53caaf671e06d3f3e6013b769febce61d2b4a80fdc290e82b716595d2bc",
+  "original_started_sha256": "be63d9390b0492db08a084d93e78d096143012bcb5a42ff5aec0163581d3b31f",
+  "groups": [
+    {
+      "role": "candidate",
+      "suite": "unit",
+      "passed": 134,
+      "expected": 134,
+      "classes": {
+        "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SincGridBatchTests": 57,
+        "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedAlmaWindowTests": 21,
+        "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.AnalyticGridBatchTests": 14,
+        "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.AlmaGridBatchTests": 14,
+        "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.WindowedSincCompactTests": 8,
+        "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedWeightedWindowTests": 16,
+        "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.AlmaWideDivisorTests": 4
+      },
+      "trx_sha256": "649b22ea5efa353a55bf8dba8ce83d46e25146de7d337de2294b682900f4534f",
+      "receipt_sha256": "cc86add3125c51764b2f9418845cafc2419fdd46c2cda0644834cfd22091d161",
+      "status": "passed-original-receipt"
+    },
+    {
+      "role": "candidate",
+      "suite": "parity",
+      "passed": 86,
+      "expected": 86,
+      "classes": {
+        "OoplesFinance.StockIndicators.CompetitorTests.AlmaComparisonTests": 16,
+        "OoplesFinance.StockIndicators.CompetitorTests.AnalyticKernelComparisonTests": 15,
+        "OoplesFinance.StockIndicators.CompetitorTests.FixedWeightedComparisonTests": 9,
+        "OoplesFinance.StockIndicators.CompetitorTests.NamedComparisonPublisherTests": 20,
+        "OoplesFinance.StockIndicators.CompetitorTests.ConvolutionComparisonTests": 17,
+        "OoplesFinance.StockIndicators.CompetitorTests.SincBuilderComparisonTests": 7,
+        "OoplesFinance.StockIndicators.CompetitorTests.AlmaPublisherAlignmentTests": 2
+      },
+      "trx_sha256": "ab8861b252e98f324612230a8d483c13167f9c65ac728f349fadd9921b144a4c",
+      "receipt_sha256": "9019766b12c5810eacdaef6d85d84a5ac97e5245808202a13c9d4a27d6a8abde",
+      "status": "passed-original-receipt"
+    },
+    {
+      "role": "baseline",
+      "suite": "unit",
+      "passed": 26,
+      "expected": 45,
+      "classes": {
+        "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.TillsonSharedExecutionTests": 12,
+        "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SeededAdaptiveSharedExecutionTests": 14
+      },
+      "trx_sha256": "4a1be352dfceca8b6fb60a9772b34f76e51716c9c05e113e4e2f477ca019c8ab",
+      "receipt_sha256": null,
+      "status": "inventory-mismatch-run-stopped"
+    },
+    {
+      "role": "baseline",
+      "suite": "parity",
+      "status": "not-executed-after-first-inventory-failure"
+    }
+  ],
+  "cause": "Packet used ModelsTests namespace for EmaRecurrenceTests; accepted4b declares it in ValidationTests. The19 EMA cases were not selected.",
+  "failure_is_test_inventory_not_assertion": true,
+  "all_original_files_preserved": true,
+  "baseline_parity_executed": false,
+  "automatic_retry": false,
+  "recovery_test_executions": 0,
+  "baseline_coverage_complete": false,
+  "source_builds": 0,
+  "gpu_executions": 0,
+  "timings": 0
+}

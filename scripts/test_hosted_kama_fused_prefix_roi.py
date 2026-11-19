@@ -1,6 +1,5 @@
 """Bounded orchestration checks; no production build, workload, capture or timing."""
 import copy,json,unittest
-import os
 import shutil
 from pathlib import Path
 from unittest import mock
@@ -8,8 +7,7 @@ from hosted_timing import kama_fused_prefix_roi as q
 from hosted_timing import pipeline,roi_scope_dispatch,verify
 
 SAVED_PLAN=Path(__file__).resolve().parents[1]/'benchmarks/plans/hosted-kama-current-source-roi-20261119.json'
-PLAN=Path(os.environ.get('HOSTED_TIMING_PLAN',str(SAVED_PLAN)))
-if not PLAN.is_absolute():PLAN=SAVED_PLAN.parents[2]/PLAN
+PLAN=SAVED_PLAN
 
 class KamaFusedPrefixRoiTests(unittest.TestCase):
     def plan(self):return json.loads(PLAN.read_bytes())

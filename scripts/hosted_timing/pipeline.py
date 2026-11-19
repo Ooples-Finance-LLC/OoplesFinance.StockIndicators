@@ -217,6 +217,9 @@ def warmup_context(plan, fixture, task=None):
 def verify_inputs(folder):
     proof, plan = read(folder/'provenance.json'), read(PLAN)
     _verify_input_contents(folder, plan, proof, digest(PLAN))
+    if plan.get('kama_full_qualification'):
+        from .kama_full_qualification import verify_authentication
+        verify_authentication(folder,plan,proof)
     if plan.get('triple_body_master_reconciliation'):
         from .master_reconciliation import verify_authentication
         verify_authentication(folder,plan,proof)
@@ -329,7 +332,7 @@ def _verify_input_contents(folder, plan, proof, plan_sha256):
     elif plan.get('analytic_grid_qualification'):
         from .analytic_grid_qualification import verify_harness_alias
         verify_harness_alias(folder,plan,proof)
-    elif plan.get('diagnostic_kind') == 'kama-current-source-native-pilot':
+    elif plan.get('kama_full_qualification') or plan.get('diagnostic_kind') == 'kama-current-source-native-pilot':
         from .kama_fused_prefix_roi import verify_harness_alias
         verify_harness_alias(folder,plan,proof)
     elif plan.get('diagnostic_kind') == 'analytic-grid-native-pilot':

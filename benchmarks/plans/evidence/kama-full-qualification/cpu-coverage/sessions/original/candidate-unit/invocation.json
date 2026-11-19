@@ -1,0 +1,20 @@
+{
+  "command": [
+    "C:/Program Files/dotnet/dotnet.exe",
+    "exec",
+    "C:/Program Files/dotnet/sdk/10.0.404/dotnet.dll",
+    "vstest",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-kama-current-accepted-gpu-only-20261119\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.Tests.Unit.dll",
+    "/Settings:C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\serial.runsettings",
+    "/TestCaseFilter:FullyQualifiedName~OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.AlmaGridBatchTests.|FullyQualifiedName~OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.AlmaWideDivisorTests.|FullyQualifiedName~OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.AnalyticGridBatchTests.|FullyQualifiedName~OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedAlmaWindowTests.|FullyQualifiedName~OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedWeightedWindowTests.|FullyQualifiedName~OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SincGridBatchTests.|FullyQualifiedName~OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.WindowedSincCompactTests.",
+    "/Logger:trx;LogFileName=checks.trx",
+    "/ResultsDirectory:C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-unit"
+  ],
+  "source": "9e9fbb08c1d9f6164d861446f27b6d2a393430f3",
+  "assembly_sha256": "dd1b9b2d4e26acf019d0522295ea27d7276ba756752d157b8ab245c1db324406",
+  "ci_compiler_sdk": "10.0.403",
+  "local_launcher_sdk": "10.0.404",
+  "local_execution": true,
+  "build": false,
+  "gpu": false
+}

@@ -54,6 +54,10 @@ def sample(case):
 
 
 def collect(folder, phase):
+    if read(PLAN).get('kama_full_qualification'):
+        assert phase == 'targeted'
+        from .kama_full_qualification import collect as kama_full_collect
+        return kama_full_collect(folder)
     if read(PLAN).get('cmf_alma_combined_qualification'):
         assert phase == 'targeted'
         from .cmf_alma_combined_qualification import collect as combined_qualify

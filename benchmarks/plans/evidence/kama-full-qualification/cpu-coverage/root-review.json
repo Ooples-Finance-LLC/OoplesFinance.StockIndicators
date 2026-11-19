@@ -1,0 +1,162 @@
+{
+  "status": "root-independent-kama-full-cpu-coverage-passed",
+  "utc": "2026-11-19T10:43:38.130156+00:00",
+  "sources": {
+    "candidate": "9e9fbb08c1d9f6164d861446f27b6d2a393430f3",
+    "baseline": "4b4e8a385ed1c210998d26de6460e23f5842ffe9"
+  },
+  "source_fingerprints": {
+    "candidate": "be4aca86a7c67bbdac47207c99fc4fa4eb51fdd963096caf2285b2751924c5cc",
+    "baseline": "1b6b4cf28b0820a992fbd4e049bf2c993cdfa6efdee8deabf9d98fb0cde436ae"
+  },
+  "combined_coverage_totals": {
+    "candidate": {
+      "unit": 196,
+      "parity": 129
+    },
+    "baseline": {
+      "unit": 179,
+      "parity": 125
+    }
+  },
+  "checks": {
+    "candidate": {
+      "unit": {
+        "passed": 196,
+        "actual_exact_class_counts": {
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SeededAdaptiveBatchTests": 17,
+          "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests": 15,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.TillsonSharedExecutionTests": 12,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SeededAdaptiveSharedExecutionTests": 14,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.TsiWordEmaRecurrenceTests": 4,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SincGridBatchTests": 57,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.AlmaWideDivisorTests": 4,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.AnalyticGridBatchTests": 14,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.WindowedSincCompactTests": 8,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.AlmaGridBatchTests": 14,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedWeightedWindowTests": 16,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedAlmaWindowTests": 21
+        },
+        "sessions": [
+          {
+            "passed": 62,
+            "trx_sha256": "de8995a763b998341303ef89da390568d824372e2760719304cb2b37277a270d"
+          },
+          {
+            "passed": 134,
+            "trx_sha256": "649b22ea5efa353a55bf8dba8ce83d46e25146de7d337de2294b682900f4534f"
+          }
+        ]
+      },
+      "parity": {
+        "passed": 129,
+        "actual_exact_class_counts": {
+          "OoplesFinance.StockIndicators.CompetitorTests.ExponentialAverageComparisonTests": 5,
+          "OoplesFinance.StockIndicators.CompetitorTests.TradyAdaptiveComparisonTests": 5,
+          "OoplesFinance.StockIndicators.CompetitorTests.SharedTillsonBenchmarkTests": 16,
+          "OoplesFinance.StockIndicators.CompetitorTests.TaAdaptiveComparisonTests": 5,
+          "OoplesFinance.StockIndicators.CompetitorTests.SeededAdaptiveComparisonTests": 8,
+          "OoplesFinance.StockIndicators.CompetitorTests.SeededAdaptiveBatchParityTests": 4,
+          "OoplesFinance.StockIndicators.CompetitorTests.AlmaComparisonTests": 16,
+          "OoplesFinance.StockIndicators.CompetitorTests.SincBuilderComparisonTests": 7,
+          "OoplesFinance.StockIndicators.CompetitorTests.NamedComparisonPublisherTests": 20,
+          "OoplesFinance.StockIndicators.CompetitorTests.ConvolutionComparisonTests": 17,
+          "OoplesFinance.StockIndicators.CompetitorTests.AnalyticKernelComparisonTests": 15,
+          "OoplesFinance.StockIndicators.CompetitorTests.FixedWeightedComparisonTests": 9,
+          "OoplesFinance.StockIndicators.CompetitorTests.AlmaPublisherAlignmentTests": 2
+        },
+        "sessions": [
+          {
+            "passed": 43,
+            "trx_sha256": "2f12c6a7011ab6fd5b2e920142c43052449a13b6838114c2bde6ac9396a950af"
+          },
+          {
+            "passed": 86,
+            "trx_sha256": "ab8861b252e98f324612230a8d483c13167f9c65ac728f349fadd9921b144a4c"
+          }
+        ]
+      }
+    },
+    "baseline": {
+      "unit": {
+        "passed": 179,
+        "actual_exact_class_counts": {
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.AnalyticGridBatchTests": 14,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.AlmaWideDivisorTests": 4,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SincGridBatchTests": 57,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedAlmaWindowTests": 21,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.AlmaGridBatchTests": 14,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedWeightedWindowTests": 16,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.WindowedSincCompactTests": 8,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SeededAdaptiveSharedExecutionTests": 14,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.TillsonSharedExecutionTests": 12,
+          "OoplesFinance.StockIndicators.Tests.Unit.ValidationTests.EmaRecurrenceTests": 15,
+          "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.TsiWordEmaRecurrenceTests": 4
+        },
+        "sessions": [
+          {
+            "passed": 134,
+            "trx_sha256": "615c60c97adda8ce5c118b61512eb8d93b8742be6a46a7d2291d336c89f88179"
+          },
+          {
+            "passed": 26,
+            "trx_sha256": "4a1be352dfceca8b6fb60a9772b34f76e51716c9c05e113e4e2f477ca019c8ab"
+          },
+          {
+            "passed": 19,
+            "trx_sha256": "5fae0ba6331bcde301f941dd0e8fdbd42a05e0c624ef5d140ba8db7122c6f5d2"
+          }
+        ]
+      },
+      "parity": {
+        "passed": 125,
+        "actual_exact_class_counts": {
+          "OoplesFinance.StockIndicators.CompetitorTests.ConvolutionComparisonTests": 17,
+          "OoplesFinance.StockIndicators.CompetitorTests.AlmaPublisherAlignmentTests": 2,
+          "OoplesFinance.StockIndicators.CompetitorTests.NamedComparisonPublisherTests": 20,
+          "OoplesFinance.StockIndicators.CompetitorTests.AlmaComparisonTests": 16,
+          "OoplesFinance.StockIndicators.CompetitorTests.SincBuilderComparisonTests": 7,
+          "OoplesFinance.StockIndicators.CompetitorTests.AnalyticKernelComparisonTests": 15,
+          "OoplesFinance.StockIndicators.CompetitorTests.FixedWeightedComparisonTests": 9,
+          "OoplesFinance.StockIndicators.CompetitorTests.SharedTillsonBenchmarkTests": 16,
+          "OoplesFinance.StockIndicators.CompetitorTests.ExponentialAverageComparisonTests": 5,
+          "OoplesFinance.StockIndicators.CompetitorTests.TradyAdaptiveComparisonTests": 5,
+          "OoplesFinance.StockIndicators.CompetitorTests.SeededAdaptiveComparisonTests": 8,
+          "OoplesFinance.StockIndicators.CompetitorTests.TaAdaptiveComparisonTests": 5
+        },
+        "sessions": [
+          {
+            "passed": 86,
+            "trx_sha256": "af8214c7dbb9929fa500312c6aeb951831f0d425115334a60f84d4460628f2d3"
+          },
+          {
+            "passed": 39,
+            "trx_sha256": "a0fd21b3598bac9d8e125ba420313a0df355a8bf63bf8e6d12db2034c3baa578"
+          }
+        ]
+      }
+    }
+  },
+  "original_ci_manifests_and_counts_unchanged": true,
+  "coverage_assembled_from_multiple_actual_sessions": true,
+  "actual_test_names_independently_verified": true,
+  "exact_class_names_verified": true,
+  "original_filter_19_expands_to_15_validation_ema_and_4_models_tsi": true,
+  "local_clr": "10.0.15",
+  "ci_compiler_sdk": "10.0.403",
+  "local_launcher_sdk": "10.0.404",
+  "packet_sha256": "73fcc53caaf671e06d3f3e6013b769febce61d2b4a80fdc290e82b716595d2bc",
+  "repair_summary_sha256": "19d74b2de6d6317e70e0c62d4211faabafbb5ee707716fdeca21b36dd30df2ec",
+  "actual_local_trx_pins": {
+    "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-unit\\checks.trx": "649b22ea5efa353a55bf8dba8ce83d46e25146de7d337de2294b682900f4534f",
+    "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-parity\\checks.trx": "ab8861b252e98f324612230a8d483c13167f9c65ac728f349fadd9921b144a4c",
+    "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\baseline-unit\\checks.trx": "4a1be352dfceca8b6fb60a9772b34f76e51716c9c05e113e4e2f477ca019c8ab",
+    "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\baseline-unit\\checks.trx": "5fae0ba6331bcde301f941dd0e8fdbd42a05e0c624ef5d140ba8db7122c6f5d2",
+    "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\baseline-parity\\checks.trx": "a0fd21b3598bac9d8e125ba420313a0df355a8bf63bf8e6d12db2034c3baa578"
+  },
+  "source_builds": 0,
+  "benchmark_builds": 0,
+  "gpu_executions": 0,
+  "qualified": false,
+  "closure_credit": 0
+}

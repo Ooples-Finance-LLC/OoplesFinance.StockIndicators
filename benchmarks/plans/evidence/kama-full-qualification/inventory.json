@@ -1,0 +1,850 @@
+{
+  "status": "planning-only-conditional-no-source-acceptance-or-launch",
+  "started_utc": "2026-11-19T08:59:26+00:00",
+  "completed_utc": "2026-11-19T09:15:07.321665+00:00",
+  "cap_minutes": 20,
+  "elapsed_seconds": 941.3,
+  "baseline": {
+    "accepted_source": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+    "source_equivalent_published_head": "20d21f263a25f14c4c15a0ab9354bfc91e0dab60",
+    "fingerprint": "1b6b4cf28b0820a992fbd4e049bf2c993cdfa6efdee8deabf9d98fb0cde436ae",
+    "rule": "Reuse the accepted190 scope, NOT its old48980-to4b timing values. Any later qualification freshly measures accepted4b old versus the final candidate and matched native controls."
+  },
+  "plans": [
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-alma-sinc-combined-qualification-20261119\\benchmarks\\plans\\hosted-alma-sinc-combined-qualification-20261119.json",
+      "sha256": "3a20fad981c48c235c1930b4786db2c882babc38dacf15b3551972af3f025738"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-candle-topology-replay-roi-tooling-20261119\\benchmarks\\plans\\hosted-candle-topology-replay-roi-20261119.json",
+      "sha256": "f1c71d2e94a4b636e11756e1fdf2b3a51e03d896730b40a21b0376877a1fc5a7"
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-kama-fused-prefix-roi-20261119\\benchmarks\\plans\\hosted-kama-current-source-roi-20261119.json",
+      "sha256": "0b0727ef801b065a48a3c0171ab3c4f9252578e901a88c5eee63d33f010351fa"
+    }
+  ],
+  "source_catalog_sha256": {
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaReversalContinuationBenchmarks.cs": "d41692817885b749f0b74f1b115110a9af15e2108dcabde68792315c57c0c479",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaCandleBenchmarkBase.cs": "05408d6989246202190641ee9833329cdfd3b4345884d46c1576bfdd80001ca4",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedMappedBenchmarkBase.cs": "47cd0c4548df79d06b5d31010d19257c6137378f5199b788d6f706eecbecc353",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedSeededAdaptiveBenchmarks.cs": "52238cfcc699a67d65e2f119bdcf1fb0242962f321acf599734cc92207f981ef",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedAdaptiveVariantBenchmarks.cs": "ba25e7722107c52d98813d9a8d840b28d20228932c3fec0d4dac1cfbdfd70105",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaAdaptiveRateNativeBenchmarks.cs": "d78d00d635c193aa102f6523561a144c90a77be210c91e4d95a82d340694079e",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTaPackedBenchmarkBase.cs": "554e8ba702eb188a385c7a9bc0d7bf63244b3622e38d7063587e8a8efe2689fe",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTradyCciAdaptiveBenchmarks.cs": "29a1e6b427bc20b3eb961e85747e9ece2fde5070e0bc16e625da6f06eac46f74",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedRecursiveStateBenchmarks.cs": "ee9b3e2d03c9fec19dc0a014b56a29037890d098549f9e7dbebf3baca8973203",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedTillsonBenchmarks.cs": "7253bd27406d940f97b8f9619d06c8635bd39b73f44a246bc20342b1b4f26bd6",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedExhaustionBenchmarks.cs": "24a8acd5b84a602d164aa01891722fae49232ad42df89df7317f29f59f1fd6bd",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedCrowSoldierBenchmarks.cs": "fcaf3ca6dd546a21206430bdf238b40ff77e354f1dd515f165c89c208086ccac",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/SharedBenchmarkSupport.cs": "93f533594aab696c70b388485128a6ffc3db87327a015dd1f1950b4e149c9831"
+  },
+  "groups": {
+    "alma-sinc": {
+      "cases": 190,
+      "decisions": 38
+    },
+    "candle": {
+      "cases": 180,
+      "decisions": 36
+    },
+    "kama": {
+      "cases": 120,
+      "decisions": 24
+    },
+    "sentinels": {
+      "cases": 60,
+      "decisions": 12
+    }
+  },
+  "scenarios": {
+    "candle_only": {
+      "groups": [
+        "alma-sinc",
+        "candle",
+        "sentinels"
+      ],
+      "cases": 430,
+      "decisions": 86,
+      "lp_pair_count": 13,
+      "builder_pair_count": 15
+    },
+    "kama_only": {
+      "groups": [
+        "alma-sinc",
+        "kama",
+        "sentinels"
+      ],
+      "cases": 370,
+      "decisions": 74,
+      "lp_pair_count": 11,
+      "builder_pair_count": 13
+    },
+    "both": {
+      "groups": [
+        "alma-sinc",
+        "candle",
+        "kama",
+        "sentinels"
+      ],
+      "cases": 550,
+      "decisions": 110,
+      "lp_pair_count": 17,
+      "builder_pair_count": 19
+    }
+  },
+  "registry": [
+    {
+      "group": "alma-sinc",
+      "fixture": "LibraryPairBenchmarks",
+      "pair_parameter": "PairId",
+      "size_parameter": "Bars",
+      "operations": [
+        {
+          "raw": "QuanTAlib.Gma",
+          "pair": "QuanTAlib.Gma"
+        },
+        {
+          "raw": "QuanTAlib.Sinema",
+          "pair": "QuanTAlib.Sinema"
+        },
+        {
+          "raw": "QuanTAlib.Convolution",
+          "pair": "QuanTAlib.Convolution"
+        },
+        {
+          "raw": "QuanTAlib.Alma",
+          "pair": "QuanTAlib.Alma"
+        },
+        {
+          "raw": "Skender.GetAlma",
+          "pair": "Skender.GetAlma"
+        }
+      ],
+      "methods": [
+        "Ooples",
+        "Competitor"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "group": "alma-sinc",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "pair_parameter": "Operation",
+      "size_parameter": "Count",
+      "operations": [
+        {
+          "raw": "QuanTAlib.Alma",
+          "pair": "QuanTAlib.Alma"
+        },
+        {
+          "raw": "Skender.GetAlma",
+          "pair": "Skender.GetAlma"
+        }
+      ],
+      "methods": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "group": "alma-sinc",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "pair_parameter": "Operation",
+      "size_parameter": "Count",
+      "operations": [
+        {
+          "raw": "Gma",
+          "pair": "QuanTAlib.Gma"
+        },
+        {
+          "raw": "Sinema",
+          "pair": "QuanTAlib.Sinema"
+        },
+        {
+          "raw": "Convolution",
+          "pair": "QuanTAlib.Convolution"
+        }
+      ],
+      "methods": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "group": "alma-sinc",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "pair_parameter": "Operation",
+      "size_parameter": "Count",
+      "operations": [
+        {
+          "raw": "QuanTAlib.Fwma",
+          "pair": "QuanTAlib.Fwma"
+        }
+      ],
+      "methods": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "group": "alma-sinc",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "pair_parameter": "Operation",
+      "size_parameter": "Count",
+      "operations": [
+        {
+          "raw": "QuanTAlib.Afirma",
+          "pair": "QuanTAlib.Afirma"
+        }
+      ],
+      "methods": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "group": "candle",
+      "fixture": "LibraryPairBenchmarks",
+      "pair_parameter": "PairId",
+      "size_parameter": "Bars",
+      "operations": [
+        {
+          "pair": "TaLib.Candles.Stalled",
+          "raw": "TaLib.Candles.Stalled"
+        },
+        {
+          "pair": "TaLib.Candles.IdenticalThreeCrows",
+          "raw": "TaLib.Candles.IdenticalThreeCrows"
+        },
+        {
+          "pair": "TaLib.Candles.ThreeStarsInSouth",
+          "raw": "TaLib.Candles.ThreeStarsInSouth"
+        },
+        {
+          "pair": "TaLib.Candles.AdvanceBlock",
+          "raw": "TaLib.Candles.AdvanceBlock"
+        },
+        {
+          "pair": "TaLib.Candles.ThreeBlackCrows",
+          "raw": "TaLib.Candles.ThreeBlackCrows"
+        },
+        {
+          "pair": "TaLib.Candles.ThreeWhiteSoldiers",
+          "raw": "TaLib.Candles.ThreeWhiteSoldiers"
+        }
+      ],
+      "methods": [
+        "Ooples",
+        "Competitor"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "group": "candle",
+      "fixture": "SharedTaReversalContinuationBenchmarks",
+      "pair_parameter": "Operation",
+      "size_parameter": "Count",
+      "operations": [
+        {
+          "pair": "TaLib.Candles.Stalled",
+          "raw": "Stalled"
+        },
+        {
+          "pair": "TaLib.Candles.IdenticalThreeCrows",
+          "raw": "IdenticalThreeCrows"
+        },
+        {
+          "pair": "TaLib.Candles.ThreeStarsInSouth",
+          "raw": "ThreeStarsInSouth"
+        },
+        {
+          "pair": "TaLib.Candles.AdvanceBlock",
+          "raw": "AdvanceBlock"
+        },
+        {
+          "pair": "TaLib.Candles.ThreeBlackCrows",
+          "raw": "ThreeBlackCrows"
+        },
+        {
+          "pair": "TaLib.Candles.ThreeWhiteSoldiers",
+          "raw": "ThreeWhiteSoldiers"
+        }
+      ],
+      "methods": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "group": "kama",
+      "fixture": "LibraryPairBenchmarks",
+      "pair_parameter": "PairId",
+      "size_parameter": "Bars",
+      "operations": [
+        {
+          "pair": "QuanTAlib.Kama",
+          "raw": "QuanTAlib.Kama"
+        },
+        {
+          "pair": "Skender.GetKama",
+          "raw": "Skender.GetKama"
+        },
+        {
+          "pair": "TaLib.Functions.Kama",
+          "raw": "TaLib.Functions.Kama"
+        },
+        {
+          "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+          "raw": "Trady.Indicator.KaufmanAdaptiveMovingAverage"
+        }
+      ],
+      "methods": [
+        "Ooples",
+        "Competitor"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "group": "kama",
+      "fixture": "SharedSeededAdaptiveBenchmarks",
+      "pair_parameter": "Operation",
+      "size_parameter": "Count",
+      "operations": [
+        {
+          "pair": "QuanTAlib.Kama",
+          "raw": "QuanTAlib.Kama"
+        },
+        {
+          "pair": "Skender.GetKama",
+          "raw": "Skender.GetKama"
+        }
+      ],
+      "methods": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "group": "kama",
+      "fixture": "SharedTaAdaptiveRateNativeBenchmarks",
+      "pair_parameter": "Operation",
+      "size_parameter": "Count",
+      "operations": [
+        {
+          "pair": "TaLib.Functions.Kama",
+          "raw": "TaLib.Functions.Kama"
+        }
+      ],
+      "methods": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "group": "kama",
+      "fixture": "SharedTradyCciAdaptiveBenchmarks",
+      "pair_parameter": "Operation",
+      "size_parameter": "Count",
+      "operations": [
+        {
+          "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+          "raw": "KaufmanAdaptiveMovingAverage"
+        }
+      ],
+      "methods": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "group": "sentinels",
+      "fixture": "LibraryPairBenchmarks",
+      "pair_parameter": "PairId",
+      "size_parameter": "Bars",
+      "operations": [
+        {
+          "pair": "TaLib.Functions.Ema",
+          "raw": "TaLib.Functions.Ema"
+        },
+        {
+          "pair": "TaLib.Functions.T3",
+          "raw": "TaLib.Functions.T3"
+        }
+      ],
+      "methods": [
+        "Ooples",
+        "Competitor"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "group": "sentinels",
+      "fixture": "SharedRecursiveStateBenchmarks",
+      "pair_parameter": "Operation",
+      "size_parameter": "Count",
+      "operations": [
+        {
+          "pair": "TaLib.Functions.Ema",
+          "raw": "Ema"
+        }
+      ],
+      "methods": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "group": "sentinels",
+      "fixture": "SharedTillsonBenchmarks",
+      "pair_parameter": "Operation",
+      "size_parameter": "Count",
+      "operations": [
+        {
+          "pair": "TaLib.Functions.T3",
+          "raw": "TaLib.Functions.T3"
+        }
+      ],
+      "methods": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    }
+  ],
+  "deduplication": {
+    "shared_ema_t3_cases": 60,
+    "shared_ema_t3_decisions": 12,
+    "shared_alma_sinc_cases": 190,
+    "shared_alma_sinc_decisions": 38,
+    "combined_saves_vs_two_separate_qualifications_cases": 250,
+    "combined_saves_decisions": 50,
+    "rule": "Deduplicate exact fixture/pair/profile/size and native controls once per fixture/pair/size/method in round2; LP and builder input shapes remain distinct."
+  },
+  "aliases_covered_without_duplicate_timing": [
+    {
+      "alias": "SharedExhaustionBenchmarks",
+      "canonical": "SharedTaReversalContinuationBenchmarks",
+      "pairs": [
+        "TaLib.Candles.Stalled",
+        "TaLib.Candles.ThreeStarsInSouth",
+        "TaLib.Candles.AdvanceBlock"
+      ],
+      "profiles": [
+        "BuilderFull",
+        "BuilderLatestOnly"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ],
+      "proof": "Both use BenchmarkFixture(pair,Count), ExhaustionComparison.Create short name, and BuildCpu with all owned outputs; alias uses full pair Operation, canonical uses short name."
+    },
+    {
+      "alias": "SharedCrowSoldierBenchmarks",
+      "canonical": "SharedTaReversalContinuationBenchmarks",
+      "pairs": [
+        "TaLib.Candles.IdenticalThreeCrows",
+        "TaLib.Candles.ThreeBlackCrows",
+        "TaLib.Candles.ThreeWhiteSoldiers"
+      ],
+      "profiles": [
+        "BuilderFull",
+        "BuilderLatestOnly"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ],
+      "proof": "Both use BenchmarkFixture and CrowSoldierComparison.Create defaults through BuildCpu."
+    },
+    {
+      "alias": "SharedAdaptiveVariantBenchmarks",
+      "canonical": {
+        "TaLib.Functions.Kama": "SharedTaAdaptiveRateNativeBenchmarks",
+        "Trady.Indicator.KaufmanAdaptiveMovingAverage": "SharedTradyCciAdaptiveBenchmarks"
+      },
+      "pairs": [
+        "TaLib.Functions.Kama",
+        "Trady.Indicator.KaufmanAdaptiveMovingAverage"
+      ],
+      "profiles": [
+        "BuilderFull",
+        "BuilderLatestOnly"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ],
+      "proof": "Same BenchmarkFixture, SeededAdaptiveAverage20/2/30, resetFlat=false, TA fastFlat=true/delay1 or Trady fastFlat=false/delay0, all value/efficiency/presence columns, BuildCpu. Canonical fixtures additionally supply fresh matched native arms."
+    }
+  ],
+  "protection": {
+    "alma_sinc_required_in_every_scenario": true,
+    "reason": "KAMA changes shared Execute; candle changes shared BoundedWindows dispatch. Accepted ALMA/Sinc stays a protection/control scope, not a new-progress family.",
+    "inherited_edges": 26,
+    "accepted4b_confident_edges": 38,
+    "union_coverage_edges": 41,
+    "owned_contexts": 28,
+    "legacy_not_current_confident": [
+      [
+        "SharedFibonacciWeightedBenchmarks",
+        "QuanTAlib.Fwma",
+        "BuilderFull",
+        1000,
+        "NativeParallel"
+      ],
+      [
+        "SharedWeightedWindowBenchmarks",
+        "QuanTAlib.Convolution",
+        "BuilderLatestOnly",
+        1000,
+        "NativeParallel"
+      ],
+      [
+        "SharedWeightedWindowBenchmarks",
+        "QuanTAlib.Gma",
+        "BuilderFull",
+        1000,
+        "NativeParallel"
+      ]
+    ],
+    "edge_csv": "alma-sinc-protection-edges.csv",
+    "interpretation": "Historical edges identify mandatory coverage/reconciliation; fresh matched old/native data recomputes the unchanged prior-win preservation gate. Do not silently erase three inherited1k edges or infer new credit from edge counts.",
+    "additional_named_prior_controls": [
+      "TaLib.Candles.ThreeStarsInSouth LP10000: prior winner, no automatic new credit.",
+      "Current candle screen reports accepted4b Identical/Stalled both10k already point winners; not eligible new candle closures. Root recollection pending.",
+      "Canonical Trady KAMA Full/LatestOnly both1000/10000 are historical native Faster controls; retain all four.",
+      "Canonical IdenticalThreeCrows LatestOnly10000 and ThreeWhiteSoldiers Full/LatestOnly10000 have historical Faster builder records; retain coverage."
+    ],
+    "all_scope_source_regressions": "No slower decisions permitted; preserve prior native means under unchanged existing rule at both sizes.",
+    "new_target_gates": "Only eligible selected winning families may receive new credit; independently require original fresh eligibility, source-faster and separated CIs in both candidate rounds, retained net10k progress. ALMA/Sinc and EMA/T3 are controls, not extra credit. LP Afirma remains excluded and gets zero row credit."
+  },
+  "correctness": {
+    "classes": {
+      "candle_only": {
+        "unit": [
+          "AlmaGridBatchTests",
+          "AlmaWideDivisorTests",
+          "AnalyticGridBatchTests",
+          "CandleTopologyReplayTests",
+          "CrowSoldierSharedExecutionTests",
+          "EmaRecurrenceTests",
+          "ExhaustionSharedExecutionTests",
+          "SharedAlmaWindowTests",
+          "SharedWeightedWindowTests",
+          "SincGridBatchTests",
+          "TillsonSharedExecutionTests",
+          "WindowedSincCompactTests"
+        ],
+        "parity": [
+          "AlmaComparisonTests",
+          "AlmaPublisherAlignmentTests",
+          "AnalyticKernelComparisonTests",
+          "ConvolutionComparisonTests",
+          "CrowSoldierTests",
+          "ExhaustionTests",
+          "ExponentialAverageComparisonTests",
+          "FixedWeightedComparisonTests",
+          "NamedComparisonPublisherTests",
+          "SharedCrowSoldierBenchmarkTests",
+          "SharedExhaustionBenchmarkTests",
+          "SharedTillsonBenchmarkTests",
+          "SincBuilderComparisonTests"
+        ]
+      },
+      "kama_only": {
+        "unit": [
+          "AlmaGridBatchTests",
+          "AlmaWideDivisorTests",
+          "AnalyticGridBatchTests",
+          "EmaRecurrenceTests",
+          "SeededAdaptiveBatchTests",
+          "SeededAdaptiveSharedExecutionTests",
+          "SharedAlmaWindowTests",
+          "SharedWeightedWindowTests",
+          "SincGridBatchTests",
+          "TillsonSharedExecutionTests",
+          "WindowedSincCompactTests"
+        ],
+        "parity": [
+          "AlmaComparisonTests",
+          "AlmaPublisherAlignmentTests",
+          "AnalyticKernelComparisonTests",
+          "ConvolutionComparisonTests",
+          "ExponentialAverageComparisonTests",
+          "FixedWeightedComparisonTests",
+          "NamedComparisonPublisherTests",
+          "SeededAdaptiveBatchParityTests",
+          "SeededAdaptiveComparisonTests",
+          "SharedTillsonBenchmarkTests",
+          "SincBuilderComparisonTests",
+          "TaAdaptiveComparisonTests",
+          "TradyAdaptiveComparisonTests"
+        ]
+      },
+      "both": {
+        "unit": [
+          "AlmaGridBatchTests",
+          "AlmaWideDivisorTests",
+          "AnalyticGridBatchTests",
+          "CandleTopologyReplayTests",
+          "CrowSoldierSharedExecutionTests",
+          "EmaRecurrenceTests",
+          "ExhaustionSharedExecutionTests",
+          "SeededAdaptiveBatchTests",
+          "SeededAdaptiveSharedExecutionTests",
+          "SharedAlmaWindowTests",
+          "SharedWeightedWindowTests",
+          "SincGridBatchTests",
+          "TillsonSharedExecutionTests",
+          "WindowedSincCompactTests"
+        ],
+        "parity": [
+          "AlmaComparisonTests",
+          "AlmaPublisherAlignmentTests",
+          "AnalyticKernelComparisonTests",
+          "ConvolutionComparisonTests",
+          "CrowSoldierTests",
+          "ExhaustionTests",
+          "ExponentialAverageComparisonTests",
+          "FixedWeightedComparisonTests",
+          "NamedComparisonPublisherTests",
+          "SeededAdaptiveBatchParityTests",
+          "SeededAdaptiveComparisonTests",
+          "SharedCrowSoldierBenchmarkTests",
+          "SharedExhaustionBenchmarkTests",
+          "SharedTillsonBenchmarkTests",
+          "SincBuilderComparisonTests",
+          "TaAdaptiveComparisonTests",
+          "TradyAdaptiveComparisonTests"
+        ]
+      }
+    },
+    "unit_namespace": "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.",
+    "parity_namespace": "OoplesFinance.StockIndicators.CompetitorTests.",
+    "gpu_methods": "Existing scripts/competitor-gpu-methods.json: 100 actual cases /12 methods.",
+    "source_union_cycle": [
+      "Freeze the final accepted-source union and scoped fingerprint only after root source review; no source acceptance is provided here.",
+      "For exact existing candle-only c55 or KAMA-only9e, reuse authenticated immutable artifacts and existing source-bound GPU100 if fingerprints and all assembly/runtime pins match; execute missing deduplicated CPU filters against those assemblies without rebuilding unchanged production.",
+      "For a new both-source union, one immutable CPU correctness package runs the deduplicated14 unit/17 parity classes, then one actual source-bound GPU100 cycle after independent CPU root authentication. Individual source receipts cannot be relabeled as union execution.",
+      "Run the relevant compiled route checks against final source-matched binaries: all KAMA value/efficiency/presence outputs, real rate workers and unchanged serial blend/fallback; candle exact reset/replay/halo/positive references if that source is ever admitted. No performance claim from route proof.",
+      "Baseline4b CPU134/86 and GPU100 remain honest source-scoped evidence; reuse additional authentic baseline bridges/checks where identity is proved, otherwise run missing filters against retained baseline binaries. No duplicate baseline production build.",
+      "Prepare one common pinned harness with explicit actual-vs-common hashes and scoped fixture-source identity; retain Tensor0.151.1, .NET10.0.15, SDK10.0.403 and existing sampling/runtime gates.",
+      "Only after final correctness, root/peer inventory/gate review and screen acceptance may a later separately authorized single full consumer union qualification proceed. One normal collection and independent root recollection; no automatic retry."
+    ],
+    "baseline_existing_class_filters": {
+      "candle_only": {
+        "unit": [
+          "AlmaGridBatchTests",
+          "AlmaWideDivisorTests",
+          "AnalyticGridBatchTests",
+          "CrowSoldierSharedExecutionTests",
+          "EmaRecurrenceTests",
+          "ExhaustionSharedExecutionTests",
+          "SharedAlmaWindowTests",
+          "SharedWeightedWindowTests",
+          "SincGridBatchTests",
+          "TillsonSharedExecutionTests",
+          "WindowedSincCompactTests"
+        ],
+        "parity": [
+          "AlmaComparisonTests",
+          "AlmaPublisherAlignmentTests",
+          "AnalyticKernelComparisonTests",
+          "ConvolutionComparisonTests",
+          "CrowSoldierTests",
+          "ExhaustionTests",
+          "ExponentialAverageComparisonTests",
+          "FixedWeightedComparisonTests",
+          "NamedComparisonPublisherTests",
+          "SharedCrowSoldierBenchmarkTests",
+          "SharedExhaustionBenchmarkTests",
+          "SharedTillsonBenchmarkTests",
+          "SincBuilderComparisonTests"
+        ]
+      },
+      "kama_only": {
+        "unit": [
+          "AlmaGridBatchTests",
+          "AlmaWideDivisorTests",
+          "AnalyticGridBatchTests",
+          "EmaRecurrenceTests",
+          "SeededAdaptiveSharedExecutionTests",
+          "SharedAlmaWindowTests",
+          "SharedWeightedWindowTests",
+          "SincGridBatchTests",
+          "TillsonSharedExecutionTests",
+          "WindowedSincCompactTests"
+        ],
+        "parity": [
+          "AlmaComparisonTests",
+          "AlmaPublisherAlignmentTests",
+          "AnalyticKernelComparisonTests",
+          "ConvolutionComparisonTests",
+          "ExponentialAverageComparisonTests",
+          "FixedWeightedComparisonTests",
+          "NamedComparisonPublisherTests",
+          "SeededAdaptiveComparisonTests",
+          "SharedTillsonBenchmarkTests",
+          "SincBuilderComparisonTests",
+          "TaAdaptiveComparisonTests",
+          "TradyAdaptiveComparisonTests"
+        ]
+      },
+      "both": {
+        "unit": [
+          "AlmaGridBatchTests",
+          "AlmaWideDivisorTests",
+          "AnalyticGridBatchTests",
+          "CrowSoldierSharedExecutionTests",
+          "EmaRecurrenceTests",
+          "ExhaustionSharedExecutionTests",
+          "SeededAdaptiveSharedExecutionTests",
+          "SharedAlmaWindowTests",
+          "SharedWeightedWindowTests",
+          "SincGridBatchTests",
+          "TillsonSharedExecutionTests",
+          "WindowedSincCompactTests"
+        ],
+        "parity": [
+          "AlmaComparisonTests",
+          "AlmaPublisherAlignmentTests",
+          "AnalyticKernelComparisonTests",
+          "ConvolutionComparisonTests",
+          "CrowSoldierTests",
+          "ExhaustionTests",
+          "ExponentialAverageComparisonTests",
+          "FixedWeightedComparisonTests",
+          "NamedComparisonPublisherTests",
+          "SeededAdaptiveComparisonTests",
+          "SharedCrowSoldierBenchmarkTests",
+          "SharedExhaustionBenchmarkTests",
+          "SharedTillsonBenchmarkTests",
+          "SincBuilderComparisonTests",
+          "TaAdaptiveComparisonTests",
+          "TradyAdaptiveComparisonTests"
+        ]
+      }
+    },
+    "new_candidate_only_classes_absent_from_baseline4b": {
+      "unit": [
+        "CandleTopologyReplayTests",
+        "SeededAdaptiveBatchTests"
+      ],
+      "parity": [
+        "SeededAdaptiveBatchParityTests"
+      ]
+    },
+    "baseline_reuse_warning": "Git confirms all three new private-route test classes are absent from accepted4b. Never claim baseline4b executed them. Existing baseline class filters are separate; run only available filters against retained authenticated4b binaries, or describe a distinct root-reviewed tests-only supplement honestly. No new baseline production build is needed."
+  },
+  "operational_state": {
+    "candle": "Owner-collected20/4 screen failed progress gate because both10k targets already won in fresh accepted4b baseline; root independent review pending. Candle-only/both matrices are hypothetical and authorize no qualification.",
+    "kama": "60/12 diagnostic run44492372467 active; no accepted performance result or closure credit.",
+    "published_batch": "20d21f publication CI already complete; no speculative publication hold.",
+    "next": "If only KAMA passes, qualify its370/74 catalog independently. Use550/110 only if both source families independently pass their unchanged gates; current candle screen does not."
+  },
+  "artifacts": [
+    {
+      "path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\conditional-candle-kama-qualification-inventory-20261119\\pair-profile-size-tuples.csv",
+      "sha256": "03d2a39ae67f24972e29156bbbd63f6d5af025a4253e07e413b85f4ba788cbb5",
+      "bytes": 19971
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\conditional-candle-kama-qualification-inventory-20261119\\case-tuples.csv",
+      "sha256": "270641502aa78b8df88d73c8c49525eaa493fb67c87647154fe2abc11e00d41b",
+      "bytes": 59128
+    },
+    {
+      "path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\conditional-candle-kama-qualification-inventory-20261119\\alma-sinc-protection-edges.csv",
+      "sha256": "545a4ecc929ac4265e768bcc546ced07d57dc6ec8591d53caeecfea71d2b0ae1",
+      "bytes": 3808
+    }
+  ],
+  "source_edits": 0,
+  "builds": 0,
+  "ci_executions": 0,
+  "timing_executions": 0,
+  "source_acceptance": false,
+  "launch_authorized": false,
+  "overall_goal_complete": false,
+  "alias_deduplication_limit": "Canonical source-equivalent workload coverage is proposed from identical fixture data/owner parameters/history/BuildCpu calls. Benchmark wrapper IL and timing are not claimed identical; alias methods receive no separately measured native-win credit. Root must review this catalog equivalence before freezing a later plan.",
+  "scope_limit": "This bounded catalog protects the named affected/control consumers. It is not a fresh whole-401-pair performance claim or a whole-repository audit.",
+  "materialized_inventory_verified": {
+    "decision_tuples": 110,
+    "case_tuples": 550,
+    "protection_edges": 41,
+    "scenario_counts_independently_reparsed": true
+  }
+}

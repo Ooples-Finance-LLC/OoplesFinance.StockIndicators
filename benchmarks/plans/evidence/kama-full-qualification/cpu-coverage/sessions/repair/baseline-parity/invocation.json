@@ -1,0 +1,44 @@
+{
+  "command": [
+    "C:/Program Files/dotnet/dotnet.exe",
+    "exec",
+    "C:/Program Files/dotnet/sdk/10.0.404/dotnet.dll",
+    "vstest",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-alma-sinc-combined-gpu-only-20261119\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.CompetitorTests.dll",
+    "/Settings:C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\serial.runsettings",
+    "/TestCaseFilter:FullyQualifiedName~OoplesFinance.StockIndicators.CompetitorTests.ExponentialAverageComparisonTests.|FullyQualifiedName~OoplesFinance.StockIndicators.CompetitorTests.SeededAdaptiveComparisonTests.|FullyQualifiedName~OoplesFinance.StockIndicators.CompetitorTests.SharedTillsonBenchmarkTests.|FullyQualifiedName~OoplesFinance.StockIndicators.CompetitorTests.TaAdaptiveComparisonTests.|FullyQualifiedName~OoplesFinance.StockIndicators.CompetitorTests.TradyAdaptiveComparisonTests.",
+    "/Logger:trx;LogFileName=checks.trx",
+    "/ResultsDirectory:C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\baseline-parity"
+  ],
+  "group": {
+    "role": "baseline",
+    "suite": "parity",
+    "classes": [
+      "ExponentialAverageComparisonTests",
+      "SeededAdaptiveComparisonTests",
+      "SharedTillsonBenchmarkTests",
+      "TaAdaptiveComparisonTests",
+      "TradyAdaptiveComparisonTests"
+    ],
+    "namespace": "OoplesFinance.StockIndicators.CompetitorTests.",
+    "filter": "FullyQualifiedName~OoplesFinance.StockIndicators.CompetitorTests.ExponentialAverageComparisonTests.|FullyQualifiedName~OoplesFinance.StockIndicators.CompetitorTests.SeededAdaptiveComparisonTests.|FullyQualifiedName~OoplesFinance.StockIndicators.CompetitorTests.SharedTillsonBenchmarkTests.|FullyQualifiedName~OoplesFinance.StockIndicators.CompetitorTests.TaAdaptiveComparisonTests.|FullyQualifiedName~OoplesFinance.StockIndicators.CompetitorTests.TradyAdaptiveComparisonTests.",
+    "expected_counts": {
+      "ExponentialAverageComparisonTests": 5,
+      "SeededAdaptiveComparisonTests": 8,
+      "SharedTillsonBenchmarkTests": 16,
+      "TaAdaptiveComparisonTests": 5,
+      "TradyAdaptiveComparisonTests": 5
+    },
+    "expected_cases": 39,
+    "assembly_path": "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.CompetitorTests.dll",
+    "assembly_sha256": "169d0077fc84a0bbae9332099d3c112217faa043b2a4572aa4ef3ede3beaceb2",
+    "counts_basis": "Expected from authenticated opposite-role CI for unchanged existing test classes; actual local TRX must match before any supplement passes."
+  },
+  "source": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+  "assembly_sha256": "169d0077fc84a0bbae9332099d3c112217faa043b2a4572aa4ef3ede3beaceb2",
+  "ci_compiler_sdk": "10.0.403",
+  "local_launcher_sdk": "10.0.404",
+  "local_execution": true,
+  "build": false,
+  "gpu": false
+}

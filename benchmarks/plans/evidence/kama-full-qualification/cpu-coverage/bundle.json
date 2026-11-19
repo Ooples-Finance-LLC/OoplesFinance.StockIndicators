@@ -1,0 +1,243 @@
+{
+  "status": "immutable-multiple-actual-session-cpu-evidence",
+  "root_review_sha256": "415358e5941cebeb4888f9e6b3f1ed82289a13a291fc6884ebdb7685074694f1",
+  "files": [
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\baseline-unit\\checks.trx",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/baseline-unit/checks.trx",
+      "sha256": "4a1be352dfceca8b6fb60a9772b34f76e51716c9c05e113e4e2f477ca019c8ab"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\baseline-unit\\invocation.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/baseline-unit/invocation.json",
+      "sha256": "c3d9723533b112b303f2c669330d756655ad79bf8b733685f9f5e9c188aa2a73"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\baseline-unit\\run.log",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/baseline-unit/run.log",
+      "sha256": "8c8b5d2043967f3af6032b522c82fc149a0601eb77fbb322b73e00f98c374989"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\baseline-unit\\runtime-after.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/baseline-unit/runtime-after.json",
+      "sha256": "0ff14446c916259e1491dc79cb6cff351fa92a9de0707bffcb82606838014e95"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\baseline-unit\\runtime-before.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/baseline-unit/runtime-before.json",
+      "sha256": "0ff14446c916259e1491dc79cb6cff351fa92a9de0707bffcb82606838014e95"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\baseline-unit\\runtime-selection.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/baseline-unit/runtime-selection.json",
+      "sha256": "2bc868fb47ae3aa3fb159217187b020a1d34d16f0a149de6492b0584d11f1dd4"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-parity\\checks.trx",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/candidate-parity/checks.trx",
+      "sha256": "ab8861b252e98f324612230a8d483c13167f9c65ac728f349fadd9921b144a4c"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-parity\\invocation.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/candidate-parity/invocation.json",
+      "sha256": "38ffa0a177150f47b4056f3a6b9fa1904ad9f4b344a9022fc6769254d93c4b79"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-parity\\receipt.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/candidate-parity/receipt.json",
+      "sha256": "9019766b12c5810eacdaef6d85d84a5ac97e5245808202a13c9d4a27d6a8abde"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-parity\\run.log",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/candidate-parity/run.log",
+      "sha256": "f9e7075a6d6c123ede4c0918070708c02a4a56701212ba6b59411bcc4e692727"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-parity\\runtime-after.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/candidate-parity/runtime-after.json",
+      "sha256": "0ff14446c916259e1491dc79cb6cff351fa92a9de0707bffcb82606838014e95"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-parity\\runtime-before.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/candidate-parity/runtime-before.json",
+      "sha256": "0ff14446c916259e1491dc79cb6cff351fa92a9de0707bffcb82606838014e95"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-parity\\runtime-selection.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/candidate-parity/runtime-selection.json",
+      "sha256": "2bc868fb47ae3aa3fb159217187b020a1d34d16f0a149de6492b0584d11f1dd4"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-unit\\checks.trx",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/candidate-unit/checks.trx",
+      "sha256": "649b22ea5efa353a55bf8dba8ce83d46e25146de7d337de2294b682900f4534f"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-unit\\invocation.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/candidate-unit/invocation.json",
+      "sha256": "133d6fb5a628d1ae507cb50cda33ab868988b32b2fd07f60285e0ef46810929a"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-unit\\receipt.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/candidate-unit/receipt.json",
+      "sha256": "cc86add3125c51764b2f9418845cafc2419fdd46c2cda0644834cfd22091d161"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-unit\\run.log",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/candidate-unit/run.log",
+      "sha256": "c9b0ba1ca51224d292f075f5ac3d0ff537073fdff861f750f5b1ce0f28609c85"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-unit\\runtime-after.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/candidate-unit/runtime-after.json",
+      "sha256": "0ff14446c916259e1491dc79cb6cff351fa92a9de0707bffcb82606838014e95"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-unit\\runtime-before.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/candidate-unit/runtime-before.json",
+      "sha256": "0ff14446c916259e1491dc79cb6cff351fa92a9de0707bffcb82606838014e95"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\candidate-unit\\runtime-selection.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/candidate-unit/runtime-selection.json",
+      "sha256": "2bc868fb47ae3aa3fb159217187b020a1d34d16f0a149de6492b0584d11f1dd4"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\packet.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/packet.json",
+      "sha256": "73fcc53caaf671e06d3f3e6013b769febce61d2b4a80fdc290e82b716595d2bc"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\recovered-outcome.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/recovered-outcome.json",
+      "sha256": "44ee87ce0d8332188f2f132973be82028e1757656b16f832d8ddeb705f61f08a"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\serial.runsettings",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/serial.runsettings",
+      "sha256": "ebcf40b0cac74d9f6ae69b04f89d688069c71124c9ba76fa89ab49d34f38192d"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-full-qualification-cpu-supplement-20261119\\started.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/original/started.json",
+      "sha256": "be63d9390b0492db08a084d93e78d096143012bcb5a42ff5aec0163581d3b31f"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\baseline-parity\\checks.trx",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/repair/baseline-parity/checks.trx",
+      "sha256": "a0fd21b3598bac9d8e125ba420313a0df355a8bf63bf8e6d12db2034c3baa578"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\baseline-parity\\invocation.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/repair/baseline-parity/invocation.json",
+      "sha256": "7fafb4f9578f3ffc5dff2c55c2aca22eb32b60e175538f99f36a5aa7d65dc7f7"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\baseline-parity\\receipt.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/repair/baseline-parity/receipt.json",
+      "sha256": "40bc65545e8f8df3faf401f4bc1cfa37b5a35707d030e1b9b0d082875719b8cd"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\baseline-parity\\run.log",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/repair/baseline-parity/run.log",
+      "sha256": "68a36346ffc972b5d1856392e27190a449c826a23580c02ee42fe87e48be1e2b"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\baseline-parity\\runtime-after.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/repair/baseline-parity/runtime-after.json",
+      "sha256": "0ff14446c916259e1491dc79cb6cff351fa92a9de0707bffcb82606838014e95"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\baseline-parity\\runtime-before.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/repair/baseline-parity/runtime-before.json",
+      "sha256": "0ff14446c916259e1491dc79cb6cff351fa92a9de0707bffcb82606838014e95"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\baseline-unit\\checks.trx",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/repair/baseline-unit/checks.trx",
+      "sha256": "5fae0ba6331bcde301f941dd0e8fdbd42a05e0c624ef5d140ba8db7122c6f5d2"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\baseline-unit\\invocation.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/repair/baseline-unit/invocation.json",
+      "sha256": "00fbb434d0917feee96d315aea9c39ad02438173aea8de5857a5892175780126"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\baseline-unit\\receipt.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/repair/baseline-unit/receipt.json",
+      "sha256": "92fe83ba7ad4f28bf8d5f669d5a807dce9035c082efee0c5a1c2b46c3cda40fa"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\baseline-unit\\run.log",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/repair/baseline-unit/run.log",
+      "sha256": "e56a9aac5ea461d304578e9cb3446082e9394b5ac2f179289908c23dae43269a"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\baseline-unit\\runtime-after.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/repair/baseline-unit/runtime-after.json",
+      "sha256": "0ff14446c916259e1491dc79cb6cff351fa92a9de0707bffcb82606838014e95"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\baseline-unit\\runtime-before.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/repair/baseline-unit/runtime-before.json",
+      "sha256": "0ff14446c916259e1491dc79cb6cff351fa92a9de0707bffcb82606838014e95"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\repair-summary.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/repair/repair-summary.json",
+      "sha256": "19d74b2de6d6317e70e0c62d4211faabafbb5ee707716fdeca21b36dd30df2ec"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\serial.runsettings",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/repair/serial.runsettings",
+      "sha256": "ebcf40b0cac74d9f6ae69b04f89d688069c71124c9ba76fa89ab49d34f38192d"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-baseline-filter-repair-20261119\\started.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/sessions/repair/started.json",
+      "sha256": "63c4e615553056e2278722acc1e140f90d620589303c3586074dd157f2cda7b9"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\alma-sinc-combined-correctness-20261119\\authenticated-input-44469775767\\manifest.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/original-ci/baseline/manifest.json",
+      "sha256": "fc7c16d3669d0ffe8affcaf17ac3e08f29e0121e980e53c50c17f75bb440b8a3"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\alma-sinc-combined-correctness-20261119\\authenticated-input-44469775767\\evidence\\unit.trx",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/original-ci/baseline/evidence/unit.trx",
+      "sha256": "615c60c97adda8ce5c118b61512eb8d93b8742be6a46a7d2291d336c89f88179"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\alma-sinc-combined-correctness-20261119\\authenticated-input-44469775767\\evidence\\parity.trx",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/original-ci/baseline/evidence/parity.trx",
+      "sha256": "af8214c7dbb9929fa500312c6aeb951831f0d425115334a60f84d4460628f2d3"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-current-accepted-correctness-20261119\\authenticated-input-44488281016\\manifest.json",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/original-ci/candidate/manifest.json",
+      "sha256": "f931bb6d631b7ca3779d1f22a7fe0bc31ce76d8e404062a99d264dd8b8fb07ed"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-current-accepted-correctness-20261119\\authenticated-input-44488281016\\evidence\\unit.trx",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/original-ci/candidate/evidence/unit.trx",
+      "sha256": "de8995a763b998341303ef89da390568d824372e2760719304cb2b37277a270d"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\kama-current-accepted-correctness-20261119\\authenticated-input-44488281016\\evidence\\parity.trx",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/original-ci/candidate/evidence/parity.trx",
+      "sha256": "2f12c6a7011ab6fd5b2e920142c43052449a13b6838114c2bde6ac9396a950af"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\run-kama-full-cpu-supplements-20261119.py",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/helpers/run-kama-full-cpu-supplements-20261119.py",
+      "sha256": "654a17f1928bd7f049ad42d0b773cd16a4f6f9ad32b5cfb9db7697417019463f"
+    },
+    {
+      "origin_path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\repair-kama-baseline-supplement-filter-20261119.py",
+      "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/helpers/repair-kama-baseline-supplement-filter-20261119.py",
+      "sha256": "f38f14ca85531cad46c413721a0a72ed702c47cad12c605be43405487abaa368"
+    }
+  ],
+  "original_ci_manifests_and_counts_unchanged": true,
+  "original_filter_19_expands_to_15_validation_ema_and_4_models_tsi": true
+}
