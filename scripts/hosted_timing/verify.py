@@ -54,6 +54,10 @@ def sample(case):
 
 
 def collect(folder, phase):
+    if read(PLAN).get('alma_sinc_combined_qualification'):
+        assert phase == 'targeted'
+        from .alma_sinc_combined_qualification import collect as combined_qualify
+        return combined_qualify(folder)
     if read(PLAN).get('cmf_alma_combined_qualification'):
         assert phase == 'targeted'
         from .cmf_alma_combined_qualification import collect as combined_qualify

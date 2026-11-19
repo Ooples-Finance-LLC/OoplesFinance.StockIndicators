@@ -1,0 +1,49 @@
+{
+  "status": "explicit-source-scoped-baseline-correctness-reuse",
+  "aligned_source": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e",
+  "original_source": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+  "aligned_actual_checks": {
+    "unit": 35,
+    "parity": 53
+  },
+  "original_actual_checks": {
+    "unit": 53,
+    "parity": 48
+  },
+  "aligned_manifest_sha256": "db13fb018e700d69db5311d996f8f788800f5e1522bb2ac989118540fe5f59cf",
+  "aligned_core_sha256": "2306fec5c382f069c4749c568b21b2a7e95c27d04e82e2c715ac55db46f76951",
+  "aligned_unit_assembly_sha256": "a954dde821b7a5c6a8733ddf8a781026d2cbf5fa382f0d255dda2e86a0fdf3bd",
+  "aligned_parity_assembly_sha256": "cad1b95ddaadbdb8534cb50764ecd28134b13dfd418d20790e22130e49a21b0c",
+  "aligned_harness_sha256": "a62254d7d576960f40b320541d3a6b81f906db3fffeea5e40ef499b9ef76e05b",
+  "original_manifest_sha256": "60a4a285d4a7879e1be3c667c2757ae3f56a772f26d64c005fa91c392b5b9ce3",
+  "original_core_sha256": "5cdb8051eb19e26ec7fa2202f0fbeba70bc30f3dd9220ac8abab6a9d50fde74b",
+  "original_unit_assembly_sha256": "3ab9524ad33e035edf07514004035cc90dcbc3ff819887f060b9fae7339a1db0",
+  "original_parity_assembly_sha256": "3ad5bb27b2b599a7a2e9acdf56dfc31db0fdaf56007cea558bfc7daf9deaaec6",
+  "original_harness_sha256": "933e0694594e08f663d27e31d0e174f267ad5471c9206a91e4f21be39e6aafe0",
+  "original_manifest": {
+    "path": "benchmarks/plans/evidence/alma-sinc-d3-original-cpu-manifest-20261119.json.gz",
+    "sha256": "689d06d067dfddce19a045842be65a23f80f1935a1eb3b573c83b87c026f175a"
+  },
+  "original_cpu_root_review": {
+    "path": "benchmarks/plans/evidence/alma-sinc-d3-original-cpu-root-review-20261119.json",
+    "sha256": "54f7a87f11b219633941227618ef003d5da69c36e01677abbe039c1e7cb17c17"
+  },
+  "original_unit_trx": {
+    "path": "benchmarks/plans/evidence/alma-sinc-d3-original-unit-20261119.trx.gz",
+    "sha256": "9bea266ead03746e4bfbb9e9acc248bb624cdd14fd288fc3d06d3ffc273086f5"
+  },
+  "original_parity_trx": {
+    "path": "benchmarks/plans/evidence/alma-sinc-d3-original-parity-20261119.trx.gz",
+    "sha256": "d16817f87505084c58ac255bdfca5aa402183eacacc8ee97b3b28d4096f9eed5"
+  },
+  "excluded_alma_alignment_paths": [
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/AlmaComparison.cs",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/AlmaPublisherAlignmentTests.cs"
+  ],
+  "production_and_unit_source_identical": true,
+  "all_other_harness_scopes_identical": true,
+  "claim_original_tests_executed_on_aligned_binaries": false,
+  "claim_artifact_binary_identity": false,
+  "timed_out_supplement_credit": 0,
+  "interpretation": "Original d3 checks remain executions against their original binaries. Aligned48980 retains its actual35unit/53parity/GPU100; no74/86execution claim is made for aligned binaries."
+}

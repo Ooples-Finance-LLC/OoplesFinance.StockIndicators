@@ -41,3 +41,6 @@ evidence/alma-grid-*.json.gz binary
 hosted-alma-cached-wide-aligned-roi-20261119.json text eol=lf
 evidence/alma-cached-wide-aligned-*.json binary
 evidence/alma-cached-wide-aligned-*.json.gz binary
+
+hosted-alma-sinc-combined-qualification-20261119.json text eol=lf
+evidence/alma-sinc-* binary

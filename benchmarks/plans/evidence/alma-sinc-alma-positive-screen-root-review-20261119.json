@@ -1,0 +1,53 @@
+{
+  "status": "root-independent-alma-roi-authentication-passed",
+  "run_id": "44466844849",
+  "head": "600a096a570abd8a0d488e45177126978cf20d85",
+  "plan_sha256": "f230f7329ed191f6482c8ab0be4e7ffaf5ece7a2706815c169b8e8f5b0f4d0d9",
+  "summary_sha256": "4becc6ac0a1cc81a569bb0f918dac93a7ec0697a41c5abbd5f6d095e5c1eec38",
+  "artifact_zip_sha256": "20e48b83e28af803479e7e18caf1f0dcc383a3f9880490c90da76ee97c49ca50",
+  "independent_hosted_recollection_files": 1052,
+  "retained_evidence_files_changed": 0,
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "faster": 4,
+    "inconclusive": 2
+  },
+  "native_math_independently_recomputed": true,
+  "new_native_target_rows": [
+    {
+      "pair": "QuanTAlib.Alma",
+      "candidate_uppers_ns": [
+        651706.2504631546,
+        394227.9930600301
+      ],
+      "native_lower_ns": 2900632.4954961776
+    },
+    {
+      "pair": "Skender.GetAlma",
+      "candidate_uppers_ns": [
+        366092.89214206266,
+        374697.9619800613
+      ],
+      "native_lower_ns": 758326.641485325
+    }
+  ],
+  "old_10000_point_win_counts": {
+    "0": 1,
+    "3": 1
+  },
+  "candidate_10000_point_win_counts": {
+    "1": 3,
+    "2": 3
+  },
+  "prior_wins_preserved": [
+    [
+      "QuanTAlib.Gma",
+      10000
+    ]
+  ],
+  "screen_passed": true,
+  "qualification": false,
+  "accepted": false,
+  "closure_credit": 0
+}

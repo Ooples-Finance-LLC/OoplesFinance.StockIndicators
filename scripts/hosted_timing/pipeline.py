@@ -232,6 +232,9 @@ def verify_inputs(folder):
     if plan.get('pointwise_family_refresh') or plan.get('named_output_projection_refresh') or plan.get('current_baseline_ten_refresh'):
         from .baseline_refresh_dispatch import implementation
         implementation(plan).verify_authentication(folder,plan,proof)
+    if plan.get('alma_sinc_combined_qualification'):
+        from .alma_sinc_combined_qualification import verify_authentication
+        verify_authentication(folder,plan,proof)
     if plan.get('cmf_alma_combined_qualification'):
         from .cmf_alma_combined_qualification import verify_authentication
         verify_authentication(folder,plan,proof)
@@ -317,7 +320,10 @@ def _verify_input_contents(folder, plan, proof, plan_sha256):
         results = ET.fromstring(raw).findall('.//{*}UnitTestResult')
         assert len(results) == receipt['passed_cases'] == 100
         assert all(r.attrib['outcome'] == 'Passed' for r in results)
-    if plan.get('cmf_alma_combined_qualification'):
+    if plan.get('alma_sinc_combined_qualification'):
+        from .alma_sinc_combined_qualification import verify_harness_alias
+        verify_harness_alias(folder,plan,proof)
+    elif plan.get('cmf_alma_combined_qualification'):
         from .cmf_alma_combined_qualification import verify_harness_alias
         verify_harness_alias(folder,plan,proof)
     elif plan.get('ultimate_direct_long_qualification'):

@@ -1,0 +1,53 @@
+{
+  "status": "root-independent-cpu-authentication-passed",
+  "source": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+  "source_fingerprint": "1b6b4cf28b0820a992fbd4e049bf2c993cdfa6efdee8deabf9d98fb0cde436ae",
+  "run_id": "44469775767",
+  "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+  "artifact_id": 14503779776,
+  "zip_sha256": "1a33e221d1fcb768360e5be90bae7d1293601a30fbc8ca35c3da26c15bee36a7",
+  "zip_verified_in_memory": true,
+  "zip_files_verified": 320,
+  "manifest_sha256": "fc7c16d3669d0ffe8affcaf17ac3e08f29e0121e980e53c50c17f75bb440b8a3",
+  "core_sha256": "2aeba2543a532a59337b6a2f87edff9d1d76c9f54f91ad1ccd7b2254c9e1331f",
+  "actual_harness_sha256": "5a7b5b13be2308661be6c66a51aefa0f5a2f1be863c3501f8213d9e4f2963045",
+  "competitor_test_dll_sha256": "169d0077fc84a0bbae9332099d3c112217faa043b2a4572aa4ef3ede3beaceb2",
+  "collection_receipt_sha256": "6cccadf2f2667774db9b0743a1ea67e9569e7c5a0f73db5773fab069ba553ed2",
+  "runtime_entries_verified": 444,
+  "blob_files_verified": 312,
+  "checks": {
+    "unit": {
+      "passed": 134,
+      "classes": {
+        "AlmaWideDivisorTests": 4,
+        "AlmaGridBatchTests": 14,
+        "SharedAlmaWindowTests": 21,
+        "AnalyticGridBatchTests": 14,
+        "SincGridBatchTests": 57,
+        "WindowedSincCompactTests": 8,
+        "SharedWeightedWindowTests": 16
+      },
+      "sha256": "615c60c97adda8ce5c118b61512eb8d93b8742be6a46a7d2291d336c89f88179"
+    },
+    "parity": {
+      "passed": 86,
+      "classes": {
+        "AlmaComparisonTests": 16,
+        "AlmaPublisherAlignmentTests": 2,
+        "NamedComparisonPublisherTests": 20,
+        "AnalyticKernelComparisonTests": 15,
+        "SincBuilderComparisonTests": 7,
+        "FixedWeightedComparisonTests": 9,
+        "ConvolutionComparisonTests": 17
+      },
+      "sha256": "af8214c7dbb9929fa500312c6aeb951831f0d425115334a60f84d4460628f2d3"
+    }
+  },
+  "unit": 134,
+  "parity": 86,
+  "gpu_executed": false,
+  "gpu_verified": false,
+  "qualification": false,
+  "performance_claim": false,
+  "closure_credit": 0
+}

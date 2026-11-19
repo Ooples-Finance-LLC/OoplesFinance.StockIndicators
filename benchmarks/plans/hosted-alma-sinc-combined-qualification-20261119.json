@@ -1,0 +1,3719 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "expected_runtime_version": ".NET 10.0.15",
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "diagnostic_only": false,
+  "cases": 190,
+  "decisions": 38,
+  "matrix": {
+    "shards": 2,
+    "max_parallel": 2,
+    "timeout_minutes_per_shard": 120
+  },
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Gma",
+              "pair": "QuanTAlib.Gma"
+            },
+            {
+              "raw": "QuanTAlib.Sinema",
+              "pair": "QuanTAlib.Sinema"
+            },
+            {
+              "raw": "QuanTAlib.Convolution",
+              "pair": "QuanTAlib.Convolution"
+            },
+            {
+              "raw": "QuanTAlib.Alma",
+              "pair": "QuanTAlib.Alma"
+            },
+            {
+              "raw": "Skender.GetAlma",
+              "pair": "Skender.GetAlma"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 50,
+          "decisions": 10
+        },
+        {
+          "fixture": "SharedAlmaWindowBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Alma",
+              "pair": "QuanTAlib.Alma"
+            },
+            {
+              "raw": "Skender.GetAlma",
+              "pair": "Skender.GetAlma"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 40,
+          "decisions": 8
+        }
+      ],
+      "cases": 90,
+      "decisions": 18
+    },
+    {
+      "index": 1,
+      "tasks": [
+        {
+          "fixture": "SharedWeightedWindowBenchmarks",
+          "operations": [
+            {
+              "raw": "Gma",
+              "pair": "QuanTAlib.Gma"
+            },
+            {
+              "raw": "Sinema",
+              "pair": "QuanTAlib.Sinema"
+            },
+            {
+              "raw": "Convolution",
+              "pair": "QuanTAlib.Convolution"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 60,
+          "decisions": 12
+        },
+        {
+          "fixture": "SharedFibonacciWeightedBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Fwma",
+              "pair": "QuanTAlib.Fwma"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        },
+        {
+          "fixture": "SharedWindowedSincBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Afirma",
+              "pair": "QuanTAlib.Afirma"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "BuilderLatestOnly",
+            "NativeSingle",
+            "NativeParallel"
+          ],
+          "implicit_pair": false,
+          "cases": 20,
+          "decisions": 4
+        }
+      ],
+      "cases": 100,
+      "decisions": 20
+    }
+  ],
+  "inputs_ready": true,
+  "parent_review_approved": true,
+  "sources": {
+    "published": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e",
+    "old": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e",
+    "successor": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+    "variants": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e"
+  },
+  "gpu_sources": {
+    "old": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e",
+    "successor": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+    "variants": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "SharedAlmaWindowTests",
+      "AnalyticGridBatchTests"
+    ],
+    "successor": [
+      "AlmaWideDivisorTests",
+      "AlmaGridBatchTests",
+      "SharedAlmaWindowTests",
+      "AnalyticGridBatchTests",
+      "SincGridBatchTests",
+      "WindowedSincCompactTests",
+      "SharedWeightedWindowTests"
+    ],
+    "variants": [
+      "SharedAlmaWindowTests",
+      "AnalyticGridBatchTests"
+    ]
+  },
+  "old_candidate": {
+    "source": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e",
+    "ci_run": "44460024410",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "85b858d9992d779e1ad6594743b27ff4b23bb81c",
+    "manifest_sha256": "db13fb018e700d69db5311d996f8f788800f5e1522bb2ac989118540fe5f59cf",
+    "gpu_receipt_sha256": "59239a701f315547762bfe7c50196f8f0f2037f3fc1a44ae612f7249f6b27282",
+    "production_sha256": "2306fec5c382f069c4749c568b21b2a7e95c27d04e82e2c715ac55db46f76951",
+    "source_fingerprint": "cf81cab21dc8c332f9b953e4fac668e53afa1442563f9ba87e445a9e4562dc11",
+    "artifact_id": "14500047073",
+    "artifact_zip_sha256": "d85f79cb61cee72fe6328b47f932893ac823a6b1e17b58be1fa648c02a5bc386",
+    "unit_passed": 35,
+    "parity_passed": 53,
+    "unit_classes": [
+      "SharedAlmaWindowTests",
+      "AnalyticGridBatchTests"
+    ],
+    "parity_classes": [
+      "AlmaComparisonTests",
+      "AlmaPublisherAlignmentTests",
+      "NamedComparisonPublisherTests",
+      "AnalyticKernelComparisonTests"
+    ],
+    "actual_harness_sha256": "a62254d7d576960f40b320541d3a6b81f906db3fffeea5e40ef499b9ef76e05b"
+  },
+  "candidate": {
+    "source": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+    "source_fingerprint": "1b6b4cf28b0820a992fbd4e049bf2c993cdfa6efdee8deabf9d98fb0cde436ae",
+    "ci_run": "44469775767",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "unit_classes": [
+      "AlmaWideDivisorTests",
+      "AlmaGridBatchTests",
+      "SharedAlmaWindowTests",
+      "AnalyticGridBatchTests",
+      "SincGridBatchTests",
+      "WindowedSincCompactTests",
+      "SharedWeightedWindowTests"
+    ],
+    "parity_classes": [
+      "AlmaComparisonTests",
+      "AlmaPublisherAlignmentTests",
+      "NamedComparisonPublisherTests",
+      "AnalyticKernelComparisonTests",
+      "SincBuilderComparisonTests",
+      "FixedWeightedComparisonTests",
+      "ConvolutionComparisonTests"
+    ],
+    "unit_passed": 134,
+    "parity_passed": 86,
+    "evidence_source": "6cd3d0391488b842fbf941467aa12a6f45d2a640",
+    "manifest_sha256": "fc7c16d3669d0ffe8affcaf17ac3e08f29e0121e980e53c50c17f75bb440b8a3",
+    "production_sha256": "2aeba2543a532a59337b6a2f87edff9d1d76c9f54f91ad1ccd7b2254c9e1331f",
+    "artifact_id": "14503779776",
+    "artifact_zip_sha256": "1a33e221d1fcb768360e5be90bae7d1293601a30fbc8ca35c3da26c15bee36a7",
+    "actual_harness_sha256": "5a7b5b13be2308661be6c66a51aefa0f5a2f1be863c3501f8213d9e4f2963045",
+    "gpu_receipt_sha256": "d36f2c13a94dfa6b49861c6c3e6f8b063d7ab7588ad228d219112fd4fe373b9c"
+  },
+  "harness_sha256": "a62254d7d576960f40b320541d3a6b81f906db3fffeea5e40ef499b9ef76e05b",
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "harness_alias_policy": {
+    "common_artifact_role": "old",
+    "variants_artifact_role": "old",
+    "baseline_source": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e",
+    "candidate_source": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+    "require_scoped_source_identity": true,
+    "claim_artifact_binary_identity": false
+  },
+  "automatic_qualification": false,
+  "future_builder_fixture": [
+    "SharedWeightedWindowBenchmarks",
+    "SharedFibonacciWeightedBenchmarks",
+    "SharedWindowedSincBenchmarks",
+    "SharedAlmaWindowBenchmarks"
+  ],
+  "require_net_10000_point_progress": true,
+  "frozen_baseline_feasibility_only": false,
+  "current_combined_source_qualified": false,
+  "report_import_permitted": false,
+  "followup_requires_current_published_baseline": true,
+  "published_baseline": {
+    "pull_request": 266,
+    "head": "87405159446f3de0132ce49800b52bd0af00e234",
+    "branch": "perf/remaining-indicator-rollout",
+    "source_fingerprint": "cd8a76c3f21d8f8ebcc066b55c37db2f68b01f2fdb853bd8b7eee57b8c206519"
+  },
+  "native_win_policy_approval": {
+    "path": "benchmarks/plans/evidence/native-win-rule-user-approved-20261118.json",
+    "sha256": "414b558eae1deda750c3d169020128986a0e0db9b2acd95f23da035be03bfd7c",
+    "policy_id": "native-separated-confidence-intervals-both-rounds-20261118"
+  },
+  "native_progress_gate": {
+    "old_rounds": [
+      0,
+      3
+    ],
+    "candidate_rounds": [
+      1,
+      2
+    ],
+    "native_round": 2,
+    "minimum_margin": null,
+    "require_separated_intervals_both_rounds": true,
+    "require_both_family_gates": true,
+    "require_own_source_faster": true,
+    "protect_prior_confident_wins_both_sizes": true,
+    "require_all_context_prior_native_wins": true,
+    "require_net_10000_point_progress": true,
+    "new_closure_bars": 10000,
+    "minimum_new_closures_per_family": 1,
+    "lp_afirma_report_row_credit": 0
+  },
+  "baseline_cpu_root_review": {
+    "path": "benchmarks/plans/evidence/alma-cached-wide-aligned-baseline-cpu-root-review-20261119.json",
+    "sha256": "d7b19a67b3407785cdaa953364e860816533c6ae4c8ab2809ae5f50c46866326"
+  },
+  "fixture_contracts": {
+    "LibraryPairBenchmarks": {
+      "pair_parameter": "PairId",
+      "size_parameter": "Bars",
+      "sizes": [
+        1000,
+        10000
+      ],
+      "methods": [
+        "Ooples",
+        "Competitor"
+      ]
+    }
+  },
+  "candidate_cpu_root_review": {
+    "path": "benchmarks/plans/evidence/alma-sinc-candidate-cpu-root-review-20261119.json",
+    "sha256": "8c17be3338e3bfc14cca85b9c2a6397bd46bcabe232c339980db8e15a8abcdd1"
+  },
+  "candidate_gpu_root_review": {
+    "path": "benchmarks/plans/evidence/alma-sinc-candidate-gpu-root-review-20261119.json",
+    "sha256": "37ebf92ac00469f6ac35d75c635cb4ef76ec6021172ac04f916911a1ed9541e2"
+  },
+  "baseline_gpu_root_review": {
+    "path": "benchmarks/plans/evidence/alma-cached-wide-aligned-baseline-gpu-root-review-20261119.json",
+    "sha256": "33b5f8252f4493adb74bb1681cbd388de93c1a35ef81aee5d89d9915a380986e"
+  },
+  "aligned_published_production": {
+    "published_source": "87405159446f3de0132ce49800b52bd0af00e234",
+    "aligned_artifact_source": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e",
+    "production_and_unit_sources_identical": true,
+    "aligned_harness_paths": [
+      "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/AlmaComparison.cs",
+      "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/AlmaPublisherAlignmentTests.cs"
+    ],
+    "claim_original_harness_identity": false
+  },
+  "alma_sinc_combined_qualification": true,
+  "peer_review_approved": true,
+  "targeted_reference": {
+    "scope": "alma-sinc-combined-qualification-20261119"
+  },
+  "full_consumer_registry": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair_parameter": "PairId",
+      "size_parameter": "Bars",
+      "operations": [
+        "QuanTAlib.Gma",
+        "QuanTAlib.Sinema",
+        "QuanTAlib.Convolution",
+        "QuanTAlib.Alma",
+        "Skender.GetAlma"
+      ],
+      "methods": [
+        "Ooples",
+        "Competitor"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "pair_parameter": "Operation",
+      "size_parameter": "Count",
+      "operations": [
+        "Gma",
+        "Sinema",
+        "Convolution"
+      ],
+      "methods": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "pair_parameter": "Operation",
+      "size_parameter": "Count",
+      "operations": [
+        "QuanTAlib.Fwma"
+      ],
+      "methods": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "fixture": "SharedWindowedSincBenchmarks",
+      "pair_parameter": "Operation",
+      "size_parameter": "Count",
+      "operations": [
+        "QuanTAlib.Afirma"
+      ],
+      "methods": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    },
+    {
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "pair_parameter": "Operation",
+      "size_parameter": "Count",
+      "operations": [
+        "QuanTAlib.Alma",
+        "Skender.GetAlma"
+      ],
+      "methods": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    }
+  ],
+  "requested_case_inventory": [
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Gma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Gma",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Gma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Gma",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Sinema\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Sinema",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Sinema\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Sinema",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Convolution\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Convolution",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Convolution\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Convolution",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Alma",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Alma",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetAlma",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetAlma",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Gma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Gma",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Gma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Gma",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Sinema\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Sinema",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Sinema\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Sinema",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Convolution\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Convolution",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Convolution\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Convolution",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Alma",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Alma",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetAlma",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetAlma",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Gma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Gma",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Gma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Gma",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "Competitor",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"QuanTAlib.Gma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Gma",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "Competitor",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"QuanTAlib.Gma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Gma",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Sinema\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Sinema",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Sinema\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Sinema",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "Competitor",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"QuanTAlib.Sinema\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Sinema",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "Competitor",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"QuanTAlib.Sinema\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Sinema",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Convolution\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Convolution",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Convolution\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Convolution",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "Competitor",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"QuanTAlib.Convolution\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Convolution",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "Competitor",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"QuanTAlib.Convolution\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Convolution",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Alma",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Alma",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "Competitor",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Alma",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "Competitor",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Alma",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetAlma",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetAlma",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "Competitor",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetAlma",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "Competitor",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetAlma",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "NativeSingle",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.NativeSingle*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "NativeSingle",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.NativeSingle*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "NativeParallel",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.NativeParallel*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "NativeParallel",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.NativeParallel*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "NativeSingle",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.NativeSingle*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "NativeSingle",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.NativeSingle*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "NativeParallel",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.NativeParallel*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "NativeParallel",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.NativeParallel*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Gma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Gma",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Gma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Gma",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Sinema\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Sinema",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Sinema\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Sinema",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Convolution\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Convolution",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Convolution\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Convolution",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Alma",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Alma",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetAlma",
+        "Bars": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetAlma",
+        "Bars": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "QuanTAlib.Alma",
+      "pair": "QuanTAlib.Alma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"QuanTAlib.Alma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Alma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderFull*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 0,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedAlmaWindowBenchmarks",
+      "raw": "Skender.GetAlma",
+      "pair": "Skender.GetAlma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedAlmaWindowBenchmarks.BuilderLatestOnly*\"Skender.GetAlma\"*"
+      ],
+      "parameters": {
+        "Operation": "Skender.GetAlma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderFull*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderFull*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderLatestOnly*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderLatestOnly*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderFull*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderFull*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderLatestOnly*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 0,
+      "arm": "old",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderLatestOnly*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderFull*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderFull*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderLatestOnly*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderLatestOnly*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderFull*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderFull*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderLatestOnly*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 1,
+      "arm": "new",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderLatestOnly*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "NativeSingle",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.NativeSingle*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "NativeSingle",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.NativeSingle*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "NativeParallel",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.NativeParallel*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "NativeParallel",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.NativeParallel*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "NativeSingle",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.NativeSingle*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "NativeSingle",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.NativeSingle*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "NativeParallel",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.NativeParallel*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "NativeParallel",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.NativeParallel*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "NativeSingle",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.NativeSingle*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "NativeSingle",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.NativeSingle*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "NativeParallel",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.NativeParallel*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "NativeParallel",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.NativeParallel*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderFull*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderFull*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderLatestOnly*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderLatestOnly*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "NativeSingle",
+      "bars": 1000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.NativeSingle*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "NativeSingle",
+      "bars": 10000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.NativeSingle*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "NativeParallel",
+      "bars": 1000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.NativeParallel*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "NativeParallel",
+      "bars": 10000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.NativeParallel*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderFull*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderFull*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderLatestOnly*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderLatestOnly*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "NativeSingle",
+      "bars": 1000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.NativeSingle*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "NativeSingle",
+      "bars": 10000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.NativeSingle*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "NativeParallel",
+      "bars": 1000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.NativeParallel*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 2,
+      "arm": "new",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "NativeParallel",
+      "bars": 10000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.NativeParallel*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Gma",
+      "pair": "QuanTAlib.Gma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Gma\"*"
+      ],
+      "parameters": {
+        "Operation": "Gma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Sinema",
+      "pair": "QuanTAlib.Sinema",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Sinema\"*"
+      ],
+      "parameters": {
+        "Operation": "Sinema",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderFull*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWeightedWindowBenchmarks",
+      "raw": "Convolution",
+      "pair": "QuanTAlib.Convolution",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWeightedWindowBenchmarks.BuilderLatestOnly*\"Convolution\"*"
+      ],
+      "parameters": {
+        "Operation": "Convolution",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderFull*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderFull*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderLatestOnly*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedFibonacciWeightedBenchmarks",
+      "raw": "QuanTAlib.Fwma",
+      "pair": "QuanTAlib.Fwma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedFibonacciWeightedBenchmarks.BuilderLatestOnly*\"QuanTAlib.Fwma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Fwma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderFull",
+      "bars": 1000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderFull*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderFull",
+      "bars": 10000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderFull*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 10000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderLatestOnly",
+      "bars": 1000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderLatestOnly*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 1000
+      }
+    },
+    {
+      "shard": 1,
+      "round": 3,
+      "arm": "old",
+      "fixture": "SharedWindowedSincBenchmarks",
+      "raw": "QuanTAlib.Afirma",
+      "pair": "QuanTAlib.Afirma",
+      "method": "BuilderLatestOnly",
+      "bars": 10000,
+      "filters": [
+        "*SharedWindowedSincBenchmarks.BuilderLatestOnly*\"QuanTAlib.Afirma\"*"
+      ],
+      "parameters": {
+        "Operation": "QuanTAlib.Afirma",
+        "Count": 10000
+      }
+    }
+  ],
+  "production_integrated": false,
+  "lp_afirma_snapshot_excluded": true,
+  "lp_afirma_report_row_credit": 0,
+  "combined_route_root_review": {
+    "path": "benchmarks/plans/evidence/alma-sinc-combined-route-root-review-20261119.json",
+    "sha256": "44f5a0f194830ccd0e1b27a773fd3e8e75ce543ad2600e0424178397f6fa6883"
+  },
+  "screen_gates": {
+    "sinc": {
+      "run_id": "44464894451",
+      "head": "bedcb62e1bb44fa8ec6aa9167159246e60cc20f2",
+      "summary": {
+        "path": "benchmarks/plans/evidence/alma-sinc-sinc-positive-screen-20261119.json",
+        "sha256": "3b5f2ca831146b70dec237f176da1882776a71d05c7f4299e38c8ecc4ad4f447"
+      },
+      "root_review": {
+        "path": "benchmarks/plans/evidence/alma-sinc-sinc-positive-screen-root-review-20261119.json",
+        "sha256": "d856beb589a0cfd95239e401923d3c25423bd3670f58acb2ad41067c0a4cba2f"
+      }
+    },
+    "alma": {
+      "run_id": "44466844849",
+      "head": "600a096a570abd8a0d488e45177126978cf20d85",
+      "summary": {
+        "path": "benchmarks/plans/evidence/alma-sinc-alma-positive-screen-20261119.json",
+        "sha256": "4becc6ac0a1cc81a569bb0f918dac93a7ec0697a41c5abbd5f6d095e5c1eec38"
+      },
+      "root_review": {
+        "path": "benchmarks/plans/evidence/alma-sinc-alma-positive-screen-root-review-20261119.json",
+        "sha256": "32e1ad518096eeb796ebbb2d5eea06dc573d9814e06edd0f2a9c01c9f0e4109a"
+      }
+    }
+  },
+  "source_scoped_baseline_reuse": {
+    "path": "benchmarks/plans/evidence/alma-sinc-source-scoped-baseline-reuse-20261119.json",
+    "sha256": "b8eb0593ac4b3e64231d65ee397b08a21b0953b99b061ccc5e96d9750812300d"
+  }
+}

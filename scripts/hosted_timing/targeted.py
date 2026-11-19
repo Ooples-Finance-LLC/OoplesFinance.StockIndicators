@@ -576,6 +576,7 @@ SCOPES['ultimate-direct-long-qualification-20261118'] = dict(
     implicit_fixtures=set(),totals=(60,12),shards=1)
 
 SCOPES['cmf-alma-combined-qualification-20261118']=dict(totals=(100,20))
+SCOPES['alma-sinc-combined-qualification-20261119']=dict(totals=(190,38))
 
 def expected_totals(plan):
     return SCOPES[plan['targeted_reference']['scope']]['totals']
@@ -588,6 +589,10 @@ SCOPES['abandoned-inventory-repair-20261114']['methods']['SharedCrowSoldierBench
 SCOPES['abandoned-inventory-repair-20261114']['totals'] = (176, 36)
 
 def verify_reference(plan):
+    if plan.get('alma_sinc_combined_qualification'):
+        from .alma_sinc_combined_qualification import validate_scope
+        validate_scope(plan)
+        return
     if plan.get('cmf_alma_combined_qualification'):
         from .cmf_alma_combined_qualification import validate_scope
         validate_scope(plan)

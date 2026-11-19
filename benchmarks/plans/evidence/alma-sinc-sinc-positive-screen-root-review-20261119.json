@@ -1,0 +1,56 @@
+{
+  "status": "root-independent-sinc-roi-authentication-passed",
+  "run_id": "44464894451",
+  "head": "bedcb62e1bb44fa8ec6aa9167159246e60cc20f2",
+  "plan_sha256": "38a4a6b33793a72cd36bacb9f1bcb4779af7ab6bbe6184f013c8ccad3607aac2",
+  "summary_sha256": "3b5f2ca831146b70dec237f176da1882776a71d05c7f4299e38c8ecc4ad4f447",
+  "artifact_zip_sha256": "e28b53bd6ae26ef0d6c4efdde2e98080249e2a56bf9334b6a89679321b275dbb",
+  "independent_hosted_recollection_files": 1033,
+  "retained_evidence_files_changed": 0,
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 4,
+    "faster": 2
+  },
+  "native_math_independently_recomputed": true,
+  "new_builder_contexts": [
+    {
+      "method": "BuilderFull",
+      "candidate_uppers_ns": [
+        517756.5599181012,
+        344872.7384291018
+      ],
+      "native_lower_ns": 701238.8891095477
+    },
+    {
+      "method": "BuilderLatestOnly",
+      "candidate_uppers_ns": [
+        507554.1172759138,
+        302923.5073720229
+      ],
+      "native_lower_ns": 701238.8891095477
+    }
+  ],
+  "old_10000_point_win_counts": {
+    "0": 1,
+    "3": 1
+  },
+  "candidate_10000_point_win_counts": {
+    "1": 3,
+    "2": 3
+  },
+  "prior_wins_preserved": [
+    [
+      "LibraryPairBenchmarks",
+      "QuanTAlib.Gma",
+      10000,
+      "Ooples"
+    ]
+  ],
+  "screen_passed": true,
+  "qualification": false,
+  "accepted": false,
+  "closure_credit": 0,
+  "lp_afirma_credit": 0
+}
