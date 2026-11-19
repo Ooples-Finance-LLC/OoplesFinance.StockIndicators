@@ -1,5 +1,4 @@
 #if !NETFRAMEWORK
-using AiDotNet.Tensors.Engines.Simd;
 using AiDotNet.Tensors.Helpers;
 using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Validation;
@@ -61,12 +60,11 @@ internal static partial class ValuesBarExecution
                     return latest;
                 }
                 total += change;
-                prefix[i] = change;
+                // Certification already has the exact running total. Store it
+                // directly; every integer <=2^24 is exact in binary32.
+                prefix[i] = total;
                 previous = unit;
             }
-            // Every input, vector intermediate, block carry and tail sum is a
-            // nonnegative integer <=2^24, exactly representable in binary32.
-            ScanKernels.PrefixSumFloat(prefix, prefix);
             int count = source.Length - owner.Period;
             int chunks = Math.Min(WorkerCount(), 1 + (count - 1) / 1024);
             try
