@@ -61,6 +61,46 @@ public sealed class StockIndicatorBuilder
         return this;
     }
 
+    private IndicatorNumerics _numerics;
+
+    /// <summary>Selects exact (the default) or fast double arithmetic for finite array-backed builds.</summary>
+    /// <remarks>
+    /// Fast applies when every configured indicator has a fast kernel and the source is a bar array without
+    /// warm-up; any other build keeps the exact route, and <see cref="LastExecution"/> says which one ran.
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when numerics is not a defined value.</exception>
+    public StockIndicatorBuilder ConfigureNumerics(IndicatorNumerics numerics)
+    {
+        if (numerics is not (IndicatorNumerics.Exact or IndicatorNumerics.Fast))
+            throw new ArgumentOutOfRangeException(nameof(numerics));
+        _numerics = numerics;
+        return this;
+    }
+
+    private Indicators.IIndicatorRun? TryBuildFast(Indicators.IBarSource source, bool latestOnly, CancellationToken cancellationToken)
+    {
+        if (_numerics != IndicatorNumerics.Fast || _executionBackend == IndicatorExecutionBackend.Gpu
+            || !CanUseDirectFusedExecution
+            || (source as Indicators.ISynchronousBarSource)?.DirectBars is not { } bars
+            || !Indicators.Fast.FastExecution.Supports(_configuredIndicators))
+            return null;
+        cancellationToken.ThrowIfCancellationRequested();
+        var series = Indicators.Fast.FastExecution.Execute(bars, _configuredIndicators, cancellationToken, out var warmup);
+        LastExecution = new(IndicatorExecutionBackend.Cpu, null, "Fast double execution over borrowed bars.");
+        if (!latestOnly) return new Indicators.IndicatorRun(null, series, bars, 0, warmup);
+        var count = bars.Length;
+        Indicators.IBarSnapshot? latest = null;
+        if (count != 0)
+        {
+            var warmed = count >= warmup;
+            if (warmed)
+                foreach (var values in series.Values)
+                    if (double.IsNaN(values[count - 1])) { warmed = false; break; }
+            latest = new Indicators.BarSnapshot(bars[count - 1], count - 1, series, warmed);
+        }
+        return new Indicators.LatestOnlyIndicatorRun(series, count, latest);
+    }
+
     private IndicatorHistoryMode _historyMode;
 
     /// <summary>Selects retained bar history. Completed indicator series are available in both modes.</summary>
@@ -80,6 +120,7 @@ public sealed class StockIndicatorBuilder
         cancellationToken.ThrowIfCancellationRequested();
         var source = _barSource ?? throw new InvalidOperationException("No bar source. Call ConfigureSource before BuildAsync.");
         if (!source.IsFinite) return await BuildWithHistoryAsync(cancellationToken).ConfigureAwait(false);
+        if (TryBuildFast(source, true, cancellationToken) is { } fastLatest) return fastLatest;
 #if !NETFRAMEWORK
         if (_executionBackend == IndicatorExecutionBackend.Gpu && CanUseDirectFusedExecution
             && (source as Indicators.ISynchronousBarSource)?.DirectBars is { } gpuSource
@@ -299,6 +340,8 @@ public sealed class StockIndicatorBuilder
             LastExecution = execution;
             return live;
         }
+
+        if (TryBuildFast(source, false, cancellationToken) is { } fastRun) return fastRun;
 
         var bars = new Indicators.OwnedBarHistory();
 
