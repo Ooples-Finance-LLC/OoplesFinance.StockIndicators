@@ -364,4 +364,48 @@ internal static partial class FastKernels
             output[i] = (first + 2 * second + 2 * third + fourth) / 6;
         }
     }
+
+
+    // One exponential stage that divides by the weight it has accumulated until the unaccumulated remainder
+    // is negligible, and is a plain exponential average after that.
+    private struct MassNormalized(double alpha)
+    {
+        private double _mean, _mass;
+        private double _residual = 1;
+
+        internal double Next(double input)
+        {
+            if (_residual == 0) return _mean += alpha * (input - _mean);
+            _residual = _residual > 1e-10 ? (1 - alpha) * _residual : 0;
+            if (_mass == 0)
+            {
+                _mass = alpha;
+                return _mean = input;
+            }
+            var previousWeight = (1 - alpha) * _mass;
+            var weight = previousWeight + alpha;
+            var numerator = previousWeight * _mean + input * alpha;
+            _mean = _residual == 0 ? numerator : numerator / weight;
+            _mass = _residual == 0 ? 1 : weight;
+            return _mean;
+        }
+    }
+
+    /// <summary>
+    /// Quadruple exponential average of four chained mass-normalized stages, combined 4, -6, 4, -1.
+    /// </summary>
+    internal static void QuadrupleEma(ReadOnlySpan<double> close, Span<double> output, MassNormalizedQuadrupleEma owner)
+    {
+        var n = close.Length;
+        output = output.Slice(0, n);
+        MassNormalized first = new(owner.Alpha1), second = new(owner.Alpha2), third = new(owner.Alpha3),
+            fourth = new(owner.Alpha4);
+        for (var i = 0; i < n; i++)
+        {
+            var one = first.Next(close[i]);
+            var two = second.Next(one);
+            var three = third.Next(two);
+            output[i] = 4 * one - 6 * two + 4 * three - fourth.Next(three);
+        }
+    }
 }
