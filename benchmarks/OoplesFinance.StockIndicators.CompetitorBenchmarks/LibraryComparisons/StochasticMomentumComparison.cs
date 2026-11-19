@@ -70,7 +70,7 @@ internal static class StochasticMomentumComparison
     )
     {
         var indicator = Indicator(p, variant, first, second, signal);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

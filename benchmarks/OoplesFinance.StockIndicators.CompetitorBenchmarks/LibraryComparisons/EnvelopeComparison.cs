@@ -69,7 +69,7 @@ internal static class EnvelopeComparison
     )
     {
         var indicator = new WindowAverageEnvelope(period, percent, average);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

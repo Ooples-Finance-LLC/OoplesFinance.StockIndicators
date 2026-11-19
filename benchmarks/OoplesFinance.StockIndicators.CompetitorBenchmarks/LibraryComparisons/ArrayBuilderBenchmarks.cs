@@ -27,7 +27,7 @@ public class ArrayBuilderBenchmarks
     }
 
     private Task<IIndicatorRun> BuildProjected(IIndicator indicator) =>
-        new StockIndicatorBuilder().ConfigureSource(Bars.From(_work.Data.IndicatorBars, bar => bar))
+        ComparisonBuilder.Create().ConfigureSource(Bars.From(_work.Data.IndicatorBars, bar => bar))
             .ConfigureIndicators(indicator).BuildAsync();
 
     [Benchmark] public async Task<int> ArrayBuilder()

@@ -73,7 +73,7 @@ internal static class HilbertCycleSignalComparison
     {
         var owner = Indicator(kind, suppression);
         var count = Names(kind).Length;
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(owner)
             .BuildAsync()

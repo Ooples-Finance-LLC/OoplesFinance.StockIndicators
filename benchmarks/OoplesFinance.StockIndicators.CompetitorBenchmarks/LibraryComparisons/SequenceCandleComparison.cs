@@ -45,7 +45,7 @@ internal static class SequenceCandleComparison
     private static ComparisonSeries Ooples(string name, CompetitorData data)
     {
         var indicator = Create(name);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

@@ -57,7 +57,7 @@ internal static class WindowFisherComparison
     internal static ComparisonSeries Owned(Bar[] bars, int period, bool midpoint)
     {
         var owner = new WindowFisherTransform(period, midpoint);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(owner)
             .BuildAsync()

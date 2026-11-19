@@ -30,7 +30,7 @@ internal static class EntropyComparison
     internal static ComparisonSeries Owned(IReadOnlyList<Bar> bars, int period)
     {
         var indicator = new NormalizedWindowEntropy(period);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

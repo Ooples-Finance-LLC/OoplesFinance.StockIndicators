@@ -31,7 +31,7 @@ internal static class OldestHilbertComparison
     internal static ComparisonSeries Owned(Bar[] bars)
     {
         var indicator = new OldestFirstHilbertTrendline();
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

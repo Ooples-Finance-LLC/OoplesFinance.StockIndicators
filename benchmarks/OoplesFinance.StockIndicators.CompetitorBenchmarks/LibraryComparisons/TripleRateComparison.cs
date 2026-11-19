@@ -141,7 +141,7 @@ internal static class TripleRateComparison
     )
     {
         var indicator = new TripleExponentialRate(p, mode, signal, suppression);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

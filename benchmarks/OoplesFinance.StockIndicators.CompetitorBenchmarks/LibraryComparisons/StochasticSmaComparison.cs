@@ -63,7 +63,7 @@ internal static class StochasticSmaComparison
     internal static ComparisonSeries Owned(Bar[] bars, int p, string variant, int k, int d)
     {
         var indicator = Indicator(p, variant, k, d);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

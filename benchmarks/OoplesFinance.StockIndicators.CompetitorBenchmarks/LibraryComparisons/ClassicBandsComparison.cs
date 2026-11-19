@@ -60,7 +60,7 @@ internal static class ClassicBandsComparison
     )
     {
         var indicator = new ClassicDeviationBands(p, up, down, method, first, suppression);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

@@ -70,7 +70,7 @@ public class SharedEngulfingBenchmarks
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool ordinary = false,
         IndicatorExecutionBackend backend = IndicatorExecutionBackend.Cpu)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(history).ConfigureExecution(backend);
         if (ordinary) builder.ConfigureBehavior(_ => { });
         var result = builder.BuildAsync().GetAwaiter().GetResult();

@@ -163,7 +163,7 @@ internal static class EmaDifferenceSignalComparison
             variant == 1,
             Selection(variant)
         );
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

@@ -45,7 +45,7 @@ internal static class DecayingExtremeComparison
     internal static ComparisonSeries Owned(Bar[] bars, int period, bool maximum, double decay)
     {
         var indicator = new DecayingWindowExtreme(period, maximum, decay);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

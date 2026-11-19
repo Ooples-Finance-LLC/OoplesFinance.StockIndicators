@@ -36,7 +36,7 @@ internal static class FixedWeightedComparison
         var indicator = new FixedPeriodWma(period);
         if (twice)
             indicator.Of(new FixedPeriodWma(period));
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

@@ -27,7 +27,7 @@ internal static class PriceChangeComparison
     private static ComparisonSeries Ooples(PriceChangeKind kind, CompetitorData data, int period)
     {
         var indicator = new LaggedPriceChange(period, kind);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

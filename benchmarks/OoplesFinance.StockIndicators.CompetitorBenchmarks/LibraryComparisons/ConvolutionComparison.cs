@@ -53,7 +53,7 @@ internal static class ConvolutionComparison
         IIndicator indicator = endpoint
             ? new EndpointWeightedAverage(period)
             : new NormalizedConvolution(Weights(period, false, kernel));
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

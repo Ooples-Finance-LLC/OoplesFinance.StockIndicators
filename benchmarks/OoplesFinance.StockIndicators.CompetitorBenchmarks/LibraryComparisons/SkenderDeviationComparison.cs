@@ -53,7 +53,7 @@ internal static class SkenderDeviationComparison
     private static ComparisonSeries Ooples(CompetitorData data, int period, int? smooth)
     {
         var indicator = new StandardDeviationWithDetails(period, smooth);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

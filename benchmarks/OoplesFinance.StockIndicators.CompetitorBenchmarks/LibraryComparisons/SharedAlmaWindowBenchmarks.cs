@@ -91,7 +91,7 @@ public class SharedAlmaWindowBenchmarks
     private ArnaudLegouxWindow Create() => new(Period, fullWindowOnly: FullWindow);
     private IIndicatorRun Build(ArnaudLegouxWindow indicator, IndicatorHistoryMode history, bool reference = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
+        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
         if (reference) builder.ConfigureBehavior(_ => { });
         return builder.BuildAsync().GetAwaiter().GetResult();
     }

@@ -58,7 +58,7 @@ internal static class PriceWindowChannelComparison
             id == Ids[0] ? new PriorPriceChannel(period)
             : id == Ids[3] ? new WindowPriceRange(period)
             : new WilliamsR(period);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

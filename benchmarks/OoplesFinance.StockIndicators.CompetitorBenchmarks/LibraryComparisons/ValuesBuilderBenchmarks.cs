@@ -22,7 +22,7 @@ public class ValuesBuilderBenchmarks
         foreach (var output in indicator.Outputs)
             AsinFeasibilityBenchmarks.RequireSame(expected[output].ToArray(), actual[output].ToArray());
     }
-    private StockIndicatorBuilder Builder(IIndicator indicator) => new StockIndicatorBuilder()
+    private StockIndicatorBuilder Builder(IIndicator indicator) => ComparisonBuilder.Create()
         .ConfigureSource(Bars.From(_work.Data.IndicatorBars)).ConfigureIndicators(indicator);
     [Benchmark(Baseline = true)] public int WithSnapshots()
     {

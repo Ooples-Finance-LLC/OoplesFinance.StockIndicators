@@ -79,7 +79,7 @@ internal static class ExponentialAverageComparison
     private static ComparisonSeries FirstValueOoples(CompetitorData data, int period)
     {
         var indicator = new FirstValueEma(period);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

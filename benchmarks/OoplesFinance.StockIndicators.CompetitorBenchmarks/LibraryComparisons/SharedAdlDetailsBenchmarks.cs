@@ -44,7 +44,7 @@ public class SharedAdlDetailsBenchmarks
             var parallel = Columns(NativeParallel());
             for (int slot = 0; slot < 5; slot++) Check(native[slot], parallel[slot]);
             var indicator = new AccumulationDistributionWithAverage(Period);
-            using var reference = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars))
+            using var reference = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars))
                 .ConfigureIndicators(indicator).ConfigureBehavior(_ => { }).BuildAsync().GetAwaiter().GetResult();
             foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
             {
@@ -93,7 +93,7 @@ public class SharedAdlDetailsBenchmarks
 
     internal IIndicatorRun Build(AccumulationDistributionWithAverage indicator, IndicatorHistoryMode history, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(history).ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Detailed ADL GPU fixture did not execute on device.");
     }

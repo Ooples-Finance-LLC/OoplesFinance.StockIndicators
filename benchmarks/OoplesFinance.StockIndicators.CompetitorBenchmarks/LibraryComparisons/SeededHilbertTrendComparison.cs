@@ -45,7 +45,7 @@ internal static class SeededHilbertTrendComparison
     internal static ComparisonSeries Owned(Bar[] bars, bool midpoint)
     {
         var owner = new SeededHilbertTrendline(midpoint);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(owner)
             .BuildAsync()

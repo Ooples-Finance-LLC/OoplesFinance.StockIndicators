@@ -75,7 +75,7 @@ public class SharedLaggedChangeBenchmarks
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false,
         IndicatorExecutionBackend backend = IndicatorExecutionBackend.Cpu)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(history).ConfigureExecution(backend);
         if (reference) builder.ConfigureBehavior(_ => { });
         return builder.BuildAsync().GetAwaiter().GetResult();

@@ -142,7 +142,7 @@ internal static class AlignedMacdComparison
             fixedCoefficients,
             selection
         );
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

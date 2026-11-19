@@ -79,7 +79,7 @@ internal static class AccumulationDistributionComparison
         IIndicator indicator = priceAdjusted
             ? new PriceAdjustedAccumulationDistribution()
             : new Adl(1);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
@@ -95,7 +95,7 @@ internal static class AccumulationDistributionComparison
     private static ComparisonSeries OoplesDetails(CompetitorData data, int? averagePeriod)
     {
         var indicator = new AccumulationDistributionWithAverage(averagePeriod);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

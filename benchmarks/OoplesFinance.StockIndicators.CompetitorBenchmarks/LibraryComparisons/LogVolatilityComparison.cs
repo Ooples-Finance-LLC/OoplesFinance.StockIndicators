@@ -44,7 +44,7 @@ internal static class LogVolatilityComparison
     internal static ComparisonSeries Owned(Bar[] bars, int p, bool realized, bool annual)
     {
         var indicator = new WindowLogVolatility(p, realized, annual);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

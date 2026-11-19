@@ -26,7 +26,7 @@ internal static class PenetrationCandleComparison
     private static ComparisonSeries Ooples(string name, CompetitorData data, double penetration)
     {
         var indicator = Create(name, penetration: penetration);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

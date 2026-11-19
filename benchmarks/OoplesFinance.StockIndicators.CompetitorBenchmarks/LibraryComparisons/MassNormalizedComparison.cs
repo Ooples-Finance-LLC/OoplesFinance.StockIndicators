@@ -47,7 +47,7 @@ internal static class MassNormalizedComparison
     internal static ComparisonSeries Owned(Bar[] bars, int period, double[]? alphas)
     {
         var indicator = Indicator(period, alphas);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

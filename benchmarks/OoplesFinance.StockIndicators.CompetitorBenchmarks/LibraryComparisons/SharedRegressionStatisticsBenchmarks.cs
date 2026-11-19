@@ -161,7 +161,7 @@ public class SharedRegressionStatisticsBenchmarks
     internal IIndicator Create() => Operation == "Skender.GetSlope" ? new RegressionWithFinalLine(Period) : new WindowRegressionStatistics(Period);
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(history).ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         var run = builder.BuildAsync().GetAwaiter().GetResult();
         if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)

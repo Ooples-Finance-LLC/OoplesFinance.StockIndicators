@@ -33,7 +33,7 @@ internal static class ZeroSeedLaguerreComparison
     private static ComparisonSeries Owned(CompetitorData data, double gamma)
     {
         var indicator = new ZeroSeedLaguerreFilter(gamma);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

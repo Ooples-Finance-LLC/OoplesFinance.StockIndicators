@@ -31,7 +31,7 @@ internal static class WilderAverageComparison
     private static ComparisonSeries Ooples(string id, CompetitorData data, int period)
     {
         var indicator = new WilderMovingAverage(period, !FirstSeed(id));
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

@@ -51,7 +51,7 @@ internal static class SeededAtrComparison
         IIndicator indicator = details
             ? new AverageTrueRangeWithDetails(period)
             : new SeededAverageTrueRange(period);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

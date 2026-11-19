@@ -8,7 +8,7 @@ internal static class SharedBenchmarkSupport
 {
     // Keep source ownership, indicator registration, history and execution order identical.
     internal static IIndicatorRun BuildCpu(Bar[] bars, IIndicator indicator, IndicatorHistoryMode history) =>
-        new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicator)
+        ComparisonBuilder.Create().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu)
             .BuildAsync().GetAwaiter().GetResult();
 

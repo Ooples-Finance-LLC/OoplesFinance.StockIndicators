@@ -30,7 +30,7 @@ internal static class PriceComparison
             "AvgPrice" => new FullTypicalPrice(1), "MedPrice" => new MedianPrice(1), "TypPrice" => new TypicalPrice(1),
             "WclPrice" => new WeightedClose(1), _ => new TrueRange(1)
         };
-        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create().ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
         // Ooples also publishes the first candle's range. These three competitor contracts
         // start at the second candle because a previous close is required.

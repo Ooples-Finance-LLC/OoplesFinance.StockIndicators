@@ -58,7 +58,7 @@ internal static class HeikinAshiComparison
     private static ComparisonSeries Owned(CompetitorData d, int _)
     {
         var indicator = new HeikinAshiCandles();
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(d.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

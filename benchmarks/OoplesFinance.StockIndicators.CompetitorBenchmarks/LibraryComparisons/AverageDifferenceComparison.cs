@@ -66,7 +66,7 @@ internal static class AverageDifferenceComparison
     internal static ComparisonSeries Owned(Bar[] bars, int first, int second, bool exponential)
     {
         var indicator = new MovingAverageDifference(first, second, exponential);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

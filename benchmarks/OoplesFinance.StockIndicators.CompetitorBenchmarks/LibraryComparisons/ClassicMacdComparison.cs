@@ -89,7 +89,7 @@ internal static class ClassicMacdComparison
     )
     {
         var indicator = new ClassicMacd(fast, slow, signal, fm, sm, dm, first, suppression);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

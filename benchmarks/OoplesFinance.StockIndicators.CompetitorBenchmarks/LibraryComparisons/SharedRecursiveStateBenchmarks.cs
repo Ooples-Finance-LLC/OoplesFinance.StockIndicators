@@ -84,7 +84,7 @@ public class SharedRecursiveStateBenchmarks
     private IIndicator Create() => Operation == "Ema" ? new Ema(Period) : new Adl(Period);
     private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu);
         if (reference) builder.ConfigureBehavior(_ => { });
         return builder.BuildAsync().GetAwaiter().GetResult();

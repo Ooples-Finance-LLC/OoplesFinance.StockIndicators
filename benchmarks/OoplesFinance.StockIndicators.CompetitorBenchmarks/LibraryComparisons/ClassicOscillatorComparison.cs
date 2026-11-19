@@ -46,7 +46,7 @@ internal static class ClassicOscillatorComparison
     )
     {
         var indicator = new ClassicPriceOscillator(fast, slow, method, percent, first, suppression);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

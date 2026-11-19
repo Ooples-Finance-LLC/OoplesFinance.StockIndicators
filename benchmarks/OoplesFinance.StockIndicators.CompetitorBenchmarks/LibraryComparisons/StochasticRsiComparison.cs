@@ -115,7 +115,7 @@ internal static class StochasticRsiComparison
     )
     {
         var indicator = Indicator(period, skender, stochastic, signal, smooth);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

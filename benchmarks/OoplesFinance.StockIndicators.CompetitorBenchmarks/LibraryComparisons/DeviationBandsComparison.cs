@@ -61,7 +61,7 @@ internal static class DeviationBandsComparison
     internal static ComparisonSeries Owned(string id, Bar[] bars, int p, double factor)
     {
         var indicator = new WindowDeviationBands(p, factor, id != Ids[0]);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

@@ -25,7 +25,7 @@ internal static class QuanAtrComparison
     private static ComparisonSeries Ooples(CompetitorData data, int period)
     {
         var indicator = new ScaledTrueRange(period);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

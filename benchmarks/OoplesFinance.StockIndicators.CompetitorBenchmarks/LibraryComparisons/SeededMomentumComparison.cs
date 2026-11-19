@@ -56,7 +56,7 @@ internal static class SeededMomentumComparison
         IIndicator indicator = pmo
             ? new SeededPriceMomentum(p, s, g)
             : new SeededTrueStrength(p, s, g);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

@@ -57,7 +57,7 @@ internal static class HilbertCycleComparison
     internal static ComparisonSeries Owned(Bar[] bars, bool periodOnly, int suppression)
     {
         var indicator = Indicator(periodOnly, suppression);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

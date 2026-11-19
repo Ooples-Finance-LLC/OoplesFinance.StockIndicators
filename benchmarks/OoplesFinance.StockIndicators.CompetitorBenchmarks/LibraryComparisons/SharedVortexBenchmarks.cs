@@ -82,7 +82,7 @@ public class SharedVortexBenchmarks
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new WindowVortex(Period), IndicatorHistoryMode.LatestOnly);
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars))
+        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars))
             .ConfigureIndicators(indicator).ConfigureHistory(history)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Required GPU Vortex did not execute on the device.");

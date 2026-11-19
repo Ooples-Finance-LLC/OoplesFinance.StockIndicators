@@ -41,7 +41,7 @@ public class PilotSmaSchedulingBenchmarks
         AsinFeasibilityBenchmarks.RequireSame(guarded, actual[sma].ToArray());
     }
 
-    private IIndicatorRun Build(Sma sma) => new StockIndicatorBuilder()
+    private IIndicatorRun Build(Sma sma) => ComparisonBuilder.Create()
         .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(sma)
         .ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync().GetAwaiter().GetResult();
 

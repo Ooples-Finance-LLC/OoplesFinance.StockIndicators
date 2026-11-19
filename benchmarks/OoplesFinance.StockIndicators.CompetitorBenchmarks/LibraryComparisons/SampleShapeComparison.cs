@@ -37,7 +37,7 @@ internal static class SampleShapeComparison
     internal static ComparisonSeries Owned(Bar[] bars, int period, bool kurtosis)
     {
         var indicator = new WindowSampleShape(period, kurtosis);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

@@ -114,7 +114,7 @@ internal static class TrueRangeRatioComparison
     internal static ComparisonSeries OwnedVortex(Bar[] bars, int p)
     {
         var indicator = new WindowVortex(p);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
@@ -133,7 +133,7 @@ internal static class TrueRangeRatioComparison
     internal static ComparisonSeries OwnedUltimate(Bar[] bars, int[] p, bool ta)
     {
         var indicator = new WindowUltimateOscillator(p[0], p[1], p[2], ta);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

@@ -110,7 +110,7 @@ public class SharedGeneratedStateBenchmarks
     };
     private IIndicatorRun Build(IIndicator[] indicators, IndicatorHistoryMode history, bool reference = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicators)
+        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicators)
             .ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu);
         if (reference) builder.ConfigureBehavior(_ => { });
         return builder.BuildAsync().GetAwaiter().GetResult();

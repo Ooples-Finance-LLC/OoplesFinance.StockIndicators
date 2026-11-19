@@ -45,7 +45,7 @@ internal static class DelayedDarkCloudComparison
     private static ComparisonSeries Ooples(CompetitorData data, int period, int delay)
     {
         var indicator = new DelayedDarkCloudCoverPattern(period, delay);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

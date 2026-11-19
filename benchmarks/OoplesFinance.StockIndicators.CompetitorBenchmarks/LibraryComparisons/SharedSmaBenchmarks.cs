@@ -84,7 +84,7 @@ public class SharedSmaBenchmarks
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
     [Benchmark] public IIndicatorRun BuilderFull() => Build(new Sma(Period), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new Sma(Period), IndicatorHistoryMode.LatestOnly);
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => ComparisonBuilder.Create()
         .ConfigureSource(Bars.From(_input.Bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
         .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
 

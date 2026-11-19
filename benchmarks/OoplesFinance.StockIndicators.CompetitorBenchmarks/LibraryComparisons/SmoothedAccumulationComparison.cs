@@ -49,7 +49,7 @@ internal static class SmoothedAccumulationComparison
     )
     {
         var indicator = new SmoothedAccumulationOscillator(fast, slow, first, suppression, !first);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

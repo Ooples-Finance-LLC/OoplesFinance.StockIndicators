@@ -38,7 +38,7 @@ internal static class KlingerComparison
     internal static ComparisonSeries Owned(Bar[] bars, int fast, int slow, int signal)
     {
         var indicator = new KlingerVolumeWithSignal(fast, slow, signal);
-        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create().ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
         var values = new[] { run[indicator.Oscillator].ToArray(), run[indicator.Signal].ToArray() };
         var present = new[] { run[indicator.OscillatorIsDefined].ToArray(), run[indicator.SignalIsDefined].ToArray() };

@@ -53,7 +53,7 @@ internal static class McGinleyComparison
             factor,
             reset ? McGinleyStartup.ResetDelay : McGinleyStartup.Immediate
         );
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

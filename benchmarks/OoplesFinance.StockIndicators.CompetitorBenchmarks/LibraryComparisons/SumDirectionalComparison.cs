@@ -53,7 +53,7 @@ internal static class SumDirectionalComparison
     internal static ComparisonSeries Owned(Bar[] bars, int p)
     {
         var indicator = new SumSeededDirectionalIndex(p);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

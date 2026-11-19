@@ -57,7 +57,7 @@ internal static class TradyAdaptiveComparison
     internal static ComparisonSeries Owned(Bar[] bars, int p, int fast, int slow)
     {
         var indicator = new SeededAdaptiveAverage(p, fast, slow, resetFlat: false);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

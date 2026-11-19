@@ -79,7 +79,7 @@ public class SharedMidpointBenchmarks
     internal WindowRangeMidpoint Create() => new(Period, Operation == "MidPrice");
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
+        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
         if (reference) builder.ConfigureBehavior(_ => { });
         if (gpu) builder.ConfigureExecution(IndicatorExecutionBackend.Gpu);
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Midpoint benchmark did not dispatch GPU work.");

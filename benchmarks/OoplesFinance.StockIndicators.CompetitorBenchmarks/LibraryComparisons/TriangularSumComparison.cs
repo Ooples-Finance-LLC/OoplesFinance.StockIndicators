@@ -36,7 +36,7 @@ internal static class TriangularSumComparison
         IIndicator indicator = sum
             ? new RollingPriceSum(period)
             : new TriangularWindowAverage(period);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

@@ -25,7 +25,7 @@ public class PilotCostBoundaryBenchmarks
         var ours = OoplesValues();
         var theirs = TalibValues();
         IIndicator indicator = Case == "Asin" ? new PriceCircularTransform(PriceCircularOperation.ArcSine) : new Sma(20);
-        var built = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+        var built = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync().GetAwaiter().GetResult();
         AsinFeasibilityBenchmarks.RequireSame(ours, built[indicator].ToArray());
         // Decimal arithmetic contracts differ: expose the discrepancy instead of
@@ -143,13 +143,13 @@ public class PilotCostBoundaryBenchmarks
     [Benchmark] public IIndicatorRun OoplesLatestOnlyBuilder()
     {
         IIndicator indicator = Case == "Asin" ? new PriceCircularTransform(PriceCircularOperation.ArcSine) : new Sma(20);
-        return new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+        return ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
             .ConfigureExecution(IndicatorExecutionBackend.Cpu).ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync().GetAwaiter().GetResult();
     }
     [Benchmark] public int OoplesBuilder()
     {
         IIndicator indicator = Case == "Asin" ? new PriceCircularTransform(PriceCircularOperation.ArcSine) : new Sma(20);
-        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+        using var run = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
             .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
         return run.BarCount;
     }

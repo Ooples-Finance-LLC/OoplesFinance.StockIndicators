@@ -34,7 +34,7 @@ internal static class ExtrapolatedAverageComparison
             order,
             cascaded ? ExponentialSeedMode.Cascaded : ExponentialSeedMode.Shared
         );
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

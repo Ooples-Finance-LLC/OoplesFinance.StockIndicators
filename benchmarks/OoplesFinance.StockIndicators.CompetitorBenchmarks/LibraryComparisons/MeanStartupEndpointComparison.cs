@@ -19,7 +19,7 @@ internal static class MeanStartupEndpointComparison
     private static ComparisonSeries Ooples(CompetitorData data, int period)
     {
         var indicator = new EndpointWeightedAverage(period, true);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

@@ -35,7 +35,7 @@ internal static class StrictHaramiComparison
     )
     {
         var indicator = Create(name, period, shadows);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

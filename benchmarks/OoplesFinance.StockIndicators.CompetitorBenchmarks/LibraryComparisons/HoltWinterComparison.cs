@@ -55,7 +55,7 @@ internal static class HoltWinterComparison
             factors is null ? new HoltWinterForecast(period)
             : derived ? new HoltWinterForecast(factors[0], factors[1], factors[2])
             : new HoltWinterForecast(period, factors[0], factors[1], factors[2]);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

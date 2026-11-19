@@ -145,7 +145,7 @@ internal static class AtrEnvelopeComparison
             Mode(variant),
             variant == 0
         );
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

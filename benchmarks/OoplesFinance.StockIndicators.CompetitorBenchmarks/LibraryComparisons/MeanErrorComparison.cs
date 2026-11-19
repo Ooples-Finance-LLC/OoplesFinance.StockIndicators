@@ -53,7 +53,7 @@ internal static class MeanErrorComparison
         IIndicator indicator = details
             ? new MovingAverageDiagnostics(period)
             : new WindowMeanAbsoluteDeviation(period);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

@@ -51,7 +51,7 @@ internal static class DelayedHilbertTrendComparison
     internal static ComparisonSeries Owned(Bar[] bars, int suppression)
     {
         var owner = new DelayedHilbertTrendline(suppression);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(owner)
             .BuildAsync()

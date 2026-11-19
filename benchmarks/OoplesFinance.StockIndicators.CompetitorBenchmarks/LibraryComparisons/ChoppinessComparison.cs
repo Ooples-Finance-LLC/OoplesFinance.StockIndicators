@@ -37,7 +37,7 @@ internal static class ChoppinessComparison
     internal static ComparisonSeries Owned(Bar[] bars, int period)
     {
         var indicator = new WindowChoppinessIndex(period);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

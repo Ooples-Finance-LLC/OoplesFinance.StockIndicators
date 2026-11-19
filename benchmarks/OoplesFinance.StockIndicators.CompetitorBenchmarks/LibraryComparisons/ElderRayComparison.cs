@@ -50,7 +50,7 @@ internal static class ElderRayComparison
     private static ComparisonSeries Owned(CompetitorData data, int period)
     {
         var indicator = new ElderRayWithDetails(period);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

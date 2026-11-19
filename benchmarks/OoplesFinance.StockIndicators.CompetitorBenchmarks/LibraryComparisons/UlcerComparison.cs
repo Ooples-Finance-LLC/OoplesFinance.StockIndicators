@@ -25,7 +25,7 @@ internal static class UlcerComparison
     internal static ComparisonSeries Owned(Bar[] bars, int period)
     {
         var indicator = new WindowUlcerIndex(period);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

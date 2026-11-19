@@ -62,7 +62,7 @@ internal static class HullComparison
     )
     {
         var indicator = new HullWindow(period, convention);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

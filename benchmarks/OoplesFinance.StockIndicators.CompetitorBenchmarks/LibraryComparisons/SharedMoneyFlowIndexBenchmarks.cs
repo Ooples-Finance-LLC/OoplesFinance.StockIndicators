@@ -70,7 +70,7 @@ public class SharedMoneyFlowIndexBenchmarks
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new WindowMoneyFlowIndex(Period, minimumTotalOne: IsTa), IndicatorHistoryMode.LatestOnly);
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars))
+        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars))
             .ConfigureIndicators(indicator).ConfigureHistory(history)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Required GPU MFI did not execute on the device.");

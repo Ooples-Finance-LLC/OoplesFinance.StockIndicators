@@ -60,7 +60,7 @@ public class SharedScaledTrueRangeBenchmarks
     [Benchmark] public IIndicatorRun GpuLatestOnly() => Build(new(Divisor), IndicatorHistoryMode.LatestOnly, true);
     private IIndicatorRun Build(ScaledTrueRange indicator, IndicatorHistoryMode history, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_data.IndicatorBars))
+        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_data.IndicatorBars))
             .ConfigureIndicators(indicator).ConfigureHistory(history)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         var run = builder.BuildAsync().GetAwaiter().GetResult();

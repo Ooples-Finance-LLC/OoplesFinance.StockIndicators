@@ -64,7 +64,7 @@ internal static class AroonComparison
     private static ComparisonSeries Owned(string id, CompetitorData data, int period)
     {
         var indicator = Create(id, period);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

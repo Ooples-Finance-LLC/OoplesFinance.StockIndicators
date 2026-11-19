@@ -65,7 +65,7 @@ internal static class TranscendentalComparison
     )
     {
         var indicator = new PriceTranscendentalTransform(operation);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

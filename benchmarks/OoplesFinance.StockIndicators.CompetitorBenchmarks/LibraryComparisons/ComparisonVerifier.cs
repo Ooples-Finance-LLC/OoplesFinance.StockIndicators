@@ -1503,6 +1503,10 @@ internal static class ComparisonVerifier
     internal static void Compare(ComparisonSeries expected, ComparisonSeries actual, string context,
         OoplesFinance.StockIndicators.Validation.IndicatorErrorBudget? errorBudget = null)
     {
+        // The opt-in fast mode promises agreement to rounding, not bit equality, so a budget written for
+        // the exact route is widened to that promise and no further.
+        if (errorBudget is not null && ComparisonBuilder.Numerics == OoplesFinance.StockIndicators.Builder.IndicatorNumerics.Fast)
+            errorBudget = new(Math.Max(errorBudget.AbsoluteTolerance, 1e-9), Math.Max(errorBudget.RelativeTolerance, 1e-9));
         if (expected.Outputs.Count != actual.Outputs.Count || expected.Outputs.Keys.Except(actual.Outputs.Keys, StringComparer.Ordinal).Any())
             throw new InvalidOperationException(context + ": output names differ.");
         foreach (var (name, wantedOutput) in expected.Outputs)

@@ -125,7 +125,7 @@ internal static class ReturnBetaComparison
         IIndicator indicator = full
             ? new WindowBetaStatistics(period, selection)
             : new WindowReturnBeta(period);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

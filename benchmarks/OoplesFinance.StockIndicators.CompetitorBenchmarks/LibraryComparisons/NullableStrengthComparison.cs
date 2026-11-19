@@ -138,7 +138,7 @@ internal static class NullableStrengthComparison
     )
     {
         var indicator = new NullableStrengthOscillator(p, c, lag);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

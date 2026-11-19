@@ -29,7 +29,7 @@ internal static class VolumeRecurrenceComparison
     {
         IIndicator indicator =
             id == Ids[0] ? new SeededForceIndex(period) : new VolumeConditionedIndex(id == Ids[1]);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

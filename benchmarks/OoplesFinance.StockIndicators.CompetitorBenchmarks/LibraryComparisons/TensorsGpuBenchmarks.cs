@@ -66,7 +66,7 @@ public class TensorsGpuBenchmarks
             if (Shape == "SmaAsin") asin.Of(indicator);
             indicator = asin;
         }
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars))
+        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars))
             .ConfigureIndicators(indicator).ConfigureExecution(backend).ConfigureHistory(history);
         var run = builder.BuildAsync().GetAwaiter().GetResult();
         if (builder.LastExecution?.Backend != backend) throw new InvalidOperationException("Unexpected backend.");

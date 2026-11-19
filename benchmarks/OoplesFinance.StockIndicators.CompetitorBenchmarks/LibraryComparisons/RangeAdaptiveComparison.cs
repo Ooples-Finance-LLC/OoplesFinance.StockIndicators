@@ -40,7 +40,7 @@ internal static class RangeAdaptiveComparison
     internal static ComparisonSeries Owned(Bar[] bars, int period, bool fractal, double scale = .9)
     {
         var owner = Indicator(period, fractal, scale);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(owner)
             .BuildAsync()

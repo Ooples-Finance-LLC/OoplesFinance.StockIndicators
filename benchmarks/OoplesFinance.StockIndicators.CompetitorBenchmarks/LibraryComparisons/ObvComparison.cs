@@ -66,7 +66,7 @@ internal static class ObvComparison
     )
     {
         var indicator = new SeededOnBalanceVolume(seed, averagePeriod);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

@@ -84,7 +84,7 @@ public class SharedTradyMomentumBenchmarks
     private IIndicator Create() => new LaggedPriceChange(Period, _kind);
     private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
+        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         if (reference) builder.ConfigureBehavior(_ => { });
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Momentum benchmark did not dispatch GPU work.");

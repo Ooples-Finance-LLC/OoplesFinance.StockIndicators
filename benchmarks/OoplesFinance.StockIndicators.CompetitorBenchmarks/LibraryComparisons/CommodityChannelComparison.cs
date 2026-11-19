@@ -93,7 +93,7 @@ internal static class CommodityChannelComparison
     internal static ComparisonSeries Owned(Bar[] bars, int period, int variant)
     {
         var indicator = new WindowCommodityChannelIndex(period, variant == 2, variant != 0);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

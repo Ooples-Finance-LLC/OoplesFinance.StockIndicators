@@ -72,7 +72,7 @@ internal static class MoneyFlowIndexComparison
     internal static ComparisonSeries Owned(Bar[] bars, int period, bool ta, int suppressed = 0)
     {
         var indicator = new WindowMoneyFlowIndex(period, ta, suppressed);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

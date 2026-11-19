@@ -149,7 +149,7 @@ internal static class ChandelierComparison
             Selection(trady, shortSide),
             !trady
         );
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

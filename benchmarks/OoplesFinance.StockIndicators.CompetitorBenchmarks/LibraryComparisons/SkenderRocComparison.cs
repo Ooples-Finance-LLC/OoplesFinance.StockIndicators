@@ -22,7 +22,7 @@ internal static class SkenderRocComparison
     private static ComparisonSeries Ooples(CompetitorData data, int period, int? averagePeriod)
     {
         var indicator = new RateOfChangeWithAverage(period, averagePeriod);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

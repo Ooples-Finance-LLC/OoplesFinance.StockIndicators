@@ -43,7 +43,7 @@ internal static class PathRatioComparison
             period,
             Absolute(id) ? PathRatioConvention.AbsoluteFraction : PathRatioConvention.SignedPercent
         );
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

@@ -56,7 +56,7 @@ internal static class AnalyticKernelComparison
         IIndicator indicator = gaussian
             ? new GaussianWeightedAverage(period, sigma)
             : new SineWeightedAverage(period);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

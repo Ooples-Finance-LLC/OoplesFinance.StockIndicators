@@ -34,7 +34,7 @@ internal static class PercentileComparison
     )
     {
         var indicator = new RollingPercentile(period, fraction, quan);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

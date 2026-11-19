@@ -78,7 +78,7 @@ internal static class ElementaryMathComparison
         IIndicator indicator = arithmetic.HasValue
             ? new CandleArithmetic(arithmetic.Value)
             : new PriceRoundingTransform(rounding!.Value);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

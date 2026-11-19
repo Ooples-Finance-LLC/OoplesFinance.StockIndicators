@@ -87,7 +87,7 @@ public class SharedRegressionBenchmarks
     private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode) => Build(indicator, mode, false, false);
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode, bool reference = false, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder()
+        var builder = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(mode)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         if (reference) builder.ConfigureBehavior(_ => { });

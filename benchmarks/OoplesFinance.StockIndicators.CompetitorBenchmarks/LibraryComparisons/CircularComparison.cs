@@ -62,7 +62,7 @@ internal static class CircularComparison
     private static ComparisonSeries Owned(PriceCircularOperation operation, CompetitorData data)
     {
         var indicator = new PriceCircularTransform(operation);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()

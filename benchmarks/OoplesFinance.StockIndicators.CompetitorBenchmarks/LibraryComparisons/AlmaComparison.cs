@@ -60,7 +60,7 @@ internal static class AlmaComparison
     )
     {
         var indicator = new ArnaudLegouxWindow(period, offset, sigma, fullWindow);
-        using var run = new StockIndicatorBuilder()
+        using var run = ComparisonBuilder.Create()
             .ConfigureSource(Bars.From(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
