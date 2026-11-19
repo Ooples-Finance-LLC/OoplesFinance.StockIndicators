@@ -144,4 +144,36 @@ internal static partial class FastKernels
             famaOut[i] = fama;
         }
     }
+
+
+    /// <summary>
+    /// The dominant cycle period, smoothed, or the in-phase and quadrature parts themselves; published
+    /// after the run-in of 32 bars plus the suppression.
+    /// </summary>
+    internal static void HilbertCycle(ReadOnlySpan<double> close, double[][] outputs, bool periodOnly, long publishFrom)
+    {
+        var n = close.Length;
+        var slots = periodOnly ? 1 : 2;
+        for (var slot = 0; slot < slots; slot++)
+        {
+            outputs[slot].AsSpan(0, n).Clear();
+            DefinedFrom(outputs[slots + slot].AsSpan(0, n), publishFrom);
+        }
+        var hilbert = new HilbertCore(12, true, false);
+        double smoothed = 0;
+        Span<double> first = outputs[0];
+        Span<double> second = periodOnly ? default : outputs[1];
+        for (var i = 0; i < n; i++)
+        {
+            hilbert.Update(close[i]);
+            if (i >= 12) smoothed = .33 * hilbert.Period + .67 * smoothed;
+            if (i < publishFrom) continue;
+            if (periodOnly) first[i] = smoothed;
+            else
+            {
+                first[i] = hilbert.InPhase;
+                second[i] = hilbert.Quadrature;
+            }
+        }
+    }
 }
