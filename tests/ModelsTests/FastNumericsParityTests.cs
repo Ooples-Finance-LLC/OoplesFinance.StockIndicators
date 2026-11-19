@@ -130,6 +130,14 @@ public sealed class FastNumericsParityTests
         ("PriceTranscendentalTransform(HyperbolicSine)", () => new PriceTranscendentalTransform(PriceTranscendentalOperation.HyperbolicSine)),
         ("PriceTranscendentalTransform(HyperbolicCosine)", () => new PriceTranscendentalTransform(PriceTranscendentalOperation.HyperbolicCosine)),
         ("PriceTranscendentalTransform(HyperbolicTangent)", () => new PriceTranscendentalTransform(PriceTranscendentalOperation.HyperbolicTangent)),
+        ("TripleExponentialRate()", () => new TripleExponentialRate()),
+        ("TripleExponentialRate(1,shared,signal 1)", () => new TripleExponentialRate(1, TripleRateSeed.SharedMean, 1)),
+        ("TripleExponentialRate(9,shared,signal 5)", () => new TripleExponentialRate(9, TripleRateSeed.SharedMean, 5)),
+        ("TripleExponentialRate(5,means,signal 3,supp 2)", () => new TripleExponentialRate(5, TripleRateSeed.CascadedMeans, 3, 2)),
+        ("TripleExponentialRate(14,means)", () => new TripleExponentialRate(14, TripleRateSeed.CascadedMeans)),
+        ("TripleExponentialRate(1,means,signal 2)", () => new TripleExponentialRate(1, TripleRateSeed.CascadedMeans, 2)),
+        ("TripleExponentialRate(6,first,signal 4)", () => new TripleExponentialRate(6, TripleRateSeed.CascadedFirstPrice, 4)),
+        ("TripleExponentialRate(3,first,supp 4)", () => new TripleExponentialRate(3, TripleRateSeed.CascadedFirstPrice, null, 4)),
         ("AlignedEmaMacd()", () => new AlignedEmaMacd()),
         ("AlignedEmaMacd(fixed)", () => new AlignedEmaMacd(12, 26, 9, false, 0, true)),
         ("AlignedEmaMacd(first,supp)", () => new AlignedEmaMacd(5, 13, 4, true, 3)),
@@ -354,6 +362,8 @@ public sealed class FastNumericsParityTests
             var close = Math.Round(1.6 * Math.Sin(i * 0.37) + (bar.Close % 1 - .5) * .1, 4);
             return new Bar(bar.Time, close - .05, close + .3, close - .2, close, bar.Volume);
         }).ToArray());
+        // Zero prices make every ratio zero over zero, which each indicator defines for itself.
+        yield return ("zero", Enumerable.Range(0, 60).Select(i => new Bar(Day(i), 0, 0, 0, 0, 0)).ToArray());
         yield return ("flat", Enumerable.Range(0, 250).Select(i => new Bar(Day(i), 50, 50, 50, 50, 1000)).ToArray());
     }
 
