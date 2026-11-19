@@ -8,6 +8,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import copy
 from pathlib import Path
 
 from . import pipeline as p
@@ -15,7 +16,7 @@ from . import candle_single_pass_roi as common
 from . import triple_body_macro_qualification as original
 from . import analytic_grid_roi as policy
 
-KIND = 'kama-fused-prefix-native-pilot'
+KIND = 'kama-fused-prefix-v2-native-pilot'
 OLD = 'd3d5c905a5d75b666b440aa6c5f6b4c24b42dc91'
 NEW = '7de04493efa8304cb2a21fea45c21d177ca0903f'
 PUBLISHED = '87405159446f3de0132ce49800b52bd0af00e234'
@@ -23,7 +24,7 @@ FIXTURE = 'LibraryPairBenchmarks'
 TARGETS = ['QuanTAlib.Kama','Skender.GetKama']
 KAMA = TARGETS + ['TaLib.Functions.Kama','Trady.Indicator.KaufmanAdaptiveMovingAverage']
 PAIRS = KAMA + ['TaLib.Functions.Ema','TaLib.Functions.T3']
-WORKFLOW_BRANCH = 'perf/kama-fused-prefix-roi-20261119'
+WORKFLOW_BRANCH = 'perf/kama-fused-prefix-roi-v2-20261119'
 COUNTS = (1000,10000)
 HARNESS_PATH = p.BENCH + '/bin/Release/net10.0/' + original.HARNESS_ASSEMBLY
 HARNESS_SCOPES = [p.BENCH,'Directory.Build.props','Directory.Build.targets','Directory.Packages.props','global.json','NuGet.Config','nuget.config']
@@ -87,10 +88,10 @@ def verify_source_boundary():
 
 def verify_workflow_entrypoint(text=None):
     """Registration and gate checks are independent of the two readiness flags."""
-    if text is None:text=(p.REPO/'.github/workflows/kama-fused-prefix-roi.yml').read_text()
+    if text is None:text=(p.REPO/'.github/workflows/kama-fused-prefix-roi-v2.yml').read_text()
     assert '  workflow_dispatch:' not in text and '  pull_request:' not in text
     assert '  push:\n    branches: ['+WORKFLOW_BRANCH+']\n' in text
-    assert '    paths: [.github/workflows/kama-fused-prefix-roi.yml, benchmarks/plans/hosted-kama-fused-prefix-roi-20261119.json]\n' in text
+    assert '    paths: [.github/workflows/kama-fused-prefix-roi-v2.yml, benchmarks/plans/hosted-kama-fused-prefix-roi-v2-20261119.json]\n' in text
     assert "    if: github.event_name == 'push'\n" in text
     assert text.index('Fail closed before SDK or input setup')<text.index('actions/setup-dotnet@')<text.index('actions/download-artifact@')
     gate=text.split('Fail closed before SDK or input setup',1)[1].split('actions/setup-dotnet@',1)[0]
@@ -180,6 +181,8 @@ def verify_root_evidence(plan):
 def validate_scope(plan, *, require_ready=True):
     verify_workflow_entrypoint()
     assert plan['diagnostic_kind']==KIND and plan['diagnostic_only'] is True
+    assert plan['bootstrap_policy']==dict(version=2,framework='Microsoft.NETCore.App',fx_version='10.0.15',
+        require_powershell_target_major=10,remove_only_core_runtimepack=True,measurement_runtime_unchanged=True)
     assert plan['sources']==dict(published=OLD,old=OLD,successor=NEW,variants=OLD)
     assert plan['gpu_sources']==dict(old=OLD,successor=NEW,variants=OLD)
     assert (plan['cases'],plan['decisions'])==(60,12)
@@ -292,6 +295,57 @@ def verify_bridge_record(plan,record):
         assert row['full_returned_output_hash']==json.loads(ready['full_returned_output_hash'])
         assert row['presence_sha256']==json.loads(ready['presence_sha256'])
 
+def framework_deps(raw):
+    """Remove only self-contained Core.App assets from a temporary deps copy."""
+    original=json.loads(raw);document=copy.deepcopy(original)
+    target=original['runtimeTarget']['name']
+    assert re.match(r'^\.NETCoreApp,Version=v10\.0(?:/|$)',target),'Incompatible PowerShell target major; stop'
+    assert all(re.match(r'^\.NETCoreApp,Version=v10\.0(?:/|$)',name) for name in original['targets'])
+    prefix='runtimepack.Microsoft.NETCore.App.Runtime.'
+    packs={name for name in original['libraries'] if name.startswith(prefix)}
+    assert len(packs)==1,'Expected exactly one Core.App runtimepack'
+    assert {name for libraries in original['targets'].values() for name in libraries if name.startswith(prefix)}==packs, 'Core runtimepack target/library mismatch'
+    names={name.rsplit('/',1)[0] for name in packs};removed=[]
+    for name in sorted(packs):
+        del document['libraries'][name];removed.append(['libraries',name])
+    for target_name,libraries in document['targets'].items():
+        for name in sorted(packs&set(libraries)):
+            del libraries[name];removed.append(['targets',target_name,name])
+        for library_name,library in libraries.items():
+            for dependency in list(library.get('dependencies',{})):
+                if dependency in names:
+                    del library['dependencies'][dependency]
+                    removed.append(['targets',target_name,library_name,'dependencies',dependency])
+    forbidden={'system.private.corelib.dll','coreclr.dll','hostpolicy.dll'}
+    for libraries in document['targets'].values():
+        for library in libraries.values():
+            for category in ('runtime','native','runtimeTargets'):
+                assert not any(Path(asset).name.lower() in forbidden for asset in library.get(category,{})), 'Forbidden self-contained runtime asset retained'
+    # Recompute the only allowed structural transformation independently.
+    expected=copy.deepcopy(original)
+    for keypath in removed:
+        parent=expected
+        for key in keypath[:-1]:parent=parent[key]
+        del parent[keypath[-1]]
+    assert document==expected and document['runtimeTarget']==original['runtimeTarget']
+    encoded=(json.dumps(document,indent=2)+'\n').encode()
+    return encoded,dict(original_sha256=sha(raw),normalized_sha256=sha(encoded),target_major=10,
+        removed_keypaths=removed,other_components_preserved=True,forbidden_runtime_assets_remaining=False)
+
+def verify_bootstrap_evidence(folder,plan,proof):
+    original=(folder/'evidence/powershell-original.deps.json').read_bytes()
+    normalized,normalization=framework_deps(original)
+    assert normalized==(folder/'evidence/powershell-framework.deps.json').read_bytes()
+    assert proof['normalization']==normalization and proof['fx_version']=='10.0.15'
+    assert proof['powershell_deps_sha256']==sha(original)
+    raw=(folder/'evidence/common-harness-bootstrap.json').read_bytes();assert sha(raw)==proof['bootstrap_sha256']
+    bootstrap=json.loads(raw)
+    assert bootstrap['actual_clr']=='10.0.15' and bootstrap['disable_gpu']=='1'
+    assert bootstrap['normalized_deps_sha256']==normalization['normalized_sha256']
+    assert bootstrap['powershell_dll_sha256']==proof['powershell_dll_sha256']
+    assert bootstrap['process_executable'] and bootstrap['pshome'] and bootstrap['deps_path']
+    assert re.fullmatch('[a-f0-9]{64}',bootstrap['process_executable_sha256'])
+
 def common_harness_bridge(out,plan):
     """One input-preparation preflight; temporary common runtime, candidate core only."""
     baseline=p.manifest(out/'common')
@@ -299,6 +353,9 @@ def common_harness_bridge(out,plan):
     assert p.digest(helper)==plan['bridge_helper_sha256']
     pwsh=Path(shutil.which('pwsh')).resolve();pwsh_dll=pwsh.with_name('pwsh.dll');pwsh_deps=pwsh.with_name('pwsh.deps.json')
     assert pwsh_dll.is_file() and pwsh_deps.is_file()
+    original_deps=pwsh_deps.read_bytes();normalized_deps,normalization=framework_deps(original_deps)
+    (out/'evidence/powershell-original.deps.json').write_bytes(original_deps)
+    (out/'evidence/powershell-framework.deps.json').write_bytes(normalized_deps)
     with tempfile.TemporaryDirectory(prefix='kama-common-bridge-') as temp:
         temp=Path(temp);runtime=temp/'runtime';shutil.copytree(out/'common',runtime)
         core=runtime/'OoplesFinance.StockIndicators.dll'
@@ -309,19 +366,24 @@ def common_harness_bridge(out,plan):
         p.write(result/'invocation.json',dict(runtime_file_pins=p.manifest(runtime)))
         expected=p.REPO/plan['worker_bridge_expected']['path']
         config=runtime/'OoplesFinance.StockIndicators.CompetitorBenchmarks.runtimeconfig.json'
-        command=['dotnet','exec','--runtimeconfig',str(config),'--depsfile',str(pwsh_deps),str(pwsh_dll),
-            '-NoProfile','-NonInteractive','-File',str(helper),'-Output',str(result),'-Runtime',str(runtime),'-Expected',str(expected)]
+        framework_deps_path=temp/'powershell-framework.deps.json';framework_deps_path.write_bytes(normalized_deps)
+        command=['dotnet','exec','--fx-version','10.0.15','--runtimeconfig',str(config),'--depsfile',str(framework_deps_path),str(pwsh_dll),
+            '-NoProfile','-NonInteractive','-File',str(helper),'-Output',str(result),'-Runtime',str(runtime),'-Expected',str(expected),'-BootstrapDeps',str(framework_deps_path)]
         env=dict(os.environ,AIDOTNET_DISABLE_GPU='1')
         process=subprocess.run(command,env=env,capture_output=True,text=True,timeout=120)
         (out/'evidence/common-harness-bridge.log').write_text(process.stdout+process.stderr,encoding='utf-8')
+        if (result/'bootstrap.json').exists():(out/'evidence/common-harness-bootstrap.json').write_bytes((result/'bootstrap.json').read_bytes())
         assert process.returncode==0,'Common-harness bridge failed; no retry or timing'
         raw=(result/'bridge.json').read_bytes();record=json.loads(raw);verify_bridge_record(plan,record)
         assert p.manifest(runtime)==dict(baseline,**{'OoplesFinance.StockIndicators.dll':plan['candidate']['production_sha256']})
         (out/'evidence/common-harness-bridge.json').write_bytes(raw)
     assert p.manifest(out/'common')==baseline
-    return dict(receipt_sha256=sha(raw),helper_sha256=p.digest(helper),expected_sha256=plan['worker_bridge_expected']['sha256'],
+    proof=dict(receipt_sha256=sha(raw),helper_sha256=p.digest(helper),expected_sha256=plan['worker_bridge_expected']['sha256'],
         common_runtime_unchanged=True,temporary_core_only_replacement=True,
-        powershell_dll_sha256=p.digest(pwsh_dll),powershell_deps_sha256=p.digest(pwsh_deps))
+        powershell_dll_sha256=p.digest(pwsh_dll),powershell_deps_sha256=p.digest(pwsh_deps),
+        normalization=normalization,bootstrap_sha256=p.digest(out/'evidence/common-harness-bootstrap.json'),fx_version='10.0.15')
+    verify_bootstrap_evidence(out,plan,proof)
+    return proof
 
 def verify_authentication(folder,plan,proof):
     validate_scope(plan)
@@ -336,6 +398,7 @@ def verify_authentication(folder,plan,proof):
     assert sha(raw)==bridge['receipt_sha256'] and bridge['helper_sha256']==plan['bridge_helper_sha256']
     assert bridge['expected_sha256']==plan['worker_bridge_expected']['sha256']
     assert bridge['common_runtime_unchanged'] is True and bridge['temporary_core_only_replacement'] is True
+    verify_bootstrap_evidence(folder,plan,bridge)
     verify_bridge_record(plan,json.loads(raw))
     authenticated={}
     for label,key in [('old','old_candidate'),('successor','candidate')]:

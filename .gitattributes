@@ -259,3 +259,4 @@ benchmarks/plans/evidence/renko-normalized-actual-lp-setup-proof-20261118.json -
 benchmarks/plans/evidence/kama-* -text whitespace=cr-at-eol
 benchmarks/plans/hosted-kama-fused-prefix-roi-20261119.json text eol=lf
 scripts/kama-common-harness-preflight.ps1 text eol=lf
+benchmarks/plans/hosted-kama-fused-prefix-roi-v2-20261119.json text eol=lf

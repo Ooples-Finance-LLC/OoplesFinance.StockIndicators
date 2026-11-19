@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$Output,[Parameter(Mandatory=$true)][string]$Runtime,[Parameter(Mandatory=$true)][string]$Expected)
+param([Parameter(Mandatory=$true)][string]$Output,[Parameter(Mandatory=$true)][string]$Runtime,[Parameter(Mandatory=$true)][string]$Expected,[Parameter(Mandatory=$true)][string]$BootstrapDeps)
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
 $taskRoot=[IO.Path]::GetFullPath($Output)
@@ -41,6 +41,14 @@ function Result-Hash($Result) {
     $taskHashes|ConvertTo-Json -Compress
 }
 try {
+    $taskProcessPath=[Environment]::ProcessPath
+    Write-AtomicJson 'bootstrap.json' @{
+        actual_clr=[Environment]::Version.ToString();disable_gpu=$env:AIDOTNET_DISABLE_GPU
+        process_executable=$taskProcessPath;process_executable_sha256=File-Hash $taskProcessPath
+        pshome=$PSHOME;deps_path=[IO.Path]::GetFullPath($BootstrapDeps);normalized_deps_sha256=File-Hash $BootstrapDeps
+        powershell_dll_sha256=File-Hash (Join-Path $PSHOME 'pwsh.dll')
+    }
+    [Console]::WriteLine('KAMA bootstrap CLR='+[Environment]::Version.ToString()+' CPU_DISABLE_GPU='+$env:AIDOTNET_DISABLE_GPU+' PROCESS='+$taskProcessPath+' PSHOME='+$PSHOME+' DEPS='+$BootstrapDeps)
     if ([Environment]::Version.ToString() -ne '10.0.15' -or $env:AIDOTNET_DISABLE_GPU -ne '1') { throw 'Wrong CLR or CPU diagnostic bootstrap' }
     if (!(Test-Path -LiteralPath $taskRoot -PathType Container)) { throw 'Parent must create fresh bounded output first' }
     $taskPins=@{

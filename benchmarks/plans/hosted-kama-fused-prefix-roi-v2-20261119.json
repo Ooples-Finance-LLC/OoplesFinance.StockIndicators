@@ -1,0 +1,1337 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "expected_runtime_version": ".NET 10.0.15",
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "native_win_policy_approval": {
+    "path": "benchmarks/plans/evidence/native-win-rule-user-approved-20261118.json",
+    "sha256": "414b558eae1deda750c3d169020128986a0e0db9b2acd95f23da035be03bfd7c",
+    "policy_id": "native-separated-confidence-intervals-both-rounds-20261118"
+  },
+  "diagnostic_kind": "kama-fused-prefix-v2-native-pilot",
+  "diagnostic_only": true,
+  "cases": 60,
+  "decisions": 12,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 120
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Kama",
+              "pair": "QuanTAlib.Kama"
+            },
+            {
+              "raw": "Skender.GetKama",
+              "pair": "Skender.GetKama"
+            },
+            {
+              "raw": "TaLib.Functions.Kama",
+              "pair": "TaLib.Functions.Kama"
+            },
+            {
+              "raw": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+              "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage"
+            },
+            {
+              "raw": "TaLib.Functions.Ema",
+              "pair": "TaLib.Functions.Ema"
+            },
+            {
+              "raw": "TaLib.Functions.T3",
+              "pair": "TaLib.Functions.T3"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 60,
+          "decisions": 12
+        }
+      ],
+      "cases": 60,
+      "decisions": 12
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Kama",
+              "pair": "QuanTAlib.Kama"
+            },
+            {
+              "raw": "Skender.GetKama",
+              "pair": "Skender.GetKama"
+            },
+            {
+              "raw": "TaLib.Functions.Kama",
+              "pair": "TaLib.Functions.Kama"
+            },
+            {
+              "raw": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+              "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage"
+            },
+            {
+              "raw": "TaLib.Functions.Ema",
+              "pair": "TaLib.Functions.Ema"
+            },
+            {
+              "raw": "TaLib.Functions.T3",
+              "pair": "TaLib.Functions.T3"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 60,
+          "decisions": 12
+        }
+      ],
+      "cases": 60,
+      "decisions": 12
+    }
+  ],
+  "inputs_ready": false,
+  "parent_review_approved": false,
+  "sources": {
+    "published": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+    "old": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+    "successor": "7de04493efa8304cb2a21fea45c21d177ca0903f",
+    "variants": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91"
+  },
+  "gpu_sources": {
+    "old": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+    "successor": "7de04493efa8304cb2a21fea45c21d177ca0903f",
+    "variants": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91"
+  },
+  "old_candidate": {
+    "source": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+    "ci_run": "44432145585",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "manifest_sha256": "60a4a285d4a7879e1be3c667c2757ae3f56a772f26d64c005fa91c392b5b9ce3",
+    "production_sha256": "5cdb8051eb19e26ec7fa2202f0fbeba70bc30f3dd9220ac8abab6a9d50fde74b",
+    "source_fingerprint": "cd8a76c3f21d8f8ebcc066b55c37db2f68b01f2fdb853bd8b7eee57b8c206519",
+    "artifact_id": "14487094783",
+    "artifact_zip_sha256": "803c35d7f98b2353b4ab9c853579aedfb7e4faf9daf2f31ce0ff6684c4c7a448",
+    "unit_passed": 53,
+    "parity_passed": 48,
+    "unit_classes": [
+      "AnalyticGridBatchTests",
+      "SharedWeightedWindowTests",
+      "FibonacciWeightedAverageTests",
+      "AffineConvolutionTests",
+      "WindowedSincCompactTests"
+    ],
+    "parity_classes": [
+      "AnalyticKernelComparisonTests",
+      "FixedWeightedComparisonTests",
+      "ConvolutionComparisonTests",
+      "SincBuilderComparisonTests"
+    ],
+    "actual_harness_sha256": "933e0694594e08f663d27e31d0e174f267ad5471c9206a91e4f21be39e6aafe0",
+    "cpu_root_review": {
+      "path": "benchmarks/plans/evidence/analytic-grid-candidate-cpu-root-review-20261119.json",
+      "sha256": "54f7a87f11b219633941227618ef003d5da69c36e01677abbe039c1e7cb17c17"
+    },
+    "gpu_root_review": {
+      "path": "benchmarks/plans/evidence/analytic-grid-candidate-gpu-root-review-20261119.json",
+      "sha256": "2f130e27079d837041a3011247add3ec0e576dfebe2cae3511156dab48258388"
+    },
+    "gpu_receipt": {
+      "path": "benchmarks/plans/evidence/kama-baseline-gpu-receipt-20261119.json",
+      "sha256": "bb51f6bf8181c742cff56869a1083b0f7bbb93d2b3cc85644046dbfb797ed890"
+    },
+    "gpu_trx": {
+      "path": "benchmarks/plans/evidence/kama-baseline-gpu-20261119.trx.gz",
+      "sha256": "39c42683af189c0e297da1c6dd965c3cec78191c2ecfdf91c44cce32e3556c60"
+    }
+  },
+  "candidate": {
+    "source": "7de04493efa8304cb2a21fea45c21d177ca0903f",
+    "ci_run": "44467491698",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "source_fingerprint": "3fd3ec18ed442cb6bcb9241766c13adcbb19718cfe5740df2030b7062cca9dd4",
+    "manifest_sha256": "1bd4853394274a4ef855603ca71ca19918ab1111f0879aeaf353899decbe152b",
+    "production_sha256": "34f5f2f8f01e71a284011378915c2f5a4e4a515063d1cb8e8822bac2e1412d3c",
+    "actual_harness_sha256": "25a4b8834ea5a0334ff4cdc61d10e87048b57e05c28c32c9dfe22f97d8cf9497",
+    "artifact_id": "14502319613",
+    "artifact_zip_sha256": "f0d9ee4b7bbe9e6035519fe8f5e0440f2c15c76e8b3bf0f676e716c9f88afc7a",
+    "unit_passed": 62,
+    "parity_passed": 43,
+    "unit_classes": [
+      "SeededAdaptiveBatchTests",
+      "SeededAdaptiveSharedExecutionTests",
+      "EmaRecurrenceTests",
+      "TillsonSharedExecutionTests"
+    ],
+    "parity_classes": [
+      "SeededAdaptiveBatchParityTests",
+      "SeededAdaptiveComparisonTests",
+      "TaAdaptiveComparisonTests",
+      "TradyAdaptiveComparisonTests",
+      "ExponentialAverageComparisonTests",
+      "SharedTillsonBenchmarkTests"
+    ],
+    "cpu_root_review": {
+      "path": "benchmarks/plans/evidence/kama-candidate-cpu_root_review-root-review.json",
+      "sha256": "4bb38854991d82bee6722b69ddd1f83ef31eb8c43164990b46b906be1a2d5e25"
+    },
+    "gpu_root_review": {
+      "path": "benchmarks/plans/evidence/kama-candidate-gpu_root_review-root-review.json",
+      "sha256": "f40dde6951915f372cb61d73b57843267eedeb98dc16b08357d99d272edd0eee"
+    },
+    "gpu_receipt": {
+      "path": "benchmarks/plans/evidence/kama-candidate-gpu_receipt-actual-local-gpu-receipt.json",
+      "sha256": "a35ef28d65c3cff3a08fdde8c01040456f5c2aaab149a85d5ebb9a8a9791bdbf"
+    },
+    "gpu_trx": {
+      "path": "benchmarks/plans/evidence/kama-candidate-gpu_trx-actual-local-gpu.trx.gz",
+      "sha256": "1727481e232721ebf61c07431af941a50f05c68e96a4fc15bd1213bcb7a65cc8"
+    },
+    "evidence_source": "8f61c985fca900ca4942c2bf1cf21ac903e89cf8"
+  },
+  "harness_sha256": "933e0694594e08f663d27e31d0e174f267ad5471c9206a91e4f21be39e6aafe0",
+  "cpu_test_classes": {
+    "old": [
+      "AnalyticGridBatchTests",
+      "SharedWeightedWindowTests",
+      "FibonacciWeightedAverageTests",
+      "AffineConvolutionTests",
+      "WindowedSincCompactTests"
+    ],
+    "successor": [
+      "SeededAdaptiveBatchTests",
+      "SeededAdaptiveSharedExecutionTests",
+      "EmaRecurrenceTests",
+      "TillsonSharedExecutionTests"
+    ],
+    "variants": [
+      "AnalyticGridBatchTests",
+      "SharedWeightedWindowTests",
+      "FibonacciWeightedAverageTests",
+      "AffineConvolutionTests",
+      "WindowedSincCompactTests"
+    ]
+  },
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "automatic_qualification": false,
+  "report_import_permitted": false,
+  "native_progress_gate": {
+    "fixture": "LibraryPairBenchmarks",
+    "owned_methods": [
+      "Ooples"
+    ],
+    "native_methods": [
+      "Competitor"
+    ],
+    "native_round": 2,
+    "old_rounds": [
+      0,
+      3
+    ],
+    "candidate_rounds": [
+      1,
+      2
+    ],
+    "minimum_margin": null,
+    "require_separated_intervals_both_rounds": true,
+    "new_closure_bars": 10000,
+    "minimum_new_closures": 1,
+    "target_pairs": [
+      "QuanTAlib.Kama",
+      "Skender.GetKama"
+    ],
+    "require_own_source_faster": true,
+    "require_net_10000_point_progress": true,
+    "protect_prior_confident_wins_both_sizes": true,
+    "prior_controls": [
+      "TaLib.Functions.Kama",
+      "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "TaLib.Functions.Ema",
+      "TaLib.Functions.T3"
+    ]
+  },
+  "full_consumer_registry": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair_parameter": "PairId",
+      "size_parameter": "Bars",
+      "operations": [
+        "QuanTAlib.Kama",
+        "Skender.GetKama",
+        "TaLib.Functions.Kama",
+        "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+        "TaLib.Functions.Ema",
+        "TaLib.Functions.T3"
+      ],
+      "methods": [
+        "Ooples",
+        "Competitor"
+      ],
+      "sizes": [
+        1000,
+        10000
+      ]
+    }
+  ],
+  "harness_alias_policy": {
+    "common_artifact_role": "old",
+    "variants_artifact_role": "old",
+    "baseline_source": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+    "candidate_source": "7de04493efa8304cb2a21fea45c21d177ca0903f",
+    "require_scoped_source_identity": true,
+    "claim_artifact_binary_identity": false,
+    "excluded_sibling_test": "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/SeededAdaptiveBatchParityTests.cs"
+  },
+  "published_baseline": {
+    "pull_request": 266,
+    "head": "87405159446f3de0132ce49800b52bd0af00e234",
+    "branch": "perf/remaining-indicator-rollout",
+    "source_fingerprint": "cd8a76c3f21d8f8ebcc066b55c37db2f68b01f2fdb853bd8b7eee57b8c206519"
+  },
+  "requested_case_inventory": [
+    {
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Kama",
+      "pair": "QuanTAlib.Kama",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Kama",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Kama",
+      "pair": "QuanTAlib.Kama",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Kama",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetKama",
+      "pair": "Skender.GetKama",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetKama\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetKama",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetKama",
+      "pair": "Skender.GetKama",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetKama\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetKama",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Kama",
+      "pair": "TaLib.Functions.Kama",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Kama",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Kama",
+      "pair": "TaLib.Functions.Kama",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Kama",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Trady.Indicator.KaufmanAdaptiveMovingAverage\"*"
+      ],
+      "parameters": {
+        "PairId": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Trady.Indicator.KaufmanAdaptiveMovingAverage\"*"
+      ],
+      "parameters": {
+        "PairId": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Ema",
+      "pair": "TaLib.Functions.Ema",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Ema\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Ema",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Ema",
+      "pair": "TaLib.Functions.Ema",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Ema\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Ema",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.T3",
+      "pair": "TaLib.Functions.T3",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.T3\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.T3",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.T3",
+      "pair": "TaLib.Functions.T3",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.T3\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.T3",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Kama",
+      "pair": "QuanTAlib.Kama",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Kama",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Kama",
+      "pair": "QuanTAlib.Kama",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Kama",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetKama",
+      "pair": "Skender.GetKama",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetKama\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetKama",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetKama",
+      "pair": "Skender.GetKama",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetKama\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetKama",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Kama",
+      "pair": "TaLib.Functions.Kama",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Kama",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Kama",
+      "pair": "TaLib.Functions.Kama",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Kama",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Trady.Indicator.KaufmanAdaptiveMovingAverage\"*"
+      ],
+      "parameters": {
+        "PairId": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Trady.Indicator.KaufmanAdaptiveMovingAverage\"*"
+      ],
+      "parameters": {
+        "PairId": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Ema",
+      "pair": "TaLib.Functions.Ema",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Ema\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Ema",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Ema",
+      "pair": "TaLib.Functions.Ema",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Ema\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Ema",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.T3",
+      "pair": "TaLib.Functions.T3",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.T3\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.T3",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.T3",
+      "pair": "TaLib.Functions.T3",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.T3\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.T3",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Kama",
+      "pair": "QuanTAlib.Kama",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Kama",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Kama",
+      "pair": "QuanTAlib.Kama",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Kama",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Kama",
+      "pair": "QuanTAlib.Kama",
+      "method": "Competitor",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"QuanTAlib.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Kama",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Kama",
+      "pair": "QuanTAlib.Kama",
+      "method": "Competitor",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"QuanTAlib.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Kama",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetKama",
+      "pair": "Skender.GetKama",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetKama\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetKama",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetKama",
+      "pair": "Skender.GetKama",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetKama\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetKama",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetKama",
+      "pair": "Skender.GetKama",
+      "method": "Competitor",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"Skender.GetKama\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetKama",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetKama",
+      "pair": "Skender.GetKama",
+      "method": "Competitor",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"Skender.GetKama\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetKama",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Kama",
+      "pair": "TaLib.Functions.Kama",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Kama",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Kama",
+      "pair": "TaLib.Functions.Kama",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Kama",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Kama",
+      "pair": "TaLib.Functions.Kama",
+      "method": "Competitor",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"TaLib.Functions.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Kama",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Kama",
+      "pair": "TaLib.Functions.Kama",
+      "method": "Competitor",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"TaLib.Functions.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Kama",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Trady.Indicator.KaufmanAdaptiveMovingAverage\"*"
+      ],
+      "parameters": {
+        "PairId": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Trady.Indicator.KaufmanAdaptiveMovingAverage\"*"
+      ],
+      "parameters": {
+        "PairId": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "method": "Competitor",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"Trady.Indicator.KaufmanAdaptiveMovingAverage\"*"
+      ],
+      "parameters": {
+        "PairId": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "method": "Competitor",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"Trady.Indicator.KaufmanAdaptiveMovingAverage\"*"
+      ],
+      "parameters": {
+        "PairId": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Ema",
+      "pair": "TaLib.Functions.Ema",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Ema\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Ema",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Ema",
+      "pair": "TaLib.Functions.Ema",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Ema\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Ema",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Ema",
+      "pair": "TaLib.Functions.Ema",
+      "method": "Competitor",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"TaLib.Functions.Ema\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Ema",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Ema",
+      "pair": "TaLib.Functions.Ema",
+      "method": "Competitor",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"TaLib.Functions.Ema\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Ema",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.T3",
+      "pair": "TaLib.Functions.T3",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.T3\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.T3",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.T3",
+      "pair": "TaLib.Functions.T3",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.T3\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.T3",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.T3",
+      "pair": "TaLib.Functions.T3",
+      "method": "Competitor",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"TaLib.Functions.T3\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.T3",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.T3",
+      "pair": "TaLib.Functions.T3",
+      "method": "Competitor",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"TaLib.Functions.T3\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.T3",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Kama",
+      "pair": "QuanTAlib.Kama",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Kama",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "QuanTAlib.Kama",
+      "pair": "QuanTAlib.Kama",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"QuanTAlib.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "QuanTAlib.Kama",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetKama",
+      "pair": "Skender.GetKama",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetKama\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetKama",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Skender.GetKama",
+      "pair": "Skender.GetKama",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Skender.GetKama\"*"
+      ],
+      "parameters": {
+        "PairId": "Skender.GetKama",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Kama",
+      "pair": "TaLib.Functions.Kama",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Kama",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Kama",
+      "pair": "TaLib.Functions.Kama",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Kama\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Kama",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Trady.Indicator.KaufmanAdaptiveMovingAverage\"*"
+      ],
+      "parameters": {
+        "PairId": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "pair": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"Trady.Indicator.KaufmanAdaptiveMovingAverage\"*"
+      ],
+      "parameters": {
+        "PairId": "Trady.Indicator.KaufmanAdaptiveMovingAverage",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Ema",
+      "pair": "TaLib.Functions.Ema",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Ema\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Ema",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.Ema",
+      "pair": "TaLib.Functions.Ema",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.Ema\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.Ema",
+        "Bars": 10000
+      }
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.T3",
+      "pair": "TaLib.Functions.T3",
+      "method": "Ooples",
+      "bars": 1000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.T3\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.T3",
+        "Bars": 1000
+      }
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "raw": "TaLib.Functions.T3",
+      "pair": "TaLib.Functions.T3",
+      "method": "Ooples",
+      "bars": 10000,
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Functions.T3\"*"
+      ],
+      "parameters": {
+        "PairId": "TaLib.Functions.T3",
+        "Bars": 10000
+      }
+    }
+  ],
+  "worker_proof_root_review": {
+    "path": "benchmarks/plans/evidence/kama-worker-root-review-20261119.json",
+    "sha256": "af85063768a0006547c4c17f7a1d560710ddc36493cb65f5928d3a06ec844323"
+  },
+  "worker_proof_index": {
+    "path": "benchmarks/plans/evidence/kama-worker-index-20261119.json",
+    "sha256": "465c147020398ef5e2b9eff3ebb5bb13ef8c7ad02ecad4e4eaeee482eb032b65"
+  },
+  "worker_proof_helper": {
+    "path": "benchmarks/plans/evidence/kama-worker-child-20261119.ps1",
+    "sha256": "f639a34f5ace0f125b60f0c7672ad02e8a2498bade4c9a071f5a1bca6867d9b4"
+  },
+  "model_input": {
+    "path": "benchmarks/plans/evidence/kama-model-input-20261119.json",
+    "sha256": "ebc3f3e4b6c33448667a0e96e340bf0b9b16dbae6d06032f3fa70c7c77d4fe16"
+  },
+  "worker_bridge_expected": {
+    "path": "benchmarks/plans/evidence/kama-worker-bridge-expected-20261119.json",
+    "sha256": "a4937eb4b1a6aed56a3c36d77c875fa91834dfe9c6a3bf7f804d950dece0ccb2"
+  },
+  "bridge_policy": {
+    "fixture": "LibraryPairBenchmarks",
+    "pairs": [
+      "QuanTAlib.Kama",
+      "Skender.GetKama",
+      "TaLib.Functions.Kama",
+      "Trady.Indicator.KaufmanAdaptiveMovingAverage"
+    ],
+    "bars": 10000,
+    "setup_calls": 4,
+    "explicit_ooples_calls": 4,
+    "builds": 0,
+    "profiles": 0,
+    "warmups": 0,
+    "timings": 0,
+    "temporary_common_runtime": true,
+    "replace_core_only": true,
+    "common_harness_sha256": "933e0694594e08f663d27e31d0e174f267ad5471c9206a91e4f21be39e6aafe0",
+    "candidate_core_sha256": "34f5f2f8f01e71a284011378915c2f5a4e4a515063d1cb8e8822bac2e1412d3c"
+  },
+  "bridge_helper_sha256": "4907821b64e98f22e14ceb14eec032a96c3c671480fa6017c4ef5d0fbabcc2b3",
+  "bootstrap_policy": {
+    "version": 2,
+    "framework": "Microsoft.NETCore.App",
+    "fx_version": "10.0.15",
+    "require_powershell_target_major": 10,
+    "remove_only_core_runtimepack": true,
+    "measurement_runtime_unchanged": true
+  }
+}

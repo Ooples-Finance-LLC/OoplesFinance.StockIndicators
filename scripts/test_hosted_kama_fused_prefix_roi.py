@@ -1,12 +1,13 @@
 """Bounded orchestration checks; no production build, workload, capture or timing."""
 import copy,json,unittest
 import os
+import shutil
 from pathlib import Path
 from unittest import mock
 from hosted_timing import kama_fused_prefix_roi as q
 from hosted_timing import pipeline,roi_scope_dispatch,verify
 
-SAVED_PLAN=Path(__file__).resolve().parents[1]/'benchmarks/plans/hosted-kama-fused-prefix-roi-20261119.json'
+SAVED_PLAN=Path(__file__).resolve().parents[1]/'benchmarks/plans/hosted-kama-fused-prefix-roi-v2-20261119.json'
 PLAN=Path(os.environ.get('HOSTED_TIMING_PLAN',str(SAVED_PLAN)))
 if not PLAN.is_absolute():PLAN=SAVED_PLAN.parents[2]/PLAN
 
@@ -93,11 +94,11 @@ class KamaFusedPrefixRoiTests(unittest.TestCase):
     def test_dispatch_hooks_and_narrow_single_push_workflow(self):
         for module in (pipeline,roi_scope_dispatch,verify):
             self.assertIn('kama_fused_prefix_roi',Path(module.__file__).read_text())
-        workflow=(SAVED_PLAN.parents[2]/'.github/workflows/kama-fused-prefix-roi.yml').read_text()
+        workflow=(SAVED_PLAN.parents[2]/'.github/workflows/kama-fused-prefix-roi-v2.yml').read_text()
         q.verify_workflow_entrypoint(workflow)
         self.assertNotIn('workflow_dispatch:',workflow)
     def test_entrypoint_checks_are_flag_independent(self):
-        workflow=(SAVED_PLAN.parents[2]/'.github/workflows/kama-fused-prefix-roi.yml').read_text()
+        workflow=(SAVED_PLAN.parents[2]/'.github/workflows/kama-fused-prefix-roi-v2.yml').read_text()
         for mutate in [lambda t:t.replace('  push:','  workflow_dispatch:'),lambda t:t.replace(q.WORKFLOW_BRANCH,'perf/other'),
             lambda t:t.replace("github.event_name == 'push'","github.event_name == 'workflow_dispatch'"),
             lambda t:t.replace('!$plan.inputs_ready','false'),lambda t:t.replace('!$plan.parent_review_approved','false')]:
@@ -105,5 +106,35 @@ class KamaFusedPrefixRoiTests(unittest.TestCase):
         for event,ref in [('workflow_dispatch','refs/heads/'+q.WORKFLOW_BRANCH),('push','refs/heads/other')]:
             with self.subTest(event=event,ref=ref),self.assertRaises(AssertionError):q.verify_entrypoint_environment(dict(GITHUB_EVENT_NAME=event,GITHUB_REF=ref))
         q.verify_entrypoint_environment(dict(GITHUB_EVENT_NAME='push',GITHUB_REF='refs/heads/'+q.WORKFLOW_BRANCH))
+    def deps(self):
+        pack='runtimepack.Microsoft.NETCore.App.Runtime.win-x64/10.0.14'
+        return dict(runtimeTarget=dict(name='.NETCoreApp,Version=v10.0/win-x64'),libraries={pack:dict(type='runtimepack'),
+            'PowerShell/7.6.0':dict(type='project'),'runtimepack.Microsoft.WindowsDesktop.App.Runtime.win-x64/10.0.14':dict(type='runtimepack')},
+            targets={'.NETCoreApp,Version=v10.0/win-x64':{pack:dict(runtime={'System.Private.CoreLib.dll':{}},native={'coreclr.dll':{},'hostpolicy.dll':{}}),
+                'PowerShell/7.6.0':dict(runtime={'pwsh.dll':{}},dependencies={pack.rsplit('/',1)[0]:'10.0.14','Other':'1.0'}),
+                'runtimepack.Microsoft.WindowsDesktop.App.Runtime.win-x64/10.0.14':dict(runtime={'System.Windows.Forms.dll':{}})}})
+    def test_v2_normalizes_only_core_runtimepack(self):
+        d=self.deps();raw=json.dumps(d).encode();normalized,proof=q.framework_deps(raw);n=json.loads(normalized)
+        self.assertEqual(proof['target_major'],10);self.assertTrue(proof['other_components_preserved'])
+        self.assertFalse(proof['forbidden_runtime_assets_remaining']);self.assertEqual(len(proof['removed_keypaths']),3)
+        self.assertEqual(n['runtimeTarget'],d['runtimeTarget'])
+        self.assertIn('runtimepack.Microsoft.WindowsDesktop.App.Runtime.win-x64/10.0.14',n['libraries'])
+        self.assertEqual(n['targets'][d['runtimeTarget']['name']]['PowerShell/7.6.0']['runtime'],{'pwsh.dll':{}})
+        self.assertEqual(n['targets'][d['runtimeTarget']['name']]['PowerShell/7.6.0']['dependencies'],{'Other':'1.0'})
+        d['targets']['.NETCoreApp,Version=v10.0']={}
+        normalized,proof=q.framework_deps(json.dumps(d).encode())
+        self.assertEqual(json.loads(normalized)['targets']['.NETCoreApp,Version=v10.0'],{})
+    def test_v2_rejects_wrong_major_or_residual_core_assets(self):
+        for major in (8,9,11):
+            d=self.deps();d['runtimeTarget']['name']=d['runtimeTarget']['name'].replace('v10.0','v'+str(major)+'.0')
+            with self.subTest(major=major),self.assertRaisesRegex(AssertionError,'target major'):q.framework_deps(json.dumps(d).encode())
+        for asset in ('System.Private.CoreLib.dll','coreclr.dll','hostpolicy.dll'):
+            d=self.deps();d['targets'][d['runtimeTarget']['name']]['PowerShell/7.6.0']['runtime'][asset]={}
+            with self.subTest(asset=asset),self.assertRaisesRegex(AssertionError,'runtime asset'):q.framework_deps(json.dumps(d).encode())
+    def test_v2_real_local_deps_structure_only(self):
+        raw=Path(shutil.which('pwsh')).resolve().with_name('pwsh.deps.json').read_bytes()
+        normalized,proof=q.framework_deps(raw)
+        self.assertEqual(q.sha(normalized),proof['normalized_sha256'])
+        self.assertEqual(q.sha(raw),proof['original_sha256'])
 
 if __name__=='__main__':unittest.main()
