@@ -1,0 +1,75 @@
+{
+  "input_head": "0a1d7e892ec8a9bb1e357ee34072862f295ea266",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/ClassicMovingAverage.cs",
+    "src/Indicators/WideClassicalWindowState.cs",
+    "tests/ModelsTests/ClassicalCompactInputTests.cs"
+  ],
+  "batch_note": "Approved classical compact state follow-up: decode finite SMA/WMA/TRIMA inputs directly, preserving wide composition and alignment. Verify numerical windows, mixed wide/finite histories, reset and affected consumers. No separate timing run added.",
+  "step": "complete",
+  "updated_utc": "2026-10-30T17:26:19.313871+00:00",
+  "unit": {
+    "passed": 121,
+    "class_counts": {
+      "ClassicAverageSharedExecutionTests": 14,
+      "VariableAverageSharedExecutionTests": 12,
+      "CompactClassicalWindowTests": 22,
+      "ClassicalCompactInputTests": 6,
+      "MacdSharedExecutionTests": 18,
+      "ClassicalFiniteDifferenceTests": 18,
+      "SharedClassicBandsTests": 11,
+      "ClassicStochasticSharedExecutionTests": 16,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\classical-input\\unit\\unit.trx",
+    "sha256": "ce403183f86029a805b46ab443ce0a01e2298b53b2c8e4c7e74e7c3fe4ff4b5b",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-classical-direct-compact-input-certified-20261030-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 198,
+    "class_counts": {
+      "ClassicBandsComparisonTests": 10,
+      "ClassicStochasticRsiComparisonTests": 15,
+      "ClassicStochasticComparisonTests": 16,
+      "SharedTaAdaptiveRateNativeBenchmarkTests": 13,
+      "SharedTaStochasticNativeBenchmarkTests": 40,
+      "SharedTaAverageNativeBenchmarkTests": 40,
+      "SharedClassicAverageBenchmarkTests": 6,
+      "ClassicMacdComparisonTests": 16,
+      "VariablePeriodComparisonTests": 16,
+      "ClassicOscillatorComparisonTests": 11,
+      "ClassicAverageComparisonTests": 15
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\classical-input\\parity\\parity.trx",
+    "sha256": "c03be071f08be2555dd39b645947222a70410c1b7ca7b216846aec900cf419a6",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-classical-direct-compact-input-certified-20261030-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-classical-direct-compact-input-20261030\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "76b8c032de296438259d4c23c03ecdb62c1f73456f47b0171332a477a39da806",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-classical-direct-compact-input-20261030\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "76b8c032de296438259d4c23c03ecdb62c1f73456f47b0171332a477a39da806",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-classical-direct-compact-input-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "76b8c032de296438259d4c23c03ecdb62c1f73456f47b0171332a477a39da806",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-classical-direct-compact-input-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "76b8c032de296438259d4c23c03ecdb62c1f73456f47b0171332a477a39da806"
+  },
+  "source_fingerprint_sha256": "63bd48c010ee7d6edfef66a4c71da22b62fff1b64d9a484edc6abdc05fede15a",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved classical compact state follow-up: decode finite SMA/WMA/TRIMA inputs directly, preserving wide composition and alignment. Verify numerical windows, mixed wide/finite histories, reset and affected consumers. No separate timing run added. Correctness checks passed; controlled performance remains pending."
+}

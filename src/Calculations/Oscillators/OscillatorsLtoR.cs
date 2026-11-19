@@ -2352,8 +2352,6 @@ public static partial class Calculations
         length = Math.Max(1, length);
         smoothLength = Math.Max(1, smoothLength);
         List<double> rsmkList = new(stockData.Count);
-        List<double> logRatioList = new(stockData.Count);
-        List<double> logDiffList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
         var (spInputList, _, _, _, _) = GetInputValuesList(marketData);
@@ -2367,8 +2365,32 @@ public static partial class Calculations
                 throw new ArgumentOutOfRangeException(nameof(stockData), "RSMK requires positive finite primary and benchmark inputs.");
         }
 
-        if (stockData.Count == marketData.Count)
+        // Reuse the exact EMA state used by MovingAverageCore. Keep whole-batch
+        // input validation above so invalid later bars cannot publish partial output.
+        if (maType == MovingAvgType.ExponentialMovingAverage && !Builder.Compute.ComponentAverage.HasOverrides)
         {
+            var lag = length < stockData.Count ? new double[length] : Array.Empty<double>();
+            var average = new Streaming.EmaState(smoothLength);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                double difference = 0;
+                if (lag.Length != 0)
+                {
+                    var slot = i % length;
+                    var logRatio = Math.Log(inputList[i]) - Math.Log(spInputList[i]);
+                    difference = i < length ? 0 : logRatio - lag[slot];
+                    lag[slot] = logRatio;
+                }
+                var previous = GetLastOrDefault(rsmkList);
+                var value = average.GetNext(difference, commit: true) * 100;
+                rsmkList.Add(value);
+                signalsList?.Add(GetCompareSignal(value, previous));
+            }
+        }
+        else
+        {
+            List<double> logRatioList = new(stockData.Count);
+            List<double> logDiffList = new(stockData.Count);
             for (var i = 0; i < stockData.Count; i++)
             {
                 var currentValue = inputList[i];

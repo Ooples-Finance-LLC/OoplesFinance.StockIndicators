@@ -1,0 +1,75 @@
+{
+  "measured_source": "9be29920c71f072c69e87c367809a3b2f989d792",
+  "integration_source_commit": "738627aec8bc6abbb6a201d1c7588883aeb2bf11",
+  "inventory_commit": "35a73802387f89521f8c50e8206e12fa237169b5",
+  "run_id": "41635873553",
+  "plan_sha256": "0d65b12f5ba75739ffacfc0ca83ca97e62ed1b8d65060fb41f82dfd7547e607c",
+  "source_and_tests_exactly_match": true,
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "faster": 6
+  },
+  "correctness": {
+    "unit": 59,
+    "comparator": 98,
+    "actual_gpu": 100
+  },
+  "gpu_source_sha256": "0988454e996346282e343f09d534d2954e3d6c7ec87a88b9821d307e87f3a116",
+  "inventory_tests": 8,
+  "report_imported": true,
+  "report_sha256": "630591eadeed99d35e4d98c9d3eeb909e1889489557fef5d05327b16c03fd5c4",
+  "baseline_rows_updated": 2,
+  "baseline_rows_preserved": 800,
+  "builder_slots_updated": 4,
+  "builder_slots_preserved": 1540,
+  "browser_all802_csv_and_builder_values_verified": true,
+  "javascript_errors": [],
+  "report_archives": {
+    "before.html": {
+      "sha256": "4d38b2d12928fe5f6be53c012f5ca499352c71ec5edf9e1f5d655f50ba145cb5",
+      "archive": "benchmarks/results/remaining-indicators/tsi-compact-ema-integration-20261103/before.html.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "7e28b7c6a228bb23ebe874b5a976e608612685a8d493f0845d3f79f3788e7b35",
+      "archive": "benchmarks/results/remaining-indicators/tsi-compact-ema-integration-20261103/browser-verification.json.gz"
+    },
+    "candidate.html": {
+      "sha256": "630591eadeed99d35e4d98c9d3eeb909e1889489557fef5d05327b16c03fd5c4",
+      "archive": "benchmarks/results/remaining-indicators/tsi-compact-ema-integration-20261103/candidate.html.gz"
+    },
+    "imported.json": {
+      "sha256": "f66ecfa890e0f630c6e1a6133866c60295940bd114871735791facb8dbe9855e",
+      "archive": "benchmarks/results/remaining-indicators/tsi-compact-ema-integration-20261103/imported.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "274316ddb97eab372bee755b9c96b81d278de35a4c39dc486920d18ab610f9aa",
+      "archive": "benchmarks/results/remaining-indicators/tsi-compact-ema-integration-20261103/measurement.json.gz"
+    },
+    "refreshed-baseline.png": {
+      "sha256": "d645aeb1c08effba9bcea5cf55089dc12628044f9dd66cae0d4bfc76e323df07",
+      "archive": "benchmarks/results/remaining-indicators/tsi-compact-ema-integration-20261103/refreshed-baseline.png"
+    },
+    "staged.json": {
+      "sha256": "35885527e62a7f707bd0bc6d47f041026797331134de8d87fd4ea6c984ba30f1",
+      "archive": "benchmarks/results/remaining-indicators/tsi-compact-ema-integration-20261103/staged.json.gz"
+    },
+    "updated-pair-details.png": {
+      "sha256": "d60848354b872b5afca17e0a30aacbefe7b9b542ab10a751174212747f511a2d",
+      "archive": "benchmarks/results/remaining-indicators/tsi-compact-ema-integration-20261103/updated-pair-details.png"
+    },
+    "verify-hosted-certified-report-20261101.py": {
+      "sha256": "f1112bb2e981aa1fa68e0a41e917e423bcd8fd0856a40df97ccd6567986a7cda",
+      "archive": "benchmarks/results/remaining-indicators/tsi-compact-ema-integration-20261103/verify-hosted-certified-report-20261101.py.gz"
+    },
+    "import-hosted-certified-report-20261101.py": {
+      "sha256": "380745f04a0b07f71a33dd049bdf1f3392ff9a388f5cda9849c0ae3bda66be75",
+      "archive": "benchmarks/results/remaining-indicators/tsi-compact-ema-integration-20261103/import-hosted-certified-report-20261101.py.gz"
+    },
+    "report.py": {
+      "sha256": "ec5151d32284558921f0d3aee547f9b18e5599acd5e506f1348946adf7a29853",
+      "archive": "benchmarks/results/remaining-indicators/tsi-compact-ema-integration-20261103/report.py.gz"
+    }
+  },
+  "overall_goal_complete": false
+}

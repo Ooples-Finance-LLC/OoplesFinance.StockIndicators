@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "13872205c7b47bf6e26318a35e48ac28d0fa40eae1851e5599afd5980a196faf",
+    "archive": "benchmarks/results/remaining-indicators/classic-ppo-normalization-report-integration-20261104/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "0901247091c004d660eb1cc58be080f32b6495ba62261ed5a8cd5202c6a6ef82",
+    "archive": "benchmarks/results/remaining-indicators/classic-ppo-normalization-report-integration-20261104/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "7a68623cc4ebf9789e2301940bebbf4f04d921777f6cb66b4c3b48a1b5bfeb2e",
+    "archive": "benchmarks/results/remaining-indicators/classic-ppo-normalization-report-integration-20261104/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "ebb9047929959af2290efbd9beea1201d471d20ad1bfd3282c8ac8eea84b712b",
+    "archive": "benchmarks/results/remaining-indicators/classic-ppo-normalization-report-integration-20261104/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "24e9857378dd588bb9305cc4baf162519a8c1caf6249e752f746735349271fb2",
+    "archive": "benchmarks/results/remaining-indicators/classic-ppo-normalization-report-integration-20261104/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "775211c62db29b4819132b7b9defb7a6af23361a7f542caad0d00f5d8a805d27",
+    "archive": "benchmarks/results/remaining-indicators/classic-ppo-normalization-report-integration-20261104/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "bc3ee0104749bd733ceee3055e21ad6a4084d71087dcec32de96a2cc9b801b3a",
+    "archive": "benchmarks/results/remaining-indicators/classic-ppo-normalization-report-integration-20261104/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "6d5913ad8ecf19c84cec544f15edaab47b3bf662f90a6450978f1975b7be79ce",
+    "archive": "benchmarks/results/remaining-indicators/classic-ppo-normalization-report-integration-20261104/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "dc4e2693bd8014192721d23824acbf902610fffd3a502a49b293df81e8e12559",
+    "archive": "benchmarks/results/remaining-indicators/classic-ppo-normalization-report-integration-20261104/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "efb72fa16b3e063e5d8432a7826606fa272825d10c4b3447f0a75e925baa69c8",
+    "archive": "benchmarks/results/remaining-indicators/classic-ppo-normalization-report-integration-20261104/updated-pair-details.png.gz"
+  }
+}

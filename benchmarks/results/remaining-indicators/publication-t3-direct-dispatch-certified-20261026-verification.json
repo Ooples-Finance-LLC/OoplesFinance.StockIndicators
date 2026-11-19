@@ -1,0 +1,65 @@
+{
+  "input_head": "a2bfcf399f454713f7fc876d1032c7dea9bd7196",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/ValuesBarExecution.cs"
+  ],
+  "batch_note": "Local T3 concrete dispatch avoids repeated type tests and redundant caller scratch clearing. Tillson Update clears the complete span before state mutation. Preserve output copies, exception/input order, seed/suppression, reset and mixed roots. Shared execution and representative A/D regressions required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-26T23:22:02.646387+00:00",
+  "unit": {
+    "passed": 57,
+    "class_counts": {
+      "TillsonFloatingSmoothingTests": 7,
+      "TillsonWordBinadeTests": 2,
+      "CertifiedTillsonTests": 17,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "TillsonSharedExecutionTests": 12,
+      "CompactAccumulationDistributionExecutionTests": 3,
+      "SharedRecursiveStateTests": 8,
+      "TillsonWordSmoothingTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-direct-dispatch\\unit\\unit.trx",
+    "sha256": "1c3e3691f8bfd86f9e46e145567d7a97713fc9c859dd1ff5d96a52ef20704010",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-direct-dispatch-certified-20261026-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 51,
+    "class_counts": {
+      "AccumulationDistributionComparisonTests": 17,
+      "SharedTillsonBenchmarkTests": 16,
+      "TillsonComparisonTests": 10,
+      "SharedAdlDetailsFixtureTests": 8
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-direct-dispatch\\parity\\parity.trx",
+    "sha256": "a5519b9aa48db171e06c29f9a5d86713f21c8d765cc4275f86285e7ab863a2e8",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-direct-dispatch-certified-20261026-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-direct-dispatch-20261026\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9e33cb5dffd5f74b2e787e8d51a44b083a4ded497ae763bda4d803cc00a9d967",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-direct-dispatch-20261026\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9e33cb5dffd5f74b2e787e8d51a44b083a4ded497ae763bda4d803cc00a9d967",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-direct-dispatch-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9e33cb5dffd5f74b2e787e8d51a44b083a4ded497ae763bda4d803cc00a9d967",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-direct-dispatch-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9e33cb5dffd5f74b2e787e8d51a44b083a4ded497ae763bda4d803cc00a9d967"
+  },
+  "source_fingerprint_sha256": "fdf66f1bac75b2fc5924ac5f15b197b6ab1503ff01bf1740ca6c67581065b916",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Local T3 concrete dispatch avoids repeated type tests and redundant caller scratch clearing. Tillson Update clears the complete span before state mutation. Preserve output copies, exception/input order, seed/suppression, reset and mixed roots. Shared execution and representative A/D regressions required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

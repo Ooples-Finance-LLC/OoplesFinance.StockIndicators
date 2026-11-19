@@ -7,19 +7,26 @@ namespace OoplesFinance.StockIndicators.Helpers;
 internal sealed class KendallCorrelationWindow : IDisposable
 {
     private readonly ExactLinearFitWindow _fit;
+    private readonly int _length;
     private readonly PooledRingBuffer<double> _prices;
     private readonly PooledRingBuffer<BigInteger> _fitted;
-    internal KendallCorrelationWindow(int length)
+    internal KendallCorrelationWindow(int length) : this(length, int.MaxValue) { }
+    internal KendallCorrelationWindow(int length, int maximumObservations)
     {
-        length = Math.Max(1, length);
-        _fit = new ExactLinearFitWindow(length);
-        _prices = new PooledRingBuffer<double>(length); _fitted = new PooledRingBuffer<BigInteger>(length);
+        _length = Math.Max(1, length);
+        var capacity = Math.Min(_length, Math.Max(1, maximumObservations));
+        // The bounded form is for a complete batch of at most maximumObservations bars.
+        // OLS uses observed history; Kendall retains the original zero-padding period.
+        _fit = new ExactLinearFitWindow(capacity);
+        _prices = new PooledRingBuffer<double>(capacity); _fitted = new PooledRingBuffer<BigInteger>(capacity);
     }
     internal double Next(double price, bool commit)
     {
+        if (_prices.Capacity < _length && _prices.Count == _prices.Capacity)
+            throw new InvalidOperationException("The bounded Kendall history has reached its observation limit.");
         var fitted = _fit.Next(price, commit).RoundedLastUnits;
         var count = Math.Min(_prices.Capacity, _prices.Count + 1);
-        var padding = _prices.Capacity - count;
+        var padding = _length - count;
         long score = 0;
         for (var j = 0; j < count; j++)
         {
@@ -33,7 +40,7 @@ internal sealed class KendallCorrelationWindow : IDisposable
                 score += p.CompareTo(otherPrice) * f.CompareTo(otherFit);
             }
         }
-        var pairs = (long)_prices.Capacity * (_prices.Capacity - 1) / 2;
+        var pairs = (long)_length * (_length - 1) / 2;
         var result = pairs == 0 ? 0 : ExactMeanAccumulator.UnitRatio(new BigInteger(score) << 1074, new BigInteger(pairs));
         if (commit) { _prices.TryAdd(price, out _); _fitted.TryAdd(fitted, out _); }
         return result;

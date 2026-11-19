@@ -45,9 +45,58 @@ public sealed class KlingerVolumeWithSignal : MultiOutputIndicatorBase, IVolumeI
                 _ => value.Signal.HasValue ? 1d : 0
             }).ToArray(), IndicatorErrorBudget.Exact));
 
+#if !NETFRAMEWORK
+    internal sealed class CertifiedAverage(int period)
+    {
+        private readonly CompactMacdValue.EmaRecurrence _recurrence = new(period);
+        private long _count;
+        private CompactMacdValue _sum, _value;
+        private double _previous;
+
+        public void Reset()
+        {
+            _count = 0;
+            _sum = _value = default;
+            _previous = 0;
+        }
+
+        public CompactMacdValue? Add(CompactMacdValue input)
+        {
+            if (_count < period)
+            {
+                _sum += input;
+                if (++_count < period) return null;
+                _value = _sum.Round(period);
+                _sum = default;
+            }
+            else
+            {
+                double ordinary = input.Publish();
+                if (double.IsFinite(ordinary) && double.IsFinite(_previous)
+                    && EmaDifferenceSignal.VolumeAverage.TryBlend(_previous, ordinary, period, out var rounded))
+                {
+                    _previous = rounded;
+                    return _value = CompactMacdValue.Of(rounded);
+                }
+                _value = _recurrence.Advance(_value, input);
+            }
+            // Keep the compact value authoritative when its published double
+            // overflows: a later recurrence can cancel the extended stage.
+            _previous = _value.Publish();
+            return _value;
+        }
+    }
+#endif
+
     internal sealed class State(int fastPeriod, int slowPeriod, int signalPeriod) : IMultiOutputState
     {
-        private readonly SeededDyadicEma.State _fast = new(fastPeriod), _slow = new(slowPeriod), _signal = new(signalPeriod);
+#if !NETFRAMEWORK
+        private readonly CertifiedAverage _fast = new(fastPeriod),
+            _slow = new(slowPeriod), _signal = new(signalPeriod);
+#else
+        private readonly EmaDifferenceSignal.CompactAverage _fast = new(fastPeriod, false),
+            _slow = new(slowPeriod, false), _signal = new(signalPeriod, false);
+#endif
         private JurikDyadic _previousBasis, _previousRange, _cumulative, _force;
         private int _seen, _direction;
         public void Reset()
@@ -88,14 +137,15 @@ public sealed class KlingerVolumeWithSignal : MultiOutputIndicatorBase, IVolumeI
                     _force = SeededDyadicEma.RoundedRatio(residual, denominator);
                 }
                 // A zero cumulative range otherwise retains the preceding force.
-                bool fastReady = _fast.Add(_force, out var fast);
-                bool slowReady = _slow.Add(_force, out var slow);
-                if (fastReady && slowReady)
+                var force = CompactMacdValue.FromRounded(_force);
+                var fast = _fast.Add(force);
+                var slow = _slow.Add(force);
+                if (fast.HasValue && slow.HasValue)
                 {
-                    fast.Subtract(slow); var oscillator = fast.Rounded();
-                    bool signalReady = _signal.Add(oscillator, out var signal);
-                    output[0] = oscillator.Mean(1); output[2] = 1;
-                    if (signalReady) { output[1] = signal.Mean(1); output[3] = 1; }
+                    var oscillator = (fast.Value - slow.Value).Round(1L);
+                    var signal = _signal.Add(oscillator);
+                    output[0] = oscillator.Publish(); output[2] = 1;
+                    if (signal.HasValue) { output[1] = signal.Value.Publish(); output[3] = 1; }
                 }
             }
             else _seen++;

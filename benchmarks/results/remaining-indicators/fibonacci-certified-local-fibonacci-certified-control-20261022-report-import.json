@@ -1,0 +1,60 @@
+{
+  "before_sha256": "974e7080381bac20dd6bb1291f3cbe5514a17eecd354dab0a4f640a7c1198e32",
+  "candidate_sha256": "064c89f5e5856c816e90259df139f95e446d8b374767b3db2d1959aab84218d1",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 0,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 0,
+  "verdicts": {
+    "faster": 534,
+    "slower": 643,
+    "inconclusive": 19
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-fibonacci-certified-control-20261022",
+  "imported_utc": "2026-10-22T16:03:58.812243+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "2e8ac10535e00fc3b1ee4d3350fcd36015b76de1a204436962728a57cf9d7754",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-certified-local-fibonacci-certified-control-20261022-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "fff5a1a7fe59f8ab3a6b0062e2e49432de44f7a64d8bdac1a658905a1b1252e0",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-certified-local-fibonacci-certified-control-20261022-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "2b42c95b2686a9441a7a98d6336d4f1380b9f07df21036b96b70dfc1c457a223",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-certified-local-fibonacci-certified-control-20261022-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "135ad541d1d6df89c32b65d9e628d4d88acd0948842137c566bc02a4c0760095",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-certified-local-fibonacci-certified-control-20261022-measurement.json.gz"
+    },
+    "stage-approved-certified-report.py": {
+      "sha256": "1d180491377382a9ce8644578cf2c383188670ebb033285ca808928a749859a8",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-certified-local-fibonacci-certified-control-20261022-stage-approved-certified-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-certified-local-fibonacci-certified-control-20261022-verify-approved-certified-report.py.gz"
+    },
+    "import-approved-certified-report.py": {
+      "sha256": "b6162f5512a80ca252a9d3655a3022b6e617c5cd5dc119e0c800e78890847ee5",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-certified-local-fibonacci-certified-control-20261022-import-approved-certified-report.py.gz"
+    },
+    "archive-approved-certified-control.py": {
+      "sha256": "b9456e0aefcbc1e6184b833ef99df8c1cf62ae122e04cafb3f9bd62489132105",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-certified-local-fibonacci-certified-control-20261022-archive-approved-certified-control.py.gz"
+    },
+    "archive-combined-certified-integration.py": {
+      "sha256": "b2f8abfeeb66fe6b693edae3b78dfae6a637548c04b5568d70eee0d350e4908b",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-certified-local-fibonacci-certified-control-20261022-archive-combined-certified-integration.py.gz"
+    },
+    "archive-approved-certified-report.py": {
+      "sha256": "84a1384360d6935dfef02f1500ccd0d23a11ed0f9920eec32080a31252d5ff76",
+      "archive": "benchmarks/results/remaining-indicators/fibonacci-certified-local-fibonacci-certified-control-20261022-archive-approved-certified-report.py.gz"
+    }
+  }
+}

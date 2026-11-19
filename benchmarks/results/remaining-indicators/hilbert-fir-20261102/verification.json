@@ -1,0 +1,67 @@
+{
+  "source": "4830d7ab530160b4cebb18dd41bae0ea9e8c7150",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-fir-20261102",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0
+    },
+    "restore-comparator": {
+      "exit_code": 0
+    },
+    "build-and-gpu": {
+      "exit_code": 0
+    },
+    "unit": {
+      "exit_code": 0
+    },
+    "parity": {
+      "exit_code": 0
+    }
+  },
+  "compiler_process_isolation": true,
+  "active": null,
+  "unit": {
+    "passed": 452,
+    "classes": {
+      "HilbertRoundedKernelTests": 6,
+      "CompactHilbertPhaseTests": 11,
+      "CompactPhaseAdaptiveTests": 9,
+      "SharedGeneratedHilbertFamilyTests": 83,
+      "HilbertTrendlineSharedExecutionTests": 11,
+      "ClassicHilbertNumericalTests": 70,
+      "HilbertCycleNumericalTests": 262
+    },
+    "sha256": "156467488d1d0051c2500259c4ebbf1f894c3b953675831fabe3e67b6e9433cb"
+  },
+  "parity": {
+    "passed": 233,
+    "classes": {
+      "DelayedHilbertTrendComparisonTests": 8,
+      "HilbertCycleSignalComparisonTests": 11,
+      "HilbertCycleComparisonTests": 9,
+      "SeededHilbertTrendComparisonTests": 5,
+      "OldestHilbertComparisonTests": 5,
+      "SharedTaHilbertNativeBenchmarkTests": 54,
+      "SharedHilbertTrendlineBenchmarkTests": 10,
+      "SharedHilbertSignalBenchmarkTests": 32,
+      "SharedHilbertBenchmarkTests": 13,
+      "RemainingHilbertFamilyBenchmarkTests": 20,
+      "RemainingMamaPairBenchmarkTests": 8,
+      "RemainingMamaDerivedBenchmarkTests": 16,
+      "ClassicAverageComparisonTests": 15,
+      "ClassicMacdComparisonTests": 16,
+      "ClassicOscillatorComparisonTests": 11
+    },
+    "sha256": "e821495f97b48a38787e6412ed5e048d687f684b49153edc2dfc27754c36876a"
+  },
+  "status": "correctness-complete",
+  "gpu_passed": 100,
+  "source_fingerprint": "cc16bf6bf5a8d28028353da24e6ff64d3d5628db2967626f2528770d6462e194",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "d34cc183b9735918e570d11d268b1adb76cf08f6ad06a02639b115b78483f811",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "d34cc183b9735918e570d11d268b1adb76cf08f6ad06a02639b115b78483f811",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "d34cc183b9735918e570d11d268b1adb76cf08f6ad06a02639b115b78483f811",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "d34cc183b9735918e570d11d268b1adb76cf08f6ad06a02639b115b78483f811"
+  },
+  "note": "Focused exact-rounding, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}

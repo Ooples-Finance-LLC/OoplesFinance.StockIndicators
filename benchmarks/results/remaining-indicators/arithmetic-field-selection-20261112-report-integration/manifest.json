@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "7ce7a6ab46f7b862c124fecb7ef313bc2b6a906312ea4ac6963f217507cdd501",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-field-selection-20261112-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "28717bbd5adb5635f310b9d003970fc1e1677e39022efd8e714bc57d52aeee92",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-field-selection-20261112-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "0f172570098e5d8e7cc37df39245b4bbea226e4c023fa6a4cae096ee9f78fa63",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-field-selection-20261112-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "cb8c603b26918a37f3aedf0fe0c3310d68f993cc5a264e863a67fe5c8a5f75f1",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-field-selection-20261112-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "dc7ade50a022a74e4d25d2b4c74d726f887e0f9558a19951a406ea86b18d0c2c",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-field-selection-20261112-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "5d61aee8cfa885650f8245f6609cd208d844ef090816a186e65d708df73651c3",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-field-selection-20261112-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "a4b5ddfe89e7d26195193bdeee0aa5e50fa09fc5825921a85784012a502b5d95",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-field-selection-20261112-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "10491a2e3bd89d31aa5b5be1dbd527912497aab241ac87c43b310d9cb6d891fd",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-field-selection-20261112-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "84624e6e9a6dba5bd7128a6ebf9c9e44e684e737b9df3a6a99be0735d23ce719",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-field-selection-20261112-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "5e9ac88af9942ea6c44857c53d76aeb19649c02a0c95f9ed36a779e596447d6f",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-field-selection-20261112-report-integration/updated-pair-details.png.gz"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "input_head": "3d34d55b15b088a0f391ed35cdafddabfdcc9ecd",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/RangeAccelerationBands.cs"
+  ],
+  "batch_note": "Replace each private three-element BigInteger history array with an inline value tuple. Exact values, products, rolling accumulation order and output publication unchanged. Removes one array allocation per bar; existing boundary, long-history, worker/reset and native fixture regressions. Performance pending.",
+  "step": "complete",
+  "updated_utc": "2026-10-30T10:39:38.741251+00:00",
+  "unit": {
+    "passed": 12,
+    "class_counts": {
+      "AccelerationSharedExecutionTests": 11,
+      "AccelerationGcdScaleTests": 1
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\acceleration-inline-history\\unit\\unit.trx",
+    "sha256": "4648a78e6e1f10072637148fcda3b1755ebe38a758fe28febffbc8f4613f91fc",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-acceleration-inline-history-certified-20261029-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 11,
+    "class_counts": {
+      "RangeAccelerationComparisonTests": 9,
+      "SharedAccelerationBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\acceleration-inline-history\\parity\\parity.trx",
+    "sha256": "2d53c7aecfd06de01df094c264787ed88a43625085453024786ca2214c81ed9f",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-acceleration-inline-history-certified-20261029-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-acceleration-inline-history-20261029\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1ca6f7c6b1e43ac91b389f57efd82527f7b4691a84b73ec3c95eb14690cce5d2",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-acceleration-inline-history-20261029\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1ca6f7c6b1e43ac91b389f57efd82527f7b4691a84b73ec3c95eb14690cce5d2",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-acceleration-inline-history-20261029\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1ca6f7c6b1e43ac91b389f57efd82527f7b4691a84b73ec3c95eb14690cce5d2",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-acceleration-inline-history-20261029\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "1ca6f7c6b1e43ac91b389f57efd82527f7b4691a84b73ec3c95eb14690cce5d2"
+  },
+  "source_fingerprint_sha256": "84b9749f850ebcacbf5faaf1087177015d144d5b67f60414a2f2b2b3707588fb",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Replace each private three-element BigInteger history array with an inline value tuple. Exact values, products, rolling accumulation order and output publication unchanged. Removes one array allocation per bar; existing boundary, long-history, worker/reset and native fixture regressions. Performance pending. Correctness checks passed; controlled performance remains pending."
+}

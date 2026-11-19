@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "9732a804f8f02fc2aa2a39f8f7da9d70958a0a7a9b5d2d0b862ad09e1bf67cf0",
+    "archive": "benchmarks/results/remaining-indicators/qema-harness-aligned-combination-20261113-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "d9527a006db4cdb882034848faff6c7ba0f92d68c95726f59b749a46615c2197",
+    "archive": "benchmarks/results/remaining-indicators/qema-harness-aligned-combination-20261113-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "1a91241911ddee3db559bbdacbf141a002552751b30c89d8bc0ab134ca99cbbc",
+    "archive": "benchmarks/results/remaining-indicators/qema-harness-aligned-combination-20261113-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "f7ed9d261280fb6f9f85ef2d000ee45da4f1aa98b55c994cc4cd2dc3c9afca82",
+    "archive": "benchmarks/results/remaining-indicators/qema-harness-aligned-combination-20261113-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "1cab2c636bc3a9ba2c11d89b531f7c9e453061f8f243fce2f002aade52362913",
+    "archive": "benchmarks/results/remaining-indicators/qema-harness-aligned-combination-20261113-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "738bd21941e11dec44d575511e2848862c2ab2115d131ffdb9103a979e270d65",
+    "archive": "benchmarks/results/remaining-indicators/qema-harness-aligned-combination-20261113-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "a24079a287f3a22d39911d7a694cd218fad3002c77f9fd83a57ad91ab2f99be8",
+    "archive": "benchmarks/results/remaining-indicators/qema-harness-aligned-combination-20261113-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "1a804cbff83ebfdd23395307368bb125f2b25b2be0ba8fa69bf5bbae554a7f6c",
+    "archive": "benchmarks/results/remaining-indicators/qema-harness-aligned-combination-20261113-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "fe3da2908282c46c78cd10904ca9c86924e70cd284284a6603aa57ce5ecca99e",
+    "archive": "benchmarks/results/remaining-indicators/qema-harness-aligned-combination-20261113-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "0b46fee5c19a45d1a2dd8592b55993d09dbf315f75cda92028ecdbe9bfd5ae85",
+    "archive": "benchmarks/results/remaining-indicators/qema-harness-aligned-combination-20261113-report-integration/updated-pair-details.png.gz"
+  }
+}

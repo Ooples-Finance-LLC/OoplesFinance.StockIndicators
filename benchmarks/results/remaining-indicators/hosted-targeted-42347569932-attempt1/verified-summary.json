@@ -1,0 +1,1845 @@
+{
+  "all_cases_verified": true,
+  "phase": "targeted",
+  "case_count": 90,
+  "decision_count": 18,
+  "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+  "sources": {
+    "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+    "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+  },
+  "decisions": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.HtDcPhase",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.95592,
+        0.94499
+      ],
+      "new_means_ms": [
+        0.91277,
+        0.90227
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 1000
+      }
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.HtDcPhase",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        9.3624625,
+        9.614744444444444
+      ],
+      "new_means_ms": [
+        9.09623,
+        9.042588888888888
+      ],
+      "verdict": "faster",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 1000
+      }
+    },
+    {
+      "fixture": "SharedTaHilbertNativeBenchmarks",
+      "pair": "TaLib.Functions.HtDcPhase",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.8213546875,
+        0.8172530381944445
+      ],
+      "new_means_ms": [
+        0.7896302734375,
+        0.7862654513888889
+      ],
+      "verdict": "faster",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "SharedTaHilbertNativeBenchmarks",
+      "pair": "TaLib.Functions.HtDcPhase",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.81628525390625,
+        0.8143405381944445
+      ],
+      "new_means_ms": [
+        0.7835490451388889,
+        0.776442724609375
+      ],
+      "verdict": "faster",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "SharedTaHilbertNativeBenchmarks",
+      "pair": "TaLib.Functions.HtDcPhase",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        9.115234343434343,
+        9.1784
+      ],
+      "new_means_ms": [
+        9.056205208333333,
+        8.859794444444447
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "SharedTaHilbertNativeBenchmarks",
+      "pair": "TaLib.Functions.HtDcPhase",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        9.21477272727273,
+        9.226662499999998
+      ],
+      "new_means_ms": [
+        9.107343434343434,
+        8.945308333333333
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.HtSine",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.6992111111111111,
+        0.6844666666666667
+      ],
+      "new_means_ms": [
+        0.6845944444444445,
+        0.6704777777777777
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+        },
+        "shard": 1,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 1000
+      }
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.HtSine",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        6.97573,
+        7.101755555555556
+      ],
+      "new_means_ms": [
+        6.960877777777778,
+        6.9292375
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+        },
+        "shard": 1,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 1000
+      }
+    },
+    {
+      "fixture": "SharedTaHilbertNativeBenchmarks",
+      "pair": "TaLib.Functions.HtSine",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.60067125,
+        0.5863865017361112
+      ],
+      "new_means_ms": [
+        0.5757345486111112,
+        0.5763990234375
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+        },
+        "shard": 1,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "SharedTaHilbertNativeBenchmarks",
+      "pair": "TaLib.Functions.HtSine",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.574241328125,
+        0.5981490885416666
+      ],
+      "new_means_ms": [
+        0.561669921875,
+        0.5567872395833334
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+        },
+        "shard": 1,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "SharedTaHilbertNativeBenchmarks",
+      "pair": "TaLib.Functions.HtSine",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        6.662269642857143,
+        6.931725833333333
+      ],
+      "new_means_ms": [
+        6.40622,
+        6.54290625
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+        },
+        "shard": 1,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "SharedTaHilbertNativeBenchmarks",
+      "pair": "TaLib.Functions.HtSine",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        6.619252666666666,
+        6.8396285714285705
+      ],
+      "new_means_ms": [
+        6.445940625,
+        6.501111805555556
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+        },
+        "shard": 1,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.HtTrendMode",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        1.4050333333333334,
+        1.41231
+      ],
+      "new_means_ms": [
+        1.4512,
+        1.43854
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+        },
+        "shard": 2,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 1000
+      }
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Functions.HtTrendMode",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        14.302811111111112,
+        14.273555555555555
+      ],
+      "new_means_ms": [
+        14.626644444444445,
+        14.183125
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+        },
+        "shard": 2,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 1000
+      }
+    },
+    {
+      "fixture": "SharedTaHilbertTrendModeBenchmarks",
+      "pair": "TaLib.Functions.HtTrendMode",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        1.3404846153846155,
+        1.3254258680555555
+      ],
+      "new_means_ms": [
+        1.3315037037037039,
+        1.331223846153846
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+        },
+        "shard": 2,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "SharedTaHilbertTrendModeBenchmarks",
+      "pair": "TaLib.Functions.HtTrendMode",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        1.31092578125,
+        1.29900341796875
+      ],
+      "new_means_ms": [
+        1.382826328125,
+        1.30822099609375
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+        },
+        "shard": 2,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "SharedTaHilbertTrendModeBenchmarks",
+      "pair": "TaLib.Functions.HtTrendMode",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        14.1374875,
+        14.030634722222223
+      ],
+      "new_means_ms": [
+        14.13383125,
+        14.020749206349205
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+        },
+        "shard": 2,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "SharedTaHilbertTrendModeBenchmarks",
+      "pair": "TaLib.Functions.HtTrendMode",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        14.032607936507937,
+        14.015258333333334
+      ],
+      "new_means_ms": [
+        14.095408928571427,
+        14.220628125
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42347569932",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+        },
+        "shard": 2,
+        "phase": "targeted",
+        "sources": {
+          "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+          "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+        },
+        "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+        "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+        "warmup_count": 10
+      }
+    }
+  ],
+  "verdicts": {
+    "inconclusive": 15,
+    "faster": 3
+  },
+  "accepted": true,
+  "final_candidate_round": 2,
+  "final_candidate_rows": {
+    "LibraryPairBenchmarks": [
+      {
+        "pair": "TaLib.Functions.HtDcPhase",
+        "bars": 1000,
+        "method": "Ooples",
+        "mean_ns": 902270,
+        "lower_ns": 878039.6807623358,
+        "upper_ns": 926500.3192376642,
+        "samples": 10,
+        "allocated_bytes": 112704,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtDcPhase",
+        "bars": 1000,
+        "method": "Competitor",
+        "mean_ns": 425975,
+        "lower_ns": 415825.9538572918,
+        "upper_ns": 436124.0461427082,
+        "samples": 8,
+        "allocated_bytes": 38728,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtDcPhase",
+        "bars": 10000,
+        "method": "Ooples",
+        "mean_ns": 9042588.888888888,
+        "lower_ns": 8952435.327079762,
+        "upper_ns": 9132742.450698014,
+        "samples": 9,
+        "allocated_bytes": 1060104,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtDcPhase",
+        "bars": 10000,
+        "method": "Competitor",
+        "mean_ns": 4421270,
+        "lower_ns": 4388822.346284999,
+        "upper_ns": 4453717.653715001,
+        "samples": 10,
+        "allocated_bytes": 335392,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtSine",
+        "bars": 1000,
+        "method": "Ooples",
+        "mean_ns": 670477.7777777778,
+        "lower_ns": 648954.6279804755,
+        "upper_ns": 692000.92757508,
+        "samples": 9,
+        "allocated_bytes": 170456,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+          },
+          "shard": 1,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtSine",
+        "bars": 1000,
+        "method": "Competitor",
+        "mean_ns": 378287.5,
+        "lower_ns": 377606.22407559206,
+        "upper_ns": 378968.77592440794,
+        "samples": 8,
+        "allocated_bytes": 70976,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+          },
+          "shard": 1,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtSine",
+        "bars": 10000,
+        "method": "Ooples",
+        "mean_ns": 6929237.5,
+        "lower_ns": 6872191.210688905,
+        "upper_ns": 6986283.789311095,
+        "samples": 8,
+        "allocated_bytes": 1628792,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+          },
+          "shard": 1,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtSine",
+        "bars": 10000,
+        "method": "Competitor",
+        "mean_ns": 4088310,
+        "lower_ns": 4034572.388951197,
+        "upper_ns": 4142047.611048803,
+        "samples": 10,
+        "allocated_bytes": 664016,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+          },
+          "shard": 1,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtTrendMode",
+        "bars": 1000,
+        "method": "Ooples",
+        "mean_ns": 1438540,
+        "lower_ns": 1402316.7066235356,
+        "upper_ns": 1474763.2933764644,
+        "samples": 10,
+        "allocated_bytes": 115392,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+          },
+          "shard": 2,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtTrendMode",
+        "bars": 1000,
+        "method": "Competitor",
+        "mean_ns": 486366.6666666667,
+        "lower_ns": 466898.4429560662,
+        "upper_ns": 505834.89037726715,
+        "samples": 9,
+        "allocated_bytes": 38088,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+          },
+          "shard": 2,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtTrendMode",
+        "bars": 10000,
+        "method": "Ooples",
+        "mean_ns": 14183125,
+        "lower_ns": 14066946.48258975,
+        "upper_ns": 14299303.51741025,
+        "samples": 8,
+        "allocated_bytes": 1066104,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+          },
+          "shard": 2,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtTrendMode",
+        "bars": 10000,
+        "method": "Competitor",
+        "mean_ns": 5002160,
+        "lower_ns": 4968264.60351023,
+        "upper_ns": 5036055.39648977,
+        "samples": 10,
+        "allocated_bytes": 297744,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+          },
+          "shard": 2,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 1000
+        }
+      }
+    ],
+    "SharedTaHilbertNativeBenchmarks": [
+      {
+        "pair": "TaLib.Functions.HtDcPhase",
+        "bars": 1000,
+        "method": "BuilderFull",
+        "mean_ns": 786265.4513888889,
+        "lower_ns": 777127.0141072444,
+        "upper_ns": 795403.8886705333,
+        "samples": 9,
+        "allocated_bytes": 70594,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtDcPhase",
+        "bars": 1000,
+        "method": "BuilderLatestOnly",
+        "mean_ns": 776442.724609375,
+        "lower_ns": 772216.997557307,
+        "upper_ns": 780668.451661443,
+        "samples": 8,
+        "allocated_bytes": 21857,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtDcPhase",
+        "bars": 1000,
+        "method": "NativeSingle",
+        "mean_ns": 360665.9830729167,
+        "lower_ns": 358498.5491572535,
+        "upper_ns": 362833.41698857985,
+        "samples": 9,
+        "allocated_bytes": 8570,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtDcPhase",
+        "bars": 1000,
+        "method": "NativeParallel",
+        "mean_ns": 552344.6484375,
+        "lower_ns": 533322.8184110512,
+        "upper_ns": 571366.4784639488,
+        "samples": 10,
+        "allocated_bytes": 30919,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtDcPhase",
+        "bars": 10000,
+        "method": "BuilderFull",
+        "mean_ns": 8859794.444444446,
+        "lower_ns": 8831580.93765822,
+        "upper_ns": 8888007.951230671,
+        "samples": 9,
+        "allocated_bytes": 647451,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtDcPhase",
+        "bars": 10000,
+        "method": "BuilderLatestOnly",
+        "mean_ns": 8945308.333333334,
+        "lower_ns": 8864265.051453955,
+        "upper_ns": 9026351.615212712,
+        "samples": 8,
+        "allocated_bytes": 166359,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtDcPhase",
+        "bars": 10000,
+        "method": "NativeSingle",
+        "mean_ns": 4346428.125,
+        "lower_ns": 4315786.095934659,
+        "upper_ns": 4377070.154065341,
+        "samples": 8,
+        "allocated_bytes": 80728,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtDcPhase",
+        "bars": 10000,
+        "method": "NativeParallel",
+        "mean_ns": 6185833.333333333,
+        "lower_ns": 5943121.583064982,
+        "upper_ns": 6428545.083601684,
+        "samples": 8,
+        "allocated_bytes": 283422,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "97e7b55dd53945ce816016c3b66cfcf8"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtSine",
+        "bars": 1000,
+        "method": "BuilderFull",
+        "mean_ns": 576399.0234375,
+        "lower_ns": 538235.786806864,
+        "upper_ns": 614562.260068136,
+        "samples": 10,
+        "allocated_bytes": 86861,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+          },
+          "shard": 1,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtSine",
+        "bars": 1000,
+        "method": "BuilderLatestOnly",
+        "mean_ns": 556787.2395833334,
+        "lower_ns": 543758.7440501023,
+        "upper_ns": 569815.7351165644,
+        "samples": 9,
+        "allocated_bytes": 38134,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+          },
+          "shard": 1,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtSine",
+        "bars": 1000,
+        "method": "NativeSingle",
+        "mean_ns": 389197.87109375,
+        "lower_ns": 359851.69174493937,
+        "upper_ns": 418544.05044256063,
+        "samples": 10,
+        "allocated_bytes": 16099,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+          },
+          "shard": 1,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtSine",
+        "bars": 1000,
+        "method": "NativeParallel",
+        "mean_ns": 547146.3324652778,
+        "lower_ns": 528504.2376730295,
+        "upper_ns": 565788.427257526,
+        "samples": 9,
+        "allocated_bytes": 57301,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+          },
+          "shard": 1,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtSine",
+        "bars": 10000,
+        "method": "BuilderFull",
+        "mean_ns": 6542906.25,
+        "lower_ns": 6497487.465965748,
+        "upper_ns": 6588325.034034252,
+        "samples": 9,
+        "allocated_bytes": 807734,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+          },
+          "shard": 1,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtSine",
+        "bars": 10000,
+        "method": "BuilderLatestOnly",
+        "mean_ns": 6501111.805555556,
+        "lower_ns": 6362870.5035216175,
+        "upper_ns": 6639353.107589494,
+        "samples": 9,
+        "allocated_bytes": 326337,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+          },
+          "shard": 1,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtSine",
+        "bars": 10000,
+        "method": "NativeSingle",
+        "mean_ns": 3949180.46875,
+        "lower_ns": 3846627.058696696,
+        "upper_ns": 4051733.878803304,
+        "samples": 8,
+        "allocated_bytes": 160098,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+          },
+          "shard": 1,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtSine",
+        "bars": 10000,
+        "method": "NativeParallel",
+        "mean_ns": 5826345.625,
+        "lower_ns": 5649008.83618093,
+        "upper_ns": 6003682.41381907,
+        "samples": 10,
+        "allocated_bytes": 561470,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 26 Model 2 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "fc26fdcdf6d6428e81c76cbbeaa73c8d"
+          },
+          "shard": 1,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      }
+    ],
+    "SharedTaHilbertTrendModeBenchmarks": [
+      {
+        "pair": "TaLib.Functions.HtTrendMode",
+        "bars": 1000,
+        "method": "BuilderFull",
+        "mean_ns": 1331223.846153846,
+        "lower_ns": 1312574.3910762065,
+        "upper_ns": 1349873.3012314856,
+        "samples": 10,
+        "allocated_bytes": 73402,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+          },
+          "shard": 2,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtTrendMode",
+        "bars": 1000,
+        "method": "BuilderLatestOnly",
+        "mean_ns": 1308220.99609375,
+        "lower_ns": 1297014.6186568232,
+        "upper_ns": 1319427.3735306768,
+        "samples": 8,
+        "allocated_bytes": 24607,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+          },
+          "shard": 2,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtTrendMode",
+        "bars": 1000,
+        "method": "NativeSingle",
+        "mean_ns": 411465.234375,
+        "lower_ns": 402075.40550574777,
+        "upper_ns": 420855.06324425223,
+        "samples": 8,
+        "allocated_bytes": 4838,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+          },
+          "shard": 2,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtTrendMode",
+        "bars": 1000,
+        "method": "NativeParallel",
+        "mean_ns": 628210.1953125,
+        "lower_ns": 602527.2520046112,
+        "upper_ns": 653893.1386203888,
+        "samples": 10,
+        "allocated_bytes": 17815,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+          },
+          "shard": 2,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtTrendMode",
+        "bars": 10000,
+        "method": "BuilderFull",
+        "mean_ns": 14020749.206349205,
+        "lower_ns": 13981939.008732403,
+        "upper_ns": 14059559.403966008,
+        "samples": 9,
+        "allocated_bytes": 650887,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+          },
+          "shard": 2,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtTrendMode",
+        "bars": 10000,
+        "method": "BuilderLatestOnly",
+        "mean_ns": 14220628.125,
+        "lower_ns": 14203658.60576327,
+        "upper_ns": 14237597.64423673,
+        "samples": 8,
+        "allocated_bytes": 169392,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+          },
+          "shard": 2,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtTrendMode",
+        "bars": 10000,
+        "method": "NativeSingle",
+        "mean_ns": 4933075.78125,
+        "lower_ns": 4920429.6807857575,
+        "upper_ns": 4945721.8817142425,
+        "samples": 8,
+        "allocated_bytes": 41005,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+          },
+          "shard": 2,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "TaLib.Functions.HtTrendMode",
+        "bars": 10000,
+        "method": "NativeParallel",
+        "mean_ns": 7091038.636363637,
+        "lower_ns": 6497089.829088307,
+        "upper_ns": 7684987.443638966,
+        "samples": 8,
+        "allocated_bytes": 144513,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42347569932",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "b943086ca1994c9cb406041276d42ca0"
+          },
+          "shard": 2,
+          "phase": "targeted",
+          "sources": {
+            "old": "28f95fce8d54d9e3e0c9d95f43e777dbea2d3d56",
+            "new": "dfe4c9e0e55dbf20cd24ff0ad81101d4a852fae0"
+          },
+          "workflow_head": "f802240a9c03ef15b1592ddc59ad9eb7e69e3fe5",
+          "input_provenance_sha256": "ae5bd63ccfc21999c3ec0edea3606f37bbd0bf1a95ec013c7966bbc25890c13f",
+          "warmup_count": 10
+        }
+      }
+    ]
+  }
+}

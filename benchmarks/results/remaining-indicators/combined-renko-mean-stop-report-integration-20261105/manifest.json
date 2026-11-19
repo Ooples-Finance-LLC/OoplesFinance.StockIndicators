@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "70969e5395a0b52262f852d448283c41fbad05c6bd2f0b6d69b54ef738645efd",
+    "archive": "benchmarks/results/remaining-indicators/combined-renko-mean-stop-report-integration-20261105/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "377690b6f5234d0ce697a87c0c963696053646f4948789ed9f341568a4910396",
+    "archive": "benchmarks/results/remaining-indicators/combined-renko-mean-stop-report-integration-20261105/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "c9f7ad9b9b8947ed78895e98cc6f2426e82d33fa4e11af77a60ca91778c557c1",
+    "archive": "benchmarks/results/remaining-indicators/combined-renko-mean-stop-report-integration-20261105/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "4a2fc2c2d158031a4ccaff2f8a901091d5d51a889a3abc99b06c0f599773fe52",
+    "archive": "benchmarks/results/remaining-indicators/combined-renko-mean-stop-report-integration-20261105/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "a6e4cbd11f8fe54128e50bf08b77a6e1b8b5712cb9528e875ad083822d4d21d0",
+    "archive": "benchmarks/results/remaining-indicators/combined-renko-mean-stop-report-integration-20261105/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "b588c349b1e29d7d00111cc781a1da252ed5734199f3e7d393aa45f5e9c97cb6",
+    "archive": "benchmarks/results/remaining-indicators/combined-renko-mean-stop-report-integration-20261105/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "0caf265c676364610d911e4335df7cfe0da25e66d18fd0901935a836a7699d6b",
+    "archive": "benchmarks/results/remaining-indicators/combined-renko-mean-stop-report-integration-20261105/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "b676a8928a66b37338e0353b559e32f359add7297b09b5666b994ada7f329d5e",
+    "archive": "benchmarks/results/remaining-indicators/combined-renko-mean-stop-report-integration-20261105/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "d0e9f628c8ba942bcd6bbb83dd64a1ef71440493d52d7dfffc88d0555f3eb6cd",
+    "archive": "benchmarks/results/remaining-indicators/combined-renko-mean-stop-report-integration-20261105/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "1a9db1700a3ca005d7e0c8cc7a9aed8324c7b144f00f07f4e19769c23ded2cd6",
+    "archive": "benchmarks/results/remaining-indicators/combined-renko-mean-stop-report-integration-20261105/updated-pair-details.png.gz"
+  }
+}

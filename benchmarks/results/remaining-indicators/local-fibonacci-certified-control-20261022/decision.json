@@ -1,0 +1,99 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "c851480a86b60d7104486959ba057649d2b24ff6",
+    "new": "08ab442eedbc886bd417b65330017572e26634eb"
+  },
+  "candidate_code_source": "ed0701e926c63974c9059ac9358d7ba62689777d",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Fwma",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        10.467288888888888,
+        12.23198
+      ],
+      "new_means_ms": [
+        3.08933,
+        3.03173
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Fwma",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        57.3506,
+        57.890655555555554
+      ],
+      "new_means_ms": [
+        2.76696,
+        2.7046333333333337
+      ],
+      "verdict": "faster"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "a5704585864da36695a3944d19f109bc6ecd3ea0e46f927e546e8f509e9dc47f",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-control-20261022/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "f4cd42be8e6e2ef5f81a1ed087073d54ce42faa3b474045f68e55fd0db1c3445",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-control-20261022/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "0a8c00d298f61f347e5325d3cc06d3875b569270fe54528b0cc1d9473678225b",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-control-20261022/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "b8b722c53fe577a7ee4f7a27677b8d34c622c6ed25c3fd8187e8791340c209fc",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-control-20261022/verified-summary.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "bed7bad56861f0e8802100e0277b68db7620846a362ba1a630c68b718dccc4e5",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-control-20261022/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "9b04ff100be385517bd7ccac58c7928deaeb64f1c20be31b40b24b8aabf53971",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-control-20261022/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "2bbc491600b46857b99ee4414fc360f155f010cb64fc2f0d5a6726071e9a5e87",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-control-20261022/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "4066ab214bd449d5f49268bbb9c781d83edd10358e0520c5df1220c614733dff",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-control-20261022/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "3b69e9e379fc4c1b093ea90b62f82ebdfcd9945e0b99f2bde1a9cb6af2606614",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-control-20261022/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "d08fe4275f7c8ebd5c5b8346bf8e1f7b3e7a5e2c0ee0d125b3ae2671253c9219",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-control-20261022/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "f2712c6fe9ee918bf356ee2670312c82abf5e69716bed647001da8f252bac2c9",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-control-20261022/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "f0397160ca1854985a8125baf9e23b9dbb3c794195de0ac78281601e00756ade",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-certified-control-20261022/round3-old-LibraryPairBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-fibonacci-certified-control.py": "1c168148def4dcea84798c39ea968892ffcb6bb4297a6181488e694097dd4a8c",
+    "verify-fibonacci-certified-control.py": "d7281fe813846a015e90fe7e9f9db76dbb03db4e7ae0b5cdf4f68e708131bb8d"
+  },
+  "report_imported": false,
+  "production_integrated": true,
+  "integration_source": "e02890955fb6ff8ce4f562cfde46488cf5e78eda",
+  "integration_verification": "benchmarks/results/remaining-indicators/publication-combined-integration-certified-20261022-verification.json"
+}

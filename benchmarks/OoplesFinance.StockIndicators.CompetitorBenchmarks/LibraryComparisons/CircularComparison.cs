@@ -68,11 +68,7 @@ internal static class CircularComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Value].ToArray();
-        var flags = run[indicator.IsDefined].ToArray();
-        return VolumePriceComparison.Mask(
-            values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray()
-        );
+        return PointwiseComparisonPublisher.Publish(run[indicator.Value], run[indicator.IsDefined]);
     }
 
     private static ComparisonSeries Reference(string name, CompetitorData data) =>

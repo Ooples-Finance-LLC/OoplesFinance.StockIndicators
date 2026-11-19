@@ -1,0 +1,22 @@
+{
+  "diagnostic_only": true,
+  "measurement_run": "42325654760",
+  "measurement_tooling": "b32555a46fc68c9fab1c456ffe626bd6bfb8167a",
+  "collection_run": "42327644840",
+  "collection_tooling": "fe7c4ff449e7302f50e4c6a1c9e13583dc533f68",
+  "all_cases_verified": true,
+  "case_count": 30,
+  "comparison_count": 6,
+  "local_hosted_collection_equal": true,
+  "source_accepted": false,
+  "production_integrated": false,
+  "report_imported": false,
+  "policy_changed": false,
+  "separation_counts": {
+    "B_above_A": 1,
+    "overlap": 4,
+    "B_below_A": 1
+  },
+  "sampling": "Original1000fixed-batchwarmups/10adaptivewarmups/10measurediterations/defaulttieringandCPUgates unchanged.",
+  "interpretation": "Same-byte old-profileHarami1000bar A/A produced separated intervals; this demonstrates a measurement instability without source differences. Both profiles reachedTier1 in instrumentedMarubozu traces; original regression cause remains unproven. Body/shadow source remains excluded."
+}

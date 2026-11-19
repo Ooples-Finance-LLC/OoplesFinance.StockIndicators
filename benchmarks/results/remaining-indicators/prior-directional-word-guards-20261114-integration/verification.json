@@ -1,0 +1,22 @@
+{
+  "source_integration_commit": "eaa7a7ee7eab74f9f6f5b3d4255682f7ab5eddbb",
+  "qualified_source": "f1e4d6715a265eaabe21b0d44c67d4ab6135fcb2",
+  "compiled_source": "6821c05c13ebdaf7914d62534612eb3f04bb2ae6",
+  "source_fingerprint": "e74227ceb8dcdc6306928f41b867a5937b2f145488b4de71a16339bcc5be7bdb",
+  "unit": 56,
+  "comparator": 49,
+  "actual_gpu": 100,
+  "production_sha256": "892145210cac0449ca4767f42db18cfbc205099109679e12c8f5c690c1a46ec8",
+  "run_id": "43562679883",
+  "cases": 270,
+  "decisions": 54,
+  "verdicts": {
+    "inconclusive": 17,
+    "faster": 37
+  },
+  "integrated_paths": [
+    "src/Indicators/PriorSeededDirectionalMeasure.cs",
+    "tests/ModelsTests/PriorDirectionalWordSmoothingTests.cs"
+  ],
+  "verified_utc": "2026-11-14T07:32:41.348870+00:00"
+}

@@ -78,11 +78,19 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
     {
         private long _index = -1;
         private double _previous;
-        private JurikDyadic _signed,
+#if !NETFRAMEWORK
+        private readonly TsiWordEmaRecurrence _firstRecurrence = new(period),
+            _secondRecurrence = new(smooth);
+#else
+        private readonly CompactMacdValue.EmaRecurrence _firstRecurrence = new(period),
+            _secondRecurrence = new(smooth);
+#endif
+        private readonly CompactMacdValue.EmaRecurrence _signalRecurrence = new(signal);
+        private CompactMacdValue _signed,
             _absolute,
             _secondSigned,
-            _secondAbsolute,
-            _sumSigned,
+            _secondAbsolute;
+        private JurikDyadic _sumSigned,
             _sumAbsolute,
             _seedSignal;
         private double? _signal;
@@ -112,6 +120,19 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
             return previous;
         }
 
+        private double AdvanceSignal(double previous, double current)
+        {
+#if !NETFRAMEWORK
+            double rounded = _signalRecurrence.Advance(CompactMacdValue.Of(previous),
+                CompactMacdValue.Of(current)).Publish();
+            // Compact zero does not retain an underflow sign. Keep the original
+            // publication for zero; all nonzero results use the existing EMA kernel.
+            if (rounded != 0) return rounded; // NOSONAR: Exact zero boundary preserves signed-underflow publication.
+#endif
+            return Numerator(JurikDyadic.FromDouble(previous), JurikDyadic.FromDouble(current), signal)
+                .Ratio(JurikDyadic.FromDouble((long)signal + 1));
+        }
+
         public void Reset()
         {
             _index = -1;
@@ -119,8 +140,8 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
             _signed =
                 _absolute =
                 _secondSigned =
-                _secondAbsolute =
-                _sumSigned =
+                _secondAbsolute = default;
+            _sumSigned =
                 _sumAbsolute =
                 _seedSignal = default;
             _signal = null;
@@ -139,9 +160,20 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            var change = JurikDyadic.FromDouble(bar.Close);
-            change.Subtract(JurikDyadic.FromDouble(_previous));
-            change = change.Rounded();
+            JurikDyadic change;
+#if !NETFRAMEWORK
+            // Binary64 subtraction already rounds the exact difference once.
+            // FromDouble canonicalizes zero; extended results keep the original path.
+            double difference = bar.Close - _previous;
+            if (double.IsFinite(difference))
+                change = JurikDyadic.FromDouble(difference);
+            else
+#endif
+            {
+                change = JurikDyadic.FromDouble(bar.Close);
+                change.Subtract(JurikDyadic.FromDouble(_previous));
+                change = change.Rounded();
+            }
             var absoluteChange = change;
             if (absoluteChange.Sign < 0) absoluteChange.Multiply(-1);
             _previous = bar.Close;
@@ -153,34 +185,35 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
                 _sumAbsolute.AddExact(absoluteChange);
                 if (_index == period)
                 {
-                    _signed = R(_sumSigned, period);
-                    _absolute = R(_sumAbsolute, period);
-                    _sumSigned = _signed;
-                    _sumAbsolute = _absolute;
+                    _signed = CompactMacdValue.FromRounded(R(_sumSigned, period));
+                    _absolute = CompactMacdValue.FromRounded(R(_sumAbsolute, period));
+                    _sumSigned = _signed.ToRoundedDyadic();
+                    _sumAbsolute = _absolute.ToRoundedDyadic();
                 }
                 return;
             }
-            _signed = R(Numerator(_signed, change, period), (long)period + 1);
-            _absolute = R(Numerator(_absolute, absoluteChange, period), (long)period + 1);
+            _signed = _firstRecurrence.Advance(_signed, CompactMacdValue.FromRounded(change));
+            _absolute = _firstRecurrence.Advance(_absolute, CompactMacdValue.FromRounded(absoluteChange));
             var secondStart = (long)period + smooth - 1;
             if (_index <= secondStart)
             {
-                _sumSigned.AddExact(_signed);
-                _sumAbsolute.AddExact(_absolute);
+                _sumSigned.AddExact(_signed.ToRoundedDyadic());
+                _sumAbsolute.AddExact(_absolute.ToRoundedDyadic());
                 if (_index < secondStart)
                     return;
-                _secondSigned = R(_sumSigned, smooth);
-                _secondAbsolute = R(_sumAbsolute, smooth);
+                _secondSigned = CompactMacdValue.FromRounded(R(_sumSigned, smooth));
+                _secondAbsolute = CompactMacdValue.FromRounded(R(_sumAbsolute, smooth));
                 _sumSigned = _sumAbsolute = default;
             }
             else
             {
-                _secondSigned = R(Numerator(_secondSigned, _signed, smooth), (long)smooth + 1);
-                _secondAbsolute = R(Numerator(_secondAbsolute, _absolute, smooth), (long)smooth + 1);
+                _secondSigned = _secondRecurrence.Advance(_secondSigned, _signed);
+                _secondAbsolute = _secondRecurrence.Advance(_secondAbsolute, _absolute);
             }
-            var percent = _secondSigned;
+            var percent = _secondSigned.ToRoundedDyadic();
             percent.Multiply(100);
-            double? tsi = _secondAbsolute.Sign == 0 ? null : percent.Ratio(_secondAbsolute);
+            var absolute = _secondAbsolute.ToRoundedDyadic();
+            double? tsi = absolute.Sign == 0 ? null : percent.Ratio(absolute);
             Publish(tsi, 0, output);
             if (_index == secondStart)
             {
@@ -201,8 +234,7 @@ public sealed class SeededTrueStrength : MultiOutputIndicatorBase, IIndicatorVal
                     _signal = _seedSignal.Ratio(JurikDyadic.FromDouble(signal));
             }
             else if (_signal.HasValue && tsi.HasValue)
-                _signal = Numerator(JurikDyadic.FromDouble(_signal.Value),
-                    JurikDyadic.FromDouble(tsi.Value), signal).Ratio(JurikDyadic.FromDouble((long)signal + 1));
+                _signal = AdvanceSignal(_signal.Value, tsi.Value);
             else
                 _signal = null;
             Publish(_signal, 1, output);

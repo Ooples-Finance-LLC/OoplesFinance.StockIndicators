@@ -1,0 +1,16 @@
+{
+  "kind": "Codegen diagnostic passed; performance qualification not accepted",
+  "jit_gate_passed": true,
+  "performance_accepted": false,
+  "run_id": "42703042087",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 6
+  },
+  "compiled_source": "12a7494ae1783e688b8e6aa326d2d7ffecaa1048",
+  "qualified_source": "b8cbd6fb79dfc4ea7868a9b90cc4b60daaad1f81",
+  "production_integrated": false,
+  "report_imported": false,
+  "sampling_and_acceptance_gates": "unchanged"
+}

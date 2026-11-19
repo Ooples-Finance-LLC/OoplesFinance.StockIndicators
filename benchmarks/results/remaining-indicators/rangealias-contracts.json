@@ -1,0 +1,37 @@
+{
+  "batch": "generated-range-and-momentum-aliases",
+  "types": [
+    "AverageTrueRange",
+    "ChandeMomentumOscillator",
+    "RateOfChange",
+    "DetrendedPriceOscillator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact ATR, Chande, ratio and detrended shared states for independently verified facades. Chande signal length is configurable while Cmo retains its default3. Preserve extended true ranges, startup lags and custom-average fallback.",
+  "verification": {
+    "unit_passed": 39,
+    "fixture_passed": 16,
+    "discovery_passed": 25,
+    "gpu_passed": 100,
+    "contract_methods": 1360,
+    "hosted_methods": 1348,
+    "evidence": [
+      {
+        "file": "rangealias-unit.trx.gz",
+        "passed_cases": 39,
+        "trx_sha256": "9173ac1c2cdfb7ce1df38844e42242e7d465e018c64948be4609796b20240cee"
+      },
+      {
+        "file": "rangealias-fixture.trx.gz",
+        "passed_cases": 41,
+        "trx_sha256": "f5e3dbb99fc1c4bcc739b145ae3c5d53603abfac98b4d4947b3017186c0c6311"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingRangeAliasBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

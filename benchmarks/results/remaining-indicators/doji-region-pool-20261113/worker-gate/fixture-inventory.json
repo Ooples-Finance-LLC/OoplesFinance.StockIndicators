@@ -1,0 +1,126 @@
+{
+  "productionSha256": "0428f3867cb110fdf86375647c79766672adabb3faea6cc2553f58bf786a166c",
+  "benchmarkModule": "f82511cd-4b29-45ee-9775-444a68cd891e",
+  "fixture": "SharedRangeDojiBenchmarks",
+  "fixtureMethods": [
+    "BuilderFull",
+    "BuilderLatestOnly",
+    "NativeParallel",
+    "NativeSingle"
+  ],
+  "checks": [
+    {
+      "operation": "TaLib.Candles.Doji",
+      "count": 1000,
+      "setupIndependentReferences": true,
+      "requestedMethodsInvoked": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ]
+    },
+    {
+      "operation": "TaLib.Candles.Doji",
+      "count": 10000,
+      "setupIndependentReferences": true,
+      "requestedMethodsInvoked": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ]
+    },
+    {
+      "operation": "TaLib.Candles.DragonflyDoji",
+      "count": 1000,
+      "setupIndependentReferences": true,
+      "requestedMethodsInvoked": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ]
+    },
+    {
+      "operation": "TaLib.Candles.DragonflyDoji",
+      "count": 10000,
+      "setupIndependentReferences": true,
+      "requestedMethodsInvoked": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ]
+    },
+    {
+      "operation": "TaLib.Candles.GravestoneDoji",
+      "count": 1000,
+      "setupIndependentReferences": true,
+      "requestedMethodsInvoked": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ]
+    },
+    {
+      "operation": "TaLib.Candles.GravestoneDoji",
+      "count": 10000,
+      "setupIndependentReferences": true,
+      "requestedMethodsInvoked": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ]
+    },
+    {
+      "operation": "TaLib.Candles.LongLeggedDoji",
+      "count": 1000,
+      "setupIndependentReferences": true,
+      "requestedMethodsInvoked": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ]
+    },
+    {
+      "operation": "TaLib.Candles.LongLeggedDoji",
+      "count": 10000,
+      "setupIndependentReferences": true,
+      "requestedMethodsInvoked": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ]
+    },
+    {
+      "operation": "TaLib.Candles.TakuriLine",
+      "count": 1000,
+      "setupIndependentReferences": true,
+      "requestedMethodsInvoked": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ]
+    },
+    {
+      "operation": "TaLib.Candles.TakuriLine",
+      "count": 10000,
+      "setupIndependentReferences": true,
+      "requestedMethodsInvoked": [
+        "BuilderFull",
+        "BuilderLatestOnly",
+        "NativeSingle",
+        "NativeParallel"
+      ]
+    }
+  ],
+  "passed": true,
+  "performanceEvidence": false,
+  "note": "Existing verified runtime fixture inventory and invocation smoke; production candidate remains unbuilt."
+}

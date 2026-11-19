@@ -1,0 +1,41 @@
+{
+  "batch": "donchian-channels-shared-execution",
+  "types": [
+    "DonchianChannel",
+    "DonchianChannelUpper",
+    "DonchianChannelLower"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse bounded exact extrema for Donchian upper/lower and compute midpoint with exact PriceMean. Preserve earliest signed-zero ties, shortened startup windows, facade clamps, warmup, ownership and source fallback.",
+  "verification": {
+    "unit_passed": 43,
+    "fixture_passed": 12,
+    "discovery_passed": 110,
+    "gpu_passed": 100,
+    "contract_methods": 1449,
+    "hosted_methods": 1437,
+    "evidence": [
+      {
+        "file": "donchianchannels-unit.trx.gz",
+        "passed_cases": 43,
+        "trx_sha256": "92430948650eaeabe2da047159dee45df8f2362bb122daf2f8d3f48a5f6b3401"
+      },
+      {
+        "file": "donchianchannels-fixture.trx.gz",
+        "passed_cases": 122,
+        "trx_sha256": "0a37c74253be713f49fd0e664b537ee70b8861b1f93c84fbf660837666732c1c"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingDonchianChannelBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "DonchianChannel",
+      "DonchianChannelUpper",
+      "DonchianChannelLower"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -1,0 +1,23 @@
+{
+  "source_integration_commit": "3b6ce38713ad23e6fffafc9336632c6af00dcc2b",
+  "qualified_source": "d7a8e56d7dfc23ad1408213b420688a26f0e2617",
+  "compiled_source": "4081b7c07458c766be35ac01b246f356e22d3f53",
+  "source_fingerprint": "59bd4359fa6ebfad7a4c90963c652f3ccf886ce19dd6d40bdd61e5fcbff252d8",
+  "unit": 65,
+  "comparator": 45,
+  "actual_gpu": 100,
+  "production_sha256": "315cd63df2fb58a4640798ff626b083e5c2ab7f2df5975b1d56d7898962460b3",
+  "run_id": "42572319702",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 5,
+    "faster": 1
+  },
+  "integrated_paths": [
+    "src/Helpers/CompactMacdValue.cs",
+    "src/Indicators/ValuesBarExecution.AccumulationDistribution.cs",
+    "tests/ModelsTests/CompactAccumulationDistributionExecutionTests.cs"
+  ],
+  "verified_utc": "2026-11-09T07:02:15.689592+00:00"
+}

@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "0df58f11bb68216960a3c35aac9f5395e94c79e78bbb8b11fcb83e18b041fead",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-residual-bound-20261107-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "01193fb945f31384f9b2a7d0de8e97e3815d67b92c80ff5dea99b79c270642e1",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-residual-bound-20261107-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "0d285d575b853359236b4bf26be91db1940bc0182b379a9479e7ef14619b1271",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-residual-bound-20261107-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "9f57c2ccb57a96b3f337bca26d601ae8ab64ea5e6b6d66ab49e68f1be03929be",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-residual-bound-20261107-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "e5aea0486a6dc351e2f108d5a8cbdd94f7dba7baa85f964bac403e3c8fbc2dbe",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-residual-bound-20261107-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "1449566a4e2d1a55a6b27a5d5ce776f308ccb4dcc398587f2af9dacb9d4829e2",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-residual-bound-20261107-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "e61ed42c16b3567da1d1bc0c2c853c060b1119eae98119929b27a4d84c12f785",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-residual-bound-20261107-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "f5cffc2d75f92f8b8031e0cc66008aca24221c71a17f37889eb9c7f9f66e8bf7",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-residual-bound-20261107-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "e4f1944e8ed7df20195d01755afc60fefdebc9b928f038505478e1f70569bb33",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-residual-bound-20261107-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "13d617be382a5a394db0ae2345df1da93416d4940b2d14b4feeb6a13d1faec2e",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-residual-bound-20261107-report-integration/updated-pair-details.png.gz"
+  }
+}

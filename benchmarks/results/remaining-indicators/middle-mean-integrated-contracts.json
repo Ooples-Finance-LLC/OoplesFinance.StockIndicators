@@ -1,0 +1,33 @@
+{
+  "types": [
+    "MiddleHighLowMovingAverage"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "e5f71af5af7b2e9f22976f4937701d8c13c0c2b0",
+  "source_fingerprint_sha256": "bdb6a41117ff1fe8f1de9f11b20bda5fc12cac0a217b84e322dcfba543504f05",
+  "benchmark_fixture": {
+    "type": "RemainingMiddleMeanBenchmarks",
+    "operations": [
+      "MiddleHighLowMovingAverage"
+    ]
+  },
+  "checks": {
+    "unit": 98,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "unit_class_counts": {
+    "SharedGeneratedMiddleMeanTests": 12,
+    "MiddleMeanNumericalTests": 86
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/publication-oscar-martin-20261021-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-oscar-martin-20261021-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

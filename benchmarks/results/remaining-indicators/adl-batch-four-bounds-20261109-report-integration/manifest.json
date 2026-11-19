@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "ee54b7ef903fc435f119108c82558b9ec8f21b1c69a7aa509cd96a18c71896ab",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-four-bounds-20261109-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "34e39922c57e87aa616fc57f8200b600e86612c88490c44ee45d3f596dc6cda0",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-four-bounds-20261109-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "d4022e56e010cdc2b4b868933d198aa8925a0686ed8d13b8749bb2e6d71ea09e",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-four-bounds-20261109-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "79effc9bc7669212d9efe0e6b6dc6807eb8a5e27f6334c9784de23b05a764d3a",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-four-bounds-20261109-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "381e2a80f9a5932a81a74789c11a6b946f3aa49fb989e695c3b1a2915e23164c",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-four-bounds-20261109-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "97346f9c1200890589330e19a649feeb67482429a46a50105cf069ff60ef7be9",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-four-bounds-20261109-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "f2034949ace32a3b96a9a2483fa0d771afd6704285d5a997f09cef87beafb7f5",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-four-bounds-20261109-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "edf84fd6b5822568280b7e78488a1bfefd9147c434e4d344cadb7b33b25d7c2d",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-four-bounds-20261109-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "6239fd50c20dd72473346f4278e3b04dd8572c42a9405cdc79cd91b7b9f176d3",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-four-bounds-20261109-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "fd7794194e42d2e5c0178a15ec3f9cbda69fe023618aa7a9b3645d095423417a",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-four-bounds-20261109-report-integration/updated-pair-details.png.gz"
+  }
+}

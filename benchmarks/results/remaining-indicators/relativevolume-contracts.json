@@ -1,0 +1,37 @@
+{
+  "batch": "relative-volume-shared-execution",
+  "types": [
+    "RelativeVolumeIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Compute score and demand price together with the exact existing default-SMA kernel. Rent the raw mean buffer only when a custom average needs it; preserve original close/volume, startup, threshold comparisons and fallback.",
+  "verification": {
+    "unit_passed": 52,
+    "fixture_passed": 4,
+    "discovery_passed": 68,
+    "gpu_passed": 100,
+    "contract_methods": 1403,
+    "hosted_methods": 1391,
+    "evidence": [
+      {
+        "file": "relativevolume-unit.trx.gz",
+        "passed_cases": 52,
+        "trx_sha256": "d14136d2d594940ea88e2ad3d93be972cec168ce4744818cc36ebcd5417a2e31"
+      },
+      {
+        "file": "relativevolume-fixture.trx.gz",
+        "passed_cases": 72,
+        "trx_sha256": "a3d3ca30b521f3770eed5fd6bd6abaca598ac72557c4fb144dc626ffbc9fe4b4"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingRelativeVolumeBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "RelativeVolumeIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

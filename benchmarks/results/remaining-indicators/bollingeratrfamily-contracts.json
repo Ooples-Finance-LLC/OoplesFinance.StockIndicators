@@ -1,0 +1,45 @@
+{
+  "batch": "bollinger-atr-family-shared-execution",
+  "types": [
+    "BollingerBandsMiddle",
+    "BollingerBandsAtr",
+    "BollingerBandsAvgTrueRange",
+    "BollingerBandsFibonacciRatios",
+    "BollingerBandsWithAtrPct"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse rounded middle, exact ATR/deviation ratios, outer Fibonacci bands and ATR-percent bands with input-bounded state. Preserve average eligibility, ignored inner ratios, hidden ATR defaults, startup, original fields, ownership and fallback.",
+  "verification": {
+    "unit_passed": 244,
+    "fixture_passed": 20,
+    "discovery_passed": 126,
+    "gpu_passed": 100,
+    "contract_methods": 1465,
+    "hosted_methods": 1453,
+    "evidence": [
+      {
+        "file": "bollingeratrfamily-unit.trx.gz",
+        "passed_cases": 244,
+        "trx_sha256": "e36b6106f88cdcab1f577802252c83f1fae2f241a7d3d08811704901a99982d0"
+      },
+      {
+        "file": "bollingeratrfamily-fixture.trx.gz",
+        "passed_cases": 146,
+        "trx_sha256": "de9fcbfd568a2a3fe5c57b61132f8ad920b43bebc7aa14d3dfd1b3bbb4141684"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingBollingerAtrFamilyBenchmarks",
+    "cases": 40,
+    "status": "prepared-not-measured",
+    "operations": [
+      "BollingerBandsMiddle",
+      "BollingerBandsAtr",
+      "BollingerBandsAvgTrueRange",
+      "BollingerBandsFibonacciRatios",
+      "BollingerBandsWithAtrPct"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

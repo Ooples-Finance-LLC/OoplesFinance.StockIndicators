@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "96ba3a4a3428207c51568b327b5397e91c6d4dcd645b8b4a55cbce650be42c1c",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-normalization-report-integration-20261104/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "24a25a97e4f880a901debaa9752af3c405dbe3d55b7d6f46f7b65a6f04704790",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-normalization-report-integration-20261104/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "25317a929020675b6448215a699b06c98c17dd46f8794e8c90f281b7c3ec38d4",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-normalization-report-integration-20261104/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "ccde5d0e58ddcdc0e75eca0715436762394cd676dd3fc8e5e36b65b9710ea884",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-normalization-report-integration-20261104/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "89b66e320e53f4aa8e3c64883fac0f868161e91bdbfd5fc386df71768cc6e6a0",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-normalization-report-integration-20261104/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "5c864e45402826905a46d96828bc4157f0af99f73e974dc14101ee90f92a785b",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-normalization-report-integration-20261104/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "bc7a03a1dd39cde699293c42773287a9d7993325efddb59386c6c7b00a08e651",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-normalization-report-integration-20261104/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "438125cf3fd4410ebbb55a5d1ae1e8d943d40048addc118ad3b9f417c927ce01",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-normalization-report-integration-20261104/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "02a05595747e14a8d9a3b7fcd9df58e87de4893bf4f2c060289b2eeebe362f89",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-normalization-report-integration-20261104/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "c27c34f8bfb6f359b8b95d0b43b4d7115e941effd74f821a1bea3f03a7f1b927",
+    "archive": "benchmarks/results/remaining-indicators/sum-directional-normalization-report-integration-20261104/updated-pair-details.png.gz"
+  }
+}

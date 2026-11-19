@@ -1,0 +1,54 @@
+{
+  "before.html": {
+    "sha256": "4de85c8c2f37b11f0f8b379036750787638925a44258e10b70de49ce3e5f4aeb",
+    "archive": "benchmarks/results/remaining-indicators/window-log-positive-regions-20261115-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "ce5498237af10fbbda23467228e1e89f1b5a841ccac202d4ff2a999419ea524b",
+    "archive": "benchmarks/results/remaining-indicators/window-log-positive-regions-20261115-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "6939a65612198af0942eda309969ca1c8666d3adf6a6f461ed3f963497751acc",
+    "archive": "benchmarks/results/remaining-indicators/window-log-positive-regions-20261115-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "66a6be4a6aadbc420e9ae2e90bbc0cbddb4efa6880c6990089a6b04e1179ba24",
+    "archive": "benchmarks/results/remaining-indicators/window-log-positive-regions-20261115-report-integration/candidate.html.gz"
+  },
+  "delivery-tooling/origin.json": {
+    "sha256": "06bea55c55d531b013a3158339aa54b11e9ce2fce362b9193bda5791d7cf4389",
+    "archive": "benchmarks/results/remaining-indicators/window-log-positive-regions-20261115-report-integration/delivery-tooling/origin.json.gz"
+  },
+  "delivery-tooling/report.py": {
+    "sha256": "41192039eda421cf69df12e666d9ed28ab7c3585499aa067127ea980ae913a24",
+    "archive": "benchmarks/results/remaining-indicators/window-log-positive-regions-20261115-report-integration/delivery-tooling/report.py.gz"
+  },
+  "delivery-tooling/test_hosted_report.py": {
+    "sha256": "ea092f6608739fb9d107070c2e5d8b93e434ea848e46cdb5a6da3460b43a7b0d",
+    "archive": "benchmarks/results/remaining-indicators/window-log-positive-regions-20261115-report-integration/delivery-tooling/test_hosted_report.py.gz"
+  },
+  "import.log": {
+    "sha256": "8d0cbfb7c031493a603d43ce7f75e7eb1d801caa611ed19bae56a37fb22cb9be",
+    "archive": "benchmarks/results/remaining-indicators/window-log-positive-regions-20261115-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "168d6870cf785bb8506943566e70599c5a01a04dd463d53747bf7da554465624",
+    "archive": "benchmarks/results/remaining-indicators/window-log-positive-regions-20261115-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "72b5b96de314cdcc05f1185481bd616fabe076ea6dcc9512715bc6cb8979c630",
+    "archive": "benchmarks/results/remaining-indicators/window-log-positive-regions-20261115-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "e232c7d7b7a9327649a36585f518f7ffa675cecabc442fb69f69576251fd9a7e",
+    "archive": "benchmarks/results/remaining-indicators/window-log-positive-regions-20261115-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "e95c2222060948ae5f0e183ffb47cf70d796a54f323405f3e39b3a6e32d420ca",
+    "archive": "benchmarks/results/remaining-indicators/window-log-positive-regions-20261115-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "7c2104d8da1adea661b8bb32c8499d751a75cf1c339062f7f7d07fa1c9b9ca24",
+    "archive": "benchmarks/results/remaining-indicators/window-log-positive-regions-20261115-report-integration/updated-pair-details.png.gz"
+  }
+}

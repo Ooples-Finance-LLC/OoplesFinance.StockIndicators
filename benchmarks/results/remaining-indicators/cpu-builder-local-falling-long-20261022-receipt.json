@@ -1,0 +1,156 @@
+{
+  "fixture": "SharedTradyNativeCandleBenchmarks",
+  "source_sha": "5d1ead6f23e872c6ada463a8e6692fef54c34fd7",
+  "run_id": "local-falling-long-20261022",
+  "measurement_location": "Local Windows; approved longer native measurement",
+  "host": {
+    "BenchmarkDotNetCaption": "BenchmarkDotNet",
+    "BenchmarkDotNetVersion": "0.15.8",
+    "OsVersion": "Windows 11 (10.0.26220.9739)",
+    "ProcessorName": "AMD Ryzen 9 3950X",
+    "PhysicalProcessorCount": 1,
+    "PhysicalCoreCount": 16,
+    "LogicalCoreCount": 32,
+    "RuntimeVersion": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+    "Architecture": "X64",
+    "HasAttachedDebugger": false,
+    "HasRyuJit": true,
+    "Configuration": "RELEASE",
+    "DotNetCliVersion": "10.0.402",
+    "ChronometerFrequency": {
+      "Hertz": 10000000
+    },
+    "HardwareTimerKind": "Unknown"
+  },
+  "report_sha256": "729540a84e136b620e99e4cccd8ab74104aa66e54269d4775a3b5d0100f96324",
+  "report_file": "SharedTradyNativeCandleBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyNativeCandleBenchmarks-report-full-compressed.json",
+  "quiet_cpu_samples": [
+    9.3,
+    9.8,
+    9.2
+  ],
+  "complete": true,
+  "comparisons": [
+    {
+      "pair": "Trady.Candlestick.FallingThreeMethods",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 319102.3828125,
+        "lower_ns": 255332.05942731583,
+        "upper_ns": 382872.70619768417,
+        "samples": 10,
+        "allocated_bytes": 62541
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1090815697.5,
+          "lower_ns": 1044984245.009735,
+          "upper_ns": 1136647149.990265,
+          "samples": 10,
+          "allocated_bytes": 1557495572
+        },
+        "NativeParallel": {
+          "mean_ns": 168366494.44444445,
+          "lower_ns": 164705018.0188113,
+          "upper_ns": 172027970.8700776,
+          "samples": 9,
+          "allocated_bytes": 858603200
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Candlestick.FallingThreeMethods",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 317062.6171875,
+        "lower_ns": 260181.28464943968,
+        "upper_ns": 373943.9497255603,
+        "samples": 10,
+        "allocated_bytes": 13518
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 1090815697.5,
+          "lower_ns": 1044984245.009735,
+          "upper_ns": 1136647149.990265,
+          "samples": 10,
+          "allocated_bytes": 1557495572
+        },
+        "NativeParallel": {
+          "mean_ns": 168366494.44444445,
+          "lower_ns": 164705018.0188113,
+          "upper_ns": 172027970.8700776,
+          "samples": 9,
+          "allocated_bytes": 858603200
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Candlestick.FallingThreeMethods",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 3321939.6875,
+        "lower_ns": 2837203.7710195477,
+        "upper_ns": 3806675.6039804523,
+        "samples": 10,
+        "allocated_bytes": 567142
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 117346189820,
+          "lower_ns": 103068549574.60484,
+          "upper_ns": 131623830065.39516,
+          "samples": 10,
+          "allocated_bytes": 156283384408
+        },
+        "NativeParallel": {
+          "mean_ns": 19030200560,
+          "lower_ns": 18828445242.581688,
+          "upper_ns": 19231955877.418312,
+          "samples": 10,
+          "allocated_bytes": 87408441816
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Candlestick.FallingThreeMethods",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 2654445.2256944445,
+        "lower_ns": 2606069.338830271,
+        "upper_ns": 2702821.112558618,
+        "samples": 9,
+        "allocated_bytes": 85614
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 117346189820,
+          "lower_ns": 103068549574.60484,
+          "upper_ns": 131623830065.39516,
+          "samples": 10,
+          "allocated_bytes": 156283384408
+        },
+        "NativeParallel": {
+          "mean_ns": 19030200560,
+          "lower_ns": 18828445242.581688,
+          "upper_ns": 19231955877.418312,
+          "samples": 10,
+          "allocated_bytes": 87408441816
+        }
+      },
+      "fastest_native": "NativeParallel",
+      "verdict": "faster"
+    }
+  ],
+  "measurement_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/tree/perf/remaining-indicator-rollout/benchmarks/results/remaining-indicators/local-falling-long-20261022"
+}

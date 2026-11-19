@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "a7ebe9397436fb516bf441b76c57b51c8f602bc9f940fa8dbe209a00885040ed",
+    "archive": "benchmarks/results/remaining-indicators/tsi-compact-signal-20261110-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "d484d0f2384d37abf50d895a30900a7d9becc2c9f15d802269a147f54d163e9a",
+    "archive": "benchmarks/results/remaining-indicators/tsi-compact-signal-20261110-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "64875911aeff535122f08f60e555343dba361787e4bb8bb15acee06cfcdccdde",
+    "archive": "benchmarks/results/remaining-indicators/tsi-compact-signal-20261110-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "eac9fd5263a8b821e19cc7917624a6a937b4422d52b642f83e75a0a41eae38d7",
+    "archive": "benchmarks/results/remaining-indicators/tsi-compact-signal-20261110-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "cc646c8cd53faea8e399fb565fe39c2aae44e376f62a7c9c24f700680648f95e",
+    "archive": "benchmarks/results/remaining-indicators/tsi-compact-signal-20261110-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "9955b73dbf0b5bfe7ca5b2a6b1246e71ce856d500ca2b34d419987f11470b921",
+    "archive": "benchmarks/results/remaining-indicators/tsi-compact-signal-20261110-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "8a2c17950794e09f9aad4be678e0e96ba8816d241de17abc611932d135c3bfca",
+    "archive": "benchmarks/results/remaining-indicators/tsi-compact-signal-20261110-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "e4b816564dd3318ec6d66adadba99b0a484441e11a7cee41ef1bb3a2f2d34884",
+    "archive": "benchmarks/results/remaining-indicators/tsi-compact-signal-20261110-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "686390ef7e1401f365b8ba7d0fe0ac56b3608dc81a4adc2f8fbafa883064e711",
+    "archive": "benchmarks/results/remaining-indicators/tsi-compact-signal-20261110-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "5eeb75799e7fc5b4c73ec2d7dc69756407b5f869e2136261ba2754d389dd0547",
+    "archive": "benchmarks/results/remaining-indicators/tsi-compact-signal-20261110-report-integration/updated-pair-details.png.gz"
+  }
+}

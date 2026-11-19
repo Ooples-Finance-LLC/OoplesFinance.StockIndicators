@@ -1,0 +1,58 @@
+{
+  "kind": "Actual source-bound JIT diagnostic evidence; no timing claim",
+  "compiled_source": "12a7494ae1783e688b8e6aa326d2d7ffecaa1048",
+  "qualified_source": "b8cbd6fb79dfc4ea7868a9b90cc4b60daaad1f81",
+  "production_sha256": "5a7d24f5623da5725d716cb90e5be20ba279be766d3496b24ddee2499f7b784a",
+  "files": {
+    "command-0.log": {
+      "sha256": "c4a852207eba793728f6121719e8eca921f4cf262faaced68cc3d57a71b6e943",
+      "raw_bytes": 943,
+      "archive": "command-0.log.gz"
+    },
+    "command-1.log": {
+      "sha256": "a13cd36ccd407316c43a527f2cdb79665a189a5ceaf55d0a206cebb24b51bb79",
+      "raw_bytes": 78,
+      "archive": "command-1.log.gz"
+    },
+    "events.json": {
+      "sha256": "486e2396c878ebcba9f496b8f507fc747877f026b17071bcf2687013f3014ca8",
+      "raw_bytes": 13159,
+      "archive": "events.json.gz"
+    },
+    "inlining.nettrace": {
+      "sha256": "bd72ab2e9e1012e7e4678d8493e7a8082426222b4ff7b4a59fbe4913027cba5b",
+      "raw_bytes": 18009218,
+      "archive": "inlining.nettrace.gz"
+    },
+    "read-adl-inlining-events-20261109.ps1": {
+      "sha256": "b12f43021d520b732bf25f46082cd32746ca0ab231611e14f04d68223c9d07ab",
+      "raw_bytes": 1872,
+      "archive": "read-adl-inlining-events-20261109.ps1.gz"
+    },
+    "summary-initial-attribution.json": {
+      "sha256": "5fe82b417db575de4d7d533626fea7cf261a29271b172877b5970f778ac3a480",
+      "raw_bytes": 735,
+      "archive": "summary-initial-attribution.json.gz"
+    },
+    "summary.json": {
+      "sha256": "fd0609b4a071e9d63c2fc7e5582ac001d604ab5638ea180de65faac7a5681f67",
+      "raw_bytes": 947,
+      "archive": "summary.json.gz"
+    },
+    "trace-adl-inlining-worker-20261109.ps1": {
+      "sha256": "434b97a5473a7f39d9c7afa887bf38fe681a1f857439293335b6aa7846eec5ea",
+      "raw_bytes": 1610,
+      "archive": "trace-adl-inlining-worker-20261109.ps1.gz"
+    },
+    "verify-adl-inline-hint-codegen-20261109.py": {
+      "sha256": "caa48450e930635a152388b0c167ed796f44e260d7af0e8c3ab4a4f3bd01eaf9",
+      "raw_bytes": 6554,
+      "archive": "verify-adl-inline-hint-codegen-20261109.py.gz"
+    },
+    "worker.json": {
+      "sha256": "88cdaa1a67925909b03510d64f87492a217d6ff2a8c0ca121567bece0d0db389",
+      "raw_bytes": 394,
+      "archive": "worker.json.gz"
+    }
+  }
+}

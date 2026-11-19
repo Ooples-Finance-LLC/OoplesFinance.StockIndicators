@@ -162,10 +162,10 @@ public sealed class WindowRegressionStatistics
 
         public void Dispose() => _history.Clear();
 
-        public void Update(in Bar bar, Span<double> output)
+        // Historical block consumers need moments on every bar, but fitted
+        // outputs only at the block endpoint. Call Update before reading a fit.
+        internal void Accumulate(in Bar bar)
         {
-            output.Clear();
-            output[5] = 1;
             var current = JurikDyadic.FromDouble(bar.Close);
             if (_history.Count == period)
             {
@@ -183,6 +183,13 @@ public sealed class WindowRegressionStatistics
             _squares.AddExact(current);
             _history.Enqueue(bar.Close);
             _seen.Add(1);
+        }
+
+        public void Update(in Bar bar, Span<double> output)
+        {
+            output.Clear();
+            output[5] = 1;
+            Accumulate(bar);
             int count = _history.Count;
             if (count < 2) return;
 

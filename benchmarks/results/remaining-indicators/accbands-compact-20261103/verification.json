@@ -1,0 +1,49 @@
+{
+  "source": "50893d0007008328e8e00248eb3a93bfd527fc47",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-pmo-compact-ema-20261103",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0
+    },
+    "restore-comparator": {
+      "exit_code": 0
+    },
+    "build-and-gpu": {
+      "exit_code": 0
+    },
+    "unit": {
+      "exit_code": 0
+    },
+    "parity": {
+      "exit_code": 0
+    }
+  },
+  "compiler_process_isolation": true,
+  "dependency_copy_mode": "SDK hard links when supported; no runtime changes",
+  "active": null,
+  "unit": {
+    "passed": 15,
+    "classes": {
+      "AccelerationSharedExecutionTests": 15
+    },
+    "sha256": "90cb676e747eb9d991c6533324e3bf834d31add84e1c39b15de521c6b3366885"
+  },
+  "parity": {
+    "passed": 11,
+    "classes": {
+      "RangeAccelerationComparisonTests": 9,
+      "SharedAccelerationBenchmarkTests": 2
+    },
+    "sha256": "f75bdc5bb379e2e8e0b018ffab6780c7598dbebadd825792667a3b5046271dd7"
+  },
+  "status": "correctness-complete",
+  "gpu_passed": 100,
+  "source_fingerprint": "b618a3e0c44936aa579fd6a4eca9eac5ee66a483609e26105a1bef0d06727a56",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "3a129478f84f3308eb2a37bd37a0bc5ff76fa253777b7fb11dd818198feb5552",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "3a129478f84f3308eb2a37bd37a0bc5ff76fa253777b7fb11dd818198feb5552",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "3a129478f84f3308eb2a37bd37a0bc5ff76fa253777b7fb11dd818198feb5552",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "3a129478f84f3308eb2a37bd37a0bc5ff76fa253777b7fb11dd818198feb5552"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}

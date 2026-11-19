@@ -1,0 +1,59 @@
+{
+  "input_head": "2d27f8bcf15d2580a3cd113d5e1b28dcb43c0d39",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/FibonacciWindowMean.cs",
+    "tests/ValidationTests/FibonacciWindowRecurrenceTests.cs"
+  ],
+  "batch_note": "Use established exact Fibonacci recurrence for nonoverlapping batch Core spans, direct expired input indexing, fixed full-window denominator. Preserve overlap read/write ordering using original tap loop. Independent tap oracle, numerical aliases/shared routes, framework, long-history parity, GPU/inventory. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-23T05:13:59.300505+00:00",
+  "unit": {
+    "passed": 57,
+    "class_counts": {
+      "FibonacciWindowRecurrenceTests": 18,
+      "SharedGeneratedWeightedMeanTests": 22,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "FibonacciMeanNumericalTests": 13
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\fib-core-rolling\\unit\\unit.trx",
+    "sha256": "6a3ca648f59c9665c62c9a427591afd9edf3e06453e36eee13b6df24285c5012",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-fib-core-rolling-certified-20261023-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 12,
+    "class_counts": {
+      "RemainingWeightedMeanBenchmarkTests": 12
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\fib-core-rolling\\parity\\parity.trx",
+    "sha256": "311705b35a7c6d26c8fe39737a25fcc37cbeded55df5ed3bdef72a47756fd140",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-fib-core-rolling-certified-20261023-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fib-core-rolling-20261023\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "41a8183343b6bfafef93c0cf298c14310d88e1cb2e830b2e59e84831f9d2ee13",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fib-core-rolling-20261023\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "41a8183343b6bfafef93c0cf298c14310d88e1cb2e830b2e59e84831f9d2ee13",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fib-core-rolling-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "41a8183343b6bfafef93c0cf298c14310d88e1cb2e830b2e59e84831f9d2ee13",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-fib-core-rolling-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "41a8183343b6bfafef93c0cf298c14310d88e1cb2e830b2e59e84831f9d2ee13"
+  },
+  "source_fingerprint_sha256": "2efb824f1d9324c6bef28504915712455635d479f19367a887b2be6bfb1faf21",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Use established exact Fibonacci recurrence for nonoverlapping batch Core spans, direct expired input indexing, fixed full-window denominator. Preserve overlap read/write ordering using original tap loop. Independent tap oracle, numerical aliases/shared routes, framework, long-history parity, GPU/inventory. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

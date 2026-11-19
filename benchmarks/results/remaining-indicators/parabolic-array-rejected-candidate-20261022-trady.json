@@ -1,0 +1,55 @@
+{
+  "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+  "rows": [
+    {
+      "pair": "Trady.Indicator.ParabolicStopAndReverse",
+      "bars": 1000,
+      "ooples": {
+        "mean_ns": 242953.7,
+        "lower_ns": 227262.9864729707,
+        "upper_ns": 258644.41352702933,
+        "allocated_bytes": 41960,
+        "samples": 10
+      },
+      "competitor": {
+        "mean_ns": 1396390.2,
+        "lower_ns": 1286238.6421563858,
+        "upper_ns": 1506541.757843614,
+        "allocated_bytes": 960392,
+        "samples": 10
+      },
+      "competitor_over_ooples": 5.747556839019121,
+      "verdict": "faster"
+    },
+    {
+      "pair": "Trady.Indicator.ParabolicStopAndReverse",
+      "bars": 10000,
+      "ooples": {
+        "mean_ns": 1020660.4,
+        "lower_ns": 854905.9205285826,
+        "upper_ns": 1186414.8794714175,
+        "allocated_bytes": 419984,
+        "samples": 10
+      },
+      "competitor": {
+        "mean_ns": 8986719,
+        "lower_ns": 8781014.191796672,
+        "upper_ns": 9192423.808203328,
+        "allocated_bytes": 9344976,
+        "samples": 8
+      },
+      "competitor_over_ooples": 8.804808141865795,
+      "verdict": "faster"
+    }
+  ],
+  "source_sha": "cfb6d342a5fe35c2c48df46937d2ab3ddaf25e06",
+  "binary_run": 39721035437,
+  "workflow_sha": "8b93566d0b198f8521ed638debf60fe91b26aebc",
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/39721061988",
+  "report_sha256": "e6dacdad66b64e2090af14dfdc6dce52836a59b7d09bdf0df5d969eb871e4252",
+  "benchmark_binary_sha256": "4a17244a21562ad915cfe1195fbbfd1453d1ac0d71c9a55b6043cd60d0abb8e9",
+  "production_binary_sha256": "837ed4455b99b38a301fb3051b2a85d3a1c2c9c6ae3e7b7acabfa276c6b9f631",
+  "note": "Source-pinned direct Parabolic comparison at both sizes. Retained confidence intervals determine the verdict; cross-run times are not controlled speedup evidence.",
+  "raw_evidence": "benchmarks/results/remaining-indicators/parabolic-array-rejected-candidate-20261022-trady-raw.json.gz",
+  "disposition": "Not imported: production follow-up rejected after controlled same-runner10k regression confirmation. Retained as measured evidence, not current-source performance."
+}

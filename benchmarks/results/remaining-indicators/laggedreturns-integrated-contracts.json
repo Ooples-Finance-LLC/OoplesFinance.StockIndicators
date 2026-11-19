@@ -1,0 +1,31 @@
+{
+  "types": [
+    "SimpleReturns",
+    "LogReturns"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "15278cde95b5b38b98b56d5eb6326cc4b908fdd0",
+  "combined_input_sha256": "825dfb7f9e6484505f642dacf37ec2dc098a07626da2c0368a9a92edb6e6ffaa",
+  "benchmark_fixture": {
+    "type": "RemainingLaggedReturnsBenchmarks",
+    "operations": [
+      "SimpleReturns",
+      "LogReturns"
+    ]
+  },
+  "checks": {
+    "unit": 38,
+    "parity": 8,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/laggedreturns-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/laggedreturns-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

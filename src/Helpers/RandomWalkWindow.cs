@@ -74,10 +74,12 @@ internal sealed class RandomWalkWindow : IDisposable
         private BigInteger Denominator => _denominator.IsZero ? BigInteger.One : _denominator;
         internal Fraction(BigInteger numerator) { _numerator = numerator; _denominator = BigInteger.One; }
         private Fraction(BigInteger numerator, BigInteger denominator)
+            : this(numerator, denominator, false) { }
+        private Fraction(BigInteger numerator, BigInteger denominator, bool reduced)
         {
             if (denominator.IsZero) throw new DivideByZeroException();
             if (denominator.Sign < 0) { numerator = -numerator; denominator = -denominator; }
-            var common = BigInteger.GreatestCommonDivisor(BigInteger.Abs(numerator), denominator);
+            var common = reduced ? BigInteger.One : BigInteger.GreatestCommonDivisor(BigInteger.Abs(numerator), denominator);
             _numerator = numerator / common; _denominator = denominator / common;
         }
         internal int Sign => _numerator.Sign;
@@ -85,12 +87,33 @@ internal sealed class RandomWalkWindow : IDisposable
         {
             var common = BigInteger.GreatestCommonDivisor(a.Denominator, b.Denominator);
             var aScale = b.Denominator / common; var bScale = a.Denominator / common;
-            return new(a._numerator * aScale + b._numerator * bScale, a.Denominator * aScale);
+            var numerator = a._numerator * aScale + b._numerator * bScale;
+            // Reduced inputs leave possible cancellation only in the original denominator GCD.
+            var reduction = BigInteger.GreatestCommonDivisor(BigInteger.Abs(numerator), common);
+            return new(numerator / reduction, bScale * (b.Denominator / reduction), true);
         }
-        public static Fraction operator -(Fraction a, Fraction b) => a + new Fraction(-b._numerator, b.Denominator);
-        public static Fraction operator /(Fraction a, Fraction b) => new(a._numerator * b.Denominator, a.Denominator * b._numerator);
-        internal Fraction Times(long value) => new(_numerator * value, Denominator);
-        internal Fraction Divide(long value) => new(_numerator, Denominator * value);
+        public static Fraction operator -(Fraction a, Fraction b) => a + new Fraction(-b._numerator, b.Denominator, true);
+        public static Fraction operator /(Fraction a, Fraction b)
+        {
+            if (b._numerator.IsZero) throw new DivideByZeroException();
+            var numerators = BigInteger.GreatestCommonDivisor(BigInteger.Abs(a._numerator), BigInteger.Abs(b._numerator));
+            var denominators = BigInteger.GreatestCommonDivisor(a.Denominator, b.Denominator);
+            return new((a._numerator / numerators) * (b.Denominator / denominators),
+                (a.Denominator / denominators) * (b._numerator / numerators), true);
+        }
+        internal Fraction Times(long value)
+        {
+            var scalar = new BigInteger(value);
+            var common = BigInteger.GreatestCommonDivisor(BigInteger.Abs(scalar), Denominator);
+            return new(_numerator * (scalar / common), Denominator / common, true);
+        }
+        internal Fraction Divide(long value)
+        {
+            if (value == 0) throw new DivideByZeroException();
+            var scalar = new BigInteger(value);
+            var common = BigInteger.GreatestCommonDivisor(BigInteger.Abs(_numerator), BigInteger.Abs(scalar));
+            return new(_numerator / common, Denominator * (scalar / common), true);
+        }
         internal double PublishUnits() => Sign * ExactPopulationDeviation.RootRatio(_numerator * _numerator, Denominator * Denominator);
         internal double RootScale(int length) => Sign * ExactPopulationDeviation.RootRatio((_numerator * _numerator) << 2148, Denominator * Denominator * length);
     }

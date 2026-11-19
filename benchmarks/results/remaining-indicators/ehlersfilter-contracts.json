@@ -1,0 +1,39 @@
+{
+  "batch": "generated-ehlers-filters",
+  "types": [
+    "EhlersIirFilter",
+    "EhlersInfiniteImpulseResponseFilter",
+    "EhlersFirFilter",
+    "EhlersFiniteImpulseResponseFilter",
+    "EhlersOptimumEllipticFilter",
+    "EhlersModifiedOptimumEllipticFilter"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing IIR, FIR and elliptic numerical kernels through shared owned execution across six public facades. Preserve fixed FIR coefficients, period-derived IIR coefficients and capped lag, original versus modified elliptic startup, ignored length parameters and staged rounding.",
+  "verification": {
+    "unit_passed": 243,
+    "fixture_passed": 24,
+    "discovery_passed": 34,
+    "gpu_passed": 100,
+    "contract_methods": 1369,
+    "hosted_methods": 1357,
+    "evidence": [
+      {
+        "file": "ehlersfilter-unit.trx.gz",
+        "passed_cases": 243,
+        "trx_sha256": "9f1dca9deeff5af0c1f471f45fe05ba0743bb7cf01c45f8f52f1dbf42b49e4b6"
+      },
+      {
+        "file": "ehlersfilter-fixture.trx.gz",
+        "passed_cases": 58,
+        "trx_sha256": "4412aad8d2dd9e5e463488574f8dbfda2b5489c9af26a58ec4f356e67e361082"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingEhlersFilterBenchmarks",
+    "cases": 48,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

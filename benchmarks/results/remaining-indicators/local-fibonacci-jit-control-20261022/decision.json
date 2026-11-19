@@ -1,0 +1,97 @@
+{
+  "status": "candidate-rejected-or-inconclusive",
+  "sources": {
+    "old": "d8f073710ba73de2e0398b008f5b85fd2af318d0",
+    "new": "778730fa1bb932ee4229bf6bf7ff64899e21ab75"
+  },
+  "candidate_code_source": "babee581a328d1950705c9495003c4bf9bbfbdfb",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Fwma",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.55761,
+        0.5850666666666666
+      ],
+      "new_means_ms": [
+        0.81401,
+        0.7959444444444445
+      ],
+      "verdict": "slower"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Fwma",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        1.18498,
+        1.1590777777777777
+      ],
+      "new_means_ms": [
+        1.2271888888888889,
+        1.2625444444444445
+      ],
+      "verdict": "inconclusive"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "eecacb46aea8d5724cad8d442c82e622f01221213cb0f839d885b181fc53064c",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-jit-control-20261022/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "1a39d600858c79eace44786f79b1db1b62243f33731ad1c1506abf4546ccbd60",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-jit-control-20261022/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "9ca6acf07ea3edf45421c549796c8fe805fbf6828a6ac512acecafb3ab2c16b8",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-jit-control-20261022/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "06b506491af180a2139fd1ef2089fabf33e29deacfa297a111e2758666d8e16c",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-jit-control-20261022/verified-summary.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "1c5c1144c9eb9fc1d41883de7a01202d6ce3ea6e8df707ea5bf1de9423e8bc39",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-jit-control-20261022/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "2dc3461dddad7d24bb925d2a001ca9fc77153ed40d0c76e6d84749ed07a4fd5a",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-jit-control-20261022/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "a8845ee45b62146bb1a7e4ea9062fcfbcde03e55e0280b62471b72985382ab6b",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-jit-control-20261022/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "5a0f8c4d599adda890fd20625ceda139c501eb6c787cd6dd3072badfc23e1932",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-jit-control-20261022/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "4169506671aa9b4d2f129fa2073c52afa050c2c0eac1afdd2e2b280819cca96c",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-jit-control-20261022/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "6fd11d5a8da1ada4345fb08bf28c1eada6e585e037010b13e2a0816d66ea7f73",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-jit-control-20261022/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "59d249f8e8cccbbbc77ad3edd50a2f7587bb43dd3e96b065fe0ea12c291f175c",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-jit-control-20261022/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "445019406a1ae9f1609a70094073270453d98c89396fc2a6a6fc582f9099f435",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-jit-control-20261022/round3-old-LibraryPairBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-fibonacci-jit-control.py": "b02b57f3291dc1aa071a9c99e49f50815d84d1bb37f678f3c048b664bf4fc56b",
+    "verify-fibonacci-jit-control.py": "d307f2b12780565cd54f5228a47e17b177f186e96eddf8f295824135fe908ea7"
+  },
+  "report_imported": false,
+  "production_integrated": false
+}

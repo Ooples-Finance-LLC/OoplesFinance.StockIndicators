@@ -1,0 +1,60 @@
+{
+  "before_sha256": "1dbc29054f4e730a3e4c35db101bc01b9f722d883b72ed61888344a9c32ac306",
+  "candidate_sha256": "293b6238402804d0d8cb9317ddb7f6b4ff39b0600e00c4bb7c8c0e7b0e4ab5c8",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 0,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 0,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-zigzag-rolling-interpolation-control-20261024",
+  "imported_utc": "2026-10-24T17:28:50.275276+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "4962feea6295aa13452aee116800bac652b270c0c74951b96928032401225d99",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-rolling-interpolation-certified-local-zigzag-rolling-interpolation-control-20261024-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "8812a99625f360d83f352d237335e7f8aab38a2aee58840531d73c73d1abbbb5",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-rolling-interpolation-certified-local-zigzag-rolling-interpolation-control-20261024-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "b774c1dcd56dad692c6c12a4062ba5cc4416b17898ce702a67b3528fd204bb54",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-rolling-interpolation-certified-local-zigzag-rolling-interpolation-control-20261024-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "99fc12c5d029c20c87bb6c50fc2d3f2b59c77352f12e191a0bd96750a144ae8c",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-rolling-interpolation-certified-local-zigzag-rolling-interpolation-control-20261024-measurement.json.gz"
+    },
+    "stage-zigzag-rolling-interpolation-report.py": {
+      "sha256": "8c4541b6f0015a8a97b887ce8d9101a53dab1665628aafd902bcc4bb226dfb67",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-rolling-interpolation-certified-local-zigzag-rolling-interpolation-control-20261024-stage-zigzag-rolling-interpolation-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-rolling-interpolation-certified-local-zigzag-rolling-interpolation-control-20261024-verify-approved-certified-report.py.gz"
+    },
+    "import-zigzag-rolling-interpolation-report.py": {
+      "sha256": "a270bfbe6ead613d93e2a28e7a3b379cb112ca8217920d3f4b959b6167d5e8f5",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-rolling-interpolation-certified-local-zigzag-rolling-interpolation-control-20261024-import-zigzag-rolling-interpolation-report.py.gz"
+    },
+    "archive-zigzag-rolling-interpolation-control.py": {
+      "sha256": "e7aa93b82a4d96663884ef5887a8b4cf47715ca0d5396debb00b1db81a32daf1",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-rolling-interpolation-certified-local-zigzag-rolling-interpolation-control-20261024-archive-zigzag-rolling-interpolation-control.py.gz"
+    },
+    "prove-zigzag-rolling-interpolation-integration.py": {
+      "sha256": "27cab2353ba1459770494537caba5a22e3e7e5931c3adc5022dfaee6ae4f3901",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-rolling-interpolation-certified-local-zigzag-rolling-interpolation-control-20261024-prove-zigzag-rolling-interpolation-integration.py.gz"
+    },
+    "archive-zigzag-rolling-interpolation-report.py": {
+      "sha256": "3d16db2aab74fc328e79c8ba96824dcd04a2634fdbb14d13750b03bbec6d9482",
+      "archive": "benchmarks/results/remaining-indicators/zigzag-rolling-interpolation-certified-local-zigzag-rolling-interpolation-control-20261024-archive-zigzag-rolling-interpolation-report.py.gz"
+    }
+  }
+}

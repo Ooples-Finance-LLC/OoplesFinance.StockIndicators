@@ -1,0 +1,23 @@
+{
+  "source_integration_commit": "df8dabbe98a935b9da543075005ab12d80c159b3",
+  "qualified_source": "a0260df3a13f631f169849d7241f868ce6df2ac4",
+  "compiled_source": "83239529036a52ed7ead92eb9b1095757260a38f",
+  "source_fingerprint": "0824276eac557862d3c454bc0b4c68b77aae489852fbb305db9394fd7ce58a05",
+  "unit": 83,
+  "comparator": 37,
+  "actual_gpu": 100,
+  "production_sha256": "959bcb4a0e258d32001b0bb63fbac30b0aeba07b7651940962b79b02d14f5f13",
+  "run_id": "43345228740",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 5,
+    "faster": 1
+  },
+  "integrated_paths": [
+    "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "src/Indicators/ValuesBarExecution.IdentityAdl.cs",
+    "tests/ModelsTests/CapturedIdentityAdlGridTests.cs"
+  ],
+  "verified_utc": "2026-11-13T02:13:58.657192+00:00"
+}

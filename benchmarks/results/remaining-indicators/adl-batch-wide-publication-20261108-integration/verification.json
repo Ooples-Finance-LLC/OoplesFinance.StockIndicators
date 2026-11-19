@@ -1,0 +1,24 @@
+{
+  "source_integration_commit": "04f5725b217048b55d1700b0082daf3916826ec2",
+  "qualified_source": "244cb78c6b10147b0121419dd3b9c5a79e46d9ae",
+  "compiled_source": "19dfdee1b64bf3e5b20b4f98fee4403b1325dabb",
+  "source_fingerprint": "70aee4991b87b95af1b401a0f55001f87692bc1ec238a21c2316e01a0798d62f",
+  "unit": 62,
+  "comparator": 37,
+  "actual_gpu": 100,
+  "production_sha256": "8add1f4846be2ffa98357502a6035c0ffdce5ebec1185710c8ad431fd56c2542",
+  "run_id": "42446630682",
+  "cases": 90,
+  "decisions": 18,
+  "verdicts": {
+    "inconclusive": 17,
+    "faster": 1
+  },
+  "integrated_paths": [
+    "src/Helpers/ExactMeanAccumulator.cs",
+    "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs",
+    "tests/ModelsTests/CompactMoneyFlowPublicationTests.cs"
+  ],
+  "verified_utc": "2026-11-08T05:02:00.530925+00:00"
+}

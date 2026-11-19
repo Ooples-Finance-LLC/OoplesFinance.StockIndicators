@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "1579825e4b7c5d56afc03cb3b7d0098eab6482ba05d6ed410946b4bb0e319259",
+    "archive": "benchmarks/results/remaining-indicators/deviation-position-certificate-report-integration-20261105/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "3b3e3fb1fdb4b30e99069ec1934ea64df019faef8b4d2cf54351c6c437dc3a85",
+    "archive": "benchmarks/results/remaining-indicators/deviation-position-certificate-report-integration-20261105/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "8b4d0bd6ca69a8f141d610e9529cef142de0790ec4253c3044c05f1ba4cbc8c2",
+    "archive": "benchmarks/results/remaining-indicators/deviation-position-certificate-report-integration-20261105/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "3ba1b451c6fd0247e08e6cf3d6dfe122925f0c025d88411c1aee35a124c60c76",
+    "archive": "benchmarks/results/remaining-indicators/deviation-position-certificate-report-integration-20261105/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "d6b04b517f6166c6b9edf54915abf0765540833ee8396ec499b518bf104517e0",
+    "archive": "benchmarks/results/remaining-indicators/deviation-position-certificate-report-integration-20261105/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "c3341744f4cadff9ed019d6aeb785f651382d848be1d6c750b275fef92895f84",
+    "archive": "benchmarks/results/remaining-indicators/deviation-position-certificate-report-integration-20261105/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "76442e759a1fd525a7b7b7e214468125e72bb450e9aba87f04b76c3605e746e2",
+    "archive": "benchmarks/results/remaining-indicators/deviation-position-certificate-report-integration-20261105/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "e5f1df282ac85628c081e1c6a6078461d3342c77a0bd175f59c88d36edd5382e",
+    "archive": "benchmarks/results/remaining-indicators/deviation-position-certificate-report-integration-20261105/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "a42477f422fb8c129697d2391faffa8cf15f34ef8a8558b49ae6e4952a1d9ba6",
+    "archive": "benchmarks/results/remaining-indicators/deviation-position-certificate-report-integration-20261105/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "fe20e62b33fa0a2f990a267f0edca276fa31beacf26cb0f6502c8e325d9a20b1",
+    "archive": "benchmarks/results/remaining-indicators/deviation-position-certificate-report-integration-20261105/updated-pair-details.png.gz"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "run_id": 41826135013,
+  "workflow_head": "71ea056b506a7484a0b3899e2dcff629dc3f4246",
+  "conclusion": "cancelled",
+  "timings_excluded": true,
+  "reason": "Plan declared max_parallel6 but targeted GitHub strategy omitted max-parallel and started9jobs. Entire timing run cancelled; no measurement decision or report import.",
+  "original_inputs_verified": true,
+  "original_inputs": "hosted-runs/41826135013/verified-inputs-local.json",
+  "repair": "Export frozen plan max_parallel and wire to targeted strategy; reuse authenticated prepared binaries and checks, repeat all270cases54decisions without pooling.",
+  "artifacts": [
+    {
+      "name": "hosted-targeted-7.zip",
+      "sha256": "95bdff08087daf096ae22597afd06cb438fe9fc73ac9233f1b2ac1551c6a78d1",
+      "artifact_id": 13323027680
+    },
+    {
+      "name": "hosted-targeted-2.zip",
+      "sha256": "746efe82436495396916e291044cf2865c209f14c8a5c4879d34f13080331d08",
+      "artifact_id": 13322978048
+    },
+    {
+      "name": "hosted-targeted-5.zip",
+      "sha256": "2f1132fc0a2092c97b6e4260a283dd9b3626af93b4d0d1d5577aa954805e8311",
+      "artifact_id": 13322768100
+    },
+    {
+      "name": "hosted-targeted-4.zip",
+      "sha256": "5d2e76d685af10ee3329985b944ef2c138f4cf9c5054d6cc3712de25b730bdef",
+      "artifact_id": 13322688148
+    },
+    {
+      "name": "hosted-targeted-0.zip",
+      "sha256": "ceba73975196460b97d90978d25059ad51dc8018c48e0c2a50b56f475185cae3",
+      "artifact_id": 13322337922
+    },
+    {
+      "name": "hosted-targeted-6.zip",
+      "sha256": "d72142494bdd712eb2f38d490a96d0db69f255f4be63555181007fd07db9c064",
+      "artifact_id": 13322298353
+    },
+    {
+      "name": "hosted-targeted-3.zip",
+      "sha256": "e240ddac18fc94a6bed490fecae1890c16b6aae2c6465f1037682bc536bc9cac",
+      "artifact_id": 13322203407
+    },
+    {
+      "name": "hosted-targeted-1.zip",
+      "sha256": "82804ea831553de697edc6ce41758dac1bf0fbc25233902b4d37d10299515add",
+      "artifact_id": 13321409495
+    },
+    {
+      "name": "hosted-targeted-8.zip",
+      "sha256": "f1a60fc53ecd9257a87666cb61368748b917d89d4509f225fc933b7ab47dfc67",
+      "artifact_id": 13321094475
+    }
+  ]
+}

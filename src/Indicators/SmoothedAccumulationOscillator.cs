@@ -116,6 +116,7 @@ public sealed class SmoothedAccumulationOscillator
         private readonly double _denominator = ((long)period + 1) * .5;
         private readonly bool _powerOfTwoDivisor = (((long)period + 1) & period) == 0;
         private readonly JurikDyadic _divisor = JurikDyadic.FromDouble(((long)period + 1) * .5);
+        private readonly TsiWordEmaRecurrence _wordBlend = new(period);
         private int _count;
         private JurikDyadic _sum;
         internal JurikDyadic Value { get; private set; }
@@ -150,6 +151,18 @@ public sealed class SmoothedAccumulationOscillator
                             Value = JurikDyadic.FromDouble(mean);
                             return;
                         }
+                    }
+                    // Reuse only the bounded finite-word certificate. This mean
+                    // keeps its own original seeds and extended-stage fallback.
+                    if (_wordBlend.TryAdvance(previous, input, out var wordRounded))
+                    {
+                        Value = JurikDyadic.FromDouble(wordRounded);
+                        return;
+                    }
+                    if (EmaDifferenceSignal.VolumeAverage.TryBlend(previous, input, period, out var certified))
+                    {
+                        Value = JurikDyadic.FromDouble(certified);
+                        return;
                     }
                     if (Binary64ArithmeticCertificate.TryProduct(previous, _weight, out var weighted)
                         && Binary64ArithmeticCertificate.TryDifference(weighted, -input, out var exactNumerator))

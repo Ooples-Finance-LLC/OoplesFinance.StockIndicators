@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "cb8c603b26918a37f3aedf0fe0c3310d68f993cc5a264e863a67fe5c8a5f75f1",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-warmup-policy-20261112-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "b810e19a2c2ff698227c28acb68612487f15cae326df5513d0d067dd0d007d0f",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-warmup-policy-20261112-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "28de73d1dfd935f55b489e7521b6ab4c952c40e3a4ece8ed63157499f7615577",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-warmup-policy-20261112-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "713e13f6c00e5cdc5bb032568f670cd70f9598f398b4e62e2461821feccbf66a",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-warmup-policy-20261112-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "1bb22287690202c133c852c00b0af080d91f8393f573fa4a3bce181e702fae17",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-warmup-policy-20261112-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "467d288d8657007ecf0364fa9c5c11a99717f54ef0818cfdc08d984caeadce7c",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-warmup-policy-20261112-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "b92fb83d9cce9de6f39b7dcc0f13ae03239670c026927d730fb40d45d1a97769",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-warmup-policy-20261112-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "10491a2e3bd89d31aa5b5be1dbd527912497aab241ac87c43b310d9cb6d891fd",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-warmup-policy-20261112-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "1a14460e7eaf614253011d05a394275c8f3fab19081cdaba1aa094987b299960",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-warmup-policy-20261112-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "2c2500e84466b8ed6d7864cc86103740d368aa44ba6e0bf449459301066c414b",
+    "archive": "benchmarks/results/remaining-indicators/arithmetic-warmup-policy-20261112-report-integration/updated-pair-details.png.gz"
+  }
+}

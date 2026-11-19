@@ -1,0 +1,22 @@
+{
+  "source_integration_commit": "aab40c9b47a282bd3d0e58c968eda5d7de6590a1",
+  "qualified_source": "ec2584c935a3c6875562cdce443fda3cf2cf9c89",
+  "compiled_source": "c257d0b8ae8594f36036c2d7f9bfb9cbfb4c9de7",
+  "source_fingerprint": "4caceee695f0d3f032c9e7a17cba2bc1fad874a7ee97595128b8f69bceaccb2f",
+  "unit": 12,
+  "comparator": 20,
+  "actual_gpu": 100,
+  "production_sha256": "9091f27b5a78f1dd431dc186257073b9b84b283f39bc06ceab760cf36ddb71b2",
+  "run_id": "43382446422",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 3,
+    "faster": 3
+  },
+  "integrated_paths": [
+    "src/Indicators/MassNormalizedEma.cs",
+    "tests/ModelsTests/MassNormalizedStageExecutionTests.cs"
+  ],
+  "verified_utc": "2026-11-13T07:42:53.413439+00:00"
+}

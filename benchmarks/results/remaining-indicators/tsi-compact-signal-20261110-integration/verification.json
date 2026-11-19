@@ -1,0 +1,21 @@
+{
+  "source_integration_commit": "cde901697cf6b23f723f10460cb470dbb0e3d7ff",
+  "qualified_source": "d34b5d50b653d0deffb507526c90efeec63d3ebb",
+  "compiled_source": "565a1d5d1c864c59654e27d839df92cc9a55136b",
+  "source_fingerprint": "f1cfa849ce1f6b5e3cfbb35157d4f68f96f1ebad6c8558b3543d920fad318f4a",
+  "unit": 64,
+  "comparator": 98,
+  "actual_gpu": 100,
+  "production_sha256": "8b343a134ca97400b3e77d310b59aa8251fef2be41d1c94509a10499956d5225",
+  "run_id": "42893400524",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "faster": 6
+  },
+  "integrated_paths": [
+    "src/Indicators/SeededTrueStrength.cs",
+    "tests/ModelsTests/SeededTrueStrengthExecutionTests.cs"
+  ],
+  "verified_utc": "2026-11-10T20:58:45.549200+00:00"
+}

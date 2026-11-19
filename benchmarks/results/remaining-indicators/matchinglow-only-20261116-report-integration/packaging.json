@@ -1,0 +1,29 @@
+{
+  "status": "qualified-source-report-integration-packaged",
+  "run_id": "43992359476",
+  "tooling_head": "fab5e0179feee36f3e0d9205dd0323d1b1e9c2f7",
+  "source": "a1f0028c601e1c6e7be5eabfe0d5da5cfe1f0758",
+  "qualified_source": "a921574e878c82392a6ce26122f5f2adaa2f430e",
+  "report_sha256": "9dc3d9b721dfaed8f114b6cc5d680d71b726598331236f9a51e0b541d4f81e11",
+  "imported_json_sha256": "5467e0c18eac1ed0359ddf391c9431f25a43a9a1e63e18ba872463c8c125ef6a",
+  "browser_receipt_sha256": "a41dac1100c8ac88b6c026dd6d2358bdad0b1677ec035847520b8b9e53d33c7f",
+  "changed_baseline_rows": 6,
+  "unchanged_baseline_rows": 796,
+  "replaced_builder_comparisons": 12,
+  "unchanged_builder_comparisons": 1532,
+  "report_point_wins": {
+    "1000": 196,
+    "10000": 238
+  },
+  "mixed_historical_point_gaps_10000": 163,
+  "full_current_gap_count_established": false,
+  "qualified_matchinglow_native_crossover": true,
+  "qualified_source_closures": 1,
+  "published_source_optimization_credit": 0,
+  "overall_goal_complete": false,
+  "package_source_raw_bytes": 37684679,
+  "required_free_bytes": 209587086,
+  "available_free_bytes_at_start": 2643877888,
+  "committed": false,
+  "pushed": false
+}

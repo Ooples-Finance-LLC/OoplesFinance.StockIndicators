@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "7484c717ffd55491b7fc14fec89e5964ebe0d3103b372afd85f8c6edac00b421",
+    "archive": "benchmarks/results/remaining-indicators/classic-oscillator-finite-inputs-report-integration-20261104/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "b46f8154f719b0fc7071ce227c773fb7c0a9e2a57f3d409586e7975ea1c2e4fa",
+    "archive": "benchmarks/results/remaining-indicators/classic-oscillator-finite-inputs-report-integration-20261104/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "431d780f7fba9f934dce8848461e5d8c7acb12201bb9710e1b6092ca0381c54a",
+    "archive": "benchmarks/results/remaining-indicators/classic-oscillator-finite-inputs-report-integration-20261104/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "96ba3a4a3428207c51568b327b5397e91c6d4dcd645b8b4a55cbce650be42c1c",
+    "archive": "benchmarks/results/remaining-indicators/classic-oscillator-finite-inputs-report-integration-20261104/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "81d37f1f4ffe7afb6f9b2c1c767c5c4363f73142433d837f8d77130857d62cfa",
+    "archive": "benchmarks/results/remaining-indicators/classic-oscillator-finite-inputs-report-integration-20261104/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "0b4c0ef0cfd2b68cf0633b2ef50faf2928f0361963eff01e39f8b0c22471c8b2",
+    "archive": "benchmarks/results/remaining-indicators/classic-oscillator-finite-inputs-report-integration-20261104/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "72dfe409ce9d8a604dc573ea7cd5eb812e54b698c178b177ed6e12f478f2d83c",
+    "archive": "benchmarks/results/remaining-indicators/classic-oscillator-finite-inputs-report-integration-20261104/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "162d18b4f156a27924540b26b78cddd5c6cac476cf41fb54a834b1f9b4014ce8",
+    "archive": "benchmarks/results/remaining-indicators/classic-oscillator-finite-inputs-report-integration-20261104/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "fc473cceef8f59df62cac322f132a80bd82fd436345a7a82c35d65b885ec776b",
+    "archive": "benchmarks/results/remaining-indicators/classic-oscillator-finite-inputs-report-integration-20261104/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "1bb7cadd605d172e66fc05b74138a24a533a8ad2b8c6efcc2d9e24da80b41507",
+    "archive": "benchmarks/results/remaining-indicators/classic-oscillator-finite-inputs-report-integration-20261104/updated-pair-details.png.gz"
+  }
+}

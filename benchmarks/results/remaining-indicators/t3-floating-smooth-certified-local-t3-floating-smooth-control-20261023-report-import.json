@@ -1,0 +1,60 @@
+{
+  "before_sha256": "b1f182a490f6c11b97eb5feba515ed031e8c6281524f8c94ccadef8764a06960",
+  "candidate_sha256": "6aaade3602ee1b0583ada267e096207b7d0afdbd6df0de945cbd856b6547bd69",
+  "changed_baseline_rows": 6,
+  "unchanged_baseline_rows": 796,
+  "changed_builder_slots": 12,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 12,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 796,
+  "run_id": "local-t3-floating-smooth-control-20261023",
+  "imported_utc": "2026-10-23T21:50:12.401183+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "478130dfb5e583000f4b2ec4f727ea01b8877952fc2ad88425fd3b68a19081cb",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-smooth-certified-local-t3-floating-smooth-control-20261023-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "f9e6e4bbdafcaccdf08aec06328ab9f96f1c6ed828aa25acd715edf075c7e0f4",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-smooth-certified-local-t3-floating-smooth-control-20261023-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "0f6dd8ac3f58742f7a303042b99990ba8eb443003110704f90d8bce6c649d80b",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-smooth-certified-local-t3-floating-smooth-control-20261023-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "cf0a43b210058a1dd770516071048ff9ff17f28242a6a49599025b79a7efe059",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-smooth-certified-local-t3-floating-smooth-control-20261023-measurement.json.gz"
+    },
+    "stage-t3-floating-smooth-report.py": {
+      "sha256": "916ee3933030e6d9a8e78246f62a44386ac74b5fb4f45a53a126c36a0f1b4ae0",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-smooth-certified-local-t3-floating-smooth-control-20261023-stage-t3-floating-smooth-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-smooth-certified-local-t3-floating-smooth-control-20261023-verify-approved-certified-report.py.gz"
+    },
+    "import-t3-floating-smooth-report.py": {
+      "sha256": "df5d6bf1bce9de3e60281cd6443876972c39c86d781f500557ae76e4bbff41ea",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-smooth-certified-local-t3-floating-smooth-control-20261023-import-t3-floating-smooth-report.py.gz"
+    },
+    "archive-t3-floating-smooth-control.py": {
+      "sha256": "903c464c8351ee38a82194b3a96f73c126ab0687a45c495ab4dda3f3aa12160c",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-smooth-certified-local-t3-floating-smooth-control-20261023-archive-t3-floating-smooth-control.py.gz"
+    },
+    "prove-t3-floating-smooth-integration.py": {
+      "sha256": "29c0f03bfb257ea21bb5128da32ab196359290422b2dd45e53cb8a09e5df91eb",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-smooth-certified-local-t3-floating-smooth-control-20261023-prove-t3-floating-smooth-integration.py.gz"
+    },
+    "archive-t3-floating-smooth-report.py": {
+      "sha256": "3575d9c53e4537d79e240583fc6dae7ba597363e80506a49251d07f161ed5299",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-smooth-certified-local-t3-floating-smooth-control-20261023-archive-t3-floating-smooth-report.py.gz"
+    }
+  }
+}

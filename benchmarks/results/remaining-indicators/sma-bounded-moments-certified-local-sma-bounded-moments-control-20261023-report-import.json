@@ -1,0 +1,60 @@
+{
+  "before_sha256": "6aaade3602ee1b0583ada267e096207b7d0afdbd6df0de945cbd856b6547bd69",
+  "candidate_sha256": "8ffbcb61f3f1f5f6c76980b3966a046df7cdff1aaf95c5a5ffaffd826a8dcc8b",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 0,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 0,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-sma-bounded-moments-control-20261023",
+  "imported_utc": "2026-10-24T11:31:13.265009+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "e9cbc80a2e3fb7330cbb255af64b7226edcc7151f21d9f5b5e97f4fc9f57f1ae",
+      "archive": "benchmarks/results/remaining-indicators/sma-bounded-moments-certified-local-sma-bounded-moments-control-20261023-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "a971fec2f36b7c34b338a752c2ec4dddd1e6c95658b5e457c84719a46062b75d",
+      "archive": "benchmarks/results/remaining-indicators/sma-bounded-moments-certified-local-sma-bounded-moments-control-20261023-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "f72cf046633a3a6450a426b594b108b2731dd504be69e6f3e651eefe4d820d03",
+      "archive": "benchmarks/results/remaining-indicators/sma-bounded-moments-certified-local-sma-bounded-moments-control-20261023-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "9837575d8e5b054ffcc26b41614129f3a8f89e22c884b95e1b0e22a1a683b713",
+      "archive": "benchmarks/results/remaining-indicators/sma-bounded-moments-certified-local-sma-bounded-moments-control-20261023-measurement.json.gz"
+    },
+    "stage-sma-bounded-moments-report.py": {
+      "sha256": "3f5d12a208ba14ad20c28d49993a09ceea8a51d983abe4a96b105f3b4ab4bca0",
+      "archive": "benchmarks/results/remaining-indicators/sma-bounded-moments-certified-local-sma-bounded-moments-control-20261023-stage-sma-bounded-moments-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/sma-bounded-moments-certified-local-sma-bounded-moments-control-20261023-verify-approved-certified-report.py.gz"
+    },
+    "import-sma-bounded-moments-report.py": {
+      "sha256": "ee0f7c239f24cd6b854365cd126e0f2c9241d7112fd813c76edeca4db64c15d4",
+      "archive": "benchmarks/results/remaining-indicators/sma-bounded-moments-certified-local-sma-bounded-moments-control-20261023-import-sma-bounded-moments-report.py.gz"
+    },
+    "archive-sma-bounded-moments-control.py": {
+      "sha256": "f0a344471f17b4263e25d8e73054d7cd7d415cea0369da3efcdbd8af542ecaeb",
+      "archive": "benchmarks/results/remaining-indicators/sma-bounded-moments-certified-local-sma-bounded-moments-control-20261023-archive-sma-bounded-moments-control.py.gz"
+    },
+    "prove-sma-bounded-moments-integration.py": {
+      "sha256": "9773649949c52762d039861dc01a973979124a95b8b294021a3371762f907780",
+      "archive": "benchmarks/results/remaining-indicators/sma-bounded-moments-certified-local-sma-bounded-moments-control-20261023-prove-sma-bounded-moments-integration.py.gz"
+    },
+    "archive-sma-bounded-moments-report.py": {
+      "sha256": "f4548b7aebb29ebc19c4bcdfe1cfc6cf1e121779f2c7af365e73e1cd65cb499e",
+      "archive": "benchmarks/results/remaining-indicators/sma-bounded-moments-certified-local-sma-bounded-moments-control-20261023-archive-sma-bounded-moments-report.py.gz"
+    }
+  }
+}

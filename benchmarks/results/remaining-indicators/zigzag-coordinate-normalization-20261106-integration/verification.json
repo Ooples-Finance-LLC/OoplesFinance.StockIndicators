@@ -1,0 +1,21 @@
+{
+  "source_integration_commit": "b84427fb6ec072b66daab42270ac25c789499367",
+  "qualified_source": "ec1fd7b111ef3370ff1330c660883da747c9e331",
+  "compiled_source": "0b9c443f453f527baaafd84f16d76983e27f9072",
+  "source_fingerprint": "dcf6cc51d176145172b6fbc181697242198597f4b6c8fa4be997824beecce144",
+  "unit": 14,
+  "comparator": 13,
+  "actual_gpu": 100,
+  "production_sha256": "d85213a8f4e16909f6933baae634d8235a95f160e35083d22a4883a053357351",
+  "run_id": "42226929015",
+  "cases": 20,
+  "decisions": 4,
+  "verdicts": {
+    "faster": 4
+  },
+  "integrated_paths": [
+    "src/Indicators/ZigZagSnapshot.cs",
+    "tests/ModelsTests/ZigZagExactScaleTests.cs"
+  ],
+  "verified_utc": "2026-11-06T15:55:06.819540+00:00"
+}

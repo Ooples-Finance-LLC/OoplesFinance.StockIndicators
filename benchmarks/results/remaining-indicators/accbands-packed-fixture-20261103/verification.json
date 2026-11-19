@@ -1,0 +1,9 @@
+{
+  "passed": 27,
+  "classes": {
+    "SharedTaWindowNativeBenchmarkTests": 27
+  },
+  "sha256": "fcba3ef118af43ed63689b1a17066a5eaed235c6652239912546b7479fb97b39",
+  "source": "bd5fcd33a519bccd1f8afed8aec4c57baf173fc3",
+  "production_sha256": "3a129478f84f3308eb2a37bd37a0bc5ff76fa253777b7fb11dd818198feb5552"
+}

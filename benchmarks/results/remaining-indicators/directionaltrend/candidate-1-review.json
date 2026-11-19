@@ -1,0 +1,372 @@
+{
+  "status": "reviewed-candidate-only-same-library",
+  "candidate_stage": "directionaltrend-candidate1",
+  "candidate_archive_sha256": "158ff68b72604a1eba3a62e43541be2c3d79dcdb189583b7e0b041a06f539960",
+  "candidate_input_sha256": "bb5d7db956bbaf81dfa86132b2136634626b534b33b3999d50a2d6361f6348dc",
+  "baseline_archive_sha256": "31dba763bb6dab8b830f45adaa52ebae9ec9019d521f7b1dd6b3c453f2a316b8",
+  "cases": 4,
+  "saved_baseline_repeated": false,
+  "comparisons": [
+    {
+      "operation": "DirectionalTrendIndex",
+      "count": 1000,
+      "history": "Full",
+      "candidate": {
+        "mean_ns": 790281.5972222222,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 790281.5972222222,
+          "StandardError": 18680.49894146729,
+          "Level": 12,
+          "Margin": 94174.10076050472,
+          "Lower": 696107.4964617175,
+          "Upper": 884455.697982727
+        },
+        "allocated_bytes": 59668
+      },
+      "versus_saved_legacy": {
+        "operation": "DirectionalTrendIndex",
+        "count": 1000,
+        "history": "Full",
+        "latency_result": "overlapping-intervals",
+        "shared_to_legacy_mean_ratio": 0.7867859931095545,
+        "mean_latency_delta_ns": -214161.29340277775,
+        "allocation_delta_bytes": -90643,
+        "shared_to_legacy_allocation_ratio": 0.39696362874307267,
+        "legacy": {
+          "mean_ns": 1004442.890625,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 1004442.890625,
+            "StandardError": 29207.29498780558,
+            "Level": 12,
+            "Margin": 139637.52416983174,
+            "Lower": 864805.3664551682,
+            "Upper": 1144080.4147948318
+          },
+          "allocated_bytes": 150311
+        },
+        "shared": {
+          "mean_ns": 790281.5972222222,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 790281.5972222222,
+            "StandardError": 18680.49894146729,
+            "Level": 12,
+            "Margin": 94174.10076050472,
+            "Lower": 696107.4964617175,
+            "Upper": 884455.697982727
+          },
+          "allocated_bytes": 59668
+        }
+      },
+      "versus_saved_shared": {
+        "operation": "DirectionalTrendIndex",
+        "count": 1000,
+        "history": "Full",
+        "latency_result": "overlapping-intervals",
+        "shared_to_legacy_mean_ratio": 0.8972860775462735,
+        "mean_latency_delta_ns": -90464.9305555555,
+        "allocation_delta_bytes": -51,
+        "shared_to_legacy_allocation_ratio": 0.9991460004353723,
+        "legacy": {
+          "mean_ns": 880746.5277777778,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 880746.5277777778,
+            "StandardError": 9572.009439896096,
+            "Level": 12,
+            "Margin": 48255.42317139376,
+            "Lower": 832491.104606384,
+            "Upper": 929001.9509491716
+          },
+          "allocated_bytes": 59719
+        },
+        "shared": {
+          "mean_ns": 790281.5972222222,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 790281.5972222222,
+            "StandardError": 18680.49894146729,
+            "Level": 12,
+            "Margin": 94174.10076050472,
+            "Lower": 696107.4964617175,
+            "Upper": 884455.697982727
+          },
+          "allocated_bytes": 59668
+        }
+      }
+    },
+    {
+      "operation": "DirectionalTrendIndex",
+      "count": 1000,
+      "history": "LatestOnly",
+      "candidate": {
+        "mean_ns": 800620.546875,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 800620.546875,
+          "StandardError": 34910.87844324744,
+          "Level": 12,
+          "Margin": 166905.85808936923,
+          "Lower": 633714.6887856307,
+          "Upper": 967526.4049643693
+        },
+        "allocated_bytes": 10609
+      },
+      "versus_saved_legacy": {
+        "operation": "DirectionalTrendIndex",
+        "count": 1000,
+        "history": "LatestOnly",
+        "latency_result": "overlapping-intervals",
+        "shared_to_legacy_mean_ratio": 0.9173157742252049,
+        "mean_latency_delta_ns": -72165.65104166663,
+        "allocation_delta_bytes": -140076,
+        "shared_to_legacy_allocation_ratio": 0.07040514981584099,
+        "legacy": {
+          "mean_ns": 872786.1979166666,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 872786.1979166666,
+            "StandardError": 9044.492499713042,
+            "Level": 12,
+            "Margin": 45596.04915609939,
+            "Lower": 827190.1487605672,
+            "Upper": 918382.2470727661
+          },
+          "allocated_bytes": 150685
+        },
+        "shared": {
+          "mean_ns": 800620.546875,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 800620.546875,
+            "StandardError": 34910.87844324744,
+            "Level": 12,
+            "Margin": 166905.85808936923,
+            "Lower": 633714.6887856307,
+            "Upper": 967526.4049643693
+          },
+          "allocated_bytes": 10609
+        }
+      },
+      "versus_saved_shared": {
+        "operation": "DirectionalTrendIndex",
+        "count": 1000,
+        "history": "LatestOnly",
+        "latency_result": "overlapping-intervals",
+        "shared_to_legacy_mean_ratio": 0.9150131905536952,
+        "mean_latency_delta_ns": -74361.97265625,
+        "allocation_delta_bytes": -59,
+        "shared_to_legacy_allocation_ratio": 0.9944694413198351,
+        "legacy": {
+          "mean_ns": 874982.51953125,
+          "confidence_interval": {
+            "N": 8,
+            "Mean": 874982.51953125,
+            "StandardError": 5874.571420985899,
+            "Level": 12,
+            "Margin": 31768.992087843806,
+            "Lower": 843213.5274434062,
+            "Upper": 906751.5116190938
+          },
+          "allocated_bytes": 10668
+        },
+        "shared": {
+          "mean_ns": 800620.546875,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 800620.546875,
+            "StandardError": 34910.87844324744,
+            "Level": 12,
+            "Margin": 166905.85808936923,
+            "Lower": 633714.6887856307,
+            "Upper": 967526.4049643693
+          },
+          "allocated_bytes": 10609
+        }
+      }
+    },
+    {
+      "operation": "DirectionalTrendIndex",
+      "count": 10000,
+      "history": "Full",
+      "candidate": {
+        "mean_ns": 6438033.333333333,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 6438033.333333333,
+          "StandardError": 24406.127569996916,
+          "Level": 12,
+          "Margin": 123038.74345928409,
+          "Lower": 6314994.589874049,
+          "Upper": 6561072.076792617
+        },
+        "allocated_bytes": 564500
+      },
+      "versus_saved_legacy": {
+        "operation": "DirectionalTrendIndex",
+        "count": 10000,
+        "history": "Full",
+        "latency_result": "shared-faster-separated-intervals",
+        "shared_to_legacy_mean_ratio": 0.6325424955561941,
+        "mean_latency_delta_ns": -3739991.666666667,
+        "allocation_delta_bytes": -813831,
+        "shared_to_legacy_allocation_ratio": 0.40955329307691696,
+        "legacy": {
+          "mean_ns": 10178025,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 10178025,
+            "StandardError": 409558.66331468447,
+            "Level": 12,
+            "Margin": 1958064.1675802465,
+            "Lower": 8219960.832419753,
+            "Upper": 12136089.167580247
+          },
+          "allocated_bytes": 1378331
+        },
+        "shared": {
+          "mean_ns": 6438033.333333333,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 6438033.333333333,
+            "StandardError": 24406.127569996916,
+            "Level": 12,
+            "Margin": 123038.74345928409,
+            "Lower": 6314994.589874049,
+            "Upper": 6561072.076792617
+          },
+          "allocated_bytes": 564500
+        }
+      },
+      "versus_saved_shared": {
+        "operation": "DirectionalTrendIndex",
+        "count": 10000,
+        "history": "Full",
+        "latency_result": "shared-faster-separated-intervals",
+        "shared_to_legacy_mean_ratio": 0.6433550902958762,
+        "mean_latency_delta_ns": -3568933.9393939404,
+        "allocation_delta_bytes": -296,
+        "shared_to_legacy_allocation_ratio": 0.9994759169682504,
+        "legacy": {
+          "mean_ns": 10006967.272727273,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 10006967.272727273,
+            "StandardError": 377556.62683233863,
+            "Level": 12,
+            "Margin": 1805065.2286284147,
+            "Lower": 8201902.044098859,
+            "Upper": 11812032.501355689
+          },
+          "allocated_bytes": 564796
+        },
+        "shared": {
+          "mean_ns": 6438033.333333333,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 6438033.333333333,
+            "StandardError": 24406.127569996916,
+            "Level": 12,
+            "Margin": 123038.74345928409,
+            "Lower": 6314994.589874049,
+            "Upper": 6561072.076792617
+          },
+          "allocated_bytes": 564500
+        }
+      }
+    },
+    {
+      "operation": "DirectionalTrendIndex",
+      "count": 10000,
+      "history": "LatestOnly",
+      "candidate": {
+        "mean_ns": 6590103.75,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 6590103.75,
+          "StandardError": 46272.667701519844,
+          "Level": 12,
+          "Margin": 221225.57933801427,
+          "Lower": 6368878.170661986,
+          "Upper": 6811329.329338014
+        },
+        "allocated_bytes": 83097
+      },
+      "versus_saved_legacy": {
+        "operation": "DirectionalTrendIndex",
+        "count": 10000,
+        "history": "LatestOnly",
+        "latency_result": "shared-faster-separated-intervals",
+        "shared_to_legacy_mean_ratio": 0.7646672860089104,
+        "mean_latency_delta_ns": -2028159.2129629627,
+        "allocation_delta_bytes": -1294891,
+        "shared_to_legacy_allocation_ratio": 0.06030313761803441,
+        "legacy": {
+          "mean_ns": 8618262.962962963,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 8618262.962962963,
+            "StandardError": 74083.83879070671,
+            "Level": 12,
+            "Margin": 373479.25881753775,
+            "Lower": 8244783.704145425,
+            "Upper": 8991742.221780501
+          },
+          "allocated_bytes": 1377988
+        },
+        "shared": {
+          "mean_ns": 6590103.75,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 6590103.75,
+            "StandardError": 46272.667701519844,
+            "Level": 12,
+            "Margin": 221225.57933801427,
+            "Lower": 6368878.170661986,
+            "Upper": 6811329.329338014
+          },
+          "allocated_bytes": 83097
+        }
+      },
+      "versus_saved_shared": {
+        "operation": "DirectionalTrendIndex",
+        "count": 10000,
+        "history": "LatestOnly",
+        "latency_result": "shared-faster-separated-intervals",
+        "shared_to_legacy_mean_ratio": 0.723104422754498,
+        "mean_latency_delta_ns": -2523522.916666666,
+        "allocation_delta_bytes": -226,
+        "shared_to_legacy_allocation_ratio": 0.9972876636702951,
+        "legacy": {
+          "mean_ns": 9113626.666666666,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 9113626.666666666,
+            "StandardError": 284686.69418460026,
+            "Level": 12,
+            "Margin": 1361062.1989002742,
+            "Lower": 7752564.467766392,
+            "Upper": 10474688.865566941
+          },
+          "allocated_bytes": 83323
+        },
+        "shared": {
+          "mean_ns": 6590103.75,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 6590103.75,
+            "StandardError": 46272.667701519844,
+            "Level": 12,
+            "Margin": 221225.57933801427,
+            "Lower": 6368878.170661986,
+            "Upper": 6811329.329338014
+          },
+          "allocated_bytes": 83097
+        }
+      }
+    }
+  ],
+  "limitations": "Separate historical runs; individual-arm confidence intervals do not form a ratio confidence interval. Native qualification and required correctness/hosted gates remain separate."
+}

@@ -1,0 +1,71 @@
+{
+  "source": "aeb531fde9382646548070fedb859144f33a66f3",
+  "production_sha256": "14df42986ce30bc00402ead2e764fc052bf48be0f2ac14cee0210f8b95802fa0",
+  "source_fingerprint": "41a77b0e51a25af9e90eeabc954dcd18bfd769b3978ebbe9b66a6074a1a74163",
+  "accepted": true,
+  "optimized_callers": [
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node:TryFillPriorDirectional(OoplesFinance.StockIndicators.Indicators.Bar[],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,byref):bool:this (Tier1-OSR)",
+      "code_bytes": 986
+    },
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node:TryFillPriorDirectional(OoplesFinance.StockIndicators.Indicators.Bar[],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,byref):bool:this (Tier1-OSR)",
+      "code_bytes": 1003
+    },
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node:TryFillPriorDirectional(OoplesFinance.StockIndicators.Indicators.Bar[],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,byref):bool:this (Tier1)",
+      "code_bytes": 1004
+    }
+  ],
+  "actual_typed_path": true,
+  "typed_frames": [
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node.TryFillPriorDirectional(value class OoplesFinance.StockIndicators.Indicators.Bar[],value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      14786.796657120523
+    ]
+  ],
+  "state_arithmetic_unchanged": true,
+  "direct_concrete_update": true,
+  "no_interface_update_in_optimized_loop": true,
+  "roi_promising": true,
+  "diagnostic_rounds": [
+    {
+      "label": "old1",
+      "batches": 790,
+      "seconds": 5.0059343,
+      "allocated_bytes": 834628104,
+      "mean_batch_ms": 6.336625696202532
+    },
+    {
+      "label": "new1",
+      "batches": 924,
+      "seconds": 5.0054682,
+      "allocated_bytes": 976110008,
+      "mean_batch_ms": 5.417173376623377
+    },
+    {
+      "label": "new2",
+      "batches": 930,
+      "seconds": 5.0040794,
+      "allocated_bytes": 982447432,
+      "mean_batch_ms": 5.380730537634409
+    },
+    {
+      "label": "old2",
+      "batches": 798,
+      "seconds": 5.0001143,
+      "allocated_bytes": 843062568,
+      "mean_batch_ms": 6.265807393483709
+    }
+  ],
+  "diagnostic_mean_reduction": 0.14318895110066254,
+  "disassembly_sha256": "62b339d03edff75dfeec56ab2e99975d2210a6a570d9be3614669d6af132b1ea",
+  "trace_sha256": "e2c3519fa4e28f8d52462beeff34ce13029b2d9703dae44fc7af4376888fab8e",
+  "performance_qualified": false,
+  "local_timing_usable_for_acceptance": false,
+  "limits": [
+    "Unisolated local diagnostic; five-second windows,100unmeasured warmups,one diagnostic worker. CLR defaults retained. Not confidence intervals or acceptance.",
+    "Sampled thread-time frames include required validation/capture/output work; frame weight is not removable dispatch cost or process CPU usage.",
+    "The older0.148interface-loop trial was rejected for EMA1000; both EMA and T3 are mandatory in the approved270case qualification."
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "batch": "generated-simplified-least-squares-and-extrapolation-storage",
+  "types": [
+    "SimplifiedLeastSquaresMovingAverage",
+    "LinearExtrapolation"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Add shared Simplified LSMA execution with owned history bounded by input count while retaining original-period weights and denominator. Existing Linear Extrapolation shared execution skips lag storage when the input cannot reach the lag. Preserve startup, exact rounding and legacy/custom routing.",
+  "verification": {
+    "unit_passed": 68,
+    "fixture_passed": 8,
+    "discovery_passed": 49,
+    "gpu_passed": 100,
+    "contract_methods": 1384,
+    "hosted_methods": 1372,
+    "evidence": [
+      {
+        "file": "leastsquares-unit.trx.gz",
+        "passed_cases": 68,
+        "trx_sha256": "53841576c8bd594fd9ebe586d43adf283e4fc1ab8140bfaf1bd6089724699f97"
+      },
+      {
+        "file": "leastsquares-fixture.trx.gz",
+        "passed_cases": 57,
+        "trx_sha256": "45a5901ad9ca4897734bab7e19fcaca22b64bc6fb8ed8e1c979a5d940ad86586"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingLeastSquaresBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

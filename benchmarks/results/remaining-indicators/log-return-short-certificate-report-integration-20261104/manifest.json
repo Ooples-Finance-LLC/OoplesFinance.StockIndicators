@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "ebb9047929959af2290efbd9beea1201d471d20ad1bfd3282c8ac8eea84b712b",
+    "archive": "benchmarks/results/remaining-indicators/log-return-short-certificate-report-integration-20261104/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "67abe4d25993d201ca1d4b896dc8bbb56e1b4c62a2d0c217357835df3d594f82",
+    "archive": "benchmarks/results/remaining-indicators/log-return-short-certificate-report-integration-20261104/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "01ba57b97e209463125f4df7380495472b352002600d7bc4a87f20fadbfccdae",
+    "archive": "benchmarks/results/remaining-indicators/log-return-short-certificate-report-integration-20261104/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "7484c717ffd55491b7fc14fec89e5964ebe0d3103b372afd85f8c6edac00b421",
+    "archive": "benchmarks/results/remaining-indicators/log-return-short-certificate-report-integration-20261104/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "e14bf4ae441e2e6fae8cf0590012b18b2aec9d8ee4f6c92c439ddd8886897883",
+    "archive": "benchmarks/results/remaining-indicators/log-return-short-certificate-report-integration-20261104/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "f48feaf327a7b3ad36afc0e0f304280a4d7e2d4bdd2ca40cc93199079f258e17",
+    "archive": "benchmarks/results/remaining-indicators/log-return-short-certificate-report-integration-20261104/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "c5b130684d5b98efbf098db1839e616be9cd12816e29e52cb6884e0960ef9777",
+    "archive": "benchmarks/results/remaining-indicators/log-return-short-certificate-report-integration-20261104/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "e41df13628b43660f137dc013af332a884491c14006a82bb12d4ba681bbbe7b1",
+    "archive": "benchmarks/results/remaining-indicators/log-return-short-certificate-report-integration-20261104/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "a7559d71a7eb58cbdaf4a588dfed5e716bffe23940ea4b57ff76cbeb6f9f0b2c",
+    "archive": "benchmarks/results/remaining-indicators/log-return-short-certificate-report-integration-20261104/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "77a527eb4270c7d0b762e9f9611a962fe84718da87bb6ccc714f1f5861f278c1",
+    "archive": "benchmarks/results/remaining-indicators/log-return-short-certificate-report-integration-20261104/updated-pair-details.png.gz"
+  }
+}

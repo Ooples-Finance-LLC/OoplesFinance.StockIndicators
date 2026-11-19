@@ -1,0 +1,34 @@
+{
+  "qualified_commit": "0e62018ed67b73a18cd94c6320af6d0612a78af7",
+  "qualified_code": "8c895af7c2e77632e6523ec7b348289a61d7b4f0",
+  "matched_paths": [
+    "src",
+    "tests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "3878626756949344357d4565d238ec597bcc66755e76228388cb61694d859df4",
+  "qualification_reused": {
+    "builds": 4,
+    "unit": 16,
+    "parity": 19,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tema-factored-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b9a8f5493289a4aeb545d9c5cf301f4eeadf9926690c72509924055a0bfe8884",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tema-factored-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b9a8f5493289a4aeb545d9c5cf301f4eeadf9926690c72509924055a0bfe8884",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tema-factored-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b9a8f5493289a4aeb545d9c5cf301f4eeadf9926690c72509924055a0bfe8884",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tema-factored-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b9a8f5493289a4aeb545d9c5cf301f4eeadf9926690c72509924055a0bfe8884"
+  },
+  "control_run": 39738942544,
+  "note": "Indexed executable sources and build inputs exactly match qualified candidate; no redundant rebuild. Original publishing-checkout binaries remain old and are not reused as candidate binaries."
+}

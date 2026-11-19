@@ -1,0 +1,60 @@
+{
+  "before_sha256": "7e5ef2899b05c9c212941236d1da2ee7355975241af055839039b3726300410c",
+  "candidate_sha256": "008031c7a34c926c11a88328c27afae968cbfd6ee09f6e2854a20f06c8444926",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 0,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 0,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-gator-direct-modern-control-20261023",
+  "imported_utc": "2026-10-23T06:23:05.047676+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "86c720d16f0bb25617172406aab7c92c70582e1b5044c27b41b61baedca99fa9",
+      "archive": "benchmarks/results/remaining-indicators/gator-direct-modern-certified-local-gator-direct-modern-control-20261023-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "e883df803f0b2a3525c77bc4297fa679cc759b5d16bbb91c4f810f573fc1b324",
+      "archive": "benchmarks/results/remaining-indicators/gator-direct-modern-certified-local-gator-direct-modern-control-20261023-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "ac2763f3ac65d07dc0b2c9aceb899275b7a6a494bb9c1ab873b7840c77ffc6c2",
+      "archive": "benchmarks/results/remaining-indicators/gator-direct-modern-certified-local-gator-direct-modern-control-20261023-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "d97a71930d2edf66fd4d6fb24e003cfeae2bdec1d68929276e788f56d445062b",
+      "archive": "benchmarks/results/remaining-indicators/gator-direct-modern-certified-local-gator-direct-modern-control-20261023-measurement.json.gz"
+    },
+    "stage-gator-direct-modern-report.py": {
+      "sha256": "06dd346d6af5095652045e985d4543db085723f9544a7486972180a647999ddb",
+      "archive": "benchmarks/results/remaining-indicators/gator-direct-modern-certified-local-gator-direct-modern-control-20261023-stage-gator-direct-modern-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/gator-direct-modern-certified-local-gator-direct-modern-control-20261023-verify-approved-certified-report.py.gz"
+    },
+    "import-gator-direct-modern-report.py": {
+      "sha256": "2936be6845d47055b18b750df0bc48ee86cf41e381cb7b6a2041703a46ca41bb",
+      "archive": "benchmarks/results/remaining-indicators/gator-direct-modern-certified-local-gator-direct-modern-control-20261023-import-gator-direct-modern-report.py.gz"
+    },
+    "archive-gator-direct-modern-control.py": {
+      "sha256": "79454eb4f5d98ff7c677e24c84a897dd244d922a481e1e22ee34aa3b69ab14c4",
+      "archive": "benchmarks/results/remaining-indicators/gator-direct-modern-certified-local-gator-direct-modern-control-20261023-archive-gator-direct-modern-control.py.gz"
+    },
+    "prove-gator-direct-modern-integration.py": {
+      "sha256": "26f850b8c39e12a49b663590cd31e8b9eed8b588fe175c268b47ba0f4ca2d0c2",
+      "archive": "benchmarks/results/remaining-indicators/gator-direct-modern-certified-local-gator-direct-modern-control-20261023-prove-gator-direct-modern-integration.py.gz"
+    },
+    "archive-gator-direct-modern-report.py": {
+      "sha256": "58a99b4a2cd0e3c54e8fc61dbf41a4e276db3d4bcdd14391b48a69422293ee83",
+      "archive": "benchmarks/results/remaining-indicators/gator-direct-modern-certified-local-gator-direct-modern-control-20261023-archive-gator-direct-modern-report.py.gz"
+    }
+  }
+}

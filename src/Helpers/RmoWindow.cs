@@ -10,10 +10,18 @@ internal sealed class RmoWindow : IDisposable
     private readonly LinkedList<(long Index, double Value)> _highs = new(), _lows = new();
     private long _count;
     private Number _previous;
-    internal RmoWindow(int first, int range, int swing, int output)
+    private readonly int _swingLength, _outputLength;
+    private readonly bool _allowCertified;
+    private readonly List<Number>? _replay;
+    private CertifiedRmoQqe.Rmo? _certified;
+    internal long CertifiedCount { get; private set; }
+    internal int FallbackCount { get; private set; }
+    internal RmoWindow(int first, int range, int swing, int output, bool allowCertified = true)
     {
         _range = Math.Max(2, range); _cascade = Enumerable.Range(0, 10).Select(_ => new Mean(first, false)).ToArray();
         _second = new(swing, true); _third = new(swing, true); _rmo = new(output, true);
+        _swingLength = Math.Max(1, swing); _outputLength = Math.Max(1, output); _allowCertified = allowCertified;
+        if (allowCertified) { _replay = new(); _certified = new(_swingLength, _outputLength); }
     }
     private double Extreme(LinkedList<(long Index, double Value)> deque, double price, bool high, bool final)
     {
@@ -40,7 +48,23 @@ internal sealed class RmoWindow : IDisposable
     {
         StreamingInputValidation.Finite(price, nameof(price)); var value = Number.Of(price); var sum = default(Number);
         foreach (var stage in _cascade) { value = stage.Next(value, final); sum += value; }
-        var first = Raw(price, sum, final); var second = _second.Next(first, final); var third = _third.Next(second, final); var rmo = _rmo.Next(first, final);
+        var first = Raw(price, sum, final);
+        if (_certified is not null)
+        {
+            if (_certified.TryNext(first, final, out var result))
+            {
+                if (final) { _replay!.Add(first); CertifiedCount++; }
+                return result;
+            }
+            _certified = null; FallbackCount++;
+            foreach (var previous in _replay!) FinishExact(previous, true);
+            _replay.Clear();
+        }
+        return FinishExact(first, final);
+    }
+    private (double Rmo, double Swing1, double Swing2, double Swing3, Signal Trade) FinishExact(Number first, bool final)
+    {
+        var second = _second.Next(first, final); var third = _third.Next(second, final); var rmo = _rmo.Next(first, final);
         var change = rmo - _previous;
         var trade = rmo.Sign > 0 && change.Sign > 0 ? Signal.StrongBuy : rmo.Sign < 0 && change.Sign < 0 ? Signal.StrongSell
             : rmo.Sign > 0 ? Signal.Buy : rmo.Sign < 0 ? Signal.Sell : Signal.None;
@@ -108,6 +132,10 @@ internal sealed class RmoWindow : IDisposable
         }
         internal void Reset() { _history.Clear(); _sum = _previous = default; _count = 0; }
     }
-    internal void Reset() { foreach (var stage in _cascade) stage.Reset(); _second.Reset(); _third.Reset(); _rmo.Reset(); _highs.Clear(); _lows.Clear(); _count = 0; _previous = default; }
+    internal void Reset()
+    {
+        foreach (var stage in _cascade) stage.Reset(); _second.Reset(); _third.Reset(); _rmo.Reset(); _highs.Clear(); _lows.Clear(); _count = 0; _previous = default;
+        _replay?.Clear(); CertifiedCount = 0; FallbackCount = 0; _certified = _allowCertified ? new(_swingLength, _outputLength) : null;
+    }
     public void Dispose() => Reset();
 }

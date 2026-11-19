@@ -1,0 +1,36 @@
+{
+  "status.json": {
+    "sha256": "e6a89a4147bf47b8b209a34966e2d5f25d834054b80f12b8670752d23e3481ff",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-20261022/status.json.gz"
+  },
+  "provenance.json": {
+    "sha256": "2714e6fb33be18d1714f79c3914e26db4950addb09108beea46f30e555182bf4",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-20261022/provenance.json.gz"
+  },
+  "binary-manifest.json": {
+    "sha256": "9caa8cfb9d7eedf3e7da609598ebb77cb46984e11875eef5ae99fa7da956ddf6",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-20261022/binary-manifest.json.gz"
+  },
+  "verified-summary.json": {
+    "sha256": "6e2d5699617ff39fac2d39ecd7b306635f9a7163b1c09c5982ef74ee87cd3d8f",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-20261022/verified-summary.json.gz"
+  },
+  "SharedRollingSumBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRollingSumBenchmarks-report-full-compressed.json": {
+    "sha256": "dc7ceb528ceb1878195296b3b8ba367713c2bb6b905c16218bc7a43ef9a8a170",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-20261022/SharedRollingSumBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedRollingSumBenchmarks-report-full-compressed.json.gz"
+  },
+  "SharedTriangularBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTriangularBenchmarks-report-full-compressed.json": {
+    "sha256": "837a35c469b9e13e46420313f17b83850f749d305ad069118d300287fc77de05",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-20261022/SharedTriangularBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTriangularBenchmarks-report-full-compressed.json.gz"
+  },
+  "measure-local-gpu-setup-builders.py": {
+    "sha256": "1f34f64a8f1ecd3997015a3d90e95742d8b5a95ab9252a03d6e4c5a49dbf6b0f",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-20261022/measure-local-gpu-setup-builders.py.gz"
+  },
+  "verify-local-gpu-setup-builders.py": {
+    "sha256": "fb8a022c818b69f343d2068eb9915707833eccdf7ba3216b16b3ab23d301b667",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-20261022/verify-local-gpu-setup-builders.py.gz"
+  },
+  "measurement_location": "Local Windows host,CPU timed paths,full required GPU setup retained. No hosted runner measurement claim.",
+  "discarded_attempt": "First attempt overlapped browser verification; no measurements from it are qualified or imported."
+}

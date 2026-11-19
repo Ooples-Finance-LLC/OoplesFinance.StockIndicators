@@ -1,0 +1,34 @@
+{
+  "qualified_commit": "f883988476b017b2bb32a933fe85e90afbd4a12b",
+  "qualified_code": "ea079b8a7211aca039f5994ddc2696fe618dfc15",
+  "matched_paths": [
+    "src",
+    "tests",
+    "examples",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "c17a455c0710890a672b2637c8a84809173bc351ef2eaa9cf0c1b6748ae93dba",
+  "qualification_reused": {
+    "unit": 44,
+    "parity": 2,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-bounded-moments-20261023\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "42a6c5c7076284d079fca5dd40005be468e412285566d714968fc5a4c52a2f8f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-bounded-moments-20261023\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "42a6c5c7076284d079fca5dd40005be468e412285566d714968fc5a4c52a2f8f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-bounded-moments-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "42a6c5c7076284d079fca5dd40005be468e412285566d714968fc5a4c52a2f8f",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-bounded-moments-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "42a6c5c7076284d079fca5dd40005be468e412285566d714968fc5a4c52a2f8f"
+  },
+  "control": "local-sma-bounded-moments-control-20261023",
+  "note": "Integrated executable sources and build inputs exactly match qualified candidate. Publishing checkout binaries remain older; preserved candidate DLL supplied the new measurement arm. No redundant production rebuild."
+}

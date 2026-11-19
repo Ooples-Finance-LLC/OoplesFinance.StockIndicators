@@ -1,4 +1,5 @@
 using OoplesFinance.StockIndicators.Builder;
+using OoplesFinance.StockIndicators.Helpers;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Validation;
 
@@ -10,10 +11,34 @@ public sealed class SharedTrendReversalTests : IDisposable
     private readonly int _priorDop = AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism;
     public SharedTrendReversalTests() => AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = 8;
     public void Dispose() => AiDotNet.Tensors.Helpers.CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
+#if !NETFRAMEWORK
+    [Fact]
+    public void CertifiedBodiesPreserveRoundedTiesAndWideOrdering()
+    {
+        static void Check(double a, double b, double c, double d)
+        {
+            var left = new TrendStarState.CertifiedBody(a, b);
+            var right = new TrendStarState.CertifiedBody(c, d);
+            var expectedLeft = (ReferenceFraction.FromDouble(a) - ReferenceFraction.FromDouble(b)).Abs();
+            var expectedRight = (ReferenceFraction.FromDouble(c) - ReferenceFraction.FromDouble(d)).Abs();
+            Assert.Equal(expectedLeft.CompareTo(expectedRight) >= 0, left.AtLeast(right));
+        }
+        (double Open, double Close)[] points = [(1, 0), (1, -double.Epsilon),
+            (double.MaxValue, -double.MaxValue), (double.MaxValue, -Math.BitDecrement(double.MaxValue)),
+            (double.Epsilon, 0), (-0d, 0d), (Math.ScaleB(1, 600), Math.BitDecrement(Math.ScaleB(1, 600)))];
+        foreach (var left in points)
+        foreach (var right in points) Check(left.Open, left.Close, right.Open, right.Close);
+        var random = new Random(1907);
+        double Next() => Math.ScaleB(random.NextDouble() * 2 - 1, random.Next(-1074, 1024));
+        for (int i = 0; i < 1000; i++) Check(Next(), Next(), Next(), Next());
+    }
+#endif
     [Fact]
     public async Task EachPatternPreservesExactWindowsAndResetAcrossWideAndSubnormalBars()
     {
-        double[] points = [-double.MaxValue, -10, -1, -double.Epsilon, -0d, 0d, double.Epsilon, 1, 10, double.MaxValue];
+        double[] points = [-double.MaxValue, -10, -1, -double.Epsilon, -0d, 0d, double.Epsilon,
+            Math.ScaleB(1, -1022), Math.BitDecrement(1), 1, Math.BitIncrement(1),
+            Math.ScaleB(1, 53), 10, double.MaxValue];
         var bars = (from open in points from close in points select new Bar(default, open, double.MaxValue, -double.MaxValue, close, 1))
             .Concat(points.Select(v => new Bar(default, 0, double.Epsilon, 0, v, 1)))
             .Concat(Fixture(257)).ToArray();

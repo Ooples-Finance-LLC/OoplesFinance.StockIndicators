@@ -1,0 +1,50 @@
+{
+  "source_sha": "eb9d6058b009f526ecd9c89c1b76eaee9e1fcadc",
+  "measurement_location": "Local Windows; unchanged correctness setup; CPU builder and native methods timed",
+  "cases": 24,
+  "comparisons": 12,
+  "partial": true,
+  "excluded_fixtures": [
+    "SharedTradyNativeCandleBenchmarks",
+    "SharedTradyCciAdaptiveBenchmarks",
+    "SharedTradyAtrChannelBenchmarks"
+  ],
+  "archives": {
+    "verified-summary.json": {
+      "sha256": "92d068088ba14691139338cd7f143cb41489c1d60452f4ceb84ee03186eb1037",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch3-20261022/verified-summary.json.gz"
+    },
+    "status.json": {
+      "sha256": "7f7172bd829ea2a633e55fd6999998619ffb4d4ed406766f8ed2db542fd6da19",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch3-20261022/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "b85e8887bad21e0415720bd6e78ca111bb860e05d3a70895efa7ef3618428125",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch3-20261022/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "a20a1647ad4f01ccae6a76522fffc7337df7481cc86d7714dfd77d029ff70e10",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch3-20261022/binary-manifest.json.gz"
+    },
+    "interrupted-for-cost-review.json": {
+      "sha256": "2e9b8241259d2c520be218380a49a387561285cc3ff90c2f3bf06f77306a902d",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch3-20261022/interrupted-for-cost-review.json.gz"
+    },
+    "SharedTradyNativeVolumeBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyNativeVolumeBenchmarks-report-full-compressed.json": {
+      "sha256": "d34ae1c20828da01adb26bd64b964f6c5b830130a4e5ab3376a0f60afce5463a",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch3-20261022/SharedTradyNativeVolumeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyNativeVolumeBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedTradyNativeCandleBenchmarks.log": {
+      "sha256": "cf74c9ae7bd1ec1f0a6ec7183f51d035a815bc3ded0741c89211b87011f6de00",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch3-20261022/SharedTradyNativeCandleBenchmarks.log.gz"
+    },
+    "SharedTradyNativeVolumeBenchmarks.log": {
+      "sha256": "1d664bf137e9974c07b7f9cd097ee22eaad9ce792348196e056753b0578ca3e4",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch3-20261022/SharedTradyNativeVolumeBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-local-mapped-batch3.py": "06e97c0f458715985e212379e3ad7c843e2ee9b027b9b228f9f7947d17f22864",
+    "verify-local-mapped-batch3-partial.py": "5afd7ed84335ade41fade201fe6d06fb5a33dad9bb134ed0460ed0e6616b8d9f"
+  }
+}

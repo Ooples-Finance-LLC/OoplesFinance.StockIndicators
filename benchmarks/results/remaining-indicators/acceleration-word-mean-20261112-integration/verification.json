@@ -1,0 +1,22 @@
+{
+  "source_integration_commit": "4e51aa310fd998fafc269716cb43a626ce9edbcc",
+  "qualified_source": "b789c53ee54f479ce839f59d468db1de5ba7c18f",
+  "compiled_source": "800cae61efce98d3e54a646b08d02ee5b2f55807",
+  "source_fingerprint": "10f9cfb85b7af319355f29e6cff911061f691f7014074dc86ad2f9afe4aa62a2",
+  "unit": 23,
+  "comparator": 38,
+  "actual_gpu": 100,
+  "production_sha256": "046c887a5f83601ae30e075c09e5c013a3efea1ac038d9fc67dfe75f640e68ac",
+  "run_id": "43330748040",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 5,
+    "faster": 1
+  },
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.Acceleration.cs",
+    "tests/ModelsTests/AccelerationWordMeanTests.cs"
+  ],
+  "verified_utc": "2026-11-13T00:27:31.264508+00:00"
+}

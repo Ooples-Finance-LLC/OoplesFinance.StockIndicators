@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "c154e8b7c6973a586ed92c42b9c32d598001b09e59c385ea0d6c38da3b9238d8",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-normalization-report-integration-20261105/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "de6ea7ae63402fd5b616c6b5dbbb6d65abb0e1a4156764949427708fcab0443a",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-normalization-report-integration-20261105/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "6fb17a9849ccf0fba102877a63c24d421c377985f388461a963271841b6f1cc6",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-normalization-report-integration-20261105/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "13b7cea4dea84346d3ed58fa9d6ec62f4fc44bc7b21e2ddafe46163801674346",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-normalization-report-integration-20261105/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "03c81f77940720992b32ab195fc193fc59187890fa924a480e6d73eba0177a4a",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-normalization-report-integration-20261105/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "d73d66387ab94723e5decd4dee40cb70c1dac6c8a00d002ae33dcae943fb9756",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-normalization-report-integration-20261105/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "8f3d6ce00269b7a3397ae9a84cc1eaa1796b10935bd8c526446e637d20c53c0b",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-normalization-report-integration-20261105/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "c18ea9e1c07d845d6e9c3c2b3bc8279c1ef68f52a65b04638d69a91af12f8959",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-normalization-report-integration-20261105/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "ee71db61f2b5c5c3eb594fd121f5c89a1f7f3f37d76d49d5b4d06457b8d7a052",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-normalization-report-integration-20261105/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "d25c38ec90eedcf59af7b7e6eb7be91838a957aa5c44642c4a4cba017d22677d",
+    "archive": "benchmarks/results/remaining-indicators/renko-price-normalization-report-integration-20261105/updated-pair-details.png.gz"
+  }
+}

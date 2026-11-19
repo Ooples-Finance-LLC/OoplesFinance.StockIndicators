@@ -1,0 +1,21 @@
+{
+  "prior_source": "c52320b15a83802a0889bcf0eb70f336c38f12e9",
+  "final_source": "ed460a11b3061a31c9cb8f31447becb1736dbe76",
+  "prior_checks": {
+    "unit": 794,
+    "parity": 381,
+    "gpu": 100
+  },
+  "final_changed_input_checks": {
+    "unit": 54,
+    "parity": 72,
+    "gpu": 100
+  },
+  "changed_inputs": [
+    "src/Indicators/ClassicMacd.cs",
+    "src/Indicators/ClassicPriceOscillator.cs",
+    "tests/ModelsTests/ClassicalFiniteDifferenceTests.cs"
+  ],
+  "prior_evidence": "benchmarks/results/remaining-indicators/consolidated-exact-arithmetic-20261030/verification.json",
+  "note": "Earlier full batch checked before these three files changed; final affected-path checks cover both changed production classes. Earlier counts are not relabelled as a full rerun on final source."
+}

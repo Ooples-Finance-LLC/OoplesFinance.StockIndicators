@@ -1,0 +1,12 @@
+{
+  "diagnostic_only": true,
+  "production_integrated": false,
+  "report_imported": false,
+  "policy_changed": false,
+  "hashes": {
+    "plan.json": "39af082853c9ee8c17ef3800f61b9c83b4967350c2e12c69640e1fd5fbc12517",
+    "tooling.tar.gz": "beae2aaa986d581273efb7ad9a98d3df6883d27cf2be616dc40e9764633a3ddd",
+    "archive-manifest.json": "ba6efc07dc28d4eb54b4012978250f908b9643acd946665c4758a4c50ff6dd78",
+    "original-input-manifest.json": "f66dff2053f631d516391832c749026d317e4dc45b29337ee453c3e3d9aea0e6"
+  }
+}

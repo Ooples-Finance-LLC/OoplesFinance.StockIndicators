@@ -1,0 +1,24 @@
+{
+  "source_integration_commit": "92364663ae932400f31f354f8225941b9b0b2930",
+  "qualified_source": "8c210d75f2fef0c1226183f9b995a7156d7f3af6",
+  "compiled_source": "a33cb87fc593d55e6be7ed4010a5c9ec09112b08",
+  "source_fingerprint": "cdadbd6fa4d36ac9c8c5f86c19a0da58ebc9087f37ad0776ecd0e5b993ba37c6",
+  "unit": 20,
+  "comparator": 26,
+  "actual_gpu": 100,
+  "production_sha256": "8c5f517a7076c17469d1fcb85f88335559fd41344bbe8e54be362befa4d4eff7",
+  "run_id": "43530847086",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 3,
+    "faster": 3
+  },
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.Tillson.cs",
+    "src/Indicators/ValuesBarExecution.TillsonRegions.cs",
+    "src/Indicators/ValuesBarExecution.cs",
+    "tests/ModelsTests/TillsonCheckedRegionTests.cs"
+  ],
+  "verified_utc": "2026-11-14T00:34:05.067894+00:00"
+}

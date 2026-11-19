@@ -1,0 +1,39 @@
+{
+  "batch": "auto-filter-dispersion-shared-execution",
+  "types": [
+    "AutoFilter",
+    "AutoDispersionBands"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact AutoFilter SMA kernel and share AutoDispersion weighted double-smoothing kernel across all three outputs; retain facade clamps, input-bounded storage, source and component fallback.",
+  "verification": {
+    "unit_passed": 150,
+    "fixture_passed": 8,
+    "discovery_passed": 96,
+    "gpu_passed": 100,
+    "contract_methods": 1433,
+    "hosted_methods": 1421,
+    "evidence": [
+      {
+        "file": "autopair-unit.trx.gz",
+        "passed_cases": 150,
+        "trx_sha256": "4ce30aec6a6d55357f1b53d9c0df91eb9f9232efd5ce46dc1337ea53918cb71d"
+      },
+      {
+        "file": "autopair-fixture.trx.gz",
+        "passed_cases": 104,
+        "trx_sha256": "730d2ac8339a2b2cba09ecfd35dbdcbe57c24d88a9592c2487a602338b6c6bd9"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAutoPairBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "AutoFilter",
+      "AutoDispersionBands"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

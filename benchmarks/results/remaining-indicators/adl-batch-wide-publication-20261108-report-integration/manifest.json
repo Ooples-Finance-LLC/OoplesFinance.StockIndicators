@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "8da9d99d6cd69051866d8e8d33c7f4281cedceb55b98cd03e99ec21a9b04affd",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-wide-publication-20261108-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "8d2acd2197bf0732f3da6e221567c9b17dfbea11363eb97cf425c50cf847a048",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-wide-publication-20261108-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "1f5c4bd394ec67fc43656c526c2647e85d4986050ac5ed57e5235e7769902d8f",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-wide-publication-20261108-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "ea56f58bb9a155163deaad9460d1ad2051eb742f40a9629d60b9481e774de4e9",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-wide-publication-20261108-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "093b9d754b7b42e620a435200efd611ec39756ffe2087493ec7955661ac453aa",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-wide-publication-20261108-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "32b45ff7b4747ed2ec39d72cedadd56256cb6dace2cc91822dac460cedf3320d",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-wide-publication-20261108-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "15b31fbf08599b100186ca937da7e765d451bc7645d19f6d9b51dce7da536f9a",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-wide-publication-20261108-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "4f78fcf13c748c8bd311fe620c8dc04fe06deaf84b5ae19e99afaf0b9b42dd74",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-wide-publication-20261108-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "b87f1a00ed8eaf621892c0cc3bf39999ee1f72bb959f38b4ae92840fe7d5c58e",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-wide-publication-20261108-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "96dde08c03b27cf99b423990f9b1b6b65af32b797cc2b1f75c92c2759ce3b10f",
+    "archive": "benchmarks/results/remaining-indicators/adl-batch-wide-publication-20261108-report-integration/updated-pair-details.png.gz"
+  }
+}

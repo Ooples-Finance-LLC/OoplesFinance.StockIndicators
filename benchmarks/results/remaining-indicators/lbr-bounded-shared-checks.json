@@ -1,0 +1,22 @@
+{
+  "status": "shared-contract-checks-passed",
+  "production_sha256": "d819a9b72a48a721b1f32b8ae1b591055001b7b2919c04a640193b02badc03a0",
+  "fixture_sha256": "33034e230177e02c405e2af497d57dc7b53490a9d7001366bb450dc23406d8eb",
+  "counts": {
+    "discovery": 257,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": {
+    "discovery": {
+      "file": "lbr-bounded-discovery.trx.gz",
+      "sha256": "2d9dec5334efbae55b79cfa57b19ffd9bcf0d01ec5dbd79aaeaa52059d921062"
+    },
+    "gpu": {
+      "file": "lbr-bounded-gpu.trx.gz",
+      "sha256": "5ebcead71f464215591c1cfba69a9d8b5aea730c119edff035f30500a94ac2da"
+    }
+  },
+  "inventory_log": "......\n----------------------------------------------------------------------\nRan 6 tests in 2.316s\n\nOK\n",
+  "scope": "Shared GPU contracts do not establish per-indicator GPU performance or overall rollout completion. Raw timing remains pending."
+}

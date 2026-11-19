@@ -1,0 +1,22 @@
+{
+  "run_id": "local-mapped-batch1-20261022",
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/blob/afc45099759be15a9da57e96c4fd51ea5dc03472/benchmarks/results/remaining-indicators/local-mapped-batch1-20261022/manifest.json",
+  "source_sha": "eb9d6058b009f526ecd9c89c1b76eaee9e1fcadc",
+  "receipt_files": [
+    "cpu-builder-local-mapped-batch1-20261022-SharedSkenderDiagnosticsBenchmarks.json",
+    "cpu-builder-local-mapped-batch1-20261022-SharedTradyAverageBenchmarks.json",
+    "cpu-builder-local-mapped-batch1-20261022-SharedTradyMacdBenchmarks.json"
+  ],
+  "comparisons": 40,
+  "verdicts": {
+    "slower": 19,
+    "inconclusive": 5,
+    "faster": 16
+  },
+  "changed_production_files_since_baseline": [
+    "src/Helpers/CertifiedMeanRelativeError.cs",
+    "src/Indicators/CompensatedExponentialAverage.cs"
+  ],
+  "measurement_location": "Local Windows; CPU builder and native paths; unchanged setup checks",
+  "raw_archive_commit": "afc45099759be15a9da57e96c4fd51ea5dc03472"
+}

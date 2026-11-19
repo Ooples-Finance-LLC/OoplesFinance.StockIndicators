@@ -1,0 +1,43 @@
+{
+  "batch": "bull-bear-power-shared-execution",
+  "types": [
+    "BullPower",
+    "BearPower",
+    "BullPowerIndicator",
+    "BearPowerIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share existing exact CandlePowerWindow once across Value and default EMA Signal for all four facades. Preserve original OHLC, previous-close seed, candle/gap/wick branch precedence, extended stages, clamps and component/source fallback.",
+  "verification": {
+    "unit_passed": 186,
+    "fixture_passed": 16,
+    "discovery_passed": 98,
+    "gpu_passed": 100,
+    "contract_methods": 1435,
+    "hosted_methods": 1423,
+    "evidence": [
+      {
+        "file": "candlepower-unit.trx.gz",
+        "passed_cases": 186,
+        "trx_sha256": "e8aa45872245a66105bff3c4d763ea2623132ac94eaff152d9a73482dfc453c9"
+      },
+      {
+        "file": "candlepower-fixture.trx.gz",
+        "passed_cases": 114,
+        "trx_sha256": "8c2d5b83feeff76245da574b9d92f8812dfbcbf89efe6c66fb9f8a080023575c"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingCandlePowerBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured",
+    "operations": [
+      "BullPower",
+      "BearPower",
+      "BullPowerIndicator",
+      "BearPowerIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

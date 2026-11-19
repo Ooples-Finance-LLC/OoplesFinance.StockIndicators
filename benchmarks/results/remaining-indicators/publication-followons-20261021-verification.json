@@ -1,0 +1,45 @@
+{
+  "input_head": "5d3a49acf7921a5ba11f3b1dd4d8897ff760adfc",
+  "status": "checks-passed-review-and-publication-pending",
+  "step": "complete",
+  "updated_utc": "2026-10-21T06:46:17.194649+00:00",
+  "unit": {
+    "passed": 389,
+    "class_counts": {
+      "SharedGeneratedGOscillatorsTests": 21,
+      "GannNumericalTests": 9,
+      "SharedGOscillatorNumericalTests": 4,
+      "SharedGeneratedGatorMeannessTests": 20,
+      "GatorNumericalTests": 38,
+      "MeannessNumericalTests": 43,
+      "SharedGeneratedFloorAliasesTests": 10,
+      "FloorPivotNumericalTests": 30,
+      "PivotPointAliasNumericalTests": 33,
+      "SharedGeneratedAdaptiveIntegrationTests": 3
+    },
+    "trx": "Z:\\StockIndicators-work\\si-pr266-followons-20261021\\unit\\unit.trx",
+    "sha256": "8b36a20dbc0d9889e8dd650eac99f522e669365f4db75410f7c234529edceddc",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-followons-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 398,
+    "class_counts": {
+      "RemainingGOscillatorsBenchmarkTests": 8,
+      "RemainingGatorMeannessBenchmarkTests": 8,
+      "RemainingFloorAliasesBenchmarkTests": 12,
+      "RemainingBenchmarkDiscoveryTests": 370
+    },
+    "trx": "Z:\\StockIndicators-work\\si-pr266-followons-20261021\\parity\\parity.trx",
+    "sha256": "06ef42184e5531176e778b6cdfb43636d8593fc007bf1d7e1ba0ac2be292d188",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-followons-20261021-parity.trx.gz"
+  },
+  "production_assembly_hashes": {
+    "src/bin/Release/net10.0": "a6e7d12637f638000653aa845efcae7530bfce205b48227929807ed65a181eb6",
+    "tests/bin/Release/net10.0": "a6e7d12637f638000653aa845efcae7530bfce205b48227929807ed65a181eb6",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0": "a6e7d12637f638000653aa845efcae7530bfce205b48227929807ed65a181eb6",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0": "a6e7d12637f638000653aa845efcae7530bfce205b48227929807ed65a181eb6"
+  },
+  "gpu_passed": 100,
+  "inventory_tests_passed": 6,
+  "performance": "Pending; correctness does not establish competitor speed"
+}

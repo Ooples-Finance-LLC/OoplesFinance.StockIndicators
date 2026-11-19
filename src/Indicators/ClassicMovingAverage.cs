@@ -210,8 +210,25 @@ public sealed class ClassicMovingAverage
                 disposable.Dispose();
         }
 
-        public void Update(in Bar bar, Span<double> output) =>
-            UpdateUnits(ExactVarianceWindow.Units(bar.Close), output);
+        public void Update(in Bar bar, Span<double> output)
+        {
+            if (_engine is not WideClassicalWindowState window)
+            {
+                UpdateUnits(ExactVarianceWindow.Units(bar.Close), output);
+                return;
+            }
+            // Decode finite prices once. Wide composed inputs retain UpdateUnits.
+            var value = CompactMacdValue.Of(bar.Close);
+            output.Clear();
+            _index++;
+            if (_index < _offset)
+                return;
+            window.UpdateCompact(value, _scratch);
+            if (_index < _first)
+                return;
+            output[0] = _scratch[0];
+            output[1] = 1;
+        }
 
         public void UpdateUnits(BigInteger input, Span<double> output)
         {

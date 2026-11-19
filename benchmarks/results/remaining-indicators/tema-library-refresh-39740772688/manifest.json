@@ -1,0 +1,23 @@
+{
+  "comparison.json": {
+    "sha256": "da6df0be5133f3a7b72116db819e052fe562f236bdb5442d237848920985a013",
+    "archive": "benchmarks/results/remaining-indicators/tema-library-refresh-39740772688/comparison.json.gz"
+  },
+  "provenance.json": {
+    "sha256": "2c1cf78647973db8d9b76e014d7a73d50a43bb392e042597cc0dc0f829b84ebc",
+    "archive": "benchmarks/results/remaining-indicators/tema-library-refresh-39740772688/provenance.json.gz"
+  },
+  "binary-manifest.json": {
+    "sha256": "a18dd97950cfad9d5983313ec6cb27b0a50c84c34aab1ac4dbbe490f26d2355a",
+    "archive": "benchmarks/results/remaining-indicators/tema-library-refresh-39740772688/binary-manifest.json.gz"
+  },
+  "verified-summary.json": {
+    "sha256": "de7a7b42aa3cc1672ef23269eb22d46fa7d93c4cce714b55818097048001b991",
+    "archive": "benchmarks/results/remaining-indicators/tema-library-refresh-39740772688/verified-summary.json.gz"
+  },
+  "0-new/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+    "sha256": "e2bea3d28d4f7bd7ab473388caff704a43b6bdba0fa292494c8253d4c46b4d87",
+    "archive": "benchmarks/results/remaining-indicators/tema-library-refresh-39740772688/0-new/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+  },
+  "verifier_sha256": "2e38aef7a3aca80b677b7b56556ab7293155b8db07e95b9a02644f169abab876"
+}

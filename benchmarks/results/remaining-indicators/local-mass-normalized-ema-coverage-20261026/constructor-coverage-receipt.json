@@ -1,0 +1,270 @@
+{
+  "fixture": "SharedMassNormalizedEmaBenchmarks",
+  "source_sha": "b8a0cd963bbc2f7dc8366ec1295c290a1634fb37",
+  "run_id": "local-mass-normalized-ema-coverage-20261026",
+  "measurement_location": "Local Windows",
+  "report_sha256": "a99ff5d0d60b2e87341aaa544cdc41da98cc1d87c63c7cd8f872520566c67b0b",
+  "report_file": "attempt-0\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedMassNormalizedEmaBenchmarks-report-full-compressed.json",
+  "verification_sha256": "6749d27cd44a1502772cb79c4d061b368ff883bcc2d19ef48c3e82b2eeb98f86",
+  "scope": "Additional constructor coverage outside the seeded 401-API baseline catalog.",
+  "baseline_replacements": 0,
+  "catalog_pending_slots_completed": 0,
+  "comparisons": [
+    {
+      "pair": "QuanTAlib.Ema",
+      "constructor_contract": "period-20-compensated",
+      "indicator": "MassNormalizedEma",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 231051.171875,
+        "lower_ns": 221916.09526104605,
+        "upper_ns": 240186.24848895395,
+        "samples": 8,
+        "allocated_bytes": 214394
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 21167.88330078125,
+          "lower_ns": 19249.89642474128,
+          "upper_ns": 23085.87017682122,
+          "samples": 10,
+          "allocated_bytes": 48761
+        },
+        "NativeParallel": {
+          "mean_ns": 40248.11740451389,
+          "lower_ns": 36462.97873969539,
+          "upper_ns": 44033.25606933239,
+          "samples": 9,
+          "allocated_bytes": 194097
+        }
+      },
+      "verdict": "slower",
+      "fastest_native": "NativeSingle"
+    },
+    {
+      "pair": "QuanTAlib.Ema",
+      "constructor_contract": "period-20-compensated",
+      "indicator": "MassNormalizedEma",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 247621.0546875,
+        "lower_ns": 226020.1078960022,
+        "upper_ns": 269222.00147899776,
+        "samples": 10,
+        "allocated_bytes": 214907
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 21167.88330078125,
+          "lower_ns": 19249.89642474128,
+          "upper_ns": 23085.87017682122,
+          "samples": 10,
+          "allocated_bytes": 48761
+        },
+        "NativeParallel": {
+          "mean_ns": 40248.11740451389,
+          "lower_ns": 36462.97873969539,
+          "upper_ns": 44033.25606933239,
+          "samples": 9,
+          "allocated_bytes": 194097
+        }
+      },
+      "verdict": "slower",
+      "fastest_native": "NativeSingle"
+    },
+    {
+      "pair": "QuanTAlib.Ema",
+      "constructor_contract": "period-20-compensated",
+      "indicator": "MassNormalizedEma",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 706391.5234375,
+        "lower_ns": 633797.1508671232,
+        "upper_ns": 778985.8960078768,
+        "samples": 10,
+        "allocated_bytes": 718924
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 194481.92274305556,
+          "lower_ns": 170161.62732570933,
+          "upper_ns": 218802.2181604018,
+          "samples": 9,
+          "allocated_bytes": 480778
+        },
+        "NativeParallel": {
+          "mean_ns": 270007.2509765625,
+          "lower_ns": 266110.3064386981,
+          "upper_ns": 273904.1955144269,
+          "samples": 8,
+          "allocated_bytes": 1886106
+        }
+      },
+      "verdict": "slower",
+      "fastest_native": "NativeSingle"
+    },
+    {
+      "pair": "QuanTAlib.Ema",
+      "constructor_contract": "period-20-compensated",
+      "indicator": "MassNormalizedEma",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 676299.7829861111,
+        "lower_ns": 639576.9713217084,
+        "upper_ns": 713022.5946505138,
+        "samples": 9,
+        "allocated_bytes": 719420
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 194481.92274305556,
+          "lower_ns": 170161.62732570933,
+          "upper_ns": 218802.2181604018,
+          "samples": 9,
+          "allocated_bytes": 480778
+        },
+        "NativeParallel": {
+          "mean_ns": 270007.2509765625,
+          "lower_ns": 266110.3064386981,
+          "upper_ns": 273904.1955144269,
+          "samples": 8,
+          "allocated_bytes": 1886106
+        }
+      },
+      "verdict": "slower",
+      "fastest_native": "NativeSingle"
+    },
+    {
+      "pair": "QuanTAlib.Ema",
+      "constructor_contract": "explicit-alpha-0.2",
+      "indicator": "MassNormalizedEma",
+      "bars": 1000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 136589.27001953125,
+        "lower_ns": 129386.82708358768,
+        "upper_ns": 143791.71295547482,
+        "samples": 8,
+        "allocated_bytes": 130851
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 20231.907958984375,
+          "lower_ns": 18727.961039534555,
+          "upper_ns": 21735.854878434195,
+          "samples": 10,
+          "allocated_bytes": 48457
+        },
+        "NativeParallel": {
+          "mean_ns": 36740.72808159722,
+          "lower_ns": 34122.11342167737,
+          "upper_ns": 39359.342741517066,
+          "samples": 9,
+          "allocated_bytes": 191658
+        }
+      },
+      "verdict": "slower",
+      "fastest_native": "NativeSingle"
+    },
+    {
+      "pair": "QuanTAlib.Ema",
+      "constructor_contract": "explicit-alpha-0.2",
+      "indicator": "MassNormalizedEma",
+      "bars": 1000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 150597.69965277778,
+        "lower_ns": 134760.65624913474,
+        "upper_ns": 166434.74305642082,
+        "samples": 9,
+        "allocated_bytes": 131356
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 20231.907958984375,
+          "lower_ns": 18727.961039534555,
+          "upper_ns": 21735.854878434195,
+          "samples": 10,
+          "allocated_bytes": 48457
+        },
+        "NativeParallel": {
+          "mean_ns": 36740.72808159722,
+          "lower_ns": 34122.11342167737,
+          "upper_ns": 39359.342741517066,
+          "samples": 9,
+          "allocated_bytes": 191658
+        }
+      },
+      "verdict": "slower",
+      "fastest_native": "NativeSingle"
+    },
+    {
+      "pair": "QuanTAlib.Ema",
+      "constructor_contract": "explicit-alpha-0.2",
+      "indicator": "MassNormalizedEma",
+      "bars": 10000,
+      "mode": "BuilderFull",
+      "ooples": {
+        "mean_ns": 606883.90625,
+        "lower_ns": 582951.9980479145,
+        "upper_ns": 630815.8144520855,
+        "samples": 10,
+        "allocated_bytes": 635373
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 229559.0234375,
+          "lower_ns": 180921.14356903668,
+          "upper_ns": 278196.9033059633,
+          "samples": 10,
+          "allocated_bytes": 480473
+        },
+        "NativeParallel": {
+          "mean_ns": 266948.4700520833,
+          "lower_ns": 263360.2596076073,
+          "upper_ns": 270536.6804965593,
+          "samples": 9,
+          "allocated_bytes": 1883673
+        }
+      },
+      "verdict": "slower",
+      "fastest_native": "NativeSingle"
+    },
+    {
+      "pair": "QuanTAlib.Ema",
+      "constructor_contract": "explicit-alpha-0.2",
+      "indicator": "MassNormalizedEma",
+      "bars": 10000,
+      "mode": "BuilderLatestOnly",
+      "ooples": {
+        "mean_ns": 601092.421875,
+        "lower_ns": 574979.4696230504,
+        "upper_ns": 627205.3741269496,
+        "samples": 10,
+        "allocated_bytes": 635869
+      },
+      "native": {
+        "NativeSingle": {
+          "mean_ns": 229559.0234375,
+          "lower_ns": 180921.14356903668,
+          "upper_ns": 278196.9033059633,
+          "samples": 10,
+          "allocated_bytes": 480473
+        },
+        "NativeParallel": {
+          "mean_ns": 266948.4700520833,
+          "lower_ns": 263360.2596076073,
+          "upper_ns": 270536.6804965593,
+          "samples": 9,
+          "allocated_bytes": 1883673
+        }
+      },
+      "verdict": "slower",
+      "fastest_native": "NativeSingle"
+    }
+  ]
+}

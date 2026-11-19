@@ -1,0 +1,49 @@
+{
+  "source": "8a313d6c2940dd691f90423e21e68f831952feb5",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-quartic-interval-20261103",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0
+    },
+    "restore-comparator": {
+      "exit_code": 0
+    },
+    "build-and-gpu": {
+      "exit_code": 0
+    },
+    "unit": {
+      "exit_code": 0
+    },
+    "parity": {
+      "exit_code": 0
+    }
+  },
+  "compiler_process_isolation": true,
+  "dependency_copy_mode": "SDK hard links when supported; no runtime changes",
+  "active": null,
+  "unit": {
+    "passed": 15,
+    "classes": {
+      "QuarticSharedExecutionTests": 15
+    },
+    "sha256": "a4635d7e44255928f8cab242c99b75bb705d100e5af6b06c1f45c9b9133bef90"
+  },
+  "parity": {
+    "passed": 18,
+    "classes": {
+      "McGinleyComparisonTests": 8,
+      "SharedQuarticDynamicBenchmarkTests": 10
+    },
+    "sha256": "718d03965959cdad783901bddbadd152176b79cd04f7f1a25226dce6fc71503e"
+  },
+  "status": "correctness-complete",
+  "gpu_passed": 100,
+  "source_fingerprint": "41480bf8cf4bdb196262dcfe02007be371589208e6f45bc25ced109bec5f5655",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "d00a20ac9bd3a746973acde6f3d82ec7716206b5aa5cbb78179d5e85883fa5ba",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "d00a20ac9bd3a746973acde6f3d82ec7716206b5aa5cbb78179d5e85883fa5ba",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "d00a20ac9bd3a746973acde6f3d82ec7716206b5aa5cbb78179d5e85883fa5ba",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "d00a20ac9bd3a746973acde6f3d82ec7716206b5aa5cbb78179d5e85883fa5ba"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}

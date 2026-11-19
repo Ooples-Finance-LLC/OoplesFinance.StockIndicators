@@ -1,0 +1,49 @@
+{
+  "source": "82e89d6098ce278de497c066425697ab8d3b980a",
+  "repo": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-dsma-filter-interval-20261103",
+  "steps": {
+    "build-unit": {
+      "exit_code": 0
+    },
+    "restore-comparator": {
+      "exit_code": 0
+    },
+    "build-and-gpu": {
+      "exit_code": 0
+    },
+    "unit": {
+      "exit_code": 0
+    },
+    "parity": {
+      "exit_code": 0
+    }
+  },
+  "compiler_process_isolation": true,
+  "dependency_copy_mode": "SDK hard links when supported; no runtime changes",
+  "active": null,
+  "unit": {
+    "passed": 33,
+    "classes": {
+      "DeviationAverageSharedExecutionTests": 33
+    },
+    "sha256": "b26ad9cdeb02469eb458ebd53d3f9e74a7f8f15ae8c0249bcb42ca73a4f1575b"
+  },
+  "parity": {
+    "passed": 22,
+    "classes": {
+      "RangeAdaptiveComparisonTests": 10,
+      "SharedDeviationAverageBenchmarkTests": 12
+    },
+    "sha256": "567b992ccb611bdf7ec69be371f3dab711493d6199d784a0b6649bb6bbb5baa3"
+  },
+  "status": "correctness-complete",
+  "gpu_passed": 100,
+  "source_fingerprint": "b3ca1891a8f0483a5014daf5053db38f862ba695a51141415012c9c6def1e154",
+  "production_hashes": {
+    "src/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "88269d5fdc867754a2893f984775be137256cf264afb8e767afd9bf030b789f4",
+    "tests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "88269d5fdc867754a2893f984775be137256cf264afb8e767afd9bf030b789f4",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "88269d5fdc867754a2893f984775be137256cf264afb8e767afd9bf030b789f4",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/bin/Release/net10.0/OoplesFinance.StockIndicators.dll": "88269d5fdc867754a2893f984775be137256cf264afb8e767afd9bf030b789f4"
+  },
+  "note": "Focused exact arithmetic, affected-consumer and actual local GPU correctness. Performance qualification pending."
+}

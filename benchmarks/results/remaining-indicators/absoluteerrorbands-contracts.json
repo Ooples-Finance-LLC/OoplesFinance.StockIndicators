@@ -1,0 +1,39 @@
+{
+  "batch": "absolute-error-bands-shared-execution",
+  "types": [
+    "MeanAbsoluteErrorBands",
+    "MeanAbsoluteDeviationBands"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse rounded SMA, exact cumulative absolute errors and partial-window mean absolute deviations. Compute three bands together with input-bounded storage, preserving distinct startup, factor boundaries, original fields, clamps, component/source fallback and ownership.",
+  "verification": {
+    "unit_passed": 59,
+    "fixture_passed": 8,
+    "discovery_passed": 123,
+    "gpu_passed": 100,
+    "contract_methods": 1462,
+    "hosted_methods": 1450,
+    "evidence": [
+      {
+        "file": "absoluteerrorbands-unit.trx.gz",
+        "passed_cases": 59,
+        "trx_sha256": "89c6d2862f5a81c6e7671c40d582aabed790400307474a65c15dfd7039c52633"
+      },
+      {
+        "file": "absoluteerrorbands-fixture.trx.gz",
+        "passed_cases": 131,
+        "trx_sha256": "03931948d5e7c4dee624c4f3593109cf77a3bc4b3b08595e833baa1d5a217516"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAbsoluteErrorBandBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "MeanAbsoluteErrorBands",
+      "MeanAbsoluteDeviationBands"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

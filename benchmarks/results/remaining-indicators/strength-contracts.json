@@ -1,0 +1,39 @@
+{
+  "batch": "generated-rsi-atr",
+  "types": [
+    "Rsi",
+    "Atr"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "RSI shares one PriceRsiWindow and one three-period StrengthAverage across value/signal/histogram, preserving ordinary subtraction. ATR reuses the existing KeltnerWindow range recurrence. Plain default configurations only; custom components retain graph execution.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "initial_unit_passed": 39,
+    "strengthened_unit_class_passed": 12,
+    "note": "The 12 strengthened cases rerun the new class; they are not additional unique cases beyond the initial 39. Opposite extreme high/low values exercise extended ATR ranges.",
+    "fixture_passed": 8,
+    "gpu_passed": 100,
+    "contract_methods": 1335,
+    "hosted_methods": 1323,
+    "unit_trx_sha256": "051366a533c0352f5650b3dde6b5050663021fb0fc17ef7df5114bfc9f79b8c9",
+    "fixture_trx_sha256": "357fee3034f0a3a5de0fa3dcd4217ccd3a9556a0ac0e9b4b8a10109b863355ef"
+  },
+  "benchmark_fixture": {
+    "type": "RemainingStrengthRangeBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 16,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -1,0 +1,21 @@
+{
+  "status": "read-only-model-not-runtime-instrumentation",
+  "fixtures": [
+    {
+      "bars": 1000,
+      "modeled_product_fallback_calls": 0,
+      "summary_certificate_width": 74,
+      "summary_certifies": false,
+      "widest_exact_cumulative_significand": 67,
+      "cumulative_prefixes_wider_than_signed64": 643
+    },
+    {
+      "bars": 10000,
+      "modeled_product_fallback_calls": 0,
+      "summary_certificate_width": 82,
+      "summary_certifies": false,
+      "widest_exact_cumulative_significand": 73,
+      "cumulative_prefixes_wider_than_signed64": 9628
+    }
+  ]
+}

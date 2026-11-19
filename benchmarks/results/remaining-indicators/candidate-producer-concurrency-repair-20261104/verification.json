@@ -1,0 +1,20 @@
+{
+  "excluded_runs": [
+    "41863546444",
+    "41864850004"
+  ],
+  "results_excluded": true,
+  "reason": "Original correctness dispatches shared a cancelling producer-ref concurrency group; dedicated immutable0857eef refs succeeded. No cancelled results imported.",
+  "sha256": {
+    ".gitattributes": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+    "41863546444-artifacts.json": "53b678429916bc99c65df1ad18818b0e7e1fb923582bd2e110da3587def95d52",
+    "41863546444-jobs.json": "77b921af7bed7e943fa625caf94d911c06c7c66616a72e88a04cfd27699d6f9f",
+    "41863546444-logs.txt.gz": "4eaaeb1fc411883f1b48c882aab8c987838342de746335df68ff14317592306f",
+    "41863546444-run.json": "a839e8fb41a31d34deea421bb17e01f586ebcda96bba9d44b4d731e0a0e1771d",
+    "41864850004-artifacts.json": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c",
+    "41864850004-jobs.json": "b3dab5870ff3a8209160335de7c1077b89e461d875d9041ac9d8b8ed7c1666f6",
+    "41864850004-logs.txt.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "41864850004-run.json": "d1ac9223a4cf3a77e6ee878096d3fc2e7739511cc08a72796d41941b001b1c70",
+    "fixed-start-candidate-ci-20261104.py": "95ae84f550f44f8529497c559ec18c175b72eb2695783ef71c96fe25306ea87a"
+  }
+}

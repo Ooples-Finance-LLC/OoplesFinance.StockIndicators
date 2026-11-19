@@ -1,0 +1,37 @@
+{
+  "batch": "voss-predictive-shared-execution",
+  "types": [
+    "EhlersVossPredictiveFilter"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact Voss predictive kernel and publish both outputs together; preserve phase rescue, overflow fallback, prediction order, startup, source selection and lifecycle.",
+  "verification": {
+    "unit_passed": 29,
+    "fixture_passed": 4,
+    "discovery_passed": 163,
+    "gpu_passed": 100,
+    "contract_methods": 1504,
+    "hosted_methods": 1492,
+    "evidence": [
+      {
+        "file": "vosspredictive-unit.trx.gz",
+        "passed_cases": 29,
+        "trx_sha256": "25a417ea2db6b9618f7d4cec71a3756ded1c3bca06c9182f8e850705706c6e47"
+      },
+      {
+        "file": "vosspredictive-fixture.trx.gz",
+        "passed_cases": 167,
+        "trx_sha256": "e6c47bde0e58724c1c5203250e5f4488928df890747537f09959780d4767727e"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVossPredictiveBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersVossPredictiveFilter"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

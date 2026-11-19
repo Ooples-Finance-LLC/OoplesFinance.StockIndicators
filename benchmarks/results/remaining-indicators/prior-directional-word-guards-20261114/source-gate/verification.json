@@ -1,0 +1,51 @@
+{
+  "source": "6821c05c13ebdaf7914d62534612eb3f04bb2ae6",
+  "qualified_source": "cfc560bc6d48e179b8139bbcbd4e422be689ec77",
+  "baseline": "e21708710e17b7c90be8d6c9ab69608845709c21",
+  "production_sha256": "892145210cac0449ca4767f42db18cfbc205099109679e12c8f5c690c1a46ec8",
+  "baseline_production_sha256": "14df42986ce30bc00402ead2e764fc052bf48be0f2ac14cee0210f8b95802fa0",
+  "source_fingerprint": "e74227ceb8dcdc6306928f41b867a5937b2f145488b4de71a16339bcc5be7bdb",
+  "optimized_word_smoothing_observed": true,
+  "optimized_headers": [
+    "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.PriorSeededDirectionalMeasure+WordSmoothing:TrySum(double,double,byref):bool:this (Tier1)"
+  ],
+  "diagnostic_rounds": [
+    {
+      "label": "old1",
+      "batches": 913,
+      "seconds": 5.0044896,
+      "allocated_bytes": 964475336,
+      "mean_batch_ms": 5.481368674698795
+    },
+    {
+      "label": "new1",
+      "batches": 1138,
+      "seconds": 5.0001617,
+      "allocated_bytes": 1202181568,
+      "mean_batch_ms": 4.3938152021089625
+    },
+    {
+      "label": "new2",
+      "batches": 1058,
+      "seconds": 5.0005215,
+      "allocated_bytes": 1117637936,
+      "mean_batch_ms": 4.726390831758033
+    },
+    {
+      "label": "old2",
+      "batches": 927,
+      "seconds": 5.0017168,
+      "allocated_bytes": 979265432,
+      "mean_batch_ms": 5.395595253505932
+    }
+  ],
+  "roi_promising": true,
+  "diagnostic_mean_reduction": 0.1615117882097904,
+  "disassembly_sha256": "cb2cea171bcb15e35307bf58bc7a02a2e5a1abe834d58f0f45409215c3adcf03",
+  "performance_qualified": false,
+  "local_timing_usable_for_acceptance": false,
+  "limits": [
+    "Unisolated local diagnostic, five-second windows,100warmups,one worker,default runtime.",
+    "A promising result permits only the explicitly approved full270case qualification; no native closure or source acceptance."
+  ]
+}

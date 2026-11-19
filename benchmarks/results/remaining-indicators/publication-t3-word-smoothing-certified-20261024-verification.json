@@ -1,0 +1,62 @@
+{
+  "input_head": "6740f677a92acabc22d4ad93e2fb61fb2d5ace36",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedTillson.cs",
+    "src/Indicators/ValuesBarExecution.Tillson.cs",
+    "tests/ModelsTests/TillsonWordSmoothingTests.cs"
+  ],
+  "batch_note": "Approved T3 exact machine-word smoothing for positive normal same-binade inputs and periods through 2047. Cached reciprocal division is corrected exactly before ties-to-even rounding; unsupported values retain existing floating certificates and exact fallback. Focused boundary, random, fallback and lifecycle regressions. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-24T23:35:47.891325+00:00",
+  "unit": {
+    "passed": 44,
+    "class_counts": {
+      "TillsonSharedExecutionTests": 12,
+      "CertifiedTillsonTests": 17,
+      "TillsonFloatingSmoothingTests": 7,
+      "TillsonWordSmoothingTests": 4,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-word-smoothing\\unit\\unit.trx",
+    "sha256": "627156c4e503d791b7773d89965400cf005832d2616e70aff71dd25398b2ad69",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-word-smoothing-certified-20261024-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 26,
+    "class_counts": {
+      "SharedTillsonBenchmarkTests": 16,
+      "TillsonComparisonTests": 10
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-word-smoothing\\parity\\parity.trx",
+    "sha256": "354f7ccdb7f2650d2434d82bc8935ffa68cd87d1b2e2c68be6d532aaaf9c240f",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-word-smoothing-certified-20261024-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-smoothing-20261024\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "29fbcf3029d958fe8915ac1ef37050322a55de3762b665931839b44a57ad7852",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-smoothing-20261024\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "29fbcf3029d958fe8915ac1ef37050322a55de3762b665931839b44a57ad7852",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-smoothing-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "29fbcf3029d958fe8915ac1ef37050322a55de3762b665931839b44a57ad7852",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-smoothing-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "29fbcf3029d958fe8915ac1ef37050322a55de3762b665931839b44a57ad7852"
+  },
+  "source_fingerprint_sha256": "d4db82167e6cf13973b4e9a6d2044a51ebb067f8b1b033f042cb07746bd9f94f",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved T3 exact machine-word smoothing for positive normal same-binade inputs and periods through 2047. Cached reciprocal division is corrected exactly before ties-to-even rounding; unsupported values retain existing floating certificates and exact fallback. Focused boundary, random, fallback and lifecycle regressions. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

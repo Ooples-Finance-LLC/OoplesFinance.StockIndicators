@@ -1,0 +1,36 @@
+{
+  "batch": "generated-atr-filter-and-exact-window-extremes",
+  "types": [
+    "AtrFilteredEma",
+    "AtrFilteredExponentialMovingAverage",
+    "AdaptiveLeastSquares"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Route both ATR filter facades through the existing exact kernel. Replace the deviation minimum scan with reusable ordered candidates; share that helper with Adaptive LSMA maximum tracking. Preserve previews, commit ordering, staged rounding, reset/disposal, and nonfinite-cap legacy fallback. Requalify Adaptive LSMA because its helper allocation path changes.",
+  "verification": {
+    "unit_passed": 261,
+    "fixture_passed": 12,
+    "discovery_passed": 55,
+    "gpu_passed": 100,
+    "contract_methods": 1390,
+    "hosted_methods": 1378,
+    "evidence": [
+      {
+        "file": "atrfilter-unit.trx.gz",
+        "passed_cases": 261,
+        "trx_sha256": "ebf67d2cdb94c42cee1474b6d75d572646b4f1564355fdd1ebb2cc66531e82a9"
+      },
+      {
+        "file": "atrfilter-fixture.trx.gz",
+        "passed_cases": 67,
+        "trx_sha256": "b448010dd5fa94fc3fa2be1a0f4d1f1a5a1cff2f8d1f11990d295d004a03703a"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAtrFilterBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

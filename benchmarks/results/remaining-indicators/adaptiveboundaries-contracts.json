@@ -1,0 +1,58 @@
+{
+  "batch": "adaptive-boundaries-shared-execution",
+  "types": [
+    "FlaggingBands",
+    "ExtendedRecursiveBands",
+    "MotionToAttractionChannels",
+    "VolumeAdaptiveBands"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact flagging, extended recursive, motion-attraction and volume-adaptive kernels. Avoid unfillable deviation storage while preserving boundary decisions, biased midpoints, trailing stop, average startup, original fields, fallback and ownership.",
+  "verification": {
+    "unit_passed": 217,
+    "fixture_passed": 16,
+    "discovery_passed": 130,
+    "gpu_passed": 100,
+    "contract_methods": 1469,
+    "hosted_methods": 1457,
+    "evidence": [
+      {
+        "file": "adaptiveboundaries-unit-initial.trx.gz",
+        "passed_cases": 216,
+        "failed_cases": 1,
+        "retained_passed_cases": 181,
+        "superseded_class": "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedGeneratedAdaptiveBoundaryTests",
+        "trx_sha256": "900671d6e8a87f2ef31f730fe47470e0b564e30bb131364fd8bd607e25a89e81"
+      },
+      {
+        "file": "adaptiveboundaries-unit.trx.gz",
+        "passed_cases": 36,
+        "trx_sha256": "38bafd6962cf8c73597a079abc441e365d622c592c974258befd07efd4f6a92f"
+      },
+      {
+        "file": "adaptiveboundaries-fixture.trx.gz",
+        "passed_cases": 146,
+        "trx_sha256": "823f36204dcbaa993613e2c5b1afc9f0a9df173a866aa3831e49e1c294f0ba42"
+      }
+    ],
+    "unit_rerun": {
+      "corrected_class": "OoplesFinance.StockIndicators.Tests.Unit.ModelsTests.SharedGeneratedAdaptiveBoundaryTests",
+      "interpretation": "Initial completed run retained unchanged passing numerical tests; the corrected test class was rerun in full. Both raw runs are preserved, including the superseded failures. Production source and binaries were unchanged.",
+      "production_dll_sha256": "d6a2df579b82afb2387803247afc2e8d715b8b7633294907b80c74606d6a2654",
+      "verifier_file": "adaptiveboundaries-unit-rerun-verifier.py",
+      "verifier_sha256": "31d7f2baad0135ce18a02ab607b91f94a42e32cce28112ed3334d36046079ff2"
+    }
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAdaptiveBoundaryBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured",
+    "operations": [
+      "FlaggingBands",
+      "ExtendedRecursiveBands",
+      "MotionToAttractionChannels",
+      "VolumeAdaptiveBands"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

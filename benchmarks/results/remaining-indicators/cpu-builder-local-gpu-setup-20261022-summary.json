@@ -1,0 +1,18 @@
+{
+  "run_id": "local-gpu-setup-20261022",
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/blob/3c9ddb448127b2e519af205080b877e01c75e342/benchmarks/results/remaining-indicators/local-gpu-setup-20261022/manifest.json",
+  "source_sha": "0e62018ed67b73a18cd94c6320af6d0612a78af7",
+  "apis": 3,
+  "comparisons": 12,
+  "verdicts": {
+    "slower": 8,
+    "faster": 4
+  },
+  "receipt_files": [
+    "cpu-builder-local-gpu-setup-20261022-SharedRollingSumBenchmarks.json",
+    "cpu-builder-local-gpu-setup-20261022-SharedTriangularBenchmarks.json"
+  ],
+  "changed_production_files_since_baseline": [],
+  "measurement_location": "Local Windows host,CPU timed paths,full required GPU setup retained. No hosted runner measurement claim.",
+  "archive_commit": "3c9ddb448127b2e519af205080b877e01c75e342"
+}

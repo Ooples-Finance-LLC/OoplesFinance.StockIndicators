@@ -1,0 +1,49 @@
+{
+  "status": "passed",
+  "unit_classes": [
+    "SeededMomentumSharedExecutionTests",
+    "TillsonWordSmoothingTests",
+    "TrixNumericalTests"
+  ],
+  "parity_classes": [
+    "SharedSeededMomentumBenchmarkTests",
+    "SharedSkenderEmaFamilyBenchmarkTests",
+    "SharedTaAdaptiveRateNativeBenchmarkTests",
+    "TripleRateComparisonTests"
+  ],
+  "step": "parity",
+  "unit": {
+    "passed": 62,
+    "class_counts": {
+      "SeededMomentumSharedExecutionTests": 15,
+      "TrixNumericalTests": 43,
+      "TillsonWordSmoothingTests": 4
+    },
+    "sha256": "04e9901eaf7751db63123f8f817ed86f4b47000b442631eb5461046d4f411a04"
+  },
+  "parity": {
+    "passed": 139,
+    "class_counts": {
+      "TripleRateComparisonTests": 10,
+      "SharedSkenderEmaFamilyBenchmarkTests": 81,
+      "SharedTaAdaptiveRateNativeBenchmarkTests": 40,
+      "SharedSeededMomentumBenchmarkTests": 8
+    },
+    "sha256": "9f9d5ad9f2abbd00071ce92a3bda1a9078e9de903f760c227cb0caacb2a28ac9"
+  },
+  "gpu": {
+    "passed_cases": 100,
+    "source_sha256": "905c570790dbe274cdfc6981ec7a86c371e869f75d637f8b02ac8d56eed89f62",
+    "trx_sha256": "1d8975732c509516dd409a7fc54a413ba5fde246397b9bb6855ee32dc6352812"
+  },
+  "production_dll_sha256": {
+    "src": "994a89da4eb5badef98557434da4f4634f6c41d09bc37044c0dff7a5395be97c",
+    "tests": "994a89da4eb5badef98557434da4f4634f6c41d09bc37044c0dff7a5395be97c",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks": "994a89da4eb5badef98557434da4f4634f6c41d09bc37044c0dff7a5395be97c",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests": "994a89da4eb5badef98557434da4f4634f6c41d09bc37044c0dff7a5395be97c"
+  },
+  "source_commit": "56958335d0c416b85dffc7aa799149d2c16f58f2",
+  "source_fingerprint": "905c570790dbe274cdfc6981ec7a86c371e869f75d637f8b02ac8d56eed89f62",
+  "performance": "Pending fresh hosted qualification; correctness is not performance acceptance.",
+  "repair": "TRIX-only candidate on qualified production: reuse CertifiedTillson.WordSmoother for supported exact ratios, retaining the existing dyadic fallback."
+}

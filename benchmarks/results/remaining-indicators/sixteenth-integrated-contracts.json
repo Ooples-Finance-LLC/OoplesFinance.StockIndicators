@@ -1,0 +1,80 @@
+{
+  "types": [
+    "SmoothedRateOfChange",
+    "SimplifiedWeightedMovingAverage",
+    "SmoothedDeltaRatioOscillator",
+    "SuperTrendFilter",
+    "SurfaceRoughnessEstimator",
+    "SupportAndResistanceOscillator",
+    "StiffnessIndicator",
+    "StrengthOfMovement",
+    "SuperTrend",
+    "SwingIndex",
+    "TimePriceIndicator",
+    "TickLineMomentumOscillator",
+    "TFSTetherLineIndicator",
+    "TFSMboIndicator",
+    "TFSMboPercentagePriceOscillator",
+    "TopsAndBottomsFinder"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "base_head": "ca08f5939ce8102ae8aeba4d0dfed465ad20b930",
+  "combined_input_sha256": "db69040dcd92442b359c6faee17be2f60d915c06a9878987e3c5901f777f6c0c",
+  "manifest_sha256": "480166d9346aea825f04fd226ec7dfaad4ad2a94edf84ced7d77e80474d4dbf2",
+  "unit_class_counts": {
+    "SharedGeneratedSmoothedReturnTests": 26,
+    "SharedGeneratedSimplifiedWeightedTests": 16,
+    "SharedGeneratedSmoothedDeltaTests": 18,
+    "SharedGeneratedSuperTrendFilterTests": 23,
+    "SharedGeneratedSurfaceRoughnessTests": 18,
+    "SharedGeneratedSupportResistanceTests": 15,
+    "SharedGeneratedStiffnessTests": 37,
+    "SharedGeneratedMovementStrengthTests": 27,
+    "SharedGeneratedSuperTrendTests": 17,
+    "SharedGeneratedSwingIndexTests": 20,
+    "SharedGeneratedTimePriceTests": 16,
+    "SharedGeneratedTickLineTests": 18,
+    "SharedGeneratedTetherLineTests": 16,
+    "SharedGeneratedTfsPairTests": 49,
+    "SharedGeneratedTopsBottomsTests": 18
+  },
+  "parity_class_counts": {
+    "RemainingSmoothedReturnBenchmarkTests": 4,
+    "RemainingSimplifiedWeightedBenchmarkTests": 4,
+    "RemainingSmoothedDeltaBenchmarkTests": 4,
+    "RemainingSuperTrendFilterBenchmarkTests": 4,
+    "RemainingSurfaceRoughnessBenchmarkTests": 4,
+    "RemainingSupportResistanceBenchmarkTests": 4,
+    "RemainingStiffnessBenchmarkTests": 4,
+    "RemainingMovementStrengthBenchmarkTests": 4,
+    "RemainingSuperTrendBenchmarkTests": 4,
+    "RemainingSwingIndexBenchmarkTests": 4,
+    "RemainingTimePriceBenchmarkTests": 4,
+    "RemainingTickLineBenchmarkTests": 4,
+    "RemainingTetherLineBenchmarkTests": 4,
+    "RemainingTfsPairBenchmarkTests": 8,
+    "RemainingTopsBottomsBenchmarkTests": 4
+  },
+  "unique_check_counts": {
+    "unit": 334,
+    "finite_smoothing": 0,
+    "parity": 64,
+    "discovery": 323,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/sixteenth-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/sixteenth-integrated-parity.trx.gz",
+    "benchmarks/results/remaining-indicators/sixteenth-integrated-discovery.trx.gz"
+  ],
+  "production_sha256": "d11ec743b7077c0d7702c4b31fa2046c3a9a8824056d77c164ddf17b3253d826",
+  "fixture_sha256": "46c02161d7d15a54d23e75acb04ee82b51c1504ffa5c2d313209cc9810c253f9",
+  "input_repairs": [],
+  "context": "Fresh scoped checks on combined working candidate. Selective commits are not separately rebuilt; source fingerprint identifies tested composition. Earlier numerical repairs retained.",
+  "pending": [
+    "controlled raw timing",
+    "remaining rollout"
+  ]
+}

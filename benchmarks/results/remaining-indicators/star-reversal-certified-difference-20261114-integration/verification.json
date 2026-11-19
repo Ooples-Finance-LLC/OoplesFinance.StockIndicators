@@ -1,0 +1,22 @@
+{
+  "source_integration_commit": "4b107ec6e53b6a24774f3ec2872c62ae4cf23c11",
+  "qualified_source": "e3db0fa7a5ad96edb8e33ac9f2f94b0da419d3fc",
+  "compiled_source": "1d4b1f9f534d9c485a16e66762b1f44d2485e065",
+  "source_fingerprint": "63ac284fa15ebc98a2952e3299cfb6c80818503f67cad2700b8d42e3224f2be8",
+  "unit": 21,
+  "comparator": 145,
+  "actual_gpu": 100,
+  "production_sha256": "186c441ad23620cfaae3a94e9d10df7f0b46cacc66cdb8fb03860536b00ce7e5",
+  "run_id": "43590354236",
+  "cases": 150,
+  "decisions": 30,
+  "verdicts": {
+    "inconclusive": 21,
+    "faster": 9
+  },
+  "integrated_paths": [
+    "src/Indicators/StarReversalCandles.cs",
+    "tests/ModelsTests/StarReversalSharedExecutionTests.cs"
+  ],
+  "verified_utc": "2026-11-14T13:22:06.094165+00:00"
+}

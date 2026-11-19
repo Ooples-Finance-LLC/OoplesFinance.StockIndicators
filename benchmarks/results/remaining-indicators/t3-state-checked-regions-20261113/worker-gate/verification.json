@@ -1,0 +1,128 @@
+{
+  "source": "a33cb87fc593d55e6be7ed4010a5c9ec09112b08",
+  "production_sha256": "8c5f517a7076c17469d1fcb85f88335559fd41344bbe8e54be362befa4d4eff7",
+  "source_fingerprint": "cdadbd6fa4d36ac9c8c5f86c19a0da58ebc9087f37ad0776ecd0e5b993ba37c6",
+  "accepted": true,
+  "optimized_callers": [
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:TryFillTillsonRegions(OoplesFinance.StockIndicators.Indicators.Bar[],OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+Node,OoplesFinance.StockIndicators.Indicators.TillsonAverage,System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,byref):bool (Tier0-FullOpts)",
+      "code_bytes": 2003
+    },
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+<>c__DisplayClass1012_0:<TryFillTillsonRegions>b__0(int):this (Tier0-FullOpts)",
+      "code_bytes": 925
+    }
+  ],
+  "worker_region_sample_weight_ms": 38229.38111329602,
+  "worker_frames": [
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+<>c__DisplayClass1012_0.<TryFillTillsonRegions>b__0(int32)",
+      38229.38111329602
+    ],
+    [
+      "(Non-Activities)",
+      38229.38111329602
+    ],
+    [
+      "Threads",
+      38229.38111329602
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor.WorkerLoop(int32)",
+      38229.38111329602
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor.RunSet(class Job,int32,bool)",
+      38229.38111329602
+    ],
+    [
+      "Process64 pwsh (51040) Args:  -NoProfile -File C:\\Users\\cheat\\source\\stock-indicators-operations\\profile-native-gaps-perfview-20261113.ps1 -Pair TaLib.Functions.T3 -Seconds 20 -Workers 8 -Runtime C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-state-checked-regions-20261113\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0 -Expected 8c5f517a7076c17469d1fcb85f88335559fd41344bbe8e54be362befa4d4eff7 ",
+      38229.38111329602
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor+<>c__DisplayClass28_0.<.ctor>b__0()",
+      38229.38111329602
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.Thread.StartCallback()",
+      38229.38111329602
+    ],
+    [
+      "CPU_TIME",
+      38225.21540839697
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TillsonValueState.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&,value class System.Span`1<float64>)",
+      36754.49031400229
+    ],
+    [
+      "Thread (16312)",
+      5839.706338287697
+    ],
+    [
+      "Thread (30500)",
+      5777.1626622032145
+    ],
+    [
+      "Thread (43280)",
+      5656.374558401232
+    ],
+    [
+      "Thread (17240)",
+      5532.597647143544
+    ],
+    [
+      "Thread (67148)",
+      5286.13103608241
+    ],
+    [
+      "Thread (36916)",
+      5201.821740324984
+    ],
+    [
+      "Thread (23328)",
+      4935.587130852915
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TillsonValueState.Combine(float64,float64,float64,float64,float64)",
+      967.7347701194558
+    ],
+    [
+      "System.Private.CoreLib!System.SpanHelpers.ClearWithoutReferences(unsigned int8&,unsigned int)",
+      259.4895901866803
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.CertifiedTillson.TrySmooth(float64,float64,int32,float64&)",
+      186.967895481499
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Helpers.JurikDyadic.Mean(int32)",
+      183.85519331911746
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+TillsonValueState.CommonWordExponent()",
+      77.03079552077543
+    ],
+    [
+      "UNMANAGED_CODE_TIME",
+      4.165600061416626
+    ]
+  ],
+  "disassembly_sha256": "6c485328e7885d5e43a786e4285e0d929fcc7eae48f238ebe8946ce863742a2e",
+  "trace_sha256": "4ff3753f3629e68a8462c18fa05259347807651ec5ccd5875c411476618bd0a7",
+  "claim": "Public T3 call executes optimized checked regions on tensor persistent workers.",
+  "performance_qualified": false,
+  "local_timing_usable_for_acceptance": false,
+  "diagnostic": {
+    "eight_worker_batches": 16547,
+    "eight_worker_seconds": 20.0001065,
+    "serial_batches": 7229,
+    "serial_seconds": 20.0001869,
+    "limitations": "Sequential local diagnostic only; eight-worker process was traced, serial process was not. No acceptance or native-closure claim."
+  },
+  "limits": [
+    "Sampled thread weights are not whole-process CPU percentages.",
+    "Tier0-FullOpts is optimized native code; default runtime/tiering settings were preserved.",
+    "Only complete isolated30case6decision qualification can accept this source."
+  ]
+}

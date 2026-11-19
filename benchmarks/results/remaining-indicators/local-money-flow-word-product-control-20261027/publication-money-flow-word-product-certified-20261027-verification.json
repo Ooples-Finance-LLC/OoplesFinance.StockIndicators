@@ -1,0 +1,66 @@
+{
+  "input_head": "b423a1b84f2b8f1a55950d5118a34b9e01592593",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "tests/ModelsTests/SharedMoneyFlowCertificateTests.cs"
+  ],
+  "batch_note": "Approved A/D shared-helper redesign: retain exact UInt128 significand products and certify normal ratios without constructing wide integers, keeping existing overflow/underflow fallback. Direct helper, accumulation/Chaikin/percentage consumers, preview/reset, comparison and GPU/inventory contracts required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-27T14:30:59.050778+00:00",
+  "unit": {
+    "passed": 290,
+    "class_counts": {
+      "ChaikinFlowNumericalTests": 35,
+      "MoneyFlowAccumulationNumericalTests": 147,
+      "CompactSmoothedAccumulationTests": 15,
+      "MoneyFlowPercentNumericalTests": 75,
+      "SharedMoneyFlowCertificateTests": 3,
+      "PriceVolumeDetailsSharedExecutionTests": 12,
+      "CompactAccumulationDistributionExecutionTests": 3
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\money-flow-word-product\\unit\\unit.trx",
+    "sha256": "9a9e0bb4572b6e0185da8ff93fb10ee25e2ce125874e37c1b2b885c066adeff4",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-money-flow-word-product-certified-20261027-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 54,
+    "class_counts": {
+      "SharedSmoothedAccumulationFixtureTests": 12,
+      "MoneyFlowDetailComparisonTests": 9,
+      "SharedAdlDetailsFixtureTests": 8,
+      "AccumulationDistributionComparisonTests": 17,
+      "SmoothedAccumulationComparisonTests": 8
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\money-flow-word-product\\parity\\parity.trx",
+    "sha256": "3ca79a1dd0816de09b4d75183c9d7111003f8d93d53bee47b2293508a68f5f0d",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-money-flow-word-product-certified-20261027-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-money-flow-word-product-20261027\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7fb925cf1edb7fc0332096ed442f68d183f5ce6411b26f71af48612ce4ff2a0e",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-money-flow-word-product-20261027\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7fb925cf1edb7fc0332096ed442f68d183f5ce6411b26f71af48612ce4ff2a0e",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-money-flow-word-product-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7fb925cf1edb7fc0332096ed442f68d183f5ce6411b26f71af48612ce4ff2a0e",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-money-flow-word-product-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "7fb925cf1edb7fc0332096ed442f68d183f5ce6411b26f71af48612ce4ff2a0e"
+  },
+  "source_fingerprint_sha256": "02cd78e440b8fef6dbdbc234e80b5cf9e0728f81d50be42762b464cf35a74ae3",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved A/D shared-helper redesign: retain exact UInt128 significand products and certify normal ratios without constructing wide integers, keeping existing overflow/underflow fallback. Direct helper, accumulation/Chaikin/percentage consumers, preview/reset, comparison and GPU/inventory contracts required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

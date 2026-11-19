@@ -1,0 +1,13 @@
+{
+  "source": "0a1ae1af1e3bfd8ed8a9be4c7500014dd70bf61c",
+  "runtime": "0.148.0",
+  "run": "42511136990",
+  "evidence_commit": "f8fd4f88e",
+  "verdicts": {
+    "faster": 34,
+    "inconclusive": 19,
+    "slower": 1
+  },
+  "failed_control": "TaLib.Functions.Ema1000batch",
+  "distinction": "Older loop held IMultiOutputState and cleared scratch before original Update. Current loop binds concrete State and clears only in original Update. Not an unchanged retry; known EMA risk must be qualified."
+}

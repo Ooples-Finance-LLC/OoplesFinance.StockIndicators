@@ -1,0 +1,54 @@
+{
+  "before.html": {
+    "sha256": "90ad9d7da57fe3f0bf3b56c6dd291eea88fea62eb0c637a7d19902bfc15f1b6e",
+    "archive": "benchmarks/results/remaining-indicators/zigzag-coordinate-normalization-20261106-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "e1d1c3bc1f6f375dca8d9765c6bf8127f13762fc05dbce7dc047a813a7a2e5eb",
+    "archive": "benchmarks/results/remaining-indicators/zigzag-coordinate-normalization-20261106-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "0e22791247f1949a2c1ec0f9aae7f1ec45b4987fe20e0d7e83f318ae9b2192b3",
+    "archive": "benchmarks/results/remaining-indicators/zigzag-coordinate-normalization-20261106-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "1843731f071bc6ba0cc5c5c33838c741e586669d3bc5658ecd39f9f33bd3c7e6",
+    "archive": "benchmarks/results/remaining-indicators/zigzag-coordinate-normalization-20261106-report-integration/candidate.html.gz"
+  },
+  "delivery-tooling/origin.json": {
+    "sha256": "61a35c9b7b1b32c2d76578581fc23a8ad7dac9cacf25272cac0ccff6c224f2af",
+    "archive": "benchmarks/results/remaining-indicators/zigzag-coordinate-normalization-20261106-report-integration/delivery-tooling/origin.json.gz"
+  },
+  "delivery-tooling/report.py": {
+    "sha256": "42bbdb00a4e6717553b58d6f57b04f0142b751b0fb77384c63f558d7ef6cf0e1",
+    "archive": "benchmarks/results/remaining-indicators/zigzag-coordinate-normalization-20261106-report-integration/delivery-tooling/report.py.gz"
+  },
+  "delivery-tooling/test_hosted_report.py": {
+    "sha256": "9ba1f66b3ff8a16435a17813543b322af92a0ed220ae157d7f64469608295799",
+    "archive": "benchmarks/results/remaining-indicators/zigzag-coordinate-normalization-20261106-report-integration/delivery-tooling/test_hosted_report.py.gz"
+  },
+  "import.log": {
+    "sha256": "f7f14b80636ece41ff905aea41b22ce0f49162ec09a8934f4a40edf4165dfcbb",
+    "archive": "benchmarks/results/remaining-indicators/zigzag-coordinate-normalization-20261106-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "fd402fcd422e6dafbc7fd9c30edbb711e5aebbe2928ef7eacf0b15418137cb35",
+    "archive": "benchmarks/results/remaining-indicators/zigzag-coordinate-normalization-20261106-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "b990f86e4b07531ac238fdca88d18577d8e6920b9dfa6b5967a5347456ba7c88",
+    "archive": "benchmarks/results/remaining-indicators/zigzag-coordinate-normalization-20261106-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "1e172a2958e053efcb7c5902d0199cc77ada89811dbebdddedafff1445ffa522",
+    "archive": "benchmarks/results/remaining-indicators/zigzag-coordinate-normalization-20261106-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "4cf10be81676688e24f3221f7fc1af80ee1adf7ba46885fc486567c0c6201b49",
+    "archive": "benchmarks/results/remaining-indicators/zigzag-coordinate-normalization-20261106-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "d402a76df4cf0df01ba25e8c8f3be43fc40ae1c55c704b5996dff5926b5c2115",
+    "archive": "benchmarks/results/remaining-indicators/zigzag-coordinate-normalization-20261106-report-integration/updated-pair-details.png.gz"
+  }
+}

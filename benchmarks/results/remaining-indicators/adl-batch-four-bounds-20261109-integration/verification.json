@@ -1,0 +1,22 @@
+{
+  "source_integration_commit": "2afb5c36c6d6139ae296f146aa017293642a8647",
+  "qualified_source": "788f4eb4fc444dea7ed5e90012c58ccb3ef284b3",
+  "compiled_source": "d1a1b1ea0cab3260e2d1f9bf715dfb8f27b729b6",
+  "source_fingerprint": "39920425b71f2a2605dedf82d3c97fd2d2d03eec5f955e515755425ab6801ff8",
+  "unit": 71,
+  "comparator": 37,
+  "actual_gpu": 100,
+  "production_sha256": "26bf8f145210325e765e0a189d5ef951cf093b8a4b6aabd3526f337dc1ea5f3e",
+  "run_id": "42685081255",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "faster": 2,
+    "inconclusive": 4
+  },
+  "integrated_paths": [
+    "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "tests/ModelsTests/BoundedBatchMoneyFlowTests.cs"
+  ],
+  "verified_utc": "2026-11-09T20:29:13.688261+00:00"
+}

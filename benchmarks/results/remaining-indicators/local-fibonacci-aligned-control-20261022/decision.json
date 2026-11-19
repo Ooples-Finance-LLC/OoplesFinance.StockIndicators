@@ -1,0 +1,99 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "9f5a7fa83525eebba4d1ea93b73283993142f231",
+    "new": "d8f073710ba73de2e0398b008f5b85fd2af318d0"
+  },
+  "candidate_code_source": "9cf86ccb2fa201cb9f15e576ca64d6edc4f4080a",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Fwma",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        2.9773666666666667,
+        3.064322222222222
+      ],
+      "new_means_ms": [
+        0.5772666666666666,
+        0.5918555555555555
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "QuanTAlib.Fwma",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        2.69354,
+        2.693461111111111
+      ],
+      "new_means_ms": [
+        0.81422,
+        0.81492
+      ],
+      "verdict": "faster"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "1f7a459f2e8bd1b447a048e06dee55a3703e666cc8d3299a145883a1f868f947",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-aligned-control-20261022/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "fbe358aa961206d2114f13d2590c29b2eedcf01aa1158aafaf5f5a392afc94ad",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-aligned-control-20261022/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "48850d2f0c17eecb96057a82f51e239da9f803fbfd215cf222113c56ed2e4ae7",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-aligned-control-20261022/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "f57faa972d467960cbaede883d1613f2734e7dbaf36d12c493fb2ca980147318",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-aligned-control-20261022/verified-summary.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "b8a0fb82addd9bcd27f119c0e2d1143d1810958074ad0cd261bd26683cd1c2dd",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-aligned-control-20261022/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "ccdbce56fd27cb6b3bfdd4fd7f39910128ce1b2c9c62cd6dd7b536991addd63b",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-aligned-control-20261022/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "d7693f400d6e19b4e345793421de5a94bcb942f852d675154df89a12a63f978b",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-aligned-control-20261022/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "290d877e8487ca059814045f84a21e3cc24888080e1556683d181c866dacc99f",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-aligned-control-20261022/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "820636a1c11e87ae7f4212eef07fd9b355bf2d97664d24630e5ce85023cc30c9",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-aligned-control-20261022/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "209a22c350e216b1be6d69652e4db369b2b318a1ad5948330e2f0db3beb20080",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-aligned-control-20261022/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "b957ea3e0344ca66de6ac791ad86d1d81d1981a25dccaefcaeb2c508b8fc47ae",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-aligned-control-20261022/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "a5f55be65f065883ecc8f85efcc9642022dffd01b91079d827b8bbb965c74098",
+      "archive": "benchmarks/results/remaining-indicators/local-fibonacci-aligned-control-20261022/round3-old-LibraryPairBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-fibonacci-aligned-control.py": "433df9a77beb1cf0bb05369336e367e94fc84099b69c7b2e089424433342e760",
+    "verify-fibonacci-aligned-control.py": "a2c30b28195411801849e9d805c67937e1e2215271e7e323253adedb0d77c821"
+  },
+  "report_imported": true,
+  "production_integrated": true,
+  "integration_source_proof": "benchmarks/results/remaining-indicators/fibonacci-aligned-integration-source-proof-20261022.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/fibonacci-aligned-certified-local-fibonacci-aligned-control-20261022-report-import.json"
+}

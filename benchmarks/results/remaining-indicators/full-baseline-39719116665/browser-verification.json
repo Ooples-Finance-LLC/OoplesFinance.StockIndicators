@@ -1,0 +1,79 @@
+{
+  "source": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+  "run_id": "39719116665",
+  "report_sha256": "5f59c2a43dc769a5643d9f0fd50a7a080b8985257f6ec0e52f45a579879053ca",
+  "changed_means": {
+    "ooples": 802,
+    "competitor": 802
+  },
+  "summary": [
+    {
+      "library": "QuanTAlib",
+      "bars": 1000,
+      "comparisons": 50,
+      "lower": 22,
+      "higher": 28,
+      "equal": 0
+    },
+    {
+      "library": "QuanTAlib",
+      "bars": 10000,
+      "comparisons": 50,
+      "lower": 27,
+      "higher": 23,
+      "equal": 0
+    },
+    {
+      "library": "Skender",
+      "bars": 1000,
+      "comparisons": 84,
+      "lower": 32,
+      "higher": 52,
+      "equal": 0
+    },
+    {
+      "library": "Skender",
+      "bars": 10000,
+      "comparisons": 84,
+      "lower": 31,
+      "higher": 53,
+      "equal": 0
+    },
+    {
+      "library": "TaLib",
+      "bars": 1000,
+      "comparisons": 160,
+      "lower": 57,
+      "higher": 103,
+      "equal": 0
+    },
+    {
+      "library": "TaLib",
+      "bars": 10000,
+      "comparisons": 160,
+      "lower": 15,
+      "higher": 145,
+      "equal": 0
+    },
+    {
+      "library": "Trady",
+      "bars": 1000,
+      "comparisons": 107,
+      "lower": 106,
+      "higher": 1,
+      "equal": 0
+    },
+    {
+      "library": "Trady",
+      "bars": 10000,
+      "comparisons": 107,
+      "lower": 107,
+      "higher": 0,
+      "equal": 0
+    }
+  ],
+  "comparisons": 802,
+  "displayed_table_comparisons": 802,
+  "exported_comparisons": 802,
+  "javascript_errors": []
+}

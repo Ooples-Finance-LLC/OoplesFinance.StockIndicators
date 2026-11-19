@@ -1,0 +1,68 @@
+{
+  "input_head": "feaf2a1b5ca0c4a1b752ceca6c3ffab6d1850e20",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedPeriodicChannel.cs",
+    "src/Helpers/PeriodicChannelWindow.cs",
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs",
+    "src/Indicators/ValuesBarExecution.PeriodicChannel.cs",
+    "src/Validation/BuiltInFormulaReferences.PeriodicChannel.cs",
+    "tests/ModelsTests/SharedGeneratedPeriodicChannelTests.cs",
+    "tests/ValidationTests/PeriodicChannelCertifiedTests.cs",
+    "tests/ValidationTests/PeriodicChannelNumericalTests.cs"
+  ],
+  "reused_periodic_source": "14dab541523d44999c33b131b4c14fa5e5cf7f48",
+  "reused_periodic_unit_manifest": "benchmarks/results/remaining-indicators/publication-periodic-certified-20261022-unit-manifest.json",
+  "integration_note": "Periodic production/reference/tests unchanged from qualified source; dispatch union adds only Periodic to published routes. Compact exact input representation unchanged from qualified published source. Repeat certified fallback, shared routes, normalization, four long-history cases and current discovery/GPU on combined binaries.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T03:37:02.498397+00:00",
+  "unit": {
+    "passed": 23,
+    "class_counts": {
+      "MacZInputNormalizationTests": 6,
+      "SharedGeneratedPeriodicChannelTests": 10,
+      "PeriodicChannelCertifiedTests": 7
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\periodic-current-integration\\unit\\unit.trx",
+    "sha256": "d933719b71b11f7a1e524891ac3c81444dc10f9db667dd725e8799f3d1446cc4",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-periodic-current-integration-20261022-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 423,
+    "class_counts": {
+      "RemainingPeriodicChannelBenchmarkTests": 4,
+      "RemainingBenchmarkDiscoveryTests": 419
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\periodic-current-integration\\parity\\parity.trx",
+    "sha256": "a2b6c6b1f607afe680b9c95621e2b3a70205188605d361be61f783c717e4bed6",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-periodic-current-integration-20261022-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-periodic-certified-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "88d4608202c71dbfde91039dea193f8a1d20085ff071d197db9fb00ffca6749a",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-periodic-certified-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "88d4608202c71dbfde91039dea193f8a1d20085ff071d197db9fb00ffca6749a",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-periodic-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "88d4608202c71dbfde91039dea193f8a1d20085ff071d197db9fb00ffca6749a",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-periodic-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "88d4608202c71dbfde91039dea193f8a1d20085ff071d197db9fb00ffca6749a"
+  },
+  "source_fingerprint_sha256": "93ed14d0fa8cb3791be21c2d9049b2e800d3f59b2a9be5302e4d9c5a6235117b",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Periodic production/reference/tests unchanged from qualified source; dispatch union adds only Periodic to published routes. Compact exact input representation unchanged from qualified published source. Repeat certified fallback, shared routes, normalization, four long-history cases and current discovery/GPU on combined binaries."
+}

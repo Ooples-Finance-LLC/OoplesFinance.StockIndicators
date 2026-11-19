@@ -1,0 +1,58 @@
+{
+  "before_sha256": "ad2fd0ed92a9b3a9ae8611dbcfe674c41779e4264288f34898e8ba32a841967e",
+  "candidate_sha256": "73f4d2d0d146b85020eb5f06e3caef0fbd7ebd9098d991fe3cb017b756f7fe45",
+  "changed_baseline_rows": 6,
+  "unchanged_baseline_rows": 796,
+  "changed_builder_slots": 12,
+  "verdicts": {
+    "faster": 534,
+    "slower": 643,
+    "inconclusive": 19
+  },
+  "unchanged_rows": 796,
+  "run_id": "local-t3-certified-control-20261022",
+  "imported_utc": "2026-10-22T11:30:41.870443+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "201ba623c0f0d82b6c16539ba04babefc0e2c846126cd367b33b41edebb931a2",
+      "archive": "benchmarks/results/remaining-indicators/t3-certified-local-t3-certified-control-20261022-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "b9d38c5e5a559a42a2d32d33d6ec185f60e3c7057fcd085aa12924b4b6e83735",
+      "archive": "benchmarks/results/remaining-indicators/t3-certified-local-t3-certified-control-20261022-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "31390c54d8a386c910bbe93a9a545c7525515920e06920ecc038338be556fa54",
+      "archive": "benchmarks/results/remaining-indicators/t3-certified-local-t3-certified-control-20261022-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "2bc1138dc57a619b2fad35df735f8dbd4d1ac9af56e3056f1e7803e53cd590c8",
+      "archive": "benchmarks/results/remaining-indicators/t3-certified-local-t3-certified-control-20261022-measurement.json.gz"
+    },
+    "stage-t3-certified-report.py": {
+      "sha256": "2e942a02bf1ac26757e05214c976eedc5000ade703aa35b7a6978cb27ba134f6",
+      "archive": "benchmarks/results/remaining-indicators/t3-certified-local-t3-certified-control-20261022-stage-t3-certified-report.py.gz"
+    },
+    "verify-t3-certified-report.py": {
+      "sha256": "83331b8164d8142f0ab71f83c262171261b3acd48ec78b59683f76ff8ee59af8",
+      "archive": "benchmarks/results/remaining-indicators/t3-certified-local-t3-certified-control-20261022-verify-t3-certified-report.py.gz"
+    },
+    "import-t3-certified-report.py": {
+      "sha256": "eb5f1ba333cea4e1b9d3788f8edc697b4bf2bc58fbba1c3f91e034110b3b6636",
+      "archive": "benchmarks/results/remaining-indicators/t3-certified-local-t3-certified-control-20261022-import-t3-certified-report.py.gz"
+    },
+    "archive-t3-certified-control.py": {
+      "sha256": "4dee874c655456a0c698d787d252d5d0437b128dfe891241637deaca836c65cd",
+      "archive": "benchmarks/results/remaining-indicators/t3-certified-local-t3-certified-control-20261022-archive-t3-certified-control.py.gz"
+    },
+    "prove-t3-integration.py": {
+      "sha256": "fd5250615b2dd16a19906ed656c06693fb527d71fdbf52539c2fbee4d9a7e5cc",
+      "archive": "benchmarks/results/remaining-indicators/t3-certified-local-t3-certified-control-20261022-prove-t3-integration.py.gz"
+    },
+    "archive-t3-certified-report.py": {
+      "sha256": "ef42211f96e53e23fe58a9d594117917431e6b734e70fb9dadb1add82ffbeca3",
+      "archive": "benchmarks/results/remaining-indicators/t3-certified-local-t3-certified-control-20261022-archive-t3-certified-report.py.gz"
+    }
+  }
+}

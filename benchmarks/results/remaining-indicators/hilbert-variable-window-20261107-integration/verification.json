@@ -1,0 +1,22 @@
+{
+  "source_integration_commit": "6ac55f12642f417a3e2b170371d2f9f4c5bc3da8",
+  "qualified_source": "7a3fcb9296e732392bffcacbaed485944b208e53",
+  "compiled_source": "2a018b22dd5ef80ce93fb47f4be1e96490159053",
+  "source_fingerprint": "a5a69ff38ecf2997f7f9852b0f0bd87262ecec6b7c23d1bc5ebb2743af9b20ca",
+  "unit": 14,
+  "comparator": 120,
+  "actual_gpu": 100,
+  "production_sha256": "277377b8c6366d11a9a1e8a36733c0bcf541219827a2f2be5d7768f22f56b0df",
+  "run_id": "42333605830",
+  "cases": 90,
+  "decisions": 18,
+  "verdicts": {
+    "inconclusive": 12,
+    "faster": 6
+  },
+  "integrated_paths": [
+    "src/Indicators/HilbertTrendMeanState.cs",
+    "tests/ModelsTests/HilbertVariableWindowTests.cs"
+  ],
+  "verified_utc": "2026-11-07T04:22:03.744297+00:00"
+}

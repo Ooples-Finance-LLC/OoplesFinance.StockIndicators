@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "79effc9bc7669212d9efe0e6b6dc6807eb8a5e27f6334c9784de23b05a764d3a",
+    "archive": "benchmarks/results/remaining-indicators/exp-parallel-minimum-20261109-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "8defe3bab5065d7135805b9e61001fb0d0540267a06833df0ae7321d2a84bda0",
+    "archive": "benchmarks/results/remaining-indicators/exp-parallel-minimum-20261109-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "a1c8821c4e48c6916d21bc012ec398c909926ff80d92a7824840875173a2b005",
+    "archive": "benchmarks/results/remaining-indicators/exp-parallel-minimum-20261109-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "8ff8ca57114ae9c47f3e687a6ba53c3e6cfa094890351e11f7b16170ee438ebf",
+    "archive": "benchmarks/results/remaining-indicators/exp-parallel-minimum-20261109-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "a59a4b0e739668e72eb4ec9a75a25f2f51320da61fda6fa3fc79170443f0d347",
+    "archive": "benchmarks/results/remaining-indicators/exp-parallel-minimum-20261109-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "73d6a361c6256f94684d99917c66a4396979599e14d1a844dc72a198d0801013",
+    "archive": "benchmarks/results/remaining-indicators/exp-parallel-minimum-20261109-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "077971de7691992ee40cbc8e34f612099a0a2adaf44f3220d161a74567a276d5",
+    "archive": "benchmarks/results/remaining-indicators/exp-parallel-minimum-20261109-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "67bbc116584539cfa40561da0c1004de5e1568f3d42b75348174a19e209ad385",
+    "archive": "benchmarks/results/remaining-indicators/exp-parallel-minimum-20261109-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "bf1be94ace337d54d78e4532e123ce8a1c6d26e389f2a42151fd92c3a2598623",
+    "archive": "benchmarks/results/remaining-indicators/exp-parallel-minimum-20261109-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "f8ee7ad0a06dfa6f228e404111d457e54e974fc730a93650a0511996b3df061d",
+    "archive": "benchmarks/results/remaining-indicators/exp-parallel-minimum-20261109-report-integration/updated-pair-details.png.gz"
+  }
+}

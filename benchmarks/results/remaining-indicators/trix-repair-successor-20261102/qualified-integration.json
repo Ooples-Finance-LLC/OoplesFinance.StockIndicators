@@ -1,0 +1,121 @@
+{
+  "run_id": "41500711235",
+  "candidate_source": "5a5109ada5aebcffd2869a1b4a81e3372aebb944",
+  "integrated_source_commit": "e63b98a5e7b053db98108a5e4c8fff15ad6316d5",
+  "source_and_tests_match_measured_candidate": true,
+  "qualification": {
+    "cases": 1860,
+    "decisions": 372,
+    "faster": 13,
+    "inconclusive": 359,
+    "slower": 0,
+    "independent_summary_matches_hosted": true
+  },
+  "correctness": {
+    "unit": 62,
+    "comparator": 139,
+    "actual_local_gpu": 100,
+    "note": "Retained authenticated source-matched checks; not claimed rerun.",
+    "inventory_tests": 8
+  },
+  "report": {
+    "before_sha256": "bd87950daafaa1e4643d90930fa63eaede3d426ff11018eac48eb4bcdc1dc0ce",
+    "candidate_sha256": "613c05fa8708aada1e43e6ae32eeedc933e8080a2824d58c8421de8eaa6dd7c2",
+    "changed_baseline_rows": 128,
+    "unchanged_baseline_rows": 674,
+    "changed_builder_slots": 244,
+    "added_builder_slots": 0,
+    "replaced_builder_slots": 244,
+    "verdicts": {
+      "faster": 594,
+      "slower": 890,
+      "inconclusive": 52
+    },
+    "run_id": "41500711235"
+  },
+  "browser_verification": {
+    "source": null,
+    "run_id": "41500711235",
+    "report_sha256": "613c05fa8708aada1e43e6ae32eeedc933e8080a2824d58c8421de8eaa6dd7c2",
+    "changed_means": {
+      "ooples": 802,
+      "competitor": 802
+    },
+    "summary": [
+      {
+        "library": "QuanTAlib",
+        "bars": 1000,
+        "comparisons": 50,
+        "lower": 26,
+        "higher": 24,
+        "equal": 0
+      },
+      {
+        "library": "QuanTAlib",
+        "bars": 10000,
+        "comparisons": 50,
+        "lower": 27,
+        "higher": 23,
+        "equal": 0
+      },
+      {
+        "library": "Skender",
+        "bars": 1000,
+        "comparisons": 84,
+        "lower": 33,
+        "higher": 51,
+        "equal": 0
+      },
+      {
+        "library": "Skender",
+        "bars": 10000,
+        "comparisons": 84,
+        "lower": 32,
+        "higher": 52,
+        "equal": 0
+      },
+      {
+        "library": "TaLib",
+        "bars": 1000,
+        "comparisons": 160,
+        "lower": 56,
+        "higher": 104,
+        "equal": 0
+      },
+      {
+        "library": "TaLib",
+        "bars": 10000,
+        "comparisons": 160,
+        "lower": 19,
+        "higher": 141,
+        "equal": 0
+      },
+      {
+        "library": "Trady",
+        "bars": 1000,
+        "comparisons": 107,
+        "lower": 107,
+        "higher": 0,
+        "equal": 0
+      },
+      {
+        "library": "Trady",
+        "bars": 10000,
+        "comparisons": 107,
+        "lower": 106,
+        "higher": 1,
+        "equal": 0
+      }
+    ],
+    "comparisons": 802,
+    "displayed_table_comparisons": 802,
+    "exported_comparisons": 802,
+    "javascript_errors": [],
+    "hosted_provenance_verified": true
+  },
+  "imported_utc": "2026-11-02T21:00:28.166894+00:00",
+  "builder_pending": 68,
+  "report_imported": true,
+  "draft": true,
+  "auto_merge": false
+}

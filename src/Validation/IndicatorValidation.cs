@@ -228,8 +228,12 @@ public static class IndicatorValidation
                     var expected = rule.OverflowReference!(accepted);
                     if (expected.Count != accepted.Length)
                         throw new InvalidOperationException("Overflow reference output length differs.");
+                    var source = rule.OverflowSourceReference?.Invoke(accepted);
+                    if (source is not null && source.Count != accepted.Length)
+                        throw new InvalidOperationException("Overflow source reference output length differs.");
                     for (var i = 0; i < expected.Count; i++)
-                        if (double.IsInfinity(expected[i]))
+                        if (double.IsInfinity(expected[i]) || (double.IsNaN(expected[i])
+                            && source is not null && double.IsInfinity(source[i])))
                         {
                             overflow.Add((rule.ReferenceOutputSlot!.Value, i, expected[i]));
                             break;
@@ -294,9 +298,10 @@ public static class IndicatorValidation
                             && ex.BarIndex == prefixLength && overflow.Any(value => value.Bar == prefixLength
                                 && value.Slot == ex.OutputSlot && value.Value.Equals(ex.Value))) // NOSONAR: S1244 - Match the actual rejected output value to its exception evidence.
                         {
-                            if (overflowSlot.HasValue && (overflowSlot != ex.OutputSlot || overflowSign != Math.Sign(ex.Value)))
+                            int? sign = double.IsNaN(ex.Value) ? null : Math.Sign(ex.Value);
+                            if (overflowSlot.HasValue && (overflowSlot != ex.OutputSlot || overflowSign != sign))
                                 Add(fixture.Name, "OutputOverflow", "Fresh runs rejected different output slots or signs.");
-                            overflowBarIndex = ex.BarIndex; overflowSlot = ex.OutputSlot; overflowSign = Math.Sign(ex.Value);
+                            overflowBarIndex = ex.BarIndex; overflowSlot = ex.OutputSlot; overflowSign = sign;
                             outputOverflowRejections++;
                         }
                     }

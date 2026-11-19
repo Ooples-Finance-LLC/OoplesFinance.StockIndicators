@@ -1,0 +1,22 @@
+{
+  "source_integration_commit": "a84467a6181afeaf5bab2e8b35fb59beb60909e9",
+  "qualified_source": "98adcaddfaba9bd630ff4ef8adcc91b66469f6c7",
+  "compiled_source": "43f0400f601c1f4e6f7173971070703f8f49e2c9",
+  "source_fingerprint": "5f0d8febd1c9f50d7f2f20a34ee74aa29141962dad4ff80fd3c6ebd75b68dd7f",
+  "unit": 6,
+  "comparator": 97,
+  "actual_gpu": 100,
+  "production_sha256": "04d0c063e2acf6d30ec26d813981bbe356b49670f82ef142830a3cbfb378c276",
+  "run_id": "42360441758",
+  "cases": 90,
+  "decisions": 18,
+  "verdicts": {
+    "faster": 17,
+    "inconclusive": 1
+  },
+  "integrated_paths": [
+    "src/Helpers/CertifiedHilbertProjection.cs",
+    "tests/ModelsTests/CertifiedHilbertProjectionTests.cs"
+  ],
+  "verified_utc": "2026-11-07T10:25:29.026167+00:00"
+}

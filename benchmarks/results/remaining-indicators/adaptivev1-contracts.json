@@ -1,0 +1,43 @@
+{
+  "batch": "ehlers-adaptive-v1-shared-execution",
+  "types": [
+    "EhlersAdaptiveRelativeStrengthIndexV1",
+    "EhlersAdaptiveRsiFisherTransformV1",
+    "EhlersAdaptiveStochasticIndicatorV1",
+    "EhlersAdaptiveCommodityChannelIndexV1"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact MAMA-cycle RSI and range kernels; publish paired outputs together while preserving typical-price versus close-cycle inputs, hidden Fisher fraction, positive parameter validation, sources and lifecycle.",
+  "verification": {
+    "unit_passed": 35,
+    "fixture_passed": 16,
+    "discovery_passed": 168,
+    "gpu_passed": 100,
+    "contract_methods": 1509,
+    "hosted_methods": 1497,
+    "evidence": [
+      {
+        "file": "adaptivev1-unit.trx.gz",
+        "passed_cases": 35,
+        "trx_sha256": "c08c473b5192914f5f877b37655622831452400a28b258710745d5afdc53d0b9"
+      },
+      {
+        "file": "adaptivev1-fixture.trx.gz",
+        "passed_cases": 184,
+        "trx_sha256": "dce46b6f1034017b647433e8c26857f66fafb1ae94ed94ebd8313a7a6c34ba86"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAdaptiveV1Benchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersAdaptiveRelativeStrengthIndexV1",
+      "EhlersAdaptiveRsiFisherTransformV1",
+      "EhlersAdaptiveStochasticIndicatorV1",
+      "EhlersAdaptiveCommodityChannelIndexV1"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

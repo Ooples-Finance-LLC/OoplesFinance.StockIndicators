@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "847db893e8cdd398b6d845fb753c507d4c1967367e72a03aff9c800800efb8e0",
+    "archive": "benchmarks/results/remaining-indicators/acceleration-word-mean-20261112-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "a31a021779f992457d04b5371bc6b51fdab92264d58cb3aaac622f1ed7054681",
+    "archive": "benchmarks/results/remaining-indicators/acceleration-word-mean-20261112-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "6b68e406d6f0ecf501d2f7c35f4b40e290e53c7c058fe3e637fbb9aa6bb8fcb7",
+    "archive": "benchmarks/results/remaining-indicators/acceleration-word-mean-20261112-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "6d1bbd96655a827d1760b71454316a4537825d10d2ef4fd962f058aad3a23f18",
+    "archive": "benchmarks/results/remaining-indicators/acceleration-word-mean-20261112-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "9795b86be8d9e1921971269893ef25543e9a71608330c7628da85da49732362f",
+    "archive": "benchmarks/results/remaining-indicators/acceleration-word-mean-20261112-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "f05619d4ac4f82c91cd59bea9022167d6e56b3150eb65254ada0199a726c6c92",
+    "archive": "benchmarks/results/remaining-indicators/acceleration-word-mean-20261112-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "e6294c66383bb67a17e26ac1833263cd8716904b263329a5b95df573f4c4b456",
+    "archive": "benchmarks/results/remaining-indicators/acceleration-word-mean-20261112-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "2d6daf58e29c044fedc35f9aa134dd9724a88966b5c95191110e9078fd3808f2",
+    "archive": "benchmarks/results/remaining-indicators/acceleration-word-mean-20261112-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "eb993e6cd13e93b16f1aab6167a8d4273424f4afd37620db68fd52ce77a86e22",
+    "archive": "benchmarks/results/remaining-indicators/acceleration-word-mean-20261112-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "a4110c5cc9ec33d96e2f3a182d7fed6d57bdecccec8d0745666485c68cc00a51",
+    "archive": "benchmarks/results/remaining-indicators/acceleration-word-mean-20261112-report-integration/updated-pair-details.png.gz"
+  }
+}

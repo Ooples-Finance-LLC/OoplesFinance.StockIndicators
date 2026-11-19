@@ -1,0 +1,15 @@
+{
+  "head": "1ed2d752954432b64d3fcbd11db1e6fe8054afb6",
+  "successful_post_window_run": "42670386216",
+  "historical_nonretryable_runs": [
+    "42668418641",
+    "42668408206"
+  ],
+  "recovery": "New title event succeeds; supersede old failures with a metadata-only publication commit",
+  "security_policy_changed": false,
+  "reason": "GitHub rejected retry of a startup_failure run: This workflow run cannot be retried",
+  "indicator_code_changed": false,
+  "report_values_changed": false,
+  "source_fingerprint": "b50e7fa95997833bff94792e9e428c14785cb6972c7cb8d56e4129da5e0a89be",
+  "report_sha256": "ee54b7ef903fc435f119108c82558b9ec8f21b1c69a7aa509cd96a18c71896ab"
+}

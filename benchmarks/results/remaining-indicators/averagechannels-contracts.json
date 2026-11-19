@@ -1,0 +1,41 @@
+{
+  "batch": "average-channels-shared-execution",
+  "types": [
+    "MovingAverageSupportResistance",
+    "MovingAverageChannel",
+    "HighLowBands"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact SMA channel kernels and band helpers, computing three outputs together while preserving original fields, rounding, clamps, finite-shift eligibility, component/source fallback and bounded unfillable-window allocation.",
+  "verification": {
+    "unit_passed": 167,
+    "fixture_passed": 12,
+    "discovery_passed": 117,
+    "gpu_passed": 100,
+    "contract_methods": 1456,
+    "hosted_methods": 1444,
+    "evidence": [
+      {
+        "file": "averagechannels-unit.trx.gz",
+        "passed_cases": 167,
+        "trx_sha256": "d45548e21ad6fff2b02f29b5f839c565508ccecd3ef7049e28b91a17a3bd9615"
+      },
+      {
+        "file": "averagechannels-fixture.trx.gz",
+        "passed_cases": 129,
+        "trx_sha256": "e413c840415f10c83979104ae2317571822ba0fa4aed14bda321fe61236c0621"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAverageChannelBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "MovingAverageSupportResistance",
+      "MovingAverageChannel",
+      "HighLowBands"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

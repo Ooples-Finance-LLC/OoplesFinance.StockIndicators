@@ -1,0 +1,26 @@
+{
+  "source_integration_commit": "34d612ef7ed4e01a781298c892fef05e686a28c3",
+  "qualified_source": "376c0ef71e4dad1cef14330d3a6d989d19de729e",
+  "compiled_source": "dd252af7b5b99501af28b9b6cace31375cc3ff5b",
+  "source_fingerprint": "e0d15242774510fc55b572d7af3ad996fdf3bf15b093b9feb3cd3fd02a2c29b9",
+  "unit": 64,
+  "comparator": 38,
+  "actual_gpu": 100,
+  "inventory_tests": 8,
+  "production_sha256": "d29732715a4ee33a789dcd18bf87701a7a4aa195fc5239ab8763fc5a88128db7",
+  "run_id": "41901544931",
+  "cases": 240,
+  "decisions": 48,
+  "verdicts": {
+    "inconclusive": 42,
+    "faster": 6
+  },
+  "integrated_paths": [
+    "src/Indicators/KlingerVolumeWithSignal.cs",
+    "tests/ModelsTests/KlingerPrivateBlendTests.cs"
+  ],
+  "excluded": [
+    "Rejected41883056295 timing and cancelled original correctness dispatches; no independent timings pooled"
+  ],
+  "verified_utc": "2026-11-04T20:54:35.283401+00:00"
+}

@@ -1,0 +1,44 @@
+{
+  "source_sha": "eb9d6058b009f526ecd9c89c1b76eaee9e1fcadc",
+  "measurement_location": "Local Windows; unchanged correctness setup; CPU builder and native methods timed",
+  "cases": 64,
+  "comparisons": 32,
+  "archives": {
+    "verified-summary.json": {
+      "sha256": "b0d98e20acbe53ccec0bca59807ba0318ce6afe3e5c5e86c35c021948adcd47a",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch2-20261022/verified-summary.json.gz"
+    },
+    "status.json": {
+      "sha256": "22b0b530532ae1d44dce6d2e9d858bad8df7e2d261f4f8f6008d96c8e8483f19",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch2-20261022/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "b85e8887bad21e0415720bd6e78ca111bb860e05d3a70895efa7ef3618428125",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch2-20261022/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "a20a1647ad4f01ccae6a76522fffc7337df7481cc86d7714dfd77d029ff70e10",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch2-20261022/binary-manifest.json.gz"
+    },
+    "SharedTradyStrengthBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyStrengthBenchmarks-report-full-compressed.json": {
+      "sha256": "300554787dc82360a8ca56112ea26c96e17a92b6c2403806e1c898acf81fa64b",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch2-20261022/SharedTradyStrengthBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyStrengthBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedTradyStochasticMomentumBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyStochasticMomentumBenchmarks-report-full-compressed.json": {
+      "sha256": "64524f3ca415604c32fefbafbd14081e2009029816b35a5fe401920c97a5a2d4",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch2-20261022/SharedTradyStochasticMomentumBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyStochasticMomentumBenchmarks-report-full-compressed.json.gz"
+    },
+    "SharedTradyStochasticMomentumBenchmarks.log": {
+      "sha256": "cf7b02a30d413228073b01ef90f86ba75de194aaec687a914f17f38d1d833df1",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch2-20261022/SharedTradyStochasticMomentumBenchmarks.log.gz"
+    },
+    "SharedTradyStrengthBenchmarks.log": {
+      "sha256": "93c65ba6c8b5e7db586ca05a1dfbdd4ef7e962e286a07e1bcaa7d7daa6f107c5",
+      "archive": "benchmarks/results/remaining-indicators/local-mapped-batch2-20261022/SharedTradyStrengthBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-local-mapped-batch2.py": "1e9efc7337c5615b59f6d71fde30decfaa742734efe9d8779dcd27df1efea56f",
+    "verify-local-mapped-batch2.py": "9c8ce59378291a47d2a60c698345c61c4cb2275ab8bfd90d86e3b36b9cfaafe0"
+  }
+}

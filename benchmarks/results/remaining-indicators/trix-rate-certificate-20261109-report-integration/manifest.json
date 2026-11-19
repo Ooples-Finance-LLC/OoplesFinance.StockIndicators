@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "6c4786b28697ca9cf2a2e7fd16afae3f811ad54d7178c84993c2e856391d3893",
+    "archive": "benchmarks/results/remaining-indicators/trix-rate-certificate-20261109-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "8eaefd2df540051e205c0599e4e9d937e5b24eb4143ad4e3b8a328321855d7ba",
+    "archive": "benchmarks/results/remaining-indicators/trix-rate-certificate-20261109-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "b0712bad2f697ae1de0160eb09207302a5e69c30a2bb56ffc77aadc540a6266e",
+    "archive": "benchmarks/results/remaining-indicators/trix-rate-certificate-20261109-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "a41a8048418c044f00e72096fe7cffc719d0f1ff3cb116ba45c527a4e6baa93e",
+    "archive": "benchmarks/results/remaining-indicators/trix-rate-certificate-20261109-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "4cd33e9afc58c09c4c7cfd48fbddb2b77fb3d1ab42185974a03dcfd1e4f39fff",
+    "archive": "benchmarks/results/remaining-indicators/trix-rate-certificate-20261109-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "b9261713f2b3dab0aafe3f354b0094c99831e8de56184f44aa92ebc03840711f",
+    "archive": "benchmarks/results/remaining-indicators/trix-rate-certificate-20261109-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "9117a23ee69347d6f84cbde3932f2e566ddc4b1274bc20e3810a53952290f6a0",
+    "archive": "benchmarks/results/remaining-indicators/trix-rate-certificate-20261109-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "dc4d3eeb2d1e61b2b19cd337f84f45b57096f201ca267575c09d89399fc1d3ed",
+    "archive": "benchmarks/results/remaining-indicators/trix-rate-certificate-20261109-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "a49a13929233ea688a3e7b32ef7a275fca720031fcfff857de1ba17b859a22c4",
+    "archive": "benchmarks/results/remaining-indicators/trix-rate-certificate-20261109-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "4983ef3eb589423d9b4073030bd86a7d31f9b03e23ca6fb75f1b15d0e52af21d",
+    "archive": "benchmarks/results/remaining-indicators/trix-rate-certificate-20261109-report-integration/updated-pair-details.png.gz"
+  }
+}

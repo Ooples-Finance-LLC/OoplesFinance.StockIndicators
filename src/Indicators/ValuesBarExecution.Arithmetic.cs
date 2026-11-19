@@ -15,8 +15,22 @@ internal static partial class ValuesBarExecution
 
     private static Bar FillArithmetic<TMath>(Bar[] source, double[][] output, CandleArithmetic indicator,
         CancellationToken cancellation, OwnedBarBuffer? owned) where TMath : struct, IBinaryMath =>
-        FillPointwiseKernel(source, output, indicator, new BinaryKernel<TMath>(indicator.Left, indicator.Right),
-            cancellation, owned);
+        indicator.Left == CandlePriceField.Close && indicator.Right == CandlePriceField.Open
+            ? FillPointwiseKernel(source, output, indicator, new CloseOpenBinaryKernel<TMath>(), cancellation, owned)
+            : FillPointwiseKernel(source, output, indicator, new BinaryKernel<TMath>(indicator.Left, indicator.Right),
+                cancellation, owned);
+
+    private readonly struct CloseOpenBinaryKernel<TMath> : IPointwiseKernel
+        where TMath : struct, IBinaryMath
+    {
+        public double Invoke(in Bar bar, out bool defined)
+        {
+            defined = !default(TMath).CanBeUndefined || Math.Abs(bar.Open) > 0;
+            return defined ? default(TMath).Invoke(bar.Close, bar.Open) : 0;
+        }
+        public bool AlwaysDefined => !default(TMath).CanBeUndefined;
+        public bool CanOverflow => true;
+    }
 
     private interface IBinaryMath
     {

@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "a41a8048418c044f00e72096fe7cffc719d0f1ff3cb116ba45c527a4e6baa93e",
+    "archive": "benchmarks/results/remaining-indicators/adl-direct-prefix-publication-20261109-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "bdebee200cadad2c5a0f710d2384fa4d6402a4dfa0324b06c239195a52443822",
+    "archive": "benchmarks/results/remaining-indicators/adl-direct-prefix-publication-20261109-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "11091b70e099b204e5fd459f309498146800d21fdd0d46e91652eecde9122228",
+    "archive": "benchmarks/results/remaining-indicators/adl-direct-prefix-publication-20261109-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "b596101cfefef1fda593bf6f9f220c897e5bf5d7e6cceb099de656df04e913ba",
+    "archive": "benchmarks/results/remaining-indicators/adl-direct-prefix-publication-20261109-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "efc32d2548c2fdf25e1112bdbfcfc518756f5bc28fbf67ecd68fd90d2b60bd3b",
+    "archive": "benchmarks/results/remaining-indicators/adl-direct-prefix-publication-20261109-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "42a69b8e64b89b80a31ac68789947276f6d7a2dc2d98fa76ebd9f34b9b973ed3",
+    "archive": "benchmarks/results/remaining-indicators/adl-direct-prefix-publication-20261109-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "ab7cd41f13dbd8a636248988848a428747832318219f02490178fef66ce81bd3",
+    "archive": "benchmarks/results/remaining-indicators/adl-direct-prefix-publication-20261109-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "712d0d92e7bc8597d65ff16218bd7f313ad857ef7fd88ab98045bee859eb4917",
+    "archive": "benchmarks/results/remaining-indicators/adl-direct-prefix-publication-20261109-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "0687b74092a285fa3d62902e2089d5b68224d35861349dab20dd7019fa7aba94",
+    "archive": "benchmarks/results/remaining-indicators/adl-direct-prefix-publication-20261109-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "705fe0adaa063d70720eb557e0bedcf24c6a741c8ec896d0eaf479fd6f26f90b",
+    "archive": "benchmarks/results/remaining-indicators/adl-direct-prefix-publication-20261109-report-integration/updated-pair-details.png.gz"
+  }
+}

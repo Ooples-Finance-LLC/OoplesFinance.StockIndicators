@@ -1,0 +1,113 @@
+{
+  "source": "b7d8eafcdf87ac2091b8cb8e619406b2a1473e98",
+  "production_sha256": "e5ee21bd5708383ef23aba78fc7cf621216a4dc92bfb23366a1512480e034713",
+  "source_fingerprint": "5eb39c86d1d3b4a41571d10818ad4f6799ca47091f99e4a3f307ce81e6294b36",
+  "accepted": true,
+  "optimized_callers": [
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeBoundedRegion[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+RangeDojiKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.IIndicator):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier1-OSR)",
+      "code_bytes": 1448
+    },
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeBoundedRegion[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+RangeDojiKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.IIndicator):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier1-OSR)",
+      "code_bytes": 4186
+    },
+    {
+      "header": "; Assembly listing for method OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:ComputeBoundedRegion[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+RangeDojiKernel](OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer,int,int,int,System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar],System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.IIndicator):OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+PointwiseRegion (Tier1)",
+      "code_bytes": 5267
+    }
+  ],
+  "worker_region_sample_weight_ms": 15772.306661376013,
+  "worker_frames": [
+    [
+      "(Non-Activities)",
+      15772.306661376013
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor.WorkerLoop(int32)",
+      15772.306661376013
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor.RunSet(class Job,int32,bool)",
+      15772.306661376013
+    ],
+    [
+      "Process64 pwsh (55960) Args:  -NoProfile -File profile-native-gaps-perfview-20261113.ps1 -Pair TaLib.Candles.DragonflyDoji -Seconds 20 -Runtime C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-doji-region-pool-20261113\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0 -Expected e5ee21bd5708383ef23aba78fc7cf621216a4dc92bfb23366a1512480e034713 ",
+      15772.306661376013
+    ],
+    [
+      "Threads",
+      15772.306661376013
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+<>c__DisplayClass142_0`1[OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+RangeDojiKernel].<FillBoundedWindow>b__0(int32)",
+      15772.306661376013
+    ],
+    [
+      "AiDotNet.Tensors!AiDotNet.Tensors.Helpers.PersistentParallelExecutor+<>c__DisplayClass28_0.<.ctor>b__0()",
+      15772.306661376013
+    ],
+    [
+      "System.Private.CoreLib!System.Threading.Thread.StartCallback()",
+      15772.306661376013
+    ],
+    [
+      "CPU_TIME",
+      15270.07625134298
+    ],
+    [
+      "Thread (19924)",
+      2613.731900754352
+    ],
+    [
+      "Thread (53948)",
+      2421.254212896729
+    ],
+    [
+      "Thread (64844)",
+      2404.7954046735904
+    ],
+    [
+      "Thread (56332)",
+      2394.858611068561
+    ],
+    [
+      "Thread (25840)",
+      2227.0901095123263
+    ],
+    [
+      "Thread (53972)",
+      1902.3048170412003
+    ],
+    [
+      "Thread (38824)",
+      1808.2716054292541
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.AverageRangeDojiState.Matches(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      1401.0853346439471
+    ],
+    [
+      "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.AverageRangeDojiState.Update(value class OoplesFinance.StockIndicators.Indicators.Bar&)",
+      825.5323628885271
+    ],
+    [
+      "System.Private.CoreLib!System.Collections.Generic.Queue`1[System.ValueTuple`2[System.Double,System.Double]].Grow(int32)",
+      825.5323628885271
+    ],
+    [
+      "UNMANAGED_CODE_TIME",
+      502.23037938213383
+    ]
+  ],
+  "disassembly_sha256": "adbfe18af4645a1ba9f72481c5b819de66546b10f1d291cf58a3524154b903bd",
+  "trace_sha256": "5400dc685373d6a81cbb2a8eae0cfc21a6c0702adc13644bcf187bab159f5fbf",
+  "claim": "Observed optimized RangeDojiKernel region code and actual off-main-thread typed regions under the existing persistent tensor worker executor.",
+  "interpretation": "Sampled thread time only. The JIT inlines region code into FillBoundedWindow dispatcher lambdas; worker bucketing includes those lambdas and excludes NativeGapProfile.Run main stacks.",
+  "performance_qualified": false,
+  "local_timing_usable_for_acceptance": false,
+  "limits": [
+    "This proves execution-path reachability, not native speed or a whole-process CPU percentage.",
+    "Only complete isolated150case30decision qualification may accept source; no pooling or selected timing imports."
+  ]
+}

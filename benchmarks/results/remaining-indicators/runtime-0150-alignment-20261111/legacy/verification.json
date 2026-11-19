@@ -1,0 +1,13 @@
+{
+  "run_id": "43106175412",
+  "source": "5a9d80f52faa59abca68522ecd5e55f29b85ceba",
+  "workflow_head": "acca7eccc1e4143481cf7945969016f1387c9fe7",
+  "framework": "net461",
+  "project_sha256": "220dde08e10fbd067c46a40970e1a932bcc9a97cca17e60ec9d60855481f501c",
+  "result": "passed",
+  "project_hash_policy": "UTF-8 text, BOM removed and CRLF normalized, matching PowerShell Get-Content",
+  "project_bytes_sha256": "497ebefdff8d31824d54fd29c47b5c8c0e3377406615713a55067a98b19de92a",
+  "log_sha256": "69b8ea5b6e0ec5e405fb530a7dd6e52c52d914f34afdd9ea9895792c75110cc3",
+  "target_support_warning": "System.Text.Json 11.0.0 reports net461 is unsupported; build succeeds. Prior 10.0.14 declares the same target limitation.",
+  "limitation": "Legacy build verified; no legacy runtime tests claimed."
+}

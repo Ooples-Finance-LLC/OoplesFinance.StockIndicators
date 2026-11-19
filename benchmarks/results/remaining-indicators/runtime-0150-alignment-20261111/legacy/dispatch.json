@@ -1,0 +1,7 @@
+{
+  "ref": "perf/runtime-0150-legacy-20261111-ci-producer",
+  "inputs": {
+    "suite": "legacy-net461-build",
+    "candidate_source": "5a9d80f52faa59abca68522ecd5e55f29b85ceba"
+  }
+}

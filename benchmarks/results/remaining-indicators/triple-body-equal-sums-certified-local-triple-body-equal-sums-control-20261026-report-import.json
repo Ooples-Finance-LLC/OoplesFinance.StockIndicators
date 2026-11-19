@@ -1,0 +1,60 @@
+{
+  "before_sha256": "6c88f20fded8f8280d149019e9153e6b760d5648afdafe800835cec3caae9ac1",
+  "candidate_sha256": "35f967e259abb51465e5f72d88394cd7a308163870ac8720503965acd14b5490",
+  "changed_baseline_rows": 8,
+  "unchanged_baseline_rows": 794,
+  "changed_builder_slots": 16,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 16,
+  "verdicts": {
+    "faster": 593,
+    "slower": 893,
+    "inconclusive": 50
+  },
+  "unchanged_rows": 794,
+  "run_id": "local-triple-body-equal-sums-control-20261026",
+  "imported_utc": "2026-10-26T20:36:17.374997+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "85e27eb2128ac8b412fd2f16bd12e2ed44bdb4946a95cc68267eb0618d8ee1c9",
+      "archive": "benchmarks/results/remaining-indicators/triple-body-equal-sums-certified-local-triple-body-equal-sums-control-20261026-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "0b143479725ef920dc06bfbaafa80fbf9f6343bb052807933253598fbac93e97",
+      "archive": "benchmarks/results/remaining-indicators/triple-body-equal-sums-certified-local-triple-body-equal-sums-control-20261026-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "1fd3cfa2a2b776b06a97a688d36e82f7dde4f2e44f0ea1dc4a372073b0c05ba5",
+      "archive": "benchmarks/results/remaining-indicators/triple-body-equal-sums-certified-local-triple-body-equal-sums-control-20261026-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "f04283798b722df3b673e45a239e3c276d336c39d028e53e103b711138c44928",
+      "archive": "benchmarks/results/remaining-indicators/triple-body-equal-sums-certified-local-triple-body-equal-sums-control-20261026-measurement.json.gz"
+    },
+    "stage-triple-body-equal-sums-report.py": {
+      "sha256": "1dfe9f2ba24cef36e4837d101762f8ad858154a2d5d9a99b0f48bdf37ef131df",
+      "archive": "benchmarks/results/remaining-indicators/triple-body-equal-sums-certified-local-triple-body-equal-sums-control-20261026-stage-triple-body-equal-sums-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/triple-body-equal-sums-certified-local-triple-body-equal-sums-control-20261026-verify-approved-certified-report.py.gz"
+    },
+    "import-triple-body-equal-sums-report.py": {
+      "sha256": "eb4f13dbeed876865a5b1a2a05dfbe7820700750e32722328bab89364c37d105",
+      "archive": "benchmarks/results/remaining-indicators/triple-body-equal-sums-certified-local-triple-body-equal-sums-control-20261026-import-triple-body-equal-sums-report.py.gz"
+    },
+    "archive-triple-body-equal-sums-control.py": {
+      "sha256": "7176bfcd78f52bdc558803f5adac3f48960c433a79ee259901269050b2bfa16b",
+      "archive": "benchmarks/results/remaining-indicators/triple-body-equal-sums-certified-local-triple-body-equal-sums-control-20261026-archive-triple-body-equal-sums-control.py.gz"
+    },
+    "prove-triple-body-equal-sums-integration.py": {
+      "sha256": "87b6ea4e57f0f0403531b72bc1d07029447de4c5af6cababfa36cad16d9a07cb",
+      "archive": "benchmarks/results/remaining-indicators/triple-body-equal-sums-certified-local-triple-body-equal-sums-control-20261026-prove-triple-body-equal-sums-integration.py.gz"
+    },
+    "archive-triple-body-equal-sums-report.py": {
+      "sha256": "1eecc77cdac71895baa92830050d1f22aadce35861710364e7bdf5c5534966a3",
+      "archive": "benchmarks/results/remaining-indicators/triple-body-equal-sums-certified-local-triple-body-equal-sums-control-20261026-archive-triple-body-equal-sums-report.py.gz"
+    }
+  }
+}

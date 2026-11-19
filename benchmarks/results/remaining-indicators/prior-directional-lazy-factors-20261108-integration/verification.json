@@ -1,0 +1,22 @@
+{
+  "source_integration_commit": "8e7295882654d3c026bbf82e22ff4a8d0b983cac",
+  "qualified_source": "992aa204eaf4a9f330c0fa1ee42305b7dc7f8203",
+  "compiled_source": "87233f97235b3bafff1e5a63abc2f27302c187ae",
+  "source_fingerprint": "a5c104c201aa85723f7455392dcb42b9767ce4a8e87dc103c2c460030ebe212a",
+  "unit": 49,
+  "comparator": 23,
+  "actual_gpu": 100,
+  "production_sha256": "e8259616bf535a1b94e30d7550585706a482d901b744ec2bc76cb4e159786aaf",
+  "run_id": "42517850155",
+  "cases": 210,
+  "decisions": 42,
+  "verdicts": {
+    "inconclusive": 26,
+    "faster": 16
+  },
+  "integrated_paths": [
+    "src/Indicators/PriorSeededDirectionalMeasure.cs",
+    "tests/ModelsTests/PriorDirectionalLazyFactorTests.cs"
+  ],
+  "verified_utc": "2026-11-08T20:57:39.133310+00:00"
+}

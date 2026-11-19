@@ -57,6 +57,7 @@ internal static partial class CertifiedLogReturn
         var currentFactor = new ExactMeanAccumulator.ProductFactor(Math.Abs(current));
         var previousFactor = new ExactMeanAccumulator.ProductFactor(Math.Abs(previous));
 #if !NETFRAMEWORK
+        if (TryShort(currentFactor, previousFactor, out var initial)) return initial;
         if (TryFixed(currentFactor, previousFactor, out var certified)) return certified;
 #endif
         var n = new BigInteger(currentFactor.Mantissa);

@@ -1,0 +1,70 @@
+{
+  "input_head": "6d4953d224c2de80e00b028d9ff982f19cf15ba2",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CompactMacdValue.cs",
+    "src/Indicators/AlignedEmaMacd.cs",
+    "src/Indicators/EmaDifferenceSignal.cs",
+    "tests/ModelsTests/CompactMacdValueTests.cs"
+  ],
+  "arithmetic_cases": 4,
+  "batch_note": "Approved compact exact MACD state representation. Preserve exact seeds and fixed coefficient complements, unit-grid rounding, nullable percentage signal seeding and selected overflow. Certified compact ratios retain existing wide fallback. Numerical and long-history parity qualification; performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-27T18:07:58.195098+00:00",
+  "unit": {
+    "passed": 233,
+    "class_counts": {
+      "MacdNumericalTests": 81,
+      "PpoNumericalTests": 71,
+      "MacdFixedCoefficientReductionTests": 2,
+      "MacdSharedExecutionTests": 18,
+      "PvoNumericalTests": 46,
+      "CompactRocUnitsTests": 5,
+      "CompactMacdValueTests": 4,
+      "CompactRatioArithmeticTests": 6
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\compact-macd-state\\unit\\unit.trx",
+    "sha256": "353cbf37b8127a7bd73a8c30e0ba5ad3809f129560dac887bc8586f75c401e03",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-compact-macd-state-certified-20261027-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 119,
+    "class_counts": {
+      "SharedTaMacdNativeBenchmarkTests": 46,
+      "ClassicMacdComparisonTests": 16,
+      "AlignedMacdComparisonTests": 10,
+      "SharedTradyMacdBenchmarkTests": 33,
+      "SharedMacdBenchmarkTests": 14
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\compact-macd-state\\parity\\parity.trx",
+    "sha256": "d022cde0d6b009f7b03f227df30a3c5f0a50c27e3584cead034d2a782bca5dce",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-compact-macd-state-certified-20261027-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-state-20261027\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2326a4f102b3e5dca366f2ae5666ff76a83282ba3b880dc08d00229f3df6caa8",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-state-20261027\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2326a4f102b3e5dca366f2ae5666ff76a83282ba3b880dc08d00229f3df6caa8",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-state-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2326a4f102b3e5dca366f2ae5666ff76a83282ba3b880dc08d00229f3df6caa8",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-state-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "2326a4f102b3e5dca366f2ae5666ff76a83282ba3b880dc08d00229f3df6caa8"
+  },
+  "source_fingerprint_sha256": "d1e3faca8b1b039adbc5eff5254a6c51fc6650ed7c09e449b8d354bd2196beb2",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved compact exact MACD state representation. Preserve exact seeds and fixed coefficient complements, unit-grid rounding, nullable percentage signal seeding and selected overflow. Certified compact ratios retain existing wide fallback. Numerical and long-history parity qualification; performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

@@ -1,0 +1,12 @@
+{
+  "scope": "Diagnostic sampled-thread attribution only; no timing qualification or report measurement replacement.",
+  "finding": "Near-zero-window means leave the existing narrow CCI deviation grid and retain dyadic fallback.",
+  "raw_profile_location": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\commodity-channel-current-profile-20261022",
+  "source_sha": "6e4d81cd776b36ebeb22db64fc2a4edf4c521bbe",
+  "archives": {
+    "provenance.json": "fda5d791dc24fd2e97c112fa9b5e8fed1eabfce44dbefa0a89dd6af3a86995d0",
+    "kernel-profile-summary.json": "955f160da2e06386ca0c709fe649cbc3a17481b9e1020584d9e25f98455b4400",
+    "ready.json": "b50d152fd7b7ae443459cab201666041e5eb3bb290d4902f6736a3b16ecf5204",
+    "completed.json": "c6209869333ba4440ecd62649933e55d029d6f510d2fc3e6e6aecdf098f5e2fd"
+  }
+}

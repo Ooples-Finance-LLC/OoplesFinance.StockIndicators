@@ -1,0 +1,189 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "c879ac3f9c6a3e71a9ffd54341f5ec55385abbb0",
+    "new": "ef13e8501481b65806e4cfb856c230c202850624"
+  },
+  "candidate_code_source": "4b058ef229baa15c15323349861d03db78dec998",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "SharedAlligatorBenchmarks",
+      "pair": "Skender.GetGator",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.2686284375,
+        0.2635409722222222
+      ],
+      "new_means_ms": [
+        0.221301953125,
+        0.20642178819444443
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedAlligatorBenchmarks",
+      "pair": "Skender.GetGator",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.257744140625,
+        0.2638420572916667
+      ],
+      "new_means_ms": [
+        0.217643515625,
+        0.19748421875
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedAlligatorBenchmarks",
+      "pair": "Skender.GetGator",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        2.59158515625,
+        2.5443017578125
+      ],
+      "new_means_ms": [
+        2.0900129340277775,
+        1.9809837890625
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedAlligatorBenchmarks",
+      "pair": "Skender.GetGator",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        2.4420474609375,
+        2.50239640625
+      ],
+      "new_means_ms": [
+        2.03462640625,
+        1.920004375
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetGator",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        1.9634,
+        2.01867
+      ],
+      "new_means_ms": [
+        1.56317,
+        1.4808666666666668
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetGator",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        3.4752333333333336,
+        3.5223
+      ],
+      "new_means_ms": [
+        3.044588888888889,
+        3.064275
+      ],
+      "verdict": "faster"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "a5a0c1556235039353fbe1f071034282556a66d51fc99b555f73265511a382e0",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "ff47861bfe7acc6a6b11491efe26f6efca65a5d5b617a8e882c9e1fb6c3cf384",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "81eb9ec1ffdf751a50d50f91d374695d5fa97ca82aeba3da76757361563a2728",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "ffea52baa421d9ed5536c640d017ff69e211ca33e33ca0f39fe9abda9e70be0e",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/verified-summary.json.gz"
+    },
+    "round0-old-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json": {
+      "sha256": "5cb950c2b144782e67d4806c8dc17989a979b88dc6ac3a50278f4e32fa361146",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round0-old-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "630e923b1fb66f7c09b3462dfbb944642bdd28d4afb575ed3bb49e3ef5f89453",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json": {
+      "sha256": "08fcd6ac9b062c73a9076ff66eb662fd8194f3076a017ab789e43f185ff9f4eb",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round1-new-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "7447556c526e09c40394791867012338df01c21d07db053703c7934a555bcf98",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json": {
+      "sha256": "34aa24680fd88e157a8b0d675061d8b1739fddb480cd7b32a371a59f3004fc23",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round2-new-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "a0d94591aa7e0798d0ba4f58a87b9d10e1f1ebea9172ea1fd718a6abf2b81d71",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json": {
+      "sha256": "3fbe570a9a7c517b1852c8794f2099798cfd0aad2179276e749221c70d7193ee",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round3-old-SharedAlligatorBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedAlligatorBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "4f362e8f3740b3f81102afc12c456dacf113290c40e81130c601be45d4452ec0",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "832888b688c16bd82d6cdb9a9b95f8a00a327cc9782a3afe7418d3572b1b8258",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round0-old-SharedAlligatorBenchmarks.log": {
+      "sha256": "0106e64e7a9a876c420fd4ecfae2138e3c81e2282444479c26bc7455257429b2",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round0-old-SharedAlligatorBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "e6cef1efa73d40d30b8fa86074f705b126e6e18ba840528bfea0559f017eeff4",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-SharedAlligatorBenchmarks.log": {
+      "sha256": "1a4f95e1d2af5546cddbf960e39fe37a7648c53ebb872c7d4bd0e6b5efafcad8",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round1-new-SharedAlligatorBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "cac8d28b53963cde7947c8b3dbf3017c91612ceda33674a5e76fc55dcc0a53f7",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-SharedAlligatorBenchmarks.log": {
+      "sha256": "c53f9b2aed87901c09547eed11f32aa0ba07e32292522737ba7f5150093d3711",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round2-new-SharedAlligatorBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "95ea5f87207b7f43733ebe57e9f16c7592c1d47abef82f46b7271136c9648fc0",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-SharedAlligatorBenchmarks.log": {
+      "sha256": "942fb2f71825e99620c107545d357f34b4333858a70c5adab06d07ec973a6019",
+      "archive": "benchmarks/results/remaining-indicators/local-gator-direct-modern-control-20261023/round3-old-SharedAlligatorBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-gator-direct-modern-control.py": "3afd01c28a353c8fbec5e0c755524d2abc75f5165146e9f057258d70d77c1528",
+    "verify-gator-direct-modern-control.py": "855f8b700ffdc6008330d9ed7a581e31f16471e736f40fd81220fd06e2026377"
+  },
+  "report_imported": false,
+  "production_integrated": true
+}

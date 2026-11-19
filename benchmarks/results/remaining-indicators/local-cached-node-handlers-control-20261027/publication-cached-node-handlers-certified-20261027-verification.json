@@ -1,0 +1,79 @@
+{
+  "input_head": "f37abd50acb455b744d56e44952e602326f99752",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/ValuesBarExecution.cs",
+    "tests/ModelsTests/CachedNodeHandlerTests.cs"
+  ],
+  "arithmetic_cases": 4,
+  "batch_note": "Approved bounded caching of existing MACD/T3/A-D update handlers per execution node; fallback, clearing and exception capture retained. Mixed-builder and affected numerical/parity checks; performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-27T19:26:20.770655+00:00",
+  "unit": {
+    "passed": 530,
+    "class_counts": {
+      "MoneyFlowAccumulationNumericalTests": 147,
+      "MacdNumericalTests": 81,
+      "PpoNumericalTests": 71,
+      "IndicatorValuesTests": 109,
+      "MacdSharedExecutionTests": 18,
+      "CertifiedTillsonTests": 17,
+      "TillsonWordBinadeTests": 2,
+      "PvoNumericalTests": 46,
+      "TillsonSharedExecutionTests": 12,
+      "CachedNodeHandlerTests": 4,
+      "TillsonPolynomialExecutionTests": 2,
+      "TillsonFloatingSmoothingTests": 7,
+      "SharedRecursiveStateTests": 8,
+      "MacdFixedCoefficientReductionTests": 2,
+      "TillsonWordSmoothingTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\cached-node-handlers\\unit\\unit.trx",
+    "sha256": "963ff60756fd77adf86d324f00d860fa87f501ad7aedad1a9cc5e9baafacd15b",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-cached-node-handlers-certified-20261027-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 170,
+    "class_counts": {
+      "ClassicMacdComparisonTests": 16,
+      "AccumulationDistributionComparisonTests": 17,
+      "SharedTaMacdNativeBenchmarkTests": 46,
+      "SharedTradyMacdBenchmarkTests": 33,
+      "SharedMacdBenchmarkTests": 14,
+      "SharedTillsonBenchmarkTests": 16,
+      "TillsonComparisonTests": 10,
+      "AlignedMacdComparisonTests": 10,
+      "SharedAdlDetailsFixtureTests": 8
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\cached-node-handlers\\parity\\parity.trx",
+    "sha256": "f8e638dbd6a7b09e96cc88bdb69c31293bcf365a009e8dbbfa163a8dcf8e9347",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-cached-node-handlers-certified-20261027-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cached-node-handlers-20261027\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ab3f3affdc89cb08e177a98e3f376716546d87e43cb7988917c8f3be6d582791",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cached-node-handlers-20261027\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ab3f3affdc89cb08e177a98e3f376716546d87e43cb7988917c8f3be6d582791",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cached-node-handlers-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ab3f3affdc89cb08e177a98e3f376716546d87e43cb7988917c8f3be6d582791",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cached-node-handlers-20261027\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ab3f3affdc89cb08e177a98e3f376716546d87e43cb7988917c8f3be6d582791"
+  },
+  "source_fingerprint_sha256": "917d629497e3ef34206bc6775f6facb957538a763b50f5a6eda20d823ab9703b",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved bounded caching of existing MACD/T3/A-D update handlers per execution node; fallback, clearing and exception capture retained. Mixed-builder and affected numerical/parity checks; performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

@@ -1,0 +1,39 @@
+{
+  "batch": "average-envelopes-shared-execution",
+  "types": [
+    "MovingAverageEnvelope",
+    "MovingAverageDisplacedEnvelope"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact SMA/EMA smoothers and rounded fraction/percent band helpers to compute three envelope outputs together. Preserve distinct percentage units, delayed zero startup, facade clamps, invalid-factor and component/source fallbacks. Unfillable average windows and unreachable delays allocate no period-sized history.",
+  "verification": {
+    "unit_passed": 128,
+    "fixture_passed": 8,
+    "discovery_passed": 116,
+    "gpu_passed": 100,
+    "contract_methods": 1455,
+    "hosted_methods": 1443,
+    "evidence": [
+      {
+        "file": "averageenvelopes-unit.trx.gz",
+        "passed_cases": 128,
+        "trx_sha256": "ec5a00cbdf1998fb585836b6115baec59388d1e4fea881f099249c11dbcffd83"
+      },
+      {
+        "file": "averageenvelopes-fixture.trx.gz",
+        "passed_cases": 124,
+        "trx_sha256": "f5f316fec58cad1a34f40d299b22ddab40620fbe0c2d64df27ef337315d26d29"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAverageEnvelopeBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "MovingAverageEnvelope",
+      "MovingAverageDisplacedEnvelope"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "552cc20bc998e2409199fada0fb94ef63c91fb34b26fa813e8dd086e77030780",
+    "archive": "benchmarks/results/remaining-indicators/adl-identity-column-20261109-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "f641e20dd73bbe8e6dfa9f971d56a7363ec96563aaa6e370e82960b016e1f7ed",
+    "archive": "benchmarks/results/remaining-indicators/adl-identity-column-20261109-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "09e39c1bdd062cda0b05a9cc7047e399874d377e1244bc1bd82b03e6daa24295",
+    "archive": "benchmarks/results/remaining-indicators/adl-identity-column-20261109-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "ee54b7ef903fc435f119108c82558b9ec8f21b1c69a7aa509cd96a18c71896ab",
+    "archive": "benchmarks/results/remaining-indicators/adl-identity-column-20261109-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "7486ffcb1704037efb48b34b31b1a37902b59bb15a4cdeb449eba74af4e91725",
+    "archive": "benchmarks/results/remaining-indicators/adl-identity-column-20261109-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "da761afd24acdf1c468c86677796d18960c3935fade6b59a7371215c2772e0df",
+    "archive": "benchmarks/results/remaining-indicators/adl-identity-column-20261109-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "451a22c82dfbe03703ee123bb0f49621db6db4403d72c95a4f27f6cd75c9dd9a",
+    "archive": "benchmarks/results/remaining-indicators/adl-identity-column-20261109-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "ca630f4504ccbe4ffdc4175ec2fd9f992b895b98bfbb477b0c843d66ae6e3b2d",
+    "archive": "benchmarks/results/remaining-indicators/adl-identity-column-20261109-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "cc4749a00832b0968d5cd4cf06a84a3158fd945fd109c415be2fc3e88aed94d6",
+    "archive": "benchmarks/results/remaining-indicators/adl-identity-column-20261109-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "b065498c8c558276ba27723355807768e7480d1239ad3cf57aa6ae35aa6e5249",
+    "archive": "benchmarks/results/remaining-indicators/adl-identity-column-20261109-report-integration/updated-pair-details.png.gz"
+  }
+}

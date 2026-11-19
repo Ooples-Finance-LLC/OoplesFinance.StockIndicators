@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "f7ed9d261280fb6f9f85ef2d000ee45da4f1aa98b55c994cc4cd2dc3c9afca82",
+    "archive": "benchmarks/results/remaining-indicators/doji-region-pool-20261113-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "da453bb9c7837a20487c2785bc6fe1968ae78259bec79af1e675491bc36bf9b6",
+    "archive": "benchmarks/results/remaining-indicators/doji-region-pool-20261113-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "e54a2eaf1050648584e945410adeb78b649a00f16f29a1352a2161b16ba01e93",
+    "archive": "benchmarks/results/remaining-indicators/doji-region-pool-20261113-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "a986e16d06c167dc3891efc850354ddc4ab2652203f4e7ebfee08545c5d5199e",
+    "archive": "benchmarks/results/remaining-indicators/doji-region-pool-20261113-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "9a8107f2b057adc74147b53cf2395b34e57a59346da3f8d6403e0105855f900f",
+    "archive": "benchmarks/results/remaining-indicators/doji-region-pool-20261113-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "eecbd8aa47c213bd160283b0a5d4e9f7985e89cd1b206584d4421e3555afcc7d",
+    "archive": "benchmarks/results/remaining-indicators/doji-region-pool-20261113-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "cc58437a98ef7b5d8643d501d257019592b32d9c9433aa795767d245f4e76263",
+    "archive": "benchmarks/results/remaining-indicators/doji-region-pool-20261113-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "e4010ee5aa20bbd22627fe9d5481a89e87da52d12c9d2f27410e86439150b881",
+    "archive": "benchmarks/results/remaining-indicators/doji-region-pool-20261113-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "c35201940163543d74c872eee1186195050cf2760a63dd14b7dd5935b9a65e2e",
+    "archive": "benchmarks/results/remaining-indicators/doji-region-pool-20261113-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "c90bb952dcda2dbc1a870de276e9c780e1a4d5fd29fe2b75b7d21b3333746e13",
+    "archive": "benchmarks/results/remaining-indicators/doji-region-pool-20261113-report-integration/updated-pair-details.png.gz"
+  }
+}

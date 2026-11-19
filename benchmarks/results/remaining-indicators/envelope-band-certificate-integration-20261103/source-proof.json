@@ -1,0 +1,24 @@
+{
+  "qualified_source": "0285a8217d791857cf3ddeeac34c1aa826d27d65",
+  "baseline": "44963e8bddb19d6258498a5a41df8c917d4fb7d1",
+  "timing_run": "41769857963",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 3,
+    "faster": 3
+  },
+  "local_hosted_equality": true,
+  "src_tests_exactly_qualified": true,
+  "unit": 22,
+  "comparator": 127,
+  "actual_gpu": 100,
+  "source_fingerprint": "f72ae50801ce7447acdbc6e378c5a36f256ad0aaba997a23204bc2d7fe8499e5",
+  "production_sha256": "56975bb35153284dc3212897d4b846722c8ca4bcbb5bfa2b55affa735ad2eeda",
+  "rejected_pvo_and_cache_source_excluded": true,
+  "source_integration": "37f75c4c27ef0213f70b3531afc6a56c8b7b4caa",
+  "inventory_commit": "37f75c4c27ef0213f70b3531afc6a56c8b7b4caa",
+  "inventory_tests": 8,
+  "report_sha256": "a52255bcdef87a4a8dfa596051c1dd29b848cabb9a650f15a41fde2830c1fa76",
+  "remaining_slower_10000": 215
+}

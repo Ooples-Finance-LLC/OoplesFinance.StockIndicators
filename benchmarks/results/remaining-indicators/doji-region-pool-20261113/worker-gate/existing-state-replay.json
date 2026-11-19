@@ -1,0 +1,1 @@
+{"productionSha256":"0428f3867cb110fdf86375647c79766672adabb3faea6cc2553f58bf786a166c","productionModule":"007464cc-2552-4487-afd4-56911014a619","bars":10003,"cases":100,"compared":1000300,"allMatched":true,"productionChanged":false,"performanceEvidence":false,"scope":"Existing state replay on authenticated finite fixture; not implementation correctness or qualification"}

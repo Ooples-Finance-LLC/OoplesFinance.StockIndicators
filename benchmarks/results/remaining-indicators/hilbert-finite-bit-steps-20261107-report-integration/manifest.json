@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "9df1326b214394d3cd61cc1bae3e77c660adf15f905c31ea572f4657b62b2797",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-finite-bit-steps-20261107-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "cd053499df591c340d129a77a5efde4e0ab8e7a113049c34cf93758a21cd6329",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-finite-bit-steps-20261107-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "b9a71f31c5c1c18bebc8e2a2c88feea373ce832c14809d5b92a29fa86a0e19b0",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-finite-bit-steps-20261107-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "0df58f11bb68216960a3c35aac9f5395e94c79e78bbb8b11fcb83e18b041fead",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-finite-bit-steps-20261107-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "cfc8a66881dfd69a975118f56754aae226d4654af16417898178eedb7a375b88",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-finite-bit-steps-20261107-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "042c843b8d71a22950105fcd7455121a4d4dba1eb92c94cb720ffaee230b7882",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-finite-bit-steps-20261107-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "81d978d9aa1b0b15cfa5e4f3e5c45ece72e8bc1b280ec3bf06fd81a181213fcd",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-finite-bit-steps-20261107-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "3f70a0382ed0c1bf505d0ab0f7a634eb617d526e7d8caf8788f381fa50ebb385",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-finite-bit-steps-20261107-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "2c7e200fd246e1aff7bed537a292531566fe7a9f38dc09fbd783b9a2dc1a477b",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-finite-bit-steps-20261107-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "9c392a19e1f3e58a30455b63e4ca824af1c8e85e459eef197fafac1575088996",
+    "archive": "benchmarks/results/remaining-indicators/hilbert-finite-bit-steps-20261107-report-integration/updated-pair-details.png.gz"
+  }
+}

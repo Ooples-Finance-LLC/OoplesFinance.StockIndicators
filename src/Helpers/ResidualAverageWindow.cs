@@ -6,9 +6,11 @@ internal sealed class ResidualAverageWindow : IDisposable
     private readonly StrengthAverage _mean;
     private readonly StrengthAverage[] _stages;
     internal ResidualAverageWindow(MovingAvgType meanKind, int meanLength, MovingAvgType smoothingKind, params int[] lengths)
+        : this(meanKind, meanLength, smoothingKind, lengths, int.MaxValue) { }
+    internal ResidualAverageWindow(MovingAvgType meanKind, int meanLength, MovingAvgType smoothingKind, int[] lengths, int capacityHint)
     {
-        _mean = new StrengthAverage(meanKind, meanLength);
-        _stages = lengths.Select(length => new StrengthAverage(smoothingKind, length)).ToArray();
+        _mean = new StrengthAverage(meanKind, meanLength, capacityHint);
+        _stages = lengths.Select(length => new StrengthAverage(smoothingKind, length, capacityHint)).ToArray();
     }
     internal (double Value, double Signal) Next(double value, bool commit)
     {

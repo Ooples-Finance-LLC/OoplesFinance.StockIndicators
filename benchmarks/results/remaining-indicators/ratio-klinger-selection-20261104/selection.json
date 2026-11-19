@@ -1,0 +1,42 @@
+{
+  "status": "Conditional combined source preparation; final ratio workflow success and fresh combined correctness/GPU100/timing required",
+  "baseline": "b33d8494f96364b9bccb02ad6dd1d590b2df8d03",
+  "members": [
+    {
+      "name": "prior-directional-ratios-20261104",
+      "run_id": "41870750086",
+      "source": "c7fab5d9313e876e729b072e9eb4fb0a6ab93e3d",
+      "paths": [
+        "src/Indicators/PriorSeededDirectionalMeasure.cs",
+        "tests/ModelsTests/PriorDirectionalRatioTests.cs"
+      ],
+      "verdicts": {
+        "inconclusive": 21,
+        "faster": 21
+      }
+    },
+    {
+      "name": "klinger-private-blend-20261104",
+      "run_id": "41870055383",
+      "source": "de72a017dd66e7d0c1efa017d657ca67a6b14e19",
+      "paths": [
+        "src/Indicators/KlingerVolumeWithSignal.cs",
+        "tests/ModelsTests/KlingerPrivateBlendTests.cs"
+      ],
+      "verdicts": {
+        "faster": 5,
+        "inconclusive": 1
+      }
+    }
+  ],
+  "source_paths": [
+    "src/Indicators/PriorSeededDirectionalMeasure.cs",
+    "tests/ModelsTests/PriorDirectionalRatioTests.cs",
+    "src/Indicators/KlingerVolumeWithSignal.cs",
+    "tests/ModelsTests/KlingerPrivateBlendTests.cs"
+  ],
+  "expected_unit": 64,
+  "expected_comparator": 38,
+  "expected_cases": 240,
+  "expected_decisions": 48
+}

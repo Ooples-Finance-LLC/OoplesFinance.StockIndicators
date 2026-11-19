@@ -1,0 +1,24 @@
+{
+  "source_integration_commit": "de03a42c66d37327154c63c6336c013a5cc36e8d",
+  "qualified_source": "62523462a7339ad6c7369ab6ab06d9b49dfcf88b",
+  "compiled_source": "b7d8eafcdf87ac2091b8cb8e619406b2a1473e98",
+  "source_fingerprint": "5eb39c86d1d3b4a41571d10818ad4f6799ca47091f99e4a3f307ce81e6294b36",
+  "unit": 14,
+  "comparator": 69,
+  "actual_gpu": 100,
+  "production_sha256": "e5ee21bd5708383ef23aba78fc7cf621216a4dc92bfb23366a1512480e034713",
+  "run_id": "43486167503",
+  "cases": 150,
+  "decisions": 30,
+  "verdicts": {
+    "faster": 17,
+    "inconclusive": 13
+  },
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.BoundedBatch.cs",
+    "src/Indicators/ValuesBarExecution.BoundedWindows.cs",
+    "src/Indicators/ValuesBarExecution.RangeDoji.cs",
+    "tests/ModelsTests/DojiRegionPoolTests.cs"
+  ],
+  "verified_utc": "2026-11-13T20:17:14.222988+00:00"
+}

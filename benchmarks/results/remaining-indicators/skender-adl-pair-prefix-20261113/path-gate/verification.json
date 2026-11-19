@@ -1,0 +1,76 @@
+{
+  "accepted": true,
+  "source": "94cb6d6fa0bdb247f7a7f7153947808342b3631c",
+  "production_sha256": "94176b27549ad9c690a78483d42b32c5146fe21e99161edb23bfcb18162eac44",
+  "source_fingerprint": "19604e8c01ae5901068b418a0d5741b9bed9e610941022e1477171d38e4f548f",
+  "pair": "Skender.GetAdl",
+  "bars": 10000,
+  "optimized_callers": [
+    {
+      "header": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:FillAccumulationDistribution(OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.AccumulationDistributionWithAverage,System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer):OoplesFinance.StockIndicators.Indicators.Bar (Tier1-OSR)",
+      "code_bytes": 5117
+    },
+    {
+      "header": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:FillIdentityAdlPair(double[][],System.Threading.CancellationToken) (Tier1-OSR)",
+      "code_bytes": 257
+    },
+    {
+      "header": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:FillAccumulationDistribution(OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.AccumulationDistributionWithAverage,System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer):OoplesFinance.StockIndicators.Indicators.Bar (Tier1-OSR)",
+      "code_bytes": 5146
+    },
+    {
+      "header": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:FillIdentityAdlPair(double[][],System.Threading.CancellationToken) (Tier1-OSR)",
+      "code_bytes": 257
+    },
+    {
+      "header": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:FillAccumulationDistribution(OoplesFinance.StockIndicators.Indicators.Bar[],double[][],OoplesFinance.StockIndicators.Indicators.AccumulationDistributionWithAverage,System.Threading.CancellationToken,OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer):OoplesFinance.StockIndicators.Indicators.Bar (Tier1)",
+      "code_bytes": 10876
+    },
+    {
+      "header": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution:FillIdentityAdlPair(double[][],System.Threading.CancellationToken) (Tier1)",
+      "code_bytes": 226
+    }
+  ],
+  "pair_prefix_sample_weight_ms": 403.303293580997,
+  "actual_public_call_ancestry": [
+    "Process64 pwsh (50448) Args:  -NoProfile -File .\\profile-native-gaps-perfview-20261113.ps1 -Pair Skender.GetAdl -Runtime C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-skender-adl-pair-prefix-20261113\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0 -Expected 94176b27549ad9c690a78483d42b32c5146fe21e99161edb23bfcb18162eac44 -Seconds 20 ",
+    "(Non-Activities)",
+    "Threads",
+    "Thread (26628)",
+    "System.Private.CoreLib!System.Threading.ExecutionContext.RunInternal(class System.Threading.ExecutionContext,class System.Threading.ContextCallback,class System.Object)",
+    "System.Private.CoreLib!System.Threading.Thread+StartHelper.Callback(class System.Object)",
+    "System.Management.Automation!System.Management.Automation.Runspaces.PipelineThread.WorkerProc()",
+    "System.Management.Automation!System.Management.Automation.Runspaces.LocalPipeline.InvokeThreadProc()",
+    "System.Management.Automation!System.Management.Automation.Runspaces.LocalPipeline.InvokeHelper()",
+    "System.Management.Automation!System.Management.Automation.Internal.PipelineProcessor.SynchronousExecuteEnumerate(class System.Object)",
+    "System.Management.Automation!System.Management.Automation.Internal.PipelineProcessor.DoCompleteCore(class System.Management.Automation.CommandProcessorBase)",
+    "System.Management.Automation!System.Management.Automation.CommandProcessorBase.DoComplete()",
+    "System.Management.Automation!System.Management.Automation.DlrScriptCommandProcessor.Complete()",
+    "System.Management.Automation!System.Management.Automation.DlrScriptCommandProcessor.RunClause(class System.Action`1<class System.Management.Automation.Language.FunctionContext>,class System.Object,class System.Object)",
+    "System.Management.Automation!System.Management.Automation.Interpreter.LightLambda.RunVoid1(!!0)",
+    "System.Management.Automation!System.Management.Automation.Interpreter.Interpreter.Run(class System.Management.Automation.Interpreter.InterpretedFrame)",
+    "System.Management.Automation!System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(class System.Management.Automation.Interpreter.InterpretedFrame)",
+    "System.Management.Automation!System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(class System.Management.Automation.Interpreter.InterpretedFrame)",
+    "System.Management.Automation!System.Management.Automation.Interpreter.DynamicInstruction`6[System.__Canon,System.__Canon,System.__Canon,System.__Canon,System.__Canon,System.__Canon].Run(class System.Management.Automation.Interpreter.InterpretedFrame)",
+    "System.Linq.Expressions!System.Dynamic.UpdateDelegates.UpdateAndExecute5(class System.Runtime.CompilerServices.CallSite,!!0,!!1,!!2,!!3,!!4)",
+    "Anonymously Hosted DynamicMethods Assembly!dynamicClass.CallSite.Target(pMT: 00007FFED80DD0B8,pMT: 00007FFED7BF8170,pMT: 00007FFED78280E8,class System.Object,class System.Object,class System.Object,class System.Object)",
+    "0ak43uat.zgs!NativeGapProfile.Run(class System.String,class System.String,int32,int32)",
+    "Anonymously Hosted DynamicMethods Assembly!dynamicClass.lambda_method17(pMT: 00007FFED80DD0B8)",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.ComparisonPair.Ooples(class OoplesFinance.StockIndicators.CompetitorBenchmarks.CompetitorData,int32)",
+    "OoplesFinance.StockIndicators.CompetitorBenchmarks!OoplesFinance.StockIndicators.CompetitorBenchmarks.AccumulationDistributionComparison.OoplesDetails(class OoplesFinance.StockIndicators.CompetitorBenchmarks.CompetitorData,value class System.Nullable`1<int32>)",
+    "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Builder.StockIndicatorBuilder+<BuildWithHistoryAsync>d__68.MoveNext()",
+    "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.Execute(value class OoplesFinance.StockIndicators.Indicators.Bar[],class System.Collections.Generic.IReadOnlyList`1<class OoplesFinance.StockIndicators.Indicators.IIndicator>,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.OwnedBarHistory,class OoplesFinance.StockIndicators.Indicators.TensorsGpuExecution)",
+    "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.FillAccumulationDistribution(value class OoplesFinance.StockIndicators.Indicators.Bar[],float64[][],class OoplesFinance.StockIndicators.Indicators.AccumulationDistributionWithAverage,value class System.Threading.CancellationToken,class OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+    "OoplesFinance.StockIndicators!OoplesFinance.StockIndicators.Indicators.ValuesBarExecution.FillIdentityAdlPair(float64[][],value class System.Threading.CancellationToken)"
+  ],
+  "trace_sha256": "5299718972d1b4c5bda2c76ed58e94835c29a2e9b89839b014d977b36e19cdae",
+  "trace_file": "skender-adl-pair-prefix-path-20261113.nettrace",
+  "trace_conversion": "Actual PerfView NetperfToSpeedScope conversion passed",
+  "window_ms": [
+    9190.007868749999,
+    25190.00786875
+  ],
+  "performance_evidence": false,
+  "limitations": "Sampled thread-time and actual optimized call reachability only; no kernel CPU percentage, speedup or native closure claim.",
+  "command": "dotnet-trace collect --profile dotnet-sampled-thread-time --output skender-adl-pair-prefix-path-20261113.nettrace -- pwsh -NoProfile -File profile-driver.ps1 -Pair Skender.GetAdl -Runtime <verified candidate net10.0 runtime> -Expected 94176b27549ad9c690a78483d42b32c5146fe21e99161edb23bfcb18162eac44 -Seconds 20"
+}

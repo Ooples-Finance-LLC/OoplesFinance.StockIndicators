@@ -1,0 +1,27 @@
+{
+  "status": "root-independent-full-qualification-authentication-passed",
+  "run_id": "44357379290",
+  "head": "f57f39fb1379acfd7497d562b495cb9aba7f8ae9",
+  "plan_sha256": "b00904a2ae5a3c534cde95f24f8be7f2b4555645fa7f748c2d14835693f95402",
+  "artifact_id": 14453554966,
+  "artifact_zip_sha256": "4e285aad145a211a3f2ef644e2a35ba5b8648bde632f860f098a5b29612eb99c",
+  "summary_sha256": "da26977f3894f83c515b11339599f659fc0122d085d67b70297c6b6cdaee78a7",
+  "verified_zip_files": 1092,
+  "independent_recollection_matches": true,
+  "cases": 60,
+  "decisions": 12,
+  "verdicts": {
+    "faster": 4,
+    "inconclusive": 8
+  },
+  "source_gate_passed": true,
+  "native_progress_gate_passed": true,
+  "new_10000_native_wins": [
+    "Skender.GetUltimate"
+  ],
+  "qualified_candidate_native_wins": 1,
+  "production_integrated": false,
+  "report_imported": false,
+  "published_closure_credit": 0,
+  "overall_goal_complete": false
+}

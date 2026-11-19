@@ -1,0 +1,42 @@
+{
+  "batch": "generated-true-strength",
+  "types": [
+    "Tsi",
+    "TrueStrengthIndex",
+    "ErgodicTrueStrengthIndexV1",
+    "SMIErgodicIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share existing EMA StrengthWindow stages and the rounded StrengthAverage signal. Preserve two-stage TSI/SMI and three-stage ergodic arithmetic, default/custom signal lengths, bounded histories, and graph fallback for supplied averages.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 45,
+    "fixture_passed": 16,
+    "gpu_passed": 100,
+    "contract_methods": 1350,
+    "hosted_methods": 1338,
+    "unit_trx_sha256": "e7e416195d4e6d8fd4aaaf94db0c09620a462b9db3d9f69d2b083102a3a2abfa",
+    "fixture_trx_sha256": "2cf99cc49bc02421e8c9cca04d1168c0d8f4f24f5ea2878d986f4b602f53e058",
+    "discovery_passed": 19,
+    "selected_comparator_passed": 35,
+    "comparator_isolation": "Release comparator built into a separate output directory while the earlier Klinger validation continued. Production DLL hashes matched source, unit and benchmark outputs. GPU TRX and source fingerprint verified by the repository verifier."
+  },
+  "benchmark_fixture": {
+    "type": "RemainingTrueStrengthBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

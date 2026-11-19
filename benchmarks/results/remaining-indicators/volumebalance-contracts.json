@@ -1,0 +1,41 @@
+{
+  "batch": "volumebalance-shared-execution",
+  "types": [
+    "UpsideDownsideVolume",
+    "TFSVolumeOscillator",
+    "VolumeAccumulationOscillator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Route three single-output facades through the existing exact VolumeBalanceWindow with original candle fields; preserve direction comparisons, partial-window divisors, pooled ring ownership and reset/disposal.",
+  "verification": {
+    "unit_passed": 120,
+    "fixture_passed": 12,
+    "discovery_passed": 65,
+    "gpu_passed": 100,
+    "contract_methods": 1400,
+    "hosted_methods": 1388,
+    "evidence": [
+      {
+        "file": "volumebalance-unit.trx.gz",
+        "passed_cases": 120,
+        "trx_sha256": "3d6eff6627234e6a3c79f0a9d9dd19fbaa0d2985aac435cf0dd9de9e7aab9006"
+      },
+      {
+        "file": "volumebalance-fixture.trx.gz",
+        "passed_cases": 77,
+        "trx_sha256": "5d9aae4d975db8cabff03121b8f89d85bba47e3d25dc223f9aa5ae8b1eb83e4d"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVolumeBalanceBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "UpsideDownsideVolume",
+      "TFSVolumeOscillator",
+      "VolumeAccumulationOscillator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

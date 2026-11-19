@@ -1,0 +1,24 @@
+{
+  "source_integration_commit": "e569c5740f450b2782f07ef4caecf191cfdf61a0",
+  "qualified_source": "dd71bb35ecea4a14d2f9e5055212c48674b0526d",
+  "compiled_source": "d94cca49038d85b1d306fd51797c01d8a2820613",
+  "source_fingerprint": "d96c23af5e1b48cb0735cdf3374b4d7b02fb5981b87eb4658d78cdc235003dd2",
+  "unit": 20,
+  "comparator": 25,
+  "actual_gpu": 100,
+  "production_sha256": "a8af4df2b6e2bf4c8f88534a24fbd3dcdfce50c6f7fef54276c64b1e0077e493",
+  "run_id": "42616750530",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 5,
+    "faster": 1
+  },
+  "integrated_paths": [
+    "src/Helpers/ExactMeanAccumulator.CachedWordMean.cs",
+    "src/Helpers/ExactMeanAccumulator.cs",
+    "src/Indicators/ValuesBarExecution.AccumulationDistribution.cs",
+    "tests/ModelsTests/CachedWordAccumulationMeanTests.cs"
+  ],
+  "verified_utc": "2026-11-09T13:14:30.013033+00:00"
+}

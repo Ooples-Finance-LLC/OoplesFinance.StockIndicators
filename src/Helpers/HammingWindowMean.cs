@@ -8,7 +8,7 @@ internal sealed class HammingWindowMean : IDisposable
     private readonly ExactMeanAccumulator _denominator;
     private readonly PooledRingBuffer<double> _values;
 
-    internal HammingWindowMean(int length, double pedestal)
+    internal HammingWindowMean(int length, double pedestal, int capacityHint = int.MaxValue)
     {
         if (double.IsNaN(pedestal) || double.IsInfinity(pedestal)) throw new ArgumentOutOfRangeException(nameof(pedestal));
         length = Math.Max(1, length);
@@ -26,7 +26,7 @@ internal sealed class HammingWindowMean : IDisposable
             denominator.Add(weight);
         }
         _denominator = denominator;
-        _values = new PooledRingBuffer<double>(length);
+        _values = new PooledRingBuffer<double>(Math.Min(length, Math.Max(1, capacityHint)));
     }
 
     internal double Next(double value, bool commit)

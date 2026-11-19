@@ -1,0 +1,35 @@
+{
+  "types": [
+    "RapidRelativeStrengthIndex",
+    "StochRsi",
+    "StochasticRsiOscillator",
+    "StochasticRelativeStrengthIndex"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "8e920133f7a29cd6c174c54c6cd1165c7b1b9ce3",
+  "combined_input_sha256": "85838e39584dcb761ca0f27ed9b216058aab0f5323480a1da020c51df45658a5",
+  "benchmark_fixture": {
+    "type": "RemainingRsiFollowupsBenchmarks",
+    "operations": [
+      "RapidRelativeStrengthIndex",
+      "StochRsi",
+      "StochasticRsiOscillator",
+      "StochasticRelativeStrengthIndex"
+    ]
+  },
+  "checks": {
+    "unit": 423,
+    "parity": 16,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/rsi-followups-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/rsi-followups-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

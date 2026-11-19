@@ -1,0 +1,211 @@
+[
+  {
+    "Time": "2026-10-18T06:18:23.7016231Z",
+    "Processes": [
+      {
+        "ProcessId": 2292,
+        "ParentProcessId": 15116,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.402\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false",
+        "CreationTime": "2026-10-18T05:41:15.7961660Z",
+        "CpuSeconds": 35.84375
+      },
+      {
+        "ProcessId": 6396,
+        "ParentProcessId": 15188,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.402\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false",
+        "CreationTime": "2026-10-18T06:00:54.2134950Z",
+        "CpuSeconds": 10.203125
+      },
+      {
+        "ProcessId": 7088,
+        "ParentProcessId": 28428,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-18T06:00:54.2186550Z",
+        "CpuSeconds": 0.03125
+      },
+      {
+        "ProcessId": 10208,
+        "ParentProcessId": 32208,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-18T05:38:25.3268410Z",
+        "CpuSeconds": 0.015625
+      },
+      {
+        "ProcessId": 13512,
+        "ParentProcessId": 28504,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-18T05:41:15.8052910Z",
+        "CpuSeconds": 0.015625
+      },
+      {
+        "ProcessId": 17696,
+        "ParentProcessId": 2292,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-18T05:41:15.8052710Z",
+        "CpuSeconds": 0.015625
+      },
+      {
+        "ProcessId": 20316,
+        "ParentProcessId": 30248,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.402\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false",
+        "CreationTime": "2026-10-18T05:44:08.9673220Z",
+        "CpuSeconds": 15.0
+      },
+      {
+        "ProcessId": 20920,
+        "ParentProcessId": 29108,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-18T06:00:53.8871640Z",
+        "CpuSeconds": 0.015625
+      },
+      {
+        "ProcessId": 26876,
+        "ParentProcessId": 22868,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.402\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false",
+        "CreationTime": "2026-10-18T05:41:11.3134980Z",
+        "CpuSeconds": 17.1875
+      },
+      {
+        "ProcessId": 28428,
+        "ParentProcessId": 15188,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.402\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false",
+        "CreationTime": "2026-10-18T06:00:54.2135400Z",
+        "CpuSeconds": 8.609375
+      },
+      {
+        "ProcessId": 28504,
+        "ParentProcessId": 15116,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.402\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false",
+        "CreationTime": "2026-10-18T05:41:15.7961910Z",
+        "CpuSeconds": 12.359375
+      },
+      {
+        "ProcessId": 28692,
+        "ParentProcessId": 6396,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-18T06:00:54.2191590Z",
+        "CpuSeconds": 0.015625
+      },
+      {
+        "ProcessId": 29108,
+        "ParentProcessId": 15188,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.402\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false",
+        "CreationTime": "2026-10-18T06:00:53.8795800Z",
+        "CpuSeconds": 6.453125
+      },
+      {
+        "ProcessId": 30596,
+        "ParentProcessId": 15188,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.402\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false",
+        "CreationTime": "2026-10-18T06:00:54.2135780Z",
+        "CpuSeconds": 4.34375
+      },
+      {
+        "ProcessId": 31760,
+        "ParentProcessId": 30596,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-18T06:00:54.2191420Z",
+        "CpuSeconds": 0.015625
+      },
+      {
+        "ProcessId": 32208,
+        "ParentProcessId": 22948,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\sdk\\10.0.402\\Roslyn\\bincore\\VBCSCompiler.exe\" \"-pipename:_TSs8qU62pVGWK32Eygkn5cCjlvgXHhKDpTp8uWOITg\"",
+        "CreationTime": "2026-10-18T05:38:25.3112210Z",
+        "CpuSeconds": 2355.59375
+      },
+      {
+        "ProcessId": 32508,
+        "ParentProcessId": 34448,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-18T06:00:54.2186440Z",
+        "CpuSeconds": 0.046875
+      },
+      {
+        "ProcessId": 33188,
+        "ParentProcessId": 26876,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-18T05:41:11.3207540Z",
+        "CpuSeconds": 0.015625
+      },
+      {
+        "ProcessId": 33784,
+        "ParentProcessId": 20316,
+        "CommandLine": "\\??\\C:\\WINDOWS\\system32\\conhost.exe 0x4",
+        "CreationTime": "2026-10-18T05:44:08.9726940Z",
+        "CpuSeconds": 0.046875
+      },
+      {
+        "ProcessId": 34448,
+        "ParentProcessId": 15188,
+        "CommandLine": "\"C:\\Program Files\\dotnet\\dotnet.exe\" \"C:\\Program Files\\dotnet\\sdk\\10.0.402\\MSBuild.dll\" /noautoresponse /nologo /nodemode:1 /nodeReuse:true /low:false",
+        "CreationTime": "2026-10-18T06:00:54.2134940Z",
+        "CpuSeconds": 4.578125
+      }
+    ]
+  },
+  {
+    "Time": "2026-10-18T06:18:38.9331461Z",
+    "Processes": []
+  },
+  {
+    "Time": "2026-10-18T06:18:54.1448387Z",
+    "Processes": []
+  },
+  {
+    "Time": "2026-10-18T06:19:09.3832477Z",
+    "Processes": []
+  },
+  {
+    "Time": "2026-10-18T06:19:24.6002169Z",
+    "Processes": []
+  },
+  {
+    "Time": "2026-10-18T06:19:39.7970374Z",
+    "Processes": []
+  },
+  {
+    "Time": "2026-10-18T06:19:55.0214611Z",
+    "Processes": []
+  },
+  {
+    "Time": "2026-10-18T06:20:10.2319815Z",
+    "Processes": []
+  },
+  {
+    "Time": "2026-10-18T06:20:25.4296176Z",
+    "Processes": []
+  },
+  {
+    "Time": "2026-10-18T06:20:40.6505705Z",
+    "Processes": []
+  },
+  {
+    "Time": "2026-10-18T06:20:55.8297205Z",
+    "Processes": []
+  },
+  {
+    "Time": "2026-10-18T06:21:11.0579117Z",
+    "Processes": []
+  },
+  {
+    "Time": "2026-10-18T06:21:26.3810114Z",
+    "Processes": []
+  },
+  {
+    "Time": "2026-10-18T06:21:41.5816663Z",
+    "Processes": []
+  },
+  {
+    "Time": "2026-10-18T06:21:57.9765448Z",
+    "Processes": []
+  },
+  {
+    "Time": "2026-10-18T06:22:13.5583181Z",
+    "Processes": []
+  },
+  {
+    "Time": "2026-10-18T06:22:29.2257782Z",
+    "Processes": []
+  }
+]

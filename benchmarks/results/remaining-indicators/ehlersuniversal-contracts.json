@@ -1,0 +1,41 @@
+{
+  "batch": "ehlers-universal-family-shared-execution",
+  "types": [
+    "EhlersUniversalOscillator",
+    "EhlersUniversalTradingFilter",
+    "EhlersSnakeUniversalTradingFilter"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact universal oscillator and universal trading kernels to publish related outputs together; preserve hidden signal9, distinct Snake output order, independent smoothing/RMS periods, finite parameter eligibility, source/component fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 64,
+    "fixture_passed": 12,
+    "discovery_passed": 162,
+    "gpu_passed": 100,
+    "contract_methods": 1503,
+    "hosted_methods": 1491,
+    "evidence": [
+      {
+        "file": "ehlersuniversal-unit.trx.gz",
+        "passed_cases": 64,
+        "trx_sha256": "973cb1a1c051973b1d3ab7af3f1695f74b83f6637e53233c70b6d67ab7c4a8b4"
+      },
+      {
+        "file": "ehlersuniversal-fixture.trx.gz",
+        "passed_cases": 174,
+        "trx_sha256": "4f35cb5d0bdb77c351c7b199848687cb1f233e82cd194790d28b970a10ecc6e8"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingEhlersUniversalBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersUniversalOscillator",
+      "EhlersUniversalTradingFilter",
+      "EhlersSnakeUniversalTradingFilter"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -9,6 +9,43 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class DeviationAverageSharedExecutionTests
 {
     [Fact]
+    public void FilterCertificateMatchesIndependentExactProductsAcrossScales()
+    {
+        var random = new Random(31107);
+        int certified = 0;
+        for (int i = 0; i < 2000; i++)
+        {
+            int exponent = i % 801 - 400;
+            double a = Math.ScaleB(random.NextDouble() * 2 - 1, exponent);
+            double c = Math.ScaleB(random.NextDouble() * 2 - 1, exponent);
+            double e = Math.ScaleB(random.NextDouble() * 2 - 1, exponent);
+            double b = random.NextDouble(), d = random.NextDouble() * 2 - 1, f = -random.NextDouble();
+            if (!ValuesBarExecution.TryDeviationFilterSum(a, b, c, d, e, f, out double actual)) continue;
+            certified++;
+            var exact = new ExactMeanAccumulator();
+            exact.AddProduct(a, b); exact.AddProduct(c, d); exact.AddProduct(e, f);
+            Assert.Equal(BitConverter.DoubleToInt64Bits(exact.Mean(1)), BitConverter.DoubleToInt64Bits(actual));
+        }
+        Assert.True(certified > 1500, $"Only {certified}/2000 filter sums certified.");
+        foreach (double value in new[] { double.Epsilon, double.MaxValue })
+            Assert.False(ValuesBarExecution.TryDeviationFilterSum(value, 1, 0, 1, 0, 1, out _));
+        Assert.False(ValuesBarExecution.TryDeviationFilterSum(1, 1, -1, 1, 0, 1, out _));
+        Assert.False(ValuesBarExecution.TryDeviationFilterSum(1, 1, Math.ScaleB(1d, -53), 1, 0, 1, out _));
+    }
+
+    [Theory]
+    [InlineData(2)] [InlineData(20)] [InlineData(256)]
+    public async Task FilterCertificateAndFallbackTransitionsPreserveExactHistory(int period)
+    {
+        foreach (int exponent in new[] { -500, -200, 0, 200, 500 })
+        {
+            var bars = Enumerable.Range(0, 257).Select(i => new Bar(default, 0, 0, 0,
+                Math.ScaleB(i % 31 < 15 ? 100 + (i * 13 % 101) / 8d : (i % 7 - 3) * .125, exponent), 0)).ToArray();
+            await Check(bars, period, .9);
+        }
+    }
+
+    [Fact]
     public void RootCertificatePreservesMidpointTiesAndPowerOfTwoSpacing()
     {
         foreach (ulong midpoint in new[] { (1UL << 53) - 1, (1UL << 53) + 1,

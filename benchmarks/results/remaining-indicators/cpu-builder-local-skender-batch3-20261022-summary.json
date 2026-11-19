@@ -1,0 +1,22 @@
+{
+  "run_id": "local-skender-batch3-20261022",
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/blob/5a1166117403b5d25734e47cd66749c740feecfa/benchmarks/results/remaining-indicators/local-skender-batch3-20261022/manifest.json",
+  "source_sha": "eb9d6058b009f526ecd9c89c1b76eaee9e1fcadc",
+  "receipt_files": [
+    "cpu-builder-local-skender-batch3-20261022-SharedSkenderAtrFamilyBenchmarks.json",
+    "cpu-builder-local-skender-batch3-20261022-SharedSkenderSmoothingBenchmarks.json",
+    "cpu-builder-local-skender-batch3-20261022-SharedSkenderStatisticsBenchmarks.json"
+  ],
+  "comparisons": 44,
+  "verdicts": {
+    "slower": 32,
+    "inconclusive": 1,
+    "faster": 11
+  },
+  "changed_production_files_since_baseline": [
+    "src/Helpers/CertifiedMeanRelativeError.cs",
+    "src/Indicators/CompensatedExponentialAverage.cs"
+  ],
+  "measurement_location": "Local Windows; CPU builder and native paths; unchanged setup checks",
+  "raw_archive_commit": "5a1166117403b5d25734e47cd66749c740feecfa"
+}

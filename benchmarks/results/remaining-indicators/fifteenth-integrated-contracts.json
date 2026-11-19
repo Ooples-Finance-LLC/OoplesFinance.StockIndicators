@@ -1,0 +1,68 @@
+{
+  "types": [
+    "SimpleLines",
+    "SentimentZoneOscillator",
+    "RandomWalkIndex",
+    "RSINGIndicator",
+    "SellGravitationIndex",
+    "RainbowOscillator",
+    "SchaffTrendCycle",
+    "SchaffTrendCycleShk",
+    "StationaryExtrapolatedLevels",
+    "StationaryExtrapolatedLevelsOscillator",
+    "SettingLessTrendStepFiltering",
+    "SqueezeMomentumIndicator",
+    "SharpModifiedMovingAverage",
+    "SequentiallyFilteredMovingAverage",
+    "ReversalPoints",
+    "ShapeshiftingMovingAverage"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "base_head": "057d89bac524da6bc3781adb252c4bdeb741e877",
+  "combined_input_sha256": "1be687fe8217c5c0a6b13e102b375cf6f7812dc949426d1f1443e57028ccc868",
+  "manifest_sha256": "b8bc54357e779831f005a8b3cc6acc38ce2c864374e8de11b6d7959e0d8ec79f",
+  "unit_class_counts": {
+    "SharedGeneratedLineSentimentTests": 42,
+    "SharedGeneratedWalkRainbowTests": 68,
+    "SharedGeneratedSchaffPairTests": 81,
+    "SharedGeneratedStationaryPairTests": 34,
+    "SharedGeneratedStepAndSqueezeTests": 32,
+    "SharedGeneratedSharpRollingTests": 18,
+    "SharedGeneratedSequentialStreakTests": 75,
+    "SharedGeneratedReversalBoundedTests": 18,
+    "SharedGeneratedShapeshiftingWeightsTests": 17
+  },
+  "parity_class_counts": {
+    "RemainingLineSentimentBenchmarkTests": 8,
+    "RemainingWalkRainbowBenchmarkTests": 16,
+    "RemainingSchaffPairBenchmarkTests": 8,
+    "RemainingStationaryPairBenchmarkTests": 8,
+    "RemainingStepAndSqueezeBenchmarkTests": 8,
+    "RemainingSharpRollingBenchmarkTests": 4,
+    "RemainingSequentialStreakBenchmarkTests": 4,
+    "RemainingReversalBoundedBenchmarkTests": 4,
+    "RemainingShapeshiftingWeightsBenchmarkTests": 4
+  },
+  "unique_check_counts": {
+    "unit": 385,
+    "finite_smoothing": 0,
+    "parity": 64,
+    "discovery": 308,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/fifteenth-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/fifteenth-integrated-parity.trx.gz",
+    "benchmarks/results/remaining-indicators/fifteenth-integrated-discovery.trx.gz"
+  ],
+  "production_sha256": "6636252a9a051c7a1c5afe18e57bdabb71a609065ad8d594cfc15a3b98d4e303",
+  "fixture_sha256": "2430f971d1b7e6f6204ad8d23875c32826cfe6d9610941de8f1882b17ec8d89a",
+  "input_repairs": [],
+  "context": "Fresh scoped checks on combined working candidate. Selective commits are not separately rebuilt; source fingerprint identifies tested composition. Earlier numerical repairs retained.",
+  "pending": [
+    "controlled raw timing",
+    "remaining rollout"
+  ]
+}

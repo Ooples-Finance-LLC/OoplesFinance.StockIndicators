@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "fe7248780365eecefe7fb69f14d603d00ab5d961b2f4ee7aeb92e5da8330f9ad",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-typed-writer-20261113-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "24b7bde9cbd9b46664ff682cd4aab647607c240c22ee2c74d4fdb4e3a9b63703",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-typed-writer-20261113-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "9283b043cf634aa5013f51eeec0123ba7fa7d6e20dafa7f06f0eda4b88b0d81c",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-typed-writer-20261113-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "2a2b6701d74a3e3d221c240481ec5e1254e538c355506cc1fe7b640aa027cd5f",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-typed-writer-20261113-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "b36803a462bfb4153a5b01f4f6d6fbb22337627d7e65ec4a5ca13bb9537e3f3a",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-typed-writer-20261113-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "465bcb912d49712ed07f39083f15a6c9dd7dad32b5dfa536f83fad238788edc3",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-typed-writer-20261113-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "279dddeda3ad75684951f78290c4bc18c701c78aec6642e583631a44c5922a6e",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-typed-writer-20261113-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "01ecdd157d8c6a7b750475b6ff1082a4d7f829ee8dbe174d683f143e8c93e81c",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-typed-writer-20261113-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "5f0d5402809db45afbdf9eb7e170d430e1892bda061693c78d1cdde3ced29f32",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-typed-writer-20261113-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "42236ba306ebf4c863258a7c85b4d7925c0fc0e725aa2aa403dc176c2537e8c8",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-typed-writer-20261113-report-integration/updated-pair-details.png.gz"
+  }
+}

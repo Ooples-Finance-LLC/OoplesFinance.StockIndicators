@@ -1,0 +1,506 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "5c35b53f058c98fee0ee2417d5f5b7c53b4b13e4",
+    "new": "1e4f9c0a4297a6134bedf1aa1656df3aa3f0d009"
+  },
+  "candidate_code_source": "4b479a6759bf123185c64b44c1aabf2ee980c77a",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.ThreeInside",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.03650384765625,
+        0.0373700927734375
+      ],
+      "new_means_ms": [
+        0.029751500108506947,
+        0.0306576171875
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.ThreeInside",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.031048638916015624,
+        0.03138203369140625
+      ],
+      "new_means_ms": [
+        0.02717480712890625,
+        0.02590703125
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.ThreeInside",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.257312890625,
+        0.24802021484375
+      ],
+      "new_means_ms": [
+        0.2126804296875,
+        0.21184139539930555
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.ThreeInside",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.22616063368055556,
+        0.21764474826388888
+      ],
+      "new_means_ms": [
+        0.1821098828125,
+        0.18293615234375
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.TwoCrows",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.027418017578125,
+        0.02700027099609375
+      ],
+      "new_means_ms": [
+        0.0297620263671875,
+        0.02818487548828125
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.TwoCrows",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.0236364599609375,
+        0.023363739691840277
+      ],
+      "new_means_ms": [
+        0.024739384765625,
+        0.024265879991319444
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.TwoCrows",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.190559130859375,
+        0.181405302734375
+      ],
+      "new_means_ms": [
+        0.19888478515625,
+        0.19514638671875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.TwoCrows",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.16154921875,
+        0.163302685546875
+      ],
+      "new_means_ms": [
+        0.160329619140625,
+        0.157358212890625
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.UniqueThreeRiver",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.037165740966796874,
+        0.03667401733398438
+      ],
+      "new_means_ms": [
+        0.02928422607421875,
+        0.0317629638671875
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.UniqueThreeRiver",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.03221399739583333,
+        0.03189687771267361
+      ],
+      "new_means_ms": [
+        0.02577282986111111,
+        0.025849905056423608
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.UniqueThreeRiver",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.2624250651041667,
+        0.2537537651909722
+      ],
+      "new_means_ms": [
+        0.20857120225694445,
+        0.2015089453125
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.UniqueThreeRiver",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.2270855712890625,
+        0.2242501953125
+      ],
+      "new_means_ms": [
+        0.1820919921875,
+        0.1828234619140625
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.UpsideGapTwoCrows",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.03854775634765625,
+        0.03554748046875
+      ],
+      "new_means_ms": [
+        0.02842927001953125,
+        0.0299817724609375
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.UpsideGapTwoCrows",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.031745361328125,
+        0.03148275282118056
+      ],
+      "new_means_ms": [
+        0.02650411376953125,
+        0.02588107177734375
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.UpsideGapTwoCrows",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.2593019097222222,
+        0.24117515625
+      ],
+      "new_means_ms": [
+        0.20440927734375,
+        0.1924882421875
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "SharedTripleBodyBenchmarks",
+      "pair": "TaLib.Candles.UpsideGapTwoCrows",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.2308979296875,
+        0.230963203125
+      ],
+      "new_means_ms": [
+        0.175056455078125,
+        0.187760107421875
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.ThreeInside",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.9102611111111111,
+        0.8426111111111111
+      ],
+      "new_means_ms": [
+        0.61643,
+        0.61899
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.ThreeInside",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.3277111111111111,
+        0.3287555555555556
+      ],
+      "new_means_ms": [
+        0.26208333333333333,
+        0.24787777777777778
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.TwoCrows",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.90133,
+        0.91137
+      ],
+      "new_means_ms": [
+        0.86238,
+        0.96092
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.TwoCrows",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.21615555555555557,
+        0.23219444444444443
+      ],
+      "new_means_ms": [
+        0.2228,
+        0.32377
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.UniqueThreeRiver",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.09147777777777778,
+        0.08155555555555556
+      ],
+      "new_means_ms": [
+        0.0823,
+        0.1132
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.UniqueThreeRiver",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.31907,
+        0.3401666666666667
+      ],
+      "new_means_ms": [
+        0.25515,
+        0.2553722222222222
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.UpsideGapTwoCrows",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.07202777777777779,
+        0.0934
+      ],
+      "new_means_ms": [
+        0.05903888888888889,
+        0.08424444444444444
+      ],
+      "verdict": "inconclusive"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.UpsideGapTwoCrows",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.208975,
+        0.349
+      ],
+      "new_means_ms": [
+        0.257825,
+        0.20056666666666664
+      ],
+      "verdict": "inconclusive"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "dadb159e7b84c124484386b8bffb0d15a230c0fc40418c5f0b63169846098362",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "c3bcbcf5b82d3516a7b03e3db6fde6b10ad291063826c1c8c3d7b97d052ed98e",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "eba69a079e993fcbf7e6133b1d7efc0f31f469a4c203bbea03d623210b93ab26",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "e71b67907e7d9457a3831ad3f789a2abca12cac50270987429fca94bd884a660",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/verified-summary.json.gz"
+    },
+    "round0-old-SharedTripleBodyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json": {
+      "sha256": "3003c85b4254124251b28a9ee84a97d76fbb56667d67bfeed98aa98fe01c313a",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round0-old-SharedTripleBodyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "3ea08eeb96879759853bdc7c0dc365ae1e815461efbe7d6b817ca1106de3c1b0",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedTripleBodyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json": {
+      "sha256": "552ebcc8791529819d75f608a53f976442faa3972924f84d3eb1fd324a5351d7",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round1-new-SharedTripleBodyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "45b4afca82ffd864f9f5f496541c6c4699e3c44013c134502847a449ef36c8ff",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedTripleBodyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json": {
+      "sha256": "77b8a08341fbc85e014710ee683dbd39a87c2f0205ed2911494d43d4199441f5",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round2-new-SharedTripleBodyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "301e5f41005f4b076b05de067182fa91e00bc0fa8a800fba01e15bba7028d3e3",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedTripleBodyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json": {
+      "sha256": "7d48947cd04a11a1b63b0b2f1d94faa31fbfa6b83cc689acfdf106106c38b79c",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round3-old-SharedTripleBodyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "2fe57cd8f76828745bd385d5b0fdb9050262805ed24bca230d3654c9a493fe73",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "71f59a1108b738d4e5682b97fc21fcdb97bb5e550424f6dda2adc69af18a45fc",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round0-old-SharedTripleBodyBenchmarks.log": {
+      "sha256": "60b3e8131c07a4d3492bef3aea8d4ea4c01a8d20d1d43b5f701f44a5e48609e7",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round0-old-SharedTripleBodyBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "525087cb7289dff8ca4f52207bb8c3ab37f0e02a25a53c87f44dc750ca0df86f",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-SharedTripleBodyBenchmarks.log": {
+      "sha256": "7bd40662cfb254a8b43c1e7d8ecfa36cd2c7ff6b61b07bb98232c84b6b0fd58d",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round1-new-SharedTripleBodyBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "b49dc2c4c9a7ea0e4f5e64bf6224c663c52b2741e29a126234164daabc3817e3",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-SharedTripleBodyBenchmarks.log": {
+      "sha256": "5ec20d4b0203e428d7bcf089b9f5e646c2e4945beedbed97917c8cb9a5ddd1e1",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round2-new-SharedTripleBodyBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "0de8f5e9786b7adc7313b701b23d9425e20507236a560132af12b94fecfa71cd",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-SharedTripleBodyBenchmarks.log": {
+      "sha256": "7a2184d7b0c7632a3e229ffee0b2bcdb8bfb558186b1bd97656e8a046b7f5505",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/round3-old-SharedTripleBodyBenchmarks.log.gz"
+    },
+    "invalidated-attempts/20261026T161915172569/interruption.json": {
+      "sha256": "6fcc66ea8cea3be31c3d1e70978eb7b89368d58ccdb4e906000056e1036d9b16",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/invalidated-attempts/20261026T161915172569/interruption.json.gz"
+    },
+    "invalidated-attempts/20261026T161915172569/round0-old-SharedTripleBodyBenchmarks.log": {
+      "sha256": "6bdf63a45e05532eeecda21dc3d258011e456d3c3275d534f22e651ce58b1731",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/invalidated-attempts/20261026T161915172569/round0-old-SharedTripleBodyBenchmarks.log.gz"
+    },
+    "invalidated-attempts/20261026T180752327582/interruption.json": {
+      "sha256": "f636d0dbdd115164ad33fcd265169d0052eb9910d21e0be5611ef80258b72e97",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/invalidated-attempts/20261026T180752327582/interruption.json.gz"
+    },
+    "invalidated-attempts/20261026T180752327582/round0-old-SharedTripleBodyBenchmarks.log": {
+      "sha256": "1a79a37c1d90815fcab8774218a0549862a4dd63189fec5157f262b8e265b1b8",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/invalidated-attempts/20261026T180752327582/round0-old-SharedTripleBodyBenchmarks.log.gz"
+    },
+    "invalidated-attempts/20261026T202039345779/interruption.json": {
+      "sha256": "810da604cd15238d9483f1fdcb4787750e3a7106386a9a3ba15e4fcbdb87444e",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/invalidated-attempts/20261026T202039345779/interruption.json.gz"
+    },
+    "invalidated-attempts/20261026T202039345779/round1-new-SharedTripleBodyBenchmarks.log": {
+      "sha256": "6e2fbe08b04cb2287c4ce29ce2ae9d6d5f40121e02a3ccad7a693746d9fd874c",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/invalidated-attempts/20261026T202039345779/round1-new-SharedTripleBodyBenchmarks.log.gz"
+    },
+    "invalidated-attempts/20261026T202039345779/round1-new-SharedTripleBodyBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-20261026-162028.log": {
+      "sha256": "ffa447c99e28c614fe666338578e38be1daee8a071cb19b9ff055e2af052b7b2",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/invalidated-attempts/20261026T202039345779/round1-new-SharedTripleBodyBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-20261026-162028.log.gz"
+    },
+    "invalidated-attempts/20261026T180752327582/round0-old-SharedTripleBodyBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-20261026-140547.log": {
+      "sha256": "dcb7092ab716046f496641a89b3481871fff347f25f97dce4c320436dc54d19b",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/invalidated-attempts/20261026T180752327582/round0-old-SharedTripleBodyBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-20261026-140547.log.gz"
+    },
+    "invalidated-attempts/20261026T180752327582/round0-old-SharedTripleBodyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-github.md": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/invalidated-attempts/20261026T180752327582/round0-old-SharedTripleBodyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report-github.md.gz"
+    },
+    "invalidated-attempts/20261026T180752327582/round0-old-SharedTripleBodyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report.csv": {
+      "sha256": "3b25c3c7b90871acf3d121cb8e41ff494184cd8f77cb18df8e9b7c61e9bcb365",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/invalidated-attempts/20261026T180752327582/round0-old-SharedTripleBodyBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-report.csv.gz"
+    },
+    "invalidated-attempts/20261026T161915172569/round0-old-SharedTripleBodyBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-20261026-121819.log": {
+      "sha256": "d59db448d37d3e150ea5b44253577cd26684dcbb6a53763cbc8594d4f2fb0887",
+      "archive": "benchmarks/results/remaining-indicators/local-triple-body-equal-sums-control-20261026/invalidated-attempts/20261026T161915172569/round0-old-SharedTripleBodyBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTripleBodyBenchmarks-20261026-121819.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-triple-body-equal-sums-control.py": "ec50283a841f1db0e962d2c8ec04897106efa0e6f2fef18a766f5d2223c974de",
+    "verify-triple-body-equal-sums-control.py": "fe4ce1967ee15136036251e60c933a08eb811a05129178516a0c020e32d316bb"
+  },
+  "report_imported": true,
+  "production_integrated": true,
+  "qualified_source_ref": "refs/heads/perf/qualified-triple-body-equal-sums-20261026",
+  "integration_source_proof": "benchmarks/results/remaining-indicators/triple-body-equal-sums-integration-source-proof-20261026.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/triple-body-equal-sums-certified-local-triple-body-equal-sums-control-20261026-report-import.json"
+}

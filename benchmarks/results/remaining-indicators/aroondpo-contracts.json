@@ -1,0 +1,37 @@
+{
+  "batch": "generated-aroon-dpo",
+  "types": [
+    "Aroon",
+    "Dpo"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Aroon shares two newest-tie close-price deques across its three outputs, replacing repeated backwards extrema scans. DPO retains the existing lookback clamp and rounded SMA with bounded lag storage. AroonUp/Down facades remain separately unqualified.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 30,
+    "fixture_passed": 8,
+    "gpu_passed": 100,
+    "contract_methods": 1339,
+    "hosted_methods": 1327,
+    "unit_trx_sha256": "117208a648437810abd6a17f57fe04f2359b438f136a4d5a219577d0bcb0054f",
+    "fixture_trx_sha256": "8a43ca5ba5b76962c551dc847a2e1d37e6aedc88c7e45401b3c3aa4b9937408a"
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAroonDpoBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 16,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

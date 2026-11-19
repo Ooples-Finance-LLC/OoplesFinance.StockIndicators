@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "75a72b6324d63e07c53be49d9e0e19c837914cfcd0681ace30e47604c1390491",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-ratios-report-integration-20261104/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "3e2b69f73ad2ed7749250ddedfb09199760ef45293d53c3a9f6894227da83fef",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-ratios-report-integration-20261104/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "e8d9990d8d49d376c828607a9e0f3f4ed731afb927141fc45dc1e8d0712fe8df",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-ratios-report-integration-20261104/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "2864caefdac527bd540d801071280374818a4de3c9e5e34803d3b4c2e75b6d1c",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-ratios-report-integration-20261104/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "26a7c06025da07947b2d30de83f339a0455cab78775bdd65e451bbd3751d5c1c",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-ratios-report-integration-20261104/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "2beae630e81844422eb85532c7d57c673fbffd2030bd0525b0e0bb1639123ecc",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-ratios-report-integration-20261104/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "c282858d5f6217e1e8719e5fe5fc9eff36d8b2224c09662ca4e24066fd025bb2",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-ratios-report-integration-20261104/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "89bd8c5e62f66eb2cf6a499997435c300a5c814e0ba07dd8b2ef58e3abe9e822",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-ratios-report-integration-20261104/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "d7fcb202941dc45a7dbbab1ad34c3ddcec38ca119daaa6597b4ec779764a03c6",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-ratios-report-integration-20261104/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "3f64beaac0118e03eeb15249d171e25435eeccd62f328eed22dca9d7be57bef9",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-ratios-report-integration-20261104/updated-pair-details.png.gz"
+  }
+}

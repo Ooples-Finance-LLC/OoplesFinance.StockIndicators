@@ -1,0 +1,194 @@
+{
+  "status": "candidate-qualified-for-integration",
+  "sources": {
+    "old": "ad791d97faeaca1c05dd1c95743e8bcaa566900e",
+    "new": "137971bb99ede907afa22f7e6802f69897720dbd"
+  },
+  "candidate_code_source": "3f074e2b5bc29ce81195e739663a8c4b000f750d",
+  "measurement_location": "Local Windows; preserved source-qualified binaries; only production DLL differs",
+  "decisions": [
+    {
+      "fixture": "SharedSkenderDiagnosticsBenchmarks",
+      "pair": "Skender.GetPrs",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        1.3585025,
+        1.379060625
+      ],
+      "new_means_ms": [
+        0.29259887152777775,
+        0.28455265625
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedSkenderDiagnosticsBenchmarks",
+      "pair": "Skender.GetPrs",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        1.3399578125,
+        1.353314453125
+      ],
+      "new_means_ms": [
+        0.2729825390625,
+        0.26786273871527777
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedSkenderDiagnosticsBenchmarks",
+      "pair": "Skender.GetPrs",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        12.99797125,
+        13.043115
+      ],
+      "new_means_ms": [
+        2.791346701388889,
+        2.62582734375
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "SharedSkenderDiagnosticsBenchmarks",
+      "pair": "Skender.GetPrs",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        12.71275125,
+        13.084379166666666
+      ],
+      "new_means_ms": [
+        2.4010596875,
+        2.42641984375
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetPrs",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        5.639355555555556,
+        5.73848
+      ],
+      "new_means_ms": [
+        2.0910444444444445,
+        2.1485666666666665
+      ],
+      "verdict": "faster"
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetPrs",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        15.167622222222223,
+        14.786944444444444
+      ],
+      "new_means_ms": [
+        4.284138888888889,
+        4.161433333333333
+      ],
+      "verdict": "faster"
+    }
+  ],
+  "archives": {
+    "status.json": {
+      "sha256": "02ad46df9b972ad2e2bd5a5d0a171089e98d5f30d6fc135959b048016ec4243f",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/status.json.gz"
+    },
+    "provenance.json": {
+      "sha256": "9ffebe60a4c1f57ea75df20408bc3c328902f2d5c74afc99ec16e01996fb8782",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/provenance.json.gz"
+    },
+    "binary-manifest.json": {
+      "sha256": "5697adde9cfc026444356f011ed2097b4eb04d78b1195017cb5e0513aebba16d",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/binary-manifest.json.gz"
+    },
+    "verified-summary.json": {
+      "sha256": "10fb0d5a69a75d91a4980f53c2532c0945f43bad34a3bc572b9d0d1abbea8c73",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/verified-summary.json.gz"
+    },
+    "round0-old-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json": {
+      "sha256": "d2487163cc75be6e88908521d1a9b9695741b35d753f889430ecd4c2abedb082",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round0-old-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "12d5f91e86814a0247a978af1d0d188a5d89b3e19198134d40e24e2713c42e06",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round0-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json": {
+      "sha256": "0c0e11cebcb7d26522938f62cf302ab5ca83b7734039c4529f3ae8a42f15fe01",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round1-new-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json.gz"
+    },
+    "round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "f549fe6d8276bf5dfd5a82862af7ce92a8f27b8cc8447cad2837c774529e0ef6",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round1-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json": {
+      "sha256": "a75161bb82c36843972874f6b1ea24d2a8ea70599db198096ba4bec3572b49a0",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round2-new-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json.gz"
+    },
+    "round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "1cc2395eeb55b770a9df2ce7d0100fa65cc3c0a8875911fdb5b65e32bb67e30f",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round2-new-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json": {
+      "sha256": "35296a2068fc10762fc9597ddda238d0a36463e67b7cf503c7aa7fe94b12ead3",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round3-old-SharedSkenderDiagnosticsBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedSkenderDiagnosticsBenchmarks-report-full-compressed.json.gz"
+    },
+    "round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json": {
+      "sha256": "1ddc298a503d92b663a934d0b5ef88264a384ec4d2b1d409cb47192c826b9e4b",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round3-old-LibraryPairBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks-report-full-compressed.json.gz"
+    },
+    "round0-old-LibraryPairBenchmarks.log": {
+      "sha256": "308db3eacd6492381a8416cd0887250af8e1c650df81664f2152f1bed4dd3db0",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round0-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round0-old-SharedSkenderDiagnosticsBenchmarks.log": {
+      "sha256": "584ab9162bd9ac5e1df115e79d5cea41f44a6108a1711ac2108e3b4ccb83f026",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round0-old-SharedSkenderDiagnosticsBenchmarks.log.gz"
+    },
+    "round1-new-LibraryPairBenchmarks.log": {
+      "sha256": "cb9cc6be2b4c8f1bee0dfa542a6c8806b35f7a1c094ece91aab16be13da641d7",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round1-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round1-new-SharedSkenderDiagnosticsBenchmarks.log": {
+      "sha256": "5b1dc8148b61bab3c7ce442808bd215a996a79cdadf1dcd2f783293d3be5104d",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round1-new-SharedSkenderDiagnosticsBenchmarks.log.gz"
+    },
+    "round2-new-LibraryPairBenchmarks.log": {
+      "sha256": "88cb1d3758d3011b20f473ba425af20747f070ed2d00d1ae2b2cad45bbf41db7",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round2-new-LibraryPairBenchmarks.log.gz"
+    },
+    "round2-new-SharedSkenderDiagnosticsBenchmarks.log": {
+      "sha256": "863b024b9a9c686ef39888fe2e3f88ae0647cbe89a0e54f6bd731c3fe9280c40",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round2-new-SharedSkenderDiagnosticsBenchmarks.log.gz"
+    },
+    "round3-old-LibraryPairBenchmarks.log": {
+      "sha256": "94c7059144ae4f53e090da9dca549cdb76004b903082483df1670c71b205d130",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round3-old-LibraryPairBenchmarks.log.gz"
+    },
+    "round3-old-SharedSkenderDiagnosticsBenchmarks.log": {
+      "sha256": "75c02c9fe3c93d11c9d89be384d0beeca0c43076d9495c65ceb5d60417befce0",
+      "archive": "benchmarks/results/remaining-indicators/local-price-relative-compact-return-control-20261029/round3-old-SharedSkenderDiagnosticsBenchmarks.log.gz"
+    }
+  },
+  "scripts": {
+    "measure-price-relative-compact-return-control-20261029.py": "071d527cc88453d0a8ee77eabc606ecc41e85e414d734482870598b189579b57",
+    "verify-price-relative-compact-return-control-20261029.py": "cc261ae8650aa1c64b9ff1c4de4d4e2baa9ba2826cfa8cc5a72a77c5c36685e7",
+    "benchmark_process_cleanup.py": "fa2c088e49c3cc04c2e5a99bbe875080b95253f5e156f2983e4691420b8d8fc3",
+    "price_relative_compact_acceptance.py": "7122a874d1dd548ef3b98285fd3fdaeba4ac618ad7ef2a22d91093ae9462f599"
+  },
+  "source_companion_inputs": {},
+  "report_imported": true,
+  "production_integrated": true,
+  "integration_source_proof": "benchmarks/results/remaining-indicators/price-relative-compact-return-integration-source-proof-20261029.json",
+  "report_import_receipt": "benchmarks/results/remaining-indicators/price-relative-compact-return-certified-local-price-relative-compact-return-control-20261029-report-import.json"
+}

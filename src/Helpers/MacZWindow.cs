@@ -33,7 +33,19 @@ internal sealed class MacZWindow : IDisposable
             _coefficient = coefficient / common; _denominator = denominator / common; _exponent = exponent;
         }
         internal int Sign => _coefficient.Sign;
-        internal static Number Of(double value) => new(ExactVarianceWindow.Units(value), -1074);
+        internal static Number Of(double value)
+        {
+            // Keep the exact binary64 significand and its scale separately.
+            // Expanding every ordinary input onto the subnormal grid adds over
+            // a thousand zero bits to arithmetic without changing its value.
+            long bits = BitConverter.DoubleToInt64Bits(value);
+            int exponent = (int)((bits >> 52) & 2047);
+            if (exponent == 2047) throw new ArgumentOutOfRangeException(nameof(value));
+            long coefficient = bits & ((1L << 52) - 1);
+            if (exponent != 0) coefficient |= 1L << 52;
+            if (bits < 0) coefficient = -coefficient;
+            return new(coefficient, exponent == 0 ? -1074 : exponent - 1075, reduced: true);
+        }
         internal static Number Integer(BigInteger value) => new(value, 0);
         private static int Bits(BigInteger value)
         { var bytes = BigInteger.Abs(value).ToByteArray(); var last = bytes.Length - 1; while (last > 0 && bytes[last] == 0) last--; var bits = last * 8; for (var b = bytes[last]; b != 0; b >>= 1) bits++; return bits; }
@@ -43,12 +55,29 @@ internal sealed class MacZWindow : IDisposable
             var power = Math.Min(a._exponent, b._exponent);
             var common = BigInteger.GreatestCommonDivisor(a.Denominator, b.Denominator);
             var aScale = b.Denominator / common; var bScale = a.Denominator / common;
-            // Exponent alignment can create further factors, so fully reduce the sum.
-            return new((a._coefficient << (a._exponent - power)) * aScale + (b._coefficient << (b._exponent - power)) * bScale, power, a.Denominator * aScale);
+            var coefficient = (a._coefficient << (a._exponent - power)) * aScale + (b._coefficient << (b._exponent - power)) * bScale;
+            var denominator = a.Denominator * aScale;
+            // Reduced inputs leave only the original denominator GCD and
+            // powers of two introduced by exponent alignment as common factors.
+            // Intersect that bound with the denominator before cancelling: the
+            // coefficient may contain additional powers of two that do not.
+            var reductionBound = common;
+            if (a._exponent != b._exponent && denominator.IsEven)
+            {
+                var shift = Math.Max(a._exponent - power, b._exponent - power);
+                reductionBound = BigInteger.GreatestCommonDivisor(denominator, common << shift);
+            }
+            var remaining = BigInteger.GreatestCommonDivisor(BigInteger.Abs(coefficient), reductionBound);
+            return new(coefficient / remaining, power, denominator / remaining, reduced: true);
         }
         public static Number operator -(Number a, Number b) => a + new Number(-b._coefficient, b._exponent, b.Denominator, reduced: true);
         public static Number operator *(Number a, Number b)
         {
+            // Both fractions are reduced. With equal denominators, neither
+            // numerator has a cross factor to cancel (including exact squares).
+            if (a.Denominator == b.Denominator)
+                return new(a._coefficient * b._coefficient, checked(a._exponent + b._exponent),
+                    a.Denominator * b.Denominator, reduced: true);
             var crossA = BigInteger.GreatestCommonDivisor(BigInteger.Abs(a._coefficient), b.Denominator);
             var crossB = BigInteger.GreatestCommonDivisor(BigInteger.Abs(b._coefficient), a.Denominator);
             return new((a._coefficient / crossA) * (b._coefficient / crossB), checked(a._exponent + b._exponent),
@@ -82,8 +111,22 @@ internal sealed class MacZWindow : IDisposable
             if (side > 0 || side == 0 && !significand.IsEven) significand++;
             return new(Sign * significand, checked(binaryPower / 2 + grid));
         }
-        internal Number Times(long value) => new(_coefficient * value, _exponent, Denominator);
-        internal Number Divide(long divisor) => new(_coefficient, _exponent, Denominator * divisor);
+        internal Number Times(long value)
+        {
+            // The state is already reduced. Only the scalar can introduce a
+            // common factor; avoid a full GCD of two growing recursive values.
+            var scalar = new BigInteger(value);
+            var common = BigInteger.GreatestCommonDivisor(BigInteger.Abs(scalar), Denominator);
+            return new(_coefficient * (scalar / common), _exponent, Denominator / common, reduced: true);
+        }
+        internal Number Divide(long divisor)
+        {
+            // Preserve the existing zero-denominator constructor behavior.
+            if (divisor == 0) return new(_coefficient, _exponent);
+            var scalar = new BigInteger(divisor);
+            var common = BigInteger.GreatestCommonDivisor(BigInteger.Abs(_coefficient), BigInteger.Abs(scalar));
+            return new(_coefficient / common, _exponent, Denominator * (scalar / common), reduced: true);
+        }
         // Recursive states are bounded to 106 significant bits. Finite-window
         // means retain their exact divisor, including binary64 midpoint ties.
         internal Number Round()

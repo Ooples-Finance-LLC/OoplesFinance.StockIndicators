@@ -1,0 +1,60 @@
+{
+  "before_sha256": "c58eeae5709b53af329e3738895fa910c5022d7a9b8f127a353819223280f85c",
+  "candidate_sha256": "6c88f20fded8f8280d149019e9153e6b760d5648afdafe800835cec3caae9ac1",
+  "changed_baseline_rows": 10,
+  "unchanged_baseline_rows": 792,
+  "changed_builder_slots": 20,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 20,
+  "verdicts": {
+    "faster": 593,
+    "slower": 893,
+    "inconclusive": 50
+  },
+  "unchanged_rows": 792,
+  "run_id": "local-star-reversal-equal-sums-control-20261026",
+  "imported_utc": "2026-10-26T14:43:07.891821+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "9aba9fdaf37f0175d8489e8a05c445bf55dd25bbd98e8035df9131d3c03f0815",
+      "archive": "benchmarks/results/remaining-indicators/star-reversal-equal-sums-certified-local-star-reversal-equal-sums-control-20261026-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "4878b5f1398f6eabc32db47e38d49012b259850f862724c65783b7f3f061fc6c",
+      "archive": "benchmarks/results/remaining-indicators/star-reversal-equal-sums-certified-local-star-reversal-equal-sums-control-20261026-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "7f2f1dc0acfbd228b3cd29e949e8bb6c4a969c65d16cc8ee70d66b586733d683",
+      "archive": "benchmarks/results/remaining-indicators/star-reversal-equal-sums-certified-local-star-reversal-equal-sums-control-20261026-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "3e39499e3e440bf0ae6bbe387d4728da6278a70749f7ae402a10916d193dae9c",
+      "archive": "benchmarks/results/remaining-indicators/star-reversal-equal-sums-certified-local-star-reversal-equal-sums-control-20261026-measurement.json.gz"
+    },
+    "stage-star-reversal-equal-sums-report.py": {
+      "sha256": "faee507d21871f4c75bb14c63f4ba233f58b4396d8158e46c23526e990b71d1c",
+      "archive": "benchmarks/results/remaining-indicators/star-reversal-equal-sums-certified-local-star-reversal-equal-sums-control-20261026-stage-star-reversal-equal-sums-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/star-reversal-equal-sums-certified-local-star-reversal-equal-sums-control-20261026-verify-approved-certified-report.py.gz"
+    },
+    "import-star-reversal-equal-sums-report.py": {
+      "sha256": "bad0473624ef4d6f9d3fc95101f1420de17c64d92217f369eb3b9c50f52adaf4",
+      "archive": "benchmarks/results/remaining-indicators/star-reversal-equal-sums-certified-local-star-reversal-equal-sums-control-20261026-import-star-reversal-equal-sums-report.py.gz"
+    },
+    "archive-star-reversal-equal-sums-control.py": {
+      "sha256": "0132a432e832dfeaf96672a2d0c00b54da5f1ac2c6d22c808004691a85c8c8eb",
+      "archive": "benchmarks/results/remaining-indicators/star-reversal-equal-sums-certified-local-star-reversal-equal-sums-control-20261026-archive-star-reversal-equal-sums-control.py.gz"
+    },
+    "prove-star-reversal-equal-sums-integration.py": {
+      "sha256": "6f609396f307da56a256b218681399316a13d4f90f3f2b116f5d9af7ad170c91",
+      "archive": "benchmarks/results/remaining-indicators/star-reversal-equal-sums-certified-local-star-reversal-equal-sums-control-20261026-prove-star-reversal-equal-sums-integration.py.gz"
+    },
+    "archive-star-reversal-equal-sums-report.py": {
+      "sha256": "c63c33004cc687746ccfba41ccc69b401c108c0518affcd3b8f166b28e3e856b",
+      "archive": "benchmarks/results/remaining-indicators/star-reversal-equal-sums-certified-local-star-reversal-equal-sums-control-20261026-archive-star-reversal-equal-sums-report.py.gz"
+    }
+  }
+}

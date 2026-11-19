@@ -1,0 +1,142 @@
+{
+  "before.html": {
+    "sha256": "2e454a8bd0f51b83e827c7d44ed47d1c1597faa3bdc5e53b5c0afbb848752311",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "c9f8506804307123611c5c3d3395b2232cc40fa6bb169a5a2967a2262548dade",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "e64bf62e0e3a35b0114783077b58862351c03702b6412b72810d38bfe832895e",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "7b3ad6b8829afa29d2d9b86143b088bf66cc3b28a6411d318d821bd049d6d67b",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/candidate.html.gz"
+  },
+  "delivery-tooling/.github/workflows/cpu-kernel-performance.yml": {
+    "sha256": "32fb9c54df7ca35454d23823f4bebafc2e03e15780a3e6058e6de8e785175ce4",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/.github/workflows/cpu-kernel-performance.yml.gz"
+  },
+  "delivery-tooling/collection-receipt.json": {
+    "sha256": "39149aaa5c06a51053a232d2059f6b639841e4e85c9d19ea75841c679efae45f",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/collection-receipt.json.gz"
+  },
+  "delivery-tooling/manifest.json": {
+    "sha256": "8f1d5609a65f9efa2cd765777a0feb57ceb6e058bbbb8dc0e1340d4873b01945",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/manifest.json.gz"
+  },
+  "delivery-tooling/operations/collect-current-baseline-ten-20261116.py": {
+    "sha256": "bc015a6aa767cb2485540cccaa69539010d1e1ba0119cf6c021e9af697346ca9",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/operations/collect-current-baseline-ten-20261116.py.gz"
+  },
+  "delivery-tooling/operations/current-baseline-ten-collector-review-receipt-20261116.json": {
+    "sha256": "0f1b84d934d3df1a187ac8a11b027257b76fd21ec9c399294a388b82f77115ef",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/operations/current-baseline-ten-collector-review-receipt-20261116.json.gz"
+  },
+  "delivery-tooling/operations/current-baseline-ten-report-guard-receipt-20261116.json": {
+    "sha256": "d85341f42ef423919f67b4b48294707544af379fc1c05c186fb127a6f7d6c665",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/operations/current-baseline-ten-report-guard-receipt-20261116.json.gz"
+  },
+  "delivery-tooling/operations/import-current-baseline-ten-report-20261116.py": {
+    "sha256": "11cb44b37789ceda6ed615d7e506efcbee5f5524496873a13e0c96fe50eb4906",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/operations/import-current-baseline-ten-report-20261116.py.gz"
+  },
+  "delivery-tooling/operations/prepare-current-baseline-ten-report-publication-20261116.py": {
+    "sha256": "d274081b4550ec6c33cb90259b4407120aa9aec931e0e1d8dfa1d3df36b91d00",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/operations/prepare-current-baseline-ten-report-publication-20261116.py.gz"
+  },
+  "delivery-tooling/operations/test_collect_current_baseline_ten_20261116.py": {
+    "sha256": "574fcfc3815de745e9c70c7cbd6193639171b0ab4074d297ea78cd3e6d2e44a9",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/operations/test_collect_current_baseline_ten_20261116.py.gz"
+  },
+  "delivery-tooling/operations/test_current_baseline_ten_report_guards_20261116.py": {
+    "sha256": "0a0a91e1c5be243879a35777346d30426591dea5e4b74620ac74ca70eba685d0",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/operations/test_current_baseline_ten_report_guards_20261116.py.gz"
+  },
+  "delivery-tooling/operations/verify-current-baseline-ten-report-20261116.py": {
+    "sha256": "eb07c2fb1023fc870fe46fd565a407dedd2e9dc25950770cd79e3073847acc87",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/operations/verify-current-baseline-ten-report-20261116.py.gz"
+  },
+  "delivery-tooling/origin.json": {
+    "sha256": "f45d7fe9ad7e9201d40c51cd46410bfa199c2af54795b798ea9af5dbad631248",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/origin.json.gz"
+  },
+  "delivery-tooling/scripts/run-current-baseline-ten-refresh.py": {
+    "sha256": "579be447f40bf1f5bcc3b382804cd62a9565c0bf20885e913b4338551587cec5",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/scripts/run-current-baseline-ten-refresh.py.gz"
+  },
+  "delivery-tooling/scripts/test_current_baseline_archive.py": {
+    "sha256": "990d83b5c8a6128867568fcd48a1163b0986a92f187b5161a17f0dba3db023c9",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/scripts/test_current_baseline_archive.py.gz"
+  },
+  "delivery-tooling/scripts/test_current_baseline_report_admission.py": {
+    "sha256": "d4057b17ae58280449474a28ae04107f3fb89874079bcc2d140969de847e596d",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/scripts/test_current_baseline_report_admission.py.gz"
+  },
+  "delivery-tooling/scripts/test_hosted_current_baseline_ten_refresh.py": {
+    "sha256": "804cdf078e30fa4fdf9e4da9d8ef834066102148ff0b82bc10277c3334d79d90",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/delivery-tooling/scripts/test_hosted_current_baseline_ten_refresh.py.gz"
+  },
+  "imported.json": {
+    "sha256": "90ef14a5abee904ce22565a685bcdd55224ea441c2cb2ac7e441f627092c3a74",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "db97da168c27d9771712cc098a7756bb0408303c5d35d7f9fd2d36e42c188cc5",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/measurement.json.gz"
+  },
+  "operations/current-baseline-ten-collector-review-receipt-20261116.json": {
+    "sha256": "0f1b84d934d3df1a187ac8a11b027257b76fd21ec9c399294a388b82f77115ef",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/operations/current-baseline-ten-collector-review-receipt-20261116.json.gz"
+  },
+  "operations/current-baseline-ten-refresh-progress-delta-20261116.json": {
+    "sha256": "4450b3a2183700c200515182dfe7c798e3c7235fca57c95da3350c83f6011c70",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/operations/current-baseline-ten-refresh-progress-delta-20261116.json.gz"
+  },
+  "operations/current-baseline-ten-report-guard-receipt-20261116.json": {
+    "sha256": "d85341f42ef423919f67b4b48294707544af379fc1c05c186fb127a6f7d6c665",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/operations/current-baseline-ten-report-guard-receipt-20261116.json.gz"
+  },
+  "operations/current-baseline-ten-report-preparer-review-20261116.json": {
+    "sha256": "ff3bd0155109faedab8a7771290927bc40ab97430d60269033397a7bbc29c8a8",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/operations/current-baseline-ten-report-preparer-review-20261116.json.gz"
+  },
+  "operations/package-current-baseline-ten-report-20261116.py": {
+    "sha256": "f4a7246ca9ac29372f1e7fff638049ce0ebd5ae2058b5afa8c66de872e14e5a4",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/operations/package-current-baseline-ten-report-20261116.py.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "7ada60ba1aa40ef3042161ea66a97cead7419e233771ba19248c2da5ec3072d0",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "35ed679874ae5c3032f821720fb02afa4dfb9d387495ca3cc280f45f5663d9b5",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "3480239e7008f50036a76e705ad4cfd96fdaa14edcb3bbed1e91d6f8e322e389",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/updated-pair-details.png.gz"
+  },
+  "operations/publish-current-baseline-ten-refresh-20261116.py": {
+    "sha256": "24a97af0b6f697b5ec835fc22352656d2194fd18ab51d9758414c957246e5fc7",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/operations/publish-current-baseline-ten-refresh-20261116.py.gz"
+  },
+  "operations/close-current-baseline-ten-refresh-publication-20261116.py": {
+    "sha256": "5893edbd0064b310a91e24fb1f89fd8bc9fb117c78ee52dfdd82e61e4a0328d6",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/operations/close-current-baseline-ten-refresh-publication-20261116.py.gz"
+  },
+  "operations/pr266-current-baseline-ten-refresh-20261116-body.md": {
+    "sha256": "e138b87dea710b8864ae91ee66fff113247efbb707d3a2853f657cc8486a42cf",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/operations/pr266-current-baseline-ten-refresh-20261116-body.md.gz"
+  },
+  "operations/pr266-current-baseline-ten-refresh-20261116-body.json": {
+    "sha256": "067ffb76311d42a398d46c0ea31f2fafc72ff23460f277e82cb3a4c4d5df4d0e",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/operations/pr266-current-baseline-ten-refresh-20261116-body.json.gz"
+  },
+  "operations/pr266-current-baseline-ten-refresh-20261116-origin.json": {
+    "sha256": "50455a84404af17c58971271894413512b9a990da3287400161f59a2963bc6d4",
+    "archive": "benchmarks/results/remaining-indicators/current-baseline-ten-refresh-20261116-report-integration/operations/pr266-current-baseline-ten-refresh-20261116-origin.json.gz"
+  }
+}

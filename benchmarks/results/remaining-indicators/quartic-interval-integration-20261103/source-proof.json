@@ -1,0 +1,75 @@
+{
+  "measured_source": "a0b452c62eb1e5178ee113d2afb9dd827bb46177",
+  "integration_source_commit": "c85ab4a13f453bf1eda0089933dd46d7966437f2",
+  "inventory_commit": "265caf08f1d0611792f284632f6c82bacf1954b3",
+  "run_id": "41662315626",
+  "plan_sha256": "6085dc0ab8760aa30e9f8c48a81a637614a271fa521bde290e328d92487871a1",
+  "source_and_tests_exactly_match": true,
+  "cases": 60,
+  "decisions": 12,
+  "verdicts": {
+    "faster": 12
+  },
+  "correctness": {
+    "unit": 15,
+    "comparator": 18,
+    "actual_gpu": 100
+  },
+  "gpu_source_sha256": "41480bf8cf4bdb196262dcfe02007be371589208e6f45bc25ced109bec5f5655",
+  "inventory_tests": 8,
+  "report_imported": true,
+  "report_sha256": "9f081fe96d8e658ffb26a6a6650d3011803ccae20c5532a4b5484ce6d6c26fca",
+  "baseline_rows_updated": 4,
+  "baseline_rows_preserved": 798,
+  "builder_slots_updated": 8,
+  "builder_slots_preserved": 1536,
+  "browser_all802_csv_and_builder_values_verified": true,
+  "javascript_errors": [],
+  "report_archives": {
+    "before.html": {
+      "sha256": "ea750b4ac3e3fc631764b343da0ed4c4d0f387cded121b2c5e2c52ff4562cb8f",
+      "archive": "benchmarks/results/remaining-indicators/quartic-interval-integration-20261103/before.html.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "c0e2e0dd88ec91cbf1afb0a3055f79d8b68651076e02223fb60244db467c8ab9",
+      "archive": "benchmarks/results/remaining-indicators/quartic-interval-integration-20261103/browser-verification.json.gz"
+    },
+    "candidate.html": {
+      "sha256": "9f081fe96d8e658ffb26a6a6650d3011803ccae20c5532a4b5484ce6d6c26fca",
+      "archive": "benchmarks/results/remaining-indicators/quartic-interval-integration-20261103/candidate.html.gz"
+    },
+    "imported.json": {
+      "sha256": "bfa84cb7ebf4d59d315867a3ff1cf3067837b537d82377f873be88f651445fd9",
+      "archive": "benchmarks/results/remaining-indicators/quartic-interval-integration-20261103/imported.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "b32cd6b171a2dafe60cf3f98540ec710583ea842bbc825cb0a8ba524739c6911",
+      "archive": "benchmarks/results/remaining-indicators/quartic-interval-integration-20261103/measurement.json.gz"
+    },
+    "refreshed-baseline.png": {
+      "sha256": "8b20368c4327e9730aa5cd758ad89a7ccaa2bf35ec7c600f4b63424f22e52c23",
+      "archive": "benchmarks/results/remaining-indicators/quartic-interval-integration-20261103/refreshed-baseline.png"
+    },
+    "staged.json": {
+      "sha256": "5c05e069954ed23f04724f241682d173b23b329f88b852afe5eb9b59f6a666cb",
+      "archive": "benchmarks/results/remaining-indicators/quartic-interval-integration-20261103/staged.json.gz"
+    },
+    "updated-pair-details.png": {
+      "sha256": "f48e130e0c80cdbd58fa654cd6347605cf049108989615002432ee712dad5e3c",
+      "archive": "benchmarks/results/remaining-indicators/quartic-interval-integration-20261103/updated-pair-details.png"
+    },
+    "verify-hosted-certified-report-20261101.py": {
+      "sha256": "f1112bb2e981aa1fa68e0a41e917e423bcd8fd0856a40df97ccd6567986a7cda",
+      "archive": "benchmarks/results/remaining-indicators/quartic-interval-integration-20261103/verify-hosted-certified-report-20261101.py.gz"
+    },
+    "import-hosted-certified-report-20261101.py": {
+      "sha256": "380745f04a0b07f71a33dd049bdf1f3392ff9a388f5cda9849c0ae3bda66be75",
+      "archive": "benchmarks/results/remaining-indicators/quartic-interval-integration-20261103/import-hosted-certified-report-20261101.py.gz"
+    },
+    "report.py": {
+      "sha256": "ec5151d32284558921f0d3aee547f9b18e5599acd5e506f1348946adf7a29853",
+      "archive": "benchmarks/results/remaining-indicators/quartic-interval-integration-20261103/report.py.gz"
+    }
+  },
+  "overall_goal_complete": false
+}

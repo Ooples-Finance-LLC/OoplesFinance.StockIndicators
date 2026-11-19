@@ -1,0 +1,58 @@
+{
+  "status": "seventh-stage-checks-passed-inherited-macd-failures-and-performance-pending",
+  "context": "Two new families in the combined working candidate; the isolated committed tree was not separately built or tested. Common GPU fixtures do not establish per-indicator GPU performance.",
+  "input_sha256": "47436d00b4b73743e274239957521c32282302758fe1e26cd03ff3e2bf3474e7",
+  "validation_base_head": "c1a9db259fd1ecb433d101467acfb6c6c336d575",
+  "family_check_counts": {
+    "unit": 111,
+    "parity": 20
+  },
+  "family_cpu_receipts": [
+    "gaingann-cpu-contracts.json",
+    "gopalgrand-cpu-contracts.json"
+  ],
+  "checks": {
+    "discovery": {
+      "status": "passed",
+      "verified_count": 237,
+      "log_sha256": "eea9d96f9a28d3e410f6f2154b7a843d363efbb935c17ac75622e98ea0cc8ec4"
+    },
+    "gpu": {
+      "status": "passed",
+      "verified_count": 100,
+      "log_sha256": "7802fced43e2cbd186a26dee1bacd3e29973382ed1aafb0b8e6986eea92b3490"
+    },
+    "verify-gpu-partition": {
+      "status": "passed",
+      "verified_count": null,
+      "log_sha256": "4b9274372ef00ff4b9be817c96b6b3adbb0c960def77952634b8cb600b40f4ce",
+      "result": "Verified 100 local GPU cases; 1566 methods remain assigned to hosted CI"
+    },
+    "inventory": {
+      "status": "passed",
+      "verified_count": 6,
+      "log_sha256": "c21f1255ba744da37b7c5bf4c588ffc91e937c63a7ff7c1df438d23d3f140ea9",
+      "result": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.351s\n\nOK"
+    }
+  },
+  "discovery_evidence": "seventh5-discovery.trx.gz",
+  "gpu_evidence": "seventh5-gpu-contracts.json",
+  "gpu_trx_evidence": "seventh5-gpu.trx.gz",
+  "inherited_failed_unit_cases": 3,
+  "inherited_failure_evidence": "combined113-known-macd-failures.trx.gz",
+  "pending": [
+    "inherited MACD unit-contract failures",
+    "raw timing and performance comparison",
+    "required hosted checks"
+  ],
+  "family_execution_inputs_sha256": {
+    "gaingann": {
+      "unit": "3e818eab198c574b5385ac66d9c8914dca137721d45bc90a3bb56faa1e113d72",
+      "parity": "3e818eab198c574b5385ac66d9c8914dca137721d45bc90a3bb56faa1e113d72"
+    },
+    "gopalgrand": {
+      "unit": "47436d00b4b73743e274239957521c32282302758fe1e26cd03ff3e2bf3474e7",
+      "parity": "47436d00b4b73743e274239957521c32282302758fe1e26cd03ff3e2bf3474e7"
+    }
+  }
+}

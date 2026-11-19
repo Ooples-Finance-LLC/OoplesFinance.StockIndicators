@@ -1,0 +1,27 @@
+{
+  "status": "implementation-complete-review-before-qualification",
+  "checkout": "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-consolidated-exact-arithmetic-20261030",
+  "published_base": "9bd6432540e0c17340a5dd377f01b2d767df0abd",
+  "dependency_baseline": "7f50786248ed6713ae58e290b64954925c3f79be",
+  "candidate": "c52320b15a83802a0889bcf0eb70f336c38f12e9",
+  "source_commits": [
+    "07a7fa863c49c5b9189eff20e1471b43b4890db6",
+    "f129cbbaa",
+    "2255047ec8b39939248483f12b493c612695950c",
+    "933aea0ea6f501b5de6f9a4599b66123589c3571",
+    "452499d22978f34bfb1d4e5e28da31b25044ea6b"
+  ],
+  "changes": [
+    "src/Helpers/CompactMacdValue.cs",
+    "src/Helpers/RocBankWindow.cs",
+    "src/Indicators/ClassicPriceOscillator.cs",
+    "src/Indicators/PriceRelativeStrength.cs",
+    "src/Indicators/RangeAccelerationBands.cs",
+    "src/Indicators/ValuesBarExecution.TripleRate.cs",
+    "src/Indicators/WideClassicalWindowState.cs",
+    "tests/ModelsTests/CompactClassicalWindowTests.cs",
+    "tests/ModelsTests/CompactMacdBitPublicationTests.cs",
+    "tests/ModelsTests/ScaledRocUnitsTests.cs"
+  ],
+  "next": "Deduplicated affected unit, compatibility, parity, GPU and inventory checks. One combined timing qualification after correctness."
+}

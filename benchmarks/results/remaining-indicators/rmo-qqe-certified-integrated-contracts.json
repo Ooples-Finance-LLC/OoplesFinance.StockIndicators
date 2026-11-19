@@ -1,0 +1,37 @@
+{
+  "types": [
+    "RahulMohindarOscillator",
+    "QuantitativeQualitativeEstimation"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "e0a0aa672074c8c2795a3edd49d887f4a7a9d82c",
+  "source_fingerprint_sha256": "d4757e9a45e48800fcc02614c3c484a421ae23ce9dc9d025ea04d9e6d408e548",
+  "benchmark_fixture": {
+    "type": "RemainingRmoQqeBenchmarks",
+    "operations": [
+      "RahulMohindarOscillator",
+      "QuantitativeQualitativeEstimation"
+    ]
+  },
+  "checks": {
+    "unit": 154,
+    "parity": 8,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "unit_class_counts": {
+    "RmoQqeCertifiedTests": 14,
+    "RmoNumericalTests": 40,
+    "QqeNumericalTests": 80,
+    "SharedGeneratedRmoQqeTests": 20
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/publication-rmo-qqe-certified-20261021-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-rmo-qqe-certified-20261021-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

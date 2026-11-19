@@ -11,6 +11,29 @@ public sealed class CompensatedAverageComparisonTests
     [Theory]
     [InlineData(2)]
     [InlineData(3)]
+    public void FinalCombinationPreservesMixedExponentCancellation(int order)
+    {
+        double[] pattern =
+        [
+            1, -1, double.Epsilon, -double.Epsilon, 0, -0d,
+            Math.BitIncrement(1), Math.BitDecrement(1),
+            1e200, -1e200, 2 * double.Epsilon, -2 * double.Epsilon,
+        ];
+        var prices = Enumerable.Range(0, 144).Select(i => pattern[i % pattern.Length]).ToArray();
+        var bars = prices.Select((value, i) =>
+            new Bar(DateTime.UnixEpoch.AddDays(i), value, value, value, value, 0)).ToArray();
+        foreach (int period in new[] { 1, 2, 3, 20, 100 })
+        {
+            var expected = CompensatedAverageComparison.Reference(prices, period, order, false);
+            var actual = CompensatedAverageComparison.Owned(bars, period, order).Outputs["Value"].Values;
+            Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits),
+                actual.Select(BitConverter.DoubleToInt64Bits));
+        }
+    }
+
+    [Theory]
+    [InlineData(2)]
+    [InlineData(3)]
     public async Task ExactFactoredUpdatesPreserveBitsAcrossCompensationCutoff(int order)
     {
         foreach (int period in new[] { 1, 3, 20, int.MaxValue })

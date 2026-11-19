@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "713e13f6c00e5cdc5bb032568f670cd70f9598f398b4e62e2461821feccbf66a",
+    "archive": "benchmarks/results/remaining-indicators/adosc-word-ema-20261112-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "58cdab9f14069e4759590c63c625ef6ccae1c3140fe1a33d651cfb5735676e94",
+    "archive": "benchmarks/results/remaining-indicators/adosc-word-ema-20261112-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "b039c4ab239fab149037f17438270b83135566c978e1d8d91f3f3a3166bb88a9",
+    "archive": "benchmarks/results/remaining-indicators/adosc-word-ema-20261112-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "847db893e8cdd398b6d845fb753c507d4c1967367e72a03aff9c800800efb8e0",
+    "archive": "benchmarks/results/remaining-indicators/adosc-word-ema-20261112-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "d7201279e15cf3a209e1f1baf6a6e6333c8f51ac0e536f5a4491a7df99013f54",
+    "archive": "benchmarks/results/remaining-indicators/adosc-word-ema-20261112-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "6d722dc13395baa1b8b67cff3769bd9c4c0a309a00c7d480cf14888c484eb562",
+    "archive": "benchmarks/results/remaining-indicators/adosc-word-ema-20261112-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "be77ae952d1067f2844b848fae26e0f62ec7a139f3e5602a27ae8ed913aa0c50",
+    "archive": "benchmarks/results/remaining-indicators/adosc-word-ema-20261112-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "821e100f475ff7f5b266392c5137d20de0eee571c2746e4809ac995c875723ad",
+    "archive": "benchmarks/results/remaining-indicators/adosc-word-ema-20261112-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "f35b9f9027bf04b6b4e4aee1c776dca288141b7eed88099572184f94fa1dd104",
+    "archive": "benchmarks/results/remaining-indicators/adosc-word-ema-20261112-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "eb71000694596661a1ab271376bd2b4e9bf0fcb11490070aced1b9669bf2ae3b",
+    "archive": "benchmarks/results/remaining-indicators/adosc-word-ema-20261112-report-integration/updated-pair-details.png.gz"
+  }
+}

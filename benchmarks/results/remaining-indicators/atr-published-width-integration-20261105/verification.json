@@ -1,0 +1,26 @@
+{
+  "source_integration_commit": "b354c3ec3ac4d6c009aecb59c2773ed07e2ce510",
+  "qualified_source": "1fffcd76334709a7847bfd938fe89f24b370b12b",
+  "compiled_source": "525b779054bc34f9e8661c95d083366d1fc33906",
+  "source_fingerprint": "ebb15de9ef2d05cc85f114627d233e88b3bb857bce1d1c0ca84b52c79d7107a4",
+  "unit": 19,
+  "comparator": 14,
+  "actual_gpu": 100,
+  "inventory_tests": 8,
+  "production_sha256": "d9108f1bdec3797939416d03a19fc18d14f7d2d8dfcf711148289f5b62280071",
+  "run_id": "42013615363",
+  "cases": 90,
+  "decisions": 18,
+  "verdicts": {
+    "inconclusive": 13,
+    "faster": 5
+  },
+  "integrated_paths": [
+    "src/Indicators/WindowAtrBands.cs",
+    "tests/ModelsTests/AtrPublishedWidthTests.cs"
+  ],
+  "excluded": [
+    "Only this complete source-bound ATR qualification is imported; no pooling or policy changes"
+  ],
+  "verified_utc": "2026-11-05T11:42:12.841831+00:00"
+}

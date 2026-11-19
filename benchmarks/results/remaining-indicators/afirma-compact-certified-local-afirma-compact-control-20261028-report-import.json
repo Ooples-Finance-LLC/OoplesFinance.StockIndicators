@@ -1,0 +1,60 @@
+{
+  "before_sha256": "dc747044dbbca4461276a2788dfc28d4cee5dd1f030f713ff175bd3c663f6e57",
+  "candidate_sha256": "bd06898215ef860cdd0eec06ce60cc273a14f6815b86fbd37020f4fb064193b9",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 0,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 0,
+  "verdicts": {
+    "faster": 602,
+    "slower": 886,
+    "inconclusive": 48
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-afirma-compact-control-20261028",
+  "imported_utc": "2026-10-28T19:15:13.517064+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "1fa91d6ea62e3807de7900603c62cfdc7884cdf63446378f3b2ef6fa5d043cce",
+      "archive": "benchmarks/results/remaining-indicators/afirma-compact-certified-local-afirma-compact-control-20261028-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "4c40a6b6fb5e36d8bf061d83d98d96854ad7195b5af94a21c215727d5ab871bb",
+      "archive": "benchmarks/results/remaining-indicators/afirma-compact-certified-local-afirma-compact-control-20261028-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "257a850c8b81a629b47c1272cbd33b3ec2288b29594e960be04c7b85c9f11676",
+      "archive": "benchmarks/results/remaining-indicators/afirma-compact-certified-local-afirma-compact-control-20261028-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "b15d6503bd2bafeb0166ab371b377d5e5076aefcb294f22b73ff89fc19f8ba30",
+      "archive": "benchmarks/results/remaining-indicators/afirma-compact-certified-local-afirma-compact-control-20261028-measurement.json.gz"
+    },
+    "stage-afirma-compact-report-20261028.py": {
+      "sha256": "e91f9b659eed172f3cb86c367228a96937b5918d6d913f652071505dbfc93690",
+      "archive": "benchmarks/results/remaining-indicators/afirma-compact-certified-local-afirma-compact-control-20261028-stage-afirma-compact-report-20261028.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/afirma-compact-certified-local-afirma-compact-control-20261028-verify-approved-certified-report.py.gz"
+    },
+    "import-afirma-compact-report-20261028.py": {
+      "sha256": "60cbc9f28493d24a185f2ec0dc6efea8ae55b4ab171e41f0d6c3f2c5637e0b70",
+      "archive": "benchmarks/results/remaining-indicators/afirma-compact-certified-local-afirma-compact-control-20261028-import-afirma-compact-report-20261028.py.gz"
+    },
+    "archive-afirma-compact-control-20261028.py": {
+      "sha256": "e908e3f120bdb28c5c6238a77419d1878468f360e9da0ecb57666df5179982b7",
+      "archive": "benchmarks/results/remaining-indicators/afirma-compact-certified-local-afirma-compact-control-20261028-archive-afirma-compact-control-20261028.py.gz"
+    },
+    "prove-afirma-compact-integration-20261028.py": {
+      "sha256": "8c0bd70441fb4553325557b0f56d8a3b8749c9cc83c007f78a60a9e10118b916",
+      "archive": "benchmarks/results/remaining-indicators/afirma-compact-certified-local-afirma-compact-control-20261028-prove-afirma-compact-integration-20261028.py.gz"
+    },
+    "archive-afirma-compact-report-20261028.py": {
+      "sha256": "82822a45d0c563ff4e1f032482f50e1bcba556b32acdb90fd1dcdb1d274a64c3",
+      "archive": "benchmarks/results/remaining-indicators/afirma-compact-certified-local-afirma-compact-control-20261028-archive-afirma-compact-report-20261028.py.gz"
+    }
+  }
+}

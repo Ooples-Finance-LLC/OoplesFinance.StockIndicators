@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "b596101cfefef1fda593bf6f9f220c897e5bf5d7e6cceb099de656df04e913ba",
+    "archive": "benchmarks/results/remaining-indicators/adl-four-difference-bounds-20261109-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "0380037d2a77ff2f5555dfec33d5a77a18afad0c483030c0a16dc81f204069ab",
+    "archive": "benchmarks/results/remaining-indicators/adl-four-difference-bounds-20261109-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "44f3ed671b4825fd565bfb83611cb64b02c1be5233560420325fbb8ffaaab5c2",
+    "archive": "benchmarks/results/remaining-indicators/adl-four-difference-bounds-20261109-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "82f8305da33c97b5e52504739b22f5168febbebaa9a9dc7a7db6b1648bbf1170",
+    "archive": "benchmarks/results/remaining-indicators/adl-four-difference-bounds-20261109-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "5356368efb5e1f371ff5ac0128d0314d225591c063903ca2540d6f5c92c214bb",
+    "archive": "benchmarks/results/remaining-indicators/adl-four-difference-bounds-20261109-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "afb2a4496f101777d0980266490c40e2475b5cb5257d9da79e49bd439393c244",
+    "archive": "benchmarks/results/remaining-indicators/adl-four-difference-bounds-20261109-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "45bfaaadb1a4d8f4487171f047c733bda2da6ab5c99ab9105e1d459ee496b8ce",
+    "archive": "benchmarks/results/remaining-indicators/adl-four-difference-bounds-20261109-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "0669a01933061d8cb3a98898d437ec0d3641d4e984409029f1db97379b70b51e",
+    "archive": "benchmarks/results/remaining-indicators/adl-four-difference-bounds-20261109-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "f27660bd12fb17eed59ceedcd889b6a06a593042c929834d92ae7d796844ff51",
+    "archive": "benchmarks/results/remaining-indicators/adl-four-difference-bounds-20261109-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "2ed9ab0edcea382245717da93d101c9265b9f8d1a4dfbca9f331322e54d1c0e7",
+    "archive": "benchmarks/results/remaining-indicators/adl-four-difference-bounds-20261109-report-integration/updated-pair-details.png.gz"
+  }
+}

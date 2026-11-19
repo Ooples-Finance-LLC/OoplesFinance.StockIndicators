@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "8713507f31e7ca3f20d2d1a08dc4b03ba3534f107c56edc03d646d9831908747",
+    "archive": "benchmarks/results/remaining-indicators/combined-directional-accumulation-report-integration-20261104/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "e8a899ae1fe7f5048d86d9ae47c1866d6d6b52796fb03db76b078a44aea20d07",
+    "archive": "benchmarks/results/remaining-indicators/combined-directional-accumulation-report-integration-20261104/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "e2b5d6ffda48d7085225a2b3610f9e975f3684677479a1c1fa88812e5706caec",
+    "archive": "benchmarks/results/remaining-indicators/combined-directional-accumulation-report-integration-20261104/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "23ef350d749744ce93d1c04aadbdf707d240dfaf5c3157d6697ce735f21041fc",
+    "archive": "benchmarks/results/remaining-indicators/combined-directional-accumulation-report-integration-20261104/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "586906b34441a6e8e0373f7a3bd0ca12559da96bf9350cf3564e5257b7d22d41",
+    "archive": "benchmarks/results/remaining-indicators/combined-directional-accumulation-report-integration-20261104/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "03328674c89952e89ee652634137dae2935b9f6851e9b80c2b77feefb60c40ad",
+    "archive": "benchmarks/results/remaining-indicators/combined-directional-accumulation-report-integration-20261104/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "d329a34bb4dff6c5557eab903bf2ec921b1dd85651f32a80117a499341b178d8",
+    "archive": "benchmarks/results/remaining-indicators/combined-directional-accumulation-report-integration-20261104/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "62505b1055108e1493410625bbb074ba190da7971115669ba3a05db9237fca12",
+    "archive": "benchmarks/results/remaining-indicators/combined-directional-accumulation-report-integration-20261104/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "b1ad3eb28ad80ba8326bb7ef9c9b1047fdfdfc2270e5f4339ad7e27c18f307f8",
+    "archive": "benchmarks/results/remaining-indicators/combined-directional-accumulation-report-integration-20261104/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "84a82ffb4e8379dc052e6466093a6213e5acb1f63575ef400a23f3bdf7ee99ba",
+    "archive": "benchmarks/results/remaining-indicators/combined-directional-accumulation-report-integration-20261104/updated-pair-details.png.gz"
+  }
+}

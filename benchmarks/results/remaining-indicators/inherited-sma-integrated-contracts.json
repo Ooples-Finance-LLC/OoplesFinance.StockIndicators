@@ -1,0 +1,38 @@
+{
+  "types": [
+    "Sma"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "3c3c5f0575bc036bd2611d4858ccb14c61a33901",
+  "source_fingerprint_sha256": "2dc2d322d6c288e5c3625b64ad83c9244e9ccdc63e5dd395a057667b323f95dc",
+  "benchmark_fixture": {
+    "type": "SharedSmaBenchmarks",
+    "operations": [
+      "QuanTAlib.Sma",
+      "Skender.GetSma",
+      "TaLib.Functions.Sma",
+      "Trady.Indicator.SimpleMovingAverage"
+    ]
+  },
+  "checks": {
+    "unit": 171,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "unit_class_counts": {
+    "CertifiedSmaBatchTests": 8,
+    "SmaCpuKernelTests": 121,
+    "SmaExtremeRangeTests": 32,
+    "QmaSmaNumericalTests": 10
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/publication-inherited-sma-20261021-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-inherited-sma-20261021-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

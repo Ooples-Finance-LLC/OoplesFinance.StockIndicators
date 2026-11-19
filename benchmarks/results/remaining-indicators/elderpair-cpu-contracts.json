@@ -1,0 +1,38 @@
+{
+  "batch": "elderpair-shared-execution",
+  "types": [
+    "ElderImpulseSystem",
+    "ElderRayIndex"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 68,
+    "parity_passed": 8,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "elderpair-unit-verified.trx.gz",
+        "passed_cases": 68,
+        "trx_sha256": "e10c5ad0fdbf18f64135703a4da79ca48c3ce6b8cbad6fb0bb9b16700194d410"
+      },
+      {
+        "file": "elderpair-parity-verified.trx.gz",
+        "passed_cases": 8,
+        "trx_sha256": "2e6e570d15d0fd0e2b3e9f8787ba656e00541417b2e17af1cdccb16aff1e67e2"
+      }
+    ],
+    "context": "Executed in the 14-facade third-stage working candidate with inherited unresolved MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "6f322184dccc472f8e1a3c6f304af1643602d5ab2bc48f7309f3a191cb50078d",
+    "test_execution_input_sha256": {
+      "unit": "6f322184dccc472f8e1a3c6f304af1643602d5ab2bc48f7309f3a191cb50078d",
+      "parity": "6f322184dccc472f8e1a3c6f304af1643602d5ab2bc48f7309f3a191cb50078d"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "9709e6b7d82fd46f40e9527c65cafd2f48cbc47a"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

@@ -96,7 +96,7 @@ internal static partial class ValuesBarExecution
         var numerator = 3 * value * value;
         var denominator = (largeVariance.IsZero ? (BigInteger)variance : largeVariance) * spread;
         // This positive ratio is at most one by Cauchy-Schwarz. Its integer
-        // operands are below2^180 under the input/period bounds, so every
+        // operands are below2^220 under the per-tier input/period bounds, so every
         // nonzero result is normal. Round directly on its final binary64 grid,
         // avoiding arbitrary-grid accumulator wrappers for these known integers.
         int exponent = (int)(numerator.GetBitLength() - denominator.GetBitLength());

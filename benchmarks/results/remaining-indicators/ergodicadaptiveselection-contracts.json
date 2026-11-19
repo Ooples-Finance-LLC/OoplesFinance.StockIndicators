@@ -1,0 +1,39 @@
+{
+  "batch": "adaptive-candle-commodity-selection-shared-execution",
+  "types": [
+    "AdaptiveErgodicCandlestickOscillator",
+    "ErgodicCommoditySelectionIndex"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact adaptive candle and commodity selection kernels to compute both outputs together, preserving adaptive seed boundary, wide point-value quotients, finite-point eligibility, period clamping, original fields, component/source fallback and ownership.",
+  "verification": {
+    "unit_passed": 51,
+    "fixture_passed": 8,
+    "discovery_passed": 152,
+    "gpu_passed": 100,
+    "contract_methods": 1491,
+    "hosted_methods": 1479,
+    "evidence": [
+      {
+        "file": "ergodicadaptiveselection-unit.trx.gz",
+        "passed_cases": 51,
+        "trx_sha256": "74aeb80e110683e90699788ae7d8ef6eda7292695ffd6ab721dff3f90a09f08d"
+      },
+      {
+        "file": "ergodicadaptiveselection-fixture.trx.gz",
+        "passed_cases": 160,
+        "trx_sha256": "34515ebd1c8b73ed65a3d238dde77e3da9fa1344b53ffe0102c9620ac91c5ee2"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingErgodicAdaptiveSelectionBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "AdaptiveErgodicCandlestickOscillator",
+      "ErgodicCommoditySelectionIndex"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

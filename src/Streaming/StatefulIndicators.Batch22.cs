@@ -333,8 +333,15 @@ public sealed class SectorRotationModelState : IMultiSeriesIndicatorState, IDisp
     }
 
     public MultiSeriesIndicatorStateResult Update(MultiSeriesContext context, SeriesKey series, OhlcvBar bar,
-        bool isFinal, bool includeOutputs)
+        bool isFinal, bool includeOutputs) => UpdateCore(context, series, bar, isFinal, includeOutputs, out _);
+
+    internal MultiSeriesIndicatorStateResult UpdateValues(MultiSeriesContext context, SeriesKey series, OhlcvBar bar,
+        bool isFinal, out double signalValue) => UpdateCore(context, series, bar, isFinal, false, out signalValue);
+
+    private MultiSeriesIndicatorStateResult UpdateCore(MultiSeriesContext context, SeriesKey series, OhlcvBar bar,
+        bool isFinal, bool includeOutputs, out double signalValue)
     {
+        signalValue = 0;
         if (!_alignment.CanUpdate(context, _primarySeries, _marketSeries, series, bar, isFinal))
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
 
@@ -384,6 +391,7 @@ public sealed class SectorRotationModelState : IMultiSeriesIndicatorState, IDisp
         var raw = (TechnicalRatingValue)100d * (bull - bear);
         var osc = PairedOutput.Publish(GetType(), 0, _index, raw);
         var signal = PairedOutput.Publish(GetType(), 1, _index, _signal.Next(raw, false));
+        signalValue = signal;
         if (isFinal) { _primaryRoc1.Next(bar.Close, true); _primaryRoc2.Next(bar.Close, true); _signal.Next(raw, true); _index++; }
 
         IReadOnlyDictionary<string, double>? outputs = null;

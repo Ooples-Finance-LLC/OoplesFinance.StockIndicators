@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "a986e16d06c167dc3891efc850354ddc4ab2652203f4e7ebfee08545c5d5199e",
+    "archive": "benchmarks/results/remaining-indicators/skender-adl-pair-prefix-20261113-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "1b5cfc7ad4f3141b6230c021b199e7a02f485c88a93b52c0c9dba0c0de5f981f",
+    "archive": "benchmarks/results/remaining-indicators/skender-adl-pair-prefix-20261113-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "1ba09d782d5954af98ebed0832a6e576867791608b506a454aae363a92736643",
+    "archive": "benchmarks/results/remaining-indicators/skender-adl-pair-prefix-20261113-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "308536840c09761a08e751ab88ca1be160dd50a29455225c61599fc1af273bd8",
+    "archive": "benchmarks/results/remaining-indicators/skender-adl-pair-prefix-20261113-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "a4ea94fe03b970ef032498fff206f0243f77842667b6411d515d727dbdef7ad4",
+    "archive": "benchmarks/results/remaining-indicators/skender-adl-pair-prefix-20261113-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "b49511ef72efae7c44e87d753882328d18c9015546e189f4fcba0cd972c2f451",
+    "archive": "benchmarks/results/remaining-indicators/skender-adl-pair-prefix-20261113-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "57b8332f70925d3632dfdde7c6d51c3dfa138cd4417bb3576fe41e7a03315d0d",
+    "archive": "benchmarks/results/remaining-indicators/skender-adl-pair-prefix-20261113-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "df21ea96ea05f87f912c0c9d64bb1df7a4b83a54f89bde46538d27849bcbd0b4",
+    "archive": "benchmarks/results/remaining-indicators/skender-adl-pair-prefix-20261113-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "05f1215fe2d4fa43fbb185ff8ba1bc49398d7fb4035dfdcce9f485a5a9b103fd",
+    "archive": "benchmarks/results/remaining-indicators/skender-adl-pair-prefix-20261113-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "411f7d7a7c5386736e145fcef20553dda2b51ed298d284f66aef61d74c5299de",
+    "archive": "benchmarks/results/remaining-indicators/skender-adl-pair-prefix-20261113-report-integration/updated-pair-details.png.gz"
+  }
+}

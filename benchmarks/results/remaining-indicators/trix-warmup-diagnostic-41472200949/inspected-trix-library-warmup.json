@@ -1,0 +1,119 @@
+{
+  "run": "41472200949",
+  "profile": "trix-library-warmup",
+  "integrity_verified": true,
+  "diagnostic_only": true,
+  "rows": [
+    {
+      "round": 0,
+      "arm": "old",
+      "bars": 1000,
+      "method": "Ooples",
+      "mean_ns": 589200,
+      "lower_ns": 584294.9712993186,
+      "upper_ns": 594105.0287006814,
+      "samples": 9,
+      "allocated_bytes": 197584
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "bars": 10000,
+      "method": "Ooples",
+      "mean_ns": 6079961.111111111,
+      "lower_ns": 6052530.298536012,
+      "upper_ns": 6107391.92368621,
+      "samples": 9,
+      "allocated_bytes": 1943272
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "bars": 1000,
+      "method": "Ooples",
+      "mean_ns": 366875,
+      "lower_ns": 341714.90286538756,
+      "upper_ns": 392035.09713461244,
+      "samples": 8,
+      "allocated_bytes": 197496
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "bars": 10000,
+      "method": "Ooples",
+      "mean_ns": 3722511.111111111,
+      "lower_ns": 3707075.227048456,
+      "upper_ns": 3737946.995173766,
+      "samples": 9,
+      "allocated_bytes": 1942848
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "bars": 1000,
+      "method": "Ooples",
+      "mean_ns": 372840,
+      "lower_ns": 369857.555158441,
+      "upper_ns": 375822.444841559,
+      "samples": 10,
+      "allocated_bytes": 197464
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "bars": 10000,
+      "method": "Ooples",
+      "mean_ns": 4351662.5,
+      "lower_ns": 4050886.6895707487,
+      "upper_ns": 4652438.310429251,
+      "samples": 8,
+      "allocated_bytes": 1943152
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "bars": 1000,
+      "method": "Ooples",
+      "mean_ns": 603911.1111111111,
+      "lower_ns": 561403.6210602717,
+      "upper_ns": 646418.6011619505,
+      "samples": 9,
+      "allocated_bytes": 197584
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "bars": 10000,
+      "method": "Ooples",
+      "mean_ns": 5925700,
+      "lower_ns": 5870474.243256617,
+      "upper_ns": 5980925.756743383,
+      "samples": 9,
+      "allocated_bytes": 1942600
+    }
+  ],
+  "code": [],
+  "logs": [
+    {
+      "round": 0,
+      "console_sha256": "409788e858134ee052377359e3419601c41cece5219e5e2f23dc500936a5be9a",
+      "bdn_sha256": "8e94b90fc20d60b43f4c0ec4517c5780aba049b8916b0772353bd01496417997"
+    },
+    {
+      "round": 1,
+      "console_sha256": "5f36bb79910048c473f349733738c096797514afbd3ffa23009e0f09a245645c",
+      "bdn_sha256": "0e46f94b5f4d5df71f208f398c5e5dd9c6d0c10310ae9fd7df8994fffe8a9a2f"
+    },
+    {
+      "round": 2,
+      "console_sha256": "9207914c87c77663657f83db61111ad982447d06e07bb702def17b7bd57be65b",
+      "bdn_sha256": "99fed41fc4458c4dda62789bd3810f0cd273f3968668d4889fdcaa99841f05f0"
+    },
+    {
+      "round": 3,
+      "console_sha256": "0b185a5253c0831f83d2a779cb76b651fe18127ad5d073f7446149df94991038",
+      "bdn_sha256": "cc80d24eac3dd0477b7681f68cac19346aa416cfcf7db9b1daad20b9add0a4c9"
+    }
+  ]
+}

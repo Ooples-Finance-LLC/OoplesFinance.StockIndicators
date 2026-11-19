@@ -1,0 +1,26 @@
+{
+  "source_integration_commit": "21e00644edbb600fa9fe18f9c43126fc88fa45d4",
+  "qualified_source": "d15373f629c8a9f8ab8a8552f0c5317524768708",
+  "compiled_source": "f69805c2f8687a119c2a2d9c0cf4b7891bfbb66c",
+  "source_fingerprint": "95fc2d0c53327f3c3281b83f5f90ca560604dd8f4627b68e96ae352549e2a1c7",
+  "unit": 13,
+  "comparator": 10,
+  "actual_gpu": 100,
+  "inventory_tests": 8,
+  "production_sha256": "236ef811fff577ce693a04e04f5fdaa9ec44c35d75bdc3aa6e8f2c12179adfde",
+  "run_id": "42026525060",
+  "cases": 90,
+  "decisions": 18,
+  "verdicts": {
+    "inconclusive": 17,
+    "faster": 1
+  },
+  "integrated_paths": [
+    "src/Indicators/WindowDeviationBands.cs",
+    "tests/ModelsTests/DeviationPositionCertificateTests.cs"
+  ],
+  "excluded": [
+    "Only this complete source-bound deviation qualification is imported; no pooling or policy changes"
+  ],
+  "verified_utc": "2026-11-05T13:13:34.317167+00:00"
+}

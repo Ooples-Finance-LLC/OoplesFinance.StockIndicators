@@ -1,0 +1,51 @@
+{
+  "source": "8c210d75f2fef0c1226183f9b995a7156d7f3af6",
+  "run": "43530847086",
+  "rows": [
+    {
+      "pair": "TaLib.Functions.T3",
+      "bars": 1000,
+      "old_ratio": 0.025327943868212324,
+      "new_ratio": 0.04980727771607761,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "5a5109ada5aebcffd2869a1b4a81e3372aebb944",
+      "same_run_old_source_ooples_means_ms": [
+        0.22401,
+        0.1936
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.21511111111111111,
+        0.1913375
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.T3",
+      "bars": 10000,
+      "old_ratio": 0.029888782268086642,
+      "new_ratio": 0.05172472648449367,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "5a5109ada5aebcffd2869a1b4a81e3372aebb944",
+      "same_run_old_source_ooples_means_ms": [
+        1.7797222222222222,
+        1.7994777777777777
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        1.089611111111111,
+        1.17178
+      ]
+    }
+  ],
+  "new_wins": {
+    "1000": 0,
+    "10000": 0
+  },
+  "old_wins": {
+    "1000": 0,
+    "10000": 0
+  },
+  "comparison_basis": "old_ratio/old_win are the prior report values with historical source/host/runtime provenance. Same-run old/new source means are separate qualification evidence; native intervals refer to the final candidate/native control, not a paired old-source/native measurement."
+}

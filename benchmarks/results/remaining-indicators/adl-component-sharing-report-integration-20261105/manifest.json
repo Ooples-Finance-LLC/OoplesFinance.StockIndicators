@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "13b7cea4dea84346d3ed58fa9d6ec62f4fc44bc7b21e2ddafe46163801674346",
+    "archive": "benchmarks/results/remaining-indicators/adl-component-sharing-report-integration-20261105/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "c9d8a0ca1e76e21fa6de8282fd4685def122ff91b8b4243b0cd0902c00e807c7",
+    "archive": "benchmarks/results/remaining-indicators/adl-component-sharing-report-integration-20261105/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "2af511c57dc21232f200b5456a65aeda37c8b8bc5f85954993367a275feebd08",
+    "archive": "benchmarks/results/remaining-indicators/adl-component-sharing-report-integration-20261105/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "90ad9d7da57fe3f0bf3b56c6dd291eea88fea62eb0c637a7d19902bfc15f1b6e",
+    "archive": "benchmarks/results/remaining-indicators/adl-component-sharing-report-integration-20261105/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "879d1461b314c376d7ba40e7d80e90fde2e75d0eafa1570242c27bcae4432c51",
+    "archive": "benchmarks/results/remaining-indicators/adl-component-sharing-report-integration-20261105/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "08f1cb24e920bf0389eebb7a452543239fc462f28d20d2b1e972342b45ffdc81",
+    "archive": "benchmarks/results/remaining-indicators/adl-component-sharing-report-integration-20261105/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "fd0bce03a467729db0670f39064d5fd135dda67902246a4ad5fc14738a3eb5d5",
+    "archive": "benchmarks/results/remaining-indicators/adl-component-sharing-report-integration-20261105/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "135429ab4939e732a135d659b15c677d3f5cbe9757bd8206fbf248c774514f5c",
+    "archive": "benchmarks/results/remaining-indicators/adl-component-sharing-report-integration-20261105/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "ceadd9d1c22e4188c8e748649f6a38787eabd48dcd87263141c07c0c3763f739",
+    "archive": "benchmarks/results/remaining-indicators/adl-component-sharing-report-integration-20261105/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "7bd0ceb43060882a49a49f06dd923829f15518261160c06e7d1fa2e3a2d82020",
+    "archive": "benchmarks/results/remaining-indicators/adl-component-sharing-report-integration-20261105/updated-pair-details.png.gz"
+  }
+}

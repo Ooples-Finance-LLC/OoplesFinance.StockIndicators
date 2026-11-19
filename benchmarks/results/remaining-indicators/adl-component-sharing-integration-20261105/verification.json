@@ -1,0 +1,26 @@
+{
+  "source_integration_commit": "e43e155221e1b5e28a870f3e67c257d72efbce88",
+  "qualified_source": "1555811d175c61499565df89150c6fda17772c8e",
+  "compiled_source": "0af38f75d560a119237b9d83a233e584ca1f8747",
+  "source_fingerprint": "65ab7a062d2d7643517ef6486f5ffd05a4f7429405dd0bd6811fee1587b57ed8",
+  "unit": 7,
+  "comparator": 25,
+  "actual_gpu": 100,
+  "inventory_tests": 8,
+  "production_sha256": "e5c245e4f5f8985a0f999152e89e2c68ec406b16db241d49b02fcc3a2e6fd69a",
+  "run_id": "42163827026",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 1,
+    "faster": 5
+  },
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.AccumulationDistribution.cs",
+    "tests/ModelsTests/AccumulationDistributionComponentSharingTests.cs"
+  ],
+  "excluded": [
+    "Only this complete source-bound A/D qualification is imported; no pooling or policy changes"
+  ],
+  "verified_utc": "2026-11-06T05:45:47.093951+00:00"
+}

@@ -1,0 +1,435 @@
+using System.Numerics;
+
+namespace OoplesFinance.StockIndicators.Helpers;
+
+// Exact integer subnormal-grid units, with the common binary scale kept out
+// of the coefficient. Uncertified ratios retain the original wide arithmetic.
+internal readonly struct CompactMacdValue
+{
+    private readonly BigInteger _coefficient;
+    private readonly int _scale;
+#if !NETFRAMEWORK
+    private readonly Int128 _compact;
+    private readonly bool _wide;
+    private CompactMacdValue(Int128 coefficient, int scale)
+    {
+        _compact = coefficient; _scale = coefficient == 0 ? 0 : scale;
+        _coefficient = default; _wide = false;
+    }
+    private static UInt128 Magnitude(Int128 value) => value < 0
+        ? (UInt128)(-(value + 1)) + 1 : (UInt128)value;
+    private static int Width(UInt128 value)
+    {
+        ulong high = (ulong)(value >> 64);
+        return high != 0 ? 128 - BitOperations.LeadingZeroCount(high)
+            : 64 - BitOperations.LeadingZeroCount((ulong)value);
+    }
+#endif
+    private CompactMacdValue(BigInteger coefficient, int scale)
+    {
+        _scale = coefficient.IsZero ? 0 : scale;
+#if !NETFRAMEWORK
+        if (BigInteger.Abs(coefficient).GetBitLength() <= 127)
+        {
+            _compact = (Int128)coefficient; _coefficient = default; _wide = false;
+            return;
+        }
+        _compact = default; _wide = true;
+#endif
+        _coefficient = coefficient;
+    }
+    private BigInteger Coefficient
+    {
+        get
+        {
+#if !NETFRAMEWORK
+            if (!_wide) return (BigInteger)_compact;
+#endif
+            return _coefficient;
+        }
+    }
+    internal bool IsZero
+    {
+        get
+        {
+#if !NETFRAMEWORK
+            if (!_wide) return _compact == 0;
+#endif
+            return _coefficient.IsZero;
+        }
+    }
+    internal BigInteger Units => Coefficient << _scale;
+    // These adapters receive already-rounded stages. Ordinary stages remain
+    // binary64; extended exponents retain their exact integer-grid units.
+    internal static CompactMacdValue FromRounded(JurikDyadic value)
+    {
+        double ordinary = value.Mean(1);
+        return FrameworkCompatibility.IsFinite(ordinary) ? Of(ordinary) : FromUnits(value.RoundedUnits());
+    }
+    internal JurikDyadic ToRoundedDyadic()
+    {
+        double ordinary = Publish();
+        return FrameworkCompatibility.IsFinite(ordinary) ? JurikDyadic.FromDouble(ordinary) : JurikDyadic.FromUnits(Units);
+    }
+    internal static CompactMacdValue Of(double value)
+    {
+        long bits = BitConverter.DoubleToInt64Bits(value);
+        int exponent = (int)((bits >> 52) & 2047);
+        if (exponent == 2047) throw new ArgumentOutOfRangeException(nameof(value));
+        long coefficient = bits & ((1L << 52) - 1);
+        if (exponent != 0) coefficient |= 1L << 52;
+#if !NETFRAMEWORK
+        return new((Int128)(bits < 0 ? -coefficient : coefficient), exponent == 0 ? 0 : exponent - 1);
+#else
+        return new(new BigInteger(bits < 0 ? -coefficient : coefficient), exponent == 0 ? 0 : exponent - 1);
+#endif
+    }
+    internal static CompactMacdValue FromUnits(BigInteger units)
+    {
+#if !NETFRAMEWORK
+        if (!units.IsZero)
+        {
+            int scale = checked((int)BigInteger.TrailingZeroCount(BigInteger.Abs(units)));
+            return new(units >> scale, scale);
+        }
+#endif
+        return new(units, 0);
+    }
+    public static CompactMacdValue operator +(CompactMacdValue left, CompactMacdValue right)
+    {
+        if (left.IsZero) return right;
+        if (right.IsZero) return left;
+        int scale = Math.Min(left._scale, right._scale);
+#if !NETFRAMEWORK
+        int leftShift = left._scale - scale, rightShift = right._scale - scale;
+        if (!left._wide && !right._wide
+            && Width(Magnitude(left._compact)) + leftShift <= 127
+            && Width(Magnitude(right._compact)) + rightShift <= 127)
+        {
+            // Shifts are guarded separately: checked shifts do not detect lost bits.
+            try { return new(checked((left._compact << leftShift) + (right._compact << rightShift)), scale); }
+            catch (OverflowException) { } // Exact wide fallback below.
+        }
+#endif
+        return new((left.Coefficient << (left._scale - scale))
+            + (right.Coefficient << (right._scale - scale)), scale);
+    }
+    public static CompactMacdValue operator -(CompactMacdValue left, CompactMacdValue right)
+    {
+#if !NETFRAMEWORK
+        if (!right._wide && right._compact != Int128.MinValue)
+            return left + new CompactMacdValue(-right._compact, right._scale);
+#endif
+        return left + new CompactMacdValue(-right.Coefficient, right._scale);
+    }
+    // Reuse the proven word-smoother quotient estimate for fixed periods.
+    // The zero reciprocal retains general division outside the bounded domain.
+    internal readonly struct EmaRecurrence
+    {
+        private readonly int _period;
+        private readonly ulong _reciprocal;
+
+        internal EmaRecurrence(int period)
+        {
+            _period = period;
+#if !NETFRAMEWORK
+            _reciprocal = period is >= 1 and <= 2047
+                ? (ulong)(((UInt128)1 << 64) / (ulong)(period + 1)) : 0;
+#else
+            _reciprocal = 0;
+#endif
+        }
+
+        internal CompactMacdValue Advance(in CompactMacdValue prior, in CompactMacdValue input) =>
+            prior.AdvanceEma(input, _period, _reciprocal);
+    }
+
+    // Keep the unrounded recurrence in one compact expression. The fallback
+    // preserves extended exponents and all exact subnormal rounding boundaries.
+    internal CompactMacdValue AdvanceEma(CompactMacdValue input, int period) => AdvanceEma(input, period, 0);
+
+    private CompactMacdValue AdvanceEma(CompactMacdValue input, int period, ulong reciprocal)
+    {
+        if (period < 1) throw new ArgumentOutOfRangeException(nameof(period));
+#if !NETFRAMEWORK
+        // Same-sign normal operands in the same binade form a convex mean.
+        // With period+1 <= 2048, the exact weighted 53-bit significands fit
+        // UInt64. Integer quotient/remainder gives the final ties-to-even
+        // rounding directly, without constructing a general ratio certificate.
+        const long hiddenBit = 1L << 52, largestSignificand = (1L << 53) - 1;
+        if (!_wide && !input._wide && period <= 2047 && _scale == input._scale
+            && _scale >= 0 && _scale <= 2045
+            && ((_compact >= hiddenBit && _compact <= largestSignificand
+                && input._compact >= hiddenBit && input._compact <= largestSignificand)
+                || (_compact <= -hiddenBit && _compact >= -largestSignificand
+                    && input._compact <= -hiddenBit && input._compact >= -largestSignificand)))
+        {
+            bool negative = _compact < 0;
+            ulong priorMagnitude = (ulong)(negative ? -_compact : _compact);
+            ulong inputMagnitude = (ulong)(negative ? -input._compact : input._compact);
+            ulong denominator = (ulong)(period + 1);
+            ulong numerator = checked(priorMagnitude * (ulong)(period - 1) + 2 * inputMagnitude);
+            ulong quotient, remainder;
+            if (reciprocal != 0)
+            {
+                // floor(2^64/d) underestimates n/d by less than one for
+                // n < 2^64. One correction recovers the exact quotient.
+                quotient = Math.BigMul(numerator, reciprocal, out _);
+                remainder = numerator - quotient * denominator;
+                if (remainder >= denominator) { quotient++; remainder -= denominator; }
+            }
+            else
+            {
+                quotient = numerator / denominator;
+                remainder = numerator % denominator;
+            }
+            ulong complement = denominator - remainder;
+            if (remainder > complement || remainder == complement && (quotient & 1) != 0)
+                quotient++;
+            // Round-to-nearest-even is symmetric under negation. This convex
+            // combination of normal same-sign inputs cannot round to zero.
+            return new(negative ? -(Int128)quotient : (Int128)quotient, _scale);
+        }
+        if (!_wide && !input._wide)
+        {
+            int scale = Math.Min(_scale, input._scale);
+            int leftShift = _scale - scale, rightShift = input._scale - scale;
+            if (Width(Magnitude(_compact)) + leftShift <= 127
+                && Width(Magnitude(input._compact)) + rightShift <= 127)
+            {
+                try
+                {
+                    Int128 numerator = checked((_compact << leftShift) * (period - 1)
+                        + (input._compact << rightShift) * 2);
+                    if (TryRatio(numerator, (UInt128)((long)period + 1), scale, out var result))
+                        return result;
+                }
+                catch (OverflowException) { } // Exact wide fallback below.
+            }
+        }
+#endif
+        return (Times(period - 1) + input.Times(2)).Round((long)period + 1);
+    }
+    // The fixed 0.15/0.075 coefficients are exact binary fractions. Keep their
+    // integer weights compact through the complete recurrence and round once.
+    internal CompactMacdValue AdvanceFixedEma(CompactMacdValue input, long alpha, long denominator)
+    {
+        if (alpha <= 0 || alpha >= denominator) throw new ArgumentOutOfRangeException(nameof(alpha));
+        long complement = denominator - alpha;
+#if !NETFRAMEWORK
+        const long hiddenBit = 1L << 52, largestSignificand = (1L << 53) - 1;
+        if (!_wide && !input._wide && _scale == input._scale
+            && _scale >= 0 && _scale <= 2045 && (denominator & (denominator - 1)) == 0
+            && ((_compact >= hiddenBit && _compact <= largestSignificand
+                && input._compact >= hiddenBit && input._compact <= largestSignificand)
+                || (_compact <= -hiddenBit && _compact >= -largestSignificand
+                    && input._compact <= -hiddenBit && input._compact >= -largestSignificand)))
+        {
+            // Fixed EMA weights are binary fractions. A positive Int64 power
+            // of two is at most 2^62, so its convex 53-bit weighted numerator
+            // fits 115 bits. Shifts retain the exact quotient and remainder.
+            bool negative = _compact < 0;
+            UInt128 priorMagnitude = (UInt128)(negative ? -_compact : _compact);
+            UInt128 inputMagnitude = (UInt128)(negative ? -input._compact : input._compact);
+            UInt128 numerator = checked(priorMagnitude * (ulong)complement + inputMagnitude * (ulong)alpha);
+            int shift = BitOperations.TrailingZeroCount((ulong)denominator);
+            ulong quotient = (ulong)(numerator >> shift);
+            ulong remainder = (ulong)(numerator & (ulong)(denominator - 1));
+            ulong residualComplement = (ulong)denominator - remainder;
+            if (remainder > residualComplement || remainder == residualComplement && (quotient & 1) != 0)
+                quotient++;
+            return new(negative ? -(Int128)quotient : (Int128)quotient, _scale);
+        }
+        if (!_wide && !input._wide)
+        {
+            int scale = Math.Min(_scale, input._scale);
+            int leftShift = _scale - scale, rightShift = input._scale - scale;
+            if (Width(Magnitude(_compact)) + leftShift <= 127
+                && Width(Magnitude(input._compact)) + rightShift <= 127)
+            {
+                try
+                {
+                    Int128 numerator = checked((_compact << leftShift) * complement
+                        + (input._compact << rightShift) * alpha);
+                    if (TryRatio(numerator, (UInt128)denominator, scale, out var result))
+                        return result;
+                }
+                catch (OverflowException) { } // Preserve the exact wide recurrence below.
+            }
+        }
+#endif
+        return (Times(complement) + input.Times(alpha)).Round(denominator);
+    }
+    // Integer periods and recurrence weights need no BigInteger conversion on
+    // the compact path. Overflow still uses the same exact wide multiplication.
+    internal CompactMacdValue Times(long weight)
+    {
+#if !NETFRAMEWORK
+        if (!_wide)
+        {
+            try { return new(checked(_compact * weight), _scale); }
+            catch (OverflowException) { } // Exact wide fallback below.
+        }
+#endif
+        return new(Coefficient * weight, _scale);
+    }
+
+    internal CompactMacdValue Round(long divisor)
+    {
+#if !NETFRAMEWORK
+        if (!_wide)
+        {
+            if (divisor == 1 && Width(Magnitude(_compact)) <= 106)
+            {
+                double rounded = JurikDyadic.FromBinaryProduct(_compact, _scale - 1074).Mean(1);
+                if (double.IsFinite(rounded)) return Of(rounded);
+            }
+            if (divisor > 0 && TryRatio(_compact, (UInt128)divisor, _scale, out var compact))
+                return compact;
+        }
+#endif
+        return Ratio(Coefficient, divisor, _scale);
+    }
+
+    internal CompactMacdValue Times(BigInteger weight)
+    {
+#if !NETFRAMEWORK
+        if (!_wide && BigInteger.Abs(weight).GetBitLength() <= 127)
+        {
+            try { return new(checked(_compact * (Int128)weight), _scale); }
+            catch (OverflowException) { } // Exact wide fallback below.
+        }
+#endif
+        return new(Coefficient * weight, _scale);
+    }
+    internal CompactMacdValue Round(BigInteger divisor)
+    {
+#if !NETFRAMEWORK
+        // A unit divisor needs only binary rounding, not quotient certification.
+        // Reuse the established publisher within its 106-bit input contract;
+        // extended unpublished results retain the exact wide fallback below.
+        if (!_wide && divisor.IsOne && Width(Magnitude(_compact)) <= 106)
+        {
+            double rounded = JurikDyadic.FromBinaryProduct(_compact, _scale - 1074).Mean(1);
+            if (double.IsFinite(rounded)) return Of(rounded);
+        }
+        if (!_wide && divisor.Sign > 0 && divisor.GetBitLength() <= 128
+            && TryRatio(_compact, (UInt128)divisor, _scale, out var compact)) return compact;
+#endif
+        return Ratio(Coefficient, divisor, _scale);
+    }
+    internal CompactMacdValue Percentage(CompactMacdValue divisor)
+    {
+        int scale = checked(_scale - divisor._scale + 1074);
+#if !NETFRAMEWORK
+        if (!_wide && !divisor._wide && divisor._compact != 0)
+        {
+            try
+            {
+                Int128 numerator = checked(100 * _compact * (divisor._compact < 0 ? -1 : 1));
+                if (TryRatio(numerator, Magnitude(divisor._compact), scale, out var compact)) return compact;
+            }
+            catch (OverflowException) { } // Exact wide fallback below.
+        }
+#endif
+        return Ratio(100 * Coefficient * divisor.Coefficient.Sign, BigInteger.Abs(divisor.Coefficient), scale);
+    }
+#if !NETFRAMEWORK
+    private static bool TryRatio(Int128 numerator, UInt128 denominator, int scale, out CompactMacdValue result)
+    {
+        result = default;
+        if (numerator == 0) return denominator != 0;
+        // Periods and seeding counts use the existing exact integer-count
+        // publisher. Subnormal, extended and larger-divisor cases retain
+        // general certification and the caller's original wide fallback.
+        if (denominator <= int.MaxValue
+            && CertifiedMeanRelativeError.TryDivideCount(Magnitude(numerator), (int)denominator,
+                checked(scale - 1074), out double counted))
+        {
+            result = Of(numerator < 0 ? -counted : counted);
+            return true;
+        }
+        if (!CertifiedCompactRatio.TryDivide(Magnitude(numerator), denominator,
+            checked(scale - 1074), out double rounded)) return false;
+        result = Of(numerator < 0 ? -rounded : rounded);
+        return true;
+    }
+#endif
+    private static CompactMacdValue Ratio(BigInteger numerator, BigInteger denominator, int scale)
+    {
+        if (denominator.Sign <= 0) throw new ArgumentOutOfRangeException(nameof(denominator));
+        if (numerator.IsZero) return default;
+#if !NETFRAMEWORK
+        var magnitude = BigInteger.Abs(numerator);
+        if (magnitude.GetBitLength() <= 128 && denominator.GetBitLength() <= 128
+            && CertifiedCompactRatio.TryDivide((UInt128)magnitude, (UInt128)denominator,
+                checked(scale - 1074), out double rounded))
+            return Of(numerator.Sign < 0 ? -rounded : rounded);
+#endif
+        // This also preserves extended unpublished values and exact subnormal
+        // rounding. Never publish a finite approximation for an unproven ratio.
+        return FromUnits(scale >= 0
+            ? RocBankValue.RoundUnits(numerator << scale, denominator)
+            : RocBankValue.RoundUnits(numerator, denominator << -scale));
+    }
+    // Publish the ratio directly: rounded integer zero cannot retain the sign
+    // of an underflowing negative quotient. Those cases use the original path.
+    internal double PublishRatio(long divisor)
+    {
+        if (divisor <= 0) throw new ArgumentOutOfRangeException(nameof(divisor));
+#if !NETFRAMEWORK
+        // Classical windows usually divide by a small integer. Reuse exact
+        // count rounding instead of certifying a general rational quotient.
+        if (!_wide && divisor <= int.MaxValue
+            && CertifiedMeanRelativeError.TryDivideCount(Magnitude(_compact), (int)divisor,
+                checked(_scale - 1074), out double counted))
+            return _compact < 0 ? -counted : counted;
+        if (!_wide && CertifiedCompactRatio.TryDivide(Magnitude(_compact),
+            (UInt128)divisor, checked(_scale - 1074), out double result))
+            return _compact < 0 ? -result : result;
+#endif
+        return ExactMeanAccumulator.UnitRatio(Units, divisor);
+    }
+
+    // A/D publishes each exact prefix immediately; avoid decoding and encoding
+    // the already-rounded finite result again. Stored exact state stays intact.
+    internal double PublishRoundedSum()
+    {
+#if !NETFRAMEWORK
+        if (!_wide && Width(Magnitude(_compact)) <= 106)
+        {
+            double rounded = JurikDyadic.FromBinaryProduct(_compact, _scale - 1074).Mean(1);
+            if (double.IsFinite(rounded)) return rounded == 0 ? 0 : rounded;
+        }
+#endif
+        return Round(1L).Publish();
+    }
+
+    internal double Publish()
+    {
+#if !NETFRAMEWORK
+        if (!_wide)
+        {
+            UInt128 magnitude = Magnitude(_compact);
+            int width = Width(magnitude);
+            if (width <= 53)
+            {
+                // This integer already fits a binary64 significand. For a normal
+                // result, compose its exact bits without floating-point scaling.
+                int exponent = _scale + width - 52;
+                if (width != 0 && exponent > 0 && exponent < 2047)
+                {
+                    ulong significand = (ulong)magnitude << (53 - width);
+                    ulong bits = ((ulong)exponent << 52)
+                        | (significand & ((1UL << 52) - 1));
+                    if (_compact < 0) bits |= 1UL << 63;
+                    return BitConverter.Int64BitsToDouble(unchecked((long)bits));
+                }
+                double value = Math.ScaleB((double)(ulong)magnitude, _scale - 1074);
+                if (!double.IsInfinity(value)) return _compact < 0 ? -value : value;
+            }
+        }
+#endif
+        return ExactMeanAccumulator.UnitRatio(Units, 1);
+    }
+}

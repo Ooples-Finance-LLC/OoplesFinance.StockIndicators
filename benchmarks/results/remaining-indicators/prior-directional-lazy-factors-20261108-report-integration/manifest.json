@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "ea56f58bb9a155163deaad9460d1ad2051eb742f40a9629d60b9481e774de4e9",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-lazy-factors-20261108-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "4d1d85916d1a73c034151fe24c859296af7af0452545c4ec334b8530b96224df",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-lazy-factors-20261108-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "b2daae49632135af8cb75a84ef41d6360bd47a1adc94a6ebd1138bf0ea3d9f7b",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-lazy-factors-20261108-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "6cbb4ad7ecbe29a213660108e8ab24315fd064c10fa9c535c6d165af75b3e671",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-lazy-factors-20261108-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "e5e346ce2ef162fc1077a2ce2948f4f74c2bf09b6b43ad6e897f8b9f661615eb",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-lazy-factors-20261108-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "90e737148c0a90b2983a60c87d6b68f57fa0c24e43c27109c155932ce9b8bdcf",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-lazy-factors-20261108-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "16a2ef5f9b3ab782886e821cb4547979a2e2890c38c83c1ecbfd11fb47c35f1e",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-lazy-factors-20261108-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "c524282363391fe97d65d845372fec0f508956e45c8ee53db18028d9820a5fcd",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-lazy-factors-20261108-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "589920fc2bb6839e54c1eb6c1aabb9363d4a910e4d3ea25aa5b96e161fed20e9",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-lazy-factors-20261108-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "be8d36eaf61c4f1bc1501c172cca799ec533d4d21cb677a1d3f2a63c42b6e20d",
+    "archive": "benchmarks/results/remaining-indicators/prior-directional-lazy-factors-20261108-report-integration/updated-pair-details.png.gz"
+  }
+}

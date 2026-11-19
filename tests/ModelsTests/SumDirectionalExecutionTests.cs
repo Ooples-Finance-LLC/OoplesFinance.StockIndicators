@@ -34,10 +34,16 @@ public sealed class SumDirectionalExecutionTests
             double Value() => Math.ScaleB(random.NextDouble() - .5, random.Next(-1070, 1024));
             return new Bar(default, 0, Value(), Value(), Value(), 1);
         }).ToArray();
+        double[] boundaries = [0, -0d, double.Epsilon, -double.Epsilon,
+            Math.ScaleB(1, -1022), Math.BitDecrement(1), 1, Math.BitIncrement(1),
+            Math.ScaleB(1, 53), -Math.ScaleB(1, 53), double.MaxValue, -double.MaxValue];
+        var rangeBoundaries = Enumerable.Range(0, 12 * 12 * 12).Select(i =>
+            new Bar(default, 0, boundaries[i % 12], boundaries[i / 12 % 12],
+                boundaries[i / 144], 1)).ToArray();
         var state = (IMultiOutputState)new SumSeededDirectionalIndex(period).CreateState();
         var output = new double[10];
         foreach (var bars in new[] { ordinary, extreme.Concat(ordinary).ToArray(),
-            extreme.Reverse().Concat(ordinary).ToArray(), missedSeed, ties, varied, ordinary })
+            extreme.Reverse().Concat(ordinary).ToArray(), missedSeed, ties, varied, rangeBoundaries, ordinary })
         {
             var expected = SumDirectionalReference.Calculate(bars, period);
             state.Reset();
@@ -66,5 +72,46 @@ public sealed class SumDirectionalExecutionTests
         for (int i = 0; i < 4000; i++) state.Update(in bars[i % bars.Length], output);
         Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
         Assert.All(output.Skip(5), value => Assert.Equal(1d, value));
+    }
+
+    [Theory]
+    [InlineData(2)]
+    [InlineData(14)]
+    [InlineData(int.MaxValue)]
+    public void ExactMovementSelectionPreservesNearTiesAndFallbackTransitions(int period)
+    {
+        var bars = new List<Bar>();
+        foreach (int scale in new[] { 0, -1000, 900, 0 })
+        {
+            double one = Math.ScaleB(1, scale), tiny = Math.ScaleB(1, scale - 54);
+            (double High, double Low)[] transitions =
+            [
+                (-tiny, one), (one, 0), (0, tiny), (one, -one),
+                (Math.BitIncrement(one), -one), (one, -Math.BitIncrement(one)),
+                (one, -one), (one * 2, -one * 2), (one, -one),
+                (double.MaxValue, -double.MaxValue), (-double.MaxValue, double.MaxValue),
+                (double.Epsilon, -double.Epsilon), (-0d, 0d), (0d, -0d)
+            ];
+            for (int repeat = 0; repeat < 3; repeat++)
+                bars.AddRange(transitions.Select(v => new Bar(default, 0, v.High, v.Low, 0, 1)));
+        }
+        var input = bars.ToArray();
+        var expected = SumDirectionalReference.Calculate(input, period);
+        var state = (IMultiOutputState)new SumSeededDirectionalIndex(period).CreateState();
+        var output = new double[10];
+        for (int replay = 0; replay < 2; replay++)
+        {
+            state.Reset();
+            for (int i = 0; i < input.Length; i++)
+            {
+                state.Update(in input[i], output);
+                for (int slot = 0; slot < 5; slot++)
+                {
+                    Assert.Equal(expected[slot][i].HasValue ? 1d : 0d, output[slot + 5]);
+                    Assert.Equal(BitConverter.DoubleToInt64Bits(expected[slot][i] ?? 0),
+                        BitConverter.DoubleToInt64Bits(output[slot]));
+                }
+            }
+        }
     }
 }

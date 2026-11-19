@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "3f93e9702c446e1eb31eebc82d539e43b1eb6fe2dc64fa6d393df1b23aa92d7a",
+    "archive": "benchmarks/results/remaining-indicators/accepted-carryover-composition-20261107-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "38f3290bab69268681e9c5ee928a4fa1230c029051fe6296d5b260d16e96cfb1",
+    "archive": "benchmarks/results/remaining-indicators/accepted-carryover-composition-20261107-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "10e0094684d47b80f6b701d5e6976aef4cd588453c7f56987abaf0718d27375f",
+    "archive": "benchmarks/results/remaining-indicators/accepted-carryover-composition-20261107-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "419cf12feaad5e36ea9a2600875c85afb2c3265b869f4888177fa5c517fd6dc9",
+    "archive": "benchmarks/results/remaining-indicators/accepted-carryover-composition-20261107-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "12ad15c9acb3d2b3e93d85c296f047c85ecfda258fdc032593046faf99320f1f",
+    "archive": "benchmarks/results/remaining-indicators/accepted-carryover-composition-20261107-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "94f72e84a3363cbf8063c916ad8e19beb5c29d0852f7e3e69512843189060bad",
+    "archive": "benchmarks/results/remaining-indicators/accepted-carryover-composition-20261107-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "5fce62c26be1e2ea3e776f415563ccbca493070f808067717a342966ea51432c",
+    "archive": "benchmarks/results/remaining-indicators/accepted-carryover-composition-20261107-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "1d5c57dd060dfa6056282b68200b1d26a1f51484015481b1968f0b32fcf47f56",
+    "archive": "benchmarks/results/remaining-indicators/accepted-carryover-composition-20261107-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "2c99c04a34c88fc4fb5cf78f41e51234ff0bcf114b05e8f63e49db9f1eaabe3a",
+    "archive": "benchmarks/results/remaining-indicators/accepted-carryover-composition-20261107-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "274646c7ff61975bd09f85819a71527bd864394bda03a1272d2b8d9ab7ade84b",
+    "archive": "benchmarks/results/remaining-indicators/accepted-carryover-composition-20261107-report-integration/updated-pair-details.png.gz"
+  }
+}

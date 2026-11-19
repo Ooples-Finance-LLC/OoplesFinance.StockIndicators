@@ -1,0 +1,28 @@
+{
+  "source_integration_commit": "647ab77d91fc1b7b6ee2742fb37fb5462688446f",
+  "qualified_source": "a942c58ce4829e5e723ba664840f034fc083129d",
+  "compiled_source": "ab6c6a6f960f50168c8ea3467c6023b80b5aa9b2",
+  "source_fingerprint": "b136acab49f8a241064a24befc111b063508cfe0f103f25fb65b4ff4d43f4832",
+  "unit": 53,
+  "comparator": 56,
+  "actual_gpu": 100,
+  "inventory_tests": 8,
+  "production_sha256": "89039eda294d0159a51ba14853a55a2b1cc5adb48914ee7a099434e22a70ab40",
+  "run_id": "42075234237",
+  "cases": 96,
+  "decisions": 18,
+  "verdicts": {
+    "inconclusive": 9,
+    "faster": 9
+  },
+  "integrated_paths": [
+    "src/Indicators/PriceRelativeStrength.cs",
+    "src/Indicators/VolatilityStopSnapshot.cs",
+    "tests/ModelsTests/PriceRelativeMeanTests.cs",
+    "tests/ModelsTests/VolatilityStopFiniteStageTests.cs"
+  ],
+  "excluded": [
+    "Only this complete source-bound combined qualification is imported; no pooling or policy changes"
+  ],
+  "verified_utc": "2026-11-05T18:19:15.510216+00:00"
+}

@@ -1,0 +1,29 @@
+{
+  "types": [
+    "Kama"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "769a2b5687249a00a2ec8eda0dbf6232db74364c",
+  "combined_input_sha256": "4cef5a70e31dba211902d94953a9ef8d6ac33083ae37be20f57705cc6f1bc01c",
+  "benchmark_fixture": {
+    "type": "RemainingKamaBenchmarks",
+    "operations": [
+      "Kama"
+    ]
+  },
+  "checks": {
+    "unit": 123,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/kama-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/kama-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

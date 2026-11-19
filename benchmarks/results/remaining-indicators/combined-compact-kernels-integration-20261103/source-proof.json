@@ -1,0 +1,77 @@
+{
+  "measured_source": "31515553c6894561a34c6c3beada122e74a77fb6",
+  "integration_source_commit": "6b1faf8b0a3d84681f1457ce12f7a4fbb9f3f0cf",
+  "inventory_commit": "563a95251c31003dff1cf777a7b4880b099935e2",
+  "run_id": "41686079328",
+  "plan_sha256": "5d34c99866e4a4417623b61e32067eca4a1eca2a1a024e8ac6dcb54a9712850a",
+  "source_and_tests_exactly_match": true,
+  "cases": 60,
+  "decisions": 12,
+  "verdicts": {
+    "faster": 12
+  },
+  "correctness": {
+    "unit": 48,
+    "comparator": 58,
+    "actual_gpu": 100,
+    "cpu_build_run": "41682337223",
+    "gpu_location": "Actual local Radeon RX5500XT on source-bound CI-built binaries"
+  },
+  "gpu_source_sha256": "aedf7c2ab7f77d62a12cfd55a87ad942f817b5ec9bd488164b4c02d60c73d0c3",
+  "inventory_tests": 8,
+  "report_imported": true,
+  "report_sha256": "79c464e499217b3ddd8861d0d3a33e8b73a031be8014d45b29177b7759af1b88",
+  "baseline_rows_updated": 4,
+  "baseline_rows_preserved": 798,
+  "builder_slots_updated": 8,
+  "builder_slots_preserved": 1536,
+  "browser_all802_csv_and_builder_values_verified": true,
+  "javascript_errors": [],
+  "report_archives": {
+    "before.html": {
+      "sha256": "9f081fe96d8e658ffb26a6a6650d3011803ccae20c5532a4b5484ce6d6c26fca",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-integration-20261103/before.html.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "2f0900b8965228ac5a38dedbd343f88147f4c7d8787d1a7cc953330b2e4ee27e",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-integration-20261103/browser-verification.json.gz"
+    },
+    "candidate.html": {
+      "sha256": "79c464e499217b3ddd8861d0d3a33e8b73a031be8014d45b29177b7759af1b88",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-integration-20261103/candidate.html.gz"
+    },
+    "imported.json": {
+      "sha256": "33d420fd92155ed98006c4d8f64c81716d833791eeee9df7c7a5ff13ecc60bb0",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-integration-20261103/imported.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "6d1fa2e58af5e1339d3a36466d42c80158b3004fd732f3baab0aad2240d73a74",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-integration-20261103/measurement.json.gz"
+    },
+    "refreshed-baseline.png": {
+      "sha256": "78c08375e7da94648a63d002d8dfdb5a03246774c09241361db7689f7bc193ff",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-integration-20261103/refreshed-baseline.png"
+    },
+    "staged.json": {
+      "sha256": "9148f933bbf50590a402fff7332f3caf03e606448e3e817d28aeb4ac7d25b342",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-integration-20261103/staged.json.gz"
+    },
+    "updated-pair-details.png": {
+      "sha256": "dd0854d88c2a6d3b63633b24ca287111f2cf56efc38f9caff9c4bf5565eeb262",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-integration-20261103/updated-pair-details.png"
+    },
+    "verify-hosted-certified-report-20261101.py": {
+      "sha256": "f1112bb2e981aa1fa68e0a41e917e423bcd8fd0856a40df97ccd6567986a7cda",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-integration-20261103/verify-hosted-certified-report-20261101.py.gz"
+    },
+    "import-hosted-certified-report-20261101.py": {
+      "sha256": "380745f04a0b07f71a33dd049bdf1f3392ff9a388f5cda9849c0ae3bda66be75",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-integration-20261103/import-hosted-certified-report-20261101.py.gz"
+    },
+    "report.py": {
+      "sha256": "ec5151d32284558921f0d3aee547f9b18e5599acd5e506f1348946adf7a29853",
+      "archive": "benchmarks/results/remaining-indicators/combined-compact-kernels-integration-20261103/report.py.gz"
+    }
+  },
+  "overall_goal_complete": false
+}

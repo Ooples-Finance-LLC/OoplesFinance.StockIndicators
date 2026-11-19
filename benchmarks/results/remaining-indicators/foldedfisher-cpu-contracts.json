@@ -1,0 +1,38 @@
+{
+  "batch": "foldedfisher-shared-execution",
+  "types": [
+    "FoldedRelativeStrengthIndex",
+    "FisherTransformStochasticOscillator"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 33,
+    "parity_passed": 8,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "foldedfisher-unit-verified.trx.gz",
+        "passed_cases": 33,
+        "trx_sha256": "12813a3890de6d6866b16d9a98093437fbc6e53dc2b619afd66c4b38cdd80f53"
+      },
+      {
+        "file": "foldedfisher-parity-verified.trx.gz",
+        "passed_cases": 8,
+        "trx_sha256": "445acc8fdbdb0f87e6feabba6123104f14a643a5f37797517462589237620893"
+      }
+    ],
+    "context": "Executed in the 6-facade sixth-stage working candidate with inherited unresolved MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "6c3a7fe967b37111d4cef55cd1e6a3c72b24117155de27d455b4956716760597",
+    "test_execution_input_sha256": {
+      "unit": "6c3a7fe967b37111d4cef55cd1e6a3c72b24117155de27d455b4956716760597",
+      "parity": "6c3a7fe967b37111d4cef55cd1e6a3c72b24117155de27d455b4956716760597"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "6c33eebf8c4520545e8767f584b4f3f051721d44"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

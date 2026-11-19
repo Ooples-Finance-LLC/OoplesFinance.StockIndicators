@@ -1,0 +1,23 @@
+{
+  "source_integration_commit": "e2035ecbcb62eea56e8ce3bb32db9bb36d52d4ae",
+  "qualified_source": "02adad1edeabc82866e0c28a11041565a4915819",
+  "compiled_source": "9ca9ded74f0df6aba87f38048d68d284bbbe2cbc",
+  "source_fingerprint": "f5ede628f8ad06a63daeb1bb791d124fa553758702c28a68808b59f78a07ba8a",
+  "unit": 68,
+  "comparator": 98,
+  "actual_gpu": 100,
+  "production_sha256": "0e8d6acf06e2a93b644876f6e799e559845443329ae800c8772178866b7c2409",
+  "run_id": "42909557184",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 3,
+    "faster": 3
+  },
+  "integrated_paths": [
+    "src/Helpers/TsiWordEmaRecurrence.cs",
+    "src/Indicators/SeededTrueStrength.cs",
+    "tests/ModelsTests/TsiWordEmaRecurrenceTests.cs"
+  ],
+  "verified_utc": "2026-11-10T22:32:24.626226+00:00"
+}

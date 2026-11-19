@@ -1,0 +1,41 @@
+{
+  "types": [
+    "Stochastic",
+    "StochasticK",
+    "StochasticD",
+    "PricePosition",
+    "StochasticOscillator",
+    "StochasticFastOscillator",
+    "StochasticRegular"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "e8fa5d5fb1127ce51ac99fbbd5f52d40af94885b",
+  "combined_input_sha256": "719dd69f5f8c7f909928eb88c614a78d909023db06f64b7fa7c2095e7a210b13",
+  "benchmark_fixture": {
+    "type": "RemainingStochasticBenchmarks",
+    "operations": [
+      "Stochastic",
+      "StochasticK",
+      "StochasticD",
+      "PricePosition",
+      "StochasticOscillator",
+      "StochasticFastOscillator",
+      "StochasticRegular"
+    ]
+  },
+  "checks": {
+    "unit": 1148,
+    "parity": 28,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/stochastic-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/stochastic-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

@@ -1,0 +1,339 @@
+{
+  "source": "f1e4d6715a265eaabe21b0d44c67d4ab6135fcb2",
+  "run": "43562679883",
+  "rows": [
+    {
+      "pair": "TaLib.Functions.Adx",
+      "bars": 1000,
+      "old_ratio": 0.052044830401543826,
+      "new_ratio": 0.06858898914607034,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        0.50509,
+        0.4067
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.34348,
+        0.3398666666666667
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.Adx",
+      "bars": 10000,
+      "old_ratio": 0.051716111192970024,
+      "new_ratio": 0.07158022530280359,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        4.275911111111111,
+        3.9092
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        3.197475,
+        3.1483555555555554
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.Adxr",
+      "bars": 1000,
+      "old_ratio": 0.05081039361975817,
+      "new_ratio": 0.0653509808555897,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        0.46092,
+        0.45494444444444443
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.36912222222222224,
+        0.37608888888888886
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.Adxr",
+      "bars": 10000,
+      "old_ratio": 0.052892132632577096,
+      "new_ratio": 0.06430463256497611,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        4.261775,
+        4.41003
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        3.639377777777778,
+        3.567977777777778
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.Dx",
+      "bars": 1000,
+      "old_ratio": 0.05460719036503993,
+      "new_ratio": 0.06956313010081613,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        0.377825,
+        0.38923
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.2720875,
+        0.27773333333333333
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.Dx",
+      "bars": 10000,
+      "old_ratio": 0.045288629939829024,
+      "new_ratio": 0.06107889974354796,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        3.52543,
+        3.4837666666666665
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        2.62243,
+        2.590911111111111
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.Ema",
+      "bars": 1000,
+      "old_ratio": 0.019453966205589385,
+      "new_ratio": 0.27892387501508026,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        0.1114,
+        0.09964444444444444
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.10135,
+        0.04605
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.Ema",
+      "bars": 10000,
+      "old_ratio": 0.09115101091976875,
+      "new_ratio": 0.08770443182781121,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        0.2702666666666667,
+        0.25992
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.2621,
+        0.26224444444444445
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.MinusDI",
+      "bars": 1000,
+      "old_ratio": 0.07038402801057847,
+      "new_ratio": 0.08082971647595964,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        0.23361,
+        0.23982
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.1877375,
+        0.19712222222222223
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.MinusDI",
+      "bars": 10000,
+      "old_ratio": 0.0704899788740123,
+      "new_ratio": 0.10270156088507994,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        1.9847,
+        1.9795666666666667
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        1.4694333333333331,
+        1.472811111111111
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.MinusDM",
+      "bars": 1000,
+      "old_ratio": 0.0832157139496589,
+      "new_ratio": 0.09181040336819231,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        0.21895,
+        0.1647111111111111
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.5050222222222223,
+        0.184075
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.MinusDM",
+      "bars": 10000,
+      "old_ratio": 0.12852666543951538,
+      "new_ratio": 0.16152933178157014,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        1.1639555555555554,
+        1.1912666666666667
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.9583,
+        0.9642555555555555
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.PlusDI",
+      "bars": 1000,
+      "old_ratio": 0.07347770912646404,
+      "new_ratio": 0.10590210416355766,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        0.17563333333333334,
+        0.1743111111111111
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.12950555555555557,
+        0.14891111111111113
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.PlusDI",
+      "bars": 10000,
+      "old_ratio": 0.09449587867111463,
+      "new_ratio": 0.12405835754594509,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        1.5757777777777777,
+        1.5702555555555555
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        1.1548333333333332,
+        1.13233
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.PlusDM",
+      "bars": 1000,
+      "old_ratio": 0.0408028956893715,
+      "new_ratio": 0.12417553425380354,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        0.22585,
+        0.20637777777777777
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.1701,
+        0.1421375
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.PlusDM",
+      "bars": 10000,
+      "old_ratio": 0.15363127639319452,
+      "new_ratio": 0.1741315506744658,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        1.1417625,
+        1.14045
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        1.0578777777777777,
+        0.9307777777777777
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.T3",
+      "bars": 1000,
+      "old_ratio": 0.03413054309915296,
+      "new_ratio": 0.0379845880260818,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        0.19013333333333335,
+        0.191175
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        0.23418888888888886,
+        0.18744444444444444
+      ]
+    },
+    {
+      "pair": "TaLib.Functions.T3",
+      "bars": 10000,
+      "old_ratio": 0.049634903343165164,
+      "new_ratio": 0.04476180326121709,
+      "old_win": false,
+      "new_win": false,
+      "native_intervals_separated": false,
+      "historical_report_source": "a0bcae673a173a31891f00f8b0fd1d2afdeec524",
+      "same_run_old_source_ooples_means_ms": [
+        1.097488888888889,
+        1.181888888888889
+      ],
+      "same_run_new_source_ooples_means_ms": [
+        1.1621666666666668,
+        1.21979
+      ]
+    }
+  ],
+  "new_wins": {
+    "1000": 0,
+    "10000": 0
+  },
+  "old_wins": {
+    "1000": 0,
+    "10000": 0
+  },
+  "comparison_basis": "old_ratio/old_win are the prior report values with historical source/host/runtime provenance. Same-run old/new source means are separate qualification evidence; native intervals refer to the final candidate/native control, not a paired old-source/native measurement."
+}

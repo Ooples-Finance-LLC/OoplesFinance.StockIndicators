@@ -1,0 +1,47 @@
+{
+  "status.json": {
+    "sha256": "c8b73b77c34d42a76e2501d047ef04a7120b17f2f2ff4c02953e82c4068f8048",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-batch2-20261022/status.json.gz"
+  },
+  "provenance.json": {
+    "sha256": "2714e6fb33be18d1714f79c3914e26db4950addb09108beea46f30e555182bf4",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-batch2-20261022/provenance.json.gz"
+  },
+  "binary-manifest.json": {
+    "sha256": "9caa8cfb9d7eedf3e7da609598ebb77cb46984e11875eef5ae99fa7da956ddf6",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-batch2-20261022/binary-manifest.json.gz"
+  },
+  "verified-summary.json": {
+    "sha256": "fe8359a0c1eafac6b9745683195e5fb2c1494b7cb49dda3b0c2fcd73521eb994",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-batch2-20261022/verified-summary.json.gz"
+  },
+  "SharedHistoricalExtremaBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedHistoricalExtremaBenchmarks-report-full-compressed.json": {
+    "sha256": "ba670ef33370d4787bf27e6fb0cc3f436950ab7db91a85d789e27d1669bed9c8",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-batch2-20261022/SharedHistoricalExtremaBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedHistoricalExtremaBenchmarks-report-full-compressed.json.gz"
+  },
+  "SharedTradyExtremaBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyExtremaBenchmarks-report-full-compressed.json": {
+    "sha256": "c6654dfc46d217db903942810fc1bc995c2ed49d87950b9712afe16fc1ada8f1",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-batch2-20261022/SharedTradyExtremaBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyExtremaBenchmarks-report-full-compressed.json.gz"
+  },
+  "SharedTradyMomentumBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyMomentumBenchmarks-report-full-compressed.json": {
+    "sha256": "ce6cb558fcca42d8dae5980a6a90efa1b43511acc68878419b82513ac4408599",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-batch2-20261022/SharedTradyMomentumBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTradyMomentumBenchmarks-report-full-compressed.json.gz"
+  },
+  "SharedScaledTrueRangeBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedScaledTrueRangeBenchmarks-report-full-compressed.json": {
+    "sha256": "011c85f05786d2cc537876d0fd2dd8aab4abb4772836675ebf97f903fdf5f4dc",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-batch2-20261022/SharedScaledTrueRangeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedScaledTrueRangeBenchmarks-report-full-compressed.json.gz"
+  },
+  "SharedTrueRangeBenchmarks\\results\\OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTrueRangeBenchmarks-report-full-compressed.json": {
+    "sha256": "bc61efff8667a538972284b0e7164c042caf733970657aebad40cfe947afeec3",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-batch2-20261022/SharedTrueRangeBenchmarks/results/OoplesFinance.StockIndicators.CompetitorBenchmarks.SharedTrueRangeBenchmarks-report-full-compressed.json.gz"
+  },
+  "measure-local-gpu-setup-batch2.py": {
+    "sha256": "1da13d165ee848a79391c4aea61887aab1c37908396452b8690c0ee6eba77143",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-batch2-20261022/measure-local-gpu-setup-batch2.py.gz"
+  },
+  "verify-local-gpu-setup-batch2.py": {
+    "sha256": "39fed366960cadcfd3632dd97e796387fc193162d0df6e0eb190a056600beb95",
+    "archive": "benchmarks/results/remaining-indicators/local-gpu-setup-batch2-20261022/verify-local-gpu-setup-batch2.py.gz"
+  },
+  "measurement_location": "Local Windows host; CPU timed paths with original required GPU setup. No hosted measurement claim."
+}

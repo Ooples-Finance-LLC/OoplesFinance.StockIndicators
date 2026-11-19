@@ -1,0 +1,57 @@
+{
+  "input_head": "e38ed2198011cdeba9cd557d65556100e7fd7070",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/ExhaustionCandles.cs"
+  ],
+  "batch_note": "Bounded exhaustion optimization: reuse identical body/range windows for equal periods. Different periods, shadow arithmetic, lag thresholds, warmup/reset and independent formulas retained. Validate three facades and affected native fixture cases, with58selected TA fixture cases (3operations x19lengths plus4arm metadata contract),6saved-input parity cases, numerical/lifecycle tests, GPU and inventory. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-26T20:48:09.200723+00:00",
+  "unit": {
+    "passed": 7,
+    "class_counts": {
+      "ExhaustionSharedExecutionTests": 7
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\exhaustion-equal-windows\\unit\\unit.trx",
+    "sha256": "677d0f99ef2e27aecaf547f8faf3909e0e82d762e0e55817c3cfa14cce417043",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-exhaustion-equal-windows-certified-20261026-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 197,
+    "class_counts": {
+      "SharedTaReversalContinuationBenchmarkTests": 58,
+      "ExhaustionTests": 133,
+      "SharedExhaustionBenchmarkTests": 6
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\exhaustion-equal-windows\\parity\\parity.trx",
+    "sha256": "3fca444711fa3299a23a0cda5d31f5f3929d4ebd461b79e86ab3b8180088d2b9",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-exhaustion-equal-windows-certified-20261026-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-exhaustion-equal-windows-20261026\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c8b4448201d99f3d8ba2c133c5d2dab8d6411830852866e0b437ca6996e11a23",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-exhaustion-equal-windows-20261026\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c8b4448201d99f3d8ba2c133c5d2dab8d6411830852866e0b437ca6996e11a23",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-exhaustion-equal-windows-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c8b4448201d99f3d8ba2c133c5d2dab8d6411830852866e0b437ca6996e11a23",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-exhaustion-equal-windows-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "c8b4448201d99f3d8ba2c133c5d2dab8d6411830852866e0b437ca6996e11a23"
+  },
+  "source_fingerprint_sha256": "3e05fb20a3d4ec21f221a30f64cdb5c65042376ce7bb83279b0cd03defb6a66d",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Bounded exhaustion optimization: reuse identical body/range windows for equal periods. Different periods, shadow arithmetic, lag thresholds, warmup/reset and independent formulas retained. Validate three facades and affected native fixture cases, with58selected TA fixture cases (3operations x19lengths plus4arm metadata contract),6saved-input parity cases, numerical/lifecycle tests, GPU and inventory. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

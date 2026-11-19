@@ -1,0 +1,56 @@
+{
+  "input_head": "4feb0adb2a42b06618a3d5d73f4776c107c4b7ba",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "parallel_batch_note": "Approved SMA helper follow-up: exact Int128 rolling sum, lazy original moments on unsupported scales or squared-error fallback, bit-preserving mean, eviction/reset/invalid-input regressions and zero-allocation normal updates.",
+  "step": "complete",
+  "updated_utc": "2026-10-22T00:50:12.052270+00:00",
+  "unit": {
+    "passed": 41,
+    "class_counts": {
+      "MeanDiagnosticsCertifiedTests": 18,
+      "RollingStatisticsSharedExecutionTests": 17,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "MeanDiagnosticsScaleReductionTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-compact-window\\unit\\unit.trx",
+    "sha256": "d00c3bb9d4870e20e9eaf2d9492fe25e0e9426ed3ca45e74452a632ca4c53b67",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-compact-window-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 2,
+    "class_counts": {
+      "SharedRollingStatisticsBenchmarkTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\sma-compact-window\\parity\\parity.trx",
+    "sha256": "4333960014ad350422532fcb8e25d93569e0d3eef82ce38c2ccae64ddc42cdf0",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-sma-compact-window-20261021-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-diagnostics-certified-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "804fad85a5ce449efca9cb709c922b27126de825d18ebee6c3a4f0e751e9977d",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-diagnostics-certified-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "804fad85a5ce449efca9cb709c922b27126de825d18ebee6c3a4f0e751e9977d",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-diagnostics-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "804fad85a5ce449efca9cb709c922b27126de825d18ebee6c3a4f0e751e9977d",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-sma-diagnostics-certified-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "804fad85a5ce449efca9cb709c922b27126de825d18ebee6c3a4f0e751e9977d"
+  },
+  "source_fingerprint_sha256": "e18bd6463faa42d2acfacb1011528ad6831699df3711e0678ae89df67b18343b",
+  "inventory_tests_passed": 6,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Exact fixed-width rolling sums retain lazy original-moment fallback. Independent rational comparisons cover eviction, reset, unsupported scales, invalid-input mutation, and zero-allocation ordinary updates. Long-history parity passed; controlled timing remains pending."
+}

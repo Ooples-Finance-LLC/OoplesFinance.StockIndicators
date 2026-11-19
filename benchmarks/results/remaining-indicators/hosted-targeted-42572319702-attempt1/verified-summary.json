@@ -1,0 +1,631 @@
+{
+  "all_cases_verified": true,
+  "phase": "targeted",
+  "case_count": 30,
+  "decision_count": 6,
+  "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+  "sources": {
+    "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+    "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+  },
+  "decisions": [
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetAdl",
+      "bars": 1000,
+      "method": "Ooples",
+      "old_means_ms": [
+        0.14575555555555555,
+        0.20243888888888886
+      ],
+      "new_means_ms": [
+        0.13966,
+        0.18185
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42572319702",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+          "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+        },
+        "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+        "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+        "warmup_count": 1000
+      }
+    },
+    {
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "Skender.GetAdl",
+      "bars": 10000,
+      "method": "Ooples",
+      "old_means_ms": [
+        1.3243777777777777,
+        1.59129
+      ],
+      "new_means_ms": [
+        1.060211111111111,
+        1.05095
+      ],
+      "verdict": "faster",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42572319702",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+          "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+        },
+        "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+        "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+        "warmup_count": 1000
+      }
+    },
+    {
+      "fixture": "SharedAdlDetailsBenchmarks",
+      "pair": "Skender.GetAdl",
+      "bars": 1000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.0314618310546875,
+        0.03449043579101563
+      ],
+      "new_means_ms": [
+        0.03150286254882813,
+        0.031595713975694446
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42572319702",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+          "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+        },
+        "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+        "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "SharedAdlDetailsBenchmarks",
+      "pair": "Skender.GetAdl",
+      "bars": 1000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.02881683349609375,
+        0.02877130126953125
+      ],
+      "new_means_ms": [
+        0.028923101806640625,
+        0.03669127468532986
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42572319702",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+          "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+        },
+        "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+        "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "SharedAdlDetailsBenchmarks",
+      "pair": "Skender.GetAdl",
+      "bars": 10000,
+      "method": "BuilderFull",
+      "old_means_ms": [
+        0.2963,
+        0.2966597412109375
+      ],
+      "new_means_ms": [
+        0.3006021240234375,
+        0.297906201171875
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42572319702",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+          "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+        },
+        "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+        "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+        "warmup_count": 10
+      }
+    },
+    {
+      "fixture": "SharedAdlDetailsBenchmarks",
+      "pair": "Skender.GetAdl",
+      "bars": 10000,
+      "method": "BuilderLatestOnly",
+      "old_means_ms": [
+        0.276415625,
+        0.277054052734375
+      ],
+      "new_means_ms": [
+        0.27653791232638886,
+        0.27712370876736114
+      ],
+      "verdict": "inconclusive",
+      "provenance": {
+        "host": {
+          "machine": "runnervmm7ud1",
+          "platform": "Windows-2025Server-10.0.26100-SP0",
+          "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+          "logical_cpus": 4,
+          "runner_image": "20261103.298.1",
+          "run_id": "42572319702",
+          "run_attempt": "1",
+          "job": "hosted-targeted",
+          "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+        },
+        "shard": 0,
+        "phase": "targeted",
+        "sources": {
+          "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+          "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+        },
+        "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+        "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+        "warmup_count": 10
+      }
+    }
+  ],
+  "verdicts": {
+    "inconclusive": 5,
+    "faster": 1
+  },
+  "accepted": true,
+  "final_candidate_round": 2,
+  "final_candidate_rows": {
+    "LibraryPairBenchmarks": [
+      {
+        "pair": "Skender.GetAdl",
+        "bars": 1000,
+        "method": "Ooples",
+        "mean_ns": 181850,
+        "lower_ns": 173332.75655867576,
+        "upper_ns": 190367.24344132424,
+        "samples": 10,
+        "allocated_bytes": 162856,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42572319702",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+            "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+          },
+          "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+          "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "Skender.GetAdl",
+        "bars": 1000,
+        "method": "Competitor",
+        "mean_ns": 70625,
+        "lower_ns": 66329.28181159875,
+        "upper_ns": 74920.71818840125,
+        "samples": 8,
+        "allocated_bytes": 272880,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42572319702",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+            "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+          },
+          "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+          "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "Skender.GetAdl",
+        "bars": 10000,
+        "method": "Ooples",
+        "mean_ns": 1050950,
+        "lower_ns": 1020579.413767088,
+        "upper_ns": 1081320.586232912,
+        "samples": 8,
+        "allocated_bytes": 1546984,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42572319702",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+            "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+          },
+          "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+          "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+          "warmup_count": 1000
+        }
+      },
+      {
+        "pair": "Skender.GetAdl",
+        "bars": 10000,
+        "method": "Competitor",
+        "mean_ns": 709450,
+        "lower_ns": 676071.5102057601,
+        "upper_ns": 742828.4897942399,
+        "samples": 10,
+        "allocated_bytes": 2716920,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42572319702",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+            "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+          },
+          "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+          "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+          "warmup_count": 1000
+        }
+      }
+    ],
+    "SharedAdlDetailsBenchmarks": [
+      {
+        "pair": "Skender.GetAdl",
+        "bars": 1000,
+        "method": "BuilderFull",
+        "mean_ns": 31595.713975694445,
+        "lower_ns": 30980.01122429922,
+        "upper_ns": 32211.41672708967,
+        "samples": 9,
+        "allocated_bytes": 90428,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42572319702",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+            "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+          },
+          "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+          "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "Skender.GetAdl",
+        "bars": 1000,
+        "method": "BuilderLatestOnly",
+        "mean_ns": 36691.27468532986,
+        "lower_ns": 36481.76964824071,
+        "upper_ns": 36900.77972241901,
+        "samples": 9,
+        "allocated_bytes": 41675,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42572319702",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+            "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+          },
+          "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+          "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "Skender.GetAdl",
+        "bars": 1000,
+        "method": "NativeSingle",
+        "mean_ns": 54985.39767795139,
+        "lower_ns": 54041.09640994638,
+        "upper_ns": 55929.6989459564,
+        "samples": 9,
+        "allocated_bytes": 180444,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42572319702",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+            "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+          },
+          "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+          "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "Skender.GetAdl",
+        "bars": 1000,
+        "method": "NativeParallel",
+        "mean_ns": 148167.63237847222,
+        "lower_ns": 137849.45625925323,
+        "upper_ns": 158485.8084976912,
+        "samples": 9,
+        "allocated_bytes": 460184,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42572319702",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+            "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+          },
+          "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+          "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "Skender.GetAdl",
+        "bars": 10000,
+        "method": "BuilderFull",
+        "mean_ns": 297906.201171875,
+        "lower_ns": 295580.87716738414,
+        "upper_ns": 300231.52517636586,
+        "samples": 8,
+        "allocated_bytes": 882809,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42572319702",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+            "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+          },
+          "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+          "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "Skender.GetAdl",
+        "bars": 10000,
+        "method": "BuilderLatestOnly",
+        "mean_ns": 277123.7087673611,
+        "lower_ns": 274948.10200232675,
+        "upper_ns": 279299.3155323955,
+        "samples": 9,
+        "allocated_bytes": 401693,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42572319702",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+            "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+          },
+          "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+          "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "Skender.GetAdl",
+        "bars": 10000,
+        "method": "NativeSingle",
+        "mean_ns": 617272.314453125,
+        "lower_ns": 609549.272262585,
+        "upper_ns": 624995.356643665,
+        "samples": 8,
+        "allocated_bytes": 1800462,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42572319702",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+            "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+          },
+          "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+          "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+          "warmup_count": 10
+        }
+      },
+      {
+        "pair": "Skender.GetAdl",
+        "bars": 10000,
+        "method": "NativeParallel",
+        "mean_ns": 1354265.9375,
+        "lower_ns": 1296448.0205349685,
+        "upper_ns": 1412083.8544650315,
+        "samples": 10,
+        "allocated_bytes": 4582239,
+        "provenance": {
+          "host": {
+            "machine": "runnervmm7ud1",
+            "platform": "Windows-2025Server-10.0.26100-SP0",
+            "cpu": "AMD64 Family 25 Model 17 Stepping 1, AuthenticAMD",
+            "logical_cpus": 4,
+            "runner_image": "20261103.298.1",
+            "run_id": "42572319702",
+            "run_attempt": "1",
+            "job": "hosted-targeted",
+            "instance_nonce": "65bcf4a8994740c48fbd9a0b07d982f3"
+          },
+          "shard": 0,
+          "phase": "targeted",
+          "sources": {
+            "old": "2c83abc0a9803e44aed9270be8ac04708cf3211c",
+            "new": "d7a8e56d7dfc23ad1408213b420688a26f0e2617"
+          },
+          "workflow_head": "f47390d3eab2378e55cc353c729d71faea19aa7d",
+          "input_provenance_sha256": "1ab865a236b38c1adfc0c4cf472855a4514364d90591bbad1a05c4c6bb4f5e03",
+          "warmup_count": 10
+        }
+      }
+    ]
+  }
+}

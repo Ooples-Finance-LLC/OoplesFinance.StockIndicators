@@ -1,0 +1,55 @@
+{
+  "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+  "rows": [
+    {
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 1000,
+      "ooples": {
+        "mean_ns": 6536137.8,
+        "lower_ns": 6240652.906276995,
+        "upper_ns": 6831622.693723004,
+        "allocated_bytes": 302288,
+        "samples": 10
+      },
+      "competitor": {
+        "mean_ns": 779888.4,
+        "lower_ns": 734014.6146934085,
+        "upper_ns": 825762.1853065916,
+        "allocated_bytes": 299528,
+        "samples": 10
+      },
+      "competitor_over_ooples": 0.11931945498456291,
+      "verdict": "slower"
+    },
+    {
+      "pair": "Skender.GetSmaAnalysis",
+      "bars": 10000,
+      "ooples": {
+        "mean_ns": 7632198.125,
+        "lower_ns": 5135294.413383806,
+        "upper_ns": 10129101.836616194,
+        "allocated_bytes": 2822168,
+        "samples": 8
+      },
+      "competitor": {
+        "mean_ns": 1387737.7,
+        "lower_ns": 1319009.4952845299,
+        "upper_ns": 1456465.90471547,
+        "allocated_bytes": 2891528,
+        "samples": 10
+      },
+      "competitor_over_ooples": 0.18182673946242714,
+      "verdict": "slower"
+    }
+  ],
+  "source_sha": "37c8bd54b6a9861338bd7b2f21dd65cab02f9326",
+  "binary_run": 39703203214,
+  "workflow_sha": "e6439e6313596b74822e369c65340acbf036eb9f",
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/39703278539",
+  "report_sha256": "18e20f6b15c56a23f5ebfd35165ed171b199baaa9563a3f25655d4c05aa705f5",
+  "benchmark_binary_sha256": "33879859a24757baeff1f967de843c780b128c0da3058db59f0b80e42ecedaf3",
+  "production_binary_sha256": "38f3297027f2b42100cc770fd7b13204692768d4486bd7263a7807ccfbc6d411",
+  "note": "Dedicated hosted SMA comparison only; confidence intervals are retained; this does not establish performance for other indicators.",
+  "raw_evidence": "benchmarks/results/remaining-indicators/sma-compact-window-timing-20261022-raw.json.gz",
+  "report_import": "Actual two SMA rows replaced; all802 displayed/exported comparisons verified;800 other comparisons preserved. Cross-run timing is not controlled speedup evidence."
+}

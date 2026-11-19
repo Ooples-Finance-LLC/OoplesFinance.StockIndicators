@@ -14,16 +14,25 @@ internal sealed class QqeWindow : IDisposable
     private double _price, _rsi;
     private Number _previousSignal, _bull, _bear;
     private bool _hasPrevious;
+    private readonly int _smooth;
+    private readonly bool _allowCertified;
+    private readonly List<double>? _replay;
+    private CertifiedRmoQqe.Qqe? _certified;
+    internal long CertifiedCount { get; private set; }
+    internal int FallbackCount { get; private set; }
     internal static long WidthPeriod(int length) => 2L * Math.Max(1, length) - 1;
     internal static void ValidateFactors(double fast, double slow)
     {
         if (double.IsNaN(fast) || double.IsInfinity(fast) || fast < 0) throw new ArgumentOutOfRangeException(nameof(fast));
         if (double.IsNaN(slow) || double.IsInfinity(slow) || slow < 0) throw new ArgumentOutOfRangeException(nameof(slow));
     }
-    internal QqeWindow(MovingAvgType kind, int length, int smooth, double fast, double slow, bool external = false)
+    internal QqeWindow(MovingAvgType kind, int length, int smooth, double fast, double slow, bool external = false, bool allowCertified = true)
     {
         ValidateFactors(fast, slow); _kind = kind; _length = Math.Max(1, length); _fast = fast; _slow = slow;
+        _smooth = Math.Max(1, smooth);
         if (external) return;
+        _allowCertified = allowCertified && kind is MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod;
+        if (_allowCertified) { _replay = new(); _certified = new(kind, _smooth, WidthPeriod(length), fast, slow); }
         if (!StrengthWindow.Supports(kind)) throw new NotSupportedException("Native QQE requires SMA, WMA, EMA or Wilder smoothing.");
         _gain = new(kind, _length); _loss = new(kind, _length);
         _signal = new(kind, Math.Max(1, smooth)); _first = new(kind, WidthPeriod(length)); _second = new(kind, WidthPeriod(length));
@@ -49,10 +58,31 @@ internal sealed class QqeWindow : IDisposable
         var preserve = _hasPrevious && _length > 1 && (_kind is MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod) && price == _price;
 #pragma warning restore S1244
         var rsi = preserve ? _rsi : GainLossShare.Of(numerator, total, 100);
+        var result = Smooth(rsi, final);
+        if (final) { _price = price; _rsi = rsi; _hasPrevious = true; }
+        return result;
+    }
+    private (double Fast, double Slow, Signal Trade) Smooth(double rsi, bool final)
+    {
+        if (_certified is not null)
+        {
+            if (_certified.TryNext(rsi, final, out var result))
+            {
+                if (final) { _replay!.Add(rsi); CertifiedCount++; }
+                return result;
+            }
+            _certified = null; FallbackCount++;
+            foreach (var previous in _replay!) SmoothExact(previous, true);
+            _replay.Clear();
+        }
+        return SmoothExact(rsi, final);
+    }
+    private (double Fast, double Slow, Signal Trade) SmoothExact(double rsi, bool final)
+    {
         var signal = _signal!.Next(Number.Of(rsi), final); var movement = signal - _previousSignal;
         if (movement.Sign < 0) movement = movement.Times(-1);
         var result = Finish(_second!.Next(_first!.Next(movement, final), final), final);
-        if (final) { _price = price; _rsi = rsi; _previousSignal = signal; _hasPrevious = true; }
+        if (final) _previousSignal = signal;
         return result;
     }
     internal static (double[] Fast, double[] Slow, Signal[] Trades) Calculate(StockData data, MovingAvgType kind, int length, int smooth, double fast, double slow, bool callbacks)
@@ -118,7 +148,11 @@ internal sealed class QqeWindow : IDisposable
         internal void Reset() { _history.Clear(); _sum = _weighted = _previous = default; _count = 0; }
     }
     internal void Reset()
-    { _gain?.Reset(); _loss?.Reset(); _signal?.Reset(); _first?.Reset(); _second?.Reset(); _price = _rsi = 0; _previousSignal = _bull = _bear = default; _hasPrevious = false; }
+    {
+        _gain?.Reset(); _loss?.Reset(); _signal?.Reset(); _first?.Reset(); _second?.Reset(); _price = _rsi = 0; _previousSignal = _bull = _bear = default; _hasPrevious = false;
+        _replay?.Clear(); CertifiedCount = 0; FallbackCount = 0;
+        _certified = _allowCertified ? new(_kind, _smooth, WidthPeriod(_length), _fast, _slow) : null;
+    }
     public void Dispose() => Reset();
     private sealed class RsiMean
     {

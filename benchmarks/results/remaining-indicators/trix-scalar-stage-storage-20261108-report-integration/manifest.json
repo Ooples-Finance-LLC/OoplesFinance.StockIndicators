@@ -1,0 +1,42 @@
+{
+  "before.html": {
+    "sha256": "6cbb4ad7ecbe29a213660108e8ab24315fd064c10fa9c535c6d165af75b3e671",
+    "archive": "benchmarks/results/remaining-indicators/trix-scalar-stage-storage-20261108-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "25d74f7653fcf38511e8ef6c1f870a3550b0cd94ca3f1db7834dd58105087b2d",
+    "archive": "benchmarks/results/remaining-indicators/trix-scalar-stage-storage-20261108-report-integration/browser-verification.json.gz"
+  },
+  "browser.log": {
+    "sha256": "3b6053ad14c6fe7867338070cd34d95ef26b79c933f1b9edd217c97e78cb95c3",
+    "archive": "benchmarks/results/remaining-indicators/trix-scalar-stage-storage-20261108-report-integration/browser.log.gz"
+  },
+  "candidate.html": {
+    "sha256": "6c4786b28697ca9cf2a2e7fd16afae3f811ad54d7178c84993c2e856391d3893",
+    "archive": "benchmarks/results/remaining-indicators/trix-scalar-stage-storage-20261108-report-integration/candidate.html.gz"
+  },
+  "import.log": {
+    "sha256": "1b6ac07a47e4dcbc4b9fb2b54c4e58e34c791c91554242b2b4b05ea0818c981f",
+    "archive": "benchmarks/results/remaining-indicators/trix-scalar-stage-storage-20261108-report-integration/import.log.gz"
+  },
+  "imported.json": {
+    "sha256": "c8f5114ced24d264221e50c337eb561e8c6011fc8e12951c82232271f5fb0a23",
+    "archive": "benchmarks/results/remaining-indicators/trix-scalar-stage-storage-20261108-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "0e326dadaae0e851f99e2236d4110586d65bd7214d49631bec0c11a5cffbabe5",
+    "archive": "benchmarks/results/remaining-indicators/trix-scalar-stage-storage-20261108-report-integration/measurement.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "6a81ba151ff2f8add21b8257db20ffd0b062a64a2e23de4b1e2b4401a5e28caf",
+    "archive": "benchmarks/results/remaining-indicators/trix-scalar-stage-storage-20261108-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "4bf9384628c6eabebf254126ff0a769c1af2124d4fb00d9117b564de04a24b2e",
+    "archive": "benchmarks/results/remaining-indicators/trix-scalar-stage-storage-20261108-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "050f95fcfdb01f8ff363cc4fb40c5733e9b579c54307c1be651e528f29fc10e9",
+    "archive": "benchmarks/results/remaining-indicators/trix-scalar-stage-storage-20261108-report-integration/updated-pair-details.png.gz"
+  }
+}

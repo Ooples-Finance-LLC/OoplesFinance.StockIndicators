@@ -1,0 +1,98 @@
+{
+  "before.html": {
+    "sha256": "7b3ad6b8829afa29d2d9b86143b088bf66cc3b28a6411d318d821bd049d6d67b",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/before.html.gz"
+  },
+  "browser-verification.json": {
+    "sha256": "a41dac1100c8ac88b6c026dd6d2358bdad0b1677ec035847520b8b9e53d33c7f",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/browser-verification.json.gz"
+  },
+  "candidate.html": {
+    "sha256": "9dc3d9b721dfaed8f114b6cc5d680d71b726598331236f9a51e0b541d4f81e11",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/candidate.html.gz"
+  },
+  "collection/collection-receipt.json": {
+    "sha256": "3a8e68fea828355331d33d6151e7a1f0ef27b7cf8614c3310b5daf54134d5278",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/collection/collection-receipt.json.gz"
+  },
+  "collection/independently-collected.json": {
+    "sha256": "fa465da307af645e523d9bce080e655a4548baef3b0145f7a1198a0615eba484",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/collection/independently-collected.json.gz"
+  },
+  "imported.json": {
+    "sha256": "5467e0c18eac1ed0359ddf391c9431f25a43a9a1e63e18ba872463c8c125ef6a",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/imported.json.gz"
+  },
+  "measurement.json": {
+    "sha256": "a57871fa1605caba1c8309a23e2ee99dd4ca988969090ad958ee92709653336d",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/measurement.json.gz"
+  },
+  "normalization-receipt.json": {
+    "sha256": "88d395aa2a6f09d3d441dceb8d56e7c167f56fe51865dd426e9e560d093e7fb7",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/normalization-receipt.json.gz"
+  },
+  "operations/collect-matchinglow-qualification-20261116.py": {
+    "sha256": "cab1d80a9db103f2847dd639fc56407e16e5df3561f174a578c1437e1029ff73",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/operations/collect-matchinglow-qualification-20261116.py.gz"
+  },
+  "operations/matchinglow-report-normalization-review-receipt-20261116.json": {
+    "sha256": "dbd6041c45f20d55973c63287f6da4643a7b4ba2cc52a29559a03f50253cd4dc",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/operations/matchinglow-report-normalization-review-receipt-20261116.json.gz"
+  },
+  "operations/package-matchinglow-report-20261116.py": {
+    "sha256": "379d4cce9f0e9b58f34de1f3141d3142416011a5fde4b09b0046b5124ce8a3cb",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/operations/package-matchinglow-report-20261116.py.gz"
+  },
+  "operations/stage-matchinglow-report-20261116.py": {
+    "sha256": "faa9f33d22fa22aa9e2f06970fe07aadb551ebde778987dd6ba7f288beed2c27",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/operations/stage-matchinglow-report-20261116.py.gz"
+  },
+  "operations/test_collect_matchinglow_qualification_20261116.py": {
+    "sha256": "4cded19445328cd92f149df9a13654c719fde4bce0b6d8228c70444f323a90fb",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/operations/test_collect_matchinglow_qualification_20261116.py.gz"
+  },
+  "operations/test_matchinglow_report_normalization_20261116.py": {
+    "sha256": "01c67b06bb26d04dfac9cd053239c65d4831ac92280130f7ed65f9d170549bd5",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/operations/test_matchinglow_report_normalization_20261116.py.gz"
+  },
+  "operations/verify-matchinglow-report-20261116.py": {
+    "sha256": "72fcd4fa0262077a791cb19fcb29ad84c63d28550645d56e3d1373496ac51919",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/operations/verify-matchinglow-report-20261116.py.gz"
+  },
+  "parent-visual-review.json": {
+    "sha256": "4facd9531801c3c54e4348c3b4527508a638a95c03c66b8bff54ee8f3def22c5",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/parent-visual-review.json.gz"
+  },
+  "proofs/correctness/actual-local-gpu-receipt.json": {
+    "sha256": "c41d3565f89350caceb25992e978ebbfb3c4f49f8bbad369f7c93d1794fd3bf2",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/proofs/correctness/actual-local-gpu-receipt.json.gz"
+  },
+  "proofs/correctness/ci-manifest.json": {
+    "sha256": "f2541e7d0621187f35160c9fcd94627f7fc70169bd185a5a6bc73cae594c1508",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/proofs/correctness/ci-manifest.json.gz"
+  },
+  "proofs/correctness/status.json": {
+    "sha256": "fed5d814fdd4c729bd32b76d034144a2afcde6ea9bf9fb9b4b8fcf2aec588c27",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/proofs/correctness/status.json.gz"
+  },
+  "proofs/jit/jit-adjudication.json": {
+    "sha256": "15a499970a22e437dfedb76e93236223089d1e56998ba8e87b374eeacb25e864",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/proofs/jit/jit-adjudication.json.gz"
+  },
+  "proofs/jit/jit-proof.json": {
+    "sha256": "8e6f0ddf6ca7eacf451dda94854aed3bfdd4683e5e9d48e4d03178d1c6a07452",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/proofs/jit/jit-proof.json.gz"
+  },
+  "refreshed-baseline.png": {
+    "sha256": "5fc6d067f9b76e3221b24ebf0e41e9602d322f0726c2508786ff719de1a5e0e0",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/refreshed-baseline.png.gz"
+  },
+  "staged.json": {
+    "sha256": "0652668537f0e1cf7f46a4788afa95a3ae4fb2bd416f1ba4aff3fef67d182d12",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/staged.json.gz"
+  },
+  "updated-pair-details.png": {
+    "sha256": "00c48d51d75de62d4a5bb191d37a44ae649551f5e3b1929e5f161a2971df31ab",
+    "archive": "benchmarks/results/remaining-indicators/matchinglow-only-20261116-report-integration/updated-pair-details.png.gz"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "source_integration_commit": "4ed43711681df710fdb21194936d587120c19084",
+  "qualified_source": "a404f829c0f81422cda7e1770977a77ae9757060",
+  "compiled_source": "d0cce9e3ec4f76dd74b28e15d042995c7d758dbf",
+  "source_fingerprint": "c4d598e0fdacb9eddbc5ef5b0271e1d147e130f98dd0e1092b400bc114835ef1",
+  "unit": 40,
+  "comparator": 16,
+  "actual_gpu": 100,
+  "production_sha256": "ea469a6e4f632484536939195bc750365d905741074bd1784a72074dacb2eb27",
+  "run_id": "42714960149",
+  "cases": 30,
+  "decisions": 6,
+  "verdicts": {
+    "inconclusive": 4,
+    "faster": 2
+  },
+  "integrated_paths": [
+    "src/Indicators/ValuesBarExecution.Pointwise.cs"
+  ],
+  "verified_utc": "2026-11-09T23:31:31.407115+00:00"
+}

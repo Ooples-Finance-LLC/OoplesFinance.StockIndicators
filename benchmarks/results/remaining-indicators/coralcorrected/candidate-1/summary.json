@@ -1,0 +1,741 @@
+{
+  "status": "reviewed-candidate-only-same-library",
+  "candidate_base_commit": "406c85e468d68cd7eb8f4c3fa0941a4fe5530def",
+  "candidate_input_sha256": "bb5d7db956bbaf81dfa86132b2136634626b534b33b3999d50a2d6361f6348dc",
+  "commit_is_base_only": true,
+  "baseline_stage": {
+    "name": "coralcorrected",
+    "snapshot": "Z:/StockIndicators-work/si-remaining-followon-7af73507-preserved",
+    "fixture": "RemainingCoralCorrectedBenchmarks",
+    "operations": [
+      "CoralTrendIndicator",
+      "CorrectedMovingAverage"
+    ],
+    "filter": "*RemainingCoralCorrectedBenchmarks*",
+    "destination": "C:/Users/cheat/source/repos/Ooples-Finance-LLC/si-adaptive-v1-rollout-work/benchmarks/results/remaining-indicators/coralcorrected/timing"
+  },
+  "baseline_archive_sha256": "189e27f21c4a43e9b24fbd579c940b32fe464692790e4a6375bba292d928a91d",
+  "comparisons": [
+    {
+      "operation": "CoralTrendIndicator",
+      "count": 1000,
+      "history": "Full",
+      "candidate": {
+        "mean_ns": 39298241.666666664,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 39298241.666666664,
+          "StandardError": 308751.09376212023,
+          "Level": 12,
+          "Margin": 1556508.5656960565,
+          "Lower": 37741733.10097061,
+          "Upper": 40854750.23236272
+        },
+        "allocated_bytes": 16395528
+      },
+      "versus_saved_legacy": {
+        "operation": "CoralTrendIndicator",
+        "count": 1000,
+        "history": "Full",
+        "latency_result": "shared-faster-separated-intervals",
+        "shared_to_legacy_mean_ratio": 0.7408522800764764,
+        "mean_latency_delta_ns": -13746397.222222224,
+        "allocation_delta_bytes": -2727832,
+        "shared_to_legacy_allocation_ratio": 0.8573560294843584,
+        "legacy": {
+          "mean_ns": 53044638.88888889,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 53044638.88888889,
+            "StandardError": 363355.29719333496,
+            "Level": 12,
+            "Margin": 1831785.032989087,
+            "Lower": 51212853.8558998,
+            "Upper": 54876423.92187797
+          },
+          "allocated_bytes": 19123360
+        },
+        "shared": {
+          "mean_ns": 39298241.666666664,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 39298241.666666664,
+            "StandardError": 308751.09376212023,
+            "Level": 12,
+            "Margin": 1556508.5656960565,
+            "Lower": 37741733.10097061,
+            "Upper": 40854750.23236272
+          },
+          "allocated_bytes": 16395528
+        }
+      },
+      "versus_saved_shared": {
+        "operation": "CoralTrendIndicator",
+        "count": 1000,
+        "history": "Full",
+        "latency_result": "shared-faster-separated-intervals",
+        "shared_to_legacy_mean_ratio": 0.69044267598683,
+        "mean_latency_delta_ns": -17619215.833333336,
+        "allocation_delta_bytes": -2639836,
+        "shared_to_legacy_allocation_ratio": 0.8613193842786511,
+        "legacy": {
+          "mean_ns": 56917457.5,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 56917457.5,
+            "StandardError": 1837111.7321765418,
+            "Level": 12,
+            "Margin": 8783070.599711059,
+            "Lower": 48134386.90028894,
+            "Upper": 65700528.09971106
+          },
+          "allocated_bytes": 19035364
+        },
+        "shared": {
+          "mean_ns": 39298241.666666664,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 39298241.666666664,
+            "StandardError": 308751.09376212023,
+            "Level": 12,
+            "Margin": 1556508.5656960565,
+            "Lower": 37741733.10097061,
+            "Upper": 40854750.23236272
+          },
+          "allocated_bytes": 16395528
+        }
+      }
+    },
+    {
+      "operation": "CoralTrendIndicator",
+      "count": 1000,
+      "history": "LatestOnly",
+      "candidate": {
+        "mean_ns": 42677125,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 42677125,
+          "StandardError": 1388777.8570263376,
+          "Level": 12,
+          "Margin": 6639625.53389517,
+          "Lower": 36037499.46610483,
+          "Upper": 49316750.53389517
+        },
+        "allocated_bytes": 16348500
+      },
+      "versus_saved_legacy": {
+        "operation": "CoralTrendIndicator",
+        "count": 1000,
+        "history": "LatestOnly",
+        "latency_result": "shared-faster-separated-intervals",
+        "shared_to_legacy_mean_ratio": 0.8070283611787393,
+        "mean_latency_delta_ns": -10204690.625,
+        "allocation_delta_bytes": -2777272,
+        "shared_to_legacy_allocation_ratio": 0.8547890249868084,
+        "legacy": {
+          "mean_ns": 52881815.625,
+          "confidence_interval": {
+            "N": 8,
+            "Mean": 52881815.625,
+            "StandardError": 592783.9943432158,
+            "Level": 12,
+            "Margin": 3205706.199913656,
+            "Lower": 49676109.42508634,
+            "Upper": 56087521.82491366
+          },
+          "allocated_bytes": 19125772
+        },
+        "shared": {
+          "mean_ns": 42677125,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 42677125,
+            "StandardError": 1388777.8570263376,
+            "Level": 12,
+            "Margin": 6639625.53389517,
+            "Lower": 36037499.46610483,
+            "Upper": 49316750.53389517
+          },
+          "allocated_bytes": 16348500
+        }
+      },
+      "versus_saved_shared": {
+        "operation": "CoralTrendIndicator",
+        "count": 1000,
+        "history": "LatestOnly",
+        "latency_result": "overlapping-intervals",
+        "shared_to_legacy_mean_ratio": 0.7839019086762553,
+        "mean_latency_delta_ns": -11764795,
+        "allocation_delta_bytes": -2637708,
+        "shared_to_legacy_allocation_ratio": 0.8610724163561254,
+        "legacy": {
+          "mean_ns": 54441920,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 54441920,
+            "StandardError": 1385748.1834223464,
+            "Level": 12,
+            "Margin": 6625140.929234565,
+            "Lower": 47816779.070765436,
+            "Upper": 61067060.929234564
+          },
+          "allocated_bytes": 18986208
+        },
+        "shared": {
+          "mean_ns": 42677125,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 42677125,
+            "StandardError": 1388777.8570263376,
+            "Level": 12,
+            "Margin": 6639625.53389517,
+            "Lower": 36037499.46610483,
+            "Upper": 49316750.53389517
+          },
+          "allocated_bytes": 16348500
+        }
+      }
+    },
+    {
+      "operation": "CoralTrendIndicator",
+      "count": 10000,
+      "history": "Full",
+      "candidate": {
+        "mean_ns": 390321525,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 390321525,
+          "StandardError": 1730753.3717035465,
+          "Level": 12,
+          "Margin": 8725256.371850986,
+          "Lower": 381596268.62814903,
+          "Upper": 399046781.37185097
+        },
+        "allocated_bytes": 163932996
+      },
+      "versus_saved_legacy": {
+        "operation": "CoralTrendIndicator",
+        "count": 10000,
+        "history": "Full",
+        "latency_result": "shared-faster-separated-intervals",
+        "shared_to_legacy_mean_ratio": 0.6949252534760537,
+        "mean_latency_delta_ns": -171352587.5,
+        "allocation_delta_bytes": -27208036,
+        "shared_to_legacy_allocation_ratio": 0.8576546557517802,
+        "legacy": {
+          "mean_ns": 561674112.5,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 561674112.5,
+            "StandardError": 9072612.165037367,
+            "Level": 12,
+            "Margin": 43375365.67517986,
+            "Lower": 518298746.82482016,
+            "Upper": 605049478.1751798
+          },
+          "allocated_bytes": 191141032
+        },
+        "shared": {
+          "mean_ns": 390321525,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 390321525,
+            "StandardError": 1730753.3717035465,
+            "Level": 12,
+            "Margin": 8725256.371850986,
+            "Lower": 381596268.62814903,
+            "Upper": 399046781.37185097
+          },
+          "allocated_bytes": 163932996
+        }
+      },
+      "versus_saved_shared": {
+        "operation": "CoralTrendIndicator",
+        "count": 10000,
+        "history": "Full",
+        "latency_result": "shared-faster-separated-intervals",
+        "shared_to_legacy_mean_ratio": 0.7189840128039884,
+        "mean_latency_delta_ns": -152557757.5,
+        "allocation_delta_bytes": -26397832,
+        "shared_to_legacy_allocation_ratio": 0.8613055369044053,
+        "legacy": {
+          "mean_ns": 542879282.5,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 542879282.5,
+            "StandardError": 8299404.042654913,
+            "Level": 12,
+            "Margin": 39678725.23235321,
+            "Lower": 503200557.2676468,
+            "Upper": 582558007.7323532
+          },
+          "allocated_bytes": 190330828
+        },
+        "shared": {
+          "mean_ns": 390321525,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 390321525,
+            "StandardError": 1730753.3717035465,
+            "Level": 12,
+            "Margin": 8725256.371850986,
+            "Lower": 381596268.62814903,
+            "Upper": 399046781.37185097
+          },
+          "allocated_bytes": 163932996
+        }
+      }
+    },
+    {
+      "operation": "CoralTrendIndicator",
+      "count": 10000,
+      "history": "LatestOnly",
+      "candidate": {
+        "mean_ns": 389764063.8888889,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 389764063.8888889,
+          "StandardError": 1485136.7439151618,
+          "Level": 12,
+          "Margin": 7487027.932328274,
+          "Lower": 382277035.9565606,
+          "Upper": 397251091.8212172
+        },
+        "allocated_bytes": 163451544
+      },
+      "versus_saved_legacy": {
+        "operation": "CoralTrendIndicator",
+        "count": 10000,
+        "history": "LatestOnly",
+        "latency_result": "shared-faster-separated-intervals",
+        "shared_to_legacy_mean_ratio": 0.7157381555297013,
+        "mean_latency_delta_ns": -154798302.77777773,
+        "allocation_delta_bytes": -27689728,
+        "shared_to_legacy_allocation_ratio": 0.8551347508035837,
+        "legacy": {
+          "mean_ns": 544562366.6666666,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 544562366.6666666,
+            "StandardError": 4966643.787901726,
+            "Level": 12,
+            "Margin": 25038368.299955774,
+            "Lower": 519523998.36671084,
+            "Upper": 569600734.9666224
+          },
+          "allocated_bytes": 191141272
+        },
+        "shared": {
+          "mean_ns": 389764063.8888889,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 389764063.8888889,
+            "StandardError": 1485136.7439151618,
+            "Level": 12,
+            "Margin": 7487027.932328274,
+            "Lower": 382277035.9565606,
+            "Upper": 397251091.8212172
+          },
+          "allocated_bytes": 163451544
+        }
+      },
+      "versus_saved_shared": {
+        "operation": "CoralTrendIndicator",
+        "count": 10000,
+        "history": "LatestOnly",
+        "latency_result": "shared-faster-separated-intervals",
+        "shared_to_legacy_mean_ratio": 0.7090785469975541,
+        "mean_latency_delta_ns": -159912788.6111111,
+        "allocation_delta_bytes": -26397876,
+        "shared_to_legacy_allocation_ratio": 0.86095361260519,
+        "legacy": {
+          "mean_ns": 549676852.5,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 549676852.5,
+            "StandardError": 7472513.940105811,
+            "Level": 12,
+            "Margin": 35725435.93498065,
+            "Lower": 513951416.56501937,
+            "Upper": 585402288.4349806
+          },
+          "allocated_bytes": 189849420
+        },
+        "shared": {
+          "mean_ns": 389764063.8888889,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 389764063.8888889,
+            "StandardError": 1485136.7439151618,
+            "Level": 12,
+            "Margin": 7487027.932328274,
+            "Lower": 382277035.9565606,
+            "Upper": 397251091.8212172
+          },
+          "allocated_bytes": 163451544
+        }
+      }
+    },
+    {
+      "operation": "CorrectedMovingAverage",
+      "count": 1000,
+      "history": "Full",
+      "candidate": {
+        "mean_ns": 8285928.333333334,
+        "confidence_interval": {
+          "N": 10,
+          "Mean": 8285928.333333334,
+          "StandardError": 27418.022515162822,
+          "Level": 12,
+          "Margin": 131083.16888806454,
+          "Lower": 8154845.16444527,
+          "Upper": 8417011.502221398
+        },
+        "allocated_bytes": 7308543
+      },
+      "versus_saved_legacy": {
+        "operation": "CorrectedMovingAverage",
+        "count": 1000,
+        "history": "Full",
+        "latency_result": "shared-faster-separated-intervals",
+        "shared_to_legacy_mean_ratio": 0.904062510607739,
+        "mean_latency_delta_ns": -879287.8282828294,
+        "allocation_delta_bytes": -102746,
+        "shared_to_legacy_allocation_ratio": 0.9861365546533133,
+        "legacy": {
+          "mean_ns": 9165216.161616163,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 9165216.161616163,
+            "StandardError": 93591.16933968483,
+            "Level": 12,
+            "Margin": 471821.6702512037,
+            "Lower": 8693394.49136496,
+            "Upper": 9637037.831867367
+          },
+          "allocated_bytes": 7411289
+        },
+        "shared": {
+          "mean_ns": 8285928.333333334,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 8285928.333333334,
+            "StandardError": 27418.022515162822,
+            "Level": 12,
+            "Margin": 131083.16888806454,
+            "Lower": 8154845.16444527,
+            "Upper": 8417011.502221398
+          },
+          "allocated_bytes": 7308543
+        }
+      },
+      "versus_saved_shared": {
+        "operation": "CorrectedMovingAverage",
+        "count": 1000,
+        "history": "Full",
+        "latency_result": "shared-faster-separated-intervals",
+        "shared_to_legacy_mean_ratio": 0.8136481509212866,
+        "mean_latency_delta_ns": -1897746.666666666,
+        "allocation_delta_bytes": -120,
+        "shared_to_legacy_allocation_ratio": 0.9999835811283131,
+        "legacy": {
+          "mean_ns": 10183675,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 10183675,
+            "StandardError": 358794.15723048156,
+            "Level": 12,
+            "Margin": 1715363.5015903953,
+            "Lower": 8468311.498409605,
+            "Upper": 11899038.501590395
+          },
+          "allocated_bytes": 7308663
+        },
+        "shared": {
+          "mean_ns": 8285928.333333334,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 8285928.333333334,
+            "StandardError": 27418.022515162822,
+            "Level": 12,
+            "Margin": 131083.16888806454,
+            "Lower": 8154845.16444527,
+            "Upper": 8417011.502221398
+          },
+          "allocated_bytes": 7308543
+        }
+      }
+    },
+    {
+      "operation": "CorrectedMovingAverage",
+      "count": 1000,
+      "history": "LatestOnly",
+      "candidate": {
+        "mean_ns": 8306852.884615384,
+        "confidence_interval": {
+          "N": 8,
+          "Mean": 8306852.884615384,
+          "StandardError": 41620.843976202836,
+          "Level": 12,
+          "Margin": 225080.63452013707,
+          "Lower": 8081772.250095247,
+          "Upper": 8531933.519135522
+        },
+        "allocated_bytes": 7259470
+      },
+      "versus_saved_legacy": {
+        "operation": "CorrectedMovingAverage",
+        "count": 1000,
+        "history": "LatestOnly",
+        "latency_result": "overlapping-intervals",
+        "shared_to_legacy_mean_ratio": 0.7737581236601749,
+        "mean_latency_delta_ns": -2428870.115384616,
+        "allocation_delta_bytes": -151628,
+        "shared_to_legacy_allocation_ratio": 0.9795404135797422,
+        "legacy": {
+          "mean_ns": 10735723,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 10735723,
+            "StandardError": 484414.30024778954,
+            "Level": 12,
+            "Margin": 2315942.4242232777,
+            "Lower": 8419780.575776722,
+            "Upper": 13051665.424223278
+          },
+          "allocated_bytes": 7411098
+        },
+        "shared": {
+          "mean_ns": 8306852.884615384,
+          "confidence_interval": {
+            "N": 8,
+            "Mean": 8306852.884615384,
+            "StandardError": 41620.843976202836,
+            "Level": 12,
+            "Margin": 225080.63452013707,
+            "Lower": 8081772.250095247,
+            "Upper": 8531933.519135522
+          },
+          "allocated_bytes": 7259470
+        }
+      },
+      "versus_saved_shared": {
+        "operation": "CorrectedMovingAverage",
+        "count": 1000,
+        "history": "LatestOnly",
+        "latency_result": "overlapping-intervals",
+        "shared_to_legacy_mean_ratio": 0.8319974177224047,
+        "mean_latency_delta_ns": -1677376.2820512839,
+        "allocation_delta_bytes": 103,
+        "shared_to_legacy_allocation_ratio": 1.0000141885649259,
+        "legacy": {
+          "mean_ns": 9984229.166666668,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 9984229.166666668,
+            "StandardError": 377558.4790005393,
+            "Level": 12,
+            "Margin": 1805074.0836826742,
+            "Lower": 8179155.082983994,
+            "Upper": 11789303.250349343
+          },
+          "allocated_bytes": 7259367
+        },
+        "shared": {
+          "mean_ns": 8306852.884615384,
+          "confidence_interval": {
+            "N": 8,
+            "Mean": 8306852.884615384,
+            "StandardError": 41620.843976202836,
+            "Level": 12,
+            "Margin": 225080.63452013707,
+            "Lower": 8081772.250095247,
+            "Upper": 8531933.519135522
+          },
+          "allocated_bytes": 7259470
+        }
+      }
+    },
+    {
+      "operation": "CorrectedMovingAverage",
+      "count": 10000,
+      "history": "Full",
+      "candidate": {
+        "mean_ns": 86591483.33333333,
+        "confidence_interval": {
+          "N": 9,
+          "Mean": 86591483.33333333,
+          "StandardError": 1041506.0832055503,
+          "Level": 12,
+          "Margin": 5250550.273298752,
+          "Lower": 81340933.06003457,
+          "Upper": 91842033.60663208
+        },
+        "allocated_bytes": 74616904
+      },
+      "versus_saved_legacy": {
+        "operation": "CorrectedMovingAverage",
+        "count": 10000,
+        "history": "Full",
+        "latency_result": "overlapping-intervals",
+        "shared_to_legacy_mean_ratio": 0.9191563014513087,
+        "mean_latency_delta_ns": -7616088.541666672,
+        "allocation_delta_bytes": -825708,
+        "shared_to_legacy_allocation_ratio": 0.9890551509536812,
+        "legacy": {
+          "mean_ns": 94207571.875,
+          "confidence_interval": {
+            "N": 8,
+            "Mean": 94207571.875,
+            "StandardError": 703871.2782526726,
+            "Level": 12,
+            "Margin": 3806453.1805312335,
+            "Lower": 90401118.69446877,
+            "Upper": 98014025.05553123
+          },
+          "allocated_bytes": 75442612
+        },
+        "shared": {
+          "mean_ns": 86591483.33333333,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 86591483.33333333,
+            "StandardError": 1041506.0832055503,
+            "Level": 12,
+            "Margin": 5250550.273298752,
+            "Lower": 81340933.06003457,
+            "Upper": 91842033.60663208
+          },
+          "allocated_bytes": 74616904
+        }
+      },
+      "versus_saved_shared": {
+        "operation": "CorrectedMovingAverage",
+        "count": 10000,
+        "history": "Full",
+        "latency_result": "overlapping-intervals",
+        "shared_to_legacy_mean_ratio": 0.8286463002503153,
+        "mean_latency_delta_ns": -17906036.66666667,
+        "allocation_delta_bytes": -220,
+        "shared_to_legacy_allocation_ratio": 0.9999970516151225,
+        "legacy": {
+          "mean_ns": 104497520,
+          "confidence_interval": {
+            "N": 10,
+            "Mean": 104497520,
+            "StandardError": 3999957.766905171,
+            "Level": 12,
+            "Margin": 19123448.425734952,
+            "Lower": 85374071.57426505,
+            "Upper": 123620968.42573495
+          },
+          "allocated_bytes": 74617124
+        },
+        "shared": {
+          "mean_ns": 86591483.33333333,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 86591483.33333333,
+            "StandardError": 1041506.0832055503,
+            "Level": 12,
+            "Margin": 5250550.273298752,
+            "Lower": 81340933.06003457,
+            "Upper": 91842033.60663208
+          },
+          "allocated_bytes": 74616904
+        }
+      }
+    },
+    {
+      "operation": "CorrectedMovingAverage",
+      "count": 10000,
+      "history": "LatestOnly",
+      "candidate": {
+        "mean_ns": 83057834.375,
+        "confidence_interval": {
+          "N": 8,
+          "Mean": 83057834.375,
+          "StandardError": 190410.2086695175,
+          "Level": 12,
+          "Margin": 1029716.0386980866,
+          "Lower": 82028118.33630191,
+          "Upper": 84087550.41369809
+        },
+        "allocated_bytes": 74135620
+      },
+      "versus_saved_legacy": {
+        "operation": "CorrectedMovingAverage",
+        "count": 10000,
+        "history": "LatestOnly",
+        "latency_result": "shared-faster-separated-intervals",
+        "shared_to_legacy_mean_ratio": 0.8536880802486176,
+        "mean_latency_delta_ns": -14235118.75,
+        "allocation_delta_bytes": -1307304,
+        "shared_to_legacy_allocation_ratio": 0.9826716154320848,
+        "legacy": {
+          "mean_ns": 97292953.125,
+          "confidence_interval": {
+            "N": 8,
+            "Mean": 97292953.125,
+            "StandardError": 1262857.15265946,
+            "Level": 12,
+            "Margin": 6829383.118501989,
+            "Lower": 90463570.00649801,
+            "Upper": 104122336.24350199
+          },
+          "allocated_bytes": 75442924
+        },
+        "shared": {
+          "mean_ns": 83057834.375,
+          "confidence_interval": {
+            "N": 8,
+            "Mean": 83057834.375,
+            "StandardError": 190410.2086695175,
+            "Level": 12,
+            "Margin": 1029716.0386980866,
+            "Lower": 82028118.33630191,
+            "Upper": 84087550.41369809
+          },
+          "allocated_bytes": 74135620
+        }
+      },
+      "versus_saved_shared": {
+        "operation": "CorrectedMovingAverage",
+        "count": 10000,
+        "history": "LatestOnly",
+        "latency_result": "shared-faster-separated-intervals",
+        "shared_to_legacy_mean_ratio": 0.9109976480453192,
+        "mean_latency_delta_ns": -8114557.291666672,
+        "allocation_delta_bytes": -168,
+        "shared_to_legacy_allocation_ratio": 0.9999977338879841,
+        "legacy": {
+          "mean_ns": 91172391.66666667,
+          "confidence_interval": {
+            "N": 9,
+            "Mean": 91172391.66666667,
+            "StandardError": 1157662.7965521018,
+            "Level": 12,
+            "Margin": 5836131.743096901,
+            "Lower": 85336259.92356977,
+            "Upper": 97008523.40976357
+          },
+          "allocated_bytes": 74135788
+        },
+        "shared": {
+          "mean_ns": 83057834.375,
+          "confidence_interval": {
+            "N": 8,
+            "Mean": 83057834.375,
+            "StandardError": 190410.2086695175,
+            "Level": 12,
+            "Margin": 1029716.0386980866,
+            "Lower": 82028118.33630191,
+            "Upper": 84087550.41369809
+          },
+          "allocated_bytes": 74135620
+        }
+      }
+    }
+  ],
+  "qualification": "Candidate-only timings against saved historical arms. No native-competitor qualification. Inspect historical-run variability and outstanding correctness/hosted gates."
+}
