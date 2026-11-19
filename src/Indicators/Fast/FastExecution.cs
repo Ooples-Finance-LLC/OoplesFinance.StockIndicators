@@ -146,6 +146,7 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<ZeroSeedLaguerreFilter>(binders, t => (c, o) => FastKernels.LaguerreFilter(c.Close, o[0], t.Gamma));
         Bind<WindowUlcerIndex>(binders, t => (c, o) => FastKernels.UlcerIndex(c.Close, o[0], o[1], t.Period));
         Bind<ClassicStochasticRsi>(binders, t => !FastKernels.SupportsClassic(t.Method) ? null : (c, o) => FastKernels.StochasticStrength(c.Close, o, t));
         Bind<KlingerVolumeWithSignal>(binders, t => (c, o) => FastKernels.KlingerVolume(c, o, t));

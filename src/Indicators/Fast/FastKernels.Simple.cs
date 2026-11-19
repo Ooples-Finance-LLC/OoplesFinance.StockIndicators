@@ -339,4 +339,29 @@ internal static partial class FastKernels
         RebuiltMean(value.Slice(1), average.Slice(1), period);
         defined.Slice(period).Fill(1);
     }
+
+
+    /// <summary>
+    /// Four-stage Laguerre filter started from zero: each stage follows the one before it with the same
+    /// damping, and the output weights the stages 1, 2, 2, 1.
+    /// </summary>
+    internal static void LaguerreFilter(ReadOnlySpan<double> close, Span<double> output, double gamma)
+    {
+        var n = close.Length;
+        output = output.Slice(0, n);
+        double first = 0, second = 0, third = 0, fourth = 0;
+        for (var i = 0; i < n; i++)
+        {
+            var price = close[i];
+            var nextFirst = price + gamma * (first - price);
+            var nextSecond = first + gamma * (second - nextFirst);
+            var nextThird = second + gamma * (third - nextSecond);
+            var nextFourth = third + gamma * (fourth - nextThird);
+            first = nextFirst;
+            second = nextSecond;
+            third = nextThird;
+            fourth = nextFourth;
+            output[i] = (first + 2 * second + 2 * third + fourth) / 6;
+        }
+    }
 }
