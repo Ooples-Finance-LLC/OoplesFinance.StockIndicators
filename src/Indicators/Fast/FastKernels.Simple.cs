@@ -408,4 +408,62 @@ internal static partial class FastKernels
             output[i] = 4 * one - 6 * two + 4 * three - fourth.Next(three);
         }
     }
+
+
+    /// <summary>
+    /// McGinley dynamic: each step moves toward the price by the gap over factor * period, scaled by the
+    /// fourth power of average over price, so it speeds up when the price falls below it. The delayed
+    /// start restarts from a zero average and withholds the value for a period after that.
+    /// </summary>
+    internal static void QuarticDynamic(ReadOnlySpan<double> close, Span<double> value, Span<double> defined,
+        QuarticDynamicAverage owner)
+    {
+        var n = close.Length;
+        value = value.Slice(0, n);
+        defined = defined.Slice(0, n);
+        value.Clear();
+        defined.Clear();
+        if (n == 0) return;
+        var immediate = owner.Startup == McGinleyStartup.Immediate;
+        var scale = owner.Factor * owner.Period;
+        var period = owner.Period;
+        long start = 1;
+        var previous = close[0];
+        var first = 0;
+        if (immediate)
+        {
+            value[0] = previous;
+            defined[0] = 1;
+            first = 1;
+        }
+        for (var i = first; i < n; i++)
+        {
+            var price = close[i];
+            if (!immediate && previous == 0)
+            {
+                previous = price;
+                start = (long)i + period;
+                continue;
+            }
+            double next;
+            if (previous == 0) next = price / scale;
+            else if (price == 0) next = previous > 0 ? double.NegativeInfinity : double.PositiveInfinity;
+            else
+            {
+                var ratio = previous / price;
+                var square = ratio * ratio;
+                next = previous + (price - previous) * (square * square) / scale;
+            }
+            if (double.IsInfinity(next) || double.IsNaN(next))
+            {
+                // Published without a flag, which is what the output check rejects.
+                value[i] = next;
+                continue;
+            }
+            previous = next;
+            if (!immediate && i < start) continue;
+            value[i] = next;
+            defined[i] = 1;
+        }
+    }
 }

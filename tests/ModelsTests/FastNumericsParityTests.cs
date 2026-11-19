@@ -455,6 +455,11 @@ public sealed class FastNumericsParityTests
         ("SumSeededDirectionalIndex(2)", () => new SumSeededDirectionalIndex(2)),
         ("SumSeededDirectionalIndex(5)", () => new SumSeededDirectionalIndex(5)),
         ("SumSeededDirectionalIndex(300)", () => new SumSeededDirectionalIndex(300)),
+        ("QuarticDynamicAverage()", () => new QuarticDynamicAverage()),
+        ("QuarticDynamicAverage(1, 1)", () => new QuarticDynamicAverage(1, 1)),
+        ("QuarticDynamicAverage(10, 0.6, ResetDelay)", () => new QuarticDynamicAverage(10, 0.6, McGinleyStartup.ResetDelay)),
+        ("QuarticDynamicAverage(40, 2, ResetDelay)", () => new QuarticDynamicAverage(40, 2, McGinleyStartup.ResetDelay)),
+        ("QuarticDynamicAverage(300, 0.6)", () => new QuarticDynamicAverage(300, 0.6)),
         ("WindowAtrBands()", () => new WindowAtrBands()),
         ("WindowAtrBands(1, 1)", () => new WindowAtrBands(1, 1)),
         ("WindowAtrBands(20, 10, 2, Simple)", () => new WindowAtrBands(20, 10, 2, AtrBandCenterMode.Simple)),
@@ -492,8 +497,20 @@ public sealed class FastNumericsParityTests
         foreach (var (fixture, bars) in Fixtures())
         {
             var exactIndicator = create();
-            using var exact = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
-                .ConfigureIndicators(exactIndicator).BuildAsync();
+            // Some indicators have no finite value on some fixtures (a division by a close of exactly zero).
+            // The exact route rejects those; the fast route must reject them at the same bar with the same value.
+            IndicatorOutputException? rejection = null;
+            IIndicatorRun? exactRun = null;
+            try
+            {
+                exactRun = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                    .ConfigureIndicators(exactIndicator).BuildAsync();
+            }
+            catch (IndicatorOutputException rejected)
+            {
+                rejection = rejected;
+            }
+            using var exact = exactRun;
             foreach (var columnar in new[] { false, true })
             foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
             {
@@ -505,8 +522,15 @@ public sealed class FastNumericsParityTests
                     : Bars.From(bars);
                 var builder = new StockIndicatorBuilder().ConfigureSource(source).ConfigureIndicators(indicator)
                     .ConfigureNumerics(IndicatorNumerics.Fast).ConfigureHistory(history);
-                using var fast = await builder.BuildAsync();
                 var where = $"{name} / {fixture} / columnar={columnar} / {history}";
+                if (rejection is not null || exact is null)
+                {
+                    var fastRejection = await Assert.ThrowsAsync<IndicatorOutputException>(() => builder.BuildAsync());
+                    Assert.True(rejection is not null && rejection.Message == fastRejection.Message,
+                        $"{where}: exact rejected with '{rejection?.Message}', fast with '{fastRejection.Message}'");
+                    continue;
+                }
+                using var fast = await builder.BuildAsync();
                 Assert.True(builder.LastExecution?.Reason.StartsWith("Fast", StringComparison.Ordinal), where + ": did not take the fast route");
                 Assert.Equal(bars.Length, fast.BarCount);
                 Assert.Equal(exactIndicator.Outputs.Count, indicator.Outputs.Count);
