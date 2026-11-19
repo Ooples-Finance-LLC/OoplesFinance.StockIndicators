@@ -114,6 +114,21 @@ public sealed class FastNumericsParityTests
         ("TillsonAverage(5,.7,CascadedMeans,0)", () => new TillsonAverage(5, .7, TillsonSeed.CascadedMeans, 0)),
         ("TillsonAverage(14,.7,CascadedMeans,3)", () => new TillsonAverage(14, .7, TillsonSeed.CascadedMeans, 3)),
         ("TillsonAverage(8,.4,CascadedMeans)", () => new TillsonAverage(8, .4, TillsonSeed.CascadedMeans)),
+        ("PriceRoundingTransform(Ceiling)", () => new PriceRoundingTransform(PriceRoundingOperation.Ceiling)),
+        ("PriceRoundingTransform(Floor)", () => new PriceRoundingTransform(PriceRoundingOperation.Floor)),
+        ("PriceRoundingTransform(SquareRoot)", () => new PriceRoundingTransform(PriceRoundingOperation.SquareRoot)),
+        ("PriceCircularTransform(Sine)", () => new PriceCircularTransform(PriceCircularOperation.Sine)),
+        ("PriceCircularTransform(Cosine)", () => new PriceCircularTransform(PriceCircularOperation.Cosine)),
+        ("PriceCircularTransform(Tangent)", () => new PriceCircularTransform(PriceCircularOperation.Tangent)),
+        ("PriceCircularTransform(ArcSine)", () => new PriceCircularTransform(PriceCircularOperation.ArcSine)),
+        ("PriceCircularTransform(ArcCosine)", () => new PriceCircularTransform(PriceCircularOperation.ArcCosine)),
+        ("PriceCircularTransform(ArcTangent)", () => new PriceCircularTransform(PriceCircularOperation.ArcTangent)),
+        ("PriceTranscendentalTransform(NaturalLogarithm)", () => new PriceTranscendentalTransform(PriceTranscendentalOperation.NaturalLogarithm)),
+        ("PriceTranscendentalTransform(CommonLogarithm)", () => new PriceTranscendentalTransform(PriceTranscendentalOperation.CommonLogarithm)),
+        ("PriceTranscendentalTransform(Exponential)", () => new PriceTranscendentalTransform(PriceTranscendentalOperation.Exponential)),
+        ("PriceTranscendentalTransform(HyperbolicSine)", () => new PriceTranscendentalTransform(PriceTranscendentalOperation.HyperbolicSine)),
+        ("PriceTranscendentalTransform(HyperbolicCosine)", () => new PriceTranscendentalTransform(PriceTranscendentalOperation.HyperbolicCosine)),
+        ("PriceTranscendentalTransform(HyperbolicTangent)", () => new PriceTranscendentalTransform(PriceTranscendentalOperation.HyperbolicTangent)),
         ("AlignedEmaMacd()", () => new AlignedEmaMacd()),
         ("AlignedEmaMacd(fixed)", () => new AlignedEmaMacd(12, 26, 9, false, 0, true)),
         ("AlignedEmaMacd(first,supp)", () => new AlignedEmaMacd(5, 13, 4, true, 3)),
@@ -230,6 +245,15 @@ public sealed class FastNumericsParityTests
         yield return ("shorter than most windows", Walk(7, 5));
         yield return ("walk 300", Walk(300, 17));
         yield return ("walk 2000", Walk(2000, 29));
+        yield return ("signed unit range", Walk(400, 41).Select((bar, i) =>
+        {
+            // Closes in about [-1.6, 1.6], so inverse circular functions, logarithms and square roots meet
+            // both sides of their domains. The close is kept off the middle of the range: at the exact middle
+            // a money-flow multiplier is zero in real arithmetic, and all that is left to compare is the
+            // rounding of the inputs.
+            var close = Math.Round(1.6 * Math.Sin(i * 0.37) + (bar.Close % 1 - .5) * .1, 4);
+            return new Bar(bar.Time, close - .05, close + .3, close - .2, close, bar.Volume);
+        }).ToArray());
         yield return ("flat", Enumerable.Range(0, 250).Select(i => new Bar(Day(i), 50, 50, 50, 50, 1000)).ToArray());
     }
 

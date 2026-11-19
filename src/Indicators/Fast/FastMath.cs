@@ -80,4 +80,42 @@ internal static class FastMath
         for (var i = 0; i < result.Length; i++) result[i] = a[i] * scalar;
 #endif
     }
+
+    internal static void Floor(ReadOnlySpan<double> input, Span<double> result)
+    {
+#if !NETFRAMEWORK
+        AiDotNet.Tensors.Engines.Simd.SimdKernels.Floor(input, result);
+#else
+        for (var i = 0; i < result.Length; i++) result[i] = Math.Floor(input[i]);
+#endif
+    }
+
+    internal static void Ceiling(ReadOnlySpan<double> input, Span<double> result)
+    {
+#if !NETFRAMEWORK
+        AiDotNet.Tensors.Engines.Simd.SimdKernels.Ceiling(input, result);
+#else
+        for (var i = 0; i < result.Length; i++) result[i] = Math.Ceiling(input[i]);
+#endif
+    }
+
+    internal static void Sqrt(ReadOnlySpan<double> input, Span<double> result)
+    {
+#if !NETFRAMEWORK
+        AiDotNet.Tensors.Engines.Simd.SimdKernels.Sqrt(input, result);
+#else
+        for (var i = 0; i < result.Length; i++) result[i] = Math.Sqrt(input[i]);
+#endif
+    }
+
+    internal static double Min(ReadOnlySpan<double> input)
+    {
+#if !NETFRAMEWORK
+        return AiDotNet.Tensors.Engines.Simd.SimdKernels.Min(input);
+#else
+        var minimum = input[0];
+        for (var i = 1; i < input.Length; i++) minimum = Math.Min(minimum, input[i]);
+        return minimum;
+#endif
+    }
 }

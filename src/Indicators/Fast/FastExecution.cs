@@ -63,6 +63,7 @@ internal static partial class FastExecution
         BindAverages(binders);
         BindClassic(binders);
         BindRange(binders);
+        BindTransforms(binders);
         return binders;
     }
 
@@ -99,5 +100,12 @@ internal static partial class FastExecution
         Bind<SmoothedAccumulationOscillator>(binders, oscillator => (c, o) => FastKernels.SmoothedAccumulation(c, o, oscillator));
         Bind<WilderStrengthOscillator>(binders, strength => (c, o) => FastKernels.WilderStrength(c.Close, o[0], o[1],
             strength.Period, strength.Convention, strength.UnstablePeriods));
+    }
+
+    private static void BindTransforms(Dictionary<Type, Func<IIndicator, FastKernel?>> binders)
+    {
+        Bind<PriceRoundingTransform>(binders, t => (c, o) => FastKernels.Rounding(c.Close, o[0], o[1], t.Operation));
+        Bind<PriceCircularTransform>(binders, t => (c, o) => FastKernels.Circular(c.Close, o[0], o[1], t.Operation));
+        Bind<PriceTranscendentalTransform>(binders, t => (c, o) => FastKernels.Transcendental(c.Close, o[0], o[1], t.Operation));
     }
 }
