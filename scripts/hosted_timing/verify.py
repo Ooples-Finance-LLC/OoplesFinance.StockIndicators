@@ -74,6 +74,10 @@ def collect(folder, phase):
         assert phase == 'diagnostic'
         from .alma_grid_roi import collect as alma_grid_collect
         return alma_grid_collect(folder)
+    elif read(PLAN).get('diagnostic_kind') == 'gapside-interval-replay-native-pilot':
+        assert phase == 'diagnostic'
+        from .gapside_interval_replay_roi import collect as gapside_collect
+        return gapside_collect(folder)
     elif read(PLAN).get('diagnostic_kind') == 'candle-topology-replay-native-pilot':
         assert phase == 'diagnostic'
         from .candle_topology_replay_roi import collect as candle_topology_collect

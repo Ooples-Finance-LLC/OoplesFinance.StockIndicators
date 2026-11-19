@@ -1,0 +1,380 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "expected_runtime_version": ".NET 10.0.15",
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "diagnostic_kind": "gapside-interval-replay-native-pilot",
+  "diagnostic_only": true,
+  "cases": 10,
+  "decisions": 2,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 60
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.GapSideBySideWhiteLines",
+              "pair": "TaLib.Candles.GapSideBySideWhiteLines"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.GapSideBySideWhiteLines",
+              "pair": "TaLib.Candles.GapSideBySideWhiteLines"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 10,
+      "decisions": 2
+    }
+  ],
+  "inputs_ready": false,
+  "parent_review_approved": false,
+  "sources": {
+    "published": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+    "old": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+    "successor": "9025295cc3901fed088ed45f09c53ab4edd46988",
+    "variants": "4b4e8a385ed1c210998d26de6460e23f5842ffe9"
+  },
+  "gpu_sources": {
+    "old": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+    "successor": "9025295cc3901fed088ed45f09c53ab4edd46988",
+    "variants": "4b4e8a385ed1c210998d26de6460e23f5842ffe9"
+  },
+  "old_candidate": {
+    "source": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+    "ci_run": "44469775767",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "source_fingerprint": "1b6b4cf28b0820a992fbd4e049bf2c993cdfa6efdee8deabf9d98fb0cde436ae",
+    "manifest_sha256": "fc7c16d3669d0ffe8affcaf17ac3e08f29e0121e980e53c50c17f75bb440b8a3",
+    "production_sha256": "2aeba2543a532a59337b6a2f87edff9d1d76c9f54f91ad1ccd7b2254c9e1331f",
+    "actual_harness_sha256": "5a7b5b13be2308661be6c66a51aefa0f5a2f1be863c3501f8213d9e4f2963045",
+    "artifact_id": "14503779776",
+    "artifact_zip_sha256": "1a33e221d1fcb768360e5be90bae7d1293601a30fbc8ca35c3da26c15bee36a7",
+    "unit_passed": 134,
+    "parity_passed": 86,
+    "unit_classes": [
+      "AlmaWideDivisorTests",
+      "AlmaGridBatchTests",
+      "SharedAlmaWindowTests",
+      "AnalyticGridBatchTests",
+      "SincGridBatchTests",
+      "WindowedSincCompactTests",
+      "SharedWeightedWindowTests"
+    ],
+    "parity_classes": [
+      "AlmaComparisonTests",
+      "AlmaPublisherAlignmentTests",
+      "NamedComparisonPublisherTests",
+      "AnalyticKernelComparisonTests",
+      "SincBuilderComparisonTests",
+      "FixedWeightedComparisonTests",
+      "ConvolutionComparisonTests"
+    ],
+    "cpu_root_review": {
+      "path": "benchmarks/plans/evidence/candle-topology-alma-sinc-combined-cpu-root-review.json",
+      "sha256": "8c17be3338e3bfc14cca85b9c2a6397bd46bcabe232c339980db8e15a8abcdd1"
+    },
+    "gpu_root_review": {
+      "path": "benchmarks/plans/evidence/candle-topology-alma-sinc-combined-gpu-root-review.json",
+      "sha256": "37ebf92ac00469f6ac35d75c635cb4ef76ec6021172ac04f916911a1ed9541e2"
+    },
+    "gpu_receipt": {
+      "path": "benchmarks/plans/evidence/candle-topology-alma-sinc-combined-gpu-receipt.json",
+      "sha256": "d36f2c13a94dfa6b49861c6c3e6f8b063d7ab7588ad228d219112fd4fe373b9c"
+    },
+    "gpu_trx": {
+      "path": "benchmarks/plans/evidence/candle-topology-alma-sinc-combined-gpu.trx.gz",
+      "sha256": "461e68498c5f4028c1986f0991dcc7aa8dcd1a6e40eaae2d0175c154d8f67894"
+    }
+  },
+  "candidate": {
+    "source": "9025295cc3901fed088ed45f09c53ab4edd46988",
+    "ci_run": "44533761016",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "source_fingerprint": "e858182e382154683f46d31f37a1b25e57cea8474d30260ee1b7b2145790ebb6",
+    "manifest_sha256": "977a2b34f9d252a67eb5013778407ffe0a8374d6d5ad650dddff969fd70f9896",
+    "production_sha256": "5cb7a6155d5bd51a281dabcf35ccf5ebda02978adbfe9214d494d4d9bca6b800",
+    "actual_harness_sha256": "88060c6ce41e82e3ccc88be38b328530ea02128075df7cd781ddfadee153a39e",
+    "artifact_id": "14534914528",
+    "artifact_zip_sha256": "4967476568773b65f8286c9c5ff89777a4acf400d59be37889e78c7e5f59b97d",
+    "unit_passed": 26,
+    "parity_passed": 76,
+    "unit_classes": [
+      "GapSideReplayTests",
+      "MatchedLinesSharedExecutionTests",
+      "MatchedLinesParallelExecutionTests"
+    ],
+    "parity_classes": [
+      "MatchedLinesTests",
+      "SharedMatchedLinesBenchmarkTests"
+    ],
+    "cpu_root_review": {
+      "path": "benchmarks/plans/evidence/gapside-roi-candidate-cpu-root-review.json",
+      "sha256": "798214cf25ed47908f5bbf56375fb858281a9f24cb12a4beb5ce4c5bed9bfbf1"
+    },
+    "gpu_root_review": {
+      "path": "benchmarks/plans/evidence/gapside-roi-candidate-gpu-root-review.json",
+      "sha256": "fc93e0f0fd53c5146378989eb6b6df110e9c25cf9e2afa56193974ce67d03bb4"
+    },
+    "gpu_receipt": {
+      "path": "benchmarks/plans/evidence/gapside-roi-candidate-gpu-receipt.json",
+      "sha256": "67d3e7426c329aefe6f02d928ad56708299785336f9384de67d95468fac71da0"
+    },
+    "gpu_trx": {
+      "path": "benchmarks/plans/evidence/gapside-roi-candidate-gpu.trx.gz",
+      "sha256": "d609ccb0308364896358e30e9934834f9ace59dc9180bb7cb8e50017d8136aa1"
+    }
+  },
+  "harness_sha256": "5a7b5b13be2308661be6c66a51aefa0f5a2f1be863c3501f8213d9e4f2963045",
+  "cpu_test_classes": {
+    "old": [
+      "AlmaWideDivisorTests",
+      "AlmaGridBatchTests",
+      "SharedAlmaWindowTests",
+      "AnalyticGridBatchTests",
+      "SincGridBatchTests",
+      "WindowedSincCompactTests",
+      "SharedWeightedWindowTests"
+    ],
+    "successor": [
+      "GapSideReplayTests",
+      "MatchedLinesSharedExecutionTests",
+      "MatchedLinesParallelExecutionTests"
+    ],
+    "variants": [
+      "AlmaWideDivisorTests",
+      "AlmaGridBatchTests",
+      "SharedAlmaWindowTests",
+      "AnalyticGridBatchTests",
+      "SincGridBatchTests",
+      "WindowedSincCompactTests",
+      "SharedWeightedWindowTests"
+    ]
+  },
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "automatic_qualification": false,
+  "report_import_permitted": false,
+  "harness_alias_policy": {
+    "common_artifact_role": "old",
+    "variants_artifact_role": "old",
+    "baseline_source": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+    "candidate_source": "9025295cc3901fed088ed45f09c53ab4edd46988",
+    "require_scoped_source_identity": true,
+    "claim_artifact_binary_identity": false
+  },
+  "published_baseline": {
+    "head": "20d21f263a25f14c4c15a0ab9354bfc91e0dab60",
+    "branch": "perf/remaining-indicator-rollout",
+    "source_fingerprint": "1b6b4cf28b0820a992fbd4e049bf2c993cdfa6efdee8deabf9d98fb0cde436ae"
+  },
+  "common_harness_contract": {
+    "setup": "LibraryPairBenchmarks.Setup",
+    "checks": [
+      "actual pair selected by PairId",
+      "CompetitorData.Create authenticated deterministic inputs",
+      "both Ooples and Competitor full outputs verified against independent reference",
+      "unchanged candle adapter builds actual StockIndicatorBuilder"
+    ],
+    "extra_compiled_experiments": 0
+  },
+  "native_progress_gate": {
+    "primary_targets": [
+      {
+        "pair": "TaLib.Candles.GapSideBySideWhiteLines",
+        "bars": 10000
+      }
+    ],
+    "old_rounds": [
+      0,
+      3
+    ],
+    "candidate_rounds": [
+      1,
+      2
+    ],
+    "native_round": 2,
+    "require_source_faster": true,
+    "require_separated_intervals_both_rounds": true,
+    "minimum_margin": null,
+    "protect_prior_confident_wins_both_sizes": true,
+    "qualification": false,
+    "closure_credit": 0,
+    "require_net_10000_point_progress": true
+  },
+  "native_win_policy_approval": {
+    "path": "benchmarks/plans/evidence/candle-topology-native-win-policy.json",
+    "sha256": "414b558eae1deda750c3d169020128986a0e0db9b2acd95f23da035be03bfd7c"
+  },
+  "source_root_review": {
+    "path": "benchmarks/plans/evidence/gapside-roi-code-root-review.json",
+    "sha256": "2b58a2626d810e53cfeeacf4c43654260adcb6e5d2aaf196161c4b433d8a35f1"
+  },
+  "requested_case_inventory": [
+    {
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.GapSideBySideWhiteLines",
+      "bars": 1000,
+      "method": "Ooples",
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Candles.GapSideBySideWhiteLines\"*"
+      ]
+    },
+    {
+      "round": 0,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.GapSideBySideWhiteLines",
+      "bars": 10000,
+      "method": "Ooples",
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Candles.GapSideBySideWhiteLines\"*"
+      ]
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.GapSideBySideWhiteLines",
+      "bars": 1000,
+      "method": "Ooples",
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Candles.GapSideBySideWhiteLines\"*"
+      ]
+    },
+    {
+      "round": 1,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.GapSideBySideWhiteLines",
+      "bars": 10000,
+      "method": "Ooples",
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Candles.GapSideBySideWhiteLines\"*"
+      ]
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.GapSideBySideWhiteLines",
+      "bars": 1000,
+      "method": "Ooples",
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Candles.GapSideBySideWhiteLines\"*"
+      ]
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.GapSideBySideWhiteLines",
+      "bars": 1000,
+      "method": "Competitor",
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"TaLib.Candles.GapSideBySideWhiteLines\"*"
+      ]
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.GapSideBySideWhiteLines",
+      "bars": 10000,
+      "method": "Ooples",
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Candles.GapSideBySideWhiteLines\"*"
+      ]
+    },
+    {
+      "round": 2,
+      "arm": "new",
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.GapSideBySideWhiteLines",
+      "bars": 10000,
+      "method": "Competitor",
+      "filters": [
+        "*LibraryPairBenchmarks.Competitor*\"TaLib.Candles.GapSideBySideWhiteLines\"*"
+      ]
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.GapSideBySideWhiteLines",
+      "bars": 1000,
+      "method": "Ooples",
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Candles.GapSideBySideWhiteLines\"*"
+      ]
+    },
+    {
+      "round": 3,
+      "arm": "old",
+      "fixture": "LibraryPairBenchmarks",
+      "pair": "TaLib.Candles.GapSideBySideWhiteLines",
+      "bars": 10000,
+      "method": "Ooples",
+      "filters": [
+        "*LibraryPairBenchmarks.Ooples*\"TaLib.Candles.GapSideBySideWhiteLines\"*"
+      ]
+    }
+  ],
+  "input_pin_status": "bound",
+  "preparation_branch": "perf/gapside-interval-replay-roi-20261119",
+  "preparation_revision": "gapside-interval-replay-roi-v1-20261119"
+}

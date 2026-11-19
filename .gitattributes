@@ -255,3 +255,7 @@ benchmarks/plans/evidence/renko-normalized-baseline-focused-20261118-receipt.jso
 benchmarks/plans/evidence/renko-normalized-baseline-focused-20261118-unit.trx -text
 benchmarks/plans/evidence/renko-normalized-baseline-focused-20261118-parity.trx -text
 benchmarks/plans/evidence/renko-normalized-actual-lp-setup-proof-20261118.json -text
+
+# Preserve exact GapSide correctness evidence and the hosted plan bytes.
+benchmarks/plans/evidence/gapside-roi-* -text whitespace=cr-at-eol
+benchmarks/plans/hosted-gapside-interval-replay-roi-20261119.json text eol=lf

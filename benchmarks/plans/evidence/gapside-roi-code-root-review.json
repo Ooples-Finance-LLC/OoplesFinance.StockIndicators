@@ -1,0 +1,28 @@
+{
+  "status": "root-code-review-passed-focused-correctness-permitted",
+  "source": "9025295cc3901fed088ed45f09c53ab4edd46988",
+  "base": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+  "reviewed": [
+    "Complete three-file diff",
+    "Original MatchedLinesState and independent reference",
+    "ComputeBoundedRegion seed/tail/validation/ownership caller"
+  ],
+  "findings": [
+    "No material code defect found",
+    "Signed range maximum and outward thresholds conservatively bound exact signed means",
+    "Uncertain nonfinite intervals retain original state replay",
+    "Warmup halo max66 and capture98 cover merged and reset replay indices",
+    "Explicit positive-zero initialization and all raw input validation retained",
+    "No changes to original arithmetic, unrelated consumers, or worker policy"
+  ],
+  "permitted": [
+    "One source-bound build and focused GapSide/MatchedLines tests",
+    "Actual candidate-bound GPU100 after correctness",
+    "Prepare complete-call ROI proposal only after those pass"
+  ],
+  "tests_run_by_root": 0,
+  "performance_verified": false,
+  "qualification": false,
+  "publication": false,
+  "win_credit": 0
+}

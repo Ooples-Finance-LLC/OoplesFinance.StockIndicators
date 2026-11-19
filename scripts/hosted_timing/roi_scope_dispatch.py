@@ -1,7 +1,9 @@
 """Keep legacy and family diagnostic scopes independently pinned."""
 def validate_scope(plan):
     kind = plan.get("diagnostic_kind")
-    if kind == "candle-topology-replay-native-pilot":
+    if kind == "gapside-interval-replay-native-pilot":
+        from .gapside_interval_replay_roi import validate_scope as check
+    elif kind == "candle-topology-replay-native-pilot":
         from .candle_topology_replay_roi import validate_scope as check
     elif kind == "alma-cached-wide-aligned-native-pilot":
         from .alma_grid_roi import validate_scope as check
