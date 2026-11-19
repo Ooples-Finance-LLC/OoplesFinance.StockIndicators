@@ -146,6 +146,11 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<SineWeightedAverage>(binders, t => (c, o) => FastKernels.LagWeightedWindow(c.Close, o[0], FastKernels.SineWeights(t.Period)));
+        Bind<GaussianWeightedAverage>(binders, t => (c, o) => FastKernels.LagWeightedWindow(c.Close, o[0], FastKernels.GaussianWeights(t.Period, t.Sigma)));
+        Bind<TriangularWindowAverage>(binders, t => (c, o) => FastKernels.TriangularWindow(c.Close, o[0], t.Period));
+        Bind<WindowMeanAbsoluteDeviation>(binders, t => (c, o) => FastKernels.MeanAbsoluteDeviation(c.Close, o[0], t.Period));
+        Bind<MovingAverageDiagnostics>(binders, t => (c, o) => FastKernels.MeanDiagnostics(c.Close, o, t.Period));
         Bind<LaggedPriceChange>(binders, t => (c, o) => FastKernels.LaggedChange(c.Close, o[0], t));
         Bind<RangeAccelerationBands>(binders, t => (c, o) => FastKernels.AccelerationBands(c, o, t));
         Bind<SeededTrueStrength>(binders, t => (c, o) => FastKernels.TrueStrength(c.Close, o, t));

@@ -261,4 +261,129 @@ internal static partial class FastKernels
             }
         }
     }
+
+    /// <summary>
+    /// Mean of the window weighted by lag, newest first, over the bars so far while the window fills.
+    /// Weights that sum to exactly zero fall back to the plain count as the divisor.
+    /// </summary>
+    internal static void LagWeightedWindow(ReadOnlySpan<double> input, Span<double> output, ReadOnlySpan<double> lagWeights)
+    {
+        var n = input.Length;
+        var period = lagWeights.Length;
+        output = output.Slice(0, n);
+        // Oldest first, so a window and its weights run the same way.
+        var weights = new double[period];
+        for (var j = 0; j < period; j++) weights[j] = lagWeights[period - 1 - j];
+        double total = 0;
+        var filling = Math.Min(period - 1, n);
+        for (var i = 0; i < filling; i++)
+        {
+            total += lagWeights[i];
+            var sum = Dot(input.Slice(0, i + 1), weights.AsSpan(period - 1 - i));
+            output[i] = total == 0 ? sum / (i + 1) : sum / total;
+        }
+        if (n < period) return;
+        total += lagWeights[period - 1];
+        var divisor = total == 0 ? period : total;
+        for (var i = period - 1; i < n; i++) output[i] = Dot(input.Slice(i - period + 1, period), weights) / divisor;
+    }
+
+    internal static double[] SineWeights(int period)
+    {
+        var weights = new double[period];
+        for (var lag = 0; lag < period; lag++) weights[lag] = Math.Sin((lag + 1d) * Math.PI / (period + 1d));
+        return weights;
+    }
+
+    internal static double[] GaussianWeights(int period, double sigma)
+    {
+        var weights = new double[period];
+        var center = period / 2;
+        for (var lag = 0; lag < period; lag++)
+        {
+            var x = (lag - center) / (double)center / sigma;
+            weights[lag] = Math.Exp(-.5 * x * x);
+        }
+        return weights;
+    }
+
+    /// <summary>Mean absolute distance of the window's values from their mean, over the bars so far at first.</summary>
+    internal static void MeanAbsoluteDeviation(ReadOnlySpan<double> input, Span<double> output, int period)
+    {
+        var n = input.Length;
+        output = output.Slice(0, n);
+        double sum = 0;
+        for (var i = 0; i < n; i++)
+        {
+            var start = Math.Max(0, i - period + 1);
+            sum = WindowSum(input, sum, i, period);
+            var count = i - start + 1;
+            var mean = sum / count;
+            double a = 0, b = 0;
+            var j = start;
+            for (; j < i; j += 2)
+            {
+                a += Math.Abs(input[j] - mean);
+                b += Math.Abs(input[j + 1] - mean);
+            }
+            if (j == i) a += Math.Abs(input[j] - mean);
+            output[i] = (a + b) / count;
+        }
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    private static double WindowSum(ReadOnlySpan<double> input, double sum, int i, int period)
+    {
+        if (i < period) return sum + input[i];
+        // A window of one is the value itself; sliding would leave the rounding of the bars before it.
+        if (period == 1) return input[i];
+        if ((i & RebuildMask) != 0) return sum + (input[i] - input[i - period]);
+        sum = 0;
+        for (var j = i - period + 1; j <= i; j++) sum += input[j];
+        return sum;
+    }
+
+    /// <summary>
+    /// The window mean with its mean absolute error, mean squared error and mean signed relative error.
+    /// A zero in the window leaves the relative error undefined.
+    /// </summary>
+    internal static void MeanDiagnostics(ReadOnlySpan<double> input, double[][] outputs, int period)
+    {
+        var n = input.Length;
+        Span<double> means = outputs[0].AsSpan(0, n), absolutes = outputs[1].AsSpan(0, n), squares = outputs[2].AsSpan(0, n),
+            relatives = outputs[3].AsSpan(0, n), relativeDefined = outputs[7].AsSpan(0, n);
+        for (var slot = 4; slot < 7; slot++) DefinedFrom(outputs[slot], period - 1L);
+        relatives.Clear();
+        relativeDefined.Clear();
+        double sum = 0;
+        // Zeros among the last period values.
+        var zeros = 0;
+        for (var i = 0; i < n; i++)
+        {
+            sum = WindowSum(input, sum, i, period);
+            if (input[i] == 0) zeros++;
+            if (i >= period && input[i - period] == 0) zeros--;
+            if (i < period - 1)
+            {
+                means[i] = absolutes[i] = squares[i] = 0;
+                continue;
+            }
+            var mean = sum / period;
+            double absolute = 0, squared = 0, relative = 0;
+            for (var j = i - period + 1; j <= i; j++)
+            {
+                var value = input[j];
+                var distance = Math.Abs(value - mean);
+                absolute += distance;
+                squared += distance * distance;
+                relative += distance / value;
+            }
+            means[i] = mean;
+            absolutes[i] = absolute / period;
+            squares[i] = squared / period;
+            if (zeros != 0) continue;
+            relatives[i] = relative / period;
+            relativeDefined[i] = 1;
+        }
+    }
 }
