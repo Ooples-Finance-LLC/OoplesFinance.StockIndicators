@@ -1029,8 +1029,18 @@ internal static partial class ValuesBarExecution
 
     private readonly struct StateWindowKernel(IIndicatorState state) : IBoundedKernel<StateWindowKernel>
     {
-        public static StateWindowKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
-            new((IIndicatorState)((IndicatorBase)indicator).CreateState()!);
+        public static StateWindowKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
+        {
+            var original = (IIndicatorState)((IndicatorBase)indicator).CreateState()!;
+            return new(indicator switch
+            {
+                GaussianWeightedAverage { Period: <= 64 } average =>
+                    new AnalyticGridBatchState(original, average.BatchCoefficient, average.Period, count, target),
+                SineWeightedAverage { Period: <= 64 } average =>
+                    new AnalyticGridBatchState(original, average.BatchCoefficient, average.Period, count, target),
+                _ => original
+            });
+        }
         public double Update(in Bar bar) => state.Update(in bar);
     }
 

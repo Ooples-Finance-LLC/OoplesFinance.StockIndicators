@@ -40,6 +40,10 @@ public sealed class GaussianWeightedAverage
         return Math.Exp(-.5 * x * x);
     }
 
+#if !NETFRAMEWORK
+    internal Func<int, double> BatchCoefficient => Weight;
+#endif
+
     /// <inheritdoc/>
     protected internal override object CreateState() =>
         new CachedAnalyticKernelState(Period, Weight);
@@ -85,6 +89,10 @@ public sealed class SineWeightedAverage
     public override int WarmupBars => Period - 1;
 
     private double Weight(int lag) => Math.Sin((lag + 1d) * Math.PI / (Period + 1d));
+
+#if !NETFRAMEWORK
+    internal Func<int, double> BatchCoefficient => Weight;
+#endif
 
     /// <inheritdoc/>
     protected internal override object CreateState() =>
