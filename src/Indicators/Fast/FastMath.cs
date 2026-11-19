@@ -2,8 +2,9 @@ namespace OoplesFinance.StockIndicators.Indicators.Fast;
 
 /// <summary>Allocation and vector primitives shared by the fast kernels.</summary>
 /// <remarks>
-/// On modern targets the element-wise operations are AiDotNet.Tensors SIMD kernels; the .NET Framework
-/// target, which does not reference that package, uses the scalar loops.
+/// The element-wise operations are written here over <see cref="System.Numerics.Vector{T}"/> rather than
+/// called from AiDotNet.Tensors: loading that assembly runs its GPU detection, which costs a CPU-only
+/// caller about two seconds on its first build. The .NET Framework target uses the scalar loops.
 /// </remarks>
 internal static class FastMath
 {
@@ -56,67 +57,110 @@ internal static class FastMath
 
     internal static void Add(ReadOnlySpan<double> a, ReadOnlySpan<double> b, Span<double> result)
     {
+        var i = 0;
 #if !NETFRAMEWORK
-        AiDotNet.Tensors.Engines.Simd.SimdKernels.VectorAdd(a, b, result);
-#else
-        for (var i = 0; i < result.Length; i++) result[i] = a[i] + b[i];
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            for (; i <= result.Length - width; i += width)
+                (new System.Numerics.Vector<double>(a.Slice(i, width)) + new System.Numerics.Vector<double>(b.Slice(i, width)))
+                    .CopyTo(result.Slice(i, width));
+        }
 #endif
+        for (; i < result.Length; i++) result[i] = a[i] + b[i];
     }
 
     internal static void Subtract(ReadOnlySpan<double> a, ReadOnlySpan<double> b, Span<double> result)
     {
+        var i = 0;
 #if !NETFRAMEWORK
-        AiDotNet.Tensors.Engines.Simd.SimdKernels.VectorSubtract(a, b, result);
-#else
-        for (var i = 0; i < result.Length; i++) result[i] = a[i] - b[i];
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            for (; i <= result.Length - width; i += width)
+                (new System.Numerics.Vector<double>(a.Slice(i, width)) - new System.Numerics.Vector<double>(b.Slice(i, width)))
+                    .CopyTo(result.Slice(i, width));
+        }
 #endif
+        for (; i < result.Length; i++) result[i] = a[i] - b[i];
     }
 
     internal static void Scale(ReadOnlySpan<double> a, double scalar, Span<double> result)
     {
+        var i = 0;
 #if !NETFRAMEWORK
-        AiDotNet.Tensors.Engines.Simd.SimdKernels.MultiplyScalar(a, scalar, result);
-#else
-        for (var i = 0; i < result.Length; i++) result[i] = a[i] * scalar;
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            for (; i <= result.Length - width; i += width)
+                (new System.Numerics.Vector<double>(a.Slice(i, width)) * scalar).CopyTo(result.Slice(i, width));
+        }
 #endif
+        for (; i < result.Length; i++) result[i] = a[i] * scalar;
     }
 
     internal static void Floor(ReadOnlySpan<double> input, Span<double> result)
     {
+        var i = 0;
 #if !NETFRAMEWORK
-        AiDotNet.Tensors.Engines.Simd.SimdKernels.Floor(input, result);
-#else
-        for (var i = 0; i < result.Length; i++) result[i] = Math.Floor(input[i]);
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            for (; i <= result.Length - width; i += width)
+                System.Numerics.Vector.Floor(new System.Numerics.Vector<double>(input.Slice(i, width)))
+                    .CopyTo(result.Slice(i, width));
+        }
 #endif
+        for (; i < result.Length; i++) result[i] = Math.Floor(input[i]);
     }
 
     internal static void Ceiling(ReadOnlySpan<double> input, Span<double> result)
     {
+        var i = 0;
 #if !NETFRAMEWORK
-        AiDotNet.Tensors.Engines.Simd.SimdKernels.Ceiling(input, result);
-#else
-        for (var i = 0; i < result.Length; i++) result[i] = Math.Ceiling(input[i]);
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            for (; i <= result.Length - width; i += width)
+                System.Numerics.Vector.Ceiling(new System.Numerics.Vector<double>(input.Slice(i, width)))
+                    .CopyTo(result.Slice(i, width));
+        }
 #endif
+        for (; i < result.Length; i++) result[i] = Math.Ceiling(input[i]);
     }
 
     internal static void Sqrt(ReadOnlySpan<double> input, Span<double> result)
     {
+        var i = 0;
 #if !NETFRAMEWORK
-        AiDotNet.Tensors.Engines.Simd.SimdKernels.Sqrt(input, result);
-#else
-        for (var i = 0; i < result.Length; i++) result[i] = Math.Sqrt(input[i]);
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            for (; i <= result.Length - width; i += width)
+                System.Numerics.Vector.SquareRoot(new System.Numerics.Vector<double>(input.Slice(i, width)))
+                    .CopyTo(result.Slice(i, width));
+        }
 #endif
+        for (; i < result.Length; i++) result[i] = Math.Sqrt(input[i]);
     }
 
     internal static double Min(ReadOnlySpan<double> input)
     {
-#if !NETFRAMEWORK
-        return AiDotNet.Tensors.Engines.Simd.SimdKernels.Min(input);
-#else
         var minimum = input[0];
-        for (var i = 1; i < input.Length; i++) minimum = Math.Min(minimum, input[i]);
-        return minimum;
+        var i = 1;
+#if !NETFRAMEWORK
+        var width = System.Numerics.Vector<double>.Count;
+        if (System.Numerics.Vector.IsHardwareAccelerated && input.Length >= width)
+        {
+            var lowest = new System.Numerics.Vector<double>(input.Slice(0, width));
+            for (i = width; i <= input.Length - width; i += width)
+                lowest = System.Numerics.Vector.Min(lowest, new System.Numerics.Vector<double>(input.Slice(i, width)));
+            minimum = lowest[0];
+            for (var lane = 1; lane < width; lane++) minimum = Math.Min(minimum, lowest[lane]);
+        }
 #endif
+        for (; i < input.Length; i++) minimum = Math.Min(minimum, input[i]);
+        return minimum;
     }
 
     /// <summary>
