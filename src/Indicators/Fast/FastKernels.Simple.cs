@@ -518,4 +518,127 @@ internal static partial class FastKernels
             output[i] = average;
         }
     }
+
+
+    /// <summary>
+    /// Price relative: the ratio of one price field to another, the mean of that ratio over a window, and
+    /// the difference between the two fields' returns over a lag. Each value has its own defined flag.
+    /// </summary>
+    internal static void PriceRelative(FastColumns columns, double[][] output, PriceRelativeStrength owner)
+    {
+        var evaluation = Field(columns, owner.Evaluation);
+        var basis = Field(columns, owner.Basis);
+        var n = columns.Close.Length;
+        for (var slot = 0; slot < 6; slot++) output[slot].AsSpan(0, n).Clear();
+        var meanPeriod = owner.MeanPeriod ?? 0;
+        var lag = owner.Period ?? 0;
+        // Bars whose ratio overflows are skipped by the windows, so both windows keep their own rings
+        // instead of indexing back into the columns.
+        var ratios = new double[meanPeriod];
+        var pastEvaluation = new double[lag];
+        var pastBasis = new double[lag];
+        int ratioSlot = 0, ratioCount = 0, missing = 0, pastSlot = 0, pastCount = 0, slid = 0;
+        double sum = 0, largest = 0;
+        for (var i = 0; i < n; i++)
+        {
+            var e = evaluation[i];
+            var b = basis[i];
+            var has = b != 0;
+            var ratio = has ? e / b : double.NaN;
+            if (has)
+            {
+                output[0][i] = ratio;
+                output[3][i] = 1;
+                if (double.IsInfinity(ratio)) continue;
+            }
+            if (meanPeriod != 0)
+            {
+                if (ratioCount == meanPeriod)
+                {
+                    var old = ratios[ratioSlot];
+                    if (double.IsNaN(old)) missing--;
+                    else
+                    {
+                        sum -= old;
+                        largest = Math.Max(largest, Math.Abs(old));
+                    }
+                }
+                else ratioCount++;
+                ratios[ratioSlot] = ratio;
+                ratioSlot = ratioSlot + 1 == meanPeriod ? 0 : ratioSlot + 1;
+                if (has)
+                {
+                    sum += ratio;
+                    largest = Math.Max(largest, Math.Abs(ratio));
+                }
+                else missing++;
+                // Rebuilt at intervals, and whenever the sum has fallen far below what passed through it.
+                if (++slid > RebuildMask || !(Math.Abs(sum) > largest * (1.0 / 1024)))
+                {
+                    sum = 0;
+                    double carry = 0;
+                    for (var j = 0; j < ratioCount; j++)
+                    {
+                        var term = ratios[j];
+                        if (double.IsNaN(term)) continue;
+                        var total = sum + term;
+                        carry += Math.Abs(sum) >= Math.Abs(term) ? sum - total + term : term - total + sum;
+                        sum = total;
+                    }
+                    sum += carry;
+                    largest = Math.Abs(sum);
+                    slid = 0;
+                }
+                if (ratioCount == meanPeriod && missing == 0)
+                {
+                    output[1][i] = meanPeriod == 1 ? ratio : sum / meanPeriod;
+                    output[4][i] = 1;
+                }
+            }
+            if (lag == 0) continue;
+            if (pastCount == lag)
+            {
+                var oldEvaluation = pastEvaluation[pastSlot];
+                var oldBasis = pastBasis[pastSlot];
+                if (oldEvaluation != 0 && oldBasis != 0)
+                {
+                    output[2][i] = ReturnGap(e, b, oldEvaluation, oldBasis);
+                    output[5][i] = 1;
+                }
+            }
+            else pastCount++;
+            pastEvaluation[pastSlot] = e;
+            pastBasis[pastSlot] = b;
+            pastSlot = pastSlot + 1 == lag ? 0 : pastSlot + 1;
+        }
+    }
+
+    // e / oldE - b / oldB as one quotient, with the products' rounding carried, so the two returns
+    // cancelling does not leave only their rounding behind.
+    private static double ReturnGap(double e, double b, double oldE, double oldB)
+    {
+        var left = e * oldB;
+        var right = b * oldE;
+        var divisor = oldE * oldB;
+        var plain = (left - right) / divisor;
+        if (double.IsInfinity(left) || double.IsInfinity(right) || double.IsInfinity(divisor) || divisor == 0
+            || Math.Abs(left) < 1e-270 || Math.Abs(right) < 1e-270)
+            return e / oldE - b / oldB;
+        var residual = ProductResidual(e, oldB, left) - ProductResidual(b, oldE, right);
+        var refined = (left - right + residual) / divisor;
+        return double.IsNaN(refined) || double.IsInfinity(refined) ? plain : refined;
+    }
+
+    // What a * b lost to rounding, by splitting each factor into two halves whose products are exact.
+    private static double ProductResidual(double a, double b, double product)
+    {
+        const double Splitter = 134217729;
+        var scaledA = a * Splitter;
+        var highA = scaledA - (scaledA - a);
+        var lowA = a - highA;
+        var scaledB = b * Splitter;
+        var highB = scaledB - (scaledB - b);
+        var lowB = b - highB;
+        return lowA * lowB - (product - highA * highB - lowA * highB - highA * lowB);
+    }
 }
