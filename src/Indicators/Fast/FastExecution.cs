@@ -146,6 +146,8 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<WindowUlcerIndex>(binders, t => (c, o) => FastKernels.UlcerIndex(c.Close, o[0], o[1], t.Period));
+        Bind<ClassicStochasticRsi>(binders, t => !FastKernels.SupportsClassic(t.Method) ? null : (c, o) => FastKernels.StochasticStrength(c.Close, o, t));
         Bind<KlingerVolumeWithSignal>(binders, t => (c, o) => FastKernels.KlingerVolume(c, o, t));
         Bind<ExpandingRegularizedEma>(binders, t => (c, o) => FastKernels.RegularizedEma(c.Close, o[0], t.Period, t.Lambda));
         Bind<ExpandingZeroLagEma>(binders, t => (c, o) => FastKernels.ZeroLagEma(c.Close, o[0], t.Period));

@@ -96,4 +96,82 @@ internal static partial class FastKernels
         exact.Add(-previousClose);
         return exact.Sign > 0 ? 1 : -1;
     }
+
+
+    /// <summary>
+    /// Ulcer index: the root mean square of each window value's percentage drop from the highest value
+    /// before it in the window. Published once the window is full and its oldest value is positive.
+    /// </summary>
+    internal static void UlcerIndex(ReadOnlySpan<double> close, Span<double> value, Span<double> defined, int period)
+    {
+        var n = close.Length;
+        value = value.Slice(0, n);
+        defined = defined.Slice(0, n);
+        value.Clear();
+        defined.Clear();
+        for (var i = period - 1; i < n; i++)
+        {
+            var window = close.Slice(i - period + 1, period);
+            if (!(window[0] > 0)) continue;
+            double peak = 0, squares = 0;
+            for (var j = 0; j < window.Length; j++)
+            {
+                var price = window[j];
+                if (price >= peak)
+                {
+                    peak = price;
+                    continue;
+                }
+                var drop = (price - peak) * 100 / peak;
+                squares += drop * drop;
+            }
+            value[i] = Math.Sqrt(squares / period);
+            defined[i] = 1;
+        }
+    }
+
+    /// <summary>
+    /// Stochastic of the relative strength index: where the index sits in its own recent range, zero when
+    /// that range is flat, with a classic average of it as the signal. Both wait for the signal.
+    /// </summary>
+    internal static void StochasticStrength(ReadOnlySpan<double> close, double[][] outputs, ClassicStochasticRsi owner)
+    {
+        var n = close.Length;
+        for (var slot = 0; slot < 4; slot++) outputs[slot].AsSpan().Clear();
+        double[] strength = FastMath.Allocate(n), present = FastMath.Allocate(n);
+        WilderStrength(close, strength, present, owner.Rsi.Period, owner.Rsi.Convention, owner.Rsi.UnstablePeriods);
+        // Only the bars that have an index feed the range, so they are packed together first.
+        var bars = new int[n];
+        var count = 0;
+        for (var i = 0; i < n; i++)
+        {
+            if (present[i] == 0) continue;
+            strength[count] = strength[i];
+            bars[count++] = i;
+        }
+        var period = owner.StochasticPeriod;
+        var length = count - (period - 1);
+        var first = owner.SignalAverage.First;
+        if (length <= first) return;
+        var packed = strength.AsSpan(0, count);
+        double[] highest = FastMath.Allocate(count), lowest = FastMath.Allocate(count);
+        RollingExtreme(packed, highest, period, true);
+        RollingExtreme(packed, lowest, period, false);
+        double[] raw = FastMath.Allocate(length), average = FastMath.Allocate(length);
+        for (var j = 0; j < length; j++)
+        {
+            var at = j + period - 1;
+            double high = highest[at], low = lowest[at];
+            raw[j] = high == low ? 0 : 100 * (packed[at] - low) / (high - low);
+        }
+        ClassicAverage(raw, average, owner.SignalAverage, first);
+        Span<double> k = outputs[0], d = outputs[1], kDefined = outputs[2], dDefined = outputs[3];
+        for (var j = (int)first; j < length; j++)
+        {
+            var bar = bars[j + period - 1];
+            k[bar] = raw[j];
+            d[bar] = average[j];
+            kDefined[bar] = dDefined[bar] = 1;
+        }
+    }
 }
