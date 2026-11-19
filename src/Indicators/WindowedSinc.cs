@@ -49,6 +49,15 @@ public sealed class WindowedSinc : IndicatorBase, IIndicatorValidationContract
     public SincWindow Window { get; }
     /// <inheritdoc/>
     public override int WarmupBars => Taps - 1;
+#if !NETFRAMEWORK
+    // Decode the original compact values without recomputing trigonometry.
+    // Sinc stores oldest first; the batch convolution requests newest-first lags.
+    internal double BatchCoefficient(int lag)
+    {
+        var factor = _compactCoefficients[Taps - 1 - lag];
+        return Math.ScaleB(factor.Mantissa, factor.Scale - 1074);
+    }
+#endif
     /// <inheritdoc/>
     protected internal override object CreateState() =>
 #if !NETFRAMEWORK
