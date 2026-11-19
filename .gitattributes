@@ -262,3 +262,4 @@ scripts/kama-common-harness-preflight.ps1 text eol=lf
 benchmarks/plans/hosted-kama-fused-prefix-roi-v2-20261119.json text eol=lf
 scripts/kama-preflight/* text eol=lf
 benchmarks/plans/hosted-kama-fused-prefix-roi-v3-20261119.json text eol=lf
+benchmarks/plans/hosted-kama-current-source-roi-20261119.json text eol=lf

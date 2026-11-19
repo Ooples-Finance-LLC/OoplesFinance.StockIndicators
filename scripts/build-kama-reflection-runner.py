@@ -14,6 +14,7 @@ def main():
     sdk=subprocess.check_output(['dotnet','--version'],text=True).strip()
     with tempfile.TemporaryDirectory(prefix='kama-empty-package-source-') as empty:
         command=['dotnet','build',str(project),'--configuration','Release','--output',str(out),'--source',empty,'--nologo',
+            '--disable-build-servers','-p:UseSharedCompilation=false',
             '-p:ImportDirectoryBuildProps=false','-p:ImportDirectoryBuildTargets=false']
         process=subprocess.run(command,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
     log=out.with_name(out.name+'-build.log');log.write_bytes(process.stdout)

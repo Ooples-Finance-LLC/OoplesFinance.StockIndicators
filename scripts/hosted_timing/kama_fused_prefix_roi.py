@@ -15,15 +15,15 @@ from . import candle_single_pass_roi as common
 from . import triple_body_macro_qualification as original
 from . import analytic_grid_roi as policy
 
-KIND = 'kama-fused-prefix-v3-native-pilot'
-OLD = 'd3d5c905a5d75b666b440aa6c5f6b4c24b42dc91'
-NEW = '7de04493efa8304cb2a21fea45c21d177ca0903f'
-PUBLISHED = '87405159446f3de0132ce49800b52bd0af00e234'
+KIND = 'kama-current-source-native-pilot'
+OLD = '4b4e8a385ed1c210998d26de6460e23f5842ffe9'
+NEW = '9e9fbb08c1d9f6164d861446f27b6d2a393430f3'
+PUBLISHED = '20d21f263a25f14c4c15a0ab9354bfc91e0dab60'
 FIXTURE = 'LibraryPairBenchmarks'
 TARGETS = ['QuanTAlib.Kama','Skender.GetKama']
 KAMA = TARGETS + ['TaLib.Functions.Kama','Trady.Indicator.KaufmanAdaptiveMovingAverage']
 PAIRS = KAMA + ['TaLib.Functions.Ema','TaLib.Functions.T3']
-WORKFLOW_BRANCH = 'perf/kama-fused-prefix-roi-v3-20261119'
+WORKFLOW_BRANCH = 'perf/kama-current-source-roi-20261119'
 COUNTS = (1000,10000)
 HARNESS_PATH = p.BENCH + '/bin/Release/net10.0/' + original.HARNESS_ASSEMBLY
 HARNESS_SCOPES = [p.BENCH,'Directory.Build.props','Directory.Build.targets','Directory.Packages.props','global.json','NuGet.Config','nuget.config']
@@ -32,8 +32,8 @@ PATHS = {'src/Indicators/ValuesBarExecution.cs','src/Indicators/ValuesBarExecuti
          'src/Indicators/ValuesBarExecution.SeededAdaptiveBatch.cs','tests/ModelsTests/SeededAdaptiveBatchTests.cs',PARITY_FILE}
 UNIT = ['SeededAdaptiveBatchTests','SeededAdaptiveSharedExecutionTests','EmaRecurrenceTests','TillsonSharedExecutionTests']
 PARITY = ['SeededAdaptiveBatchParityTests','SeededAdaptiveComparisonTests','TaAdaptiveComparisonTests','TradyAdaptiveComparisonTests','ExponentialAverageComparisonTests','SharedTillsonBenchmarkTests']
-BASE_UNIT = ['AnalyticGridBatchTests','SharedWeightedWindowTests','FibonacciWeightedAverageTests','AffineConvolutionTests','WindowedSincCompactTests']
-BASE_PARITY = ['AnalyticKernelComparisonTests','FixedWeightedComparisonTests','ConvolutionComparisonTests','SincBuilderComparisonTests']
+BASE_UNIT = ['AlmaWideDivisorTests','AlmaGridBatchTests','SharedAlmaWindowTests','AnalyticGridBatchTests','SincGridBatchTests','WindowedSincCompactTests','SharedWeightedWindowTests']
+BASE_PARITY = ['AlmaComparisonTests','AlmaPublisherAlignmentTests','NamedComparisonPublisherTests','AnalyticKernelComparisonTests','SincBuilderComparisonTests','FixedWeightedComparisonTests','ConvolutionComparisonTests']
 sha = lambda raw: hashlib.sha256(raw).hexdigest()
 
 def blob(source,path):
@@ -87,15 +87,15 @@ def verify_source_boundary():
 
 def verify_workflow_entrypoint(text=None):
     """Registration and gate checks are independent of the two readiness flags."""
-    if text is None:text=(p.REPO/'.github/workflows/kama-fused-prefix-roi-v3.yml').read_text()
+    if text is None:text=(p.REPO/'.github/workflows/kama-current-source-roi.yml').read_text()
     assert '  workflow_dispatch:' not in text and '  pull_request:' not in text
     assert '  push:\n    branches: ['+WORKFLOW_BRANCH+']\n' in text
-    assert '    paths: [.github/workflows/kama-fused-prefix-roi-v3.yml, benchmarks/plans/hosted-kama-fused-prefix-roi-v3-20261119.json]\n' in text
+    assert '    paths: [.github/workflows/kama-current-source-roi.yml, benchmarks/plans/hosted-kama-current-source-roi-20261119.json]\n' in text
     assert "    if: github.event_name == 'push'\n" in text
     assert text.index('Fail closed before SDK or input setup')<text.index('actions/setup-dotnet@')<text.index('actions/download-artifact@')
     gate=text.split('Fail closed before SDK or input setup',1)[1].split('actions/setup-dotnet@',1)[0]
-    if 'v3' in WORKFLOW_BRANCH:
-        assert "$plan.current_baseline_reconciliation.status -ne 'complete'" in gate
+    assert "$plan.current_baseline_reconciliation.status -ne 'complete'" in gate
+    assert '$plan.candidate_evidence_ready -isnot [bool] -or !$plan.candidate_evidence_ready' in gate
     assert '$plan.inputs_ready -isnot [bool] -or !$plan.inputs_ready' in gate
     assert '$plan.parent_review_approved -isnot [bool] -or !$plan.parent_review_approved' in gate
     assert NEW in gate and OLD in gate
@@ -125,7 +125,7 @@ def verify_publication(plan, *, current=False):
     return binding
 
 def verify_root_evidence(plan):
-    for key,source,unit,parity in [('old_candidate',OLD,53,48),('candidate',NEW,62,43)]:
+    for key,source,unit,parity in [('old_candidate',OLD,134,86),('candidate',NEW,62,43)]:
         c=plan[key];cpu=json.loads(evidence(c['cpu_root_review']));gpu=json.loads(evidence(c['gpu_root_review']))
         assert cpu['status']=='root-independent-cpu-authentication-passed' and cpu['source']==source
         assert (cpu['unit'],cpu['parity'])==(unit,parity)
@@ -138,7 +138,9 @@ def verify_root_evidence(plan):
         assert sha(evidence(c['gpu_receipt']))==c['gpu_receipt']['sha256']
     root=json.loads(evidence(plan['worker_proof_root_review']))
     index=json.loads(evidence(plan['worker_proof_index']))
-    assert root['status']=='root-independent-kama-four-api-worker-proof-passed' and root['source']==NEW
+    mechanism=plan['retained_worker_mechanism']
+    assert mechanism['current_execution_width_inferred'] is False and mechanism['current_source_or_timing_credit'] is False
+    assert root['status']=='root-independent-kama-four-api-worker-proof-passed' and root['source']==mechanism['source']
     assert root['index_sha256']==plan['worker_proof_index']['sha256']
     assert root['context_files_verified_local_and_archive']==28
     assert root['raw_speedscope_thread_contexts_independently_recomputed'] is True
@@ -146,9 +148,9 @@ def verify_root_evidence(plan):
     assert all(x['output_and_presence_match'] for x in root['contexts'])
     bundle=json.loads(evidence(plan['worker_bridge_expected']))
     assert set(bundle)==set(KAMA)
-    assert index['source']==NEW and index['source_fingerprint']==plan['candidate']['source_fingerprint']
-    assert index['cpu_root_review_sha256']==plan['candidate']['cpu_root_review']['sha256']
-    assert index['gpu_root_review_sha256']==plan['candidate']['gpu_root_review']['sha256']
+    assert index['source']==mechanism['source'] and index['source_fingerprint']==mechanism['source_fingerprint']
+    assert index['cpu_root_review_sha256']==mechanism['cpu_root_review_sha256']
+    assert index['gpu_root_review_sha256']==mechanism['gpu_root_review_sha256']
     assert index['child_sha256']==plan['worker_proof_helper']['sha256']
     indexed={r['pair']:r for r in index['contexts']}
     models={r['pair']:r for r in json.loads(evidence(plan['model_input']))['rows'] if r['bars']==10000}
@@ -156,9 +158,9 @@ def verify_root_evidence(plan):
         ready=record['ready']
         assert sha(record['ready_raw'].encode())==record['ready_sha256']==indexed[pair]['hashes']['ready.json']
         assert json.loads(record['ready_raw'])==ready
-        assert ready['pair']==pair and ready['source']==NEW and ready['bars']==10000
-        assert ready['loaded_modules']['OoplesFinance.StockIndicators']['sha256']==plan['candidate']['production_sha256']
-        assert ready['loaded_modules']['OoplesFinance.StockIndicators.CompetitorBenchmarks']['sha256']==plan['candidate']['actual_harness_sha256']
+        assert ready['pair']==pair and ready['source']==mechanism['source'] and ready['bars']==10000
+        assert ready['loaded_modules']['OoplesFinance.StockIndicators']['sha256']==mechanism['core_sha256']
+        assert ready['loaded_modules']['OoplesFinance.StockIndicators.CompetitorBenchmarks']['sha256']==mechanism['harness_sha256']
         assert ready['full_returned_output_hash']==ready['independent_reference_output_hash']
         assert ready['presence_sha256']==ready['independent_reference_presence_hash']
         model=record['model']
@@ -172,6 +174,10 @@ def verify_root_evidence(plan):
             import base64
             assert sha(base64.b64decode(column['presence_base64']))==json.loads(ready['presence_sha256'])[name]
     assert evidence(plan['worker_proof_helper']) and evidence(plan['model_input'])
+    for path in PATHS:assert blob(NEW,path)==blob(mechanism['source'],path), 'Retained mechanism source differs from current KAMA delta'
+    for name in ('LibraryPairBenchmarks','ComparisonVerifier','SeededAdaptiveComparison','TaAdaptiveComparison','TradyAdaptiveComparison','ExponentialAverageComparison','TillsonComparison'):
+        path=p.BENCH+'/LibraryComparisons/'+name+'.cs'
+        assert blob(OLD,path)==blob(NEW,path)==blob(mechanism['source'],path), 'Retained actual fixture/factory source changed'
     c=plan['candidate'];frozen=c['evidence_source']
     assert common.source_fingerprint(frozen)==c['source_fingerprint']
     assert not p.git('diff','--name-only',NEW,frozen,'--','src','tests',p.BENCH,p.TESTS)
@@ -205,14 +211,26 @@ def validate_scope(plan, *, require_ready=True):
     assert plan['old_candidate']['source']==OLD and plan['candidate']['source']==NEW
     assert plan['old_candidate']['unit_classes']==BASE_UNIT and plan['old_candidate']['parity_classes']==BASE_PARITY
     assert plan['candidate']['unit_classes']==UNIT and plan['candidate']['parity_classes']==PARITY
-    assert (plan['candidate']['unit_passed'],plan['candidate']['parity_passed'])==(62,43)
-    assert (plan['old_candidate']['unit_passed'],plan['old_candidate']['parity_passed'])==(53,48)
+    assert type(plan['candidate_evidence_ready']) is bool
+    if plan['candidate_evidence_ready']:
+        assert (plan['candidate']['unit_passed'],plan['candidate']['parity_passed'])==(62,43)
+    else:
+        assert (plan['candidate']['unit_passed'],plan['candidate']['parity_passed'])==(None,None)
+        assert (plan['candidate']['intended_unit'],plan['candidate']['intended_parity'])==(62,43)
+    assert (plan['old_candidate']['unit_passed'],plan['old_candidate']['parity_passed'])==(134,86)
     assert plan['cpu_test_classes']==dict(old=BASE_UNIT,successor=UNIT,variants=BASE_UNIT)
     assert type(plan['inputs_ready']) is bool and type(plan['parent_review_approved']) is bool
     if require_ready:
         assert plan['inputs_ready'] is True and plan['parent_review_approved'] is True, 'HELD: root review before SDK/input I/O'
         assert plan['current_baseline_reconciliation']['status']=='complete','HELD: reconcile accepted publication baseline before hosted timing'
-    verify_source_boundary();verify_registry();verify_publication(plan);verify_root_evidence(plan)
+        assert plan['candidate_evidence_ready'] is True,'HELD: actual current-source CPU/GPU authentication'
+    protection=plan['accepted_shared_dispatch_protection']
+    assert protection==dict(accepted_implementations_unchanged=True,shared_execute_jit_layout_risk=True,
+        screen_controls=['TaLib.Functions.Ema','TaLib.Functions.T3'],alma_sinc_timing_in_this_screen=False,
+        alma_sinc_preservation_credit=False,publication_permitted=False,
+        positive_roi_requires_full_affected_consumer_qualification_including_alma_sinc=True)
+    verify_source_boundary();verify_registry();verify_publication(plan)
+    if plan['candidate_evidence_ready']:verify_root_evidence(plan)
 
 def checked_inputs(folder,c):
     """Reviewed package/GPU verification, with all source and evidence passed explicitly."""
@@ -278,6 +296,7 @@ def bridge_contract(plan):
 
 def verify_bridge_record(plan,record):
     assert plan['bridge_policy']==bridge_contract(plan)
+    assert re.fullmatch('[a-f0-9]{64}',plan['candidate']['production_sha256'] or ''),'Unbound current candidate core'
     assert record['status']=='common-harness-four-adapter-preflight-passed' and record['source']==NEW
     assert record['actual_clr']=='10.0.15'
     assert record['core_sha256']==plan['candidate']['production_sha256'] and record['harness_sha256']==plan['harness_sha256']

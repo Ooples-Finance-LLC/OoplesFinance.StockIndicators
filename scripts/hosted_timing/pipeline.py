@@ -241,7 +241,7 @@ def verify_inputs(folder):
     if plan.get('analytic_grid_qualification'):
         from .analytic_grid_qualification import verify_authentication
         verify_authentication(folder,plan,proof)
-    elif plan.get('diagnostic_kind') == 'kama-fused-prefix-v3-native-pilot':
+    elif plan.get('diagnostic_kind') == 'kama-current-source-native-pilot':
         from .kama_fused_prefix_roi import verify_authentication
         verify_authentication(folder,plan,proof)
     elif plan.get('diagnostic_kind') == 'analytic-grid-native-pilot':
@@ -329,7 +329,7 @@ def _verify_input_contents(folder, plan, proof, plan_sha256):
     elif plan.get('analytic_grid_qualification'):
         from .analytic_grid_qualification import verify_harness_alias
         verify_harness_alias(folder,plan,proof)
-    elif plan.get('diagnostic_kind') == 'kama-fused-prefix-v3-native-pilot':
+    elif plan.get('diagnostic_kind') == 'kama-current-source-native-pilot':
         from .kama_fused_prefix_roi import verify_harness_alias
         verify_harness_alias(folder,plan,proof)
     elif plan.get('diagnostic_kind') == 'analytic-grid-native-pilot':

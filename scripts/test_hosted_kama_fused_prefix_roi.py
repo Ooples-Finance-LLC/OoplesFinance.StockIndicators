@@ -7,7 +7,7 @@ from unittest import mock
 from hosted_timing import kama_fused_prefix_roi as q
 from hosted_timing import pipeline,roi_scope_dispatch,verify
 
-SAVED_PLAN=Path(__file__).resolve().parents[1]/'benchmarks/plans/hosted-kama-fused-prefix-roi-v3-20261119.json'
+SAVED_PLAN=Path(__file__).resolve().parents[1]/'benchmarks/plans/hosted-kama-current-source-roi-20261119.json'
 PLAN=Path(os.environ.get('HOSTED_TIMING_PLAN',str(SAVED_PLAN)))
 if not PLAN.is_absolute():PLAN=SAVED_PLAN.parents[2]/PLAN
 
@@ -28,8 +28,13 @@ class KamaFusedPrefixRoiTests(unittest.TestCase):
                     native_controls={'Competitor':sample(100)}))
                 decisions.append(dict(fixture=q.FIXTURE,pair=pair,bars=bars,method='Ooples',verdict='faster' if target else 'inconclusive'))
         return rows,decisions
+    def contract_plan(self):
+        plan=self.plan()
+        if plan['candidate']['production_sha256'] is None:
+            plan['candidate']['production_sha256']='a'*64;plan['bridge_policy']['candidate_core_sha256']='a'*64
+        return plan
     def bridge(self):
-        plan=self.plan();bundle=json.loads(q.evidence(plan['worker_bridge_expected']))
+        plan=self.contract_plan();bundle=json.loads(q.evidence(plan['worker_bridge_expected']))
         return dict(status='common-harness-four-adapter-preflight-passed',source=q.NEW,actual_clr='10.0.15',
             core_sha256=plan['candidate']['production_sha256'],harness_sha256=plan['harness_sha256'],
             cpu_engine='AiDotNet.Tensors.Engines.CpuEngine',default_backend='Auto',default_history='Full',default_workers=2,
@@ -56,12 +61,15 @@ class KamaFusedPrefixRoiTests(unittest.TestCase):
             p=self.plan();mutate(p)
             with self.subTest(mutate=mutate),self.assertRaises(AssertionError):q.validate_scope(p,require_ready=False)
     def test_source_boundary_and_all_six_registry_paths(self):q.verify_source_boundary();q.verify_registry()
-    def test_root_cpu_gpu_and_four_actual_worker_bindings(self):q.verify_root_evidence(self.plan())
+    def test_root_cpu_gpu_and_four_actual_worker_bindings(self):
+        if not self.plan()['candidate_evidence_ready']:self.skipTest('Actual current candidate CPU/GPU authentication pending')
+        q.verify_root_evidence(self.plan())
     def test_evidence_mutation_fails(self):
+        if not self.plan()['candidate_evidence_ready']:self.skipTest('Actual current candidate CPU/GPU authentication pending')
         for field in ('worker_proof_root_review','worker_proof_index','worker_proof_helper','worker_bridge_expected','model_input'):
             p=self.plan();p[field]['sha256']='0'*64
             with self.subTest(field=field),self.assertRaises(AssertionError):q.verify_root_evidence(p)
-    def test_actual_common_harness_bridge_contract(self):q.verify_bridge_record(self.plan(),self.bridge())
+    def test_actual_common_harness_bridge_contract(self):q.verify_bridge_record(self.contract_plan(),self.bridge())
     def test_bridge_wrong_harness_source_outputs_masks_or_calls_fails(self):
         mutations=[lambda r:r.update(harness_sha256='25a4b8834ea5a0334ff4cdc61d10e87048b57e05c28c32c9dfe22f97d8cf9497'),
             lambda r:r.update(source=q.OLD),lambda r:r.update(warmups=1),lambda r:r.update(explicit_ooples_calls=5),
@@ -70,7 +78,7 @@ class KamaFusedPrefixRoiTests(unittest.TestCase):
             lambda r:r['contexts'][1]['presence_sha256'].update(ER='0'*64),lambda r:r.update(default_history='LatestOnly')]
         for mutate in mutations:
             r=self.bridge();mutate(r)
-            with self.subTest(mutate=mutate),self.assertRaises(AssertionError):q.verify_bridge_record(self.plan(),r)
+            with self.subTest(mutate=mutate),self.assertRaises(AssertionError):q.verify_bridge_record(self.contract_plan(),r)
     def test_one_eligible_separated_target_crossover_suffices(self):
         rows,ds=self.rows();result=q.adjudicate_feasibility(rows,ds)
         self.assertTrue(result['passed']);self.assertEqual(len(result['new_10000_target_wins']),1)
@@ -94,14 +102,15 @@ class KamaFusedPrefixRoiTests(unittest.TestCase):
     def test_dispatch_hooks_and_narrow_single_push_workflow(self):
         for module in (pipeline,roi_scope_dispatch,verify):
             self.assertIn('kama_fused_prefix_roi',Path(module.__file__).read_text())
-        workflow=(SAVED_PLAN.parents[2]/'.github/workflows/kama-fused-prefix-roi-v3.yml').read_text()
+        workflow=(SAVED_PLAN.parents[2]/'.github/workflows/kama-current-source-roi.yml').read_text()
         q.verify_workflow_entrypoint(workflow)
         self.assertNotIn('workflow_dispatch:',workflow)
     def test_entrypoint_checks_are_flag_independent(self):
-        workflow=(SAVED_PLAN.parents[2]/'.github/workflows/kama-fused-prefix-roi-v3.yml').read_text()
+        workflow=(SAVED_PLAN.parents[2]/'.github/workflows/kama-current-source-roi.yml').read_text()
         for mutate in [lambda t:t.replace('  push:','  workflow_dispatch:'),lambda t:t.replace(q.WORKFLOW_BRANCH,'perf/other'),
             lambda t:t.replace("github.event_name == 'push'","github.event_name == 'workflow_dispatch'"),
             lambda t:t.replace('!$plan.inputs_ready','false'),lambda t:t.replace('!$plan.parent_review_approved','false'),
+            lambda t:t.replace('!$plan.candidate_evidence_ready','false'),
             lambda t:t.replace("$plan.current_baseline_reconciliation.status -ne 'complete'",'$false')]:
             with self.subTest(mutate=mutate),self.assertRaises(AssertionError):q.verify_workflow_entrypoint(mutate(workflow))
         for event,ref in [('workflow_dispatch','refs/heads/'+q.WORKFLOW_BRANCH),('push','refs/heads/other')]:
@@ -116,6 +125,8 @@ class KamaFusedPrefixRoiTests(unittest.TestCase):
         self.assertEqual(props['UseAppHost'],'false')
         self.assertFalse(project.findall('.//PackageReference'));self.assertFalse(project.findall('.//ProjectReference'))
         self.assertEqual(q.runner_source_pins(),self.plan()['runner_source_pins'])
+        wrapper=(SAVED_PLAN.parents[2]/'scripts/build-kama-reflection-runner.py').read_text()
+        self.assertIn('--disable-build-servers',wrapper);self.assertIn('-p:UseSharedCompilation=false',wrapper)
     def test_v3_rejects_packages_or_wrong_framework_runtime(self):
         import tempfile
         with tempfile.TemporaryDirectory() as temp:
@@ -133,6 +144,7 @@ class KamaFusedPrefixRoiTests(unittest.TestCase):
             with self.assertRaises(AssertionError):q.verify_runner_runtime(folder,self.plan(),require_receipt=False)
     def test_v3_pending_publication_reconciliation_blocks_ready(self):
         plan=self.plan();plan.update(inputs_ready=True,parent_review_approved=True)
+        plan['current_baseline_reconciliation']['status']='pending'
         with mock.patch.object(q.subprocess,'check_output',side_effect=RuntimeError('forbidden')) as io:
             with self.assertRaisesRegex(AssertionError,'reconcile accepted publication'):q.validate_scope(plan)
             io.assert_not_called()

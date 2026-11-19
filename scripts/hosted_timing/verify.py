@@ -66,7 +66,7 @@ def collect(folder, phase):
         assert phase == 'targeted'
         from .analytic_grid_qualification import collect as analytic_qualify
         return analytic_qualify(folder)
-    elif read(PLAN).get('diagnostic_kind') == 'kama-fused-prefix-v3-native-pilot':
+    elif read(PLAN).get('diagnostic_kind') == 'kama-current-source-native-pilot':
         assert phase == 'diagnostic'
         from .kama_fused_prefix_roi import collect as kama_collect
         return kama_collect(folder)
