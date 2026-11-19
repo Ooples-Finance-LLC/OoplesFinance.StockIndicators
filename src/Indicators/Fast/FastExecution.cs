@@ -44,10 +44,23 @@ internal static partial class FastExecution
             var outputs = new double[indicator.Outputs.Count][];
             for (var slot = 0; slot < outputs.Length; slot++) outputs[slot] = FastMath.Allocate(columns.Count);
             kernel(columns, outputs);
+            RejectInvalidOutputs(indicator, outputs);
             for (var slot = 0; slot < outputs.Length; slot++) series[indicator.Outputs[slot]] = outputs[slot];
             warmup = Math.Max(warmup, indicator.WarmupBars);
         }
         return series;
+    }
+
+    // The exact routes reject an infinite or unexpected NaN output as they publish it. Here one vectorized
+    // pass per output decides the usual all-finite case, and only a failure walks the bars to name the first.
+    private static void RejectInvalidOutputs(IIndicator indicator, double[][] outputs)
+    {
+        var finite = true;
+        for (var slot = 0; slot < outputs.Length && finite; slot++) finite = FastMath.AllFinite(outputs[slot]);
+        if (finite) return;
+        for (var index = 0; index < outputs[0].Length; index++)
+            for (var slot = 0; slot < outputs.Length; slot++)
+                Validation.IndicatorOutputPolicy.Validate(indicator, slot, index, outputs[slot][index]);
     }
 
     private static FastKernel? Resolve(IIndicator indicator) =>

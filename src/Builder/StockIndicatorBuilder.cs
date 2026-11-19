@@ -99,7 +99,19 @@ public sealed class StockIndicatorBuilder
         cancellationToken.ThrowIfCancellationRequested();
         var series = Indicators.Fast.FastExecution.Execute(columns, _configuredIndicators, cancellationToken, out var warmup);
         LastExecution = new(IndicatorExecutionBackend.Cpu, null, "Fast double execution over borrowed bars.");
-        if (!latestOnly) return new Indicators.IndicatorRun(null, series, bars, 0, warmup);
+        if (!latestOnly)
+        {
+            // A later legacy Build() reads this builder's history. Nothing is copied unless that happens, and
+            // the copy is then validated in full, as the exact routes validate theirs.
+            var synchronous = (Indicators.ISynchronousBarSource)source;
+            _configuredSource = IndicatorDataSource.FromValidatedHistory(new Lazy<StockData>(() =>
+            {
+                var owned = new Indicators.OwnedBarHistory();
+                synchronous.AppendValidated(owned, CancellationToken.None);
+                return CreateOwnedBatch(owned);
+            }));
+            return new Indicators.IndicatorRun(null, series, bars, 0, warmup);
+        }
         var count = bars.Count;
         Indicators.IBarSnapshot? latest = null;
         if (count != 0)
@@ -332,12 +344,31 @@ public sealed class StockIndicatorBuilder
     /// <exception cref="InvalidOperationException">Thrown when no source was configured.</exception>
     public Task<Indicators.IIndicatorRun> BuildAsync(CancellationToken cancellationToken = default)
     {
-        // A fast build completes synchronously, so it is answered here without an async state machine.
-        if (_numerics == IndicatorNumerics.Fast && _barSource is { IsFinite: true } finite)
+        // A fast build completes synchronously, so it is answered here without an async state machine. Its
+        // failures still arrive through the task, as they do from the asynchronous routes.
+        if (_numerics == IndicatorNumerics.Fast)
         {
-            LastExecution = null;
-            if (TryBuildFast(finite, _historyMode == IndicatorHistoryMode.LatestOnly, cancellationToken) is { } fast)
-                return Task.FromResult(fast);
+            try
+            {
+                if (_barSource is { IsFinite: true } finite)
+                {
+                    LastExecution = null;
+                    if (TryBuildFast(finite, _historyMode == IndicatorHistoryMode.LatestOnly, cancellationToken) is { } fast)
+                        return Task.FromResult(fast);
+                }
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                LastExecution = null;
+                return Task.FromCanceled<Indicators.IIndicatorRun>(cancellationToken);
+            }
+#pragma warning disable CA1031 // Not swallowed: the failure is handed to the caller through the returned task.
+            catch (Exception failure)
+#pragma warning restore CA1031
+            {
+                LastExecution = null;
+                return Task.FromException<Indicators.IIndicatorRun>(failure);
+            }
         }
         return _historyMode == IndicatorHistoryMode.LatestOnly
             ? BuildLatestOnlyAsync(cancellationToken) : BuildWithHistoryAsync(cancellationToken);

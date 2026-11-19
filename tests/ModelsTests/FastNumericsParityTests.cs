@@ -2,6 +2,7 @@ using OoplesFinance.StockIndicators.Builder;
 using AiDotNet.Tensors.Helpers;
 using OoplesFinance.StockIndicators.Indicators;
 using OoplesFinance.StockIndicators.Indicators.Fast;
+using OoplesFinance.StockIndicators.Validation;
 
 namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 
@@ -236,6 +237,105 @@ public sealed class FastNumericsParityTests
             .ConfigureNumerics(IndicatorNumerics.Fast);
         using (await builder.BuildAsync())
             Assert.False(builder.LastExecution?.Reason.StartsWith("Fast", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task FastFailuresArriveThroughTheTask()
+    {
+        var bars = Walk(32, 7);
+        bars[4] = new Bar(bars[4].Time, 1, 1, 1, double.NaN, 1);
+        // Calling BuildAsync must not throw; the failure belongs to the task it returns.
+        var failing = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(new Sma(3))
+            .ConfigureNumerics(IndicatorNumerics.Fast).BuildAsync();
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => failing);
+
+        using var cancelled = new CancellationTokenSource();
+        cancelled.Cancel();
+        var stopped = new StockIndicatorBuilder().ConfigureSource(Bars.From(Walk(32, 7))).ConfigureIndicators(new Sma(3))
+            .ConfigureNumerics(IndicatorNumerics.Fast).BuildAsync(cancelled.Token);
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => stopped);
+        Assert.True(stopped.IsCanceled);
+    }
+
+    [Fact]
+    public async Task FastRejectsANonFiniteOutputExactlyAsTheExactRouteDoes()
+    {
+        // exp(1000) overflows on bar 5 only.
+        var bars = Walk(16, 9);
+        bars[5] = new Bar(bars[5].Time, 1000, 1000, 1000, 1000, 1);
+        Task<IIndicatorRun> Build(IndicatorNumerics numerics) => new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(new PriceTranscendentalTransform(PriceTranscendentalOperation.Exponential))
+            .ConfigureNumerics(numerics).BuildAsync();
+        var exact = await Assert.ThrowsAsync<IndicatorOutputException>(() => Build(IndicatorNumerics.Exact));
+        var fast = await Assert.ThrowsAsync<IndicatorOutputException>(() => Build(IndicatorNumerics.Fast));
+        Assert.Equal(exact.Message, fast.Message);
+        Assert.Equal(5, fast.BarIndex);
+    }
+
+    [Fact]
+    public async Task ColumnSourceServesTheExactRouteAndReplay()
+    {
+        var bars = Walk(120, 13);
+        IBarSource Columns() => Bars.FromColumns(bars.Select(b => b.Open).ToArray(), bars.Select(b => b.High).ToArray(),
+            bars.Select(b => b.Low).ToArray(), bars.Select(b => b.Close).ToArray(), bars.Select(b => b.Volume).ToArray(),
+            bars.Select(b => b.Time).ToArray());
+        foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+        {
+            var fromBars = new SeededAverageTrueRange(14);
+            var fromColumns = new SeededAverageTrueRange(14);
+            using var expected = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+                .ConfigureIndicators(fromBars).ConfigureHistory(history).BuildAsync();
+            var builder = new StockIndicatorBuilder().ConfigureSource(Columns()).ConfigureIndicators(fromColumns)
+                .ConfigureHistory(history);
+            using var actual = await builder.BuildAsync();
+            Assert.False(builder.LastExecution?.Reason.StartsWith("Fast", StringComparison.Ordinal));
+            Assert.Equal(expected[fromBars].ToArray(), actual[fromColumns].ToArray());
+        }
+
+        var replayed = new Sma(5);
+        using var run = await new StockIndicatorBuilder().ConfigureSource(Columns()).ConfigureIndicators(replayed)
+            .ConfigureNumerics(IndicatorNumerics.Fast).BuildAsync();
+        var index = 0;
+        await foreach (var snapshot in run)
+        {
+            Assert.Equal(bars[index].Close, snapshot.Bar.Close);
+            Assert.Equal(bars[index].Time, snapshot.Bar.Time);
+            Assert.Equal(run[replayed][index], snapshot[replayed]);
+            index++;
+        }
+        Assert.Equal(bars.Length, index);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => Task.Run(() => Bars.FromColumns(new double[2], new double[2],
+            new double[2], new double[3], new double[2])));
+    }
+
+    [Fact]
+    public async Task AKernelThatDoesNotCoverAConfigurationLeavesItToTheExactRoute()
+    {
+        var bars = Walk(200, 19);
+        var exactIndicator = new ClassicMovingAverage(10, ClassicAverageMethod.Kama);
+        var fastIndicator = new ClassicMovingAverage(10, ClassicAverageMethod.Kama);
+        using var exact = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+            .ConfigureIndicators(exactIndicator).BuildAsync();
+        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(fastIndicator)
+            .ConfigureNumerics(IndicatorNumerics.Fast);
+        using var fast = await builder.BuildAsync();
+        Assert.False(builder.LastExecution?.Reason.StartsWith("Fast", StringComparison.Ordinal));
+        Assert.Equal(exact[exactIndicator].ToArray(), fast[fastIndicator].ToArray());
+    }
+
+    [Fact]
+    public async Task ALegacyBuildAfterAFastBuildReadsTheSameSource()
+    {
+        var bars = Enumerable.Range(0, 6).Select(i => new Bar(Day(i), i + 1, i + 1, i + 1, i + 1, 1)).ToArray();
+        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(new Sma(3))
+            .ConfigureNumerics(IndicatorNumerics.Fast);
+        using var typed = await builder.BuildAsync();
+        Assert.True(builder.LastExecution?.Reason.StartsWith("Fast", StringComparison.Ordinal));
+        SeriesHandle average = default;
+        using var legacy = builder.ConfigureIndicators(catalog => average = catalog.Sma(3)).Build();
+        legacy.Start();
+        Assert.Equal(new[] { 0d, 0d, 2d, 3d, 4d, 5d }, legacy.GetSeries(average).ToArray());
     }
 
     private static IEnumerable<(string Name, Bar[] Bars)> Fixtures()

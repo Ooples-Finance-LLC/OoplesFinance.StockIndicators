@@ -34,6 +34,19 @@ internal static partial class FastKernels
         defined = defined.Slice(0, n);
         switch (operation)
         {
+#if NETFRAMEWORK
+            // .NET Framework's own circular functions lose accuracy on large arguments, so the exact state
+            // uses this replacement there, and so does this kernel.
+            case PriceCircularOperation.Sine:
+                for (var i = 0; i < n; i++) value[i] = Helpers.FrameworkCircularMath.Value(close[i], 0);
+                break;
+            case PriceCircularOperation.Cosine:
+                for (var i = 0; i < n; i++) value[i] = Helpers.FrameworkCircularMath.Value(close[i], 1);
+                break;
+            case PriceCircularOperation.Tangent:
+                for (var i = 0; i < n; i++) value[i] = Helpers.FrameworkCircularMath.Value(close[i], 2);
+                break;
+#else
             case PriceCircularOperation.Sine:
                 for (var i = 0; i < n; i++) value[i] = Math.Sin(close[i]);
                 break;
@@ -43,6 +56,7 @@ internal static partial class FastKernels
             case PriceCircularOperation.Tangent:
                 for (var i = 0; i < n; i++) value[i] = Math.Tan(close[i]);
                 break;
+#endif
             case PriceCircularOperation.ArcTangent:
                 for (var i = 0; i < n; i++) value[i] = Math.Atan(close[i]);
                 break;
