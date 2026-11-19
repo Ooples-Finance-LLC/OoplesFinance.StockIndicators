@@ -146,6 +146,13 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<MarubozuCandle>(binders, t => (c, o) => FastKernels.BodyShadowCandle(c, o[0], t.Period, BodyShadowCandleKind.Marubozu));
+        Bind<ClosingMarubozuCandle>(binders, t => (c, o) => FastKernels.BodyShadowCandle(c, o[0], t.Period, BodyShadowCandleKind.ClosingMarubozu));
+        Bind<SpinningTopCandle>(binders, t => (c, o) => FastKernels.BodyShadowCandle(c, o[0], t.Period, BodyShadowCandleKind.SpinningTop));
+        Bind<HighWaveCandle>(binders, t => (c, o) => FastKernels.BodyShadowCandle(c, o[0], t.Period, BodyShadowCandleKind.HighWave));
+        Bind<LongLineCandle>(binders, t => (c, o) => FastKernels.BodyShadowCandle(c, o[0], t.Period, BodyShadowCandleKind.LongLine));
+        Bind<ShortLineCandle>(binders, t => (c, o) => FastKernels.BodyShadowCandle(c, o[0], t.Period, BodyShadowCandleKind.ShortLine));
+        Bind<BeltHoldCandle>(binders, t => (c, o) => FastKernels.BodyShadowCandle(c, o[0], t.Period, BodyShadowCandleKind.BeltHold));
         Bind<DelayedHilbertPhase>(binders, t => (c, o) => FastKernels.HilbertSignal(c.Close, o, HilbertCycleSignal.Phase, 63L + t.Suppression));
         Bind<DelayedHilbertSine>(binders, t => (c, o) => FastKernels.HilbertSignal(c.Close, o, HilbertCycleSignal.Sine, 63L + t.Suppression));
         Bind<DelayedHilbertTrendMode>(binders, t => (c, o) => FastKernels.HilbertSignal(c.Close, o, HilbertCycleSignal.Trend, 63L + t.Suppression));
