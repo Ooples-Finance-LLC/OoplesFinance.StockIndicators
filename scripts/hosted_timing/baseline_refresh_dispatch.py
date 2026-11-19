@@ -2,6 +2,10 @@
 
 
 def implementation(plan):
+    if plan.get('native_eligibility_eight_screen'):
+        assert not any(plan.get(key) for key in ('current_baseline_ten_refresh','named_output_projection_refresh','pointwise_family_refresh'))
+        from . import native_eligibility_eight_screen
+        return native_eligibility_eight_screen
     if plan.get("current_baseline_ten_refresh"):
         assert not plan.get("named_output_projection_refresh") and not plan.get("pointwise_family_refresh")
         from . import current_baseline_ten_refresh

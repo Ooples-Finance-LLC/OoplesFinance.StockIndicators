@@ -7,7 +7,7 @@ import math
 import re
 
 from .checkpoints import case_key, combine_reports
-from .pipeline import PLAN, DLL, read, digest, phase_shards, phase_tasks, phase_labels, methods_for, phase_sources, trix_preflight_tasks, warmups_for, warmup_context
+from .pipeline import PLAN, DLL, read, digest, phase_shards, phase_tasks, phase_labels, methods_for, phase_sources, trix_preflight_tasks, warmups_for, warmup_context, benchmark_counts
 
 
 def archived(root, raw_root, raw_path):
@@ -174,7 +174,7 @@ def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=Fal
         assert phase == 'targeted' and matchinglow_gate, 'MatchingLow native crossover gate is required'
     else:
         assert not matchinglow_gate
-    if plan.get('pointwise_family_refresh') or plan.get('named_output_projection_refresh') or plan.get('current_baseline_ten_refresh') or phase == 'baseline-refresh':
+    if plan.get('pointwise_family_refresh') or plan.get('named_output_projection_refresh') or plan.get('current_baseline_ten_refresh') or plan.get('native_eligibility_eight_screen') or phase == 'baseline-refresh':
         assert phase == 'baseline-refresh' and not preflight and not diagnostic, 'Harness baseline refresh cannot qualify production'
         from .baseline_refresh_dispatch import validate_scope
         validate_scope(plan)
@@ -182,6 +182,8 @@ def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=Fal
         assert diagnostic and not preflight, 'Diagnostic evidence cannot qualify production'
         from .roi_scope_dispatch import validate_scope
         validate_scope(plan)
+    elif phase=='baseline-refresh' and plan.get('native_eligibility_eight_screen'):
+        assert plan['diagnostic_only'] is True and not diagnostic
     else:
         assert not diagnostic and not plan.get('diagnostic_only'), 'Diagnostic evidence cannot qualify production'
     if phase == 'coverage':
@@ -216,7 +218,7 @@ def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=Fal
         encoded = (json.dumps(inputs, indent=2) + '\n').encode()
         assert hashlib.sha256(encoded).hexdigest() == proof['input_provenance_sha256']
         assert inputs['sources'] == plan['sources'] and inputs['plan_sha256'] == digest(PLAN)
-        if plan.get('renko_constant_tr_private_qualification'):
+        if plan.get('renko_constant_tr_private_qualification') or plan.get('native_eligibility_eight_screen'):
             from .renko_constant_tr_private_qualification import verify_publication_provenance
             verify_publication_provenance(plan,inputs)
         assert inputs['sdk'] == plan['proposed_dotnet_sdk']
@@ -251,7 +253,7 @@ def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=Fal
             assert record['arm'] == arm
             task = tasks[fixture]
             mapping = {op['raw']: op['pair'] for op in task['operations']}
-            methods = methods_for(task, index)
+            methods = methods_for(task, index); counts_for_task=benchmark_counts(plan,task)
             implicit = next(iter(mapping)) if task.get('implicit_pair') else None
             chunks = record['operation_checkpoints']
             assert [c['pair'] for c in chunks] == list(mapping)
@@ -263,7 +265,7 @@ def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=Fal
                 assert all(math.isfinite(v) and 0 <= v <= 15 for v in chunk['quiet_cpu_samples'])
                 assert chunk['quiet_build_free_samples'] == 12 and chunk['build_monitor_observations'] >= 1
                 assert chunk['quiet_sequence_started_utc']
-                assert chunk['cases'] == 2 * len(methods)
+                assert chunk['cases'] == len(counts_for_task) * len(methods)
                 checkpoint = root/'operation-checkpoints'/fixture/f'round{index}-{arm}'
                 assert read(checkpoint/f'operation{position}.json') == chunk
                 paths = {kind: archived(root, proof['raw_root'], chunk[kind]) for kind in ('report', 'log')}
@@ -271,7 +273,7 @@ def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=Fal
                 assert paths['log'] == (checkpoint/f'operation{position}.log').resolve()
                 assert digest(paths['report']) == chunk['sha256'] and digest(paths['log']) == chunk['log_sha256']
                 original = read(paths['report'])
-                combine_reports([original], [chunk['pair']], methods, implicit)
+                combine_reports([original], [chunk['pair']], methods, implicit, counts=counts_for_task)
                 log = paths['log'].read_text(encoding='utf-8-sig')
                 check_log(log, chunk['cases'], warmups=warmups_for(plan, fixture, task),
                     native_invocations=plan.get('coverage_harness',{}).get('native_invocation_count') if phase == 'coverage' else None)
@@ -280,7 +282,7 @@ def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=Fal
             merged_path = archived(root, proof['raw_root'], record['report'])
             assert digest(merged_path) == record['sha256']
             merged = read(merged_path)
-            assert combine_reports(originals, list(mapping), methods, implicit) == merged
+            assert combine_reports(originals, list(mapping), methods, implicit, counts=counts_for_task) == merged
             assert (root/f'round{index}-{arm}-{fixture}.log').read_text(encoding='utf-8-sig') == '\n'.join(logs)
             assert record['build_monitor_observations'] == sum(c['build_monitor_observations'] for c in chunks)
             cases = {}

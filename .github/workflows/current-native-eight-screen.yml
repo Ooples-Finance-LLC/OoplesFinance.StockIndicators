@@ -1,0 +1,95 @@
+name: Current native eight-pair identical-binary eligibility diagnostic
+on:
+  workflow_dispatch:
+  push:
+    branches: [perf/current-native-eight-screen-20261118]
+    paths: [.github/workflows/current-native-eight-screen.yml]
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+concurrency:
+  group: current-native-eight-screen
+  cancel-in-progress: false
+env:
+  HOSTED_TIMING_PLAN: benchmarks/plans/hosted-current-native-eight-screen-20261118.json
+jobs:
+  screen:
+    runs-on: windows-2025
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            .github
+            benchmarks/plans
+      - name: Fail closed before SDK or artifact setup
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $plan=Get-Content -LiteralPath $env:HOSTED_TIMING_PLAN -Raw | ConvertFrom-Json
+          if ($plan.inputs_ready -isnot [bool] -or !$plan.inputs_ready -or $plan.parent_review_approved -isnot [bool] -or !$plan.parent_review_approved) { throw 'UNBOUND baseline receipts or parent review' }
+          if ($plan.cases -ne 40 -or $plan.decisions -ne 8 -or $plan.sources.old -ne 'd9d00ca56ebb857b87ead45044616970b607019c' -or $plan.sources.successor -ne $plan.sources.old -or $plan.diagnostic_only -ne $true -or $plan.production_qualification -ne $false) { throw 'Wrong diagnostic scope or same-source binding' }
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - name: Select unchanged SDK and compatible runtime
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          if (Test-Path -LiteralPath global.json) { throw 'Unexpected existing SDK selector' }
+          [IO.File]::WriteAllText((Join-Path $PWD 'global.json'), '{"sdk":{"version":"10.0.403","rollForward":"disable","allowPrerelease":false}}')
+          $actualSdk=(& dotnet --version).Trim()
+          if ($LASTEXITCODE -ne 0 -or $actualSdk -ne '10.0.403') { throw 'Wrong SDK' }
+          $runtimes=@(& dotnet --list-runtimes)
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to inspect runtime' }
+          $compatible=@($runtimes | ForEach-Object { if ($_ -match '^Microsoft\.NETCore\.App (10\.0\.\d+) \[') { [version]$Matches[1] } } | Sort-Object)
+          if ($compatible.Count -eq 0 -or $compatible[-1].ToString() -ne '10.0.15') { throw 'Wrong compatible net10 runtime' }
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install psutil==7.2.2
+      - name: Validate pinned source, held scope and original artifact API identity
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          Push-Location scripts
+          try {
+            python -m unittest -v test_hosted_native_eligibility_eight_screen
+            if ($LASTEXITCODE -ne 0) { throw 'Diagnostic orchestration tests failed' }
+            python -c "from hosted_timing import native_eligibility_eight_screen as q; plan=q.p.read(q.p.PLAN); q.validate_scope(plan); q.baseline.verify_current_publication(plan)"
+            if ($LASTEXITCODE -ne 0) { throw 'Pinned baseline publication or scope mismatch' }
+          } finally { Pop-Location }
+          $plan=Get-Content -LiteralPath $env:HOSTED_TIMING_PLAN -Raw | ConvertFrom-Json
+          $receipt=$plan.old_candidate
+          $artifact=Invoke-RestMethod -Uri ('https://api.github.com/repos/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/artifacts/'+$receipt.artifact_id) -Headers @{Authorization=('Bearer '+$env:GH_TOKEN);'X-GitHub-Api-Version'='2022-11-28'}
+          if ($artifact.id -ne [long]$receipt.artifact_id -or $artifact.name -ne 'candidate-correctness-inputs' -or $artifact.expired -or $artifact.workflow_run.id -ne [long]$receipt.ci_run -or $artifact.workflow_run.head_sha -ne $receipt.producer -or $artifact.digest -ne ('sha256:'+$receipt.artifact_zip_sha256)) { throw 'Reused baseline artifact identity/digest mismatch' }
+          ('BASELINE_RUN='+$receipt.ci_run) | Add-Content -LiteralPath $env:GITHUB_ENV
+          ('BASELINE_ID='+$receipt.artifact_id) | Add-Content -LiteralPath $env:GITHUB_ENV
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ env.BASELINE_ID }}
+          merge-multiple: true
+          path: baseline-candidate
+          run-id: ${{ env.BASELINE_RUN }}
+          github-token: ${{ github.token }}
+      - name: Authenticate one reused baseline and capture exact registry PairIds
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/run-current-native-eight-screen.py prepare --candidate baseline-candidate --out baseline-inputs
+      - name: Measure 40 identical-binary baseline and native cases on one runner
+        run: python scripts/run-current-native-eight-screen.py measure --inputs baseline-inputs --out native-eight-screen/evidence/shard0
+      - name: Collect eight A/A comparisons and frozen new-win eligibility
+        run: python scripts/run-current-native-eight-screen.py collect --inputs baseline-inputs --evidence native-eight-screen/evidence --out native-eight-screen/summary.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: current-native-eight-screen
+          path: |
+            baseline-inputs/
+            native-eight-screen/
+          if-no-files-found: warn

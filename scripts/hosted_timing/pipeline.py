@@ -129,6 +129,13 @@ def methods_for(task, index):
     return [m for m in task['methods'] if index == 2 or m in OWNED]
 
 
+def benchmark_counts(plan, task):
+    counts=tuple(task.get('counts',(1000,10000)))
+    if counts!=(1000,10000):
+        assert plan.get('native_eligibility_eight_screen') is True and task['fixture']=='LibraryPairBenchmarks' and counts==(10000,)
+    return counts
+
+
 def phase_labels(phase):
     assert phase in ('successor', 'variants', 'coverage', 'targeted', 'diagnostic', 'baseline-refresh')
     if phase == 'coverage':
@@ -205,6 +212,8 @@ def warmup_context(plan, fixture, task=None):
     if 'fixed_invocation_warmups' not in plan['measurement_policy']: return {}
     count=warmups_for(plan, fixture, task)
     context={'warmup_count':count}
+    if plan.get('native_eligibility_eight_screen'):
+        context['benchmark_counts']=list(benchmark_counts(plan,task))
     if fixture == 'LibraryPairBenchmarks' and count == 20000 and plan.get('arithmetic_warmup_approval'):
         from .arithmetic_warmup_policy import SHA
         context['arithmetic_warmup_policy_sha256']=SHA
@@ -229,7 +238,7 @@ def verify_inputs(folder):
     if plan.get('matchinglow_grid_qualification'):
         from .matchinglow_grid_qualification import verify_authentication
         verify_authentication(folder, plan, proof)
-    if plan.get('pointwise_family_refresh') or plan.get('named_output_projection_refresh') or plan.get('current_baseline_ten_refresh'):
+    if plan.get('pointwise_family_refresh') or plan.get('named_output_projection_refresh') or plan.get('current_baseline_ten_refresh') or plan.get('native_eligibility_eight_screen'):
         from .baseline_refresh_dispatch import implementation
         implementation(plan).verify_authentication(folder,plan,proof)
     if plan.get('renko_constant_tr_private_qualification'):
@@ -316,6 +325,9 @@ def _verify_input_contents(folder, plan, proof, plan_sha256):
         verify_harness_alias(folder,plan,proof)
     elif plan.get('renko_constant_tr_private_qualification'):
         from .renko_constant_tr_private_qualification import verify_harness_alias
+        verify_harness_alias(folder,plan,proof)
+    elif plan.get('native_eligibility_eight_screen'):
+        from .native_eligibility_eight_screen import verify_harness_alias
         verify_harness_alias(folder,plan,proof)
     elif plan.get('cmf_alma_combined_qualification'):
         from .cmf_alma_combined_qualification import verify_harness_alias
@@ -611,7 +623,7 @@ def measure(inputs, out, phase, shard, diagnostic=None):
                     runtime=runtimes[arm],env=env,state=state,save=save,builds=builds,
                     assert_binaries=assert_binaries,implicit=task.get('implicit_pair',False),variant=task.get('variant',False),
                     variance=task.get('variance_parameter',False),
-                    operation_timeout_seconds=operation_timeout_for(plan,phase),
+                    operation_timeout_seconds=operation_timeout_for(plan,phase),counts=benchmark_counts(plan,task),
                     context=dict(host_nonce=identity['instance_nonce'],production_sha256=manifests[arm][DLL],phase=phase,shard=shard,
                         **warmup_context(plan, task['fixture'], task),
                         **({'diagnostic_warmups':1000} if diagnostic == 'trix-library-warmup' else {})),

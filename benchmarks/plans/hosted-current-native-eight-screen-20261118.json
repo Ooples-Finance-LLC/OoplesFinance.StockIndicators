@@ -1,0 +1,256 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "scope": "current-native-eight-screen-20261118",
+  "native_eligibility_eight_screen": true,
+  "diagnostic_only": true,
+  "inputs_ready": true,
+  "parent_review_approved": true,
+  "proposed_dotnet_sdk": "10.0.403",
+  "expected_runtime_version": ".NET 10.0.15",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "require_fixture_inventory": true,
+  "cases": 40,
+  "decisions": 8,
+  "bars": [
+    10000
+  ],
+  "affected_pairs": [
+    "TaLib.Functions.PlusDI",
+    "TaLib.Functions.Adx",
+    "TaLib.Functions.Aroon",
+    "TaLib.Functions.AroonOsc",
+    "TaLib.Functions.MinIndex",
+    "TaLib.Functions.Var",
+    "TaLib.Functions.StdDev",
+    "Skender.GetStdDev"
+  ],
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 60
+  },
+  "refresh_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.PlusDI",
+              "pair": "TaLib.Functions.PlusDI"
+            },
+            {
+              "raw": "TaLib.Functions.Adx",
+              "pair": "TaLib.Functions.Adx"
+            },
+            {
+              "raw": "TaLib.Functions.Aroon",
+              "pair": "TaLib.Functions.Aroon"
+            },
+            {
+              "raw": "TaLib.Functions.AroonOsc",
+              "pair": "TaLib.Functions.AroonOsc"
+            },
+            {
+              "raw": "TaLib.Functions.MinIndex",
+              "pair": "TaLib.Functions.MinIndex"
+            },
+            {
+              "raw": "TaLib.Functions.Var",
+              "pair": "TaLib.Functions.Var"
+            },
+            {
+              "raw": "TaLib.Functions.StdDev",
+              "pair": "TaLib.Functions.StdDev"
+            },
+            {
+              "raw": "Skender.GetStdDev",
+              "pair": "Skender.GetStdDev"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "counts": [
+            10000
+          ],
+          "cases": 40,
+          "decisions": 8
+        }
+      ],
+      "cases": 40,
+      "decisions": 8
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.PlusDI",
+              "pair": "TaLib.Functions.PlusDI"
+            },
+            {
+              "raw": "TaLib.Functions.Adx",
+              "pair": "TaLib.Functions.Adx"
+            },
+            {
+              "raw": "TaLib.Functions.Aroon",
+              "pair": "TaLib.Functions.Aroon"
+            },
+            {
+              "raw": "TaLib.Functions.AroonOsc",
+              "pair": "TaLib.Functions.AroonOsc"
+            },
+            {
+              "raw": "TaLib.Functions.MinIndex",
+              "pair": "TaLib.Functions.MinIndex"
+            },
+            {
+              "raw": "TaLib.Functions.Var",
+              "pair": "TaLib.Functions.Var"
+            },
+            {
+              "raw": "TaLib.Functions.StdDev",
+              "pair": "TaLib.Functions.StdDev"
+            },
+            {
+              "raw": "Skender.GetStdDev",
+              "pair": "Skender.GetStdDev"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "counts": [
+            10000
+          ],
+          "cases": 40,
+          "decisions": 8
+        }
+      ],
+      "cases": 40,
+      "decisions": 8
+    }
+  ],
+  "sources": {
+    "published": "c20d08c731245b4f0b4f4600b38173f0fd6ebf6d",
+    "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "successor": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "variants": "d9d00ca56ebb857b87ead45044616970b607019c"
+  },
+  "gpu_sources": {
+    "old": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "successor": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "variants": "d9d00ca56ebb857b87ead45044616970b607019c"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests"
+    ],
+    "successor": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests"
+    ],
+    "variants": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests"
+    ]
+  },
+  "old_candidate": {
+    "source": "d9d00ca56ebb857b87ead45044616970b607019c",
+    "ci_run": "44388147138",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "aaf895d4e7b5b9a2e70810c87227db08ddaad9f6",
+    "manifest_sha256": "291f8660e56d5f056ad47881891e92742522704f5cac8f9016f11ba1a2c4c332",
+    "gpu_receipt_sha256": "8c5fa1866814f4cd6a60666470c7a75c5171142d943a669c4d824532e6a2ca82",
+    "production_sha256": "ebc789ea23a9145d85705d53ce35fedb707e803c6c80cadfeafc431dbec1a3d7",
+    "source_fingerprint": "c526951d5a65c7aeaa1cdcbcaaf56035cc96b241095704f6bf278513753935e3",
+    "artifact_id": "14467645201",
+    "artifact_zip_sha256": "07f1bab22ccdb4e7a3a7084a5706ca79f9c4839227485168a1d55df6d32b19a7",
+    "unit_passed": 55,
+    "parity_passed": 8,
+    "unit_classes": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests"
+    ],
+    "parity_classes": [
+      "RenkoComparisonTests"
+    ],
+    "actual_harness_sha256": "32e9b2a5e92bdd4aabec6b9749a5b891befab3e02a922022c93a4d0c95784e5f"
+  },
+  "published_baseline": {
+    "pull_request": 266,
+    "head": "c20d08c731245b4f0b4f4600b38173f0fd6ebf6d",
+    "branch": "perf/remaining-indicator-rollout",
+    "source_fingerprint": "c526951d5a65c7aeaa1cdcbcaaf56035cc96b241095704f6bf278513753935e3"
+  },
+  "native_win_policy_approval": {
+    "path": "benchmarks/plans/evidence/native-win-rule-user-approved-20261118.json",
+    "sha256": "414b558eae1deda750c3d169020128986a0e0db9b2acd95f23da035be03bfd7c",
+    "policy_id": "native-separated-confidence-intervals-both-rounds-20261118"
+  },
+  "baseline_origin": {
+    "head": "dfc1cb47d132ec50afeaece838bd9c46d8820024",
+    "plan": "benchmarks/plans/hosted-renko-constant-tr-private-qualification-20261118.json",
+    "plan_sha256": "ccf53175c0587e019abb7622d8e8d50f1da367ec6f1cc7c7754e788af938797b",
+    "artifact_role": "old_candidate"
+  },
+  "reused_correctness_scope": {
+    "unit_classes": [
+      "RenkoPriceGridTests",
+      "RenkoPriceNormalizationTests",
+      "RenkoCompactVolumeTests",
+      "RenkoNormalizedGridTests"
+    ],
+    "unit_passed": 55,
+    "parity_classes": [
+      "RenkoComparisonTests"
+    ],
+    "parity_passed": 8,
+    "gpu_cases": 100,
+    "new_selected_pair_cohort": false
+  },
+  "production_qualification": false,
+  "report_refresh_only": false,
+  "automatic_qualification": false,
+  "report_imported": false,
+  "profile_in_this_plan": false,
+  "automatic_profile_start": false,
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "scope_note": "One new immutable identical-binary baseline/native diagnostic. Existing d9 CPU/GPU receipts are reused without relabeling their actual Renko cohort. No source/harness rebuild, external driver compilation, profile, qualification, report refresh/import or closure credit. Conditional eligible-row local reflection/PerfView profiling is separate later work after root review."
+}
