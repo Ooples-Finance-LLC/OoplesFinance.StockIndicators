@@ -1038,6 +1038,8 @@ internal static partial class ValuesBarExecution
                     new AnalyticGridBatchState(original, average.BatchCoefficient, average.Period, count, target),
                 SineWeightedAverage { Period: <= 64 } average =>
                     new AnalyticGridBatchState(original, average.BatchCoefficient, average.Period, count, target),
+                WindowedSinc { Taps: <= 64 } sinc when count - sinc.Taps >= 128 =>
+                    new SincGridBatchState(original, sinc, count, target),
                 _ => original
             });
         }

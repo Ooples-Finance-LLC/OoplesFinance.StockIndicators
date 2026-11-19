@@ -35,6 +35,8 @@ internal static partial class ValuesBarExecution
             _weightsCertified = CertifyWeights(coefficient, out _weightGrid);
         }
 
+        internal bool HasCertifiedPositiveMass => _weightsCertified && _masses[_period - 1] != 0;
+
         public void Reset()
         {
             _fill = _carry = _received = 0; _origin = _target.Origin;
