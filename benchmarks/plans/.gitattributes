@@ -37,3 +37,7 @@ evidence/analytic-grid-*.json.gz binary
 hosted-alma-grid-roi-20261119.json text eol=lf
 evidence/alma-grid-*.json binary
 evidence/alma-grid-*.json.gz binary
+
+hosted-alma-cached-wide-aligned-roi-20261119.json text eol=lf
+evidence/alma-cached-wide-aligned-*.json binary
+evidence/alma-cached-wide-aligned-*.json.gz binary

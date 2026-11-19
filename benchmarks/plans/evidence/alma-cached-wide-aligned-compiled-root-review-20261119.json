@@ -1,0 +1,94 @@
+{
+  "status": "root-independent-compiled-feasibility-proof-authenticated",
+  "independent_authentication_passed": true,
+  "source": "bc5d3b26469a1eeeed0f1448f04b3e6f6888fe2b",
+  "baseline_source": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e",
+  "cpu_root_review_sha256": "513f46121f769a7c632e97a362281139ea7e0bc1c18c4c368d4267abeb038faf",
+  "gpu_root_review_sha256": "741106db1cca8c28fdf8cfff7842661acd59f409c1af99d65aa259c26a791ce9",
+  "inspection_receipt_sha256": "7bf97b34a5104f48c4891ca2f025ffafde41932cd3d9378bfdd888a0644d4bc7",
+  "supplemental_inspection_receipt_sha256": "8b8bb5355bfc7bfc49be8ed53449f385db34f4508f99eec038186a6a1ce715ba",
+  "cached_word_multiply_route_observed": true,
+  "cached_tier1_bodies": {
+    "Divide": {
+      "header": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+AlmaWideDivisor:Divide(System.UInt128):System.ValueTuple`2[System.UInt128,System.UInt128]:this (Tier1)",
+      "mulx": 9,
+      "integer_division": 0,
+      "portable_divide_slow": false
+    },
+    "TryRatio": {
+      "header": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+AlmaWideDivisor:TryRatio(System.Int128,int,byref):bool:this (Tier1)",
+      "mulx": 9,
+      "integer_division": 0,
+      "portable_divide_slow": false
+    }
+  },
+  "packed_bundle_sha256": "39501a68b5d8a20ab5411c2f2abea10289501cbf9d9201915398bb17e919729b",
+  "pairs": [
+    {
+      "pair": "QuanTAlib.Alma",
+      "full_outputs_and_inputs_equal_both_sizes": true,
+      "actual_private_batch_mentions": 2,
+      "flush_il_length": 553,
+      "simd_calls": 2,
+      "tensor_fma_ymm_observed": true,
+      "protected_methods": [
+        {
+          "method": "OoplesFinance.StockIndicators.Indicators.Bar FillBoundedWindow(OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.IIndicator, System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+          "normalized_il_equal": true,
+          "raw_locals_equal": true,
+          "maxstack_equal": true
+        },
+        {
+          "method": "OoplesFinance.StockIndicators.Indicators.Bar FillBoundedWindow[T](OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.IIndicator, Int32, System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+          "normalized_il_equal": true,
+          "raw_locals_equal": false,
+          "maxstack_equal": true
+        },
+        {
+          "method": "PointwiseRegion ComputeBoundedRegion[T](OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer, Int32, Int32, Int32, System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar], System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar], System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.IIndicator)",
+          "normalized_il_equal": true,
+          "raw_locals_equal": true,
+          "maxstack_equal": true
+        }
+      ]
+    },
+    {
+      "pair": "Skender.GetAlma",
+      "full_outputs_and_inputs_equal_both_sizes": true,
+      "actual_private_batch_mentions": 1,
+      "flush_il_length": 553,
+      "simd_calls": 2,
+      "tensor_fma_ymm_observed": true,
+      "protected_methods": [
+        {
+          "method": "OoplesFinance.StockIndicators.Indicators.Bar FillBoundedWindow(OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.IIndicator, System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+          "normalized_il_equal": true,
+          "raw_locals_equal": true,
+          "maxstack_equal": true
+        },
+        {
+          "method": "OoplesFinance.StockIndicators.Indicators.Bar FillBoundedWindow[T](OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.IIndicator, Int32, System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+          "normalized_il_equal": true,
+          "raw_locals_equal": false,
+          "maxstack_equal": true
+        },
+        {
+          "method": "PointwiseRegion ComputeBoundedRegion[T](OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer, Int32, Int32, Int32, System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar], System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar], System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.IIndicator)",
+          "normalized_il_equal": true,
+          "raw_locals_equal": true,
+          "maxstack_equal": true
+        }
+      ]
+    }
+  ],
+  "builds": 0,
+  "new_gpu_runs": 0,
+  "timing_samples": 0,
+  "qualification": false,
+  "limitations": [
+    "Original broadmethodselector missedcachedbody; one reviewedmethodnameselector supplement closesmissingobservation withoutsource/runtimepolicychange.",
+    "GenericFill rawlocals differ; output/IL equality do not prove nativecode/performanceidentity.",
+    "OtherglobalDivideSlowbodiesexistforfallbacks; onlyactualcachedTier1Divide/TryRatio are checkedfordivision-freecode.",
+    "Actual freshcomplete-call/nativeROI remainsrequired; no credit fromJIT/model/functionalproof."
+  ]
+}

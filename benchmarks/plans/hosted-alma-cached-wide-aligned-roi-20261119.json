@@ -1,0 +1,287 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "expected_runtime_version": ".NET 10.0.15",
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "diagnostic_kind": "alma-cached-wide-aligned-native-pilot",
+  "diagnostic_only": true,
+  "cases": 30,
+  "decisions": 6,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 120
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Alma",
+              "pair": "QuanTAlib.Alma"
+            },
+            {
+              "raw": "Skender.GetAlma",
+              "pair": "Skender.GetAlma"
+            },
+            {
+              "raw": "QuanTAlib.Gma",
+              "pair": "QuanTAlib.Gma"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 30,
+          "decisions": 6
+        }
+      ],
+      "cases": 30,
+      "decisions": 6
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Alma",
+              "pair": "QuanTAlib.Alma"
+            },
+            {
+              "raw": "Skender.GetAlma",
+              "pair": "Skender.GetAlma"
+            },
+            {
+              "raw": "QuanTAlib.Gma",
+              "pair": "QuanTAlib.Gma"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 30,
+          "decisions": 6
+        }
+      ],
+      "cases": 30,
+      "decisions": 6
+    }
+  ],
+  "inputs_ready": true,
+  "parent_review_approved": true,
+  "sources": {
+    "published": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e",
+    "old": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e",
+    "successor": "bc5d3b26469a1eeeed0f1448f04b3e6f6888fe2b",
+    "variants": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e"
+  },
+  "gpu_sources": {
+    "old": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e",
+    "successor": "bc5d3b26469a1eeeed0f1448f04b3e6f6888fe2b",
+    "variants": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "SharedAlmaWindowTests",
+      "AnalyticGridBatchTests"
+    ],
+    "successor": [
+      "AlmaWideDivisorTests",
+      "AlmaGridBatchTests",
+      "SharedAlmaWindowTests",
+      "AnalyticGridBatchTests"
+    ],
+    "variants": [
+      "SharedAlmaWindowTests",
+      "AnalyticGridBatchTests"
+    ]
+  },
+  "old_candidate": {
+    "source": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e",
+    "ci_run": "44460024410",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "85b858d9992d779e1ad6594743b27ff4b23bb81c",
+    "manifest_sha256": "db13fb018e700d69db5311d996f8f788800f5e1522bb2ac989118540fe5f59cf",
+    "gpu_receipt_sha256": "59239a701f315547762bfe7c50196f8f0f2037f3fc1a44ae612f7249f6b27282",
+    "production_sha256": "2306fec5c382f069c4749c568b21b2a7e95c27d04e82e2c715ac55db46f76951",
+    "source_fingerprint": "cf81cab21dc8c332f9b953e4fac668e53afa1442563f9ba87e445a9e4562dc11",
+    "artifact_id": "14500047073",
+    "artifact_zip_sha256": "d85f79cb61cee72fe6328b47f932893ac823a6b1e17b58be1fa648c02a5bc386",
+    "unit_passed": 35,
+    "parity_passed": 53,
+    "unit_classes": [
+      "SharedAlmaWindowTests",
+      "AnalyticGridBatchTests"
+    ],
+    "parity_classes": [
+      "AlmaComparisonTests",
+      "AlmaPublisherAlignmentTests",
+      "NamedComparisonPublisherTests",
+      "AnalyticKernelComparisonTests"
+    ],
+    "actual_harness_sha256": "a62254d7d576960f40b320541d3a6b81f906db3fffeea5e40ef499b9ef76e05b"
+  },
+  "candidate": {
+    "source": "bc5d3b26469a1eeeed0f1448f04b3e6f6888fe2b",
+    "ci_run": "44460028846",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "45fb7762e54d465c9c84c0d8d35c5a37592b640a",
+    "manifest_sha256": "d6f056b6dd8fa2b0758bc39c3a7580c931ee9d3c3ba95eebf87b3951ea1d3961",
+    "gpu_receipt_sha256": "1c207b3c2fb2a833cd09a102afe4f57ea632333675db66320b862a9fb35a6411",
+    "production_sha256": "92d9f195cf480b33789918c6843ff5dbcf8daf221cbb684fd0a16d0a6b3c18ee",
+    "source_fingerprint": "968b8530099217783fcba6a8efdf21916d099a49941e347891da2eb34265f21c",
+    "artifact_id": "14499898129",
+    "artifact_zip_sha256": "3754afb2cd3c63b78820df116856f8d546a82216e415d41237ad323bb5668f4e",
+    "unit_passed": 53,
+    "parity_passed": 53,
+    "unit_classes": [
+      "AlmaWideDivisorTests",
+      "AlmaGridBatchTests",
+      "SharedAlmaWindowTests",
+      "AnalyticGridBatchTests"
+    ],
+    "parity_classes": [
+      "AlmaComparisonTests",
+      "AlmaPublisherAlignmentTests",
+      "NamedComparisonPublisherTests",
+      "AnalyticKernelComparisonTests"
+    ],
+    "actual_harness_sha256": "1f19a20c26784b4c0aa897dff26459264369774d211adad1ec560636f5c625b3"
+  },
+  "harness_sha256": "a62254d7d576960f40b320541d3a6b81f906db3fffeea5e40ef499b9ef76e05b",
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "harness_alias_policy": {
+    "common_artifact_role": "old",
+    "variants_artifact_role": "old",
+    "baseline_source": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e",
+    "candidate_source": "bc5d3b26469a1eeeed0f1448f04b3e6f6888fe2b",
+    "require_scoped_source_identity": true,
+    "claim_artifact_binary_identity": false
+  },
+  "automatic_qualification": false,
+  "future_builder_fixture": [
+    "SharedAlmaWindowBenchmarks"
+  ],
+  "require_net_10000_point_progress": true,
+  "frozen_baseline_feasibility_only": true,
+  "current_combined_source_qualified": false,
+  "report_import_permitted": false,
+  "followup_requires_current_published_baseline": true,
+  "actual_input_provenance": {
+    "path": "benchmarks/plans/evidence/alma-cached-wide-aligned-compiled-bundle-20261119.json.gz",
+    "sha256": "39501a68b5d8a20ab5411c2f2abea10289501cbf9d9201915398bb17e919729b"
+  },
+  "compiled_fixture_path_proof": {
+    "path": "benchmarks/plans/evidence/alma-cached-wide-aligned-compiled-bundle-20261119.json.gz",
+    "sha256": "39501a68b5d8a20ab5411c2f2abea10289501cbf9d9201915398bb17e919729b"
+  },
+  "published_baseline": {
+    "pull_request": 266,
+    "head": "87405159446f3de0132ce49800b52bd0af00e234",
+    "branch": "perf/remaining-indicator-rollout",
+    "source_fingerprint": "cd8a76c3f21d8f8ebcc066b55c37db2f68b01f2fdb853bd8b7eee57b8c206519"
+  },
+  "native_win_policy_approval": {
+    "path": "benchmarks/plans/evidence/native-win-rule-user-approved-20261118.json",
+    "sha256": "414b558eae1deda750c3d169020128986a0e0db9b2acd95f23da035be03bfd7c",
+    "policy_id": "native-separated-confidence-intervals-both-rounds-20261118"
+  },
+  "native_progress_gate": {
+    "fixture": "LibraryPairBenchmarks",
+    "method": "Ooples",
+    "native_method": "Competitor",
+    "native_round": 2,
+    "old_rounds": [
+      0,
+      3
+    ],
+    "candidate_rounds": [
+      1,
+      2
+    ],
+    "minimum_margin": null,
+    "require_separated_intervals_both_rounds": true,
+    "new_closure_bars": 10000,
+    "minimum_new_closures": 1,
+    "require_own_source_faster": true,
+    "require_net_10000_point_progress": true,
+    "protect_prior_confident_wins_both_sizes": true,
+    "target_pairs": [
+      "QuanTAlib.Alma",
+      "Skender.GetAlma"
+    ]
+  },
+  "compiled_proof_root_review": {
+    "path": "benchmarks/plans/evidence/alma-cached-wide-aligned-compiled-root-review-20261119.json",
+    "sha256": "e34e232cff4ede9de490e4386b0984621b0fe090d4e145c2d8a1f7b404094be8"
+  },
+  "baseline_cpu_root_review": {
+    "path": "benchmarks/plans/evidence/alma-cached-wide-aligned-baseline-cpu-root-review-20261119.json",
+    "sha256": "d7b19a67b3407785cdaa953364e860816533c6ae4c8ab2809ae5f50c46866326"
+  },
+  "fixture_contracts": {
+    "LibraryPairBenchmarks": {
+      "pair_parameter": "PairId",
+      "size_parameter": "Bars",
+      "sizes": [
+        1000,
+        10000
+      ],
+      "methods": [
+        "Ooples",
+        "Competitor"
+      ]
+    }
+  },
+  "candidate_cpu_root_review": {
+    "path": "benchmarks/plans/evidence/alma-cached-wide-aligned-candidate-cpu-root-review-20261119.json",
+    "sha256": "513f46121f769a7c632e97a362281139ea7e0bc1c18c4c368d4267abeb038faf"
+  },
+  "candidate_gpu_root_review": {
+    "path": "benchmarks/plans/evidence/alma-cached-wide-aligned-candidate-gpu-root-review-20261119.json",
+    "sha256": "741106db1cca8c28fdf8cfff7842661acd59f409c1af99d65aa259c26a791ce9"
+  },
+  "baseline_gpu_root_review": {
+    "path": "benchmarks/plans/evidence/alma-cached-wide-aligned-baseline-gpu-root-review-20261119.json",
+    "sha256": "33b5f8252f4493adb74bb1681cbd388de93c1a35ef81aee5d89d9915a380986e"
+  },
+  "aligned_published_production": {
+    "published_source": "87405159446f3de0132ce49800b52bd0af00e234",
+    "aligned_artifact_source": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e",
+    "production_and_unit_sources_identical": true,
+    "aligned_harness_paths": [
+      "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/AlmaComparison.cs",
+      "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/AlmaPublisherAlignmentTests.cs"
+    ],
+    "claim_original_harness_identity": false
+  }
+}

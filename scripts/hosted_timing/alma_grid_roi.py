@@ -4,19 +4,19 @@ from pathlib import Path
 from . import pipeline as p
 from . import candle_single_pass_roi as common
 from . import triple_body_macro_qualification as original
-SCOPE='alma-grid-native-roi-20261119'
-KIND='alma-grid-native-pilot'
-OLD='d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91'
-NEW='1500d6b72d776c7f129dc191d8a44bd4a89fe8be'
+SCOPE='alma-cached-wide-aligned-native-roi-20261119'
+KIND='alma-cached-wide-aligned-native-pilot'
+OLD='48980c2bd9d04dd5cd472ccc768efe9b44e5e20e'
+NEW='bc5d3b26469a1eeeed0f1448f04b3e6f6888fe2b'
 TARGETS=['QuanTAlib.Alma','Skender.GetAlma']
 PAIRS=TARGETS+['QuanTAlib.Gma']
 HARNESS_PATH='benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/bin/Release/net10.0/'+original.HARNESS_ASSEMBLY
 HARNESS_SCOPES=[p.BENCH,p.TESTS,'Directory.Build.props','Directory.Build.targets','Directory.Packages.props','global.json','NuGet.Config','nuget.config']
-BASE_UNIT=['AnalyticGridBatchTests','SharedWeightedWindowTests','FibonacciWeightedAverageTests','AffineConvolutionTests','WindowedSincCompactTests']
-BASE_PARITY=['AnalyticKernelComparisonTests','FixedWeightedComparisonTests','ConvolutionComparisonTests','SincBuilderComparisonTests']
-UNIT=['AlmaGridBatchTests','SharedAlmaWindowTests','AnalyticGridBatchTests']
-PARITY=['AlmaComparisonTests','AnalyticKernelComparisonTests']
-PATHS={'src/Indicators/ArnaudLegouxWindow.cs','src/Indicators/ValuesBarExecution.AlmaGrid.cs','src/Indicators/ValuesBarExecution.BoundedWindows.cs','tests/ModelsTests/AlmaGridBatchTests.cs'}
+BASE_UNIT=['SharedAlmaWindowTests', 'AnalyticGridBatchTests']
+BASE_PARITY=['AlmaComparisonTests', 'AlmaPublisherAlignmentTests', 'NamedComparisonPublisherTests', 'AnalyticKernelComparisonTests']
+UNIT=['AlmaWideDivisorTests', 'AlmaGridBatchTests', 'SharedAlmaWindowTests', 'AnalyticGridBatchTests']
+PARITY=['AlmaComparisonTests', 'AlmaPublisherAlignmentTests', 'NamedComparisonPublisherTests', 'AnalyticKernelComparisonTests']
+PATHS={'src/Indicators/ArnaudLegouxWindow.cs','src/Indicators/ValuesBarExecution.AlmaGrid.cs','src/Indicators/ValuesBarExecution.BoundedWindows.cs','tests/ModelsTests/AlmaGridBatchTests.cs','src/Indicators/ValuesBarExecution.AlmaWideDivisor.cs','tests/ModelsTests/AlmaWideDivisorTests.cs'}
 sha=lambda raw:hashlib.sha256(raw).hexdigest()
 def blob(source,path):return subprocess.check_output(['git','show',source+':'+path],cwd=p.REPO)
 
@@ -48,9 +48,9 @@ def validate_scope(plan,*,require_ready=True):
             values=c[category+'_classes'];assert values and len(set(values))==len(values) and all(v.isidentifier() for v in values)
     assert plan['old_candidate']['unit_classes']==BASE_UNIT and plan['old_candidate']['parity_classes']==BASE_PARITY
     assert plan['candidate']['unit_classes']==UNIT and plan['candidate']['parity_classes']==PARITY
-    assert (plan['old_candidate']['unit_passed'],plan['old_candidate']['parity_passed'])==(53,48)
-    assert (plan['candidate']['unit_passed'],plan['candidate']['parity_passed'])==(49,31)
-    assert plan['candidate']['ci_run']=='44447015919' and plan['candidate']['producer']=='ce6d1a0373166c42583278e4d7efd38f65e0934d'
+    assert (plan['old_candidate']['unit_passed'],plan['old_candidate']['parity_passed'])==(35,53)
+    assert (plan['candidate']['unit_passed'],plan['candidate']['parity_passed'])==(53,53)
+    assert plan['candidate']['ci_run']=='44460028846' and plan['candidate']['producer']=='ce6d1a0373166c42583278e4d7efd38f65e0934d'
     assert plan['native_progress_gate']==NATIVE_POLICY
     verify_native_policy(plan)
     if require_ready:
@@ -262,7 +262,11 @@ def focused_baseline(plan,manifest=None):
     assert root['status']=='root-independent-cpu-authentication-passed' and root['source']==OLD
     c=plan['old_candidate']
     for a,b in [('run_id','ci_run'),('source_fingerprint','source_fingerprint'),('manifest_sha256','manifest_sha256'),('core_sha256','production_sha256'),('actual_harness_sha256','actual_harness_sha256')]:assert root[a]==c[b]
-    assert root['unit']==53 and root['parity']==48
+    assert root['unit']==35 and root['parity']==53
+    gpu=json.loads(evidence_entry(plan['baseline_gpu_root_review']))
+    assert gpu['status']=='root-independent-actual-gpu-authentication-passed' and gpu['source']==OLD and gpu['run_id']==c['ci_run']
+    assert gpu['source_fingerprint']==c['source_fingerprint'] and gpu['passed_cases']==100 and gpu['methods']==12
+    assert gpu['cpu_root_review_sha256']==plan['baseline_cpu_root_review']['sha256'] and gpu['receipt_sha256']==c['gpu_receipt_sha256']
     return {}
 
 def compiled_proof(plan):
@@ -272,7 +276,7 @@ def compiled_proof(plan):
     assert review['source']==NEW and review['baseline_source']==OLD
     cpu=json.loads(evidence_entry(plan['candidate_cpu_root_review']));gpu=json.loads(evidence_entry(plan['candidate_gpu_root_review']))
     assert review['cpu_root_review_sha256']==plan['candidate_cpu_root_review']['sha256'] and review['gpu_root_review_sha256']==plan['candidate_gpu_root_review']['sha256']
-    assert cpu['status']=='root-independent-cpu-authentication-passed' and cpu['source']==NEW and cpu['unit']==49 and cpu['parity']==31 and cpu['gpu_executed'] is False
+    assert cpu['status']=='root-independent-cpu-authentication-passed' and cpu['source']==NEW and cpu['unit']==53 and cpu['parity']==53 and cpu['gpu_executed'] is False
     c=plan['candidate']
     for a,b in [('run_id','ci_run'),('source_fingerprint','source_fingerprint'),('manifest_sha256','manifest_sha256'),('core_sha256','production_sha256'),('actual_harness_sha256','actual_harness_sha256')]:assert cpu[a]==c[b]
     assert gpu['status']=='root-independent-actual-gpu-authentication-passed' and gpu['source']==NEW and gpu['run_id']==c['ci_run'] and gpu['passed_cases']==100 and gpu['methods']==12
@@ -281,6 +285,20 @@ def compiled_proof(plan):
     receipt=json.loads(receipt)
     assert receipt['builds']==receipt['timing_samples']==receipt['new_gpu_runs']==0 and len(receipt['processes'])==4
     for name,pin in receipt['files'].items():assert sha(bundle[name].encode())==pin
+    supplemental_raw=bundle['supplemental-cached-route/inspection-receipt.json'].encode()
+    assert sha(supplemental_raw)==review['supplemental_inspection_receipt_sha256']=='8b8bb5355bfc7bfc49be8ed53449f385db34f4508f99eec038186a6a1ce715ba'
+    supplemental=json.loads(supplemental_raw)
+    assert supplemental['original_inspection_receipt_sha256']==review['inspection_receipt_sha256']
+    assert supplemental['builds']==supplemental['timing_samples']==supplemental['new_gpu_runs']==0 and len(supplemental['processes'])==1
+    assert supplemental['processes'][0]['source']==NEW and supplemental['processes'][0]['role']=='candidate' and supplemental['processes'][0]['pair']=='Skender.GetAlma'
+    for name,pin in supplemental['files'].items():assert sha(bundle['supplemental-cached-route/'+name].encode())==pin
+    assert json.loads(bundle['supplemental-cached-route/candidate-Skender.GetAlma-proof.json'])==json.loads(bundle['candidate-Skender.GetAlma-proof.json'])
+    assert review['cached_word_multiply_route_observed'] is True
+    chunks=re.split(r'(?=; Assembly listing for method )',bundle['supplemental-cached-route/candidate-Skender.GetAlma-jit.txt'])
+    for method in ('Divide','TryRatio'):
+        bodies=[chunk for chunk in chunks if chunk.startswith('; Assembly listing for method ') and 'AlmaWideDivisor:'+method+'(' in chunk.splitlines()[0] and '(Tier1)' in chunk.splitlines()[0]]
+        assert len(bodies)==1 and re.search(r'\bmulx\b',bodies[0]) and 'DivideSlow' not in bodies[0] and not re.search(r'^\s+(?:idiv|div)\s',bodies[0],re.M),'Missing actual cached multiply route'
+    assert any('AlmaGridBatchState:Flush(' in chunk.splitlines()[0] and 'AlmaWideDivisor:TryRatio(' in chunk for chunk in chunks if chunk.startswith('; Assembly listing for method '))
     return dict(bundle=bundle,review=review)
 
 def verify_compiled_fixture_path(plan):
@@ -296,6 +314,10 @@ def verify_compiled_fixture_path(plan):
             observed=json.loads(bundle[role+'-'+pair['pair']+'-proof.json'])
             assert observed['actual_clr']=='10.0.15' and observed['cpu_engine']=='AiDotNet.Tensors.Engines.CpuEngine'
             assert observed['default_worker_setting_unchanged'] is True
+            assert observed['common_harness_role']=='baseline' and observed['claim_artifact_harness_binary_identity'] is False
+            auth=plan['old_candidate' if role=='baseline' else 'candidate']
+            assert observed['core']==auth['production_sha256'] and observed['actual_artifact_harness']==auth['actual_harness_sha256']
+            assert observed['harness']==plan['harness_sha256'] and observed['loaded_core_path']!=observed['common_harness_path']
     assert plan['fixture_contracts']==dict(LibraryPairBenchmarks=dict(pair_parameter='PairId',size_parameter='Bars',sizes=[1000,10000],methods=['Ooples','Competitor']))
     verify_source_fixture_routes()
 
@@ -333,13 +355,21 @@ def verify_native_policy(plan):
     assert receipt['original_frozen_plans_and_results_must_remain_unchanged'] is True
 
 def verify_published_baseline(plan):
-    """Validate the pinned historical source using immutable Git objects only."""
-    binding=plan['published_baseline']
+    """Bind published production to a separately aligned, explicitly changed harness."""
+    binding=plan['published_baseline'];alignment=plan['aligned_published_production']
     assert binding['pull_request']==266 and binding['branch']=='perf/remaining-indicator-rollout'
-    assert binding['source_fingerprint']==plan['old_candidate']['source_fingerprint']
-    assert re.fullmatch('[a-f0-9]{40}',binding['head'])
+    assert binding['head']=='87405159446f3de0132ce49800b52bd0af00e234'
+    assert binding['source_fingerprint']=='cd8a76c3f21d8f8ebcc066b55c37db2f68b01f2fdb853bd8b7eee57b8c206519'
     assert common.source_fingerprint(binding['head'])==binding['source_fingerprint']
-    assert not p.git('diff','--name-only',OLD,binding['head'],'--','src','tests',*HARNESS_SCOPES),'Published source differs from authenticated d3'
+    paths=[p.BENCH+'/LibraryComparisons/AlmaComparison.cs',p.TESTS+'/AlmaPublisherAlignmentTests.cs']
+    assert alignment==dict(published_source=binding['head'],aligned_artifact_source=OLD,production_and_unit_sources_identical=True,aligned_harness_paths=paths,claim_original_harness_identity=False)
+    assert not p.git('diff','--name-only',OLD,binding['head'],'--','src','tests'),'Aligned baseline production/unit sources changed'
+    assert set(p.git('diff','--name-only',binding['head'],OLD,'--',*HARNESS_SCOPES).splitlines())==set(paths)
+    assert not p.git('diff','--name-only',OLD,NEW,'--',*HARNESS_SCOPES),'Aligned role harness sources differ'
+    for source in (OLD,NEW):
+        assert 'NamedComparisonPublisher.Single' in blob(source,paths[0]).decode()
+        assert blob(source,paths[1])==blob(OLD,paths[1])
+
 
 def verify_current_publication(plan):
     """Require the current PR binding only when launching or preparing inputs."""

@@ -62,7 +62,7 @@ def collect(folder, phase):
         assert phase == 'targeted'
         from .ultimate_direct_long_qualification import collect as ultimate_qualify
         return ultimate_qualify(folder)
-    if read(PLAN).get('diagnostic_kind') == 'alma-grid-native-pilot':
+    if read(PLAN).get('diagnostic_kind') == 'alma-cached-wide-aligned-native-pilot':
         assert phase == 'diagnostic'
         from .alma_grid_roi import collect as alma_grid_collect
         return alma_grid_collect(folder)

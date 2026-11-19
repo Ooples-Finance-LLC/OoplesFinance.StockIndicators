@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest import mock
 from hosted_timing import alma_grid_roi as q
 from hosted_timing import pipeline,roi_scope_dispatch,verify
-PLAN=Path(__file__).resolve().parents[1]/'benchmarks/plans/hosted-alma-grid-roi-20261119.json'
+PLAN=Path(__file__).resolve().parents[1]/'benchmarks/plans/hosted-alma-cached-wide-aligned-roi-20261119.json'
 class AlmaGridRoiTests(unittest.TestCase):
  def plan(self):return json.loads(PLAN.read_bytes())
  def rows(self):
@@ -17,7 +17,7 @@ class AlmaGridRoiTests(unittest.TestCase):
     decisions.append(dict(fixture='LibraryPairBenchmarks',method='Ooples',pair=pair,bars=bars,verdict='faster' if win else 'inconclusive'))
   return rows,decisions
  def test_exact_three_pair_scope_and_honest_counts(self):
-  p=self.plan();q.validate_scope(p,require_ready=False);self.assertEqual((p['cases'],p['decisions']),(30,6));self.assertEqual((p['old_candidate']['unit_passed'],p['old_candidate']['parity_passed']),(53,48));self.assertEqual((p['candidate']['unit_passed'],p['candidate']['parity_passed']),(49,31));self.assertIsInstance(p['parent_review_approved'],bool)
+  p=self.plan();q.validate_scope(p,require_ready=False);self.assertEqual((p['cases'],p['decisions']),(30,6));self.assertEqual((p['old_candidate']['unit_passed'],p['old_candidate']['parity_passed']),(35,53));self.assertEqual((p['candidate']['unit_passed'],p['candidate']['parity_passed']),(53,53));self.assertIsInstance(p['parent_review_approved'],bool)
   self.assertEqual(p['targeted_shards'],q.shards());self.assertNotIn(b'\r',PLAN.read_bytes())
  def test_held_stops_before_sdk_input_io(self):
   held=self.plan();held['parent_review_approved']=False
@@ -67,14 +67,39 @@ class AlmaGridRoiTests(unittest.TestCase):
   with mock.patch.object(verify,'read',return_value=p),mock.patch.object(q,'collect',return_value={'accepted':False}) as check:
    self.assertFalse(verify.collect(Path('unused'),'diagnostic')['accepted']);check.assert_called_once()
    with self.assertRaises(AssertionError):verify.collect(Path('unused'),'targeted')
-  tree=ast.parse(inspect.getsource(pipeline._verify_input_contents));branch=next(n for n in ast.walk(tree) if isinstance(n,ast.If) and ast.unparse(n.test)=="plan.get('diagnostic_kind') == 'alma-grid-native-pilot'");code=compile(ast.fix_missing_locations(ast.Module(body=[branch],type_ignores=[])),pipeline.__file__,'exec')
+  tree=ast.parse(inspect.getsource(pipeline._verify_input_contents));branch=next(n for n in ast.walk(tree) if isinstance(n,ast.If) and ast.unparse(n.test)=="plan.get('diagnostic_kind') == 'alma-cached-wide-aligned-native-pilot'");code=compile(ast.fix_missing_locations(ast.Module(body=[branch],type_ignores=[])),pipeline.__file__,'exec')
   with mock.patch.object(q,'verify_harness_alias') as alias:exec(code,dict(__package__='hosted_timing',plan=p,folder=Path('unused'),proof={},verify_trx=mock.Mock(side_effect=AssertionError('fallback'))));alias.assert_called_once()
  def test_existing_size_filters_and_inventory_contract(self):
   tasks=q.shards()[0]['tasks'];self.assertEqual([q.p.methods_for(t,0) for t in tasks],[['Ooples']]);self.assertEqual([q.p.methods_for(t,2) for t in tasks],[['Ooples','Competitor']])
   text=(q.p.REPO/'.github/workflows/alma-grid-roi.yml').read_text();self.assertIn('  pull-requests: read',text);self.assertIn('Measure 30 cases',text)
  def test_publication_is_held_and_historical_verification_is_offline(self):
-  p=self.plan();p['published_baseline']['head']='UNBOUND_GMA_PUBLICATION';p['inputs_ready']=False;p['parent_review_approved']=False;binding=p['published_baseline']
+  p=self.plan();p['published_baseline']['head']='UNBOUND_GMA_PUBLICATION'
   with self.assertRaises(AssertionError):q.verify_published_baseline(p)
-  binding['head']=q.OLD
-  with mock.patch.object(q.subprocess,'check_output',side_effect=RuntimeError('live API forbidden')) as live,mock.patch.object(q.common,'source_fingerprint',return_value=binding['source_fingerprint']),mock.patch.object(q.p,'git',return_value=''):q.verify_publication_provenance(p,dict(published_baseline=binding));live.assert_not_called()
+  p=self.plan()
+  with mock.patch.object(q,'verify_published_baseline',autospec=True) as frozen,mock.patch.object(q.subprocess,'check_output',side_effect=RuntimeError('live API forbidden')) as live:
+   q.verify_publication_provenance(p,dict(published_baseline=p['published_baseline']));frozen.assert_called_once_with(p);live.assert_not_called()
+ def test_aligned_baseline_publication_is_explicit_and_current(self):
+  p=self.plan();q.verify_published_baseline(p);self.assertEqual(q.verify_current_publication(p),p['published_baseline'])
+  self.assertNotEqual(p['published_baseline']['source_fingerprint'],p['old_candidate']['source_fingerprint'])
+  p['aligned_published_production']['claim_original_harness_identity']=True
+  with self.assertRaises(AssertionError):q.verify_published_baseline(p)
+ def test_original_and_supplemental_exact_bundle_and_cached_route(self):
+  p=self.plan();proof=q.compiled_proof(p);self.assertTrue(proof['review']['cached_word_multiply_route_observed'])
+  self.assertEqual(proof['review']['packed_bundle_sha256'],p['compiled_fixture_path_proof']['sha256'])
+  for field in ('compiled_proof_root_review','candidate_gpu_root_review','baseline_gpu_root_review'):
+   mutated=copy.deepcopy(p);mutated[field]=None
+   with self.subTest(field=field),self.assertRaisesRegex(AssertionError,'UNBOUND'):
+    (q.focused_baseline if field=='baseline_gpu_root_review' else q.compiled_proof)(mutated)
+ def test_explicit_common_harness_alias_preserves_actual_identities(self):
+  p=self.plan();auth=[dict(manifest=dict(runtime_files={q.HARNESS_PATH:p[key]['actual_harness_sha256']})) for key in ('old_candidate','candidate')]
+  alias=q.harness_role_alias(p,*auth)
+  self.assertFalse(alias['actual_artifact_binary_identical']);self.assertTrue(alias['scoped_source_identical'])
+  self.assertEqual(alias['common_harness_sha256'],p['old_candidate']['actual_harness_sha256'])
+  self.assertNotEqual(alias['actual_artifact_harness_sha256']['old'],alias['actual_artifact_harness_sha256']['successor'])
+  self.assertEqual(q.source_authentication(p)['additional_cpu_executions'],0)
+ def test_narrow_push_trigger_and_single_measurement_runner(self):
+  text=(q.p.REPO/'.github/workflows/alma-grid-roi.yml').read_text()
+  self.assertIn('branches: [perf/alma-cached-wide-aligned-roi-20261119]',text)
+  self.assertIn('paths: [.github/workflows/alma-grid-roi.yml, benchmarks/plans/hosted-alma-cached-wide-aligned-roi-20261119.json]',text)
+  self.assertIn('cancel-in-progress: false',text);self.assertEqual(self.plan()['matrix']['max_parallel'],1)
 if __name__=='__main__':unittest.main()

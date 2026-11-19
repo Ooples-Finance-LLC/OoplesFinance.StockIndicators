@@ -1,0 +1,45 @@
+{
+  "status": "root-independent-cpu-authentication-passed",
+  "source": "48980c2bd9d04dd5cd472ccc768efe9b44e5e20e",
+  "source_fingerprint": "cf81cab21dc8c332f9b953e4fac668e53afa1442563f9ba87e445a9e4562dc11",
+  "run_id": "44460024410",
+  "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+  "artifact_id": 14500047073,
+  "zip_sha256": "d85f79cb61cee72fe6328b47f932893ac823a6b1e17b58be1fa648c02a5bc386",
+  "zip_verified_in_memory": true,
+  "zip_files_verified": 320,
+  "manifest_sha256": "db13fb018e700d69db5311d996f8f788800f5e1522bb2ac989118540fe5f59cf",
+  "core_sha256": "2306fec5c382f069c4749c568b21b2a7e95c27d04e82e2c715ac55db46f76951",
+  "actual_harness_sha256": "a62254d7d576960f40b320541d3a6b81f906db3fffeea5e40ef499b9ef76e05b",
+  "competitor_test_dll_sha256": "cad1b95ddaadbdb8534cb50764ecd28134b13dfd418d20790e22130e49a21b0c",
+  "collection_receipt_sha256": "ac8fd77c2a525dd60a676eefa5413404cac82ef367aa578986b2792fdf65e8c9",
+  "runtime_entries_verified": 444,
+  "blob_files_verified": 312,
+  "checks": {
+    "unit": {
+      "passed": 35,
+      "classes": {
+        "SharedAlmaWindowTests": 21,
+        "AnalyticGridBatchTests": 14
+      },
+      "sha256": "cd77ec50e49499efcea2442c002f4d095d7e96d9b65c0cb1dc83083fa6b6a26a"
+    },
+    "parity": {
+      "passed": 53,
+      "classes": {
+        "AlmaComparisonTests": 16,
+        "AlmaPublisherAlignmentTests": 2,
+        "NamedComparisonPublisherTests": 20,
+        "AnalyticKernelComparisonTests": 15
+      },
+      "sha256": "4fb6aa3096636464902adb5937d243a87ab70011dddc9d439a6eec1948fab32e"
+    }
+  },
+  "unit": 35,
+  "parity": 53,
+  "gpu_executed": false,
+  "gpu_verified": false,
+  "qualification": false,
+  "performance_claim": false,
+  "closure_credit": 0
+}

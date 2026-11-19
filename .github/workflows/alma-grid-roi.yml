@@ -1,18 +1,18 @@
-name: ALMA exact-grid frozen-baseline BDN feasibility diagnostic
+name: ALMA cached-wide aligned frozen-baseline BDN feasibility diagnostic
 on:
   workflow_dispatch:
   push:
-    branches: [perf/alma-grid-native-roi-20261119]
-    paths: [.github/workflows/alma-grid-roi.yml, scripts/hosted_timing/pipeline.py]
+    branches: [perf/alma-cached-wide-aligned-roi-20261119]
+    paths: [.github/workflows/alma-grid-roi.yml, benchmarks/plans/hosted-alma-cached-wide-aligned-roi-20261119.json]
 permissions:
   contents: read
   actions: read
   pull-requests: read
 concurrency:
-  group: alma-grid-roi
+  group: alma-cached-wide-aligned-roi
   cancel-in-progress: false
 env:
-  HOSTED_TIMING_PLAN: benchmarks/plans/hosted-alma-grid-roi-20261119.json
+  HOSTED_TIMING_PLAN: benchmarks/plans/hosted-alma-cached-wide-aligned-roi-20261119.json
 jobs:
   qualify:
     runs-on: windows-2025
@@ -30,7 +30,7 @@ jobs:
         run: |
           $ErrorActionPreference='Stop'
           $plan=Get-Content -LiteralPath $env:HOSTED_TIMING_PLAN -Raw | ConvertFrom-Json
-          if ($plan.inputs_ready -isnot [bool] -or !$plan.inputs_ready -or $plan.parent_review_approved -isnot [bool] -or !$plan.parent_review_approved -or $plan.sources.successor -ne '1500d6b72d776c7f129dc191d8a44bd4a89fe8be' -or $plan.sources.old -ne 'd3d5c905a5d75b666b440aa6c5f6b4c24b42dc91') { throw 'UNBOUND diagnostic receipts or parent review; no SDK/input I/O permitted' }
+          if ($plan.inputs_ready -isnot [bool] -or !$plan.inputs_ready -or $plan.parent_review_approved -isnot [bool] -or !$plan.parent_review_approved -or $plan.sources.successor -ne 'bc5d3b26469a1eeeed0f1448f04b3e6f6888fe2b' -or $plan.sources.old -ne '48980c2bd9d04dd5cd472ccc768efe9b44e5e20e') { throw 'UNBOUND diagnostic receipts or parent review; no SDK/input I/O permitted' }
           if ($plan.published_baseline.head -notmatch '^[a-f0-9]{40}$') { throw 'UNBOUND GMA publication baseline' }
           foreach ($role in @('old_candidate','candidate')) {
             $receipt=$plan.$role
@@ -116,7 +116,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: alma-grid-roi
+          name: alma-cached-wide-aligned-roi
           path: |
             reconciled-inputs/
             reconciled-qualification/
