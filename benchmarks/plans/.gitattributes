@@ -44,3 +44,5 @@ evidence/alma-cached-wide-aligned-*.json.gz binary
 
 hosted-alma-sinc-combined-qualification-20261119.json text eol=lf
 evidence/alma-sinc-* binary
+hosted-candle-topology-replay-roi-20261119.json text eol=lf
+evidence/candle-topology-* binary

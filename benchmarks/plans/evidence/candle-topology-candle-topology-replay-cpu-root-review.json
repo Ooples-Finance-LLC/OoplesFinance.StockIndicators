@@ -1,0 +1,46 @@
+{
+  "status": "root-independent-cpu-authentication-passed",
+  "source": "c55fd48202a7583ab9df7695e603d3b6789d7bf9",
+  "source_fingerprint": "1593297cdd2dca424154fa11c0e2fdc3b2f23e5de0d2ed45b2068147c11003df",
+  "run_id": "44486893051",
+  "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+  "artifact_id": 14512056280,
+  "zip_sha256": "eb03e09ec99fad22fdc6a7c3cd85863e30d0e3e7dade599a99e5b5bb3c3a4476",
+  "zip_verified_in_memory": true,
+  "zip_files_verified": 320,
+  "manifest_sha256": "f358557de80da2758b2314ef5bdb2075fad354170abba877fafb9683344df6dd",
+  "core_sha256": "045815f25d166e6edf68e11900083b0bd00055d86f7795f1b4cb92185520fb6a",
+  "actual_harness_sha256": "7b7855653a5685574e4d8ebf59903dabb15b52cecb6966282ef39fc80ab9c728",
+  "competitor_test_dll_sha256": "ca8e5c4617a567cff298b9d69a208d96a0383433ce45d4c723b2fac4cdbb5ca9",
+  "collection_receipt_sha256": "5938ca07f29642c7bf83fc96ceab7e70b12cd4cddea2bf4b67826dfa95513629",
+  "runtime_entries_verified": 444,
+  "blob_files_verified": 312,
+  "checks": {
+    "unit": {
+      "passed": 35,
+      "classes": {
+        "CandleTopologyReplayTests": 20,
+        "ExhaustionSharedExecutionTests": 7,
+        "CrowSoldierSharedExecutionTests": 8
+      },
+      "sha256": "de071d1c1484907f588f5e75043e3936d778313a005e6a0d94c3aa83f4b5a2e8"
+    },
+    "parity": {
+      "passed": 197,
+      "classes": {
+        "ExhaustionTests": 133,
+        "CrowSoldierTests": 52,
+        "SharedExhaustionBenchmarkTests": 6,
+        "SharedCrowSoldierBenchmarkTests": 6
+      },
+      "sha256": "0fb15ce38af14ac35b66bbdf6ba0cca552113dcf68c26f093fc83b199803760b"
+    }
+  },
+  "unit": 35,
+  "parity": 197,
+  "gpu_executed": false,
+  "gpu_verified": false,
+  "qualification": false,
+  "performance_claim": false,
+  "closure_credit": 0
+}

@@ -1,0 +1,27 @@
+{
+  "status": "root-adversarial-source-review-passed-correctness-authorized-not-performance-qualified",
+  "reviewed_utc": "2026-11-19T08:19:11.119768+00:00",
+  "base": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+  "published_head": "20d21f263a25f14c4c15a0ab9354bfc91e0dab60",
+  "files": {
+    "src/Indicators/ValuesBarExecution.CandleTopologyReplay.cs": "0fc71798135cf97f82a8c4e29eabea300c336627683c1b0e0662eb0188a4a409",
+    "src/Indicators/ValuesBarExecution.BoundedWindows.cs": "ba7ca49fba193a53a53cc35161cbafd1fbd1996b200a64e38907a41f553d0c89",
+    "tests/ModelsTests/CandleTopologyReplayTests.cs": "b94f5a8250f38ff6cdc0fc37c784bf1f2d733f5bc6c1c9f446f83eac14644a83"
+  },
+  "checks": [
+    "Necessary predicate directions checked against original ExhaustionCandleState and CrowSoldierState including strict shadows and inclusive near/equal conditions.",
+    "At most66 preceding bars plus32 capture slots fit98Bar spans; global warmup prevents negative topology indexes.",
+    "Skipped state spans are restored from bounded exact queues and lag sums; gap<=lookback consumes deferred captured bars, otherwise Reset and warmup replay.",
+    "Signed/unordered range bounds remain conservative; overflow enclosures disable zero certificates. Dividing the upper bound by positive5/10/20 and advancing one ulp encloses exact means.",
+    "Finite validation, cancellation, owned history and immutable worker seed/tail skeleton preserved.",
+    "Tests include original independent references, compiled exact-rational primitives, latent state, poisoned captured seed/tail, seams and dispatch limits."
+  ],
+  "remaining_gates": [
+    "Focused source-bound correctness/comparator and actualGPU100.",
+    "Cheap complete-call native screen; modeled update elimination is not demonstrated latency.",
+    "Full qualification and publication only for accepted candidates."
+  ],
+  "new_primary_credit": 0,
+  "source_builds": 0,
+  "overall_goal_complete": false
+}

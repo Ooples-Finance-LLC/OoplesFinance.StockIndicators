@@ -1,0 +1,47 @@
+{
+  "source_sha256": "1b6b4cf28b0820a992fbd4e049bf2c993cdfa6efdee8deabf9d98fb0cde436ae",
+  "methods": [
+    "OoplesFinance.StockIndicators.CompetitorTests.ScaledTrueRangeFixtureTests.AllocationProbeRetainsEagerCpuAndOptionalGpuArms",
+    "OoplesFinance.StockIndicators.CompetitorTests.ScaledTrueRangeFixtureTests.EveryArmMatchesItsIndependentArithmeticAndRestoresSettings",
+    "OoplesFinance.StockIndicators.CompetitorTests.SharedCmfFixtureTests.GpuFixtureVerifiesAllColumnsAndRestoresSettings",
+    "OoplesFinance.StockIndicators.CompetitorTests.SharedCmfFixtureTests.GpuNativeArmsAreEagerAndAllocationProbeRetainsAllSix",
+    "OoplesFinance.StockIndicators.CompetitorTests.SharedForceIndexFixtureTests.EagerNativeResultsAndAllAllocationArmsRemainAvailable",
+    "OoplesFinance.StockIndicators.CompetitorTests.SharedForceIndexFixtureTests.GpuColumnsMatchIndependentReferencesAcrossStartupAndBlocks",
+    "OoplesFinance.StockIndicators.CompetitorTests.SharedGpuRegressionStatisticsFixtureTests.AllocationProbeRetainsSixEagerArms",
+    "OoplesFinance.StockIndicators.CompetitorTests.SharedGpuRegressionStatisticsFixtureTests.DeviceColumnsMatchIndependentCpuAndNativeReferences",
+    "OoplesFinance.StockIndicators.CompetitorTests.SharedGpuSeededAtrFixtureTests.AllocationProbeRetainsSixEagerArms",
+    "OoplesFinance.StockIndicators.CompetitorTests.SharedGpuSeededAtrFixtureTests.DeviceColumnsMatchIndependentCpuAndNativeReferences",
+    "OoplesFinance.StockIndicators.CompetitorTests.SharedGpuVolumeWeightedPriceFixtureTests.AllocationProbeRetainsSixEagerArms",
+    "OoplesFinance.StockIndicators.CompetitorTests.SharedGpuVolumeWeightedPriceFixtureTests.DeviceColumnsMatchIndependentCpuAndNativeReferences"
+  ],
+  "passed_cases": 100,
+  "trx_sha256": "c75ee6930b8afdd52fa790cf6f004c8c435e0e2b4ed7c292bcfdf866cee9bc5c",
+  "host": "Windows-11-10.0.26220-SP0",
+  "device": "Radeon RX 5500 XT; actual RequiredGPU fixtures using authenticated CI binaries",
+  "dotnet_info": ".NET SDK:\r\n Version:           10.0.404\r\n Commit:            2ab2854867\r\n Workload version:  10.0.400-manifests.80e15866\r\n MSBuild version:   18.9.15+2ab285486\r\n\r\nRuntime Environment:\r\n OS Name:     Windows\r\n OS Version:  10.0.26220\r\n OS Platform: Windows\r\n RID:         win-x64\r\n Base Path:   C:\\Program Files\\dotnet\\sdk\\10.0.404\\\r\n\r\n.NET workloads installed:\r\n [tvos]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    27.2.10000/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.tvos\\27.2.10000\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [macos]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    27.2.10000/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.macos\\27.2.10000\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [android]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    36.1.118/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.android\\36.1.118\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [maccatalyst]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    27.2.10000/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.maccatalyst\\27.2.10000\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [ios]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    27.2.10000/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.ios\\27.2.10000\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\n [maui-windows]\r\n   Installation Source: VS 18.11.12402.416\r\n   Manifest Version:    10.0.110/10.0.100\r\n   Manifest Path:       C:\\Program Files\\dotnet\\sdk-manifests\\10.0.100\\microsoft.net.sdk.maui\\10.0.110\\WorkloadManifest.json\r\n   Install Type:              Msi\r\n\r\nConfigured to use workload sets when installing new manifests.\r\nNo workload sets are installed. Run \"dotnet workload restore\" to install a workload set.\r\n",
+  "test_assembly_sha256": "169d0077fc84a0bbae9332099d3c112217faa043b2a4572aa4ef3ede3beaceb2",
+  "build_origin": {
+    "run_id": "44469775767",
+    "workflow_head": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "source": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+    "artifact_id": 14503779776,
+    "url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/44469775767"
+  },
+  "local_dotnet_launcher": [
+    "C:\\Program Files\\dotnet\\dotnet.exe",
+    "exec",
+    "C:\\Program Files\\dotnet\\sdk\\10.0.404\\dotnet.dll"
+  ],
+  "ci_compiler_sdk": "10.0.403",
+  "local_gpu_sdk": "10.0.404",
+  "local_gpu_host_runtime": "10.0.15",
+  "local_gpu_file_pins": {
+    "C:\\Program Files\\dotnet\\dotnet.exe": "0a1b7ca731245de1f267a9c3c4d1ef8705e0821923fcdd6e0d61c31132f51240",
+    "C:\\Program Files\\dotnet\\sdk\\10.0.404\\dotnet.dll": "17b294d599d2417bbc4e9670f85fd299512132f0082ed937a2a17e6901380665",
+    "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\10.0.15\\coreclr.dll": "a6988fc77326c245873986446de4f15218df929664750d333cb2d42486c071da",
+    "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\10.0.15\\hostpolicy.dll": "20405152b719ccb8d4e0361f3259db8875d8d4f3c97d1fbea4e1ca6cc6d21902"
+  },
+  "local_dotnet_runtime_inventory": "Microsoft.AspNetCore.App 8.0.20 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.AspNetCore.App 8.0.34 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.AspNetCore.App 9.0.23 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.AspNetCore.App 10.0.1 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.AspNetCore.App 10.0.5 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.AspNetCore.App 10.0.15 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\nMicrosoft.NETCore.App 5.0.17 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 6.0.36 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 7.0.0-preview.7.22375.6 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 7.0.20 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 8.0.0-rc.1.23419.4 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 8.0.20 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 8.0.34 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 9.0.9 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 9.0.23 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 10.0.1 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 10.0.5 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.NETCore.App 10.0.15 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\nMicrosoft.WindowsDesktop.App 5.0.17 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 7.0.20 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 8.0.0-rc.1.23420.5 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 8.0.20 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 8.0.34 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 9.0.9 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 9.0.23 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 10.0.1 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 10.0.5 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\nMicrosoft.WindowsDesktop.App 10.0.15 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\n",
+  "local_gpu_host_info": "\r\n  Version:      10.0.15\r\n  Architecture: x64\r\n  Commit:       8e0f8ed231\r\n\r\n",
+  "note": "Actual source-bound local GPU correctness; no local compilation, measurement, qualification or closure credit."
+}
