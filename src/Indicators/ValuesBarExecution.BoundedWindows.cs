@@ -69,11 +69,14 @@ internal static partial class ValuesBarExecution
         HikkakeCandle or ModifiedHikkakeCandle
         && indicator.WarmupBars < int.MaxValue ? indicator.WarmupBars + 1 : 0;
 
-    private readonly struct HikkakeKernel(HikkakeState state) : IBoundedKernel<HikkakeKernel>
+    private readonly struct HikkakeKernel(HikkakeState state, ModifiedHikkakeSparseReplay? sparse) : IBoundedKernel<HikkakeKernel>
     {
-        public static HikkakeKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
-            new((HikkakeState)((IndicatorBase)indicator).CreateState()!);
-        public double Update(in Bar bar) => state.Update(in bar);
+        public static HikkakeKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
+        {
+            var state = (HikkakeState)((IndicatorBase)indicator).CreateState()!;
+            return new(state, indicator is ModifiedHikkakeCandle { Period: 5 } ? new(state) : null);
+        }
+        public double Update(in Bar bar) => sparse is null ? state.Update(in bar) : sparse.Update(in bar);
     }
 
     // Four prior anchors and complete threshold history restore the exact
