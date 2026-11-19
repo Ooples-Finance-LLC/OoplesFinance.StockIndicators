@@ -41,7 +41,7 @@ internal static partial class FastKernels
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     internal static double TrueRange(double high, double low, double previousClose) =>
-        Math.Max(high - low, Math.Max(Math.Abs(high - previousClose), Math.Abs(low - previousClose)));
+        FastMath.Larger(high - low, FastMath.Larger(Math.Abs(high - previousClose), Math.Abs(low - previousClose)));
 
     /// <summary>
     /// Accumulation/distribution line smoothed by two exponential averages, published as fast minus slow,
@@ -49,6 +49,7 @@ internal static partial class FastKernels
     /// </summary>
     internal static void SmoothedAccumulation(FastColumns columns, double[][] outputs, SmoothedAccumulationOscillator owner)
     {
+        columns.RequireHighLowClose();
         ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close, volume = columns.Volume;
         var n = close.Length;
         var details = owner.IncludeDetails;

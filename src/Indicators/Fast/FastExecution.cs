@@ -90,7 +90,11 @@ internal static partial class FastExecution
         Bind<TypicalPrice>(binders, _ => (c, o) => FastKernels.PricePoint(c, o[0], 1, false));
         Bind<WeightedClose>(binders, _ => (c, o) => FastKernels.PricePoint(c, o[0], 2, false));
         Bind<FullTypicalPrice>(binders, _ => (c, o) => FastKernels.PricePoint(c, o[0], 1, true));
-        Bind<TrueRange>(binders, _ => (c, o) => FastKernels.TrueRangeSeries(c.High, c.Low, c.Close, o[0]));
+        Bind<TrueRange>(binders, _ => (c, o) =>
+        {
+            c.RequireHighLowClose();
+            FastKernels.TrueRangeSeries(c.High, c.Low, c.Close, o[0]);
+        });
         Bind<HighestHigh>(binders, t => (c, o) => FastKernels.RollingExtreme(c.High, o[0], Math.Max(1, t.Length), true));
         Bind<LowestLow>(binders, t => (c, o) => FastKernels.RollingExtreme(c.Low, o[0], Math.Max(1, t.Length), false));
         Bind<WilliamsR>(binders, t => (c, o) => FastKernels.WilliamsPercent(c, o[0], t.Length));
@@ -117,9 +121,15 @@ internal static partial class FastExecution
     private static void BindRange(Dictionary<Type, Func<IIndicator, FastKernel?>> binders)
     {
         Bind<SeededAverageTrueRange>(binders, atr => (c, o) =>
-            FastKernels.SeededAverageTrueRange(c.High, c.Low, c.Close, o[0], atr.Period, false));
+        {
+            c.RequireHighLowClose();
+            FastKernels.SeededAverageTrueRange(c.High, c.Low, c.Close, o[0], atr.Period, false);
+        });
         Bind<NormalizedSeededAverageTrueRange>(binders, atr => (c, o) =>
-            FastKernels.SeededAverageTrueRange(c.High, c.Low, c.Close, o[0], atr.Period, true));
+        {
+            c.RequireHighLowClose();
+            FastKernels.SeededAverageTrueRange(c.High, c.Low, c.Close, o[0], atr.Period, true);
+        });
         Bind<SmoothedAccumulationOscillator>(binders, oscillator => (c, o) => FastKernels.SmoothedAccumulation(c, o, oscillator));
         Bind<WilderStrengthOscillator>(binders, strength => (c, o) => FastKernels.WilderStrength(c.Close, o[0], o[1],
             strength.Period, strength.Convention, strength.UnstablePeriods));

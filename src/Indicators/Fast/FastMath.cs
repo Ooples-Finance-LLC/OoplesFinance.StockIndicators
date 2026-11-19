@@ -118,4 +118,20 @@ internal static class FastMath
         return minimum;
 #endif
     }
+
+    /// <summary>
+    /// The larger of two finite values as one instruction. Math.Max also orders NaN and signed zero, which
+    /// costs several more and, on a value carried from bar to bar, sets the pace of the whole loop.
+    /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    internal static double Larger(double a, double b)
+    {
+#if !NETFRAMEWORK
+        if (System.Runtime.Intrinsics.X86.Sse2.IsSupported)
+            return System.Runtime.Intrinsics.Vector128.ToScalar(System.Runtime.Intrinsics.X86.Sse2.MaxScalar(
+                System.Runtime.Intrinsics.Vector128.CreateScalarUnsafe(a),
+                System.Runtime.Intrinsics.Vector128.CreateScalarUnsafe(b)));
+#endif
+        return a > b ? a : b;
+    }
 }

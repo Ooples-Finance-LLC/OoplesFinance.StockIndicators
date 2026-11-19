@@ -63,6 +63,7 @@ internal static partial class FastKernels
     /// <summary>Mean of the high and low, optionally with the close once or twice, or with the open.</summary>
     internal static void PricePoint(FastColumns columns, Span<double> output, int closes, bool open)
     {
+        if (closes > 0 && !open) columns.RequireHighLowClose();
         ReadOnlySpan<double> high = columns.High, low = columns.Low;
         output = output.Slice(0, high.Length);
         FastMath.Add(high, low, output);
@@ -95,6 +96,7 @@ internal static partial class FastKernels
     /// </summary>
     internal static void WilliamsPercent(FastColumns columns, Span<double> output, int length)
     {
+        columns.RequireHighLowClose();
         ReadOnlySpan<double> close = columns.Close;
         var n = close.Length;
         output = output.Slice(0, n);

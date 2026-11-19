@@ -33,6 +33,35 @@ internal sealed class FastColumns
     internal double[] Close => _close ??= Prepare(IndicatorInputFields.Close);
     internal double[] Volume => _volume ??= Prepare(IndicatorInputFields.Volume);
 
+    /// <summary>
+    /// Gathers the high, low and close of a bar array in one pass. Kernels that read all three call this
+    /// first, so the bars are walked once instead of once per field. Borrowed columns need nothing.
+    /// </summary>
+    internal void RequireHighLowClose()
+    {
+        if (_bars is not { } bars || _high is not null || _low is not null || _close is not null) return;
+        double[] high = FastMath.Allocate(bars.Length), low = FastMath.Allocate(bars.Length), close = FastMath.Allocate(bars.Length);
+        double checkHigh = 0, checkLow = 0, checkClose = 0;
+        for (var i = 0; i < bars.Length; i++)
+        {
+            ref readonly var bar = ref bars[i];
+            double h = bar.High, l = bar.Low, c = bar.Close;
+            high[i] = h;
+            low[i] = l;
+            close[i] = c;
+            checkHigh += h - h;
+            checkLow += l - l;
+            checkClose += c - c;
+        }
+        // Reported in the order the separate gathers would have met them.
+        if (!(checkHigh == 0)) ThrowNonFinite(IndicatorInputFields.High);
+        if (!(checkLow == 0)) ThrowNonFinite(IndicatorInputFields.Low);
+        if (!(checkClose == 0)) ThrowNonFinite(IndicatorInputFields.Close);
+        _high = high;
+        _low = low;
+        _close = close;
+    }
+
     private double[] Prepare(IndicatorInputFields field)
     {
         if (_source is { } source)

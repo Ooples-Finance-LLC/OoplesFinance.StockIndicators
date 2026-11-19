@@ -107,67 +107,75 @@ internal static partial class FastKernels
         }
         var selected = owner.Output;
         var sample = owner.Sample;
-        var inverse = 1.0 / period;
         var block = Math.Max(64, period);
         // Below this multiple of the block's largest update, the block's rounding could reach the tolerance.
         var floor = block * Ulp / SpreadTolerance;
-        var moments = new SlidingMoments { Anchor = close[0] };
-        double largest = 0;
+        double anchor = close[0], mean = 0, squares = 0, largest = 0;
         int run = 1, slid = 0;
         output[0] = 0;
-        for (var i = 1; i < n; i++)
+        var filling = Math.Min(period, n);
+        for (var i = 1; i < filling; i++)
         {
             var value = close[i];
             run = value == close[i - 1] ? run + 1 : 1;
-            var count = i < period ? i + 1 : period;
-            if (run >= count)
+            var count = i + 1;
+            var offset = value - anchor;
+            var delta = offset - mean;
+            mean += delta / count;
+            var term = delta * (offset - mean);
+            squares += term;
+            largest = FastMath.Larger(largest, Math.Abs(term));
+            if (!(squares > largest * floor))
             {
-                moments = new SlidingMoments { Anchor = value };
+                var moments = run >= count ? new SlidingMoments { Anchor = value } : SlidingMoments.Of(close.Slice(0, count));
+                anchor = moments.Anchor;
+                mean = moments.Mean;
+                squares = moments.Squares;
                 largest = 0;
-                slid = 0;
-                output[i] = 0;
-                continue;
-            }
-            var offset = value - moments.Anchor;
-            var rebuild = slid == block;
-            if (!rebuild)
-            {
-                double delta, term;
-                if (i < period)
-                {
-                    delta = offset - moments.Mean;
-                    moments.Mean += delta / count;
-                    term = delta * (offset - moments.Mean);
-                }
-                else
-                {
-                    var expired = close[i - period] - moments.Anchor;
-                    delta = offset - expired;
-                    var prior = moments.Mean;
-                    moments.Mean += delta * inverse;
-                    term = delta * (offset - moments.Mean + expired - prior);
-                }
-                moments.Squares += term;
-                largest = Math.Max(largest, Math.Abs(term));
-                slid++;
-                rebuild = !(moments.Squares > largest * floor);
-            }
-            if (rebuild)
-            {
-                moments = SlidingMoments.Of(close.Slice(i - count + 1, count));
                 offset = 0;
+            }
+            output[i] = Reading(selected, squares / (sample ? count - 1 : count), offset - mean, multiplier);
+        }
+        var inverse = 1.0 / period;
+        var divisor = sample ? period - 1.0 : period;
+        var varianceScale = multiplier / divisor;
+        // The full window: no branch in the common case but the one that guards the rounding.
+        for (var i = filling; i < n; i++)
+        {
+            var value = close[i];
+            run = value == close[i - 1] ? run + 1 : 1;
+            var offset = value - anchor;
+            var expired = close[i - period] - anchor;
+            var delta = offset - expired;
+            var prior = mean;
+            mean += delta * inverse;
+            var term = delta * (offset - mean + expired - prior);
+            squares += term;
+            largest = FastMath.Larger(largest, Math.Abs(term));
+            if (++slid > block || !(squares > largest * floor))
+            {
+                var moments = run >= period
+                    ? new SlidingMoments { Anchor = value } : SlidingMoments.Of(close.Slice(i - period + 1, period));
+                anchor = moments.Anchor;
+                mean = moments.Mean;
+                squares = moments.Squares;
                 largest = 0;
                 slid = 0;
+                offset = 0;
             }
-            var variance = moments.Squares / (sample ? count - 1 : count);
-            output[i] = selected switch
-            {
-                WindowDispersionOutput.Variance => variance * multiplier,
-                WindowDispersionOutput.StandardDeviation => multiplier * Math.Sqrt(variance),
-                _ => (offset - moments.Mean) * multiplier / Math.Sqrt(variance),
-            };
+            output[i] = selected == WindowDispersionOutput.Variance ? squares * varianceScale
+                : Reading(selected, squares / divisor, offset - mean, multiplier);
         }
     }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    private static double Reading(WindowDispersionOutput selected, double variance, double deviation, double multiplier) =>
+        selected switch
+        {
+            WindowDispersionOutput.Variance => variance * multiplier,
+            WindowDispersionOutput.StandardDeviation => multiplier * Math.Sqrt(variance),
+            _ => variance > 0 ? deviation * multiplier / Math.Sqrt(variance) : 0,
+        };
 
     // Mean and sum of squared deviations of a window, both measured from the anchor price.
     private struct SlidingMoments
@@ -197,6 +205,7 @@ internal static partial class FastKernels
     /// </summary>
     internal static void Stochastic(FastColumns columns, double[][] outputs, ClassicStochastic owner)
     {
+        columns.RequireHighLowClose();
         ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close;
         var n = close.Length;
         Span<double> k = outputs[0], d = outputs[1];

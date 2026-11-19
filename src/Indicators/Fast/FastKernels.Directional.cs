@@ -18,6 +18,7 @@ internal static partial class FastKernels
         var needsRange = measure >= PriorDirectionalMeasure.PositiveIndicator;
         var movementOnly = measure <= PriorDirectionalMeasure.NegativeMovement;
         var positiveSide = measure is PriorDirectionalMeasure.PositiveMovement or PriorDirectionalMeasure.PositiveIndicator;
+        if (needsRange) columns.RequireHighLowClose();
         ReadOnlySpan<double> high = columns.High, low = columns.Low;
         // The movement measures never read the close, so it is neither gathered nor validated for them.
         var close = needsRange ? columns.Close : default(ReadOnlySpan<double>);
