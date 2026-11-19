@@ -109,4 +109,43 @@ internal static partial class FastKernels
             output[i] = upper == lower ? -100 : close[i] == upper ? 0 : 100 * (close[i] - upper) / (upper - lower);
         }
     }
+
+
+    /// <summary>
+    /// Accumulation/distribution line: the running total of volume weighted by where the close sits in the
+    /// bar's range, with the catalog exponential average of the line as its signal.
+    /// </summary>
+    internal static void AccumulationLine(FastColumns columns, Span<double> line, Span<double> signal, int length)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close, volume = columns.Volume;
+        var n = close.Length;
+        line = line.Slice(0, n);
+        double total = 0;
+        for (var i = 0; i < n; i++)
+        {
+            double h = high[i], l = low[i], c = close[i];
+            if (h != l) total += (c - l - (h - c)) * volume[i] / (h - l);
+            line[i] = total;
+        }
+        RunningSeedEma(line, signal, length);
+    }
+
+    /// <summary>
+    /// Balance of power: the bar's close-open move over its range, zero for a bar with no range, with the
+    /// catalog exponential average of it as its signal.
+    /// </summary>
+    internal static void BalanceOfPower(FastColumns columns, Span<double> value, Span<double> signal, int length)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        value = value.Slice(0, n);
+        for (var i = 0; i < n; i++)
+        {
+            double h = high[i], l = low[i];
+            value[i] = h == l ? 0 : (close[i] - open[i]) / (h - l);
+        }
+        RunningSeedEma(value, signal, length);
+    }
 }
