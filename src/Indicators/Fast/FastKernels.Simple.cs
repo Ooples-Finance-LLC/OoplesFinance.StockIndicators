@@ -263,4 +263,73 @@ internal static partial class FastKernels
             output[i] = value;
         }
     }
+
+
+    /// <summary>
+    /// Regularized exponential average: the usual step toward the close plus a pull along the previous
+    /// slope, with the period growing to its setting over the first bars. The first two bars are the close.
+    /// </summary>
+    internal static void RegularizedEma(ReadOnlySpan<double> close, Span<double> output, int period, double lambda)
+    {
+        var n = close.Length;
+        output = output.Slice(0, n);
+        double previous = 0, older = 0;
+        for (var i = 0; i < n; i++)
+        {
+            var result = close[i];
+            if (i >= 2)
+            {
+                double effective = Math.Min(i + 1, period), mass = effective + 1;
+                result = (previous * (effective - 1) + 2 * result + lambda * (2 * previous - older) * mass)
+                    / ((1 + lambda) * mass);
+            }
+            older = previous;
+            previous = result;
+            output[i] = result;
+        }
+    }
+
+    /// <summary>
+    /// Zero-lag exponential average: an average of the close pushed ahead by its change over half the
+    /// period, with the period growing to its setting over the first bars.
+    /// </summary>
+    internal static void ZeroLagEma(ReadOnlySpan<double> close, Span<double> output, int period)
+    {
+        var n = close.Length;
+        output = output.Slice(0, n);
+        var lag = (period - 1) / 2;
+        double previous = 0;
+        for (var i = 0; i < n; i++)
+        {
+            double count = Math.Min(i + 1, period);
+            previous = (4 * close[i] - 2 * close[Math.Max(0, i - lag)] + previous * (count - 1)) / (count + 1);
+            output[i] = previous;
+        }
+    }
+
+    /// <summary>
+    /// On-balance volume: volume added on a rising close and removed on a falling one, starting from the
+    /// first bar's volume or from zero, with an optional window mean that starts at the second bar.
+    /// </summary>
+    internal static void OnBalanceVolume(FastColumns columns, double[][] outputs, SeededOnBalanceVolume owner)
+    {
+        ReadOnlySpan<double> close = columns.Close, volume = columns.Volume;
+        var n = close.Length;
+        Span<double> value = outputs[0].AsSpan(0, n), average = outputs[1].AsSpan(0, n), defined = outputs[2].AsSpan(0, n);
+        average.Clear();
+        defined.Clear();
+        if (n == 0) return;
+        var total = owner.Seed == ObvSeed.FirstVolume ? volume[0] : 0;
+        value[0] = total;
+        for (var i = 1; i < n; i++)
+        {
+            double current = close[i], previous = close[i - 1];
+            if (current > previous) total += volume[i];
+            else if (current < previous) total -= volume[i];
+            value[i] = total;
+        }
+        if (owner.AveragePeriod is not int period || n <= period) return;
+        RebuiltMean(value.Slice(1), average.Slice(1), period);
+        defined.Slice(period).Fill(1);
+    }
 }

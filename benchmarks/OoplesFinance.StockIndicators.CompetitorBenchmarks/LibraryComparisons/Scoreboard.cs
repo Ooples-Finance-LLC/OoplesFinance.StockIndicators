@@ -11,6 +11,10 @@ internal static class Scoreboard
 {
     private const int Period = 20;
 
+    // The reference oracles are exact and can take minutes a pair, so agreement is checked only on request.
+    // LibraryPairBenchmarks always checks it before it times anything.
+    private static readonly bool Verify = Environment.GetEnvironmentVariable("SCOREBOARD_VERIFY") == "1";
+
     internal static void Run(string? filter)
     {
         Console.WriteLine("pair,indicator,bars,ooples_us,competitor_us,ooples_over_competitor,status");
@@ -22,7 +26,10 @@ internal static class Scoreboard
         foreach (var pair in pairs)
         {
             foreach (var bars in new[] { 1_000, 10_000 })
+                {
                 Console.WriteLine(Line(pair, bars));
+                Console.Out.Flush();
+            }
         }
     }
 
@@ -32,7 +39,7 @@ internal static class Scoreboard
         try
         {
             var data = ComparisonVerifier.BenchmarkFixture(pair, bars);
-            ComparisonVerifier.Check(pair, data, Period, verifyIsolation: false);
+            if (Verify) ComparisonVerifier.Check(pair, data, Period, verifyIsolation: false);
             var ooples = Best(() => pair.Ooples(data, Period));
             var competitor = Best(() => pair.Competitor(data, Period));
             return string.Create(CultureInfo.InvariantCulture, $"{prefix},{ooples:F2},{competitor:F2},{ooples / competitor:F3},ok");
