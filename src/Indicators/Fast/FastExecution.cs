@@ -146,6 +146,10 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<HammerCandle>(binders, t => (c, o) => FastKernels.ContextReversalCandle(c, o[0], t.Period, t.NearPeriod, ContextReversalKind.Hammer));
+        Bind<HangingManCandle>(binders, t => (c, o) => FastKernels.ContextReversalCandle(c, o[0], t.Period, t.NearPeriod, ContextReversalKind.HangingMan));
+        Bind<InvertedHammerCandle>(binders, t => (c, o) => FastKernels.ContextReversalCandle(c, o[0], t.Period, 0, ContextReversalKind.InvertedHammer));
+        Bind<ShootingStarCandle>(binders, t => (c, o) => FastKernels.ContextReversalCandle(c, o[0], t.Period, 0, ContextReversalKind.ShootingStar));
         Bind<MarubozuCandle>(binders, t => (c, o) => FastKernels.BodyShadowCandle(c, o[0], t.Period, BodyShadowCandleKind.Marubozu));
         Bind<ClosingMarubozuCandle>(binders, t => (c, o) => FastKernels.BodyShadowCandle(c, o[0], t.Period, BodyShadowCandleKind.ClosingMarubozu));
         Bind<SpinningTopCandle>(binders, t => (c, o) => FastKernels.BodyShadowCandle(c, o[0], t.Period, BodyShadowCandleKind.SpinningTop));

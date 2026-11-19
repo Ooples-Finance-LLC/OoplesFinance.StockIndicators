@@ -179,4 +179,64 @@ internal static partial class FastKernels
             if (ranged || shadowed) other.Include(i);
         }
     }
+
+
+    // Sign of a - b - (c - d), exactly.
+    private static int DifferenceSign(double a, double b, double c, double d)
+    {
+        var gap = a - b - (c - d);
+        var margin = 8e-16 * (Math.Abs(a) + Math.Abs(b) + Math.Abs(c) + Math.Abs(d));
+        if (gap > margin) return 1;
+        if (gap < -margin) return -1;
+        var exact = new ExactMeanAccumulator();
+        exact.Add(a);
+        exact.Add(b, -1);
+        exact.Add(c, -1);
+        exact.Add(d);
+        return exact.Sign;
+    }
+
+    /// <summary>
+    /// Hammer, hanging man, inverted hammer and shooting star: a short body with one long shadow and
+    /// almost none on the other side, placed against the previous bar.
+    /// </summary>
+    internal static void ContextReversalCandle(FastColumns columns, Span<double> output, int period, int nearPeriod,
+        ContextReversalKind kind)
+    {
+        double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var warmup = Math.Max(period, nearPeriod) + 1;
+        var lowerPattern = kind is ContextReversalKind.Hammer or ContextReversalKind.HangingMan;
+        var value = kind is ContextReversalKind.Hammer or ContextReversalKind.InvertedHammer ? 100 : -100;
+        var bodies = new CandleWindow(columns, CandleStatistic.Body, period);
+        var ranges = new CandleWindow(columns, CandleStatistic.Range, period);
+        var near = new CandleWindow(columns, CandleStatistic.Range, nearPeriod);
+        long tenth = 10L * period, fifth = 5L * nearPeriod;
+        for (var i = 0; i < n; i++)
+        {
+            if (i >= warmup)
+            {
+                double top = Math.Max(open[i], close[i]), bottom = Math.Min(open[i], close[i]);
+                var matches = bodies.Compare(i, period, top, bottom) > 0
+                    && (lowerPattern ? DifferenceSign(bottom, low[i], top, bottom) : DifferenceSign(high[i], top, top, bottom)) > 0
+                    && ranges.Compare(i, tenth, lowerPattern ? high[i] : bottom, lowerPattern ? top : low[i]) > 0;
+                if (matches)
+                {
+                    matches = kind switch
+                    {
+                        ContextReversalKind.Hammer => near.Compare(i - 1, fifth, bottom, low[i - 1]) >= 0,
+                        ContextReversalKind.HangingMan => near.Compare(i - 1, fifth, high[i - 1], bottom) >= 0,
+                        ContextReversalKind.InvertedHammer => top < Math.Min(open[i - 1], close[i - 1]),
+                        _ => bottom > Math.Max(open[i - 1], close[i - 1]),
+                    };
+                    if (matches) output[i] = value;
+                }
+            }
+            bodies.Include(i);
+            ranges.Include(i);
+            if (nearPeriod > 0 && i > 0) near.Include(i - 1);
+        }
+    }
 }
