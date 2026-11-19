@@ -641,4 +641,52 @@ internal static partial class FastKernels
         var lowB = b - highB;
         return lowA * lowB - (product - highA * highB - lowA * highB - highA * lowB);
     }
+
+
+    /// <summary>
+    /// Fractal adaptive average: the mean of the bars so far until a window fills, then an exponential
+    /// average whose step comes from the fractal dimension, the ranges of the window's two halves against
+    /// the range of the whole window.
+    /// </summary>
+    internal static void FractalAdaptive(ReadOnlySpan<double> close, Span<double> output, int period)
+    {
+        var n = close.Length;
+        output = output.Slice(0, n);
+        if (n == 0) return;
+        var half = period / 2;
+        var rest = period - half;
+        double sum = 0, average = 0;
+        var filling = Math.Min(n, period - 1);
+        for (var i = 0; i < filling; i++)
+        {
+            sum += close[i];
+            average = i == 0 ? close[0] : sum / (i + 1);
+            output[i] = average;
+        }
+        if (n < period) return;
+        double[] wholeHigh = FastMath.Allocate(n), wholeLow = FastMath.Allocate(n), restHigh = FastMath.Allocate(n),
+            restLow = FastMath.Allocate(n), halfHigh = FastMath.Allocate(n), halfLow = FastMath.Allocate(n);
+        RollingExtreme(close, wholeHigh, period, true);
+        RollingExtreme(close, wholeLow, period, false);
+        RollingExtreme(close, restHigh, rest, true);
+        RollingExtreme(close, restLow, rest, false);
+        RollingExtreme(close, halfHigh, half, true);
+        RollingExtreme(close, halfLow, half, false);
+        var scale = (double)period / half;
+        var inverseLog = 1 / Math.Log(2);
+        for (var i = period - 1; i < n; i++)
+        {
+            var whole = wholeHigh[i] - wholeLow[i];
+            var split = halfHigh[i - rest] - halfLow[i - rest] + (restHigh[i] - restLow[i]);
+            // Flat halves leave a ratio of one unit against the whole range, or exactly one: a full step.
+            double gain = 1;
+            if (split != 0)
+            {
+                var dimension = Math.Log(split * scale / whole) * inverseLog;
+                gain = Math.Max(.01, Math.Min(1, Math.Exp(-4.6 * (dimension - 1))));
+            }
+            average = gain * close[i] + (1 - gain) * average;
+            output[i] = average;
+        }
+    }
 }
