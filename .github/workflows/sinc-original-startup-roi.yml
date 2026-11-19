@@ -1,6 +1,9 @@
 name: Actual Sinc original-startup builder feasibility diagnostic
 on:
   workflow_dispatch:
+  push:
+    branches: [perf/sinc-original-startup-roi-scaffold-20261119]
+    paths: [.github/workflows/sinc-original-startup-roi.yml]
 permissions:
   contents: read
   actions: read
@@ -12,6 +15,7 @@ env:
   HOSTED_TIMING_PLAN: benchmarks/plans/hosted-sinc-original-startup-roi-20261119.json
 jobs:
   qualify:
+    if: github.event_name == 'push'
     runs-on: windows-2025
     timeout-minutes: 120
     steps:

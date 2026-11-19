@@ -248,9 +248,11 @@ class SincOriginalStartupRoiTests(unittest.TestCase):
                 exec(code,dict(__package__='hosted_timing',plan=plan,folder=Path('unused'),proof={}))
                 check.assert_called_once()
 
-    def test_workflow_is_manual_held_before_sdk_download_and_has_no_build(self):
+    def test_workflow_is_single_scoped_push_held_before_sdk_download_and_has_no_build(self):
         text=(REPO/'.github/workflows/sinc-original-startup-roi.yml').read_text()
-        self.assertNotIn('\n  push:',text)
+        self.assertIn("if: github.event_name == 'push'",text)
+        self.assertIn('branches: [perf/sinc-original-startup-roi-scaffold-20261119]',text)
+        self.assertIn('paths: [.github/workflows/sinc-original-startup-roi.yml]',text)
         self.assertLess(text.index('UNBOUND diagnostic'),text.index('actions/setup-dotnet'))
         self.assertLess(text.index('parent_review_approved'),text.index('actions/download-artifact'))
         self.assertIn('Measure 30 actual-builder',text)
