@@ -79,7 +79,7 @@ internal static partial class FastKernels
     // One unit in the last place of a value near one.
     private const double Ulp = 2.220446049250313e-16;
 
-    // The slid moments are rebuilt from the window once their error bound passes this fraction of the result.
+    // The rounding the slid moments may carry, as a fraction of the spread they describe.
     private const double SpreadTolerance = 5.820766091346741e-11;
 
     /// <summary>
@@ -88,9 +88,10 @@ internal static partial class FastKernels
     /// </summary>
     /// <remarks>
     /// The mean and the sum of squared deviations slide with the window, measured from an anchor price so
-    /// that their rounding is on the scale of the deviations and not of the price. A bound on the rounding
-    /// they have absorbed is carried along; when it becomes a visible fraction of the spread, the window is
-    /// summed again around a new anchor. A window of equal values is recognised exactly.
+    /// that their rounding is on the scale of the deviations and not of the price. The window is summed
+    /// again around a new anchor after every block of bars, which bounds the rounding a block can add to a
+    /// block's worth of its largest update. If the spread falls so far below that largest update that the
+    /// bound would show, the window is summed again at once. A window of equal values is recognised exactly.
     /// </remarks>
     internal static void Dispersion(ReadOnlySpan<double> close, Span<double> output, WindowDispersion owner)
     {
@@ -106,10 +107,13 @@ internal static partial class FastKernels
         }
         var selected = owner.Output;
         var sample = owner.Sample;
-        var score = selected == WindowDispersionOutput.ZScore;
         var inverse = 1.0 / period;
+        var block = Math.Max(64, period);
+        // Below this multiple of the block's largest update, the block's rounding could reach the tolerance.
+        var floor = block * Ulp / SpreadTolerance;
         var moments = new SlidingMoments { Anchor = close[0] };
-        var run = 1;
+        double largest = 0;
+        int run = 1, slid = 0;
         output[0] = 0;
         for (var i = 1; i < n; i++)
         {
@@ -119,12 +123,13 @@ internal static partial class FastKernels
             if (run >= count)
             {
                 moments = new SlidingMoments { Anchor = value };
+                largest = 0;
+                slid = 0;
                 output[i] = 0;
                 continue;
             }
             var offset = value - moments.Anchor;
-            // The subtraction above is exact only while the price stays within half the anchor of it.
-            var rebuild = moments.Anchor != 0 && !(Math.Abs(offset) <= 0.5 * Math.Abs(moments.Anchor));
+            var rebuild = slid == block;
             if (!rebuild)
             {
                 double delta, term;
@@ -143,16 +148,16 @@ internal static partial class FastKernels
                     term = delta * (offset - moments.Mean + expired - prior);
                 }
                 moments.Squares += term;
-                moments.MeanError += Ulp * Math.Abs(moments.Mean);
-                moments.Error += Ulp * (Math.Abs(term) + moments.Squares) + 2 * Math.Abs(delta) * moments.MeanError;
-                rebuild = !(moments.Squares > 0) || moments.Error > moments.Squares * SpreadTolerance
-                    || score && moments.MeanError * moments.MeanError * count
-                        > moments.Squares * (SpreadTolerance * SpreadTolerance);
+                largest = Math.Max(largest, Math.Abs(term));
+                slid++;
+                rebuild = !(moments.Squares > largest * floor);
             }
             if (rebuild)
             {
                 moments = SlidingMoments.Of(close.Slice(i - count + 1, count));
                 offset = 0;
+                largest = 0;
+                slid = 0;
             }
             var variance = moments.Squares / (sample ? count - 1 : count);
             output[i] = selected switch
@@ -167,19 +172,14 @@ internal static partial class FastKernels
     // Mean and sum of squared deviations of a window, both measured from the anchor price.
     private struct SlidingMoments
     {
-        internal double Anchor, Mean, Squares, MeanError, Error;
+        internal double Anchor, Mean, Squares;
 
         // Sums the window around its newest value, which becomes the anchor.
         internal static SlidingMoments Of(ReadOnlySpan<double> window)
         {
             var anchor = window[window.Length - 1];
-            double sum = 0, largest = 0;
-            for (var i = 0; i < window.Length; i++)
-            {
-                var offset = window[i] - anchor;
-                sum += offset;
-                largest = Math.Max(largest, Math.Abs(offset));
-            }
+            double sum = 0;
+            for (var i = 0; i < window.Length; i++) sum += window[i] - anchor;
             var mean = sum / window.Length;
             double squares = 0;
             for (var i = 0; i < window.Length; i++)
@@ -187,11 +187,7 @@ internal static partial class FastKernels
                 var deviation = window[i] - anchor - mean;
                 squares += deviation * deviation;
             }
-            return new SlidingMoments
-            {
-                Anchor = anchor, Mean = mean, Squares = squares,
-                MeanError = Ulp * largest, Error = 4 * Ulp * squares,
-            };
+            return new SlidingMoments { Anchor = anchor, Mean = mean, Squares = squares };
         }
     }
 

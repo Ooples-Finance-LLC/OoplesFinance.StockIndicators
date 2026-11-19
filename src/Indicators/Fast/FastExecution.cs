@@ -84,6 +84,16 @@ internal static partial class FastExecution
     {
         Bind<Sma>(binders, sma => (c, o) => FastKernels.Sma(c.Close, o[0], sma.Length));
         Bind<FirstValueEma>(binders, ema => (c, o) => FastKernels.FirstValueEma(c.Close, o[0], ema.Period));
+        Bind<Ema>(binders, ema => (c, o) => FastKernels.RunningSeedEma(c.Close, o[0], ema.Length));
+        Bind<Wma>(binders, wma => (c, o) => FastKernels.FullDivisorWma(c.Close, o[0], wma.Length));
+        Bind<MedianPrice>(binders, _ => (c, o) => FastKernels.PricePoint(c, o[0], 0, false));
+        Bind<TypicalPrice>(binders, _ => (c, o) => FastKernels.PricePoint(c, o[0], 1, false));
+        Bind<WeightedClose>(binders, _ => (c, o) => FastKernels.PricePoint(c, o[0], 2, false));
+        Bind<FullTypicalPrice>(binders, _ => (c, o) => FastKernels.PricePoint(c, o[0], 1, true));
+        Bind<TrueRange>(binders, _ => (c, o) => FastKernels.TrueRangeSeries(c.High, c.Low, c.Close, o[0]));
+        Bind<HighestHigh>(binders, t => (c, o) => FastKernels.RollingExtreme(c.High, o[0], Math.Max(1, t.Length), true));
+        Bind<LowestLow>(binders, t => (c, o) => FastKernels.RollingExtreme(c.Low, o[0], Math.Max(1, t.Length), false));
+        Bind<WilliamsR>(binders, t => (c, o) => FastKernels.WilliamsPercent(c, o[0], t.Length));
         Bind<SeededExponentialAverage>(binders, seeded => (c, o) => FastKernels.SeededExponential(c.Close, o[0],
             seeded.Period, seeded.Order, seeded.SeedMode == ExponentialSeedMode.Shared));
     }
