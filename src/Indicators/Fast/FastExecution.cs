@@ -122,5 +122,8 @@ internal static partial class FastExecution
         Bind<PriceTranscendentalTransform>(binders, t => (c, o) => FastKernels.Transcendental(c.Close, o[0], o[1], t.Operation));
         Bind<TripleExponentialRate>(binders, t => (c, o) => FastKernels.TripleRate(c.Close, o, t));
         Bind<PriorSeededDirectionalMeasure>(binders, t => (c, o) => FastKernels.Directional(c, o[0], o[1], t));
+        Bind<WindowDispersion>(binders, t => (c, o) => FastKernels.Dispersion(c.Close, o[0], t));
+        Bind<ClassicStochastic>(binders, t => !FastKernels.SupportsClassic(t.KMethod) || !FastKernels.SupportsClassic(t.DMethod)
+            ? null : (c, o) => FastKernels.Stochastic(c, o, t));
     }
 }
