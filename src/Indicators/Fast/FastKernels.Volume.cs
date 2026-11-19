@@ -240,4 +240,83 @@ internal static partial class FastKernels
         for (var j = last - period + 1; j <= last; j++) sum += values[j];
         return sum;
     }
+
+
+    /// <summary>
+    /// Directional index whose movement and range totals start as plain sums over the first period: the
+    /// two directional indicators, their index, its mean-seeded Wilder average, and that average's mean
+    /// with its value one period back.
+    /// </summary>
+    internal static void SumSeededDirectional(FastColumns columns, double[][] outputs, int period)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        for (var slot = 0; slot < 10; slot++) outputs[slot].AsSpan().Clear();
+        Span<double> positiveOut = outputs[0], negativeOut = outputs[1], indexOut = outputs[2], averageOut = outputs[3],
+            ratingOut = outputs[4], averageDefined = outputs[8];
+        double positive = 0, negative = 0, range = 0, seed = 0, average = 0;
+        var hasAverage = false;
+        var keep = (period - 1.0) / period;
+        long seedIndex = 2L * period - 1;
+        for (var i = 1; i < n; i++)
+        {
+            double up = high[i] - high[i - 1], down = low[i - 1] - low[i];
+            // Which move dominates decides a whole bar, so a near tie is settled exactly.
+            var dominance = up > 0 || down > 0 ? SumSign(high[i], low[i], high[i - 1], low[i - 1]) : 0;
+            double plus = up > 0 && dominance > 0 ? up : 0, minus = down > 0 && dominance < 0 ? down : 0;
+            var trueRange = TrueRange(high[i], low[i], close[i - 1]);
+            if (i <= period)
+            {
+                positive += plus;
+                negative += minus;
+                range += trueRange;
+                if (i < period) continue;
+            }
+            else
+            {
+                positive = FastMath.Blend(keep, positive, plus);
+                negative = FastMath.Blend(keep, negative, minus);
+                range = FastMath.Blend(keep, range, trueRange);
+            }
+            if (range == 0) continue;
+            double plusIndicator = 100 * positive / range, minusIndicator = 100 * negative / range;
+            var total = plusIndicator + minusIndicator;
+            var index = total == 0 ? 0 : 100 * Math.Abs(plusIndicator - minusIndicator) / total;
+            positiveOut[i] = plusIndicator;
+            negativeOut[i] = minusIndicator;
+            indexOut[i] = index;
+            outputs[5][i] = outputs[6][i] = outputs[7][i] = 1;
+            if (i <= seedIndex)
+            {
+                seed += index;
+                if (i == seedIndex)
+                {
+                    average = seed / period;
+                    hasAverage = true;
+                }
+            }
+            else if (hasAverage)
+                average = (average * (period - 1) + index) / period;
+            if (!hasAverage) continue;
+            averageOut[i] = average;
+            averageDefined[i] = 1;
+            if (averageDefined[i - period] == 0) continue;
+            ratingOut[i] = (averageOut[i - period] + average) / 2;
+            outputs[9][i] = 1;
+        }
+    }
+
+    // Sign of (a + b) - (c + d). The rounded value decides it unless it is too close to zero to trust.
+    private static int SumSign(double a, double b, double c, double d)
+    {
+        var difference = a - c + (b - d);
+        var magnitude = Math.Abs(a) + Math.Abs(b) + Math.Abs(c) + Math.Abs(d);
+        if (Math.Abs(difference) > 4e-15 * magnitude) return difference > 0 ? 1 : -1;
+        var exact = JurikDyadic.FromDouble(a);
+        exact.Add(b);
+        exact.Add(-c);
+        exact.Add(-d);
+        return exact.Sign;
+    }
 }
