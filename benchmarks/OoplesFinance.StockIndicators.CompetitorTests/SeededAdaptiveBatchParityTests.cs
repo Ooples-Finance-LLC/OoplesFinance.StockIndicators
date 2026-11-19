@@ -1,4 +1,5 @@
 using OoplesFinance.StockIndicators.CompetitorBenchmarks;
+using Xunit;
 
 namespace OoplesFinance.StockIndicators.CompetitorTests;
 
