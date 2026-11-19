@@ -62,6 +62,7 @@ internal static partial class FastExecution
         var binders = new Dictionary<Type, Func<IIndicator, FastKernel?>>();
         BindAverages(binders);
         BindClassic(binders);
+        BindRange(binders);
         return binders;
     }
 
@@ -86,5 +87,14 @@ internal static partial class FastExecution
             || !FastKernels.SupportsClassic(macd.SlowAverage.Method) || !FastKernels.SupportsClassic(macd.SignalAverage.Method)
             ? null : (c, o) => FastKernels.ClassicMacd(c.Close, o, macd));
         Bind<AlignedEmaMacd>(binders, macd => (c, o) => FastKernels.AlignedMacd(c.Close, o, macd));
+    }
+
+    private static void BindRange(Dictionary<Type, Func<IIndicator, FastKernel?>> binders)
+    {
+        Bind<SeededAverageTrueRange>(binders, atr => (c, o) =>
+            FastKernels.SeededAverageTrueRange(c.High, c.Low, c.Close, o[0], atr.Period, false));
+        Bind<NormalizedSeededAverageTrueRange>(binders, atr => (c, o) =>
+            FastKernels.SeededAverageTrueRange(c.High, c.Low, c.Close, o[0], atr.Period, true));
+        Bind<SmoothedAccumulationOscillator>(binders, oscillator => (c, o) => FastKernels.SmoothedAccumulation(c, o, oscillator));
     }
 }
