@@ -1,5 +1,8 @@
 namespace OoplesFinance.StockIndicators.Indicators.Fast;
 
+/// <summary>A fast kernel: reads the columns it needs and writes every element of every output.</summary>
+internal delegate void FastKernel(FastColumns columns, double[][] outputs);
+
 /// <summary>
 /// Executes indicators with ordinary double arithmetic over borrowed columns, for builds that asked for
 /// <see cref="Builder.IndicatorNumerics.Fast"/>.
@@ -9,9 +12,14 @@ namespace OoplesFinance.StockIndicators.Indicators.Fast;
 /// other indicator is not supported, and the builder then keeps its exact route for the whole build rather
 /// than mixing the two arithmetics in one run.
 /// </remarks>
-internal static class FastExecution
+internal static partial class FastExecution
 {
-    private delegate void Kernel(FastColumns columns, double[][] outputs);
+    // Keyed by the indicator's exact type. A binder returns null for a configuration its kernel does not
+    // cover, which sends the build down the exact route.
+    private static readonly Dictionary<Type, Func<IIndicator, FastKernel?>> Binders = CreateBinders();
+
+    /// <summary>Every indicator type that has a fast kernel, for the parity tests to enumerate.</summary>
+    internal static IReadOnlyCollection<Type> KernelTypes => Binders.Keys;
 
     internal static bool Supports(IReadOnlyList<IIndicator> indicators)
     {
@@ -42,16 +50,25 @@ internal static class FastExecution
         return series;
     }
 
-    private static Kernel? Resolve(IIndicator indicator)
+    private static FastKernel? Resolve(IIndicator indicator) =>
+        indicator.Source is null && indicator.Components.Count == 0
+        && Binders.TryGetValue(indicator.GetType(), out var bind) ? bind(indicator) : null;
+
+    private static void Bind<T>(Dictionary<Type, Func<IIndicator, FastKernel?>> binders, Func<T, FastKernel?> bind)
+        where T : class, IIndicator => binders.Add(typeof(T), indicator => bind((T)indicator));
+
+    private static Dictionary<Type, Func<IIndicator, FastKernel?>> CreateBinders()
     {
-        if (indicator.Source is not null || indicator.Components.Count != 0) return null;
-        return indicator switch
-        {
-            Sma sma => (c, o) => FastKernels.Sma(c.Close, o[0], sma.Length),
-            FirstValueEma ema => (c, o) => FastKernels.FirstValueEma(c.Close, o[0], ema.Period),
-            SeededExponentialAverage seeded => (c, o) => FastKernels.SeededExponential(c.Close, o[0], seeded.Period,
-                seeded.Order, seeded.SeedMode == ExponentialSeedMode.Shared),
-            _ => null
-        };
+        var binders = new Dictionary<Type, Func<IIndicator, FastKernel?>>();
+        BindAverages(binders);
+        return binders;
+    }
+
+    private static void BindAverages(Dictionary<Type, Func<IIndicator, FastKernel?>> binders)
+    {
+        Bind<Sma>(binders, sma => (c, o) => FastKernels.Sma(c.Close, o[0], sma.Length));
+        Bind<FirstValueEma>(binders, ema => (c, o) => FastKernels.FirstValueEma(c.Close, o[0], ema.Period));
+        Bind<SeededExponentialAverage>(binders, seeded => (c, o) => FastKernels.SeededExponential(c.Close, o[0],
+            seeded.Period, seeded.Order, seeded.SeedMode == ExponentialSeedMode.Shared));
     }
 }
