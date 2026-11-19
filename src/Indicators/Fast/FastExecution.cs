@@ -123,6 +123,8 @@ internal static partial class FastExecution
         Bind<TripleExponentialRate>(binders, t => (c, o) => FastKernels.TripleRate(c.Close, o, t));
         Bind<PriorSeededDirectionalMeasure>(binders, t => (c, o) => FastKernels.Directional(c, o[0], o[1], t));
         Bind<WindowDispersion>(binders, t => (c, o) => FastKernels.Dispersion(c.Close, o[0], t));
+        Bind<SeededAdaptiveAverage>(binders, t => (c, o) => FastKernels.AdaptiveAverage(c.Close, o, t));
+        Bind<WindowLinearRegression>(binders, t => (c, o) => FastKernels.LinearRegression(c.Close, o[0], t));
         Bind<ClassicStochastic>(binders, t => !FastKernels.SupportsClassic(t.KMethod) || !FastKernels.SupportsClassic(t.DMethod)
             ? null : (c, o) => FastKernels.Stochastic(c, o, t));
     }
