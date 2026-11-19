@@ -146,6 +146,7 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<WindowDeviationBands>(binders, t => (c, o) => FastKernels.DeviationBands(c.Close, o, t));
         Bind<SineWeightedAverage>(binders, t => (c, o) => FastKernels.LagWeightedWindow(c.Close, o[0], FastKernels.SineWeights(t.Period)));
         Bind<GaussianWeightedAverage>(binders, t => (c, o) => FastKernels.LagWeightedWindow(c.Close, o[0], FastKernels.GaussianWeights(t.Period, t.Sigma)));
         Bind<TriangularWindowAverage>(binders, t => (c, o) => FastKernels.TriangularWindow(c.Close, o[0], t.Period));

@@ -283,4 +283,45 @@ internal static partial class FastKernels
             value[i] = force;
         }
     }
+
+    /// <summary>
+    /// Deviation bands around the window mean with the close's position between them, its z-score and the
+    /// band width over the mean. A flat window has no position or z-score, and a zero mean has no width.
+    /// </summary>
+    internal static void DeviationBands(ReadOnlySpan<double> close, double[][] outputs, WindowDeviationBands owner)
+    {
+        var n = close.Length;
+        var period = owner.Period;
+        var factor = owner.Factor;
+        var widthScale = owner.WidthAsPercent ? 200.0 : 2.0;
+        for (var slot = 0; slot < 12; slot++) outputs[slot].AsSpan().Clear();
+        if (n < period) return;
+        Span<double> middle = outputs[0].AsSpan(0, n), upper = outputs[1].AsSpan(0, n), lower = outputs[2].AsSpan(0, n),
+            position = outputs[3].AsSpan(0, n), score = outputs[4].AsSpan(0, n), width = outputs[5].AsSpan(0, n),
+            positionDefined = outputs[9].AsSpan(0, n), scoreDefined = outputs[10].AsSpan(0, n),
+            widthDefined = outputs[11].AsSpan(0, n);
+        var deviation = FastMath.Allocate(n);
+        Dispersion(close, deviation, new WindowDispersion(period, WindowDispersionOutput.StandardDeviation, false, 1));
+        Dispersion(close, score, new WindowDispersion(period, WindowDispersionOutput.ZScore, false, 1));
+        RebuiltMean(close, middle, period);
+        var first = period - 1;
+        score.Slice(0, first).Clear();
+        for (var slot = 6; slot < 9; slot++) outputs[slot].AsSpan(first, n - first).Fill(1);
+        for (var i = first; i < n; i++)
+        {
+            double center = middle[i], spread = deviation[i], half = factor * spread;
+            upper[i] = center + half;
+            lower[i] = center - half;
+            if (half != 0)
+            {
+                position[i] = (close[i] - center + half) / (2 * half);
+                positionDefined[i] = 1;
+            }
+            if (spread != 0) scoreDefined[i] = 1;
+            else score[i] = 0;
+            if (center == 0) continue;
+            width[i] = widthScale * half / center;
+            widthDefined[i] = 1;
+        }
+    }
 }
