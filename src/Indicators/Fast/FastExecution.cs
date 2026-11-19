@@ -143,6 +143,16 @@ internal static partial class FastExecution
         Bind<TripleExponentialRate>(binders, t => (c, o) => FastKernels.TripleRate(c.Close, o, t));
         Bind<PriorSeededDirectionalMeasure>(binders, t => (c, o) => FastKernels.Directional(c, o[0], o[1], t));
         Bind<WindowDispersion>(binders, t => (c, o) => FastKernels.Dispersion(c.Close, o[0], t));
+        Bind<WilderMovingAverage>(binders, t => (c, o) => FastKernels.WilderAverage(c.Close, o[0], t.Period, t.SeedWithAverage));
+        Bind<CompensatedExponentialAverage>(binders, t => (c, o) => FastKernels.CompensatedExponential(c.Close, o[0], t.Period, t.Order));
+        Bind<CandleArithmetic>(binders, t => (c, o) => FastKernels.CandleArithmetic(c, o[0], o[1], t));
+        Bind<WindowAroon>(binders, t => (c, o) => FastKernels.Aroon(c, o, t));
+        Bind<WindowExtremeIndex>(binders, t => (c, o) => FastKernels.RollingExtremeIndex(c.Close, o[0], t.Period, t.Maximum, true));
+        Bind<WindowRangeMidpoint>(binders, t => (c, o) =>
+        {
+            if (t.CandleRanges) FastKernels.RangeMidpoint(c.Low, c.High, o[0], t.Period);
+            else FastKernels.RangeMidpoint(c.Close, c.Close, o[0], t.Period);
+        });
         Bind<SeededAdaptiveAverage>(binders, t => (c, o) => FastKernels.AdaptiveAverage(c.Close, o, t));
         Bind<WindowLinearRegression>(binders, t => (c, o) => FastKernels.LinearRegression(c.Close, o[0], t));
         Bind<ClassicStochastic>(binders, t => !FastKernels.SupportsClassic(t.KMethod) || !FastKernels.SupportsClassic(t.DMethod)
