@@ -61,6 +61,7 @@ internal static partial class FastExecution
     {
         var binders = new Dictionary<Type, Func<IIndicator, FastKernel?>>();
         BindAverages(binders);
+        BindClassic(binders);
         return binders;
     }
 
@@ -70,5 +71,20 @@ internal static partial class FastExecution
         Bind<FirstValueEma>(binders, ema => (c, o) => FastKernels.FirstValueEma(c.Close, o[0], ema.Period));
         Bind<SeededExponentialAverage>(binders, seeded => (c, o) => FastKernels.SeededExponential(c.Close, o[0],
             seeded.Period, seeded.Order, seeded.SeedMode == ExponentialSeedMode.Shared));
+    }
+
+    private static void BindClassic(Dictionary<Type, Func<IIndicator, FastKernel?>> binders)
+    {
+        Bind<ClassicMovingAverage>(binders, average => !FastKernels.SupportsClassic(average.Method) ? null : (c, o) =>
+        {
+            FastKernels.ClassicAverage(c.Close, o[0], average, average.First);
+            FastKernels.DefinedFrom(o[1], average.First);
+        });
+        Bind<ClassicPriceOscillator>(binders, oscillator => !FastKernels.SupportsClassic(oscillator.Method) ? null
+            : (c, o) => FastKernels.PriceOscillator(c.Close, o[0], o[1], oscillator));
+        Bind<ClassicMacd>(binders, macd => !FastKernels.SupportsClassic(macd.FastAverage.Method)
+            || !FastKernels.SupportsClassic(macd.SlowAverage.Method) || !FastKernels.SupportsClassic(macd.SignalAverage.Method)
+            ? null : (c, o) => FastKernels.ClassicMacd(c.Close, o, macd));
+        Bind<AlignedEmaMacd>(binders, macd => (c, o) => FastKernels.AlignedMacd(c.Close, o, macd));
     }
 }
