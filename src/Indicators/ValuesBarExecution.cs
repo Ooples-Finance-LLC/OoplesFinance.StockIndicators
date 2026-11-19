@@ -116,6 +116,10 @@ internal static partial class ValuesBarExecution
                 latest = gpu.ExecutePointwise(source, [minimum.Values[0], maximum.Values[0]],
                     minimum.Indicator, cancellation, owned, maximum.Indicator);
             }
+            else if (indicators.Count == 1 && nodes.Count == 1 && source.Length >= 8192
+                && nodes[0].Indicator is SeededAdaptiveAverage seededAdaptive && seededAdaptive.Period < source.Length
+                && nodes[0].TryFillSeededAdaptive(source, cancellation, owned, out var adaptiveLatest))
+                latest = adaptiveLatest;
             else if (pointwiseBatch)
                 latest = FillPointwiseBatch(source, nodes, cancellation, owned);
             else if (nodes.Count == 1 && nodes[0].Indicator is TrueRange)
@@ -1017,6 +1021,14 @@ internal static partial class ValuesBarExecution
                 // matching the finite builder's input-before-output validation order.
                 Failure = ExceptionDispatchInfo.Capture(error);
             }
+        }
+        internal bool TryFillSeededAdaptive(Bar[] source, CancellationToken cancellation,
+            OwnedBarBuffer? owned, out Bar latest)
+        {
+            latest = default;
+            if (_state is not SeededAdaptiveValueState state) return false;
+            latest = state.FillBatch(source, Values, cancellation, owned, CaptureFailure);
+            return true;
         }
         internal bool TryFillPriorDirectional(Bar[] source, CancellationToken cancellation,
             OwnedBarBuffer? owned, out Bar latest)
