@@ -84,4 +84,203 @@ internal static partial class FastKernels
             lower[i] = center - spread * lowerFactor;
         }
     }
+
+    /// <summary>
+    /// Close minus the close <c>period</c> bars back, as a difference, a fraction or percentage of the old
+    /// close, a ratio, or only its rising or falling part. A zero old close publishes zero for the quotients.
+    /// </summary>
+    internal static void LaggedChange(ReadOnlySpan<double> close, Span<double> output, LaggedPriceChange owner)
+    {
+        var n = close.Length;
+        output = output.Slice(0, n);
+        var period = owner.Period;
+        var start = Math.Min(period, n);
+        output.Slice(0, start).Clear();
+        if (start == n) return;
+        ReadOnlySpan<double> current = close.Slice(start), previous = close.Slice(0, n - start);
+        var tail = output.Slice(start);
+        switch (owner.Kind)
+        {
+            case PriceChangeKind.Difference:
+                FastMath.Subtract(current, previous, tail);
+                break;
+            case PriceChangeKind.Gain:
+                for (var i = 0; i < tail.Length; i++) tail[i] = current[i] > previous[i] ? current[i] - previous[i] : 0;
+                break;
+            case PriceChangeKind.Loss:
+                for (var i = 0; i < tail.Length; i++) tail[i] = current[i] < previous[i] ? previous[i] - current[i] : 0;
+                break;
+            case PriceChangeKind.Ratio:
+                for (var i = 0; i < tail.Length; i++) tail[i] = previous[i] == 0 ? 0 : current[i] / previous[i];
+                break;
+            case PriceChangeKind.RatioPercent:
+                for (var i = 0; i < tail.Length; i++) tail[i] = previous[i] == 0 ? 0 : current[i] * 100 / previous[i];
+                break;
+            case PriceChangeKind.Percent:
+                for (var i = 0; i < tail.Length; i++)
+                    tail[i] = previous[i] == 0 ? 0 : (current[i] - previous[i]) * 100 / previous[i];
+                break;
+            default:
+                for (var i = 0; i < tail.Length; i++)
+                    tail[i] = previous[i] == 0 ? 0 : (current[i] - previous[i]) / previous[i];
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Acceleration bands: window means of the high widened, and the low narrowed, by four times the bar's
+    /// range over its high-low sum, around the window mean of the close.
+    /// </summary>
+    internal static void AccelerationBands(FastColumns columns, double[][] outputs, RangeAccelerationBands owner)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> high = columns.High, low = columns.Low;
+        var n = high.Length;
+        var period = owner.Period;
+        double[] raised = FastMath.Allocate(n), lowered = FastMath.Allocate(n);
+        for (var i = 0; i < n; i++)
+        {
+            double h = high[i], l = low[i], sum = h + l;
+            if (sum == 0)
+            {
+                raised[i] = h;
+                lowered[i] = l;
+                continue;
+            }
+            var spread = 4 * (h - l);
+            raised[i] = h * (sum + spread) / sum;
+            lowered[i] = l * (sum - spread) / sum;
+        }
+        RebuiltMean(raised, outputs[0].AsSpan(0, n), period);
+        RebuiltMean(columns.Close, outputs[1].AsSpan(0, n), period);
+        RebuiltMean(lowered, outputs[2].AsSpan(0, n), period);
+        for (var slot = 3; slot < 6; slot++) DefinedFrom(outputs[slot], period - 1L);
+    }
+
+    // Rolling mean whose sum is rebuilt from the window at intervals, so it cannot drift on a long series.
+    private static void RebuiltMean(ReadOnlySpan<double> input, Span<double> output, int period)
+    {
+        var n = input.Length;
+        double sum = 0;
+        for (var i = 0; i < n; i++)
+        {
+            if (i >= period && (i & RebuildMask) == 0)
+            {
+                sum = 0;
+                for (var j = i - period + 1; j <= i; j++) sum += input[j];
+            }
+            else
+                sum += i >= period ? input[i] - input[i - period] : input[i];
+            output[i] = i < period - 1 ? 0 : sum / period;
+        }
+    }
+
+    /// <summary>
+    /// True strength index: the one-bar change and its magnitude, each smoothed twice with mean-seeded
+    /// exponential averages, as a percentage ratio, with a mean-seeded signal average. A zero denominator
+    /// publishes nothing and ends the signal.
+    /// </summary>
+    internal static void TrueStrength(ReadOnlySpan<double> close, double[][] outputs, SeededTrueStrength owner)
+    {
+        var n = close.Length;
+        int period = owner.Period, smooth = owner.SmoothPeriod, signalPeriod = owner.SignalPeriod;
+        Span<double> strength = outputs[0].AsSpan(0, n), signal = outputs[1].AsSpan(0, n),
+            strengthDefined = outputs[2].AsSpan(0, n), signalDefined = outputs[3].AsSpan(0, n);
+        strength.Clear();
+        signal.Clear();
+        strengthDefined.Clear();
+        signalDefined.Clear();
+        long secondStart = (long)period + smooth - 1, seedIndex = secondStart + signalPeriod - 1;
+        double signed = 0, absolute = 0, secondSigned = 0, secondAbsolute = 0, sumSigned = 0, sumAbsolute = 0;
+        double seedSignal = 0, line = 0;
+        bool signalMissing = false, hasLine = false;
+        for (var i = 1; i < n; i++)
+        {
+            var change = close[i] - close[i - 1];
+            var magnitude = Math.Abs(change);
+            if (i <= period)
+            {
+                sumSigned += change;
+                sumAbsolute += magnitude;
+                if (i == period)
+                {
+                    // The first stage's seed is also the first term of the second stage's seed.
+                    sumSigned = signed = sumSigned / period;
+                    sumAbsolute = absolute = sumAbsolute / period;
+                }
+                continue;
+            }
+            signed = (signed * (period - 1) + 2 * change) / (period + 1.0);
+            absolute = (absolute * (period - 1) + 2 * magnitude) / (period + 1.0);
+            if (i <= secondStart)
+            {
+                sumSigned += signed;
+                sumAbsolute += absolute;
+                if (i < secondStart) continue;
+                secondSigned = sumSigned / smooth;
+                secondAbsolute = sumAbsolute / smooth;
+            }
+            else
+            {
+                secondSigned = (secondSigned * (smooth - 1) + 2 * signed) / (smooth + 1.0);
+                secondAbsolute = (secondAbsolute * (smooth - 1) + 2 * absolute) / (smooth + 1.0);
+            }
+            var present = secondAbsolute != 0;
+            var value = present ? 100 * secondSigned / secondAbsolute : 0;
+            if (present)
+            {
+                strength[i] = value;
+                strengthDefined[i] = 1;
+            }
+            if (i == secondStart)
+            {
+                signalMissing = !present;
+                seedSignal = value;
+                continue;
+            }
+            if (signalPeriod <= 1) continue;
+            if (i <= seedIndex)
+            {
+                if (present) seedSignal += value;
+                else signalMissing = true;
+                if (i == seedIndex && !signalMissing)
+                {
+                    line = seedSignal / signalPeriod;
+                    hasLine = true;
+                }
+            }
+            else if (hasLine && present)
+                line = (line * (signalPeriod - 1) + 2 * value) / (signalPeriod + 1.0);
+            else
+                hasLine = false;
+            if (!hasLine) continue;
+            signal[i] = line;
+            signalDefined[i] = 1;
+        }
+    }
+
+    /// <summary>
+    /// Force index: the one-bar change times the volume, as a mean-seeded exponential average.
+    /// </summary>
+    internal static void ForceIndex(FastColumns columns, Span<double> value, Span<double> defined, int period)
+    {
+        ReadOnlySpan<double> close = columns.Close, volume = columns.Volume;
+        var n = close.Length;
+        value = value.Slice(0, n);
+        DefinedFrom(defined.Slice(0, n), period);
+        var seeded = (int)Math.Min((long)period + 1, n);
+        value.Slice(0, Math.Min(period, n)).Clear();
+        double sum = 0;
+        for (var i = 1; i < seeded; i++) sum += (close[i] - close[i - 1]) * volume[i];
+        if (n <= period) return;
+        var force = sum / period;
+        value[period] = force;
+        var alpha = 2.0 / (period + 1.0);
+        var weight = (period - 1.0) / (period + 1.0);
+        for (var i = period + 1; i < n; i++)
+        {
+            force = FastMath.Blend(weight, force, alpha * ((close[i] - close[i - 1]) * volume[i]));
+            value[i] = force;
+        }
+    }
 }
