@@ -96,5 +96,7 @@ internal static partial class FastExecution
         Bind<NormalizedSeededAverageTrueRange>(binders, atr => (c, o) =>
             FastKernels.SeededAverageTrueRange(c.High, c.Low, c.Close, o[0], atr.Period, true));
         Bind<SmoothedAccumulationOscillator>(binders, oscillator => (c, o) => FastKernels.SmoothedAccumulation(c, o, oscillator));
+        Bind<WilderStrengthOscillator>(binders, strength => (c, o) => FastKernels.WilderStrength(c.Close, o[0], o[1],
+            strength.Period, strength.Convention, strength.UnstablePeriods));
     }
 }
