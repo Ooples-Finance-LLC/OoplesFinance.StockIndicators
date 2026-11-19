@@ -392,4 +392,50 @@ internal static partial class FastKernels
         }
         return 0;
     }
+
+
+    /// <summary>
+    /// Least-squares line through the window (the bars so far while it fills): slope, intercept, the
+    /// window's standard deviation, r-squared and the line's value at the newest bar. Each window is
+    /// measured from its own newest price, so nothing drifts and a flat window is exactly flat.
+    /// </summary>
+    internal static void RegressionStatistics(ReadOnlySpan<double> close, double[][] outputs, int period)
+    {
+        var n = close.Length;
+        for (var slot = 0; slot < 10; slot++) outputs[slot].AsSpan(0, n).Clear();
+        outputs[5].AsSpan(0, n).Fill(1);
+        if (n < 2) return;
+        for (var slot = 6; slot < 10; slot++)
+            if (slot != 8) outputs[slot].AsSpan(1, n - 1).Fill(1);
+        Span<double> slopes = outputs[0], intercepts = outputs[1], deviations = outputs[2], fit = outputs[3],
+            line = outputs[4], fitDefined = outputs[8];
+        for (var i = 1; i < n; i++)
+        {
+            var count = Math.Min(period, i + 1);
+            var window = close.Slice(i - count + 1, count);
+            var anchor = window[count - 1];
+            double sum = 0;
+            for (var j = 0; j < count; j++) sum += window[j] - anchor;
+            var mean = sum / count;
+            var center = (count + 1) * .5;
+            // The sum of squared centred positions 1..count.
+            var xx = count * ((double)count * count - 1) / 12;
+            double yy = 0, xy = 0;
+            for (var j = 0; j < count; j++)
+            {
+                var y = window[j] - anchor - mean;
+                yy += y * y;
+                xy += (j + 1 - center) * y;
+            }
+            var slope = xy / xx;
+            var level = anchor + mean;
+            slopes[i] = slope;
+            intercepts[i] = level - slope * center;
+            deviations[i] = Math.Sqrt(yy / count);
+            line[i] = level + slope * (count - center);
+            if (yy == 0) continue;
+            fit[i] = xy / xx * (xy / yy);
+            fitDefined[i] = 1;
+        }
+    }
 }
