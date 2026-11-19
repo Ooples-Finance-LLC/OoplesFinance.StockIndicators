@@ -26,14 +26,40 @@ public sealed class SincGridBatchTests
     }
 
     [Theory]
-    [InlineData(21, 125, false)] [InlineData(21, 145, false)]
-    [InlineData(21, 148, false)] [InlineData(21, 149, true)]
-    [InlineData(64, 191, false)] [InlineData(64, 192, true)]
-    [InlineData(65, 500, false)]
-    public void FundedCountGuardSelectsBeforeAllocatingWrapperStorage(int taps, int count, bool selected)
+    [InlineData(1000, 21, 125, false)] [InlineData(1000, 21, 145, false)]
+    [InlineData(1000, 21, 250, false)] [InlineData(1000, 21, 270, false)]
+    [InlineData(1000, 21, 1000, false)] [InlineData(2047, 21, 149, false)]
+    [InlineData(2048, 21, 148, false)] [InlineData(2048, 21, 149, true)]
+    [InlineData(2048, 64, 191, false)] [InlineData(2048, 64, 192, true)]
+    [InlineData(2048, 65, 500, false)]
+    public void FundedCountGuardSelectsBeforeAllocatingWrapperStorage(int totalCount, int taps, int count, bool selected)
     {
-        var state = CreateKernelState(new WindowedSinc(100, taps), count, new double[count], 0, 0);
+        var state = CreateKernelState(new WindowedSinc(100, taps), count, new double[totalCount], 0, 0);
         Assert.Equal(selected ? "SincGridBatchState" : "CompactState", state.GetType().Name);
+    }
+
+    [Theory]
+    [InlineData(1000, 1, false)] [InlineData(1000, 4, false)] [InlineData(1000, 8, false)]
+    [InlineData(10000, 1, true)] [InlineData(10000, 4, true)] [InlineData(10000, 8, true)]
+    public void ActualWorkerGeometryParksOneThousandAndSelectsTenThousand(int count, int configuredWorkers, bool selected)
+    {
+        int prior = CpuParallelSettings.MaxDegreeOfParallelism;
+        try
+        {
+            CpuParallelSettings.MaxDegreeOfParallelism = configuredWorkers;
+            var method = typeof(ValuesBarExecution).GetMethod("WorkerCount", BindingFlags.NonPublic | BindingFlags.Static)!;
+            int chunks = (int)method.Invoke(null, [8])!;
+            Assert.InRange(chunks, 1, Math.Min(configuredWorkers, Environment.ProcessorCount));
+            var output = new double[count];
+            for (int chunk = 0; chunk < chunks; chunk++)
+            {
+                int start = (int)((long)count * chunk / chunks), end = (int)((long)count * (chunk + 1) / chunks);
+                int origin = Math.Max(0, start - 20);
+                var state = CreateKernelState(new WindowedSinc(20, 21), end - origin, output, origin, start);
+                Assert.Equal(selected ? "SincGridBatchState" : "CompactState", state.GetType().Name);
+            }
+        }
+        finally { CpuParallelSettings.MaxDegreeOfParallelism = prior; }
     }
 
     [Theory]
@@ -49,11 +75,14 @@ public sealed class SincGridBatchTests
     }
 
     [Theory]
-    [InlineData(0, 0)] [InlineData(41, 61)]
-    public void ShiftedOriginCountAndWriteStartPublishEachOwnedRowAndResetExactly(int origin, int writeStart)
+    [InlineData(0, 0, 149)] [InlineData(41, 61, 149)]
+    [InlineData(0, 0, 150)] [InlineData(41, 61, 150)]
+    [InlineData(0, 0, 277)] [InlineData(41, 61, 277)]
+    [InlineData(0, 0, 278)] [InlineData(41, 61, 278)]
+    [InlineData(0, 0, 406)] [InlineData(41, 61, 406)]
+    public void ShiftedOriginCountAndWriteStartPublishEachOwnedRowAndResetExactly(int origin, int writeStart, int count)
     {
-        const int count = 405;
-        var bars = Fixture(origin + count + 17);
+        var bars = Fixture(2048);
         var output = Enumerable.Repeat(double.NaN, bars.Length).ToArray();
         var indicator = new WindowedSinc(20, 21);
         var state = CreateKernelState(indicator, count, output, origin, writeStart);
@@ -147,7 +176,7 @@ public sealed class SincGridBatchTests
     [InlineData(100, 65, SincWindow.Hann)]
     public async Task KernelBoundaryAndFallbackCasesMatchIndependentRationals(int period, int taps, SincWindow window)
     {
-        await Check(Fixture(1601), new WindowedSinc(period, taps, window));
+        await Check(Fixture(2048), new WindowedSinc(period, taps, window));
     }
 
     [Fact]
@@ -157,7 +186,7 @@ public sealed class SincGridBatchTests
         try
         {
             CpuParallelSettings.MaxDegreeOfParallelism = 1;
-            var bars = Fixture(601);
+            var bars = Fixture(2048);
             var indicator = new WindowedSinc(20, 21);
             var builder = Build(bars, indicator, IndicatorHistoryMode.Full);
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => builder.BuildAsync(new CancellationToken(true)));
