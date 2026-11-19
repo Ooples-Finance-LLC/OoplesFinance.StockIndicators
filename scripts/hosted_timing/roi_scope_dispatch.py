@@ -1,7 +1,7 @@
 """Keep legacy and family diagnostic scopes independently pinned."""
 def validate_scope(plan):
     kind = plan.get("diagnostic_kind")
-    if kind == "kama-fused-prefix-v2-native-pilot":
+    if kind == "kama-fused-prefix-v3-native-pilot":
         from .kama_fused_prefix_roi import validate_scope as check
     elif kind == "analytic-grid-native-pilot":
         from .analytic_grid_roi import validate_scope as check
