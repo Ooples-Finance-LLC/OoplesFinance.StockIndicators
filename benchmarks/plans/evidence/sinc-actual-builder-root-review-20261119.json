@@ -1,0 +1,22 @@
+{
+  "status": "root-independent-actual-builder-proof-authenticated",
+  "source": "75259781f6efcd7d4403ae2b761790d0ca7e41cd",
+  "run_id": "44456211036",
+  "source_fingerprint": "b897b80c70c92817cafe93b541d74230125ee8eb142302d1b2a7f38e1bc0c62f",
+  "cpu_root_review_sha256": "c13265d1e03624b3cfb50346a846df73947b954cadfacc57005b9cd585419400",
+  "gpu_root_review_sha256": "649cfd6ab4d5f062622770f1d212e0eef16a32eb02f025dc94a38b49ab12d11e",
+  "helper_sha256": "3bb922a13bf6a4b876966a0bc5fe69ee3eec50abae6f8f0848ca8dfaf3575e3d",
+  "proof_sha256": "b7a70c17cb00b5d32dbd178e50e7861ee146c4dadf61b09434938f0d13821439",
+  "receipt_sha256": "9c5213e45b54a4580df671692d9972473f60bc1f2a6f0147727db1694efc65bc",
+  "core_sha256": "001dfaa5f96d48d4a4c0a61a6e3dde16e2da914fab26118890901e743fb6b775",
+  "actual_harness_sha256": "a2b00bae9e385e47884f6aba34c9aef549902cc95c7aaf52ea31d00793c29c56",
+  "full_outputs_equal_original_both_modes": true,
+  "bars": 10000,
+  "actual_local_worker_chunks": 8,
+  "hosted_worker_count_not_inferred": true,
+  "independently_checked_handoff_and_output_hashes": true,
+  "new_builds": 0,
+  "new_timings": 0,
+  "qualified": false,
+  "closure_credit": 0
+}

@@ -66,6 +66,10 @@ def collect(folder, phase):
         assert phase == 'targeted'
         from .analytic_grid_qualification import collect as analytic_qualify
         return analytic_qualify(folder)
+    elif read(PLAN).get('diagnostic_kind') == 'sinc-original-startup-native-pilot':
+        assert phase == 'diagnostic'
+        from .sinc_original_startup_roi import collect as sinc_collect
+        return sinc_collect(folder)
     elif read(PLAN).get('diagnostic_kind') == 'analytic-grid-native-pilot':
         assert phase == 'diagnostic'
         from .analytic_grid_roi import collect as analytic_grid_collect

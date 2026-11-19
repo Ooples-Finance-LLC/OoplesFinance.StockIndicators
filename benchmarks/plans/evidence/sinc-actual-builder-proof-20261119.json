@@ -1,0 +1,124 @@
+{
+  "period": 20,
+  "fixture_hash": "814ad816b7db39c23240d4999f9b4dc6f793f184af08ddb56f2a415af40c757f",
+  "setup_calls": 0,
+  "factory_calls": 1,
+  "calls": [
+    {
+      "run_type": "OoplesFinance.StockIndicators.Indicators.IndicatorRun",
+      "method": "BuilderFull",
+      "output_sha256": "b319fa2ed5278ec984e4a8a4141643c13a00b1eb44b294f8068f55981c17b2f2",
+      "bar_count": 10000
+    },
+    {
+      "run_type": "OoplesFinance.StockIndicators.Indicators.ScalarLatestOnlyIndicatorRun",
+      "method": "BuilderLatestOnly",
+      "output_sha256": "b319fa2ed5278ec984e4a8a4141643c13a00b1eb44b294f8068f55981c17b2f2",
+      "bar_count": 10000
+    }
+  ],
+  "local_builds": 0,
+  "core_sha256": "001dfaa5f96d48d4a4c0a61a6e3dde16e2da914fab26118890901e743fb6b775",
+  "actual_worker_chunks": 8,
+  "fixture_dop": 8,
+  "timings": 0,
+  "window": "Hann",
+  "taps": 21,
+  "reference_output_sha256": "b319fa2ed5278ec984e4a8a4141643c13a00b1eb44b294f8068f55981c17b2f2",
+  "reference": "unchanged original CompactState",
+  "region_eligibility": [
+    {
+      "origin": 0,
+      "write_start": 21,
+      "count": 1250,
+      "batch_count": 1249,
+      "end": 1250,
+      "start": 0,
+      "batch_origin": 1,
+      "seeded": 20,
+      "certified": true
+    },
+    {
+      "origin": 1230,
+      "write_start": 1251,
+      "count": 1270,
+      "batch_count": 1269,
+      "end": 2500,
+      "start": 1250,
+      "batch_origin": 1231,
+      "seeded": 20,
+      "certified": true
+    },
+    {
+      "origin": 2480,
+      "write_start": 2501,
+      "count": 1270,
+      "batch_count": 1269,
+      "end": 3750,
+      "start": 2500,
+      "batch_origin": 2481,
+      "seeded": 20,
+      "certified": true
+    },
+    {
+      "origin": 3730,
+      "write_start": 3751,
+      "count": 1270,
+      "batch_count": 1269,
+      "end": 5000,
+      "start": 3750,
+      "batch_origin": 3731,
+      "seeded": 20,
+      "certified": true
+    },
+    {
+      "origin": 4980,
+      "write_start": 5001,
+      "count": 1270,
+      "batch_count": 1269,
+      "end": 6250,
+      "start": 5000,
+      "batch_origin": 4981,
+      "seeded": 20,
+      "certified": true
+    },
+    {
+      "origin": 6230,
+      "write_start": 6251,
+      "count": 1270,
+      "batch_count": 1269,
+      "end": 7500,
+      "start": 6250,
+      "batch_origin": 6231,
+      "seeded": 20,
+      "certified": true
+    },
+    {
+      "origin": 7480,
+      "write_start": 7501,
+      "count": 1270,
+      "batch_count": 1269,
+      "end": 8750,
+      "start": 7500,
+      "batch_origin": 7481,
+      "seeded": 20,
+      "certified": true
+    },
+    {
+      "origin": 8730,
+      "write_start": 8751,
+      "count": 1270,
+      "batch_count": 1269,
+      "end": 10000,
+      "start": 8750,
+      "batch_origin": 8731,
+      "seeded": 20,
+      "certified": true
+    }
+  ],
+  "status": "actual-builder-correctness-proof-only",
+  "oopless_calls": 0,
+  "harness_sha256": "a2b00bae9e385e47884f6aba34c9aef549902cc95c7aaf52ea31d00793c29c56",
+  "builder_calls": 2,
+  "profiles": 0
+}
