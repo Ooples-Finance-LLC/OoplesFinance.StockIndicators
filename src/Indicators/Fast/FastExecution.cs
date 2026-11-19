@@ -143,6 +143,9 @@ internal static partial class FastExecution
         Bind<TripleExponentialRate>(binders, t => (c, o) => FastKernels.TripleRate(c.Close, o, t));
         Bind<PriorSeededDirectionalMeasure>(binders, t => (c, o) => FastKernels.Directional(c, o[0], o[1], t));
         Bind<WindowDispersion>(binders, t => (c, o) => FastKernels.Dispersion(c.Close, o[0], t));
+        Bind<EmaDifferenceSignal>(binders, t => (c, o) => FastKernels.EmaDifference(c, o, t));
+        Bind<WindowCommodityChannelIndex>(binders, t => (c, o) => FastKernels.CommodityChannel(c, o[0], o[1], t));
+        Bind<WindowMoneyFlowIndex>(binders, t => (c, o) => FastKernels.MoneyFlow(c, o[0], o[1], t));
         Bind<WilderMovingAverage>(binders, t => (c, o) => FastKernels.WilderAverage(c.Close, o[0], t.Period, t.SeedWithAverage));
         Bind<CompensatedExponentialAverage>(binders, t => (c, o) => FastKernels.CompensatedExponential(c.Close, o[0], t.Period, t.Order));
         Bind<CandleArithmetic>(binders, t => (c, o) => FastKernels.CandleArithmetic(c, o[0], o[1], t));
