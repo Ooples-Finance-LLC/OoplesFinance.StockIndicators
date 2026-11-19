@@ -146,6 +146,8 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<SeededPriceMomentum>(binders, t => (c, o) => FastKernels.PriceMomentum(c.Close, o, t));
+        Bind<ClassicDeviationBands>(binders, t => !FastKernels.SupportsClassic(t.Method) ? null : (c, o) => FastKernels.ClassicBands(c.Close, o, t));
         Bind<SeededAtrTrailingStop>(binders, t => (c, o) => FastKernels.AtrTrailingStop(c, o, t));
         Bind<RollingPriceSum>(binders, t => (c, o) => FastKernels.RollingSum(c.Close, o[0], t.Period));
         Bind<ReverseWilderAverage>(binders, t => (c, o) => FastKernels.ReverseWilder(c.Close, o[0], t.Period));
