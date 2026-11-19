@@ -32,8 +32,8 @@ def filters(fixture, pair, methods, *, implicit=False, variant=False, variance=F
     if tuple(counts)==(10000,):
         assert fixture=='LibraryPairBenchmarks' and not (implicit or variant or variance)
         return [pattern for method in methods for pattern in (
-            f'*{fixture}.{method}*"{pair}"*Count: 10000)*',
-            f'*{fixture}.{method}*Count: 10000,*"{pair}"*')]
+            f'*{fixture}.{method}*"{pair}"*Bars: 10000)*',
+            f'*{fixture}.{method}*Bars: 10000,*"{pair}"*')]
     if fixture == 'SharedPointwiseBenchmarks':
         assert not (implicit or variant or variance)
         # This existing fixture also declares 100,000 bars. Preserve the

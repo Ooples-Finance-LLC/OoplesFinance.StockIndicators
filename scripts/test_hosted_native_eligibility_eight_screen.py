@@ -1,9 +1,9 @@
 """Focused held-screen and shared default-count regression checks; no builds/timing."""
-import ast,copy,fnmatch,inspect,json,unittest
+import ast,copy,fnmatch,inspect,json,re,unittest
 from pathlib import Path
 from unittest import mock
 from hosted_timing import native_eligibility_eight_screen as q,pipeline,checkpoints,baseline_refresh_dispatch as dispatch,verify
-PLAN=q.p.REPO/'benchmarks/plans/hosted-current-native-eight-screen-20261118.json'
+PLAN=q.p.REPO/'benchmarks/plans/hosted-current-native-eight-bars-screen-20261119.json'
 
 class NativeEightScreenTests(unittest.TestCase):
     def plan(self):return json.loads(PLAN.read_bytes())
@@ -13,12 +13,12 @@ class NativeEightScreenTests(unittest.TestCase):
         decisions=[dict(pair=pair,bars=10000,fixture='LibraryPairBenchmarks',method='Ooples',verdict='inconclusive') for pair in q.PAIRS]
         return rows,decisions
     def case(self,count,method='Ooples'):
-        return dict(FullName=f'LibraryPairBenchmarks.{method}(PairId: "{q.PAIRS[0]}", Count: {count})',Method=method,Statistics=dict(N=7))
+        return dict(FullName=f'LibraryPairBenchmarks.{method}(PairId: "{q.PAIRS[0]}", Bars: {count})',Method=method,Statistics=dict(N=7))
     def test_held_scope_and_honest_reused_cohort(self):
         plan=self.plan();q.validate_scope(plan,require_ready=False)
         self.assertEqual((plan['cases'],plan['decisions']),(40,8))
-        self.assertEqual((plan['old_candidate']['unit_passed'],plan['old_candidate']['parity_passed']),(55,8))
-        self.assertEqual(plan['old_candidate']['unit_classes'],q.baseline.BASE_UNIT)
+        self.assertEqual((plan['old_candidate']['unit_passed'],plan['old_candidate']['parity_passed']),(18,55))
+        self.assertEqual(plan['old_candidate']['unit_classes'],q.baseline_record()['unit_classes'])
         self.assertFalse(plan['reused_correctness_scope']['new_selected_pair_cohort'])
         held=copy.deepcopy(plan);held.update(inputs_ready=False,parent_review_approved=False)
         with self.assertRaisesRegex(AssertionError,'UNBOUND'):q.validate_scope(held)
@@ -29,7 +29,7 @@ class NativeEightScreenTests(unittest.TestCase):
             lambda p:p['old_candidate']['unit_classes'].append('DirectionalTests'),
             lambda p:p['reused_correctness_scope'].update(new_selected_pair_cohort=True),
             lambda p:p.update(profile_in_this_plan=True),lambda p:p['sources'].update(successor=q.baseline.NEW),
-            lambda p:p['published_baseline'].update(head='0'*40)]
+            lambda p:p['published_baseline'].update(head='0'*40),lambda p:p.update(execution_nonce='old'),lambda p:p['selector_preflight'].update(parameter='Count')]
         for mutate in mutations:
             plan=self.plan();mutate(plan)
             with self.assertRaises(AssertionError):q.validate_scope(plan,require_ready=False)
@@ -42,7 +42,7 @@ class NativeEightScreenTests(unittest.TestCase):
         with self.assertRaises(AssertionError):q.verify_registry_data(rows+[rows[0]])
     def test_ten_thousand_filters_match_both_orders_without_extra_sizes(self):
         patterns=checkpoints.filters('LibraryPairBenchmarks',q.PAIRS[0],['Ooples'],counts=[10000])
-        for name in (f'LibraryPairBenchmarks.Ooples(PairId: "{q.PAIRS[0]}", Count: 10000)',f'LibraryPairBenchmarks.Ooples(Count: 10000, PairId: "{q.PAIRS[0]}")'):
+        for name in (f'LibraryPairBenchmarks.Ooples(PairId: "{q.PAIRS[0]}", Bars: 10000)',f'LibraryPairBenchmarks.Ooples(Bars: 10000, PairId: "{q.PAIRS[0]}")'):
             self.assertTrue(any(fnmatch.fnmatchcase(name,p) for p in patterns))
         for count in (1000,100000):
             self.assertFalse(any(fnmatch.fnmatchcase(self.case(count)['FullName'],p) for p in patterns))
@@ -57,6 +57,32 @@ class NativeEightScreenTests(unittest.TestCase):
         with self.assertRaises(AssertionError):checkpoints.combine_reports([dict(Benchmarks=[self.case(100000)])],[pair],['Ooples'],counts=[10000])
         bad=copy.deepcopy(one);bad['Benchmarks'][0]['Statistics']['N']=6
         with self.assertRaises(AssertionError):checkpoints.combine_reports([bad],[pair],['Ooples'],counts=[10000])
+    def test_size_parameter_is_derived_from_the_frozen_fixture(self):
+        source=q.baseline.blob(q.SOURCE,'benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/LibraryPairBenchmarks.cs').decode()
+        parameter=re.search(r'\[Params\(1_000,\s*10_000\)\]\s+public int (\w+)',source)[1]
+        self.assertEqual(parameter,'Bars')
+        patterns=checkpoints.filters('LibraryPairBenchmarks',q.PAIRS[0],['Ooples'],counts=[10000])
+        actual=f'LibraryPairBenchmarks.Ooples(PairId: "{q.PAIRS[0]}", {parameter}: 10000)'
+        self.assertTrue(any(fnmatch.fnmatchcase(actual,pattern) for pattern in patterns))
+        self.assertFalse(any(fnmatch.fnmatchcase(actual.replace('Bars:','Count:'),pattern) for pattern in patterns))
+    def test_compiled_selection_preflight_contract_and_tamper(self):
+        plan=self.plan();calls=[]
+        source=q.baseline.blob(q.SOURCE,'benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/LibraryPairBenchmarks.cs').decode()
+        parameter=re.search(r'\[Params\(1_000,\s*10_000\)\]\s+public int (\w+)',source)[1]
+        def listing(command,**kwargs):
+            calls.append(command);self.assertEqual(command[2:5],['--list','flat','--filter'])
+            text=' '.join(command[5:])
+            if '__UNREGISTERED_SELECTOR_CONTROL__' in text or f'{parameter}: 100000' in text:return ''
+            self.assertTrue(all(f'{parameter}: 10000' in pattern for pattern in command[5:]))
+            method=re.search(r'LibraryPairBenchmarks\.(Ooples|Competitor)',text)[1]
+            return 'OoplesFinance.StockIndicators.CompetitorBenchmarks.LibraryPairBenchmarks.'+method+'\n'
+        with mock.patch.object(q.p,'digest',return_value=plan['old_candidate']['actual_harness_sha256']):
+            data=q.record_selection_inventory(Path('unused-runtime'),plan,runner=listing)
+        self.assertEqual(len(calls),18);self.assertEqual(len(data['selected']),16);self.assertEqual(len(data['negative_controls']),2)
+        for mutate in (lambda d:d['selected'][0].update(bars=1000),lambda d:d['selected'][0].update(listing=''),
+                       lambda d:d.update(harness_sha256='0'*64),lambda d:d['negative_controls'][0].update(listing=data['selected'][0]['listing'])):
+            changed=copy.deepcopy(data);mutate(changed)
+            with self.assertRaises(AssertionError):q.verify_selection_data(changed,plan)
     def test_count_override_is_exclusive_and_bound_into_checkpoint_context(self):
         plan=self.plan();task=q.shards()[0]['tasks'][0]
         self.assertEqual(pipeline.benchmark_counts(plan,task),(10000,))
@@ -115,14 +141,42 @@ class NativeEightScreenTests(unittest.TestCase):
         alias.assert_called_once();forbidden.assert_not_called()
     def test_held_prepare_stops_before_current_api_sdk_or_artifacts(self):
         plan=self.plan();plan.update(inputs_ready=False,parent_review_approved=False)
-        with mock.patch.object(q.p,'read',return_value=plan),mock.patch.object(q.baseline,'verify_current_publication') as current,mock.patch.object(q.baseline,'checked_inputs') as inputs:
+        with mock.patch.object(q.p,'read',return_value=plan),mock.patch.object(q,'verify_current_publication') as current,mock.patch.object(q.baseline,'checked_inputs') as inputs:
             with self.assertRaisesRegex(AssertionError,'UNBOUND'):q.prepare('unused','unused-out')
         current.assert_not_called();inputs.assert_not_called()
+    def test_current_publication_uses_48d_binding_and_rejects_a_changed_head(self):
+        plan=self.plan();binding=plan['published_baseline']
+        actual=dict(head=dict(sha=binding['head'],ref=binding['branch']))
+        with mock.patch.object(q,'verify_published_baseline') as frozen,mock.patch.object(q.subprocess,'check_output',return_value=json.dumps(actual)) as api:
+            self.assertEqual(q.verify_current_publication(plan),binding)
+            frozen.assert_called_once_with(plan)
+            self.assertEqual(api.call_args.args[0],['gh','api','repos/Ooples-Finance-LLC/OoplesFinance.StockIndicators/pulls/266'])
+            actual['head']['sha']='0'*40;api.return_value=json.dumps(actual)
+            with self.assertRaisesRegex(AssertionError,'Published PR head changed'):q.verify_current_publication(plan)
+    def test_historical_publication_replay_is_offline_and_bound_to_48d_cde(self):
+        plan=self.plan();proof=dict(published_baseline=copy.deepcopy(plan['published_baseline']))
+        with mock.patch.object(q,'verify_current_publication',side_effect=AssertionError('live lookup')),mock.patch.object(q.baseline,'verify_published_baseline',side_effect=AssertionError('Renko d9 helper')):
+            q.verify_publication_provenance(plan,proof)
+            proof['published_baseline']['head']='0'*40
+            with self.assertRaisesRegex(AssertionError,'Captured publication binding mismatch'):q.verify_publication_provenance(plan,proof)
+        changed=copy.deepcopy(plan);changed['published_baseline']['source_fingerprint']='0'*64
+        with self.assertRaises(AssertionError):q.verify_published_baseline(changed)
+    def test_collector_uses_scope_owned_publication_verifier(self):
+        tree=ast.parse(inspect.getsource(verify._collect))
+        branch=next(node for node in ast.walk(tree) if isinstance(node,ast.If) and any(isinstance(child,ast.ImportFrom) and child.module=='renko_constant_tr_private_qualification' and any(alias.name=='verify_publication_provenance' for alias in child.names) for child in node.body))
+        code=compile(ast.fix_missing_locations(ast.Module(body=[branch],type_ignores=[])),verify.__file__,'exec')
+        plan=self.plan();proof=dict(published_baseline=plan['published_baseline'])
+        with mock.patch.object(q,'verify_publication_provenance') as own,mock.patch.object(q.baseline,'verify_publication_provenance',side_effect=AssertionError('Renko d9 helper')):
+            exec(code,dict(__package__='hosted_timing',plan=plan,inputs=proof))
+        own.assert_called_once_with(plan,proof)
+
     def test_workflow_is_narrow_single_runner_without_build_or_profile(self):
         text=(q.p.REPO/'.github/workflows/current-native-eight-screen.yml').read_text()
         self.assertIn('workflow_dispatch:',text);self.assertIn('push:',text);self.assertNotIn('strategy:',text)
-        self.assertIn('branches: [perf/current-native-eight-screen-20261118]',text)
+        self.assertIn('branches: [perf/current-native-eight-bars-screen-20261119]',text)
         self.assertIn('paths: [.github/workflows/current-native-eight-screen.yml]',text)
+        self.assertIn("$plan.selector_preflight.parameter -ne 'Bars'",text)
+        self.assertIn('native-eight-bars-20261119-v2',text)
         self.assertNotIn('dotnet build',text);self.assertNotIn('dotnet run',text);self.assertNotIn('dotnet-trace',text)
         self.assertLess(text.index('Fail closed before SDK'),text.index('actions/setup-dotnet'))
         self.assertEqual(text.count('GH_TOKEN: ${{ github.token }}'),2)

@@ -1,0 +1,253 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "scope": "current-native-eight-bars-screen-20261119",
+  "native_eligibility_eight_screen": true,
+  "diagnostic_only": true,
+  "inputs_ready": true,
+  "parent_review_approved": true,
+  "proposed_dotnet_sdk": "10.0.403",
+  "expected_runtime_version": ".NET 10.0.15",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "require_fixture_inventory": true,
+  "cases": 40,
+  "decisions": 8,
+  "bars": [
+    10000
+  ],
+  "affected_pairs": [
+    "TaLib.Functions.PlusDI",
+    "TaLib.Functions.Adx",
+    "TaLib.Functions.Aroon",
+    "TaLib.Functions.AroonOsc",
+    "TaLib.Functions.MinIndex",
+    "TaLib.Functions.Var",
+    "TaLib.Functions.StdDev",
+    "Skender.GetStdDev"
+  ],
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 60
+  },
+  "refresh_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.PlusDI",
+              "pair": "TaLib.Functions.PlusDI"
+            },
+            {
+              "raw": "TaLib.Functions.Adx",
+              "pair": "TaLib.Functions.Adx"
+            },
+            {
+              "raw": "TaLib.Functions.Aroon",
+              "pair": "TaLib.Functions.Aroon"
+            },
+            {
+              "raw": "TaLib.Functions.AroonOsc",
+              "pair": "TaLib.Functions.AroonOsc"
+            },
+            {
+              "raw": "TaLib.Functions.MinIndex",
+              "pair": "TaLib.Functions.MinIndex"
+            },
+            {
+              "raw": "TaLib.Functions.Var",
+              "pair": "TaLib.Functions.Var"
+            },
+            {
+              "raw": "TaLib.Functions.StdDev",
+              "pair": "TaLib.Functions.StdDev"
+            },
+            {
+              "raw": "Skender.GetStdDev",
+              "pair": "Skender.GetStdDev"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "counts": [
+            10000
+          ],
+          "cases": 40,
+          "decisions": 8
+        }
+      ],
+      "cases": 40,
+      "decisions": 8
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.PlusDI",
+              "pair": "TaLib.Functions.PlusDI"
+            },
+            {
+              "raw": "TaLib.Functions.Adx",
+              "pair": "TaLib.Functions.Adx"
+            },
+            {
+              "raw": "TaLib.Functions.Aroon",
+              "pair": "TaLib.Functions.Aroon"
+            },
+            {
+              "raw": "TaLib.Functions.AroonOsc",
+              "pair": "TaLib.Functions.AroonOsc"
+            },
+            {
+              "raw": "TaLib.Functions.MinIndex",
+              "pair": "TaLib.Functions.MinIndex"
+            },
+            {
+              "raw": "TaLib.Functions.Var",
+              "pair": "TaLib.Functions.Var"
+            },
+            {
+              "raw": "TaLib.Functions.StdDev",
+              "pair": "TaLib.Functions.StdDev"
+            },
+            {
+              "raw": "Skender.GetStdDev",
+              "pair": "Skender.GetStdDev"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "counts": [
+            10000
+          ],
+          "cases": 40,
+          "decisions": 8
+        }
+      ],
+      "cases": 40,
+      "decisions": 8
+    }
+  ],
+  "sources": {
+    "published": "cde51367fc534e6d825f603d58f6899d4752ad05",
+    "old": "48d238f56c37986b8437e5c31164552cc1362802",
+    "successor": "48d238f56c37986b8437e5c31164552cc1362802",
+    "variants": "48d238f56c37986b8437e5c31164552cc1362802"
+  },
+  "gpu_sources": {
+    "old": "48d238f56c37986b8437e5c31164552cc1362802",
+    "successor": "48d238f56c37986b8437e5c31164552cc1362802",
+    "variants": "48d238f56c37986b8437e5c31164552cc1362802"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "ModifiedHikkakeSparseReplayTests",
+      "HikkakeSharedExecutionTests"
+    ],
+    "successor": [
+      "ModifiedHikkakeSparseReplayTests",
+      "HikkakeSharedExecutionTests"
+    ],
+    "variants": [
+      "ModifiedHikkakeSparseReplayTests",
+      "HikkakeSharedExecutionTests"
+    ]
+  },
+  "old_candidate": {
+    "source": "48d238f56c37986b8437e5c31164552cc1362802",
+    "ci_run": "44419618060",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "c398c4d0dad6f7868f84734bca2e42da20e2dbc5",
+    "manifest_sha256": "da15f6cf7c072d0cc35ec846a4ea2927821b5d9bab231e6b620fe9504e07576c",
+    "gpu_receipt_sha256": "8662a14c8f84f5caacdebabc515492ac342324586a8402f8d862aff58e5a76b6",
+    "production_sha256": "fdeea3ee60cc5f8e5826933e20dba822477e171ecf1c562eefb7ab00a7ae0258",
+    "source_fingerprint": "eee20a82686be9470cf725dde6dae8107224c99505ac205836822433d24e195e",
+    "artifact_id": "14481543267",
+    "artifact_zip_sha256": "be40b9aa9eb08c90b9af196b257c8d32a12f017c982d00f51909d49e619b0f4e",
+    "unit_passed": 18,
+    "parity_passed": 55,
+    "unit_classes": [
+      "ModifiedHikkakeSparseReplayTests",
+      "HikkakeSharedExecutionTests"
+    ],
+    "parity_classes": [
+      "HikkakeTests"
+    ],
+    "actual_harness_sha256": "b84b24176386b7b5c93b46175a2e18f02b2d66dc5db3724f18ce385d2762bda9"
+  },
+  "published_baseline": {
+    "pull_request": 266,
+    "head": "cde51367fc534e6d825f603d58f6899d4752ad05",
+    "branch": "perf/remaining-indicator-rollout",
+    "source_fingerprint": "eee20a82686be9470cf725dde6dae8107224c99505ac205836822433d24e195e"
+  },
+  "native_win_policy_approval": {
+    "path": "benchmarks/plans/evidence/native-win-rule-user-approved-20261118.json",
+    "sha256": "414b558eae1deda750c3d169020128986a0e0db9b2acd95f23da035be03bfd7c",
+    "policy_id": "native-separated-confidence-intervals-both-rounds-20261118"
+  },
+  "baseline_origin": {
+    "head": "a4e2cc4e1c8b2bb4da00cf306703da283f36344a",
+    "plan": "benchmarks/plans/hosted-modified-hikkake-sparse-replay-qualification-20261118.json",
+    "plan_sha256": "271048d4d5bc7280898a070e474d4235873c4b2b7a659721f62fef8edda11473",
+    "artifact_role": "candidate"
+  },
+  "reused_correctness_scope": {
+    "unit_classes": [
+      "ModifiedHikkakeSparseReplayTests",
+      "HikkakeSharedExecutionTests"
+    ],
+    "unit_passed": 18,
+    "parity_classes": [
+      "HikkakeTests"
+    ],
+    "parity_passed": 55,
+    "gpu_cases": 100,
+    "new_selected_pair_cohort": false
+  },
+  "production_qualification": false,
+  "report_refresh_only": false,
+  "automatic_qualification": false,
+  "report_imported": false,
+  "profile_in_this_plan": false,
+  "automatic_profile_start": false,
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "scope_note": "New immutable diagnostic after failed selector-only run 44430729203; no completed case or summary is reused. Measure current published cde source using the original 48d Hikkake candidate runtime and its honest 18 unit / 55 parity / GPU100 cohort. Sampling remains 40 cases / 8 comparisons / 10000 bars with unchanged runtime and CPU gates. Compiled metadata-only listing must prove all 16 selected pair/method keys at Bars 10000 and two empty negative controls before measurement. No qualification, import, credit, source/harness build or profile.",
+  "execution_nonce": "native-eight-bars-20261119-v2",
+  "supersedes_failed_run": "44430729203",
+  "selector_preflight": {
+    "parameter": "Bars",
+    "selected_keys": 16,
+    "negative_controls": 2
+  }
+}

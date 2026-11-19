@@ -218,8 +218,11 @@ def _collect(folder, phase, *, preflight, diagnostic=False, matchinglow_gate=Fal
         encoded = (json.dumps(inputs, indent=2) + '\n').encode()
         assert hashlib.sha256(encoded).hexdigest() == proof['input_provenance_sha256']
         assert inputs['sources'] == plan['sources'] and inputs['plan_sha256'] == digest(PLAN)
-        if plan.get('renko_constant_tr_private_qualification') or plan.get('native_eligibility_eight_screen'):
+        if plan.get('renko_constant_tr_private_qualification'):
             from .renko_constant_tr_private_qualification import verify_publication_provenance
+            verify_publication_provenance(plan,inputs)
+        elif plan.get('native_eligibility_eight_screen'):
+            from .native_eligibility_eight_screen import verify_publication_provenance
             verify_publication_provenance(plan,inputs)
         assert inputs['sdk'] == plan['proposed_dotnet_sdk']
         assert host['run_id'] and host['run_attempt'] and host['machine'] and host['runner_image']

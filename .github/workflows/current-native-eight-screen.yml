@@ -1,8 +1,8 @@
-name: Current native eight-pair identical-binary eligibility diagnostic
+name: Current native eight-pair Bars diagnostic v2
 on:
   workflow_dispatch:
   push:
-    branches: [perf/current-native-eight-screen-20261118]
+    branches: [perf/current-native-eight-bars-screen-20261119]
     paths: [.github/workflows/current-native-eight-screen.yml]
 permissions:
   contents: read
@@ -12,7 +12,7 @@ concurrency:
   group: current-native-eight-screen
   cancel-in-progress: false
 env:
-  HOSTED_TIMING_PLAN: benchmarks/plans/hosted-current-native-eight-screen-20261118.json
+  HOSTED_TIMING_PLAN: benchmarks/plans/hosted-current-native-eight-bars-screen-20261119.json
 jobs:
   screen:
     runs-on: windows-2025
@@ -31,7 +31,8 @@ jobs:
           $ErrorActionPreference='Stop'
           $plan=Get-Content -LiteralPath $env:HOSTED_TIMING_PLAN -Raw | ConvertFrom-Json
           if ($plan.inputs_ready -isnot [bool] -or !$plan.inputs_ready -or $plan.parent_review_approved -isnot [bool] -or !$plan.parent_review_approved) { throw 'UNBOUND baseline receipts or parent review' }
-          if ($plan.cases -ne 40 -or $plan.decisions -ne 8 -or $plan.sources.old -ne 'd9d00ca56ebb857b87ead45044616970b607019c' -or $plan.sources.successor -ne $plan.sources.old -or $plan.diagnostic_only -ne $true -or $plan.production_qualification -ne $false) { throw 'Wrong diagnostic scope or same-source binding' }
+          if ($plan.execution_nonce -ne 'native-eight-bars-20261119-v2' -or $plan.scope -ne 'current-native-eight-bars-screen-20261119' -or $plan.selector_preflight.parameter -ne 'Bars') { throw 'Wrong immutable Bars selector plan' }
+          if ($plan.cases -ne 40 -or $plan.decisions -ne 8 -or $plan.sources.old -ne '48d238f56c37986b8437e5c31164552cc1362802' -or $plan.sources.successor -ne $plan.sources.old -or $plan.diagnostic_only -ne $true -or $plan.production_qualification -ne $false) { throw 'Wrong diagnostic scope or same-source binding' }
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.403'
@@ -61,7 +62,7 @@ jobs:
           try {
             python -m unittest -v test_hosted_native_eligibility_eight_screen
             if ($LASTEXITCODE -ne 0) { throw 'Diagnostic orchestration tests failed' }
-            python -c "from hosted_timing import native_eligibility_eight_screen as q; plan=q.p.read(q.p.PLAN); q.validate_scope(plan); q.baseline.verify_current_publication(plan)"
+            python -c "from hosted_timing import native_eligibility_eight_screen as q; plan=q.p.read(q.p.PLAN); q.validate_scope(plan); q.verify_current_publication(plan)"
             if ($LASTEXITCODE -ne 0) { throw 'Pinned baseline publication or scope mismatch' }
           } finally { Pop-Location }
           $plan=Get-Content -LiteralPath $env:HOSTED_TIMING_PLAN -Raw | ConvertFrom-Json
@@ -77,7 +78,7 @@ jobs:
           path: baseline-candidate
           run-id: ${{ env.BASELINE_RUN }}
           github-token: ${{ github.token }}
-      - name: Authenticate one reused baseline and capture exact registry PairIds
+      - name: Authenticate baseline, registry and all 16 compiled Bars selectors
         env:
           GH_TOKEN: ${{ github.token }}
         run: python scripts/run-current-native-eight-screen.py prepare --candidate baseline-candidate --out baseline-inputs
@@ -88,7 +89,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: current-native-eight-screen
+          name: current-native-eight-bars-screen-v2
           path: |
             baseline-inputs/
             native-eight-screen/
