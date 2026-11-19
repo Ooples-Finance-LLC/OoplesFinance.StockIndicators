@@ -90,7 +90,7 @@ internal static partial class FastKernels
         if (n < period) return;
         var typical = FastMath.Allocate(n);
         // Equal typical prices must compare equal, so they are rounded exactly as the exact route rounds them.
-        for (var i = 0; i < n; i++) typical[i] = ExactTypicalPrice.Calculate(high[i], low[i], close[i]);
+        for (var i = 0; i < n; i++) typical[i] = FastMath.TypicalPrice(high[i], low[i], close[i]);
         // Distances of the last period bars, for the rolling form.
         var distances = rolling ? new double[period] : null;
         double anchor = typical[0], sum = 0, deviationSum = 0;
@@ -168,11 +168,11 @@ internal static partial class FastKernels
         ups[0] = downs[0] = 0;
         // The comparison decides which side a whole bar's flow joins, so the typical price is rounded
         // exactly as the exact route rounds it.
-        var previous = ExactTypicalPrice.Calculate(high[0], low[0], close[0]);
+        var previous = FastMath.TypicalPrice(high[0], low[0], close[0]);
         double positive = 0, negative = 0;
         for (var i = 1; i < n; i++)
         {
-            var typical = ExactTypicalPrice.Calculate(high[i], low[i], close[i]);
+            var typical = FastMath.TypicalPrice(high[i], low[i], close[i]);
             var flow = typical * volume[i];
             double up = typical > previous ? flow : 0, down = typical < previous ? flow : 0;
             previous = typical;

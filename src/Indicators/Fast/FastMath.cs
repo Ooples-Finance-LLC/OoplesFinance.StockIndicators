@@ -134,4 +134,45 @@ internal static class FastMath
 #endif
         return a > b ? a : b;
     }
+
+    /// <summary>
+    /// The correctly rounded mean of the high, low and close: the value the exact route publishes, without
+    /// its arbitrary-precision sum.
+    /// </summary>
+    /// <remarks>
+    /// Indicators that compare typical prices need them rounded exactly, because two bars with equal sums
+    /// must compare equal. The three-way sum is kept as a rounded value and its exact residual, the quotient
+    /// is corrected by the exact remainder, and the result is accepted only when what is left is provably
+    /// inside the half-unit that makes it the nearest double. Anything closer to a tie than that, and any
+    /// residual that is not exact, takes the exact route's own calculation.
+    /// </remarks>
+    internal static double TypicalPrice(double high, double low, double close)
+    {
+#if !NETFRAMEWORK
+        var pair = high + low;
+        var virtualLow = pair - high;
+        var pairResidual = high - (pair - virtualLow) + (low - virtualLow);
+        var sum = pair + close;
+        var virtualClose = sum - pair;
+        var sumResidual = pair - (sum - virtualClose) + (close - virtualClose);
+        if (pairResidual == 0 && sumResidual == 0) return sum == 0 ? 0 : sum / 3;
+        var residual = pairResidual + sumResidual;
+        var quotient = sum / 3;
+        // sum - 3 * quotient is exact in one fused step; with the sum's residual it is what the quotient lacks.
+        var remainder = Math.FusedMultiplyAdd(-3, quotient, sum);
+        var lacking = remainder + residual;
+        var result = quotient + lacking / 3;
+        var left = quotient - result + lacking / 3;
+        var magnitude = Math.Abs(result);
+        var unit = Math.BitIncrement(magnitude) - magnitude;
+        // Exact residual sums, a result away from a power of two and from the subnormals, and a remaining
+        // distance clearly under half a unit: then no other double is nearer.
+        if (residual - pairResidual == sumResidual && lacking - remainder == residual
+            && magnitude > 1e-290 && magnitude < 1e290
+            && (BitConverter.DoubleToInt64Bits(result) & 0xFFFFFFFFFFFFFL) != 0
+            && Math.Abs(left) < 0.4999999 * unit)
+            return result;
+#endif
+        return Helpers.ExactTypicalPrice.Calculate(high, low, close);
+    }
 }
