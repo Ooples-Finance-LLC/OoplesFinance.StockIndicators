@@ -5,7 +5,7 @@ namespace OoplesFinance.StockIndicators.Indicators;
 
 internal static partial class ValuesBarExecution
 {
-    internal sealed class SeededAdaptiveValueState(SeededAdaptiveAverage owner, int count) : IMultiOutputState
+    internal sealed partial class SeededAdaptiveValueState(SeededAdaptiveAverage owner, int count) : IMultiOutputState
     {
         private readonly Queue<double> _prices = new(Math.Min(owner.Period, count));
         private readonly Queue<JurikDyadic> _changes = new(Math.Min(owner.Period, Math.Max(0, count - 1)));
