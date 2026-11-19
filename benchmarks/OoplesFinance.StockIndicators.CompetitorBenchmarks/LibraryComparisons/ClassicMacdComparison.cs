@@ -102,7 +102,7 @@ internal static class ClassicMacdComparison
                 {
                     var values = run[indicator.Outputs[j]].ToArray();
                     var flags = run[indicator.Outputs[j + 3]].ToArray();
-                    return values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray();
+                    return values.WherePresent(flags);
                 })
                 .ToArray()
         );

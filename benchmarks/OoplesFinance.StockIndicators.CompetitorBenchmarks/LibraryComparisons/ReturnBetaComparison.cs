@@ -137,7 +137,7 @@ internal static class ReturnBetaComparison
         {
             var values = run[indicator.Outputs[slot]].ToArray();
             var mask = run[indicator.Outputs[slot + names.Length]].ToArray();
-            result[slot] = values.Select((v, i) => mask[i] > 0 ? (double?)v : null).ToArray();
+            result[slot] = values.WherePresent(mask);
         }
         return RetrospectivePriceComparison.Series(names, result);
     }

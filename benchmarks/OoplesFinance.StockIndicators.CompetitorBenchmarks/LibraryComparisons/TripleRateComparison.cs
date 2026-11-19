@@ -152,7 +152,7 @@ internal static class TripleRateComparison
         {
             var values = run[indicator.Outputs[j]].ToArray();
             var flags = run[indicator.Outputs[j + 3]].ToArray();
-            r[j] = values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray();
+            r[j] = values.WherePresent(flags);
         }
         return Series(r, rateOnly);
     }

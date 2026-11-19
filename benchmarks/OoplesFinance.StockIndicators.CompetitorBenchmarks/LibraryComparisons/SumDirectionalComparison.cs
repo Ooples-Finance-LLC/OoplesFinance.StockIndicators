@@ -64,7 +64,7 @@ internal static class SumDirectionalComparison
         {
             var values = run[indicator.Outputs[j]].ToArray();
             var flags = run[indicator.Outputs[j + 5]].ToArray();
-            result[j] = values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray();
+            result[j] = values.WherePresent(flags);
         }
         return Series(result);
     }

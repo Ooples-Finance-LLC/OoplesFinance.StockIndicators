@@ -87,7 +87,7 @@ internal static class CurvatureComparison
                 {
                     var values = run[curvature.Outputs[slot]].ToArray();
                     var flags = run[curvature.Outputs[slot + 5]].ToArray();
-                    return values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray();
+                    return values.WherePresent(flags);
                 })
                 .ToArray()
         );

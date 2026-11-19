@@ -87,7 +87,7 @@ internal static class ElementaryMathComparison
         var values = run[indicator.Outputs[0]].ToArray();
         var flags = run[indicator.Outputs[1]].ToArray();
         return VolumePriceComparison.Mask(
-            values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray()
+            values.WherePresent(flags)
         );
     }
 

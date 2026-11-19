@@ -196,7 +196,7 @@ internal static class TaDirectionalComparison
         var flags = run[indicator.IsDefined].ToArray();
         var values = run[indicator.Value].ToArray();
         return VolumePriceComparison.Mask(
-            values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray()
+            values.WherePresent(flags)
         );
     }
 

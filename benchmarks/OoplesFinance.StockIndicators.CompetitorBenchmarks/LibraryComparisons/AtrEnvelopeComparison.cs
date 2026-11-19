@@ -156,7 +156,7 @@ internal static class AtrEnvelopeComparison
         {
             var response = run[indicator.Outputs[slot]].ToArray();
             var mask = run[indicator.Outputs[slot + 4]].ToArray();
-            values[slot] = response.Select((v, i) => mask[i] > 0 ? (double?)v : null).ToArray();
+            values[slot] = response.WherePresent(mask);
         }
         return Series(values, variant);
     }

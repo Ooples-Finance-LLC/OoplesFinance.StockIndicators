@@ -67,7 +67,7 @@ internal static class AwesomeComparison
                     var flags = run[indicator.Outputs[slot + 2]].ToArray();
                     return run[indicator.Outputs[slot]]
                         .ToArray()
-                        .Select((v, i) => flags[i] > 0 ? (double?)v : null)
+                        .WherePresent(flags)
                         .ToArray();
                 })
                 .ToArray()

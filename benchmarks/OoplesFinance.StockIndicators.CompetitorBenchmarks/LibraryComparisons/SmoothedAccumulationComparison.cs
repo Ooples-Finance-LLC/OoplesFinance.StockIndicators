@@ -60,7 +60,7 @@ internal static class SmoothedAccumulationComparison
         {
             var values = run[indicator.Outputs[j]].ToArray();
             var flags = run[indicator.Outputs[j + 4]].ToArray();
-            rows[j] = values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray();
+            rows[j] = values.WherePresent(flags);
         }
         return Series(rows, first);
     }

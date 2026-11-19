@@ -55,7 +55,7 @@ internal static class ClassicOscillatorComparison
         var values = run[indicator.Value].ToArray();
         var mask = run[indicator.IsDefined].ToArray();
         return VolumePriceComparison.Mask(
-            values.Select((v, i) => mask[i] > 0 ? (double?)v : null).ToArray()
+            values.WherePresent(mask)
         );
     }
 

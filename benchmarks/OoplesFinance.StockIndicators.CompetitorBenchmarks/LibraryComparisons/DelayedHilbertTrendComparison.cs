@@ -59,7 +59,7 @@ internal static class DelayedHilbertTrendComparison
             .GetResult();
         var values = run[owner.Trendline].ToArray();
         var flags = run[owner.IsDefined].ToArray();
-        return Series(values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray());
+        return Series(values.WherePresent(flags));
     }
 
     private static ComparisonSeries Native(double[] prices)

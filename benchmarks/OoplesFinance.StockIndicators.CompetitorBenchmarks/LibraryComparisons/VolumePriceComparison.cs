@@ -75,7 +75,7 @@ internal static class VolumePriceComparison
             .GetResult();
         var values = run[indicator.Value].ToArray();
         var flags = run[indicator.IsDefined].ToArray();
-        return Mask(values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray());
+        return Mask(values.WherePresent(flags));
     }
 
     private static ComparisonSeries Exact(

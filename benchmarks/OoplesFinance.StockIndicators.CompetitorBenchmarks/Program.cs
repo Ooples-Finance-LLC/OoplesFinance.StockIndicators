@@ -1,6 +1,15 @@
 using BenchmarkDotNet.Running;
 using OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
+// A warmed-up pass over every comparison pair, for a local reading of where each one stands in the
+// numeric mode COMPARISON_NUMERICS selects. It is a triage tool: the published numbers still come from
+// LibraryPairBenchmarks. An optional second argument keeps the pairs whose id contains it.
+if (args.Length >= 1 && args[0] == "--scoreboard")
+{
+    Scoreboard.Run(args.Length > 1 ? args[1] : null);
+    return;
+}
+
 if (args.Length == 4 && args[0] == "--profile-pair")
 {
     var count = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);

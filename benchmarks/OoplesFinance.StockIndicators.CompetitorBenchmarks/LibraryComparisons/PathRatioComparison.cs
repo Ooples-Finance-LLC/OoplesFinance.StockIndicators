@@ -53,7 +53,7 @@ internal static class PathRatioComparison
         return VolumePriceComparison.Mask(
             run[indicator.Value]
                 .ToArray()
-                .Select((v, i) => flags[i] > 0 ? (double?)v : null)
+                .WherePresent(flags)
                 .ToArray()
         );
     }

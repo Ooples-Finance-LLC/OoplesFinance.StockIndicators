@@ -89,7 +89,7 @@ internal static class AccumulationDistributionComparison
         if (!priceAdjusted)
             return new(0, values);
         var flags = run[indicator.Outputs[1]].ToArray();
-        return Mask(values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray());
+        return Mask(values.WherePresent(flags));
     }
 
     private static ComparisonSeries OoplesDetails(CompetitorData data, int? averagePeriod)

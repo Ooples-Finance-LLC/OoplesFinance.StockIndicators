@@ -118,7 +118,7 @@ internal static class TillsonComparison
         var values = run[indicator.Value].ToArray();
         var flags = run[indicator.IsDefined].ToArray();
         return VolumePriceComparison.Mask(
-            values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray()
+            values.WherePresent(flags)
         );
     }
 

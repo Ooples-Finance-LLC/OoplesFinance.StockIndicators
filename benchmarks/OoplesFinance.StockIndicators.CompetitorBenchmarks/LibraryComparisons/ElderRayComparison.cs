@@ -63,7 +63,7 @@ internal static class ElderRayComparison
                 .Select(slot =>
                     run[indicator.Outputs[slot]]
                         .ToArray()
-                        .Select((v, i) => flags[i] > 0 ? (double?)v : null)
+                        .WherePresent(flags)
                         .ToArray()
                 )
                 .ToArray()

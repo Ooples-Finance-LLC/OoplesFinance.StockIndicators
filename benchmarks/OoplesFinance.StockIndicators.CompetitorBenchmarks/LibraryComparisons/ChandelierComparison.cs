@@ -160,7 +160,7 @@ internal static class ChandelierComparison
         {
             var response = run[indicator.Outputs[slot]].ToArray();
             var mask = run[indicator.Outputs[slot + 2]].ToArray();
-            values[slot] = response.Select((v, i) => mask[i] > 0 ? (double?)v : null).ToArray();
+            values[slot] = response.WherePresent(mask);
         }
         return Pack(values, trady, shortSide);
     }
