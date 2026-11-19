@@ -1,0 +1,7 @@
+VSTest version 18.7.1 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Results File: C:\Users\cheat\source\stock-indicators-operations\kama-full-qualification-cpu-supplement-20261119\baseline-unit\checks.trx
+
+Passed!  - Failed:     0, Passed:    26, Skipped:     0, Total:    26, Duration: 948 ms - OoplesFinance.StockIndicators.Tests.Unit.dll (net10.0)

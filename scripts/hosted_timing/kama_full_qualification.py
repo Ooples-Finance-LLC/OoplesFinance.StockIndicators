@@ -106,6 +106,8 @@ def validate_scope(plan=None, *, require_ready=True):
     if require_ready:
         assert all(plan[k] is True for k in ('inputs_ready','parent_review_approved','peer_review_approved',
             'input_authentication_complete','collector_integration_complete')),'HELD: full-scope integration and root timing review required'
+        from .evidence_closure import audit
+        audit(REPO,'benchmarks/plans/hosted-kama-full-qualification-20261119.json',ref='HEAD')
         verify_cpu_coverage(plan)
         from . import kama_fused_prefix_roi as prior
         prior.verify_source_boundary();prior.verify_registry();prior.verify_publication(plan)

@@ -1,0 +1,7 @@
+VSTest version 18.7.1 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Results File: C:\Users\cheat\source\stock-indicators-operations\kama-baseline-filter-repair-20261119\baseline-parity\checks.trx
+
+Passed!  - Failed:     0, Passed:    39, Skipped:     0, Total:    39, Duration: 25 s - OoplesFinance.StockIndicators.CompetitorTests.dll (net10.0)

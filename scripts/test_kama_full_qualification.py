@@ -4,6 +4,8 @@ import json
 import unittest
 import tempfile
 import gzip
+import os
+import subprocess
 from pathlib import Path
 from unittest.mock import patch
 from contextlib import ExitStack
@@ -37,6 +39,34 @@ class FrozenScopeTests(unittest.TestCase):
         review=q.verify_cpu_coverage(self.plan)
         self.assertEqual(review['combined_coverage_totals']['baseline']['unit'],179)
         self.assertTrue(review['original_filter_19_expands_to_15_validation_ema_and_4_models_tsi'])
+    def test_entire_committed_plan_evidence_closure(self):
+        from hosted_timing.evidence_closure import audit
+        # Precommit review explicitly selects INDEX. Hosted CI always uses HEAD.
+        ref=os.environ.get('KAMA_EVIDENCE_CLOSURE_TEST_REF','HEAD')
+        result=audit(q.REPO,q.PLAN.relative_to(q.REPO).as_posix(),ref=ref)
+        self.assertEqual(result['status'],'committed-transitive-evidence-closure-passed')
+
+class CommittedClosureRegressionTests(unittest.TestCase):
+    def test_ignored_physical_file_cannot_mask_missing_commit_or_index_entry(self):
+        from hosted_timing.evidence_closure import audit
+        with tempfile.TemporaryDirectory(prefix='kama-git-closure-') as temp:
+            root=Path(temp)
+            def git(*args):return subprocess.check_output(['git',*args],cwd=root,stderr=subprocess.STDOUT)
+            git('init','-q');(root/'.gitignore').write_bytes(b'*.log\n')
+            (root/'.gitattributes').write_bytes(b'*.log -text\n')
+            folder=root/'benchmarks/plans';folder.mkdir(parents=True)
+            log=folder/'ignored.log';log.write_bytes(b'original immutable evidence\r\n')
+            bundle=folder/'bundle.json';bundle.write_bytes(json.dumps(dict(files=[dict(path='benchmarks/plans/ignored.log',sha256=q.sha(log.read_bytes()))])).encode())
+            plan=folder/'plan.json';plan.write_bytes(json.dumps(dict(evidence=dict(path='benchmarks/plans/bundle.json',sha256=q.sha(bundle.read_bytes())))).encode())
+            git('add','.gitignore','.gitattributes','benchmarks/plans/plan.json','benchmarks/plans/bundle.json')
+            git('-c','user.name=Qualification Test','-c','user.email=qualification@example.invalid','commit','-qm','fixture without ignored evidence')
+            for ref in ('HEAD','INDEX'):
+                with self.subTest(ref=ref),self.assertRaisesRegex(AssertionError,'missing '+ref+' evidence'):
+                    audit(root,'benchmarks/plans/plan.json',ref=ref)
+            git('add','-f','benchmarks/plans/ignored.log')
+            self.assertEqual(len(audit(root,'benchmarks/plans/plan.json',ref='INDEX')['files']),3)
+            with self.assertRaisesRegex(AssertionError,'missing HEAD evidence'):
+                audit(root,'benchmarks/plans/plan.json',ref='HEAD')
 
 class CompletePreparationPathTests(unittest.TestCase):
     def test_real_prepare_reaches_explicit_alias_without_legacy_variant_harness(self):

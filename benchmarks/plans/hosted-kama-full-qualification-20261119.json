@@ -6048,5 +6048,14 @@
   "supplemental_cpu_bundle": {
     "path": "benchmarks/plans/evidence/kama-full-qualification/cpu-coverage/bundle.json",
     "sha256": "c9f8eb9820a2cc07bcfe5427e6686594a049fdf02ac874d8065b20a85d7760c4"
+  },
+  "superseded_zero_case_run": {
+    "run_id": "44510348172",
+    "head": "a13af8366cf92848d6f822530df3599b2828b48b",
+    "conclusion": "failure",
+    "measured_cases": 0,
+    "cause": "Five descriptor-pinned logs were ignored and absent from the committed evidence tree.",
+    "partial_results_excluded": true,
+    "unchanged_measurement_policy": true
   }
 }
