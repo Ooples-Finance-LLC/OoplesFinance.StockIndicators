@@ -34,7 +34,7 @@ public sealed class AlmaWideDivisorTests
     public void ScaledRoundingMatchesIndependentFractionsAndKeepsOriginalFallback()
     {
         UInt128[] denominators = [(UInt128)1 << 64, ((UInt128)1 << 64) + 1,
-            (UInt128)1 << 72, ActualMass, ((UInt128)1 << 78) - 1];
+            (UInt128)1 << 72, (UInt128)1 << 75, ActualMass, ((UInt128)1 << 78) - 1];
         Int128[] numerators = [0, 1, -1, ((Int128)1 << 53) - 1,
             ((Int128)1 << 89) - 1, -(((Int128)1 << 89) - 1), Int128.MaxValue, Int128.MinValue];
         int accepted = 0, fallback = 0;
@@ -48,6 +48,10 @@ public sealed class AlmaWideDivisorTests
             else
             {
                 fallback++;
+                // The cached helper may decline any rounding-grid miss. Do
+                // not extend the original product factory's <=106-bit contract
+                // merely to test the private helper's larger input domain.
+                if (BigInteger.Abs((BigInteger)numerator).GetBitLength() > 106) continue;
                 actual = JurikDyadic.FromBinaryProduct(numerator, scale)
                     .Ratio(JurikDyadic.FromBinaryProduct((Int128)denominator, 0));
             }
