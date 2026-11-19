@@ -277,4 +277,137 @@ internal static partial class FastKernels
             if (i >= publishFrom) value[i] = means.Average;
         }
     }
+
+
+    // For each window length up to fifty: the sine and cosine of every lag's angle, and what each set
+    // sums to. The sums are rounding residue, a few parts in 1e17, but on a flat price they are the whole
+    // projection, so they are summed without loss.
+    private static readonly double[][] ProjectionSines = new double[51][];
+    private static readonly double[][] ProjectionCosines = new double[51][];
+    private static readonly double[] SineResidue = new double[51];
+    private static readonly double[] CosineResidue = new double[51];
+
+    private static bool BuildProjections()
+    {
+        for (var count = 0; count <= 50; count++)
+        {
+            double[] sines = new double[count], cosines = new double[count];
+            double sineHigh = 0, sineLow = 0, cosineHigh = 0, cosineLow = 0;
+            for (var lag = 0; lag < count; lag++)
+            {
+                var angle = lag * 2d * Math.PI / count;
+                sines[lag] = Math.Sin(angle);
+                cosines[lag] = Math.Cos(angle);
+                var total = sineHigh + sines[lag];
+                var virtualTerm = total - sineHigh;
+                sineLow += sineHigh - (total - virtualTerm) + (sines[lag] - virtualTerm);
+                sineHigh = total;
+                total = cosineHigh + cosines[lag];
+                virtualTerm = total - cosineHigh;
+                cosineLow += cosineHigh - (total - virtualTerm) + (cosines[lag] - virtualTerm);
+                cosineHigh = total;
+            }
+            ProjectionSines[count] = sines;
+            ProjectionCosines[count] = cosines;
+            SineResidue[count] = sineHigh + sineLow;
+            CosineResidue[count] = cosineHigh + cosineLow;
+        }
+        return true;
+    }
+
+    private static readonly bool ProjectionsBuilt = BuildProjections();
+
+    /// <summary>
+    /// Dominant cycle phase, its sine and lead sine, or the trend-versus-cycle mode: the smoothed price
+    /// projected onto one cycle of the measured period. Published from bar 63 plus the suppression.
+    /// </summary>
+    internal static void HilbertSignal(ReadOnlySpan<double> close, double[][] outputs, HilbertCycleSignal kind, long publishFrom)
+    {
+        var n = close.Length;
+        var slots = kind == HilbertCycleSignal.Sine ? 2 : 1;
+        for (var slot = 0; slot < slots; slot++)
+        {
+            outputs[slot].AsSpan(0, n).Clear();
+            DefinedFrom(outputs[slots + slot].AsSpan(0, n), publishFrom);
+        }
+        if (!ProjectionsBuilt) return;
+        Span<double> first = outputs[0];
+        Span<double> second = kind == HilbertCycleSignal.Sine ? outputs[1] : default;
+        var trending = kind == HilbertCycleSignal.Trend;
+        var hilbert = new HilbertCore(37, true, false);
+        var means = new TrendMean();
+        double[] ring = new double[50], smooth = new double[50];
+        int cursor = 0, days = 0;
+        double period = 0, previousPhase = 0, previousSine = 0, previousLead = 0;
+        for (var i = 0; i < n; i++)
+        {
+            var price = close[i];
+            hilbert.Update(price);
+            if (i < 37)
+            {
+                if (trending) means.Update(ring, price, 0, false);
+                continue;
+            }
+            period = .33 * hilbert.Period + .67 * period;
+            var count = (int)(period + .5);
+            var anchor = hilbert.SmoothPrice;
+            smooth[cursor] = anchor;
+            // Measured from the newest value, so the sums carry the cycle and not the price level; the
+            // level's share is the anchor times what the coefficients sum to.
+            double real = 0, imaginary = 0;
+            double[] sines = ProjectionSines[count], cosines = ProjectionCosines[count];
+            var slot = cursor;
+            for (var lag = 0; lag < count; lag++)
+            {
+                var value = smooth[slot] - anchor;
+                real += value * sines[lag];
+                imaginary += value * cosines[lag];
+                slot = slot == 0 ? 49 : slot - 1;
+            }
+            real += anchor * SineResidue[count];
+            imaginary += anchor * CosineResidue[count];
+            var phase = imaginary != 0 ? Math.Atan(real / imaginary) * 180 / Math.PI
+                : previousPhase + (real < 0 ? -90 : real > 0 ? 90 : 0);
+            phase += 90;
+            phase += 360 / period;
+            if (imaginary < 0) phase += 180;
+            if (phase > 315) phase -= 360;
+            var sine = Math.Sin(phase * (Math.PI / 180));
+            var lead = Math.Sin((phase + 45) * (Math.PI / 180));
+            var trend = 1;
+            if (trending)
+            {
+                means.Update(ring, price, count, true);
+                if (sine > lead && previousSine <= previousLead || sine < lead && previousSine >= previousLead)
+                {
+                    days = 0;
+                    trend = 0;
+                }
+                days = Math.Min(days + 1, 50);
+                if (days < .5 * period) trend = 0;
+                var delta = phase - previousPhase;
+                if (delta > .67 * 90 * 4 / period && delta < 1.5 * 90 * 4 / period) trend = 0;
+                var baseline = means.Average;
+                if (baseline != 0 && Math.Abs(anchor - baseline) - .015 * Math.Abs(baseline) >= 0) trend = 1;
+            }
+            previousPhase = phase;
+            previousSine = sine;
+            previousLead = lead;
+            cursor = cursor == 49 ? 0 : cursor + 1;
+            if (i < publishFrom) continue;
+            switch (kind)
+            {
+                case HilbertCycleSignal.Sine:
+                    first[i] = sine;
+                    second[i] = lead;
+                    break;
+                case HilbertCycleSignal.Phase:
+                    first[i] = phase;
+                    break;
+                default:
+                    first[i] = trend;
+                    break;
+            }
+        }
+    }
 }

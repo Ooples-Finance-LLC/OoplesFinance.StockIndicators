@@ -146,6 +146,9 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<DelayedHilbertPhase>(binders, t => (c, o) => FastKernels.HilbertSignal(c.Close, o, HilbertCycleSignal.Phase, 63L + t.Suppression));
+        Bind<DelayedHilbertSine>(binders, t => (c, o) => FastKernels.HilbertSignal(c.Close, o, HilbertCycleSignal.Sine, 63L + t.Suppression));
+        Bind<DelayedHilbertTrendMode>(binders, t => (c, o) => FastKernels.HilbertSignal(c.Close, o, HilbertCycleSignal.Trend, 63L + t.Suppression));
         Bind<SeededHilbertTrendline>(binders, t => (c, o) => FastKernels.SeededTrendline(c, o, t.UseMidpoint));
         Bind<DelayedHilbertTrendline>(binders, t => (c, o) => FastKernels.DelayedTrendline(c.Close, o[0], o[1], 63L + t.Suppression));
         Bind<HilbertCyclePeriod>(binders, t => (c, o) => FastKernels.HilbertCycle(c.Close, o, true, 32L + t.Suppression));
