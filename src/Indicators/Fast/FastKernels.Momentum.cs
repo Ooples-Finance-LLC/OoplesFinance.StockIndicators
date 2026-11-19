@@ -438,4 +438,49 @@ internal static partial class FastKernels
             fitDefined[i] = 1;
         }
     }
+
+
+    /// <summary>
+    /// Least-squares fit of each full window with the intercept measured on the bar index of the whole
+    /// series, and the final window's line drawn back over its own bars.
+    /// </summary>
+    internal static void RegressionFinalLine(ReadOnlySpan<double> close, double[][] outputs, int period)
+    {
+        var n = close.Length;
+        for (var slot = 0; slot < 10; slot++) outputs[slot].AsSpan(0, n).Clear();
+        if (n < period) return;
+        var first = period - 1;
+        for (var slot = 5; slot < 8; slot++) outputs[slot].AsSpan(first, n - first).Fill(1);
+        Span<double> slopes = outputs[0], intercepts = outputs[1], deviations = outputs[2], fit = outputs[3],
+            fitDefined = outputs[8];
+        var center = (period + 1) * .5;
+        var xx = period * ((double)period * period - 1) / 12;
+        double slope = 0, level = 0;
+        for (var i = first; i < n; i++)
+        {
+            var window = close.Slice(i - first, period);
+            var anchor = window[first];
+            double sum = 0;
+            for (var j = 0; j < period; j++) sum += window[j] - anchor;
+            var mean = sum / period;
+            double yy = 0, xy = 0;
+            for (var j = 0; j < period; j++)
+            {
+                var y = window[j] - anchor - mean;
+                yy += y * y;
+                xy += (j + 1 - center) * y;
+            }
+            slope = xy / xx;
+            level = anchor + mean;
+            slopes[i] = slope;
+            intercepts[i] = level - slope * (center + (i - first));
+            deviations[i] = Math.Sqrt(yy / period);
+            if (yy == 0) continue;
+            fit[i] = xy / xx * (xy / yy);
+            fitDefined[i] = 1;
+        }
+        Span<double> line = outputs[4].AsSpan(n - period, period);
+        for (var position = 0; position < period; position++) line[position] = level + slope * (position + 1 - center);
+        outputs[9].AsSpan(n - period, period).Fill(1);
+    }
 }
