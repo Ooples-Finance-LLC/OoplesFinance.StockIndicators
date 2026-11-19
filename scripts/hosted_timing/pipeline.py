@@ -323,7 +323,10 @@ def _verify_input_contents(folder, plan, proof, plan_sha256):
         results = ET.fromstring(raw).findall('.//{*}UnitTestResult')
         assert len(results) == receipt['passed_cases'] == 100
         assert all(r.attrib['outcome'] == 'Passed' for r in results)
-    if plan.get('alma_sinc_combined_qualification'):
+    if plan.get('current_frontier_refresh'):
+        from .current_frontier_refresh import verify_harness_alias
+        verify_harness_alias(folder,plan,proof)
+    elif plan.get('alma_sinc_combined_qualification'):
         from .alma_sinc_combined_qualification import verify_harness_alias
         verify_harness_alias(folder,plan,proof)
     elif plan.get('cmf_alma_combined_qualification'):

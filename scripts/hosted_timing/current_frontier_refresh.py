@@ -25,6 +25,8 @@ SCOPE_SHA = '374752d1f51d2b95112b4064d76768d11d6ca7c421b47fa6c63185251b32afa4'
 ASSEMBLY = 'OoplesFinance.StockIndicators.CompetitorBenchmarks.dll'
 POLICY = dict(order=['old','new','new','old'], quiet_samples=12, max_cpu_percent=15,
               warmups=10, iterations=10, fixed_invocation_warmups=1000)
+PREPARATION_BRANCH = 'perf/current-frontier-prep-repair-20261119'
+PREPARATION_REVISION = 'accepted-runtime-alias-v1-20261119'
 
 
 def scope():
@@ -63,6 +65,7 @@ def verify_snapshot(plan):
 def validate_scope(plan,*,require_ready=True):
     approved=scope()
     assert plan.get('current_frontier_refresh') is True and plan['baseline_measurement_refresh'] is True
+    assert plan['preparation_branch']==PREPARATION_BRANCH and plan['preparation_revision']==PREPARATION_REVISION
     assert not any(plan.get(key) for key in ('diagnostic_only','pointwise_family_refresh','named_output_projection_refresh',
         'current_baseline_ten_refresh','targeted_reference','coverage_reference','standalone_variants','qualify_variants','trix_preflight','reuse_inputs'))
     assert plan['scope_approval']==dict(path=SCOPE_PATH,sha256=SCOPE_SHA)
@@ -138,6 +141,7 @@ def source_authentication(plan):
 
 def prepare(candidate,out):
     plan=p.read(p.PLAN);validate_scope(plan)
+    assert os.environ.get('GITHUB_REF_NAME')==PREPARATION_BRANCH,'Wrong successor preparation branch'
     assert subprocess.check_output(['dotnet','--version'],text=True).strip()=='10.0.403'
     candidate,out=map(lambda path:Path(path).resolve(),(candidate,out))
     assert not out.exists() and not out.is_relative_to(candidate)
@@ -167,6 +171,7 @@ def prepare(candidate,out):
     proof=dict(plan_sha256=p.digest(p.PLAN),sources=plan['sources'],source_trees={label:p.git('rev-parse',CANONICAL+':src') for label in ('old','successor','variants')},
         sdk='10.0.403',dotnet_info=subprocess.check_output(['dotnet','--info'],text=True),workflow_head=p.git('rev-parse','HEAD'),
         run_id=os.environ['GITHUB_RUN_ID'],run_attempt=os.environ['GITHUB_RUN_ATTEMPT'],preparation_mode='authenticated-current-frontier-refresh',
+        workflow_branch=os.environ['GITHUB_REF_NAME'],preparation_revision=PREPARATION_REVISION,
         source_authentication=source_authentication(plan),common_manifest=p.manifest(out/'common'),evidence_manifest=p.manifest(out/'evidence'),
         production_sha256=production,checks=checks,tested_runtime_dependencies=dependencies,published_snapshot=verify_snapshot(plan),
         observed_publication_head=observed[0],primary_pair_inventory_sha256=p.digest(metadata),production_qualification=False,report_refresh_only=True)
@@ -176,8 +181,48 @@ def prepare(candidate,out):
     return proof
 
 
+def verify_harness_alias(folder,plan,proof):
+    """The single accepted runtime supplies every label, including the unused variant alias.
+
+    This replaces only the unrelated legacy WMA/TRIMA harness-proof route.
+    Actual common files, core bytes, CPU/parity TRXs and GPU evidence stay bound
+    to the accepted immutable artifact; no result or sampling gate is waived.
+    """
+    folder=Path(folder);validate_scope(plan)
+    assert proof['workflow_branch']==PREPARATION_BRANCH
+    assert proof['preparation_revision']==PREPARATION_REVISION
+    assert proof['source_authentication']==source_authentication(plan)
+    candidate=plan['candidate'];accepted=folder/'baseline-authentication'
+    raw=(accepted/'manifest.json').read_bytes()
+    assert hashlib.sha256(raw).hexdigest()==candidate['manifest_sha256']
+    manifest=json.loads(raw)
+    assert manifest['schema']==1 and manifest['status']=='cpu-correctness-complete' and manifest['sdk']==plan['proposed_dotnet_sdk']
+    assert (manifest['source'],manifest['run_id'],manifest['workflow_head'])==(CANONICAL,candidate['ci_run'],candidate['producer'])
+    assert manifest['classes']==dict(unit=candidate['unit_classes'],parity=candidate['parity_classes'])
+    assert (manifest['checks']['unit']['passed'],manifest['checks']['parity']['passed'])==(candidate['unit_passed'],candidate['parity_passed'])
+    prefix=p.BENCH+'/bin/Release/net10.0/'
+    expected={name[len(prefix):]:digest for name,digest in manifest['runtime_files'].items() if name.startswith(prefix)}
+    assert expected==proof['common_manifest']==p.manifest(folder/'common')
+    assert expected[p.DLL]==CORE_SHA and expected[ASSEMBLY]==HARNESS_SHA
+    cpu={}
+    for kind in ('unit','parity'):
+        value=(accepted/'evidence'/(kind+'.trx')).read_bytes()
+        assert hashlib.sha256(value).hexdigest()==manifest['evidence']['evidence/'+kind+'.trx']
+        cpu[kind]=value
+    gpu_receipt=evidence_entry(candidate['gpu_receipt']);gpu_trx=evidence_entry(candidate['gpu_trx'])
+    for label in ('old','successor','variants'):
+        assert proof['production_sha256'][label]==CORE_SHA==p.digest(folder/'production'/(label+'.dll'))
+        assert proof['checks'][label]==dict(manifest['checks']['unit'],original_gpu_source=CANONICAL)
+        assert (folder/'evidence'/(label+'.trx')).read_bytes()==cpu['unit']
+        assert (folder/'evidence'/(label+'-parity.trx')).read_bytes()==cpu['parity']
+        assert (folder/'evidence'/(label+'-original-gpu-receipt.json')).read_bytes()==gpu_receipt
+        assert (folder/'evidence'/(label+'-original-gpu-gpu.trx.gz')).read_bytes()==gpu_trx
+        assert proof['tested_runtime_dependencies'][label]==proof['tested_runtime_dependencies']['old']
+
+
 def verify_authentication(folder,plan,proof):
     folder=Path(folder);validate_scope(plan)
+    assert proof['workflow_branch']==PREPARATION_BRANCH and proof['preparation_revision']==PREPARATION_REVISION
     assert proof['preparation_mode']=='authenticated-current-frontier-refresh'
     assert proof['published_snapshot']==verify_snapshot(plan) and re.fullmatch('[a-f0-9]{40}',proof['observed_publication_head'])
     assert proof['production_qualification'] is False and proof['report_refresh_only'] is True

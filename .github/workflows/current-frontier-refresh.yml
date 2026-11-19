@@ -1,7 +1,7 @@
 name: Accepted baseline first154 frontier measurement refresh
 on:
   push:
-    branches: [perf/current-frontier-refresh-20261119]
+    branches: [perf/current-frontier-prep-repair-20261119]
     paths: [.github/workflows/current-frontier-refresh.yml]
 permissions:
   contents: read
@@ -30,6 +30,7 @@ jobs:
           $ErrorActionPreference='Stop'
           $plan=Get-Content -LiteralPath $env:HOSTED_TIMING_PLAN -Raw | ConvertFrom-Json
           if ($plan.inputs_ready -isnot [bool] -or !$plan.inputs_ready -or $plan.parent_review_approved -isnot [bool] -or !$plan.parent_review_approved) { throw 'HELD before SDK/input I/O; final root review required' }
+          if ($env:GITHUB_REF_NAME -ne 'perf/current-frontier-prep-repair-20261119' -or $plan.preparation_branch -ne $env:GITHUB_REF_NAME -or $plan.preparation_revision -ne 'accepted-runtime-alias-v1-20261119') { throw 'Wrong successor preparation binding' }
           if ($plan.current_frontier_refresh -ne $true -or $plan.baseline_measurement_refresh -ne $true -or $plan.report_refresh_only -ne $true -or $plan.production_qualification -ne $false -or $plan.cases -ne 1540 -or $plan.decisions -ne 308 -or $plan.matrix.shards -ne 12 -or $plan.matrix.max_parallel -ne 1 -or $plan.matrix.timeout_minutes_per_shard -ne 60 -or $plan.affected_pairs.Count -ne 154 -or $plan.algorithm_credit -ne 0 -or $plan.closure_credit -ne 0) { throw 'Wrong frozen first154 baseline refresh scope' }
           if ($plan.sources.old -ne '4b4e8a385ed1c210998d26de6460e23f5842ffe9' -or $plan.sources.successor -ne $plan.sources.old -or $plan.sources.variants -ne $plan.sources.old -or $plan.candidate.actual_harness_sha256 -ne '5a7b5b13be2308661be6c66a51aefa0f5a2f1be863c3501f8213d9e4f2963045') { throw 'Wrong accepted snapshot/runtime identity' }
           # Publication may advance; this remains the explicitly frozen4b/20d snapshot.
@@ -68,7 +69,7 @@ jobs:
           $ErrorActionPreference='Stop'
           Push-Location scripts
           try {
-            python -m unittest -v test_hosted_current_frontier_refresh test_current_frontier_report_admission test_current_frontier_archive
+            python -m unittest -v test_hosted_current_frontier_refresh test_current_frontier_report_admission test_current_frontier_archive test_current_frontier_preparation
             if ($LASTEXITCODE -ne 0) { throw 'Frontier orchestration tests failed' }
             python -c "from hosted_timing import current_frontier_refresh as q; q.validate_scope(q.p.read(q.p.PLAN))"
             if ($LASTEXITCODE -ne 0) { throw 'Frontier scope/source/evidence is not executable' }

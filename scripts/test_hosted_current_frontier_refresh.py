@@ -60,7 +60,7 @@ class CurrentFrontierRefreshTests(unittest.TestCase):
         self.assertEqual(list(range(12)),list(p.phase_shards(plan,'baseline-refresh')))
 
     def test_scope_mutations_fail_closed(self):
-        for key in ('source','pair','duplicate','size','warmup','iterations','runners','cap','cpu','gpu','core','harness','qualification','credit','report','scope','candidate','mixed_scope','report_source','timestamp_precedence'):
+        for key in ('source','pair','duplicate','size','warmup','iterations','runners','cap','cpu','gpu','core','harness','qualification','credit','report','scope','candidate','mixed_scope','report_source','timestamp_precedence','preparation_branch','preparation_revision'):
             plan=self.plan(ready=True)
             if key=='source':plan['sources']['successor']='0'*40
             elif key=='pair':plan['affected_pairs'].pop()
@@ -81,7 +81,9 @@ class CurrentFrontierRefreshTests(unittest.TestCase):
             elif key=='candidate':plan['candidate']['ci_run']='1'
             elif key=='mixed_scope':plan['current_baseline_ten_refresh']=True
             elif key=='report_source':plan['report_before_sha256']='f'*64
-            else:plan['composition_policy']['precedence']='latest-wall-clock-timestamp'
+            elif key=='timestamp_precedence':plan['composition_policy']['precedence']='latest-wall-clock-timestamp'
+            elif key=='preparation_branch':plan['preparation_branch']='perf/current-frontier-refresh-20261119'
+            else:plan['preparation_revision']='missing-alias-route'
             with self.subTest(key=key),self.assertRaises(AssertionError):q.validate_scope(plan)
 
     def test_runtime_identity_includes_all_dependencies_and_actual_core_harness(self):
@@ -194,6 +196,7 @@ class CurrentFrontierRefreshTests(unittest.TestCase):
         self.assertIn('fail-fast: true',text);self.assertEqual(4,text.count('timeout-minutes: 60'))
         self.assertNotIn('--phase diagnostic',text);self.assertNotIn('verify_current_publication',text)
         self.assertNotIn('dotnet build',text);self.assertNotIn('dotnet test',text)
+        self.assertIn(q.PREPARATION_BRANCH,text);self.assertIn(q.PREPARATION_REVISION,text)
 
     def test_effective_stopping_contract_is_honest_about_waiting_and_contamination(self):
         approved=q.scope()
