@@ -19,6 +19,8 @@ internal static partial class ValuesBarExecution
         private readonly double[] _scratch = new double[2];
         private int _fill, _carry, _received, _origin, _weightGrid;
         private UInt128 _mass;
+        private AlmaWideDivisor _wideDivisor;
+        private bool _hasWideDivisor;
         private bool _weightsReady, _originalOnly;
 
         internal AlmaGridBatchState(ArnaudLegouxWindow.State original, int period,
@@ -101,6 +103,8 @@ internal static partial class ValuesBarExecution
             }
             if (mass == 0 || mass >= (UInt128)1 << 78) return false;
             _mass = mass; _weightGrid = grid;
+            _hasWideDivisor = mass > ulong.MaxValue;
+            if (_hasWideDivisor) _wideDivisor = new(mass);
             return true;
         }
 
@@ -129,8 +133,13 @@ internal static partial class ValuesBarExecution
                 // each signed36-bit limb partial is strictly below2^53.
                 // Integer recombination is below2^89 and fits Int128.
                 Int128 integer = ((Int128)(long)_high[i] << 36) + (long)_low[i];
-                var numerator = JurikDyadic.FromBinaryProduct(integer, grid + _weightGrid);
-                Publish(i, numerator.Ratio(denominator), 1, ref last);
+                double value;
+                if (!_hasWideDivisor || !_wideDivisor.TryRatio(integer, grid, out value))
+                {
+                    var numerator = JurikDyadic.FromBinaryProduct(integer, grid + _weightGrid);
+                    value = numerator.Ratio(denominator);
+                }
+                Publish(i, value, 1, ref last);
             }
             return last;
         }
