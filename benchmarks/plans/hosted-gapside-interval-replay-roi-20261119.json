@@ -79,8 +79,8 @@
       "decisions": 2
     }
   ],
-  "inputs_ready": false,
-  "parent_review_approved": false,
+  "inputs_ready": true,
+  "parent_review_approved": true,
   "sources": {
     "published": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
     "old": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
