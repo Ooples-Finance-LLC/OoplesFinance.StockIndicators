@@ -176,4 +176,105 @@ internal static partial class FastKernels
             }
         }
     }
+
+
+    // The mean of the newest count prices, then a 4-3-2-1 weighting of the last four such means.
+    private struct TrendMean
+    {
+        private double _mean1, _mean2, _mean3;
+        private int _cursor;
+        internal double Average;
+
+        // prices is a ring of fifty; a count of zero is a mean of zero.
+        internal void Update(double[] prices, double price, int count, bool average)
+        {
+            prices[_cursor] = price;
+            if (average)
+            {
+                double sum = 0;
+                var slot = _cursor;
+                for (var lag = 0; lag < count; lag++)
+                {
+                    sum += prices[slot];
+                    slot = slot == 0 ? 49 : slot - 1;
+                }
+                var mean = count == 0 ? 0 : count == 1 ? price : sum / count;
+                Average = (4 * mean + 3 * _mean1 + 2 * _mean2 + _mean3) / 10;
+                _mean3 = _mean2;
+                _mean2 = _mean1;
+                _mean1 = mean;
+            }
+            _cursor = _cursor == 49 ? 0 : _cursor + 1;
+        }
+    }
+
+    /// <summary>
+    /// Instantaneous trendline from bar six: the mean of the price over the dominant cycle, weighted over
+    /// its last four values, with the smoothed price and the cycle length. The price itself stands in for
+    /// the trendline until bar eleven.
+    /// </summary>
+    internal static void SeededTrendline(FastColumns columns, double[][] outputs, bool useMidpoint)
+    {
+        ReadOnlySpan<double> close = columns.Close;
+        var n = close.Length;
+        ReadOnlySpan<double> high = useMidpoint ? columns.High : default, low = useMidpoint ? columns.Low : default;
+        Span<double> trendline = outputs[0].AsSpan(0, n), smooth = outputs[1].AsSpan(0, n), periods = outputs[2].AsSpan(0, n),
+            periodsDefined = outputs[5].AsSpan(0, n);
+        smooth.Clear();
+        periods.Clear();
+        periodsDefined.Clear();
+        outputs[3].AsSpan(0, n).Fill(1);
+        DefinedFrom(outputs[4].AsSpan(0, n), 6);
+        var hilbert = new HilbertCore(6, false, false);
+        var means = new TrendMean();
+        var ring = new double[50];
+        double period = 0;
+        for (var i = 0; i < n; i++)
+        {
+            var price = useMidpoint ? (high[i] + low[i]) / 2 : close[i];
+            hilbert.Update(price);
+            trendline[i] = price;
+            if (i < 6)
+            {
+                means.Update(ring, price, 0, false);
+                continue;
+            }
+            period = .33 * hilbert.Period + .67 * period;
+            var count = Math.Min((int)(period + .5), i + 1);
+            means.Update(ring, price, count == 0 ? 1 : count, true);
+            if (i >= 11) trendline[i] = means.Average;
+            smooth[i] = hilbert.SmoothPrice;
+            if (count <= 0) continue;
+            periods[i] = count;
+            periodsDefined[i] = 1;
+        }
+    }
+
+    /// <summary>
+    /// Instantaneous trendline after a 37-bar run-in, published from bar 63 plus the suppression.
+    /// </summary>
+    internal static void DelayedTrendline(ReadOnlySpan<double> close, Span<double> value, Span<double> defined, long publishFrom)
+    {
+        var n = close.Length;
+        value = value.Slice(0, n);
+        value.Clear();
+        DefinedFrom(defined.Slice(0, n), publishFrom);
+        var hilbert = new HilbertCore(37, true, false);
+        var means = new TrendMean();
+        var ring = new double[50];
+        double period = 0;
+        for (var i = 0; i < n; i++)
+        {
+            var price = close[i];
+            hilbert.Update(price);
+            if (i < 37)
+            {
+                means.Update(ring, price, 0, false);
+                continue;
+            }
+            period = .33 * hilbert.Period + .67 * period;
+            means.Update(ring, price, (int)(period + .5), true);
+            if (i >= publishFrom) value[i] = means.Average;
+        }
+    }
 }
