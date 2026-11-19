@@ -15,10 +15,13 @@ internal static partial class FastKernels
         for (var i = 0; i < period; i++) sum += input[i];
         var reciprocal = 1.0 / period;
         output[period - 1] = sum * reciprocal;
-        for (var i = period; i < n; i++)
+        var entering = input.Slice(period);
+        var leaving = input.Slice(0, entering.Length);
+        var tail = output.Slice(period, entering.Length);
+        for (var i = 0; i < tail.Length; i++)
         {
-            sum += input[i] - input[i - period];
-            output[i] = sum * reciprocal;
+            sum += entering[i] - leaving[i];
+            tail[i] = sum * reciprocal;
         }
     }
 
@@ -29,11 +32,13 @@ internal static partial class FastKernels
         if (n == 0) return;
         if (period <= 1) { input.CopyTo(output); return; }
         var alpha = 2.0 / (period + 1.0);
+        var weight = 1.0 - alpha;
         var previous = input[0];
         output[0] = previous;
+        output = output.Slice(0, n);
         for (var i = 1; i < n; i++)
         {
-            previous += alpha * (input[i] - previous);
+            previous = FastMath.Blend(weight, previous, alpha * input[i]);
             output[i] = previous;
         }
     }
@@ -49,6 +54,7 @@ internal static partial class FastKernels
         output.Slice(0, Math.Min(warmup, n)).Clear();
         if (warmup >= n) return;
         var alpha = 2.0 / (period + 1.0);
+        var weight = 1.0 - alpha;
         double a0 = 0, a1 = 0, a2 = 0;
         if (shared)
         {
@@ -59,11 +65,11 @@ internal static partial class FastKernels
             output[period - 1] = seed;
             for (var i = period; i < n; i++)
             {
-                a0 += alpha * (input[i] - a0);
-                a1 += alpha * (a0 - a1);
+                a0 = FastMath.Blend(weight, a0, alpha * input[i]);
+                a1 = FastMath.Blend(weight, a1, alpha * a0);
                 if (order == 3)
                 {
-                    a2 += alpha * (a1 - a2);
+                    a2 = FastMath.Blend(weight, a2, alpha * a1);
                     output[i] = 3 * (a0 - a1) + a2;
                 }
                 else output[i] = 2 * a0 - a1;
@@ -76,13 +82,13 @@ internal static partial class FastKernels
         for (var i = 0; i < n; i++)
         {
             if (c0 < period) { s0 += input[i]; if (++c0 < period) continue; a0 = s0 / period; }
-            else a0 += alpha * (input[i] - a0);
+            else a0 = FastMath.Blend(weight, a0, alpha * input[i]);
             if (c1 < period) { s1 += a0; if (++c1 < period) continue; a1 = s1 / period; }
-            else a1 += alpha * (a0 - a1);
+            else a1 = FastMath.Blend(weight, a1, alpha * a0);
             if (order == 3)
             {
                 if (c2 < period) { s2 += a1; if (++c2 < period) continue; a2 = s2 / period; }
-                else a2 += alpha * (a1 - a2);
+                else a2 = FastMath.Blend(weight, a2, alpha * a1);
                 output[i] = 3 * (a0 - a1) + a2;
             }
             else output[i] = 2 * a0 - a1;

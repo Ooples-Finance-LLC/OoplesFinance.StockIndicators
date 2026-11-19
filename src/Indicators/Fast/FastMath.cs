@@ -15,6 +15,45 @@ internal static class FastMath
         GC.AllocateUninitializedArray<double>(count);
 #endif
 
+    /// <summary>One exponential step: weight * previous + scaled, where scaled is alpha * input.</summary>
+    /// <remarks>
+    /// Written so the only operation on the loop-carried value is a single fused multiply-add. The usual
+    /// previous + alpha * (input - previous) form chains a subtract, a multiply and an add through the
+    /// recurrence, which is three times the latency per bar.
+    /// </remarks>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    internal static double Blend(double weight, double previous, double scaled)
+    {
+#if !NETFRAMEWORK
+        if (System.Runtime.Intrinsics.X86.Fma.IsSupported || System.Runtime.Intrinsics.Arm.AdvSimd.Arm64.IsSupported)
+            return Math.FusedMultiplyAdd(weight, previous, scaled);
+#endif
+        return weight * previous + scaled;
+    }
+
+    /// <summary>Whether every element is finite, checked a vector at a time.</summary>
+    internal static bool AllFinite(ReadOnlySpan<double> values)
+    {
+        // value - value is zero for a finite value and NaN for an infinity or a NaN.
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated && values.Length >= System.Numerics.Vector<double>.Count)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            var check = System.Numerics.Vector<double>.Zero;
+            for (; i <= values.Length - width; i += width)
+            {
+                var v = new System.Numerics.Vector<double>(values.Slice(i, width));
+                check += v - v;
+            }
+            if (!System.Numerics.Vector.EqualsAll(check, System.Numerics.Vector<double>.Zero)) return false;
+        }
+#endif
+        double tail = 0;
+        for (; i < values.Length; i++) tail += values[i] - values[i];
+        return tail == 0;
+    }
+
     internal static void Add(ReadOnlySpan<double> a, ReadOnlySpan<double> b, Span<double> result)
     {
 #if !NETFRAMEWORK

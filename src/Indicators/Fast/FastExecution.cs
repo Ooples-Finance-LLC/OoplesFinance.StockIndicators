@@ -22,10 +22,9 @@ internal static class FastExecution
     }
 
     /// <summary>Computes every configured output. The caller owns the returned arrays.</summary>
-    internal static Dictionary<IIndicatorOutput, double[]> Execute(Bar[] source, IReadOnlyList<IIndicator> indicators,
+    internal static Dictionary<IIndicatorOutput, double[]> Execute(FastColumns columns, IReadOnlyList<IIndicator> indicators,
         CancellationToken cancellation, out int warmup)
     {
-        var columns = new FastColumns(source);
         var series = new Dictionary<IIndicatorOutput, double[]>();
         warmup = 0;
         for (var i = 0; i < indicators.Count; i++)
@@ -35,7 +34,7 @@ internal static class FastExecution
             if (series.ContainsKey(indicator.Outputs[0])) continue;
             var kernel = Resolve(indicator) ?? throw new InvalidOperationException("Unqualified fast execution plan.");
             var outputs = new double[indicator.Outputs.Count][];
-            for (var slot = 0; slot < outputs.Length; slot++) outputs[slot] = FastMath.Allocate(source.Length);
+            for (var slot = 0; slot < outputs.Length; slot++) outputs[slot] = FastMath.Allocate(columns.Count);
             kernel(columns, outputs);
             for (var slot = 0; slot < outputs.Length; slot++) series[indicator.Outputs[slot]] = outputs[slot];
             warmup = Math.Max(warmup, indicator.WarmupBars);

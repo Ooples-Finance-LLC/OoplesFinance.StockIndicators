@@ -81,14 +81,26 @@ public sealed class StockIndicatorBuilder
     {
         if (_numerics != IndicatorNumerics.Fast || _executionBackend == IndicatorExecutionBackend.Gpu
             || !CanUseDirectFusedExecution
-            || (source as Indicators.ISynchronousBarSource)?.DirectBars is not { } bars
             || !Indicators.Fast.FastExecution.Supports(_configuredIndicators))
             return null;
+        IReadOnlyList<Indicators.Bar> bars;
+        Indicators.Fast.FastColumns columns;
+        if (source is Indicators.IColumnBarSource columnar)
+        {
+            bars = columnar.Columns;
+            columns = new Indicators.Fast.FastColumns(columnar.Columns);
+        }
+        else if ((source as Indicators.ISynchronousBarSource)?.DirectBars is { } direct)
+        {
+            bars = direct;
+            columns = new Indicators.Fast.FastColumns(direct);
+        }
+        else return null;
         cancellationToken.ThrowIfCancellationRequested();
-        var series = Indicators.Fast.FastExecution.Execute(bars, _configuredIndicators, cancellationToken, out var warmup);
+        var series = Indicators.Fast.FastExecution.Execute(columns, _configuredIndicators, cancellationToken, out var warmup);
         LastExecution = new(IndicatorExecutionBackend.Cpu, null, "Fast double execution over borrowed bars.");
         if (!latestOnly) return new Indicators.IndicatorRun(null, series, bars, 0, warmup);
-        var count = bars.Length;
+        var count = bars.Count;
         Indicators.IBarSnapshot? latest = null;
         if (count != 0)
         {
@@ -120,7 +132,6 @@ public sealed class StockIndicatorBuilder
         cancellationToken.ThrowIfCancellationRequested();
         var source = _barSource ?? throw new InvalidOperationException("No bar source. Call ConfigureSource before BuildAsync.");
         if (!source.IsFinite) return await BuildWithHistoryAsync(cancellationToken).ConfigureAwait(false);
-        if (TryBuildFast(source, true, cancellationToken) is { } fastLatest) return fastLatest;
 #if !NETFRAMEWORK
         if (_executionBackend == IndicatorExecutionBackend.Gpu && CanUseDirectFusedExecution
             && (source as Indicators.ISynchronousBarSource)?.DirectBars is { } gpuSource
@@ -319,9 +330,18 @@ public sealed class StockIndicatorBuilder
     /// </para>
     /// </remarks>
     /// <exception cref="InvalidOperationException">Thrown when no source was configured.</exception>
-    public Task<Indicators.IIndicatorRun> BuildAsync(CancellationToken cancellationToken = default) =>
-        _historyMode == IndicatorHistoryMode.LatestOnly
+    public Task<Indicators.IIndicatorRun> BuildAsync(CancellationToken cancellationToken = default)
+    {
+        // A fast build completes synchronously, so it is answered here without an async state machine.
+        if (_numerics == IndicatorNumerics.Fast && _barSource is { IsFinite: true } finite)
+        {
+            LastExecution = null;
+            if (TryBuildFast(finite, _historyMode == IndicatorHistoryMode.LatestOnly, cancellationToken) is { } fast)
+                return Task.FromResult(fast);
+        }
+        return _historyMode == IndicatorHistoryMode.LatestOnly
             ? BuildLatestOnlyAsync(cancellationToken) : BuildWithHistoryAsync(cancellationToken);
+    }
 
     private async Task<Indicators.IIndicatorRun> BuildWithHistoryAsync(CancellationToken cancellationToken)
     {
@@ -340,8 +360,6 @@ public sealed class StockIndicatorBuilder
             LastExecution = execution;
             return live;
         }
-
-        if (TryBuildFast(source, false, cancellationToken) is { } fastRun) return fastRun;
 
         var bars = new Indicators.OwnedBarHistory();
 
