@@ -1,0 +1,76 @@
+{
+  "status": "root-independent-compiled-feasibility-proof-authenticated",
+  "independent_authentication_passed": true,
+  "source": "1500d6b72d776c7f129dc191d8a44bd4a89fe8be",
+  "baseline_source": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+  "cpu_root_review_sha256": "150bbf90c651556aeed22e6e5c9be127ea2d4979f9c1f37f4ff69f77385937b0",
+  "gpu_root_review_sha256": "95b56971445069b42746af04db53ddc00104bf6aa65543ca215e0aae25cc2fdf",
+  "inspection_receipt_sha256": "3bc2e867f264ba4a8657ae7144afb8857a4021503cbb24f453e455b189a26c31",
+  "pairs": [
+    {
+      "pair": "QuanTAlib.Alma",
+      "full_outputs_and_inputs_equal_both_sizes": true,
+      "actual_private_batch_mentions": 4,
+      "flush_il_length": 516,
+      "simd_calls": 2,
+      "tensor_fma_ymm_observed": true,
+      "protected_methods": [
+        {
+          "method": "OoplesFinance.StockIndicators.Indicators.Bar FillBoundedWindow(OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.IIndicator, System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+          "normalized_il_equal": true,
+          "raw_locals_equal": true,
+          "maxstack_equal": true
+        },
+        {
+          "method": "OoplesFinance.StockIndicators.Indicators.Bar FillBoundedWindow[T](OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.IIndicator, Int32, System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+          "normalized_il_equal": true,
+          "raw_locals_equal": false,
+          "maxstack_equal": true
+        },
+        {
+          "method": "PointwiseRegion ComputeBoundedRegion[T](OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer, Int32, Int32, Int32, System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar], System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar], System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.IIndicator)",
+          "normalized_il_equal": true,
+          "raw_locals_equal": true,
+          "maxstack_equal": true
+        }
+      ]
+    },
+    {
+      "pair": "Skender.GetAlma",
+      "full_outputs_and_inputs_equal_both_sizes": true,
+      "actual_private_batch_mentions": 1,
+      "flush_il_length": 516,
+      "simd_calls": 2,
+      "tensor_fma_ymm_observed": true,
+      "protected_methods": [
+        {
+          "method": "OoplesFinance.StockIndicators.Indicators.Bar FillBoundedWindow(OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.IIndicator, System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+          "normalized_il_equal": true,
+          "raw_locals_equal": true,
+          "maxstack_equal": true
+        },
+        {
+          "method": "OoplesFinance.StockIndicators.Indicators.Bar FillBoundedWindow[T](OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.IIndicator, Int32, System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+          "normalized_il_equal": true,
+          "raw_locals_equal": false,
+          "maxstack_equal": true
+        },
+        {
+          "method": "PointwiseRegion ComputeBoundedRegion[T](OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer, Int32, Int32, Int32, System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar], System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar], System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.IIndicator)",
+          "normalized_il_equal": true,
+          "raw_locals_equal": true,
+          "maxstack_equal": true
+        }
+      ]
+    }
+  ],
+  "builds": 0,
+  "new_gpu_runs": 0,
+  "timing_samples": 0,
+  "qualification": false,
+  "limitations": [
+    "Standalone privateFlush body not captured; actualcallsite+IL+FMA proof adequate forcheapROI.",
+    "No machinecode/performanceidentity inferred from normalizedIL or outputequality.",
+    "Actualpostcall inputhashes matchbaseline; inputmutability also covered byunitownership tests."
+  ]
+}

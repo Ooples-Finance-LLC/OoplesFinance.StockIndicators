@@ -1,0 +1,278 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "expected_runtime_version": ".NET 10.0.15",
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "diagnostic_kind": "alma-grid-native-pilot",
+  "diagnostic_only": true,
+  "cases": 30,
+  "decisions": 6,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 120
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Alma",
+              "pair": "QuanTAlib.Alma"
+            },
+            {
+              "raw": "Skender.GetAlma",
+              "pair": "Skender.GetAlma"
+            },
+            {
+              "raw": "QuanTAlib.Gma",
+              "pair": "QuanTAlib.Gma"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 30,
+          "decisions": 6
+        }
+      ],
+      "cases": 30,
+      "decisions": 6
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Alma",
+              "pair": "QuanTAlib.Alma"
+            },
+            {
+              "raw": "Skender.GetAlma",
+              "pair": "Skender.GetAlma"
+            },
+            {
+              "raw": "QuanTAlib.Gma",
+              "pair": "QuanTAlib.Gma"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 30,
+          "decisions": 6
+        }
+      ],
+      "cases": 30,
+      "decisions": 6
+    }
+  ],
+  "inputs_ready": true,
+  "parent_review_approved": true,
+  "sources": {
+    "published": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+    "old": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+    "successor": "1500d6b72d776c7f129dc191d8a44bd4a89fe8be",
+    "variants": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91"
+  },
+  "gpu_sources": {
+    "old": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+    "successor": "1500d6b72d776c7f129dc191d8a44bd4a89fe8be",
+    "variants": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "AnalyticGridBatchTests",
+      "SharedWeightedWindowTests",
+      "FibonacciWeightedAverageTests",
+      "AffineConvolutionTests",
+      "WindowedSincCompactTests"
+    ],
+    "successor": [
+      "AlmaGridBatchTests",
+      "SharedAlmaWindowTests",
+      "AnalyticGridBatchTests"
+    ],
+    "variants": [
+      "AnalyticGridBatchTests",
+      "SharedWeightedWindowTests",
+      "FibonacciWeightedAverageTests",
+      "AffineConvolutionTests",
+      "WindowedSincCompactTests"
+    ]
+  },
+  "old_candidate": {
+    "source": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+    "ci_run": "44432145585",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "4b0475d0cd4bc19cae16b72c6aa017fb63f1fc33",
+    "manifest_sha256": "60a4a285d4a7879e1be3c667c2757ae3f56a772f26d64c005fa91c392b5b9ce3",
+    "gpu_receipt_sha256": "bb51f6bf8181c742cff56869a1083b0f7bbb93d2b3cc85644046dbfb797ed890",
+    "production_sha256": "5cdb8051eb19e26ec7fa2202f0fbeba70bc30f3dd9220ac8abab6a9d50fde74b",
+    "source_fingerprint": "cd8a76c3f21d8f8ebcc066b55c37db2f68b01f2fdb853bd8b7eee57b8c206519",
+    "artifact_id": "14487094783",
+    "artifact_zip_sha256": "803c35d7f98b2353b4ab9c853579aedfb7e4faf9daf2f31ce0ff6684c4c7a448",
+    "unit_passed": 53,
+    "parity_passed": 48,
+    "unit_classes": [
+      "AnalyticGridBatchTests",
+      "SharedWeightedWindowTests",
+      "FibonacciWeightedAverageTests",
+      "AffineConvolutionTests",
+      "WindowedSincCompactTests"
+    ],
+    "parity_classes": [
+      "AnalyticKernelComparisonTests",
+      "FixedWeightedComparisonTests",
+      "ConvolutionComparisonTests",
+      "SincBuilderComparisonTests"
+    ],
+    "actual_harness_sha256": "933e0694594e08f663d27e31d0e174f267ad5471c9206a91e4f21be39e6aafe0"
+  },
+  "candidate": {
+    "source": "1500d6b72d776c7f129dc191d8a44bd4a89fe8be",
+    "ci_run": "44447015919",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "354e94cf989cc0cb16a456cba1c59a700e21bd90",
+    "manifest_sha256": "cf8a0720afb84bfa1f564ac01598335954928921d8bd17df59098ffbbd946da2",
+    "gpu_receipt_sha256": "45a6bb202ee1a2fbfca66280c78e4428a6af04c9c31e46e49fa3f8f6ca86aa65",
+    "production_sha256": "131d472392891d3a4a45193b2999c7ef310901218f07cca8d8e77e82322cf1ad",
+    "source_fingerprint": "bd9589ba577334f36614689e98442c23aee9a77c00a3c4e05a39f3111a6c8cc9",
+    "artifact_id": "14493499527",
+    "artifact_zip_sha256": "cdf19cdf3cfcac2a876fc898efc057fc42cd1107287492c4bd59545f4f76686f",
+    "unit_passed": 49,
+    "parity_passed": 31,
+    "unit_classes": [
+      "AlmaGridBatchTests",
+      "SharedAlmaWindowTests",
+      "AnalyticGridBatchTests"
+    ],
+    "parity_classes": [
+      "AlmaComparisonTests",
+      "AnalyticKernelComparisonTests"
+    ],
+    "actual_harness_sha256": "1829da77256baedabe8729fabb9b208a1e210462e5a341f2428dbd21a45ea03d"
+  },
+  "harness_sha256": "933e0694594e08f663d27e31d0e174f267ad5471c9206a91e4f21be39e6aafe0",
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "harness_alias_policy": {
+    "common_artifact_role": "old",
+    "variants_artifact_role": "old",
+    "baseline_source": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+    "candidate_source": "1500d6b72d776c7f129dc191d8a44bd4a89fe8be",
+    "require_scoped_source_identity": true,
+    "claim_artifact_binary_identity": false
+  },
+  "automatic_qualification": false,
+  "future_builder_fixture": [
+    "SharedAlmaWindowBenchmarks"
+  ],
+  "require_net_10000_point_progress": true,
+  "frozen_baseline_feasibility_only": true,
+  "current_combined_source_qualified": false,
+  "report_import_permitted": false,
+  "followup_requires_current_published_baseline": true,
+  "actual_input_provenance": {
+    "path": "benchmarks/plans/evidence/alma-grid-compiled-bundle-20261119.json.gz",
+    "sha256": "0b6e1bbde28ab63958e9ccc0deafdf6c39e3947dc59ecc63ed2774b80f858111"
+  },
+  "compiled_fixture_path_proof": {
+    "path": "benchmarks/plans/evidence/alma-grid-compiled-bundle-20261119.json.gz",
+    "sha256": "0b6e1bbde28ab63958e9ccc0deafdf6c39e3947dc59ecc63ed2774b80f858111"
+  },
+  "published_baseline": {
+    "pull_request": 266,
+    "head": "87405159446f3de0132ce49800b52bd0af00e234",
+    "branch": "perf/remaining-indicator-rollout",
+    "source_fingerprint": "cd8a76c3f21d8f8ebcc066b55c37db2f68b01f2fdb853bd8b7eee57b8c206519"
+  },
+  "native_win_policy_approval": {
+    "path": "benchmarks/plans/evidence/native-win-rule-user-approved-20261118.json",
+    "sha256": "414b558eae1deda750c3d169020128986a0e0db9b2acd95f23da035be03bfd7c",
+    "policy_id": "native-separated-confidence-intervals-both-rounds-20261118"
+  },
+  "native_progress_gate": {
+    "fixture": "LibraryPairBenchmarks",
+    "method": "Ooples",
+    "native_method": "Competitor",
+    "native_round": 2,
+    "old_rounds": [
+      0,
+      3
+    ],
+    "candidate_rounds": [
+      1,
+      2
+    ],
+    "minimum_margin": null,
+    "require_separated_intervals_both_rounds": true,
+    "new_closure_bars": 10000,
+    "minimum_new_closures": 1,
+    "require_own_source_faster": true,
+    "require_net_10000_point_progress": true,
+    "protect_prior_confident_wins_both_sizes": true,
+    "target_pairs": [
+      "QuanTAlib.Alma",
+      "Skender.GetAlma"
+    ]
+  },
+  "compiled_proof_root_review": {
+    "path": "benchmarks/plans/evidence/alma-grid-compiled-root-review-20261119.json",
+    "sha256": "aa8cbbc975d50403d72d1c645b401306a25dda7d2a715a1d10277f0c84de623d"
+  },
+  "baseline_cpu_root_review": {
+    "path": "benchmarks/plans/evidence/alma-grid-baseline-cpu-root-review-20261119.json",
+    "sha256": "54f7a87f11b219633941227618ef003d5da69c36e01677abbe039c1e7cb17c17"
+  },
+  "fixture_contracts": {
+    "LibraryPairBenchmarks": {
+      "pair_parameter": "PairId",
+      "size_parameter": "Bars",
+      "sizes": [
+        1000,
+        10000
+      ],
+      "methods": [
+        "Ooples",
+        "Competitor"
+      ]
+    }
+  },
+  "candidate_cpu_root_review": {
+    "path": "benchmarks/plans/evidence/alma-grid-candidate-cpu-root-review-20261119.json",
+    "sha256": "150bbf90c651556aeed22e6e5c9be127ea2d4979f9c1f37f4ff69f77385937b0"
+  },
+  "candidate_gpu_root_review": {
+    "path": "benchmarks/plans/evidence/alma-grid-candidate-gpu-root-review-20261119.json",
+    "sha256": "95b56971445069b42746af04db53ddc00104bf6aa65543ca215e0aae25cc2fdf"
+  }
+}
