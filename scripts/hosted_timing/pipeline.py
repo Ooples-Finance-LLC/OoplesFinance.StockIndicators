@@ -238,7 +238,10 @@ def verify_inputs(folder):
     if plan.get('ultimate_direct_long_qualification'):
         from .ultimate_direct_long_qualification import verify_authentication
         verify_authentication(folder, plan, proof)
-    if plan.get('diagnostic_kind') == 'modified-hikkake-sparse-replay-native-pilot':
+    if plan.get('diagnostic_kind') == 'analytic-grid-native-pilot':
+        from .analytic_grid_roi import verify_authentication
+        verify_authentication(folder,plan,proof)
+    elif plan.get('diagnostic_kind') == 'modified-hikkake-sparse-replay-native-pilot':
         from .modified_hikkake_sparse_replay_roi import verify_authentication
         verify_authentication(folder,plan,proof)
     elif plan.get('diagnostic_kind') == 'renko-constant-tr-private-native-pilot':
@@ -316,6 +319,9 @@ def _verify_input_contents(folder, plan, proof, plan_sha256):
         verify_harness_alias(folder,plan,proof)
     elif plan.get('ultimate_direct_long_qualification'):
         from .ultimate_direct_long_qualification import verify_harness_alias
+        verify_harness_alias(folder,plan,proof)
+    elif plan.get('diagnostic_kind') == 'analytic-grid-native-pilot':
+        from .analytic_grid_roi import verify_harness_alias
         verify_harness_alias(folder,plan,proof)
     elif plan.get('diagnostic_kind') == 'modified-hikkake-sparse-replay-native-pilot':
         from .modified_hikkake_sparse_replay_roi import verify_harness_alias

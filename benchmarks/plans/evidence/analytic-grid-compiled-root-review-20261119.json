@@ -1,0 +1,160 @@
+{
+  "status": "root-independent-compiled-feasibility-proof-authenticated",
+  "source": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+  "baseline_source": "48d238f56c37986b8437e5c31164552cc1362802",
+  "inspection_receipt_sha256": "b0eb8a72847005916deb23c335acc911ce44b8bedbe22d2b28c11dde87a217c1",
+  "compiled_analysis_sha256": "0e1f633a0267f0dd963d5aadc202fd5e6b71ac57906143fc164f84f6965d9750",
+  "cpu_root_review_sha256": "54f7a87f11b219633941227618ef003d5da69c36e01677abbe039c1e7cb17c17",
+  "gpu_root_review_sha256": "2f130e27079d837041a3011247add3ec0e576dfebe2cae3511156dab48258388",
+  "pairs": [
+    {
+      "pair": "QuanTAlib.Gma",
+      "output_rows": [
+        {
+          "lp_period": 20,
+          "first_valid": 0,
+          "full_returned_output_sha256": "8f8eb3c685bdc0d26f54f3efddd5dc6008d33df5db20c4fec43debfe7151bea9",
+          "present_is_null": true,
+          "pair": "QuanTAlib.Gma",
+          "bars": 1000,
+          "actual_data_bits": {
+            "Opens": "7c76532e5d6a9a10039cd77623582c5c6e72b6aa55a6973531207a1589f1e518",
+            "Closes": "7c76532e5d6a9a10039cd77623582c5c6e72b6aa55a6973531207a1589f1e518",
+            "Volumes": "348ea5c9cb898fb7426cd15bb975800f2b6764800e1ae6283bb8f094c2ce8232",
+            "Lows": "3140cab4dd7b1d48c77aea0f95dab31d5fa0b1f226f2ee63632071d81c68a310",
+            "Highs": "df616634532ec4123229086585a70c35ffabc41309e8a9e7515f31c49f11263b"
+          }
+        },
+        {
+          "lp_period": 20,
+          "first_valid": 0,
+          "full_returned_output_sha256": "2eb8f402813db182b32bdb435b653b05e928a18eb7321d6f66215a4fba06f0b4",
+          "present_is_null": true,
+          "pair": "QuanTAlib.Gma",
+          "bars": 10000,
+          "actual_data_bits": {
+            "Opens": "2514304ca43cdca9c200b4d0afb36b16a586d583f887dc85efc0dbdd144b7b31",
+            "Closes": "2514304ca43cdca9c200b4d0afb36b16a586d583f887dc85efc0dbdd144b7b31",
+            "Volumes": "210ce3075d6c4a608006e85425f24a604753d080a0a3d2855ebff5fab48ca326",
+            "Lows": "89e4e6ec6bd016497bf7e1ba16d666a568be5ec67cc8378be5d2836496a43fc5",
+            "Highs": "c9dd8ec942130882ff18c8aee89a03e9cbb1a57c38ec10d1b204b97e338fe189"
+          }
+        }
+      ],
+      "protected_methods": [
+        {
+          "type": "OoplesFinance.StockIndicators.Indicators.NormalizedKernelState",
+          "method": "Void Reset()",
+          "raw_locals_equal": true
+        },
+        {
+          "type": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution",
+          "method": "PointwiseRegion ComputeBoundedRegion[T](OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer, Int32, Int32, Int32, System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar], System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar], System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.IIndicator)",
+          "raw_locals_equal": true
+        },
+        {
+          "type": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution",
+          "method": "OoplesFinance.StockIndicators.Indicators.Bar FillBoundedWindow(OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.IIndicator, System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+          "raw_locals_equal": true
+        },
+        {
+          "type": "OoplesFinance.StockIndicators.Indicators.NormalizedKernelState",
+          "method": "Double Update(OoplesFinance.StockIndicators.Indicators.Bar ByRef)",
+          "raw_locals_equal": true
+        },
+        {
+          "type": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution",
+          "method": "OoplesFinance.StockIndicators.Indicators.Bar FillBoundedWindow[T](OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.IIndicator, Int32, System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+          "raw_locals_equal": false
+        },
+        {
+          "type": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+StateWindowKernel",
+          "method": "Double Update(OoplesFinance.StockIndicators.Indicators.Bar ByRef)",
+          "raw_locals_equal": true
+        }
+      ],
+      "compiled_flush_call_sites": 9,
+      "standalone_flush_body_captured": false,
+      "tensor_fma_listing_observed": true
+    },
+    {
+      "pair": "QuanTAlib.Sinema",
+      "output_rows": [
+        {
+          "full_returned_output_sha256": "6ef916d8a56fa774a8bf3034a8f7320e29be3054a66a9d4151e60e6fb73a5c73",
+          "actual_data_bits": {
+            "Closes": "7c76532e5d6a9a10039cd77623582c5c6e72b6aa55a6973531207a1589f1e518",
+            "Volumes": "348ea5c9cb898fb7426cd15bb975800f2b6764800e1ae6283bb8f094c2ce8232",
+            "Lows": "3140cab4dd7b1d48c77aea0f95dab31d5fa0b1f226f2ee63632071d81c68a310",
+            "Opens": "7c76532e5d6a9a10039cd77623582c5c6e72b6aa55a6973531207a1589f1e518",
+            "Highs": "df616634532ec4123229086585a70c35ffabc41309e8a9e7515f31c49f11263b"
+          },
+          "first_valid": 0,
+          "bars": 1000,
+          "pair": "QuanTAlib.Sinema",
+          "lp_period": 20,
+          "present_is_null": true
+        },
+        {
+          "full_returned_output_sha256": "5d900e12f1ec74a991e14cdbd4356ec246c38d395be20320e896af761f490612",
+          "actual_data_bits": {
+            "Closes": "2514304ca43cdca9c200b4d0afb36b16a586d583f887dc85efc0dbdd144b7b31",
+            "Volumes": "210ce3075d6c4a608006e85425f24a604753d080a0a3d2855ebff5fab48ca326",
+            "Lows": "89e4e6ec6bd016497bf7e1ba16d666a568be5ec67cc8378be5d2836496a43fc5",
+            "Opens": "2514304ca43cdca9c200b4d0afb36b16a586d583f887dc85efc0dbdd144b7b31",
+            "Highs": "c9dd8ec942130882ff18c8aee89a03e9cbb1a57c38ec10d1b204b97e338fe189"
+          },
+          "first_valid": 0,
+          "bars": 10000,
+          "pair": "QuanTAlib.Sinema",
+          "lp_period": 20,
+          "present_is_null": true
+        }
+      ],
+      "protected_methods": [
+        {
+          "type": "OoplesFinance.StockIndicators.Indicators.NormalizedKernelState",
+          "method": "Void Reset()",
+          "raw_locals_equal": true
+        },
+        {
+          "type": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution",
+          "method": "PointwiseRegion ComputeBoundedRegion[T](OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer, Int32, Int32, Int32, System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar], System.ReadOnlySpan`1[OoplesFinance.StockIndicators.Indicators.Bar], System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.IIndicator)",
+          "raw_locals_equal": true
+        },
+        {
+          "type": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution",
+          "method": "OoplesFinance.StockIndicators.Indicators.Bar FillBoundedWindow(OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.IIndicator, System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+          "raw_locals_equal": true
+        },
+        {
+          "type": "OoplesFinance.StockIndicators.Indicators.NormalizedKernelState",
+          "method": "Double Update(OoplesFinance.StockIndicators.Indicators.Bar ByRef)",
+          "raw_locals_equal": true
+        },
+        {
+          "type": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution",
+          "method": "OoplesFinance.StockIndicators.Indicators.Bar FillBoundedWindow[T](OoplesFinance.StockIndicators.Indicators.Bar[], Double[][], OoplesFinance.StockIndicators.Indicators.IIndicator, Int32, System.Threading.CancellationToken, OoplesFinance.StockIndicators.Indicators.OwnedBarBuffer)",
+          "raw_locals_equal": false
+        },
+        {
+          "type": "OoplesFinance.StockIndicators.Indicators.ValuesBarExecution+StateWindowKernel",
+          "method": "Double Update(OoplesFinance.StockIndicators.Indicators.Bar ByRef)",
+          "raw_locals_equal": true
+        }
+      ],
+      "compiled_flush_call_sites": 9,
+      "standalone_flush_body_captured": false,
+      "tensor_fma_listing_observed": true
+    }
+  ],
+  "independent_authentication_passed": true,
+  "limitations": [
+    "Compiled callsites/IL bind Flush to tensor FMA; no standalone Flush body captured and callsite counts are not execution counts.",
+    "Generic local closure name changes143to144; raw locals are not identical. Other local types/maxstack and normalized IL match. No claim of identical native code or latency.",
+    "Changed shared factory needs representative actual StateWindow-route control; default Convolution is affine and unsuitable."
+  ],
+  "approved_next": "Prepare held40-case full-call ROI for Gma/Sinema with verified StateWindow-route and prior Hikkake controls; primary review before launch.",
+  "qualification": false,
+  "closure_credit": 0
+}

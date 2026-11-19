@@ -1,0 +1,322 @@
+{
+  "repository": "Ooples-Finance-LLC/OoplesFinance.StockIndicators",
+  "proposed_dotnet_sdk": "10.0.403",
+  "measurement_policy": {
+    "order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "quiet_samples": 12,
+    "max_cpu_percent": 15,
+    "warmups": 10,
+    "iterations": 10,
+    "fixed_invocation_warmups": 1000
+  },
+  "runtime_policy_overrides": {},
+  "require_fixture_inventory": true,
+  "expected_runtime_version": ".NET 10.0.15",
+  "runtime_dependency_alignment": {
+    "tensor_version": "0.151.1"
+  },
+  "diagnostic_kind": "analytic-grid-native-pilot",
+  "diagnostic_only": true,
+  "cases": 40,
+  "decisions": 8,
+  "matrix": {
+    "shards": 1,
+    "max_parallel": 1,
+    "timeout_minutes_per_shard": 120
+  },
+  "diagnostic_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Gma",
+              "pair": "QuanTAlib.Gma"
+            },
+            {
+              "raw": "QuanTAlib.Sinema",
+              "pair": "QuanTAlib.Sinema"
+            },
+            {
+              "raw": "TaLib.Candles.HikkakeModified",
+              "pair": "TaLib.Candles.HikkakeModified"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 30,
+          "decisions": 6
+        },
+        {
+          "fixture": "SharedWindowedSincBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Afirma",
+              "pair": "QuanTAlib.Afirma"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "NativeSingle"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 40,
+      "decisions": 8
+    }
+  ],
+  "targeted_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Gma",
+              "pair": "QuanTAlib.Gma"
+            },
+            {
+              "raw": "QuanTAlib.Sinema",
+              "pair": "QuanTAlib.Sinema"
+            },
+            {
+              "raw": "TaLib.Candles.HikkakeModified",
+              "pair": "TaLib.Candles.HikkakeModified"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 30,
+          "decisions": 6
+        },
+        {
+          "fixture": "SharedWindowedSincBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Afirma",
+              "pair": "QuanTAlib.Afirma"
+            }
+          ],
+          "methods": [
+            "BuilderFull",
+            "NativeSingle"
+          ],
+          "implicit_pair": false,
+          "cases": 10,
+          "decisions": 2
+        }
+      ],
+      "cases": 40,
+      "decisions": 8
+    }
+  ],
+  "inputs_ready": true,
+  "parent_review_approved": true,
+  "sources": {
+    "published": "48d238f56c37986b8437e5c31164552cc1362802",
+    "old": "48d238f56c37986b8437e5c31164552cc1362802",
+    "successor": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+    "variants": "48d238f56c37986b8437e5c31164552cc1362802"
+  },
+  "gpu_sources": {
+    "old": "48d238f56c37986b8437e5c31164552cc1362802",
+    "successor": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+    "variants": "48d238f56c37986b8437e5c31164552cc1362802"
+  },
+  "cpu_test_classes": {
+    "old": [
+      "ModifiedHikkakeSparseReplayTests",
+      "HikkakeSharedExecutionTests"
+    ],
+    "successor": [
+      "AnalyticGridBatchTests",
+      "SharedWeightedWindowTests",
+      "FibonacciWeightedAverageTests",
+      "AffineConvolutionTests",
+      "WindowedSincCompactTests"
+    ],
+    "variants": [
+      "ModifiedHikkakeSparseReplayTests",
+      "HikkakeSharedExecutionTests"
+    ]
+  },
+  "old_candidate": {
+    "source": "48d238f56c37986b8437e5c31164552cc1362802",
+    "ci_run": "44419618060",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "c398c4d0dad6f7868f84734bca2e42da20e2dbc5",
+    "manifest_sha256": "da15f6cf7c072d0cc35ec846a4ea2927821b5d9bab231e6b620fe9504e07576c",
+    "gpu_receipt_sha256": "8662a14c8f84f5caacdebabc515492ac342324586a8402f8d862aff58e5a76b6",
+    "production_sha256": "fdeea3ee60cc5f8e5826933e20dba822477e171ecf1c562eefb7ab00a7ae0258",
+    "source_fingerprint": "eee20a82686be9470cf725dde6dae8107224c99505ac205836822433d24e195e",
+    "artifact_id": "14481543267",
+    "artifact_zip_sha256": "be40b9aa9eb08c90b9af196b257c8d32a12f017c982d00f51909d49e619b0f4e",
+    "unit_passed": 18,
+    "parity_passed": 55,
+    "unit_classes": [
+      "ModifiedHikkakeSparseReplayTests",
+      "HikkakeSharedExecutionTests"
+    ],
+    "parity_classes": [
+      "HikkakeTests"
+    ],
+    "actual_harness_sha256": "b84b24176386b7b5c93b46175a2e18f02b2d66dc5db3724f18ce385d2762bda9"
+  },
+  "candidate": {
+    "source": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+    "ci_run": "44432145585",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "evidence_source": "4b0475d0cd4bc19cae16b72c6aa017fb63f1fc33",
+    "manifest_sha256": "60a4a285d4a7879e1be3c667c2757ae3f56a772f26d64c005fa91c392b5b9ce3",
+    "gpu_receipt_sha256": "bb51f6bf8181c742cff56869a1083b0f7bbb93d2b3cc85644046dbfb797ed890",
+    "production_sha256": "5cdb8051eb19e26ec7fa2202f0fbeba70bc30f3dd9220ac8abab6a9d50fde74b",
+    "source_fingerprint": "cd8a76c3f21d8f8ebcc066b55c37db2f68b01f2fdb853bd8b7eee57b8c206519",
+    "artifact_id": "14487094783",
+    "artifact_zip_sha256": "803c35d7f98b2353b4ab9c853579aedfb7e4faf9daf2f31ce0ff6684c4c7a448",
+    "unit_passed": 53,
+    "parity_passed": 48,
+    "unit_classes": [
+      "AnalyticGridBatchTests",
+      "SharedWeightedWindowTests",
+      "FibonacciWeightedAverageTests",
+      "AffineConvolutionTests",
+      "WindowedSincCompactTests"
+    ],
+    "parity_classes": [
+      "AnalyticKernelComparisonTests",
+      "FixedWeightedComparisonTests",
+      "ConvolutionComparisonTests",
+      "SincBuilderComparisonTests"
+    ],
+    "actual_harness_sha256": "933e0694594e08f663d27e31d0e174f267ad5471c9206a91e4f21be39e6aafe0"
+  },
+  "harness_sha256": "b84b24176386b7b5c93b46175a2e18f02b2d66dc5db3724f18ce385d2762bda9",
+  "closure_ledger_new_rows": 0,
+  "qualify_variants": false,
+  "harness_alias_policy": {
+    "common_artifact_role": "old",
+    "variants_artifact_role": "old",
+    "baseline_source": "48d238f56c37986b8437e5c31164552cc1362802",
+    "candidate_source": "d3d5c905a5d75b666b440aa6c5f6b4c24b42dc91",
+    "require_scoped_source_identity": true,
+    "claim_artifact_binary_identity": false
+  },
+  "automatic_qualification": false,
+  "future_builder_fixture": [
+    "SharedWeightedWindowBenchmarks",
+    "SharedWindowedSincBenchmarks",
+    "SharedHikkakeBenchmarks"
+  ],
+  "require_net_10000_point_progress": true,
+  "frozen_baseline_feasibility_only": true,
+  "current_combined_source_qualified": false,
+  "report_import_permitted": false,
+  "followup_requires_current_published_baseline": true,
+  "actual_input_provenance": {
+    "path": "benchmarks/plans/evidence/analytic-grid-compiled-bundle-20261119.json.gz",
+    "sha256": "fe8a353e82efe5d066ae911aaef5aaf2841e88d38c2401947d4eb0ad9617f93a"
+  },
+  "compiled_fixture_path_proof": {
+    "path": "benchmarks/plans/evidence/analytic-grid-compiled-bundle-20261119.json.gz",
+    "sha256": "fe8a353e82efe5d066ae911aaef5aaf2841e88d38c2401947d4eb0ad9617f93a"
+  },
+  "published_baseline": {
+    "pull_request": 266,
+    "head": "cde51367fc534e6d825f603d58f6899d4752ad05",
+    "branch": "perf/remaining-indicator-rollout",
+    "source_fingerprint": "eee20a82686be9470cf725dde6dae8107224c99505ac205836822433d24e195e"
+  },
+  "native_win_policy_approval": {
+    "path": "benchmarks/plans/evidence/native-win-rule-user-approved-20261118.json",
+    "sha256": "414b558eae1deda750c3d169020128986a0e0db9b2acd95f23da035be03bfd7c",
+    "policy_id": "native-separated-confidence-intervals-both-rounds-20261118"
+  },
+  "native_progress_gate": {
+    "fixture": "LibraryPairBenchmarks",
+    "method": "Ooples",
+    "native_method": "Competitor",
+    "native_round": 2,
+    "old_rounds": [
+      0,
+      3
+    ],
+    "candidate_rounds": [
+      1,
+      2
+    ],
+    "minimum_margin": null,
+    "require_separated_intervals_both_rounds": true,
+    "new_closure_bars": 10000,
+    "minimum_new_closures": 1,
+    "require_own_source_faster": true,
+    "require_net_10000_point_progress": true,
+    "protect_prior_confident_wins_both_sizes": true,
+    "target_pairs": [
+      "QuanTAlib.Gma",
+      "QuanTAlib.Sinema"
+    ]
+  },
+  "compiled_proof_root_review": {
+    "path": "benchmarks/plans/evidence/analytic-grid-compiled-root-review-20261119.json",
+    "sha256": "0e77245d23d8343b6c6f559bc08131bfdd10a719b1b7bd4e5d7d13d648c83caa"
+  },
+  "baseline_cpu_root_review": {
+    "path": "benchmarks/plans/evidence/analytic-grid-baseline-cpu-root-review-20261119.json",
+    "sha256": "4f5fb8e82f58866cd02f74322b59b4af752eac24c3007f27ed7f6a730754e92a"
+  },
+  "fixture_contracts": {
+    "LibraryPairBenchmarks": {
+      "pair_parameter": "PairId",
+      "size_parameter": "Bars",
+      "sizes": [
+        1000,
+        10000
+      ],
+      "methods": [
+        "Ooples",
+        "Competitor"
+      ]
+    },
+    "SharedWindowedSincBenchmarks": {
+      "pair_parameter": "Operation",
+      "size_parameter": "Count",
+      "sizes": [
+        1000,
+        10000
+      ],
+      "methods": [
+        "BuilderFull",
+        "NativeSingle"
+      ],
+      "period": 20,
+      "taps": 21,
+      "window": "Hann",
+      "actual_state_window_route": true
+    }
+  },
+  "candidate_cpu_root_review": {
+    "path": "benchmarks/plans/evidence/analytic-grid-candidate-cpu-root-review-20261119.json",
+    "sha256": "54f7a87f11b219633941227618ef003d5da69c36e01677abbe039c1e7cb17c17"
+  },
+  "candidate_gpu_root_review": {
+    "path": "benchmarks/plans/evidence/analytic-grid-candidate-gpu-root-review-20261119.json",
+    "sha256": "2f130e27079d837041a3011247add3ec0e576dfebe2cae3511156dab48258388"
+  }
+}

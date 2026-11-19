@@ -62,7 +62,11 @@ def collect(folder, phase):
         assert phase == 'targeted'
         from .ultimate_direct_long_qualification import collect as ultimate_qualify
         return ultimate_qualify(folder)
-    if read(PLAN).get('diagnostic_kind') == 'modified-hikkake-sparse-replay-native-pilot':
+    if read(PLAN).get('diagnostic_kind') == 'analytic-grid-native-pilot':
+        assert phase == 'diagnostic'
+        from .analytic_grid_roi import collect as analytic_grid_collect
+        return analytic_grid_collect(folder)
+    elif read(PLAN).get('diagnostic_kind') == 'modified-hikkake-sparse-replay-native-pilot':
         assert phase == 'diagnostic'
         from .modified_hikkake_sparse_replay_roi import collect as modified_hikkake_collect
         return modified_hikkake_collect(folder)
