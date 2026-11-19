@@ -324,4 +324,72 @@ internal static partial class FastKernels
             widthDefined[i] = 1;
         }
     }
+
+
+    /// <summary>
+    /// KDJ: the close's position in the high/low window as a percentage (zero for a flat window), K as a
+    /// simple or Wilder average of that, D as the same average of K, and J as a weighted difference of the two.
+    /// </summary>
+    internal static void StochasticKdj(FastColumns columns, double[][] outputs, WindowStochasticKdj owner)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        for (var slot = 0; slot < 6; slot++) outputs[slot].AsSpan(0, n).Clear();
+        var offset = owner.Period - 1;
+        if (offset >= n) return;
+        var highest = FastMath.Allocate(n);
+        var lowest = FastMath.Allocate(n);
+        RollingExtreme(high, highest, owner.Period, true);
+        RollingExtreme(low, lowest, owner.Period, false);
+        // The raw position reuses the highest buffer.
+        var raw = highest.AsSpan(offset, n - offset);
+        for (var i = offset; i < n; i++)
+        {
+            var top = highest[i];
+            var bottom = lowest[i];
+            raw[i - offset] = top == bottom ? 0 : 100 * (close[i] - bottom) / (top - bottom);
+        }
+        var wilder = owner.WilderSmoothing;
+        var k = outputs[0].AsSpan(offset, n - offset);
+        var kFirst = KdjAverage(raw, k, owner.KPeriod, wilder);
+        if (kFirst >= k.Length) return;
+        outputs[3].AsSpan(offset + kFirst, n - offset - kFirst).Fill(1);
+        var kStart = offset + kFirst;
+        var d = outputs[1].AsSpan(kStart, n - kStart);
+        var dFirst = KdjAverage(outputs[0].AsSpan(kStart, n - kStart), d, owner.DPeriod, wilder);
+        var start = kStart + dFirst;
+        if (start >= n) return;
+        outputs[4].AsSpan(start, n - start).Fill(1);
+        outputs[5].AsSpan(start, n - start).Fill(1);
+        double kFactor = owner.KFactor, dFactor = owner.DFactor;
+        Span<double> kAll = outputs[0], dAll = outputs[1], j = outputs[2];
+        for (var i = start; i < n; i++) j[i] = kAll[i] * kFactor - dAll[i] * dFactor;
+    }
+
+    // Simple average defined once the window fills, or Wilder's average seeded with the first value.
+    // Returns the index of the first defined value; earlier outputs are zero.
+    private static int KdjAverage(ReadOnlySpan<double> input, Span<double> output, int period, bool wilder)
+    {
+        if (period == 1)
+        {
+            input.CopyTo(output);
+            return 0;
+        }
+        if (!wilder)
+        {
+            RebuiltMean(input, output, period);
+            return period - 1;
+        }
+        if (input.Length == 0) return 0;
+        var last = input[0];
+        output[0] = last;
+        double weight = period - 1, inverse = period;
+        for (var i = 1; i < input.Length; i++)
+        {
+            last = (last * weight + input[i]) / inverse;
+            output[i] = last;
+        }
+        return 0;
+    }
 }
