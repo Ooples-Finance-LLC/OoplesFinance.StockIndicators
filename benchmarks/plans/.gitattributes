@@ -46,3 +46,5 @@ hosted-alma-sinc-combined-qualification-20261119.json text eol=lf
 evidence/alma-sinc-* binary
 hosted-candle-topology-replay-roi-20261119.json text eol=lf
 evidence/candle-topology-* binary
+hosted-current-frontier-refresh-20261119.json text eol=lf
+evidence/current-frontier-* binary

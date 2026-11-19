@@ -15,7 +15,9 @@ from hosted_timing.report import stage
 
 
 class CurrentBaselineReportAdmissionTests(unittest.TestCase):
-    def check_admission(self, admitted_count, wrong_report_hash=False):
+    def check_admission(self, admitted_count, wrong_report_hash=False, *, refresh_module=None,
+                        refresh_flag='current_baseline_ten_refresh', plan_extra=None):
+        refresh = refresh_module or globals()['refresh']
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             raw = root/'raw'; raw.mkdir()
@@ -50,13 +52,14 @@ const keys=Object.keys(D.rows[0]).filter(k=>k!=='raw');
 const detail=`${esc(r.raw.Ooples.host.ProcessorName)}`;
 </script>"""
             live = root/'live.html'; live.write_bytes(document.encode())
-            plan = p.read(p.REPO/refresh.BASE_PLAN)
+            plan = p.read(p.REPO/globals()['refresh'].BASE_PLAN)
             plan.pop('named_output_projection_refresh')
-            plan.update(current_baseline_ten_refresh=True, cases=100, decisions=20,
+            plan.update({refresh_flag:True}, cases=10*len(pairs), decisions=2*len(pairs),
                 sources=dict(published=refresh.PUBLISHED, old=refresh.CANONICAL,
                     successor=refresh.CANONICAL, variants=refresh.HARNESS),
                 expected_runtime_version='test runtime',
                 report_before_sha256='wrong' if wrong_report_hash else hashlib.sha256(live.read_bytes()).hexdigest())
+            plan.update(plan_extra or {})
             plan['refresh_shards'] = plan['targeted_shards'] = [dict(index=i, cases=10, decisions=2,
                 tasks=[dict(fixture='LibraryPairBenchmarks', operations=[dict(raw=pair, pair=pair)],
                     methods=['Ooples', 'Competitor'], implicit_pair=False, cases=10, decisions=2)])
@@ -111,6 +114,7 @@ const detail=`${esc(r.raw.Ooples.host.ProcessorName)}`;
             staged = p.read(root/'staged/staged.json')
             self.assertEqual(staged['changed_baseline_rows'], 2*admitted_count)
             self.assertEqual(staged['changed_builder_slots'], 0)
+            return after
 
     def test_partial_admission_preserves_802_rows_and_all_1544_builders(self):
         self.check_admission(1)

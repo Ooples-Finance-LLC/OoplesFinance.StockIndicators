@@ -1,0 +1,101 @@
+{
+  "status": "review-stopped-at-20-minute-cap-revised-contract-required-no-launch",
+  "review_started_utc": "2026-11-19T09:16:48+00:00",
+  "inspection_stopped_utc": "2026-11-19T09:36:48+00:00",
+  "reviewed_plan_sha256": "cea794a2b1f2d1719d441e23960af3a6029406d0fb755e45dbe5c0a797aed174",
+  "reviewed_catalog_sha256": "4006edcd197deb5b0cb477fce938ea4efadc00d24afb3f6c24684f6ce7a764e7",
+  "csv_sha256": "c84512d3d5edc73736a29ebaa1514d7ebf05f94fd439fc58197901e2c7be7f77",
+  "verified": [
+    "Reproduced exact401 catalog and154 historical point-nonwinner partition; no duplicates,20k overrides or12 huge controls in wave1.",
+    "Accepted4b/core2a/common actual harness5a7b/CPU134-parity86/GPU100 pins match established authenticated evidence; A and B must reuse identical runtime bytes.",
+    "ABBA, fresh native round2, same-host-per-pair, no pooling, snapshot source labels and zero algorithm/qualification credit are appropriate.",
+    "Historical154 labels select a scheduling partition, not current gaps. Stalled both-old point wins do not establish both-old separated-CI wins.",
+    "After154 current10k rows,247 remain unknown. No whole401 current-source frontier or full401 launch follows."
+  ],
+  "retracted_preliminary_finding": {
+    "claim": "Quiet sampling occurs independently for each of770 checkpoints and exceeds12runner-hours.",
+    "disposition": "WITHDRAWN-INCORRECT; root and author notified before action",
+    "source_fact": "checkpoints.run_checkpointed initializes quiet outside the pair loop. Successful pairs reuse it; interruptions reset it. Each window is12 cpu_percent(interval=5) calls=60s.",
+    "correct_nominal_quiet_windows": 48,
+    "correct_nominal_quiet_seconds": 2880
+  },
+  "both_size_comparison": {
+    "both_sizes": {"cases":1540,"decisions":308,"operation_reports":616,"quiet_windows":48},
+    "only10k": {"cases":770,"decisions":154,"operation_reports":616,"quiet_windows":48,"shared_selector_boundaries":6},
+    "historical_invocation_seconds_10k": 1728.23313718,
+    "extra1k_historical_invocation_seconds": 449.97993667555556,
+    "retained_candle_calibration": {
+      "run": "44490937372",
+      "cases":20,
+      "operation_reports":8,
+      "measurement_step_seconds":577,
+      "nominal_quiet_seconds":240,
+      "two_case_bdn_global_seconds":[12.19,8.68,7.71,7.63,8.12,8.59],
+      "four_case_bdn_global_seconds":[15.06,15.73],
+      "summed_bdn_global_seconds":83.71,
+      "unattributed_pipeline_seconds":253.29,
+      "log_root":"Z:/StockIndicators-Archives/diagnostic-evidence/candle-topology-replay-20261119/screen-44490937372/raw/evidence",
+      "size_saving_limit":"Two-case reports are owned-only; four-case reports add native methods. Their simple fit (~3.29s/case plus2.25s/report) is METHOD-confounded. Removing770 cases might save ~0.70runnerh by that proxy, but no pure size delta is demonstrated. Do not claim either half the runtime or zero saving."
+    },
+    "both_size_planning_runner_hours":8.61,
+    "planning_method":"(577-240)*77 +48*60 + all2178.21s historical target invocation work. Adding all invocation work deliberately double-counts some calibration work; this is a sensitivity estimate, not a proven upper bound. Preserve12measurement-runnerh and60min/job hard stops.",
+    "recommendation":"Prefer explicitly approved BOTH-size154 first wave using existing machinery. It avoids six shared selector changes, preserves existing case/process ordering, and supports predeclared report refresh. This recommendation does not authorize doubling cases or launching."
+  },
+  "required_before_execution": [
+    {
+      "id":"STOP-1",
+      "finding":"Packet calls a15min quiet timeout existing. The inspected checkpoint quiet loop has no elapsed deadline; the3600s operation watchdog starts after Popen and excludes quiet wait.",
+      "minimum_fix":"Identify the actual enclosing15min guard, explicitly add a reviewed bounded-wait guard, or correct the claim to the real60min job ceiling. Do not relax sampling."
+    },
+    {
+      "id":"STOP-2",
+      "finding":"Packet says no unchanged/ad-hoc retries, while existing checkpoint code automatically archives and retries an external-build-interrupted operation after fresh quiet samples.",
+      "minimum_fix":"Predeclare the existing contamination-only exception within unchanged deadlines, or stop on interruption. No broader failed-data, timeout, sample or label retries; never pool invalid attempts."
+    },
+    {
+      "id":"REUSE-1",
+      "finding":"A diagnostic-only packet is not automatically a report-verified baseline refresh. Named/current-ten refresh validators reject diagnostic flags and bind source-specific scope approvals. Current-ten requires both-size A/A-inconclusive admission and whole-pair quarantine.",
+      "minimum_fix":"If report reuse is intended, freeze a new accepted4b baseline-measurement-refresh scope/approval BEFORE collection. Retain production_qualification=false, accepted=false, algorithm_credit=0 and no auto import. No retroactive promotion or criterion changes."
+    },
+    {
+      "id":"SCOPE-1",
+      "finding":"Neither singleton770/154 implementation nor BOTH-size1540/308 expansion is approved for implementation/launch by this review.",
+      "minimum_fix":"Root freezes one exact pair/size/case/shard/stopping contract before implementation. No automatic later waves."
+    }
+  ],
+  "minimum_report_reusable_artifact_scope": {
+    "pairs":154,
+    "sizes":[1000,10000],
+    "cases":1540,
+    "decisions":308,
+    "source":"4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+    "report_refresh_only":true,
+    "production_qualification":false,
+    "algorithm_credit":0,
+    "automatic_import":false,
+    "predeclare":[
+      "Exact frozen154 IDs, both-size tuples, ABBA/native inventory, core/harness/runtime/input/CPU/GPU pins and source-specific approval.",
+      "Unchanged both-size A/A-inconclusive pair admission and whole-pair quarantine; inconclusive is not equivalence. Keep approved B1/B2 native gate separate from all-four diagnostic consistency labels.",
+      "Freeze explicit three-way per-round native CI fields and A0/A3 point-eligibility; no additional qualification gate is implied.",
+      "Admitted report rows use chronological B round2, all owned columns, allocation/sample/runtime/provenance metadata. Preserve802 total primary rows,1544 builder rows and unrelated data.",
+      "Independent root baseline-measurement authentication/replay remains distinct from already accepted production-source qualification.",
+      "If publication advances, retain explicit4b snapshot labels. Never bypass report.stage source-vs-HEAD checks: stage against frozen source-equivalent20d, then compose later qualified source updates while preserving each row's source. Do not call it latest-current whole401.",
+      "Later browser/layout/export QA and explicit live import remain separate. A predeclared verified baseline-refresh artifact need not be remeasured solely to label a stable accepted-baseline row."
+    ],
+    "singleton_warning":"A10k-only diagnostic cannot satisfy existing BOTH-size admission. Do not retrofit it or pool a later1k run across hosts to evade that gate."
+  },
+  "deferred": {
+    "unknown_after_first154":247,
+    "fast_future_pairs":235,
+    "huge_native_controls_held":12,
+    "huge_controls_historical_runner_days":12.34806390561846,
+    "huge_native_case_hours_range":[2.304687828547685,39.2164925787213],
+    "full401_launch_authorized":false,
+    "policy_exception_authorized":false
+  },
+  "source_edits":0,
+  "builds":0,
+  "indicator_executions":0,
+  "timing_executions":0,
+  "launch_authorized":false
+}

@@ -54,6 +54,10 @@ def sample(case):
 
 
 def collect(folder, phase):
+    if read(PLAN).get('current_frontier_refresh'):
+        assert phase == 'baseline-refresh'
+        from .current_frontier_refresh import collect as frontier_collect
+        return frontier_collect(folder)
     if read(PLAN).get('alma_sinc_combined_qualification'):
         assert phase == 'targeted'
         from .alma_sinc_combined_qualification import collect as combined_qualify

@@ -52,7 +52,7 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
         summary=refresh.collect(raw)
         assert summary['baseline_refresh_verified'] and not summary['accepted'] and not summary['production_qualification']
         assert summary['input_provenance_sha256'] == digest(Path(inputs).resolve()/'provenance.json')
-        if read(PLAN).get('current_baseline_ten_refresh'):
+        if read(PLAN).get('current_baseline_ten_refresh') or read(PLAN).get('current_frontier_refresh'):
             admitted_pairs = set(summary['admitted_pairs'])
             quarantined_pairs = {row['pair'] for row in summary['quarantined_pairs']}
             assert admitted_pairs, 'No A/A-admitted pairs; do not stage or publish a report'
@@ -184,7 +184,7 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
                 same_binary_verdict=aa['verdict'],native_round_classifications=native['round_classifications'],
                 native_consensus=native['native_classification'],native_control_round=2,native_control_count=1)
             if admitted_pairs is not None:
-                row.update(baseline_refresh_reason='current-source-remeasurement', harness_changed=False)
+                row.update(baseline_refresh_reason=('accepted-snapshot-remeasurement' if read(PLAN).get('current_frontier_refresh') else 'current-source-remeasurement'), harness_changed=False)
         if row['bars']==1000:
             overrides.append(dict(pair=row['pair'],sourceSha=source,runUrl=link,reportSha256=sha,
                 round=2,selection='Chronologically final candidate round.',measurementLocation='GitHub-hosted Windows',**provenance))
@@ -208,6 +208,11 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
                 refresh_reason='current-source-remeasurement', harness_changed=False,
                 measured_pairs=list(refresh.PAIRS), admitted_pairs=sorted(admitted_pairs),
                 quarantined_pairs=summary['quarantined_pairs'], admission_is_not_equivalence=True)
+            if read(PLAN).get('current_frontier_refresh'):
+                data['evidence']['harnessBaselineRefreshes'][-1].update(
+                    refresh_reason='accepted-snapshot-remeasurement',snapshot_source=refresh.CANONICAL,
+                    published_snapshot=refresh.PUBLISHED,remaining_unmeasured_primary_pairs=247,
+                    production_qualification=False,algorithm_credit=0,composition_policy=read(PLAN)['composition_policy'])
     if snapshot_receipts:
         snapshot_pairs={row['pair'] for receipt in snapshot_receipts for row in receipt['rows']}
         previous=data['evidence'].get('snapshotMeasurements',[])
@@ -263,6 +268,8 @@ def stage(live, raw, repo, out, phase='successor', inputs=None):
         disclosure += ' Historical harness baseline refreshes removed intermediate projection copies while retaining every required named column, Full history and owned outputs; they are not production algorithm speedups. Their rows identify the canonical production and benchmark builds. Identical-binary A/A verdicts are timing-variability warnings. Four owned rounds are compared with the native control measured in round two; mixed or inconclusive outcomes remain uncertain.'
     if admitted_pairs is not None:
         disclosure += ' The current-baseline remeasurement reuses unchanged production and harness binaries. A/A-inconclusive pairs are admitted for this refresh, not proved equivalent; quarantined pairs retain their earlier rows. This subset does not establish a current-source gap count for all 401 pairs.'
+        if read(PLAN).get('current_frontier_refresh'):
+            disclosure += ' These measurements use accepted source4b4e8a38 and snapshot20d21f26;247 primary pairs remain unmeasured. Later accepted-source overrides take precedence by source lineage and qualified scope, not by the timestamp of this older-source remeasurement. There is no algorithm credit or publication hold.'
     if builder_control_receipts:
         names=sorted({row['pair'] for receipt in builder_control_receipts for row in receipt['rows']})
         disclosure += ' Fresh builder-only source controls for '+', '.join(names)+' contain no native timings; their existing builder/native comparisons retain their original source and run provenance.'

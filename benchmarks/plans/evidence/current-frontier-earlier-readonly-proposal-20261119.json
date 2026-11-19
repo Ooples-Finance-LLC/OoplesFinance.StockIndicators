@@ -1,0 +1,599 @@
+{
+  "status": "READ-ONLY-PROPOSAL-NO-IMPLEMENTATION-NO-LAUNCH",
+  "objective": "Measure the accepted-baseline primary native frontier before funding more historical-gap prototypes.",
+  "source": {
+    "production": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+    "published": "20d21f263a25f14c4c15a0ab9354bfc91e0dab60",
+    "branch": "perf/remaining-indicator-rollout",
+    "fingerprint": "1b6b4cf28b0820a992fbd4e049bf2c993cdfa6efdee8deabf9d98fb0cde436ae",
+    "core_sha256": "2aeba2543a532a59337b6a2f87edff9d1d76c9f54f91ad1ccd7b2254c9e1331f",
+    "actual_and_common_harness_sha256": "5a7b5b13be2308661be6c66a51aefa0f5a2f1be863c3501f8213d9e4f2963045",
+    "cpu_run": "44469775767",
+    "producer": "ce6d1a0373166c42583278e4d7efd38f65e0934d",
+    "manifest_sha256": "fc7c16d3669d0ffe8affcaf17ac3e08f29e0121e980e53c50c17f75bb440b8a3",
+    "artifact_id": 14503779776,
+    "artifact_zip_sha256": "1a33e221d1fcb768360e5be90bae7d1293601a30fbc8ca35c3da26c15bee36a7",
+    "cpu_passed": {
+      "unit": 134,
+      "parity": 86
+    },
+    "gpu_passed": 100,
+    "gpu_methods": 12,
+    "cpu_root_review": {
+      "path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\alma-sinc-combined-correctness-20261119\\cpu-44469775767\\root-review.json",
+      "sha256": "8c17be3338e3bfc14cca85b9c2a6397bd46bcabe232c339980db8e15a8abcdd1"
+    },
+    "gpu_root_review": {
+      "path": "C:\\Users\\cheat\\source\\stock-indicators-operations\\alma-sinc-combined-correctness-20261119\\actual-gpu-44469775767\\root-review.json",
+      "sha256": "37ebf92ac00469f6ac35d75c635cb4ef76ec6021172ac04f916911a1ed9541e2"
+    },
+    "no_new_build_or_gpu": true,
+    "same_runtime_for_both_labels": true,
+    "common_harness_is_actual_accepted_harness": true
+  },
+  "inventory": {
+    "catalog": "C:\\Users\\cheat\\source\\stock-indicators-operations\\current-frontier-catalog-20261119.json",
+    "catalog_sha256": "4006edcd197deb5b0cb477fce938ea4efadc00d24afb3f6c24684f6ce7a764e7",
+    "csv_sha256": "c84512d3d5edc73736a29ebaa1514d7ebf05f94fd439fc58197901e2c7be7f77",
+    "pairs": 401,
+    "library_counts": {
+      "QuanTAlib": 50,
+      "Skender": 84,
+      "TaLib": 160,
+      "Trady": 107
+    },
+    "fixture": "LibraryPairBenchmarks",
+    "pair_parameter": "PairId",
+    "size_parameter": "Bars",
+    "sizes": [
+      10000
+    ],
+    "methods": [
+      "Ooples",
+      "Competitor"
+    ],
+    "preparation_admission": "Using authenticated 5a7b runtime, existing --comparison-manifest metadata mode must return exactly these401 status=paired IDs; reject drift before any Setup/timing. Preserve current comparison factories/outputs/masks/owned definitions/alternate rows; do not substitute builder fixtures.",
+    "production_scope_identity": [
+      "src",
+      "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+      "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+      "project/props/targets/dependency/config files"
+    ]
+  },
+  "measurement": {
+    "order": [
+      "A",
+      "B",
+      "B",
+      "A"
+    ],
+    "A_rounds": [
+      0,
+      3
+    ],
+    "B_rounds": [
+      1,
+      2
+    ],
+    "native_round": 2,
+    "both_labels_source": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+    "both_label_production_sha256": "2aeba2543a532a59337b6a2f87edff9d1d76c9f54f91ad1ccd7b2254c9e1331f",
+    "native_fresh": true,
+    "cases_per_pair": 5,
+    "all401_theoretical_cases": 2005,
+    "all401_source_label_comparisons": 401,
+    "invocation_count": 1,
+    "unroll_factor": 1,
+    "default_fixed_warmups": 1000,
+    "measured_iterations": 10,
+    "retained_samples": "existing7..10/outlier rules unchanged",
+    "runtime": ".NET 10.0.15",
+    "compiler_sdk": "10.0.403",
+    "tensor": "0.151.1",
+    "runtime_overrides": {},
+    "quiet_samples": 12,
+    "quiet_interval_seconds": 5,
+    "max_cpu_percent": 15,
+    "concurrent_builds_tests": false,
+    "native_ci_gate": "Existing approved rule: B1 and B2 upper CI strictly below same fresh native lower CI; record A0/A3 separately. No new minimum margin, equivalence claim, source qualification or closure credit.",
+    "same_host_nonce_per_pair": true,
+    "never_pool_rounds_hosts_or_retries": true
+  },
+  "waves": [
+    {
+      "wave": 1,
+      "status": "RECOMMENDED-FIRST-SCOPE-HELD-FOR-REVIEW",
+      "historical_nonwinners": 154,
+      "pairs": 154,
+      "cases": 770,
+      "source_label_comparisons": 154,
+      "all_warmups": 1000,
+      "shards": [
+        {
+          "index": 0,
+          "pairs": [
+            "Skender.GetBeta",
+            "Skender.GetRocWb",
+            "QuanTAlib.Realized",
+            "QuanTAlib.Hwma",
+            "Skender.GetDema",
+            "Skender.GetCci",
+            "TaLib.Candles.ThreeStarsInSouth",
+            "TaLib.Functions.Apo",
+            "TaLib.Functions.UltOsc",
+            "TaLib.Functions.Sar",
+            "TaLib.Functions.LinearRegSlope",
+            "TaLib.Candles.Hikkake"
+          ],
+          "historical_invocation_seconds": 143.7176142872222,
+          "cases": 60,
+          "source_label_comparisons": 12,
+          "max_measurement_job_minutes": 60
+        },
+        {
+          "index": 1,
+          "pairs": [
+            "TaLib.Functions.HtTrendMode",
+            "Skender.GetAdx",
+            "QuanTAlib.Rema",
+            "TaLib.Functions.Adxr",
+            "Skender.GetAlligator",
+            "Skender.GetT3",
+            "TaLib.Candles.GapSideBySideWhiteLines",
+            "Skender.GetRenkoAtr",
+            "TaLib.Functions.Mavp",
+            "TaLib.Candles.DarkCloudCover",
+            "TaLib.Candles.UpDownSideGapThreeMethods",
+            "TaLib.Functions.Min"
+          ],
+          "historical_invocation_seconds": 144.07077127999997,
+          "cases": 60,
+          "source_label_comparisons": 12,
+          "max_measurement_job_minutes": 60
+        },
+        {
+          "index": 2,
+          "pairs": [
+            "TaLib.Functions.HtSine",
+            "TaLib.Functions.Mama",
+            "TaLib.Functions.StochRsi",
+            "QuanTAlib.Rma",
+            "QuanTAlib.Zlema",
+            "TaLib.Functions.Cmo",
+            "QuanTAlib.Qema",
+            "QuanTAlib.Ltma",
+            "TaLib.Candles.Thrusting",
+            "TaLib.Candles.Tristar",
+            "TaLib.Functions.MinMax",
+            "TaLib.Functions.Obv",
+            "TaLib.Functions.RocR100"
+          ],
+          "historical_invocation_seconds": 144.05111073222224,
+          "cases": 65,
+          "source_label_comparisons": 13,
+          "max_measurement_job_minutes": 60
+        },
+        {
+          "index": 3,
+          "pairs": [
+            "Skender.GetHtTrendline",
+            "Skender.GetMama",
+            "Skender.GetKama",
+            "TaLib.Functions.Macd",
+            "Skender.GetForceIndex",
+            "TaLib.Functions.Dx",
+            "TaLib.Functions.StochF",
+            "TaLib.Functions.Atr",
+            "TaLib.Functions.PlusDI",
+            "TaLib.Functions.Max",
+            "TaLib.Functions.SarExt",
+            "TaLib.Candles.StickSandwich",
+            "TaLib.Functions.Ad"
+          ],
+          "historical_invocation_seconds": 144.0914214594444,
+          "cases": 65,
+          "source_label_comparisons": 13,
+          "max_measurement_job_minutes": 60
+        },
+        {
+          "index": 4,
+          "pairs": [
+            "TaLib.Functions.HtDcPhase",
+            "QuanTAlib.Mama",
+            "TaLib.Functions.MacdExt",
+            "TaLib.Functions.MacdFix",
+            "Skender.GetStoch",
+            "TaLib.Functions.Beta",
+            "TaLib.Functions.Cci",
+            "TaLib.Candles.IdenticalThreeCrows",
+            "TaLib.Candles.TasukiGap",
+            "TaLib.Functions.Sum",
+            "TaLib.Candles.Breakaway",
+            "TaLib.Functions.Trima",
+            "TaLib.Functions.Roc"
+          ],
+          "historical_invocation_seconds": 143.7708114922222,
+          "cases": 65,
+          "source_label_comparisons": 13,
+          "max_measurement_job_minutes": 60
+        },
+        {
+          "index": 5,
+          "pairs": [
+            "Skender.GetConnorsRsi",
+            "Skender.GetSmi",
+            "Skender.GetStochRsi",
+            "Skender.GetVolatilityStop",
+            "Skender.GetChandelier",
+            "TaLib.Functions.Tema",
+            "TaLib.Functions.Rsi",
+            "TaLib.Candles.Stalled",
+            "TaLib.Functions.AvgDev",
+            "TaLib.Functions.MaxIndex",
+            "TaLib.Functions.Var",
+            "TaLib.Functions.MinIndex",
+            "TaLib.Functions.MedPrice"
+          ],
+          "historical_invocation_seconds": 144.0660838138889,
+          "cases": 65,
+          "source_label_comparisons": 13,
+          "max_measurement_job_minutes": 60
+        },
+        {
+          "index": 6,
+          "pairs": [
+            "QuanTAlib.Dsma",
+            "QuanTAlib.Kurtosis",
+            "TaLib.Functions.AdOsc",
+            "Skender.GetChaikinOsc",
+            "Skender.GetBollingerBands",
+            "QuanTAlib.T3",
+            "TaLib.Functions.Trix",
+            "Skender.GetFisherTransform",
+            "TaLib.Candles.ThreeInside",
+            "TaLib.Functions.Mfi",
+            "TaLib.Functions.Aroon",
+            "TaLib.Candles.Engulfing",
+            "TaLib.Functions.Sma"
+          ],
+          "historical_invocation_seconds": 144.10474902666667,
+          "cases": 65,
+          "source_label_comparisons": 13,
+          "max_measurement_job_minutes": 60
+        },
+        {
+          "index": 7,
+          "pairs": [
+            "QuanTAlib.Curvature",
+            "Skender.GetStdDev",
+            "TaLib.Functions.HtTrendline",
+            "Skender.GetSmaAnalysis",
+            "TaLib.Functions.Adx",
+            "Skender.GetTema",
+            "TaLib.Candles.MatHold",
+            "TaLib.Candles.ConcealingBabySwallow",
+            "TaLib.Functions.Dema",
+            "TaLib.Candles.ThreeLineStrike",
+            "TaLib.Functions.RocR",
+            "TaLib.Functions.Bop",
+            "TaLib.Functions.Wma"
+          ],
+          "historical_invocation_seconds": 144.08536033722223,
+          "cases": 65,
+          "source_label_comparisons": 13,
+          "max_measurement_job_minutes": 60
+        },
+        {
+          "index": 8,
+          "pairs": [
+            "Skender.GetKvo",
+            "TaLib.Candles.ThreeWhiteSoldiers",
+            "QuanTAlib.Dema",
+            "QuanTAlib.Kama",
+            "TaLib.Functions.Stoch",
+            "Skender.GetKeltner",
+            "Skender.GetRsi",
+            "Skender.GetPrs",
+            "TaLib.Functions.AroonOsc",
+            "TaLib.Functions.MinusDM",
+            "Skender.GetSmma",
+            "TaLib.Candles.ThreeOutside",
+            "TaLib.Functions.AvgPrice"
+          ],
+          "historical_invocation_seconds": 144.09011659555557,
+          "cases": 65,
+          "source_label_comparisons": 13,
+          "max_measurement_job_minutes": 60
+        },
+        {
+          "index": 9,
+          "pairs": [
+            "Skender.GetPvo",
+            "Skender.GetStdDevChannels",
+            "Skender.GetSuperTrend",
+            "TaLib.Functions.Natr",
+            "Skender.GetStarcBands",
+            "Skender.GetCmf",
+            "TaLib.Functions.Ppo",
+            "TaLib.Functions.T3",
+            "TaLib.Functions.Bbands",
+            "TaLib.Functions.Correl",
+            "TaLib.Candles.LadderBottom",
+            "TaLib.Functions.Mom",
+            "TaLib.Functions.TypPrice"
+          ],
+          "historical_invocation_seconds": 144.07022032499998,
+          "cases": 65,
+          "source_label_comparisons": 13,
+          "max_measurement_job_minutes": 60
+        },
+        {
+          "index": 10,
+          "pairs": [
+            "Skender.GetTsi",
+            "Skender.GetMacd",
+            "TaLib.Functions.HtDcPeriod",
+            "Skender.GetAtr",
+            "TaLib.Functions.HtPhasor",
+            "TaLib.Functions.StdDev",
+            "TaLib.Candles.OnNeck",
+            "TaLib.Functions.MinusDI",
+            "TaLib.Functions.Ma",
+            "TaLib.Functions.PlusDM",
+            "TaLib.Functions.Ema",
+            "TaLib.Functions.LinearReg",
+            "TaLib.Functions.TRange"
+          ],
+          "historical_invocation_seconds": 144.0491932472222,
+          "cases": 65,
+          "source_label_comparisons": 13,
+          "max_measurement_job_minutes": 60
+        },
+        {
+          "index": 11,
+          "pairs": [
+            "Skender.GetPmo",
+            "Skender.GetStc",
+            "Skender.GetAtrStop",
+            "TaLib.Functions.Accbands",
+            "TaLib.Functions.Kama",
+            "Skender.GetVortex",
+            "Skender.GetChop",
+            "Skender.GetTrix",
+            "QuanTAlib.Tema",
+            "TaLib.Functions.WillR",
+            "TaLib.Functions.LinearRegIntercept",
+            "TaLib.Functions.RocP",
+            "TaLib.Functions.WclPrice"
+          ],
+          "historical_invocation_seconds": 144.0656845833334,
+          "cases": 65,
+          "source_label_comparisons": 13,
+          "max_measurement_job_minutes": 60
+        }
+      ],
+      "max_parallel": 2,
+      "max_total_measurement_runner_hours": 12,
+      "max_measurement_job_minutes": 60,
+      "estimated_measurement_runner_hours": [
+        6,
+        12
+      ],
+      "estimated_wall_hours_if_two_slots": [
+        3,
+        6
+      ],
+      "estimated_wall_hours_if_one_slot": [
+        6,
+        12
+      ],
+      "additional_prepare_collect_runner_hours_upper_estimate": 1,
+      "explicit_unknown_pairs_after_complete_wave": 247
+    },
+    {
+      "wave": 2,
+      "status": "EVENTUAL-SCOPE-ONLY-NOT-AUTHORIZED-FOR-LAUNCH",
+      "pairs": 235,
+      "cases": 1175,
+      "source_label_comparisons": 235,
+      "detail": "Historical point winners with native <=1s. Contains all10 existing20k warmup rows; retain per-operation policies and source-specific approvals, not blanket1000 normalization. Freeze new receipt bindings before this wave; no automatic continuation."
+    },
+    {
+      "wave": 3,
+      "status": "HELD-NOT-FEASIBLE-UNDER-UNCHANGED-LP-WARMUPS-AND-JOB-CAPS",
+      "pairs": 12,
+      "cases": 60,
+      "source_label_comparisons": 12,
+      "pairs_and_historical_native_seconds": [
+        {
+          "pair": "Trady.Candlestick.BearishLongDay",
+          "seconds": 71.7523632725,
+          "native_1010_invocation_hours": 20.130524140340277
+        },
+        {
+          "pair": "Trady.Candlestick.BearishShortDay",
+          "seconds": 64.83742380633333,
+          "native_1010_invocation_hours": 18.190499456776855
+        },
+        {
+          "pair": "Trady.Candlestick.BullishLongDay",
+          "seconds": 58.66309868333334,
+          "native_1010_invocation_hours": 16.458258241712965
+        },
+        {
+          "pair": "Trady.Candlestick.BullishShortDay",
+          "seconds": 80.01570125783333,
+          "native_1010_invocation_hours": 22.44884951955879
+        },
+        {
+          "pair": "Trady.Candlestick.FallingThreeMethods",
+          "seconds": 92.229470091,
+          "native_1010_invocation_hours": 25.875490219975
+        },
+        {
+          "pair": "Trady.Candlestick.LongDay",
+          "seconds": 119.31073159716667,
+          "native_1010_invocation_hours": 33.473288586982875
+        },
+        {
+          "pair": "Trady.Candlestick.LongLowerShadow",
+          "seconds": 139.78155770633333,
+          "native_1010_invocation_hours": 39.2164925787213
+        },
+        {
+          "pair": "Trady.Candlestick.LongUpperShadow",
+          "seconds": 128.90296296033333,
+          "native_1010_invocation_hours": 36.16444238609351
+        },
+        {
+          "pair": "Trady.Candlestick.RisingThreeMethods",
+          "seconds": 63.745530370666664,
+          "native_1010_invocation_hours": 17.884162687325922
+        },
+        {
+          "pair": "Trady.Candlestick.ShortDay",
+          "seconds": 118.67753392533332,
+          "native_1010_invocation_hours": 33.295641462385184
+        },
+        {
+          "pair": "Trady.Indicator.DynamicMomentumIndex",
+          "seconds": 109.97516037683333,
+          "native_1010_invocation_hours": 30.854142216833793
+        },
+        {
+          "pair": "Trady.Indicator.VolumeWeightedAveragePrice",
+          "seconds": 8.214728893833334,
+          "native_1010_invocation_hours": 2.304687828547685
+        }
+      ],
+      "detail": "No long-control launch or policy change proposed. Existing two builder native InvocationCount(1) exceptions do not reduce primary LP warmups (LP already1 invocation) and do not authorize these12 current-source primary control policies."
+    }
+  ],
+  "size_selector": {
+    "recommended": true,
+    "implementation_this_phase": false,
+    "reason": "At401pairs, an optional explicit10k-only selector avoids2005 extra cases and matches the actual primary objective. The earlier two-pair screen correctly avoided changing shared selectors to save ten cases; that cost tradeoff reverses at401pairs.",
+    "existing_machinery_both_sizes_cases": 4010,
+    "first154_both_sizes_cases": 1540,
+    "first154_10k_cases": 770,
+    "required_coherent_boundaries": [
+      "pipeline.measure pass validated sizes for new diagnostic only; legacy default(1000,10000) remains",
+      "checkpoints.filters emit exact PairId AND Bars10000 selection, preserving native method selection",
+      "checkpoints.combine_reports expected tuple set",
+      "checkpoint receipt cases/selection context bind sizes",
+      "verify._collect chunk count, log count, combine_reports and expected summary tuple sets",
+      "new diagnostic case inventory/scope tests and real --list/Setup selection proof before expensive launch"
+    ],
+    "tests_required": [
+      "legacy callers without selector unchanged",
+      "singleton10k rejects accidental1000 or extra/missing rows",
+      "native round2 remains present",
+      "wrong size/duplicate operation/source mismatch fails closed",
+      "no performance result or warmup policy rewritten"
+    ],
+    "alternative": "Use unchanged both-size engine for1540 first-wave cases if selector review fails. This buys extra1k context but does not resolve slow-native1000-warmup cost. Do not declare770/2005 executable cases in JSON while filtering both sizes."
+  },
+  "policies": {
+    "existing_20k_pairs": [
+      "TaLib.Candles.AbandonedBaby",
+      "TaLib.Candles.EveningDojiStar",
+      "TaLib.Candles.EveningStar",
+      "TaLib.Candles.Harami",
+      "TaLib.Candles.MorningDojiStar",
+      "TaLib.Candles.MorningStar",
+      "TaLib.Functions.Add",
+      "TaLib.Functions.Div",
+      "TaLib.Functions.Mult",
+      "TaLib.Functions.Sub"
+    ],
+    "first_wave_has_no_20k_or_long_controls": true,
+    "source_specific_approval_reconciliation": "Existing arithmetic/star validators pin older sources, tensor0.150 and one-cycle scopes. Preserve their20000 counts and underlying approvals, but do not pretend those validators directly authorize current4b/all401. Their diagnostic source-bound reuse must be reviewed before any later-wave launch. Harami approval linkage needs explicit recovery; staged20000 alone is not authorization.",
+    "historical_missing_warmup_metadata_rows": 233,
+    "old_two_builder_exceptions": {
+      "pairs": [
+        "Trady.Indicator.DynamicMomentumIndex",
+        "Trady.Candlestick.RisingThreeMethods"
+      ],
+      "fixture_native_invocations": 1,
+      "warmups": 10,
+      "measured_iterations": 10,
+      "execution_timeout_minutes": 120,
+      "coverage_operation_watchdog_seconds": 10800,
+      "scope": "builder coverage only; not a primary native warmup exception; original artifacts/source labels remain unchanged"
+    }
+  },
+  "classification": {
+    "admission": "All five exact cases, Setup independent-reference equality/ownership checks, source/core/harness/runtime/input hashes, native adapter identity, warmup/log/sample/CPU/build gates and canonical replay must pass.",
+    "first_record": "Per-row A/A label verdict from unchanged source-regression adjudicator. Faster/slower labels quarantine row as same-binary instability; inconclusive is admission only, never equivalence.",
+    "independent_fields": [
+      "A0/A3 point positions versus fresh native mean",
+      "B1/B2 point positions versus same native mean",
+      "approved B native separated-CI result",
+      "A native separated-CI result",
+      "all-four point consistency",
+      "all-four CI consistency",
+      "same-binary label verdict and quarantine reason"
+    ],
+    "categories": [
+      "unmeasured",
+      "failed_or_invalid",
+      "quarantined_same_binary_label_effect",
+      "mixed_native_point_position",
+      "label_consistent_point_nonwinner",
+      "label_consistent_point_winner_without_both_label_native_CI_consensus",
+      "label_consistent_statistical_native_winner"
+    ],
+    "statistical_wording": "Never call point wins proven statistical wins: candle evidence had both10k baseline point wins, but only Identical both-old separated CIs; Stalled old-CI consensus false.",
+    "exact_rules": "After valid/inconclusive A/A admission: allfour means<native gives consistent point winner; allfour means>=native gives consistent point nonwinner; mixed means is unresolved. Statistical consensus additionally requires both old and both new upper CIs<native lower, while approved B1/B2 native gate is always reported independently and unchanged. These diagnostic consistency labels do not replace qualification policy.",
+    "incomplete_count": "Report measured count, admitted count, quarantined/invalid count, unknown count and snapshot source separately. After154 only,247 remain unmeasured regardless historical labels. No all-current154-remaining claim. Conservative possible nonwinner range: admitted consistent point nonwinners <= remaining <=401 - admitted consistent point winners; report unknown/quarantined separately.",
+    "credit": "Every row has algorithm_credit=0, source_qualified=false, report_imported=false; fresh baseline observations can prioritize work, not retroactively qualify old rejected candidates."
+  },
+  "stopping": {
+    "no_ad_hoc_retries": true,
+    "no_unchanged_retry": true,
+    "no_partial_pooling": true,
+    "integrity_or_setup_failure": "Stop affected shard immediately; preserve failed/partial evidence and classify incomplete rows invalid/unmeasured. Pause later unstarted shards on systemic source/input/runtime/sample-policy failures for root review; never substitute historical or partial native samples.",
+    "timeout_or_budget": "Existing quiet timeout15min, one-operation watchdog3600s and frozen60min measurement job cap retained. A failed or capped shard is not automatically restarted; no larger timeout or reduced samples. Wave1 hard budget12measurement runner-hours; no wave2/3 auto launch.",
+    "label_instability": "Quarantine the row; finish only already frozen independent work within bounds. Do not tune warmups or repeat labels until they agree.",
+    "snapshot_advance": "Before activation verify publication20d/accepted4b exactly. If publication advances mid-wave, retain completed evidence explicitly as4b snapshot and hold a latest-current count; never relabel/mix new source or silently rebuild.",
+    "completion": "Wave154 complete only when its154 rows have explicit admitted/quarantined/failed states; overall401 inventory remains incomplete until all401 have current valid dispositions under a separately feasible reviewed scope."
+  },
+  "costs": {
+    "estimates_not_latency_evidence": true,
+    "historical_sources": 42,
+    "historical_invocation_budget_seconds_by_wave": {
+      "1": 1728.23313718,
+      "2": 4341.225859585556,
+      "3": 1066872.721445435
+    },
+    "historical_native_seconds_per_pass": 1059.0084329151666,
+    "slow12_unchanged_policy_historical_runner_days": 12.34806390561846,
+    "max_single_slow_native_hours": 39.2164925787213,
+    "complete_pipeline_calibration": {
+      "run": "44490937372",
+      "pairs": 2,
+      "sizes": 2,
+      "cases": 20,
+      "measurement_step_seconds": 577,
+      "measurement_job_seconds": 646,
+      "source": "actual candle screen timestamps; includes quiet/process/setup effects, not just kernel costs"
+    },
+    "method": "First154 weighted invocation-only historical estimate~28.8min is not a wall-time claim. Recent complete pipeline20case step9m37 and four60s quiet sequences expose substantial process/framework cost. Budget6..12measurement runner-hours over12 <=13pair shards;3..6hwall only if both global slots available. Full401 long-control cost is prohibitive; no proposal to spend12runner-days.",
+    "storage": "Reuse authenticated C CAS/core/harness bytes; new metadata/control/temp on C with checked headroom; compressed full/raw evidence on Z. Check storage budget before each materialization; zero new production payload/builds."
+  },
+  "global_measurement_vms_max": 2,
+  "parallel_kama": "KAMA keeps its reserved slot; frontier may initially use only remaining slot. Never exceed global2.",
+  "implementation_or_launch_authorized": false,
+  "source_builds": 0,
+  "indicator_executions": 0,
+  "timing_cases_executed": 0,
+  "report_import": false,
+  "policy_changes": false,
+  "qualification": false,
+  "closure_credit": 0,
+  "review_required": [
+    "root adversarial review",
+    "independent finish-agent adversarial review",
+    "exact selector/source-bound policy implementation review before any launch"
+  ]
+}

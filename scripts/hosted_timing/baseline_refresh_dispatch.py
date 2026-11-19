@@ -2,7 +2,12 @@
 
 
 def implementation(plan):
+    if plan.get("current_frontier_refresh"):
+        assert not any(plan.get(key) for key in ("current_baseline_ten_refresh", "named_output_projection_refresh", "pointwise_family_refresh"))
+        from . import current_frontier_refresh
+        return current_frontier_refresh
     if plan.get("current_baseline_ten_refresh"):
+        assert not plan.get("current_frontier_refresh")
         assert not plan.get("named_output_projection_refresh") and not plan.get("pointwise_family_refresh")
         from . import current_baseline_ten_refresh
         return current_baseline_ten_refresh

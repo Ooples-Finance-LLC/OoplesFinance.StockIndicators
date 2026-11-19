@@ -229,7 +229,7 @@ def verify_inputs(folder):
     if plan.get('matchinglow_grid_qualification'):
         from .matchinglow_grid_qualification import verify_authentication
         verify_authentication(folder, plan, proof)
-    if plan.get('pointwise_family_refresh') or plan.get('named_output_projection_refresh') or plan.get('current_baseline_ten_refresh'):
+    if plan.get('pointwise_family_refresh') or plan.get('named_output_projection_refresh') or plan.get('current_baseline_ten_refresh') or plan.get('current_frontier_refresh'):
         from .baseline_refresh_dispatch import implementation
         implementation(plan).verify_authentication(folder,plan,proof)
     if plan.get('alma_sinc_combined_qualification'):

@@ -1,0 +1,237 @@
+name: Accepted baseline first154 frontier measurement refresh
+on:
+  push:
+    branches: [perf/current-frontier-refresh-20261119]
+    paths: [.github/workflows/current-frontier-refresh.yml]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: current-frontier-refresh-20261119
+  cancel-in-progress: false
+env:
+  HOSTED_TIMING_PLAN: benchmarks/plans/hosted-current-frontier-refresh-20261119.json
+jobs:
+  prepare:
+    if: github.event_name == 'push'
+    runs-on: windows-2025
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            .github
+            benchmarks/plans
+      - name: Hold before SDK or input I/O until final root review
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $plan=Get-Content -LiteralPath $env:HOSTED_TIMING_PLAN -Raw | ConvertFrom-Json
+          if ($plan.inputs_ready -isnot [bool] -or !$plan.inputs_ready -or $plan.parent_review_approved -isnot [bool] -or !$plan.parent_review_approved) { throw 'HELD before SDK/input I/O; final root review required' }
+          if ($plan.current_frontier_refresh -ne $true -or $plan.baseline_measurement_refresh -ne $true -or $plan.report_refresh_only -ne $true -or $plan.production_qualification -ne $false -or $plan.cases -ne 1540 -or $plan.decisions -ne 308 -or $plan.matrix.shards -ne 12 -or $plan.matrix.max_parallel -ne 1 -or $plan.matrix.timeout_minutes_per_shard -ne 60 -or $plan.affected_pairs.Count -ne 154 -or $plan.algorithm_credit -ne 0 -or $plan.closure_credit -ne 0) { throw 'Wrong frozen first154 baseline refresh scope' }
+          if ($plan.sources.old -ne '4b4e8a385ed1c210998d26de6460e23f5842ffe9' -or $plan.sources.successor -ne $plan.sources.old -or $plan.sources.variants -ne $plan.sources.old -or $plan.candidate.actual_harness_sha256 -ne '5a7b5b13be2308661be6c66a51aefa0f5a2f1be863c3501f8213d9e4f2963045') { throw 'Wrong accepted snapshot/runtime identity' }
+          # Publication may advance; this remains the explicitly frozen4b/20d snapshot.
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - name: Select the installed diagnostic SDK before input downloads
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          # This runner-only selector is not committed source or a build input.
+          if (Test-Path -LiteralPath global.json) { throw 'Unexpected existing SDK selector' }
+          [IO.File]::WriteAllText((Join-Path $PWD 'global.json'), '{"sdk":{"version":"10.0.403","rollForward":"disable","allowPrerelease":false}}')
+          $actualSdk=(& dotnet --version).Trim()
+          if ($LASTEXITCODE -ne 0 -or $actualSdk -ne '10.0.403') { throw ('Wrong actual diagnostic SDK: '+$actualSdk) }
+          $actualInfo=(& dotnet --info | Out-String)
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to inspect dotnet installation' }
+          # The muxer can be newer than the CLR selected for these net10 inputs.
+          $installedRuntimes=@(& dotnet --list-runtimes)
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to inspect installed runtimes' }
+          $compatibleRuntimes=@($installedRuntimes | ForEach-Object {
+            if ($_ -match '^Microsoft\.NETCore\.App (10\.0\.\d+) \[') { [version]$Matches[1] }
+          } | Sort-Object)
+          if ($compatibleRuntimes.Count -eq 0 -or $compatibleRuntimes[-1].ToString() -ne '10.0.15') { throw ('Wrong installed net10 compatible runtime: '+($installedRuntimes -join '; ')) }
+          Write-Output ('Installed net10 compatible runtime: '+$compatibleRuntimes[-1])
+          Write-Output $actualInfo
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install psutil==7.2.2
+      - name: Validate frozen scope and accepted artifact identity before download
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference='Stop'
+          Push-Location scripts
+          try {
+            python -m unittest -v test_hosted_current_frontier_refresh test_current_frontier_report_admission test_current_frontier_archive
+            if ($LASTEXITCODE -ne 0) { throw 'Frontier orchestration tests failed' }
+            python -c "from hosted_timing import current_frontier_refresh as q; q.validate_scope(q.p.read(q.p.PLAN))"
+            if ($LASTEXITCODE -ne 0) { throw 'Frontier scope/source/evidence is not executable' }
+          } finally { Pop-Location }
+          $plan=Get-Content -LiteralPath $env:HOSTED_TIMING_PLAN -Raw | ConvertFrom-Json
+          $receipt=$plan.candidate
+          $artifact=Invoke-RestMethod -Uri ('https://api.github.com/repos/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/artifacts/'+$receipt.artifact_id) -Headers @{Authorization=('Bearer '+$env:GH_TOKEN);'X-GitHub-Api-Version'='2022-11-28'}
+          if ($artifact.id -ne [long]$receipt.artifact_id -or $artifact.name -ne 'candidate-correctness-inputs' -or $artifact.expired -or $artifact.workflow_run.id -ne [long]$receipt.ci_run -or $artifact.workflow_run.head_sha -ne $receipt.producer -or $artifact.digest -ne ('sha256:'+$receipt.artifact_zip_sha256)) { throw 'Accepted artifact API identity/digest mismatch' }
+          ('CANDIDATE_RUN='+$receipt.ci_run) | Add-Content -LiteralPath $env:GITHUB_ENV
+          ('CANDIDATE_ID='+$receipt.artifact_id) | Add-Content -LiteralPath $env:GITHUB_ENV
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ env.CANDIDATE_ID }}
+          merge-multiple: true
+          path: accepted-candidate
+          run-id: ${{ env.CANDIDATE_RUN }}
+          github-token: ${{ github.token }}
+      - name: Authenticate one accepted runtime under both A/A labels without building
+        run: python scripts/prepare-current-frontier-refresh.py --candidate accepted-candidate --out frontier-inputs
+      - uses: actions/upload-artifact@v7
+        with:
+          name: current-frontier-refresh-inputs
+          path: frontier-inputs/
+          if-no-files-found: error
+  measure-priority:
+    needs: prepare
+    runs-on: windows-2025
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            .github
+            benchmarks/plans
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - name: Select the installed diagnostic SDK before input downloads
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          # This runner-only selector is not committed source or a build input.
+          if (Test-Path -LiteralPath global.json) { throw 'Unexpected existing SDK selector' }
+          [IO.File]::WriteAllText((Join-Path $PWD 'global.json'), '{"sdk":{"version":"10.0.403","rollForward":"disable","allowPrerelease":false}}')
+          $actualSdk=(& dotnet --version).Trim()
+          if ($LASTEXITCODE -ne 0 -or $actualSdk -ne '10.0.403') { throw ('Wrong actual diagnostic SDK: '+$actualSdk) }
+          $actualInfo=(& dotnet --info | Out-String)
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to inspect dotnet installation' }
+          # The muxer can be newer than the CLR selected for these net10 inputs.
+          $installedRuntimes=@(& dotnet --list-runtimes)
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to inspect installed runtimes' }
+          $compatibleRuntimes=@($installedRuntimes | ForEach-Object {
+            if ($_ -match '^Microsoft\.NETCore\.App (10\.0\.\d+) \[') { [version]$Matches[1] }
+          } | Sort-Object)
+          if ($compatibleRuntimes.Count -eq 0 -or $compatibleRuntimes[-1].ToString() -ne '10.0.15') { throw ('Wrong installed net10 compatible runtime: '+($installedRuntimes -join '; ')) }
+          Write-Output ('Installed net10 compatible runtime: '+$compatibleRuntimes[-1])
+          Write-Output $actualInfo
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install psutil==7.2.2
+      - uses: actions/download-artifact@v8
+        with:
+          name: current-frontier-refresh-inputs
+          path: frontier-inputs
+      - name: Measure frozen snapshot pairs under unchanged timing machinery
+        run: python scripts/run-hosted-timing.py measure --inputs frontier-inputs --out frontier-refresh/evidence/shard0 --phase baseline-refresh --shard 0
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: current-frontier-refresh-raw-0
+          path: frontier-refresh/evidence/
+          if-no-files-found: warn
+  measure-rest:
+    needs: measure-priority
+    runs-on: windows-2025
+    timeout-minutes: 60
+    strategy:
+      fail-fast: true
+      max-parallel: 1
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            .github
+            benchmarks/plans
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.403'
+      - name: Select the installed diagnostic SDK before input downloads
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          # This runner-only selector is not committed source or a build input.
+          if (Test-Path -LiteralPath global.json) { throw 'Unexpected existing SDK selector' }
+          [IO.File]::WriteAllText((Join-Path $PWD 'global.json'), '{"sdk":{"version":"10.0.403","rollForward":"disable","allowPrerelease":false}}')
+          $actualSdk=(& dotnet --version).Trim()
+          if ($LASTEXITCODE -ne 0 -or $actualSdk -ne '10.0.403') { throw ('Wrong actual diagnostic SDK: '+$actualSdk) }
+          $actualInfo=(& dotnet --info | Out-String)
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to inspect dotnet installation' }
+          # The muxer can be newer than the CLR selected for these net10 inputs.
+          $installedRuntimes=@(& dotnet --list-runtimes)
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to inspect installed runtimes' }
+          $compatibleRuntimes=@($installedRuntimes | ForEach-Object {
+            if ($_ -match '^Microsoft\.NETCore\.App (10\.0\.\d+) \[') { [version]$Matches[1] }
+          } | Sort-Object)
+          if ($compatibleRuntimes.Count -eq 0 -or $compatibleRuntimes[-1].ToString() -ne '10.0.15') { throw ('Wrong installed net10 compatible runtime: '+($installedRuntimes -join '; ')) }
+          Write-Output ('Installed net10 compatible runtime: '+$compatibleRuntimes[-1])
+          Write-Output $actualInfo
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install psutil==7.2.2
+      - uses: actions/download-artifact@v8
+        with:
+          name: current-frontier-refresh-inputs
+          path: frontier-inputs
+      - name: Measure frozen snapshot pairs under unchanged timing machinery
+        run: python scripts/run-hosted-timing.py measure --inputs frontier-inputs --out frontier-refresh/evidence/shard${{ matrix.shard }} --phase baseline-refresh --shard ${{ matrix.shard }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: current-frontier-refresh-raw-${{ matrix.shard }}
+          path: frontier-refresh/evidence/
+          if-no-files-found: warn
+  collect:
+    needs: [measure-priority, measure-rest]
+    runs-on: windows-2025
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            scripts
+            .github
+            benchmarks/plans
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python -m pip install psutil==7.2.2
+      - uses: actions/download-artifact@v8
+        with:
+          name: current-frontier-refresh-inputs
+          path: frontier-inputs
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: current-frontier-refresh-raw-*
+          merge-multiple: true
+          path: frontier-refresh/evidence
+      - name: Verify both-size A/A admission, native classifications and frozen snapshot metadata
+        run: python scripts/run-hosted-timing.py collect --inputs frontier-refresh/evidence --prepared frontier-inputs --out frontier-refresh/summary.json --phase baseline-refresh
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: current-frontier-refresh
+          path: |
+            frontier-inputs/
+            frontier-refresh/
+          if-no-files-found: warn

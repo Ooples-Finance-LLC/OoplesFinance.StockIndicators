@@ -1,0 +1,1322 @@
+{
+  "status": "root-authorized-tooling-scope-activation-and-launch-held",
+  "decision_utc": "2026-11-19T09:44:42Z",
+  "source": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+  "published_snapshot": "20d21f263a25f14c4c15a0ab9354bfc91e0dab60",
+  "pairs": [
+    "QuanTAlib.Curvature",
+    "QuanTAlib.Dema",
+    "QuanTAlib.Dsma",
+    "QuanTAlib.Hwma",
+    "QuanTAlib.Kama",
+    "QuanTAlib.Kurtosis",
+    "QuanTAlib.Ltma",
+    "QuanTAlib.Mama",
+    "QuanTAlib.Qema",
+    "QuanTAlib.Realized",
+    "QuanTAlib.Rema",
+    "QuanTAlib.Rma",
+    "QuanTAlib.T3",
+    "QuanTAlib.Tema",
+    "QuanTAlib.Zlema",
+    "Skender.GetAdx",
+    "Skender.GetAlligator",
+    "Skender.GetAtr",
+    "Skender.GetAtrStop",
+    "Skender.GetBeta",
+    "Skender.GetBollingerBands",
+    "Skender.GetCci",
+    "Skender.GetChaikinOsc",
+    "Skender.GetChandelier",
+    "Skender.GetChop",
+    "Skender.GetCmf",
+    "Skender.GetConnorsRsi",
+    "Skender.GetDema",
+    "Skender.GetFisherTransform",
+    "Skender.GetForceIndex",
+    "Skender.GetHtTrendline",
+    "Skender.GetKama",
+    "Skender.GetKeltner",
+    "Skender.GetKvo",
+    "Skender.GetMacd",
+    "Skender.GetMama",
+    "Skender.GetPmo",
+    "Skender.GetPrs",
+    "Skender.GetPvo",
+    "Skender.GetRenkoAtr",
+    "Skender.GetRocWb",
+    "Skender.GetRsi",
+    "Skender.GetSmaAnalysis",
+    "Skender.GetSmi",
+    "Skender.GetSmma",
+    "Skender.GetStarcBands",
+    "Skender.GetStc",
+    "Skender.GetStdDev",
+    "Skender.GetStdDevChannels",
+    "Skender.GetStoch",
+    "Skender.GetStochRsi",
+    "Skender.GetSuperTrend",
+    "Skender.GetT3",
+    "Skender.GetTema",
+    "Skender.GetTrix",
+    "Skender.GetTsi",
+    "Skender.GetVolatilityStop",
+    "Skender.GetVortex",
+    "TaLib.Candles.Breakaway",
+    "TaLib.Candles.ConcealingBabySwallow",
+    "TaLib.Candles.DarkCloudCover",
+    "TaLib.Candles.Engulfing",
+    "TaLib.Candles.GapSideBySideWhiteLines",
+    "TaLib.Candles.Hikkake",
+    "TaLib.Candles.IdenticalThreeCrows",
+    "TaLib.Candles.LadderBottom",
+    "TaLib.Candles.MatHold",
+    "TaLib.Candles.OnNeck",
+    "TaLib.Candles.Stalled",
+    "TaLib.Candles.StickSandwich",
+    "TaLib.Candles.TasukiGap",
+    "TaLib.Candles.ThreeInside",
+    "TaLib.Candles.ThreeLineStrike",
+    "TaLib.Candles.ThreeOutside",
+    "TaLib.Candles.ThreeStarsInSouth",
+    "TaLib.Candles.ThreeWhiteSoldiers",
+    "TaLib.Candles.Thrusting",
+    "TaLib.Candles.Tristar",
+    "TaLib.Candles.UpDownSideGapThreeMethods",
+    "TaLib.Functions.Accbands",
+    "TaLib.Functions.Ad",
+    "TaLib.Functions.AdOsc",
+    "TaLib.Functions.Adx",
+    "TaLib.Functions.Adxr",
+    "TaLib.Functions.Apo",
+    "TaLib.Functions.Aroon",
+    "TaLib.Functions.AroonOsc",
+    "TaLib.Functions.Atr",
+    "TaLib.Functions.AvgDev",
+    "TaLib.Functions.AvgPrice",
+    "TaLib.Functions.Bbands",
+    "TaLib.Functions.Beta",
+    "TaLib.Functions.Bop",
+    "TaLib.Functions.Cci",
+    "TaLib.Functions.Cmo",
+    "TaLib.Functions.Correl",
+    "TaLib.Functions.Dema",
+    "TaLib.Functions.Dx",
+    "TaLib.Functions.Ema",
+    "TaLib.Functions.HtDcPeriod",
+    "TaLib.Functions.HtDcPhase",
+    "TaLib.Functions.HtPhasor",
+    "TaLib.Functions.HtSine",
+    "TaLib.Functions.HtTrendMode",
+    "TaLib.Functions.HtTrendline",
+    "TaLib.Functions.Kama",
+    "TaLib.Functions.LinearReg",
+    "TaLib.Functions.LinearRegIntercept",
+    "TaLib.Functions.LinearRegSlope",
+    "TaLib.Functions.Ma",
+    "TaLib.Functions.Macd",
+    "TaLib.Functions.MacdExt",
+    "TaLib.Functions.MacdFix",
+    "TaLib.Functions.Mama",
+    "TaLib.Functions.Mavp",
+    "TaLib.Functions.Max",
+    "TaLib.Functions.MaxIndex",
+    "TaLib.Functions.MedPrice",
+    "TaLib.Functions.Mfi",
+    "TaLib.Functions.Min",
+    "TaLib.Functions.MinIndex",
+    "TaLib.Functions.MinMax",
+    "TaLib.Functions.MinusDI",
+    "TaLib.Functions.MinusDM",
+    "TaLib.Functions.Mom",
+    "TaLib.Functions.Natr",
+    "TaLib.Functions.Obv",
+    "TaLib.Functions.PlusDI",
+    "TaLib.Functions.PlusDM",
+    "TaLib.Functions.Ppo",
+    "TaLib.Functions.Roc",
+    "TaLib.Functions.RocP",
+    "TaLib.Functions.RocR",
+    "TaLib.Functions.RocR100",
+    "TaLib.Functions.Rsi",
+    "TaLib.Functions.Sar",
+    "TaLib.Functions.SarExt",
+    "TaLib.Functions.Sma",
+    "TaLib.Functions.StdDev",
+    "TaLib.Functions.Stoch",
+    "TaLib.Functions.StochF",
+    "TaLib.Functions.StochRsi",
+    "TaLib.Functions.Sum",
+    "TaLib.Functions.T3",
+    "TaLib.Functions.TRange",
+    "TaLib.Functions.Tema",
+    "TaLib.Functions.Trima",
+    "TaLib.Functions.Trix",
+    "TaLib.Functions.TypPrice",
+    "TaLib.Functions.UltOsc",
+    "TaLib.Functions.Var",
+    "TaLib.Functions.WclPrice",
+    "TaLib.Functions.WillR",
+    "TaLib.Functions.Wma"
+  ],
+  "priority_first_shard": [
+    "TaLib.Candles.GapSideBySideWhiteLines",
+    "TaLib.Candles.MatHold",
+    "TaLib.Candles.ConcealingBabySwallow",
+    "TaLib.Candles.ThreeLineStrike",
+    "TaLib.Functions.Adx",
+    "TaLib.Functions.Adxr",
+    "TaLib.Functions.Dx",
+    "TaLib.Functions.MinusDI",
+    "TaLib.Functions.PlusDI",
+    "TaLib.Functions.MinusDM",
+    "TaLib.Functions.PlusDM",
+    "TaLib.Functions.T3",
+    "Skender.GetT3"
+  ],
+  "priority_continues": [
+    "QuanTAlib.T3",
+    "Skender.GetAdx"
+  ],
+  "refresh_shards": [
+    {
+      "index": 0,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Candles.GapSideBySideWhiteLines",
+              "pair": "TaLib.Candles.GapSideBySideWhiteLines"
+            },
+            {
+              "raw": "TaLib.Candles.MatHold",
+              "pair": "TaLib.Candles.MatHold"
+            },
+            {
+              "raw": "TaLib.Candles.ConcealingBabySwallow",
+              "pair": "TaLib.Candles.ConcealingBabySwallow"
+            },
+            {
+              "raw": "TaLib.Candles.ThreeLineStrike",
+              "pair": "TaLib.Candles.ThreeLineStrike"
+            },
+            {
+              "raw": "TaLib.Functions.Adx",
+              "pair": "TaLib.Functions.Adx"
+            },
+            {
+              "raw": "TaLib.Functions.Adxr",
+              "pair": "TaLib.Functions.Adxr"
+            },
+            {
+              "raw": "TaLib.Functions.Dx",
+              "pair": "TaLib.Functions.Dx"
+            },
+            {
+              "raw": "TaLib.Functions.MinusDI",
+              "pair": "TaLib.Functions.MinusDI"
+            },
+            {
+              "raw": "TaLib.Functions.PlusDI",
+              "pair": "TaLib.Functions.PlusDI"
+            },
+            {
+              "raw": "TaLib.Functions.MinusDM",
+              "pair": "TaLib.Functions.MinusDM"
+            },
+            {
+              "raw": "TaLib.Functions.PlusDM",
+              "pair": "TaLib.Functions.PlusDM"
+            },
+            {
+              "raw": "TaLib.Functions.T3",
+              "pair": "TaLib.Functions.T3"
+            },
+            {
+              "raw": "Skender.GetT3",
+              "pair": "Skender.GetT3"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 130,
+          "decisions": 26
+        }
+      ],
+      "cases": 130,
+      "decisions": 26
+    },
+    {
+      "index": 1,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetBeta",
+              "pair": "Skender.GetBeta"
+            },
+            {
+              "raw": "Skender.GetMacd",
+              "pair": "Skender.GetMacd"
+            },
+            {
+              "raw": "QuanTAlib.Zlema",
+              "pair": "QuanTAlib.Zlema"
+            },
+            {
+              "raw": "QuanTAlib.Realized",
+              "pair": "QuanTAlib.Realized"
+            },
+            {
+              "raw": "TaLib.Functions.HtPhasor",
+              "pair": "TaLib.Functions.HtPhasor"
+            },
+            {
+              "raw": "TaLib.Functions.Atr",
+              "pair": "TaLib.Functions.Atr"
+            },
+            {
+              "raw": "Skender.GetTrix",
+              "pair": "Skender.GetTrix"
+            },
+            {
+              "raw": "Skender.GetPrs",
+              "pair": "Skender.GetPrs"
+            },
+            {
+              "raw": "TaLib.Functions.WillR",
+              "pair": "TaLib.Functions.WillR"
+            },
+            {
+              "raw": "TaLib.Functions.LinearReg",
+              "pair": "TaLib.Functions.LinearReg"
+            },
+            {
+              "raw": "TaLib.Functions.Obv",
+              "pair": "TaLib.Functions.Obv"
+            },
+            {
+              "raw": "TaLib.Functions.MedPrice",
+              "pair": "TaLib.Functions.MedPrice"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 120,
+          "decisions": 24
+        }
+      ],
+      "cases": 120,
+      "decisions": 24
+    },
+    {
+      "index": 2,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetConnorsRsi",
+              "pair": "Skender.GetConnorsRsi"
+            },
+            {
+              "raw": "TaLib.Functions.Natr",
+              "pair": "TaLib.Functions.Natr"
+            },
+            {
+              "raw": "TaLib.Functions.HtDcPeriod",
+              "pair": "TaLib.Functions.HtDcPeriod"
+            },
+            {
+              "raw": "TaLib.Functions.AdOsc",
+              "pair": "TaLib.Functions.AdOsc"
+            },
+            {
+              "raw": "QuanTAlib.Rma",
+              "pair": "QuanTAlib.Rma"
+            },
+            {
+              "raw": "TaLib.Functions.StdDev",
+              "pair": "TaLib.Functions.StdDev"
+            },
+            {
+              "raw": "Skender.GetCci",
+              "pair": "Skender.GetCci"
+            },
+            {
+              "raw": "QuanTAlib.Tema",
+              "pair": "QuanTAlib.Tema"
+            },
+            {
+              "raw": "TaLib.Functions.AvgDev",
+              "pair": "TaLib.Functions.AvgDev"
+            },
+            {
+              "raw": "TaLib.Functions.Mfi",
+              "pair": "TaLib.Functions.Mfi"
+            },
+            {
+              "raw": "TaLib.Functions.Sar",
+              "pair": "TaLib.Functions.Sar"
+            },
+            {
+              "raw": "TaLib.Functions.Sma",
+              "pair": "TaLib.Functions.Sma"
+            },
+            {
+              "raw": "TaLib.Functions.Roc",
+              "pair": "TaLib.Functions.Roc"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 130,
+          "decisions": 26
+        }
+      ],
+      "cases": 130,
+      "decisions": 26
+    },
+    {
+      "index": 3,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.HtTrendMode",
+              "pair": "TaLib.Functions.HtTrendMode"
+            },
+            {
+              "raw": "Skender.GetStc",
+              "pair": "Skender.GetStc"
+            },
+            {
+              "raw": "Skender.GetAdx",
+              "pair": "Skender.GetAdx"
+            },
+            {
+              "raw": "TaLib.Functions.MacdExt",
+              "pair": "TaLib.Functions.MacdExt"
+            },
+            {
+              "raw": "Skender.GetBollingerBands",
+              "pair": "Skender.GetBollingerBands"
+            },
+            {
+              "raw": "TaLib.Candles.OnNeck",
+              "pair": "TaLib.Candles.OnNeck"
+            },
+            {
+              "raw": "TaLib.Functions.Rsi",
+              "pair": "TaLib.Functions.Rsi"
+            },
+            {
+              "raw": "Skender.GetFisherTransform",
+              "pair": "Skender.GetFisherTransform"
+            },
+            {
+              "raw": "TaLib.Functions.Ma",
+              "pair": "TaLib.Functions.Ma"
+            },
+            {
+              "raw": "TaLib.Functions.Aroon",
+              "pair": "TaLib.Functions.Aroon"
+            },
+            {
+              "raw": "TaLib.Candles.UpDownSideGapThreeMethods",
+              "pair": "TaLib.Candles.UpDownSideGapThreeMethods"
+            },
+            {
+              "raw": "TaLib.Functions.Trima",
+              "pair": "TaLib.Functions.Trima"
+            },
+            {
+              "raw": "TaLib.Functions.TRange",
+              "pair": "TaLib.Functions.TRange"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 130,
+          "decisions": 26
+        }
+      ],
+      "cases": 130,
+      "decisions": 26
+    },
+    {
+      "index": 4,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetStdDevChannels",
+              "pair": "Skender.GetStdDevChannels"
+            },
+            {
+              "raw": "QuanTAlib.Rema",
+              "pair": "QuanTAlib.Rema"
+            },
+            {
+              "raw": "QuanTAlib.Dema",
+              "pair": "QuanTAlib.Dema"
+            },
+            {
+              "raw": "Skender.GetAlligator",
+              "pair": "Skender.GetAlligator"
+            },
+            {
+              "raw": "Skender.GetStoch",
+              "pair": "Skender.GetStoch"
+            },
+            {
+              "raw": "TaLib.Functions.Stoch",
+              "pair": "TaLib.Functions.Stoch"
+            },
+            {
+              "raw": "TaLib.Functions.Beta",
+              "pair": "TaLib.Functions.Beta"
+            },
+            {
+              "raw": "TaLib.Functions.Cci",
+              "pair": "TaLib.Functions.Cci"
+            },
+            {
+              "raw": "Skender.GetRenkoAtr",
+              "pair": "Skender.GetRenkoAtr"
+            },
+            {
+              "raw": "TaLib.Functions.LinearRegIntercept",
+              "pair": "TaLib.Functions.LinearRegIntercept"
+            },
+            {
+              "raw": "TaLib.Functions.SarExt",
+              "pair": "TaLib.Functions.SarExt"
+            },
+            {
+              "raw": "TaLib.Functions.Bop",
+              "pair": "TaLib.Functions.Bop"
+            },
+            {
+              "raw": "TaLib.Functions.RocR100",
+              "pair": "TaLib.Functions.RocR100"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 130,
+          "decisions": 26
+        }
+      ],
+      "cases": 130,
+      "decisions": 26
+    },
+    {
+      "index": 5,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.HtSine",
+              "pair": "TaLib.Functions.HtSine"
+            },
+            {
+              "raw": "Skender.GetPmo",
+              "pair": "Skender.GetPmo"
+            },
+            {
+              "raw": "Skender.GetMama",
+              "pair": "Skender.GetMama"
+            },
+            {
+              "raw": "Skender.GetChaikinOsc",
+              "pair": "Skender.GetChaikinOsc"
+            },
+            {
+              "raw": "QuanTAlib.Hwma",
+              "pair": "QuanTAlib.Hwma"
+            },
+            {
+              "raw": "Skender.GetStarcBands",
+              "pair": "Skender.GetStarcBands"
+            },
+            {
+              "raw": "Skender.GetCmf",
+              "pair": "Skender.GetCmf"
+            },
+            {
+              "raw": "TaLib.Functions.Correl",
+              "pair": "TaLib.Functions.Correl"
+            },
+            {
+              "raw": "TaLib.Candles.Stalled",
+              "pair": "TaLib.Candles.Stalled"
+            },
+            {
+              "raw": "TaLib.Functions.Max",
+              "pair": "TaLib.Functions.Max"
+            },
+            {
+              "raw": "TaLib.Functions.LinearRegSlope",
+              "pair": "TaLib.Functions.LinearRegSlope"
+            },
+            {
+              "raw": "TaLib.Functions.Ema",
+              "pair": "TaLib.Functions.Ema"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 120,
+          "decisions": 24
+        }
+      ],
+      "cases": 120,
+      "decisions": 24
+    },
+    {
+      "index": 6,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetHtTrendline",
+              "pair": "Skender.GetHtTrendline"
+            },
+            {
+              "raw": "Skender.GetTsi",
+              "pair": "Skender.GetTsi"
+            },
+            {
+              "raw": "TaLib.Functions.Mama",
+              "pair": "TaLib.Functions.Mama"
+            },
+            {
+              "raw": "Skender.GetForceIndex",
+              "pair": "Skender.GetForceIndex"
+            },
+            {
+              "raw": "TaLib.Functions.Macd",
+              "pair": "TaLib.Functions.Macd"
+            },
+            {
+              "raw": "Skender.GetChandelier",
+              "pair": "Skender.GetChandelier"
+            },
+            {
+              "raw": "Skender.GetKeltner",
+              "pair": "Skender.GetKeltner"
+            },
+            {
+              "raw": "TaLib.Functions.Dema",
+              "pair": "TaLib.Functions.Dema"
+            },
+            {
+              "raw": "TaLib.Functions.AroonOsc",
+              "pair": "TaLib.Functions.AroonOsc"
+            },
+            {
+              "raw": "TaLib.Functions.MinMax",
+              "pair": "TaLib.Functions.MinMax"
+            },
+            {
+              "raw": "Skender.GetSmma",
+              "pair": "Skender.GetSmma"
+            },
+            {
+              "raw": "TaLib.Functions.RocP",
+              "pair": "TaLib.Functions.RocP"
+            },
+            {
+              "raw": "TaLib.Functions.WclPrice",
+              "pair": "TaLib.Functions.WclPrice"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 130,
+          "decisions": 26
+        }
+      ],
+      "cases": 130,
+      "decisions": 26
+    },
+    {
+      "index": 7,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "TaLib.Functions.HtDcPhase",
+              "pair": "TaLib.Functions.HtDcPhase"
+            },
+            {
+              "raw": "Skender.GetSuperTrend",
+              "pair": "Skender.GetSuperTrend"
+            },
+            {
+              "raw": "QuanTAlib.Mama",
+              "pair": "QuanTAlib.Mama"
+            },
+            {
+              "raw": "TaLib.Functions.Kama",
+              "pair": "TaLib.Functions.Kama"
+            },
+            {
+              "raw": "Skender.GetRsi",
+              "pair": "Skender.GetRsi"
+            },
+            {
+              "raw": "Skender.GetVortex",
+              "pair": "Skender.GetVortex"
+            },
+            {
+              "raw": "QuanTAlib.Ltma",
+              "pair": "QuanTAlib.Ltma"
+            },
+            {
+              "raw": "TaLib.Functions.StochF",
+              "pair": "TaLib.Functions.StochF"
+            },
+            {
+              "raw": "TaLib.Candles.Tristar",
+              "pair": "TaLib.Candles.Tristar"
+            },
+            {
+              "raw": "TaLib.Functions.UltOsc",
+              "pair": "TaLib.Functions.UltOsc"
+            },
+            {
+              "raw": "TaLib.Functions.Var",
+              "pair": "TaLib.Functions.Var"
+            },
+            {
+              "raw": "TaLib.Candles.Engulfing",
+              "pair": "TaLib.Candles.Engulfing"
+            },
+            {
+              "raw": "TaLib.Candles.Hikkake",
+              "pair": "TaLib.Candles.Hikkake"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 130,
+          "decisions": 26
+        }
+      ],
+      "cases": 130,
+      "decisions": 26
+    },
+    {
+      "index": 8,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Dsma",
+              "pair": "QuanTAlib.Dsma"
+            },
+            {
+              "raw": "Skender.GetAtrStop",
+              "pair": "Skender.GetAtrStop"
+            },
+            {
+              "raw": "Skender.GetKama",
+              "pair": "Skender.GetKama"
+            },
+            {
+              "raw": "TaLib.Functions.HtTrendline",
+              "pair": "TaLib.Functions.HtTrendline"
+            },
+            {
+              "raw": "TaLib.Functions.MacdFix",
+              "pair": "TaLib.Functions.MacdFix"
+            },
+            {
+              "raw": "TaLib.Functions.Cmo",
+              "pair": "TaLib.Functions.Cmo"
+            },
+            {
+              "raw": "Skender.GetChop",
+              "pair": "Skender.GetChop"
+            },
+            {
+              "raw": "TaLib.Candles.Thrusting",
+              "pair": "TaLib.Candles.Thrusting"
+            },
+            {
+              "raw": "TaLib.Candles.TasukiGap",
+              "pair": "TaLib.Candles.TasukiGap"
+            },
+            {
+              "raw": "TaLib.Functions.MaxIndex",
+              "pair": "TaLib.Functions.MaxIndex"
+            },
+            {
+              "raw": "TaLib.Functions.RocR",
+              "pair": "TaLib.Functions.RocR"
+            },
+            {
+              "raw": "TaLib.Functions.Wma",
+              "pair": "TaLib.Functions.Wma"
+            },
+            {
+              "raw": "TaLib.Functions.Min",
+              "pair": "TaLib.Functions.Min"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 130,
+          "decisions": 26
+        }
+      ],
+      "cases": 130,
+      "decisions": 26
+    },
+    {
+      "index": 9,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Kurtosis",
+              "pair": "QuanTAlib.Kurtosis"
+            },
+            {
+              "raw": "Skender.GetStdDev",
+              "pair": "Skender.GetStdDev"
+            },
+            {
+              "raw": "Skender.GetStochRsi",
+              "pair": "Skender.GetStochRsi"
+            },
+            {
+              "raw": "Skender.GetAtr",
+              "pair": "Skender.GetAtr"
+            },
+            {
+              "raw": "Skender.GetVolatilityStop",
+              "pair": "Skender.GetVolatilityStop"
+            },
+            {
+              "raw": "Skender.GetDema",
+              "pair": "Skender.GetDema"
+            },
+            {
+              "raw": "TaLib.Candles.IdenticalThreeCrows",
+              "pair": "TaLib.Candles.IdenticalThreeCrows"
+            },
+            {
+              "raw": "QuanTAlib.Qema",
+              "pair": "QuanTAlib.Qema"
+            },
+            {
+              "raw": "TaLib.Functions.Bbands",
+              "pair": "TaLib.Functions.Bbands"
+            },
+            {
+              "raw": "TaLib.Candles.DarkCloudCover",
+              "pair": "TaLib.Candles.DarkCloudCover"
+            },
+            {
+              "raw": "TaLib.Functions.Sum",
+              "pair": "TaLib.Functions.Sum"
+            },
+            {
+              "raw": "TaLib.Functions.Ad",
+              "pair": "TaLib.Functions.Ad"
+            },
+            {
+              "raw": "TaLib.Functions.AvgPrice",
+              "pair": "TaLib.Functions.AvgPrice"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 130,
+          "decisions": 26
+        }
+      ],
+      "cases": 130,
+      "decisions": 26
+    },
+    {
+      "index": 10,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "Skender.GetKvo",
+              "pair": "Skender.GetKvo"
+            },
+            {
+              "raw": "Skender.GetPvo",
+              "pair": "Skender.GetPvo"
+            },
+            {
+              "raw": "QuanTAlib.Kama",
+              "pair": "QuanTAlib.Kama"
+            },
+            {
+              "raw": "Skender.GetRocWb",
+              "pair": "Skender.GetRocWb"
+            },
+            {
+              "raw": "Skender.GetSmaAnalysis",
+              "pair": "Skender.GetSmaAnalysis"
+            },
+            {
+              "raw": "Skender.GetTema",
+              "pair": "Skender.GetTema"
+            },
+            {
+              "raw": "QuanTAlib.T3",
+              "pair": "QuanTAlib.T3"
+            },
+            {
+              "raw": "TaLib.Functions.Trix",
+              "pair": "TaLib.Functions.Trix"
+            },
+            {
+              "raw": "TaLib.Functions.Apo",
+              "pair": "TaLib.Functions.Apo"
+            },
+            {
+              "raw": "TaLib.Functions.Mavp",
+              "pair": "TaLib.Functions.Mavp"
+            },
+            {
+              "raw": "TaLib.Functions.MinIndex",
+              "pair": "TaLib.Functions.MinIndex"
+            },
+            {
+              "raw": "TaLib.Candles.ThreeOutside",
+              "pair": "TaLib.Candles.ThreeOutside"
+            },
+            {
+              "raw": "TaLib.Candles.StickSandwich",
+              "pair": "TaLib.Candles.StickSandwich"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 130,
+          "decisions": 26
+        }
+      ],
+      "cases": 130,
+      "decisions": 26
+    },
+    {
+      "index": 11,
+      "tasks": [
+        {
+          "fixture": "LibraryPairBenchmarks",
+          "operations": [
+            {
+              "raw": "QuanTAlib.Curvature",
+              "pair": "QuanTAlib.Curvature"
+            },
+            {
+              "raw": "TaLib.Candles.ThreeWhiteSoldiers",
+              "pair": "TaLib.Candles.ThreeWhiteSoldiers"
+            },
+            {
+              "raw": "Skender.GetSmi",
+              "pair": "Skender.GetSmi"
+            },
+            {
+              "raw": "TaLib.Functions.Accbands",
+              "pair": "TaLib.Functions.Accbands"
+            },
+            {
+              "raw": "TaLib.Functions.StochRsi",
+              "pair": "TaLib.Functions.StochRsi"
+            },
+            {
+              "raw": "TaLib.Functions.Tema",
+              "pair": "TaLib.Functions.Tema"
+            },
+            {
+              "raw": "TaLib.Functions.Ppo",
+              "pair": "TaLib.Functions.Ppo"
+            },
+            {
+              "raw": "TaLib.Candles.ThreeStarsInSouth",
+              "pair": "TaLib.Candles.ThreeStarsInSouth"
+            },
+            {
+              "raw": "TaLib.Candles.ThreeInside",
+              "pair": "TaLib.Candles.ThreeInside"
+            },
+            {
+              "raw": "TaLib.Candles.Breakaway",
+              "pair": "TaLib.Candles.Breakaway"
+            },
+            {
+              "raw": "TaLib.Candles.LadderBottom",
+              "pair": "TaLib.Candles.LadderBottom"
+            },
+            {
+              "raw": "TaLib.Functions.TypPrice",
+              "pair": "TaLib.Functions.TypPrice"
+            },
+            {
+              "raw": "TaLib.Functions.Mom",
+              "pair": "TaLib.Functions.Mom"
+            }
+          ],
+          "methods": [
+            "Ooples",
+            "Competitor"
+          ],
+          "implicit_pair": false,
+          "cases": 130,
+          "decisions": 26
+        }
+      ],
+      "cases": 130,
+      "decisions": 26
+    }
+  ],
+  "cases": 1540,
+  "decisions": 308,
+  "sizes": [
+    1000,
+    10000
+  ],
+  "same_binary": true,
+  "baseline_measurement_refresh": true,
+  "report_refresh_only": true,
+  "production_qualification": false,
+  "algorithm_credit": 0,
+  "automatic_import": false,
+  "admission": "Both-size A/A-inconclusive admission; faster/slower at either size quarantines the whole pair. Inconclusive is not equivalence.",
+  "sampling": "Existing ABBA + round2 native, default1000 fixed warmups,10 iterations,7..10 retained samples,12 five-second quiet samples,CPU<=15%,no concurrent build/test; no changed measurement code.",
+  "measurement_budget": {
+    "shards": 12,
+    "max_pairs_per_shard": 13,
+    "max_parallel": 1,
+    "job_minutes": 60,
+    "max_measurement_runner_hours": 12,
+    "prepare_minutes": 60,
+    "collect_minutes": 60,
+    "nominal_estimate_measurement_runner_hours": 8.61,
+    "total_preparation_collection_allowance_runner_hours": 2
+  },
+  "cost": "Compared with10k-only, BOTH sizes doubles declared cases but preserves616 parent operation reports and48 initial quiet sequences. Existing2-case BDN global totals7.63..12.19s vs4-case15.06/15.73s are METHOD-confounded;1k is not free and savings are not2x. Historical complete-pipeline estimate8.61measurement runner-hours, not a proven upper bound. One frontierVM reserves the second global slot for KAMA.",
+  "quiet_limit": "No promised inner quiet deadline; actual enclosing60min GH measurement job cap bounds waiting. Operation watchdog3600s starts after benchmark process launch.",
+  "contamination": "Preserve existing external-build contamination discard/archive/reacquire protocol within unchanged enclosing deadlines; discarded attempts never pooled. No ad-hoc completed-result retries or failed-shard reruns.",
+  "source_advance": "No publication hold. Measurements remain frozen4b/20d snapshot if branch advances. Never call this latest-current/all401; report staging still enforces source-vs-HEAD boundaries.",
+  "remaining_scope": {
+    "unmeasured_pairs": 247,
+    "fast_later": 235,
+    "long_native_held": 12,
+    "all401_launch": false,
+    "long_control_policy_changes": false
+  },
+  "report_contract": {
+    "total_baseline_rows": 802,
+    "builder_comparisons": 1544,
+    "both_size_inconclusive_required": true,
+    "whole_pair_quarantine": true,
+    "no_current_full_inventory_claim": true,
+    "no_optimization_credit": true,
+    "chronological_owned_round": 2,
+    "native_round": 2
+  },
+  "historical_cost_by_shard": [
+    {
+      "index": 0,
+      "pairs": [
+        "TaLib.Candles.GapSideBySideWhiteLines",
+        "TaLib.Candles.MatHold",
+        "TaLib.Candles.ConcealingBabySwallow",
+        "TaLib.Candles.ThreeLineStrike",
+        "TaLib.Functions.Adx",
+        "TaLib.Functions.Adxr",
+        "TaLib.Functions.Dx",
+        "TaLib.Functions.MinusDI",
+        "TaLib.Functions.PlusDI",
+        "TaLib.Functions.MinusDM",
+        "TaLib.Functions.PlusDM",
+        "TaLib.Functions.T3",
+        "Skender.GetT3"
+      ],
+      "historical_invocation_seconds": 118.63464578666667
+    },
+    {
+      "index": 1,
+      "pairs": [
+        "Skender.GetBeta",
+        "Skender.GetMacd",
+        "QuanTAlib.Zlema",
+        "QuanTAlib.Realized",
+        "TaLib.Functions.HtPhasor",
+        "TaLib.Functions.Atr",
+        "Skender.GetTrix",
+        "Skender.GetPrs",
+        "TaLib.Functions.WillR",
+        "TaLib.Functions.LinearReg",
+        "TaLib.Functions.Obv",
+        "TaLib.Functions.MedPrice"
+      ],
+      "historical_invocation_seconds": 187.34704636222216
+    },
+    {
+      "index": 2,
+      "pairs": [
+        "Skender.GetConnorsRsi",
+        "TaLib.Functions.Natr",
+        "TaLib.Functions.HtDcPeriod",
+        "TaLib.Functions.AdOsc",
+        "QuanTAlib.Rma",
+        "TaLib.Functions.StdDev",
+        "Skender.GetCci",
+        "QuanTAlib.Tema",
+        "TaLib.Functions.AvgDev",
+        "TaLib.Functions.Mfi",
+        "TaLib.Functions.Sar",
+        "TaLib.Functions.Sma",
+        "TaLib.Functions.Roc"
+      ],
+      "historical_invocation_seconds": 187.17661217277777
+    },
+    {
+      "index": 3,
+      "pairs": [
+        "TaLib.Functions.HtTrendMode",
+        "Skender.GetStc",
+        "Skender.GetAdx",
+        "TaLib.Functions.MacdExt",
+        "Skender.GetBollingerBands",
+        "TaLib.Candles.OnNeck",
+        "TaLib.Functions.Rsi",
+        "Skender.GetFisherTransform",
+        "TaLib.Functions.Ma",
+        "TaLib.Functions.Aroon",
+        "TaLib.Candles.UpDownSideGapThreeMethods",
+        "TaLib.Functions.Trima",
+        "TaLib.Functions.TRange"
+      ],
+      "historical_invocation_seconds": 187.443095735
+    },
+    {
+      "index": 4,
+      "pairs": [
+        "Skender.GetStdDevChannels",
+        "QuanTAlib.Rema",
+        "QuanTAlib.Dema",
+        "Skender.GetAlligator",
+        "Skender.GetStoch",
+        "TaLib.Functions.Stoch",
+        "TaLib.Functions.Beta",
+        "TaLib.Functions.Cci",
+        "Skender.GetRenkoAtr",
+        "TaLib.Functions.LinearRegIntercept",
+        "TaLib.Functions.SarExt",
+        "TaLib.Functions.Bop",
+        "TaLib.Functions.RocR100"
+      ],
+      "historical_invocation_seconds": 187.45910384222222
+    },
+    {
+      "index": 5,
+      "pairs": [
+        "TaLib.Functions.HtSine",
+        "Skender.GetPmo",
+        "Skender.GetMama",
+        "Skender.GetChaikinOsc",
+        "QuanTAlib.Hwma",
+        "Skender.GetStarcBands",
+        "Skender.GetCmf",
+        "TaLib.Functions.Correl",
+        "TaLib.Candles.Stalled",
+        "TaLib.Functions.Max",
+        "TaLib.Functions.LinearRegSlope",
+        "TaLib.Functions.Ema"
+      ],
+      "historical_invocation_seconds": 185.9939389255556
+    },
+    {
+      "index": 6,
+      "pairs": [
+        "Skender.GetHtTrendline",
+        "Skender.GetTsi",
+        "TaLib.Functions.Mama",
+        "Skender.GetForceIndex",
+        "TaLib.Functions.Macd",
+        "Skender.GetChandelier",
+        "Skender.GetKeltner",
+        "TaLib.Functions.Dema",
+        "TaLib.Functions.AroonOsc",
+        "TaLib.Functions.MinMax",
+        "Skender.GetSmma",
+        "TaLib.Functions.RocP",
+        "TaLib.Functions.WclPrice"
+      ],
+      "historical_invocation_seconds": 187.422228125
+    },
+    {
+      "index": 7,
+      "pairs": [
+        "TaLib.Functions.HtDcPhase",
+        "Skender.GetSuperTrend",
+        "QuanTAlib.Mama",
+        "TaLib.Functions.Kama",
+        "Skender.GetRsi",
+        "Skender.GetVortex",
+        "QuanTAlib.Ltma",
+        "TaLib.Functions.StochF",
+        "TaLib.Candles.Tristar",
+        "TaLib.Functions.UltOsc",
+        "TaLib.Functions.Var",
+        "TaLib.Candles.Engulfing",
+        "TaLib.Candles.Hikkake"
+      ],
+      "historical_invocation_seconds": 187.15295123944443
+    },
+    {
+      "index": 8,
+      "pairs": [
+        "QuanTAlib.Dsma",
+        "Skender.GetAtrStop",
+        "Skender.GetKama",
+        "TaLib.Functions.HtTrendline",
+        "TaLib.Functions.MacdFix",
+        "TaLib.Functions.Cmo",
+        "Skender.GetChop",
+        "TaLib.Candles.Thrusting",
+        "TaLib.Candles.TasukiGap",
+        "TaLib.Functions.MaxIndex",
+        "TaLib.Functions.RocR",
+        "TaLib.Functions.Wma",
+        "TaLib.Functions.Min"
+      ],
+      "historical_invocation_seconds": 187.3817542266667
+    },
+    {
+      "index": 9,
+      "pairs": [
+        "QuanTAlib.Kurtosis",
+        "Skender.GetStdDev",
+        "Skender.GetStochRsi",
+        "Skender.GetAtr",
+        "Skender.GetVolatilityStop",
+        "Skender.GetDema",
+        "TaLib.Candles.IdenticalThreeCrows",
+        "QuanTAlib.Qema",
+        "TaLib.Functions.Bbands",
+        "TaLib.Candles.DarkCloudCover",
+        "TaLib.Functions.Sum",
+        "TaLib.Functions.Ad",
+        "TaLib.Functions.AvgPrice"
+      ],
+      "historical_invocation_seconds": 187.39561743055555
+    },
+    {
+      "index": 10,
+      "pairs": [
+        "Skender.GetKvo",
+        "Skender.GetPvo",
+        "QuanTAlib.Kama",
+        "Skender.GetRocWb",
+        "Skender.GetSmaAnalysis",
+        "Skender.GetTema",
+        "QuanTAlib.T3",
+        "TaLib.Functions.Trix",
+        "TaLib.Functions.Apo",
+        "TaLib.Functions.Mavp",
+        "TaLib.Functions.MinIndex",
+        "TaLib.Candles.ThreeOutside",
+        "TaLib.Candles.StickSandwich"
+      ],
+      "historical_invocation_seconds": 187.4088946661111
+    },
+    {
+      "index": 11,
+      "pairs": [
+        "QuanTAlib.Curvature",
+        "TaLib.Candles.ThreeWhiteSoldiers",
+        "Skender.GetSmi",
+        "TaLib.Functions.Accbands",
+        "TaLib.Functions.StochRsi",
+        "TaLib.Functions.Tema",
+        "TaLib.Functions.Ppo",
+        "TaLib.Candles.ThreeStarsInSouth",
+        "TaLib.Candles.ThreeInside",
+        "TaLib.Candles.Breakaway",
+        "TaLib.Candles.LadderBottom",
+        "TaLib.Functions.TypPrice",
+        "TaLib.Functions.Mom"
+      ],
+      "historical_invocation_seconds": 187.3971853433333
+    }
+  ],
+  "catalog": {
+    "path": "benchmarks/plans/evidence/current-frontier-frozen-catalog-20261119.json",
+    "sha256": "4006edcd197deb5b0cb477fce938ea4efadc00d24afb3f6c24684f6ce7a764e7"
+  },
+  "earlier_plan": {
+    "path": "benchmarks/plans/evidence/current-frontier-earlier-readonly-proposal-20261119.json",
+    "sha256": "cea794a2b1f2d1719d441e23960af3a6029406d0fb755e45dbe5c0a797aed174"
+  },
+  "peer_review": {
+    "path": "benchmarks/plans/evidence/current-frontier-earlier-peer-review-20261119.json",
+    "sha256": "fd0e37f2f9b1a1acdd1daf34655ae04dd7fde54d02d856693513548c50ce7293"
+  },
+  "composition_policy": {
+    "snapshot_source": "4b4e8a385ed1c210998d26de6460e23f5842ffe9",
+    "published_snapshot": "20d21f263a25f14c4c15a0ab9354bfc91e0dab60",
+    "report_before_sha256": "1f9279984a58092daf1bc6dce0f84161d962528847bf6086db7bdfd4ec10d7be",
+    "precedence": "accepted-source-lineage-and-qualified-scope",
+    "wall_clock_timestamp_is_not_source_precedence": true,
+    "later_accepted_overrides_must_be_preserved_or_reapplied": true,
+    "automatic_import": false
+  }
+}

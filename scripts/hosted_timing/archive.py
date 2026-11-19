@@ -116,7 +116,12 @@ def archive(raw, prepared, repo, phase):
         refresh=implementation(read(PLAN))
         from .pipeline import BENCH,TESTS
         blobs['harness-source.patch']=subprocess.check_output(['git','diff','--binary',refresh.PUBLISHED,refresh.CANONICAL,'--',BENCH,TESTS],cwd=repo)
-        if read(PLAN).get('current_baseline_ten_refresh'):
+        if read(PLAN).get('current_frontier_refresh'):
+            assert not blobs['harness-source.patch'], 'Current frontier refresh cannot change the harness'
+            retained=refresh.archive_authentication(prepared,read(PLAN))
+            assert all(name not in blobs or blobs[name]==value for name,value in retained.items())
+            blobs.update(retained)
+        elif read(PLAN).get('current_baseline_ten_refresh'):
             assert not blobs['harness-source.patch'], 'Current baseline refresh cannot change the harness'
             plan = read(PLAN)
             original = prepared/'origin-provenance.json'
@@ -153,6 +158,9 @@ def archive(raw, prepared, repo, phase):
         archives=manifest,production_integrated=False,report_imported=False,
         **({'baseline_refresh_verified':True,'report_refresh_only':True,'production_qualification':False,'production_optimization':False,
             'confirmed_native_wins':summary['native_review']['confirmed_native_wins']} if phase=='baseline-refresh' else {}),
+        **({'algorithm_credit':0,'closure_credit':0,'remaining_unmeasured_primary_pairs':247,
+            'snapshot_source':summary['sources']['new'],'measured_primary_pairs':154}
+           if phase=='baseline-refresh' and read(PLAN).get('current_frontier_refresh') else {}),
         **({'coverage_complete': True, 'source_qualification_claimed': False} if phase == 'coverage' else {}),
         **({'source_gate_accepted':summary['source_gate_accepted'],
             'native_progress_gate_passed':summary['native_progress_gate_passed'],
@@ -164,6 +172,7 @@ def archive(raw, prepared, repo, phase):
         'Fresh four-pair 120-case TripleBody macro qualification; unchanged 24-decision source and native-progress gates, existing CI/GPU binaries reused, no source acceptance from ThreeInside control alone.' if read(PLAN).get('triple_body_macro_qualification') else
         'Fresh 180-case six-candle predicate-order qualification. The unchanged standard 36-decision source gate and the predeclared LibraryPair native-progress gate must both pass; the native gate requires a new 10,000-bar closure with its own source Faster verdict, robust net 10,000-bar point-win progress, and preservation of prior confident native wins at both sizes. One round-two native control per pair/size is retained without pooling. Authenticated old a1f 30/89/GPU100 and new caef 24/65/GPU100 inputs are preserved separately from frozen 9a. No acceptance or publication follows from source improvements alone.' if read(PLAN).get('candle_predicate_order_qualification') else
               'Fresh 90-case MatchingLow-only qualification with SeparatingLines and StickSandwich sentinels. Accepted source requires zero slower decisions, at least one faster decision, and both MatchingLow 10,000-bar candidate rounds newly beating the measured native control with separated intervals and at least 10% lower means. Historical harness continuation carries no timing-equivalence claim; original baseline/frozen GPU evidence and fresh source-bound candidate GPU100 are retained.' if read(PLAN).get('matchinglow_grid_qualification') else
+             'Hosted CPU first154 accepted4b snapshot measurement refresh. Existing authenticated CPU134/parity86/GPU100 and identical actual harness are reused without new source compilation or GPU execution. Both-size A/A-inconclusive admission is not equivalence;247 primary pairs remain unmeasured. No production qualification, algorithm credit or automatic import is claimed.' if phase == 'baseline-refresh' and read(PLAN).get('current_frontier_refresh') else
              'Hosted CPU current-baseline A/A refresh. Original authenticated canonical/frozen GPU receipts are reused; fresh consumer validation passed 303 canonical cases and 20 frozen/canonical alignment cases, without new compilation or GPU execution. A/A admission is not equivalence; no production qualification or optimization is claimed.' if phase == 'baseline-refresh' and read(PLAN).get('current_baseline_ten_refresh') else
              'Hosted CPU harness baseline refresh with fresh canonical correctness/GPU100 and authenticated frozen-variant evidence. Identical-binary A/A outcomes describe timing variability; no production qualification or optimization is claimed.' if phase == 'baseline-refresh' else
              'Hosted CPU timings. Historical source-matched local GPU checks are retained with their original identity.' +
