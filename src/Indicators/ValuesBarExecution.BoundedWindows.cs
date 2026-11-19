@@ -1220,16 +1220,24 @@ internal static partial class ValuesBarExecution
     private struct AlmaKernel(ArnaudLegouxWindow.State state, BoundedOutput target) : IBoundedKernel<AlmaKernel>
     {
         private int _index = target.Origin;
+        private AlmaGridBatchState? _batch;
         public static AlmaKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
         {
             var alma = (ArnaudLegouxWindow)indicator;
             // Later workers never publish incomplete seed windows. Suppressing
             // those values also avoids rebuilding every expanding weight prefix.
-            return new(new(alma.Period, alma.Offset, alma.Sigma,
-                alma.FullWindowOnly || target.WriteStart > 0), target);
+            var state = new ArnaudLegouxWindow.State(alma.Period, alma.Offset, alma.Sigma,
+                alma.FullWindowOnly || target.WriteStart > 0);
+            var kernel = new AlmaKernel(state, target);
+            // Keep short regions, including LatestOnly replay windows, on the
+            // original path unless one full block follows the first full row.
+            if (alma.Period <= 64 && count - alma.Period >= 128)
+                kernel._batch = new(state, alma.Period, count, target);
+            return kernel;
         }
         public double Update(in Bar bar)
         {
+            if (_batch is not null) return _batch.Update(in bar);
             Span<double> values = stackalloc double[2];
             state.Update(in bar, values);
             int index = _index++;
