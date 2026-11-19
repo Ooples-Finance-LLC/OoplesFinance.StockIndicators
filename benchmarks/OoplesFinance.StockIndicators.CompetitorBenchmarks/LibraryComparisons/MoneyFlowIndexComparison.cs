@@ -73,7 +73,7 @@ internal static class MoneyFlowIndexComparison
     {
         var indicator = new WindowMoneyFlowIndex(period, ta, suppressed);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

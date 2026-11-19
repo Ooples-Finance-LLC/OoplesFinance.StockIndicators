@@ -54,7 +54,7 @@ internal static class TaAdaptiveComparison
             outputDelay: 1L + suppression
         );
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

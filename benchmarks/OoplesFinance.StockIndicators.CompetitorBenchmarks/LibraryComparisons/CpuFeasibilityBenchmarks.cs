@@ -47,13 +47,13 @@ public class AsinFeasibilityBenchmarks
     [Benchmark] public void DefinedReusable() => CpuFeasibilityPrototypes.AsinDefined(_input, _output, _presence);
     [Benchmark] public async Task<int> Builder()
     {
-        using var run = await ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars))
+        using var run = await ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars))
             .ConfigureIndicators(new PriceCircularTransform(PriceCircularOperation.ArcSine)).BuildAsync();
         return run.BarCount;
     }
     [Benchmark] public async Task<int> IngestionOnly()
     {
-        using var run = await ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).BuildAsync();
+        using var run = await ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).BuildAsync();
         return run.BarCount;
     }
 }
@@ -89,12 +89,12 @@ public class SmaFeasibilityBenchmarks
     [Benchmark] public void VectorReusable() => CpuFeasibilityPrototypes.SmaVector(_input, _output, 20);
     [Benchmark] public async Task<int> Builder()
     {
-        using var run = await ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(new Sma(20)).BuildAsync();
+        using var run = await ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(new Sma(20)).BuildAsync();
         return run.BarCount;
     }
     [Benchmark] public async Task<int> IngestionOnly()
     {
-        using var run = await ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).BuildAsync();
+        using var run = await ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).BuildAsync();
         return run.BarCount;
     }
 }

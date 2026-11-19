@@ -92,7 +92,7 @@ public class SharedPointwiseBatchBenchmarks
     };
     private IIndicatorRun Build(IIndicator[] indicators, IndicatorHistoryMode history, bool reference = false)
     {
-        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicators).ConfigureHistory(history);
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicators).ConfigureHistory(history);
         if (reference) builder.ConfigureBehavior(_ => { });
         return builder.BuildAsync().GetAwaiter().GetResult();
     }

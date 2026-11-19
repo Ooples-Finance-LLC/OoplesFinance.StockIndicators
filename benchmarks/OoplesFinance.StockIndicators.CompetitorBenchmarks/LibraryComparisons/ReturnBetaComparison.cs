@@ -126,7 +126,7 @@ internal static class ReturnBetaComparison
             ? new WindowBetaStatistics(period, selection)
             : new WindowReturnBeta(period);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

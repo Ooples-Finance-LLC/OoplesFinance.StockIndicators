@@ -9,7 +9,7 @@ internal static class CandleComparison
     internal static ComparisonSeries Ooples(CompetitorData data, int unused)
     {
         var indicator = new EngulfingPattern();
-        using var run = ComparisonBuilder.Create().ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
         return new(Math.Min(2, data.Count), run[indicator].ToArray());
     }

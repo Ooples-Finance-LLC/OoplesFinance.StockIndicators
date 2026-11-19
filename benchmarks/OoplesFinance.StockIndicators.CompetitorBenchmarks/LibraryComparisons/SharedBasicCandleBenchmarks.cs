@@ -82,7 +82,7 @@ public class SharedBasicCandleBenchmarks
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false,
         IndicatorExecutionBackend backend = IndicatorExecutionBackend.Cpu)
     {
-        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(history).ConfigureExecution(backend);
         if (reference) builder.ConfigureBehavior(_ => { });
         return builder.BuildAsync().GetAwaiter().GetResult();

@@ -75,7 +75,7 @@ internal static class CurvatureComparison
         var curvature = new WindowRegressionStatistics(period);
         curvature.Of(slope);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(curvature)
             .BuildAsync()
             .GetAwaiter()

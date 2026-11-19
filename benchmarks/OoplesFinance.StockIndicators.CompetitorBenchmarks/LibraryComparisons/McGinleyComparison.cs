@@ -54,7 +54,7 @@ internal static class McGinleyComparison
             reset ? McGinleyStartup.ResetDelay : McGinleyStartup.Immediate
         );
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

@@ -22,7 +22,7 @@ internal static class ContextReversalComparison
     private static ComparisonSeries Ooples(string name, CompetitorData data)
     {
         var indicator = Create(name);
-        using var run = ComparisonBuilder.Create().ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
         return new(Math.Min(11, data.Count), run[indicator.Outputs[0]].ToArray());
     }

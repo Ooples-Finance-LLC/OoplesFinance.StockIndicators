@@ -33,7 +33,7 @@ internal static class DeviationRatioComparison
     {
         var indicator = new DeviationRatioAdaptiveAverage(p, length, alpha);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

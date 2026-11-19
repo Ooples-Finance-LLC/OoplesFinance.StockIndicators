@@ -95,7 +95,7 @@ internal static class DirectionalComparison
     {
         var indicator = new WindowDirectionalMeasure(measure, p, lag);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

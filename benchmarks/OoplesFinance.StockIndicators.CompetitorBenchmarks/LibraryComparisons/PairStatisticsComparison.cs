@@ -93,7 +93,7 @@ internal static class PairStatisticsComparison
             ? new WindowPairStatistics(period)
             : new WindowCorrelation(period, flatZero: true);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

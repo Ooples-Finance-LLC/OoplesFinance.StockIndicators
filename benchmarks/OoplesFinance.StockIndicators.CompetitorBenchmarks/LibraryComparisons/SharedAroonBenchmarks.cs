@@ -74,7 +74,7 @@ public class SharedAroonBenchmarks
     [Benchmark] public IIndicatorRun BuilderFull() => Build(AroonComparison.Create(Operation, Period), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(AroonComparison.Create(Operation, Period), IndicatorHistoryMode.LatestOnly);
     internal IIndicatorRun Build(WindowAroon indicator, IndicatorHistoryMode history, bool gpu = false) => ComparisonBuilder.Create()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
+        .ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
         .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
 
     public readonly record struct NativeResult(double[]? Up = null, double[]? Down = null, double[]? Osc = null,

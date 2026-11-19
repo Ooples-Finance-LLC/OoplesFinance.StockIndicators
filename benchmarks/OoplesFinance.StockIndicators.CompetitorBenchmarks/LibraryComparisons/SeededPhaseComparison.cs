@@ -38,7 +38,7 @@ internal static class SeededPhaseComparison
     {
         var indicator = new SeededPhaseAdaptiveAverage(fast, slow, quan, quan, !quan);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

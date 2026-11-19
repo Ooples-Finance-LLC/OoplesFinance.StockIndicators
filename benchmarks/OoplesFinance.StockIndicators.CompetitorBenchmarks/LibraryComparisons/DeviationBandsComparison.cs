@@ -62,7 +62,7 @@ internal static class DeviationBandsComparison
     {
         var indicator = new WindowDeviationBands(p, factor, id != Ids[0]);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

@@ -97,7 +97,7 @@ public class SharedRollingPercentileBenchmarks
     internal RollingPercentile Create() => new(Period, Fraction, Quan);
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false)
     {
-        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(history).ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         var run = builder.BuildAsync().GetAwaiter().GetResult();
         if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)

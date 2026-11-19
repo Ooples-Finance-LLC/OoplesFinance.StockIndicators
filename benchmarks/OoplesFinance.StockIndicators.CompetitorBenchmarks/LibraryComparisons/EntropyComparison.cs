@@ -31,7 +31,7 @@ internal static class EntropyComparison
     {
         var indicator = new NormalizedWindowEntropy(period);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

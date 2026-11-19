@@ -8,7 +8,7 @@ internal static class CandleComparisonExecution
     internal static ComparisonSeries Run(IIndicator indicator, CompetitorData data, int firstValid)
     {
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

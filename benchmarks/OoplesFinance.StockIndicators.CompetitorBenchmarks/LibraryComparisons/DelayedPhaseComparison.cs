@@ -46,7 +46,7 @@ internal static class DelayedPhaseComparison
     {
         var indicator = new DelayedPhaseAdaptiveAverage(fast, slow, suppression);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

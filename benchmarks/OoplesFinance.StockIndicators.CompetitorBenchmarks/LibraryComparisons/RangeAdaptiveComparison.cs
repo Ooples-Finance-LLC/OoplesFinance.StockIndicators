@@ -41,7 +41,7 @@ internal static class RangeAdaptiveComparison
     {
         var owner = Indicator(period, fractal, scale);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(owner)
             .BuildAsync()
             .GetAwaiter()

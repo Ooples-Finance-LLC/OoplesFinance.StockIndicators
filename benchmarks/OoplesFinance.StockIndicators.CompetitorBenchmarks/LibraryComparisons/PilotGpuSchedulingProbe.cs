@@ -15,7 +15,7 @@ internal static class PilotGpuSchedulingProbe
         async Task Execute(int index)
         {
             var sma = new Sma(20);
-            var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(sources[index]))
+            var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(sources[index]))
                 .ConfigureIndicators(sma).ConfigureExecution(IndicatorExecutionBackend.Gpu);
             using var run = await builder.BuildAsync();
             if (builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu ||

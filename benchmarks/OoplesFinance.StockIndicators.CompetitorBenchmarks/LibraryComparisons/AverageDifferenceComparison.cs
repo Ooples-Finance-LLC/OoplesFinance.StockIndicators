@@ -67,7 +67,7 @@ internal static class AverageDifferenceComparison
     {
         var indicator = new MovingAverageDifference(first, second, exponential);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

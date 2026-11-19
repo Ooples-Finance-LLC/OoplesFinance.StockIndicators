@@ -59,7 +59,7 @@ public class PilotRepresentativeBenchmarks
     }
 
     private IIndicatorRun Build(IIndicator[] indicators, IndicatorHistoryMode history) => ComparisonBuilder.Create()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicators)
+        .ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicators)
         .ConfigureExecution(IndicatorExecutionBackend.Cpu).ConfigureHistory(history).BuildAsync().GetAwaiter().GetResult();
 
     [Benchmark] public IIndicatorRun CpuBuilder() => Build(Indicators(), IndicatorHistoryMode.Full);

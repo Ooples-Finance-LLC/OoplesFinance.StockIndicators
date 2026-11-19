@@ -54,7 +54,7 @@ internal static class SumDirectionalComparison
     {
         var indicator = new SumSeededDirectionalIndex(p);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

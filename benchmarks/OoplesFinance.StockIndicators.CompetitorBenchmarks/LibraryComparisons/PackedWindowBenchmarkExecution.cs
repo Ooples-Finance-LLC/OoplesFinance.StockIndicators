@@ -73,7 +73,7 @@ internal static class PackedWindowBenchmarkExecution
 
     internal static IIndicatorRun Build(Bar[] bars, IIndicator indicator, IndicatorHistoryMode mode, bool gpu)
     {
-        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicator)
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(mode).ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         var run = builder.BuildAsync().GetAwaiter().GetResult();
         if (gpu && builder.LastExecution!.Backend != IndicatorExecutionBackend.Gpu)

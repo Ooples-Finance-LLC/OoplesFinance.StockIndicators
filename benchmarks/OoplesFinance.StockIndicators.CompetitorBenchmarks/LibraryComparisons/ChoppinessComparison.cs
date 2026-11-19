@@ -38,7 +38,7 @@ internal static class ChoppinessComparison
     {
         var indicator = new WindowChoppinessIndex(period);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

@@ -58,7 +58,7 @@ internal static class TradyAdaptiveComparison
     {
         var indicator = new SeededAdaptiveAverage(p, fast, slow, resetFlat: false);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

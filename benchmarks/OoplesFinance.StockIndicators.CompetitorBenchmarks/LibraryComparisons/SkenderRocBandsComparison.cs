@@ -26,7 +26,7 @@ internal static class SkenderRocBandsComparison
         var deviation = Math.Min(3, period);
         var indicator = new RateOfChangeRmsBands(period, emaPeriod, deviation);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

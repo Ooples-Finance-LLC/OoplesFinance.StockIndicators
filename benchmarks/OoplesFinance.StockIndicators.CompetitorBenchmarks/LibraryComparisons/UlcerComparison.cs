@@ -26,7 +26,7 @@ internal static class UlcerComparison
     {
         var indicator = new WindowUlcerIndex(period);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

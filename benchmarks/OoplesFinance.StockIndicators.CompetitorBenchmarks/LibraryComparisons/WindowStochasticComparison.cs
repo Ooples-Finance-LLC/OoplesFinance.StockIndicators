@@ -80,7 +80,7 @@ internal static class WindowStochasticComparison
     {
         var indicator = new WindowStochasticKdj(period, k, d, wilder, kFactor, dFactor);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

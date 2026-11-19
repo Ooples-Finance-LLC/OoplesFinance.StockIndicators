@@ -58,7 +58,7 @@ internal static class WindowFisherComparison
     {
         var owner = new WindowFisherTransform(period, midpoint);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(owner)
             .BuildAsync()
             .GetAwaiter()

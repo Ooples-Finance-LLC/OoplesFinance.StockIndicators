@@ -42,7 +42,7 @@ public class PilotSmaSchedulingBenchmarks
     }
 
     private IIndicatorRun Build(Sma sma) => ComparisonBuilder.Create()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(sma)
+        .ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(sma)
         .ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync().GetAwaiter().GetResult();
 
     [Benchmark] public IIndicatorRun Builder() => Build(new Sma(20));

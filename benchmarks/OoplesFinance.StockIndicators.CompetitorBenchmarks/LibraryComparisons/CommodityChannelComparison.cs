@@ -94,7 +94,7 @@ internal static class CommodityChannelComparison
     {
         var indicator = new WindowCommodityChannelIndex(period, variant == 2, variant != 0);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

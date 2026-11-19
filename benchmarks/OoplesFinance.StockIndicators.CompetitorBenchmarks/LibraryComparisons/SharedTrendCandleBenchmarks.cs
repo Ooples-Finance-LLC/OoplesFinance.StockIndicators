@@ -106,7 +106,7 @@ public class SharedTrendCandleBenchmarks
     private IIndicator Create() => TradyCandleComparison.Create(Operation, Period);
     private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false)
     {
-        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
         if (reference) builder.ConfigureBehavior(_ => { });
         return builder.BuildAsync().GetAwaiter().GetResult();
     }

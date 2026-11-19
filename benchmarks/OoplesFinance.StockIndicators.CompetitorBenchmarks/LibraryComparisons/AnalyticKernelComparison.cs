@@ -57,7 +57,7 @@ internal static class AnalyticKernelComparison
             ? new GaussianWeightedAverage(period, sigma)
             : new SineWeightedAverage(period);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

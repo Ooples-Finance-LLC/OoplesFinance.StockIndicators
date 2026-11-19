@@ -32,7 +32,7 @@ internal static class BalanceOfPowerComparison
             ? new BalanceOfPowerWithValidity(period)
             : new BalanceOfPower(1);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

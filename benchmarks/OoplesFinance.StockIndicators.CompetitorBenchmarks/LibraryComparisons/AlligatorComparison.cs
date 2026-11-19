@@ -95,7 +95,7 @@ internal static class AlligatorComparison
         var indicator = Indicator(gator, settings);
         var count = gator ? 4 : 3;
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

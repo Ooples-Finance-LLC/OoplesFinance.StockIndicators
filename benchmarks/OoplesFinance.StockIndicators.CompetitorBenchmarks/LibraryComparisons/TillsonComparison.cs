@@ -110,7 +110,7 @@ internal static class TillsonComparison
     {
         var indicator = new TillsonAverage(p, factor, seed, suppression);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

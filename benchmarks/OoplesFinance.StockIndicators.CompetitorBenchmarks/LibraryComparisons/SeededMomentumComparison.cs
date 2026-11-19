@@ -57,7 +57,7 @@ internal static class SeededMomentumComparison
             ? new SeededPriceMomentum(p, s, g)
             : new SeededTrueStrength(p, s, g);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

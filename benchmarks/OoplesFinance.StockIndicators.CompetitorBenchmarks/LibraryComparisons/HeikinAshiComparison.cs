@@ -59,7 +59,7 @@ internal static class HeikinAshiComparison
     {
         var indicator = new HeikinAshiCandles();
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(d.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(d.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

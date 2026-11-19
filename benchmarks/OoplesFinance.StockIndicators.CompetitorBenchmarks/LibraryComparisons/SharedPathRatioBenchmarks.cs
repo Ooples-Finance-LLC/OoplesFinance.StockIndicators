@@ -119,7 +119,7 @@ public class SharedPathRatioBenchmarks
     internal WindowPathRatio Create() => new(Period, Absolute ? PathRatioConvention.AbsoluteFraction : PathRatioConvention.SignedPercent);
     internal IIndicatorRun Build(WindowPathRatio indicator, IndicatorHistoryMode history, bool gpu = false)
     {
-        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars))
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars))
             .ConfigureIndicators(indicator).ConfigureHistory(history)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Required GPU path ratio did not execute on the device.");

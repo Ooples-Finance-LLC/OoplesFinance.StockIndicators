@@ -20,7 +20,7 @@ internal static class NormalizedAtrComparison
     {
         var indicator = new NormalizedSeededAverageTrueRange(period);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

@@ -37,7 +37,7 @@ public class PilotAsinSchedulingBenchmarks
     }
 
     private IIndicatorRun Build(PriceCircularTransform asin) => ComparisonBuilder.Create()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(asin)
+        .ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(asin)
         .ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync().GetAwaiter().GetResult();
 
     [Benchmark]

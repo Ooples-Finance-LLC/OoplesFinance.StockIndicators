@@ -51,7 +51,7 @@ internal static class WindowRegressionComparison
     {
         var indicator = new WindowLinearRegression(period, kind);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

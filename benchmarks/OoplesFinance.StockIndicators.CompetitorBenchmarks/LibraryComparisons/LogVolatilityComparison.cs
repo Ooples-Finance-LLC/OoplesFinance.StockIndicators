@@ -45,7 +45,7 @@ internal static class LogVolatilityComparison
     {
         var indicator = new WindowLogVolatility(p, realized, annual);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

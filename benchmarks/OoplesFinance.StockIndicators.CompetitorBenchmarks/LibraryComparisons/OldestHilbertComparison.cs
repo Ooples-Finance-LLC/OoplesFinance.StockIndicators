@@ -32,7 +32,7 @@ internal static class OldestHilbertComparison
     {
         var indicator = new OldestFirstHilbertTrendline();
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

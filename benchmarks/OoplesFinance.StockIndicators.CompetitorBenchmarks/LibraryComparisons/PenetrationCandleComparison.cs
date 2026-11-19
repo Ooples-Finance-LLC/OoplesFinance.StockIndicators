@@ -27,7 +27,7 @@ internal static class PenetrationCandleComparison
     {
         var indicator = Create(name, penetration: penetration);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

@@ -49,7 +49,7 @@ public class SharedObvBenchmarks
             var parallel = NativeColumns(NativeParallel());
             for (int slot = 0; slot < 3; slot++) Check(serial[slot], parallel[slot]);
             var indicator = Indicator();
-            using var reference = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars))
+            using var reference = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars))
                 .ConfigureIndicators(indicator).ConfigureBehavior(_ => { }).BuildAsync().GetAwaiter().GetResult();
             foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
             {
@@ -77,7 +77,7 @@ public class SharedObvBenchmarks
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(Indicator(), IndicatorHistoryMode.LatestOnly);
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false)
     {
-        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(history).ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "OBV benchmark did not execute on GPU.");
     }

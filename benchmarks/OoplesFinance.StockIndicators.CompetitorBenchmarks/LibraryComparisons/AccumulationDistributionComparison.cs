@@ -80,7 +80,7 @@ internal static class AccumulationDistributionComparison
             ? new PriceAdjustedAccumulationDistribution()
             : new Adl(1);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -96,7 +96,7 @@ internal static class AccumulationDistributionComparison
     {
         var indicator = new AccumulationDistributionWithAverage(averagePeriod);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

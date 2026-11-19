@@ -58,7 +58,7 @@ internal static class HilbertCycleComparison
     {
         var indicator = Indicator(periodOnly, suppression);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

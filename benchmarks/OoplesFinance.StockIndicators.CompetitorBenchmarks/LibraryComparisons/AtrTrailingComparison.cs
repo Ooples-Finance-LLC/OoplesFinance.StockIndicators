@@ -65,7 +65,7 @@ internal static class AtrTrailingComparison
     {
         var owner = new SeededAtrTrailingStop(period, multiplier, basis);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(owner)
             .BuildAsync()
             .GetAwaiter()

@@ -53,7 +53,7 @@ internal static class DispersionComparison
     {
         var indicator = new WindowDispersion(period, kind, sample, multiplier);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

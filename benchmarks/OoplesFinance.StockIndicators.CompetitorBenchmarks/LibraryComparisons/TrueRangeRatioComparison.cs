@@ -115,7 +115,7 @@ internal static class TrueRangeRatioComparison
     {
         var indicator = new WindowVortex(p);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -134,7 +134,7 @@ internal static class TrueRangeRatioComparison
     {
         var indicator = new WindowUltimateOscillator(p[0], p[1], p[2], ta);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

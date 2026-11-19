@@ -41,7 +41,7 @@ internal static class WindowExtremeComparison
                         : new WindowExtremeIndex(period, key == "MaxIndex")
             );
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicators.Values.ToArray())
             .BuildAsync()
             .GetAwaiter()

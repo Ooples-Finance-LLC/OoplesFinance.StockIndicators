@@ -32,7 +32,7 @@ internal static class MedianAdaptiveComparison
     internal static double[] Owned(Bar[] bars, int period, double threshold)
     {
         var indicator = new MedianAdaptiveAverage(period, threshold);
-        using var run = ComparisonBuilder.Create().ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
         return run[indicator].ToArray();
     }

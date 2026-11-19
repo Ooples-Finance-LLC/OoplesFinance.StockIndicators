@@ -97,7 +97,7 @@ public class SharedGpuPointwiseBenchmarks
 
     private IIndicatorRun Build(IIndicator indicator, IndicatorExecutionBackend backend, IndicatorHistoryMode history)
     {
-        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(history).ConfigureExecution(backend);
         var result = builder.BuildAsync().GetAwaiter().GetResult();
         if (builder.LastExecution?.Backend != backend) throw new InvalidOperationException("Requested backend did not execute.");

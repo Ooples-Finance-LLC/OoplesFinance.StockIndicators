@@ -52,7 +52,7 @@ public class SharedTaDirectionalBenchmarks
     [Benchmark] public IIndicatorRun BuilderFull() => Build(new PriorSeededDirectionalMeasure(_measure, Period), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new PriorSeededDirectionalMeasure(_measure, Period), IndicatorHistoryMode.LatestOnly);
     private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => ComparisonBuilder.Create()
-        .ConfigureSource(Bars.From(_data.IndicatorBars)).ConfigureIndicators(indicator).ConfigureHistory(history)
+        .ConfigureSource(ComparisonBuilder.Source(_data.IndicatorBars)).ConfigureIndicators(indicator).ConfigureHistory(history)
         .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
 
     [Benchmark(Baseline = true)] public double[] NativeSingle() => Prefix(Count - _first);

@@ -52,7 +52,7 @@ internal static class PriceRelativeComparison
     {
         var indicator = new PriceRelativeStrength(period, mean, evaluation, basis);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

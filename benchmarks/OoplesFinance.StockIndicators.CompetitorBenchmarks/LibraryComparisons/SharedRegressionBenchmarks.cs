@@ -88,7 +88,7 @@ public class SharedRegressionBenchmarks
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode, bool reference = false, bool gpu = false)
     {
         var builder = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(mode)
+            .ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator).ConfigureHistory(mode)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         if (reference) builder.ConfigureBehavior(_ => { });
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Required GPU regression did not execute on the device.");

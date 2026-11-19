@@ -30,7 +30,7 @@ internal static class VolumeRecurrenceComparison
         IIndicator indicator =
             id == Ids[0] ? new SeededForceIndex(period) : new VolumeConditionedIndex(id == Ids[1]);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

@@ -30,7 +30,7 @@ internal static class ReverseWilderComparison
     {
         var indicator = new ReverseWilderAverage(period);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

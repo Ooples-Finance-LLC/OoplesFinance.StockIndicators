@@ -90,7 +90,7 @@ public class SharedWeightedWindowBenchmarks
     private static double[] Kernel() => Enumerable.Range(1, Period).Select(i => (double)i).ToArray();
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false, bool gpu = false)
     {
-        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
         if (reference) builder.ConfigureBehavior(_ => { });
         if (gpu) builder.ConfigureExecution(IndicatorExecutionBackend.Gpu);
         var run = builder.BuildAsync().GetAwaiter().GetResult();

@@ -91,7 +91,7 @@ public class SharedExtremeIndexBenchmarks
         ? [new(Period), new(Period, true)] : [new(Period, Operation == "MaxIndex")];
     internal IIndicatorRun Build(WindowExtremeIndex[] indicators, IndicatorHistoryMode history, bool reference = false, bool gpu = false)
     {
-        var builder = ComparisonBuilder.Create().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicators).ConfigureHistory(history);
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicators).ConfigureHistory(history);
         if (reference) builder.ConfigureBehavior(_ => { });
         if (gpu) builder.ConfigureExecution(IndicatorExecutionBackend.Gpu);
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Index benchmark did not execute on the GPU.");

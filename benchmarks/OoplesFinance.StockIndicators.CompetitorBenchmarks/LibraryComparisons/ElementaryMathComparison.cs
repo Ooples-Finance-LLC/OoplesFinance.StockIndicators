@@ -79,7 +79,7 @@ internal static class ElementaryMathComparison
             ? new CandleArithmetic(arithmetic.Value)
             : new PriceRoundingTransform(rounding!.Value);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

@@ -94,7 +94,7 @@ public class SharedSeededAtrBenchmarks
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false)
     {
         var builder = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(_data.IndicatorBars)).ConfigureIndicators(indicator).ConfigureHistory(history)
+            .ConfigureSource(ComparisonBuilder.Source(_data.IndicatorBars)).ConfigureIndicators(indicator).ConfigureHistory(history)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Required GPU seeded ATR did not execute on the device.");
     }

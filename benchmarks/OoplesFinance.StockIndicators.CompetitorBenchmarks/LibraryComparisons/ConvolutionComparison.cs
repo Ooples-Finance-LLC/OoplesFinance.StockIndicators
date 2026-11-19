@@ -54,7 +54,7 @@ internal static class ConvolutionComparison
             ? new EndpointWeightedAverage(period)
             : new NormalizedConvolution(Weights(period, false, kernel));
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

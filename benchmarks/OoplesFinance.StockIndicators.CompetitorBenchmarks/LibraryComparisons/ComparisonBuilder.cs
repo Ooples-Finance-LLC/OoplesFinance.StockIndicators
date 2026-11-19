@@ -23,6 +23,38 @@ internal static class ComparisonBuilder
 
     internal static void ForgetLatest() => _latest = null;
 
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<OoplesFinance.StockIndicators.Indicators.Bar[],
+        OoplesFinance.StockIndicators.Indicators.IBarSource> Columns = new();
+
+    /// <summary>
+    /// The source an Ooples arm reads. The exact mode reads the bar array, as it always has. The fast mode
+    /// borrows columns, which is the input it is designed for and the input the TA-Lib arms are handed: the
+    /// fixture's open, high, low, close and volume as arrays, split out once per fixture and not per call.
+    /// </summary>
+    internal static OoplesFinance.StockIndicators.Indicators.IBarSource Source(
+        IEnumerable<OoplesFinance.StockIndicators.Indicators.Bar> bars)
+    {
+        if (Numerics != IndicatorNumerics.Fast || bars is not OoplesFinance.StockIndicators.Indicators.Bar[] array)
+            return OoplesFinance.StockIndicators.Indicators.Bars.From(bars);
+        return Columns.GetValue(array, static source =>
+        {
+            int n = source.Length;
+            double[] open = new double[n], high = new double[n], low = new double[n], close = new double[n], volume = new double[n];
+            var times = new DateTime[n];
+            for (var i = 0; i < n; i++)
+            {
+                var bar = source[i];
+                open[i] = bar.Open;
+                high[i] = bar.High;
+                low[i] = bar.Low;
+                close[i] = bar.Close;
+                volume[i] = bar.Volume;
+                times[i] = bar.Time;
+            }
+            return OoplesFinance.StockIndicators.Indicators.Bars.FromColumns(open, high, low, close, volume, times);
+        });
+    }
+
     private static IndicatorNumerics Parse(string? text) =>
         string.IsNullOrEmpty(text) ? IndicatorNumerics.Exact
         : Enum.TryParse<IndicatorNumerics>(text, ignoreCase: true, out var numerics) && Enum.IsDefined(numerics) ? numerics

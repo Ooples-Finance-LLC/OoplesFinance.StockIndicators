@@ -75,7 +75,7 @@ internal static class ClassicAverageComparison
     {
         var indicator = new ClassicMovingAverage(p, method, first, suppression);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

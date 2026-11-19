@@ -85,7 +85,7 @@ public class SharedSmaBenchmarks
     [Benchmark] public IIndicatorRun BuilderFull() => Build(new Sma(Period), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new Sma(Period), IndicatorHistoryMode.LatestOnly);
     private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => ComparisonBuilder.Create()
-        .ConfigureSource(Bars.From(_input.Bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
+        .ConfigureSource(ComparisonBuilder.Source(_input.Bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
         .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
 
     // Native tuples and packed arrays are retained directly. Input conversion is

@@ -46,7 +46,7 @@ internal static class DecayingExtremeComparison
     {
         var indicator = new DecayingWindowExtreme(period, maximum, decay);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

@@ -68,7 +68,7 @@ internal static class VolumePriceComparison
     {
         var indicator = new VolumeWeightedPrice(period, typical, anchor);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()

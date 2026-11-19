@@ -65,7 +65,7 @@ internal static class DynamicMomentumComparison
     internal static ComparisonSeries Owned(Bar[] bars, int sd, int smooth, int rsi, int upper, int lower)
     {
         var indicator = new DynamicMomentumStrength(sd, smooth, rsi, upper, lower);
-        using var run = ComparisonBuilder.Create().ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
         var values = run[indicator.Value].ToArray();
         var present = run[indicator.IsDefined].ToArray();

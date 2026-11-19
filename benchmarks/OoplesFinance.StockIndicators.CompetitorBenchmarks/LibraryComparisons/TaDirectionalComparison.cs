@@ -188,7 +188,7 @@ internal static class TaDirectionalComparison
     {
         var indicator = new PriorSeededDirectionalMeasure(measure, p, unstable);
         using var run = ComparisonBuilder.Create()
-            .ConfigureSource(Bars.From(bars))
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
