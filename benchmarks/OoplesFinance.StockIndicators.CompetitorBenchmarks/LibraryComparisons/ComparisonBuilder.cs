@@ -23,6 +23,18 @@ internal static class ComparisonBuilder
 
     internal static void ForgetLatest() => _latest = null;
 
+    private static readonly System.Reflection.FieldInfo? Configured = typeof(StockIndicatorBuilder).GetField(
+        "_configuredIndicators", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+    /// <summary>
+    /// The indicator classes the most recent build on this thread was given, for the scoreboard only: it
+    /// names the class behind a pair that stayed on the exact route. Empty when that cannot be read.
+    /// </summary>
+    internal static string LatestTypes =>
+        _latest is { } builder && Configured?.GetValue(builder) is System.Collections.IEnumerable indicators
+            ? string.Join("+", indicators.Cast<object>().Select(indicator => indicator.GetType().Name).Distinct())
+            : string.Empty;
+
     private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<OoplesFinance.StockIndicators.Indicators.Bar[],
         OoplesFinance.StockIndicators.Indicators.IBarSource> Columns = new();
 

@@ -17,7 +17,7 @@ internal static class Scoreboard
 
     internal static void Run(string? filter)
     {
-        Console.WriteLine("pair,indicator,bars,ooples_us,competitor_us,ooples_over_competitor,route,status");
+        Console.WriteLine("pair,indicator,bars,ooples_us,competitor_us,ooples_over_competitor,route,status,types");
         var pairs = ComparisonPairs.All.OrderBy(pair => pair.Id, StringComparer.Ordinal)
             .Where(pair => filter is null || pair.Id.Contains(filter, StringComparison.Ordinal)).ToArray();
         // The first pair also pays for the builder and harness code every pair shares reaching its
@@ -55,9 +55,10 @@ internal static class Scoreboard
             var ooples = Best(() => pair.Ooples(data, Period));
             var reason = ComparisonBuilder.LatestRoute;
             var route = reason is null ? "none" : reason.StartsWith("Fast", StringComparison.Ordinal) ? "fast" : "exact";
+            var types = ComparisonBuilder.LatestTypes;
             var competitor = Best(() => pair.Competitor(data, Period));
             return string.Create(CultureInfo.InvariantCulture,
-                $"{prefix},{ooples:F2},{competitor:F2},{ooples / competitor:F3},{route},ok");
+                $"{prefix},{ooples:F2},{competitor:F2},{ooples / competitor:F3},{route},ok,{types}");
         }
 #pragma warning disable CA1031 // One failing pair is reported on its line; the rest still run.
         catch (Exception failure)
