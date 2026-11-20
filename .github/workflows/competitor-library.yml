@@ -41,6 +41,11 @@ on:
         type: string
         required: false
         default: ''
+      runtime_switches:
+        description: 'DOTNET_NAME=value settings, space separated, applied to a second scoreboard pass'
+        type: string
+        required: false
+        default: ''
 permissions:
   contents: read
 concurrency:
@@ -179,6 +184,7 @@ jobs:
     env:
       COMPARISON_NUMERICS: ${{ inputs.numerics || 'Exact' }}
       SCOREBOARD_FILTER: ${{ inputs.scoreboard }}
+      RUNTIME_SWITCHES: ${{ inputs.runtime_switches }}
       AIDOTNET_DISABLE_GPU: '1'
     steps:
       - uses: actions/setup-dotnet@v6
@@ -188,11 +194,15 @@ jobs:
         with:
           name: competitor-binaries
           path: binaries
+      # The second pass repeats the first, or shows what a runtime setting changes on this hardware.
       - name: Time the selected pairs twice
         run: |
-          for pass in 1 2; do
-            dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --scoreboard "$SCOREBOARD_FILTER"
+          dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --scoreboard "$SCOREBOARD_FILTER"
+          for setting in $RUNTIME_SWITCHES; do
+            if [[ "$setting" =~ ^DOTNET_[A-Za-z0-9_]+=[A-Za-z0-9]+$ ]]; then export "$setting"; else echo "ignored: $setting"; fi
           done
+          echo "== second pass: ${RUNTIME_SWITCHES:-unchanged}"
+          dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --scoreboard "$SCOREBOARD_FILTER"
   performance:
     needs: [build, complete-union]
     # Reuse saved competitor timings during normal PR validation. Fresh native
