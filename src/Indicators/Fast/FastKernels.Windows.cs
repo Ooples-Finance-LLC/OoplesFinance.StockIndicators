@@ -162,13 +162,12 @@ internal static partial class FastKernels
         // Below this multiple of the block's largest update, the block's rounding could reach the tolerance.
         var floor = block * Ulp / SpreadTolerance;
         double anchor = close[0], mean = 0, squares = 0, largest = 0;
-        int run = 1, slid = 0;
+        var slid = 0;
         output[0] = 0;
         var filling = Math.Min(period, n);
         for (var i = 1; i < filling; i++)
         {
             var value = close[i];
-            run = value == close[i - 1] ? run + 1 : 1; // NOSONAR an exact tie is the contract
             var count = i + 1;
             var offset = value - anchor;
             var delta = offset - mean;
@@ -178,7 +177,8 @@ internal static partial class FastKernels
             largest = FastMath.Larger(largest, Math.Abs(term));
             if (!(squares > largest * floor))
             {
-                var moments = run >= count ? new SlidingMoments { Anchor = value } : SlidingMoments.Of(close.Slice(0, count));
+                // A window of one repeated price sums to exactly nothing around it, so a flat one needs no case.
+                var moments = SlidingMoments.Of(close.Slice(0, count));
                 anchor = moments.Anchor;
                 mean = moments.Mean;
                 squares = moments.Squares;
@@ -189,34 +189,83 @@ internal static partial class FastKernels
         }
         var inverse = 1.0 / period;
         var divisor = sample ? period - 1.0 : period;
-        var varianceScale = multiplier / divisor;
-        // The full window: no branch in the common case but the one that guards the rounding.
-        for (var i = filling; i < n; i++)
+        // A standard deviation is published as its sum of squares first and finished below, a vector of bars
+        // at a time: a square root a bar would otherwise be most of what the bar costs.
+        var deferred = selected == WindowDispersionOutput.StandardDeviation;
+        var varianceScale = deferred ? 1.0 : multiplier / divisor;
+        var direct = deferred || selected == WindowDispersionOutput.Variance;
+        // The full window, a stretch at a time: the window slides until it has slid a block's worth of bars or
+        // its rounding can no longer be trusted, and the bar it stops on is summed afresh.
+        var window = new SlidingMoments { Anchor = anchor, Mean = mean, Squares = squares };
+        var at = filling;
+        while (at < n)
         {
-            var value = close[i];
-            run = value == close[i - 1] ? run + 1 : 1; // NOSONAR an exact tie is the contract
-            var offset = value - anchor;
-            var expired = close[i - period] - anchor;
-            var delta = offset - expired;
-            var prior = mean;
-            mean += delta * inverse;
-            var term = delta * (offset - mean + expired - prior);
-            squares += term;
-            largest = FastMath.Larger(largest, Math.Abs(term));
-            if (++slid > block || !(squares > largest * floor))
+            if (slid < block)
             {
-                var moments = run >= period
-                    ? new SlidingMoments { Anchor = value } : SlidingMoments.Of(close.Slice(i - period + 1, period));
-                anchor = moments.Anchor;
-                mean = moments.Mean;
-                squares = moments.Squares;
-                largest = 0;
-                slid = 0;
-                offset = 0;
+                var end = (int)Math.Min((long)at + block - slid, n);
+                var stopped = SlideMoments(close, output, at, end, owner, direct, inverse, divisor, varianceScale, floor,
+                    ref window, ref largest);
+                slid += stopped - at;
+                at = stopped;
+                if (at >= n) break;
             }
-            output[i] = selected == WindowDispersionOutput.Variance ? squares * varianceScale
+            window = SlidingMoments.Of(close.Slice(at - period + 1, period));
+            largest = 0;
+            slid = 0;
+            output[at] = direct ? window.Squares * varianceScale
+                : Reading(selected, window.Squares / divisor, 0.0 - window.Mean, multiplier);
+            at++;
+        }
+        if (!deferred) return;
+        var rest = output.Slice(filling);
+        var k = 0;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            System.Numerics.Vector<double> divisors = new System.Numerics.Vector<double>(divisor), scales = new System.Numerics.Vector<double>(multiplier);
+            for (; k <= rest.Length - width; k += width)
+                (scales * System.Numerics.Vector.SquareRoot(new System.Numerics.Vector<double>(rest.Slice(k, width)) / divisors))
+                    .CopyTo(rest.Slice(k, width));
+        }
+#endif
+        for (; k < rest.Length; k++) rest[k] = multiplier * Math.Sqrt(rest[k] / divisor);
+    }
+
+    // Slides the window over the bars from one index up to another, publishing each, and returns the first
+    // bar it did not publish: the end, or the bar whose slide left too little above its own rounding. The
+    // loop is a method of its own so that what it carries from bar to bar stays in registers.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
+    private static int SlideMoments(ReadOnlySpan<double> close, Span<double> output, int from, int to, WindowDispersion owner,
+        bool direct, double inverse, double divisor, double varianceScale, double floor, ref SlidingMoments moments, ref double largest)
+    {
+        var multiplier = owner.Multiplier;
+        var selected = owner.Output;
+        double anchor = moments.Anchor, mean = moments.Mean, squares = moments.Squares, peak = largest;
+        // The entering prices, the leaving ones and the bars they publish to, each from the stretch's first.
+        var entering = close.Slice(from, to - from);
+        var leaving = close.Slice(from - owner.Period, entering.Length);
+        var published = output.Slice(from, entering.Length);
+        var done = 0;
+        for (; done < entering.Length; done++)
+        {
+            var offset = entering[done] - anchor;
+            var expired = leaving[done] - anchor;
+            var delta = offset - expired;
+            var moved = mean + delta * inverse;
+            var term = delta * (offset - moved + expired - mean);
+            var total = squares + term;
+            var reached = FastMath.Larger(peak, Math.Abs(term));
+            if (!(total > reached * floor)) break;
+            mean = moved;
+            squares = total;
+            peak = reached;
+            published[done] = direct ? squares * varianceScale
                 : Reading(selected, squares / divisor, offset - mean, multiplier);
         }
+        moments = new SlidingMoments { Anchor = anchor, Mean = mean, Squares = squares };
+        largest = peak;
+        return from + done;
     }
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
@@ -238,13 +287,38 @@ internal static partial class FastKernels
         internal static SlidingMoments Of(ReadOnlySpan<double> window)
         {
             var anchor = window[window.Length - 1];
-            double sum = 0;
-            for (var i = 0; i < window.Length; i++) sum += window[i] - anchor;
-            var mean = sum / window.Length;
-            double squares = 0;
-            for (var i = 0; i < window.Length; i++)
+            double sum = 0, squares = 0;
+            int i = 0, j = 0;
+#if !NETFRAMEWORK
+            // Several running sums side by side: one sum would make every price wait for the one before it.
+            var width = System.Numerics.Vector<double>.Count;
+            if (System.Numerics.Vector.IsHardwareAccelerated && window.Length >= 2 * width)
             {
-                var deviation = window[i] - anchor - mean;
+                var anchors = new System.Numerics.Vector<double>(anchor);
+                var sums = System.Numerics.Vector<double>.Zero;
+                for (; i <= window.Length - width; i += width)
+                    sums += new System.Numerics.Vector<double>(window.Slice(i, width)) - anchors;
+                sum = System.Numerics.Vector.Sum(sums);
+            }
+#endif
+            for (; i < window.Length; i++) sum += window[i] - anchor;
+            var mean = sum / window.Length;
+#if !NETFRAMEWORK
+            if (System.Numerics.Vector.IsHardwareAccelerated && window.Length >= 2 * width)
+            {
+                System.Numerics.Vector<double> anchors = new System.Numerics.Vector<double>(anchor), means = new System.Numerics.Vector<double>(mean);
+                var sums = System.Numerics.Vector<double>.Zero;
+                for (; j <= window.Length - width; j += width)
+                {
+                    var deviation = new System.Numerics.Vector<double>(window.Slice(j, width)) - anchors - means;
+                    sums += deviation * deviation;
+                }
+                squares = System.Numerics.Vector.Sum(sums);
+            }
+#endif
+            for (; j < window.Length; j++)
+            {
+                var deviation = window[j] - anchor - mean;
                 squares += deviation * deviation;
             }
             return new SlidingMoments { Anchor = anchor, Mean = mean, Squares = squares };
