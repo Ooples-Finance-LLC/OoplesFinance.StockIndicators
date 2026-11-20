@@ -486,4 +486,75 @@ internal static partial class FastKernels
             pool.Return(rentedHigh);
         }
     }
+
+
+    /// <summary>
+    /// Linearly weighted mean with the newest value at weight <paramref name="period"/>, over the bars so
+    /// far while the window fills, divided by the weight actually held.
+    /// </summary>
+    internal static void ExpandingWeightedWindow(ReadOnlySpan<double> input, Span<double> output, int period)
+    {
+        var n = input.Length;
+        double sum = 0, weighted = 0;
+        for (var i = 0; i < n; i++)
+        {
+            var count = Math.Min(i + 1, period);
+            if (i >= period && (i & RebuildMask) == 0)
+            {
+                sum = weighted = 0;
+                for (var j = i - period + 1; j <= i; j++)
+                {
+                    sum += input[j];
+                    weighted += (j - (i - period)) * input[j];
+                }
+            }
+            else
+            {
+                // Every retained weight drops by one, then the new value enters at full weight.
+                weighted += period * input[i] - sum;
+                sum += input[i];
+                if (i >= period) sum -= input[i - period];
+            }
+            output[i] = weighted / (0.5 * count * (2.0 * period - count + 1));
+        }
+    }
+
+    /// <summary>
+    /// Hull average: twice the half-period weighted mean less the full one, weighted again over the root
+    /// period, either from the first bar or only from full windows.
+    /// </summary>
+    internal static void Hull(ReadOnlySpan<double> close, Span<double> value, Span<double> defined, HullWindow owner)
+    {
+        var n = close.Length;
+        value = value.Slice(0, n);
+        defined = defined.Slice(0, n);
+        if (owner.Convention != HullWindowConvention.ExpandingFloor)
+        {
+            value.Clear();
+            defined.Clear();
+            var first = (long)owner.Period + owner.RootPeriod - 2;
+            if (first >= n) return;
+            HullCenter(close, value, owner);
+            value.Slice(0, (int)first).Clear();
+            defined.Slice((int)first).Fill(1);
+            return;
+        }
+        defined.Fill(1);
+        if (n == 0) return;
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] rentedHalf = pool.Rent(n), rentedFull = pool.Rent(n);
+        try
+        {
+            Span<double> half = rentedHalf.AsSpan(0, n), full = rentedFull.AsSpan(0, n);
+            ExpandingWeightedWindow(close, half, owner.HalfPeriod);
+            ExpandingWeightedWindow(close, full, owner.Period);
+            for (var i = 0; i < n; i++) half[i] = 2 * half[i] - full[i];
+            ExpandingWeightedWindow(half, value, owner.RootPeriod);
+        }
+        finally
+        {
+            pool.Return(rentedHalf);
+            pool.Return(rentedFull);
+        }
+    }
 }
