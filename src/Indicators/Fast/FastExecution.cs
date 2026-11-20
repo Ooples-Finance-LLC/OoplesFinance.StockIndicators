@@ -146,6 +146,7 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<SingleStochasticCycle>(binders, t => (c, o) => FastKernels.StochasticCycle(c.Close, o[0], o[1], t.CyclePeriod, t.FastPeriod, t.SlowPeriod));
         Bind<WindowSampleShape>(binders, t => (c, o) => FastKernels.SampleShape(c.Close, o[0], o[1], t.Period, t.Kurtosis));
         Bind<WindowAverageEnvelope>(binders, t => (c, o) => FastKernels.AverageEnvelope(c.Close, o, t));
         Bind<GatorWithDetails>(binders, t => (c, o) => FastKernels.GatorDetails(c, o, t.Alligator));

@@ -416,4 +416,74 @@ internal static partial class FastKernels
                 : size * Math.Sqrt(size - 1) * third / ((size - 2) * second * Math.Sqrt(second));
         }
     }
+
+
+    // Exponential average seeded by the mean of the first period values, written from the seed bar on.
+    private static void MeanSeededEma(ReadOnlySpan<double> input, Span<double> output, int period)
+    {
+        double sum = 0;
+        for (var i = 0; i < period; i++) sum += input[i];
+        var value = period == 1 ? input[0] : sum / period;
+        output[period - 1] = value;
+        FastMath.BlendRun((period - 1.0) / (period + 1.0), 2.0 / (period + 1.0), input, output, period, value);
+    }
+
+    /// <summary>
+    /// Schaff trend cycle, single pass: where the fast-less-slow average difference sits in its rolling
+    /// range, as a percentage, averaged over three bars.
+    /// </summary>
+    internal static void StochasticCycle(ReadOnlySpan<double> close, Span<double> value, Span<double> defined, int cycle,
+        int fast, int slow)
+    {
+        var n = close.Length;
+        value = value.Slice(0, n);
+        defined = defined.Slice(0, n);
+        value.Clear();
+        defined.Clear();
+        var start = slow - 1;
+        var first = (long)start + cycle - 1 + 2;
+        if (first >= n) return;
+        var count = n - start;
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] rentedFast = pool.Rent(n), rentedSlow = pool.Rent(n), rentedLow = pool.Rent(count), rentedHigh = pool.Rent(count);
+        try
+        {
+            Span<double> fastAverage = rentedFast.AsSpan(0, n), slowAverage = rentedSlow.AsSpan(0, n);
+            MeanSeededEma(close, fastAverage, fast);
+            MeanSeededEma(close, slowAverage, slow);
+            // The difference overwrites the slow average from the bar both exist; its size before the
+            // subtraction bounds the rounding the two averages carry into it.
+            var difference = slowAverage.Slice(start);
+            double size = 0;
+            for (var k = 0; k < count; k++)
+            {
+                size = FastMath.Larger(size, Math.Abs(fastAverage[start + k]) + Math.Abs(difference[k]));
+                difference[k] = fastAverage[start + k] - difference[k];
+            }
+            var noise = 64 * Ulp * size;
+            Span<double> lowest = rentedLow.AsSpan(0, count), highest = rentedHigh.AsSpan(0, count);
+            RollingExtreme(difference, lowest, cycle, false);
+            RollingExtreme(difference, highest, cycle, true);
+            double a = 0, b = 0;
+            for (var k = cycle - 1; k < count; k++)
+            {
+                var range = highest[k] - lowest[k];
+                var position = range > noise ? 100 * (difference[k] - lowest[k]) / range : 0;
+                if (k >= cycle + 1)
+                {
+                    value[start + k] = (a + b + position) / 3;
+                    defined[start + k] = 1;
+                }
+                a = b;
+                b = position;
+            }
+        }
+        finally
+        {
+            pool.Return(rentedFast);
+            pool.Return(rentedSlow);
+            pool.Return(rentedLow);
+            pool.Return(rentedHigh);
+        }
+    }
 }
