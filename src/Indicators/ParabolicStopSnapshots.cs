@@ -37,9 +37,36 @@ public static class ParabolicStopSnapshots
         if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (parameters.Any(v => !FrameworkCompatibility.IsFinite(v)))
             throw new ArgumentOutOfRangeException(nameof(parameters));
+        // An array or a list is read in place: asking the interface for every bar costs more than the stop.
+        if (bars is Bar[] array)
+        {
+            ValidateRows(array);
+            return;
+        }
+#if NET5_0_OR_GREATER
+        if (bars is List<Bar> list)
+        {
+            ValidateRows(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(list));
+            return;
+        }
+#endif
         foreach (var b in bars)
             if (!FrameworkCompatibility.IsFinite(b.High) || !FrameworkCompatibility.IsFinite(b.Low))
                 throw new ArgumentOutOfRangeException(nameof(bars));
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    private static void ValidateRows(ReadOnlySpan<Bar> rows)
+    {
+        // value - value is +0 for a finite value and NaN otherwise, so the differences' bits stay zero only
+        // while every high and low is finite.
+        long bits = 0;
+        for (var i = 0; i < rows.Length; i++)
+        {
+            double high = rows[i].High, low = rows[i].Low;
+            bits |= BitConverter.DoubleToInt64Bits(high - high) | BitConverter.DoubleToInt64Bits(low - low);
+        }
+        if (bits != 0) throw new ArgumentOutOfRangeException("bars");
     }
 
     /// <summary>Unsigned stop with directional-movement initialization and nonnegative acceleration/maximum.</summary>

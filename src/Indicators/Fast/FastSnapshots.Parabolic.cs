@@ -24,7 +24,7 @@ internal static partial class FastSnapshots
             : throw new OverflowException("Parabolic stop is not representable.");
 
     /// <summary>The classic and the extended parabolic stop.</summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static double?[] ParabolicClassic(IReadOnlyList<Bar> bars, bool signed, double start, double offset,
         double initialLong, double stepLong, double maximumLong, double initialShort, double stepShort, double maximumShort)
     {
@@ -42,30 +42,84 @@ internal static partial class FastSnapshots
         var extreme = rising ? priorHigh : priorLow;
         var stop = start == 0 ? rising ? firstLow : firstHigh : Math.Abs(start); // NOSONAR zero selects the automatic start
         var factor = rising ? initialLong : initialShort;
-        for (var i = 1; i < count; i++)
+        // A trend is a loop of its own, so nothing in it asks which way the trend runs, and whether a bar
+        // extends the trend - as good as random - is settled without a branch. Only a reversal leaves the loop.
+        // The clamps name the stop second: a stop that is not a number then stays one and is caught below.
+        long bits = 0;
+        var i = 1;
+        while (i < count)
         {
-            ref readonly var bar = ref rows[i];
-            double high = bar.High, low = bar.Low;
-            var reversal = rising ? low <= stop : high >= stop;
-            if (reversal)
+            if (rising)
             {
-                rising = !rising;
-                stop = rising ? Math.Min(extreme, Math.Min(priorLow, low)) : Math.Max(extreme, Math.Max(priorHigh, high));
-                stop *= rising ? 1 - offset : 1 + offset;
-                factor = rising ? initialLong : initialShort;
-                extreme = rising ? high : low;
+                for (; i < count; i++)
+                {
+                    ref readonly var bar = ref rows[i];
+                    double high = bar.High, low = bar.Low;
+                    if (low <= stop) break;
+                    result[i] = stop;
+                    bits |= FastMath.NonFiniteBits(stop);
+                    // The factor never exceeds its maximum, so a step of zero leaves it as it is.
+                    factor = FastMath.Smaller(factor + FastMath.KeepIf(stepLong, high > extreme), maximumLong);
+                    extreme = FastMath.Larger(extreme, high);
+                    stop += factor * (extreme - stop);
+                    stop = FastMath.Smaller(FastMath.Smaller(priorLow, low), stop);
+                    priorHigh = high;
+                    priorLow = low;
+                }
+                if (i == count) break;
+                {
+                    ref readonly var bar = ref rows[i];
+                    double high = bar.High, low = bar.Low;
+                    rising = false;
+                    stop = FastMath.Larger(FastMath.Larger(priorHigh, high), extreme) * (1 + offset);
+                    factor = initialShort;
+                    extreme = low;
+                    var published = signed ? -stop : stop;
+                    result[i] = published;
+                    bits |= FastMath.NonFiniteBits(published);
+                    stop += factor * (extreme - stop);
+                    stop = FastMath.Larger(FastMath.Larger(priorHigh, high), stop);
+                    priorHigh = high;
+                    priorLow = low;
+                    i++;
+                }
             }
-            result[i] = Finite(signed && !rising ? -stop : stop);
-            if (!reversal && (rising ? high > extreme : low < extreme))
+            else
             {
-                extreme = rising ? high : low;
-                factor = rising ? Math.Min(factor + stepLong, maximumLong) : Math.Min(factor + stepShort, maximumShort);
+                for (; i < count; i++)
+                {
+                    ref readonly var bar = ref rows[i];
+                    double high = bar.High, low = bar.Low;
+                    if (high >= stop) break;
+                    var published = signed ? -stop : stop;
+                    result[i] = published;
+                    bits |= FastMath.NonFiniteBits(published);
+                    factor = FastMath.Smaller(factor + FastMath.KeepIf(stepShort, low < extreme), maximumShort);
+                    extreme = FastMath.Smaller(extreme, low);
+                    stop += factor * (extreme - stop);
+                    stop = FastMath.Larger(FastMath.Larger(priorHigh, high), stop);
+                    priorHigh = high;
+                    priorLow = low;
+                }
+                if (i == count) break;
+                {
+                    ref readonly var bar = ref rows[i];
+                    double high = bar.High, low = bar.Low;
+                    rising = true;
+                    stop = FastMath.Smaller(FastMath.Smaller(priorLow, low), extreme) * (1 - offset);
+                    factor = initialLong;
+                    extreme = high;
+                    result[i] = stop;
+                    bits |= FastMath.NonFiniteBits(stop);
+                    stop += factor * (extreme - stop);
+                    stop = FastMath.Smaller(FastMath.Smaller(priorLow, low), stop);
+                    priorHigh = high;
+                    priorLow = low;
+                    i++;
+                }
             }
-            stop += factor * (extreme - stop);
-            stop = rising ? Math.Min(stop, Math.Min(priorLow, low)) : Math.Max(stop, Math.Max(priorHigh, high));
-            priorHigh = high;
-            priorLow = low;
         }
+        if (bits != 0) throw new OverflowException("Parabolic stop is not representable.");
         return result;
     }
 
