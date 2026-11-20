@@ -73,6 +73,33 @@ internal sealed class FastColumns
     /// Gathers the high, low and close of a bar array in one pass. Kernels that read all three call this
     /// first, so the bars are walked once instead of once per field. Borrowed columns need nothing.
     /// </summary>
+    /// <summary>
+    /// A column as its source holds it, not yet checked. For a kernel that proves its inputs finite in the
+    /// pass that reads them, and reads the checked column, in its usual order, when that proof fails.
+    /// </summary>
+    internal double[] Raw(IndicatorInputFields field)
+    {
+        if (_source is { } source)
+        {
+            switch (field)
+            {
+                case IndicatorInputFields.Open: if (_open is null) return source.Open; break;
+                case IndicatorInputFields.High: if (_high is null) return source.High; break;
+                case IndicatorInputFields.Low: if (_low is null) return source.Low; break;
+                case IndicatorInputFields.Close: if (_close is null) return source.Close; break;
+                default: if (_volume is null) return source.Volume; break;
+            }
+        }
+        return field switch
+        {
+            IndicatorInputFields.Open => Open,
+            IndicatorInputFields.High => High,
+            IndicatorInputFields.Low => Low,
+            IndicatorInputFields.Close => Close,
+            _ => Volume
+        };
+    }
+
     internal void RequireHighLowClose()
     {
         if (_bars is not { } bars || _high is not null || _low is not null || _close is not null) return;

@@ -1,3 +1,5 @@
+using OoplesFinance.StockIndicators.Validation;
+
 namespace OoplesFinance.StockIndicators.Indicators.Fast;
 
 internal static partial class FastKernels
@@ -57,20 +59,25 @@ internal static partial class FastKernels
     }
 
     /// <summary>Mean of the high and low, optionally with the close once or twice, or with the open.</summary>
-    internal static void PricePoint(FastColumns columns, Span<double> output, int closes, bool open)
+    internal static void PricePoint(FastColumns columns, FastOutputs outputs, int closes, bool open)
     {
         if (closes > 0 && !open) columns.RequireHighLowClose();
-        ReadOnlySpan<double> high = columns.High, low = columns.Low;
+        ReadOnlySpan<double> high = columns.Raw(IndicatorInputFields.High), low = columns.Raw(IndicatorInputFields.Low);
+        ReadOnlySpan<double> first = open ? columns.Raw(IndicatorInputFields.Open) : default;
+        ReadOnlySpan<double> close = closes > 0 ? columns.Raw(IndicatorInputFields.Close) : default;
         var n = high.Length;
-        output = output.Slice(0, n);
-        ReadOnlySpan<double> first = open ? columns.Open : default, close = closes > 0 ? columns.Close : default;
+        Span<double> output = outputs[0].AsSpan(0, n);
         var scale = 1.0 / (2 + (open ? 1 : 0) + closes);
         // One pass a bar, added in the order the separate passes took: high, low, open, then each close.
+        // A NaN or an infinity in any price read makes that bar's point one too, so checking the points
+        // as they are written checks the prices as well.
+        long suspect = 0;
         var i = 0;
 #if !NETFRAMEWORK
         if (System.Numerics.Vector.IsHardwareAccelerated)
         {
             var width = System.Numerics.Vector<double>.Count;
+            var seen = System.Numerics.Vector<long>.Zero;
             for (; i <= n - width; i += width)
             {
                 var sum = new System.Numerics.Vector<double>(high.Slice(i, width)) + new System.Numerics.Vector<double>(low.Slice(i, width));
@@ -80,8 +87,11 @@ internal static partial class FastKernels
                     var c = new System.Numerics.Vector<double>(close.Slice(i, width));
                     for (var k = 0; k < closes; k++) sum += c;
                 }
-                (sum * scale).CopyTo(output.Slice(i, width));
+                var point = sum * scale;
+                seen |= System.Numerics.Vector.AsVectorInt64(point - point); // NOSONAR x - x is the finite test
+                point.CopyTo(output.Slice(i, width));
             }
+            if (!System.Numerics.Vector.EqualsAll(seen, System.Numerics.Vector<long>.Zero)) suspect = 1;
         }
 #endif
         for (; i < n; i++)
@@ -89,8 +99,21 @@ internal static partial class FastKernels
             var sum = high[i] + low[i];
             if (open) sum += first[i];
             for (var k = 0; k < closes; k++) sum += close[i];
-            output[i] = sum * scale;
+            var point = sum * scale;
+            suspect |= FastMath.NonFiniteBits(point);
+            output[i] = point;
         }
+        if (suspect == 0)
+        {
+            outputs.Verified(0);
+            return;
+        }
+        // Something is not finite. The checked columns, read in the usual order, name a price that is not;
+        // if every price is finite the points overflowed, which the output check reports.
+        _ = columns.High;
+        _ = columns.Low;
+        if (open) _ = columns.Open;
+        if (closes > 0) _ = columns.Close;
     }
 
     /// <summary>True range per bar; the first bar has no previous close and publishes its own range.</summary>
@@ -127,34 +150,42 @@ internal static partial class FastKernels
     /// Accumulation/distribution line: the running total of volume weighted by where the close sits in the
     /// bar's range, with the catalog exponential average of the line as its signal.
     /// </summary>
-    internal static void AccumulationLine(FastColumns columns, Span<double> line)
+    internal static bool AccumulationLine(FastColumns columns, Span<double> line)
     {
         columns.RequireHighLowClose();
-        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close, volume = columns.Volume;
+        ReadOnlySpan<double> high = columns.Raw(IndicatorInputFields.High), low = columns.Raw(IndicatorInputFields.Low);
+        ReadOnlySpan<double> close = columns.Raw(IndicatorInputFields.Close), volume = columns.Raw(IndicatorInputFields.Volume);
         var n = close.Length;
         line = line.Slice(0, n);
         // Each bar's flow first, a vector of bars at a time, then the running total in bar order: the
         // divisions do not wait on one another, and the total adds the same terms in the same order.
+        // A bar with no range hides its close and volume, so the four inputs are checked through their sum.
+        long suspect = 0;
         var i = 0;
 #if !NETFRAMEWORK
         if (System.Numerics.Vector.IsHardwareAccelerated)
         {
             var width = System.Numerics.Vector<double>.Count;
+            var seen = System.Numerics.Vector<long>.Zero;
             for (; i <= n - width; i += width)
             {
                 var h = new System.Numerics.Vector<double>(high.Slice(i, width));
                 var l = new System.Numerics.Vector<double>(low.Slice(i, width));
                 var c = new System.Numerics.Vector<double>(close.Slice(i, width));
-                var flow = (c - l - (h - c)) * new System.Numerics.Vector<double>(volume.Slice(i, width)) / (h - l);
+                var v = new System.Numerics.Vector<double>(volume.Slice(i, width));
+                var all = h + l + (c + v);
+                seen |= System.Numerics.Vector.AsVectorInt64(all - all); // NOSONAR x - x is the finite test
+                var flow = (c - l - (h - c)) * v / (h - l);
                 // A bar with no range divides by zero here and is then replaced by the zero it adds.
-                System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.Equals(h, l),
-                    System.Numerics.Vector<double>.Zero, flow).CopyTo(line.Slice(i, width));
+                System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.Equals(h, l), System.Numerics.Vector<double>.Zero, flow).CopyTo(line.Slice(i, width));
             }
+            if (!System.Numerics.Vector.EqualsAll(seen, System.Numerics.Vector<long>.Zero)) suspect = 1;
         }
 #endif
         for (; i < n; i++)
         {
             double h = high[i], l = low[i], c = close[i];
+            suspect |= FastMath.NonFiniteBits(h + l + (c + volume[i]));
             line[i] = h != l ? (c - l - (h - c)) * volume[i] / (h - l) : 0; // NOSONAR an exact tie is the contract
         }
         double total = 0;
@@ -163,39 +194,67 @@ internal static partial class FastKernels
             total += line[i];
             line[i] = total;
         }
+        if (suspect != 0)
+        {
+            // Either an input is not finite, which its checked column names, or four finite inputs summed
+            // past the largest double, which says nothing about the line and leaves it to the output check.
+            _ = columns.High;
+            _ = columns.Low;
+            _ = columns.Close;
+            _ = columns.Volume;
+            return false;
+        }
+        // A total that has left the finite numbers never returns to them, so the last one speaks for all.
+        return FastMath.NonFiniteBits(total) == 0;
     }
 
     /// <summary>
     /// Balance of power: the bar's close-open move over its range, zero for a bar with no range, with the
     /// catalog exponential average of it as its signal.
     /// </summary>
-    internal static void BalanceOfPower(FastColumns columns, Span<double> value)
+    internal static bool BalanceOfPower(FastColumns columns, Span<double> value)
     {
         columns.RequireHighLowClose();
-        ReadOnlySpan<double> open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
+        ReadOnlySpan<double> open = columns.Raw(IndicatorInputFields.Open), high = columns.Raw(IndicatorInputFields.High);
+        ReadOnlySpan<double> low = columns.Raw(IndicatorInputFields.Low), close = columns.Raw(IndicatorInputFields.Close);
         var n = close.Length;
         value = value.Slice(0, n);
+        // A bar with no range hides its open and close, so the inputs are checked through their sum, and
+        // each value as it is written.
+        long suspect = 0;
         var i = 0;
 #if !NETFRAMEWORK
         if (System.Numerics.Vector.IsHardwareAccelerated)
         {
             var width = System.Numerics.Vector<double>.Count;
+            var seen = System.Numerics.Vector<long>.Zero;
             for (; i <= n - width; i += width)
             {
                 var h = new System.Numerics.Vector<double>(high.Slice(i, width));
                 var l = new System.Numerics.Vector<double>(low.Slice(i, width));
-                var move = new System.Numerics.Vector<double>(close.Slice(i, width))
-                    - new System.Numerics.Vector<double>(open.Slice(i, width));
+                var c = new System.Numerics.Vector<double>(close.Slice(i, width));
+                var o = new System.Numerics.Vector<double>(open.Slice(i, width));
+                var all = h + l + (c + o);
                 // A bar with no range divides by zero here and is then replaced by the zero it is defined as.
-                System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.Equals(h, l),
-                    System.Numerics.Vector<double>.Zero, move / (h - l)).CopyTo(value.Slice(i, width));
+                var power = System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.Equals(h, l), System.Numerics.Vector<double>.Zero, (c - o) / (h - l));
+                seen |= System.Numerics.Vector.AsVectorInt64(all - all) | System.Numerics.Vector.AsVectorInt64(power - power); // NOSONAR x - x is the finite test
+                power.CopyTo(value.Slice(i, width));
             }
+            if (!System.Numerics.Vector.EqualsAll(seen, System.Numerics.Vector<long>.Zero)) suspect = 1;
         }
 #endif
         for (; i < n; i++)
         {
             double h = high[i], l = low[i];
-            value[i] = h == l ? 0 : (close[i] - open[i]) / (h - l); // NOSONAR an exact tie is the contract
+            var power = h == l ? 0 : (close[i] - open[i]) / (h - l); // NOSONAR an exact tie is the contract
+            suspect |= FastMath.NonFiniteBits(h + l + (close[i] + open[i])) | FastMath.NonFiniteBits(power);
+            value[i] = power;
         }
+        if (suspect == 0) return true;
+        _ = columns.Open;
+        _ = columns.High;
+        _ = columns.Low;
+        _ = columns.Close;
+        return false;
     }
 }

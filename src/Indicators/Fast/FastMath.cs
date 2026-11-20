@@ -68,6 +68,10 @@ internal static class FastMath
         return value;
     }
 
+    /// <summary>Zero for a finite value and nonzero for a NaN or an infinity, to be gathered with an OR.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    internal static long NonFiniteBits(double value) => BitConverter.DoubleToInt64Bits(value - value); // NOSONAR x - x is the finite test
+
     /// <summary>The value when <paramref name="keep"/> holds and positive zero otherwise, without a branch.</summary>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     internal static double KeepIf(double value, bool keep)

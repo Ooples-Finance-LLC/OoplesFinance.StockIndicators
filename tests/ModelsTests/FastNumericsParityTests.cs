@@ -1185,6 +1185,69 @@ public sealed class FastNumericsParityTests
     }
 
     [Fact]
+    public async Task AKernelThatChecksItsInputsAsItReadsThemNamesTheSameField()
+    {
+        // These kernels prove their inputs finite in the pass that computes, so every field each reads is
+        // broken in turn, at a vector's first bar, inside one and in the scalar tail, on a bar with a range
+        // and on one without, which hides the close and the volume from the arithmetic.
+        var cases = new (Func<IIndicator> Make, string[] Reads, string FirstFromColumns, string FirstFromBars)[]
+        {
+            (() => new MedianPrice(1), ["High", "Low"], "High", "High"),
+            (() => new TypicalPrice(1), ["High", "Low", "Close"], "High", "High"),
+            (() => new WeightedClose(1), ["High", "Low", "Close"], "High", "High"),
+            (() => new FullTypicalPrice(1), ["Open", "High", "Low", "Close"], "High", "High"),
+            (() => new Adl(1), ["High", "Low", "Close", "Volume"], "High", "High"),
+            (() => new BalanceOfPower(), ["Open", "High", "Low", "Close"], "Open", "High"),
+        };
+        static Bar With(Bar bar, string field, double value) => field switch
+        {
+            "Open" => new Bar(bar.Time, value, bar.High, bar.Low, bar.Close, bar.Volume),
+            "High" => new Bar(bar.Time, bar.Open, value, bar.Low, bar.Close, bar.Volume),
+            "Low" => new Bar(bar.Time, bar.Open, bar.High, value, bar.Close, bar.Volume),
+            "Close" => new Bar(bar.Time, bar.Open, bar.High, bar.Low, value, bar.Volume),
+            _ => new Bar(bar.Time, bar.Open, bar.High, bar.Low, bar.Close, value)
+        };
+        static IBarSource Source(Bar[] bars, bool columnar) => columnar
+            ? Bars.FromColumns(bars.Select(b => b.Open).ToArray(), bars.Select(b => b.High).ToArray(),
+                bars.Select(b => b.Low).ToArray(), bars.Select(b => b.Close).ToArray(), bars.Select(b => b.Volume).ToArray())
+            : Bars.From(bars);
+        static async Task<string?> Failure(Func<IIndicator> make, IBarSource source)
+        {
+            try
+            {
+                using var run = await new StockIndicatorBuilder().ConfigureSource(source).ConfigureIndicators(make())
+                    .ConfigureNumerics(IndicatorNumerics.Fast).BuildAsync();
+                return null;
+            }
+            catch (ArgumentOutOfRangeException error) { return error.Message; }
+        }
+        string[] fields = ["Open", "High", "Low", "Close", "Volume"];
+        foreach (var (make, reads, firstFromColumns, firstFromBars) in cases)
+        foreach (var columnar in new[] { false, true })
+        {
+            foreach (var field in fields)
+            foreach (var bad in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+            foreach (var at in new[] { 0, 5, 32, 66 })
+            foreach (var flat in new[] { false, true })
+            {
+                var bars = Walk(67, 23);
+                if (flat) bars[at] = new Bar(bars[at].Time, 7, 7, 7, 7, 3);
+                bars[at] = With(bars[at], field, bad);
+                var message = await Failure(make, Source(bars, columnar));
+                var where = $"{make().GetType().Name}, columnar {columnar}, {field} = {bad} at {at}, flat {flat}";
+                if (Array.IndexOf(reads, field) < 0) Assert.True(message is null, where + ": " + message);
+                else Assert.True(message is not null && message.Contains(field + " must be finite.", StringComparison.Ordinal), where + ": " + message);
+            }
+            // With every field broken, the first one the kernel reads is the one named.
+            var all = Walk(67, 23);
+            foreach (var field in fields) all[40] = With(all[40], field, double.NaN);
+            var first = await Failure(make, Source(all, columnar));
+            var expected = (columnar ? firstFromColumns : firstFromBars) + " must be finite.";
+            Assert.True(first is not null && first.Contains(expected, StringComparison.Ordinal), $"{make().GetType().Name}, columnar {columnar}: {first}");
+        }
+    }
+
+    [Fact]
     public void TheFiniteCheckFindsANonFiniteValueAtEveryPosition()
     {
         // Lengths on both sides of every vector and unrolled-block boundary, and a negative zero, which is finite.

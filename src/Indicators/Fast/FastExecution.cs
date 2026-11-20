@@ -155,10 +155,10 @@ internal static partial class FastExecution
         Bind<FirstValueEma>(binders, ema => (c, o) => FastKernels.FirstValueEma(c.Close, o[0], ema.Period));
         Bind<Ema>(binders, ema => (c, o) => FastKernels.RunningSeedEma(c.Close, o[0], ema.Length));
         Bind<Wma>(binders, wma => (c, o) => FastKernels.FullDivisorWma(c.Close, o[0], wma.Length));
-        Bind<MedianPrice>(binders, _ => (c, o) => FastKernels.PricePoint(c, o[0], 0, false));
-        Bind<TypicalPrice>(binders, _ => (c, o) => FastKernels.PricePoint(c, o[0], 1, false));
-        Bind<WeightedClose>(binders, _ => (c, o) => FastKernels.PricePoint(c, o[0], 2, false));
-        Bind<FullTypicalPrice>(binders, _ => (c, o) => FastKernels.PricePoint(c, o[0], 1, true));
+        Bind<MedianPrice>(binders, _ => (c, o) => FastKernels.PricePoint(c, o, 0, false));
+        Bind<TypicalPrice>(binders, _ => (c, o) => FastKernels.PricePoint(c, o, 1, false));
+        Bind<WeightedClose>(binders, _ => (c, o) => FastKernels.PricePoint(c, o, 2, false));
+        Bind<FullTypicalPrice>(binders, _ => (c, o) => FastKernels.PricePoint(c, o, 1, true));
         Bind<TrueRange>(binders, _ => (c, o) =>
         {
             c.RequireHighLowClose();
@@ -336,12 +336,12 @@ internal static partial class FastExecution
         Bind<SeededOnBalanceVolume>(binders, t => (c, o) => FastKernels.OnBalanceVolume(c, o, t));
         Bind<Adl>(binders, t => (c, o) =>
         {
-            FastKernels.AccumulationLine(c, o[0]);
+            if (FastKernels.AccumulationLine(c, o[0])) o.Verified(0);
             SignalOf(o, t.Length);
         });
         Bind<BalanceOfPower>(binders, t => t.MaType is not null ? null : (c, o) =>
         {
-            FastKernels.BalanceOfPower(c, o[0]);
+            if (FastKernels.BalanceOfPower(c, o[0])) o.Verified(0);
             SignalOf(o, t.Length);
         });
         Bind<WindowDeviationBands>(binders, t => (c, o) => FastKernels.DeviationBands(c.Close, o, t));

@@ -48,7 +48,13 @@ internal sealed class FastOutputs
         if (slot < 64) _shared |= 1UL << slot;
     }
 
-    /// <summary>Whether a slot is a shared flag column, which is finite by construction.</summary>
+    /// <summary>Declares a slot finite: its kernel checked every value in the pass that wrote it.</summary>
+    internal void Verified(int slot)
+    {
+        if (slot < 64) _shared |= 1UL << slot;
+    }
+
+    /// <summary>Whether a slot is finite by construction or by its kernel's own check.</summary>
     internal bool IsShared(int slot) => slot < 64 && (_shared & (1UL << slot)) != 0;
 
     /// <summary>Every slot, for a kernel that fills them all itself.</summary>
