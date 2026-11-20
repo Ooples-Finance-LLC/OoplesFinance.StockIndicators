@@ -435,7 +435,34 @@ internal static partial class FastKernels
         if (n == 0) return;
         var total = owner.Seed == ObvSeed.FirstVolume ? volume[0] : 0;
         value[0] = total;
-        for (var i = 1; i < n; i++)
+        // Bars before this one hold their signed volume and wait for the running total.
+        var signed = 1;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            // Each bar's volume, signed by which way its close moved, a vector of bars at a time; the
+            // running total then adds the same terms in the same order.
+            var width = System.Numerics.Vector<double>.Count;
+            System.Numerics.Vector<double> zero = System.Numerics.Vector<double>.Zero, one = System.Numerics.Vector<double>.One;
+            var seen = System.Numerics.Vector<long>.Zero;
+            for (; signed <= n - width; signed += width)
+            {
+                var now = new System.Numerics.Vector<double>(close.Slice(signed, width));
+                var then = new System.Numerics.Vector<double>(close.Slice(signed - 1, width));
+                var direction = System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.GreaterThan(now, then), one, zero)
+                    - System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.LessThan(now, then), one, zero);
+                seen |= System.Numerics.Vector.AsVectorInt64(now - now); // NOSONAR x - x is the finite test
+                (direction * new System.Numerics.Vector<double>(volume.Slice(signed, width))).CopyTo(value.Slice(signed, width));
+            }
+            if (!System.Numerics.Vector.EqualsAll(seen, System.Numerics.Vector<long>.Zero)) suspect = 1;
+        }
+#endif
+        for (var i = 1; i < signed; i++)
+        {
+            total += value[i];
+            value[i] = total;
+        }
+        for (var i = signed; i < n; i++)
         {
             double current = close[i], previous = close[i - 1];
 #if !NETFRAMEWORK
