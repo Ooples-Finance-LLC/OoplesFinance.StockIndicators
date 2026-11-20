@@ -39,8 +39,9 @@ internal static partial class FastKernels
         {
             var up = high[i] - high[i - 1];
             var down = low[i - 1] - low[i];
-            var plus = needsPositive && up > 0 && up > down ? up : 0;
-            var minus = needsNegative && down > 0 && down > up ? down : 0;
+            // Which way a bar moved is as good as random, so each movement is kept or zeroed without a branch.
+            var plus = FastMath.KeepIf(up, needsPositive & up > 0 & up > down);
+            var minus = FastMath.KeepIf(down, needsNegative & down > 0 & down > up);
             var trueRange = needsRange ? TrueRange(high[i], low[i], close[i - 1]) : 0;
             if (period == 1)
             {

@@ -68,6 +68,19 @@ internal static class FastMath
         return value;
     }
 
+    /// <summary>The value when <paramref name="keep"/> holds and positive zero otherwise, without a branch.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    internal static double KeepIf(double value, bool keep)
+    {
+#if !NETFRAMEWORK
+        // A true bool is the byte 1, so its negation is a mask of all ones.
+        var mask = -(long)System.Runtime.CompilerServices.Unsafe.As<bool, byte>(ref keep);
+        return BitConverter.Int64BitsToDouble(BitConverter.DoubleToInt64Bits(value) & mask);
+#else
+        return keep ? value : 0;
+#endif
+    }
+
     /// <summary>Sum of the products of two equally long runs, in four interleaved partial sums.</summary>
     internal static double Dot(ReadOnlySpan<double> a, ReadOnlySpan<double> b)
     {
