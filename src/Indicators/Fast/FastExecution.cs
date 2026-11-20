@@ -101,6 +101,14 @@ internal static partial class FastExecution
         return bind(indicator);
     }
 
+    // The catalog signal of slot 0 in slot 1. An average over one bar is the series itself, so it is
+    // published as that series and not as a copy of it.
+    private static void SignalOf(FastOutputs outputs, int length)
+    {
+        if (length <= 1) outputs.Alias(1, 0);
+        else FastKernels.RunningSeedEma(outputs[0], outputs[1], length);
+    }
+
     // These read the bar's midpoint from the bars and the close when chained, or hand whole bars to a
     // caller's function; their kernels read the bars as they were given.
     private static bool SwitchesInputWhenChained(IIndicator indicator) =>
@@ -304,8 +312,16 @@ internal static partial class FastExecution
         Bind<ExpandingRegularizedEma>(binders, t => (c, o) => FastKernels.RegularizedEma(c.Close, o[0], t.Period, t.Lambda));
         Bind<ExpandingZeroLagEma>(binders, t => (c, o) => FastKernels.ZeroLagEma(c.Close, o[0], t.Period));
         Bind<SeededOnBalanceVolume>(binders, t => (c, o) => FastKernels.OnBalanceVolume(c, o, t));
-        Bind<Adl>(binders, t => (c, o) => FastKernels.AccumulationLine(c, o[0], o[1], t.Length));
-        Bind<BalanceOfPower>(binders, t => t.MaType is not null ? null : (c, o) => FastKernels.BalanceOfPower(c, o[0], o[1], t.Length));
+        Bind<Adl>(binders, t => (c, o) =>
+        {
+            FastKernels.AccumulationLine(c, o[0]);
+            SignalOf(o, t.Length);
+        });
+        Bind<BalanceOfPower>(binders, t => t.MaType is not null ? null : (c, o) =>
+        {
+            FastKernels.BalanceOfPower(c, o[0]);
+            SignalOf(o, t.Length);
+        });
         Bind<WindowDeviationBands>(binders, t => (c, o) => FastKernels.DeviationBands(c.Close, o, t));
         Bind<SineWeightedAverage>(binders, t => (c, o) => FastKernels.LagWeightedWindow(c.Close, o[0], FastKernels.SineWeights(t.Period)));
         Bind<GaussianWeightedAverage>(binders, t => (c, o) => FastKernels.LagWeightedWindow(c.Close, o[0], FastKernels.GaussianWeights(t.Period, t.Sigma)));

@@ -41,6 +41,13 @@ internal sealed class FastOutputs
         _shared[slot] = true;
     }
 
+    /// <summary>Publishes a slot as the very series another slot holds, where the two are equal bar for bar.</summary>
+    internal void Alias(int slot, int source)
+    {
+        _slots[slot] = this[source];
+        _shared[slot] = true;
+    }
+
     /// <summary>Whether a slot is a shared flag column, which is finite by construction.</summary>
     internal bool IsShared(int slot) => _shared[slot];
 

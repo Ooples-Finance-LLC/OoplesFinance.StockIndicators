@@ -111,7 +111,7 @@ internal static partial class FastKernels
     /// Accumulation/distribution line: the running total of volume weighted by where the close sits in the
     /// bar's range, with the catalog exponential average of the line as its signal.
     /// </summary>
-    internal static void AccumulationLine(FastColumns columns, Span<double> line, Span<double> signal, int length)
+    internal static void AccumulationLine(FastColumns columns, Span<double> line)
     {
         columns.RequireHighLowClose();
         ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close, volume = columns.Volume;
@@ -147,14 +147,13 @@ internal static partial class FastKernels
             total += line[i];
             line[i] = total;
         }
-        RunningSeedEma(line, signal, length);
     }
 
     /// <summary>
     /// Balance of power: the bar's close-open move over its range, zero for a bar with no range, with the
     /// catalog exponential average of it as its signal.
     /// </summary>
-    internal static void BalanceOfPower(FastColumns columns, Span<double> value, Span<double> signal, int length)
+    internal static void BalanceOfPower(FastColumns columns, Span<double> value)
     {
         columns.RequireHighLowClose();
         ReadOnlySpan<double> open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
@@ -182,8 +181,5 @@ internal static partial class FastKernels
             double h = high[i], l = low[i];
             value[i] = h == l ? 0 : (close[i] - open[i]) / (h - l); // NOSONAR an exact tie is the contract
         }
-        // An average over one bar is the value itself.
-        if (length <= 1) value.CopyTo(signal);
-        else RunningSeedEma(value, signal, length);
     }
 }
