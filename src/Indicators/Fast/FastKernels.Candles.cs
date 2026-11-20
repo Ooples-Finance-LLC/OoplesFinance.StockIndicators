@@ -304,6 +304,11 @@ internal static partial class FastKernels
         double[] high = columns.High, low = columns.Low, close = columns.Close;
         var n = close.Length;
         output = output.Slice(0, n);
+        if (period == 0)
+        {
+            PlainHikkake(high, low, close, output);
+            return;
+        }
         output.Clear();
         var ranges = new CandleWindow(columns, CandleStatistic.Range, period);
         var fifth = 5L * period;
@@ -346,6 +351,84 @@ internal static partial class FastKernels
         }
     }
 
+
+    // The plain form in two passes. Whether a bar is an inside bar and which way the next one breaks out
+    // of it are as good as random, so the formation is taken as masks, a vector of bars at a time; the
+    // confirmation is a short walk that only branches where a formation or a pending one exists.
+    private static void PlainHikkake(double[] high, double[] low, double[] close, Span<double> output)
+    {
+        var n = close.Length;
+        output.Slice(0, Math.Min(2, n)).Clear();
+        var i = 2;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            var one = System.Numerics.Vector<double>.One;
+            for (; i <= n - width; i += width)
+            {
+                var h = new System.Numerics.Vector<double>(high, i);
+                var l = new System.Numerics.Vector<double>(low, i);
+                var h1 = new System.Numerics.Vector<double>(high, i - 1);
+                var l1 = new System.Numerics.Vector<double>(low, i - 1);
+                var inside = System.Numerics.Vector.LessThan(h1, new System.Numerics.Vector<double>(high, i - 2))
+                    & System.Numerics.Vector.GreaterThan(l1, new System.Numerics.Vector<double>(low, i - 2));
+                var below = System.Numerics.Vector.LessThan(h, h1) & System.Numerics.Vector.LessThan(l, l1);
+                var above = System.Numerics.Vector.GreaterThan(h, h1) & System.Numerics.Vector.GreaterThan(l, l1);
+                System.Numerics.Vector.ConditionalSelect(inside & below, one,
+                    System.Numerics.Vector.ConditionalSelect(inside & above, -one, System.Numerics.Vector<double>.Zero))
+                    .CopyTo(output.Slice(i, width));
+            }
+        }
+#endif
+        for (; i < n; i++)
+        {
+            var inside = high[i - 1] < high[i - 2] && low[i - 1] > low[i - 2];
+            output[i] = !inside ? 0
+                : high[i] < high[i - 1] && low[i] < low[i - 1] ? 1
+                : high[i] > high[i - 1] && low[i] > low[i - 1] ? -1
+                : 0;
+        }
+        // Only a formation and the three bars after it can carry a signal, so the walk goes from one
+        // formation to the next and leaves every other bar at the zero it already holds.
+        var next = 2;
+        while (next < n)
+        {
+            var at = next + NextNonZero(output.Slice(next));
+            if (at < next) break;
+            var formed = output[at];
+            var confirmation = formed > 0 ? high[at - 1] : low[at - 1];
+            output[at] = at >= 5 ? formed * 100 : 0;
+            next = Math.Min(at + 4, n);
+            for (var j = at + 1; j < next; j++)
+            {
+                if (output[j] != 0) // NOSONAR the formation pass stores exactly -1, 0 or 1
+                {
+                    // A new formation replaces the pending one.
+                    next = j;
+                    break;
+                }
+                if (formed > 0 ? close[j] > confirmation : close[j] < confirmation)
+                {
+                    output[j] = j >= 5 ? formed * 200 : 0;
+                    next = j + 1;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Offset of the first value that is not zero, or -1.
+    private static int NextNonZero(ReadOnlySpan<double> values)
+    {
+#if NET8_0_OR_GREATER
+        return values.IndexOfAnyExcept(0d);
+#else
+        for (var i = 0; i < values.Length; i++)
+            if (values[i] != 0) return i; // NOSONAR an exact zero is the contract
+        return -1;
+#endif
+    }
 
     /// <summary>
     /// Matching low, stick sandwich, three-line strike and three outside: two to four candles whose
@@ -441,7 +524,7 @@ internal static partial class FastKernels
         double[] open = columns.Open, close = columns.Close;
         var n = close.Length;
         output = output.Slice(0, n);
-        output.Clear();
+        output.Slice(0, Math.Min(2, n)).Clear();
         var i = 2;
 #if !NETFRAMEWORK
         if (System.Numerics.Vector.IsHardwareAccelerated)
@@ -478,6 +561,8 @@ internal static partial class FastKernels
             else if (c < o && previousClose >= previousOpen && o >= previousClose && c <= previousOpen
                 && (o > previousClose || c < previousOpen))
                 output[i] = -100;
+            else
+                output[i] = 0;
         }
     }
 
