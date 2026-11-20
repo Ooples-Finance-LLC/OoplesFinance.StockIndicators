@@ -178,7 +178,7 @@ internal static partial class FastKernels
             if (!(Math.Abs(move) > 1e-15 * (scale + previousScale)))
                 move = FastMath.TypicalPrice(h, l, c).CompareTo(FastMath.TypicalPrice(high[i - 1], low[i - 1], close[i - 1]));
             var flow = typical * volume[i];
-            double up = move > 0 ? flow : 0, down = move < 0 ? flow : 0;
+            double up = FastMath.KeepIf(flow, move > 0), down = FastMath.KeepIf(flow, move < 0);
             previous = typical;
             previousScale = scale;
             ups[i] = up;
