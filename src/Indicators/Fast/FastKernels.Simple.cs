@@ -689,4 +689,50 @@ internal static partial class FastKernels
             output[i] = average;
         }
     }
+
+
+    /// <summary>
+    /// Pearson correlation of two price columns over the window. Each window is summed around its own
+    /// means; a window where either column is flat has no correlation.
+    /// </summary>
+    internal static void Correlation(FastColumns columns, Span<double> value, Span<double> defined, WindowCorrelation owner)
+    {
+        ReadOnlySpan<double> left = Field(columns, owner.Left), right = Field(columns, owner.Right);
+        var n = columns.Count;
+        var period = owner.Period;
+        value = value.Slice(0, n);
+        defined = defined.Slice(0, n);
+        value.Clear();
+        defined.Clear();
+        int leftRun = 0, rightRun = 0;
+        for (var i = 0; i < n; i++)
+        {
+            leftRun = i > 0 && left[i] == left[i - 1] ? leftRun + 1 : 1; // NOSONAR an exact tie is the contract
+            rightRun = i > 0 && right[i] == right[i - 1] ? rightRun + 1 : 1; // NOSONAR an exact tie is the contract
+            if (i < period - 1) continue;
+            if (leftRun >= period || rightRun >= period)
+            {
+                if (owner.FlatZero) defined[i] = 1;
+                continue;
+            }
+            var from = i - period + 1;
+            double leftAnchor = left[i], rightAnchor = right[i], leftSum = 0, rightSum = 0;
+            for (var j = from; j <= i; j++)
+            {
+                leftSum += left[j] - leftAnchor;
+                rightSum += right[j] - rightAnchor;
+            }
+            double leftMean = leftSum / period, rightMean = rightSum / period, a = 0, b = 0, c = 0;
+            for (var j = from; j <= i; j++)
+            {
+                var x = left[j] - leftAnchor - leftMean;
+                var y = right[j] - rightAnchor - rightMean;
+                a += x * x;
+                b += y * y;
+                c += x * y;
+            }
+            value[i] = c / Math.Sqrt(a * b);
+            defined[i] = 1;
+        }
+    }
 }
