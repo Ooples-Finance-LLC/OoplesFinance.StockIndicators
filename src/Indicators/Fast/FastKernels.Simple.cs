@@ -161,30 +161,125 @@ internal static partial class FastKernels
             ExtremeIndexByDeque(input, index, period, highest, newestTie);
             return;
         }
+        // One loop for each rule, so that the rule is compiled into the loop and not decided on every bar.
+        var window = (int)period;
+        if (highest && newestTie) ExtremeIndexByRescan<NewestHighest>(input, index, window);
+        else if (highest) ExtremeIndexByRescan<OldestHighest>(input, index, window);
+        else if (newestTie) ExtremeIndexByRescan<NewestLowest>(input, index, window);
+        else ExtremeIndexByRescan<OldestLowest>(input, index, window);
+    }
+
+    // Which value is the extreme, and which of two equal ones.
+    private interface IExtremeRule
+    {
+        bool Highest { get; }
+        bool Newest { get; }
+        bool Replaces(double value, double best);
+        double Keep(double best, double value);
+    }
+
+    private struct NewestHighest : IExtremeRule
+    {
+        public bool Highest => true;
+        public bool Newest => true;
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+        public bool Replaces(double value, double best) => value >= best;
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+        public double Keep(double best, double value) => FastMath.Larger(best, value);
+    }
+
+    private struct OldestHighest : IExtremeRule
+    {
+        public bool Highest => true;
+        public bool Newest => false;
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+        public bool Replaces(double value, double best) => value > best;
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+        public double Keep(double best, double value) => FastMath.Larger(best, value);
+    }
+
+    private struct NewestLowest : IExtremeRule
+    {
+        public bool Highest => false;
+        public bool Newest => true;
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+        public bool Replaces(double value, double best) => value <= best;
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+        public double Keep(double best, double value) => FastMath.Smaller(best, value);
+    }
+
+    private struct OldestLowest : IExtremeRule
+    {
+        public bool Highest => false;
+        public bool Newest => false;
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+        public bool Replaces(double value, double best) => value < best;
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+        public double Keep(double best, double value) => FastMath.Smaller(best, value);
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
+    private static void ExtremeIndexByRescan<TRule>(ReadOnlySpan<double> input, Span<double> index, int period)
+        where TRule : struct, IExtremeRule
+    {
+        var rule = default(TRule);
         var best = input[0];
         var at = 0;
         index[0] = 0;
-        for (var i = 1; i < n; i++)
+        for (var i = 1; i < index.Length; i++)
         {
             var value = input[i];
-            if (Replaces(value, best, highest, newestTie))
+            // Whether a bar sets a new extreme is as good as random, so the extreme and its bar are replaced
+            // without a branch; only an extreme leaving the window takes one.
+            at = FastMath.Choose(rule.Replaces(value, best), i, at);
+            best = rule.Keep(best, value);
+            if (at <= i - period)
             {
-                best = value;
-                at = i;
-            }
-            else if (at <= i - period)
-            {
-                at = (int)(i - period + 1);
+                var from = i - period + 1;
+                at = from + ExtremeOffset(input.Slice(from, period), rule.Highest, rule.Newest);
                 best = input[at];
-                for (var j = at + 1; j <= i; j++)
-                    if (Replaces(input[j], best, highest, newestTie))
-                    {
-                        best = input[j];
-                        at = j;
-                    }
             }
             index[i] = at;
         }
+    }
+
+    // Where in a window its highest or lowest value is, counted from the window's first bar: the newest bar
+    // that holds it, or the oldest. A short window is compared a vector at a time against its own extreme
+    // and the bar is read off the comparisons' bits, so the search has no branch that the data decides.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    private static int ExtremeOffset(ReadOnlySpan<double> window, bool highest, bool newest)
+    {
+#if !NETFRAMEWORK
+        if (System.Runtime.Intrinsics.X86.Avx.IsSupported && window.Length >= 8 && window.Length <= 64)
+        {
+            // The last vector overlaps the one before it wherever the window is not a whole number of them.
+            var tail = System.Runtime.Intrinsics.Vector256.Create<double>(window.Slice(window.Length - 4, 4));
+            var bests = tail;
+            for (var j = 0; j <= window.Length - 4; j += 4)
+            {
+                var block = System.Runtime.Intrinsics.Vector256.Create<double>(window.Slice(j, 4));
+                bests = highest ? System.Runtime.Intrinsics.X86.Avx.Max(bests, block) : System.Runtime.Intrinsics.X86.Avx.Min(bests, block);
+            }
+            System.Runtime.Intrinsics.Vector128<double> lower = System.Runtime.Intrinsics.Vector256.GetLower(bests), upper = System.Runtime.Intrinsics.Vector256.GetUpper(bests);
+            var half = highest ? System.Runtime.Intrinsics.X86.Sse2.Max(lower, upper) : System.Runtime.Intrinsics.X86.Sse2.Min(lower, upper);
+            var other = System.Runtime.Intrinsics.X86.Sse2.UnpackHigh(half, half);
+            var extreme = System.Runtime.Intrinsics.Vector256.Create(System.Runtime.Intrinsics.Vector128.ToScalar(highest ? System.Runtime.Intrinsics.X86.Sse2.MaxScalar(half, other) : System.Runtime.Intrinsics.X86.Sse2.MinScalar(half, other)));
+            ulong equal = 0;
+            for (var j = 0; j <= window.Length - 4; j += 4)
+                equal |= (ulong)(uint)System.Runtime.Intrinsics.X86.Avx.MoveMask(System.Runtime.Intrinsics.X86.Avx.CompareEqual(System.Runtime.Intrinsics.Vector256.Create<double>(window.Slice(j, 4)), extreme)) << j;
+            equal |= (ulong)(uint)System.Runtime.Intrinsics.X86.Avx.MoveMask(System.Runtime.Intrinsics.X86.Avx.CompareEqual(tail, extreme)) << (window.Length - 4);
+            return newest ? 63 - System.Numerics.BitOperations.LeadingZeroCount(equal) : System.Numerics.BitOperations.TrailingZeroCount(equal);
+        }
+#endif
+        var best = window[0];
+        var at = 0;
+        for (var j = 1; j < window.Length; j++)
+        {
+            var value = window[j];
+            at = FastMath.Choose(Replaces(value, best, highest, newest), j, at);
+            best = highest ? FastMath.Larger(best, value) : FastMath.Smaller(best, value);
+        }
+        return at;
     }
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
@@ -227,7 +322,9 @@ internal static partial class FastKernels
         for (var slot = 3; slot < 6; slot++) outputs.Flag(slot, first);
         if (size <= AroonFusedLimit && n > 0)
         {
-            FusedAroon(high, low, up, down, oscillator, period, (int)size, first, !owner.OldestTie);
+            // One loop for each tie rule, so that the rule is compiled into the loop and not decided on every bar.
+            if (owner.OldestTie) FusedAroon<OldestHighest, OldestLowest>(high, low, up, down, oscillator, period, (int)size, first);
+            else FusedAroon<NewestHighest, NewestLowest>(high, low, up, down, oscillator, period, (int)size, first);
             return;
         }
         // The two outputs hold the extreme's bar index until the final pass turns it into a percentage.
@@ -267,10 +364,13 @@ internal static partial class FastKernels
 
     // Short windows in one pass: both extremes are followed together and each bar's three percentages are
     // written as soon as they are known, so nothing is stored and read back.
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
-    private static void FusedAroon(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> up, Span<double> down,
-        Span<double> oscillator, int period, int size, int first, bool newestTie)
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
+    private static void FusedAroon<THigh, TLow>(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> up, Span<double> down,
+        Span<double> oscillator, int period, int size, int first)
+        where THigh : struct, IExtremeRule where TLow : struct, IExtremeRule
     {
+        var higher = default(THigh);
+        var lower = default(TLow);
         var n = high.Length;
         up.Slice(0, first).Clear();
         down.Slice(0, first).Clear();
@@ -283,37 +383,21 @@ internal static partial class FastKernels
         for (var i = 0; i < n; i++)
         {
             double h = high[i], l = low[i];
-            if (newestTie ? h >= highest : h > highest)
+            // Whether a bar sets a new extreme is as good as random, so the extreme and its bar are replaced
+            // without a branch; only an extreme leaving the window, which is rare, takes one.
+            highestAt = FastMath.Choose(higher.Replaces(h, highest), i, highestAt);
+            highest = higher.Keep(highest, h);
+            if (highestAt <= i - size)
             {
-                highest = h;
-                highestAt = i;
-            }
-            else if (highestAt <= i - size)
-            {
-                highestAt = i - size + 1;
+                highestAt = i - size + 1 + ExtremeOffset(high.Slice(i - size + 1, size), true, higher.Newest);
                 highest = high[highestAt];
-                for (var j = highestAt + 1; j <= i; j++)
-                    if (newestTie ? high[j] >= highest : high[j] > highest)
-                    {
-                        highest = high[j];
-                        highestAt = j;
-                    }
             }
-            if (newestTie ? l <= lowest : l < lowest)
+            lowestAt = FastMath.Choose(lower.Replaces(l, lowest), i, lowestAt);
+            lowest = lower.Keep(lowest, l);
+            if (lowestAt <= i - size)
             {
-                lowest = l;
-                lowestAt = i;
-            }
-            else if (lowestAt <= i - size)
-            {
-                lowestAt = i - size + 1;
+                lowestAt = i - size + 1 + ExtremeOffset(low.Slice(i - size + 1, size), false, lower.Newest);
                 lowest = low[lowestAt];
-                for (var j = lowestAt + 1; j <= i; j++)
-                    if (newestTie ? low[j] <= lowest : low[j] < lowest)
-                    {
-                        lowest = low[j];
-                        lowestAt = j;
-                    }
             }
             if (i < first) continue;
             up[i] = percentages[2 * period + 1 - (i - highestAt)];

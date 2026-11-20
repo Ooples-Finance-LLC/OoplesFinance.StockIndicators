@@ -132,6 +132,32 @@ internal static class FastMath
         return sum;
     }
 
+    /// <summary>One of two indices, chosen without a branch: for a choice the data makes as good as at random.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+    internal static int Choose(bool first, int whenFirst, int otherwise)
+    {
+#if !NETFRAMEWORK
+        // A true bool is the byte 1, so its negation is a mask of all ones.
+        var mask = -(int)System.Runtime.CompilerServices.Unsafe.As<bool, byte>(ref first);
+        return (whenFirst & mask) | (otherwise & ~mask);
+#else
+        return first ? whenFirst : otherwise;
+#endif
+    }
+
+    /// <summary>The smaller of two finite values, without a branch.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+    internal static double Smaller(double a, double b)
+    {
+#if !NETFRAMEWORK
+        if (System.Runtime.Intrinsics.X86.Sse2.IsSupported)
+            return System.Runtime.Intrinsics.Vector128.ToScalar(System.Runtime.Intrinsics.X86.Sse2.MinScalar(
+                System.Runtime.Intrinsics.Vector128.CreateScalarUnsafe(a),
+                System.Runtime.Intrinsics.Vector128.CreateScalarUnsafe(b)));
+#endif
+        return a < b ? a : b;
+    }
+
     /// <summary>
     /// Replaces each value with the total of the values up to and including it, starting from
     /// <paramref name="carry"/>, and returns the last total.
