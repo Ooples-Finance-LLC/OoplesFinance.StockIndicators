@@ -31,8 +31,8 @@ internal static class FixedKernelSnapshotComparison
                     0,
                     (
                         fibonacci
-                            ? FibonacciWeightedSnapshot.Calculate(d.IndicatorBars, p)
-                            : WindowedSincSnapshot.Calculate(d.IndicatorBars, p, taps, window)
+                            ? FibonacciWeightedSnapshot.Calculate(d.IndicatorBars, p, numerics: ComparisonBuilder.Numerics)
+                            : WindowedSincSnapshot.Calculate(d.IndicatorBars, p, taps, window, numerics: ComparisonBuilder.Numerics)
                     ).ToArray()
                 ),
             (d, p) => new(0, Reference(d.Closes, p, fibonacci, taps, window, false)),

@@ -46,6 +46,20 @@ public sealed class FastSnapshotParityTests
         ("RenkoAtr()", (bars, numerics) => Bricks(RenkoSnapshot.CalculateAtr(bars, numerics: numerics))),
         ("RenkoAtr(2)", (bars, numerics) => Bricks(RenkoSnapshot.CalculateAtr(bars, 2, false, numerics))),
         ("RenkoAtr(50, high/low)", (bars, numerics) => Bricks(RenkoSnapshot.CalculateAtr(bars, 50, true, numerics))),
+        ("Fwma()", (bars, numerics) => Plain(FibonacciWeightedSnapshot.Calculate(bars, numerics: numerics))),
+        ("Fwma(1)", (bars, numerics) => Plain(FibonacciWeightedSnapshot.Calculate(bars, 1, numerics))),
+        ("Fwma(2)", (bars, numerics) => Plain(FibonacciWeightedSnapshot.Calculate(bars, 2, numerics))),
+        ("Fwma(90)", (bars, numerics) => Plain(FibonacciWeightedSnapshot.Calculate(bars, 90, numerics))),
+        ("Fwma(300)", (bars, numerics) => Plain(FibonacciWeightedSnapshot.Calculate(bars, 300, numerics))),
+        ("Sinc()", (bars, numerics) => Plain(WindowedSincSnapshot.Calculate(bars, numerics: numerics))),
+        ("Sinc(1, 1, Rectangular)", (bars, numerics) =>
+            Plain(WindowedSincSnapshot.Calculate(bars, 1, 1, SincWindow.Rectangular, numerics))),
+        ("Sinc(5, 3, Hamming)", (bars, numerics) => Plain(WindowedSincSnapshot.Calculate(bars, 5, 3, SincWindow.Hamming, numerics))),
+        ("Sinc(20, 64, Blackman)", (bars, numerics) =>
+            Plain(WindowedSincSnapshot.Calculate(bars, 20, 64, SincWindow.Blackman, numerics))),
+        ("Sinc(8, 301, BlackmanHarris)", (bars, numerics) =>
+            Plain(WindowedSincSnapshot.Calculate(bars, 8, 301, SincWindow.BlackmanHarris, numerics))),
+        ("Sinc(3, 40, Hann)", (bars, numerics) => Plain(WindowedSincSnapshot.Calculate(bars, 3, 40, SincWindow.Hann, numerics))),
     ];
 
     public static TheoryData<string> CaseNames()
@@ -112,6 +126,8 @@ public sealed class FastSnapshotParityTests
             Column(row => row.Volume), Column(row => row.IsUp ? 1 : 0), Column(row => row.Date.Ticks),
         ];
     }
+
+    private static double?[][] Plain(IReadOnlyList<double> values) => [[.. values.Select(value => (double?)value)]];
 
     private static double?[][] Swings(IReadOnlyList<ZigZagValue> rows) =>
     [

@@ -68,6 +68,30 @@ internal static class FastMath
         return value;
     }
 
+    /// <summary>Sum of the products of two equally long runs, in four interleaved partial sums.</summary>
+    internal static double Dot(ReadOnlySpan<double> a, ReadOnlySpan<double> b)
+    {
+        b = b.Slice(0, a.Length);
+        var i = 0;
+        double sum = 0;
+#if !NETFRAMEWORK
+        var width = System.Numerics.Vector<double>.Count;
+        if (System.Numerics.Vector.IsHardwareAccelerated && a.Length >= 2 * width)
+        {
+            System.Numerics.Vector<double> first = default, second = default;
+            for (; i <= a.Length - 2 * width; i += 2 * width)
+            {
+                first += new System.Numerics.Vector<double>(a.Slice(i)) * new System.Numerics.Vector<double>(b.Slice(i));
+                second += new System.Numerics.Vector<double>(a.Slice(i + width))
+                    * new System.Numerics.Vector<double>(b.Slice(i + width));
+            }
+            sum = System.Numerics.Vector.Sum(first + second);
+        }
+#endif
+        for (; i < a.Length; i++) sum += a[i] * b[i];
+        return sum;
+    }
+
     /// <summary>Whether every element is finite, checked a vector at a time.</summary>
     internal static bool AllFinite(ReadOnlySpan<double> values)
     {
