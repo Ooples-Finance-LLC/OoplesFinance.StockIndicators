@@ -214,4 +214,65 @@ internal static partial class FastKernels
             pool.Return(rentedSlow);
         }
     }
+
+
+    /// <summary>
+    /// Alligator: three Wilder averages of the bar midpoint, each published a fixed number of bars late.
+    /// </summary>
+    internal static void AlligatorDetails(FastColumns columns, double[][] outputs, AlligatorWithDetails owner)
+    {
+        ReadOnlySpan<double> high = columns.High, low = columns.Low;
+        var n = high.Length;
+        for (var slot = 0; slot < 6; slot++) outputs[slot].AsSpan(0, n).Clear();
+        if (n == 0) return;
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] rentedPrice = pool.Rent(n), rentedMean = pool.Rent(n);
+        try
+        {
+            Span<double> price = rentedPrice.AsSpan(0, n), mean = rentedMean.AsSpan(0, n);
+            for (var i = 0; i < n; i++) price[i] = 0.5 * high[i] + 0.5 * low[i];
+            Span<int> periods = stackalloc int[] { owner.JawPeriod, owner.TeethPeriod, owner.LipsPeriod };
+            Span<int> offsets = stackalloc int[] { owner.JawOffset, owner.TeethOffset, owner.LipsOffset };
+            for (var slot = 0; slot < 3; slot++)
+            {
+                var period = periods[slot];
+                var first = (long)period - 1 + offsets[slot];
+                if (first >= n) continue;
+                WilderAverage(price, mean, period, new WilderMovingAverage(period).SeedWithAverage);
+                var count = n - (int)first;
+                mean.Slice(period - 1, count).CopyTo(outputs[slot].AsSpan((int)first, count));
+                outputs[slot + 3].AsSpan((int)first, count).Fill(1);
+            }
+        }
+        finally
+        {
+            pool.Return(rentedPrice);
+            pool.Return(rentedMean);
+        }
+    }
+
+    /// <summary>
+    /// Elder ray: an exponential average of the close seeded by the mean of the first period closes, with
+    /// the high and the low measured from it.
+    /// </summary>
+    internal static void ElderRayDetails(FastColumns columns, double[][] outputs, int period)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        for (var slot = 0; slot < 4; slot++) outputs[slot].AsSpan(0, n).Clear();
+        if (n < period) return;
+        Span<double> average = outputs[0].AsSpan(0, n), bull = outputs[1].AsSpan(0, n), bear = outputs[2].AsSpan(0, n);
+        double sum = 0;
+        for (var i = 0; i < period; i++) sum += close[i];
+        var value = period == 1 ? close[0] : sum / period;
+        average[period - 1] = value;
+        FastMath.BlendRun((period - 1.0) / (period + 1.0), 2.0 / (period + 1.0), close, average, period, value);
+        for (var i = period - 1; i < n; i++)
+        {
+            bull[i] = high[i] - average[i];
+            bear[i] = low[i] - average[i];
+        }
+        outputs[3].AsSpan(period - 1, n - period + 1).Fill(1);
+    }
 }
