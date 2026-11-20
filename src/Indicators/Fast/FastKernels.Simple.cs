@@ -190,6 +190,11 @@ internal static partial class FastKernels
         Span<double> up = outputs[0].AsSpan(0, n), down = outputs[1].AsSpan(0, n), oscillator = outputs[2].AsSpan(0, n);
         var first = (int)Math.Min(size - 1, n);
         for (var slot = 3; slot < 6; slot++) outputs.Flag(slot, first);
+        if (size <= AroonFusedLimit && n > 0)
+        {
+            FusedAroon(high, low, up, down, oscillator, period, (int)size, first, !owner.OldestTie);
+            return;
+        }
         // The two outputs hold the extreme's bar index until the final pass turns it into a percentage.
         RollingExtremeIndex(high, up, size, true, !owner.OldestTie);
         RollingExtremeIndex(low, down, size, false, !owner.OldestTie);
@@ -221,6 +226,65 @@ internal static partial class FastKernels
     }
 
     private const int AroonTableLimit = 4096;
+
+    // Up to this window a rescan when an extreme expires is cheaper than a deque, as in RollingExtremeIndex.
+    private const int AroonFusedLimit = 32;
+
+    // Short windows in one pass: both extremes are followed together and each bar's three percentages are
+    // written as soon as they are known, so nothing is stored and read back.
+    private static void FusedAroon(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> up, Span<double> down,
+        Span<double> oscillator, int period, int size, int first, bool newestTie)
+    {
+        var n = high.Length;
+        up.Slice(0, first).Clear();
+        down.Slice(0, first).Clear();
+        oscillator.Slice(0, first).Clear();
+        // Entry k holds the percentage of k - period - 1.
+        var percentages = new double[2 * period + 3];
+        for (var k = 0; k < percentages.Length; k++) percentages[k] = WindowAroon.Percentage(k - period - 1L, period);
+        double highest = high[0], lowest = low[0];
+        int highestAt = 0, lowestAt = 0;
+        for (var i = 0; i < n; i++)
+        {
+            double h = high[i], l = low[i];
+            if (newestTie ? h >= highest : h > highest)
+            {
+                highest = h;
+                highestAt = i;
+            }
+            else if (highestAt <= i - size)
+            {
+                highestAt = i - size + 1;
+                highest = high[highestAt];
+                for (var j = highestAt + 1; j <= i; j++)
+                    if (newestTie ? high[j] >= highest : high[j] > highest)
+                    {
+                        highest = high[j];
+                        highestAt = j;
+                    }
+            }
+            if (newestTie ? l <= lowest : l < lowest)
+            {
+                lowest = l;
+                lowestAt = i;
+            }
+            else if (lowestAt <= i - size)
+            {
+                lowestAt = i - size + 1;
+                lowest = low[lowestAt];
+                for (var j = lowestAt + 1; j <= i; j++)
+                    if (newestTie ? low[j] <= lowest : low[j] < lowest)
+                    {
+                        lowest = low[j];
+                        lowestAt = j;
+                    }
+            }
+            if (i < first) continue;
+            up[i] = percentages[2 * period + 1 - (i - highestAt)];
+            down[i] = percentages[2 * period + 1 - (i - lowestAt)];
+            oscillator[i] = percentages[period + 1 + (highestAt - lowestAt)];
+        }
+    }
 
     /// <summary>Half the sum of the window's lowest and highest value.</summary>
     internal static void RangeMidpoint(ReadOnlySpan<double> lows, ReadOnlySpan<double> highs, Span<double> output, int period)
