@@ -67,28 +67,25 @@ internal static class ParabolicComparison
                 kind
             );
         }
-        return Series(
-            [
-                (
-                    kind == 0 ? ParabolicStopSnapshots.Classic(bars, p.Step, p.Maximum, ComparisonBuilder.Numerics)
-                    : kind == 1
-                        ? ParabolicStopSnapshots.Extended(
-                            bars,
-                            p.Start,
-                            p.Offset,
-                            p.Initial,
-                            p.Step,
-                            p.Maximum,
-                            p.ShortInitial,
-                            p.ShortStep,
-                            p.ShortMaximum,
-                            ComparisonBuilder.Numerics
-                        )
-                    : ParabolicStopSnapshots.FourBar(bars, p.Step, p.Maximum, ComparisonBuilder.Numerics)
-                ).ToArray(),
-            ],
-            kind
-        );
+        var stops =
+            kind == 0 ? ParabolicStopSnapshots.Classic(bars, p.Step, p.Maximum, ComparisonBuilder.Numerics)
+            : kind == 1
+                ? ParabolicStopSnapshots.Extended(
+                    bars,
+                    p.Start,
+                    p.Offset,
+                    p.Initial,
+                    p.Step,
+                    p.Maximum,
+                    p.ShortInitial,
+                    p.ShortStep,
+                    p.ShortMaximum,
+                    ComparisonBuilder.Numerics
+                )
+            : ParabolicStopSnapshots.FourBar(bars, p.Step, p.Maximum, ComparisonBuilder.Numerics);
+        // The library hands back the array it filled; it is copied only where it handed back something else,
+        // so this arm does not pay for a second result that the other arm never builds.
+        return Series([stops as double?[] ?? stops.ToArray()], kind);
     }
 
     private static ComparisonSeries Native(CompetitorData d, int kind, SarParameters p)
