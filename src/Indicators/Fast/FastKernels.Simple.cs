@@ -802,6 +802,8 @@ internal static partial class FastKernels
         var block = Math.Max(64, period);
         // Starting at the block length makes the first full window a fresh sum.
         var slid = block;
+        // One division for the window instead of three a bar.
+        var inverse = 1.0 / period;
         for (var i = period - 1; i < n; i++)
         {
             leftRun = i > 0 && left[i] == left[i - 1] ? leftRun + 1 : 1; // NOSONAR an exact tie is the contract
@@ -815,15 +817,15 @@ internal static partial class FastKernels
                 if (owner.FlatZero) defined[i] = 1;
                 continue;
             }
-            double a = sums.Xx - sums.X * sums.X / period, b = sums.Yy - sums.Y * sums.Y / period;
+            double a = sums.Xx - sums.X * sums.X * inverse, b = sums.Yy - sums.Y * sums.Y * inverse;
             // Where a variance is a small remainder of its sum of squares, the window is summed around its
             // own means instead, and the sliding sums restart from there.
             if (!(a > 1e-4 * sums.Xx) || !(b > 1e-4 * sums.Yy))
             {
                 sums = PairSums.Of(left.Slice(from, period), right.Slice(from, period));
                 slid = 1;
-                a = sums.Xx - sums.X * sums.X / period;
-                b = sums.Yy - sums.Y * sums.Y / period;
+                a = sums.Xx - sums.X * sums.X * inverse;
+                b = sums.Yy - sums.Y * sums.Y * inverse;
                 if (!(a > 1e-4 * sums.Xx) || !(b > 1e-4 * sums.Yy))
                 {
                     value[i] = CenteredCorrelation(left.Slice(from, period), right.Slice(from, period));
@@ -831,7 +833,7 @@ internal static partial class FastKernels
                     continue;
                 }
             }
-            value[i] = (sums.Xy - sums.X * sums.Y / period) / Math.Sqrt(a * b);
+            value[i] = (sums.Xy - sums.X * sums.Y * inverse) / Math.Sqrt(a * b);
             defined[i] = 1;
         }
     }
