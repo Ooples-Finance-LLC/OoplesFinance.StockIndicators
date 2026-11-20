@@ -540,7 +540,24 @@ internal static partial class FastKernels
     {
         if (price.Length == 0) return;
         output[0] = 0;
-        for (var i = 1; i < price.Length; i++)
+        var i = 1;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            // The divisions do not wait on one another, so they are taken a vector of bars at a time.
+            var width = System.Numerics.Vector<double>.Count;
+            var zero = System.Numerics.Vector<double>.Zero;
+            for (; i <= price.Length - width; i += width)
+            {
+                var previous = new System.Numerics.Vector<double>(price.Slice(i - 1, width));
+                var change = (new System.Numerics.Vector<double>(price.Slice(i, width)) - previous) / previous;
+                // A zero price divides by zero here and is then replaced by the zero its return is defined as.
+                System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.Equals(previous, zero), zero, change)
+                    .CopyTo(output.Slice(i, width));
+            }
+        }
+#endif
+        for (; i < price.Length; i++)
         {
             var previous = price[i - 1];
             output[i] = previous == 0 ? 0 : (price[i] - previous) / previous;
@@ -590,13 +607,28 @@ internal static partial class FastKernels
         ReadOnlySpan<double> x = xs, y = ys;
         double sumX = 0, sumY = 0, sumXX = 0, sumXY = 0, passedXX = 0, passedXY = 0;
         var run = 0;
-        for (var i = 1; i < n; i++)
+        // The bars that fill the first window, the last of which is the first to publish.
+        for (var i = 1; i <= period; i++)
         {
             run = i > 1 && x[i] == x[i - 1] ? run + 1 : 1; // NOSONAR an exact tie is the contract
-            if (i > period && (i & RebuildMask) == 0)
+            double product = x[i] * y[i], square = x[i] * x[i];
+            sumX += x[i];
+            sumY += y[i];
+            sumXX += square;
+            sumXY += product;
+            passedXX += square;
+            passedXY += Math.Abs(product);
+        }
+        if (run < period) value[period] = Slope(x, y, period, period, sumX, sumY, sumXX, sumXY, passedXX, passedXY);
+        var at = period + 1;
+        while (at < n)
+        {
+            // Every so many bars the window is summed afresh, which sheds what the slides have rounded away.
+            if ((at & RebuildMask) == 0)
             {
-                sumX = sumY = sumXX = sumXY = 0;
-                for (var j = i - period + 1; j <= i; j++)
+                run = x[at] == x[at - 1] ? run + 1 : 1; // NOSONAR an exact tie is the contract
+                sumX = sumY = sumXX = sumXY = passedXY = 0;
+                for (var j = at - period + 1; j <= at; j++)
                 {
                     sumX += x[j];
                     sumY += y[j];
@@ -604,37 +636,45 @@ internal static partial class FastKernels
                     sumXY += x[j] * y[j];
                 }
                 passedXX = sumXX;
-                passedXY = 0;
-                for (var j = i - period + 1; j <= i; j++) passedXY += Math.Abs(x[j] * y[j]);
+                for (var j = at - period + 1; j <= at; j++) passedXY += Math.Abs(x[j] * y[j]);
+                if (run < period) value[at] = Slope(x, y, at, period, sumX, sumY, sumXX, sumXY, passedXX, passedXY);
+                at++;
             }
-            else
+            // Up to the next fresh sum the window slides, each sum taking the difference between the return
+            // that enters and the one that leaves in a single step, so that no sum waits on two.
+            var end = Math.Min(n, (at | RebuildMask) + 1);
+            for (; at < end; at++)
             {
-                double product = x[i] * y[i], square = x[i] * x[i];
-                sumX += x[i];
-                sumY += y[i];
-                sumXX += square;
-                sumXY += product;
+                double enterX = x[at], enterY = y[at], leaveX = x[at - period], leaveY = y[at - period];
+                run = enterX == x[at - 1] ? run + 1 : 1; // NOSONAR an exact tie is the contract
+                double product = enterX * enterY, square = enterX * enterX;
+                sumX += enterX - leaveX;
+                sumY += enterY - leaveY;
+                sumXX += square - leaveX * leaveX;
+                sumXY += product - leaveX * leaveY;
                 passedXX += square;
                 passedXY += Math.Abs(product);
-                if (i > period)
-                {
-                    var old = i - period;
-                    sumX -= x[old];
-                    sumY -= y[old];
-                    sumXX -= x[old] * x[old];
-                    sumXY -= x[old] * y[old];
-                }
+                if (run >= period) continue;
+                var denominator = period * sumXX - sumX * sumX;
+                var numerator = period * sumXY - sumX * sumY;
+                // The sliding sums are trusted only while what they kept is far above what they can have lost.
+                value[at] = denominator > 1e-4 * period * passedXX && Math.Abs(numerator) > 1e-4 * period * passedXY
+                    ? numerator / denominator
+                    : AnchoredSlope(x.Slice(at - period + 1, period), y.Slice(at - period + 1, period));
             }
-            if (i < period) continue;
-            if (run >= period) continue;
-            var denominator = period * sumXX - sumX * sumX;
-            var numerator = period * sumXY - sumX * sumY;
-            // The sliding sums are trusted only while what they kept is far above what they can have lost.
-            if (denominator > 1e-4 * period * passedXX && Math.Abs(numerator) > 1e-4 * period * passedXY)
-                value[i] = numerator / denominator;
-            else
-                value[i] = AnchoredSlope(x.Slice(i - period + 1, period), y.Slice(i - period + 1, period));
         }
+    }
+
+    // The slope the sums give for the window ending at a bar, or the anchored one where they cannot be trusted.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    private static double Slope(ReadOnlySpan<double> x, ReadOnlySpan<double> y, int at, int period, double sumX,
+        double sumY, double sumXX, double sumXY, double passedXX, double passedXY)
+    {
+        var denominator = period * sumXX - sumX * sumX;
+        var numerator = period * sumXY - sumX * sumY;
+        return denominator > 1e-4 * period * passedXX && Math.Abs(numerator) > 1e-4 * period * passedXY
+            ? numerator / denominator
+            : AnchoredSlope(x.Slice(at - period + 1, period), y.Slice(at - period + 1, period));
     }
 
 
