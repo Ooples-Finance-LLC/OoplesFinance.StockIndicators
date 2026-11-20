@@ -483,4 +483,105 @@ internal static partial class FastKernels
         for (var position = 0; position < period; position++) line[position] = level + slope * (position + 1 - center);
         outputs[9].AsSpan(n - period, period).Fill(1);
     }
+
+
+    // One-bar return, zero when the previous price is zero.
+    private static void Returns(ReadOnlySpan<double> price, Span<double> output)
+    {
+        if (price.Length == 0) return;
+        output[0] = 0;
+        for (var i = 1; i < price.Length; i++)
+        {
+            var previous = price[i - 1];
+            output[i] = previous == 0 ? 0 : (price[i] - previous) / previous;
+        }
+    }
+
+    // Slope of y on x over one window, both measured from the window's newest pair so that returns
+    // that barely differ keep the digits they differ in.
+    private static double AnchoredSlope(ReadOnlySpan<double> x, ReadOnlySpan<double> y)
+    {
+        var count = x.Length;
+        double anchorX = x[count - 1], anchorY = y[count - 1];
+        double sumX = 0, sumY = 0;
+        for (var j = 0; j < count; j++)
+        {
+            sumX += x[j] - anchorX;
+            sumY += y[j] - anchorY;
+        }
+        double meanX = sumX / count, meanY = sumY / count, xx = 0, xy = 0;
+        for (var j = 0; j < count; j++)
+        {
+            var dx = x[j] - anchorX - meanX;
+            xx += dx * dx;
+            xy += dx * (y[j] - anchorY - meanY);
+        }
+        return xy / xx;
+    }
+
+    /// <summary>
+    /// Beta of one price field's returns on another's over a window: their covariance over the market
+    /// returns' variance, zero when the market returns in the window are all equal.
+    /// </summary>
+    internal static void ReturnBeta(FastColumns columns, Span<double> value, Span<double> defined, WindowReturnBeta owner)
+    {
+        ReadOnlySpan<double> market = Field(columns, owner.Market), evaluation = Field(columns, owner.Evaluation);
+        var n = market.Length;
+        var period = owner.Period;
+        value = value.Slice(0, n);
+        value.Clear();
+        DefinedFrom(defined.Slice(0, n), period);
+        if (n <= period) return;
+        double[] xs = FastMath.Allocate(n), ys = FastMath.Allocate(n);
+        Returns(market, xs);
+        Returns(evaluation, ys);
+        ReadOnlySpan<double> x = xs, y = ys;
+        double sumX = 0, sumY = 0, sumXX = 0, sumXY = 0, passedXX = 0, passedXY = 0;
+        var run = 0;
+        for (var i = 1; i < n; i++)
+        {
+            run = i > 1 && x[i] == x[i - 1] ? run + 1 : 1;
+            if (i > period && (i & RebuildMask) == 0)
+            {
+                sumX = sumY = sumXX = sumXY = 0;
+                for (var j = i - period + 1; j <= i; j++)
+                {
+                    sumX += x[j];
+                    sumY += y[j];
+                    sumXX += x[j] * x[j];
+                    sumXY += x[j] * y[j];
+                }
+                passedXX = sumXX;
+                passedXY = 0;
+                for (var j = i - period + 1; j <= i; j++) passedXY += Math.Abs(x[j] * y[j]);
+            }
+            else
+            {
+                double product = x[i] * y[i], square = x[i] * x[i];
+                sumX += x[i];
+                sumY += y[i];
+                sumXX += square;
+                sumXY += product;
+                passedXX += square;
+                passedXY += Math.Abs(product);
+                if (i > period)
+                {
+                    var old = i - period;
+                    sumX -= x[old];
+                    sumY -= y[old];
+                    sumXX -= x[old] * x[old];
+                    sumXY -= x[old] * y[old];
+                }
+            }
+            if (i < period) continue;
+            if (run >= period) continue;
+            var denominator = period * sumXX - sumX * sumX;
+            var numerator = period * sumXY - sumX * sumY;
+            // The sliding sums are trusted only while what they kept is far above what they can have lost.
+            if (denominator > 1e-4 * period * passedXX && Math.Abs(numerator) > 1e-4 * period * passedXY)
+                value[i] = numerator / denominator;
+            else
+                value[i] = AnchoredSlope(x.Slice(i - period + 1, period), y.Slice(i - period + 1, period));
+        }
+    }
 }
