@@ -343,7 +343,7 @@ public static partial class Calculations
         var input = stockData.ChainedValues.Count > 0 ? stockData.ChainedValues : stockData.InputValues;
         var result = UltimateVolatilityWindow.Calculate(stockData, length);
         var means = GetMovingAverageList(stockData, maType, length, input);
-        var signals = CreateSignalsList(stockData); System.Numerics.BigInteger previous = 0;
+        var signals = CreateSignalsList(stockData); BigInteger previous = 0;
         for (var i = 0; i < input.Count; i++)
         {
             var mean = i < means.Count ? means[i] : 0;

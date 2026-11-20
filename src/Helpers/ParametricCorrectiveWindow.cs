@@ -24,7 +24,7 @@ internal sealed class ParametricCorrectiveWindow
     }
     internal double Next(double price, bool commit)
     {
-        var displacement = new ExactMeanAccumulator(); displacement.Add(1, new System.Numerics.BigInteger(_index) + 1); _offset.AddTo(ref displacement, -1);
+        var displacement = new ExactMeanAccumulator(); displacement.Add(1, new BigInteger(_index) + 1); _offset.AddTo(ref displacement, -1);
         var weight = RocBankValue.Round(displacement);
         if (weight.Mantissa < 0) weight = weight.Multiply(_alpha);
         var lagged = _lag.Count == _length ? _lag.Peek() : 0;

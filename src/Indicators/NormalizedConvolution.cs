@@ -185,7 +185,7 @@ internal sealed class AffineConvolutionState(int length, int first, int step, bo
             double oldest = _history.Dequeue();
             if (_evictionWeight is >= int.MinValue and <= int.MaxValue)
                 _weighted.Add(oldest, (int)_evictionWeight);
-            else _weighted.Add(oldest, new System.Numerics.BigInteger(_evictionWeight));
+            else _weighted.Add(oldest, new BigInteger(_evictionWeight));
             _sum.Add(oldest, -1);
         }
         else _mass += first + (long)step * _history.Count;

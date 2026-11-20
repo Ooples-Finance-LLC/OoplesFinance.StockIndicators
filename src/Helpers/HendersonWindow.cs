@@ -2,15 +2,15 @@ namespace OoplesFinance.StockIndicators.Helpers;
 
 internal sealed class HendersonWindow : IDisposable
 {
-    private readonly System.Numerics.BigInteger[] _weights;
+    private readonly BigInteger[] _weights;
     private readonly ExactMeanAccumulator _denominator;
     private readonly PooledRingBuffer<double> _values;
 
     internal HendersonWindow(int length)
     {
         length = Math.Max(1, length);
-        _weights = new System.Numerics.BigInteger[length];
-        var m = new System.Numerics.BigInteger(Math.Max(2, Math.Min(530, (length - 1) / 2)));
+        _weights = new BigInteger[length];
+        var m = new BigInteger(Math.Max(2, Math.Min(530, (length - 1) / 2)));
         var denominator = new ExactMeanAccumulator();
         for (var lag = 0; lag < length; lag++)
         {

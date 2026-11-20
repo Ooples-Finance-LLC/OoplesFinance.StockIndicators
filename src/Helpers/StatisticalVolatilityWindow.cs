@@ -34,7 +34,7 @@ internal sealed class StatisticalVolatilityWindow : IDisposable
         if (relative <= 0.5)
         { var argument = 1 + relative; return Math.Log(argument) * (relative / (argument - 1)); }
         var ratio = ExactMeanAccumulator.UnitRatio(numerator << 1074, denominator);
-        return double.IsInfinity(ratio) ? System.Numerics.BigInteger.Log(numerator) - System.Numerics.BigInteger.Log(denominator) : Math.Log(ratio);
+        return double.IsInfinity(ratio) ? BigInteger.Log(numerator) - BigInteger.Log(denominator) : Math.Log(ratio);
     }
     internal (double Line, double Signal) Next(double high, double low, double close, bool commit)
     { var line = Line(high, low, close, commit); return (line, _signal.Next(new RocBankValue(line), commit).Publish()); }
