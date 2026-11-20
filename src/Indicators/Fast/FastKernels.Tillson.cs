@@ -65,12 +65,14 @@ internal static partial class FastKernels
         double e0 = stage[0], e1 = stage[1], e2 = stage[2], e3 = stage[3], e4 = stage[4], e5 = stage[5];
         for (; i < n; i++)
         {
-            e0 = FastMath.Blend(weight, e0, alpha * input[i]);
-            e1 = FastMath.Blend(weight, e1, alpha * e0);
-            e2 = FastMath.Blend(weight, e2, alpha * e1);
-            e3 = FastMath.Blend(weight, e3, alpha * e2);
-            e4 = FastMath.Blend(weight, e4, alpha * e3);
-            e5 = FastMath.Blend(weight, e5, alpha * e4);
+            // Each stage waits on the one before it. Its own decayed value does not, so that is the product
+            // taken first and the stage before joins in the one fused step: six steps deep a bar, not twelve.
+            e0 = FastMath.Blend(alpha, input[i], weight * e0);
+            e1 = FastMath.Blend(alpha, e0, weight * e1);
+            e2 = FastMath.Blend(alpha, e1, weight * e2);
+            e3 = FastMath.Blend(alpha, e2, weight * e3);
+            e4 = FastMath.Blend(alpha, e3, weight * e4);
+            e5 = FastMath.Blend(alpha, e4, weight * e5);
             value[i] = i >= first ? k0 * e2 + k1 * e3 + k2 * e4 + k3 * e5 : 0;
         }
     }
