@@ -328,13 +328,18 @@ internal static partial class FastKernels
     /// On-balance volume: volume added on a rising close and removed on a falling one, starting from the
     /// first bar's volume or from zero, with an optional window mean that starts at the second bar.
     /// </summary>
-    internal static void OnBalanceVolume(FastColumns columns, double[][] outputs, SeededOnBalanceVolume owner)
+    internal static void OnBalanceVolume(FastColumns columns, FastOutputs outputs, SeededOnBalanceVolume owner)
     {
         ReadOnlySpan<double> close = columns.Close, volume = columns.Volume;
         var n = close.Length;
-        Span<double> value = outputs[0].AsSpan(0, n), average = outputs[1].AsSpan(0, n), defined = outputs[2].AsSpan(0, n);
-        average.Clear();
-        defined.Clear();
+        Span<double> value = outputs[0].AsSpan(0, n);
+        // Without an average, or before one exists, its series is zero throughout and its flag never turns on.
+        var averaged = owner.AveragePeriod is int length && n > length;
+        if (!averaged)
+        {
+            outputs.Flag(1, n);
+            outputs.Flag(2, n);
+        }
         if (n == 0) return;
         var total = owner.Seed == ObvSeed.FirstVolume ? volume[0] : 0;
         value[0] = total;
@@ -352,9 +357,11 @@ internal static partial class FastKernels
 #endif
             value[i] = total;
         }
-        if (owner.AveragePeriod is not int period || n <= period) return;
+        if (!averaged || owner.AveragePeriod is not int period) return;
+        Span<double> average = outputs[1].AsSpan(0, n);
+        average.Clear();
         RebuiltMean(value.Slice(1), average.Slice(1), period);
-        defined.Slice(period).Fill(1);
+        outputs.Flag(2, period);
     }
 
 
