@@ -27,6 +27,10 @@ public sealed class FastSnapshotParityTests
             Confirmed(ParabolicStopSnapshots.Confirmed(bars, .03, .4, .1, numerics))),
         ("Parabolic.FourBar()", (bars, numerics) => [[.. ParabolicStopSnapshots.FourBar(bars, numerics: numerics)]]),
         ("Parabolic.FourBar(0.05, 0.3)", (bars, numerics) => [[.. ParabolicStopSnapshots.FourBar(bars, .05, .3, numerics)]]),
+        ("VolatilityStop()", (bars, numerics) => Stops(VolatilityStopSnapshot.Calculate(bars, numerics: numerics))),
+        ("VolatilityStop(2, 0.5)", (bars, numerics) => Stops(VolatilityStopSnapshot.Calculate(bars, 2, .5, numerics))),
+        ("VolatilityStop(20, 1.5)", (bars, numerics) => Stops(VolatilityStopSnapshot.Calculate(bars, 20, 1.5, numerics))),
+        ("VolatilityStop(300, 3)", (bars, numerics) => Stops(VolatilityStopSnapshot.Calculate(bars, 300, 3, numerics))),
     ];
 
     public static TheoryData<string> CaseNames()
@@ -80,6 +84,14 @@ public sealed class FastSnapshotParityTests
     }
 
     private static string Show(double? value) => value is double present ? present.ToString("R") : "absent";
+
+    private static double?[][] Stops(IReadOnlyList<VolatilityStopValue> rows) =>
+    [
+        [.. rows.Select(row => row.Sar)],
+        [.. rows.Select(row => row.UpperBand)],
+        [.. rows.Select(row => row.LowerBand)],
+        [.. rows.Select(row => row.IsStop is bool stop ? stop ? 1d : 0d : (double?)null)],
+    ];
 
     private static double?[][] Confirmed(IReadOnlyList<ConfirmedParabolicValue> rows) =>
     [
