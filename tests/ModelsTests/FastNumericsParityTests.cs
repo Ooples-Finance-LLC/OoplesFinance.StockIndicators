@@ -897,6 +897,43 @@ public sealed class FastNumericsParityTests
     }
 
     [Fact]
+    public async Task AColumnBuildWithoutAKernelTakesTheRouteAnArrayBuildTakes()
+    {
+        var bars = Walk(200, 17);
+        double[] open = bars.Select(b => b.Open).ToArray(), high = bars.Select(b => b.High).ToArray(),
+            low = bars.Select(b => b.Low).ToArray(), close = bars.Select(b => b.Close).ToArray(),
+            volume = bars.Select(b => b.Volume).ToArray();
+        var times = bars.Select(b => b.Time).ToArray();
+        foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
+        {
+            // No kernel covers this average, so both builds fall back to the exact routes.
+            var fromArray = new ClassicMovingAverage(10, ClassicAverageMethod.Kama);
+            var arrayBuilder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(fromArray)
+                .ConfigureNumerics(IndicatorNumerics.Fast).ConfigureHistory(history);
+            using var arrayRun = await arrayBuilder.BuildAsync();
+            var fromColumns = new ClassicMovingAverage(10, ClassicAverageMethod.Kama);
+            var columnBuilder = new StockIndicatorBuilder()
+                .ConfigureSource(Bars.FromColumns(open, high, low, close, volume, times)).ConfigureIndicators(fromColumns)
+                .ConfigureNumerics(IndicatorNumerics.Fast).ConfigureHistory(history);
+            using (var columnRun = await columnBuilder.BuildAsync())
+            {
+                Assert.False(arrayBuilder.LastExecution?.Reason.StartsWith("Fast", StringComparison.Ordinal));
+                Assert.Equal(arrayBuilder.LastExecution?.Reason, columnBuilder.LastExecution?.Reason);
+                Assert.Equal(arrayRun[fromArray].ToArray(), columnRun[fromColumns].ToArray());
+            }
+
+            // The columns are borrowed, so a later build reads what they hold then.
+            var kept = close[^1];
+            close[^1] = kept + 50;
+            high[^1] += 50;
+            using (var changed = await columnBuilder.BuildAsync())
+                Assert.NotEqual(arrayRun[fromArray][^1], changed[fromColumns][^1]);
+            close[^1] = kept;
+            high[^1] -= 50;
+        }
+    }
+
+    [Fact]
     public async Task AKernelThatDoesNotCoverAConfigurationLeavesItToTheExactRoute()
     {
         var bars = Walk(200, 19);

@@ -13,6 +13,8 @@ public sealed class StockIndicatorBuilder
 {
     private IndicatorDataSource? _configuredSource;
     private Indicators.IBarSource? _barSource;
+    // Set only while a build that began on borrowed columns runs on the exact routes.
+    private Indicators.IBarSource? _materializedSource;
     private readonly List<Indicators.IIndicator> _configuredIndicators = new();
     // Typed fused builds do not need the legacy graph or callback catalogs.
     // Keep per-builder instances when a legacy configuration first uses them.
@@ -142,7 +144,8 @@ public sealed class StockIndicatorBuilder
     {
         LastExecution = null;
         cancellationToken.ThrowIfCancellationRequested();
-        var source = _barSource ?? throw new InvalidOperationException("No bar source. Call ConfigureSource before BuildAsync.");
+        var source = _materializedSource ?? _barSource
+            ?? throw new InvalidOperationException("No bar source. Call ConfigureSource before BuildAsync.");
         if (!source.IsFinite) return await BuildWithHistoryAsync(cancellationToken).ConfigureAwait(false);
 #if !NETFRAMEWORK
         if (_executionBackend == IndicatorExecutionBackend.Gpu && CanUseDirectFusedExecution
@@ -355,6 +358,8 @@ public sealed class StockIndicatorBuilder
                     LastExecution = null;
                     if (TryBuildFast(finite, _historyMode == IndicatorHistoryMode.LatestOnly, cancellationToken) is { } fast)
                         return Task.FromResult(fast);
+                    if (finite is Indicators.IColumnBarSource columnar)
+                        return BuildFromColumnsAsync(columnar.Columns, cancellationToken);
                 }
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -374,11 +379,33 @@ public sealed class StockIndicatorBuilder
             ? BuildLatestOnlyAsync(cancellationToken) : BuildWithHistoryAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// Runs a build the fast kernels cannot serve on the exact routes. Those are built around an array of
+    /// bars and take their direct paths only when handed one, so the borrowed columns are assembled into
+    /// bars once here instead of being read back one bar at a time.
+    /// </summary>
+    private async Task<Indicators.IIndicatorRun> BuildFromColumnsAsync(Indicators.BarColumns columns,
+        CancellationToken cancellationToken)
+    {
+        var bars = new Indicators.Bar[columns.Count];
+        for (var i = 0; i < bars.Length; i++) bars[i] = columns[i];
+        _materializedSource = Indicators.Bars.From(bars);
+        try
+        {
+            return await (_historyMode == IndicatorHistoryMode.LatestOnly
+                ? BuildLatestOnlyAsync(cancellationToken) : BuildWithHistoryAsync(cancellationToken)).ConfigureAwait(false);
+        }
+        finally
+        {
+            _materializedSource = null;
+        }
+    }
+
     private async Task<Indicators.IIndicatorRun> BuildWithHistoryAsync(CancellationToken cancellationToken)
     {
         LastExecution = null;
         var execution = new IndicatorExecutionInfo(IndicatorExecutionBackend.Cpu, null, "Ordinary CPU graph execution.");
-        var source = _barSource ?? throw new InvalidOperationException(
+        var source = _materializedSource ?? _barSource ?? throw new InvalidOperationException(
             "No bar source. Call ConfigureSource before BuildAsync.");
 
         // Before the drain, not after: a live source never runs out, so reading it into lists first blocks
