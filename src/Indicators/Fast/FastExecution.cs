@@ -1,7 +1,7 @@
 namespace OoplesFinance.StockIndicators.Indicators.Fast;
 
 /// <summary>A fast kernel: reads the columns it needs and writes every element of every output.</summary>
-internal delegate void FastKernel(FastColumns columns, double[][] outputs);
+internal delegate void FastKernel(FastColumns columns, FastOutputs outputs);
 
 /// <summary>
 /// Executes indicators with ordinary double arithmetic over borrowed columns, for builds that asked for
@@ -55,12 +55,12 @@ internal static partial class FastExecution
     private static double[][] Compute(FastColumns columns, IIndicator indicator, Dictionary<IIndicatorOutput, double[]>? computed,
         CancellationToken cancellation)
     {
-        var outputs = new double[indicator.Outputs.Count][];
         if (computed is not null && computed.TryGetValue(indicator.Outputs[0], out var first))
         {
-            outputs[0] = first;
-            for (var slot = 1; slot < outputs.Length; slot++) outputs[slot] = computed[indicator.Outputs[slot]];
-            return outputs;
+            var known = new double[indicator.Outputs.Count][];
+            known[0] = first;
+            for (var slot = 1; slot < known.Length; slot++) known[slot] = computed[indicator.Outputs[slot]];
+            return known;
         }
         var kernel = Resolve(indicator) ?? throw new InvalidOperationException("Unqualified fast execution plan.");
         var input = columns;
@@ -70,9 +70,10 @@ internal static partial class FastExecution
             var chained = Compute(columns, source, computed, cancellation)[IndicatorContract.PrimaryOutput(source).Slot];
             input = columns.WithClose(chained, indicator);
         }
-        for (var slot = 0; slot < outputs.Length; slot++) outputs[slot] = FastMath.Allocate(columns.Count);
-        kernel(input, outputs);
-        RejectInvalidOutputs(indicator, outputs);
+        var published = new FastOutputs(indicator.Outputs.Count, columns.Count);
+        kernel(input, published);
+        var outputs = published.All();
+        RejectInvalidOutputs(indicator, published, outputs);
         if (computed is not null)
             for (var slot = 0; slot < outputs.Length; slot++) computed[indicator.Outputs[slot]] = outputs[slot];
         return outputs;
@@ -80,10 +81,11 @@ internal static partial class FastExecution
 
     // The exact routes reject an infinite or unexpected NaN output as they publish it. Here one vectorized
     // pass per output decides the usual all-finite case, and only a failure walks the bars to name the first.
-    private static void RejectInvalidOutputs(IIndicator indicator, double[][] outputs)
+    private static void RejectInvalidOutputs(IIndicator indicator, FastOutputs published, double[][] outputs)
     {
         var finite = true;
-        for (var slot = 0; slot < outputs.Length && finite; slot++) finite = FastMath.AllFinite(outputs[slot]);
+        for (var slot = 0; slot < outputs.Length && finite; slot++)
+            finite = published.IsShared(slot) || FastMath.AllFinite(outputs[slot]);
         if (finite) return;
         for (var index = 0; index < outputs[0].Length; index++)
             for (var slot = 0; slot < outputs.Length; slot++)
@@ -144,7 +146,7 @@ internal static partial class FastExecution
         Bind<ClassicMovingAverage>(binders, average => !FastKernels.SupportsClassic(average.Method) ? null : (c, o) =>
         {
             FastKernels.ClassicAverage(c.Close, o[0], average, average.First);
-            FastKernels.DefinedFrom(o[1], average.First);
+            o.Flag(1, average.First);
         });
         Bind<ClassicPriceOscillator>(binders, oscillator => !FastKernels.SupportsClassic(oscillator.Method) ? null
             : (c, o) => FastKernels.PriceOscillator(c.Close, o[0], o[1], oscillator));

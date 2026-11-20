@@ -60,14 +60,14 @@ internal static partial class FastKernels
     /// <summary>
     /// Bands a multiple of the window's population deviation above and below a classic average of the close.
     /// </summary>
-    internal static void ClassicBands(ReadOnlySpan<double> close, double[][] outputs, ClassicDeviationBands owner)
+    internal static void ClassicBands(ReadOnlySpan<double> close, FastOutputs outputs, ClassicDeviationBands owner)
     {
         var n = close.Length;
         var period = owner.Period;
         Span<double> upper = outputs[0].AsSpan(0, n), middle = outputs[1].AsSpan(0, n), lower = outputs[2].AsSpan(0, n);
         var simple = owner.Method == ClassicAverageMethod.Sma;
         var first = simple ? period - 1L : Math.Max(period - 1L, owner.Average.First);
-        for (var slot = 3; slot < 6; slot++) DefinedFrom(outputs[slot], first);
+        for (var slot = 3; slot < 6; slot++) outputs.Flag(slot, first);
         var deviation = FastMath.Allocate(n);
         Dispersion(close, deviation, new WindowDispersion(period, WindowDispersionOutput.StandardDeviation, false, 1));
         if (simple) Sma(close, middle, period);
@@ -131,7 +131,7 @@ internal static partial class FastKernels
     /// Acceleration bands: window means of the high widened, and the low narrowed, by four times the bar's
     /// range over its high-low sum, around the window mean of the close.
     /// </summary>
-    internal static void AccelerationBands(FastColumns columns, double[][] outputs, RangeAccelerationBands owner)
+    internal static void AccelerationBands(FastColumns columns, FastOutputs outputs, RangeAccelerationBands owner)
     {
         columns.RequireHighLowClose();
         ReadOnlySpan<double> high = columns.High, low = columns.Low;
@@ -154,7 +154,7 @@ internal static partial class FastKernels
         RebuiltMean(raised, outputs[0].AsSpan(0, n), period);
         RebuiltMean(columns.Close, outputs[1].AsSpan(0, n), period);
         RebuiltMean(lowered, outputs[2].AsSpan(0, n), period);
-        for (var slot = 3; slot < 6; slot++) DefinedFrom(outputs[slot], period - 1L);
+        for (var slot = 3; slot < 6; slot++) outputs.Flag(slot, period - 1L);
     }
 
     // Rolling mean whose sum is rebuilt from the window at intervals, so it cannot drift on a long series.

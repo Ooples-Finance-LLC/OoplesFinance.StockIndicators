@@ -103,7 +103,7 @@ internal static partial class FastKernels
     /// divided by how far the cycle phase fell on the bar, floored at the slow limit. The seeded form
     /// starts from the mean of the first bars; the delayed form starts from zero after a longer run-in.
     /// </summary>
-    internal static void PhaseAdaptive(FastColumns columns, double[][] outputs, double fastLimit, double slowLimit,
+    internal static void PhaseAdaptive(FastColumns columns, FastOutputs outputs, double fastLimit, double slowLimit,
         bool delayed, bool retainOlder, bool useMidpoint, long publishFrom)
     {
         ReadOnlySpan<double> close = columns.Close;
@@ -113,8 +113,8 @@ internal static partial class FastKernels
         var first = (int)Math.Min(publishFrom, n);
         mamaOut.Slice(0, first).Clear();
         famaOut.Slice(0, first).Clear();
-        DefinedFrom(outputs[2].AsSpan(0, n), publishFrom);
-        DefinedFrom(outputs[3].AsSpan(0, n), publishFrom);
+        outputs.Flag(2, publishFrom);
+        outputs.Flag(3, publishFrom);
         var start = delayed ? 12 : 6;
         var hilbert = new HilbertCore(start, delayed, retainOlder);
         double mama = 0, fama = 0, seed = 0, previousPhase = 0;
@@ -150,14 +150,14 @@ internal static partial class FastKernels
     /// The dominant cycle period, smoothed, or the in-phase and quadrature parts themselves; published
     /// after the run-in of 32 bars plus the suppression.
     /// </summary>
-    internal static void HilbertCycle(ReadOnlySpan<double> close, double[][] outputs, bool periodOnly, long publishFrom)
+    internal static void HilbertCycle(ReadOnlySpan<double> close, FastOutputs outputs, bool periodOnly, long publishFrom)
     {
         var n = close.Length;
         var slots = periodOnly ? 1 : 2;
         for (var slot = 0; slot < slots; slot++)
         {
             outputs[slot].AsSpan(0, n).Clear();
-            DefinedFrom(outputs[slots + slot].AsSpan(0, n), publishFrom);
+            outputs.Flag(slots + slot, publishFrom);
         }
         var hilbert = new HilbertCore(12, true, false);
         double smoothed = 0;
@@ -213,7 +213,7 @@ internal static partial class FastKernels
     /// its last four values, with the smoothed price and the cycle length. The price itself stands in for
     /// the trendline until bar eleven.
     /// </summary>
-    internal static void SeededTrendline(FastColumns columns, double[][] outputs, bool useMidpoint)
+    internal static void SeededTrendline(FastColumns columns, FastOutputs outputs, bool useMidpoint)
     {
         ReadOnlySpan<double> close = columns.Close;
         var n = close.Length;
@@ -223,8 +223,8 @@ internal static partial class FastKernels
         smooth.Clear();
         periods.Clear();
         periodsDefined.Clear();
-        outputs[3].AsSpan(0, n).Fill(1);
-        DefinedFrom(outputs[4].AsSpan(0, n), 6);
+        outputs.Flag(3, 0);
+        outputs.Flag(4, 6);
         var hilbert = new HilbertCore(6, false, false);
         var means = new TrendMean();
         var ring = new double[50];
@@ -321,14 +321,14 @@ internal static partial class FastKernels
     /// Dominant cycle phase, its sine and lead sine, or the trend-versus-cycle mode: the smoothed price
     /// projected onto one cycle of the measured period. Published from bar 63 plus the suppression.
     /// </summary>
-    internal static void HilbertSignal(ReadOnlySpan<double> close, double[][] outputs, HilbertCycleSignal kind, long publishFrom)
+    internal static void HilbertSignal(ReadOnlySpan<double> close, FastOutputs outputs, HilbertCycleSignal kind, long publishFrom)
     {
         var n = close.Length;
         var slots = kind == HilbertCycleSignal.Sine ? 2 : 1;
         for (var slot = 0; slot < slots; slot++)
         {
             outputs[slot].AsSpan(0, n).Clear();
-            DefinedFrom(outputs[slots + slot].AsSpan(0, n), publishFrom);
+            outputs.Flag(slots + slot, publishFrom);
         }
         if (!ProjectionsBuilt) return;
         Span<double> first = outputs[0];

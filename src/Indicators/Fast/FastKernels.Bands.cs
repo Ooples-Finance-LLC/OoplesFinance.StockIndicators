@@ -146,7 +146,7 @@ internal static partial class FastKernels
     /// A centre line with bands one multiple of the average true range above and below it, and the band
     /// width as a fraction of the centre.
     /// </summary>
-    internal static void AtrBands(FastColumns columns, double[][] outputs, WindowAtrBands owner)
+    internal static void AtrBands(FastColumns columns, FastOutputs outputs, WindowAtrBands owner)
     {
         columns.RequireHighLowClose();
         ReadOnlySpan<double> close = columns.Close;
@@ -161,9 +161,9 @@ internal static partial class FastKernels
         SeededAverageTrueRange(columns.High, columns.Low, close, range, atrPeriod, false);
         var centerFirst = mode == AtrBandCenterMode.Simple ? centerPeriod - 1L : Math.Max(centerPeriod, atrPeriod) - 1L;
         var bandFirst = Math.Max(centerFirst, atrPeriod);
-        DefinedFrom(outputs[4], centerFirst);
-        DefinedFrom(outputs[5], bandFirst);
-        DefinedFrom(outputs[6], bandFirst);
+        outputs.Flag(4, centerFirst);
+        outputs.Flag(5, bandFirst);
+        outputs.Flag(6, bandFirst);
         upper.Clear();
         lower.Clear();
         width.Clear();
@@ -347,12 +347,12 @@ internal static partial class FastKernels
     /// The window mean with its mean absolute error, mean squared error and mean signed relative error.
     /// A zero in the window leaves the relative error undefined.
     /// </summary>
-    internal static void MeanDiagnostics(ReadOnlySpan<double> input, double[][] outputs, int period)
+    internal static void MeanDiagnostics(ReadOnlySpan<double> input, FastOutputs outputs, int period)
     {
         var n = input.Length;
         Span<double> means = outputs[0].AsSpan(0, n), absolutes = outputs[1].AsSpan(0, n), squares = outputs[2].AsSpan(0, n),
             relatives = outputs[3].AsSpan(0, n), relativeDefined = outputs[7].AsSpan(0, n);
-        for (var slot = 4; slot < 7; slot++) DefinedFrom(outputs[slot], period - 1L);
+        for (var slot = 4; slot < 7; slot++) outputs.Flag(slot, period - 1L);
         relatives.Clear();
         relativeDefined.Clear();
         double sum = 0;

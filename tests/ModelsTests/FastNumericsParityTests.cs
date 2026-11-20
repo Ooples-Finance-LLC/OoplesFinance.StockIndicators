@@ -923,6 +923,21 @@ public sealed class FastNumericsParityTests
     }
 
     [Fact]
+    public async Task SharedFlagColumnsAreNeverWritten()
+    {
+        // A flag column is shared between every indicator whose flag turns on at the same bar, so a kernel
+        // that wrote one after declaring it would change other indicators' results.
+        var bars = Walk(300, 5);
+        foreach (var (_, create) in Cases())
+        {
+            var indicator = create();
+            using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicator)
+                .ConfigureNumerics(IndicatorNumerics.Fast).BuildAsync();
+        }
+        Assert.True(FastFlags.HeldAreIntact());
+    }
+
+    [Fact]
     public void EveryFastKernelTypeHasAParityCase()
     {
         var covered = Cases().Select(c => c.Create().GetType()).ToHashSet();

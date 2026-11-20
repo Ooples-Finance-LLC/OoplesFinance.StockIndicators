@@ -183,7 +183,7 @@ internal static partial class FastKernels
     /// Aroon: how recently the window's high and low occurred, as percentages of the period, and their
     /// difference. Nothing is published until the window is full.
     /// </summary>
-    internal static void Aroon(FastColumns columns, double[][] outputs, WindowAroon owner)
+    internal static void Aroon(FastColumns columns, FastOutputs outputs, WindowAroon owner)
     {
         ReadOnlySpan<double> high = columns.High, low = columns.Low;
         var n = high.Length;
@@ -191,7 +191,7 @@ internal static partial class FastKernels
         var size = (long)period + (owner.IncludeExtraBar ? 1 : 0);
         Span<double> up = outputs[0].AsSpan(0, n), down = outputs[1].AsSpan(0, n), oscillator = outputs[2].AsSpan(0, n);
         var first = (int)Math.Min(size - 1, n);
-        for (var slot = 3; slot < 6; slot++) DefinedFrom(outputs[slot], first);
+        for (var slot = 3; slot < 6; slot++) outputs.Flag(slot, first);
         // The two outputs hold the extreme's bar index until the final pass turns it into a percentage.
         RollingExtremeIndex(high, up, size, true, !owner.OldestTie);
         RollingExtremeIndex(low, down, size, false, !owner.OldestTie);

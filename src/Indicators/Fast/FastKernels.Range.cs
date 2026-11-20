@@ -47,7 +47,7 @@ internal static partial class FastKernels
     /// Accumulation/distribution line smoothed by two exponential averages, published as fast minus slow,
     /// with the money-flow multiplier, the bar's flow and the running line as optional details.
     /// </summary>
-    internal static void SmoothedAccumulation(FastColumns columns, double[][] outputs, SmoothedAccumulationOscillator owner)
+    internal static void SmoothedAccumulation(FastColumns columns, FastOutputs outputs, SmoothedAccumulationOscillator owner)
     {
         columns.RequireHighLowClose();
         ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close, volume = columns.Volume;
@@ -57,14 +57,12 @@ internal static partial class FastKernels
         var fast = new Seeded(owner.FastPeriod, firstValue, 2.0 / (owner.FastPeriod + 1.0));
         var slow = new Seeded(owner.SlowPeriod, firstValue, 2.0 / (owner.SlowPeriod + 1.0));
         var start = (int)Math.Min((long)Math.Max(owner.FastPeriod, owner.SlowPeriod) - 1 + owner.Suppression, n);
-        Span<double> oscillator = outputs[0], multipliers = outputs[1], flows = outputs[2], lines = outputs[3];
+        Span<double> oscillator = outputs[0];
         oscillator.Slice(0, start).Clear();
-        if (!details)
-        {
-            multipliers.Clear();
-            flows.Clear();
-            lines.Clear();
-        }
+        // Without details the three detail series are zero throughout and their flags never turn on.
+        for (var slot = 1; slot < 4 && !details; slot++) outputs.Flag(slot, n);
+        Span<double> multipliers = details ? outputs[1] : default, flows = details ? outputs[2] : default,
+            lines = details ? outputs[3] : default;
         double total = 0;
         for (var i = 0; i < n; i++)
         {
@@ -87,10 +85,8 @@ internal static partial class FastKernels
             }
             if (i >= start) oscillator[i] = fast.Value - slow.Value;
         }
-        DefinedFrom(outputs[4], start);
-        for (var slot = 5; slot < 8; slot++)
-            if (details) outputs[slot].AsSpan().Fill(1);
-            else outputs[slot].AsSpan().Clear();
+        outputs.Flag(4, start);
+        for (var slot = 5; slot < 8; slot++) outputs.Flag(slot, details ? 0 : n);
     }
 
 

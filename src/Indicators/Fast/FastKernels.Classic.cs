@@ -206,7 +206,7 @@ internal static partial class FastKernels
     }
 
     /// <summary>MACD over two aligned classic averages with a classic average of the oscillator as signal.</summary>
-    internal static void ClassicMacd(ReadOnlySpan<double> input, double[][] outputs, ClassicMacd owner)
+    internal static void ClassicMacd(ReadOnlySpan<double> input, FastOutputs outputs, ClassicMacd owner)
     {
         var n = input.Length;
         var oscillatorFirst = owner.OscillatorFirst;
@@ -230,7 +230,7 @@ internal static partial class FastKernels
         oscillator.Slice(skipped, count).CopyTo(line.Slice(signalStart));
         signal.Slice(skipped, count).CopyTo(average.Slice(signalStart));
         FastMath.Subtract(oscillator.Slice(skipped, count), signal.Slice(skipped, count), histogram.Slice(signalStart, count));
-        for (var slot = 3; slot < 6; slot++) DefinedFrom(outputs[slot], signalStart);
+        for (var slot = 3; slot < 6; slot++) outputs.Flag(slot, signalStart);
     }
 
     /// <summary>MACD whose fast average starts late so both exponential averages seed on the same bar.</summary>

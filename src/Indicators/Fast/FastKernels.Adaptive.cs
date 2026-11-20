@@ -9,13 +9,13 @@ internal static partial class FastKernels
     /// Kaufman adaptive average. The efficiency ratio is the net move over the window divided by the sum of
     /// the bar-to-bar moves, and it sets the smoothing rate between the slow and fast constants.
     /// </summary>
-    internal static void AdaptiveAverage(ReadOnlySpan<double> close, double[][] outputs, SeededAdaptiveAverage owner)
+    internal static void AdaptiveAverage(ReadOnlySpan<double> close, FastOutputs outputs, SeededAdaptiveAverage owner)
     {
         var n = close.Length;
         var period = owner.Period;
         Span<double> average = outputs[0].AsSpan(0, n), efficiency = outputs[1].AsSpan(0, n);
-        DefinedFrom(outputs[2], owner.FirstOutputIndex);
-        DefinedFrom(outputs[3], period);
+        outputs.Flag(2, owner.FirstOutputIndex);
+        outputs.Flag(3, period);
         var first = (int)Math.Min(owner.FirstOutputIndex, n);
         var fast = 2.0 / ((owner.ClampFastPeriod ? Math.Min(period, owner.FastPeriod) : owner.FastPeriod) + 1.0);
         var slow = 2.0 / (owner.SlowPeriod + 1.0);

@@ -203,7 +203,7 @@ internal static partial class FastKernels
     /// Position of the close inside the high/low window as a percentage, zero for a flat window, then the K
     /// average of that and the D average of K. Both are published once D is defined.
     /// </summary>
-    internal static void Stochastic(FastColumns columns, double[][] outputs, ClassicStochastic owner)
+    internal static void Stochastic(FastColumns columns, FastOutputs outputs, ClassicStochastic owner)
     {
         columns.RequireHighLowClose();
         ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close;
@@ -212,8 +212,8 @@ internal static partial class FastKernels
         k = k.Slice(0, n);
         d = d.Slice(0, n);
         var first = owner.First;
-        DefinedFrom(outputs[2], first);
-        DefinedFrom(outputs[3], first);
+        outputs.Flag(2, first);
+        outputs.Flag(3, first);
         var ready = owner.Period - 1L;
         if (first >= n)
         {
