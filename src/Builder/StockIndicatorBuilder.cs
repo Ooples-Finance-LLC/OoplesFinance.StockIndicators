@@ -392,6 +392,11 @@ public sealed class StockIndicatorBuilder
                 return Task.FromException<Indicators.IIndicatorRun>(failure);
             }
         }
+        // The exact routes take their direct paths only from an array of bars. Borrowed columns read one bar
+        // at a time miss every one of them, at tens to hundreds of times the cost, so they are assembled once.
+        if (_numerics != IndicatorNumerics.Fast && _barSource is { IsFinite: true } bounded
+            && bounded is Indicators.IColumnBarSource borrowed)
+            return BuildFromColumnsAsync(borrowed.Columns, cancellationToken);
         return _historyMode == IndicatorHistoryMode.LatestOnly
             ? BuildLatestOnlyAsync(cancellationToken) : BuildWithHistoryAsync(cancellationToken);
     }
