@@ -1005,4 +1005,53 @@ internal static partial class FastKernels
                 output[i] = -100;
         }
     }
+
+
+    /// <summary>
+    /// Kicking: two long marubozu of opposite colour with a gap between them, signed by the second
+    /// candle or, by length, by whichever body is longer.
+    /// </summary>
+    internal static void KickingCandle(FastColumns columns, Span<double> output, int bodyPeriod, int shadowPeriod, bool byLength)
+    {
+        double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var warmup = Math.Max(bodyPeriod, shadowPeriod) + 1;
+        var bodies = new CandleWindow(columns, CandleStatistic.Body, bodyPeriod);
+        var priorBodies = new CandleWindow(columns, CandleStatistic.Body, bodyPeriod);
+        var ranges = new CandleWindow(columns, CandleStatistic.Range, shadowPeriod);
+        var priorRanges = new CandleWindow(columns, CandleStatistic.Range, shadowPeriod);
+        var tenth = 10L * shadowPeriod;
+        for (var i = 0; i < n; i++)
+        {
+            if (i >= 2)
+            {
+                priorBodies.Include(i - 2);
+                priorRanges.Include(i - 2);
+            }
+            if (i >= 1)
+            {
+                bodies.Include(i - 1);
+                ranges.Include(i - 1);
+            }
+            if (i < warmup) continue;
+            double previousOpen = open[i - 1], previousClose = close[i - 1], o = open[i], c = close[i];
+            var previousBlack = previousClose < previousOpen;
+            if (previousBlack == (c < o)) continue;
+            if (previousBlack ? low[i] <= high[i - 1] : high[i] >= low[i - 1]) continue;
+            double previousTop = Math.Max(previousOpen, previousClose), previousBottom = Math.Min(previousOpen, previousClose);
+            double top = Math.Max(o, c), bottom = Math.Min(o, c);
+            if (priorBodies.Compare(i - 1, bodyPeriod, previousTop, previousBottom) >= 0
+                || priorRanges.Compare(i - 1, tenth, high[i - 1], previousTop) <= 0
+                || priorRanges.Compare(i - 1, tenth, previousBottom, low[i - 1]) <= 0
+                || bodies.Compare(i, bodyPeriod, top, bottom) >= 0
+                || ranges.Compare(i, tenth, high[i], top) <= 0
+                || ranges.Compare(i, tenth, bottom, low[i]) <= 0)
+                continue;
+            var white = c >= o;
+            if (byLength && DifferenceSign(top, bottom, previousTop, previousBottom) <= 0) white = previousClose >= previousOpen;
+            output[i] = white ? 100 : -100;
+        }
+    }
 }

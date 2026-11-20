@@ -146,6 +146,8 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<KickingCandle>(binders, t => (c, o) => FastKernels.KickingCandle(c, o[0], t.BodyPeriod, t.ShadowPeriod, false));
+        Bind<KickingByLengthCandle>(binders, t => (c, o) => FastKernels.KickingCandle(c, o[0], t.BodyPeriod, t.ShadowPeriod, true));
         Bind<AdvanceBlockCandle>(binders, t => (c, o) => FastKernels.ExhaustionCandle(c, o[0], ExhaustionCandleKind.AdvanceBlock, t.LongPeriod, 0, t.ShadowPeriod, t.NearPeriod, t.FarPeriod));
         Bind<StalledCandle>(binders, t => (c, o) => FastKernels.ExhaustionCandle(c, o[0], ExhaustionCandleKind.Stalled, t.LongPeriod, t.ShortPeriod, t.ShadowPeriod, t.NearPeriod, 0));
         Bind<ThreeStarsInSouthCandle>(binders, t => (c, o) => FastKernels.ExhaustionCandle(c, o[0], ExhaustionCandleKind.ThreeStarsInSouth, t.LongPeriod, t.ShortPeriod, t.ShadowPeriod, 0, 0));
