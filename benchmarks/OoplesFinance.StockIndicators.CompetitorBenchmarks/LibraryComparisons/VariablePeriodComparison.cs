@@ -83,8 +83,8 @@ internal static class VariablePeriodComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Average].ToArray();
-        var masks = run[indicator.IsDefined].ToArray();
+        var values = run[indicator.Average];
+        var masks = run[indicator.IsDefined];
         return VolumePriceComparison.Mask(
             values.WherePresent(masks)
         );

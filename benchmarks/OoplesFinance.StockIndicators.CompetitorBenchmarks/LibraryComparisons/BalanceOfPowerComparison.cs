@@ -40,7 +40,7 @@ internal static class BalanceOfPowerComparison
         var values = run[indicator.Outputs[0]].ToArray();
         if (!missingRanges)
             return new(0, values);
-        var present = run[indicator.Outputs[1]].ToArray();
+        var present = run[indicator.Outputs[1]];
         return Mask(values.WherePresent(present), period);
     }
 

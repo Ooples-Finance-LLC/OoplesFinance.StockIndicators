@@ -84,8 +84,8 @@ internal static class HilbertCycleSignalComparison
                 .Range(0, count)
                 .Select(j =>
                 {
-                    var values = run[owner.Outputs[j]].ToArray();
-                    var flags = run[owner.Outputs[j + count]].ToArray();
+                    var values = run[owner.Outputs[j]];
+                    var flags = run[owner.Outputs[j + count]];
                     return values.WherePresent(flags);
                 })
                 .ToArray(),

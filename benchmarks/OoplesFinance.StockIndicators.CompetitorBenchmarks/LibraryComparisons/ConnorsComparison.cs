@@ -54,8 +54,8 @@ internal static class ConnorsComparison
         var columns = new double?[4][];
         for (int slot = 0; slot < 4; slot++)
         {
-            var values = run[indicator.Outputs[slot]].ToArray();
-            var present = run[indicator.Outputs[slot + 4]].ToArray();
+            var values = run[indicator.Outputs[slot]];
+            var present = run[indicator.Outputs[slot + 4]];
             columns[slot] = values.WherePresent(present);
         }
         return Series(columns);

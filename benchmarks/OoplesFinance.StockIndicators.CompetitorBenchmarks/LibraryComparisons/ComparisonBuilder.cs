@@ -84,6 +84,21 @@ internal static class ComparisonBuilder
         return result;
     }
 
+    /// <summary>
+    /// The same, read straight from a run's output spans: an arm that only masks an output has no reason to
+    /// copy it first, and the competitor arms mask the array their function filled.
+    /// </summary>
+    internal static double?[] WherePresent(this ReadOnlySpan<double> values, ReadOnlySpan<double> flags)
+    {
+        var result = new double?[values.Length];
+        for (var i = 0; i < result.Length; i++)
+            if (flags[i] > 0) result[i] = values[i];
+        return result;
+    }
+
+    internal static double?[] WherePresent(this double[] values, ReadOnlySpan<double> flags) =>
+        WherePresent((ReadOnlySpan<double>)values, flags);
+
     internal static double?[] WherePresent(this IEnumerable<double> values, double[] flags) =>
         WherePresent(values as double[] ?? values.ToArray(), flags);
 }

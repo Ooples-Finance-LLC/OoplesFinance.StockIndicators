@@ -59,8 +59,8 @@ internal static class McGinleyComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var v = run[indicator.Value].ToArray();
-        var mask = run[indicator.IsDefined].ToArray();
+        var v = run[indicator.Value];
+        var mask = run[indicator.IsDefined];
         return Series(v.WherePresent(mask));
     }
 

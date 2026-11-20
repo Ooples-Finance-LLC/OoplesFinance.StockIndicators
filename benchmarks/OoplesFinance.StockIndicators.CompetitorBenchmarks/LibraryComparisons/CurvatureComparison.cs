@@ -85,8 +85,8 @@ internal static class CurvatureComparison
                 .Range(0, 5)
                 .Select(slot =>
                 {
-                    var values = run[curvature.Outputs[slot]].ToArray();
-                    var flags = run[curvature.Outputs[slot + 5]].ToArray();
+                    var values = run[curvature.Outputs[slot]];
+                    var flags = run[curvature.Outputs[slot + 5]];
                     return values.WherePresent(flags);
                 })
                 .ToArray()

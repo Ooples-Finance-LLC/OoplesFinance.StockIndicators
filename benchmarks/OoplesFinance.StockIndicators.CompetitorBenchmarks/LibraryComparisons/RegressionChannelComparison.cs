@@ -56,8 +56,8 @@ internal static class RegressionChannelComparison
         var values = new double?[4][];
         for (int slot = 0; slot < 3; slot++)
         {
-            var column = run[indicator.Outputs[slot]].ToArray();
-            var mask = run[indicator.Outputs[slot + 4]].ToArray();
+            var column = run[indicator.Outputs[slot]];
+            var mask = run[indicator.Outputs[slot + 4]];
             values[slot] = column.WherePresent(mask);
         }
         values[3] = run[indicator.BreakPoint].ToArray().Select(value => (double?)value).ToArray();

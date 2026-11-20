@@ -80,8 +80,8 @@ internal static class ClassicAverageComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Average].ToArray();
-        var flags = run[indicator.IsDefined].ToArray();
+        var values = run[indicator.Average];
+        var flags = run[indicator.IsDefined];
         return VolumePriceComparison.Mask(
             values.WherePresent(flags)
         );

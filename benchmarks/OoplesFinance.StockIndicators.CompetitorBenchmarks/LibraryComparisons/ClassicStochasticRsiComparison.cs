@@ -126,8 +126,8 @@ internal static class ClassicStochasticRsiComparison
                 .Range(0, 2)
                 .Select(j =>
                 {
-                    var values = run[indicator.Outputs[j]].ToArray();
-                    var flags = run[indicator.Outputs[j + 2]].ToArray();
+                    var values = run[indicator.Outputs[j]];
+                    var flags = run[indicator.Outputs[j + 2]];
                     return values.WherePresent(flags);
                 })
                 .ToArray()

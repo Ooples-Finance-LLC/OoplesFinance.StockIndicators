@@ -102,8 +102,8 @@ internal static class PairStatisticsComparison
         var result = new double?[names.Length][];
         for (var slot = 0; slot < names.Length; slot++)
         {
-            var values = run[indicator.Outputs[slot]].ToArray();
-            var mask = run[indicator.Outputs[slot + names.Length]].ToArray();
+            var values = run[indicator.Outputs[slot]];
+            var mask = run[indicator.Outputs[slot + names.Length]];
             result[slot] = values.WherePresent(mask);
         }
         return RetrospectivePriceComparison.Series(names, result);

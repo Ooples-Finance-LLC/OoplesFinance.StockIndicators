@@ -59,8 +59,8 @@ internal static class SmoothedAccumulationComparison
         var rows = new double?[first ? 1 : 4][];
         for (var j = 0; j < rows.Length; j++)
         {
-            var values = run[indicator.Outputs[j]].ToArray();
-            var flags = run[indicator.Outputs[j + 4]].ToArray();
+            var values = run[indicator.Outputs[j]];
+            var flags = run[indicator.Outputs[j + 4]];
             rows[j] = values.WherePresent(flags);
         }
         return Series(rows, first);

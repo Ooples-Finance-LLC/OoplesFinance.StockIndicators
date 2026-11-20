@@ -56,8 +56,8 @@ internal static class SeededHilbertTrendComparison
                 .Range(0, 3)
                 .Select(j =>
                 {
-                    var values = run[owner.Outputs[j]].ToArray();
-                    var flags = run[owner.Outputs[j + 3]].ToArray();
+                    var values = run[owner.Outputs[j]];
+                    var flags = run[owner.Outputs[j + 3]];
                     return values.WherePresent(flags);
                 })
                 .ToArray()

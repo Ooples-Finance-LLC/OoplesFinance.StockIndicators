@@ -123,8 +123,8 @@ internal static class TrueRangeRatioComparison
         var values = new double?[2][];
         for (var slot = 0; slot < 2; slot++)
         {
-            var response = run[indicator.Outputs[slot]].ToArray();
-            var mask = run[indicator.Outputs[slot + 2]].ToArray();
+            var response = run[indicator.Outputs[slot]];
+            var mask = run[indicator.Outputs[slot + 2]];
             values[slot] = response.WherePresent(mask);
         }
         return VortexSeries(values);
@@ -139,8 +139,8 @@ internal static class TrueRangeRatioComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var response = run[indicator.Value].ToArray();
-        var mask = run[indicator.IsDefined].ToArray();
+        var response = run[indicator.Value];
+        var mask = run[indicator.IsDefined];
         return VolumePriceComparison.Mask(
             response.WherePresent(mask)
         );

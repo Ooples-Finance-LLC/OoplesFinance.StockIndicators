@@ -150,8 +150,8 @@ internal static class TripleRateComparison
         var r = new double?[3][];
         for (var j = 0; j < 3; j++)
         {
-            var values = run[indicator.Outputs[j]].ToArray();
-            var flags = run[indicator.Outputs[j + 3]].ToArray();
+            var values = run[indicator.Outputs[j]];
+            var flags = run[indicator.Outputs[j + 3]];
             r[j] = values.WherePresent(flags);
         }
         return Series(r, rateOnly);

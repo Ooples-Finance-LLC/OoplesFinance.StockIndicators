@@ -63,8 +63,8 @@ internal static class TradyAdaptiveComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var v = run[indicator.Average].ToArray();
-        var f = run[indicator.AverageIsDefined].ToArray();
+        var v = run[indicator.Average];
+        var f = run[indicator.AverageIsDefined];
         return Series(v.WherePresent(f));
     }
 

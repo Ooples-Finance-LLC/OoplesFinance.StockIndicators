@@ -65,8 +65,8 @@ internal static class SeededMomentumComparison
         var result = new double?[2][];
         for (var j = 0; j < 2; j++)
         {
-            var values = run[indicator.Outputs[j]].ToArray();
-            var present = run[indicator.Outputs[j + 2]].ToArray();
+            var values = run[indicator.Outputs[j]];
+            var present = run[indicator.Outputs[j + 2]];
             result[j] = values.WherePresent(present);
         }
         return Series(result, pmo);

@@ -67,8 +67,8 @@ internal static class DynamicMomentumComparison
         var indicator = new DynamicMomentumStrength(sd, smooth, rsi, upper, lower);
         using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
-        var values = run[indicator.Value].ToArray();
-        var present = run[indicator.IsDefined].ToArray();
+        var values = run[indicator.Value];
+        var present = run[indicator.IsDefined];
         return VolumePriceComparison.Mask(values.WherePresent(present));
     }
 

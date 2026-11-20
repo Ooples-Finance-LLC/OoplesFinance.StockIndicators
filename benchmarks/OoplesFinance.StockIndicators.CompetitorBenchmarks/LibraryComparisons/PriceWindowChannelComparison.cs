@@ -71,8 +71,8 @@ internal static class PriceWindowChannelComparison
                 .Range(0, 4)
                 .Select(slot =>
                 {
-                    var values = run[indicator.Outputs[slot]].ToArray();
-                    var presence = run[indicator.Outputs[slot + 4]].ToArray();
+                    var values = run[indicator.Outputs[slot]];
+                    var presence = run[indicator.Outputs[slot + 4]];
                     return values.WherePresent(presence);
                 })
                 .ToArray()

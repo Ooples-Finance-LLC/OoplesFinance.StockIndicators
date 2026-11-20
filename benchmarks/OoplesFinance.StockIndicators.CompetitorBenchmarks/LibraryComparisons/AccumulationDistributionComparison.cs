@@ -88,7 +88,7 @@ internal static class AccumulationDistributionComparison
         var values = run[indicator.Outputs[0]].ToArray();
         if (!priceAdjusted)
             return new(0, values);
-        var flags = run[indicator.Outputs[1]].ToArray();
+        var flags = run[indicator.Outputs[1]];
         return Mask(values.WherePresent(flags));
     }
 

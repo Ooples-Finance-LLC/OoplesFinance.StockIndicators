@@ -59,8 +59,8 @@ internal static class TaAdaptiveComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var v = run[indicator.Average].ToArray();
-        var f = run[indicator.AverageIsDefined].ToArray();
+        var v = run[indicator.Average];
+        var f = run[indicator.AverageIsDefined];
         return TradyAdaptiveComparison.Series(
             v.WherePresent(f)
         );

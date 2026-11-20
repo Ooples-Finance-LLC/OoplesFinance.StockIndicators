@@ -62,8 +62,8 @@ internal static class SumDirectionalComparison
         var result = new double?[5][];
         for (var j = 0; j < 5; j++)
         {
-            var values = run[indicator.Outputs[j]].ToArray();
-            var flags = run[indicator.Outputs[j + 5]].ToArray();
+            var values = run[indicator.Outputs[j]];
+            var flags = run[indicator.Outputs[j + 5]];
             result[j] = values.WherePresent(flags);
         }
         return Series(result);

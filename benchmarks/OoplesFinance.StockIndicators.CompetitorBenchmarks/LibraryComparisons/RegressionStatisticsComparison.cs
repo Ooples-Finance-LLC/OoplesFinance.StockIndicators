@@ -72,8 +72,8 @@ internal static class RegressionStatisticsComparison
             .Range(0, 5)
             .Select(slot =>
             {
-                var output = run[indicator.Outputs[slot]].ToArray();
-                var present = run[indicator.Outputs[slot + 5]].ToArray();
+                var output = run[indicator.Outputs[slot]];
+                var present = run[indicator.Outputs[slot + 5]];
                 return output.WherePresent(present);
             })
             .ToArray();
@@ -99,8 +99,8 @@ internal static class RegressionStatisticsComparison
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
         return Series(Enumerable.Range(0, 5).Select(slot =>
         {
-            var output = run[indicator.Outputs[slot]].ToArray();
-            var presence = run[indicator.Outputs[slot + 5]].ToArray();
+            var output = run[indicator.Outputs[slot]];
+            var presence = run[indicator.Outputs[slot + 5]];
             return output.WherePresent(presence);
         }).ToArray());
     }

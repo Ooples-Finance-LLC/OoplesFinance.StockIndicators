@@ -57,8 +57,8 @@ internal static class DelayedHilbertTrendComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[owner.Trendline].ToArray();
-        var flags = run[owner.IsDefined].ToArray();
+        var values = run[owner.Trendline];
+        var flags = run[owner.IsDefined];
         return Series(values.WherePresent(flags));
     }
 

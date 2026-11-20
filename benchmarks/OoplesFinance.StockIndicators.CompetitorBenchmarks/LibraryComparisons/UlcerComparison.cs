@@ -31,8 +31,8 @@ internal static class UlcerComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Value].ToArray();
-        var present = run[indicator.IsDefined].ToArray();
+        var values = run[indicator.Value];
+        var present = run[indicator.IsDefined];
         return VolumePriceComparison.Mask(
             values.WherePresent(present)
         );

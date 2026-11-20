@@ -193,8 +193,8 @@ internal static class TaDirectionalComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var flags = run[indicator.IsDefined].ToArray();
-        var values = run[indicator.Value].ToArray();
+        var flags = run[indicator.IsDefined];
+        var values = run[indicator.Value];
         return VolumePriceComparison.Mask(
             values.WherePresent(flags)
         );

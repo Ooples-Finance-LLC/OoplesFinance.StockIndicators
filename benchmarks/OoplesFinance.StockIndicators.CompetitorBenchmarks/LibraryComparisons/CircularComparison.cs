@@ -68,8 +68,8 @@ internal static class CircularComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Value].ToArray();
-        var flags = run[indicator.IsDefined].ToArray();
+        var values = run[indicator.Value];
+        var flags = run[indicator.IsDefined];
         return VolumePriceComparison.Mask(
             values.WherePresent(flags)
         );

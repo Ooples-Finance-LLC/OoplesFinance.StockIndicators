@@ -43,8 +43,8 @@ internal static class SampleShapeComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Value].ToArray();
-        var mask = run[indicator.IsDefined].ToArray();
+        var values = run[indicator.Value];
+        var mask = run[indicator.IsDefined];
         return VolumePriceComparison.Mask(
             values.WherePresent(mask)
         );

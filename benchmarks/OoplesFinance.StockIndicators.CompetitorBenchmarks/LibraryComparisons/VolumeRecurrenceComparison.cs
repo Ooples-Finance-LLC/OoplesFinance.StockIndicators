@@ -35,8 +35,8 @@ internal static class VolumeRecurrenceComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Outputs[0]].ToArray();
-        var flags = run[indicator.Outputs[1]].ToArray();
+        var values = run[indicator.Outputs[0]];
+        var flags = run[indicator.Outputs[1]];
         return VolumePriceComparison.Mask(
             values.WherePresent(flags)
         );

@@ -64,8 +64,8 @@ internal static class SkenderDeviationComparison
                 .Range(0, 4)
                 .Select(slot =>
                 {
-                    var values = run[indicator.Outputs[slot]].ToArray();
-                    var present = run[indicator.Outputs[slot + 4]].ToArray();
+                    var values = run[indicator.Outputs[slot]];
+                    var present = run[indicator.Outputs[slot + 4]];
                     return values.WherePresent(present);
                 })
                 .ToArray()

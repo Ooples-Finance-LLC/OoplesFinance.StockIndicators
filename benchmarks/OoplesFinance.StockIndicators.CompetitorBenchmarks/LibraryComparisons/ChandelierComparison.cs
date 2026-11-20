@@ -158,8 +158,8 @@ internal static class ChandelierComparison
         var values = new double?[2][];
         for (var slot = 0; slot < 2; slot++)
         {
-            var response = run[indicator.Outputs[slot]].ToArray();
-            var mask = run[indicator.Outputs[slot + 2]].ToArray();
+            var response = run[indicator.Outputs[slot]];
+            var mask = run[indicator.Outputs[slot + 2]];
             values[slot] = response.WherePresent(mask);
         }
         return Pack(values, trady, shortSide);

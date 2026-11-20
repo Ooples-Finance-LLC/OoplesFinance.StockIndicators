@@ -37,8 +37,8 @@ internal static class RangeAccelerationComparison
         var rows = new double?[3][];
         for (var j = 0; j < 3; j++)
         {
-            var v = run[indicator.Outputs[j]].ToArray();
-            var f = run[indicator.Outputs[j + 3]].ToArray();
+            var v = run[indicator.Outputs[j]];
+            var f = run[indicator.Outputs[j + 3]];
             rows[j] = v.WherePresent(f);
         }
         return Series(rows);

@@ -60,8 +60,8 @@ internal static class PriceRelativeComparison
         var rows = new double?[3][];
         for (var j = 0; j < 3; j++)
         {
-            var v = run[indicator.Outputs[j]].ToArray();
-            var present = run[indicator.Outputs[j + 3]].ToArray();
+            var v = run[indicator.Outputs[j]];
+            var present = run[indicator.Outputs[j + 3]];
             rows[j] = v.WherePresent(present);
         }
         return Series(rows);

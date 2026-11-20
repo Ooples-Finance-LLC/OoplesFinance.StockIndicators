@@ -54,8 +54,8 @@ internal static class DelayedPhaseComparison
         var r = new double?[2][];
         for (var j = 0; j < 2; j++)
         {
-            var v = run[indicator.Outputs[j]].ToArray();
-            var f = run[indicator.Outputs[j + 2]].ToArray();
+            var v = run[indicator.Outputs[j]];
+            var f = run[indicator.Outputs[j + 2]];
             r[j] = v.WherePresent(f);
         }
         return SeededPhaseComparison.Series(r);

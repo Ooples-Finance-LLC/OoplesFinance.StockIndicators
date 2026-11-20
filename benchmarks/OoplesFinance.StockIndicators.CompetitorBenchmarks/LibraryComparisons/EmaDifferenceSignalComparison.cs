@@ -172,8 +172,8 @@ internal static class EmaDifferenceSignalComparison
         var rows = new double?[5][];
         for (var j = 0; j < 5; j++)
         {
-            var v = run[indicator.Outputs[j]].ToArray();
-            var present = run[indicator.Outputs[j + 5]].ToArray();
+            var v = run[indicator.Outputs[j]];
+            var present = run[indicator.Outputs[j + 5]];
             rows[j] = v.WherePresent(present);
         }
         return Series(rows, variant);

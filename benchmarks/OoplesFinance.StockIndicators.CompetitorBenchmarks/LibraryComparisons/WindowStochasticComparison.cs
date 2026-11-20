@@ -90,8 +90,8 @@ internal static class WindowStochasticComparison
                 .Range(0, 3)
                 .Select(j =>
                 {
-                    var values = run[indicator.Outputs[j]].ToArray();
-                    var flags = run[indicator.Outputs[j + 3]].ToArray();
+                    var values = run[indicator.Outputs[j]];
+                    var flags = run[indicator.Outputs[j + 3]];
                     return values.WherePresent(flags);
                 })
                 .ToArray()

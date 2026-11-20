@@ -46,8 +46,8 @@ internal static class SeededPhaseComparison
         var rows = new double?[2][];
         for (var j = 0; j < 2; j++)
         {
-            var v = run[indicator.Outputs[j]].ToArray();
-            var f = run[indicator.Outputs[j + 2]].ToArray();
+            var v = run[indicator.Outputs[j]];
+            var f = run[indicator.Outputs[j + 2]];
             rows[j] = v.WherePresent(f);
         }
         return Series(rows);

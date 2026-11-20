@@ -98,8 +98,8 @@ internal static class ClassicStochasticComparison
                 .Range(0, 2)
                 .Select(j =>
                 {
-                    var values = run[owner.Outputs[j]].ToArray();
-                    var flags = run[owner.Outputs[j + 2]].ToArray();
+                    var values = run[owner.Outputs[j]];
+                    var flags = run[owner.Outputs[j + 2]];
                     return values.WherePresent(flags);
                 })
                 .ToArray()
