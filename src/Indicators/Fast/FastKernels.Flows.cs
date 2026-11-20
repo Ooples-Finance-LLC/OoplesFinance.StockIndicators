@@ -165,8 +165,10 @@ internal static partial class FastKernels
         value = value.Slice(0, n);
         value.Clear();
         if (n == 0) return;
-        // Each bar's flow on the side it joined, kept so it can leave the window again.
-        double[] ups = FastMath.Allocate(n), downs = FastMath.Allocate(n);
+        // Each bar's flow on the side it joined, kept so it can leave the window again. The two series are
+        // borrowed: a build would otherwise allocate two more than it publishes.
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] ups = pool.Rent(n), downs = pool.Rent(n);
         ups[0] = downs[0] = 0;
         // The comparison decides which side a whole bar's flow joins. A plain typical price is within a few
         // units of the exactly rounded one, so it settles every comparison that is not that close; the rest
@@ -214,5 +216,7 @@ internal static partial class FastKernels
             else
                 value[i] = negative == 0 ? 100 : total == 0 ? double.NegativeInfinity : 100 * positive / total;
         }
+        pool.Return(ups);
+        pool.Return(downs);
     }
 }
