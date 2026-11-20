@@ -606,8 +606,8 @@ internal static partial class FastKernels
             {
                 var change = close[i] - previous;
                 previous = close[i];
-                up[i] = change > 0 ? change : 0;
-                down[i] = change < 0 ? -change : 0;
+                up[i] = FastMath.KeepIf(change, change > 0);
+                down[i] = FastMath.KeepIf(-change, change < 0);
             }
             var sample = new WindowDispersion(period, WindowDispersionOutput.StandardDeviation, true);
             Dispersion(up, deviation, sample);
