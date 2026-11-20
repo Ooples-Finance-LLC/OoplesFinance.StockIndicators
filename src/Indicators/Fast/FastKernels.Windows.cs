@@ -117,7 +117,7 @@ internal static partial class FastKernels
         for (var i = 1; i < filling; i++)
         {
             var value = close[i];
-            run = value == close[i - 1] ? run + 1 : 1;
+            run = value == close[i - 1] ? run + 1 : 1; // NOSONAR an exact tie is the contract
             var count = i + 1;
             var offset = value - anchor;
             var delta = offset - mean;
@@ -143,7 +143,7 @@ internal static partial class FastKernels
         for (var i = filling; i < n; i++)
         {
             var value = close[i];
-            run = value == close[i - 1] ? run + 1 : 1;
+            run = value == close[i - 1] ? run + 1 : 1; // NOSONAR an exact tie is the contract
             var offset = value - anchor;
             var expired = close[i - period] - anchor;
             var delta = offset - expired;

@@ -162,7 +162,7 @@ internal static partial class FastKernels
         {
             var at = j + period - 1;
             double high = highest[at], low = lowest[at];
-            raw[j] = high == low ? 0 : 100 * (packed[at] - low) / (high - low);
+            raw[j] = high == low ? 0 : 100 * (packed[at] - low) / (high - low); // NOSONAR an exact tie is the contract
         }
         ClassicAverage(raw, average, owner.SignalAverage, first);
         Span<double> k = outputs[0], d = outputs[1], kDefined = outputs[2], dDefined = outputs[3];

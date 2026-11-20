@@ -51,16 +51,16 @@ internal static class FastMath
                 var v1 = new System.Numerics.Vector<double>(block.Slice(width));
                 var v2 = new System.Numerics.Vector<double>(block.Slice(2 * width));
                 var v3 = new System.Numerics.Vector<double>(block.Slice(3 * width));
-                a |= System.Numerics.Vector.AsVectorInt64(v0 - v0);
-                b |= System.Numerics.Vector.AsVectorInt64(v1 - v1);
-                c |= System.Numerics.Vector.AsVectorInt64(v2 - v2);
-                d |= System.Numerics.Vector.AsVectorInt64(v3 - v3);
+                a |= System.Numerics.Vector.AsVectorInt64(v0 - v0); // NOSONAR x - x is the finite test
+                b |= System.Numerics.Vector.AsVectorInt64(v1 - v1); // NOSONAR x - x is the finite test
+                c |= System.Numerics.Vector.AsVectorInt64(v2 - v2); // NOSONAR x - x is the finite test
+                d |= System.Numerics.Vector.AsVectorInt64(v3 - v3); // NOSONAR x - x is the finite test
             }
             if (!System.Numerics.Vector.EqualsAll(a | b | c | d, System.Numerics.Vector<long>.Zero)) return false;
         }
 #endif
         double tail = 0;
-        for (; i < values.Length; i++) tail += values[i] - values[i];
+        for (; i < values.Length; i++) tail += values[i] - values[i]; // NOSONAR x - x is the finite test
         return tail == 0;
     }
 
@@ -220,7 +220,7 @@ internal static class FastMath
         var unit = Math.BitIncrement(magnitude) - magnitude;
         // Exact residual sums, a result away from a power of two and from the subnormals, and a remaining
         // distance clearly under half a unit: then no other double is nearer.
-        if (residual - pairResidual == sumResidual && lacking - remainder == residual
+        if (residual - pairResidual == sumResidual && lacking - remainder == residual // NOSONAR an exact tie is the contract
             && magnitude > 1e-290 && magnitude < 1e290
             && (BitConverter.DoubleToInt64Bits(result) & 0xFFFFFFFFFFFFFL) != 0
             && Math.Abs(left) < 0.4999999 * unit)

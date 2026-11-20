@@ -106,7 +106,7 @@ internal static partial class FastKernels
         for (var i = 0; i < n; i++)
         {
             double upper = output[i], lower = lowest[i];
-            output[i] = upper == lower ? -100 : close[i] == upper ? 0 : 100 * (close[i] - upper) / (upper - lower);
+            output[i] = upper == lower ? -100 : close[i] == upper ? 0 : 100 * (close[i] - upper) / (upper - lower); // NOSONAR an exact tie is the contract
         }
     }
 
@@ -125,7 +125,7 @@ internal static partial class FastKernels
         for (var i = 0; i < n; i++)
         {
             double h = high[i], l = low[i], c = close[i];
-            if (h != l) total += (c - l - (h - c)) * volume[i] / (h - l);
+            if (h != l) total += (c - l - (h - c)) * volume[i] / (h - l); // NOSONAR an exact tie is the contract
             line[i] = total;
         }
         RunningSeedEma(line, signal, length);
@@ -144,7 +144,7 @@ internal static partial class FastKernels
         for (var i = 0; i < n; i++)
         {
             double h = high[i], l = low[i];
-            value[i] = h == l ? 0 : (close[i] - open[i]) / (h - l);
+            value[i] = h == l ? 0 : (close[i] - open[i]) / (h - l); // NOSONAR an exact tie is the contract
         }
         // An average over one bar is the value itself.
         if (length <= 1) value.CopyTo(signal);

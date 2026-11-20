@@ -49,9 +49,9 @@ internal sealed class FastColumns
             high[i] = h;
             low[i] = l;
             close[i] = c;
-            checkHigh += h - h;
-            checkLow += l - l;
-            checkClose += c - c;
+            checkHigh += h - h; // NOSONAR x - x is the finite test
+            checkLow += l - l; // NOSONAR x - x is the finite test
+            checkClose += c - c; // NOSONAR x - x is the finite test
         }
         // Reported in the order the separate gathers would have met them.
         if (!(checkHigh == 0)) ThrowNonFinite(IndicatorInputFields.High);
@@ -86,19 +86,19 @@ internal sealed class FastColumns
         switch (field)
         {
             case IndicatorInputFields.Open:
-                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Open; column[i] = v; check += v - v; }
+                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Open; column[i] = v; check += v - v; } // NOSONAR x - x is the finite test
                 break;
             case IndicatorInputFields.High:
-                for (var i = 0; i < bars.Length; i++) { var v = bars[i].High; column[i] = v; check += v - v; }
+                for (var i = 0; i < bars.Length; i++) { var v = bars[i].High; column[i] = v; check += v - v; } // NOSONAR x - x is the finite test
                 break;
             case IndicatorInputFields.Low:
-                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Low; column[i] = v; check += v - v; }
+                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Low; column[i] = v; check += v - v; } // NOSONAR x - x is the finite test
                 break;
             case IndicatorInputFields.Close:
-                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Close; column[i] = v; check += v - v; }
+                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Close; column[i] = v; check += v - v; } // NOSONAR x - x is the finite test
                 break;
             default:
-                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Volume; column[i] = v; check += v - v; }
+                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Volume; column[i] = v; check += v - v; } // NOSONAR x - x is the finite test
                 break;
         }
         if (!(check == 0)) ThrowNonFinite(field);

@@ -99,7 +99,7 @@ internal static partial class FastKernels
         for (var i = 0; i < n; i++)
         {
             var price = typical[i];
-            if (i > 0) run = price == typical[i - 1] ? run + 1 : 1;
+            if (i > 0) run = price == typical[i - 1] ? run + 1 : 1; // NOSONAR an exact tie is the contract
             if (i >= period && (i & RebuildMask) == 0)
             {
                 anchor = price;

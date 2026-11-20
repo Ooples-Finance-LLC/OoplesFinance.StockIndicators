@@ -348,7 +348,7 @@ internal static partial class FastKernels
         {
             var top = highest[i];
             var bottom = lowest[i];
-            raw[i - offset] = top == bottom ? 0 : 100 * (close[i] - bottom) / (top - bottom);
+            raw[i - offset] = top == bottom ? 0 : 100 * (close[i] - bottom) / (top - bottom); // NOSONAR an exact tie is the contract
         }
         var wilder = owner.WilderSmoothing;
         var k = outputs[0].AsSpan(offset, n - offset);
@@ -540,7 +540,7 @@ internal static partial class FastKernels
         var run = 0;
         for (var i = 1; i < n; i++)
         {
-            run = i > 1 && x[i] == x[i - 1] ? run + 1 : 1;
+            run = i > 1 && x[i] == x[i - 1] ? run + 1 : 1; // NOSONAR an exact tie is the contract
             if (i > period && (i & RebuildMask) == 0)
             {
                 sumX = sumY = sumXX = sumXY = 0;
@@ -604,7 +604,7 @@ internal static partial class FastKernels
                 anchorY = y[j];
                 continue;
             }
-            varies |= value != anchorX;
+            varies |= value != anchorX; // NOSONAR an exact tie is the contract
             sumX += value - anchorX;
             sumY += y[j] - anchorY;
         }
