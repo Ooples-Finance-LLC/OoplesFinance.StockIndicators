@@ -37,6 +37,15 @@ public sealed class FastSnapshotParityTests
         ("ZigZag(1, high/low)", (bars, numerics) => Swings(ZigZagSnapshot.Calculate(bars, 1, true, numerics))),
         ("ZigZag(3, high/low)", (bars, numerics) => Swings(ZigZagSnapshot.Calculate(bars, 3, true, numerics))),
         ("ZigZag(50, high/low)", (bars, numerics) => Swings(ZigZagSnapshot.Calculate(bars, 50, true, numerics))),
+        ("Renko()", (bars, numerics) => Bricks(RenkoSnapshot.Calculate(bars, numerics: numerics))),
+        ("Renko(0.5)", (bars, numerics) => Bricks(RenkoSnapshot.Calculate(bars, .5, false, numerics))),
+        ("Renko(0.01)", (bars, numerics) => Bricks(RenkoSnapshot.Calculate(bars, .01, false, numerics))),
+        ("Renko(0.37)", (bars, numerics) => Bricks(RenkoSnapshot.Calculate(bars, .37, false, numerics))),
+        ("Renko(2.5, high/low)", (bars, numerics) => Bricks(RenkoSnapshot.Calculate(bars, 2.5, true, numerics))),
+        ("Renko(0.25, high/low)", (bars, numerics) => Bricks(RenkoSnapshot.Calculate(bars, .25, true, numerics))),
+        ("RenkoAtr()", (bars, numerics) => Bricks(RenkoSnapshot.CalculateAtr(bars, numerics: numerics))),
+        ("RenkoAtr(2)", (bars, numerics) => Bricks(RenkoSnapshot.CalculateAtr(bars, 2, false, numerics))),
+        ("RenkoAtr(50, high/low)", (bars, numerics) => Bricks(RenkoSnapshot.CalculateAtr(bars, 50, true, numerics))),
     ];
 
     public static TheoryData<string> CaseNames()
@@ -79,7 +88,8 @@ public sealed class FastSnapshotParityTests
                         $"{where}: slot {slot}, bar {i} expected {Show(expected)}, was {Show(actual)}");
                     if (expected is not double value || actual is not double other) continue;
                     compared++;
-                    var scale = Math.Max(Math.Abs(value), Math.Abs(bars[i].Close));
+                    // Bricks outnumber or undershoot the bars, so a row may have no bar to take a scale from.
+                    var scale = Math.Max(Math.Abs(value), i < bars.Length ? Math.Abs(bars[i].Close) : 0);
                     Assert.True(Math.Abs(value - other) <= Tolerance * Math.Max(scale, 1e-300),
                         $"{where}: slot {slot}, bar {i} expected {value:R}, was {other:R}");
                 }
@@ -90,6 +100,18 @@ public sealed class FastSnapshotParityTests
     }
 
     private static string Show(double? value) => value is double present ? present.ToString("R") : "absent";
+
+    // Bricks are a list of their own length; a different number of bricks fails the length comparison.
+    private static double?[][] Bricks(IEnumerable<RenkoBrick> bricks)
+    {
+        var rows = bricks.ToArray();
+        double?[] Column(Func<RenkoBrick, double> read) => [.. rows.Select(row => (double?)read(row))];
+        return
+        [
+            Column(row => row.Open), Column(row => row.High), Column(row => row.Low), Column(row => row.Close),
+            Column(row => row.Volume), Column(row => row.IsUp ? 1 : 0), Column(row => row.Date.Ticks),
+        ];
+    }
 
     private static double?[][] Swings(IReadOnlyList<ZigZagValue> rows) =>
     [

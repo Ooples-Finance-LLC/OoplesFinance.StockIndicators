@@ -55,7 +55,7 @@ internal static class VolatilityStopComparison
 
     internal static ComparisonSeries Owned(Bar[] bars, int period, double multiplier)
     {
-        var rows = VolatilityStopSnapshot.Calculate(bars, period, multiplier);
+        var rows = VolatilityStopSnapshot.Calculate(bars, period, multiplier, ComparisonBuilder.Numerics);
         return Series([
             rows.Select(r => r.Sar).ToArray(),
             rows.Select(r => r.UpperBand).ToArray(),
