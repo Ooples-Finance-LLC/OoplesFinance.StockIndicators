@@ -629,4 +629,103 @@ internal static partial class FastKernels
             pool.Return(rentedDeviation);
         }
     }
+
+
+    /// <summary>
+    /// Stochastic momentum: the close measured from the middle of the high/low window, from the first full
+    /// window.
+    /// </summary>
+    internal static void StochasticMomentum(FastColumns columns, Span<double> value, Span<double> defined, int period)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        value = value.Slice(0, n);
+        defined = defined.Slice(0, n);
+        defined.Clear();
+        if (n < period)
+        {
+            value.Clear();
+            return;
+        }
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        var rented = pool.Rent(n);
+        try
+        {
+            var lowest = rented.AsSpan(0, n);
+            RollingExtreme(high, value, period, true);
+            RollingExtreme(low, lowest, period, false);
+            var first = period - 1;
+            for (var i = first; i < n; i++) value[i] = close[i] - 0.5 * value[i] - 0.5 * lowest[i];
+            value.Slice(0, first).Clear();
+            defined.Slice(first).Fill(1);
+        }
+        finally
+        {
+            pool.Return(rented);
+        }
+    }
+
+    /// <summary>
+    /// Stochastic momentum index: the twice-smoothed distance of the close from the middle of the high/low
+    /// window over half the twice-smoothed window range, with an exponential signal line.
+    /// </summary>
+    internal static void StochasticMomentumIndex(FastColumns columns, double[][] outputs, DoubleSmoothedStochasticMomentum owner)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        for (var slot = 0; slot < 4; slot++) outputs[slot].AsSpan(0, n).Clear();
+        var period = owner.Period;
+        if (n < period) return;
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] rentedHigh = pool.Rent(n), rentedLow = pool.Rent(n);
+        try
+        {
+            Span<double> highest = rentedHigh.AsSpan(0, n), lowest = rentedLow.AsSpan(0, n);
+            RollingExtreme(high, highest, period, true);
+            RollingExtreme(low, lowest, period, false);
+            Span<double> index = outputs[0].AsSpan(0, n), signal = outputs[1].AsSpan(0, n);
+            Span<double> defined = outputs[2].AsSpan(0, n), signalDefined = outputs[3].AsSpan(0, n);
+            double firstAlpha = 2.0 / (owner.FirstPeriod + 1.0), secondAlpha = 2.0 / (owner.SecondPeriod + 1.0);
+            double signalAlpha = 2.0 / (owner.SignalPeriod + 1.0);
+            double delta1 = 0, delta2 = 0, range1 = 0, range2 = 0, line = 0;
+            var signalStarted = false;
+            for (var i = period - 1; i < n; i++)
+            {
+                var range = highest[i] - lowest[i];
+                var delta = close[i] - 0.5 * highest[i] - 0.5 * lowest[i];
+                if (i == period - 1)
+                {
+                    delta1 = delta2 = delta;
+                    range1 = range2 = range;
+                }
+                else
+                {
+                    delta1 += firstAlpha * (delta - delta1);
+                    delta2 += secondAlpha * (delta1 - delta2);
+                    range1 += firstAlpha * (range - range1);
+                    range2 += secondAlpha * (range1 - range2);
+                }
+                if (range2 == 0) // NOSONAR an exact tie is the contract
+                {
+                    signalStarted = false;
+                    continue;
+                }
+                var current = 200 * delta2 / range2;
+                index[i] = current;
+                defined[i] = 1;
+                if (double.IsInfinity(current)) continue;
+                line = signalStarted ? line + signalAlpha * (current - line) : current;
+                signalStarted = true;
+                signal[i] = line;
+                signalDefined[i] = 1;
+            }
+        }
+        finally
+        {
+            pool.Return(rentedHigh);
+            pool.Return(rentedLow);
+        }
+    }
 }
