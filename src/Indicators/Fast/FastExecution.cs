@@ -146,6 +146,9 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<TristarCandle>(binders, t => (c, o) => FastKernels.GapContinuationCandle(c, o[0], t.Period, GapContinuationKind.Tristar));
+        Bind<TasukiGapCandle>(binders, t => (c, o) => FastKernels.GapContinuationCandle(c, o[0], t.Period, GapContinuationKind.TasukiGap));
+        Bind<UpDownSideGapThreeMethodsCandle>(binders, t => (c, o) => FastKernels.GapContinuationCandle(c, o[0], 0, GapContinuationKind.UpDownSideGapThreeMethods));
         Bind<WindowBetaStatistics>(binders, t => (c, o) => FastKernels.BetaStatistics(c, o, t));
         Bind<WindowReturnBeta>(binders, t => (c, o) => FastKernels.ReturnBeta(c, o[0], o[1], t));
         Bind<EngulfingPattern>(binders, t => (c, o) => FastKernels.Engulfing(c, o[0]));

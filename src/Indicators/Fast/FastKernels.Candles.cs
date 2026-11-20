@@ -83,6 +83,37 @@ internal static partial class FastKernels
             if (gap > margin) return 1;
             if (gap < -margin) return -1;
             if (double.IsNaN(gap)) return 0;
+            var exact = Exact(index);
+            exact.Add(upper, -(System.Numerics.BigInteger)divisor);
+            exact.Add(lower, (System.Numerics.BigInteger)divisor);
+            return exact.Sign;
+        }
+
+        /// <summary>
+        /// Sign of sum - divisor * ((a - b) - (c - d)), for the window of bars ending just before
+        /// <paramref name="index"/>.
+        /// </summary>
+        internal int Compare(int index, long divisor, double a, double b, double c, double d)
+        {
+            var scaled = divisor * (a - b - (c - d));
+            var gap = _sum - scaled;
+            var margin = _slack * _largest
+                + 8e-16 * divisor * (Math.Abs(a) + Math.Abs(b) + Math.Abs(c) + Math.Abs(d));
+            if (gap > margin) return 1;
+            if (gap < -margin) return -1;
+            if (double.IsNaN(gap)) return 0;
+            var exact = Exact(index);
+            var weight = (System.Numerics.BigInteger)divisor;
+            exact.Add(a, -weight);
+            exact.Add(b, weight);
+            exact.Add(c, weight);
+            exact.Add(d, -weight);
+            return exact.Sign;
+        }
+
+        // The window's sum without rounding.
+        private ExactMeanAccumulator Exact(int index)
+        {
             var exact = new ExactMeanAccumulator();
             for (var j = index - _period; j < index; j++)
             {
@@ -105,9 +136,7 @@ internal static partial class FastKernels
                         break;
                 }
             }
-            exact.Add(upper, -(System.Numerics.BigInteger)divisor);
-            exact.Add(lower, (System.Numerics.BigInteger)divisor);
-            return exact.Sign;
+            return exact;
         }
     }
 
@@ -398,6 +427,56 @@ internal static partial class FastKernels
             else if (c < o && previousClose >= previousOpen && o >= previousClose && c <= previousOpen
                 && (o > previousClose || c < previousOpen))
                 output[i] = -100;
+        }
+    }
+
+
+    /// <summary>
+    /// Tristar, Tasuki gap and the gap three methods: a gap between two bodies and a third candle that
+    /// reverses into it, with doji and equal-body tests measured against the average range.
+    /// </summary>
+    internal static void GapContinuationCandle(FastColumns columns, Span<double> output, int period, GapContinuationKind kind)
+    {
+        double[] open = columns.Open, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var tristar = kind == GapContinuationKind.Tristar;
+        var divisor = (long)period * (tristar ? 10 : 5);
+        // Tristar reads the average range as it stood three bars back, Tasuki two bars back.
+        var ranges = new CandleWindow(columns, CandleStatistic.Range, period);
+        var back = tristar ? 3 : 2;
+        for (var i = 0; i < n; i++)
+        {
+            if (period > 0 && i >= back) ranges.Include(i - back);
+            if (i < period + 2) continue;
+            double topA = Math.Max(open[i - 2], close[i - 2]), bottomA = Math.Min(open[i - 2], close[i - 2]);
+            double topB = Math.Max(open[i - 1], close[i - 1]), bottomB = Math.Min(open[i - 1], close[i - 1]);
+            double topC = Math.Max(open[i], close[i]), bottomC = Math.Min(open[i], close[i]);
+            bool upGap = bottomB > topA, downGap = topB < bottomA;
+            if (tristar)
+            {
+                if (ranges.Compare(i - 2, divisor, topA, bottomA) < 0 || ranges.Compare(i - 2, divisor, topB, bottomB) < 0
+                    || ranges.Compare(i - 2, divisor, topC, bottomC) < 0) continue;
+                if (upGap && topC < topB) output[i] = -100;
+                else if (downGap && bottomC > bottomB) output[i] = 100;
+                continue;
+            }
+            var white = close[i - 1] >= open[i - 1];
+            if (white == (close[i] >= open[i]) || open[i] <= bottomB || open[i] >= topB) continue;
+            if (kind == GapContinuationKind.UpDownSideGapThreeMethods)
+            {
+                if (white == (close[i - 2] >= open[i - 2]) && (white ? upGap : downGap) && close[i] > bottomA && close[i] < topA)
+                    output[i] = white ? 100 : -100;
+                continue;
+            }
+            if (white ? !upGap || close[i] >= open[i - 1] || close[i] <= topA
+                : !downGap || close[i] <= open[i - 1] || close[i] >= bottomA) continue;
+            // The two bodies are equal within the average range: range sum > divisor * |bodyB - bodyC|.
+            var larger = DifferenceSign(topB, bottomB, topC, bottomC) >= 0;
+            var near = larger ? ranges.Compare(i - 1, divisor, topB, bottomB, topC, bottomC)
+                : ranges.Compare(i - 1, divisor, topC, bottomC, topB, bottomB);
+            if (near > 0) output[i] = white ? 100 : -100;
         }
     }
 }
