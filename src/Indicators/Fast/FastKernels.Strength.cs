@@ -131,4 +131,61 @@ internal static partial class FastKernels
         }
         return smaller;
     }
+
+
+    /// <summary>
+    /// Stochastic of the close's strength over its own rolling range, zero where that range is flat, then a
+    /// mean of that and a signal mean of the result, each from its first full window.
+    /// </summary>
+    internal static void SmoothedStochasticStrength(ReadOnlySpan<double> close, double[][] outputs, SmoothedStochasticRsi owner)
+    {
+        var n = close.Length;
+        for (var slot = 0; slot < 4; slot++) outputs[slot].AsSpan(0, n).Clear();
+        var strength = new WilderStrengthOscillator(owner.RsiPeriod, WilderStrengthConvention.RsiHundredFlat);
+        var start = (long)strength.Period + strength.UnstablePeriods;
+        var first = start + owner.StochasticPeriod - 1 + owner.SmoothPeriod - 1;
+        if (first >= n) return;
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] rentedStrength = pool.Rent(n), rentedLow = pool.Rent(n), rentedHigh = pool.Rent(n);
+        try
+        {
+            // The signal output is scratch for the strength's own flags until it is written below.
+            Span<double> values = rentedStrength.AsSpan(0, n), signal = outputs[1].AsSpan(0, n);
+            WilderStrength(close, values, signal, strength.Period, strength.Convention, strength.UnstablePeriods);
+            signal.Clear();
+            var from = (int)start;
+            var count = n - from;
+            var series = values.Slice(from);
+            Span<double> lowest = rentedLow.AsSpan(0, count), highest = rentedHigh.AsSpan(0, count);
+            RollingExtreme(series, lowest, owner.StochasticPeriod, false);
+            RollingExtreme(series, highest, owner.StochasticPeriod, true);
+            var filled = owner.StochasticPeriod - 1;
+            for (var k = filled; k < count; k++)
+            {
+                // The strength carries a few units of rounding; a range no wider than that is a flat one.
+                var range = highest[k] - lowest[k];
+                highest[k] = range <= 64 * Ulp * Math.Abs(highest[k]) ? 0 : 100 * (series[k] - lowest[k]) / range;
+            }
+            var raw = highest.Slice(filled);
+            var at = from + filled;
+            var value = outputs[0].AsSpan(at);
+            if (owner.SmoothPeriod == 1) raw.CopyTo(value);
+            else Sma(raw, value, owner.SmoothPeriod);
+            var valueFirst = (int)first;
+            outputs[2].AsSpan(valueFirst, n - valueFirst).Fill(1);
+            var signalFirst = first + owner.SignalPeriod - 1;
+            if (signalFirst >= n) return;
+            var smoothed = outputs[0].AsSpan(valueFirst, n - valueFirst);
+            var line = signal.Slice(valueFirst);
+            if (owner.SignalPeriod == 1) smoothed.CopyTo(line);
+            else Sma(smoothed, line, owner.SignalPeriod);
+            outputs[3].AsSpan((int)signalFirst, n - (int)signalFirst).Fill(1);
+        }
+        finally
+        {
+            pool.Return(rentedStrength);
+            pool.Return(rentedLow);
+            pool.Return(rentedHigh);
+        }
+    }
 }
