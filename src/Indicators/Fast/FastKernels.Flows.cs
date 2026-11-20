@@ -151,7 +151,7 @@ internal static partial class FastKernels
     /// Money flow index: the share of the window's typical-price-times-volume flow that came on bars whose
     /// typical price rose.
     /// </summary>
-    internal static void MoneyFlow(FastColumns columns, Span<double> value, Span<double> defined, WindowMoneyFlowIndex owner)
+    internal static void MoneyFlow(FastColumns columns, Span<double> value, WindowMoneyFlowIndex owner)
     {
         columns.RequireHighLowClose();
         ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close, volume = columns.Volume;
@@ -161,21 +161,26 @@ internal static partial class FastKernels
         var first = (long)period + owner.SuppressedBars;
         value = value.Slice(0, n);
         value.Clear();
-        DefinedFrom(defined.Slice(0, n), first);
         if (n == 0) return;
         // Each bar's flow on the side it joined, kept so it can leave the window again.
         double[] ups = FastMath.Allocate(n), downs = FastMath.Allocate(n);
         ups[0] = downs[0] = 0;
-        // The comparison decides which side a whole bar's flow joins, so the typical price is rounded
-        // exactly as the exact route rounds it.
-        var previous = FastMath.TypicalPrice(high[0], low[0], close[0]);
+        // The comparison decides which side a whole bar's flow joins. A plain typical price is within a few
+        // units of the exactly rounded one, so it settles every comparison that is not that close; the rest
+        // are settled by the prices rounded exactly as the exact route rounds them.
+        double previous = (high[0] + low[0] + close[0]) / 3, previousScale = Math.Abs(high[0]) + Math.Abs(low[0]) + Math.Abs(close[0]);
         double positive = 0, negative = 0;
         for (var i = 1; i < n; i++)
         {
-            var typical = FastMath.TypicalPrice(high[i], low[i], close[i]);
+            double h = high[i], l = low[i], c = close[i];
+            double typical = (h + l + c) / 3, scale = Math.Abs(h) + Math.Abs(l) + Math.Abs(c);
+            var move = typical - previous;
+            if (!(Math.Abs(move) > 1e-15 * (scale + previousScale)))
+                move = FastMath.TypicalPrice(h, l, c).CompareTo(FastMath.TypicalPrice(high[i - 1], low[i - 1], close[i - 1]));
             var flow = typical * volume[i];
-            double up = typical > previous ? flow : 0, down = typical < previous ? flow : 0;
+            double up = move > 0 ? flow : 0, down = move < 0 ? flow : 0;
             previous = typical;
+            previousScale = scale;
             ups[i] = up;
             downs[i] = down;
             if (i > period && (i & RebuildMask) == 0)

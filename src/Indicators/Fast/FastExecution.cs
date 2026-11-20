@@ -323,7 +323,11 @@ internal static partial class FastExecution
         Bind<ReverseWilderAverage>(binders, t => (c, o) => FastKernels.ReverseWilder(c.Close, o[0], t.Period));
         Bind<EmaDifferenceSignal>(binders, t => (c, o) => FastKernels.EmaDifference(c, o, t));
         Bind<WindowCommodityChannelIndex>(binders, t => (c, o) => FastKernels.CommodityChannel(c, o[0], o[1], t));
-        Bind<WindowMoneyFlowIndex>(binders, t => (c, o) => FastKernels.MoneyFlow(c, o[0], o[1], t));
+        Bind<WindowMoneyFlowIndex>(binders, t => (c, o) =>
+        {
+            FastKernels.MoneyFlow(c, o[0], t);
+            o.Flag(1, (long)t.Period + t.SuppressedBars);
+        });
         Bind<WilderMovingAverage>(binders, t => (c, o) => FastKernels.WilderAverage(c.Close, o[0], t.Period, t.SeedWithAverage));
         Bind<CompensatedExponentialAverage>(binders, t => (c, o) => FastKernels.CompensatedExponential(c.Close, o[0], t.Period, t.Order));
         Bind<CandleArithmetic>(binders, t => (c, o) => FastKernels.CandleArithmetic(c, o[0], o[1], t));

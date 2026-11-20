@@ -442,7 +442,34 @@ internal static partial class FastKernels
         var n = close.Length;
         output = output.Slice(0, n);
         output.Clear();
-        for (var i = 2; i < n; i++)
+        var i = 2;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            // Whether a candle engulfs the one before it is as good as random, so the tests are taken as
+            // masks, a vector of bars at a time, instead of as branches.
+            var width = System.Numerics.Vector<double>.Count;
+            var bullish = new System.Numerics.Vector<double>(100);
+            var bearish = new System.Numerics.Vector<double>(-100);
+            for (; i <= n - width; i += width)
+            {
+                var o = new System.Numerics.Vector<double>(open, i);
+                var c = new System.Numerics.Vector<double>(close, i);
+                var po = new System.Numerics.Vector<double>(open, i - 1);
+                var pc = new System.Numerics.Vector<double>(close, i - 1);
+                var up = System.Numerics.Vector.GreaterThanOrEqual(c, o) & System.Numerics.Vector.LessThan(pc, po)
+                    & System.Numerics.Vector.LessThanOrEqual(o, pc) & System.Numerics.Vector.GreaterThanOrEqual(c, po)
+                    & (System.Numerics.Vector.LessThan(o, pc) | System.Numerics.Vector.GreaterThan(c, po));
+                var down = System.Numerics.Vector.LessThan(c, o) & System.Numerics.Vector.GreaterThanOrEqual(pc, po)
+                    & System.Numerics.Vector.GreaterThanOrEqual(o, pc) & System.Numerics.Vector.LessThanOrEqual(c, po)
+                    & (System.Numerics.Vector.GreaterThan(o, pc) | System.Numerics.Vector.LessThan(c, po));
+                System.Numerics.Vector.ConditionalSelect(up, bullish,
+                    System.Numerics.Vector.ConditionalSelect(down, bearish, System.Numerics.Vector<double>.Zero))
+                    .CopyTo(output.Slice(i, width));
+            }
+        }
+#endif
+        for (; i < n; i++)
         {
             double o = open[i], c = close[i], previousOpen = open[i - 1], previousClose = close[i - 1];
             if (c >= o && previousClose < previousOpen && o <= previousClose && c >= previousOpen
