@@ -275,4 +275,119 @@ internal static partial class FastKernels
         }
         outputs[3].AsSpan(period - 1, n - period + 1).Fill(1);
     }
+
+
+    /// <summary>
+    /// Vortex: the summed upward and downward movement over the window, each over the summed true range,
+    /// published where the window is full and has any range at all.
+    /// </summary>
+    internal static void Vortex(FastColumns columns, double[][] outputs, int period)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        for (var slot = 0; slot < 4; slot++) outputs[slot].AsSpan(0, n).Clear();
+        if (n <= period) return;
+        Span<double> positive = outputs[0].AsSpan(0, n), negative = outputs[1].AsSpan(0, n);
+        Span<double> positiveDefined = outputs[2].AsSpan(0, n), negativeDefined = outputs[3].AsSpan(0, n);
+        double ranges = 0, ups = 0, downs = 0;
+        // A sum of magnitudes is zero only when every term is, so the count of non-zero ranges decides it exactly.
+        var moving = 0;
+        for (var i = 1; i < n; i++)
+        {
+            if (i > period && (i & RebuildMask) == 0)
+            {
+                ranges = ups = downs = 0;
+                moving = 0;
+                for (var j = i - period + 1; j <= i; j++)
+                {
+                    var term = TrueRange(high[j], low[j], close[j - 1]);
+                    ranges += term;
+                    if (term != 0) moving++; // NOSONAR an exact tie is the contract
+                    ups += Math.Abs(high[j] - low[j - 1]);
+                    downs += Math.Abs(low[j] - high[j - 1]);
+                }
+            }
+            else
+            {
+                if (i > period)
+                {
+                    var j = i - period;
+                    var old = TrueRange(high[j], low[j], close[j - 1]);
+                    ranges -= old;
+                    if (old != 0) moving--; // NOSONAR an exact tie is the contract
+                    ups -= Math.Abs(high[j] - low[j - 1]);
+                    downs -= Math.Abs(low[j] - high[j - 1]);
+                }
+                var range = TrueRange(high[i], low[i], close[i - 1]);
+                ranges += range;
+                if (range != 0) moving++; // NOSONAR an exact tie is the contract
+                ups += Math.Abs(high[i] - low[i - 1]);
+                downs += Math.Abs(low[i] - high[i - 1]);
+            }
+            if (i < period || moving == 0) continue;
+            positive[i] = ups / ranges;
+            negative[i] = downs / ranges;
+            positiveDefined[i] = negativeDefined[i] = 1;
+        }
+    }
+
+    /// <summary>
+    /// Choppiness index: the log of the summed true intervals over the span they cover, scaled by the log of
+    /// the period, published where the window is full and spans a range.
+    /// </summary>
+    internal static void Choppiness(FastColumns columns, Span<double> value, Span<double> defined, int period)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        value = value.Slice(0, n);
+        defined = defined.Slice(0, n);
+        value.Clear();
+        defined.Clear();
+        if (n <= period) return;
+        var count = n - 1;
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] rentedTop = pool.Rent(count), rentedBottom = pool.Rent(count), rentedHighest = pool.Rent(count),
+            rentedLowest = pool.Rent(count);
+        try
+        {
+            Span<double> top = rentedTop.AsSpan(0, count), bottom = rentedBottom.AsSpan(0, count);
+            Span<double> highest = rentedHighest.AsSpan(0, count), lowest = rentedLowest.AsSpan(0, count);
+            for (var i = 1; i < n; i++)
+            {
+                top[i - 1] = Math.Max(high[i], close[i - 1]);
+                bottom[i - 1] = Math.Min(low[i], close[i - 1]);
+            }
+            RollingExtreme(top, highest, period, true);
+            RollingExtreme(bottom, lowest, period, false);
+            var scale = 100 / Math.Log(period);
+            double sum = 0;
+            for (var k = 0; k < count; k++)
+            {
+                if (k >= period && (k & RebuildMask) == 0)
+                {
+                    sum = 0;
+                    for (var j = k - period + 1; j <= k; j++) sum += top[j] - bottom[j];
+                }
+                else
+                {
+                    if (k >= period) sum -= top[k - period] - bottom[k - period];
+                    sum += top[k] - bottom[k];
+                }
+                if (k < period - 1) continue;
+                var span = highest[k] - lowest[k];
+                if (span == 0) continue; // NOSONAR an exact tie is the contract
+                value[k + 1] = scale * Math.Log(sum / span);
+                defined[k + 1] = 1;
+            }
+        }
+        finally
+        {
+            pool.Return(rentedTop);
+            pool.Return(rentedBottom);
+            pool.Return(rentedHighest);
+            pool.Return(rentedLowest);
+        }
+    }
 }
