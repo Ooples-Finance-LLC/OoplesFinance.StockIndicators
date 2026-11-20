@@ -178,23 +178,27 @@ internal static partial class FastKernels
         ReadOnlySpan<double> high = columns.High, low = columns.Low;
         var n = high.Length;
         var period = owner.Period;
-        double[] raised = FastMath.Allocate(n), lowered = FastMath.Allocate(n);
+        // The two working series are borrowed, and a bar's two quotients share the one division.
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] raised = pool.Rent(n), lowered = pool.Rent(n);
         for (var i = 0; i < n; i++)
         {
             double h = high[i], l = low[i], sum = h + l;
-            if (sum == 0)
+            if (sum == 0) // NOSONAR an exact zero is the contract
             {
                 raised[i] = h;
                 lowered[i] = l;
                 continue;
             }
-            var spread = 4 * (h - l);
-            raised[i] = h * (sum + spread) / sum;
-            lowered[i] = l * (sum - spread) / sum;
+            double spread = 4 * (h - l), inverse = 1 / sum;
+            raised[i] = h * (sum + spread) * inverse;
+            lowered[i] = l * (sum - spread) * inverse;
         }
-        RebuiltMean(raised, outputs[0].AsSpan(0, n), period);
+        RebuiltMean(raised.AsSpan(0, n), outputs[0].AsSpan(0, n), period);
         RebuiltMean(columns.Close, outputs[1].AsSpan(0, n), period);
-        RebuiltMean(lowered, outputs[2].AsSpan(0, n), period);
+        RebuiltMean(lowered.AsSpan(0, n), outputs[2].AsSpan(0, n), period);
+        pool.Return(raised);
+        pool.Return(lowered);
         for (var slot = 3; slot < 6; slot++) outputs.Flag(slot, period - 1L);
     }
 
@@ -203,17 +207,33 @@ internal static partial class FastKernels
     private static void RebuiltMean(ReadOnlySpan<double> input, Span<double> output, int period)
     {
         var n = input.Length;
-        double sum = 0;
-        for (var i = 0; i < n; i++)
+        output = output.Slice(0, n);
+        double sum = 0, inverse = 1.0 / period;
+        var i = 0;
+        var filled = Math.Min(period, n);
+        for (; i < filled; i++)
         {
-            if (i >= period && (i & RebuildMask) == 0)
+            sum += input[i];
+            output[i] = i < period - 1 ? 0 : sum * inverse;
+        }
+        // Between rebuilds the sum only slides, so that stretch is a loop with nothing to decide in it.
+        while (i < n)
+        {
+            if ((i & RebuildMask) == 0)
             {
                 sum = 0;
                 for (var j = i - period + 1; j <= i; j++) sum += input[j];
+                output[i++] = sum * inverse;
             }
-            else
-                sum += i >= period ? input[i] - input[i - period] : input[i];
-            output[i] = i < period - 1 ? 0 : sum / period;
+            var end = Math.Min(n, (i | RebuildMask) + 1);
+            ReadOnlySpan<double> entering = input.Slice(i, end - i), leaving = input.Slice(i - period, end - i);
+            var target = output.Slice(i, end - i);
+            for (var j = 0; j < target.Length; j++)
+            {
+                sum += entering[j] - leaving[j];
+                target[j] = sum * inverse;
+            }
+            i = end;
         }
     }
 
