@@ -390,4 +390,47 @@ internal static partial class FastKernels
             pool.Return(rentedLowest);
         }
     }
+
+
+    /// <summary>
+    /// Chandelier exits: the window's highest high less a multiple of the average true range, and its
+    /// lowest low plus the same, from the bar the average first exists.
+    /// </summary>
+    internal static void ChandelierExit(FastColumns columns, double[][] outputs, int period, double multiplier,
+        ChandelierExitSelection selection, bool zeroFloorHigh)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        for (var slot = 0; slot < 4; slot++) outputs[slot].AsSpan(0, n).Clear();
+        if (n <= period) return;
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] rentedAverage = pool.Rent(n), rentedExtreme = pool.Rent(n);
+        try
+        {
+            Span<double> average = rentedAverage.AsSpan(0, n), extreme = rentedExtreme.AsSpan(0, n);
+            SeededAverageTrueRange(high, low, close, average, period, false);
+            var count = n - period;
+            if (selection != ChandelierExitSelection.Short)
+            {
+                RollingExtreme(high, extreme, period, true);
+                var exit = outputs[0].AsSpan(0, n);
+                for (var i = period; i < n; i++)
+                    exit[i] = (zeroFloorHigh ? Math.Max(0, extreme[i]) : extreme[i]) - multiplier * average[i];
+                outputs[2].AsSpan(period, count).Fill(1);
+            }
+            if (selection != ChandelierExitSelection.Long)
+            {
+                RollingExtreme(low, extreme, period, false);
+                var exit = outputs[1].AsSpan(0, n);
+                for (var i = period; i < n; i++) exit[i] = extreme[i] + multiplier * average[i];
+                outputs[3].AsSpan(period, count).Fill(1);
+            }
+        }
+        finally
+        {
+            pool.Return(rentedAverage);
+            pool.Return(rentedExtreme);
+        }
+    }
 }
