@@ -217,7 +217,7 @@ internal static partial class FastExecution
         Bind<PriceCircularTransform>(binders, t => (c, o) => FastKernels.Circular(c.Close, o, t.Operation));
         Bind<PriceTranscendentalTransform>(binders, t => (c, o) => FastKernels.Transcendental(c.Close, o, t.Operation));
         Bind<TripleExponentialRate>(binders, t => (c, o) => FastKernels.TripleRate(c.Close, o, t));
-        Bind<PriorSeededDirectionalMeasure>(binders, t => (c, o) => FastKernels.Directional(c, o[0], o[1], t));
+        Bind<PriorSeededDirectionalMeasure>(binders, t => (c, o) => FastKernels.Directional(c, o, t));
         Bind<WindowDispersion>(binders, t => (c, o) => FastKernels.Dispersion(c.Close, o[0], t));
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
