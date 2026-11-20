@@ -710,4 +710,69 @@ internal static partial class FastKernels
             output[i] = river || kind == TripleBodyCandleKind.ThreeInside && closeA < openA ? 100 : -100;
         }
     }
+
+
+    /// <summary>
+    /// Counterattack, separating lines and gap side-by-side white lines: two candles whose closes or
+    /// opens match within a fraction of the average range.
+    /// </summary>
+    internal static void MatchedLinesCandle(FastColumns columns, Span<double> output, int bodyPeriod, int rangePeriod,
+        int equalPeriod, MatchedLinesKind kind)
+    {
+        double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var gap = kind == MatchedLinesKind.GapSideBySideWhiteLines;
+        var counter = kind == MatchedLinesKind.Counterattack;
+        var warmup = Math.Max(bodyPeriod, Math.Max(rangePeriod, equalPeriod)) + (gap ? 2 : 1);
+        var equals = new CandleWindow(columns, CandleStatistic.Range, equalPeriod);
+        var bodies = new CandleWindow(columns, CandleStatistic.Body, bodyPeriod);
+        var laggedBodies = new CandleWindow(columns, CandleStatistic.Body, bodyPeriod);
+        var ranges = new CandleWindow(columns, CandleStatistic.Range, rangePeriod);
+        long equalDivisor = 20L * equalPeriod, rangeDivisor = (long)rangePeriod * (gap ? 5 : 10);
+        for (var i = 0; i < n; i++)
+        {
+            if (i >= 2)
+            {
+                equals.Include(i - 2);
+                if (counter) laggedBodies.Include(i - 2);
+                if (gap) ranges.Include(i - 2);
+            }
+            if (i >= 1)
+            {
+                if (!gap) bodies.Include(i - 1);
+                if (kind == MatchedLinesKind.SeparatingLines) ranges.Include(i - 1);
+            }
+            if (i < warmup) continue;
+            double openB = open[i - 1], closeB = close[i - 1], o = open[i], c = close[i];
+            if (gap)
+            {
+                if (closeB < openB || c < o) continue;
+                double topA = Math.Max(open[i - 2], close[i - 2]), bottomA = Math.Min(open[i - 2], close[i - 2]);
+                bool up = openB > topA && o > topA, down = closeB < bottomA && c < bottomA;
+                if (!up && !down) continue;
+                if (equals.Compare(i - 1, equalDivisor, Math.Max(openB, o), Math.Min(openB, o)) < 0) continue;
+                var near = DifferenceSign(c, o, closeB, openB) >= 0
+                    ? ranges.Compare(i - 1, rangeDivisor, c, o, closeB, openB)
+                    : ranges.Compare(i - 1, rangeDivisor, closeB, openB, c, o);
+                if (near >= 0) output[i] = up ? 100 : -100;
+                continue;
+            }
+            if ((closeB < openB) == (c < o)) continue;
+            if (bodies.Compare(i, bodyPeriod, Math.Max(o, c), Math.Min(o, c)) >= 0) continue;
+            if (counter)
+            {
+                if (laggedBodies.Compare(i - 1, bodyPeriod, Math.Max(openB, closeB), Math.Min(openB, closeB)) >= 0) continue;
+                if (equals.Compare(i - 1, equalDivisor, Math.Max(closeB, c), Math.Min(closeB, c)) < 0) continue;
+            }
+            else
+            {
+                if (equals.Compare(i - 1, equalDivisor, Math.Max(openB, o), Math.Min(openB, o)) < 0) continue;
+                var shadow = c >= o ? ranges.Compare(i, rangeDivisor, o, low[i]) : ranges.Compare(i, rangeDivisor, high[i], o);
+                if (shadow <= 0) continue;
+            }
+            output[i] = c >= o ? 100 : -100;
+        }
+    }
 }

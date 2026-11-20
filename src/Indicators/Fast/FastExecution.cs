@@ -146,6 +146,9 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<CounterattackCandle>(binders, t => (c, o) => FastKernels.MatchedLinesCandle(c, o[0], t.BodyPeriod, 0, t.EqualPeriod, MatchedLinesKind.Counterattack));
+        Bind<SeparatingLinesCandle>(binders, t => (c, o) => FastKernels.MatchedLinesCandle(c, o[0], t.BodyPeriod, t.ShadowPeriod, t.EqualPeriod, MatchedLinesKind.SeparatingLines));
+        Bind<GapSideBySideWhiteLinesCandle>(binders, t => (c, o) => FastKernels.MatchedLinesCandle(c, o[0], 0, t.NearPeriod, t.EqualPeriod, MatchedLinesKind.GapSideBySideWhiteLines));
         Bind<ThreeInsideCandle>(binders, t => (c, o) => FastKernels.TripleBodyCandle(c, o[0], t.LongPeriod, t.ShortPeriod, TripleBodyCandleKind.ThreeInside));
         Bind<TwoCrowsCandle>(binders, t => (c, o) => FastKernels.TripleBodyCandle(c, o[0], t.LongPeriod, t.LongPeriod, TripleBodyCandleKind.TwoCrows));
         Bind<UpsideGapTwoCrowsCandle>(binders, t => (c, o) => FastKernels.TripleBodyCandle(c, o[0], t.LongPeriod, t.ShortPeriod, TripleBodyCandleKind.UpsideGapTwoCrows));
