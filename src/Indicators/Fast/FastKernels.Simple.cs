@@ -198,14 +198,31 @@ internal static partial class FastKernels
         up.Slice(0, first).Clear();
         down.Slice(0, first).Clear();
         oscillator.Slice(0, first).Clear();
+        if (period > AroonTableLimit)
+        {
+            for (var i = first; i < n; i++)
+            {
+                long highest = (long)up[i], lowest = (long)down[i];
+                up[i] = WindowAroon.Percentage(period - (i - highest), period);
+                down[i] = WindowAroon.Percentage(period - (i - lowest), period);
+                oscillator[i] = WindowAroon.Percentage(highest - lowest, period);
+            }
+            return;
+        }
+        // An extreme is at most a window old, so every percentage is one of a few values: they are divided
+        // once each instead of three times a bar. Entry k holds the percentage of k - period.
+        var percentages = new double[2 * period + 3];
+        for (var k = 0; k < percentages.Length; k++) percentages[k] = WindowAroon.Percentage(k - period - 1L, period);
         for (var i = first; i < n; i++)
         {
-            long highest = (long)up[i], lowest = (long)down[i];
-            up[i] = WindowAroon.Percentage(period - (i - highest), period);
-            down[i] = WindowAroon.Percentage(period - (i - lowest), period);
-            oscillator[i] = WindowAroon.Percentage(highest - lowest, period);
+            int highest = (int)up[i], lowest = (int)down[i];
+            up[i] = percentages[2 * period + 1 - (i - highest)];
+            down[i] = percentages[2 * period + 1 - (i - lowest)];
+            oscillator[i] = percentages[period + 1 + (highest - lowest)];
         }
     }
+
+    private const int AroonTableLimit = 4096;
 
     /// <summary>Half the sum of the window's lowest and highest value.</summary>
     internal static void RangeMidpoint(ReadOnlySpan<double> lows, ReadOnlySpan<double> highs, Span<double> output, int period)

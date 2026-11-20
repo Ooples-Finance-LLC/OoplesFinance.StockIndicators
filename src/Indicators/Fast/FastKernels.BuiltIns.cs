@@ -117,11 +117,34 @@ internal static partial class FastKernels
         ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close, volume = columns.Volume;
         var n = close.Length;
         line = line.Slice(0, n);
-        double total = 0;
-        for (var i = 0; i < n; i++)
+        // Each bar's flow first, a vector of bars at a time, then the running total in bar order: the
+        // divisions do not wait on one another, and the total adds the same terms in the same order.
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            for (; i <= n - width; i += width)
+            {
+                var h = new System.Numerics.Vector<double>(high.Slice(i, width));
+                var l = new System.Numerics.Vector<double>(low.Slice(i, width));
+                var c = new System.Numerics.Vector<double>(close.Slice(i, width));
+                var flow = (c - l - (h - c)) * new System.Numerics.Vector<double>(volume.Slice(i, width)) / (h - l);
+                // A bar with no range divides by zero here and is then replaced by the zero it adds.
+                System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.Equals(h, l),
+                    System.Numerics.Vector<double>.Zero, flow).CopyTo(line.Slice(i, width));
+            }
+        }
+#endif
+        for (; i < n; i++)
         {
             double h = high[i], l = low[i], c = close[i];
-            if (h != l) total += (c - l - (h - c)) * volume[i] / (h - l); // NOSONAR an exact tie is the contract
+            line[i] = h != l ? (c - l - (h - c)) * volume[i] / (h - l) : 0; // NOSONAR an exact tie is the contract
+        }
+        double total = 0;
+        for (i = 0; i < n; i++)
+        {
+            total += line[i];
             line[i] = total;
         }
         RunningSeedEma(line, signal, length);
