@@ -146,6 +146,11 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<AverageRangeDoji>(binders, t => (c, o) => FastKernels.AverageRangeDojiCandle(c, o[0], t.Period, AverageRangeDojiKind.Body));
+        Bind<AverageRangeDragonflyDoji>(binders, t => (c, o) => FastKernels.AverageRangeDojiCandle(c, o[0], t.Period, AverageRangeDojiKind.Dragonfly));
+        Bind<AverageRangeGravestoneDoji>(binders, t => (c, o) => FastKernels.AverageRangeDojiCandle(c, o[0], t.Period, AverageRangeDojiKind.Gravestone));
+        Bind<AverageRangeLongLeggedDoji>(binders, t => (c, o) => FastKernels.AverageRangeDojiCandle(c, o[0], t.Period, AverageRangeDojiKind.LongLegged));
+        Bind<TakuriLineCandle>(binders, t => (c, o) => FastKernels.AverageRangeDojiCandle(c, o[0], t.Period, AverageRangeDojiKind.TakuriLine));
         Bind<OnNeckCandle>(binders, t => (c, o) => FastKernels.NeckCandle(c, o[0], t.BodyPeriod, t.EqualPeriod, NeckCandleKind.OnNeck));
         Bind<InNeckCandle>(binders, t => (c, o) => FastKernels.NeckCandle(c, o[0], t.BodyPeriod, t.EqualPeriod, NeckCandleKind.InNeck));
         Bind<ThrustingCandle>(binders, t => (c, o) => FastKernels.NeckCandle(c, o[0], t.BodyPeriod, t.EqualPeriod, NeckCandleKind.Thrusting));

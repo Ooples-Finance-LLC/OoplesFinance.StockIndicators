@@ -607,4 +607,56 @@ internal static partial class FastKernels
             if (equal < 0 && DifferenceSign(previousOpen, c, c, previousClose) >= 0) output[i] = -100;
         }
     }
+
+
+    // Sign of a - b - multiplier * (c - d), exactly.
+    private static int DifferenceSign(double a, double b, double c, double d, int multiplier)
+    {
+        var gap = a - b - multiplier * (c - d);
+        var margin = 8e-16 * (Math.Abs(a) + Math.Abs(b) + multiplier * (Math.Abs(c) + Math.Abs(d)));
+        if (gap > margin) return 1;
+        if (gap < -margin) return -1;
+        var exact = new ExactMeanAccumulator();
+        exact.Add(a);
+        exact.Add(b, -1);
+        exact.Add(c, -multiplier);
+        exact.Add(d, multiplier);
+        return exact.Sign;
+    }
+
+    /// <summary>
+    /// Doji measured against the average range of the bars before it: a body no larger than a tenth of
+    /// that average, alone or with the shadows that make a dragonfly, gravestone, long-legged doji or
+    /// takuri line.
+    /// </summary>
+    internal static void AverageRangeDojiCandle(FastColumns columns, Span<double> output, int period, AverageRangeDojiKind kind)
+    {
+        double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var warmup = kind == AverageRangeDojiKind.Dragonfly ? period + 1 : period;
+        var ranges = new CandleWindow(columns, CandleStatistic.Range, period);
+        var tenth = 10L * period;
+        for (var i = 0; i < n; i++)
+        {
+            if (i >= 1) ranges.Include(i - 1);
+            if (i < warmup) continue;
+            double top = Math.Max(open[i], close[i]), bottom = Math.Min(open[i], close[i]);
+            if (ranges.Compare(i, tenth, top, bottom) < 0) continue;
+            var matches = kind switch
+            {
+                AverageRangeDojiKind.Dragonfly => ranges.Compare(i, tenth, high[i], top) > 0
+                    && ranges.Compare(i, tenth, bottom, low[i]) < 0,
+                AverageRangeDojiKind.Gravestone => ranges.Compare(i, tenth, bottom, low[i]) > 0
+                    && ranges.Compare(i, tenth, high[i], top) < 0,
+                AverageRangeDojiKind.TakuriLine => ranges.Compare(i, tenth, high[i], top) > 0
+                    && DifferenceSign(bottom, low[i], top, bottom, 2) > 0,
+                AverageRangeDojiKind.LongLegged => DifferenceSign(high[i], top, top, bottom, 1) > 0
+                    || DifferenceSign(bottom, low[i], top, bottom, 1) > 0,
+                _ => true,
+            };
+            if (matches) output[i] = 100;
+        }
+    }
 }
