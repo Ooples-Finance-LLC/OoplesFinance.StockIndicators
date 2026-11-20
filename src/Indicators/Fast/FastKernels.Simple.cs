@@ -878,52 +878,87 @@ internal static partial class FastKernels
         var period = owner.Period;
         value = value.Slice(0, n);
         defined = defined.Slice(0, n);
-        value.Clear();
-        defined.Clear();
-        if (n < period) return;
+        if (n < period)
+        {
+            value.Clear();
+            defined.Clear();
+            return;
+        }
+        value.Slice(0, period - 1).Clear();
+        defined.Slice(0, period - 1).Clear();
         int leftRun = 0, rightRun = 0;
         for (var i = 0; i < period - 1; i++)
         {
             leftRun = i > 0 && left[i] == left[i - 1] ? leftRun + 1 : 1; // NOSONAR an exact tie is the contract
             rightRun = i > 0 && right[i] == right[i - 1] ? rightRun + 1 : 1; // NOSONAR an exact tie is the contract
         }
-        var sums = default(PairSums);
         var block = Math.Max(64, period);
-        // Starting at the block length makes the first full window a fresh sum.
-        var slid = block;
         // One division for the window instead of three a bar.
         var inverse = 1.0 / period;
-        for (var i = period - 1; i < n; i++)
+        var flat = owner.FlatZero ? 1.0 : 0.0;
+        var at = period - 1;
+        // Whether the bar a block starts on already has its runs counted: it does when the block before it
+        // stopped there to sum the window afresh.
+        var counted = false;
+        while (at < n)
         {
-            leftRun = i > 0 && left[i] == left[i - 1] ? leftRun + 1 : 1; // NOSONAR an exact tie is the contract
-            rightRun = i > 0 && right[i] == right[i - 1] ? rightRun + 1 : 1; // NOSONAR an exact tie is the contract
-            var from = i - period + 1;
-            if (slid >= block) sums = PairSums.Of(left.Slice(from, period), right.Slice(from, period));
-            else sums.Slide(left[i], right[i], left[from - 1], right[from - 1]);
-            slid = slid >= block ? 1 : slid + 1;
+            // A block starts on a fresh sum of its first window, around that window's newest pair.
+            if (!counted)
+            {
+                leftRun = at > 0 && left[at] == left[at - 1] ? leftRun + 1 : 1; // NOSONAR an exact tie is the contract
+                rightRun = at > 0 && right[at] == right[at - 1] ? rightRun + 1 : 1; // NOSONAR an exact tie is the contract
+            }
+            counted = false;
+            var from = at - period + 1;
+            var sums = PairSums.Of(left.Slice(from, period), right.Slice(from, period));
             if (leftRun >= period || rightRun >= period)
             {
-                if (owner.FlatZero) defined[i] = 1;
-                continue;
+                value[at] = 0;
+                defined[at] = flat;
             }
-            double a = sums.Xx - sums.X * sums.X * inverse, b = sums.Yy - sums.Y * sums.Y * inverse;
-            // Where a variance is a small remainder of its sum of squares, the window is summed around its
-            // own means instead, and the sliding sums restart from there.
-            if (!(a > 1e-4 * sums.Xx) || !(b > 1e-4 * sums.Yy))
+            else
             {
-                sums = PairSums.Of(left.Slice(from, period), right.Slice(from, period));
-                slid = 1;
-                a = sums.Xx - sums.X * sums.X * inverse;
-                b = sums.Yy - sums.Y * sums.Y * inverse;
-                if (!(a > 1e-4 * sums.Xx) || !(b > 1e-4 * sums.Yy))
+                double a = sums.Xx - sums.X * sums.X * inverse, b = sums.Yy - sums.Y * sums.Y * inverse;
+                // Where a variance is a small remainder even of a fresh sum of squares, the window is summed
+                // around its own means instead.
+                value[at] = !(a > 1e-4 * sums.Xx) || !(b > 1e-4 * sums.Yy)
+                    ? CenteredCorrelation(left.Slice(from, period), right.Slice(from, period))
+                    : (sums.Xy - sums.X * sums.Y * inverse) / Math.Sqrt(a * b);
+                defined[at] = 1;
+            }
+            at++;
+            // The rest of the block slides those sums, held where the compiler can keep them in registers.
+            double anchorX = sums.AnchorX, anchorY = sums.AnchorY, sumX = sums.X, sumY = sums.Y;
+            double sumXx = sums.Xx, sumYy = sums.Yy, sumXy = sums.Xy;
+            var end = (int)Math.Min((long)at + block - 1, n);
+            for (; at < end; at++)
+            {
+                leftRun = left[at] == left[at - 1] ? leftRun + 1 : 1; // NOSONAR an exact tie is the contract
+                rightRun = right[at] == right[at - 1] ? rightRun + 1 : 1; // NOSONAR an exact tie is the contract
+                double x = left[at] - anchorX, y = right[at] - anchorY;
+                double oldX = left[at - period] - anchorX, oldY = right[at - period] - anchorY;
+                sumX += x - oldX;
+                sumY += y - oldY;
+                sumXx += x * x - oldX * oldX;
+                sumYy += y * y - oldY * oldY;
+                sumXy += x * y - oldX * oldY;
+                if (leftRun >= period || rightRun >= period)
                 {
-                    value[i] = CenteredCorrelation(left.Slice(from, period), right.Slice(from, period));
-                    defined[i] = 1;
+                    value[at] = 0;
+                    defined[at] = flat;
                     continue;
                 }
+                double a = sumXx - sumX * sumX * inverse, b = sumYy - sumY * sumY * inverse;
+                // Where a variance is a small remainder of its sum of squares, the block stops and the next
+                // one starts here, on a fresh sum.
+                if (!(a > 1e-4 * sumXx) || !(b > 1e-4 * sumYy))
+                {
+                    counted = true;
+                    break;
+                }
+                value[at] = (sumXy - sumX * sumY * inverse) / Math.Sqrt(a * b);
+                defined[at] = 1;
             }
-            value[i] = (sums.Xy - sums.X * sums.Y * inverse) / Math.Sqrt(a * b);
-            defined[i] = 1;
         }
     }
 
@@ -946,16 +981,6 @@ internal static partial class FastKernels
                 sums.Xy += x * y;
             }
             return sums;
-        }
-
-        internal void Slide(double enterX, double enterY, double leaveX, double leaveY)
-        {
-            double x = enterX - AnchorX, y = enterY - AnchorY, oldX = leaveX - AnchorX, oldY = leaveY - AnchorY;
-            X += x - oldX;
-            Y += y - oldY;
-            Xx += x * x - oldX * oldX;
-            Yy += y * y - oldY * oldY;
-            Xy += x * y - oldX * oldY;
         }
     }
 
