@@ -125,4 +125,51 @@ internal static partial class FastKernels
             };
         }
     }
+
+
+    /// <summary>
+    /// Regression channels: the closes are cut into whole blocks counted back from the last bar, each
+    /// fitted with its own least-squares line and a channel a multiple of the block's deviation either side.
+    /// </summary>
+    internal static void RegressionChannels(ReadOnlySpan<double> close, double[][] outputs, int? period, double deviations)
+    {
+        var n = close.Length;
+        var length = period ?? n;
+        if (length < 2) throw new ArgumentOutOfRangeException(nameof(period), "A whole-input fit requires at least two bars.");
+        for (var slot = 0; slot < 7; slot++) outputs[slot].AsSpan(0, n).Clear();
+        if (n < length) return;
+        var leading = n % length;
+        Span<double> center = outputs[0].AsSpan(0, n), upper = outputs[1].AsSpan(0, n), lower = outputs[2].AsSpan(0, n);
+        var breaks = outputs[3].AsSpan(0, n);
+        for (var slot = 4; slot < 7; slot++) outputs[slot].AsSpan(leading, n - leading).Fill(1);
+        var middle = 0.5 * (length - 1);
+        // The sum of squared offsets from the middle of 0..length-1.
+        var spread = length * ((double)length * length - 1) / 12;
+        for (var start = leading; start < n; start += length)
+        {
+            var block = close.Slice(start, length);
+            var anchor = block[0];
+            double sum = 0;
+            for (var j = 0; j < length; j++) sum += block[j] - anchor;
+            var mean = sum / length;
+            double squares = 0, cross = 0;
+            for (var j = 0; j < length; j++)
+            {
+                var y = block[j] - anchor - mean;
+                squares += y * y;
+                cross += (j - middle) * y;
+            }
+            var slope = cross / spread;
+            var width = Math.Sqrt(squares / length) * deviations;
+            var level = anchor + mean;
+            breaks[start] = 1;
+            for (var j = 0; j < length; j++)
+            {
+                var value = level + slope * (j - middle);
+                center[start + j] = value;
+                upper[start + j] = value + width;
+                lower[start + j] = value - width;
+            }
+        }
+    }
 }
