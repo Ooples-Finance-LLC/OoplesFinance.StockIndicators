@@ -35,19 +35,28 @@ internal static class FastMath
     /// <summary>Whether every element is finite, checked a vector at a time.</summary>
     internal static bool AllFinite(ReadOnlySpan<double> values)
     {
-        // value - value is zero for a finite value and NaN for an infinity or a NaN.
+        // value - value is +0 for a finite value and NaN for an infinity or a NaN, so the OR of the
+        // differences' bits is zero only when every value is finite. Four accumulators and a bitwise OR
+        // keep the loop off the adder's latency, which a single running sum is bound by.
         var i = 0;
 #if !NETFRAMEWORK
-        if (System.Numerics.Vector.IsHardwareAccelerated && values.Length >= System.Numerics.Vector<double>.Count)
+        var width = System.Numerics.Vector<double>.Count;
+        if (System.Numerics.Vector.IsHardwareAccelerated && values.Length >= 4 * width)
         {
-            var width = System.Numerics.Vector<double>.Count;
-            var check = System.Numerics.Vector<double>.Zero;
-            for (; i <= values.Length - width; i += width)
+            System.Numerics.Vector<long> a = default, b = default, c = default, d = default;
+            for (; i <= values.Length - 4 * width; i += 4 * width)
             {
-                var v = new System.Numerics.Vector<double>(values.Slice(i, width));
-                check += v - v;
+                var block = values.Slice(i, 4 * width);
+                var v0 = new System.Numerics.Vector<double>(block);
+                var v1 = new System.Numerics.Vector<double>(block.Slice(width));
+                var v2 = new System.Numerics.Vector<double>(block.Slice(2 * width));
+                var v3 = new System.Numerics.Vector<double>(block.Slice(3 * width));
+                a |= System.Numerics.Vector.AsVectorInt64(v0 - v0);
+                b |= System.Numerics.Vector.AsVectorInt64(v1 - v1);
+                c |= System.Numerics.Vector.AsVectorInt64(v2 - v2);
+                d |= System.Numerics.Vector.AsVectorInt64(v3 - v3);
             }
-            if (!System.Numerics.Vector.EqualsAll(check, System.Numerics.Vector<double>.Zero)) return false;
+            if (!System.Numerics.Vector.EqualsAll(a | b | c | d, System.Numerics.Vector<long>.Zero)) return false;
         }
 #endif
         double tail = 0;

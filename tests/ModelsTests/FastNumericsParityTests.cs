@@ -962,6 +962,25 @@ public sealed class FastNumericsParityTests
     }
 
     [Fact]
+    public void TheFiniteCheckFindsANonFiniteValueAtEveryPosition()
+    {
+        // Lengths on both sides of every vector and unrolled-block boundary, and a negative zero, which is finite.
+        foreach (var length in new[] { 0, 1, 3, 4, 7, 15, 16, 17, 31, 32, 33, 63, 64, 65, 100 })
+        {
+            var values = Enumerable.Range(0, length).Select(i => i % 5 == 0 ? -0.0 : i * 1e300 / 3 - 1e299).ToArray();
+            Assert.True(OoplesFinance.StockIndicators.Indicators.Fast.FastMath.AllFinite(values), $"length {length}");
+            foreach (var bad in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+            for (var at = 0; at < length; at++)
+            {
+                var kept = values[at];
+                values[at] = bad;
+                Assert.False(OoplesFinance.StockIndicators.Indicators.Fast.FastMath.AllFinite(values), $"length {length}, {bad} at {at}");
+                values[at] = kept;
+            }
+        }
+    }
+
+    [Fact]
     public async Task AKernelThatDoesNotCoverAConfigurationLeavesItToTheExactRoute()
     {
         var bars = Walk(200, 19);
