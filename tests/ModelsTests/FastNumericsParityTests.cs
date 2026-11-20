@@ -953,6 +953,10 @@ public sealed class FastNumericsParityTests
         foreach (var (fixture, bars) in Fixtures())
         {
             var exactIndicator = create();
+            // Over bars that do not move a strength index is one value in real arithmetic, and where it sits in
+            // its own range is then decided by how each route rounds its decaying averages: zero on one bar and
+            // a hundred on the next, on either route. There is nothing there for the two to agree on.
+            if (fixture == FlatStretch && exactIndicator is ClassicStochasticRsi or SmoothedStochasticRsi) continue;
             // Some indicators have no finite value on some fixtures (a division by a close of exactly zero).
             // The exact route rejects those; the fast route must reject them at the same bar with the same value.
             IndicatorOutputException? rejection = null;
@@ -1352,7 +1356,13 @@ public sealed class FastNumericsParityTests
         // Zero prices make every ratio zero over zero, which each indicator defines for itself.
         yield return ("zero", Enumerable.Range(0, 60).Select(i => new Bar(Day(i), 0, 0, 0, 0, 0)).ToArray());
         yield return ("flat", Enumerable.Range(0, 250).Select(i => new Bar(Day(i), 50, 50, 50, 50, 1000)).ToArray());
+        // A flat stretch inside a moving series: windows go flat and come back, so a flag that is declared to
+        // turn on once has to give way to one written bar by bar.
+        yield return (FlatStretch, Walk(300, 53).Select((bar, i) =>
+            i is >= 120 and < 170 ? new Bar(bar.Time, 50, 50, 50, 50, 1000) : bar).ToArray());
     }
+
+    private const string FlatStretch = "flat stretch";
 
     private static DateTime Day(int index) => new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddDays(index);
 

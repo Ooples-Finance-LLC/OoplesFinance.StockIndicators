@@ -175,6 +175,9 @@ internal static partial class FastKernels
         // are settled by the prices rounded exactly as the exact route rounds them.
         double previous = (high[0] + low[0] + close[0]) / 3, previousScale = Math.Abs(high[0]) + Math.Abs(low[0]) + Math.Abs(close[0]);
         double positive = 0, negative = 0;
+        // How many bars of the window have a flow on each side. A side with none is exactly zero, which a sum
+        // that has slid over larger flows no longer is.
+        int rises = 0, falls = 0;
         for (var i = 1; i < n; i++)
         {
             double h = high[i], l = low[i], c = close[i];
@@ -188,6 +191,13 @@ internal static partial class FastKernels
             previousScale = scale;
             ups[i] = up;
             downs[i] = down;
+            rises += up != 0 ? 1 : 0; // NOSONAR an exact zero is the contract
+            falls += down != 0 ? 1 : 0; // NOSONAR an exact zero is the contract
+            if (i > period)
+            {
+                rises -= ups[i - period] != 0 ? 1 : 0; // NOSONAR an exact zero is the contract
+                falls -= downs[i - period] != 0 ? 1 : 0; // NOSONAR an exact zero is the contract
+            }
             if (i > period && (i & RebuildMask) == 0)
             {
                 positive = negative = 0;
@@ -207,6 +217,8 @@ internal static partial class FastKernels
                 positive += up;
                 negative += down;
             }
+            positive = FastMath.KeepIf(positive, rises != 0);
+            negative = FastMath.KeepIf(negative, falls != 0);
             if (i < first) continue;
             var total = positive + negative;
             if (minimumTotalOne)
