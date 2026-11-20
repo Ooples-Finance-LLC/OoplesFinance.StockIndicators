@@ -34,7 +34,7 @@ public static class VolatilityStopSnapshot
             throw new ArgumentOutOfRangeException(nameof(period));
         if (!FrameworkCompatibility.IsFinite(multiplier) || multiplier <= 0)
             throw new ArgumentOutOfRangeException(nameof(multiplier));
-        foreach (var bar in bars)
+        foreach (var bar in BarRun.Of(bars))
             if (
                 !FrameworkCompatibility.IsFinite(bar.High)
                 || !FrameworkCompatibility.IsFinite(bar.Low)

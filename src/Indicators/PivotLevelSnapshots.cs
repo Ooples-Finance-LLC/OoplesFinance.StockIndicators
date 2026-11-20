@@ -157,7 +157,7 @@ public static class PivotLevelSnapshots
         if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (style is < PivotLevelStyle.Standard or > PivotLevelStyle.Woodie)
             throw new ArgumentOutOfRangeException(nameof(style));
-        foreach (var b in bars)
+        foreach (var b in BarRun.Of(bars))
             if (
                 !FrameworkCompatibility.IsFinite(b.Open)
                 || !FrameworkCompatibility.IsFinite(b.High)

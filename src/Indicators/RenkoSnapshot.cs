@@ -138,7 +138,7 @@ public static class RenkoSnapshot
             return FastSnapshots.Renko(bars, fastSize, highLow);
         }
         var window = new SeededAtrWindow(period);
-        foreach (var bar in bars)
+        foreach (var bar in BarRun.Of(bars))
             window.Add(bar);
         if (!window.HasAverage)
             return [];
@@ -194,7 +194,7 @@ public static class RenkoSnapshot
     private static void Validate(IReadOnlyList<Bar> bars)
     {
         if (bars is null) throw new ArgumentNullException(nameof(bars));
-        foreach (var b in bars)
+        foreach (var b in BarRun.Of(bars))
             if (
                 !FrameworkCompatibility.IsFinite(b.High)
                 || !FrameworkCompatibility.IsFinite(b.Low)

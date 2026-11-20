@@ -31,7 +31,7 @@ public static class RegressionChannelSnapshot
             throw new ArgumentOutOfRangeException(nameof(period));
         if (!FrameworkCompatibility.IsFinite(deviations) || deviations <= 0)
             throw new ArgumentOutOfRangeException(nameof(deviations));
-        foreach (var bar in bars)
+        foreach (var bar in BarRun.Of(bars))
             if (!FrameworkCompatibility.IsFinite(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var result = Enumerable

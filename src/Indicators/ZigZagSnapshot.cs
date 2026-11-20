@@ -61,7 +61,7 @@ public static class ZigZagSnapshot
         if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (!FrameworkCompatibility.IsFinite(percentChange) || percentChange <= 0)
             throw new ArgumentOutOfRangeException(nameof(percentChange));
-        foreach (var b in bars)
+        foreach (var b in BarRun.Of(bars))
             if (
                 !FrameworkCompatibility.IsFinite(b.Close)
                 || highLow && (!FrameworkCompatibility.IsFinite(b.High) || !FrameworkCompatibility.IsFinite(b.Low))

@@ -36,7 +36,7 @@ public static class RegressionSnapshot
             throw new ArgumentNullException(nameof(bars));
         if (period < 2)
             throw new ArgumentOutOfRangeException(nameof(period));
-        foreach (var bar in bars)
+        foreach (var bar in BarRun.Of(bars))
             if (double.IsNaN(bar.Close) || double.IsInfinity(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars), "Closes must be finite.");
         var result = new RegressionSnapshotValue[bars.Count];

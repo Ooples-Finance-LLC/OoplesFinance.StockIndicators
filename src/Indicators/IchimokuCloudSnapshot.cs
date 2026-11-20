@@ -137,7 +137,7 @@ public static class IchimokuCloudSnapshot
             throw new ArgumentOutOfRangeException(nameof(forwardOffset));
         if (backward < 0)
             throw new ArgumentOutOfRangeException(nameof(backwardOffset));
-        foreach (var b in bars)
+        foreach (var b in BarRun.Of(bars))
             if (!FrameworkCompatibility.IsFinite(b.High) || !FrameworkCompatibility.IsFinite(b.Low) || !FrameworkCompatibility.IsFinite(b.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
     }

@@ -159,7 +159,7 @@ internal static class FixedKernelSnapshotInput
     internal static void Validate(IReadOnlyList<Bar> bars)
     {
         if (bars is null) throw new ArgumentNullException(nameof(bars));
-        foreach (var bar in bars)
+        foreach (var bar in BarRun.Of(bars))
             if (!FrameworkCompatibility.IsFinite(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
     }

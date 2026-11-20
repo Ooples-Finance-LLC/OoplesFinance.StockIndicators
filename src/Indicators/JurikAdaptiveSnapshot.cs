@@ -18,7 +18,7 @@ public static class JurikAdaptiveSnapshot
         if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (period < 1 || volatilityPeriod < 1 || !FrameworkCompatibility.IsFinite(phase))
             throw new ArgumentOutOfRangeException(nameof(period));
-        foreach (var b in bars)
+        foreach (var b in BarRun.Of(bars))
             if (!FrameworkCompatibility.IsFinite(b.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var result = new double[bars.Count];
