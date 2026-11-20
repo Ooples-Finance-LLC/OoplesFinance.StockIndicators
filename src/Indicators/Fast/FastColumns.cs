@@ -60,6 +60,9 @@ internal sealed class FastColumns
         }
         return new FastColumns(this, series);
     }
+    /// <summary>The bar at an index as the indicator reading these columns sees it.</summary>
+    internal Bar BarAt(int index) => _bars is { } bars ? bars[index] : _source is { } source ? source[index] : default;
+
     internal double[] Open => _open ??= Prepare(IndicatorInputFields.Open);
     internal double[] High => _high ??= Prepare(IndicatorInputFields.High);
     internal double[] Low => _low ??= Prepare(IndicatorInputFields.Low);

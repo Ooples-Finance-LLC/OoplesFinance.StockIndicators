@@ -99,9 +99,10 @@ internal static partial class FastExecution
         return bind(indicator);
     }
 
-    // These read the bar's midpoint from the bars and the close when chained; their kernels read the bars.
+    // These read the bar's midpoint from the bars and the close when chained, or hand whole bars to a
+    // caller's function; their kernels read the bars as they were given.
     private static bool SwitchesInputWhenChained(IIndicator indicator) =>
-        indicator is AlligatorWithDetails or AwesomeWithDetails or GatorWithDetails;
+        indicator is AlligatorWithDetails or AwesomeWithDetails or GatorWithDetails or VariablePeriodClassicAverage;
 
     private static void Bind<T>(Dictionary<Type, Func<IIndicator, FastKernel?>> binders, Func<T, FastKernel?> bind)
         where T : class, IIndicator => binders.Add(typeof(T), indicator => bind((T)indicator));
@@ -182,6 +183,7 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<VariablePeriodClassicAverage>(binders, t => !FastKernels.SupportsClassic(t.Method) ? null : (c, o) => FastKernels.VariablePeriodAverage(c, o[0], o[1], t));
         Bind<RegressionWithChannels>(binders, t => t.Period is null ? null : (c, o) => FastKernels.RegressionChannels(c.Close, o, t.Period, t.Deviations));
         Bind<SmoothedStochasticRsi>(binders, t => (c, o) => FastKernels.SmoothedStochasticStrength(c.Close, o, t));
         Bind<ConnorsStrength>(binders, t => (c, o) => FastKernels.ConnorsStrength(c.Close, o, t.RsiPeriod, t.StreakPeriod, t.RankPeriod));

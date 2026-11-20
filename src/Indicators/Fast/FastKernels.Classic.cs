@@ -282,4 +282,62 @@ internal static partial class FastKernels
             Value = FastMath.Blend(_weight, Value, alpha * input);
         }
     }
+
+
+    /// <summary>
+    /// Variable-period classic average: each bar from the longest period's first defined bar on publishes
+    /// the classic average of the period its selector names, every period aligned to that same first bar.
+    /// One pass per distinct period computes that period's average over the whole series.
+    /// </summary>
+    internal static void VariablePeriodAverage(FastColumns columns, Span<double> average, Span<double> defined,
+        VariablePeriodClassicAverage owner)
+    {
+        // The selector is handed whole bars, so every field is held to the finite rule and not only the close.
+        _ = columns.Open;
+        columns.RequireHighLowClose();
+        _ = columns.Volume;
+        ReadOnlySpan<double> close = columns.Close;
+        var n = close.Length;
+        average = average.Slice(0, n);
+        var first = owner.MaximumAverage.First;
+        var start = (int)Math.Min(first, n);
+        average.Slice(0, start).Clear();
+        DefinedFrom(defined.Slice(0, n), first);
+        if (start == n) return;
+        int minimum = owner.MinimumPeriod, maximum = owner.MaximumPeriod;
+        var periods = new int[n - start];
+        var counts = new int[maximum - minimum + 2];
+        for (var i = start; i < n; i++)
+        {
+            var selection = owner.PeriodSelector(columns.BarAt(i));
+            if (double.IsNaN(selection) || double.IsInfinity(selection))
+                throw new ArgumentOutOfRangeException(nameof(owner.PeriodSelector), "The selected period must be finite.");
+            var period = selection <= minimum ? minimum : selection >= maximum ? maximum : (int)selection;
+            periods[i - start] = period;
+            counts[period - minimum + 1]++;
+        }
+        // Bars grouped by period, so each period's pass is followed by a walk over only its own bars.
+        for (var slot = 1; slot < counts.Length; slot++) counts[slot] += counts[slot - 1];
+        var bars = new int[n - start];
+        var next = (int[])counts.Clone();
+        for (var i = 0; i < periods.Length; i++) bars[next[periods[i] - minimum]++] = i + start;
+        var scratch = System.Buffers.ArrayPool<double>.Shared.Rent(n);
+        try
+        {
+            for (var period = minimum; period <= maximum; period++)
+            {
+                int from = counts[period - minimum], to = counts[period - minimum + 1];
+                if (from == to) continue;
+                var single = new ClassicMovingAverage(period, owner.Method, owner.FirstPriceSeed, owner.Suppression);
+                // Nothing after a period's last bar is read, so its pass stops there.
+                var length = bars[to - 1] + 1;
+                ClassicAverage(close.Slice(0, length), scratch.AsSpan(0, length), single, first);
+                for (var k = from; k < to; k++) average[bars[k]] = scratch[bars[k]];
+            }
+        }
+        finally
+        {
+            System.Buffers.ArrayPool<double>.Shared.Return(scratch);
+        }
+    }
 }
