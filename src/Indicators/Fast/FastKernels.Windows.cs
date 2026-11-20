@@ -369,4 +369,51 @@ internal static partial class FastKernels
 
     private static bool DefaultSeedIsShared(int period, int order) =>
         new SeededExponentialAverage(period, order).SeedMode == ExponentialSeedMode.Shared;
+
+
+    /// <summary>
+    /// Sample skewness or sample excess kurtosis of the last period closes, over the bars so far while the
+    /// window fills. Each window is summed around its own mean, so the result does not lose digits to the
+    /// price level.
+    /// </summary>
+    internal static void SampleShape(ReadOnlySpan<double> close, Span<double> value, Span<double> defined, int period, bool kurtosis)
+    {
+        var n = close.Length;
+        value = value.Slice(0, n);
+        defined = defined.Slice(0, n);
+        value.Clear();
+        defined.Fill(1);
+        var least = kurtosis ? 4 : 3;
+        var run = 1;
+        for (var i = 1; i < n; i++)
+        {
+            run = close[i] == close[i - 1] ? run + 1 : 1; // NOSONAR an exact tie is the contract
+            var count = Math.Min(i + 1, period);
+            if (count < least) continue;
+            if (run >= count)
+            {
+                // A flat window has no shape; kurtosis reports it as absent.
+                if (kurtosis) defined[i] = 0;
+                continue;
+            }
+            var window = close.Slice(i - count + 1, count);
+            var anchor = window[count - 1];
+            double sum = 0;
+            for (var j = 0; j < count; j++) sum += window[j] - anchor;
+            var mean = sum / count;
+            double second = 0, third = 0, fourth = 0;
+            for (var j = 0; j < count; j++)
+            {
+                var deviation = window[j] - anchor - mean;
+                var square = deviation * deviation;
+                second += square;
+                third += square * deviation;
+                fourth += square * square;
+            }
+            double size = count;
+            value[i] = kurtosis
+                ? ((size * size - 1) * size * fourth / (second * second) - 3 * (size - 1) * (size - 1)) / ((size - 2) * (size - 3))
+                : size * Math.Sqrt(size - 1) * third / ((size - 2) * second * Math.Sqrt(second));
+        }
+    }
 }
