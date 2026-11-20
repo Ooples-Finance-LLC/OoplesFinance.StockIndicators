@@ -234,7 +234,7 @@ internal static partial class FastExecution
         Bind<FixedPeriodWma>(binders, t => (c, o) => FastKernels.ExpandingWeightedWindow(c.Close, o[0], t.Period));
         Bind<RateOfChangeRmsBands>(binders, t => (c, o) => FastKernels.RateOfChangeBands(c.Close, o, t.Period, t.EmaPeriod, t.DeviationPeriod));
         Bind<HoltWinterForecast>(binders, t => (c, o) => FastKernels.HoltWinter(c.Close, o[0], t));
-        Bind<WindowCorrelation>(binders, t => (c, o) => FastKernels.Correlation(c, o[0], o[1], t));
+        Bind<WindowCorrelation>(binders, t => (c, o) => FastKernels.Correlation(c, o[0], o, t));
         Bind<SingleStochasticCycle>(binders, t => (c, o) => FastKernels.StochasticCycle(c.Close, o[0], o[1], t.CyclePeriod, t.FastPeriod, t.SlowPeriod));
         Bind<WindowSampleShape>(binders, t => (c, o) => FastKernels.SampleShape(c.Close, o[0], o[1], t.Period, t.Kurtosis));
         Bind<WindowAverageEnvelope>(binders, t => (c, o) => FastKernels.AverageEnvelope(c.Close, o, t));

@@ -1008,21 +1008,22 @@ internal static partial class FastKernels
     /// price level, and are taken afresh on a schedule and whenever a variance has all but cancelled.
     /// </summary>
     [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
-    internal static void Correlation(FastColumns columns, Span<double> value, Span<double> defined, WindowCorrelation owner)
+    internal static void Correlation(FastColumns columns, Span<double> value, FastOutputs outputs, WindowCorrelation owner)
     {
         ReadOnlySpan<double> left = Field(columns, owner.Left), right = Field(columns, owner.Right);
         var n = columns.Count;
         var period = owner.Period;
         value = value.Slice(0, n);
-        defined = defined.Slice(0, n);
         if (n < period)
         {
             value.Clear();
-            defined.Clear();
+            outputs.Flag(1, n);
             return;
         }
         value.Slice(0, period - 1).Clear();
-        defined.Slice(0, period - 1).Clear();
+        // Every bar from the first whole window on is defined unless a flat window is to be withheld, so the
+        // flags are declared, and written out only for a series that has such a window.
+        var withheld = false;
         int leftRun = 0, rightRun = 0;
         for (var i = 0; i < period - 1; i++)
         {
@@ -1032,7 +1033,6 @@ internal static partial class FastKernels
         var block = Math.Max(64, period);
         // One division for the window instead of three a bar.
         var inverse = 1.0 / period;
-        var flat = owner.FlatZero ? 1.0 : 0.0;
         var at = period - 1;
         // Whether the bar a block starts on already has its runs counted: it does when the block before it
         // stopped there to sum the window afresh.
@@ -1051,7 +1051,7 @@ internal static partial class FastKernels
             if (leftRun >= period || rightRun >= period)
             {
                 value[at] = 0;
-                defined[at] = flat;
+                withheld = true;
             }
             else
             {
@@ -1061,7 +1061,6 @@ internal static partial class FastKernels
                 value[at] = !(a > 1e-4 * sums.Xx) || !(b > 1e-4 * sums.Yy)
                     ? CenteredCorrelation(left.Slice(from, period), right.Slice(from, period))
                     : (sums.Xy - sums.X * sums.Y * inverse) / Math.Sqrt(a * b);
-                defined[at] = 1;
             }
             at++;
             // The rest of the block slides those sums, held where the compiler can keep them in registers.
@@ -1082,7 +1081,7 @@ internal static partial class FastKernels
                 if (leftRun >= period || rightRun >= period)
                 {
                     value[at] = 0;
-                    defined[at] = flat;
+                    withheld = true;
                     continue;
                 }
                 double a = sumXx - sumX * sumX * inverse, b = sumYy - sumY * sumY * inverse;
@@ -1094,8 +1093,21 @@ internal static partial class FastKernels
                     break;
                 }
                 value[at] = (sumXy - sumX * sumY * inverse) / Math.Sqrt(a * b);
-                defined[at] = 1;
             }
+        }
+        if (!withheld || owner.FlatZero)
+        {
+            outputs.Flag(1, period - 1);
+            return;
+        }
+        Span<double> defined = outputs[1].AsSpan(0, n);
+        defined.Slice(0, period - 1).Clear();
+        int leftFlat = 0, rightFlat = 0;
+        for (var i = 0; i < n; i++)
+        {
+            leftFlat = i > 0 && left[i] == left[i - 1] ? leftFlat + 1 : 1; // NOSONAR an exact tie is the contract
+            rightFlat = i > 0 && right[i] == right[i - 1] ? rightFlat + 1 : 1; // NOSONAR an exact tie is the contract
+            if (i >= period - 1) defined[i] = leftFlat >= period || rightFlat >= period ? 0 : 1;
         }
     }
 
