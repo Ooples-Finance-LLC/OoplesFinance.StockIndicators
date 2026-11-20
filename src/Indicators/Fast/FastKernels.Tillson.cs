@@ -8,7 +8,7 @@ internal static partial class FastKernels
     /// from the simple mean of the first period values the stage before it publishes.
     /// </summary>
     [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
-    internal static void Tillson(ReadOnlySpan<double> input, Span<double> value, Span<double> defined, TillsonAverage owner)
+    internal static void Tillson(ReadOnlySpan<double> input, Span<double> value, FastOutputs outputs, TillsonAverage owner)
     {
         var n = input.Length;
         value = value.Slice(0, n);
@@ -17,7 +17,7 @@ internal static partial class FastKernels
         var cascaded = seed == TillsonSeed.CascadedMeans;
         var prefix = seed == TillsonSeed.FollowingPrefix;
         var first = (cascaded ? 6L * (period - 1) : 0) + owner.Suppression;
-        DefinedFrom(defined.Slice(0, n), first);
+        outputs.Flag(1, first);
         var factor = owner.VolumeFactor;
         var plus = 1 + factor;
         double k0 = plus * plus * plus, k1 = -3 * factor * plus * plus, k2 = 3 * factor * factor * plus,

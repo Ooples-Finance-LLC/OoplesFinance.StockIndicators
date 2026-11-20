@@ -306,12 +306,12 @@ internal static partial class FastKernels
     /// Force index: the one-bar change times the volume, as a mean-seeded exponential average.
     /// </summary>
     [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
-    internal static void ForceIndex(FastColumns columns, Span<double> value, Span<double> defined, int period)
+    internal static void ForceIndex(FastColumns columns, Span<double> value, FastOutputs outputs, int period)
     {
         ReadOnlySpan<double> close = columns.Close, volume = columns.Volume;
         var n = close.Length;
         value = value.Slice(0, n);
-        DefinedFrom(defined.Slice(0, n), period);
+        outputs.Flag(1, period);
         var seeded = (int)Math.Min((long)period + 1, n);
         value.Slice(0, Math.Min(period, n)).Clear();
         double sum = 0;
@@ -592,14 +592,14 @@ internal static partial class FastKernels
     /// returns' variance, zero when the market returns in the window are all equal.
     /// </summary>
     [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
-    internal static void ReturnBeta(FastColumns columns, Span<double> value, Span<double> defined, WindowReturnBeta owner)
+    internal static void ReturnBeta(FastColumns columns, Span<double> value, FastOutputs outputs, WindowReturnBeta owner)
     {
         ReadOnlySpan<double> market = Field(columns, owner.Market), evaluation = Field(columns, owner.Evaluation);
         var n = market.Length;
         var period = owner.Period;
         value = value.Slice(0, n);
         value.Clear();
-        DefinedFrom(defined.Slice(0, n), period);
+        outputs.Flag(1, period);
         if (n <= period) return;
         double[] xs = FastMath.Allocate(n), ys = FastMath.Allocate(n);
         Returns(market, xs);

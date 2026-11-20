@@ -205,7 +205,7 @@ internal static partial class FastKernels
 
     /// <summary>Fast minus slow classic average, absolute or as a percentage of the slow one.</summary>
     [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
-    internal static void PriceOscillator(ReadOnlySpan<double> input, Span<double> value, Span<double> defined,
+    internal static void PriceOscillator(ReadOnlySpan<double> input, Span<double> value, FastOutputs outputs,
         ClassicPriceOscillator owner)
     {
         var n = input.Length;
@@ -220,7 +220,7 @@ internal static partial class FastKernels
             for (var i = 0; i < slow.Length; i++)
                 slow[i] = slow[i] == 0 ? 0 : 100 * (quick[i] - slow[i]) / slow[i];
         else FastMath.Subtract(quick, slow, slow);
-        DefinedFrom(defined.Slice(0, n), start);
+        outputs.Flag(1, start);
     }
 
     /// <summary>MACD over two aligned classic averages with a classic average of the oscillator as signal.</summary>
@@ -311,7 +311,7 @@ internal static partial class FastKernels
     /// One pass per distinct period computes that period's average over the whole series.
     /// </summary>
     [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
-    internal static void VariablePeriodAverage(FastColumns columns, Span<double> average, Span<double> defined,
+    internal static void VariablePeriodAverage(FastColumns columns, Span<double> average, FastOutputs outputs,
         VariablePeriodClassicAverage owner)
     {
         // The selector is handed whole bars, so every field is held to the finite rule and not only the close.
@@ -324,7 +324,7 @@ internal static partial class FastKernels
         var first = owner.MaximumAverage.First;
         var start = (int)Math.Min(first, n);
         average.Slice(0, start).Clear();
-        DefinedFrom(defined.Slice(0, n), first);
+        outputs.Flag(1, first);
         if (start == n) return;
         int minimum = owner.MinimumPeriod, maximum = owner.MaximumPeriod;
         if (owner.Method == ClassicAverageMethod.Sma && minimum >= 1 && start >= maximum - 1)

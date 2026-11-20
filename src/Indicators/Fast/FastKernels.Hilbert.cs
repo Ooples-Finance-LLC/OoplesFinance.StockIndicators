@@ -260,12 +260,12 @@ internal static partial class FastKernels
     /// Instantaneous trendline after a 37-bar run-in, published from bar 63 plus the suppression.
     /// </summary>
     [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
-    internal static void DelayedTrendline(ReadOnlySpan<double> close, Span<double> value, Span<double> defined, long publishFrom)
+    internal static void DelayedTrendline(ReadOnlySpan<double> close, Span<double> value, FastOutputs outputs, long publishFrom)
     {
         var n = close.Length;
         value = value.Slice(0, n);
         value.Clear();
-        DefinedFrom(defined.Slice(0, n), publishFrom);
+        outputs.Flag(1, publishFrom);
         var hilbert = new HilbertCore(37, true, false);
         var means = new TrendMean();
         var ring = new double[50];

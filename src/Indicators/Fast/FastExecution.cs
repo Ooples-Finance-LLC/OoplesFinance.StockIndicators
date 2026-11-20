@@ -186,12 +186,12 @@ internal static partial class FastExecution
             o.Flag(1, average.First);
         });
         Bind<ClassicPriceOscillator>(binders, oscillator => !FastKernels.SupportsClassic(oscillator.Method) ? null
-            : (c, o) => FastKernels.PriceOscillator(c.Close, o[0], o[1], oscillator));
+            : (c, o) => FastKernels.PriceOscillator(c.Close, o[0], o, oscillator));
         Bind<ClassicMacd>(binders, macd => !FastKernels.SupportsClassic(macd.FastAverage.Method)
             || !FastKernels.SupportsClassic(macd.SlowAverage.Method) || !FastKernels.SupportsClassic(macd.SignalAverage.Method)
             ? null : (c, o) => FastKernels.ClassicMacd(c.Close, o, macd));
         Bind<AlignedEmaMacd>(binders, macd => (c, o) => FastKernels.AlignedMacd(c.Close, o, macd));
-        Bind<TillsonAverage>(binders, tillson => (c, o) => FastKernels.Tillson(c.Close, o[0], o[1], tillson));
+        Bind<TillsonAverage>(binders, tillson => (c, o) => FastKernels.Tillson(c.Close, o[0], o, tillson));
     }
 
     private static void BindRange(Dictionary<Type, Func<IIndicator, FastKernel?>> binders)
@@ -223,7 +223,7 @@ internal static partial class FastExecution
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
         Bind<NormalizedConvolution>(binders, t => !FastKernels.SupportsConvolution(t.Kernel) ? null : (c, o) => FastKernels.NormalizedConvolution(c.Close, o[0], t.Kernel));
-        Bind<VariablePeriodClassicAverage>(binders, t => !FastKernels.SupportsClassic(t.Method) ? null : (c, o) => FastKernels.VariablePeriodAverage(c, o[0], o[1], t));
+        Bind<VariablePeriodClassicAverage>(binders, t => !FastKernels.SupportsClassic(t.Method) ? null : (c, o) => FastKernels.VariablePeriodAverage(c, o[0], o, t));
         Bind<RegressionWithChannels>(binders, t => t.Period is null ? null : (c, o) => FastKernels.RegressionChannels(c.Close, o, t.Period, t.Deviations));
         Bind<SmoothedStochasticRsi>(binders, t => (c, o) => FastKernels.SmoothedStochasticStrength(c.Close, o, t));
         Bind<ConnorsStrength>(binders, t => (c, o) => FastKernels.ConnorsStrength(c.Close, o, t.RsiPeriod, t.StreakPeriod, t.RankPeriod));
@@ -296,7 +296,7 @@ internal static partial class FastExecution
         Bind<TasukiGapCandle>(binders, t => (c, o) => FastKernels.GapContinuationCandle(c, o[0], t.Period, GapContinuationKind.TasukiGap));
         Bind<UpDownSideGapThreeMethodsCandle>(binders, t => (c, o) => FastKernels.GapContinuationCandle(c, o[0], 0, GapContinuationKind.UpDownSideGapThreeMethods));
         Bind<WindowBetaStatistics>(binders, t => (c, o) => FastKernels.BetaStatistics(c, o, t));
-        Bind<WindowReturnBeta>(binders, t => (c, o) => FastKernels.ReturnBeta(c, o[0], o[1], t));
+        Bind<WindowReturnBeta>(binders, t => (c, o) => FastKernels.ReturnBeta(c, o[0], o, t));
         Bind<EngulfingPattern>(binders, t => (c, o) => FastKernels.Engulfing(c, o[0]));
         Bind<MatchingLowCandle>(binders, t => (c, o) => FastKernels.SequenceCandle(c, o[0], t.Period, SequenceCandleKind.MatchingLow));
         Bind<StickSandwichCandle>(binders, t => (c, o) => FastKernels.SequenceCandle(c, o[0], t.Period, SequenceCandleKind.StickSandwich));
@@ -319,7 +319,7 @@ internal static partial class FastExecution
         Bind<DelayedHilbertSine>(binders, t => (c, o) => FastKernels.HilbertSignal(c.Close, o, HilbertCycleSignal.Sine, 63L + t.Suppression));
         Bind<DelayedHilbertTrendMode>(binders, t => (c, o) => FastKernels.HilbertSignal(c.Close, o, HilbertCycleSignal.Trend, 63L + t.Suppression));
         Bind<SeededHilbertTrendline>(binders, t => (c, o) => FastKernels.SeededTrendline(c, o, t.UseMidpoint));
-        Bind<DelayedHilbertTrendline>(binders, t => (c, o) => FastKernels.DelayedTrendline(c.Close, o[0], o[1], 63L + t.Suppression));
+        Bind<DelayedHilbertTrendline>(binders, t => (c, o) => FastKernels.DelayedTrendline(c.Close, o[0], o, 63L + t.Suppression));
         Bind<HilbertCyclePeriod>(binders, t => (c, o) => FastKernels.HilbertCycle(c.Close, o, true, 32L + t.Suppression));
         Bind<HilbertPhasor>(binders, t => (c, o) => FastKernels.HilbertCycle(c.Close, o, false, 32L + t.Suppression));
         Bind<SeededPhaseAdaptiveAverage>(binders, t => (c, o) => FastKernels.PhaseAdaptive(c, o, t.FastLimit, t.SlowLimit, false, t.RetainOlderZeroPhase, t.UseMidpoint, t.PublishStartup ? 0 : 5));
@@ -360,7 +360,7 @@ internal static partial class FastExecution
         Bind<LaggedPriceChange>(binders, t => (c, o) => FastKernels.LaggedChange(c, o, t));
         Bind<RangeAccelerationBands>(binders, t => (c, o) => FastKernels.AccelerationBands(c, o, t));
         Bind<SeededTrueStrength>(binders, t => (c, o) => FastKernels.TrueStrength(c.Close, o, t));
-        Bind<SeededForceIndex>(binders, t => (c, o) => FastKernels.ForceIndex(c, o[0], o[1], t.Period));
+        Bind<SeededForceIndex>(binders, t => (c, o) => FastKernels.ForceIndex(c, o[0], o, t.Period));
         Bind<SeededPriceMomentum>(binders, t => (c, o) => FastKernels.PriceMomentum(c.Close, o, t));
         Bind<ClassicDeviationBands>(binders, t => !FastKernels.SupportsClassic(t.Method) ? null : (c, o) => FastKernels.ClassicBands(c.Close, o, t));
         Bind<SeededAtrTrailingStop>(binders, t => (c, o) => FastKernels.AtrTrailingStop(c, o, t));
