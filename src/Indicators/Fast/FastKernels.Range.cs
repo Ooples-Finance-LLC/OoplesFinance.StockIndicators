@@ -125,4 +125,93 @@ internal static partial class FastKernels
             percentDefined[i] = 1;
         }
     }
+
+
+    /// <summary>
+    /// Accumulation/distribution with its parts: the money-flow multiplier, the bar's flow, the running
+    /// line and, when asked for, the rolling mean of the line.
+    /// </summary>
+    internal static void AccumulationDetails(FastColumns columns, double[][] outputs, int? averagePeriod)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close, volume = columns.Volume;
+        var n = close.Length;
+        Span<double> multipliers = outputs[0].AsSpan(0, n), flows = outputs[1].AsSpan(0, n), line = outputs[2].AsSpan(0, n);
+        Span<double> average = outputs[3].AsSpan(0, n), defined = outputs[4].AsSpan(0, n);
+        average.Clear();
+        defined.Clear();
+        double total = 0;
+        for (var i = 0; i < n; i++)
+        {
+            var range = high[i] - low[i];
+            double multiplier = 0, flow = 0;
+            if (range != 0) // NOSONAR an exact tie is the contract
+            {
+                multiplier = (2 * close[i] - high[i] - low[i]) / range;
+                flow = multiplier * volume[i];
+            }
+            total += flow;
+            multipliers[i] = multiplier;
+            flows[i] = flow;
+            line[i] = total;
+        }
+        if (averagePeriod is not int period) return;
+        double sum = 0;
+        for (var i = 0; i < n; i++)
+        {
+            // An infinite line fails the build when the outputs are checked.
+            if (double.IsInfinity(line[i])) return;
+            if (i >= period && (i & RebuildMask) == 0)
+            {
+                sum = 0;
+                for (var j = i - period + 1; j <= i; j++) sum += line[j];
+            }
+            else
+            {
+                if (i >= period) sum -= line[i - period];
+                sum += line[i];
+            }
+            if (i < period - 1) continue;
+            average[i] = period == 1 ? line[i] : sum / period;
+            defined[i] = 1;
+        }
+    }
+
+    /// <summary>
+    /// Awesome oscillator: the fast mean of the bar midpoint less the slow one, and that difference as a
+    /// percentage of the midpoint where the midpoint is not zero.
+    /// </summary>
+    internal static void AwesomeDetails(FastColumns columns, double[][] outputs, int fast, int slow)
+    {
+        ReadOnlySpan<double> high = columns.High, low = columns.Low;
+        var n = high.Length;
+        for (var slot = 0; slot < 4; slot++) outputs[slot].AsSpan(0, n).Clear();
+        if (n < slow) return;
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] rentedPrice = pool.Rent(n), rentedFast = pool.Rent(n), rentedSlow = pool.Rent(n);
+        try
+        {
+            Span<double> price = rentedPrice.AsSpan(0, n), fastMean = rentedFast.AsSpan(0, n), slowMean = rentedSlow.AsSpan(0, n);
+            for (var i = 0; i < n; i++) price[i] = 0.5 * high[i] + 0.5 * low[i];
+            Sma(price, fastMean, fast);
+            Sma(price, slowMean, slow);
+            Span<double> oscillator = outputs[0].AsSpan(0, n), percent = outputs[1].AsSpan(0, n);
+            Span<double> defined = outputs[2].AsSpan(0, n), percentDefined = outputs[3].AsSpan(0, n);
+            for (var i = slow - 1; i < n; i++)
+            {
+                var value = fastMean[i] - slowMean[i];
+                oscillator[i] = value;
+                defined[i] = 1;
+                if (price[i] == 0 || double.IsInfinity(value)) continue; // NOSONAR an exact tie is the contract
+                percent[i] = 100 * value / price[i];
+                percentDefined[i] = 1;
+            }
+        }
+        finally
+        {
+            pool.Return(rentedPrice);
+            pool.Return(rentedFast);
+            pool.Return(rentedSlow);
+        }
+    }
 }
