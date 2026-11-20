@@ -659,4 +659,55 @@ internal static partial class FastKernels
             if (matches) output[i] = 100;
         }
     }
+
+
+    /// <summary>
+    /// Three inside, two crows, upside gap two crows and unique three river: a long first body, a second
+    /// body placed against it, and a third candle that confirms or reverses.
+    /// </summary>
+    internal static void TripleBodyCandle(FastColumns columns, Span<double> output, int longPeriod, int shortPeriod,
+        TripleBodyCandleKind kind)
+    {
+        double[] open = columns.Open, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var crows = kind == TripleBodyCandleKind.TwoCrows;
+        var river = kind == TripleBodyCandleKind.UniqueThreeRiver;
+        var warmup = Math.Max(longPeriod, crows ? longPeriod : shortPeriod) + 2;
+        var longBodies = new CandleWindow(columns, CandleStatistic.Body, longPeriod);
+        var shortBodies = new CandleWindow(columns, CandleStatistic.Body, shortPeriod);
+        // The river weighs the newest body against the bars before it; the others weigh the middle one.
+        var shortBack = river ? 1 : 2;
+        for (var i = 0; i < n; i++)
+        {
+            if (i >= 3) longBodies.Include(i - 3);
+            if (!crows && i >= shortBack) shortBodies.Include(i - shortBack);
+            if (i < warmup) continue;
+            double openA = open[i - 2], closeA = close[i - 2], openB = open[i - 1], closeB = close[i - 1], o = open[i], c = close[i];
+            double topA = Math.Max(openA, closeA), bottomA = Math.Min(openA, closeA);
+            double topB = Math.Max(openB, closeB), bottomB = Math.Min(openB, closeB);
+            var matches = kind switch
+            {
+                TripleBodyCandleKind.ThreeInside => topB < topA && bottomB > bottomA
+                    && (closeA >= openA ? c < o && c < openA : c >= o && c > openA),
+                TripleBodyCandleKind.TwoCrows => closeA >= openA && closeB < openB && closeB > closeA && c < o && o < openB
+                    && o > closeB && c > openA && c < closeA,
+                TripleBodyCandleKind.UpsideGapTwoCrows => closeA >= openA && closeB < openB && closeB > closeA && c < o
+                    && o > openB && c < closeB && c > closeA,
+                _ => closeA < openA && closeB < openB && closeB > closeA && openB <= openA && low[i - 1] < low[i - 2]
+                    && c >= o && o > low[i - 1],
+            };
+            if (!matches) continue;
+            if (longBodies.Compare(i - 2, longPeriod, topA, bottomA) >= 0) continue;
+            if (!crows)
+            {
+                var margin = river
+                    ? shortBodies.Compare(i, shortPeriod, Math.Max(o, c), Math.Min(o, c))
+                    : shortBodies.Compare(i - 1, shortPeriod, topB, bottomB);
+                if (river ? margin <= 0 : margin < 0) continue;
+            }
+            output[i] = river || kind == TripleBodyCandleKind.ThreeInside && closeA < openA ? 100 : -100;
+        }
+    }
 }
