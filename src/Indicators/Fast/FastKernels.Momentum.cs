@@ -675,4 +675,119 @@ internal static partial class FastKernels
             outputs[11][i] = 1;
         }
     }
+
+
+    /// <summary>
+    /// Momentum and percentage rate of change over a lag, with the rolling mean of the rate where every
+    /// rate in the window is defined.
+    /// </summary>
+    internal static void RateOfChangeAverage(ReadOnlySpan<double> close, double[][] outputs, int period, int? averagePeriod)
+    {
+        var n = close.Length;
+        Span<double> momentum = outputs[0].AsSpan(0, n), roc = outputs[1].AsSpan(0, n), rocDefined = outputs[2].AsSpan(0, n);
+        Span<double> average = outputs[3].AsSpan(0, n), averageDefined = outputs[4].AsSpan(0, n);
+        for (var slot = 0; slot < 5; slot++) outputs[slot].AsSpan(0, n).Clear();
+        for (var i = period; i < n; i++)
+        {
+            double current = close[i], previous = close[i - period];
+            momentum[i] = current - previous;
+            if (previous == 0) continue; // NOSONAR an exact tie is the contract
+            roc[i] = 100 * (current - previous) / previous;
+            rocDefined[i] = 1;
+        }
+        if (averagePeriod is not int window) return;
+        double sum = 0;
+        var missing = 0;
+        // The window holds the last `window` rates; a rate over a zero price is counted, not summed.
+        for (var i = period; i < n; i++)
+        {
+            // An infinite rate fails the build when the outputs are checked.
+            if (double.IsInfinity(roc[i])) return;
+            var held = i - period + 1;
+            if (held > window && ((i - period) & RebuildMask) == 0)
+            {
+                sum = 0;
+                missing = 0;
+                for (var j = i - window + 1; j <= i; j++)
+                {
+                    sum += roc[j];
+                    if (rocDefined[j] == 0) missing++; // NOSONAR an exact tie is the contract
+                }
+            }
+            else
+            {
+                if (held > window)
+                {
+                    var old = i - window;
+                    sum -= roc[old];
+                    if (rocDefined[old] == 0) missing--; // NOSONAR an exact tie is the contract
+                }
+                sum += roc[i];
+                if (rocDefined[i] == 0) missing++; // NOSONAR an exact tie is the contract
+            }
+            if (held >= window && missing == 0)
+            {
+                average[i] = sum / window;
+                averageDefined[i] = 1;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Rolling mean of the balance of power, published only where every bar in the window has a range.
+    /// </summary>
+    internal static void BalanceOfPowerMean(FastColumns columns, Span<double> value, Span<double> defined, int period)
+    {
+        ReadOnlySpan<double> open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        value = value.Slice(0, n);
+        defined = defined.Slice(0, n);
+        value.Clear();
+        defined.Clear();
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        var rented = pool.Rent(Math.Max(n, 1));
+        try
+        {
+            var raw = rented.AsSpan(0, n);
+            for (var i = 0; i < n; i++)
+            {
+                double h = high[i], l = low[i];
+                // NaN marks a bar with no range; it never reaches the sum.
+                raw[i] = h == l ? double.NaN : (close[i] - open[i]) / (h - l); // NOSONAR an exact tie is the contract
+            }
+            double sum = 0;
+            var missing = 0;
+            for (var i = 0; i < n; i++)
+            {
+                if (i >= period && (i & RebuildMask) == 0)
+                {
+                    sum = 0;
+                    missing = 0;
+                    for (var j = i - period + 1; j <= i; j++)
+                    {
+                        if (double.IsNaN(raw[j])) missing++;
+                        else sum += raw[j];
+                    }
+                }
+                else
+                {
+                    if (i >= period)
+                    {
+                        var old = raw[i - period];
+                        if (double.IsNaN(old)) missing--;
+                        else sum -= old;
+                    }
+                    if (double.IsNaN(raw[i])) missing++;
+                    else sum += raw[i];
+                }
+                if (i < period - 1 || missing != 0) continue;
+                value[i] = period == 1 ? raw[i] : sum / period;
+                defined[i] = 1;
+            }
+        }
+        finally
+        {
+            pool.Return(rented);
+        }
+    }
 }
