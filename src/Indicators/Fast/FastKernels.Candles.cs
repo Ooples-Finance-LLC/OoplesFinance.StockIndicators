@@ -1117,4 +1117,68 @@ internal static partial class FastKernels
             if (reached > 0) output[i] = rising ? 100 : -100;
         }
     }
+
+
+    /// <summary>
+    /// Breakaway, concealing baby swallow and ladder bottom: four or five candles running one way and a
+    /// last one that turns against them.
+    /// </summary>
+    internal static void ExtendedReversalCandle(FastColumns columns, Span<double> output, int period, ExtendedReversalKind kind)
+    {
+        double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var swallow = kind == ExtendedReversalKind.ConcealingBabySwallow;
+        var breakaway = kind == ExtendedReversalKind.Breakaway;
+        var warmup = period + (swallow ? 3 : 4);
+        var statistic = breakaway ? CandleStatistic.Body : CandleStatistic.Range;
+        // Each window ends just before the candle it weighs: the first, second, third or fourth of the pattern.
+        var first = new CandleWindow(columns, statistic, period);
+        var second = new CandleWindow(columns, statistic, period);
+        var third = new CandleWindow(columns, statistic, period);
+        var fourth = new CandleWindow(columns, statistic, period);
+        var divisor = (long)period * (breakaway ? 1 : 10);
+        for (var i = 0; i < n; i++)
+        {
+            if (breakaway && i >= 5) first.Include(i - 5);
+            if (swallow && i >= 4) second.Include(i - 4);
+            if (swallow && i >= 3) third.Include(i - 3);
+            if (!breakaway && i >= 2) fourth.Include(i - 2);
+            if (i < warmup) continue;
+            double openB = open[i - 3], closeB = close[i - 3], openC = open[i - 2], closeC = close[i - 2];
+            double openD = open[i - 1], closeD = close[i - 1], o = open[i], c = close[i];
+            if (swallow)
+            {
+                if (closeB >= openB || closeC >= openC || closeD >= openD || c >= o) continue;
+                if (!(openD < closeC && high[i - 1] > closeC && high[i] > high[i - 1] && low[i] < low[i - 1])) continue;
+                if (second.Compare(i - 3, divisor, closeB, low[i - 3]) > 0
+                    && second.Compare(i - 3, divisor, high[i - 3], openB) > 0
+                    && third.Compare(i - 2, divisor, closeC, low[i - 2]) > 0
+                    && third.Compare(i - 2, divisor, high[i - 2], openC) > 0
+                    && fourth.Compare(i - 1, divisor, high[i - 1], openD) < 0)
+                    output[i] = 100;
+                continue;
+            }
+            double openA = open[i - 4], closeA = close[i - 4];
+            if (!breakaway)
+            {
+                if (closeA < openA && closeB < openB && closeC < openC && closeD < openD && openA > openB && openB > openC
+                    && closeA > closeB && closeB > closeC && c >= o && o > openD && c > high[i - 1]
+                    && fourth.Compare(i - 1, divisor, high[i - 1], openD) < 0)
+                    output[i] = 100;
+                continue;
+            }
+            var white = closeA >= openA;
+            if (white != (closeB >= openB) || white != (closeD >= openD) || white == (c >= o)) continue;
+            var match = white
+                ? openB > closeA && high[i - 2] > high[i - 3] && low[i - 2] > low[i - 3] && high[i - 1] > high[i - 2]
+                    && low[i - 1] > low[i - 2] && c < openB && c > closeA
+                : openB < closeA && high[i - 2] < high[i - 3] && low[i - 2] < low[i - 3] && high[i - 1] < high[i - 2]
+                    && low[i - 1] < low[i - 2] && c > openB && c < closeA;
+            if (!match) continue;
+            if (first.Compare(i - 4, divisor, Math.Max(openA, closeA), Math.Min(openA, closeA)) >= 0) continue;
+            output[i] = white ? -100 : 100;
+        }
+    }
 }

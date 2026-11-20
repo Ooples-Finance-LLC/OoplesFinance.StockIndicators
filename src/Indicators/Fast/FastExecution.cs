@@ -146,6 +146,9 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<BreakawayCandle>(binders, t => (c, o) => FastKernels.ExtendedReversalCandle(c, o[0], t.Period, ExtendedReversalKind.Breakaway));
+        Bind<ConcealingBabySwallowCandle>(binders, t => (c, o) => FastKernels.ExtendedReversalCandle(c, o[0], t.Period, ExtendedReversalKind.ConcealingBabySwallow));
+        Bind<LadderBottomCandle>(binders, t => (c, o) => FastKernels.ExtendedReversalCandle(c, o[0], t.Period, ExtendedReversalKind.LadderBottom));
         Bind<MorningStarCandle>(binders, t => (c, o) => FastKernels.StarReversalCandle(c, o[0], t.LongPeriod, t.ShortPeriod, 0, t.Penetration, true, false));
         Bind<EveningStarCandle>(binders, t => (c, o) => FastKernels.StarReversalCandle(c, o[0], t.LongPeriod, t.ShortPeriod, 0, t.Penetration, false, false));
         Bind<MorningDojiStarCandle>(binders, t => (c, o) => FastKernels.StarReversalCandle(c, o[0], t.LongPeriod, t.ShortPeriod, t.DojiPeriod, t.Penetration, true, false));
