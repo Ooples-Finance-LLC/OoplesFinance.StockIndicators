@@ -36,6 +36,11 @@ on:
         required: false
         default: Exact
         options: [Exact, Fast]
+      scoreboard:
+        description: 'Only time the pairs whose id contains this text, both arms interleaved, and skip the checks'
+        type: string
+        required: false
+        default: ''
 permissions:
   contents: read
 concurrency:
@@ -98,6 +103,7 @@ jobs:
           retention-days: 7
   contracts:
     needs: build
+    if: ${{ !inputs.scoreboard }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -128,6 +134,7 @@ jobs:
           retention-days: 7
   correctness:
     needs: build
+    if: ${{ !inputs.scoreboard }}
     runs-on: ubuntu-latest
     # A shard can contain multiple quadratic Trady APIs; retain all repeated-call checks.
     timeout-minutes: 45
@@ -162,6 +169,30 @@ jobs:
           path: results
           merge-multiple: true
       - run: python scripts/verify-competitor-shards.py benchmarks/competitor-library-manifest.json results ${{ needs.build.outputs.count }}
+  # A quick reading on a hosted runner: each pair's two arms timed in alternation, which a noisy runner
+  # disturbs equally, where the full timing job runs one arm to completion before the other.
+  scoreboard:
+    needs: build
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.scoreboard }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      COMPARISON_NUMERICS: ${{ inputs.numerics || 'Exact' }}
+      SCOREBOARD_FILTER: ${{ inputs.scoreboard }}
+      AIDOTNET_DISABLE_GPU: '1'
+    steps:
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/download-artifact@v8
+        with:
+          name: competitor-binaries
+          path: binaries
+      - name: Time the selected pairs twice
+        run: |
+          for pass in 1 2; do
+            dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --scoreboard "$SCOREBOARD_FILTER"
+          done
   performance:
     needs: [build, complete-union]
     # Reuse saved competitor timings during normal PR validation. Fresh native
