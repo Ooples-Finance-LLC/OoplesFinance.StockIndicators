@@ -550,4 +550,56 @@ internal static partial class FastKernels
             defined[i] = 1;
         }
     }
+
+
+    /// <summary>
+    /// Gator: the distance between the alligator's jaw and teeth above zero and between its teeth and lips
+    /// below, each with whether it grew since the bar before.
+    /// </summary>
+    internal static void GatorDetails(FastColumns columns, double[][] outputs, AlligatorWithDetails alligator)
+    {
+        var n = columns.Count;
+        for (var slot = 0; slot < 8; slot++) outputs[slot].AsSpan(0, n).Clear();
+        if (n == 0) return;
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        var lines = new double[6][];
+        for (var slot = 0; slot < 6; slot++) lines[slot] = pool.Rent(n);
+        try
+        {
+            AlligatorDetails(columns, lines, alligator);
+            GatorSide(lines[0], lines[1], lines[3], lines[4], outputs[0], outputs[2], outputs[4], outputs[6], n, 1);
+            GatorSide(lines[1], lines[2], lines[4], lines[5], outputs[1], outputs[3], outputs[5], outputs[7], n, -1);
+        }
+        finally
+        {
+            for (var slot = 0; slot < 6; slot++) pool.Return(lines[slot]);
+        }
+    }
+
+    private static void GatorSide(double[] a, double[] b, double[] aDefined, double[] bDefined, double[] value,
+        double[] expanding, double[] valueDefined, double[] expandingDefined, int n, int sign)
+    {
+        var had = false;
+        double previous = 0;
+        for (var i = 0; i < n; i++)
+        {
+            var has = aDefined[i] > 0 && bDefined[i] > 0;
+            double current = 0;
+            if (has)
+            {
+                current = sign * Math.Abs(a[i] - b[i]);
+                value[i] = current;
+                valueDefined[i] = 1;
+            }
+            if (had)
+            {
+                expandingDefined[i] = 1;
+                // The averages carry a few units of rounding, which is not growth on a flat series.
+                var noise = 16 * Ulp * (Math.Abs(a[i]) + Math.Abs(b[i]));
+                if (has && sign * (current - previous) > noise) expanding[i] = 1;
+            }
+            had = has;
+            previous = current;
+        }
+    }
 }
