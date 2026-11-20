@@ -146,6 +146,8 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<HikkakeCandle>(binders, t => (c, o) => FastKernels.Hikkake(c, o[0], 0));
+        Bind<ModifiedHikkakeCandle>(binders, t => (c, o) => FastKernels.Hikkake(c, o[0], t.Period));
         Bind<HammerCandle>(binders, t => (c, o) => FastKernels.ContextReversalCandle(c, o[0], t.Period, t.NearPeriod, ContextReversalKind.Hammer));
         Bind<HangingManCandle>(binders, t => (c, o) => FastKernels.ContextReversalCandle(c, o[0], t.Period, t.NearPeriod, ContextReversalKind.HangingMan));
         Bind<InvertedHammerCandle>(binders, t => (c, o) => FastKernels.ContextReversalCandle(c, o[0], t.Period, 0, ContextReversalKind.InvertedHammer));

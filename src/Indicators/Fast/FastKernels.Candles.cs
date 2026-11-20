@@ -239,4 +239,57 @@ internal static partial class FastKernels
             if (nearPeriod > 0 && i > 0) near.Include(i - 1);
         }
     }
+
+
+    /// <summary>
+    /// Hikkake: an inside bar followed by a bar that breaks out of it one way, signalled at 100 times the
+    /// opposite direction, then 200 if a close within three bars confirms it. The modified form also
+    /// needs the bar before to be an inside bar that closed near its own extreme.
+    /// </summary>
+    internal static void Hikkake(FastColumns columns, Span<double> output, int period)
+    {
+        double[] high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var ranges = new CandleWindow(columns, CandleStatistic.Range, period);
+        var fifth = 5L * period;
+        int direction = 0, age = 4;
+        double confirmation = 0;
+        for (var i = 0; i < n; i++)
+        {
+            // The modified form reads the range average as it stood three bars back.
+            if (period > 0 && i >= 3) ranges.Include(i - 3);
+            if (age < 4) age++;
+            if (i < period + 2) continue;
+            var signal = 0;
+            var formed = 0;
+            if (high[i - 1] < high[i - 2] && low[i - 1] > low[i - 2])
+            {
+                formed = high[i] < high[i - 1] && low[i] < low[i - 1] ? 1
+                    : high[i] > high[i - 1] && low[i] > low[i - 1] ? -1
+                    : 0;
+                if (period != 0 && formed != 0)
+                {
+                    if (high[i - 2] >= high[i - 3] || low[i - 2] <= low[i - 3]) formed = 0;
+                    else if (ranges.Compare(i - 2, fifth, formed > 0 ? close[i - 2] : high[i - 2],
+                        formed > 0 ? low[i - 2] : close[i - 2]) < 0) formed = 0;
+                }
+            }
+            if (formed != 0)
+            {
+                direction = formed;
+                age = 0;
+                confirmation = formed > 0 ? high[i - 1] : low[i - 1];
+                signal = formed * 100;
+            }
+            else if (direction != 0 && age <= 3 && (direction > 0 ? close[i] > confirmation : close[i] < confirmation))
+            {
+                signal = direction * 200;
+                direction = 0;
+                age = 4;
+            }
+            if (i >= period + 5) output[i] = signal;
+        }
+    }
 }
