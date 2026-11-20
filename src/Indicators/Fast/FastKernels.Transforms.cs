@@ -3,35 +3,31 @@ namespace OoplesFinance.StockIndicators.Indicators.Fast;
 internal static partial class FastKernels
 {
     /// <summary>Ceiling, floor or square root of the close. A negative close has no square root.</summary>
-    internal static void Rounding(ReadOnlySpan<double> close, Span<double> value, Span<double> defined,
-        PriceRoundingOperation operation)
+    internal static void Rounding(ReadOnlySpan<double> close, FastOutputs outputs, PriceRoundingOperation operation)
     {
-        value = value.Slice(0, close.Length);
-        defined = defined.Slice(0, close.Length);
+        Span<double> value = outputs[0].AsSpan(0, close.Length);
         switch (operation)
         {
             case PriceRoundingOperation.Ceiling:
                 FastMath.Ceiling(close, value);
-                defined.Fill(1);
+                outputs.Flag(1, 0);
                 break;
             case PriceRoundingOperation.Floor:
                 FastMath.Floor(close, value);
-                defined.Fill(1);
+                outputs.Flag(1, 0);
                 break;
             default:
                 FastMath.Sqrt(close, value);
-                MaskBelow(close, value, defined, 0, inclusive: false);
+                MaskBelow(close, value, outputs, 0, inclusive: false);
                 break;
         }
     }
 
     /// <summary>A circular function of the close. The inverse sine and cosine exist only on [-1, 1].</summary>
-    internal static void Circular(ReadOnlySpan<double> close, Span<double> value, Span<double> defined,
-        PriceCircularOperation operation)
+    internal static void Circular(ReadOnlySpan<double> close, FastOutputs outputs, PriceCircularOperation operation)
     {
         var n = close.Length;
-        value = value.Slice(0, n);
-        defined = defined.Slice(0, n);
+        Span<double> value = outputs[0].AsSpan(0, n);
         switch (operation)
         {
 #if NETFRAMEWORK
@@ -62,6 +58,7 @@ internal static partial class FastKernels
                 break;
             default:
                 var sine = operation == PriceCircularOperation.ArcSine;
+                Span<double> defined = outputs[1].AsSpan(0, n);
                 for (var i = 0; i < n; i++)
                 {
                     var x = close[i];
@@ -71,21 +68,21 @@ internal static partial class FastKernels
                 }
                 return;
         }
-        defined.Fill(1);
+        outputs.Flag(1, 0);
     }
 
     /// <summary>A logarithm, exponential or hyperbolic function of the close. Logarithms need a positive close.</summary>
-    internal static void Transcendental(ReadOnlySpan<double> close, Span<double> value, Span<double> defined,
+    internal static void Transcendental(ReadOnlySpan<double> close, FastOutputs outputs,
         PriceTranscendentalOperation operation)
     {
         var n = close.Length;
-        value = value.Slice(0, n);
-        defined = defined.Slice(0, n);
+        Span<double> value = outputs[0].AsSpan(0, n);
         switch (operation)
         {
             case PriceTranscendentalOperation.NaturalLogarithm:
             case PriceTranscendentalOperation.CommonLogarithm:
                 var common = operation == PriceTranscendentalOperation.CommonLogarithm;
+                Span<double> defined = outputs[1].AsSpan(0, n);
                 for (var i = 0; i < n; i++)
                 {
                     var x = close[i];
@@ -107,18 +104,21 @@ internal static partial class FastKernels
                 for (var i = 0; i < n; i++) value[i] = Math.Tanh(close[i]);
                 break;
         }
-        defined.Fill(1);
+        outputs.Flag(1, 0);
     }
 
     // Marks every element defined, then clears the ones whose input is below the bound. The common case of
-    // an all-admissible column is decided by one vectorized minimum.
-    private static void MaskBelow(ReadOnlySpan<double> input, Span<double> value, Span<double> defined, double bound,
+    // an all-admissible column is decided by one vectorized minimum, and publishes the shared all-ones flag.
+    private static void MaskBelow(ReadOnlySpan<double> input, Span<double> value, FastOutputs outputs, double bound,
         bool inclusive)
     {
+        if (input.Length == 0 || (inclusive ? FastMath.Min(input) > bound : FastMath.Min(input) >= bound))
+        {
+            outputs.Flag(1, 0);
+            return;
+        }
+        Span<double> defined = outputs[1].AsSpan(0, input.Length);
         defined.Fill(1);
-        if (input.Length == 0) return;
-        var minimum = FastMath.Min(input);
-        if (inclusive ? minimum > bound : minimum >= bound) return;
         for (var i = 0; i < input.Length; i++)
             if (inclusive ? input[i] <= bound : input[i] < bound)
             {

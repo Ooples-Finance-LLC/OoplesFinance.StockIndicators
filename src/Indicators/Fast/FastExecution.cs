@@ -206,9 +206,9 @@ internal static partial class FastExecution
 
     private static void BindTransforms(Dictionary<Type, Func<IIndicator, FastKernel?>> binders)
     {
-        Bind<PriceRoundingTransform>(binders, t => (c, o) => FastKernels.Rounding(c.Close, o[0], o[1], t.Operation));
-        Bind<PriceCircularTransform>(binders, t => (c, o) => FastKernels.Circular(c.Close, o[0], o[1], t.Operation));
-        Bind<PriceTranscendentalTransform>(binders, t => (c, o) => FastKernels.Transcendental(c.Close, o[0], o[1], t.Operation));
+        Bind<PriceRoundingTransform>(binders, t => (c, o) => FastKernels.Rounding(c.Close, o, t.Operation));
+        Bind<PriceCircularTransform>(binders, t => (c, o) => FastKernels.Circular(c.Close, o, t.Operation));
+        Bind<PriceTranscendentalTransform>(binders, t => (c, o) => FastKernels.Transcendental(c.Close, o, t.Operation));
         Bind<TripleExponentialRate>(binders, t => (c, o) => FastKernels.TripleRate(c.Close, o, t));
         Bind<PriorSeededDirectionalMeasure>(binders, t => (c, o) => FastKernels.Directional(c, o[0], o[1], t));
         Bind<WindowDispersion>(binders, t => (c, o) => FastKernels.Dispersion(c.Close, o[0], t));
