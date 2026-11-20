@@ -12,6 +12,9 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 // tier and one stopwatch reading of a call that can take microseconds: a measurement of start-up,
 // not of the library. The pilot may settle on a single call: its default floor of four made a
 // competitor call that takes over a minute run four times per iteration, which no longer fits the bound.
+//
+// Outliers are kept. With three iterations, dropping one leaves two readings, and the report requires
+// three: a single slow iteration on a shared runner would otherwise fail the whole shard.
 public sealed class LibraryTimingConfig : ManualConfig
 {
     public LibraryTimingConfig()
@@ -22,6 +25,7 @@ public sealed class LibraryTimingConfig : ManualConfig
                 )
                 .WithUnrollFactor(1)
                 .WithMinInvokeCount(1)
+                .WithOutlierMode(Perfolizer.Mathematics.OutlierDetection.OutlierMode.DontRemove)
                 .WithMinIterationTime(Perfolizer.Horology.TimeInterval.FromMilliseconds(100))
         );
     }
