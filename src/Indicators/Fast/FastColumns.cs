@@ -77,7 +77,7 @@ internal sealed class FastColumns
     {
         if (_bars is not { } bars || _high is not null || _low is not null || _close is not null) return;
         double[] high = FastMath.Allocate(bars.Length), low = FastMath.Allocate(bars.Length), close = FastMath.Allocate(bars.Length);
-        double checkHigh = 0, checkLow = 0, checkClose = 0;
+        long checkHigh = 0, checkLow = 0, checkClose = 0;
         for (var i = 0; i < bars.Length; i++)
         {
             ref readonly var bar = ref bars[i];
@@ -85,14 +85,14 @@ internal sealed class FastColumns
             high[i] = h;
             low[i] = l;
             close[i] = c;
-            checkHigh += h - h; // NOSONAR x - x is the finite test
-            checkLow += l - l; // NOSONAR x - x is the finite test
-            checkClose += c - c; // NOSONAR x - x is the finite test
+            checkHigh |= NonFiniteBit(h);
+            checkLow |= NonFiniteBit(l);
+            checkClose |= NonFiniteBit(c);
         }
         // Reported in the order the separate gathers would have met them.
-        if (!(checkHigh == 0)) ThrowNonFinite(IndicatorInputFields.High);
-        if (!(checkLow == 0)) ThrowNonFinite(IndicatorInputFields.Low);
-        if (!(checkClose == 0)) ThrowNonFinite(IndicatorInputFields.Close);
+        if (checkHigh < 0) ThrowNonFinite(IndicatorInputFields.High);
+        if (checkLow < 0) ThrowNonFinite(IndicatorInputFields.Low);
+        if (checkClose < 0) ThrowNonFinite(IndicatorInputFields.Close);
         _high = high;
         _low = low;
         _close = close;
@@ -116,30 +116,36 @@ internal sealed class FastColumns
 
         var bars = _bars ?? [];
         var column = FastMath.Allocate(bars.Length);
-        // value - value is zero for every finite value and NaN otherwise, so one accumulated
-        // sum validates the whole column without a branch per bar.
-        double check = 0;
+        // One accumulated word validates the whole column without a branch per bar.
+        long check = 0;
         switch (field)
         {
             case IndicatorInputFields.Open:
-                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Open; column[i] = v; check += v - v; } // NOSONAR x - x is the finite test
+                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Open; column[i] = v; check |= NonFiniteBit(v); }
                 break;
             case IndicatorInputFields.High:
-                for (var i = 0; i < bars.Length; i++) { var v = bars[i].High; column[i] = v; check += v - v; } // NOSONAR x - x is the finite test
+                for (var i = 0; i < bars.Length; i++) { var v = bars[i].High; column[i] = v; check |= NonFiniteBit(v); }
                 break;
             case IndicatorInputFields.Low:
-                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Low; column[i] = v; check += v - v; } // NOSONAR x - x is the finite test
+                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Low; column[i] = v; check |= NonFiniteBit(v); }
                 break;
             case IndicatorInputFields.Close:
-                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Close; column[i] = v; check += v - v; } // NOSONAR x - x is the finite test
+                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Close; column[i] = v; check |= NonFiniteBit(v); }
                 break;
             default:
-                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Volume; column[i] = v; check += v - v; } // NOSONAR x - x is the finite test
+                for (var i = 0; i < bars.Length; i++) { var v = bars[i].Volume; column[i] = v; check |= NonFiniteBit(v); }
                 break;
         }
-        if (!(check == 0)) ThrowNonFinite(field);
+        if (check < 0) ThrowNonFinite(field);
         return column;
     }
+
+    // The sign bit is set exactly for a NaN or an infinity: the magnitude's exponent field is all ones, so
+    // adding one at its lowest bit carries out of it. Gathered with an OR the test costs a cycle a bar, where
+    // a running floating-point sum held every bar to the latency of an add.
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    private static long NonFiniteBit(double value) =>
+        unchecked((BitConverter.DoubleToInt64Bits(value) & long.MaxValue) + (1L << 52));
 
     // Same exception type and message as IndicatorInputDomain.Validate, without touching unread fields.
     private static void ThrowNonFinite(IndicatorInputFields field) =>

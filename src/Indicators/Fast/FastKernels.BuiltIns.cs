@@ -61,20 +61,36 @@ internal static partial class FastKernels
     {
         if (closes > 0 && !open) columns.RequireHighLowClose();
         ReadOnlySpan<double> high = columns.High, low = columns.Low;
-        output = output.Slice(0, high.Length);
-        FastMath.Add(high, low, output);
-        var count = 2;
-        if (open)
+        var n = high.Length;
+        output = output.Slice(0, n);
+        ReadOnlySpan<double> first = open ? columns.Open : default, close = closes > 0 ? columns.Close : default;
+        var scale = 1.0 / (2 + (open ? 1 : 0) + closes);
+        // One pass a bar, added in the order the separate passes took: high, low, open, then each close.
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
         {
-            FastMath.Add(output, columns.Open, output);
-            count++;
+            var width = System.Numerics.Vector<double>.Count;
+            for (; i <= n - width; i += width)
+            {
+                var sum = new System.Numerics.Vector<double>(high.Slice(i, width)) + new System.Numerics.Vector<double>(low.Slice(i, width));
+                if (open) sum += new System.Numerics.Vector<double>(first.Slice(i, width));
+                if (closes > 0)
+                {
+                    var c = new System.Numerics.Vector<double>(close.Slice(i, width));
+                    for (var k = 0; k < closes; k++) sum += c;
+                }
+                (sum * scale).CopyTo(output.Slice(i, width));
+            }
         }
-        for (var i = 0; i < closes; i++)
+#endif
+        for (; i < n; i++)
         {
-            FastMath.Add(output, columns.Close, output);
-            count++;
+            var sum = high[i] + low[i];
+            if (open) sum += first[i];
+            for (var k = 0; k < closes; k++) sum += close[i];
+            output[i] = sum * scale;
         }
-        FastMath.Scale(output, 1.0 / count, output);
     }
 
     /// <summary>True range per bar; the first bar has no previous close and publishes its own range.</summary>
