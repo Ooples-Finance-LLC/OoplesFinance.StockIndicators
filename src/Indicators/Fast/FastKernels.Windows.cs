@@ -240,4 +240,62 @@ internal static partial class FastKernels
         k.Slice(0, (int)first).Clear();
         d.Slice(0, kStart).Clear();
     }
+
+
+    /// <summary>
+    /// Population standard deviation over the window with the window mean, the z-score where the window is
+    /// not flat, and an optional rolling mean of the deviation.
+    /// </summary>
+    internal static void StandardDeviationDetails(ReadOnlySpan<double> close, double[][] outputs, int period, int? smoothingPeriod)
+    {
+        var n = close.Length;
+        for (var slot = 3; slot < 8; slot++) outputs[slot].AsSpan(0, n).Clear();
+        Span<double> deviation = outputs[0].AsSpan(0, n), mean = outputs[1].AsSpan(0, n), score = outputs[2].AsSpan(0, n);
+        if (n < period)
+        {
+            deviation.Clear();
+            mean.Clear();
+            score.Clear();
+            return;
+        }
+        Dispersion(close, deviation, new WindowDispersion(period));
+        Sma(close, mean, period);
+        Dispersion(close, score, new WindowDispersion(period, WindowDispersionOutput.ZScore));
+        var first = period - 1;
+        deviation.Slice(0, first).Clear();
+        mean.Slice(0, first).Clear();
+        score.Slice(0, first).Clear();
+        outputs[4].AsSpan(first, n - first).Fill(1);
+        outputs[5].AsSpan(first, n - first).Fill(1);
+        var scoreDefined = outputs[6].AsSpan(0, n);
+        // The window has a variance unless every value in it is the same one.
+        var run = 1;
+        for (var i = 1; i < n; i++)
+        {
+            run = close[i] == close[i - 1] ? run + 1 : 1; // NOSONAR an exact tie is the contract
+            if (i < first) continue;
+            if (run >= period) score[i] = 0;
+            else scoreDefined[i] = 1;
+        }
+        if (smoothingPeriod is not int window) return;
+        Span<double> smooth = outputs[3].AsSpan(0, n), smoothDefined = outputs[7].AsSpan(0, n);
+        double sum = 0;
+        for (var i = first; i < n; i++)
+        {
+            var held = i - first + 1;
+            if (held > window && ((i - first) & RebuildMask) == 0)
+            {
+                sum = 0;
+                for (var j = i - window + 1; j <= i; j++) sum += deviation[j];
+            }
+            else
+            {
+                if (held > window) sum -= deviation[i - window];
+                sum += deviation[i];
+            }
+            if (held < window) continue;
+            smooth[i] = window == 1 ? deviation[i] : sum / window;
+            smoothDefined[i] = 1;
+        }
+    }
 }
