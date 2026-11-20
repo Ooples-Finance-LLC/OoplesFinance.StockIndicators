@@ -775,4 +775,33 @@ internal static partial class FastKernels
             output[i] = c >= o ? 100 : -100;
         }
     }
+
+
+    /// <summary>
+    /// Strict harami: a body of the opposite colour held strictly inside the previous body, optionally
+    /// with its shadows inside too, and optionally only after a run of bars trending into it.
+    /// </summary>
+    internal static void StrictHarami(FastColumns columns, Span<double> output, int direction, int period, bool shadows)
+    {
+        double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var trend = 0;
+        for (var i = 1; i < n; i++)
+        {
+            double previousOpen = open[i - 1], previousClose = close[i - 1], o = open[i], c = close[i];
+            bool priorBearish = previousClose < previousOpen, bearish = c < o;
+            var match = priorBearish != bearish
+                && (priorBearish ? previousOpen > c && previousClose < o : previousOpen < c && previousClose > o);
+            if (match && shadows) match = high[i - 1] > high[i] && low[i - 1] < low[i];
+            if (direction != 0)
+            {
+                if (match) match = trend >= period && (direction > 0 ? c > o : bearish);
+                var transition = direction > 0 ? o < previousOpen && c < previousClose : o > previousOpen && c > previousClose;
+                trend = transition ? trend == period ? period : trend + 1 : 0;
+            }
+            if (match) output[i] = 1;
+        }
+    }
 }

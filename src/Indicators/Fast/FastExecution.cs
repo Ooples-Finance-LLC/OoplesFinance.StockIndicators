@@ -146,6 +146,9 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<StrictHaramiCandle>(binders, t => (c, o) => FastKernels.StrictHarami(c, o[0], 0, 1, t.ContainedShadows));
+        Bind<BullishHaramiPattern>(binders, t => (c, o) => FastKernels.StrictHarami(c, o[0], 1, t.Period, t.ContainedShadows));
+        Bind<BearishHaramiPattern>(binders, t => (c, o) => FastKernels.StrictHarami(c, o[0], -1, t.Period, t.ContainedShadows));
         Bind<CounterattackCandle>(binders, t => (c, o) => FastKernels.MatchedLinesCandle(c, o[0], t.BodyPeriod, 0, t.EqualPeriod, MatchedLinesKind.Counterattack));
         Bind<SeparatingLinesCandle>(binders, t => (c, o) => FastKernels.MatchedLinesCandle(c, o[0], t.BodyPeriod, t.ShadowPeriod, t.EqualPeriod, MatchedLinesKind.SeparatingLines));
         Bind<GapSideBySideWhiteLinesCandle>(binders, t => (c, o) => FastKernels.MatchedLinesCandle(c, o[0], 0, t.NearPeriod, t.EqualPeriod, MatchedLinesKind.GapSideBySideWhiteLines));
