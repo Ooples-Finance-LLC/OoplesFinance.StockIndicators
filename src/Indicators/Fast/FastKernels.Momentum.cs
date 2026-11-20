@@ -584,4 +584,95 @@ internal static partial class FastKernels
                 value[i] = AnchoredSlope(x.Slice(i - period + 1, period), y.Slice(i - period + 1, period));
         }
     }
+
+
+    // Slope of y on x over the window's pairs whose x has the wanted sign (zero for every pair). False
+    // when the chosen x values are all equal or there are none, which is when no slope exists.
+    private static bool SubsetSlope(ReadOnlySpan<double> x, ReadOnlySpan<double> y, int sign, out double slope)
+    {
+        slope = 0;
+        var count = 0;
+        double anchorX = 0, anchorY = 0, sumX = 0, sumY = 0;
+        var varies = false;
+        for (var j = 0; j < x.Length; j++)
+        {
+            var value = x[j];
+            if (sign > 0 ? !(value > 0) : sign < 0 && !(value < 0)) continue;
+            if (count++ == 0)
+            {
+                anchorX = value;
+                anchorY = y[j];
+                continue;
+            }
+            varies |= value != anchorX;
+            sumX += value - anchorX;
+            sumY += y[j] - anchorY;
+        }
+        if (!varies) return false;
+        double meanX = sumX / count, meanY = sumY / count, xx = 0, xy = 0;
+        for (var j = 0; j < x.Length; j++)
+        {
+            var value = x[j];
+            if (sign > 0 ? !(value > 0) : sign < 0 && !(value < 0)) continue;
+            var dx = value - anchorX - meanX;
+            xx += dx * dx;
+            xy += dx * (y[j] - anchorY - meanY);
+        }
+        slope = xy / xx;
+        return true;
+    }
+
+    /// <summary>
+    /// Beta over all the window's returns, over those where the market rose and over those where it fell,
+    /// with the ratio and squared difference of the last two, and both return series.
+    /// </summary>
+    internal static void BetaStatistics(FastColumns columns, double[][] outputs, WindowBetaStatistics owner)
+    {
+        ReadOnlySpan<double> market = Field(columns, owner.Market), evaluation = Field(columns, owner.Evaluation);
+        var n = market.Length;
+        var period = owner.Period;
+        for (var slot = 0; slot < 12; slot++)
+            if (slot is not (5 or 6)) outputs[slot].AsSpan(0, n).Clear();
+        outputs[12].AsSpan(0, n).Fill(1);
+        outputs[13].AsSpan(0, n).Fill(1);
+        Span<double> ys = outputs[5].AsSpan(0, n), xs = outputs[6].AsSpan(0, n);
+        Returns(evaluation, ys);
+        Returns(market, xs);
+        var selection = owner.Selection;
+        bool all = selection == ReturnBetaSelection.All,
+            standard = all || selection == ReturnBetaSelection.Standard,
+            up = all || selection == ReturnBetaSelection.Up,
+            down = all || selection == ReturnBetaSelection.Down;
+        for (var i = period; i < n; i++)
+        {
+            ReadOnlySpan<double> x = xs.Slice(i - period + 1, period), y = ys.Slice(i - period + 1, period);
+            if (standard && SubsetSlope(x, y, 0, out var beta))
+            {
+                outputs[0][i] = beta;
+                outputs[7][i] = 1;
+            }
+            double rising = 0, falling = 0;
+            bool hasUp = up && SubsetSlope(x, y, 1, out rising), hasDown = down && SubsetSlope(x, y, -1, out falling);
+            if (hasUp)
+            {
+                outputs[1][i] = rising;
+                outputs[8][i] = 1;
+            }
+            if (hasDown)
+            {
+                outputs[2][i] = falling;
+                outputs[9][i] = 1;
+            }
+            if (!all || !hasUp || !hasDown || double.IsNaN(rising) || double.IsInfinity(rising)
+                || double.IsNaN(falling) || double.IsInfinity(falling)) continue;
+            if (falling != 0)
+            {
+                outputs[3][i] = rising / falling;
+                outputs[10][i] = 1;
+            }
+            var difference = rising - falling;
+            outputs[4][i] = difference * difference;
+            outputs[11][i] = 1;
+        }
+    }
 }
