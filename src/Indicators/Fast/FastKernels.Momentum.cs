@@ -790,4 +790,85 @@ internal static partial class FastKernels
             pool.Return(rented);
         }
     }
+
+
+    /// <summary>
+    /// Rate of change with its exponential average and bands at plus and minus the root mean square of the
+    /// last few rates. A zero base price leaves the rate absent, ends the average and holds the bands back
+    /// while it is in their window.
+    /// </summary>
+    internal static void RateOfChangeBands(ReadOnlySpan<double> close, double[][] outputs, int period, int emaPeriod,
+        int deviationPeriod)
+    {
+        var n = close.Length;
+        for (var slot = 0; slot < 7; slot++) outputs[slot].AsSpan(0, n).Clear();
+        if (n <= period) return;
+        Span<double> roc = outputs[0].AsSpan(0, n), rocDefined = outputs[1].AsSpan(0, n);
+        Span<double> ema = outputs[2].AsSpan(0, n), emaDefined = outputs[3].AsSpan(0, n);
+        Span<double> upper = outputs[4].AsSpan(0, n), lower = outputs[5].AsSpan(0, n), bandsDefined = outputs[6].AsSpan(0, n);
+        for (var i = period; i < n; i++)
+        {
+            var previous = close[i - period];
+            if (previous == 0) continue; // NOSONAR an exact tie is the contract
+            roc[i] = 100 * (close[i] - previous) / previous;
+            rocDefined[i] = 1;
+        }
+        // The average runs from the first rate until the first absent one.
+        var end = period;
+        while (end < n && rocDefined[end] > 0) end++;
+        var seedBar = (long)period + emaPeriod - 1;
+        if (seedBar < end)
+        {
+            var at = (int)seedBar;
+            double seed = 0;
+            for (var i = period; i <= at; i++) seed += roc[i];
+            var value = emaPeriod == 1 ? roc[at] : seed / emaPeriod;
+            ema[at] = value;
+            FastMath.BlendRun((emaPeriod - 1.0) / (emaPeriod + 1.0), 2.0 / (emaPeriod + 1.0), roc.Slice(0, end), ema.Slice(0, end),
+                at + 1, value);
+            emaDefined.Slice(at, end - at).Fill(1);
+        }
+        // A sliding sum keeps the rounding of the largest total it has held, so it is summed afresh once
+        // it has fallen well below that peak as well as on the usual schedule.
+        double squares = 0, peak = 0;
+        var missing = 0;
+        for (var i = period; i < n; i++)
+        {
+            var held = i - period + 1;
+            if (held > deviationPeriod && (i & RebuildMask) == 0)
+            {
+                squares = 0;
+                missing = 0;
+                for (var j = i - deviationPeriod + 1; j <= i; j++)
+                {
+                    squares += roc[j] * roc[j];
+                    if (rocDefined[j] <= 0) missing++;
+                }
+                peak = squares;
+            }
+            else
+            {
+                if (held > deviationPeriod)
+                {
+                    var old = i - deviationPeriod;
+                    squares -= roc[old] * roc[old];
+                    if (rocDefined[old] <= 0) missing--;
+                }
+                squares += roc[i] * roc[i];
+                if (rocDefined[i] <= 0) missing++;
+                peak = FastMath.Larger(peak, squares);
+                if (held > deviationPeriod && squares < 0.01 * peak)
+                {
+                    squares = 0;
+                    for (var j = i - deviationPeriod + 1; j <= i; j++) squares += roc[j] * roc[j];
+                    peak = squares;
+                }
+            }
+            if (held < deviationPeriod || missing != 0) continue;
+            var band = Math.Sqrt(Math.Max(0, squares) / deviationPeriod);
+            upper[i] = band;
+            lower[i] = -band;
+            bandsDefined[i] = 1;
+        }
+    }
 }
