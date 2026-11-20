@@ -368,7 +368,7 @@ internal static partial class FastExecution
         });
         Bind<WilderMovingAverage>(binders, t => (c, o) => FastKernels.WilderAverage(c.Close, o[0], t.Period, t.SeedWithAverage));
         Bind<CompensatedExponentialAverage>(binders, t => (c, o) => FastKernels.CompensatedExponential(c.Close, o[0], t.Period, t.Order));
-        Bind<CandleArithmetic>(binders, t => (c, o) => FastKernels.CandleArithmetic(c, o[0], o[1], t));
+        Bind<CandleArithmetic>(binders, t => (c, o) => FastKernels.CandleArithmetic(c, o, t));
         Bind<WindowAroon>(binders, t => (c, o) => FastKernels.Aroon(c, o, t));
         Bind<WindowExtremeIndex>(binders, t => (c, o) => FastKernels.RollingExtremeIndex(c.Close, o[0], t.Period, t.Maximum, true));
         Bind<WindowRangeMidpoint>(binders, t => (c, o) =>

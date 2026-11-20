@@ -71,13 +71,11 @@ internal static partial class FastKernels
     }
 
     /// <summary>Sum, difference, product or quotient of two price fields; a zero divisor publishes nothing.</summary>
-    internal static void CandleArithmetic(FastColumns columns, Span<double> value, Span<double> defined, CandleArithmetic owner)
+    internal static void CandleArithmetic(FastColumns columns, FastOutputs outputs, CandleArithmetic owner)
     {
         ReadOnlySpan<double> left = Field(columns, owner.Left), right = Field(columns, owner.Right);
         var n = left.Length;
-        value = value.Slice(0, n);
-        defined = defined.Slice(0, n);
-        defined.Fill(1);
+        Span<double> value = outputs[0].AsSpan(0, n);
         switch (owner.Operation)
         {
             case CandleArithmeticOperation.Add:
@@ -90,19 +88,25 @@ internal static partial class FastKernels
                 for (var i = 0; i < n; i++) value[i] = left[i] * right[i];
                 break;
             default:
+                var undefined = 0;
                 for (var i = 0; i < n; i++)
                 {
                     var divisor = right[i];
                     if (divisor == 0)
                     {
                         value[i] = 0;
-                        defined[i] = 0;
+                        undefined++;
                     }
                     else
                         value[i] = left[i] / divisor;
                 }
-                break;
+                if (undefined == 0) break;
+                // A zero divisor is rare enough that its flags are worked out only once one has been met.
+                Span<double> defined = outputs[1].AsSpan(0, n);
+                for (var i = 0; i < n; i++) defined[i] = right[i] == 0 ? 0 : 1;
+                return;
         }
+        outputs.Flag(1, 0);
     }
 
     private static double[] Field(FastColumns columns, CandlePriceField field) => field switch
