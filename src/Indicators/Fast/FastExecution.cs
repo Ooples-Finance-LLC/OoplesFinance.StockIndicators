@@ -146,6 +146,7 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<AverageTrueRangeWithDetails>(binders, t => (c, o) => FastKernels.AverageTrueRangeDetails(c, o, t.Period));
         Bind<RateOfChangeWithAverage>(binders, t => (c, o) => FastKernels.RateOfChangeAverage(c.Close, o, t.Period, t.AveragePeriod));
         Bind<BalanceOfPowerWithValidity>(binders, t => (c, o) => FastKernels.BalanceOfPowerMean(c, o[0], o[1], t.Period));
         Bind<BreakawayCandle>(binders, t => (c, o) => FastKernels.ExtendedReversalCandle(c, o[0], t.Period, ExtendedReversalKind.Breakaway));

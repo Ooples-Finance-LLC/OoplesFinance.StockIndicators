@@ -92,4 +92,37 @@ internal static partial class FastKernels
             if (details) outputs[slot].AsSpan().Fill(1);
             else outputs[slot].AsSpan().Clear();
     }
+
+
+    /// <summary>
+    /// True range, its Wilder average seeded by the mean of the first ranges, and that average as a
+    /// percentage of the close, each with a flag for the bars that have it.
+    /// </summary>
+    internal static void AverageTrueRangeDetails(FastColumns columns, double[][] outputs, int period)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        for (var slot = 0; slot < 6; slot++) outputs[slot].AsSpan(0, n).Clear();
+        Span<double> range = outputs[0].AsSpan(0, n), average = outputs[1].AsSpan(0, n), percent = outputs[2].AsSpan(0, n);
+        for (var i = 1; i < n; i++) range[i] = TrueRange(high[i], low[i], close[i - 1]);
+        if (n > 1) outputs[3].AsSpan(1, n - 1).Fill(1);
+        if (n <= period) return;
+        double sum = 0;
+        for (var i = 1; i <= period; i++) sum += range[i];
+        var value = sum / period;
+        average[period] = value;
+        var weight = (period - 1.0) / period;
+        // The same recurrence as an exponential average with alpha = 1 / period.
+        FastMath.BlendRun(weight, 1.0 / period, range, average, period + 1, value);
+        outputs[4].AsSpan(period, n - period).Fill(1);
+        var percentDefined = outputs[5].AsSpan(0, n);
+        for (var i = period; i < n; i++)
+        {
+            var c = close[i];
+            if (c == 0) continue; // NOSONAR an exact tie is the contract
+            percent[i] = 100 * average[i] / c;
+            percentDefined[i] = 1;
+        }
+    }
 }
