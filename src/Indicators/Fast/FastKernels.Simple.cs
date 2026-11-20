@@ -174,7 +174,7 @@ internal static partial class FastKernels
     {
         bool Highest { get; }
         bool Newest { get; }
-        bool Replaces(double value, double best);
+        bool Takes(double value, double best);
     }
 
     private struct NewestHighest : IExtremeRule
@@ -182,7 +182,7 @@ internal static partial class FastKernels
         public bool Highest => true;
         public bool Newest => true;
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
-        public bool Replaces(double value, double best) => value >= best;
+        public bool Takes(double value, double best) => value >= best;
     }
 
     private struct OldestHighest : IExtremeRule
@@ -190,7 +190,7 @@ internal static partial class FastKernels
         public bool Highest => true;
         public bool Newest => false;
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
-        public bool Replaces(double value, double best) => value > best;
+        public bool Takes(double value, double best) => value > best;
     }
 
     private struct NewestLowest : IExtremeRule
@@ -198,7 +198,7 @@ internal static partial class FastKernels
         public bool Highest => false;
         public bool Newest => true;
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
-        public bool Replaces(double value, double best) => value <= best;
+        public bool Takes(double value, double best) => value <= best;
     }
 
     private struct OldestLowest : IExtremeRule
@@ -206,7 +206,7 @@ internal static partial class FastKernels
         public bool Highest => false;
         public bool Newest => false;
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
-        public bool Replaces(double value, double best) => value < best;
+        public bool Takes(double value, double best) => value < best;
     }
 
     [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
@@ -228,7 +228,7 @@ internal static partial class FastKernels
                 at = from + ExtremeOffset(input.Slice(from, period), rule.Highest, rule.Newest);
                 best = input[at];
             }
-            else if (rule.Replaces(value, best))
+            else if (rule.Takes(value, best))
             {
                 best = value;
                 at = i;
@@ -395,7 +395,7 @@ internal static partial class FastKernels
                 highestAt = i - size + 1 + ExtremeOffset(high.Slice(i - size + 1, size), true, higher.Newest);
                 highest = high[highestAt];
             }
-            else if (higher.Replaces(h, highest))
+            else if (higher.Takes(h, highest))
             {
                 highest = h;
                 highestAt = i;
@@ -405,7 +405,7 @@ internal static partial class FastKernels
                 lowestAt = i - size + 1 + ExtremeOffset(low.Slice(i - size + 1, size), false, lower.Newest);
                 lowest = low[lowestAt];
             }
-            else if (lower.Replaces(l, lowest))
+            else if (lower.Takes(l, lowest))
             {
                 lowest = l;
                 lowestAt = i;

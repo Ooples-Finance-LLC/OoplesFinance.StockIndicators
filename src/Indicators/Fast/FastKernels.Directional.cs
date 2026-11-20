@@ -125,8 +125,9 @@ internal static partial class FastKernels
         for (; bar < n; bar++)
         {
             double up = high[bar] - high[bar - 1], down = low[bar - 1] - low[bar];
-            positives[bar] = FastMath.KeepIf(up, needsPositive & up > 0 & up > down);
-            negatives[bar] = FastMath.KeepIf(down, needsNegative & down > 0 & down > up);
+            // Every test is evaluated on purpose: a short circuit would be a branch the data decides.
+            positives[bar] = FastMath.KeepIf(up, needsPositive & up > 0 & up > down); // NOSONAR no short circuit
+            negatives[bar] = FastMath.KeepIf(down, needsNegative & down > 0 & down > up); // NOSONAR no short circuit
             ranges[bar] = TrueRange(high[bar], low[bar], close[bar - 1]);
         }
         double positive = 0, negative = 0, range = 0;

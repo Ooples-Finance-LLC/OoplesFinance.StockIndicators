@@ -56,17 +56,13 @@ public static class ParabolicStopSnapshots
     }
 
     [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
-    private static void ValidateRows(ReadOnlySpan<Bar> rows)
+    private static void ValidateRows(ReadOnlySpan<Bar> bars)
     {
-        // value - value is +0 for a finite value and NaN otherwise, so the differences' bits stay zero only
-        // while every high and low is finite.
+        // The bits gathered stay zero only while every high and low is finite.
         long bits = 0;
-        for (var i = 0; i < rows.Length; i++)
-        {
-            double high = rows[i].High, low = rows[i].Low;
-            bits |= BitConverter.DoubleToInt64Bits(high - high) | BitConverter.DoubleToInt64Bits(low - low);
-        }
-        if (bits != 0) throw new ArgumentOutOfRangeException("bars");
+        for (var i = 0; i < bars.Length; i++)
+            bits |= FastMath.NonFiniteBits(bars[i].High) | FastMath.NonFiniteBits(bars[i].Low);
+        if (bits != 0) throw new ArgumentOutOfRangeException(nameof(bars));
     }
 
     /// <summary>Unsigned stop with directional-movement initialization and nonnegative acceleration/maximum.</summary>
