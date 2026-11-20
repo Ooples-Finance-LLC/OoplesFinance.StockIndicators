@@ -31,6 +31,12 @@ public sealed class FastSnapshotParityTests
         ("VolatilityStop(2, 0.5)", (bars, numerics) => Stops(VolatilityStopSnapshot.Calculate(bars, 2, .5, numerics))),
         ("VolatilityStop(20, 1.5)", (bars, numerics) => Stops(VolatilityStopSnapshot.Calculate(bars, 20, 1.5, numerics))),
         ("VolatilityStop(300, 3)", (bars, numerics) => Stops(VolatilityStopSnapshot.Calculate(bars, 300, 3, numerics))),
+        ("ZigZag()", (bars, numerics) => Swings(ZigZagSnapshot.Calculate(bars, numerics: numerics))),
+        ("ZigZag(1)", (bars, numerics) => Swings(ZigZagSnapshot.Calculate(bars, 1, false, numerics))),
+        ("ZigZag(0.25)", (bars, numerics) => Swings(ZigZagSnapshot.Calculate(bars, .25, false, numerics))),
+        ("ZigZag(1, high/low)", (bars, numerics) => Swings(ZigZagSnapshot.Calculate(bars, 1, true, numerics))),
+        ("ZigZag(3, high/low)", (bars, numerics) => Swings(ZigZagSnapshot.Calculate(bars, 3, true, numerics))),
+        ("ZigZag(50, high/low)", (bars, numerics) => Swings(ZigZagSnapshot.Calculate(bars, 50, true, numerics))),
     ];
 
     public static TheoryData<string> CaseNames()
@@ -84,6 +90,14 @@ public sealed class FastSnapshotParityTests
     }
 
     private static string Show(double? value) => value is double present ? present.ToString("R") : "absent";
+
+    private static double?[][] Swings(IReadOnlyList<ZigZagValue> rows) =>
+    [
+        [.. rows.Select(row => row.ZigZag)],
+        [.. rows.Select(row => row.PointType is ZigZagPointKind kind ? (double)kind : (double?)null)],
+        [.. rows.Select(row => row.RetraceHigh)],
+        [.. rows.Select(row => row.RetraceLow)],
+    ];
 
     private static double?[][] Stops(IReadOnlyList<VolatilityStopValue> rows) =>
     [
