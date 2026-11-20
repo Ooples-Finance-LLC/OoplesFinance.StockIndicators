@@ -799,8 +799,9 @@ internal static partial class FastKernels
             rightRun = i > 0 && right[i] == right[i - 1] ? rightRun + 1 : 1; // NOSONAR an exact tie is the contract
         }
         var sums = default(PairSums);
-        var slid = int.MaxValue;
         var block = Math.Max(64, period);
+        // Starting at the block length makes the first full window a fresh sum.
+        var slid = block;
         for (var i = period - 1; i < n; i++)
         {
             leftRun = i > 0 && left[i] == left[i - 1] ? leftRun + 1 : 1; // NOSONAR an exact tie is the contract
