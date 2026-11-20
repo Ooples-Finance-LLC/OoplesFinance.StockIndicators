@@ -107,6 +107,40 @@ internal static class FastMath
 #endif
     }
 
+    /// <summary>Sum of the distances of a run's values from a centre, in interleaved partial sums.</summary>
+    /// <remarks>
+    /// One running sum makes every value wait for the addition before it, which over a window costs more
+    /// than the distances themselves. The values are added in a different grouping than one at a time,
+    /// which moves the sum by rounding only: the distances are never negative, so nothing cancels.
+    /// </remarks>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+    internal static double DistanceSum(ReadOnlySpan<double> values, double centre)
+    {
+        var i = 0;
+        double sum = 0;
+#if !NETFRAMEWORK
+        var width = System.Numerics.Vector<double>.Count;
+        if (System.Numerics.Vector.IsHardwareAccelerated && values.Length >= width)
+        {
+            var middle = new System.Numerics.Vector<double>(centre);
+            System.Numerics.Vector<double> first = default, second = default;
+            for (; i <= values.Length - 2 * width; i += 2 * width)
+            {
+                first += System.Numerics.Vector.Abs(new System.Numerics.Vector<double>(values.Slice(i)) - middle);
+                second += System.Numerics.Vector.Abs(new System.Numerics.Vector<double>(values.Slice(i + width)) - middle);
+            }
+            if (i <= values.Length - width)
+            {
+                first += System.Numerics.Vector.Abs(new System.Numerics.Vector<double>(values.Slice(i)) - middle);
+                i += width;
+            }
+            sum = System.Numerics.Vector.Sum(first + second);
+        }
+#endif
+        for (; i < values.Length; i++) sum += Math.Abs(values[i] - centre);
+        return sum;
+    }
+
     /// <summary>Sum of the products of two equally long runs, in four interleaved partial sums.</summary>
     [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static double Dot(ReadOnlySpan<double> a, ReadOnlySpan<double> b)
@@ -401,5 +435,67 @@ internal static class FastMath
             return result;
 #endif
         return Helpers.ExactTypicalPrice.Calculate(high, low, close);
+    }
+
+    /// <summary>Every bar's typical price, each rounded as <see cref="TypicalPrice"/> rounds it.</summary>
+    /// <remarks>
+    /// Four bars are taken at a time through the same steps, in the same order, as the one-bar form, so a bar
+    /// it accepts has the value that form gives it. A group with a bar it does not accept is handed to that
+    /// form whole.
+    /// </remarks>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static void TypicalPrices(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close,
+        Span<double> output)
+    {
+        var n = output.Length;
+        high = high.Slice(0, n);
+        low = low.Slice(0, n);
+        close = close.Slice(0, n);
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Runtime.Intrinsics.X86.Fma.IsSupported && System.Runtime.Intrinsics.X86.Avx2.IsSupported)
+        {
+            var three = System.Runtime.Intrinsics.Vector256.Create(3.0);
+            var zero = System.Runtime.Intrinsics.Vector256<double>.Zero;
+            System.Runtime.Intrinsics.Vector256<double> least = System.Runtime.Intrinsics.Vector256.Create(1e-290), most = System.Runtime.Intrinsics.Vector256.Create(1e290);
+            var nearHalf = System.Runtime.Intrinsics.Vector256.Create(0.4999999);
+            var fraction = System.Runtime.Intrinsics.Vector256.Create(0xFFFFFFFFFFFFFL);
+            var one = System.Runtime.Intrinsics.Vector256.Create(1L);
+            for (; i <= n - 4; i += 4)
+            {
+                System.Runtime.Intrinsics.Vector256<double> h = System.Runtime.Intrinsics.Vector256.Create<double>(high.Slice(i, 4)), l = System.Runtime.Intrinsics.Vector256.Create<double>(low.Slice(i, 4)),
+                    c = System.Runtime.Intrinsics.Vector256.Create<double>(close.Slice(i, 4));
+                var pair = h + l;
+                var virtualLow = pair - h;
+                var pairResidual = h - (pair - virtualLow) + (l - virtualLow);
+                var sum = pair + c;
+                var virtualClose = sum - pair;
+                var sumResidual = pair - (sum - virtualClose) + (c - virtualClose);
+                var quotient = sum / three;
+                // A sum with nothing left over is its own third, and a zero sum is a positive zero.
+                var whole = System.Runtime.Intrinsics.Vector256.Equals(pairResidual, zero) & System.Runtime.Intrinsics.Vector256.Equals(sumResidual, zero);
+                var plain = System.Runtime.Intrinsics.Vector256.AndNot(quotient, System.Runtime.Intrinsics.Vector256.Equals(sum, zero));
+                var residual = pairResidual + sumResidual;
+                var remainder = System.Runtime.Intrinsics.X86.Fma.MultiplyAddNegated(three, quotient, sum);
+                var lacking = remainder + residual;
+                var third = lacking / three;
+                var result = quotient + third;
+                var left = quotient - result + third;
+                var magnitude = System.Runtime.Intrinsics.Vector256.Abs(result);
+                var unit = System.Runtime.Intrinsics.Vector256.AsDouble(System.Runtime.Intrinsics.Vector256.AsInt64(magnitude) + one) - magnitude;
+                var accepted = System.Runtime.Intrinsics.Vector256.Equals(residual - pairResidual, sumResidual) & System.Runtime.Intrinsics.Vector256.Equals(lacking - remainder, residual)
+                    & System.Runtime.Intrinsics.Vector256.GreaterThan(magnitude, least) & System.Runtime.Intrinsics.Vector256.LessThan(magnitude, most)
+                    & System.Runtime.Intrinsics.Vector256.LessThan(System.Runtime.Intrinsics.Vector256.Abs(left), nearHalf * unit)
+                    & ~System.Runtime.Intrinsics.Vector256.AsDouble(System.Runtime.Intrinsics.Vector256.Equals(System.Runtime.Intrinsics.Vector256.AsInt64(result) & fraction, System.Runtime.Intrinsics.Vector256<long>.Zero));
+                if (System.Runtime.Intrinsics.Vector256.ExtractMostSignificantBits(whole | accepted) != 0xF)
+                {
+                    for (var bar = i; bar < i + 4; bar++) output[bar] = TypicalPrice(high[bar], low[bar], close[bar]);
+                    continue;
+                }
+                System.Runtime.Intrinsics.Vector256.CopyTo(System.Runtime.Intrinsics.Vector256.ConditionalSelect(whole, plain, result), output.Slice(i, 4));
+            }
+        }
+#endif
+        for (; i < n; i++) output[i] = TypicalPrice(high[i], low[i], close[i]);
     }
 }

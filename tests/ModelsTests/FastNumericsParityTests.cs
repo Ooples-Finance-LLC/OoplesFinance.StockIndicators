@@ -1402,4 +1402,36 @@ public sealed class FastNumericsParityTests
             }
         }
     }
+    [Fact]
+    public void TypicalPricesTakenFourAtATimeAreTheOnesTakenOneAtATime()
+    {
+        // Ordinary prices, prices a unit in the last place apart, sums that are exact and sums that are not,
+        // zeros of both signs, and magnitudes at both ends: each bar must get the very bits the one-bar form
+        // gives it, at every length around a group of four.
+        var random = RandomHelper.CreateSeededRandom(11);
+        var specials = new[] { 0.0, -0.0, 1.0, 3.0, 0.1, 1e-300, -1e-300, 1e300, -1e300, 4.9e-324, 100.25, Math.BitIncrement(100.25) };
+        for (var length = 0; length <= 41; length++)
+        {
+            for (var round = 0; round < 40; round++)
+            {
+                double[] high = new double[length], low = new double[length], close = new double[length];
+                for (var i = 0; i < length; i++)
+                {
+                    var kind = random.Next(6);
+                    var price = 50 + random.NextDouble() * 100;
+                    high[i] = kind == 0 ? specials[random.Next(specials.Length)] : kind == 1 ? Math.Round(price, 2) : price;
+                    low[i] = kind == 0 ? specials[random.Next(specials.Length)] : kind == 2 ? Math.BitDecrement(high[i]) : price - random.NextDouble();
+                    close[i] = kind == 0 ? specials[random.Next(specials.Length)] : kind == 3 ? high[i] : kind == 4 ? Math.BitIncrement(low[i]) : price - random.NextDouble() / 2;
+                }
+                var actual = new double[length];
+                OoplesFinance.StockIndicators.Indicators.Fast.FastMath.TypicalPrices(high, low, close, actual);
+                for (var i = 0; i < length; i++)
+                {
+                    var expected = OoplesFinance.StockIndicators.Indicators.Fast.FastMath.TypicalPrice(high[i], low[i], close[i]);
+                    Assert.True(BitConverter.DoubleToInt64Bits(expected) == BitConverter.DoubleToInt64Bits(actual[i]),
+                        $"length {length}, bar {i}: {high[i]:R} {low[i]:R} {close[i]:R} gave {actual[i]:R}, not {expected:R}");
+                }
+            }
+        }
+    }
 }
