@@ -244,7 +244,7 @@ internal static partial class FastKernels
     /// Population standard deviation over the window with the window mean, the z-score where the window is
     /// not flat, and an optional rolling mean of the deviation.
     /// </summary>
-    internal static void StandardDeviationDetails(ReadOnlySpan<double> close, double[][] outputs, int period, int? smoothingPeriod)
+    internal static void StandardDeviationDetails(ReadOnlySpan<double> close, FastOutputs outputs, int period, int? smoothingPeriod)
     {
         var n = close.Length;
         for (var slot = 3; slot < 8; slot++) outputs[slot].AsSpan(0, n).Clear();
@@ -263,8 +263,8 @@ internal static partial class FastKernels
         deviation.Slice(0, first).Clear();
         mean.Slice(0, first).Clear();
         score.Slice(0, first).Clear();
-        outputs[4].AsSpan(first, n - first).Fill(1);
-        outputs[5].AsSpan(first, n - first).Fill(1);
+        outputs.Flag(4, first);
+        outputs.Flag(5, first);
         var scoreDefined = outputs[6].AsSpan(0, n);
         // The window has a variance unless every value in it is the same one.
         var run = 1;

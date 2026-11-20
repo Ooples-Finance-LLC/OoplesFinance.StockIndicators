@@ -131,7 +131,7 @@ internal static partial class FastKernels
     /// Regression channels: the closes are cut into whole blocks counted back from the last bar, each
     /// fitted with its own least-squares line and a channel a multiple of the block's deviation either side.
     /// </summary>
-    internal static void RegressionChannels(ReadOnlySpan<double> close, double[][] outputs, int? period, double deviations)
+    internal static void RegressionChannels(ReadOnlySpan<double> close, FastOutputs outputs, int? period, double deviations)
     {
         var n = close.Length;
         var length = period ?? n;
@@ -141,7 +141,7 @@ internal static partial class FastKernels
         var leading = n % length;
         Span<double> center = outputs[0].AsSpan(0, n), upper = outputs[1].AsSpan(0, n), lower = outputs[2].AsSpan(0, n);
         var breaks = outputs[3].AsSpan(0, n);
-        for (var slot = 4; slot < 7; slot++) outputs[slot].AsSpan(leading, n - leading).Fill(1);
+        for (var slot = 4; slot < 7; slot++) outputs.Flag(slot, leading);
         var middle = 0.5 * (length - 1);
         // The sum of squared offsets from the middle of 0..length-1.
         var spread = length * ((double)length * length - 1) / 12;

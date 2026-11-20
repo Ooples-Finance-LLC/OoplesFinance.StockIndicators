@@ -288,7 +288,7 @@ internal static partial class FastKernels
     /// Deviation bands around the window mean with the close's position between them, its z-score and the
     /// band width over the mean. A flat window has no position or z-score, and a zero mean has no width.
     /// </summary>
-    internal static void DeviationBands(ReadOnlySpan<double> close, double[][] outputs, WindowDeviationBands owner)
+    internal static void DeviationBands(ReadOnlySpan<double> close, FastOutputs outputs, WindowDeviationBands owner)
     {
         var n = close.Length;
         var period = owner.Period;
@@ -306,7 +306,7 @@ internal static partial class FastKernels
         RebuiltMean(close, middle, period);
         var first = period - 1;
         score.Slice(0, first).Clear();
-        for (var slot = 6; slot < 9; slot++) outputs[slot].AsSpan(first, n - first).Fill(1);
+        for (var slot = 6; slot < 9; slot++) outputs.Flag(slot, first);
         for (var i = first; i < n; i++)
         {
             double center = middle[i], spread = deviation[i], half = factor * spread;
@@ -330,7 +330,7 @@ internal static partial class FastKernels
     /// KDJ: the close's position in the high/low window as a percentage (zero for a flat window), K as a
     /// simple or Wilder average of that, D as the same average of K, and J as a weighted difference of the two.
     /// </summary>
-    internal static void StochasticKdj(FastColumns columns, double[][] outputs, WindowStochasticKdj owner)
+    internal static void StochasticKdj(FastColumns columns, FastOutputs outputs, WindowStochasticKdj owner)
     {
         columns.RequireHighLowClose();
         ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close;
@@ -354,14 +354,14 @@ internal static partial class FastKernels
         var k = outputs[0].AsSpan(offset, n - offset);
         var kFirst = KdjAverage(raw, k, owner.KPeriod, wilder);
         if (kFirst >= k.Length) return;
-        outputs[3].AsSpan(offset + kFirst, n - offset - kFirst).Fill(1);
+        outputs.Flag(3, offset + kFirst);
         var kStart = offset + kFirst;
         var d = outputs[1].AsSpan(kStart, n - kStart);
         var dFirst = KdjAverage(outputs[0].AsSpan(kStart, n - kStart), d, owner.DPeriod, wilder);
         var start = kStart + dFirst;
         if (start >= n) return;
-        outputs[4].AsSpan(start, n - start).Fill(1);
-        outputs[5].AsSpan(start, n - start).Fill(1);
+        outputs.Flag(4, start);
+        outputs.Flag(5, start);
         double kFactor = owner.KFactor, dFactor = owner.DFactor;
         Span<double> kAll = outputs[0], dAll = outputs[1], j = outputs[2];
         for (var i = start; i < n; i++) j[i] = kAll[i] * kFactor - dAll[i] * dFactor;
@@ -399,14 +399,14 @@ internal static partial class FastKernels
     /// window's standard deviation, r-squared and the line's value at the newest bar. Each window is
     /// measured from its own newest price, so nothing drifts and a flat window is exactly flat.
     /// </summary>
-    internal static void RegressionStatistics(ReadOnlySpan<double> close, double[][] outputs, int period)
+    internal static void RegressionStatistics(ReadOnlySpan<double> close, FastOutputs outputs, int period)
     {
         var n = close.Length;
         for (var slot = 0; slot < 10; slot++) outputs[slot].AsSpan(0, n).Clear();
-        outputs[5].AsSpan(0, n).Fill(1);
+        outputs.Flag(5, 0);
         if (n < 2) return;
         for (var slot = 6; slot < 10; slot++)
-            if (slot != 8) outputs[slot].AsSpan(1, n - 1).Fill(1);
+            if (slot != 8) outputs.Flag(slot, 1);
         Span<double> slopes = outputs[0], intercepts = outputs[1], deviations = outputs[2], fit = outputs[3],
             line = outputs[4], fitDefined = outputs[8];
         for (var i = 1; i < n; i++)
@@ -444,13 +444,13 @@ internal static partial class FastKernels
     /// Least-squares fit of each full window with the intercept measured on the bar index of the whole
     /// series, and the final window's line drawn back over its own bars.
     /// </summary>
-    internal static void RegressionFinalLine(ReadOnlySpan<double> close, double[][] outputs, int period)
+    internal static void RegressionFinalLine(ReadOnlySpan<double> close, FastOutputs outputs, int period)
     {
         var n = close.Length;
         for (var slot = 0; slot < 10; slot++) outputs[slot].AsSpan(0, n).Clear();
         if (n < period) return;
         var first = period - 1;
-        for (var slot = 5; slot < 8; slot++) outputs[slot].AsSpan(first, n - first).Fill(1);
+        for (var slot = 5; slot < 8; slot++) outputs.Flag(slot, first);
         Span<double> slopes = outputs[0], intercepts = outputs[1], deviations = outputs[2], fit = outputs[3],
             fitDefined = outputs[8];
         var center = (period + 1) * .5;
@@ -626,15 +626,15 @@ internal static partial class FastKernels
     /// Beta over all the window's returns, over those where the market rose and over those where it fell,
     /// with the ratio and squared difference of the last two, and both return series.
     /// </summary>
-    internal static void BetaStatistics(FastColumns columns, double[][] outputs, WindowBetaStatistics owner)
+    internal static void BetaStatistics(FastColumns columns, FastOutputs outputs, WindowBetaStatistics owner)
     {
         ReadOnlySpan<double> market = Field(columns, owner.Market), evaluation = Field(columns, owner.Evaluation);
         var n = market.Length;
         var period = owner.Period;
         for (var slot = 0; slot < 12; slot++)
             if (slot is not (5 or 6)) outputs[slot].AsSpan(0, n).Clear();
-        outputs[12].AsSpan(0, n).Fill(1);
-        outputs[13].AsSpan(0, n).Fill(1);
+        outputs.Flag(12, 0);
+        outputs.Flag(13, 0);
         Span<double> ys = outputs[5].AsSpan(0, n), xs = outputs[6].AsSpan(0, n);
         Returns(evaluation, ys);
         Returns(market, xs);

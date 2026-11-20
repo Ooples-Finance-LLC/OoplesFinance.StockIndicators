@@ -215,7 +215,7 @@ internal static partial class FastKernels
     /// Each band only tightens until the previous close crosses it, and the stop is the lower band while the
     /// close holds above it and the upper band otherwise.
     /// </summary>
-    internal static void AtrTrailingStop(FastColumns columns, double[][] outputs, SeededAtrTrailingStop owner)
+    internal static void AtrTrailingStop(FastColumns columns, FastOutputs outputs, SeededAtrTrailingStop owner)
     {
         columns.RequireHighLowClose();
         ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close;
@@ -229,7 +229,7 @@ internal static partial class FastKernels
         SeededAverageTrueRange(high, low, close, range, period, false);
         Span<double> stop = outputs[0], upperOut = outputs[1], lowerOut = outputs[2], upperFlag = outputs[4],
             lowerFlag = outputs[5];
-        outputs[3].AsSpan(period, n - period).Fill(1);
+        outputs.Flag(3, period);
         double upperBand = 0, lowerBand = 0;
         var bullish = false;
         for (var i = period; i < n; i++)

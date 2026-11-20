@@ -137,7 +137,7 @@ internal static partial class FastKernels
     /// Stochastic of the close's strength over its own rolling range, zero where that range is flat, then a
     /// mean of that and a signal mean of the result, each from its first full window.
     /// </summary>
-    internal static void SmoothedStochasticStrength(ReadOnlySpan<double> close, double[][] outputs, SmoothedStochasticRsi owner)
+    internal static void SmoothedStochasticStrength(ReadOnlySpan<double> close, FastOutputs outputs, SmoothedStochasticRsi owner)
     {
         var n = close.Length;
         for (var slot = 0; slot < 4; slot++) outputs[slot].AsSpan(0, n).Clear();
@@ -172,14 +172,14 @@ internal static partial class FastKernels
             if (owner.SmoothPeriod == 1) raw.CopyTo(value);
             else Sma(raw, value, owner.SmoothPeriod);
             var valueFirst = (int)first;
-            outputs[2].AsSpan(valueFirst, n - valueFirst).Fill(1);
+            outputs.Flag(2, valueFirst);
             var signalFirst = first + owner.SignalPeriod - 1;
             if (signalFirst >= n) return;
             var smoothed = outputs[0].AsSpan(valueFirst, n - valueFirst);
             var line = signal.Slice(valueFirst);
             if (owner.SignalPeriod == 1) smoothed.CopyTo(line);
             else Sma(smoothed, line, owner.SignalPeriod);
-            outputs[3].AsSpan((int)signalFirst, n - (int)signalFirst).Fill(1);
+            outputs.Flag(3, (int)signalFirst);
         }
         finally
         {
