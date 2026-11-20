@@ -21,7 +21,7 @@ public sealed class LibraryTimingConfig : ManualConfig
     {
         AddJob(
             Job.ShortRun.WithToolchain(
-                    new InProcessEmitToolchain(TimeSpan.FromMinutes(30), logOutput: true)
+                    new InProcessEmitToolchain(TimeSpan.FromMinutes(60), logOutput: true)
                 )
                 .WithUnrollFactor(1)
                 .WithMinInvokeCount(1)
