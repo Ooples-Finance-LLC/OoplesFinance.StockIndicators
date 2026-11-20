@@ -433,4 +433,121 @@ internal static partial class FastKernels
             pool.Return(rentedExtreme);
         }
     }
+
+
+    /// <summary>
+    /// Fisher transform of where the price sits in its rolling range, with the previous value as trigger.
+    /// </summary>
+    internal static void FisherTransform(FastColumns columns, double[][] outputs, int period, bool useMidpoint)
+    {
+        var n = columns.Count;
+        Span<double> fisher = outputs[0].AsSpan(0, n), trigger = outputs[1].AsSpan(0, n);
+        fisher.Clear();
+        trigger.Clear();
+        outputs[2].AsSpan(0, n).Fill(1);
+        outputs[3].AsSpan(0, n).Clear();
+        if (n == 0) return;
+        if (n > 1) outputs[3].AsSpan(1, n - 1).Fill(1);
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] rentedPrice = pool.Rent(n), rentedLow = pool.Rent(n), rentedHigh = pool.Rent(n);
+        try
+        {
+            Span<double> price = rentedPrice.AsSpan(0, n), lowest = rentedLow.AsSpan(0, n), highest = rentedHigh.AsSpan(0, n);
+            if (useMidpoint)
+            {
+                ReadOnlySpan<double> high = columns.High, low = columns.Low;
+                for (var i = 0; i < n; i++) price[i] = 0.5 * high[i] + 0.5 * low[i];
+            }
+            else columns.Close.AsSpan(0, n).CopyTo(price);
+            RollingExtreme(price, lowest, period, false);
+            RollingExtreme(price, highest, period, true);
+            double position = 0, value = 0;
+            for (var i = 1; i < n; i++)
+            {
+                var range = highest[i] - lowest[i];
+                position = range == 0 ? 0 // NOSONAR an exact tie is the contract
+                    : .33 * 2 * ((price[i] - lowest[i]) / range - .5) + .67 * position;
+                if (position > .99) position = .999;
+                if (position < -.99) position = -.999;
+                trigger[i] = value;
+                value = .5 * Math.Log((1 + position) / (1 - position)) + .5 * value;
+                fisher[i] = value;
+            }
+        }
+        finally
+        {
+            pool.Return(rentedPrice);
+            pool.Return(rentedLow);
+            pool.Return(rentedHigh);
+        }
+    }
+
+    /// <summary>
+    /// Chaikin money flow with its parts: the money-flow multiplier, the bar's flow, and the window's
+    /// summed flow over its summed volume where that volume is not zero.
+    /// </summary>
+    internal static void MoneyFlowDetails(FastColumns columns, double[][] outputs, int period)
+    {
+        columns.RequireHighLowClose();
+        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close, volume = columns.Volume;
+        var n = close.Length;
+        Span<double> multipliers = outputs[0].AsSpan(0, n), flows = outputs[1].AsSpan(0, n);
+        Span<double> ratio = outputs[2].AsSpan(0, n), defined = outputs[3].AsSpan(0, n);
+        ratio.Clear();
+        defined.Clear();
+        for (var i = 0; i < n; i++)
+        {
+            var range = high[i] - low[i];
+            double multiplier = 0, flow = 0;
+            if (range != 0) // NOSONAR an exact tie is the contract
+            {
+                multiplier = (2 * close[i] - high[i] - low[i]) / range;
+                flow = multiplier * volume[i];
+            }
+            multipliers[i] = multiplier;
+            flows[i] = flow;
+        }
+        double flowSum = 0, volumeSum = 0, volumeSize = 0;
+        for (var i = 0; i < n; i++)
+        {
+            // An infinite part fails the build when the outputs are checked.
+            if (double.IsInfinity(multipliers[i]) || double.IsInfinity(flows[i])) return;
+            if (i >= period && (i & RebuildMask) == 0)
+            {
+                flowSum = volumeSum = volumeSize = 0;
+                for (var j = i - period + 1; j <= i; j++)
+                {
+                    flowSum += flows[j];
+                    volumeSum += volume[j];
+                    volumeSize += Math.Abs(volume[j]);
+                }
+            }
+            else
+            {
+                if (i >= period)
+                {
+                    var old = i - period;
+                    flowSum -= flows[old];
+                    volumeSum -= volume[old];
+                    volumeSize -= Math.Abs(volume[old]);
+                }
+                flowSum += flows[i];
+                volumeSum += volume[i];
+                volumeSize += Math.Abs(volume[i]);
+            }
+            if (i < period - 1) continue;
+            var total = volumeSum;
+            // Where the summed volume is not clearly away from zero, the window is summed again in order
+            // and, if that is still not decisive, exactly.
+            if (Math.Abs(total) <= 1e-9 * volumeSize || volumeSize <= 0)
+            {
+                var exact = new ExactMeanAccumulator();
+                for (var j = i - period + 1; j <= i; j++) exact.Add(volume[j]);
+                if (exact.IsExactlyZero) continue;
+                total = exact.Mean(1);
+            }
+            ratio[i] = flowSum / total;
+            defined[i] = 1;
+        }
+    }
 }
