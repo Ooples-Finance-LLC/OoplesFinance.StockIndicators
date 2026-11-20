@@ -26,7 +26,40 @@ internal sealed class FastColumns
         Count = source.Count;
     }
 
+    // The same bars with the close column replaced, which is what reading another indicator's series means.
+    private FastColumns(FastColumns bars, double[] close)
+    {
+        _bars = bars._bars;
+        _source = bars._source;
+        Count = bars.Count;
+        _open = bars._open;
+        _high = bars._high;
+        _low = bars._low;
+        _volume = bars._volume;
+        _close = close;
+    }
+
     internal int Count { get; }
+
+    /// <summary>
+    /// These bars as an indicator chained to <paramref name="series"/> reads them. A value that is not
+    /// finite is put to the reader's own input rule, as the exact routes put every chained bar to it.
+    /// </summary>
+    internal FastColumns WithClose(double[] series, IIndicator reader)
+    {
+        if (!FastMath.AllFinite(series.AsSpan(0, Count)))
+        {
+            var domain = IndicatorInputDomain.For(reader);
+            for (var i = 0; i < Count; i++)
+            {
+                var value = series[i];
+                if (!double.IsNaN(value) && !double.IsInfinity(value)) continue;
+                var bar = _bars is { } bars ? bars[i] : _source is { } source ? source[i] : default;
+                domain.Validate(new Bar(bar.Time, bar.Open, bar.High, bar.Low, value, bar.Volume));
+            }
+        }
+        return new FastColumns(this, series);
+    }
     internal double[] Open => _open ??= Prepare(IndicatorInputFields.Open);
     internal double[] High => _high ??= Prepare(IndicatorInputFields.High);
     internal double[] Low => _low ??= Prepare(IndicatorInputFields.Low);

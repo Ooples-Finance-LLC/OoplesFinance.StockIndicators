@@ -34,21 +34,48 @@ internal static partial class FastExecution
         CancellationToken cancellation, out int warmup)
     {
         var series = new Dictionary<IIndicatorOutput, double[]>();
+        // Every series worked out so far, including the sources of chains that were not asked for themselves.
+        Dictionary<IIndicatorOutput, double[]>? computed = null;
         warmup = 0;
         for (var i = 0; i < indicators.Count; i++)
         {
             cancellation.ThrowIfCancellationRequested();
             var indicator = indicators[i];
             if (series.ContainsKey(indicator.Outputs[0])) continue;
-            var kernel = Resolve(indicator) ?? throw new InvalidOperationException("Unqualified fast execution plan.");
-            var outputs = new double[indicator.Outputs.Count][];
-            for (var slot = 0; slot < outputs.Length; slot++) outputs[slot] = FastMath.Allocate(columns.Count);
-            kernel(columns, outputs);
-            RejectInvalidOutputs(indicator, outputs);
+            if (indicator.Source is not null) computed ??= new Dictionary<IIndicatorOutput, double[]>(series);
+            var outputs = Compute(columns, indicator, computed, cancellation);
             for (var slot = 0; slot < outputs.Length; slot++) series[indicator.Outputs[slot]] = outputs[slot];
-            warmup = Math.Max(warmup, indicator.WarmupBars);
+            warmup = Math.Max(warmup, Math.Max(indicator.WarmupBars, indicator.Source?.WarmupBars ?? 0));
         }
         return series;
+    }
+
+    // One indicator's series. A chained indicator reads the bars with the close replaced by its source's
+    // primary series, so the source is worked out first, once however many readers it has.
+    private static double[][] Compute(FastColumns columns, IIndicator indicator, Dictionary<IIndicatorOutput, double[]>? computed,
+        CancellationToken cancellation)
+    {
+        var outputs = new double[indicator.Outputs.Count][];
+        if (computed is not null && computed.TryGetValue(indicator.Outputs[0], out var first))
+        {
+            outputs[0] = first;
+            for (var slot = 1; slot < outputs.Length; slot++) outputs[slot] = computed[indicator.Outputs[slot]];
+            return outputs;
+        }
+        var kernel = Resolve(indicator) ?? throw new InvalidOperationException("Unqualified fast execution plan.");
+        var input = columns;
+        if (indicator.Source is { } source)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            var chained = Compute(columns, source, computed, cancellation)[IndicatorContract.PrimaryOutput(source).Slot];
+            input = columns.WithClose(chained, indicator);
+        }
+        for (var slot = 0; slot < outputs.Length; slot++) outputs[slot] = FastMath.Allocate(columns.Count);
+        kernel(input, outputs);
+        RejectInvalidOutputs(indicator, outputs);
+        if (computed is not null)
+            for (var slot = 0; slot < outputs.Length; slot++) computed[indicator.Outputs[slot]] = outputs[slot];
+        return outputs;
     }
 
     // The exact routes reject an infinite or unexpected NaN output as they publish it. Here one vectorized
@@ -63,9 +90,18 @@ internal static partial class FastExecution
                 Validation.IndicatorOutputPolicy.Validate(indicator, slot, index, outputs[slot][index]);
     }
 
-    private static FastKernel? Resolve(IIndicator indicator) =>
-        indicator.Source is null && indicator.Components.Count == 0
-        && Binders.TryGetValue(indicator.GetType(), out var bind) ? bind(indicator) : null;
+    private static FastKernel? Resolve(IIndicator indicator)
+    {
+        if (indicator.Components.Count != 0 || !Binders.TryGetValue(indicator.GetType(), out var bind)) return null;
+        // A chain is fast only when everything it reads is, and when the reader's kernel does what its
+        // exact state does on a chained series.
+        if (indicator.Source is { } source && (SwitchesInputWhenChained(indicator) || Resolve(source) is null)) return null;
+        return bind(indicator);
+    }
+
+    // These read the bar's midpoint from the bars and the close when chained; their kernels read the bars.
+    private static bool SwitchesInputWhenChained(IIndicator indicator) =>
+        indicator is AlligatorWithDetails or AwesomeWithDetails or GatorWithDetails;
 
     private static void Bind<T>(Dictionary<Type, Func<IIndicator, FastKernel?>> binders, Func<T, FastKernel?> bind)
         where T : class, IIndicator => binders.Add(typeof(T), indicator => bind((T)indicator));

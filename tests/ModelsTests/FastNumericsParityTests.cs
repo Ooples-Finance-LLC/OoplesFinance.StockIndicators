@@ -21,6 +21,18 @@ public sealed class FastNumericsParityTests
     public static IEnumerable<(string Name, Func<IIndicator> Create)> Cases() =>
     [
         ("Sma(1)", () => new Sma(1)),
+        // Chains: the reader sees the bars with the close replaced by its source's primary series.
+        ("Sma(5).Of(FirstValueEma(10))", () => new Sma(5).Of(new FirstValueEma(10))),
+        ("WindowRegressionStatistics(14).Of(Slope(14))", () =>
+            new WindowRegressionStatistics(14).Of(new WindowLinearRegression(14, WindowRegressionOutput.Slope))),
+        ("WindowRegressionStatistics(5).Of(Slope(30))", () =>
+            new WindowRegressionStatistics(5).Of(new WindowLinearRegression(30, WindowRegressionOutput.Slope))),
+        ("WilliamsR(14).Of(Sma(5))", () => new WilliamsR(14).Of(new Sma(5))),
+        ("WilderMovingAverage(3).Of(ClassicStochastic())", () => new WilderMovingAverage(3).Of(new ClassicStochastic())),
+        ("Sma(3).Of(Wilder(4).Of(FirstValueEma(5)))", () =>
+            new Sma(3).Of(new WilderMovingAverage(4).Of(new FirstValueEma(5)))),
+        ("WindowDispersion(10).Of(WilderStrengthOscillator(14))", () =>
+            new WindowDispersion(10).Of(new WilderStrengthOscillator(14, WilderStrengthConvention.RsiHundredFlat))),
         ("Sma(20)", () => new Sma(20)),
         ("Sma(400)", () => new Sma(400)),
         ("FirstValueEma(1)", () => new FirstValueEma(1)),
@@ -1003,8 +1015,9 @@ public sealed class FastNumericsParityTests
         using (await plain.BuildAsync())
             Assert.False(plain.LastExecution?.Reason.StartsWith("Fast", StringComparison.Ordinal));
 
-        // An indicator reading another indicator's series has no fast kernel, so the whole build stays exact.
-        var chained = new Sma(5).Of(new Sma(3));
+        // A chain is fast only when everything it reads is. This source has no kernel, so the whole build
+        // stays exact; chains that are fast throughout are held to the exact route by the parity cases.
+        var chained = new Sma(5).Of(new ClassicMovingAverage(10, ClassicAverageMethod.Kama));
         var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(chained)
             .ConfigureNumerics(IndicatorNumerics.Fast);
         using (await builder.BuildAsync())
@@ -1079,6 +1092,30 @@ public sealed class FastNumericsParityTests
 
         await Assert.ThrowsAsync<ArgumentException>(() => Task.Run(() => Bars.FromColumns(new double[2], new double[2],
             new double[2], new double[3], new double[2])));
+    }
+
+    [Fact]
+    public async Task AChainWhoseReaderSwitchesInputTakesTheExactRoute()
+    {
+        // Chained, the awesome oscillator reads the series where its kernel reads the bar's midpoint, so the
+        // chain must not take the kernel; on the bars alone it does.
+        var bars = Walk(200, 17);
+        var exactIndicator = new AwesomeWithDetails().Of(new Sma(5));
+        using var exact = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(exactIndicator)
+            .BuildAsync();
+        var chained = new AwesomeWithDetails().Of(new Sma(5));
+        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(chained)
+            .ConfigureNumerics(IndicatorNumerics.Fast);
+        using var fast = await builder.BuildAsync();
+        Assert.False(builder.LastExecution?.Reason.StartsWith("Fast", StringComparison.Ordinal));
+        Assert.Equal(exact[exactIndicator.Outputs[0]].ToArray(), fast[chained.Outputs[0]].ToArray());
+        Assert.Contains(fast[chained.Outputs[0]].ToArray(), value => value != 0);
+
+        var plain = new AwesomeWithDetails();
+        var plainBuilder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(plain)
+            .ConfigureNumerics(IndicatorNumerics.Fast);
+        using var plainRun = await plainBuilder.BuildAsync();
+        Assert.True(plainBuilder.LastExecution?.Reason.StartsWith("Fast", StringComparison.Ordinal));
     }
 
     [Fact]
