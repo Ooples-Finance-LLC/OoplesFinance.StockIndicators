@@ -517,4 +517,56 @@ internal static partial class FastKernels
             if (matches) output[i] = kind == ContainmentCandleKind.HomingPigeon || previousClose < previousOpen ? 100 : -100;
         }
     }
+
+
+    /// <summary>
+    /// Piercing line and dark cloud cover: a long body, then an opposite candle that opens beyond the
+    /// first bar's extreme and closes back inside its body, past the midpoint or the given penetration.
+    /// </summary>
+    internal static void PenetrationCandle(FastColumns columns, Span<double> output, int period, bool piercing, double penetration)
+    {
+        double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var lagged = new CandleWindow(columns, CandleStatistic.Body, period);
+        var recent = new CandleWindow(columns, CandleStatistic.Body, period);
+        for (var i = 0; i < n; i++)
+        {
+            if (i >= 2) lagged.Include(i - 2);
+            if (piercing && i >= 1) recent.Include(i - 1);
+            if (i < period + 1) continue;
+            double previousOpen = open[i - 1], previousClose = close[i - 1], o = open[i], c = close[i];
+            if (piercing)
+            {
+                if (previousClose >= previousOpen || c < o || o >= low[i - 1] || c >= previousOpen) continue;
+            }
+            else if (previousClose < previousOpen || c >= o || o <= high[i - 1] || c <= previousOpen) continue;
+            if (lagged.Compare(i - 1, period, Math.Max(previousOpen, previousClose), Math.Min(previousOpen, previousClose)) >= 0)
+                continue;
+            if (piercing)
+            {
+                if (recent.Compare(i, period, c, o) >= 0) continue;
+                if (DifferenceSign(c, previousOpen, previousClose, c) > 0) output[i] = 100;
+                continue;
+            }
+            // previousClose - close - penetration * (previousClose - previousOpen) > 0
+            var gap = previousClose - c - penetration * (previousClose - previousOpen);
+            var margin = 8e-16 * (Math.Abs(previousClose) + Math.Abs(c)
+                + Math.Abs(penetration) * (Math.Abs(previousClose) + Math.Abs(previousOpen)));
+            int sign;
+            if (gap > margin) sign = 1;
+            else if (gap < -margin) sign = -1;
+            else
+            {
+                var exact = new ExactMeanAccumulator();
+                exact.Add(previousClose);
+                exact.Add(c, -1);
+                exact.AddProduct(previousClose, penetration, -1);
+                exact.AddProduct(previousOpen, penetration);
+                sign = exact.Sign;
+            }
+            if (sign > 0) output[i] = -100;
+        }
+    }
 }

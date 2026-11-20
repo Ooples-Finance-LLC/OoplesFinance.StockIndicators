@@ -146,6 +146,8 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<PiercingLineCandle>(binders, t => (c, o) => FastKernels.PenetrationCandle(c, o[0], t.Period, true, 0.5));
+        Bind<DarkCloudCoverCandle>(binders, t => (c, o) => FastKernels.PenetrationCandle(c, o[0], t.Period, false, t.Penetration));
         Bind<HaramiCandle>(binders, t => (c, o) => FastKernels.ContainmentCandle(c, o[0], t.Period, ContainmentCandleKind.Harami));
         Bind<HaramiCrossCandle>(binders, t => (c, o) => FastKernels.ContainmentCandle(c, o[0], t.Period, ContainmentCandleKind.HaramiCross));
         Bind<HomingPigeonCandle>(binders, t => (c, o) => FastKernels.ContainmentCandle(c, o[0], t.Period, ContainmentCandleKind.HomingPigeon));
