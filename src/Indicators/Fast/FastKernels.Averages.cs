@@ -90,4 +90,57 @@ internal static partial class FastKernels
             else output[i] = 2 * a0 - a1;
         }
     }
+
+
+    /// <summary>
+    /// Whether the masses of a convolution kernel's partial windows can be trusted in doubles: each running
+    /// sum of the weights is either exact, so a zero mass is a true zero, or far enough from zero that its
+    /// rounding cannot matter.
+    /// </summary>
+    internal static bool SupportsConvolution(IReadOnlyList<double> kernel)
+    {
+        double sum = 0, magnitude = 0;
+        var exact = true;
+        for (var lag = 0; lag < kernel.Count; lag++)
+        {
+            var weight = kernel[lag];
+            var next = sum + weight;
+            // Knuth's error-free sum: the part of the true sum the rounded one dropped.
+            var carried = next - sum;
+            var error = sum - (next - carried) + (weight - carried);
+            exact &= error == 0; // NOSONAR an exact zero is the proof that nothing was dropped
+            sum = next;
+            magnitude += Math.Abs(weight);
+            if (!exact && !(Math.Abs(sum) >= 1e-6 * magnitude)) return false;
+        }
+        return !double.IsInfinity(magnitude);
+    }
+
+    /// <summary>
+    /// Normalized convolution: the newest closes under the kernel, newest weight first, over the mass of
+    /// the weights in use; a window whose weights cancel exactly is divided by its length instead.
+    /// </summary>
+    internal static void NormalizedConvolution(ReadOnlySpan<double> close, Span<double> output, IReadOnlyList<double> kernel)
+    {
+        var n = close.Length;
+        output = output.Slice(0, n);
+        var length = kernel.Count;
+        // Oldest weight first, so a window of closes lines up with a run of it.
+        var weights = new double[length];
+        for (var lag = 0; lag < length; lag++) weights[length - 1 - lag] = kernel[lag];
+        var filling = Math.Min(length - 1, n);
+        double mass = 0;
+        for (var i = 0; i < filling; i++)
+        {
+            mass += kernel[i];
+            var held = i + 1;
+            output[i] = FastMath.Dot(weights.AsSpan(length - held, held), close.Slice(0, held))
+                / (mass == 0 ? held : mass); // NOSONAR the binder admits only kernels whose zero mass is exact
+        }
+        if (n < length) return;
+        mass += kernel[length - 1];
+        var divisor = mass == 0 ? length : mass; // NOSONAR the binder admits only kernels whose zero mass is exact
+        for (var i = length - 1; i < n; i++)
+            output[i] = FastMath.Dot(weights, close.Slice(i - length + 1, length)) / divisor;
+    }
 }
