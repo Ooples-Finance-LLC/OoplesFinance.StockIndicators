@@ -69,6 +69,21 @@ internal static partial class FastKernels
                 break;
             default:
                 var sine = operation == PriceCircularOperation.ArcSine;
+                // A series wholly inside the domain is defined on every bar, which needs no column of its own.
+                var outside = 0;
+                for (var i = 0; i < n; i++)
+                {
+                    var x = close[i];
+                    outside |= x >= -1 && x <= 1 ? 0 : 1;
+                }
+                if (outside == 0)
+                {
+                    if (sine)
+                        for (var i = 0; i < n; i++) value[i] = Math.Asin(close[i]);
+                    else
+                        for (var i = 0; i < n; i++) value[i] = Math.Acos(close[i]);
+                    break;
+                }
                 Span<double> defined = outputs[1].AsSpan(0, n);
                 for (var i = 0; i < n; i++)
                 {
