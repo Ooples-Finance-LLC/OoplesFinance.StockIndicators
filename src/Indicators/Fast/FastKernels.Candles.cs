@@ -111,6 +111,31 @@ internal static partial class FastKernels
             return exact.Sign;
         }
 
+        /// <summary>
+        /// Sign of 3 * sum - divisor * ((a - b) - (c - d)), for the window of bars ending just before
+        /// <paramref name="index"/>.
+        /// </summary>
+        internal int CompareTripled(int index, long divisor, double a, double b, double c, double d)
+        {
+            var scaled = divisor * (a - b - (c - d));
+            var gap = 3 * _sum - scaled;
+            var margin = 3 * _slack * _largest
+                + 8e-16 * divisor * (Math.Abs(a) + Math.Abs(b) + Math.Abs(c) + Math.Abs(d));
+            if (gap > margin) return 1;
+            if (gap < -margin) return -1;
+            if (double.IsNaN(gap)) return 0;
+            var sum = Exact(index);
+            var exact = sum;
+            exact.AddExact(sum);
+            exact.AddExact(sum);
+            var weight = (System.Numerics.BigInteger)divisor;
+            exact.Add(a, -weight);
+            exact.Add(b, weight);
+            exact.Add(c, weight);
+            exact.Add(d, -weight);
+            return exact.Sign;
+        }
+
         // The window's sum without rounding.
         private ExactMeanAccumulator Exact(int index)
         {
@@ -802,6 +827,89 @@ internal static partial class FastKernels
                 trend = transition ? trend == period ? period : trend + 1 : 0;
             }
             if (match) output[i] = 1;
+        }
+    }
+
+
+    /// <summary>
+    /// Three black crows, identical three crows and three white soldiers: three candles of one colour,
+    /// each closing beyond the last with almost no shadow on the closing side.
+    /// </summary>
+    internal static void CrowSoldierCandle(FastColumns columns, Span<double> output, int shadowPeriod, int nearPeriod,
+        int farPeriod, int bodyPeriod, CrowSoldierKind kind)
+    {
+        double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var white = kind == CrowSoldierKind.White;
+        var black = kind == CrowSoldierKind.Black;
+        var warmup = Math.Max(Math.Max(shadowPeriod, nearPeriod), Math.Max(farPeriod, bodyPeriod)) + (black ? 3 : 2);
+        // One window per bar of the pattern: each candle is weighed against the bars before itself.
+        var shadowA = new CandleWindow(columns, CandleStatistic.Range, shadowPeriod);
+        var shadowB = new CandleWindow(columns, CandleStatistic.Range, shadowPeriod);
+        var shadowC = new CandleWindow(columns, CandleStatistic.Range, shadowPeriod);
+        var nearA = new CandleWindow(columns, CandleStatistic.Range, nearPeriod);
+        var nearB = new CandleWindow(columns, CandleStatistic.Range, nearPeriod);
+        var farA = new CandleWindow(columns, CandleStatistic.Range, farPeriod);
+        var farB = new CandleWindow(columns, CandleStatistic.Range, farPeriod);
+        var bodies = new CandleWindow(columns, CandleStatistic.Body, bodyPeriod);
+        long shadowDivisor = 10L * shadowPeriod, nearDivisor = (long)nearPeriod * (white ? 5 : 20), farDivisor = 5L * farPeriod;
+        for (var i = 0; i < n; i++)
+        {
+            if (i >= 3)
+            {
+                shadowA.Include(i - 3);
+                if (!black) nearA.Include(i - 3);
+                if (white) farA.Include(i - 3);
+            }
+            if (i >= 2)
+            {
+                shadowB.Include(i - 2);
+                if (!black) nearB.Include(i - 2);
+                if (white) farB.Include(i - 2);
+            }
+            if (i >= 1)
+            {
+                shadowC.Include(i - 1);
+                if (white) bodies.Include(i - 1);
+            }
+            if (i < warmup) continue;
+            double openA = open[i - 2], closeA = close[i - 2], openB = open[i - 1], closeB = close[i - 1], o = open[i], c = close[i];
+            if (white
+                ? closeA < openA || closeB < openB || c < o || closeB <= closeA || c <= closeB
+                : closeA >= openA || closeB >= openB || c >= o || closeB >= closeA || c >= closeB)
+                continue;
+            if (black && !(close[i - 3] >= open[i - 3] && high[i - 3] > closeA && openB < openA && openB > closeA
+                && o < openB && o > closeB))
+                continue;
+            if (white && !(openB > openA && o > openB)) continue;
+            if (white
+                ? shadowA.Compare(i - 2, shadowDivisor, high[i - 2], closeA) <= 0
+                    || shadowB.Compare(i - 1, shadowDivisor, high[i - 1], closeB) <= 0
+                    || shadowC.Compare(i, shadowDivisor, high[i], c) <= 0
+                : shadowA.Compare(i - 2, shadowDivisor, closeA, low[i - 2]) <= 0
+                    || shadowB.Compare(i - 1, shadowDivisor, closeB, low[i - 1]) <= 0
+                    || shadowC.Compare(i, shadowDivisor, c, low[i]) <= 0)
+                continue;
+            if (black)
+            {
+                output[i] = -100;
+                continue;
+            }
+            if (!white)
+            {
+                if (nearA.Compare(i - 2, nearDivisor, Math.Max(openB, closeA), Math.Min(openB, closeA)) >= 0
+                    && nearB.Compare(i - 1, nearDivisor, Math.Max(o, closeB), Math.Min(o, closeB)) >= 0)
+                    output[i] = -100;
+                continue;
+            }
+            if (nearA.Compare(i - 2, nearDivisor, openB, closeA) >= 0
+                && nearB.Compare(i - 1, nearDivisor, o, closeB) >= 0
+                && farA.CompareTripled(i - 2, farDivisor, closeA, openA, closeB, openB) > 0
+                && farB.CompareTripled(i - 1, farDivisor, closeB, openB, c, o) > 0
+                && bodies.Compare(i, bodyPeriod, c, o) < 0)
+                output[i] = 100;
         }
     }
 }

@@ -146,6 +146,9 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<ThreeBlackCrowsCandle>(binders, t => (c, o) => FastKernels.CrowSoldierCandle(c, o[0], t.ShadowPeriod, 0, 0, 0, CrowSoldierKind.Black));
+        Bind<IdenticalThreeCrowsCandle>(binders, t => (c, o) => FastKernels.CrowSoldierCandle(c, o[0], t.ShadowPeriod, t.EqualPeriod, 0, 0, CrowSoldierKind.Identical));
+        Bind<ThreeWhiteSoldiersCandle>(binders, t => (c, o) => FastKernels.CrowSoldierCandle(c, o[0], t.ShadowPeriod, t.NearPeriod, t.FarPeriod, t.BodyPeriod, CrowSoldierKind.White));
         Bind<StrictHaramiCandle>(binders, t => (c, o) => FastKernels.StrictHarami(c, o[0], 0, 1, t.ContainedShadows));
         Bind<BullishHaramiPattern>(binders, t => (c, o) => FastKernels.StrictHarami(c, o[0], 1, t.Period, t.ContainedShadows));
         Bind<BearishHaramiPattern>(binders, t => (c, o) => FastKernels.StrictHarami(c, o[0], -1, t.Period, t.ContainedShadows));
