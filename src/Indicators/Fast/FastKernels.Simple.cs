@@ -735,4 +735,35 @@ internal static partial class FastKernels
             defined[i] = 1;
         }
     }
+
+
+    /// <summary>
+    /// Holt-Winter forecast: a level, a velocity and an acceleration, each corrected by a share of the
+    /// last forecast's error, published as the forecast for the next bar.
+    /// </summary>
+    internal static void HoltWinter(ReadOnlySpan<double> close, Span<double> output, HoltWinterForecast owner)
+    {
+        var n = close.Length;
+        output = output.Slice(0, n);
+        if (n == 0) return;
+        if (owner.Period == 1)
+        {
+            close.CopyTo(output);
+            return;
+        }
+        double a = owner.LevelFactor, b = owner.TrendFactor, c = owner.AccelerationFactor;
+        double level = close[0], velocity = 0, acceleration = 0;
+        output[0] = level;
+        for (var i = 1; i < n; i++)
+        {
+            var forecast = level + velocity + 0.5 * acceleration;
+            var next = forecast + a * (close[i] - forecast);
+            var trend = velocity + acceleration;
+            var speed = trend + b * (next - level - trend);
+            acceleration += c * (speed - velocity - acceleration);
+            level = next;
+            velocity = speed;
+            output[i] = level + velocity + 0.5 * acceleration;
+        }
+    }
 }
