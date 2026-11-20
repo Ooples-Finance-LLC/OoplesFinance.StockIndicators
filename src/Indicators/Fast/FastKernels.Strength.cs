@@ -10,10 +10,18 @@ internal static partial class FastKernels
     internal static void WilderStrength(ReadOnlySpan<double> close, Span<double> value, Span<double> defined,
         int period, WilderStrengthConvention convention, int unstable)
     {
+        DefinedFrom(defined.Slice(0, close.Length), (long)period + unstable);
+        WilderStrength(close, value, period, convention, unstable);
+    }
+
+    /// <summary>The strength alone, zero before bar <c>period + unstable</c> and published on every bar from it.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
+    internal static void WilderStrength(ReadOnlySpan<double> close, Span<double> value, int period,
+        WilderStrengthConvention convention, int unstable)
+    {
         var n = close.Length;
         value = value.Slice(0, n);
         var first = (long)period + unstable;
-        DefinedFrom(defined.Slice(0, n), first);
         value.Slice(0, (int)Math.Min(first, n)).Clear();
         if (n <= period) return;
         double gain = 0, loss = 0;

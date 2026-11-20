@@ -139,45 +139,50 @@ internal static partial class FastKernels
     /// that range is flat, with a classic average of it as the signal. Both wait for the signal.
     /// </summary>
     [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
-    internal static void StochasticStrength(ReadOnlySpan<double> close, double[][] outputs, ClassicStochasticRsi owner)
+    internal static void StochasticStrength(ReadOnlySpan<double> close, FastOutputs outputs, ClassicStochasticRsi owner)
     {
         var n = close.Length;
-        for (var slot = 0; slot < 4; slot++) outputs[slot].AsSpan().Clear();
-        double[] strength = FastMath.Allocate(n), present = FastMath.Allocate(n);
-        WilderStrength(close, strength, present, owner.Rsi.Period, owner.Rsi.Convention, owner.Rsi.UnstablePeriods);
-        // Only the bars that have an index feed the range, so they are packed together first.
-        var bars = new int[n];
-        var count = 0;
-        for (var i = 0; i < n; i++)
-        {
-            if (present[i] == 0) continue;
-            strength[count] = strength[i];
-            bars[count++] = i;
-        }
+        Span<double> k = outputs[0].AsSpan(0, n), d = outputs[1].AsSpan(0, n);
+        // The index is published on every bar from its first, so the bars that have one are the series' tail.
+        var from = (int)Math.Min((long)owner.Rsi.Period + owner.Rsi.UnstablePeriods, n);
+        var count = n - from;
         var period = owner.StochasticPeriod;
         var length = count - (period - 1);
         var first = owner.SignalAverage.First;
-        if (length <= first) return;
-        var packed = strength.AsSpan(0, count);
-        double[] highest = FastMath.Allocate(count), lowest = FastMath.Allocate(count);
-        RollingExtreme(packed, highest, period, true);
-        RollingExtreme(packed, lowest, period, false);
-        double[] raw = FastMath.Allocate(length), average = FastMath.Allocate(length);
+        if (length <= first)
+        {
+            k.Clear();
+            d.Clear();
+            outputs.Flag(2, n);
+            outputs.Flag(3, n);
+            return;
+        }
+        // Three working series, borrowed: the index and its highest and lowest over the range.
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] strength = pool.Rent(n), highest = pool.Rent(count), lowest = pool.Rent(count);
+        WilderStrength(close, strength.AsSpan(0, n), owner.Rsi.Period, owner.Rsi.Convention, owner.Rsi.UnstablePeriods);
+        ReadOnlySpan<double> packed = strength.AsSpan(from, count);
+        RollingExtreme(packed, highest.AsSpan(0, count), period, true);
+        RollingExtreme(packed, lowest.AsSpan(0, count), period, false);
+        // The position in the range is written where it is published, and its average beside it; the bars
+        // that only seed the average are zeroed afterwards.
+        var start = from + period - 1;
+        Span<double> raw = k.Slice(start, length);
         for (var j = 0; j < length; j++)
         {
             var at = j + period - 1;
             double high = highest[at], low = lowest[at];
             raw[j] = high == low ? 0 : 100 * (packed[at] - low) / (high - low); // NOSONAR an exact tie is the contract
         }
-        ClassicAverage(raw, average, owner.SignalAverage, first);
-        Span<double> k = outputs[0], d = outputs[1], kDefined = outputs[2], dDefined = outputs[3];
-        for (var j = (int)first; j < length; j++)
-        {
-            var bar = bars[j + period - 1];
-            k[bar] = raw[j];
-            d[bar] = average[j];
-            kDefined[bar] = dDefined[bar] = 1;
-        }
+        pool.Return(strength);
+        pool.Return(highest);
+        pool.Return(lowest);
+        ClassicAverage(raw, d.Slice(start, length), owner.SignalAverage, first);
+        var published = start + (int)first;
+        k.Slice(0, published).Clear();
+        d.Slice(0, published).Clear();
+        outputs.Flag(2, published);
+        outputs.Flag(3, published);
     }
 
 
