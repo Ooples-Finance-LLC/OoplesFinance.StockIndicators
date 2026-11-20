@@ -34,6 +34,7 @@ internal static partial class FastKernels
         double seedDx = 0, average = 0, lastDx = 0;
         // The rating pairs an average with the one period - 1 bars earlier; NaN marks one not yet available.
         var history = measure == PriorDirectionalMeasure.Rating ? new double[period - 1] : null;
+        var slot = 0;
         for (var i = 1; i < n; i++)
         {
             var up = high[i] - high[i - 1];
@@ -119,9 +120,10 @@ internal static partial class FastKernels
                 }
                 continue;
             }
-            var slot = (i - period) % history.Length;
+            // The slot walks round the history one bar at a time, which spares a remainder on every bar.
             var prior = i - period >= history.Length ? history[slot] : double.NaN;
             history[slot] = available ? average : double.NaN;
+            if (++slot == history.Length) slot = 0;
             if (available && !double.IsNaN(prior))
             {
                 value[i] = (average + prior) / 2;

@@ -54,26 +54,24 @@ internal static partial class FastKernels
     private static void ExtremeByDeque(ReadOnlySpan<double> input, Span<double> output, int period, bool highest)
     {
         // Candidate indices, oldest first; values are monotone, so the head is always the extreme.
-        var ring = new int[Math.Min(period, input.Length)];
-        int head = 0, count = 0;
+        // The queue is as long as the series: every bar enters once, so neither end ever wraps and no
+        // index needs a remainder.
+        var queue = System.Buffers.ArrayPool<int>.Shared.Rent(input.Length);
+        int head = 0, tail = 0;
         for (var i = 0; i < input.Length; i++)
         {
             var value = input[i];
-            while (count > 0)
+            while (tail > head)
             {
-                var last = input[ring[(head + count - 1) % ring.Length]];
+                var last = input[queue[tail - 1]];
                 if (highest ? last > value : last < value) break;
-                count--;
+                tail--;
             }
-            if (count > 0 && ring[head] <= i - period)
-            {
-                head = (head + 1) % ring.Length;
-                count--;
-            }
-            ring[(head + count) % ring.Length] = i;
-            count++;
-            output[i] = input[ring[head]];
+            if (tail > head && queue[head] <= i - period) head++;
+            queue[tail++] = i;
+            output[i] = input[queue[head]];
         }
+        System.Buffers.ArrayPool<int>.Shared.Return(queue);
     }
 
     // One unit in the last place of a value near one.

@@ -161,22 +161,20 @@ internal static partial class FastKernels
     private static void ExtremeIndexByDeque(ReadOnlySpan<double> input, Span<double> index, long period, bool highest,
         bool newestTie)
     {
-        var ring = new int[(int)Math.Min(period, input.Length)];
-        int head = 0, count = 0;
+        // Candidates in bar order, in a queue as long as the series: every bar enters once, so neither end
+        // ever wraps and no index needs a remainder.
+        var queue = System.Buffers.ArrayPool<int>.Shared.Rent(input.Length);
+        int head = 0, tail = 0;
         for (var i = 0; i < input.Length; i++)
         {
             var value = input[i];
             // A candidate the new value replaces can never be the extreme again.
-            while (count > 0 && Replaces(value, input[ring[(head + count - 1) % ring.Length]], highest, newestTie)) count--;
-            if (count > 0 && ring[head] <= i - period)
-            {
-                head = (head + 1) % ring.Length;
-                count--;
-            }
-            ring[(head + count) % ring.Length] = i;
-            count++;
-            index[i] = ring[head];
+            while (tail > head && Replaces(value, input[queue[tail - 1]], highest, newestTie)) tail--;
+            if (tail > head && queue[head] <= i - period) head++;
+            queue[tail++] = i;
+            index[i] = queue[head];
         }
+        System.Buffers.ArrayPool<int>.Shared.Return(queue);
     }
 
     /// <summary>
