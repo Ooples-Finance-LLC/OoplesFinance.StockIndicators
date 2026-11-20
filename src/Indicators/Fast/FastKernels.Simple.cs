@@ -692,8 +692,9 @@ internal static partial class FastKernels
 
 
     /// <summary>
-    /// Pearson correlation of two price columns over the window. Each window is summed around its own
-    /// means; a window where either column is flat has no correlation.
+    /// Pearson correlation of two price columns over the window; a window where either column is flat has
+    /// no correlation. The five sums slide, measured from anchor prices so they do not lose digits to the
+    /// price level, and are taken afresh on a schedule and whenever a variance has all but cancelled.
     /// </summary>
     internal static void Correlation(FastColumns columns, Span<double> value, Span<double> defined, WindowCorrelation owner)
     {
@@ -704,38 +705,103 @@ internal static partial class FastKernels
         defined = defined.Slice(0, n);
         value.Clear();
         defined.Clear();
+        if (n < period) return;
         int leftRun = 0, rightRun = 0;
-        for (var i = 0; i < n; i++)
+        for (var i = 0; i < period - 1; i++)
         {
             leftRun = i > 0 && left[i] == left[i - 1] ? leftRun + 1 : 1; // NOSONAR an exact tie is the contract
             rightRun = i > 0 && right[i] == right[i - 1] ? rightRun + 1 : 1; // NOSONAR an exact tie is the contract
-            if (i < period - 1) continue;
+        }
+        var sums = default(PairSums);
+        var slid = int.MaxValue;
+        var block = Math.Max(64, period);
+        for (var i = period - 1; i < n; i++)
+        {
+            leftRun = i > 0 && left[i] == left[i - 1] ? leftRun + 1 : 1; // NOSONAR an exact tie is the contract
+            rightRun = i > 0 && right[i] == right[i - 1] ? rightRun + 1 : 1; // NOSONAR an exact tie is the contract
+            var from = i - period + 1;
+            if (slid >= block) sums = PairSums.Of(left.Slice(from, period), right.Slice(from, period));
+            else sums.Slide(left[i], right[i], left[from - 1], right[from - 1]);
+            slid = slid >= block ? 1 : slid + 1;
             if (leftRun >= period || rightRun >= period)
             {
                 if (owner.FlatZero) defined[i] = 1;
                 continue;
             }
-            var from = i - period + 1;
-            double leftAnchor = left[i], rightAnchor = right[i], leftSum = 0, rightSum = 0;
-            for (var j = from; j <= i; j++)
+            double a = sums.Xx - sums.X * sums.X / period, b = sums.Yy - sums.Y * sums.Y / period;
+            // Where a variance is a small remainder of its sum of squares, the window is summed around its
+            // own means instead, and the sliding sums restart from there.
+            if (!(a > 1e-4 * sums.Xx) || !(b > 1e-4 * sums.Yy))
             {
-                leftSum += left[j] - leftAnchor;
-                rightSum += right[j] - rightAnchor;
+                sums = PairSums.Of(left.Slice(from, period), right.Slice(from, period));
+                slid = 1;
+                a = sums.Xx - sums.X * sums.X / period;
+                b = sums.Yy - sums.Y * sums.Y / period;
+                if (!(a > 1e-4 * sums.Xx) || !(b > 1e-4 * sums.Yy))
+                {
+                    value[i] = CenteredCorrelation(left.Slice(from, period), right.Slice(from, period));
+                    defined[i] = 1;
+                    continue;
+                }
             }
-            double leftMean = leftSum / period, rightMean = rightSum / period, a = 0, b = 0, c = 0;
-            for (var j = from; j <= i; j++)
-            {
-                var x = left[j] - leftAnchor - leftMean;
-                var y = right[j] - rightAnchor - rightMean;
-                a += x * x;
-                b += y * y;
-                c += x * y;
-            }
-            value[i] = c / Math.Sqrt(a * b);
+            value[i] = (sums.Xy - sums.X * sums.Y / period) / Math.Sqrt(a * b);
             defined[i] = 1;
         }
     }
 
+    // Sums of two columns over a window, each measured from that column's anchor price.
+    private struct PairSums
+    {
+        internal double AnchorX, AnchorY, X, Y, Xx, Yy, Xy;
+
+        // Sums the window around its newest pair, which becomes the anchor.
+        internal static PairSums Of(ReadOnlySpan<double> left, ReadOnlySpan<double> right)
+        {
+            var sums = new PairSums { AnchorX = left[left.Length - 1], AnchorY = right[right.Length - 1] };
+            for (var j = 0; j < left.Length; j++)
+            {
+                double x = left[j] - sums.AnchorX, y = right[j] - sums.AnchorY;
+                sums.X += x;
+                sums.Y += y;
+                sums.Xx += x * x;
+                sums.Yy += y * y;
+                sums.Xy += x * y;
+            }
+            return sums;
+        }
+
+        internal void Slide(double enterX, double enterY, double leaveX, double leaveY)
+        {
+            double x = enterX - AnchorX, y = enterY - AnchorY, oldX = leaveX - AnchorX, oldY = leaveY - AnchorY;
+            X += x - oldX;
+            Y += y - oldY;
+            Xx += x * x - oldX * oldX;
+            Yy += y * y - oldY * oldY;
+            Xy += x * y - oldX * oldY;
+        }
+    }
+
+    // The correlation of one window, summed around its own means.
+    private static double CenteredCorrelation(ReadOnlySpan<double> left, ReadOnlySpan<double> right)
+    {
+        var period = left.Length;
+        double leftAnchor = left[period - 1], rightAnchor = right[period - 1], leftSum = 0, rightSum = 0;
+        for (var j = 0; j < period; j++)
+        {
+            leftSum += left[j] - leftAnchor;
+            rightSum += right[j] - rightAnchor;
+        }
+        double leftMean = leftSum / period, rightMean = rightSum / period, a = 0, b = 0, c = 0;
+        for (var j = 0; j < period; j++)
+        {
+            var x = left[j] - leftAnchor - leftMean;
+            var y = right[j] - rightAnchor - rightMean;
+            a += x * x;
+            b += y * y;
+            c += x * y;
+        }
+        return c / Math.Sqrt(a * b);
+    }
 
     /// <summary>
     /// Holt-Winter forecast: a level, a velocity and an acceleration, each corrected by a share of the
