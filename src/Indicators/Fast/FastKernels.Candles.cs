@@ -430,6 +430,67 @@ internal static partial class FastKernels
 #endif
     }
 
+    // The gap three methods over whole vectors of bars: every test is a comparison of opens and closes,
+    // and on real prices none of them is predictable. Returns the first bar it did not decide.
+    private static int GapThreeMethodsMasks(double[] open, double[] close, Span<double> output)
+    {
+#if !NETFRAMEWORK
+        if (!System.Numerics.Vector.IsHardwareAccelerated) return 0;
+        var i = 2;
+        var width = System.Numerics.Vector<double>.Count;
+        var hundred = new System.Numerics.Vector<double>(100);
+        for (; i <= close.Length - width; i += width)
+        {
+            System.Numerics.Vector<double> openA = new(open, i - 2), closeA = new(close, i - 2), openB = new(open, i - 1),
+                closeB = new(close, i - 1), openC = new(open, i), closeC = new(close, i);
+            System.Numerics.Vector<double> topA = System.Numerics.Vector.Max(openA, closeA), bottomA = System.Numerics.Vector.Min(openA, closeA),
+                topB = System.Numerics.Vector.Max(openB, closeB), bottomB = System.Numerics.Vector.Min(openB, closeB);
+            var white = System.Numerics.Vector.GreaterThanOrEqual(closeB, openB);
+            var gap = System.Numerics.Vector.ConditionalSelect(white, System.Numerics.Vector.GreaterThan(bottomB, topA),
+                System.Numerics.Vector.LessThan(topB, bottomA));
+            // The third candle is the other colour and the first the same one: the exclusive-or of two
+            // colour masks is set where they differ.
+            var formed = (white ^ System.Numerics.Vector.GreaterThanOrEqual(closeC, openC))
+                & System.Numerics.Vector.OnesComplement(white ^ System.Numerics.Vector.GreaterThanOrEqual(closeA, openA))
+                & System.Numerics.Vector.GreaterThan(openC, bottomB) & System.Numerics.Vector.LessThan(openC, topB)
+                & gap & System.Numerics.Vector.GreaterThan(closeC, bottomA) & System.Numerics.Vector.LessThan(closeC, topA);
+            System.Numerics.Vector.ConditionalSelect(formed, System.Numerics.Vector.ConditionalSelect(white, hundred, -hundred),
+                System.Numerics.Vector<double>.Zero).CopyTo(output.Slice(i, width));
+        }
+        return i;
+#else
+        return 0;
+#endif
+    }
+
+    // Three outside over whole vectors of bars. Returns the first bar it did not decide.
+    private static int ThreeOutsideMasks(double[] open, double[] close, Span<double> output)
+    {
+#if !NETFRAMEWORK
+        if (!System.Numerics.Vector.IsHardwareAccelerated) return 0;
+        var i = 3;
+        var width = System.Numerics.Vector<double>.Count;
+        var hundred = new System.Numerics.Vector<double>(100);
+        for (; i <= close.Length - width; i += width)
+        {
+            System.Numerics.Vector<double> openMiddle = new(open, i - 2), closeMiddle = new(close, i - 2), openLast = new(open, i - 1),
+                closeLast = new(close, i - 1), closeNow = new(close, i);
+            var lastWhite = System.Numerics.Vector.GreaterThanOrEqual(closeLast, openLast);
+            var middleWhite = System.Numerics.Vector.GreaterThanOrEqual(closeMiddle, openMiddle);
+            var up = System.Numerics.Vector.AndNot(lastWhite, middleWhite) & System.Numerics.Vector.GreaterThan(closeLast, openMiddle)
+                & System.Numerics.Vector.LessThan(openLast, closeMiddle) & System.Numerics.Vector.GreaterThan(closeNow, closeLast);
+            var down = System.Numerics.Vector.AndNot(middleWhite, lastWhite) & System.Numerics.Vector.GreaterThan(openLast, closeMiddle)
+                & System.Numerics.Vector.LessThan(closeLast, openMiddle) & System.Numerics.Vector.LessThan(closeNow, closeLast);
+            System.Numerics.Vector.ConditionalSelect(up, hundred,
+                System.Numerics.Vector.ConditionalSelect(down, -hundred, System.Numerics.Vector<double>.Zero))
+                .CopyTo(output.Slice(i, width));
+        }
+        return i;
+#else
+        return 0;
+#endif
+    }
+
     /// <summary>
     /// Matching low, stick sandwich, three-line strike and three outside: two to four candles whose
     /// colours and closes line up, with "equal" and "near" measured against the average range of the bars
@@ -456,7 +517,8 @@ internal static partial class FastKernels
         bool use0 = kind == SequenceCandleKind.MatchingLow,
             use1 = kind is SequenceCandleKind.StickSandwich or SequenceCandleKind.ThreeLineStrike,
             use2 = kind == SequenceCandleKind.ThreeLineStrike;
-        for (var i = 0; i < n; i++)
+        var begin = kind == SequenceCandleKind.ThreeOutside ? ThreeOutsideMasks(open, close, output) : 0;
+        for (var i = begin; i < n; i++)
         {
             if (use0 && i >= 2) lag0.Include(i - 2);
             if (use1 && i >= 3) lag1.Include(i - 3);
@@ -582,7 +644,8 @@ internal static partial class FastKernels
         // Tristar reads the average range as it stood three bars back, Tasuki two bars back.
         var ranges = new CandleWindow(columns, CandleStatistic.Range, period);
         var back = tristar ? 3 : 2;
-        for (var i = 0; i < n; i++)
+        var begin = kind == GapContinuationKind.UpDownSideGapThreeMethods && period == 0 ? GapThreeMethodsMasks(open, close, output) : 0;
+        for (var i = begin; i < n; i++)
         {
             if (period > 0 && i >= back) ranges.Include(i - back);
             if (i < period + 2) continue;
