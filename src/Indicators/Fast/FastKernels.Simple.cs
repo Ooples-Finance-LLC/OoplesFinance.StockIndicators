@@ -342,16 +342,33 @@ internal static partial class FastKernels
         var n = input.Length;
         output = output.Slice(0, n);
         double sum = 0;
-        for (var i = 0; i < n; i++)
+        var filling = Math.Min(period, n);
+        for (var i = 0; i < filling; i++)
         {
-            if (i >= period && (i & RebuildMask) == 0)
+            sum += input[i];
+            output[i] = i < period - 1 ? 0 : sum;
+        }
+        var at = Math.Max(filling, 0);
+        while (at < n)
+        {
+            // Every so many bars the window is summed afresh, which sheds what the slides have rounded away.
+            if ((at & RebuildMask) == 0)
             {
                 sum = 0;
-                for (var j = i - period + 1; j <= i; j++) sum += input[j];
+                for (var j = at - period + 1; j <= at; j++) sum += input[j];
+                output[at++] = sum;
+                continue;
             }
-            else
-                sum += i >= period ? input[i] - input[i - period] : input[i];
-            output[i] = i < period - 1 ? 0 : sum;
+            // Up to the next fresh sum the window only slides, with nothing else to decide on any bar.
+            var count = Math.Min(n, (at | RebuildMask) + 1) - at;
+            ReadOnlySpan<double> entering = input.Slice(at, count), leaving = input.Slice(at - period, count);
+            var tail = output.Slice(at, count);
+            for (var k = 0; k < tail.Length; k++)
+            {
+                sum += entering[k] - leaving[k];
+                tail[k] = sum;
+            }
+            at += count;
         }
     }
 
