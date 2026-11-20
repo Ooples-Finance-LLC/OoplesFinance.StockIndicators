@@ -327,6 +327,11 @@ internal static partial class FastKernels
         DefinedFrom(defined.Slice(0, n), first);
         if (start == n) return;
         int minimum = owner.MinimumPeriod, maximum = owner.MaximumPeriod;
+        if (owner.Method == ClassicAverageMethod.Sma && minimum >= 1 && start >= maximum - 1)
+        {
+            VariablePeriodMean(columns, close, average, owner, start);
+            return;
+        }
         var periods = new int[n - start];
         var counts = new int[maximum - minimum + 2];
         for (var i = start; i < n; i++)
@@ -360,6 +365,53 @@ internal static partial class FastKernels
         finally
         {
             System.Buffers.ArrayPool<double>.Shared.Return(scratch);
+        }
+    }
+
+    // A simple mean needs no pass per period: a window's sum is the difference of two running totals,
+    // whatever its length. The totals restart every block, a block being at least the longest window, so a
+    // window lies in one block or the end of one and the start of the next, and no total grows with the
+    // series to round the sums of its later bars away.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
+    private static void VariablePeriodMean(FastColumns columns, ReadOnlySpan<double> close, Span<double> average,
+        VariablePeriodClassicAverage owner, int start)
+    {
+        int n = close.Length, minimum = owner.MinimumPeriod, maximum = owner.MaximumPeriod;
+        var block = Math.Max(maximum, 128);
+        var reciprocals = new double[maximum + 1];
+        for (var period = minimum; period <= maximum; period++) reciprocals[period] = 1.0 / period;
+        var selector = owner.PeriodSelector;
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        var rented = pool.Rent(n);
+        try
+        {
+            var totals = rented.AsSpan(0, n);
+            close.CopyTo(totals);
+            for (var from = 0; from < n; from += block) FastMath.PrefixSum(totals.Slice(from, Math.Min(block, n - from)), 0);
+            var home = start - start % block;
+            for (var i = start; i < n; i++)
+            {
+                if (i - home == block) home = i;
+                var selection = selector(columns.BarAt(i));
+                if (double.IsNaN(selection) || double.IsInfinity(selection))
+                    throw new ArgumentOutOfRangeException(nameof(owner.PeriodSelector), "The selected period must be finite.");
+                var period = selection <= minimum ? minimum : selection >= maximum ? maximum : (int)selection;
+                if (period == 1)
+                {
+                    average[i] = close[i];
+                    continue;
+                }
+                var oldest = i - period + 1;
+                var sum = totals[i];
+                // The window starts in this block after its first bar, at its first bar, or in the block before.
+                if (oldest > home) sum -= totals[oldest - 1];
+                else if (oldest < home) sum += totals[home - 1] - totals[oldest - 1];
+                average[i] = sum * reciprocals[period];
+            }
+        }
+        finally
+        {
+            pool.Return(rented);
         }
     }
 }
