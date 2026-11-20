@@ -132,6 +132,45 @@ internal static class FastMath
         return sum;
     }
 
+    /// <summary>
+    /// Replaces each value with the total of the values up to and including it, starting from
+    /// <paramref name="carry"/>, and returns the last total.
+    /// </summary>
+    /// <remarks>
+    /// One running total makes every bar wait for the addition before it. Four bars are totalled among
+    /// themselves instead, and only their sum joins the running total, so the total is waited on once in
+    /// four bars. The values are added in a different grouping than one at a time, which moves a total by
+    /// rounding only and leaves whole-number values, as volumes are, exactly as they were.
+    /// </remarks>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static double PrefixSum(Span<double> values, double carry)
+    {
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Runtime.Intrinsics.X86.Avx2.IsSupported && values.Length >= 8)
+        {
+            var zero = System.Runtime.Intrinsics.Vector256<double>.Zero;
+            var running = System.Runtime.Intrinsics.Vector256.Create(carry);
+            for (; i <= values.Length - 4; i += 4)
+            {
+                var block = System.Runtime.Intrinsics.Vector256.Create<double>(values.Slice(i, 4));
+                // [a, b, c, d] becomes [a, a + b, b + c, c + d] and then [a, a + b, a + b + c, a + b + c + d].
+                var pairs = block + System.Runtime.Intrinsics.X86.Avx.Blend(System.Runtime.Intrinsics.X86.Avx2.Permute4x64(block, 0x90), zero, 0x01);
+                var totals = pairs + System.Runtime.Intrinsics.X86.Avx.Permute2x128(pairs, pairs, 0x08);
+                System.Runtime.Intrinsics.Vector256.CopyTo(totals + running, values.Slice(i, 4));
+                running += System.Runtime.Intrinsics.X86.Avx2.Permute4x64(totals, 0xFF);
+            }
+            carry = System.Runtime.Intrinsics.Vector256.ToScalar(running);
+        }
+#endif
+        for (; i < values.Length; i++)
+        {
+            carry += values[i];
+            values[i] = carry;
+        }
+        return carry;
+    }
+
     /// <summary>Whether every element is finite, checked a vector at a time.</summary>
     [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static bool AllFinite(ReadOnlySpan<double> values)

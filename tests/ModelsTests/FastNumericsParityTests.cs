@@ -1372,4 +1372,34 @@ public sealed class FastNumericsParityTests
         }
         return bars;
     }
+    [Fact]
+    public void ARunningTotalTakenFourBarsAtATimeIsTheTotalTakenOneAtATime()
+    {
+        // Whole numbers, as volumes are, total exactly however they are grouped, so every length - the ones
+        // too short for a vector, the ones that end inside one - must match bar for bar. Fractions may differ
+        // by rounding only: at most a unit in the last place of the largest total for each value added, and
+        // the totals here stay under 2^16.
+        const double rounding = 68 * 65536 * 2.220446049250313e-16;
+        var random = RandomHelper.CreateSeededRandom(7);
+        for (var length = 0; length <= 67; length++)
+        {
+            foreach (var whole in new[] { true, false })
+            {
+                var values = new double[length];
+                for (var i = 0; i < length; i++)
+                    values[i] = whole ? random.Next(-100000, 100000) : (random.NextDouble() - 0.5) * 1000;
+                var expected = new double[length];
+                double total = 12345;
+                for (var i = 0; i < length; i++) expected[i] = total += values[i];
+                var last = OoplesFinance.StockIndicators.Indicators.Fast.FastMath.PrefixSum(values, 12345);
+                for (var i = 0; i < length; i++)
+                {
+                    if (whole) Assert.Equal(expected[i], values[i]);
+                    else Assert.True(Math.Abs(expected[i] - values[i]) <= rounding, $"length {length}, bar {i}");
+                }
+                if (whole) Assert.Equal(total, last);
+                else Assert.True(Math.Abs(total - last) <= rounding, $"length {length}");
+            }
+        }
+    }
 }

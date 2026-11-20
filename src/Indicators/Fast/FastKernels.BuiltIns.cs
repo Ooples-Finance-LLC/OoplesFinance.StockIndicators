@@ -286,12 +286,7 @@ internal static partial class FastKernels
             suspect |= FastMath.NonFiniteBits(h + l + (c + volume[i]));
             line[i] = h != l ? (c - l - (h - c)) * volume[i] / (h - l) : 0; // NOSONAR an exact tie is the contract
         }
-        double total = 0;
-        for (i = 0; i < n; i++)
-        {
-            total += line[i];
-            line[i] = total;
-        }
+        var total = FastMath.PrefixSum(line, 0);
         if (suspect != 0)
         {
             // Either an input is not finite, which its checked column names, or four finite inputs summed

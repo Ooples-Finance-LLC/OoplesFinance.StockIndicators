@@ -489,11 +489,7 @@ internal static partial class FastKernels
             if (!System.Numerics.Vector.EqualsAll(seen, System.Numerics.Vector<long>.Zero)) suspect = 1;
         }
 #endif
-        for (var i = 1; i < signed; i++)
-        {
-            total += value[i];
-            value[i] = total;
-        }
+        if (signed > 1) total = FastMath.PrefixSum(value.Slice(1, signed - 1), total);
         for (var i = signed; i < n; i++)
         {
             double current = close[i], previous = close[i - 1];
