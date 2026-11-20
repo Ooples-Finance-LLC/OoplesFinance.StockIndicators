@@ -136,24 +136,39 @@ internal static partial class FastKernels
             var last = order == 1 ? c0 : order == 2 ? c1 : c2;
             if (last > period) { i++; break; }
         }
-        // Steady state: one fused multiply-add per stage on the loop-carried values.
+        // Steady state: each stage is a plain exponential average of the one before, so each runs over the
+        // whole remainder in turn, four bars at a time, and the stages are combined afterwards.
         if (order == 1)
+        {
             FastMath.BlendRun(weight, alpha, input, output, i, v0);
-        else if (order == 2)
-            for (; i < n; i++)
+            return;
+        }
+        var count = n - i;
+        if (count <= 0) return;
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] rented0 = pool.Rent(count), rented1 = pool.Rent(count);
+        var rented2 = order == 3 ? pool.Rent(count) : null;
+        try
+        {
+            Span<double> stage0 = rented0.AsSpan(0, count), stage1 = rented1.AsSpan(0, count);
+            var target = output.Slice(i, count);
+            FastMath.BlendRun(weight, alpha, input.Slice(i, count), stage0, 0, v0);
+            FastMath.BlendRun(weight, alpha, stage0, stage1, 0, v1);
+            if (rented2 is null)
             {
-                v0 = FastMath.Blend(weight, v0, alpha * input[i]);
-                v1 = FastMath.Blend(weight, v1, alpha * v0);
-                output[i] = 2 * v0 - v1;
+                for (var k = 0; k < count; k++) target[k] = 2 * stage0[k] - stage1[k];
+                return;
             }
-        else
-            for (; i < n; i++)
-            {
-                v0 = FastMath.Blend(weight, v0, alpha * input[i]);
-                v1 = FastMath.Blend(weight, v1, alpha * v0);
-                v2 = FastMath.Blend(weight, v2, alpha * v1);
-                output[i] = 3 * (v0 - v1) + v2;
-            }
+            var stage2 = rented2.AsSpan(0, count);
+            FastMath.BlendRun(weight, alpha, stage1, stage2, 0, v2);
+            for (var k = 0; k < count; k++) target[k] = 3 * (stage0[k] - stage1[k]) + stage2[k];
+        }
+        finally
+        {
+            pool.Return(rented0);
+            pool.Return(rented1);
+            if (rented2 is not null) pool.Return(rented2);
+        }
     }
 
     // One seeded exponential stage. Returns whether the stage has matured and may feed the next one.
