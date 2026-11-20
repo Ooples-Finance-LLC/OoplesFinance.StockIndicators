@@ -70,7 +70,7 @@ public sealed class PositiveStrengthSmoothingTests
         foreach (var values in inputs)
         {
             var sum = new ExactMeanAccumulator();
-            var units = System.Numerics.BigInteger.Zero;
+            var units = BigInteger.Zero;
             foreach (var value in values) { sum.Add(value); units += ExactVarianceWindow.Units(value); }
             var before = sum.Mean(1);
             Assert.Equal(PositiveStrengthValue.Seed(units, period), PositiveStrengthValue.Seed(sum, period));
