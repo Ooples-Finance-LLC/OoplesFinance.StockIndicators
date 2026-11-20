@@ -1166,7 +1166,7 @@ public sealed class FastNumericsParityTests
         Assert.Equal(new[] { 0d, 0d, 2d, 3d, 4d, 5d }, legacy.GetSeries(average).ToArray());
     }
 
-    private static IEnumerable<(string Name, Bar[] Bars)> Fixtures()
+    internal static IEnumerable<(string Name, Bar[] Bars)> Fixtures()
     {
         yield return ("empty", []);
         yield return ("one bar", Walk(1, 5));

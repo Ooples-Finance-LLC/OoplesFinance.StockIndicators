@@ -51,7 +51,7 @@ internal static class ParabolicComparison
     {
         if (kind == 2)
         {
-            var rows = ParabolicStopSnapshots.Confirmed(bars, p.Step, p.Maximum, p.Initial);
+            var rows = ParabolicStopSnapshots.Confirmed(bars, p.Step, p.Maximum, p.Initial, ComparisonBuilder.Numerics);
             return Series(
                 [
                     rows.Select(r => r.Sar).ToArray(),
@@ -70,7 +70,7 @@ internal static class ParabolicComparison
         return Series(
             [
                 (
-                    kind == 0 ? ParabolicStopSnapshots.Classic(bars, p.Step, p.Maximum)
+                    kind == 0 ? ParabolicStopSnapshots.Classic(bars, p.Step, p.Maximum, ComparisonBuilder.Numerics)
                     : kind == 1
                         ? ParabolicStopSnapshots.Extended(
                             bars,
@@ -81,9 +81,10 @@ internal static class ParabolicComparison
                             p.Maximum,
                             p.ShortInitial,
                             p.ShortStep,
-                            p.ShortMaximum
+                            p.ShortMaximum,
+                            ComparisonBuilder.Numerics
                         )
-                    : ParabolicStopSnapshots.FourBar(bars, p.Step, p.Maximum)
+                    : ParabolicStopSnapshots.FourBar(bars, p.Step, p.Maximum, ComparisonBuilder.Numerics)
                 ).ToArray(),
             ],
             kind

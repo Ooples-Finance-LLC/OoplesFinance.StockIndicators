@@ -32,10 +32,10 @@ public class SharedParabolicSnapshotBenchmarks
     [Benchmark]
     public object Snapshot() => _kind switch
     {
-        0 => ParabolicStopSnapshots.Classic(_bars),
-        1 => ParabolicStopSnapshots.Extended(_bars),
-        2 => ParabolicStopSnapshots.Confirmed(_bars),
-        3 => ParabolicStopSnapshots.FourBar(_bars),
+        0 => ParabolicStopSnapshots.Classic(_bars, numerics: ComparisonBuilder.Numerics),
+        1 => ParabolicStopSnapshots.Extended(_bars, numerics: ComparisonBuilder.Numerics),
+        2 => ParabolicStopSnapshots.Confirmed(_bars, numerics: ComparisonBuilder.Numerics),
+        3 => ParabolicStopSnapshots.FourBar(_bars, numerics: ComparisonBuilder.Numerics),
         _ => throw new InvalidOperationException("Setup required.")
     };
 }
