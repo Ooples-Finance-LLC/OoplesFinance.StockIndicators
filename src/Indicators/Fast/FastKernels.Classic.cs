@@ -86,7 +86,10 @@ internal static partial class FastKernels
         var reciprocal = 1.0 / ((double)firstLength * secondLength);
         // lag is the inner sum published secondLength bars ago, which is the one leaving the outer sum.
         double inner = 0, outer = 0, lag = 0;
-        for (var i = 0; i < n; i++)
+        // Until every sum is full each step is its own case; from then on a bar is three updates, each one
+        // add behind the bar before it.
+        var settled = (int)Math.Min(n, period + 1L);
+        for (var i = 0; i < settled; i++)
         {
             inner += input[i];
             if (i >= firstLength) inner -= input[i - firstLength];
@@ -100,6 +103,13 @@ internal static partial class FastKernels
             outer += inner;
             if (i >= period) outer -= lag;
             if (i >= period - 1) output[i] = outer * reciprocal;
+        }
+        for (var i = settled; i < n; i++)
+        {
+            inner += input[i] - input[i - firstLength];
+            lag += input[i - secondLength] - input[i - period - 1];
+            outer += inner - lag;
+            output[i] = outer * reciprocal;
         }
     }
 
