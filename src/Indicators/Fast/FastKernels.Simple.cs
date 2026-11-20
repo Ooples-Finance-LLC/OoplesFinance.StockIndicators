@@ -1,3 +1,5 @@
+using OoplesFinance.StockIndicators.Validation;
+
 namespace OoplesFinance.StockIndicators.Indicators.Fast;
 
 internal static partial class FastKernels
@@ -73,7 +75,11 @@ internal static partial class FastKernels
     /// <summary>Sum, difference, product or quotient of two price fields; a zero divisor publishes nothing.</summary>
     internal static void CandleArithmetic(FastColumns columns, FastOutputs outputs, CandleArithmetic owner)
     {
-        ReadOnlySpan<double> left = Field(columns, owner.Left), right = Field(columns, owner.Right);
+        // A sum, a difference or a product is finite only if both of its terms are, so checking the result
+        // checks them. A quotient is not: a zero divisor hides what it divides.
+        var checkedByResult = owner.Operation != CandleArithmeticOperation.Divide;
+        ReadOnlySpan<double> left = checkedByResult ? columns.Raw(InputOf(owner.Left)) : Field(columns, owner.Left);
+        ReadOnlySpan<double> right = checkedByResult ? columns.Raw(InputOf(owner.Right)) : Field(columns, owner.Right);
         var n = left.Length;
         Span<double> value = outputs[0].AsSpan(0, n);
         switch (owner.Operation)
@@ -107,7 +113,24 @@ internal static partial class FastKernels
                 return;
         }
         outputs.Flag(1, 0);
+        if (!checkedByResult) return;
+        if (FastMath.AllFinite(value))
+        {
+            outputs.Verified(0);
+            return;
+        }
+        _ = Field(columns, owner.Left);
+        _ = Field(columns, owner.Right);
     }
+
+    private static IndicatorInputFields InputOf(CandlePriceField field) => field switch
+    {
+        CandlePriceField.Open => IndicatorInputFields.Open,
+        CandlePriceField.High => IndicatorInputFields.High,
+        CandlePriceField.Low => IndicatorInputFields.Low,
+        CandlePriceField.Close => IndicatorInputFields.Close,
+        _ => IndicatorInputFields.Volume
+    };
 
     private static double[] Field(FastColumns columns, CandlePriceField field) => field switch
     {
@@ -396,8 +419,11 @@ internal static partial class FastKernels
     /// </summary>
     internal static void OnBalanceVolume(FastColumns columns, FastOutputs outputs, SeededOnBalanceVolume owner)
     {
-        ReadOnlySpan<double> close = columns.Close, volume = columns.Volume;
+        // A close that is not a number compares as neither above nor below, which would hide it, so the
+        // closes are checked as they are read. A volume that is not finite stays in the total for good.
+        ReadOnlySpan<double> close = columns.Raw(IndicatorInputFields.Close), volume = columns.Raw(IndicatorInputFields.Volume);
         var n = close.Length;
+        long suspect = n > 0 ? FastMath.NonFiniteBits(close[0]) | FastMath.NonFiniteBits(volume[0]) : 0;
         Span<double> value = outputs[0].AsSpan(0, n);
         // Without an average, or before one exists, its series is zero throughout and its flag never turns on.
         var averaged = owner.AveragePeriod is int length && n > length;
@@ -420,8 +446,16 @@ internal static partial class FastKernels
 #else
             if (current > previous) total += volume[i];
             else if (current < previous) total -= volume[i];
+            suspect |= FastMath.NonFiniteBits(volume[i]);
 #endif
+            suspect |= FastMath.NonFiniteBits(current);
             value[i] = total;
+        }
+        if (suspect == 0 && FastMath.NonFiniteBits(total) == 0) outputs.Verified(0);
+        else
+        {
+            _ = columns.Close;
+            _ = columns.Volume;
         }
         if (!averaged || owner.AveragePeriod is not int period) return;
         Span<double> average = outputs[1].AsSpan(0, n);

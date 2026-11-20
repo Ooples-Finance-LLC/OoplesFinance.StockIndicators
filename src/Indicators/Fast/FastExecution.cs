@@ -206,7 +206,7 @@ internal static partial class FastExecution
 
     private static void BindTransforms(Dictionary<Type, Func<IIndicator, FastKernel?>> binders)
     {
-        Bind<PriceRoundingTransform>(binders, t => (c, o) => FastKernels.Rounding(c.Close, o, t.Operation));
+        Bind<PriceRoundingTransform>(binders, t => (c, o) => FastKernels.Rounding(c, o, t.Operation));
         Bind<PriceCircularTransform>(binders, t => (c, o) => FastKernels.Circular(c.Close, o, t.Operation));
         Bind<PriceTranscendentalTransform>(binders, t => (c, o) => FastKernels.Transcendental(c.Close, o, t.Operation));
         Bind<TripleExponentialRate>(binders, t => (c, o) => FastKernels.TripleRate(c.Close, o, t));
@@ -350,7 +350,7 @@ internal static partial class FastExecution
         Bind<TriangularWindowAverage>(binders, t => (c, o) => FastKernels.TriangularWindow(c.Close, o[0], t.Period));
         Bind<WindowMeanAbsoluteDeviation>(binders, t => (c, o) => FastKernels.MeanAbsoluteDeviation(c.Close, o[0], t.Period));
         Bind<MovingAverageDiagnostics>(binders, t => (c, o) => FastKernels.MeanDiagnostics(c.Close, o, t.Period));
-        Bind<LaggedPriceChange>(binders, t => (c, o) => FastKernels.LaggedChange(c.Close, o[0], t));
+        Bind<LaggedPriceChange>(binders, t => (c, o) => FastKernels.LaggedChange(c, o, t));
         Bind<RangeAccelerationBands>(binders, t => (c, o) => FastKernels.AccelerationBands(c, o, t));
         Bind<SeededTrueStrength>(binders, t => (c, o) => FastKernels.TrueStrength(c.Close, o, t));
         Bind<SeededForceIndex>(binders, t => (c, o) => FastKernels.ForceIndex(c, o[0], o[1], t.Period));

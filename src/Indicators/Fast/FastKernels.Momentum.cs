@@ -1,3 +1,5 @@
+using OoplesFinance.StockIndicators.Validation;
+
 namespace OoplesFinance.StockIndicators.Indicators.Fast;
 
 internal static partial class FastKernels
@@ -89,42 +91,77 @@ internal static partial class FastKernels
     /// Close minus the close <c>period</c> bars back, as a difference, a fraction or percentage of the old
     /// close, a ratio, or only its rising or falling part. A zero old close publishes zero for the quotients.
     /// </summary>
-    internal static void LaggedChange(ReadOnlySpan<double> close, Span<double> output, LaggedPriceChange owner)
+    internal static void LaggedChange(FastColumns columns, FastOutputs outputs, LaggedPriceChange owner)
     {
-        var n = close.Length;
-        output = output.Slice(0, n);
-        var period = owner.Period;
-        var start = Math.Min(period, n);
+        var n = columns.Count;
+        Span<double> output = outputs[0].AsSpan(0, n);
+        var start = Math.Min(owner.Period, n);
         output.Slice(0, start).Clear();
-        if (start == n) return;
+        if (start == n)
+        {
+            _ = columns.Close;
+            return;
+        }
+        // The closes are checked as they are read: a comparison or a zero divisor can hide one from the
+        // result, so each pair is checked through its sum, and each result as it is written.
+        ReadOnlySpan<double> close = columns.Raw(IndicatorInputFields.Close);
         ReadOnlySpan<double> current = close.Slice(start), previous = close.Slice(0, n - start);
         var tail = output.Slice(start);
-        switch (owner.Kind)
+        var kind = owner.Kind;
+        long suspect = 0;
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
         {
-            case PriceChangeKind.Difference:
-                FastMath.Subtract(current, previous, tail);
-                break;
-            case PriceChangeKind.Gain:
-                for (var i = 0; i < tail.Length; i++) tail[i] = current[i] > previous[i] ? current[i] - previous[i] : 0;
-                break;
-            case PriceChangeKind.Loss:
-                for (var i = 0; i < tail.Length; i++) tail[i] = current[i] < previous[i] ? previous[i] - current[i] : 0;
-                break;
-            case PriceChangeKind.Ratio:
-                for (var i = 0; i < tail.Length; i++) tail[i] = previous[i] == 0 ? 0 : current[i] / previous[i];
-                break;
-            case PriceChangeKind.RatioPercent:
-                for (var i = 0; i < tail.Length; i++) tail[i] = previous[i] == 0 ? 0 : current[i] * 100 / previous[i];
-                break;
-            case PriceChangeKind.Percent:
-                for (var i = 0; i < tail.Length; i++)
-                    tail[i] = previous[i] == 0 ? 0 : (current[i] - previous[i]) * 100 / previous[i];
-                break;
-            default:
-                for (var i = 0; i < tail.Length; i++)
-                    tail[i] = previous[i] == 0 ? 0 : (current[i] - previous[i]) / previous[i];
-                break;
+            var width = System.Numerics.Vector<double>.Count;
+            System.Numerics.Vector<double> zero = System.Numerics.Vector<double>.Zero, hundred = new System.Numerics.Vector<double>(100.0);
+            var seen = System.Numerics.Vector<long>.Zero;
+            for (; i <= tail.Length - width; i += width)
+            {
+                var now = new System.Numerics.Vector<double>(current.Slice(i, width));
+                var then = new System.Numerics.Vector<double>(previous.Slice(i, width));
+                var both = now + then;
+                System.Numerics.Vector<double> result;
+                switch (kind)
+                {
+                    case PriceChangeKind.Difference: result = now - then; break;
+                    case PriceChangeKind.Gain: result = System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.GreaterThan(now, then), now - then, zero); break;
+                    case PriceChangeKind.Loss: result = System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.LessThan(now, then), then - now, zero); break;
+                    case PriceChangeKind.Ratio: result = System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.Equals(then, zero), zero, now / then); break;
+                    case PriceChangeKind.RatioPercent:
+                        result = System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.Equals(then, zero), zero, now * hundred / then);
+                        break;
+                    case PriceChangeKind.Percent:
+                        result = System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.Equals(then, zero), zero, (now - then) * hundred / then);
+                        break;
+                    default: result = System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.Equals(then, zero), zero, (now - then) / then); break;
+                }
+                seen |= System.Numerics.Vector.AsVectorInt64(both - both) | System.Numerics.Vector.AsVectorInt64(result - result); // NOSONAR x - x is the finite test
+                result.CopyTo(tail.Slice(i, width));
+            }
+            if (!System.Numerics.Vector.EqualsAll(seen, System.Numerics.Vector<long>.Zero)) suspect = 1;
         }
+#endif
+        for (; i < tail.Length; i++)
+        {
+            double now = current[i], then = previous[i];
+            var result = kind switch
+            {
+                PriceChangeKind.Difference => now - then,
+                PriceChangeKind.Gain => now > then ? now - then : 0,
+                PriceChangeKind.Loss => now < then ? then - now : 0,
+                PriceChangeKind.Ratio => then == 0 ? 0 : now / then,
+                PriceChangeKind.RatioPercent => then == 0 ? 0 : now * 100 / then,
+                PriceChangeKind.Percent => then == 0 ? 0 : (now - then) * 100 / then,
+                _ => then == 0 ? 0 : (now - then) / then
+            };
+            suspect |= FastMath.NonFiniteBits(now + then) | FastMath.NonFiniteBits(result);
+            tail[i] = result;
+        }
+        // With a lag past half the series, the bars between the two runs are read by neither.
+        if (n - start < start && !FastMath.AllFinite(close.Slice(n - start, 2 * start - n))) suspect = 1;
+        if (suspect == 0) outputs.Verified(0);
+        else _ = columns.Close;
     }
 
     /// <summary>

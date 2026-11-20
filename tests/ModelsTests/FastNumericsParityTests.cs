@@ -1198,6 +1198,26 @@ public sealed class FastNumericsParityTests
             (() => new FullTypicalPrice(1), ["Open", "High", "Low", "Close"], "High", "High"),
             (() => new Adl(1), ["High", "Low", "Close", "Volume"], "High", "High"),
             (() => new BalanceOfPower(), ["Open", "High", "Low", "Close"], "Open", "High"),
+            (() => new LaggedPriceChange(5, PriceChangeKind.Difference), ["Close"], "Close", "Close"),
+            (() => new LaggedPriceChange(5, PriceChangeKind.Gain), ["Close"], "Close", "Close"),
+            (() => new LaggedPriceChange(5, PriceChangeKind.Loss), ["Close"], "Close", "Close"),
+            (() => new LaggedPriceChange(5, PriceChangeKind.Ratio), ["Close"], "Close", "Close"),
+            (() => new LaggedPriceChange(5, PriceChangeKind.RatioPercent), ["Close"], "Close", "Close"),
+            (() => new LaggedPriceChange(5, PriceChangeKind.Percent), ["Close"], "Close", "Close"),
+            (() => new LaggedPriceChange(5, PriceChangeKind.Fraction), ["Close"], "Close", "Close"),
+            // A lag past half the series leaves bars neither run reads; one past all of it reads none.
+            (() => new LaggedPriceChange(40, PriceChangeKind.Gain), ["Close"], "Close", "Close"),
+            (() => new LaggedPriceChange(100, PriceChangeKind.Fraction), ["Close"], "Close", "Close"),
+            (() => new CandleArithmetic(CandleArithmeticOperation.Add), ["Open", "Close"], "Close", "Close"),
+            (() => new CandleArithmetic(CandleArithmeticOperation.Subtract), ["Open", "Close"], "Close", "Close"),
+            (() => new CandleArithmetic(CandleArithmeticOperation.Multiply), ["Open", "Close"], "Close", "Close"),
+            (() => new CandleArithmetic(CandleArithmeticOperation.Divide), ["Open", "Close"], "Close", "Close"),
+            (() => new CandleArithmetic(CandleArithmeticOperation.Subtract, CandlePriceField.High, CandlePriceField.High), ["High"], "High", "High"),
+            (() => new PriceRoundingTransform(PriceRoundingOperation.Ceiling), ["Close"], "Close", "Close"),
+            (() => new PriceRoundingTransform(PriceRoundingOperation.Floor), ["Close"], "Close", "Close"),
+            (() => new PriceRoundingTransform(PriceRoundingOperation.SquareRoot), ["Close"], "Close", "Close"),
+            (() => new SeededOnBalanceVolume(), ["Close", "Volume"], "Close", "Close"),
+            (() => new SeededOnBalanceVolume(ObvSeed.Zero), ["Close", "Volume"], "Close", "Close"),
         };
         static Bar With(Bar bar, string field, double value) => field switch
         {
@@ -1237,6 +1257,22 @@ public sealed class FastNumericsParityTests
                 var where = $"{make().GetType().Name}, columnar {columnar}, {field} = {bad} at {at}, flat {flat}";
                 if (Array.IndexOf(reads, field) < 0) Assert.True(message is null, where + ": " + message);
                 else Assert.True(message is not null && message.Contains(field + " must be finite.", StringComparison.Ordinal), where + ": " + message);
+            }
+            // What the arithmetic itself would hide: a value divided by a zero, a zero divisor's dividend,
+            // and the volume of a bar whose close did not move.
+            foreach (var bad in new[] { double.NaN, double.PositiveInfinity })
+            foreach (var at in new[] { 6, 33, 66 })
+            {
+                var hidden = Walk(67, 23);
+                hidden[at - 5] = With(hidden[at - 5], "Close", 0);
+                hidden[at] = With(With(hidden[at], "Close", bad), "Open", 0);
+                hidden[at - 1] = With(hidden[at - 1], "Close", hidden[at - 2].Close);
+                hidden[at - 1] = With(hidden[at - 1], "Volume", bad);
+                var message = await Failure(make, Source(hidden, columnar));
+                var broken = new[] { "Close", "Volume" }.Where(field => Array.IndexOf(reads, field) >= 0).ToArray();
+                var where = $"{make().GetType().Name}, columnar {columnar}, hidden {bad} at {at}";
+                if (broken.Length == 0) Assert.True(message is null, where + ": " + message);
+                else Assert.True(message is not null && broken.Any(field => message.Contains(field + " must be finite.", StringComparison.Ordinal)), where + ": " + message);
             }
             // With every field broken, the first one the kernel reads is the one named.
             var all = Walk(67, 23);

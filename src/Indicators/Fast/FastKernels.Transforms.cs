@@ -1,10 +1,16 @@
+using OoplesFinance.StockIndicators.Validation;
+
 namespace OoplesFinance.StockIndicators.Indicators.Fast;
 
 internal static partial class FastKernels
 {
     /// <summary>Ceiling, floor or square root of the close. A negative close has no square root.</summary>
-    internal static void Rounding(ReadOnlySpan<double> close, FastOutputs outputs, PriceRoundingOperation operation)
+    internal static void Rounding(FastColumns columns, FastOutputs outputs, PriceRoundingOperation operation)
     {
+        // A ceiling or a floor is finite only if what it rounds is, so checking the result checks the close.
+        // A square root is not: a negative close is replaced before anything could show.
+        var checkedByResult = operation != PriceRoundingOperation.SquareRoot;
+        ReadOnlySpan<double> close = checkedByResult ? columns.Raw(IndicatorInputFields.Close) : columns.Close;
         Span<double> value = outputs[0].AsSpan(0, close.Length);
         switch (operation)
         {
@@ -21,6 +27,9 @@ internal static partial class FastKernels
                 MaskBelow(close, value, outputs, 0, inclusive: false);
                 break;
         }
+        if (!checkedByResult) return;
+        if (FastMath.AllFinite(value)) outputs.Verified(0);
+        else _ = columns.Close;
     }
 
     /// <summary>A circular function of the close. The inverse sine and cosine exist only on [-1, 1].</summary>
