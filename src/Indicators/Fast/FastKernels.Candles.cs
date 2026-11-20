@@ -377,4 +377,27 @@ internal static partial class FastKernels
             }
         }
     }
+
+
+    /// <summary>
+    /// Engulfing: a body of one colour that covers the previous body of the other colour and extends
+    /// past at least one of its ends. Defined from the third bar.
+    /// </summary>
+    internal static void Engulfing(FastColumns columns, Span<double> output)
+    {
+        double[] open = columns.Open, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        for (var i = 2; i < n; i++)
+        {
+            double o = open[i], c = close[i], previousOpen = open[i - 1], previousClose = close[i - 1];
+            if (c >= o && previousClose < previousOpen && o <= previousClose && c >= previousOpen
+                && (o < previousClose || c > previousOpen))
+                output[i] = 100;
+            else if (c < o && previousClose >= previousOpen && o >= previousClose && c <= previousOpen
+                && (o > previousClose || c < previousOpen))
+                output[i] = -100;
+        }
+    }
 }

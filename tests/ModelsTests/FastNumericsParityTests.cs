@@ -563,6 +563,7 @@ public sealed class FastNumericsParityTests
         ("ThreeLineStrikeCandle(1)", () => new ThreeLineStrikeCandle(1)),
         ("ThreeLineStrikeCandle(300)", () => new ThreeLineStrikeCandle(300)),
         ("ThreeOutsideCandle()", () => new ThreeOutsideCandle()),
+        ("EngulfingPattern()", () => new EngulfingPattern()),
         ("WindowAtrBands()", () => new WindowAtrBands()),
         ("WindowAtrBands(1, 1)", () => new WindowAtrBands(1, 1)),
         ("WindowAtrBands(20, 10, 2, Simple)", () => new WindowAtrBands(20, 10, 2, AtrBandCenterMode.Simple)),
