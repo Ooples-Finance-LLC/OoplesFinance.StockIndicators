@@ -292,4 +292,89 @@ internal static partial class FastKernels
             if (i >= period + 5) output[i] = signal;
         }
     }
+
+
+    /// <summary>
+    /// Matching low, stick sandwich, three-line strike and three outside: two to four candles whose
+    /// colours and closes line up, with "equal" and "near" measured against the average range of the bars
+    /// before the candle being compared.
+    /// </summary>
+    internal static void SequenceCandle(FastColumns columns, Span<double> output, int period, SequenceCandleKind kind)
+    {
+        double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var warmup = kind switch
+        {
+            SequenceCandleKind.MatchingLow => period + 1,
+            SequenceCandleKind.StickSandwich => period + 2,
+            SequenceCandleKind.ThreeLineStrike => period + 3,
+            _ => 3,
+        };
+        var divisor = (long)period * (kind == SequenceCandleKind.ThreeLineStrike ? 5 : 20);
+        // The average range as it stood before the last bar, the one before it, and the one before that.
+        var lag0 = new CandleWindow(columns, CandleStatistic.Range, period);
+        var lag1 = new CandleWindow(columns, CandleStatistic.Range, period);
+        var lag2 = new CandleWindow(columns, CandleStatistic.Range, period);
+        bool use0 = kind == SequenceCandleKind.MatchingLow,
+            use1 = kind is SequenceCandleKind.StickSandwich or SequenceCandleKind.ThreeLineStrike,
+            use2 = kind == SequenceCandleKind.ThreeLineStrike;
+        for (var i = 0; i < n; i++)
+        {
+            if (use0 && i >= 2) lag0.Include(i - 2);
+            if (use1 && i >= 3) lag1.Include(i - 3);
+            if (use2 && i >= 4) lag2.Include(i - 4);
+            if (i < warmup) continue;
+            var white = close[i] >= open[i];
+            var lastWhite = close[i - 1] >= open[i - 1];
+            switch (kind)
+            {
+                case SequenceCandleKind.MatchingLow:
+                    if (!lastWhite && !white
+                        && lag0.Compare(i - 1, divisor, Math.Max(close[i], close[i - 1]), Math.Min(close[i], close[i - 1])) >= 0)
+                        output[i] = 100;
+                    break;
+                case SequenceCandleKind.StickSandwich:
+                    if (close[i - 2] < open[i - 2] && lastWhite && !white && low[i - 1] > close[i - 2]
+                        && lag1.Compare(i - 2, divisor, Math.Max(close[i], close[i - 2]), Math.Min(close[i], close[i - 2])) >= 0)
+                        output[i] = 100;
+                    break;
+                case SequenceCandleKind.ThreeOutside:
+                {
+                    var middleWhite = close[i - 2] >= open[i - 2];
+                    if (lastWhite && !middleWhite && close[i - 1] > open[i - 2] && open[i - 1] < close[i - 2]
+                        && close[i] > close[i - 1])
+                        output[i] = 100;
+                    else if (!lastWhite && middleWhite && open[i - 1] > close[i - 2] && close[i - 1] < open[i - 2]
+                        && close[i] < close[i - 1])
+                        output[i] = -100;
+                    break;
+                }
+                default:
+                {
+                    var middleWhite = close[i - 2] >= open[i - 2];
+                    var firstWhite = close[i - 3] >= open[i - 3];
+                    if (firstWhite != middleWhite || middleWhite != lastWhite || white == lastWhite) break;
+                    // Each of the three opens inside or near the body before it.
+                    double firstTop = Math.Max(open[i - 3], close[i - 3]), firstBottom = Math.Min(open[i - 3], close[i - 3]);
+                    if (lag2.Compare(i - 3, divisor, open[i - 2], firstTop) < 0
+                        || lag2.Compare(i - 3, divisor, firstBottom, open[i - 2]) < 0) break;
+                    double middleTop = Math.Max(open[i - 2], close[i - 2]), middleBottom = Math.Min(open[i - 2], close[i - 2]);
+                    if (lag1.Compare(i - 2, divisor, open[i - 1], middleTop) < 0
+                        || lag1.Compare(i - 2, divisor, middleBottom, open[i - 1]) < 0) break;
+                    if (lastWhite)
+                    {
+                        if (close[i - 1] > close[i - 2] && close[i - 2] > close[i - 3] && open[i] > close[i - 1]
+                            && close[i] < open[i - 3])
+                            output[i] = 100;
+                    }
+                    else if (close[i - 1] < close[i - 2] && close[i - 2] < close[i - 3] && open[i] < close[i - 1]
+                        && close[i] > open[i - 3])
+                        output[i] = -100;
+                    break;
+                }
+            }
+        }
+    }
 }
