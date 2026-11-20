@@ -20,6 +20,13 @@ internal static partial class FastKernels
             input.CopyTo(output);
             return;
         }
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            ExtremeByDoubling(input, output, period, highest);
+            return;
+        }
+#endif
         if (period > RescanLimit)
         {
             ExtremeByDeque(input, output, period, highest);
@@ -50,6 +57,44 @@ internal static partial class FastKernels
             output[i] = best;
         }
     }
+
+#if !NETFRAMEWORK
+    // The extreme of the last 1, 2, 4, ... bars, each from the one before it, and then of the whole window
+    // from two of those that overlap. Every step is one vector pass with no test in it, where following
+    // the extreme bar by bar mispredicts each time prices set a new one or the old one leaves the window.
+    private static void ExtremeByDoubling(ReadOnlySpan<double> input, Span<double> output, int period, bool highest)
+    {
+        input.CopyTo(output);
+        var n = output.Length;
+        var span = 1;
+        while (span <= period / 2 && span < n)
+        {
+            ExtremeWithLagged(output, span, highest);
+            span *= 2;
+        }
+        // Past the series' own length the extreme of everything so far is already the answer.
+        if (span < n && period - span > 0) ExtremeWithLagged(output, period - span, highest);
+    }
+
+    // Each value with the one a lag before it, newest bars first so that what is read is still unwritten.
+    private static void ExtremeWithLagged(Span<double> values, int lag, bool highest)
+    {
+        var n = values.Length;
+        var width = System.Numerics.Vector<double>.Count;
+        var i = n - width;
+        for (; i >= lag; i -= width)
+        {
+            var now = new System.Numerics.Vector<double>(values.Slice(i, width));
+            var then = new System.Numerics.Vector<double>(values.Slice(i - lag, width));
+            (highest ? System.Numerics.Vector.Max(now, then) : System.Numerics.Vector.Min(now, then)).CopyTo(values.Slice(i, width));
+        }
+        for (var j = Math.Min(n, i + width) - 1; j >= lag; j--)
+        {
+            double now = values[j], then = values[j - lag];
+            values[j] = highest ? (then > now ? then : now) : (then < now ? then : now);
+        }
+    }
+#endif
 
     private static void ExtremeByDeque(ReadOnlySpan<double> input, Span<double> output, int period, bool highest)
     {

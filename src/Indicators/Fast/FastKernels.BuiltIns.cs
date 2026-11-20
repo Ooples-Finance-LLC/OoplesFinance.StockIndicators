@@ -135,12 +135,103 @@ internal static partial class FastKernels
         ReadOnlySpan<double> close = columns.Close;
         var n = close.Length;
         output = output.Slice(0, n);
+        var period = Math.Max(1, length);
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            // Both extremes a vector of bars at a time, and then the reading from them the same way.
+            var rented = System.Buffers.ArrayPool<double>.Shared.Rent(n);
+            try
+            {
+                Span<double> floor = rented.AsSpan(0, n);
+                RollingExtreme(columns.High, output, period, true);
+                RollingExtreme(columns.Low, floor, period, false);
+                var width = System.Numerics.Vector<double>.Count;
+                System.Numerics.Vector<double> zero = System.Numerics.Vector<double>.Zero, flat = new System.Numerics.Vector<double>(-100.0),
+                    hundred = new System.Numerics.Vector<double>(100.0);
+                for (; i <= n - width; i += width)
+                {
+                    var upper = new System.Numerics.Vector<double>(output.Slice(i, width));
+                    var lower = new System.Numerics.Vector<double>(floor.Slice(i, width));
+                    var c = new System.Numerics.Vector<double>(close.Slice(i, width));
+                    var reading = System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.Equals(c, upper), zero,
+                        hundred * (c - upper) / (upper - lower));
+                    System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.Equals(upper, lower), flat, reading)
+                        .CopyTo(output.Slice(i, width));
+                }
+                for (; i < n; i++)
+                {
+                    double upper = output[i], lower = floor[i];
+                    output[i] = upper == lower ? -100 : close[i] == upper ? 0 : 100 * (close[i] - upper) / (upper - lower); // NOSONAR an exact tie is the contract
+                }
+            }
+            finally { System.Buffers.ArrayPool<double>.Shared.Return(rented); }
+            return;
+        }
+#endif
+        if (period > 1 && period <= WilliamsFusedLimit)
+        {
+            FusedWilliams(columns.High, columns.Low, close, output, period);
+            return;
+        }
         var lowest = FastMath.Allocate(n);
         RollingExtreme(columns.High, output, Math.Max(1, length), true);
         RollingExtreme(columns.Low, lowest, Math.Max(1, length), false);
-        for (var i = 0; i < n; i++)
+        for (; i < n; i++)
         {
             double upper = output[i], lower = lowest[i];
+            output[i] = upper == lower ? -100 : close[i] == upper ? 0 : 100 * (close[i] - upper) / (upper - lower); // NOSONAR an exact tie is the contract
+        }
+    }
+
+    // The same bound below which a window extreme is followed by rescanning.
+    private const int WilliamsFusedLimit = 32;
+
+    // Short windows in one pass: both extremes are followed together and each bar's reading is written as
+    // soon as they are known, so no extreme is stored and read back.
+    private static void FusedWilliams(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close,
+        Span<double> output, int period)
+    {
+        var n = close.Length;
+        if (n == 0) return;
+        double upper = high[0], lower = low[0];
+        int upperAt = 0, lowerAt = 0;
+        for (var i = 0; i < n; i++)
+        {
+            double h = high[i], l = low[i];
+            if (h >= upper)
+            {
+                upper = h;
+                upperAt = i;
+            }
+            else if (upperAt <= i - period)
+            {
+                upperAt = i - period + 1;
+                upper = high[upperAt];
+                for (var j = upperAt + 1; j <= i; j++)
+                    if (high[j] >= upper)
+                    {
+                        upper = high[j];
+                        upperAt = j;
+                    }
+            }
+            if (l <= lower)
+            {
+                lower = l;
+                lowerAt = i;
+            }
+            else if (lowerAt <= i - period)
+            {
+                lowerAt = i - period + 1;
+                lower = low[lowerAt];
+                for (var j = lowerAt + 1; j <= i; j++)
+                    if (low[j] <= lower)
+                    {
+                        lower = low[j];
+                        lowerAt = j;
+                    }
+            }
             output[i] = upper == lower ? -100 : close[i] == upper ? 0 : 100 * (close[i] - upper) / (upper - lower); // NOSONAR an exact tie is the contract
         }
     }
