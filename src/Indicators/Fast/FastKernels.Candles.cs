@@ -479,4 +479,42 @@ internal static partial class FastKernels
             if (near > 0) output[i] = white ? 100 : -100;
         }
     }
+
+
+    /// <summary>
+    /// Harami, harami cross, homing pigeon and doji star: a long body followed by a short body or a doji
+    /// that sits inside it, or for the doji star gaps away from it.
+    /// </summary>
+    internal static void ContainmentCandle(FastColumns columns, Span<double> output, int period, ContainmentCandleKind kind)
+    {
+        double[] open = columns.Open, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var doji = kind is ContainmentCandleKind.HaramiCross or ContainmentCandleKind.DojiStar;
+        // The long body is weighed against the bodies before it; the short one against the bars before itself.
+        var longBodies = new CandleWindow(columns, CandleStatistic.Body, period);
+        var recent = new CandleWindow(columns, doji ? CandleStatistic.Range : CandleStatistic.Body, period);
+        var divisor = doji ? 10L * period : period;
+        for (var i = 0; i < n; i++)
+        {
+            if (i >= 2) longBodies.Include(i - 2);
+            if (i >= 1) recent.Include(i - 1);
+            if (i < period + 1) continue;
+            double previousOpen = open[i - 1], previousClose = close[i - 1];
+            double previousTop = Math.Max(previousOpen, previousClose), previousBottom = Math.Min(previousOpen, previousClose);
+            if (longBodies.Compare(i - 1, period, previousTop, previousBottom) >= 0) continue;
+            double top = Math.Max(open[i], close[i]), bottom = Math.Min(open[i], close[i]);
+            if (recent.Compare(i, divisor, top, bottom) < 0) continue;
+            var matches = kind switch
+            {
+                ContainmentCandleKind.Harami => top <= previousTop && bottom >= previousBottom,
+                ContainmentCandleKind.HaramiCross => top < previousTop && bottom > previousBottom,
+                ContainmentCandleKind.HomingPigeon => previousClose < previousOpen && close[i] < open[i]
+                    && top < previousTop && bottom > previousBottom,
+                _ => previousClose >= previousOpen ? bottom > previousTop : top < previousBottom,
+            };
+            if (matches) output[i] = kind == ContainmentCandleKind.HomingPigeon || previousClose < previousOpen ? 100 : -100;
+        }
+    }
 }

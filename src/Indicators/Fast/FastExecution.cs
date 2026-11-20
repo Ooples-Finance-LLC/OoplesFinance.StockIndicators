@@ -146,6 +146,10 @@ internal static partial class FastExecution
         Bind<ArnaudLegouxWindow>(binders, t => (c, o) => FastKernels.ArnaudLegoux(c.Close, o[0], o[1], t));
         Bind<WindowLogVolatility>(binders, t => t.Period < 2 ? null : (c, o) => FastKernels.LogVolatility(c.Close, o[0], o[1], t));
         Bind<WindowAtrBands>(binders, t => (c, o) => FastKernels.AtrBands(c, o, t));
+        Bind<HaramiCandle>(binders, t => (c, o) => FastKernels.ContainmentCandle(c, o[0], t.Period, ContainmentCandleKind.Harami));
+        Bind<HaramiCrossCandle>(binders, t => (c, o) => FastKernels.ContainmentCandle(c, o[0], t.Period, ContainmentCandleKind.HaramiCross));
+        Bind<HomingPigeonCandle>(binders, t => (c, o) => FastKernels.ContainmentCandle(c, o[0], t.Period, ContainmentCandleKind.HomingPigeon));
+        Bind<DojiStarCandle>(binders, t => (c, o) => FastKernels.ContainmentCandle(c, o[0], t.Period, ContainmentCandleKind.DojiStar));
         Bind<TristarCandle>(binders, t => (c, o) => FastKernels.GapContinuationCandle(c, o[0], t.Period, GapContinuationKind.Tristar));
         Bind<TasukiGapCandle>(binders, t => (c, o) => FastKernels.GapContinuationCandle(c, o[0], t.Period, GapContinuationKind.TasukiGap));
         Bind<UpDownSideGapThreeMethodsCandle>(binders, t => (c, o) => FastKernels.GapContinuationCandle(c, o[0], 0, GapContinuationKind.UpDownSideGapThreeMethods));
