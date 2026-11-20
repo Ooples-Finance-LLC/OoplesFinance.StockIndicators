@@ -1054,4 +1054,67 @@ internal static partial class FastKernels
             output[i] = white ? 100 : -100;
         }
     }
+
+
+    // Sign of x - y - factor * (top - bottom), exactly.
+    private static int PenetrationSign(double x, double y, double top, double bottom, double factor)
+    {
+        var gap = x - y - factor * (top - bottom);
+        var margin = 8e-16 * (Math.Abs(x) + Math.Abs(y) + Math.Abs(factor) * (Math.Abs(top) + Math.Abs(bottom)));
+        if (gap > margin) return 1;
+        if (gap < -margin) return -1;
+        var exact = new ExactMeanAccumulator();
+        exact.Add(x);
+        exact.Add(y, -1);
+        exact.AddProduct(top, factor, -1);
+        exact.AddProduct(bottom, factor);
+        return exact.Sign;
+    }
+
+    /// <summary>
+    /// Morning and evening stars, their doji forms and the abandoned baby: a long body, a small body or
+    /// doji gapped away from it, and a third candle closing back into the first by the given penetration.
+    /// </summary>
+    /// <param name="morning">The direction to look for, or null to take it from the first candle.</param>
+    internal static void StarReversalCandle(FastColumns columns, Span<double> output, int longPeriod, int shortPeriod,
+        int dojiPeriod, double penetration, bool? morning, bool fullGaps)
+    {
+        double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var warmup = Math.Max(Math.Max(longPeriod, shortPeriod), dojiPeriod) + 2;
+        var doji = dojiPeriod > 0;
+        var longs = new CandleWindow(columns, CandleStatistic.Body, longPeriod);
+        var shorts = new CandleWindow(columns, CandleStatistic.Body, shortPeriod);
+        var middles = doji
+            ? new CandleWindow(columns, CandleStatistic.Range, dojiPeriod)
+            : new CandleWindow(columns, CandleStatistic.Body, shortPeriod);
+        var middleDivisor = doji ? 10L * dojiPeriod : shortPeriod;
+        for (var i = 0; i < n; i++)
+        {
+            if (i >= 3) longs.Include(i - 3);
+            if (i >= 2) middles.Include(i - 2);
+            if (i >= 1) shorts.Include(i - 1);
+            if (i < warmup) continue;
+            double openA = open[i - 2], closeA = close[i - 2], openB = open[i - 1], closeB = close[i - 1], o = open[i], c = close[i];
+            var rising = morning ?? closeA < openA;
+            if (rising
+                ? closeA >= openA || c < o || Math.Max(openB, closeB) >= closeA
+                : closeA < openA || c >= o || Math.Min(openB, closeB) <= closeA)
+                continue;
+            if (fullGaps && (rising
+                ? high[i - 1] >= low[i - 2] || high[i - 1] >= low[i]
+                : low[i - 1] <= high[i - 2] || low[i - 1] <= high[i]))
+                continue;
+            double topA = Math.Max(openA, closeA), bottomA = Math.Min(openA, closeA);
+            if (longs.Compare(i - 2, longPeriod, topA, bottomA) >= 0) continue;
+            if (shorts.Compare(i, shortPeriod, Math.Max(o, c), Math.Min(o, c)) >= 0) continue;
+            if (middles.Compare(i - 1, middleDivisor, Math.Max(openB, closeB), Math.Min(openB, closeB)) < 0) continue;
+            var reached = rising
+                ? PenetrationSign(c, closeA, topA, bottomA, penetration)
+                : PenetrationSign(closeA, c, topA, bottomA, penetration);
+            if (reached > 0) output[i] = rising ? 100 : -100;
+        }
+    }
 }
