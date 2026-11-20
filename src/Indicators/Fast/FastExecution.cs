@@ -24,6 +24,7 @@ internal static partial class FastExecution
     internal static bool Supports(IReadOnlyList<IIndicator> indicators) => Plan(indicators) is not null;
 
     /// <summary>The kernel of every indicator, in order, or null when any of them has none.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static FastKernel[]? Plan(IReadOnlyList<IIndicator> indicators)
     {
         if (indicators.Count == 0) return null;
@@ -41,6 +42,7 @@ internal static partial class FastExecution
     /// Each indicator's series, in the order the indicators were given. Nothing is keyed: a build of one
     /// indicator is its kernel, its columns and its validation, and nothing else.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static double[][][] Execute(FastColumns columns, IIndicator[] indicators, FastKernel[] kernels,
         CancellationToken cancellation, out int warmup)
     {
@@ -74,6 +76,7 @@ internal static partial class FastExecution
 
     // One indicator's series. A chained indicator reads the bars with the close replaced by its source's
     // primary series, so the source is worked out first, once however many readers it has.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static double[][] Compute(FastColumns columns, IIndicator indicator, FastKernel? resolved,
         Dictionary<IIndicatorOutput, double[]>? computed, CancellationToken cancellation)
     {
@@ -103,6 +106,7 @@ internal static partial class FastExecution
 
     // The exact routes reject an infinite or unexpected NaN output as they publish it. Here one vectorized
     // pass per output decides the usual all-finite case, and only a failure walks the bars to name the first.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static void RejectInvalidOutputs(IIndicator indicator, FastOutputs published, double[][] outputs)
     {
         var finite = true;
@@ -114,6 +118,7 @@ internal static partial class FastExecution
                 Validation.IndicatorOutputPolicy.Validate(indicator, slot, index, outputs[slot][index]);
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static FastKernel? Resolve(IIndicator indicator)
     {
         if (indicator.Components.Count != 0 || !Binders.TryGetValue(indicator.GetType(), out var bind)) return null;
@@ -125,6 +130,7 @@ internal static partial class FastExecution
 
     // The catalog signal of slot 0 in slot 1. An average over one bar is the series itself, so it is
     // published as that series and not as a copy of it.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static void SignalOf(FastOutputs outputs, int length)
     {
         if (length <= 1) outputs.Alias(1, 0);
@@ -133,6 +139,7 @@ internal static partial class FastExecution
 
     // These read the bar's midpoint from the bars and the close when chained, or hand whole bars to a
     // caller's function; their kernels read the bars as they were given.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static bool SwitchesInputWhenChained(IIndicator indicator) =>
         indicator is AlligatorWithDetails or AwesomeWithDetails or GatorWithDetails or VariablePeriodClassicAverage;
 

@@ -7,6 +7,7 @@ internal static partial class FastSnapshots
     /// as of the bar before, reversing when the close crosses it. Nothing is published up to and including
     /// the first reversal.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static VolatilityStopValue[] VolatilityStop(IReadOnlyList<Bar> bars, int period, double multiplier)
     {
         var count = bars.Count;

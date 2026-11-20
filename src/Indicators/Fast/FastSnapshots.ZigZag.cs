@@ -15,6 +15,7 @@ internal static partial class FastSnapshots
 
     // Whether the move from b to a is at least the threshold percentage of the price, on the price's side
     // of zero.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static bool ZigZagReversal(double a, double b, double price, double threshold)
     {
         if (price == 0) return false; // NOSONAR an exact zero has no percentage
@@ -25,6 +26,7 @@ internal static partial class FastSnapshots
 
     // Which of the rise from the first low and the fall from the first high is the larger share of its
     // base: positive for the rise, negative for the fall.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static int FirstMove(double high, double low, double firstHigh, double firstLow)
     {
         double rise = (high - firstLow) * firstHigh, fall = (firstHigh - low) * firstLow, difference = rise - fall;
@@ -37,6 +39,7 @@ internal static partial class FastSnapshots
     /// Zig-zag: swing points where the price turns by at least the threshold percentage, joined by straight
     /// lines, with the retracement lines between like points.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static ZigZagValue[] ZigZag(IReadOnlyList<Bar> bars, double percentChange, bool highLow)
     {
         var count = bars.Count;
@@ -147,6 +150,7 @@ internal static partial class FastSnapshots
     private static double? Present(double value) => double.IsNaN(value) ? null : value;
 
     // The straight line from a to b, written from the given bar through b.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static void Join(ZigZagPoint a, ZigZagPoint b, int from, Span<double> output)
     {
         double span = b.Index - a.Index;

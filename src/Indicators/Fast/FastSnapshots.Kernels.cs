@@ -5,6 +5,7 @@ internal static partial class FastSnapshots
     // Fibonacci numbers pass the largest double a little after this many terms.
     internal const int FibonacciPeriodLimit = 1400;
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static double[] Closes(IReadOnlyList<Bar> bars, out double[] rented)
     {
         var rows = Rows(bars);
@@ -17,6 +18,7 @@ internal static partial class FastSnapshots
     /// Fibonacci-weighted average: the newest close carries the largest Fibonacci number of the period, over
     /// the bars so far while the window fills.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static double[] FibonacciWeighted(IReadOnlyList<Bar> bars, int period)
     {
         var count = bars.Count;
@@ -49,6 +51,7 @@ internal static partial class FastSnapshots
     /// Windowed-sinc filter: the last taps closes under a fixed kernel, the newest close standing in for
     /// the taps a short history does not have yet.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static double[] WindowedSinc(IReadOnlyList<Bar> bars, double[] weights, double mass)
     {
         var count = bars.Count;
@@ -75,6 +78,7 @@ internal static partial class FastSnapshots
     }
 
     // The sum of the taps from the given one on, taken afresh so a short history does not inherit rounding.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static double Remaining(double[] weights, int from)
     {
         double sum = 0;
@@ -82,6 +86,7 @@ internal static partial class FastSnapshots
         return sum;
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static double Representable(double value) =>
         !double.IsNaN(value) && !double.IsInfinity(value)
             ? value

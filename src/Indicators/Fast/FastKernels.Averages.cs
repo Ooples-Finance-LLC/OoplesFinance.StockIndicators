@@ -4,6 +4,7 @@ namespace OoplesFinance.StockIndicators.Indicators.Fast;
 internal static partial class FastKernels
 {
     /// <summary>Rolling mean; zero until a full window is available.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void Sma(ReadOnlySpan<double> input, Span<double> output, int period)
     {
         period = Math.Max(1, period);
@@ -26,6 +27,7 @@ internal static partial class FastKernels
     }
 
     /// <summary>Exponential average seeded by the first input, alpha = 2 / (period + 1).</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void FirstValueEma(ReadOnlySpan<double> input, Span<double> output, int period)
     {
         var n = input.Length;
@@ -43,6 +45,7 @@ internal static partial class FastKernels
     /// Double or triple exponential average whose stages are seeded by simple means. Shared seeding starts
     /// every stage from the first window's mean; cascaded seeding seeds each stage from the previous one.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void SeededExponential(ReadOnlySpan<double> input, Span<double> output, int period, int order, bool shared)
     {
         var n = input.Length;
@@ -97,6 +100,7 @@ internal static partial class FastKernels
     /// sum of the weights is either exact, so a zero mass is a true zero, or far enough from zero that its
     /// rounding cannot matter.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static bool SupportsConvolution(IReadOnlyList<double> kernel)
     {
         double sum = 0, magnitude = 0;
@@ -120,6 +124,7 @@ internal static partial class FastKernels
     /// Normalized convolution: the newest closes under the kernel, newest weight first, over the mass of
     /// the weights in use; a window whose weights cancel exactly is divided by its length instead.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void NormalizedConvolution(ReadOnlySpan<double> close, Span<double> output, IReadOnlyList<double> kernel)
     {
         var n = close.Length;

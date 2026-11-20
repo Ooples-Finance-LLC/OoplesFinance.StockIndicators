@@ -9,6 +9,7 @@ internal static partial class FastKernels
     /// averages, the first scaled by ten, and a signal average of the result. A zero close ends the series,
     /// because the change after it has no base.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void PriceMomentum(ReadOnlySpan<double> close, double[][] outputs, SeededPriceMomentum owner)
     {
         var n = close.Length;
@@ -62,6 +63,7 @@ internal static partial class FastKernels
     /// <summary>
     /// Bands a multiple of the window's population deviation above and below a classic average of the close.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void ClassicBands(ReadOnlySpan<double> close, FastOutputs outputs, ClassicDeviationBands owner)
     {
         var n = close.Length;
@@ -91,6 +93,7 @@ internal static partial class FastKernels
     /// Close minus the close <c>period</c> bars back, as a difference, a fraction or percentage of the old
     /// close, a ratio, or only its rising or falling part. A zero old close publishes zero for the quotients.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void LaggedChange(FastColumns columns, FastOutputs outputs, LaggedPriceChange owner)
     {
         var n = columns.Count;
@@ -168,6 +171,7 @@ internal static partial class FastKernels
     /// Acceleration bands: window means of the high widened, and the low narrowed, by four times the bar's
     /// range over its high-low sum, around the window mean of the close.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void AccelerationBands(FastColumns columns, FastOutputs outputs, RangeAccelerationBands owner)
     {
         columns.RequireHighLowClose();
@@ -195,6 +199,7 @@ internal static partial class FastKernels
     }
 
     // Rolling mean whose sum is rebuilt from the window at intervals, so it cannot drift on a long series.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static void RebuiltMean(ReadOnlySpan<double> input, Span<double> output, int period)
     {
         var n = input.Length;
@@ -217,6 +222,7 @@ internal static partial class FastKernels
     /// exponential averages, as a percentage ratio, with a mean-seeded signal average. A zero denominator
     /// publishes nothing and ends the signal.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void TrueStrength(ReadOnlySpan<double> close, double[][] outputs, SeededTrueStrength owner)
     {
         var n = close.Length;
@@ -299,6 +305,7 @@ internal static partial class FastKernels
     /// <summary>
     /// Force index: the one-bar change times the volume, as a mean-seeded exponential average.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void ForceIndex(FastColumns columns, Span<double> value, Span<double> defined, int period)
     {
         ReadOnlySpan<double> close = columns.Close, volume = columns.Volume;
@@ -325,6 +332,7 @@ internal static partial class FastKernels
     /// Deviation bands around the window mean with the close's position between them, its z-score and the
     /// band width over the mean. A flat window has no position or z-score, and a zero mean has no width.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void DeviationBands(ReadOnlySpan<double> close, FastOutputs outputs, WindowDeviationBands owner)
     {
         var n = close.Length;
@@ -367,6 +375,7 @@ internal static partial class FastKernels
     /// KDJ: the close's position in the high/low window as a percentage (zero for a flat window), K as a
     /// simple or Wilder average of that, D as the same average of K, and J as a weighted difference of the two.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void StochasticKdj(FastColumns columns, FastOutputs outputs, WindowStochasticKdj owner)
     {
         columns.RequireHighLowClose();
@@ -406,6 +415,7 @@ internal static partial class FastKernels
 
     // Simple average defined once the window fills, or Wilder's average seeded with the first value.
     // Returns the index of the first defined value; earlier outputs are zero.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static int KdjAverage(ReadOnlySpan<double> input, Span<double> output, int period, bool wilder)
     {
         if (period == 1)
@@ -436,6 +446,7 @@ internal static partial class FastKernels
     /// window's standard deviation, r-squared and the line's value at the newest bar. Each window is
     /// measured from its own newest price, so nothing drifts and a flat window is exactly flat.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void RegressionStatistics(ReadOnlySpan<double> close, FastOutputs outputs, int period)
     {
         var n = close.Length;
@@ -481,6 +492,7 @@ internal static partial class FastKernels
     /// Least-squares fit of each full window with the intercept measured on the bar index of the whole
     /// series, and the final window's line drawn back over its own bars.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void RegressionFinalLine(ReadOnlySpan<double> close, FastOutputs outputs, int period)
     {
         var n = close.Length;
@@ -523,6 +535,7 @@ internal static partial class FastKernels
 
 
     // One-bar return, zero when the previous price is zero.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static void Returns(ReadOnlySpan<double> price, Span<double> output)
     {
         if (price.Length == 0) return;
@@ -536,6 +549,7 @@ internal static partial class FastKernels
 
     // Slope of y on x over one window, both measured from the window's newest pair so that returns
     // that barely differ keep the digits they differ in.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static double AnchoredSlope(ReadOnlySpan<double> x, ReadOnlySpan<double> y)
     {
         var count = x.Length;
@@ -560,6 +574,7 @@ internal static partial class FastKernels
     /// Beta of one price field's returns on another's over a window: their covariance over the market
     /// returns' variance, zero when the market returns in the window are all equal.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void ReturnBeta(FastColumns columns, Span<double> value, Span<double> defined, WindowReturnBeta owner)
     {
         ReadOnlySpan<double> market = Field(columns, owner.Market), evaluation = Field(columns, owner.Evaluation);
@@ -625,6 +640,7 @@ internal static partial class FastKernels
 
     // Slope of y on x over the window's pairs whose x has the wanted sign (zero for every pair). False
     // when the chosen x values are all equal or there are none, which is when no slope exists.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static bool SubsetSlope(ReadOnlySpan<double> x, ReadOnlySpan<double> y, int sign, out double slope)
     {
         slope = 0;
@@ -663,6 +679,7 @@ internal static partial class FastKernels
     /// Beta over all the window's returns, over those where the market rose and over those where it fell,
     /// with the ratio and squared difference of the last two, and both return series.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void BetaStatistics(FastColumns columns, FastOutputs outputs, WindowBetaStatistics owner)
     {
         ReadOnlySpan<double> market = Field(columns, owner.Market), evaluation = Field(columns, owner.Evaluation);
@@ -718,6 +735,7 @@ internal static partial class FastKernels
     /// Momentum and percentage rate of change over a lag, with the rolling mean of the rate where every
     /// rate in the window is defined.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void RateOfChangeAverage(ReadOnlySpan<double> close, double[][] outputs, int period, int? averagePeriod)
     {
         var n = close.Length;
@@ -773,6 +791,7 @@ internal static partial class FastKernels
     /// <summary>
     /// Rolling mean of the balance of power, published only where every bar in the window has a range.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void BalanceOfPowerMean(FastColumns columns, Span<double> value, Span<double> defined, int period)
     {
         ReadOnlySpan<double> open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
@@ -834,6 +853,7 @@ internal static partial class FastKernels
     /// last few rates. A zero base price leaves the rate absent, ends the average and holds the bands back
     /// while it is in their window.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void RateOfChangeBands(ReadOnlySpan<double> close, double[][] outputs, int period, int emaPeriod,
         int deviationPeriod)
     {

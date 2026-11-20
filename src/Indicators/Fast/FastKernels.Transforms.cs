@@ -5,6 +5,7 @@ namespace OoplesFinance.StockIndicators.Indicators.Fast;
 internal static partial class FastKernels
 {
     /// <summary>Ceiling, floor or square root of the close. A negative close has no square root.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void Rounding(FastColumns columns, FastOutputs outputs, PriceRoundingOperation operation)
     {
         // A ceiling or a floor is finite only if what it rounds is, so checking the result checks the close.
@@ -33,6 +34,7 @@ internal static partial class FastKernels
     }
 
     /// <summary>A circular function of the close. The inverse sine and cosine exist only on [-1, 1].</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void Circular(ReadOnlySpan<double> close, FastOutputs outputs, PriceCircularOperation operation)
     {
         var n = close.Length;
@@ -81,6 +83,7 @@ internal static partial class FastKernels
     }
 
     /// <summary>A logarithm, exponential or hyperbolic function of the close. Logarithms need a positive close.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void Transcendental(ReadOnlySpan<double> close, FastOutputs outputs,
         PriceTranscendentalOperation operation)
     {
@@ -118,6 +121,7 @@ internal static partial class FastKernels
 
     // Marks every element defined, then clears the ones whose input is below the bound. The common case of
     // an all-admissible column is decided by one vectorized minimum, and publishes the shared all-ones flag.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static void MaskBelow(ReadOnlySpan<double> input, Span<double> value, FastOutputs outputs, double bound,
         bool inclusive)
     {

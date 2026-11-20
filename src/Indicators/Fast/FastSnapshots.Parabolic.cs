@@ -7,6 +7,7 @@ namespace OoplesFinance.StockIndicators.Indicators.Fast;
 internal static partial class FastSnapshots
 {
     /// <summary>The rows as a span, without a copy when the list is an array or a list.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static ReadOnlySpan<Bar> Rows(IReadOnlyList<Bar> bars) => bars switch
     {
         Bar[] array => array,
@@ -16,12 +17,14 @@ internal static partial class FastSnapshots
         _ => bars.ToArray(),
     };
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static double Finite(double value) =>
         !double.IsNaN(value) && !double.IsInfinity(value)
             ? value
             : throw new OverflowException("Parabolic stop is not representable.");
 
     /// <summary>The classic and the extended parabolic stop.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static double?[] ParabolicClassic(IReadOnlyList<Bar> bars, bool signed, double start, double offset,
         double initialLong, double stepLong, double maximumLong, double initialShort, double stepShort, double maximumShort)
     {
@@ -67,6 +70,7 @@ internal static partial class FastSnapshots
     }
 
     /// <summary>The parabolic stop that publishes nothing until its first reversal confirms a trend.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static ConfirmedParabolicValue[] ParabolicConfirmed(IReadOnlyList<Bar> bars, double step, double maximum,
         double initial)
     {
@@ -113,6 +117,7 @@ internal static partial class FastSnapshots
     }
 
     /// <summary>The parabolic stop seeded from the extremes of the first five bars.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static double?[] ParabolicFourBar(IReadOnlyList<Bar> bars, double step, double maximum)
     {
         var count = bars.Count;

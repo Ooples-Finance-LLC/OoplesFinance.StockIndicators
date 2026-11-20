@@ -10,6 +10,7 @@ internal static partial class FastSnapshots
     /// brick edge is counted exactly, since on prices quoted to a few decimals that is an everyday event.
     /// The bricks are built at once, so an unrepresentable one fails the call rather than its enumeration.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static List<RenkoBrick> Renko(IReadOnlyList<Bar> bars, double brickSize, bool highLow)
     {
         var bricks = new List<RenkoBrick>(bars.Count);
@@ -54,6 +55,7 @@ internal static partial class FastSnapshots
         return bricks;
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static double RenkoPrice(double origin, long bricks, double step, double scale)
     {
         var published = (origin + bricks * step) / scale;
@@ -63,9 +65,11 @@ internal static partial class FastSnapshots
     }
 
     // How far a brick count may be from a whole number before the double arithmetic is trusted with it.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static double RenkoSlack(double price, double origin, double step) =>
         1e-12 * (Math.Abs(price) + Math.Abs(origin)) / step + 1e-12;
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static long CloseBricks(double close, long upper, long lower, double origin, double step, double scale,
         RenkoSnapshot.BrickGrid grid)
     {
@@ -78,6 +82,7 @@ internal static partial class FastSnapshots
         return RenkoSnapshot.CloseBricksExact(close, upper, lower, grid);
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static long RangeBricks(double high, double low, long upper, long lower, double origin, double step, double scale,
         RenkoSnapshot.BrickGrid grid)
     {
@@ -94,6 +99,7 @@ internal static partial class FastSnapshots
     }
 
     // The whole bricks in a positive count, when it is clear of every whole number by the slack.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static bool TryWhole(double count, double slack, out long whole)
     {
         whole = 0;
@@ -105,6 +111,7 @@ internal static partial class FastSnapshots
     }
 
     /// <summary>The brick size the average-true-range convention uses: the Wilder average at the last bar.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static double? RenkoAtrSize(IReadOnlyList<Bar> bars, int period)
     {
         var rows = Rows(bars);

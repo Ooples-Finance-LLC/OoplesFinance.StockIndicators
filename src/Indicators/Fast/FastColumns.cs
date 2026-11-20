@@ -45,6 +45,7 @@ internal sealed class FastColumns
     /// These bars as an indicator chained to <paramref name="series"/> reads them. A value that is not
     /// finite is put to the reader's own input rule, as the exact routes put every chained bar to it.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal FastColumns WithClose(double[] series, IIndicator reader)
     {
         if (!FastMath.AllFinite(series.AsSpan(0, Count)))
@@ -77,6 +78,7 @@ internal sealed class FastColumns
     /// A column as its source holds it, not yet checked. For a kernel that proves its inputs finite in the
     /// pass that reads them, and reads the checked column, in its usual order, when that proof fails.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal double[] Raw(IndicatorInputFields field)
     {
         if (_source is { } source)
@@ -100,6 +102,7 @@ internal sealed class FastColumns
         };
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal void RequireHighLowClose()
     {
         if (_bars is not { } bars || _high is not null || _low is not null || _close is not null) return;
@@ -125,6 +128,7 @@ internal sealed class FastColumns
         _close = close;
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private double[] Prepare(IndicatorInputFields field)
     {
         if (_source is { } source)
@@ -170,11 +174,12 @@ internal sealed class FastColumns
     // The sign bit is set exactly for a NaN or an infinity: the magnitude's exponent field is all ones, so
     // adding one at its lowest bit carries out of it. Gathered with an OR the test costs a cycle a bar, where
     // a running floating-point sum held every bar to the latency of an add.
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
     private static long NonFiniteBit(double value) =>
         unchecked((BitConverter.DoubleToInt64Bits(value) & long.MaxValue) + (1L << 52));
 
     // Same exception type and message as IndicatorInputDomain.Validate, without touching unread fields.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static void ThrowNonFinite(IndicatorInputFields field) =>
         throw new ArgumentOutOfRangeException("bar", field + " must be finite.");
 }

@@ -12,7 +12,7 @@ internal static partial class FastKernels
         Shadows,
     }
 
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
     private static double CandleTerm(CandleStatistic statistic, double open, double high, double low, double close) =>
         statistic switch
         {
@@ -165,6 +165,7 @@ internal static partial class FastKernels
     }
 
     // Whether high - top and bottom - low both exceed multiplier * (top - bottom).
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static bool BothShadowsExceedBody(double high, double low, double top, double bottom, int multiplier)
     {
         var body = multiplier * (top - bottom);
@@ -189,6 +190,7 @@ internal static partial class FastKernels
     /// Single-candle patterns that weigh the body and the shadows against their averages over the
     /// preceding bars: 100 for a rising match, -100 for a falling one, zero otherwise.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void BodyShadowCandle(FastColumns columns, Span<double> output, int period, BodyShadowCandleKind kind)
     {
         double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
@@ -235,6 +237,7 @@ internal static partial class FastKernels
 
 
     // Sign of a - b - (c - d), exactly.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static int DifferenceSign(double a, double b, double c, double d)
     {
         var gap = a - b - (c - d);
@@ -253,6 +256,7 @@ internal static partial class FastKernels
     /// Hammer, hanging man, inverted hammer and shooting star: a short body with one long shadow and
     /// almost none on the other side, placed against the previous bar.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void ContextReversalCandle(FastColumns columns, Span<double> output, int period, int nearPeriod,
         ContextReversalKind kind)
     {
@@ -299,6 +303,7 @@ internal static partial class FastKernels
     /// opposite direction, then 200 if a close within three bars confirms it. The modified form also
     /// needs the bar before to be an inside bar that closed near its own extreme.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void Hikkake(FastColumns columns, Span<double> output, int period)
     {
         double[] high = columns.High, low = columns.Low, close = columns.Close;
@@ -355,6 +360,7 @@ internal static partial class FastKernels
     // The plain form in two passes. Whether a bar is an inside bar and which way the next one breaks out
     // of it are as good as random, so the formation is taken as masks, a vector of bars at a time; the
     // confirmation is a short walk that only branches where a formation or a pending one exists.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static void PlainHikkake(double[] high, double[] low, double[] close, Span<double> output)
     {
         var n = close.Length;
@@ -419,6 +425,7 @@ internal static partial class FastKernels
     }
 
     // Offset of the first value that is not zero, or -1.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static int NextNonZero(ReadOnlySpan<double> values)
     {
 #if NET8_0_OR_GREATER
@@ -432,6 +439,7 @@ internal static partial class FastKernels
 
     // The gap three methods over whole vectors of bars: every test is a comparison of opens and closes,
     // and on real prices none of them is predictable. Returns the first bar it did not decide.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static int GapThreeMethodsMasks(double[] open, double[] close, Span<double> output)
     {
 #if !NETFRAMEWORK
@@ -464,6 +472,7 @@ internal static partial class FastKernels
     }
 
     // Three outside over whole vectors of bars. Returns the first bar it did not decide.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static int ThreeOutsideMasks(double[] open, double[] close, Span<double> output)
     {
 #if !NETFRAMEWORK
@@ -496,6 +505,7 @@ internal static partial class FastKernels
     /// colours and closes line up, with "equal" and "near" measured against the average range of the bars
     /// before the candle being compared.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void SequenceCandle(FastColumns columns, Span<double> output, int period, SequenceCandleKind kind)
     {
         double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
@@ -581,6 +591,7 @@ internal static partial class FastKernels
     /// Engulfing: a body of one colour that covers the previous body of the other colour and extends
     /// past at least one of its ends. Defined from the third bar.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void Engulfing(FastColumns columns, Span<double> output)
     {
         double[] open = columns.Open, close = columns.Close;
@@ -633,6 +644,7 @@ internal static partial class FastKernels
     /// Tristar, Tasuki gap and the gap three methods: a gap between two bodies and a third candle that
     /// reverses into it, with doji and equal-body tests measured against the average range.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void GapContinuationCandle(FastColumns columns, Span<double> output, int period, GapContinuationKind kind)
     {
         double[] open = columns.Open, close = columns.Close;
@@ -684,6 +696,7 @@ internal static partial class FastKernels
     /// Harami, harami cross, homing pigeon and doji star: a long body followed by a short body or a doji
     /// that sits inside it, or for the doji star gaps away from it.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void ContainmentCandle(FastColumns columns, Span<double> output, int period, ContainmentCandleKind kind)
     {
         double[] open = columns.Open, close = columns.Close;
@@ -722,6 +735,7 @@ internal static partial class FastKernels
     /// Piercing line and dark cloud cover: a long body, then an opposite candle that opens beyond the
     /// first bar's extreme and closes back inside its body, past the midpoint or the given penetration.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void PenetrationCandle(FastColumns columns, Span<double> output, int period, bool piercing, double penetration)
     {
         double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
@@ -774,6 +788,7 @@ internal static partial class FastKernels
     /// On-neck, in-neck and thrusting: a long black body, then a white candle that opens below its low
     /// and closes at that low, at its close, or above its close without reaching the body's midpoint.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void NeckCandle(FastColumns columns, Span<double> output, int bodyPeriod, int equalPeriod, NeckCandleKind kind)
     {
         double[] open = columns.Open, low = columns.Low, close = columns.Close;
@@ -809,6 +824,7 @@ internal static partial class FastKernels
 
 
     // Sign of a - b - multiplier * (c - d), exactly.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static int DifferenceSign(double a, double b, double c, double d, int multiplier)
     {
         var gap = a - b - multiplier * (c - d);
@@ -828,6 +844,7 @@ internal static partial class FastKernels
     /// that average, alone or with the shadows that make a dragonfly, gravestone, long-legged doji or
     /// takuri line.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void AverageRangeDojiCandle(FastColumns columns, Span<double> output, int period, AverageRangeDojiKind kind)
     {
         double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
@@ -864,6 +881,7 @@ internal static partial class FastKernels
     /// Three inside, two crows, upside gap two crows and unique three river: a long first body, a second
     /// body placed against it, and a third candle that confirms or reverses.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void TripleBodyCandle(FastColumns columns, Span<double> output, int longPeriod, int shortPeriod,
         TripleBodyCandleKind kind)
     {
@@ -915,6 +933,7 @@ internal static partial class FastKernels
     /// Counterattack, separating lines and gap side-by-side white lines: two candles whose closes or
     /// opens match within a fraction of the average range.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void MatchedLinesCandle(FastColumns columns, Span<double> output, int bodyPeriod, int rangePeriod,
         int equalPeriod, MatchedLinesKind kind)
     {
@@ -980,6 +999,7 @@ internal static partial class FastKernels
     /// Strict harami: a body of the opposite colour held strictly inside the previous body, optionally
     /// with its shadows inside too, and optionally only after a run of bars trending into it.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void StrictHarami(FastColumns columns, Span<double> output, int direction, int period, bool shadows)
     {
         double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
@@ -1009,6 +1029,7 @@ internal static partial class FastKernels
     /// Three black crows, identical three crows and three white soldiers: three candles of one colour,
     /// each closing beyond the last with almost no shadow on the closing side.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void CrowSoldierCandle(FastColumns columns, Span<double> output, int shadowPeriod, int nearPeriod,
         int farPeriod, int bodyPeriod, CrowSoldierKind kind)
     {
@@ -1092,6 +1113,7 @@ internal static partial class FastKernels
     /// Advance block, stalled pattern and three stars in the south: three candles of one colour whose
     /// bodies and shadows show the move running out.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void ExhaustionCandle(FastColumns columns, Span<double> output, ExhaustionCandleKind kind, int longPeriod,
         int shortPeriod, int shadowPeriod, int nearPeriod, int farPeriod)
     {
@@ -1186,6 +1208,7 @@ internal static partial class FastKernels
     /// Kicking: two long marubozu of opposite colour with a gap between them, signed by the second
     /// candle or, by length, by whichever body is longer.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void KickingCandle(FastColumns columns, Span<double> output, int bodyPeriod, int shadowPeriod, bool byLength)
     {
         double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
@@ -1232,6 +1255,7 @@ internal static partial class FastKernels
 
 
     // Sign of x - y - factor * (top - bottom), exactly.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static int PenetrationSign(double x, double y, double top, double bottom, double factor)
     {
         var gap = x - y - factor * (top - bottom);
@@ -1251,6 +1275,7 @@ internal static partial class FastKernels
     /// doji gapped away from it, and a third candle closing back into the first by the given penetration.
     /// </summary>
     /// <param name="morning">The direction to look for, or null to take it from the first candle.</param>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void StarReversalCandle(FastColumns columns, Span<double> output, int longPeriod, int shortPeriod,
         int dojiPeriod, double penetration, bool? morning, bool fullGaps)
     {
@@ -1298,6 +1323,7 @@ internal static partial class FastKernels
     /// Breakaway, concealing baby swallow and ladder bottom: four or five candles running one way and a
     /// last one that turns against them.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void ExtendedReversalCandle(FastColumns columns, Span<double> output, int period, ExtendedReversalKind kind)
     {
         double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;

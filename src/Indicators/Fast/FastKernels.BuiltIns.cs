@@ -8,6 +8,7 @@ internal static partial class FastKernels
     /// The catalog exponential average: the running mean until <paramref name="length"/> values have been
     /// seen, published on every bar, then the usual recurrence.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void RunningSeedEma(ReadOnlySpan<double> input, Span<double> output, int length)
     {
         var n = input.Length;
@@ -30,6 +31,7 @@ internal static partial class FastKernels
     /// The catalog weighted average: newest value heaviest, divided by the full weight total from the first
     /// bar, so the startup values rise toward the average instead of being withheld.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void FullDivisorWma(ReadOnlySpan<double> input, Span<double> output, int length)
     {
         var n = input.Length;
@@ -59,6 +61,7 @@ internal static partial class FastKernels
     }
 
     /// <summary>Mean of the high and low, optionally with the close once or twice, or with the open.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void PricePoint(FastColumns columns, FastOutputs outputs, int closes, bool open)
     {
         if (closes > 0 && !open) columns.RequireHighLowClose();
@@ -117,6 +120,7 @@ internal static partial class FastKernels
     }
 
     /// <summary>True range per bar; the first bar has no previous close and publishes its own range.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void TrueRangeSeries(ReadOnlySpan<double> high, ReadOnlySpan<double> low,
         ReadOnlySpan<double> close, Span<double> output)
     {
@@ -129,6 +133,7 @@ internal static partial class FastKernels
     /// <summary>
     /// Williams %R over the available high/low window: -100 for a flat window, zero when the close is the high.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void WilliamsPercent(FastColumns columns, Span<double> output, int length)
     {
         columns.RequireHighLowClose();
@@ -190,6 +195,7 @@ internal static partial class FastKernels
 
     // Short windows in one pass: both extremes are followed together and each bar's reading is written as
     // soon as they are known, so no extreme is stored and read back.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static void FusedWilliams(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close,
         Span<double> output, int period)
     {
@@ -241,6 +247,7 @@ internal static partial class FastKernels
     /// Accumulation/distribution line: the running total of volume weighted by where the close sits in the
     /// bar's range, with the catalog exponential average of the line as its signal.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static bool AccumulationLine(FastColumns columns, Span<double> line)
     {
         columns.RequireHighLowClose();
@@ -303,6 +310,7 @@ internal static partial class FastKernels
     /// Balance of power: the bar's close-open move over its range, zero for a bar with no range, with the
     /// catalog exponential average of it as its signal.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static bool BalanceOfPower(FastColumns columns, Span<double> value)
     {
         columns.RequireHighLowClose();

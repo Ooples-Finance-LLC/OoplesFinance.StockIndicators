@@ -9,6 +9,19 @@ namespace OoplesFinance.StockIndicators.Indicators.Fast;
 internal static class FastMath
 {
     /// <summary>An output column. Kernels write every element, so it need not be cleared first.</summary>
+    /// <summary>
+    /// Compiles a method fully the first time it is called. A kernel is a loop over every bar, and the
+    /// runtime's quick first compilation leaves vector code several times slower than a plain loop for the
+    /// first few hundred milliseconds of use - which, for a caller that builds once, is all of it.
+    /// </summary>
+#if NETFRAMEWORK
+    internal const System.Runtime.CompilerServices.MethodImplOptions Hot = 0;
+#else
+    internal const System.Runtime.CompilerServices.MethodImplOptions Hot =
+        System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization;
+#endif
+
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static double[] Allocate(int count) =>
 #if NETFRAMEWORK
         new double[count];
@@ -22,7 +35,7 @@ internal static class FastMath
     /// previous + alpha * (input - previous) form chains a subtract, a multiply and an add through the
     /// recurrence, which is three times the latency per bar.
     /// </remarks>
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
     internal static double Blend(double weight, double previous, double scaled)
     {
 #if !NETFRAMEWORK
@@ -41,6 +54,7 @@ internal static class FastMath
     /// between: the recurrence then carries one multiply-add per four bars instead of one per bar. The
     /// values agree with the bar-by-bar recurrence to rounding, not bit for bit.
     /// </remarks>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static double BlendRun(double weight, double alpha, ReadOnlySpan<double> input, Span<double> output, int start,
         double value)
     {
@@ -69,11 +83,11 @@ internal static class FastMath
     }
 
     /// <summary>Zero for a finite value and nonzero for a NaN or an infinity, to be gathered with an OR.</summary>
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
     internal static long NonFiniteBits(double value) => BitConverter.DoubleToInt64Bits(value - value); // NOSONAR x - x is the finite test
 
     /// <summary>The value when <paramref name="keep"/> holds and positive zero otherwise, without a branch.</summary>
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
     internal static double KeepIf(double value, bool keep)
     {
 #if !NETFRAMEWORK
@@ -86,6 +100,7 @@ internal static class FastMath
     }
 
     /// <summary>Sum of the products of two equally long runs, in four interleaved partial sums.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static double Dot(ReadOnlySpan<double> a, ReadOnlySpan<double> b)
     {
         b = b.Slice(0, a.Length);
@@ -110,6 +125,7 @@ internal static class FastMath
     }
 
     /// <summary>Whether every element is finite, checked a vector at a time.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static bool AllFinite(ReadOnlySpan<double> values)
     {
         // value - value is +0 for a finite value and NaN for an infinity or a NaN, so the OR of the
@@ -141,6 +157,7 @@ internal static class FastMath
         return tail == 0;
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void Add(ReadOnlySpan<double> a, ReadOnlySpan<double> b, Span<double> result)
     {
         var i = 0;
@@ -156,6 +173,7 @@ internal static class FastMath
         for (; i < result.Length; i++) result[i] = a[i] + b[i];
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void Subtract(ReadOnlySpan<double> a, ReadOnlySpan<double> b, Span<double> result)
     {
         var i = 0;
@@ -171,6 +189,7 @@ internal static class FastMath
         for (; i < result.Length; i++) result[i] = a[i] - b[i];
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void Scale(ReadOnlySpan<double> a, double scalar, Span<double> result)
     {
         var i = 0;
@@ -185,6 +204,7 @@ internal static class FastMath
         for (; i < result.Length; i++) result[i] = a[i] * scalar;
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void Floor(ReadOnlySpan<double> input, Span<double> result)
     {
         var i = 0;
@@ -200,6 +220,7 @@ internal static class FastMath
         for (; i < result.Length; i++) result[i] = Math.Floor(input[i]);
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void Ceiling(ReadOnlySpan<double> input, Span<double> result)
     {
         var i = 0;
@@ -215,6 +236,7 @@ internal static class FastMath
         for (; i < result.Length; i++) result[i] = Math.Ceiling(input[i]);
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void Sqrt(ReadOnlySpan<double> input, Span<double> result)
     {
         var i = 0;
@@ -230,6 +252,7 @@ internal static class FastMath
         for (; i < result.Length; i++) result[i] = Math.Sqrt(input[i]);
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static double Min(ReadOnlySpan<double> input)
     {
         var minimum = input[0];
@@ -253,7 +276,7 @@ internal static class FastMath
     /// The larger of two finite values as one instruction. Math.Max also orders NaN and signed zero, which
     /// costs several more and, on a value carried from bar to bar, sets the pace of the whole loop.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
     internal static double Larger(double a, double b)
     {
 #if !NETFRAMEWORK
@@ -276,6 +299,7 @@ internal static class FastMath
     /// inside the half-unit that makes it the nearest double. Anything closer to a tie than that, and any
     /// residual that is not exact, takes the exact route's own calculation.
     /// </remarks>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static double TypicalPrice(double high, double low, double close)
     {
 #if !NETFRAMEWORK

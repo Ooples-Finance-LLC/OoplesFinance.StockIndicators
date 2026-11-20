@@ -31,6 +31,7 @@ internal static partial class FastKernels
     /// follows the high+low+close sum and whose size follows the bar's range against the range accumulated
     /// since the trend last turned, with a signal average.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void KlingerVolume(FastColumns columns, double[][] outputs, KlingerVolumeWithSignal owner)
     {
         columns.RequireHighLowClose();
@@ -81,6 +82,7 @@ internal static partial class FastKernels
 
     // 1 when this bar's high+low+close exceeds the previous bar's, otherwise -1. The sign decides a whole
     // bar's volume, so a difference too small for the rounded sums to settle is taken exactly.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static int BasisRises(double high, double low, double close, double previousHigh, double previousLow,
         double previousClose)
     {
@@ -102,6 +104,7 @@ internal static partial class FastKernels
     /// Ulcer index: the root mean square of each window value's percentage drop from the highest value
     /// before it in the window. Published once the window is full and its oldest value is positive.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void UlcerIndex(ReadOnlySpan<double> close, Span<double> value, Span<double> defined, int period)
     {
         var n = close.Length;
@@ -134,6 +137,7 @@ internal static partial class FastKernels
     /// Stochastic of the relative strength index: where the index sits in its own recent range, zero when
     /// that range is flat, with a classic average of it as the signal. Both wait for the signal.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void StochasticStrength(ReadOnlySpan<double> close, double[][] outputs, ClassicStochasticRsi owner)
     {
         var n = close.Length;
@@ -180,6 +184,7 @@ internal static partial class FastKernels
     /// Ultimate oscillator: buying pressure over true range summed across three windows, weighted 4, 2, 1.
     /// A window with no range at all either withholds the value or contributes nothing, as configured.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void UltimateOscillator(FastColumns columns, Span<double> value, Span<double> defined,
         WindowUltimateOscillator owner)
     {
@@ -234,6 +239,7 @@ internal static partial class FastKernels
         }
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static double Total(double[] values, int last, int period)
     {
         double sum = 0;
@@ -247,6 +253,7 @@ internal static partial class FastKernels
     /// two directional indicators, their index, its mean-seeded Wilder average, and that average's mean
     /// with its value one period back.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void SumSeededDirectional(FastColumns columns, double[][] outputs, int period)
     {
         columns.RequireHighLowClose();
@@ -308,6 +315,7 @@ internal static partial class FastKernels
     }
 
     // Sign of (a + b) - (c + d). The rounded value decides it unless it is too close to zero to trust.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static int SumSign(double a, double b, double c, double d)
     {
         var difference = a - c + (b - d);

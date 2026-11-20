@@ -4,7 +4,7 @@ internal static partial class FastKernels
 {
     // a * b + c * d with the first product's rounding carried, so two products that cancel leave their
     // true difference and a result of zero means the exact value is zero.
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
     private static double ProductSum(double a, double b, double c, double d)
     {
 #if !NETFRAMEWORK
@@ -47,7 +47,7 @@ internal static partial class FastKernels
 
         // The four-tap filter over the value and the ones two, four and six bars back. Equal values
         // cancel in the differences, so a flat input gives exactly zero.
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
         private static double Fir(double value, double lag2, double lag4, double lag6, double correction) =>
             ProductSum(value - lag6, .0962, lag2 - lag4, .5769) * correction;
 
@@ -103,6 +103,7 @@ internal static partial class FastKernels
     /// divided by how far the cycle phase fell on the bar, floored at the slow limit. The seeded form
     /// starts from the mean of the first bars; the delayed form starts from zero after a longer run-in.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void PhaseAdaptive(FastColumns columns, FastOutputs outputs, double fastLimit, double slowLimit,
         bool delayed, bool retainOlder, bool useMidpoint, long publishFrom)
     {
@@ -150,6 +151,7 @@ internal static partial class FastKernels
     /// The dominant cycle period, smoothed, or the in-phase and quadrature parts themselves; published
     /// after the run-in of 32 bars plus the suppression.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void HilbertCycle(ReadOnlySpan<double> close, FastOutputs outputs, bool periodOnly, long publishFrom)
     {
         var n = close.Length;
@@ -213,6 +215,7 @@ internal static partial class FastKernels
     /// its last four values, with the smoothed price and the cycle length. The price itself stands in for
     /// the trendline until bar eleven.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void SeededTrendline(FastColumns columns, FastOutputs outputs, bool useMidpoint)
     {
         ReadOnlySpan<double> close = columns.Close;
@@ -253,6 +256,7 @@ internal static partial class FastKernels
     /// <summary>
     /// Instantaneous trendline after a 37-bar run-in, published from bar 63 plus the suppression.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void DelayedTrendline(ReadOnlySpan<double> close, Span<double> value, Span<double> defined, long publishFrom)
     {
         var n = close.Length;
@@ -287,6 +291,7 @@ internal static partial class FastKernels
     private static readonly double[] SineResidue = new double[51];
     private static readonly double[] CosineResidue = new double[51];
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static bool BuildProjections()
     {
         for (var count = 0; count <= 50; count++)
@@ -321,6 +326,7 @@ internal static partial class FastKernels
     /// Dominant cycle phase, its sine and lead sine, or the trend-versus-cycle mode: the smoothed price
     /// projected onto one cycle of the measured period. Published from bar 63 plus the suppression.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void HilbertSignal(ReadOnlySpan<double> close, FastOutputs outputs, HilbertCycleSignal kind, long publishFrom)
     {
         var n = close.Length;

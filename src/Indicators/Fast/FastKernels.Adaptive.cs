@@ -9,6 +9,7 @@ internal static partial class FastKernels
     /// Kaufman adaptive average. The efficiency ratio is the net move over the window divided by the sum of
     /// the bar-to-bar moves, and it sets the smoothing rate between the slow and fast constants.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void AdaptiveAverage(ReadOnlySpan<double> close, FastOutputs outputs, SeededAdaptiveAverage owner)
     {
         var n = close.Length;
@@ -65,6 +66,7 @@ internal static partial class FastKernels
     /// while the window fills. The sums are kept relative to an anchor price, so the slope does not lose
     /// digits to the price level.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void LinearRegression(ReadOnlySpan<double> close, Span<double> output, WindowLinearRegression owner)
     {
         var n = close.Length;
@@ -131,6 +133,7 @@ internal static partial class FastKernels
     /// Regression channels: the closes are cut into whole blocks counted back from the last bar, each
     /// fitted with its own least-squares line and a channel a multiple of the block's deviation either side.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void RegressionChannels(ReadOnlySpan<double> close, FastOutputs outputs, int? period, double deviations)
     {
         var n = close.Length;

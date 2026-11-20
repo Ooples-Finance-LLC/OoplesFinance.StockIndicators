@@ -7,6 +7,7 @@ internal static partial class FastKernels
     /// before the period completes. Each stage keeps the running-sum form previous - previous / period +
     /// current, so the movement outputs are sums rather than averages.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void Directional(FastColumns columns, Span<double> value, Span<double> defined,
         PriorSeededDirectionalMeasure owner)
     {
@@ -134,7 +135,7 @@ internal static partial class FastKernels
     }
 
     // A zero numerator or denominator gives zero, as the exact ratio does.
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
     private static double Quotient(double numerator, double denominator) =>
         numerator == 0 || denominator == 0 ? 0 : numerator / denominator;
 }

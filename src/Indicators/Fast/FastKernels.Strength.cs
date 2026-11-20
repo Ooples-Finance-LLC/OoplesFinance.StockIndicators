@@ -6,6 +6,7 @@ internal static partial class FastKernels
     /// Wilder-smoothed gains and losses of the close, seeded by their simple means over the first
     /// <paramref name="period"/> changes, published as a strength percentage from bar period + unstable.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void WilderStrength(ReadOnlySpan<double> close, Span<double> value, Span<double> defined,
         int period, WilderStrengthConvention convention, int unstable)
     {
@@ -38,7 +39,7 @@ internal static partial class FastKernels
         }
     }
 
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
     private static double StrengthPercent(double gain, double loss, bool signed, double flat)
     {
         var total = gain + loss;
@@ -51,6 +52,7 @@ internal static partial class FastKernels
     /// Connors strength: the close's strength, the strength of its up/down streak length, the percentage of
     /// the last returns that are smaller than this bar's, and the mean of the three.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void ConnorsStrength(ReadOnlySpan<double> close, double[][] outputs, int rsiPeriod, int streakPeriod,
         int rankPeriod)
     {
@@ -116,6 +118,7 @@ internal static partial class FastKernels
         }
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static int ExactlySmallerReturns(ReadOnlySpan<double> close, ReadOnlySpan<double> ratio, int i, int rankPeriod)
     {
         var current = new ReturnOrderStatistic.ReturnKey(close[i], close[i - 1]);
@@ -137,6 +140,7 @@ internal static partial class FastKernels
     /// Stochastic of the close's strength over its own rolling range, zero where that range is flat, then a
     /// mean of that and a signal mean of the result, each from its first full window.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void SmoothedStochasticStrength(ReadOnlySpan<double> close, FastOutputs outputs, SmoothedStochasticRsi owner)
     {
         var n = close.Length;

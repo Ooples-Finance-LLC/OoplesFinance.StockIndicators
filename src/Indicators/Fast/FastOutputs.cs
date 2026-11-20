@@ -35,6 +35,7 @@ internal sealed class FastOutputs
     }
 
     /// <summary>Publishes a slot as zero before <paramref name="first"/> and one from it on.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal void Flag(int slot, long first)
     {
         _slots[slot] = FastFlags.From(Count, first);
@@ -42,6 +43,7 @@ internal sealed class FastOutputs
     }
 
     /// <summary>Publishes a slot as the very series another slot holds, where the two are equal bar for bar.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal void Alias(int slot, int source)
     {
         _slots[slot] = this[source];
@@ -49,6 +51,7 @@ internal sealed class FastOutputs
     }
 
     /// <summary>Declares a slot finite: its kernel checked every value in the pass that wrote it.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal void Verified(int slot)
     {
         if (slot < 64) _shared |= 1UL << slot;
@@ -58,6 +61,7 @@ internal sealed class FastOutputs
     internal bool IsShared(int slot) => slot < 64 && (_shared & (1UL << slot)) != 0;
 
     /// <summary>Every slot, for a kernel that fills them all itself.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal double[][] All()
     {
         for (var slot = 0; slot < _slots.Length; slot++) _ = this[slot];
@@ -84,6 +88,7 @@ internal static class FastFlags
         internal readonly double[] Values = values;
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static double[] From(int count, long first)
     {
         var start = (int)Math.Max(0, Math.Min(first, count));
@@ -98,6 +103,7 @@ internal static class FastFlags
     }
 
     /// <summary>Whether every held column is still the step it was built as; a kernel must never write one.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static bool HeldAreIntact()
     {
         for (var index = 0; index < Entries; index++)
@@ -110,6 +116,7 @@ internal static class FastFlags
         return true;
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static double[] Build(int count, int start)
     {
         var values = new double[count];

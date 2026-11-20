@@ -9,6 +9,7 @@ internal static partial class FastKernels
     /// slow average, with its signal average and histogram. A zero slow average publishes no percentage and
     /// feeds the signal a zero.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void EmaDifference(FastColumns columns, double[][] outputs, EmaDifferenceSignal owner)
     {
         ReadOnlySpan<double> input = owner.Volume ? columns.Volume : columns.Close;
@@ -64,6 +65,7 @@ internal static partial class FastKernels
         }
     }
 
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static void Flag(Span<double> flags, bool selected, long first)
     {
         if (selected) DefinedFrom(flags, first);
@@ -74,6 +76,7 @@ internal static partial class FastKernels
     /// Commodity channel index: the typical price's distance from its window mean, over 0.015 times the mean
     /// absolute deviation, taken either across the window or as the mean of the last distances.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void CommodityChannel(FastColumns columns, Span<double> value, Span<double> defined,
         WindowCommodityChannelIndex owner)
     {
@@ -151,6 +154,7 @@ internal static partial class FastKernels
     /// Money flow index: the share of the window's typical-price-times-volume flow that came on bars whose
     /// typical price rose.
     /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static void MoneyFlow(FastColumns columns, Span<double> value, WindowMoneyFlowIndex owner)
     {
         columns.RequireHighLowClose();
