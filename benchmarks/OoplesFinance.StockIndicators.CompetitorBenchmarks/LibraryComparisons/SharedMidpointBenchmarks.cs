@@ -44,7 +44,7 @@ public class SharedMidpointBenchmarks
         {
             var indicator = Create();
             using var run = Build(indicator, history, reference);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
         }
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;

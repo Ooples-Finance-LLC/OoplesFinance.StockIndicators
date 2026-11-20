@@ -60,7 +60,7 @@ internal static class MeanErrorComparison
             .GetAwaiter()
             .GetResult();
         if (!details)
-            return new(Math.Min(period - 1, data.Count), run[indicator.Outputs[0]].ToArray());
+            return new(Math.Min(period - 1, data.Count), run.Held(indicator.Outputs[0]));
         return Series(
             Enumerable
                 .Range(0, 4)

@@ -42,7 +42,7 @@ internal static class TriangularSumComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(Math.Min(period - 1, data.Count), run[indicator.Outputs[0]].ToArray());
+        return new(Math.Min(period - 1, data.Count), run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Quan(CompetitorData data, int period)

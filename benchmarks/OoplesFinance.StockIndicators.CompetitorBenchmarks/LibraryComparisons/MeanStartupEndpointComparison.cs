@@ -25,7 +25,7 @@ internal static class MeanStartupEndpointComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(0, run[indicator.Outputs[0]].ToArray());
+        return new(0, run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Competitor(CompetitorData data, int period)

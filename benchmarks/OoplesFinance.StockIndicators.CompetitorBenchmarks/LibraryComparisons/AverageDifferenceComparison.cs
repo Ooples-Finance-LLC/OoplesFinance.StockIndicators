@@ -72,7 +72,7 @@ internal static class AverageDifferenceComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var present = run[indicator.IsDefined].ToArray();
+        var present = run.Held(indicator.IsDefined);
         return VolumePriceComparison.Mask(
             run[indicator.Value]
                 .ToArray()

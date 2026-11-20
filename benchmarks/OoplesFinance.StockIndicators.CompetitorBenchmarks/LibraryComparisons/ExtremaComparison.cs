@@ -22,7 +22,7 @@ internal static class ExtremaComparison
         using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(data.CloseBars))
             .ConfigureIndicators(indicators.Values.ToArray()).BuildAsync().GetAwaiter().GetResult();
         return new(indicators.ToDictionary(pair => pair.Key,
-            pair => new ComparisonOutput(Math.Min(period - 1, data.Count), run[pair.Value.Outputs[0]].ToArray()), StringComparer.Ordinal));
+            pair => new ComparisonOutput(Math.Min(period - 1, data.Count), run.Held(pair.Value.Outputs[0])), StringComparer.Ordinal));
     }
 
     private static ComparisonSeries Competitor(string name, CompetitorData data, int period)

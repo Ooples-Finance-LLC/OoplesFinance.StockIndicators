@@ -46,7 +46,7 @@ internal static class RangeAdaptiveComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(0, run[owner.Outputs[0]].ToArray());
+        return new(0, run.Held(owner.Outputs[0]));
     }
 
     private static double NativeSum(double[] values)

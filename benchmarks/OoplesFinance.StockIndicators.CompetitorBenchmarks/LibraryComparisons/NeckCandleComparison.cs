@@ -35,7 +35,7 @@ internal static class NeckCandleComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(Math.Min(11, data.Count), run[indicator.Outputs[0]].ToArray());
+        return new(Math.Min(11, data.Count), run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Competitor(string name, CompetitorData data)

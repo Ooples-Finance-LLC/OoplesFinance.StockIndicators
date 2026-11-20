@@ -116,30 +116,34 @@ internal sealed class IndicatorRun : IIndicatorRun
     }
 
     /// <inheritdoc/>
-    public ReadOnlySpan<double> this[IIndicatorOutput output]
+    public ReadOnlySpan<double> this[IIndicatorOutput output] => SeriesArray(output);
+
+    /// <summary>
+    /// The array a published series is held in, not a copy of it. Internal: the comparison benchmarks read
+    /// it so that their arm does not pay for a copy the competitor's arm, which fills its caller's array,
+    /// never makes. A flag series may be one that other runs share, so it is only ever read.
+    /// </summary>
+    internal double[] SeriesArray(IIndicatorOutput output)
     {
-        get
+        if (output is null) throw new ArgumentNullException(nameof(output));
+
+        if (_series is null && _indicators is { } indicators && _outputs is { } outputs)
         {
-            if (output is null) throw new ArgumentNullException(nameof(output));
-
-            if (_series is null && _indicators is { } indicators && _outputs is { } outputs)
-            {
-                var owner = output.Indicator;
-                for (var i = 0; i < indicators.Length; i++)
-                    if (ReferenceEquals(indicators[i], owner) && (uint)output.Slot < (uint)outputs[i].Length
-                        && ReferenceEquals(owner.Outputs[output.Slot], output))
-                        return outputs[i][output.Slot];
-            }
-
-            if (!Series.TryGetValue(output, out var values))
-            {
-                throw new KeyNotFoundException(
-                    "That series was not configured on this run. Pass the indicator to ConfigureIndicators "
-                    + "before reading it.");
-            }
-
-            return values;
+            var owner = output.Indicator;
+            for (var i = 0; i < indicators.Length; i++)
+                if (ReferenceEquals(indicators[i], owner) && (uint)output.Slot < (uint)outputs[i].Length
+                    && ReferenceEquals(owner.Outputs[output.Slot], output))
+                    return outputs[i][output.Slot];
         }
+
+        if (!Series.TryGetValue(output, out var values))
+        {
+            throw new KeyNotFoundException(
+                "That series was not configured on this run. Pass the indicator to ConfigureIndicators "
+                + "before reading it.");
+        }
+
+        return values;
     }
 
     /// <inheritdoc/>

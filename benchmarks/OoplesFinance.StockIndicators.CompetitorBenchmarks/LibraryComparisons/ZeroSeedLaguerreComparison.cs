@@ -39,7 +39,7 @@ internal static class ZeroSeedLaguerreComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(0, run[indicator.Outputs[0]].ToArray());
+        return new(0, run.Held(indicator.Outputs[0]));
     }
 
     internal static ComparisonSeries Reference(CompetitorData data, double gamma, bool native) =>

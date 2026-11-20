@@ -32,7 +32,7 @@ public class SharedRegressionBenchmarks
         {
             var indicator = Create();
             using var run = Build(indicator, history);
-            var actual = run[indicator].ToArray();
+            var actual = run.Held(indicator);
             if (actual.Length != expected.Length) throw new InvalidOperationException("Regression output length mismatch.");
             AsinFeasibilityBenchmarks.RequireSame(expected, actual);
         }

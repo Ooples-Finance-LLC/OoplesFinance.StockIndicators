@@ -69,7 +69,7 @@ public class SharedTrendReversalBenchmarks
         {
             var indicator = Create();
             using var run = Build(indicator, history, reference);
-            AsinFeasibilityBenchmarks.RequireSame(oracle.Values, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(oracle.Values, run.Held(indicator));
         }
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;

@@ -41,7 +41,7 @@ public class PilotRepresentativeBenchmarks
                     else _close.CopyTo(expected, 0);
                     for (var i = 0; i < expected.Length; i++) expected[i] = Math.Asin(expected[i]);
                 }
-                AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
             }
         }
     }

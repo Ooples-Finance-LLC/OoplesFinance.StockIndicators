@@ -39,7 +39,7 @@ internal static class DeviationRatioComparison
             .GetAwaiter()
             .GetResult();
         var values = run[indicator.Average].ToArray();
-        var present = run[indicator.IsDefined].ToArray();
+        var present = run.Held(indicator.IsDefined);
         for (var i = 0; i < values.Length; i++)
             if (present[i] == 0)
                 values[i] = double.NaN;

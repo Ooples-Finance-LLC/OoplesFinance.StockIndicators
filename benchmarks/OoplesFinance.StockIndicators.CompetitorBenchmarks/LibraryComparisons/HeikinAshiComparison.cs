@@ -64,7 +64,7 @@ internal static class HeikinAshiComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return Series(indicator.Outputs.Select(o => run[o].ToArray()).ToArray());
+        return Series(indicator.Outputs.Select(o => run.Held(o)).ToArray());
     }
 
     private static ComparisonSeries Reference(CompetitorData data, bool native)

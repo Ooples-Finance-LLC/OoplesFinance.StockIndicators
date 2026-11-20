@@ -34,7 +34,7 @@ internal static class SkenderRocBandsComparison
         ComparisonOutput Read(IIndicatorOutput value, IIndicatorOutput flag, int first)
         {
             var values = run[value].ToArray();
-            var flags = run[flag].ToArray();
+            var flags = run.Held(flag);
             var present = new bool[data.Count];
             for (var i = 0; i < data.Count; i++)
             {

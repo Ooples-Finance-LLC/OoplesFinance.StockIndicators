@@ -42,7 +42,7 @@ internal static class PercentileComparison
             .GetResult();
         return new(
             quan ? 0 : Math.Min(period - 1, data.Count),
-            run[indicator.Outputs[0]].ToArray()
+            run.Held(indicator.Outputs[0])
         );
     }
 

@@ -51,7 +51,7 @@ internal static class DelayedDarkCloudComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(Math.Min(delay, data.Count), run[indicator.Outputs[0]].ToArray());
+        return new(Math.Min(delay, data.Count), run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Reference(CompetitorData data, int period, int delay)

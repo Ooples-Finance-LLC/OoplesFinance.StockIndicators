@@ -49,8 +49,8 @@ public class SharedAlmaWindowBenchmarks
         {
             var indicator = Create();
             using var run = Build(indicator, history, reference);
-            AsinFeasibilityBenchmarks.RequireSame(expected.Values.Select(v => double.IsNaN(v) ? 0 : v).ToArray(), run[indicator.Value].ToArray());
-            AsinFeasibilityBenchmarks.RequireSame(expected.Present!.Select(v => v ? 1d : 0d).ToArray(), run[indicator.IsDefined].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected.Values.Select(v => double.IsNaN(v) ? 0 : v).ToArray(), run.Held(indicator.Value));
+            AsinFeasibilityBenchmarks.RequireSame(expected.Present!.Select(v => v ? 1d : 0d).ToArray(), run.Held(indicator.IsDefined));
         }
     }
 

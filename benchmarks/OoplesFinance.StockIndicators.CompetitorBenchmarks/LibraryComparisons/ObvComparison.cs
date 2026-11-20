@@ -72,11 +72,11 @@ internal static class ObvComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Value].ToArray();
+        var values = run.Held(indicator.Value);
         if (!skender)
             return new(0, values);
         var average = run[indicator.Average].ToArray();
-        var present = run[indicator.AverageIsDefined].ToArray().Select(v => v > 0).ToArray();
+        var present = run.Held(indicator.AverageIsDefined).Select(v => v > 0).ToArray();
         for (var i = 0; i < data.Count; i++)
             if (!present[i])
                 average[i] = double.NaN;

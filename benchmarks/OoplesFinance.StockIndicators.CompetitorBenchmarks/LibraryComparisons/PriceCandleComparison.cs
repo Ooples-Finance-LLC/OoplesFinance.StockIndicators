@@ -49,7 +49,7 @@ internal static class PriceCandleComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = indicator.Outputs.Select(output => run[output].ToArray()).ToArray();
+        var values = indicator.Outputs.Select(output => run.Held(output)).ToArray();
         var result = new Dictionary<string, ComparisonOutput>(StringComparer.Ordinal);
         for (var slot = 0; slot < Outputs.Length; slot++)
         {

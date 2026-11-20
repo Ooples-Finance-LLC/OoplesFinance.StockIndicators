@@ -128,7 +128,7 @@ internal static class StochasticRsiComparison
                 .Range(0, count)
                 .Select(slot =>
                 {
-                    var mask = run[indicator.Outputs[slot + count]].ToArray();
+                    var mask = run.Held(indicator.Outputs[slot + count]);
                     return run[indicator.Outputs[slot]]
                         .ToArray()
                         .WherePresent(mask)

@@ -49,7 +49,7 @@ internal static class PathRatioComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var flags = run[indicator.IsDefined].ToArray();
+        var flags = run.Held(indicator.IsDefined);
         return VolumePriceComparison.Mask(
             run[indicator.Value]
                 .ToArray()

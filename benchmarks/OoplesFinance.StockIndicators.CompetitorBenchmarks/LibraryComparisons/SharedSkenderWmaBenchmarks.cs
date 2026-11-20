@@ -31,7 +31,7 @@ public class SharedSkenderWmaBenchmarks
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
             var indicator = new Wma(Period); using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(exact, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(exact, run.Held(indicator));
         }
     }
     private static (double[] Exact, double[] Native) References(double[] prices)

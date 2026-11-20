@@ -51,7 +51,7 @@ internal static class WindowExtremeComparison
                 kv => kv.Key,
                 kv => new ComparisonOutput(
                     Math.Min(period - 1, data.Count),
-                    run[kv.Value.Outputs[0]].ToArray()
+                    run.Held(kv.Value.Outputs[0])
                 )
             )
         );

@@ -43,7 +43,7 @@ internal static class CompensatedAverageComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(0, run[indicator.Outputs[0]].ToArray());
+        return new(0, run.Held(indicator.Outputs[0]));
     }
 
     internal static double[] Reference(double[] prices, int period, int order, bool native)

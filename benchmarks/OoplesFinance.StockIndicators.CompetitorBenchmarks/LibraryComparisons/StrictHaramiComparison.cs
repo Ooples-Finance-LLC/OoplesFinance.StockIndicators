@@ -43,7 +43,7 @@ internal static class StrictHaramiComparison
             .GetResult();
         return new(
             name == "Harami" ? Math.Min(1, data.Count) : 0,
-            run[indicator.Outputs[0]].ToArray()
+            run.Held(indicator.Outputs[0])
         );
     }
 

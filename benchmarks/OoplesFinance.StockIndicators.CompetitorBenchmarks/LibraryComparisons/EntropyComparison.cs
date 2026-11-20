@@ -37,7 +37,7 @@ internal static class EntropyComparison
             .GetAwaiter()
             .GetResult();
         return VolumePriceComparison.Mask(
-            run[indicator.Value].ToArray().Select(x => (double?)x).ToArray()
+            run.Held(indicator.Value).Select(x => (double?)x).ToArray()
         );
     }
 

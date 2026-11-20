@@ -106,7 +106,7 @@ internal static class AlligatorComparison
                 .Range(0, count)
                 .Select(slot =>
                 {
-                    var presence = run[indicator.Outputs[slot + count]].ToArray();
+                    var presence = run.Held(indicator.Outputs[slot + count]);
                     return run[indicator.Outputs[slot]]
                         .ToArray()
                         .WherePresent(presence);

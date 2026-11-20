@@ -54,7 +54,7 @@ public class SharedSmaBenchmarks
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
             var indicator = new Sma(Period); using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
         }
     }
 

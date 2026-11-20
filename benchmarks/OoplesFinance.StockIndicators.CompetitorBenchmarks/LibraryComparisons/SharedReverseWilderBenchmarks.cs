@@ -37,7 +37,7 @@ public class SharedReverseWilderBenchmarks
         {
             var indicator = Create();
             using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator.Outputs[0]].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator.Outputs[0]));
         }
     }
     private static ReverseWilderAverage Create() => new(Period);

@@ -67,7 +67,7 @@ public class SharedAroonBenchmarks
             var indicator = AroonComparison.Create(Operation, Period);
             using var run = Build(indicator, history);
             for (int slot = 0; slot < 6; slot++)
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot], run[indicator.Outputs[slot]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot], run.Held(indicator.Outputs[slot]));
         }
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;

@@ -40,7 +40,7 @@ public class SharedScaledTrueRangeBenchmarks
             {
                 var indicator = new ScaledTrueRange(Divisor);
                 using var run = Build(indicator, history, gpu);
-                Check(exact, run[indicator.Value].ToArray());
+                Check(exact, run.Held(indicator.Value));
             }
         }
         catch { Cleanup(); throw; }

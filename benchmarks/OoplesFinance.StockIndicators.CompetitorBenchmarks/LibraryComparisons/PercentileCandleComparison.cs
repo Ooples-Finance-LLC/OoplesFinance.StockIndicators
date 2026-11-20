@@ -28,7 +28,7 @@ internal static class PercentileCandleComparison
         var indicator = Create(name, IgnoresParameters(name) ? 20 : period);
         using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
-        return new(0, run[indicator.Outputs[0]].ToArray());
+        return new(0, run.Held(indicator.Outputs[0]));
     }
     internal static ComparisonSeries Competitor(string name, CompetitorData data, int period, decimal? percentile = null)
     {

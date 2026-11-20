@@ -60,7 +60,7 @@ internal static class RegressionChannelComparison
             var mask = run[indicator.Outputs[slot + 4]];
             values[slot] = column.WherePresent(mask);
         }
-        values[3] = run[indicator.BreakPoint].ToArray().Select(value => (double?)value).ToArray();
+        values[3] = run.Held(indicator.BreakPoint).Select(value => (double?)value).ToArray();
         return Series(values);
     }
 

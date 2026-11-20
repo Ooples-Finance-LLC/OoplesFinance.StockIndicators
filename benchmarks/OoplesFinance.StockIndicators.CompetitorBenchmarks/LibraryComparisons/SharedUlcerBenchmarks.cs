@@ -57,8 +57,8 @@ public class SharedUlcerBenchmarks
         {
             var indicator = new WindowUlcerIndex(Period);
             using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected.Select(v => v ?? 0).ToArray(), run[indicator.Value].ToArray());
-            AsinFeasibilityBenchmarks.RequireSame(expected.Select(v => v.HasValue ? 1d : 0).ToArray(), run[indicator.IsDefined].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected.Select(v => v ?? 0).ToArray(), run.Held(indicator.Value));
+            AsinFeasibilityBenchmarks.RequireSame(expected.Select(v => v.HasValue ? 1d : 0).ToArray(), run.Held(indicator.IsDefined));
         }
     }
 

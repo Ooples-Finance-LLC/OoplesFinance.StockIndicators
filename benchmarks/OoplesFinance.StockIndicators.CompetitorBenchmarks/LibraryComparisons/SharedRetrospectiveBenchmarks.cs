@@ -57,7 +57,7 @@ public class SharedRetrospectiveBenchmarks
             var indicator = new RetrospectiveFractals(Wing, Wing);
             using var run = Build(indicator, history);
             for (int slot = 0; slot < 4; slot++)
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot], run[indicator.Outputs[slot]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot], run.Held(indicator.Outputs[slot]));
         }
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;

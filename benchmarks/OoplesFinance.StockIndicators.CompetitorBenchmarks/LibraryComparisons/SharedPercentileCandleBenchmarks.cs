@@ -69,7 +69,7 @@ public class SharedPercentileCandleBenchmarks
         {
             var indicator = Create();
             using var run = Build(indicator, history, reference);
-            AsinFeasibilityBenchmarks.RequireSame(oracle, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(oracle, run.Held(indicator));
         }
     }
     private static IEnumerable<bool?> BooleanValues(object values) => values switch

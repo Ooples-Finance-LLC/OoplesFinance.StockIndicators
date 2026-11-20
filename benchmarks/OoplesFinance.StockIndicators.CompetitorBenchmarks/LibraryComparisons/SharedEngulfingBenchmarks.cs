@@ -34,7 +34,7 @@ public class SharedEngulfingBenchmarks
         {
             var indicator = new EngulfingPattern();
             using var run = Build(indicator, history, ordinary);
-            AsinFeasibilityBenchmarks.RequireSame(reference.Values, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(reference.Values, run.Held(indicator));
         }
     }
 

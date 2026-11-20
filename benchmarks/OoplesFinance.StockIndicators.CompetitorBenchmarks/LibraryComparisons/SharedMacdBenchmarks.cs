@@ -43,8 +43,8 @@ public class SharedMacdBenchmarks
             using var run=Build(owner,mode);
             for(int slot=0;slot<expected.Length;slot++)
             {
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v ?? 0).ToArray(),run[owner.Outputs[slot]].ToArray());
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v.HasValue ? 1d : 0d).ToArray(),run[owner.Outputs[slot+expected.Length]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v ?? 0).ToArray(),run.Held(owner.Outputs[slot]));
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v.HasValue ? 1d : 0d).ToArray(),run.Held(owner.Outputs[slot+expected.Length]));
             }
         }
     }

@@ -11,7 +11,7 @@ internal static class CandleComparison
         var indicator = new EngulfingPattern();
         using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
-        return new(Math.Min(2, data.Count), run[indicator].ToArray());
+        return new(Math.Min(2, data.Count), run.Held(indicator));
     }
 
     internal static ComparisonSeries TaLib(CompetitorData data, int unused)

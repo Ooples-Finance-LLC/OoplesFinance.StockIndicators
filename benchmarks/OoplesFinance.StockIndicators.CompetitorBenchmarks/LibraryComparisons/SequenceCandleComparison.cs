@@ -51,7 +51,7 @@ internal static class SequenceCandleComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(Math.Min(Lookback(name), data.Count), run[indicator.Outputs[0]].ToArray());
+        return new(Math.Min(Lookback(name), data.Count), run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Competitor(string name, CompetitorData data)

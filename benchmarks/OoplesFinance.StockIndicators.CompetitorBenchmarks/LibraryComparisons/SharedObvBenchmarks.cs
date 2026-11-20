@@ -56,7 +56,7 @@ public class SharedObvBenchmarks
                 using var run = Build(indicator, history);
                 for (int slot = 0; slot < 3; slot++)
                 {
-                    var actual = run[indicator.Outputs[slot]].ToArray();
+                    var actual = run.Held(indicator.Outputs[slot]);
                     Check(serial[slot], actual);
                     Check(reference[indicator.Outputs[slot]].ToArray(), actual);
                 }

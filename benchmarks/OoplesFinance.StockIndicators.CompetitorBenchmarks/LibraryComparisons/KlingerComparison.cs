@@ -40,8 +40,8 @@ internal static class KlingerComparison
         var indicator = new KlingerVolumeWithSignal(fast, slow, signal);
         using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
-        var values = new[] { run[indicator.Oscillator].ToArray(), run[indicator.Signal].ToArray() };
-        var present = new[] { run[indicator.OscillatorIsDefined].ToArray(), run[indicator.SignalIsDefined].ToArray() };
+        var values = new[] { run.Held(indicator.Oscillator), run.Held(indicator.Signal) };
+        var present = new[] { run.Held(indicator.OscillatorIsDefined), run.Held(indicator.SignalIsDefined) };
         return Series(values.Select((row, slot) => row.Select((value, index) =>
             present[slot][index] == 1 ? (double?)value : null).ToArray()).ToArray()); // NOSONAR: S1244 - Presence columns are discrete 0/1 flags, not approximate measurements.
     }

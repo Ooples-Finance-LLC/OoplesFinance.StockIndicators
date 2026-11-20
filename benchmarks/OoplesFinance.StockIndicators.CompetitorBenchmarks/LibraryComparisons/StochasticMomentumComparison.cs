@@ -83,7 +83,7 @@ internal static class StochasticMomentumComparison
                 .Range(0, Names(variant).Length)
                 .Select(slot =>
                 {
-                    var present = run[indicator.Outputs[slot + flags]].ToArray();
+                    var present = run.Held(indicator.Outputs[slot + flags]);
                     return run[indicator.Outputs[slot]]
                         .ToArray()
                         .WherePresent(present);

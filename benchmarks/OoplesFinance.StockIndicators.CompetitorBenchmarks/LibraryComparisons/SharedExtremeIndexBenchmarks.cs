@@ -43,7 +43,7 @@ public class SharedExtremeIndexBenchmarks
         {
             using var run = Build(indicators, history, reference);
             for (int output = 0; output < indicators.Length; output++)
-                AsinFeasibilityBenchmarks.RequireSame(expected[output], run[indicators[output]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected[output], run.Held(indicators[output]));
         }
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;

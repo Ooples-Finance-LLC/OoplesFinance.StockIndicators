@@ -13,7 +13,7 @@ internal static class CandleComparisonExecution
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(firstValid, run[indicator.Outputs[0]].ToArray());
+        return new(firstValid, run.Held(indicator.Outputs[0]));
     }
 
     internal static ComparisonSeries Unpack(

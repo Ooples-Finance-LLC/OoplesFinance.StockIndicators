@@ -65,7 +65,7 @@ internal static class PriceWindowChannelComparison
             .GetAwaiter()
             .GetResult();
         if (id != Ids[0])
-            return new(Math.Min(period - 1, data.Count), run[indicator.Outputs[0]].ToArray());
+            return new(Math.Min(period - 1, data.Count), run.Held(indicator.Outputs[0]));
         return Channel(
             Enumerable
                 .Range(0, 4)

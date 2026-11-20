@@ -25,7 +25,7 @@ internal static class TradyExtremaComparison
         IIndicator indicator = name.Contains("Highest", StringComparison.Ordinal) ? new HighestHigh(length) : new LowestLow(length);
         using var run = ComparisonBuilder.Create().ConfigureSource(Bars.From(Ohlc(name) ? data.IndicatorBars : data.CloseBars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
-        return new(First(name, data.Count, period), run[indicator.Outputs[0]].ToArray());
+        return new(First(name, data.Count, period), run.Held(indicator.Outputs[0]));
     }
     private static ComparisonSeries Competitor(string name, CompetitorData data, int period)
     {

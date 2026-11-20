@@ -32,7 +32,7 @@ public class SharedSkenderRocBenchmarks : SharedSkenderBenchmarkBase
         {
             using var run = SharedBenchmarkSupport.BuildCpu(_bars, owner, mode);
             for (int slot = 0; slot < expected.Length; slot++)
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot], run[owner.Outputs[slot]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot], run.Held(owner.Outputs[slot]));
         }
         var nativeExpected = NativeReference(_prices.Select(v => v.Value).ToArray(), Operation == "Skender.GetRocWb");
         VerifyNative(nativeExpected, NativeSingle(), NativeParallel(), Normalize, Operation, IndicatorErrorBudget.Exact);

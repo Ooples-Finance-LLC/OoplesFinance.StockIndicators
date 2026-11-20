@@ -34,7 +34,7 @@ internal static class MedianAdaptiveComparison
         var indicator = new MedianAdaptiveAverage(period, threshold);
         using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
-        return run[indicator].ToArray();
+        return run.Held(indicator);
     }
 
     internal static double[] Reference(double[] prices, int period, double threshold, bool native)

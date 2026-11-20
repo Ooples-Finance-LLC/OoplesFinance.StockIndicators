@@ -33,7 +33,7 @@ public class SharedSkenderCandleBenchmarks : SharedSkenderBenchmarkBase
         {
             using var run = SharedBenchmarkSupport.BuildCpu(_bars, owner, mode);
             for (int slot = 0; slot < expected.Length; slot++)
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot], run[owner.Outputs[slot]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot], run.Held(owner.Outputs[slot]));
         }
         VerifyNative(pair.CompetitorReference!(data, 20), NativeSingle(), NativeParallel(), Normalize, Operation, pair.ErrorBudget);
     }

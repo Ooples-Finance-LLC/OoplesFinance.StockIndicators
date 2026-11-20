@@ -63,9 +63,9 @@ public class SharedHilbertBenchmarks
             for (int slot = 0; slot < _outputs; slot++)
             {
                 AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v ?? 0).ToArray(),
-                    run[indicator.Outputs[slot]].ToArray());
+                    run.Held(indicator.Outputs[slot]));
                 AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v.HasValue ? 1d : 0d).ToArray(),
-                    run[indicator.Outputs[slot + _outputs]].ToArray());
+                    run.Held(indicator.Outputs[slot + _outputs]));
             }
         }
     }

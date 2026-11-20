@@ -34,7 +34,7 @@ internal static class PriceComparison
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
         // Ooples also publishes the first candle's range. These three competitor contracts
         // start at the second candle because a previous close is required.
-        return new(name == "TRange" ? Math.Min(1, data.Count) : 0, run[indicator.Outputs[0]].ToArray());
+        return new(name == "TRange" ? Math.Min(1, data.Count) : 0, run.Held(indicator.Outputs[0]));
     }
     private static ComparisonSeries TaLib(string name, CompetitorData data)
     {

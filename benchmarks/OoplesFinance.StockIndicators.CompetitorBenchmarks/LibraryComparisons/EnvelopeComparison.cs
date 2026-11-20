@@ -75,7 +75,7 @@ internal static class EnvelopeComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var flags = run[indicator.IsDefined].ToArray();
+        var flags = run.Held(indicator.IsDefined);
         return Series(
             Enumerable
                 .Range(0, 3)

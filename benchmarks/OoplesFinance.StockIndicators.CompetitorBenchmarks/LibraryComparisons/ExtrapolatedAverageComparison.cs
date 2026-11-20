@@ -40,7 +40,7 @@ internal static class ExtrapolatedAverageComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(First(period, order, cascaded, data.Count), run[indicator.Outputs[0]].ToArray());
+        return new(First(period, order, cascaded, data.Count), run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Competitor(CompetitorData data, int period, int order, bool ta)

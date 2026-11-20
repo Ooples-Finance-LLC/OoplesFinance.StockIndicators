@@ -32,7 +32,7 @@ internal static class TradyReturnComparison
             .GetAwaiter()
             .GetResult();
         var values = run[indicator.Value].ToArray();
-        var present = run[indicator.IsDefined].ToArray().Select(value => value > 0).ToArray();
+        var present = run.Held(indicator.IsDefined).Select(value => value > 0).ToArray();
         for (var i = 0; i < values.Length; i++)
             if (!present[i])
                 values[i] = double.NaN;

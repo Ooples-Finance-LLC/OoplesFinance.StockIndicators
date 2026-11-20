@@ -70,8 +70,8 @@ public class SharedPathRatioBenchmarks
             var indicator = Create();
             using var run = Build(indicator, history);
             if (run.BarCount != Count) throw new InvalidOperationException("Builder path-ratio length differs.");
-            var values = run[indicator.Value].ToArray();
-            var presence = run[indicator.IsDefined].ToArray();
+            var values = run.Held(indicator.Value);
+            var presence = run.Held(indicator.IsDefined);
             if (values.Length != Count || presence.Length != Count) throw new InvalidOperationException("Builder path-ratio column length differs.");
             AsinFeasibilityBenchmarks.RequireSame(expected.Values.Select((v, i) => expected.Present![i] ? v : 0).ToArray(), values);
             AsinFeasibilityBenchmarks.RequireSame(expected.Present!.Select(v => v ? 1d : 0).ToArray(), presence);

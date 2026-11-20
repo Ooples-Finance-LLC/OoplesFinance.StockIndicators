@@ -79,7 +79,7 @@ internal static class StochasticSmaComparison
                     var present =
                         variant == "Raw"
                             ? Enumerable.Repeat(1d, bars.Length).ToArray()
-                            : run[indicator.Outputs[slot + count]].ToArray();
+                            : run.Held(indicator.Outputs[slot + count]);
                     return run[indicator.Outputs[slot]]
                         .ToArray()
                         .WherePresent(present);

@@ -31,7 +31,7 @@ internal static class QuanAtrComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(0, run[indicator.Outputs[0]].ToArray());
+        return new(0, run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Reference(CompetitorData data, int period, bool native)

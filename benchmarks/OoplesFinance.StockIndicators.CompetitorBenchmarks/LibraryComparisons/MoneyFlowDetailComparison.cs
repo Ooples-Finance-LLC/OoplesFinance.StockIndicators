@@ -53,9 +53,9 @@ internal static class MoneyFlowDetailComparison
             .GetResult();
         var fields = Enumerable
             .Range(0, 3)
-            .Select(slot => run[indicator.Outputs[slot]].ToArray())
+            .Select(slot => run.Held(indicator.Outputs[slot]))
             .ToArray();
-        var flags = run[indicator.CmfIsDefined].ToArray();
+        var flags = run.Held(indicator.CmfIsDefined);
         return Series(
             fields
                 .Select(

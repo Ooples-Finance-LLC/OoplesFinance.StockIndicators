@@ -58,7 +58,7 @@ internal static class DispersionComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(First(id, data.Count, period), run[indicator.Outputs[0]].ToArray());
+        return new(First(id, data.Count, period), run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Native(

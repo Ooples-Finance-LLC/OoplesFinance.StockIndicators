@@ -62,7 +62,7 @@ internal static class AnalyticKernelComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(0, run[indicator.Outputs[0]].ToArray());
+        return new(0, run.Held(indicator.Outputs[0]));
     }
 
     // Construct the formula independently and round each specified binary64 operation.

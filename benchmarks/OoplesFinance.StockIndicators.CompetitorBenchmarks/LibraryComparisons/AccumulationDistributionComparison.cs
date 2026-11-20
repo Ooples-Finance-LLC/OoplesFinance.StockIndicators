@@ -85,7 +85,7 @@ internal static class AccumulationDistributionComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Outputs[0]].ToArray();
+        var values = run.Held(indicator.Outputs[0]);
         if (!priceAdjusted)
             return new(0, values);
         var flags = run[indicator.Outputs[1]];
@@ -101,7 +101,7 @@ internal static class AccumulationDistributionComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var columns = indicator.Outputs.Select(output => run[output].ToArray()).ToArray();
+        var columns = indicator.Outputs.Select(output => run.Held(output)).ToArray();
         return new(
             new Dictionary<string, ComparisonOutput>
             {

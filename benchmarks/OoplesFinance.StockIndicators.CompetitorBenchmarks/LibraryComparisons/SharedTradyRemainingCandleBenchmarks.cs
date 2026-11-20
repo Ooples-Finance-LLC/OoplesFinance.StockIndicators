@@ -31,7 +31,7 @@ public class SharedTradyRemainingCandleBenchmarks
         {
             var owner=Create();
             using var run=Build(owner,mode);
-            AsinFeasibilityBenchmarks.RequireSame(expected,run[owner.Outputs[0]].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected,run.Held(owner.Outputs[0]));
         }
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism=_priorDop;

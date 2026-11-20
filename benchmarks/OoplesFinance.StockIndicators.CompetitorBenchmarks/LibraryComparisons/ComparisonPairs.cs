@@ -33,7 +33,7 @@ internal sealed record ComparisonPair(string Id, string Indicator, Func<Competit
         };
         using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
-        return new(Math.Min(period - 1, data.Count), run[indicator.Outputs[0]].ToArray());
+        return new(Math.Min(period - 1, data.Count), run.Held(indicator.Outputs[0]));
     }
 }
 

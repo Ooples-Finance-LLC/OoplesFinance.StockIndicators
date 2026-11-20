@@ -32,9 +32,9 @@ public class SharedPointwiseBatchBenchmarks
             for (int slot = 0; slot < indicators.Length; slot++)
             {
                 AsinFeasibilityBenchmarks.RequireSame(native[slot], parallel[slot]);
-                AsinFeasibilityBenchmarks.RequireSame(native[slot], run[indicators[slot].Outputs[0]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(native[slot], run.Held(indicators[slot].Outputs[0]));
                 foreach (var output in indicators[slot].Outputs)
-                    AsinFeasibilityBenchmarks.RequireSame(reference[output].ToArray(), run[output].ToArray());
+                    AsinFeasibilityBenchmarks.RequireSame(reference[output].ToArray(), run.Held(output));
             }
         }
     }

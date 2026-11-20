@@ -37,7 +37,7 @@ internal static class WilderAverageComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(First(id, period, data.Count), run[indicator.Outputs[0]].ToArray());
+        return new(First(id, period, data.Count), run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Competitor(string id, CompetitorData data, int period)

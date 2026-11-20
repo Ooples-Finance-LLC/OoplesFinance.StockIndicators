@@ -53,7 +53,7 @@ internal static class MassNormalizedComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(0, run[indicator.Outputs[0]].ToArray());
+        return new(0, run.Held(indicator.Outputs[0]));
     }
 
     internal static double[] Reference(double[] prices, double[] alphas, bool native)

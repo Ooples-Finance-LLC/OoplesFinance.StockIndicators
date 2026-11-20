@@ -53,7 +53,7 @@ public class SharedTrueRangeBenchmarks
         foreach (bool gpu in new[] { false, true })
         {
             var indicator = new TrueRange(1); using var run = Build(indicator, history, gpu);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
         }
     }
     public readonly record struct NativeResult(double[]? Values = null, IEnumerable<TrResult>? Quotes = null, IReadOnlyList<decimal?>? Tuples = null);
