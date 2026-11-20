@@ -12,6 +12,7 @@ internal static partial class FastKernels
 
         internal double Value;
 
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         internal bool Add(double input)
         {
             if (_count < period)

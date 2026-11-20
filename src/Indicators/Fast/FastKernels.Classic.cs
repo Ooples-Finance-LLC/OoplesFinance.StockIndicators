@@ -291,6 +291,7 @@ internal static partial class FastKernels
         private double _sum;
         internal double Value;
 
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         internal void Add(double input)
         {
             if (_count < _seed)

@@ -234,6 +234,7 @@ internal static partial class FastKernels
         internal double Anchor, Mean, Squares;
 
         // Sums the window around its newest value, which becomes the anchor.
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         internal static SlidingMoments Of(ReadOnlySpan<double> window)
         {
             var anchor = window[window.Length - 1];

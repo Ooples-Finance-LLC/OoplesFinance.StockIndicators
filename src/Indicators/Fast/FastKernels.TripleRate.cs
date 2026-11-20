@@ -80,6 +80,7 @@ internal static partial class FastKernels
         private int _count, _missing;
         private bool _hasPrevious;
 
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         internal RateTail(double[][] outputs, int signalPeriod, bool shared)
         {
             _rate = outputs[0];
@@ -96,6 +97,7 @@ internal static partial class FastKernels
         }
 
         // The shared seed is a previous value for the first rate, but is not itself published.
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         internal void Seed(double value)
         {
             _previous = value;

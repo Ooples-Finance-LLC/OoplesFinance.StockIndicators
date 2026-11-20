@@ -35,6 +35,7 @@ internal static partial class FastKernels
         private readonly double _slack;
         private double _sum, _largest;
 
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         internal CandleWindow(FastColumns columns, CandleStatistic statistic, int period)
         {
             _open = columns.Open;
@@ -49,6 +50,7 @@ internal static partial class FastKernels
         }
 
         /// <summary>Moves the window so that it covers the <c>period</c> bars ending at <paramref name="index"/>.</summary>
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         internal void Include(int index)
         {
             if (index >= _period && (index & RebuildMask) == 0)
@@ -75,6 +77,7 @@ internal static partial class FastKernels
         /// Sign of sum - divisor * (upper - lower), for the window of bars ending just before
         /// <paramref name="index"/>.
         /// </summary>
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         internal int Compare(int index, long divisor, double upper, double lower)
         {
             var scaled = divisor * (upper - lower);
@@ -93,6 +96,7 @@ internal static partial class FastKernels
         /// Sign of sum - divisor * ((a - b) - (c - d)), for the window of bars ending just before
         /// <paramref name="index"/>.
         /// </summary>
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         internal int Compare(int index, long divisor, double a, double b, double c, double d)
         {
             var scaled = divisor * (a - b - (c - d));
@@ -115,6 +119,7 @@ internal static partial class FastKernels
         /// Sign of numerator * sum - divisor * ((a - b) - (c - d)), for the window of bars ending just before
         /// <paramref name="index"/>.
         /// </summary>
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         internal int CompareScaled(int index, int numerator, long divisor, double a, double b, double c, double d)
         {
             var scaled = divisor * (a - b - (c - d));
@@ -136,6 +141,7 @@ internal static partial class FastKernels
         }
 
         // The window's sum without rounding.
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         private ExactMeanAccumulator Exact(int index)
         {
             var exact = new ExactMeanAccumulator();

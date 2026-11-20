@@ -540,6 +540,7 @@ internal static partial class FastKernels
         private double _mean, _mass;
         private double _residual = 1;
 
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         internal double Next(double input)
         {
             if (_residual == 0) return _mean += alpha * (input - _mean);
@@ -968,6 +969,7 @@ internal static partial class FastKernels
         internal double AnchorX, AnchorY, X, Y, Xx, Yy, Xy;
 
         // Sums the window around its newest pair, which becomes the anchor.
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         internal static PairSums Of(ReadOnlySpan<double> left, ReadOnlySpan<double> right)
         {
             var sums = new PairSums { AnchorX = left[left.Length - 1], AnchorY = right[right.Length - 1] };

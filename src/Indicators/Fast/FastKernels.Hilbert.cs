@@ -37,6 +37,7 @@ internal static partial class FastKernels
 
         internal double InPhase, Quadrature, SmoothPrice, Period, Phase;
 
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         internal HilbertCore(int start, bool retainPeriod, bool retainOlder) : this()
         {
             _start = start;
@@ -51,6 +52,7 @@ internal static partial class FastKernels
         private static double Fir(double value, double lag2, double lag4, double lag6, double correction) =>
             ProductSum(value - lag6, .0962, lag2 - lag4, .5769) * correction;
 
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         internal void Update(double price)
         {
             _index++;
@@ -188,6 +190,7 @@ internal static partial class FastKernels
         internal double Average;
 
         // prices is a ring of fifty; a count of zero is a mean of zero.
+        [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
         internal void Update(double[] prices, double price, int count, bool average)
         {
             prices[_cursor] = price;
