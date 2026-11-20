@@ -36,11 +36,7 @@ internal static partial class FastKernels
         var previous = input[0];
         output[0] = previous;
         output = output.Slice(0, n);
-        for (var i = 1; i < n; i++)
-        {
-            previous = FastMath.Blend(weight, previous, alpha * input[i]);
-            output[i] = previous;
-        }
+        if (n > 1) FastMath.BlendRun(weight, alpha, input, output, 1, previous);
     }
 
     /// <summary>

@@ -32,6 +32,42 @@ internal static class FastMath
         return weight * previous + scaled;
     }
 
+    /// <summary>
+    /// Runs the exponential recurrence value = weight * value + alpha * input over
+    /// <paramref name="input"/> from <paramref name="start"/>, writing each value, and returns the last.
+    /// </summary>
+    /// <remarks>
+    /// Four bars at a time, each written from the value four bars back and a short sum of the inputs
+    /// between: the recurrence then carries one multiply-add per four bars instead of one per bar. The
+    /// values agree with the bar-by-bar recurrence to rounding, not bit for bit.
+    /// </remarks>
+    internal static double BlendRun(double weight, double alpha, ReadOnlySpan<double> input, Span<double> output, int start,
+        double value)
+    {
+        var i = start;
+        double weight2 = weight * weight, weight3 = weight2 * weight, weight4 = weight2 * weight2;
+        for (; i <= input.Length - 4; i += 4)
+        {
+            var source = input.Slice(i, 4);
+            var target = output.Slice(i, 4);
+            var s0 = alpha * source[0];
+            var p1 = Blend(weight, s0, alpha * source[1]);
+            var p2 = Blend(weight, p1, alpha * source[2]);
+            var p3 = Blend(weight, p2, alpha * source[3]);
+            target[0] = Blend(weight, value, s0);
+            target[1] = Blend(weight2, value, p1);
+            target[2] = Blend(weight3, value, p2);
+            value = Blend(weight4, value, p3);
+            target[3] = value;
+        }
+        for (; i < input.Length; i++)
+        {
+            value = Blend(weight, value, alpha * input[i]);
+            output[i] = value;
+        }
+        return value;
+    }
+
     /// <summary>Whether every element is finite, checked a vector at a time.</summary>
     internal static bool AllFinite(ReadOnlySpan<double> values)
     {

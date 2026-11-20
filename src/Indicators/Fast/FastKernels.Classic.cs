@@ -138,11 +138,7 @@ internal static partial class FastKernels
         }
         // Steady state: one fused multiply-add per stage on the loop-carried values.
         if (order == 1)
-            for (; i < n; i++)
-            {
-                v0 = FastMath.Blend(weight, v0, alpha * input[i]);
-                output[i] = v0;
-            }
+            FastMath.BlendRun(weight, alpha, input, output, i, v0);
         else if (order == 2)
             for (; i < n; i++)
             {

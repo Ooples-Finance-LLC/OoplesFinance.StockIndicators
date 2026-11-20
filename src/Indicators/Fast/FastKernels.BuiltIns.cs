@@ -21,11 +21,7 @@ internal static partial class FastKernels
         }
         var alpha = 2.0 / (length + 1.0);
         var weight = (length - 1.0) / (length + 1.0);
-        for (var i = seeded; i < n; i++)
-        {
-            value = FastMath.Blend(weight, value, alpha * input[i]);
-            output[i] = value;
-        }
+        FastMath.BlendRun(weight, alpha, input, output, seeded, value);
     }
 
     /// <summary>
