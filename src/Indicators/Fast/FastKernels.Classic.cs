@@ -3,7 +3,7 @@ namespace OoplesFinance.StockIndicators.Indicators.Fast;
 internal static partial class FastKernels
 {
     /// <summary>Whether <see cref="ClassicAverage"/> covers a method; the others keep the exact route.</summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static bool SupportsClassic(ClassicAverageMethod method) => method is ClassicAverageMethod.Sma
         or ClassicAverageMethod.Ema or ClassicAverageMethod.Wma or ClassicAverageMethod.Dema
         or ClassicAverageMethod.Tema or ClassicAverageMethod.Trima;
@@ -21,7 +21,7 @@ internal static partial class FastKernels
     /// A classic moving average, zero before <paramref name="first"/>. <paramref name="first"/> is the
     /// average's own first defined bar, or a later bar when a composite aligns it to a slower sibling.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void ClassicAverage(ReadOnlySpan<double> input, Span<double> average, ClassicMovingAverage owner, long first)
     {
         var n = input.Length;
@@ -80,7 +80,7 @@ internal static partial class FastKernels
     }
 
     /// <summary>Triangular mean: a simple mean of simple means whose lengths sum to period + 1.</summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void TriangularWindow(ReadOnlySpan<double> input, Span<double> output, int period)
     {
         var n = input.Length;
@@ -204,7 +204,7 @@ internal static partial class FastKernels
     }
 
     /// <summary>Fast minus slow classic average, absolute or as a percentage of the slow one.</summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void PriceOscillator(ReadOnlySpan<double> input, Span<double> value, Span<double> defined,
         ClassicPriceOscillator owner)
     {
@@ -224,7 +224,7 @@ internal static partial class FastKernels
     }
 
     /// <summary>MACD over two aligned classic averages with a classic average of the oscillator as signal.</summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void ClassicMacd(ReadOnlySpan<double> input, FastOutputs outputs, ClassicMacd owner)
     {
         var n = input.Length;
@@ -253,7 +253,7 @@ internal static partial class FastKernels
     }
 
     /// <summary>MACD whose fast average starts late so both exponential averages seed on the same bar.</summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void AlignedMacd(ReadOnlySpan<double> input, double[][] outputs, AlignedEmaMacd owner)
     {
         var n = input.Length;
@@ -309,7 +309,7 @@ internal static partial class FastKernels
     /// the classic average of the period its selector names, every period aligned to that same first bar.
     /// One pass per distinct period computes that period's average over the whole series.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void VariablePeriodAverage(FastColumns columns, Span<double> average, Span<double> defined,
         VariablePeriodClassicAverage owner)
     {

@@ -10,7 +10,7 @@ internal static partial class FastKernels
     /// Highest or lowest of the last <paramref name="period"/> values, over the available history while the
     /// window is still filling.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void RollingExtreme(ReadOnlySpan<double> input, Span<double> output, int period, bool highest)
     {
         var n = input.Length;
@@ -143,7 +143,7 @@ internal static partial class FastKernels
     /// block's worth of its largest update. If the spread falls so far below that largest update that the
     /// bound would show, the window is summed again at once. A window of equal values is recognised exactly.
     /// </remarks>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void Dispersion(ReadOnlySpan<double> close, Span<double> output, WindowDispersion owner)
     {
         var n = close.Length;
@@ -254,7 +254,7 @@ internal static partial class FastKernels
     /// Position of the close inside the high/low window as a percentage, zero for a flat window, then the K
     /// average of that and the D average of K. Both are published once D is defined.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void Stochastic(FastColumns columns, FastOutputs outputs, ClassicStochastic owner)
     {
         columns.RequireHighLowClose();
@@ -298,7 +298,7 @@ internal static partial class FastKernels
     /// Population standard deviation over the window with the window mean, the z-score where the window is
     /// not flat, and an optional rolling mean of the deviation.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void StandardDeviationDetails(ReadOnlySpan<double> close, FastOutputs outputs, int period, int? smoothingPeriod)
     {
         var n = close.Length;
@@ -357,7 +357,7 @@ internal static partial class FastKernels
     /// Moving-average envelope: the chosen average with a band a fixed percentage above and below it, from
     /// the first bar with a full window.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void AverageEnvelope(ReadOnlySpan<double> close, double[][] outputs, WindowAverageEnvelope owner)
     {
         var n = close.Length;
@@ -432,7 +432,7 @@ internal static partial class FastKernels
     /// window fills. Each window is summed around its own mean, so the result does not lose digits to the
     /// price level.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void SampleShape(ReadOnlySpan<double> close, Span<double> value, Span<double> defined, int period, bool kurtosis)
     {
         var n = close.Length;
@@ -490,7 +490,7 @@ internal static partial class FastKernels
     /// Schaff trend cycle, single pass: where the fast-less-slow average difference sits in its rolling
     /// range, as a percentage, averaged over three bars.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void StochasticCycle(ReadOnlySpan<double> close, Span<double> value, Span<double> defined, int cycle,
         int fast, int slow)
     {
@@ -551,7 +551,7 @@ internal static partial class FastKernels
     /// Linearly weighted mean with the newest value at weight <paramref name="period"/>, over the bars so
     /// far while the window fills, divided by the weight actually held.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void ExpandingWeightedWindow(ReadOnlySpan<double> input, Span<double> output, int period)
     {
         var n = input.Length;
@@ -583,7 +583,7 @@ internal static partial class FastKernels
     /// Hull average: twice the half-period weighted mean less the full one, weighted again over the root
     /// period, either from the first bar or only from full windows.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void Hull(ReadOnlySpan<double> close, Span<double> value, Span<double> defined, HullWindow owner)
     {
         var n = close.Length;
@@ -655,7 +655,7 @@ internal static partial class FastKernels
     /// Relative volatility strength: the sample deviation of the upward closes' changes, averaged, as a
     /// percentage of that plus the same for the downward ones. The first close counts as a change from zero.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void RelativeVolatility(ReadOnlySpan<double> close, Span<double> output, int period)
     {
         var n = close.Length;
@@ -698,7 +698,7 @@ internal static partial class FastKernels
     /// Stochastic momentum: the close measured from the middle of the high/low window, from the first full
     /// window.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void StochasticMomentum(FastColumns columns, Span<double> value, Span<double> defined, int period)
     {
         columns.RequireHighLowClose();
@@ -734,7 +734,7 @@ internal static partial class FastKernels
     /// Stochastic momentum index: the twice-smoothed distance of the close from the middle of the high/low
     /// window over half the twice-smoothed window range, with an exponential signal line.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void StochasticMomentumIndex(FastColumns columns, double[][] outputs, DoubleSmoothedStochasticMomentum owner)
     {
         columns.RequireHighLowClose();

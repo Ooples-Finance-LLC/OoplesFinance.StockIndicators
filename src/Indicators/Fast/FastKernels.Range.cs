@@ -7,7 +7,7 @@ internal static partial class FastKernels
     /// The first bar has no previous close and so no range; the output is zero until the seed completes.
     /// With <paramref name="percent"/> the average is published as a percentage of the close.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void SeededAverageTrueRange(ReadOnlySpan<double> high, ReadOnlySpan<double> low,
         ReadOnlySpan<double> close, Span<double> output, int period, bool percent)
     {
@@ -48,7 +48,7 @@ internal static partial class FastKernels
     /// Accumulation/distribution line smoothed by two exponential averages, published as fast minus slow,
     /// with the money-flow multiplier, the bar's flow and the running line as optional details.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void SmoothedAccumulation(FastColumns columns, FastOutputs outputs, SmoothedAccumulationOscillator owner)
     {
         columns.RequireHighLowClose();
@@ -96,7 +96,7 @@ internal static partial class FastKernels
     /// True range, its Wilder average seeded by the mean of the first ranges, and that average as a
     /// percentage of the close, each with a flag for the bars that have it.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void AverageTrueRangeDetails(FastColumns columns, FastOutputs outputs, int period)
     {
         columns.RequireHighLowClose();
@@ -130,7 +130,7 @@ internal static partial class FastKernels
     /// Accumulation/distribution with its parts: the money-flow multiplier, the bar's flow, the running
     /// line and, when asked for, the rolling mean of the line.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void AccumulationDetails(FastColumns columns, double[][] outputs, int? averagePeriod)
     {
         columns.RequireHighLowClose();
@@ -181,7 +181,7 @@ internal static partial class FastKernels
     /// Awesome oscillator: the fast mean of the bar midpoint less the slow one, and that difference as a
     /// percentage of the midpoint where the midpoint is not zero.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void AwesomeDetails(FastColumns columns, double[][] outputs, int fast, int slow)
     {
         ReadOnlySpan<double> high = columns.High, low = columns.Low;
@@ -220,7 +220,7 @@ internal static partial class FastKernels
     /// <summary>
     /// Alligator: three Wilder averages of the bar midpoint, each published a fixed number of bars late.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void AlligatorDetails(FastColumns columns, double[][] outputs, AlligatorWithDetails owner)
     {
         ReadOnlySpan<double> high = columns.High, low = columns.Low;
@@ -257,7 +257,7 @@ internal static partial class FastKernels
     /// Elder ray: an exponential average of the close seeded by the mean of the first period closes, with
     /// the high and the low measured from it.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void ElderRayDetails(FastColumns columns, double[][] outputs, int period)
     {
         columns.RequireHighLowClose();
@@ -284,7 +284,7 @@ internal static partial class FastKernels
     /// Vortex: the summed upward and downward movement over the window, each over the summed true range,
     /// published where the window is full and has any range at all.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void Vortex(FastColumns columns, double[][] outputs, int period)
     {
         columns.RequireHighLowClose();
@@ -340,7 +340,7 @@ internal static partial class FastKernels
     /// Choppiness index: the log of the summed true intervals over the span they cover, scaled by the log of
     /// the period, published where the window is full and spans a range.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void Choppiness(FastColumns columns, Span<double> value, Span<double> defined, int period)
     {
         columns.RequireHighLowClose();
@@ -401,7 +401,7 @@ internal static partial class FastKernels
     /// Chandelier exits: the window's highest high less a multiple of the average true range, and its
     /// lowest low plus the same, from the bar the average first exists.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void ChandelierExit(FastColumns columns, double[][] outputs, int period, double multiplier,
         ChandelierExitSelection selection, bool zeroFloorHigh)
     {
@@ -444,7 +444,7 @@ internal static partial class FastKernels
     /// <summary>
     /// Fisher transform of where the price sits in its rolling range, with the previous value as trigger.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void FisherTransform(FastColumns columns, FastOutputs outputs, int period, bool useMidpoint)
     {
         var n = columns.Count;
@@ -493,7 +493,7 @@ internal static partial class FastKernels
     /// Chaikin money flow with its parts: the money-flow multiplier, the bar's flow, and the window's
     /// summed flow over its summed volume where that volume is not zero.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void MoneyFlowDetails(FastColumns columns, double[][] outputs, int period)
     {
         columns.RequireHighLowClose();
@@ -564,7 +564,7 @@ internal static partial class FastKernels
     /// Gator: the distance between the alligator's jaw and teeth above zero and between its teeth and lips
     /// below, each with whether it grew since the bar before.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void GatorDetails(FastColumns columns, double[][] outputs, AlligatorWithDetails alligator)
     {
         var n = columns.Count;

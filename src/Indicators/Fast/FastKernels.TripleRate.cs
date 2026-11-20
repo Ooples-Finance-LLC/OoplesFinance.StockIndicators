@@ -7,7 +7,7 @@ internal static partial class FastKernels
     /// rate as further outputs. The three seeds differ only in how the stages start, so the startup bars follow
     /// the stage rules one bar at a time and the rest is three blends per bar.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void TripleRate(ReadOnlySpan<double> close, double[][] outputs, TripleExponentialRate owner)
     {
         var n = close.Length;

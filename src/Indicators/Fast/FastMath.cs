@@ -21,6 +21,14 @@ internal static class FastMath
         System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization;
 #endif
 
+    /// <summary>
+    /// For a kernel a binder calls. Once the binder's own code is recompiled with a profile, the compiler
+    /// would inline a kernel it calls from one place, and the inlined copy is compiled as part of the
+    /// binder - without the full optimisation the kernel asked for, and several times slower.
+    /// </summary>
+    internal const System.Runtime.CompilerServices.MethodImplOptions Kernel =
+        Hot | System.Runtime.CompilerServices.MethodImplOptions.NoInlining;
+
     [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     internal static double[] Allocate(int count) =>
 #if NETFRAMEWORK

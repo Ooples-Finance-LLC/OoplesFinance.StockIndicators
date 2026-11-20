@@ -7,7 +7,7 @@ internal static partial class FastKernels
     /// <c>offset</c> of the way through it. Before the window is full it is either withheld or computed
     /// over the bars so far with weights for that many bars.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void ArnaudLegoux(ReadOnlySpan<double> close, Span<double> value, Span<double> defined,
         ArnaudLegouxWindow owner)
     {
@@ -71,7 +71,7 @@ internal static partial class FastKernels
     /// for the realized form, optionally annualized by 252. A return across a zero or a sign change is
     /// missing, and a window that holds one publishes nothing.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void LogVolatility(ReadOnlySpan<double> close, Span<double> value, Span<double> defined,
         WindowLogVolatility owner)
     {
@@ -150,7 +150,7 @@ internal static partial class FastKernels
     /// A centre line with bands one multiple of the average true range above and below it, and the band
     /// width as a fraction of the centre.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void AtrBands(FastColumns columns, FastOutputs outputs, WindowAtrBands owner)
     {
         columns.RequireHighLowClose();
@@ -220,7 +220,7 @@ internal static partial class FastKernels
     /// Each band only tightens until the previous close crosses it, and the stop is the lower band while the
     /// close holds above it and the upper band otherwise.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void AtrTrailingStop(FastColumns columns, FastOutputs outputs, SeededAtrTrailingStop owner)
     {
         columns.RequireHighLowClose();
@@ -272,7 +272,7 @@ internal static partial class FastKernels
     /// Mean of the window weighted by lag, newest first, over the bars so far while the window fills.
     /// Weights that sum to exactly zero fall back to the plain count as the divisor.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void LagWeightedWindow(ReadOnlySpan<double> input, Span<double> output, ReadOnlySpan<double> lagWeights)
     {
         var n = input.Length;
@@ -295,7 +295,7 @@ internal static partial class FastKernels
         for (var i = period - 1; i < n; i++) output[i] = Dot(input.Slice(i - period + 1, period), weights) / divisor;
     }
 
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static double[] SineWeights(int period)
     {
         var weights = new double[period];
@@ -303,7 +303,7 @@ internal static partial class FastKernels
         return weights;
     }
 
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static double[] GaussianWeights(int period, double sigma)
     {
         var weights = new double[period];
@@ -317,7 +317,7 @@ internal static partial class FastKernels
     }
 
     /// <summary>Mean absolute distance of the window's values from their mean, over the bars so far at first.</summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void MeanAbsoluteDeviation(ReadOnlySpan<double> input, Span<double> output, int period)
     {
         var n = input.Length;
@@ -357,7 +357,7 @@ internal static partial class FastKernels
     /// The window mean with its mean absolute error, mean squared error and mean signed relative error.
     /// A zero in the window leaves the relative error undefined.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void MeanDiagnostics(ReadOnlySpan<double> input, FastOutputs outputs, int period)
     {
         var n = input.Length;

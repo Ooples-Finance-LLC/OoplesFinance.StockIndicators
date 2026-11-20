@@ -103,7 +103,7 @@ internal static partial class FastKernels
     /// divided by how far the cycle phase fell on the bar, floored at the slow limit. The seeded form
     /// starts from the mean of the first bars; the delayed form starts from zero after a longer run-in.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void PhaseAdaptive(FastColumns columns, FastOutputs outputs, double fastLimit, double slowLimit,
         bool delayed, bool retainOlder, bool useMidpoint, long publishFrom)
     {
@@ -151,7 +151,7 @@ internal static partial class FastKernels
     /// The dominant cycle period, smoothed, or the in-phase and quadrature parts themselves; published
     /// after the run-in of 32 bars plus the suppression.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void HilbertCycle(ReadOnlySpan<double> close, FastOutputs outputs, bool periodOnly, long publishFrom)
     {
         var n = close.Length;
@@ -215,7 +215,7 @@ internal static partial class FastKernels
     /// its last four values, with the smoothed price and the cycle length. The price itself stands in for
     /// the trendline until bar eleven.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void SeededTrendline(FastColumns columns, FastOutputs outputs, bool useMidpoint)
     {
         ReadOnlySpan<double> close = columns.Close;
@@ -256,7 +256,7 @@ internal static partial class FastKernels
     /// <summary>
     /// Instantaneous trendline after a 37-bar run-in, published from bar 63 plus the suppression.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void DelayedTrendline(ReadOnlySpan<double> close, Span<double> value, Span<double> defined, long publishFrom)
     {
         var n = close.Length;
@@ -326,7 +326,7 @@ internal static partial class FastKernels
     /// Dominant cycle phase, its sine and lead sine, or the trend-versus-cycle mode: the smoothed price
     /// projected onto one cycle of the measured period. Published from bar 63 plus the suppression.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void HilbertSignal(ReadOnlySpan<double> close, FastOutputs outputs, HilbertCycleSignal kind, long publishFrom)
     {
         var n = close.Length;

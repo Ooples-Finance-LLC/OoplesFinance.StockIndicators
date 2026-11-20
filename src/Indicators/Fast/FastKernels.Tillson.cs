@@ -7,7 +7,7 @@ internal static partial class FastKernels
     /// The seed decides how the stages start: all from the first price, from running prefix means, or each
     /// from the simple mean of the first period values the stage before it publishes.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void Tillson(ReadOnlySpan<double> input, Span<double> value, Span<double> defined, TillsonAverage owner)
     {
         var n = input.Length;

@@ -8,7 +8,7 @@ internal static partial class FastKernels
     /// Wilder average. Seeded, it publishes the running mean of the first <paramref name="period"/> values
     /// and then smooths; unseeded, it starts from the first value.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void WilderAverage(ReadOnlySpan<double> input, Span<double> output, int period, bool seedWithAverage)
     {
         var n = input.Length;
@@ -47,7 +47,7 @@ internal static partial class FastKernels
     /// Double or triple exponential average whose stages start at zero and are divided by the weight they
     /// have accumulated so far, until that correction is too small to matter.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void CompensatedExponential(ReadOnlySpan<double> input, Span<double> output, int period, int order)
     {
         var n = input.Length;
@@ -75,7 +75,7 @@ internal static partial class FastKernels
     }
 
     /// <summary>Sum, difference, product or quotient of two price fields; a zero divisor publishes nothing.</summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void CandleArithmetic(FastColumns columns, FastOutputs outputs, CandleArithmetic owner)
     {
         // A sum, a difference or a product is finite only if both of its terms are, so checking the result
@@ -149,7 +149,7 @@ internal static partial class FastKernels
     /// Bar index of the highest or lowest of the last <paramref name="period"/> values, over the available
     /// history while the window fills. Equal values resolve to the newest or the oldest of them.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void RollingExtremeIndex(ReadOnlySpan<double> input, Span<double> index, long period, bool highest,
         bool newestTie)
     {
@@ -215,7 +215,7 @@ internal static partial class FastKernels
     /// Aroon: how recently the window's high and low occurred, as percentages of the period, and their
     /// difference. Nothing is published until the window is full.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void Aroon(FastColumns columns, FastOutputs outputs, WindowAroon owner)
     {
         ReadOnlySpan<double> high = columns.High, low = columns.Low;
@@ -323,7 +323,7 @@ internal static partial class FastKernels
     }
 
     /// <summary>Half the sum of the window's lowest and highest value.</summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void RangeMidpoint(ReadOnlySpan<double> lows, ReadOnlySpan<double> highs, Span<double> output, int period)
     {
         var n = lows.Length;
@@ -336,7 +336,7 @@ internal static partial class FastKernels
     }
 
     /// <summary>Sum of the last <paramref name="period"/> values; zero until the window is full.</summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void RollingSum(ReadOnlySpan<double> input, Span<double> output, int period)
     {
         var n = input.Length;
@@ -359,7 +359,7 @@ internal static partial class FastKernels
     /// The Wilder recurrence run backwards: the running mean while it seeds, then the previous value moved
     /// away from the new one by a period-th of their distance.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void ReverseWilder(ReadOnlySpan<double> input, Span<double> output, int period)
     {
         var n = input.Length;
@@ -387,7 +387,7 @@ internal static partial class FastKernels
     /// Regularized exponential average: the usual step toward the close plus a pull along the previous
     /// slope, with the period growing to its setting over the first bars. The first two bars are the close.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void RegularizedEma(ReadOnlySpan<double> close, Span<double> output, int period, double lambda)
     {
         var n = close.Length;
@@ -412,7 +412,7 @@ internal static partial class FastKernels
     /// Zero-lag exponential average: an average of the close pushed ahead by its change over half the
     /// period, with the period growing to its setting over the first bars.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void ZeroLagEma(ReadOnlySpan<double> close, Span<double> output, int period)
     {
         var n = close.Length;
@@ -431,7 +431,7 @@ internal static partial class FastKernels
     /// On-balance volume: volume added on a rising close and removed on a falling one, starting from the
     /// first bar's volume or from zero, with an optional window mean that starts at the second bar.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void OnBalanceVolume(FastColumns columns, FastOutputs outputs, SeededOnBalanceVolume owner)
     {
         // A close that is not a number compares as neither above nor below, which would hide it, so the
@@ -511,7 +511,7 @@ internal static partial class FastKernels
     /// Four-stage Laguerre filter started from zero: each stage follows the one before it with the same
     /// damping, and the output weights the stages 1, 2, 2, 1.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void LaguerreFilter(ReadOnlySpan<double> close, Span<double> output, double gamma)
     {
         var n = close.Length;
@@ -561,7 +561,7 @@ internal static partial class FastKernels
     /// <summary>
     /// Quadruple exponential average of four chained mass-normalized stages, combined 4, -6, 4, -1.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void QuadrupleEma(ReadOnlySpan<double> close, Span<double> output, MassNormalizedQuadrupleEma owner)
     {
         var n = close.Length;
@@ -583,7 +583,7 @@ internal static partial class FastKernels
     /// fourth power of average over price, so it speeds up when the price falls below it. The delayed
     /// start restarts from a zero average and withholds the value for a period after that.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void QuarticDynamic(ReadOnlySpan<double> close, Span<double> value, Span<double> defined,
         QuarticDynamicAverage owner)
     {
@@ -641,7 +641,7 @@ internal static partial class FastKernels
     /// Deviation-scaled average: an exponential average whose step grows with how large the smoothed
     /// distance of the price from the average is against its recent root mean square.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void DeviationScaled(ReadOnlySpan<double> close, Span<double> output, int period, double scaleFactor)
     {
         var n = close.Length;
@@ -694,7 +694,7 @@ internal static partial class FastKernels
     /// Price relative: the ratio of one price field to another, the mean of that ratio over a window, and
     /// the difference between the two fields' returns over a lag. Each value has its own defined flag.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void PriceRelative(FastColumns columns, double[][] output, PriceRelativeStrength owner)
     {
         var evaluation = Field(columns, owner.Evaluation);
@@ -821,7 +821,7 @@ internal static partial class FastKernels
     /// average whose step comes from the fractal dimension, the ranges of the window's two halves against
     /// the range of the whole window.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void FractalAdaptive(ReadOnlySpan<double> close, Span<double> output, int period)
     {
         var n = close.Length;
@@ -870,7 +870,7 @@ internal static partial class FastKernels
     /// no correlation. The five sums slide, measured from anchor prices so they do not lose digits to the
     /// price level, and are taken afresh on a schedule and whenever a variance has all but cancelled.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void Correlation(FastColumns columns, Span<double> value, Span<double> defined, WindowCorrelation owner)
     {
         ReadOnlySpan<double> left = Field(columns, owner.Left), right = Field(columns, owner.Right);
@@ -986,7 +986,7 @@ internal static partial class FastKernels
     /// Holt-Winter forecast: a level, a velocity and an acceleration, each corrected by a share of the
     /// last forecast's error, published as the forecast for the next bar.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void HoltWinter(ReadOnlySpan<double> close, Span<double> output, HoltWinterForecast owner)
     {
         var n = close.Length;

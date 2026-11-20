@@ -7,7 +7,7 @@ internal static partial class FastKernels
     /// before the period completes. Each stage keeps the running-sum form previous - previous / period +
     /// current, so the movement outputs are sums rather than averages.
     /// </summary>
-    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
     internal static void Directional(FastColumns columns, Span<double> value, Span<double> defined,
         PriorSeededDirectionalMeasure owner)
     {
