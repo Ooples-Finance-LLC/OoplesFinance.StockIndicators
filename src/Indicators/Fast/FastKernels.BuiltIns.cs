@@ -137,7 +137,24 @@ internal static partial class FastKernels
         ReadOnlySpan<double> open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
         var n = close.Length;
         value = value.Slice(0, n);
-        for (var i = 0; i < n; i++)
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            for (; i <= n - width; i += width)
+            {
+                var h = new System.Numerics.Vector<double>(high.Slice(i, width));
+                var l = new System.Numerics.Vector<double>(low.Slice(i, width));
+                var move = new System.Numerics.Vector<double>(close.Slice(i, width))
+                    - new System.Numerics.Vector<double>(open.Slice(i, width));
+                // A bar with no range divides by zero here and is then replaced by the zero it is defined as.
+                System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.Equals(h, l),
+                    System.Numerics.Vector<double>.Zero, move / (h - l)).CopyTo(value.Slice(i, width));
+            }
+        }
+#endif
+        for (; i < n; i++)
         {
             double h = high[i], l = low[i];
             value[i] = h == l ? 0 : (close[i] - open[i]) / (h - l); // NOSONAR an exact tie is the contract
