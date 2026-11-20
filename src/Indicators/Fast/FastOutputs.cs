@@ -8,12 +8,12 @@ namespace OoplesFinance.StockIndicators.Indicators.Fast;
 internal sealed class FastOutputs
 {
     private readonly double[][] _slots;
-    private readonly bool[] _shared;
+    // One bit a slot; a slot past the mask is simply validated like a computed one.
+    private ulong _shared;
 
     internal FastOutputs(int slots, int count)
     {
         _slots = new double[slots][];
-        _shared = new bool[slots];
         Count = count;
     }
 
@@ -38,18 +38,18 @@ internal sealed class FastOutputs
     internal void Flag(int slot, long first)
     {
         _slots[slot] = FastFlags.From(Count, first);
-        _shared[slot] = true;
+        if (slot < 64) _shared |= 1UL << slot;
     }
 
     /// <summary>Publishes a slot as the very series another slot holds, where the two are equal bar for bar.</summary>
     internal void Alias(int slot, int source)
     {
         _slots[slot] = this[source];
-        _shared[slot] = true;
+        if (slot < 64) _shared |= 1UL << slot;
     }
 
     /// <summary>Whether a slot is a shared flag column, which is finite by construction.</summary>
-    internal bool IsShared(int slot) => _shared[slot];
+    internal bool IsShared(int slot) => slot < 64 && (_shared & (1UL << slot)) != 0;
 
     /// <summary>Every slot, for a kernel that fills them all itself.</summary>
     internal double[][] All()

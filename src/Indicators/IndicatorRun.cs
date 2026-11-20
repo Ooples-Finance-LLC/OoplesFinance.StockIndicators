@@ -56,12 +56,37 @@ public interface IIndicatorRun : IAsyncEnumerable<IBarSnapshot>, IDisposable
 /// </remarks>
 internal sealed class IndicatorRun : IIndicatorRun
 {
-    private readonly Dictionary<IIndicatorOutput, double[]> _series;
+    private Dictionary<IIndicatorOutput, double[]>? _series;
+    // A fast run holds each configured indicator's series by position. Reading one is a walk over a handful
+    // of references; the dictionary the snapshots share is built only if a snapshot is asked for.
+    private readonly IIndicator[]? _indicators;
+    private readonly double[][][]? _outputs;
     private readonly IndicatorRuntime? _runtime;
     internal bool HasLegacyRuntime => _runtime is not null;
     // Series already own their arrays. Transferring their dictionary retains neither
     // this run nor its runtime/history, and does not copy the output payload again.
-    internal IIndicatorRun AsLatestOnly() => new LatestOnlyIndicatorRun(_series, BarCount, BarCount == 0 ? null : Latest);
+    internal IIndicatorRun AsLatestOnly() => new LatestOnlyIndicatorRun(Series, BarCount, BarCount == 0 ? null : Latest);
+
+    internal IndicatorRun(IIndicator[] indicators, double[][][] outputs, IReadOnlyList<Bar> bars, int warmupRequired)
+    {
+        _indicators = indicators;
+        _outputs = outputs;
+        _bars = bars;
+        _warmupRequired = warmupRequired;
+        BarCount = bars.Count;
+    }
+
+    private Dictionary<IIndicatorOutput, double[]> Series => _series ??= SeriesOf(_indicators ?? [], _outputs ?? []);
+
+    /// <summary>Every published series of a positional result, keyed by its output.</summary>
+    internal static Dictionary<IIndicatorOutput, double[]> SeriesOf(IIndicator[] indicators, double[][][] outputs)
+    {
+        var series = new Dictionary<IIndicatorOutput, double[]>();
+        for (var i = 0; i < indicators.Length; i++)
+            for (var slot = 0; slot < outputs[i].Length; slot++)
+                series[indicators[i].Outputs[slot]] = outputs[i][slot];
+        return series;
+    }
     private readonly IReadOnlyList<Bar> _bars;
     private readonly int _warmupBarsSeen, _warmupRequired;
 
@@ -97,7 +122,16 @@ internal sealed class IndicatorRun : IIndicatorRun
         {
             if (output is null) throw new ArgumentNullException(nameof(output));
 
-            if (!_series.TryGetValue(output, out var values))
+            if (_series is null && _indicators is { } indicators && _outputs is { } outputs)
+            {
+                var owner = output.Indicator;
+                for (var i = 0; i < indicators.Length; i++)
+                    if (ReferenceEquals(indicators[i], owner) && (uint)output.Slot < (uint)outputs[i].Length
+                        && ReferenceEquals(owner.Outputs[output.Slot], output))
+                        return outputs[i][output.Slot];
+            }
+
+            if (!Series.TryGetValue(output, out var values))
             {
                 throw new KeyNotFoundException(
                     "That series was not configured on this run. Pass the indicator to ConfigureIndicators "
@@ -116,7 +150,7 @@ internal sealed class IndicatorRun : IIndicatorRun
 
     /// <inheritdoc/>
     public IBarSnapshot Latest => BarCount > 0
-        ? new BarSnapshot(_bars[BarCount - 1], BarCount - 1, _series, IsWarmedUp(BarCount - 1))
+        ? new BarSnapshot(_bars[BarCount - 1], BarCount - 1, Series, IsWarmedUp(BarCount - 1))
         : throw new InvalidOperationException("No bars have arrived yet.");
 
     /// <summary>
@@ -132,7 +166,7 @@ internal sealed class IndicatorRun : IIndicatorRun
         for (var i = 0; i < BarCount; i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            yield return new BarSnapshot(_bars[i], i, _series, IsWarmedUp(i));
+            yield return new BarSnapshot(_bars[i], i, Series, IsWarmedUp(i));
         }
 
         await Task.CompletedTask.ConfigureAwait(false);
@@ -142,5 +176,5 @@ internal sealed class IndicatorRun : IIndicatorRun
     public void Dispose() => _runtime?.Dispose();
 
     private bool IsWarmedUp(int index) => _warmupBarsSeen + index + 1 >= _warmupRequired
-        && _series.Values.All(values => !double.IsNaN(values[index]));
+        && Series.Values.All(values => !double.IsNaN(values[index]));
 }

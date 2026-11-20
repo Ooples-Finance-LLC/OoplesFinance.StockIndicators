@@ -21,39 +21,61 @@ internal static partial class FastExecution
     /// <summary>Every indicator type that has a fast kernel, for the parity tests to enumerate.</summary>
     internal static IReadOnlyCollection<Type> KernelTypes => Binders.Keys;
 
-    internal static bool Supports(IReadOnlyList<IIndicator> indicators)
+    internal static bool Supports(IReadOnlyList<IIndicator> indicators) => Plan(indicators) is not null;
+
+    /// <summary>The kernel of every indicator, in order, or null when any of them has none.</summary>
+    internal static FastKernel[]? Plan(IReadOnlyList<IIndicator> indicators)
     {
-        if (indicators.Count == 0) return false;
-        for (var i = 0; i < indicators.Count; i++)
-            if (Resolve(indicators[i]) is null) return false;
-        return true;
+        if (indicators.Count == 0) return null;
+        var kernels = new FastKernel[indicators.Count];
+        for (var i = 0; i < kernels.Length; i++)
+        {
+            if (Resolve(indicators[i]) is not { } kernel) return null;
+            kernels[i] = kernel;
+        }
+        return kernels;
     }
 
     /// <summary>Computes every configured output. The caller owns the returned arrays.</summary>
-    internal static Dictionary<IIndicatorOutput, double[]> Execute(FastColumns columns, IReadOnlyList<IIndicator> indicators,
+    /// <summary>
+    /// Each indicator's series, in the order the indicators were given. Nothing is keyed: a build of one
+    /// indicator is its kernel, its columns and its validation, and nothing else.
+    /// </summary>
+    internal static double[][][] Execute(FastColumns columns, IIndicator[] indicators, FastKernel[] kernels,
         CancellationToken cancellation, out int warmup)
     {
-        var series = new Dictionary<IIndicatorOutput, double[]>();
-        // Every series worked out so far, including the sources of chains that were not asked for themselves.
+        var results = new double[indicators.Length][][];
+        // Every series worked out so far, kept only once a chain needs to find its source's.
         Dictionary<IIndicatorOutput, double[]>? computed = null;
         warmup = 0;
-        for (var i = 0; i < indicators.Count; i++)
+        for (var i = 0; i < indicators.Length; i++)
         {
             cancellation.ThrowIfCancellationRequested();
             var indicator = indicators[i];
-            if (series.ContainsKey(indicator.Outputs[0])) continue;
-            if (indicator.Source is not null) computed ??= new Dictionary<IIndicatorOutput, double[]>(series);
-            var outputs = Compute(columns, indicator, computed, cancellation);
-            for (var slot = 0; slot < outputs.Length; slot++) series[indicator.Outputs[slot]] = outputs[slot];
             warmup = Math.Max(warmup, Math.Max(indicator.WarmupBars, indicator.Source?.WarmupBars ?? 0));
+            // The same indicator given twice is computed once.
+            var earlier = Array.IndexOf(indicators, indicator, 0, i);
+            if (earlier >= 0)
+            {
+                results[i] = results[earlier];
+                continue;
+            }
+            if (indicator.Source is not null && computed is null)
+            {
+                computed = new Dictionary<IIndicatorOutput, double[]>();
+                for (var done = 0; done < i; done++)
+                    for (var slot = 0; slot < results[done].Length; slot++)
+                        computed[indicators[done].Outputs[slot]] = results[done][slot];
+            }
+            results[i] = Compute(columns, indicator, kernels[i], computed, cancellation);
         }
-        return series;
+        return results;
     }
 
     // One indicator's series. A chained indicator reads the bars with the close replaced by its source's
     // primary series, so the source is worked out first, once however many readers it has.
-    private static double[][] Compute(FastColumns columns, IIndicator indicator, Dictionary<IIndicatorOutput, double[]>? computed,
-        CancellationToken cancellation)
+    private static double[][] Compute(FastColumns columns, IIndicator indicator, FastKernel? resolved,
+        Dictionary<IIndicatorOutput, double[]>? computed, CancellationToken cancellation)
     {
         if (computed is not null && computed.TryGetValue(indicator.Outputs[0], out var first))
         {
@@ -62,12 +84,12 @@ internal static partial class FastExecution
             for (var slot = 1; slot < known.Length; slot++) known[slot] = computed[indicator.Outputs[slot]];
             return known;
         }
-        var kernel = Resolve(indicator) ?? throw new InvalidOperationException("Unqualified fast execution plan.");
+        var kernel = resolved ?? Resolve(indicator) ?? throw new InvalidOperationException("Unqualified fast execution plan.");
         var input = columns;
         if (indicator.Source is { } source)
         {
             cancellation.ThrowIfCancellationRequested();
-            var chained = Compute(columns, source, computed, cancellation)[IndicatorContract.PrimaryOutput(source).Slot];
+            var chained = Compute(columns, source, null, computed, cancellation)[IndicatorContract.PrimaryOutput(source).Slot];
             input = columns.WithClose(chained, indicator);
         }
         var published = new FastOutputs(indicator.Outputs.Count, columns.Count);

@@ -79,11 +79,30 @@ public sealed class StockIndicatorBuilder
         return this;
     }
 
+    private static readonly IndicatorExecutionInfo FastExecutionInfo =
+        new(IndicatorExecutionBackend.Cpu, null, "Fast double execution over borrowed bars.");
+
+    // The source of the last fast build, from which a legacy Build() makes its history if it is ever asked to.
+    private Indicators.ISynchronousBarSource? _borrowedHistory;
+
+    private IndicatorDataSource HistoryOf(Indicators.ISynchronousBarSource borrowed)
+    {
+        var history = IndicatorDataSource.FromValidatedHistory(new Lazy<StockData>(() =>
+        {
+            var owned = new Indicators.OwnedBarHistory();
+            borrowed.AppendValidated(owned, CancellationToken.None);
+            return CreateOwnedBatch(owned);
+        }));
+        _configuredSource = history;
+        _borrowedHistory = null;
+        return history;
+    }
+
     private Indicators.IIndicatorRun? TryBuildFast(Indicators.IBarSource source, bool latestOnly, CancellationToken cancellationToken)
     {
         if (_numerics != IndicatorNumerics.Fast || _executionBackend == IndicatorExecutionBackend.Gpu
             || !CanUseDirectFusedExecution
-            || !Indicators.Fast.FastExecution.Supports(_configuredIndicators))
+            || Indicators.Fast.FastExecution.Plan(_configuredIndicators) is not { } kernels)
             return null;
         IReadOnlyList<Indicators.Bar> bars;
         Indicators.Fast.FastColumns columns;
@@ -99,21 +118,19 @@ public sealed class StockIndicatorBuilder
         }
         else return null;
         cancellationToken.ThrowIfCancellationRequested();
-        var series = Indicators.Fast.FastExecution.Execute(columns, _configuredIndicators, cancellationToken, out var warmup);
-        LastExecution = new(IndicatorExecutionBackend.Cpu, null, "Fast double execution over borrowed bars.");
+        // The run keeps its own list: the builder's can be added to after this build.
+        var indicators = _configuredIndicators.ToArray();
+        var outputs = Indicators.Fast.FastExecution.Execute(columns, indicators, kernels, cancellationToken, out var warmup);
+        LastExecution = FastExecutionInfo;
         if (!latestOnly)
         {
-            // A later legacy Build() reads this builder's history. Nothing is copied unless that happens, and
-            // the copy is then validated in full, as the exact routes validate theirs.
-            var synchronous = (Indicators.ISynchronousBarSource)source;
-            _configuredSource = IndicatorDataSource.FromValidatedHistory(new Lazy<StockData>(() =>
-            {
-                var owned = new Indicators.OwnedBarHistory();
-                synchronous.AppendValidated(owned, CancellationToken.None);
-                return CreateOwnedBatch(owned);
-            }));
-            return new Indicators.IndicatorRun(null, series, bars, 0, warmup);
+            // A later legacy Build() reads this builder's history. Nothing is copied, and nothing is even
+            // set up, unless that happens; the copy is then validated in full, as the exact routes validate theirs.
+            _configuredSource = null;
+            _borrowedHistory = (Indicators.ISynchronousBarSource)source;
+            return new Indicators.IndicatorRun(indicators, outputs, bars, warmup);
         }
+        var series = Indicators.IndicatorRun.SeriesOf(indicators, outputs);
         var count = bars.Count;
         Indicators.IBarSnapshot? latest = null;
         if (count != 0)
@@ -848,7 +865,8 @@ public sealed class StockIndicatorBuilder
     /// </remarks>
     /// <exception cref="InvalidOperationException">Thrown when no source has been configured.</exception>
     private IndicatorDataSource Source =>
-        _configuredSource ?? throw new InvalidOperationException(
+        _configuredSource ?? (_borrowedHistory is { } borrowed ? HistoryOf(borrowed) : null)
+        ?? throw new InvalidOperationException(
             "No data source. Pass one to the constructor, or call ConfigureSource before building.");
 
     /// <summary>
