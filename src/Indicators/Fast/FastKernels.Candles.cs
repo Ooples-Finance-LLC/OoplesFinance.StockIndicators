@@ -569,4 +569,42 @@ internal static partial class FastKernels
             if (sign > 0) output[i] = -100;
         }
     }
+
+
+    /// <summary>
+    /// On-neck, in-neck and thrusting: a long black body, then a white candle that opens below its low
+    /// and closes at that low, at its close, or above its close without reaching the body's midpoint.
+    /// </summary>
+    internal static void NeckCandle(FastColumns columns, Span<double> output, int bodyPeriod, int equalPeriod, NeckCandleKind kind)
+    {
+        double[] open = columns.Open, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var warmup = Math.Max(bodyPeriod, equalPeriod) + 1;
+        var bodies = new CandleWindow(columns, CandleStatistic.Body, bodyPeriod);
+        var ranges = new CandleWindow(columns, CandleStatistic.Range, equalPeriod);
+        var divisor = 20L * equalPeriod;
+        for (var i = 0; i < n; i++)
+        {
+            if (i >= 2)
+            {
+                bodies.Include(i - 2);
+                ranges.Include(i - 2);
+            }
+            if (i < warmup) continue;
+            double previousOpen = open[i - 1], previousClose = close[i - 1], c = close[i];
+            if (previousClose >= previousOpen || c < open[i] || open[i] >= low[i - 1]) continue;
+            if (bodies.Compare(i - 1, bodyPeriod, previousOpen, previousClose) >= 0) continue;
+            var center = kind == NeckCandleKind.OnNeck ? low[i - 1] : previousClose;
+            if (kind != NeckCandleKind.OnNeck && c < center) continue;
+            var equal = ranges.Compare(i - 1, divisor, Math.Max(c, center), Math.Min(c, center));
+            if (kind != NeckCandleKind.Thrusting)
+            {
+                if (equal >= 0) output[i] = -100;
+                continue;
+            }
+            if (equal < 0 && DifferenceSign(previousOpen, c, c, previousClose) >= 0) output[i] = -100;
+        }
+    }
 }
