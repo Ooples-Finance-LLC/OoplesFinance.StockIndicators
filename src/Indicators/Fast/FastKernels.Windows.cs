@@ -557,4 +557,76 @@ internal static partial class FastKernels
             pool.Return(rentedFull);
         }
     }
+
+
+    // Mean of the last period values of a series that is never negative, over the bars so far while the
+    // window fills. A window holding only zeros reads exactly zero, and the sliding sum is taken afresh
+    // once it has fallen well below the largest total it has held.
+    private static void MeanOfMagnitudes(ReadOnlySpan<double> input, Span<double> output, int period)
+    {
+        var n = input.Length;
+        double sum = 0, peak = 0;
+        var nonZero = 0;
+        for (var i = 0; i < n; i++)
+        {
+            var count = Math.Min(i + 1, period);
+            if (i >= period)
+            {
+                sum -= input[i - period];
+                if (input[i - period] != 0) nonZero--; // NOSONAR an exact tie is the contract
+            }
+            sum += input[i];
+            if (input[i] != 0) nonZero++; // NOSONAR an exact tie is the contract
+            peak = FastMath.Larger(peak, sum);
+            if (nonZero == 0) sum = peak = 0;
+            else if (i >= period && ((i & RebuildMask) == 0 || sum < 0.01 * peak))
+            {
+                sum = 0;
+                for (var j = i - period + 1; j <= i; j++) sum += input[j];
+                peak = sum;
+            }
+            output[i] = sum / count;
+        }
+    }
+
+    /// <summary>
+    /// Relative volatility strength: the sample deviation of the upward closes' changes, averaged, as a
+    /// percentage of that plus the same for the downward ones. The first close counts as a change from zero.
+    /// </summary>
+    internal static void RelativeVolatility(ReadOnlySpan<double> close, Span<double> output, int period)
+    {
+        var n = close.Length;
+        output = output.Slice(0, n);
+        if (n == 0) return;
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] rentedUp = pool.Rent(n), rentedDown = pool.Rent(n), rentedDeviation = pool.Rent(n);
+        try
+        {
+            Span<double> up = rentedUp.AsSpan(0, n), down = rentedDown.AsSpan(0, n), deviation = rentedDeviation.AsSpan(0, n);
+            double previous = 0;
+            for (var i = 0; i < n; i++)
+            {
+                var change = close[i] - previous;
+                previous = close[i];
+                up[i] = change > 0 ? change : 0;
+                down[i] = change < 0 ? -change : 0;
+            }
+            var sample = new WindowDispersion(period, WindowDispersionOutput.StandardDeviation, true);
+            Dispersion(up, deviation, sample);
+            MeanOfMagnitudes(deviation, up, period);
+            Dispersion(down, deviation, sample);
+            MeanOfMagnitudes(deviation, down, period);
+            for (var i = 0; i < n; i++)
+            {
+                var total = up[i] + down[i];
+                output[i] = total == 0 ? 0 : 100 * up[i] / total; // NOSONAR an exact tie is the contract
+            }
+        }
+        finally
+        {
+            pool.Return(rentedUp);
+            pool.Return(rentedDown);
+            pool.Return(rentedDeviation);
+        }
+    }
 }
