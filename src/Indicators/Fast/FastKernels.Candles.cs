@@ -112,22 +112,21 @@ internal static partial class FastKernels
         }
 
         /// <summary>
-        /// Sign of 3 * sum - divisor * ((a - b) - (c - d)), for the window of bars ending just before
+        /// Sign of numerator * sum - divisor * ((a - b) - (c - d)), for the window of bars ending just before
         /// <paramref name="index"/>.
         /// </summary>
-        internal int CompareTripled(int index, long divisor, double a, double b, double c, double d)
+        internal int CompareScaled(int index, int numerator, long divisor, double a, double b, double c, double d)
         {
             var scaled = divisor * (a - b - (c - d));
-            var gap = 3 * _sum - scaled;
-            var margin = 3 * _slack * _largest
+            var gap = numerator * _sum - scaled;
+            var margin = numerator * _slack * _largest
                 + 8e-16 * divisor * (Math.Abs(a) + Math.Abs(b) + Math.Abs(c) + Math.Abs(d));
             if (gap > margin) return 1;
             if (gap < -margin) return -1;
             if (double.IsNaN(gap)) return 0;
             var sum = Exact(index);
             var exact = sum;
-            exact.AddExact(sum);
-            exact.AddExact(sum);
+            for (var k = 1; k < numerator; k++) exact.AddExact(sum);
             var weight = (System.Numerics.BigInteger)divisor;
             exact.Add(a, -weight);
             exact.Add(b, weight);
@@ -906,10 +905,104 @@ internal static partial class FastKernels
             }
             if (nearA.Compare(i - 2, nearDivisor, openB, closeA) >= 0
                 && nearB.Compare(i - 1, nearDivisor, o, closeB) >= 0
-                && farA.CompareTripled(i - 2, farDivisor, closeA, openA, closeB, openB) > 0
-                && farB.CompareTripled(i - 1, farDivisor, closeB, openB, c, o) > 0
+                && farA.CompareScaled(i - 2, 3, farDivisor, closeA, openA, closeB, openB) > 0
+                && farB.CompareScaled(i - 1, 3, farDivisor, closeB, openB, c, o) > 0
                 && bodies.Compare(i, bodyPeriod, c, o) < 0)
                 output[i] = 100;
+        }
+    }
+
+
+    /// <summary>
+    /// Advance block, stalled pattern and three stars in the south: three candles of one colour whose
+    /// bodies and shadows show the move running out.
+    /// </summary>
+    internal static void ExhaustionCandle(FastColumns columns, Span<double> output, ExhaustionCandleKind kind, int longPeriod,
+        int shortPeriod, int shadowPeriod, int nearPeriod, int farPeriod)
+    {
+        double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        var advance = kind == ExhaustionCandleKind.AdvanceBlock;
+        var south = kind == ExhaustionCandleKind.ThreeStarsInSouth;
+        var warmup = Math.Max(Math.Max(longPeriod, shortPeriod), Math.Max(shadowPeriod, Math.Max(nearPeriod, farPeriod))) + 2;
+        var shadowStatistic = advance ? CandleStatistic.Shadows : CandleStatistic.Range;
+        // The digit is how many bars back the window ends: 0 weighs the newest candle, 2 the first.
+        var long1 = new CandleWindow(columns, CandleStatistic.Body, longPeriod);
+        var long2 = new CandleWindow(columns, CandleStatistic.Body, longPeriod);
+        var short0 = new CandleWindow(columns, CandleStatistic.Body, shortPeriod);
+        var shadow0 = new CandleWindow(columns, shadowStatistic, shadowPeriod);
+        var shadow1 = new CandleWindow(columns, shadowStatistic, shadowPeriod);
+        var shadow2 = new CandleWindow(columns, shadowStatistic, shadowPeriod);
+        var near1 = new CandleWindow(columns, CandleStatistic.Range, nearPeriod);
+        var near2 = new CandleWindow(columns, CandleStatistic.Range, nearPeriod);
+        var far1 = new CandleWindow(columns, CandleStatistic.Range, farPeriod);
+        var far2 = new CandleWindow(columns, CandleStatistic.Range, farPeriod);
+        long shadowTenth = 10L * shadowPeriod, shadowHalf = 2L * shadowPeriod, nearFifth = 5L * nearPeriod, farFifth = 5L * farPeriod;
+        for (var i = 0; i < n; i++)
+        {
+            if (i >= 3)
+            {
+                long2.Include(i - 3);
+                if (advance) shadow2.Include(i - 3);
+                if (!south) near2.Include(i - 3);
+                if (advance) far2.Include(i - 3);
+            }
+            if (i >= 2)
+            {
+                if (kind == ExhaustionCandleKind.Stalled) long1.Include(i - 2);
+                shadow1.Include(i - 2);
+                if (!south) near1.Include(i - 2);
+                if (advance) far1.Include(i - 2);
+            }
+            if (i >= 1)
+            {
+                if (!advance) short0.Include(i - 1);
+                if (kind != ExhaustionCandleKind.Stalled) shadow0.Include(i - 1);
+            }
+            if (i < warmup) continue;
+            double openA = open[i - 2], closeA = close[i - 2], openB = open[i - 1], closeB = close[i - 1], o = open[i], c = close[i];
+            if (south)
+            {
+                if (closeA >= openA || closeB >= openB || c >= o) continue;
+                double highA = high[i - 2], lowA = low[i - 2], lowB = low[i - 1];
+                if (!(openB > closeA && openB <= highA && lowB < closeA && lowB >= lowA && low[i] > lowB && high[i] < high[i - 1]))
+                    continue;
+                if (long2.Compare(i - 2, longPeriod, openA, closeA) < 0
+                    && DifferenceSign(closeA, lowA, openA, closeA) > 0
+                    && DifferenceSign(openB, closeB, openA, closeA) < 0
+                    && shadow1.Compare(i - 1, shadowTenth, closeB, lowB) < 0
+                    && short0.Compare(i, shortPeriod, o, c) > 0
+                    && shadow0.Compare(i, shadowTenth, c, low[i]) > 0
+                    && shadow0.Compare(i, shadowTenth, high[i], o) > 0)
+                    output[i] = 100;
+                continue;
+            }
+            if (closeA < openA || closeB < openB || c < o || c <= closeB || closeB <= closeA || openB <= openA) continue;
+            if (long2.Compare(i - 2, longPeriod, closeA, openA) >= 0) continue;
+            if (near2.Compare(i - 2, nearFifth, openB, closeA) < 0) continue;
+            if (!advance)
+            {
+                if (long1.Compare(i - 1, longPeriod, closeB, openB) < 0
+                    && shadow1.Compare(i - 1, shadowTenth, high[i - 1], closeB) > 0
+                    && short0.Compare(i, shortPeriod, c, o) > 0
+                    && near1.Compare(i - 1, nearFifth, closeB, c) >= 0)
+                    output[i] = -100;
+                continue;
+            }
+            if (o <= openB || near1.Compare(i - 1, nearFifth, o, closeB) < 0
+                || shadow2.Compare(i - 2, shadowHalf, high[i - 2], closeA) <= 0)
+                continue;
+            // All three are white, so each body is close - open.
+            var shrinking = DifferenceSign(c, o, closeB, openB) < 0;
+            if (far2.CompareScaled(i - 2, 3, farFifth, closeA, openA, closeB, openB) < 0
+                    && near1.CompareScaled(i - 1, 1, nearFifth, c, o, closeB, openB) > 0
+                || far1.CompareScaled(i - 1, 3, farFifth, closeB, openB, c, o) < 0
+                || shrinking && DifferenceSign(closeB, openB, closeA, openA) < 0
+                    && (shadow0.Compare(i, shadowHalf, high[i], c) < 0 || shadow1.Compare(i - 1, shadowHalf, high[i - 1], closeB) < 0)
+                || shrinking && DifferenceSign(high[i], c, c, o) > 0)
+                output[i] = -100;
         }
     }
 }
