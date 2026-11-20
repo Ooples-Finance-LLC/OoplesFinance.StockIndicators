@@ -298,4 +298,75 @@ internal static partial class FastKernels
             smoothDefined[i] = 1;
         }
     }
+
+
+    /// <summary>
+    /// Moving-average envelope: the chosen average with a band a fixed percentage above and below it, from
+    /// the first bar with a full window.
+    /// </summary>
+    internal static void AverageEnvelope(ReadOnlySpan<double> close, double[][] outputs, WindowAverageEnvelope owner)
+    {
+        var n = close.Length;
+        var period = owner.Period;
+        Span<double> center = outputs[0].AsSpan(0, n), upper = outputs[1].AsSpan(0, n), lower = outputs[2].AsSpan(0, n);
+        var defined = outputs[3].AsSpan(0, n);
+        upper.Clear();
+        lower.Clear();
+        defined.Clear();
+        if (n <= owner.First)
+        {
+            center.Clear();
+            return;
+        }
+        var first = (int)owner.First;
+        switch (owner.Average)
+        {
+            case EnvelopeAverage.Wma: WeightedWindow(close, center, period); break;
+            case EnvelopeAverage.Hma: HullCenter(close, center, new HullWindow(period)); break;
+            // The second output is scratch here; it is cleared before the bands are written.
+            case EnvelopeAverage.Alma: ArnaudLegoux(close, center, upper, new ArnaudLegouxWindow(period)); break;
+            case EnvelopeAverage.Dema: SeededExponential(close, center, period, 2, DefaultSeedIsShared(period, 2)); break;
+            case EnvelopeAverage.Tema: SeededExponential(close, center, period, 3, DefaultSeedIsShared(period, 3)); break;
+            case EnvelopeAverage.Smma: WilderAverage(close, center, period, new WilderMovingAverage(period).SeedWithAverage); break;
+            case EnvelopeAverage.Epma: LinearRegression(close, center, new WindowLinearRegression(period)); break;
+            case EnvelopeAverage.Ema: RunningSeedEma(close, center, period); break;
+            default: Sma(close, center, period); break;
+        }
+        center.Slice(0, first).Clear();
+        upper.Clear();
+        var percent = owner.PercentOffset;
+        double above = (100 + percent) / 100, below = (100 - percent) / 100;
+        for (var i = first; i < n; i++)
+        {
+            upper[i] = center[i] * above;
+            lower[i] = center[i] * below;
+        }
+        defined.Slice(first).Fill(1);
+    }
+
+    // Twice the half-period weighted mean less the full one, weighted again over the root period; the last
+    // stage starts at the first bar with a full window.
+    private static void HullCenter(ReadOnlySpan<double> close, Span<double> output, HullWindow owner)
+    {
+        var n = close.Length;
+        var start = owner.Period - 1;
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] rentedHalf = pool.Rent(n), rentedFull = pool.Rent(n);
+        try
+        {
+            Span<double> half = rentedHalf.AsSpan(0, n), full = rentedFull.AsSpan(0, n);
+            WeightedWindow(close, half, owner.HalfPeriod);
+            WeightedWindow(close, full, owner.Period);
+            for (var i = start; i < n; i++) half[i] = 2 * half[i] - full[i];
+            WeightedWindow(half.Slice(start), output.Slice(start), owner.RootPeriod);
+        }
+        finally
+        {
+            pool.Return(rentedHalf);
+            pool.Return(rentedFull);
+        }
+    }
+
+    private static bool DefaultSeedIsShared(int period, int order) =>
+        new SeededExponentialAverage(period, order).SeedMode == ExponentialSeedMode.Shared;
 }
