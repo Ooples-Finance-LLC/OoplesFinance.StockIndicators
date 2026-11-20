@@ -1,3 +1,5 @@
+using OoplesFinance.StockIndicators.Validation;
+
 namespace OoplesFinance.StockIndicators.Indicators.Fast;
 
 internal static partial class FastKernels
@@ -52,41 +54,104 @@ internal static partial class FastKernels
     internal static void SmoothedAccumulation(FastColumns columns, FastOutputs outputs, SmoothedAccumulationOscillator owner)
     {
         columns.RequireHighLowClose();
-        ReadOnlySpan<double> high = columns.High, low = columns.Low, close = columns.Close, volume = columns.Volume;
+        // The prices and the volume are checked as they are read, through their sum: a bar with no range
+        // hides its close and its volume from everything computed here.
+        ReadOnlySpan<double> high = columns.Raw(IndicatorInputFields.High), low = columns.Raw(IndicatorInputFields.Low);
+        ReadOnlySpan<double> close = columns.Raw(IndicatorInputFields.Close), volume = columns.Raw(IndicatorInputFields.Volume);
         var n = close.Length;
         var details = owner.IncludeDetails;
         var firstValue = owner.FirstValue;
-        var fast = new Seeded(owner.FastPeriod, firstValue, 2.0 / (owner.FastPeriod + 1.0));
-        var slow = new Seeded(owner.SlowPeriod, firstValue, 2.0 / (owner.SlowPeriod + 1.0));
+        double fastAlpha = 2.0 / (owner.FastPeriod + 1.0), slowAlpha = 2.0 / (owner.SlowPeriod + 1.0);
+        var fast = new Seeded(owner.FastPeriod, firstValue, fastAlpha);
+        var slow = new Seeded(owner.SlowPeriod, firstValue, slowAlpha);
         var start = (int)Math.Min((long)Math.Max(owner.FastPeriod, owner.SlowPeriod) - 1 + owner.Suppression, n);
-        Span<double> oscillator = outputs[0];
-        oscillator.Slice(0, start).Clear();
+        Span<double> oscillator = outputs[0].AsSpan(0, n);
         // Without details the three detail series are zero throughout and their flags never turn on.
         for (var slot = 1; slot < 4 && !details; slot++) outputs.Flag(slot, n);
-        Span<double> multipliers = details ? outputs[1] : default, flows = details ? outputs[2] : default,
-            lines = details ? outputs[3] : default;
-        double total = 0;
-        for (var i = 0; i < n; i++)
+        Span<double> multipliers = details ? outputs[1].AsSpan(0, n) : default, flows = details ? outputs[2].AsSpan(0, n) : default,
+            lines = details ? outputs[3].AsSpan(0, n) : default;
+        // Each bar's flow first, a vector of bars at a time: the divisions do not wait on one another. Without
+        // details the flows wait in the oscillator's own series, each read before its bar is written.
+        var held = details ? flows : oscillator;
+        long suspect = 0;
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            System.Numerics.Vector<double> zero = System.Numerics.Vector<double>.Zero, two = new System.Numerics.Vector<double>(2.0);
+            var seen = System.Numerics.Vector<long>.Zero;
+            for (; i <= n - width; i += width)
+            {
+                var h = new System.Numerics.Vector<double>(high.Slice(i, width));
+                var l = new System.Numerics.Vector<double>(low.Slice(i, width));
+                var c = new System.Numerics.Vector<double>(close.Slice(i, width));
+                var v = new System.Numerics.Vector<double>(volume.Slice(i, width));
+                var all = h + l + (c + v);
+                seen |= System.Numerics.Vector.AsVectorInt64(all - all); // NOSONAR x - x is the finite test
+                var range = h - l;
+                // Dividing by the signed range is the same as the sign-adjusted numerator over its magnitude.
+                // A bar with no range divides by zero here and is then replaced by the zero it is defined as.
+                var multiplier = (two * c - h - l) / range;
+                var ranged = firstValue
+                    ? System.Numerics.Vector.GreaterThan(range, zero)
+                    : System.Numerics.Vector.OnesComplement(System.Numerics.Vector.Equals(range, zero));
+                multiplier = System.Numerics.Vector.ConditionalSelect(ranged, multiplier, zero);
+                var flow = System.Numerics.Vector.ConditionalSelect(ranged, multiplier * v, zero);
+                if (details) multiplier.CopyTo(multipliers.Slice(i, width));
+                flow.CopyTo(held.Slice(i, width));
+            }
+            if (!System.Numerics.Vector.EqualsAll(seen, System.Numerics.Vector<long>.Zero)) suspect = 1;
+        }
+#endif
+        for (; i < n; i++)
         {
             var range = high[i] - low[i];
             double multiplier = 0, flow = 0;
             if (firstValue ? range > 0 : range != 0)
             {
-                // Dividing by the signed range is the same as the sign-adjusted numerator over its magnitude.
                 multiplier = (2 * close[i] - high[i] - low[i]) / range;
                 flow = multiplier * volume[i];
             }
-            total += flow;
+            suspect |= FastMath.NonFiniteBits(high[i] + low[i] + (close[i] + volume[i]));
+            if (details) multipliers[i] = multiplier;
+            held[i] = flow;
+        }
+        if (suspect != 0)
+        {
+            // Either an input is not finite, which its checked column names, or four finite inputs summed
+            // past the largest double, which says nothing about the oscillator and leaves it to the output check.
+            _ = columns.High;
+            _ = columns.Low;
+            _ = columns.Close;
+            _ = columns.Volume;
+        }
+        // The running total and both averages in one pass, in bar order. The bars that seed an average or
+        // precede the oscillator's first take the general step; the rest take one with no branch in it.
+        double total = 0;
+        var settled = (int)Math.Min(Math.Max((long)Math.Max(owner.FastPeriod, owner.SlowPeriod), start), n);
+        for (i = 0; i < settled; i++)
+        {
+            total += held[i];
             fast.Add(total);
             slow.Add(total);
-            if (details)
-            {
-                multipliers[i] = multiplier;
-                flows[i] = flow;
-                lines[i] = total;
-            }
-            if (i >= start) oscillator[i] = fast.Value - slow.Value;
+            if (details) lines[i] = total;
+            var value = i >= start ? fast.Value - slow.Value : 0;
+            suspect |= FastMath.NonFiniteBits(value);
+            oscillator[i] = value;
         }
+        double fastValue = fast.Value, slowValue = slow.Value, fastWeight = 1.0 - fastAlpha, slowWeight = 1.0 - slowAlpha;
+        for (; i < n; i++)
+        {
+            total += held[i];
+            fastValue = FastMath.Blend(fastWeight, fastValue, fastAlpha * total);
+            slowValue = FastMath.Blend(slowWeight, slowValue, slowAlpha * total);
+            if (details) lines[i] = total;
+            var value = fastValue - slowValue;
+            suspect |= FastMath.NonFiniteBits(value);
+            oscillator[i] = value;
+        }
+        if (suspect == 0) outputs.Verified(0);
         outputs.Flag(4, start);
         for (var slot = 5; slot < 8; slot++) outputs.Flag(slot, details ? 0 : n);
     }

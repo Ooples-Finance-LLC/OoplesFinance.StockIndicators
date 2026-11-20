@@ -1218,6 +1218,8 @@ public sealed class FastNumericsParityTests
             (() => new PriceRoundingTransform(PriceRoundingOperation.SquareRoot), ["Close"], "Close", "Close"),
             (() => new SeededOnBalanceVolume(), ["Close", "Volume"], "Close", "Close"),
             (() => new SeededOnBalanceVolume(ObvSeed.Zero), ["Close", "Volume"], "Close", "Close"),
+            (() => new SmoothedAccumulationOscillator(3, 10, true, 0, false), ["High", "Low", "Close", "Volume"], "High", "High"),
+            (() => new SmoothedAccumulationOscillator(3, 10, false, 0, true), ["High", "Low", "Close", "Volume"], "High", "High"),
         };
         static Bar With(Bar bar, string field, double value) => field switch
         {
