@@ -562,10 +562,38 @@ internal static partial class FastKernels
         if (n == 0) return;
         var total = owner.Seed == ObvSeed.FirstVolume ? volume[0] : 0;
         value[0] = total;
-        // Bars before this one hold their signed volume and wait for the running total.
-        var signed = 1;
+        // Bars before this one hold their signed volume, and those from the other one on still wait for the
+        // running total.
+        int signed = 1, totalled = 1;
 #if !NETFRAMEWORK
-        if (System.Numerics.Vector.IsHardwareAccelerated)
+        if (System.Runtime.Intrinsics.X86.Avx2.IsSupported && n >= 9)
+        {
+            // Four bars at a time, start to finish: each bar's volume signed by which way its close moved,
+            // the four totalled among themselves, and their totals added to the running one - so a bar is
+            // read once and written once, and the running total is waited on once in four bars.
+            System.Runtime.Intrinsics.Vector256<double> zero = System.Runtime.Intrinsics.Vector256<double>.Zero, one = System.Runtime.Intrinsics.Vector256.Create(1.0);
+            var running = System.Runtime.Intrinsics.Vector256.Create(total);
+            var seen = System.Runtime.Intrinsics.Vector256<long>.Zero;
+            for (; signed <= n - 4; signed += 4)
+            {
+                var now = System.Runtime.Intrinsics.Vector256.Create<double>(close.Slice(signed, 4));
+                var then = System.Runtime.Intrinsics.Vector256.Create<double>(close.Slice(signed - 1, 4));
+                var direction = System.Runtime.Intrinsics.X86.Avx.And(System.Runtime.Intrinsics.X86.Avx.CompareGreaterThan(now, then), one)
+                    - System.Runtime.Intrinsics.X86.Avx.And(System.Runtime.Intrinsics.X86.Avx.CompareLessThan(now, then), one);
+                seen |= System.Runtime.Intrinsics.Vector256.AsInt64(now - now); // NOSONAR x - x is the finite test
+                var block = direction * System.Runtime.Intrinsics.Vector256.Create<double>(volume.Slice(signed, 4));
+                // [a, b, c, d] becomes [a, a + b, b + c, c + d] and then [a, a + b, a + b + c, a + b + c + d].
+                var pairs = block + System.Runtime.Intrinsics.X86.Avx.Blend(System.Runtime.Intrinsics.X86.Avx2.Permute4x64(block, 0x90), zero, 0x01);
+                var totals = pairs + System.Runtime.Intrinsics.X86.Avx.Permute2x128(pairs, pairs, 0x08);
+                System.Runtime.Intrinsics.Vector256.CopyTo(totals + running, value.Slice(signed, 4));
+                running += System.Runtime.Intrinsics.X86.Avx2.Permute4x64(totals, 0xFF);
+            }
+            total = System.Runtime.Intrinsics.Vector256.ToScalar(running);
+            if (seen != System.Runtime.Intrinsics.Vector256<long>.Zero) suspect = 1;
+            // Nothing is left waiting for the running total.
+            totalled = signed;
+        }
+        else if (System.Numerics.Vector.IsHardwareAccelerated)
         {
             // Each bar's volume, signed by which way its close moved, a vector of bars at a time; the
             // running total then adds the same terms in the same order.
@@ -584,7 +612,7 @@ internal static partial class FastKernels
             if (!System.Numerics.Vector.EqualsAll(seen, System.Numerics.Vector<long>.Zero)) suspect = 1;
         }
 #endif
-        if (signed > 1) total = FastMath.PrefixSum(value.Slice(1, signed - 1), total);
+        if (signed > totalled) total = FastMath.PrefixSum(value.Slice(totalled, signed - totalled), total);
         for (var i = signed; i < n; i++)
         {
             double current = close[i], previous = close[i - 1];
