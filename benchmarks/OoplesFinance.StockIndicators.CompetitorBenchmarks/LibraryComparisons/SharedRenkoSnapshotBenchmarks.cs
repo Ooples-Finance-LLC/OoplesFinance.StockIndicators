@@ -23,8 +23,8 @@ public class SharedRenkoSnapshotBenchmarks
     [Benchmark]
     public RenkoBrick[] Snapshot() => Operation switch
     {
-        "Skender.GetRenko" => RenkoSnapshot.Calculate(_bars).ToArray(),
-        "Skender.GetRenkoAtr" => RenkoSnapshot.CalculateAtr(_bars, 20).ToArray(),
+        "Skender.GetRenko" => RenkoSnapshot.Calculate(_bars, numerics: ComparisonBuilder.Numerics).ToArray(),
+        "Skender.GetRenkoAtr" => RenkoSnapshot.CalculateAtr(_bars, 20, numerics: ComparisonBuilder.Numerics).ToArray(),
         _ => throw new ArgumentException("Unknown Renko snapshot.")
     };
 }

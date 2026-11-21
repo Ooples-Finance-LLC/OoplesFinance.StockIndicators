@@ -33,7 +33,7 @@ public class SharedEntropyBenchmarks
         {
             var root = new NormalizedWindowEntropy(Period);
             using var run = Build(root, mode);
-            Check(expected, run[root.Value].ToArray());
+            Check(expected, run.Held(root.Value));
         }
     }
 

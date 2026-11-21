@@ -22,8 +22,8 @@ public class ValuesBuilderBenchmarks
         foreach (var output in indicator.Outputs)
             AsinFeasibilityBenchmarks.RequireSame(expected[output].ToArray(), actual[output].ToArray());
     }
-    private StockIndicatorBuilder Builder(IIndicator indicator) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_work.Data.IndicatorBars)).ConfigureIndicators(indicator);
+    private StockIndicatorBuilder Builder(IIndicator indicator) => ComparisonBuilder.Create()
+        .ConfigureSource(ComparisonBuilder.Source(_work.Data.IndicatorBars)).ConfigureIndicators(indicator);
     [Benchmark(Baseline = true)] public int WithSnapshots()
     {
         using var run = Builder(CpuBuilderWorkload.Create(PairId)).BuildAsync().GetAwaiter().GetResult();

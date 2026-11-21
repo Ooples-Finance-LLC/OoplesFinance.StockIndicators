@@ -79,8 +79,8 @@ internal static class RenkoComparison
             (d, p) =>
                 Series(
                     atr
-                        ? RenkoSnapshot.CalculateAtr(d.IndicatorBars, p, highLow)
-                        : RenkoSnapshot.Calculate(d.IndicatorBars, size, highLow)
+                        ? RenkoSnapshot.CalculateAtr(d.IndicatorBars, p, highLow, ComparisonBuilder.Numerics)
+                        : RenkoSnapshot.Calculate(d.IndicatorBars, size, highLow, ComparisonBuilder.Numerics)
                 ),
             (d, p) => Series(Reference(d, p, atr, size, highLow, false)),
             Names,

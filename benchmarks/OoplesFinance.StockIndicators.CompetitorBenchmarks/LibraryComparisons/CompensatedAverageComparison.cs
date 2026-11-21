@@ -37,13 +37,13 @@ internal static class CompensatedAverageComparison
     internal static ComparisonSeries Owned(Bar[] bars, int period, int order)
     {
         var indicator = new CompensatedExponentialAverage(period, order);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(0, run[indicator.Outputs[0]].ToArray());
+        return new(0, run.Held(indicator.Outputs[0]));
     }
 
     internal static double[] Reference(double[] prices, int period, int order, bool native)

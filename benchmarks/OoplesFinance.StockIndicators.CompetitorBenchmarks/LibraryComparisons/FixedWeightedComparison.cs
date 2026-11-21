@@ -36,13 +36,13 @@ internal static class FixedWeightedComparison
         var indicator = new FixedPeriodWma(period);
         if (twice)
             indicator.Of(new FixedPeriodWma(period));
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(0, run[indicator.Outputs[0]].ToArray());
+        return new(0, run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Reference(

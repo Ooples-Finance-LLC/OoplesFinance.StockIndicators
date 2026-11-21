@@ -66,18 +66,17 @@ internal static class AverageDifferenceComparison
     internal static ComparisonSeries Owned(Bar[] bars, int first, int second, bool exponential)
     {
         var indicator = new MovingAverageDifference(first, second, exponential);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var present = run[indicator.IsDefined].ToArray();
+        var present = run.Held(indicator.IsDefined);
         return VolumePriceComparison.Mask(
             run[indicator.Value]
                 .ToArray()
-                .Select((v, i) => present[i] > 0 ? (double?)v : null)
-                .ToArray()
+                .WherePresent(present)
         );
     }
 

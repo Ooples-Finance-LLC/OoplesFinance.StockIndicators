@@ -28,8 +28,8 @@ internal static class RangeAccelerationComparison
     internal static ComparisonSeries Owned(Bar[] bars, int period)
     {
         var indicator = new RangeAccelerationBands(period);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -37,9 +37,9 @@ internal static class RangeAccelerationComparison
         var rows = new double?[3][];
         for (var j = 0; j < 3; j++)
         {
-            var v = run[indicator.Outputs[j]].ToArray();
-            var f = run[indicator.Outputs[j + 3]].ToArray();
-            rows[j] = v.Select((x, i) => f[i] > 0 ? (double?)x : null).ToArray();
+            var v = run[indicator.Outputs[j]];
+            var f = run[indicator.Outputs[j + 3]];
+            rows[j] = v.WherePresent(f);
         }
         return Series(rows);
     }

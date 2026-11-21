@@ -142,8 +142,8 @@ internal static class AlignedMacdComparison
             fixedCoefficients,
             selection
         );
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -151,9 +151,9 @@ internal static class AlignedMacdComparison
         var rows = new double?[3][];
         for (var j = 0; j < 3; j++)
         {
-            var v = run[indicator.Outputs[j]].ToArray();
-            var present = run[indicator.Outputs[j + 3]].ToArray();
-            rows[j] = v.Select((x, i) => present[i] > 0 ? (double?)x : null).ToArray();
+            var v = run[indicator.Outputs[j]];
+            var present = run[indicator.Outputs[j + 3]];
+            rows[j] = v.WherePresent(present);
         }
         return Series(rows);
     }

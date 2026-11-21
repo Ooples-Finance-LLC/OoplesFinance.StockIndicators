@@ -22,8 +22,8 @@ internal static class SkenderRocComparison
     private static ComparisonSeries Ooples(CompetitorData data, int period, int? averagePeriod)
     {
         var indicator = new RateOfChangeWithAverage(period, averagePeriod);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -31,16 +31,16 @@ internal static class SkenderRocComparison
         return new(
             new Dictionary<string, ComparisonOutput>(StringComparer.Ordinal)
             {
-                ["Momentum"] = new(Math.Min(period, data.Count), run[indicator.Momentum].ToArray()),
+                ["Momentum"] = new(Math.Min(period, data.Count), run.Held(indicator.Momentum)),
                 ["Roc"] = Masked(
                     period,
-                    run[indicator.Roc].ToArray(),
-                    run[indicator.RocIsDefined].ToArray()
+                    run.Held(indicator.Roc),
+                    run.Held(indicator.RocIsDefined)
                 ),
                 ["RocSma"] = Masked(
                     AverageFirst(period, averagePeriod, data.Count),
-                    run[indicator.Average].ToArray(),
-                    run[indicator.AverageIsDefined].ToArray()
+                    run.Held(indicator.Average),
+                    run.Held(indicator.AverageIsDefined)
                 ),
             }
         );

@@ -35,7 +35,7 @@ public class SharedJurikBenchmarks
         {
             var indicator = Create();
             using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator.Outputs[0]].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator.Outputs[0]));
         }
     }
     private static JurikAdaptive Create() => new(Period);

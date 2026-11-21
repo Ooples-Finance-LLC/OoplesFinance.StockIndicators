@@ -58,13 +58,13 @@ internal static class HeikinAshiComparison
     private static ComparisonSeries Owned(CompetitorData d, int _)
     {
         var indicator = new HeikinAshiCandles();
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(d.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(d.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return Series(indicator.Outputs.Select(o => run[o].ToArray()).ToArray());
+        return Series(indicator.Outputs.Select(o => run.Held(o)).ToArray());
     }
 
     private static ComparisonSeries Reference(CompetitorData data, bool native)

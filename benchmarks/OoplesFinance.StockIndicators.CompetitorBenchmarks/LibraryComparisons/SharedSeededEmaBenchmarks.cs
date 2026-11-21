@@ -38,7 +38,7 @@ public class SharedSeededEmaBenchmarks
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
             var indicator = Create(); using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
         }
         var native = Reference(true);
         Check(NativeSingle(), native); Check(NativeParallel(), native);

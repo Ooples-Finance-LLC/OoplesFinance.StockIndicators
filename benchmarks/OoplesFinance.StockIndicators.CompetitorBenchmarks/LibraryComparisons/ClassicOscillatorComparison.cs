@@ -46,16 +46,16 @@ internal static class ClassicOscillatorComparison
     )
     {
         var indicator = new ClassicPriceOscillator(fast, slow, method, percent, first, suppression);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Value].ToArray();
-        var mask = run[indicator.IsDefined].ToArray();
+        var values = run[indicator.Value];
+        var mask = run[indicator.IsDefined];
         return VolumePriceComparison.Mask(
-            values.Select((v, i) => mask[i] > 0 ? (double?)v : null).ToArray()
+            values.WherePresent(mask)
         );
     }
 

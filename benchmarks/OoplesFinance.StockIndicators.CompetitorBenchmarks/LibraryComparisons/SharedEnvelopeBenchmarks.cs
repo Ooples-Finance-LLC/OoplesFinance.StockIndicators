@@ -31,14 +31,14 @@ public class SharedEnvelopeBenchmarks
             {
                 var reference=expected.Outputs[names[slot]];
                 var present=reference.Present!;
-                AsinFeasibilityBenchmarks.RequireSame(reference.Values.Select((v,i) => present[i] ? v : 0).ToArray(),run[owner.Outputs[slot]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(reference.Values.Select((v,i) => present[i] ? v : 0).ToArray(),run.Held(owner.Outputs[slot]));
                 int flag=owner is WindowAverageEnvelope ? 3 : slot+4;
-                AsinFeasibilityBenchmarks.RequireSame(present.Select(p => p ? 1d : 0d).ToArray(),run[owner.Outputs[flag]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(present.Select(p => p ? 1d : 0d).ToArray(),run.Held(owner.Outputs[flag]));
             }
             if(owner is WindowAtrBands { IncludeWidth:false })
             {
-                AsinFeasibilityBenchmarks.RequireSame(new double[Count],run[owner.Outputs[3]].ToArray());
-                AsinFeasibilityBenchmarks.RequireSame(new double[Count],run[owner.Outputs[7]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(new double[Count],run.Held(owner.Outputs[3]));
+                AsinFeasibilityBenchmarks.RequireSame(new double[Count],run.Held(owner.Outputs[7]));
             }
         }
     }

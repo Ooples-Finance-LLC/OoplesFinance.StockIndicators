@@ -79,29 +79,29 @@ internal static class AccumulationDistributionComparison
         IIndicator indicator = priceAdjusted
             ? new PriceAdjustedAccumulationDistribution()
             : new Adl(1);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Outputs[0]].ToArray();
+        var values = run.Held(indicator.Outputs[0]);
         if (!priceAdjusted)
             return new(0, values);
-        var flags = run[indicator.Outputs[1]].ToArray();
-        return Mask(values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray());
+        var flags = run[indicator.Outputs[1]];
+        return Mask(values.WherePresent(flags));
     }
 
     private static ComparisonSeries OoplesDetails(CompetitorData data, int? averagePeriod)
     {
         var indicator = new AccumulationDistributionWithAverage(averagePeriod);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var columns = indicator.Outputs.Select(output => run[output].ToArray()).ToArray();
+        var columns = indicator.Outputs.Select(output => run.Held(output)).ToArray();
         return new(
             new Dictionary<string, ComparisonOutput>
             {

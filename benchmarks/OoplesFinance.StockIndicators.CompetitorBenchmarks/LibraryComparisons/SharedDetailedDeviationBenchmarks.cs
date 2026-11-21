@@ -32,8 +32,8 @@ public class SharedDetailedDeviationBenchmarks
             for (int slot = 0; slot < 4; slot++)
             {
                 var column = expected.Outputs[SkenderDeviationComparison.Names[slot]];
-                AsinFeasibilityBenchmarks.RequireSame(column.Values.Select((v, i) => column.Present![i] ? v : 0).ToArray(), run[indicator.Outputs[slot]].ToArray());
-                AsinFeasibilityBenchmarks.RequireSame(column.Present!.Select(v => v ? 1d : 0).ToArray(), run[indicator.Outputs[slot + 4]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(column.Values.Select((v, i) => column.Present![i] ? v : 0).ToArray(), run.Held(indicator.Outputs[slot]));
+                AsinFeasibilityBenchmarks.RequireSame(column.Present!.Select(v => v ? 1d : 0).ToArray(), run.Held(indicator.Outputs[slot + 4]));
             }
         }
     }

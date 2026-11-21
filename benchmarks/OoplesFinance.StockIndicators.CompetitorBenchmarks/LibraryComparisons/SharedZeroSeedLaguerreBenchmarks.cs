@@ -37,7 +37,7 @@ public class SharedZeroSeedLaguerreBenchmarks
         {
             var indicator = new ZeroSeedLaguerreFilter(Gamma);
             using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
         }
     }
 

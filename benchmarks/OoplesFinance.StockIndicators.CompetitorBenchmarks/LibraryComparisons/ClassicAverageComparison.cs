@@ -74,16 +74,16 @@ internal static class ClassicAverageComparison
     )
     {
         var indicator = new ClassicMovingAverage(p, method, first, suppression);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Average].ToArray();
-        var flags = run[indicator.IsDefined].ToArray();
+        var values = run[indicator.Average];
+        var flags = run[indicator.IsDefined];
         return VolumePriceComparison.Mask(
-            values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray()
+            values.WherePresent(flags)
         );
     }
 

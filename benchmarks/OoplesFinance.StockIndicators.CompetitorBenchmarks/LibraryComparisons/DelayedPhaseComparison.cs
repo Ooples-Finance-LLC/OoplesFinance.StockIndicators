@@ -45,8 +45,8 @@ internal static class DelayedPhaseComparison
     internal static ComparisonSeries Owned(Bar[] bars, double fast, double slow, int suppression)
     {
         var indicator = new DelayedPhaseAdaptiveAverage(fast, slow, suppression);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -54,9 +54,9 @@ internal static class DelayedPhaseComparison
         var r = new double?[2][];
         for (var j = 0; j < 2; j++)
         {
-            var v = run[indicator.Outputs[j]].ToArray();
-            var f = run[indicator.Outputs[j + 2]].ToArray();
-            r[j] = v.Select((x, i) => f[i] > 0 ? (double?)x : null).ToArray();
+            var v = run[indicator.Outputs[j]];
+            var f = run[indicator.Outputs[j + 2]];
+            r[j] = v.WherePresent(f);
         }
         return SeededPhaseComparison.Series(r);
     }

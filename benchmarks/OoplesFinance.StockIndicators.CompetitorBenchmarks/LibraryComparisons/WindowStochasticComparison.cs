@@ -79,8 +79,8 @@ internal static class WindowStochasticComparison
     )
     {
         var indicator = new WindowStochasticKdj(period, k, d, wilder, kFactor, dFactor);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -90,9 +90,9 @@ internal static class WindowStochasticComparison
                 .Range(0, 3)
                 .Select(j =>
                 {
-                    var values = run[indicator.Outputs[j]].ToArray();
-                    var flags = run[indicator.Outputs[j + 3]].ToArray();
-                    return values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray();
+                    var values = run[indicator.Outputs[j]];
+                    var flags = run[indicator.Outputs[j + 3]];
+                    return values.WherePresent(flags);
                 })
                 .ToArray()
         );

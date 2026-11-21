@@ -43,7 +43,7 @@ public class SharedStateRuntimeBenchmarks
 
     private IIndicatorRun Build(IIndicator indicator, bool legacy, IndicatorHistoryMode history = IndicatorHistoryMode.Full)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
         if (legacy) builder.ConfigureBehavior(_ => { });
         return builder.BuildAsync().GetAwaiter().GetResult();
     }

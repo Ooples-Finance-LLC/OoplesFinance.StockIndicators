@@ -1,4 +1,6 @@
 using System.Numerics;
+using OoplesFinance.StockIndicators.Builder;
+using OoplesFinance.StockIndicators.Indicators.Fast;
 using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Indicators;
@@ -23,7 +25,8 @@ public static class VolatilityStopSnapshot
     public static IReadOnlyList<VolatilityStopValue> Calculate(
         IReadOnlyList<Bar> bars,
         int period = 7,
-        double multiplier = 3
+        double multiplier = 3,
+        IndicatorNumerics numerics = IndicatorNumerics.Exact
     )
     {
         if (bars is null) throw new ArgumentNullException(nameof(bars));
@@ -31,13 +34,15 @@ public static class VolatilityStopSnapshot
             throw new ArgumentOutOfRangeException(nameof(period));
         if (!FrameworkCompatibility.IsFinite(multiplier) || multiplier <= 0)
             throw new ArgumentOutOfRangeException(nameof(multiplier));
-        foreach (var bar in bars)
+        foreach (var bar in BarRun.Of(bars))
             if (
                 !FrameworkCompatibility.IsFinite(bar.High)
                 || !FrameworkCompatibility.IsFinite(bar.Low)
                 || !FrameworkCompatibility.IsFinite(bar.Close)
             )
                 throw new ArgumentOutOfRangeException(nameof(bars));
+        if (numerics == IndicatorNumerics.Fast)
+            return FastSnapshots.VolatilityStop(bars, period, multiplier);
         if (bars.Count == 0)
             return Array.Empty<VolatilityStopValue>();
         var stops = new BigInteger?[bars.Count];

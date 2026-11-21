@@ -65,11 +65,11 @@ internal static class DynamicMomentumComparison
     internal static ComparisonSeries Owned(Bar[] bars, int sd, int smooth, int rsi, int upper, int lower)
     {
         var indicator = new DynamicMomentumStrength(sd, smooth, rsi, upper, lower);
-        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
-        var values = run[indicator.Value].ToArray();
-        var present = run[indicator.IsDefined].ToArray();
-        return VolumePriceComparison.Mask(values.Select((value, i) => present[i] > 0 ? (double?)value : null).ToArray());
+        var values = run[indicator.Value];
+        var present = run[indicator.IsDefined];
+        return VolumePriceComparison.Mask(values.WherePresent(present));
     }
 
     internal static double?[] Reference(

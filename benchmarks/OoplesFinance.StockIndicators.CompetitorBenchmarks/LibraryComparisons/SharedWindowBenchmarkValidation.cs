@@ -13,7 +13,7 @@ internal static class SharedWindowBenchmarkValidation
         {
             var indicator = create();
             using var run = build(indicator, history, reference);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
         }
     }
 

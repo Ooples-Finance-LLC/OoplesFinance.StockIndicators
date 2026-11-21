@@ -56,13 +56,13 @@ internal static class AnalyticKernelComparison
         IIndicator indicator = gaussian
             ? new GaussianWeightedAverage(period, sigma)
             : new SineWeightedAverage(period);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(0, run[indicator.Outputs[0]].ToArray());
+        return new(0, run.Held(indicator.Outputs[0]));
     }
 
     // Construct the formula independently and round each specified binary64 operation.

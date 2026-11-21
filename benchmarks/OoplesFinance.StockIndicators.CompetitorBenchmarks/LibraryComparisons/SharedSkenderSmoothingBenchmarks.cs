@@ -38,8 +38,8 @@ public class SharedSkenderSmoothingBenchmarks : SharedSkenderBenchmarkBase
                 {
                     var column = expected.Outputs[ElderRayComparison.Names[slot]];
                     var present = column.Present!;
-                    AsinFeasibilityBenchmarks.RequireSame(column.Values.Select((v, i) => present[i] ? v : 0).ToArray(), run[owner.Outputs[slot]].ToArray());
-                    AsinFeasibilityBenchmarks.RequireSame(present.Select(v => v ? 1d : 0d).ToArray(), run[owner.IsDefined].ToArray());
+                    AsinFeasibilityBenchmarks.RequireSame(column.Values.Select((v, i) => present[i] ? v : 0).ToArray(), run.Held(owner.Outputs[slot]));
+                    AsinFeasibilityBenchmarks.RequireSame(present.Select(v => v ? 1d : 0d).ToArray(), run.Held(owner.IsDefined));
                 }
             }
         }

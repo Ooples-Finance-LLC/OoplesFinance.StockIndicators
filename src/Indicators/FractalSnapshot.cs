@@ -53,7 +53,7 @@ public static class FractalSnapshot
             throw new ArgumentOutOfRangeException(nameof(leftSpan));
         if (rightSpan < 2)
             throw new ArgumentOutOfRangeException(nameof(rightSpan));
-        foreach (var bar in bars)
+        foreach (var bar in BarRun.Of(bars))
             if (
                 useClose
                     ? !FrameworkCompatibility.IsFinite(bar.Close)

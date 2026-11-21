@@ -44,15 +44,15 @@ internal static class LogVolatilityComparison
     internal static ComparisonSeries Owned(Bar[] bars, int p, bool realized, bool annual)
     {
         var indicator = new WindowLogVolatility(p, realized, annual);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Value].ToArray();
-        var present = run[indicator.IsDefined].ToArray();
-        return Series(values.Select((v, i) => present[i] > 0 ? (double?)v : null).ToArray());
+        var values = run[indicator.Value];
+        var present = run[indicator.IsDefined];
+        return Series(values.WherePresent(present));
     }
 
     internal static double?[] Reference(double[] prices, int p, bool realized, bool annual)

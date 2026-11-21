@@ -1,4 +1,6 @@
 using System.Numerics;
+using OoplesFinance.StockIndicators.Builder;
+using OoplesFinance.StockIndicators.Indicators.Fast;
 using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Indicators;
@@ -10,11 +12,18 @@ namespace OoplesFinance.StockIndicators.Indicators;
 public static class FibonacciWeightedSnapshot
 {
     /// <summary>Calculates positive-period Fibonacci weights; period one is the identity.</summary>
-    public static IReadOnlyList<double> Calculate(IReadOnlyList<Bar> bars, int period = 14)
+    public static IReadOnlyList<double> Calculate(
+        IReadOnlyList<Bar> bars,
+        int period = 14,
+        IndicatorNumerics numerics = IndicatorNumerics.Exact
+    )
     {
         FixedKernelSnapshotInput.Validate(bars);
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
+        // Past the limit the Fibonacci numbers no longer fit a double, so those periods stay exact.
+        if (numerics == IndicatorNumerics.Fast && period <= FastSnapshots.FibonacciPeriodLimit)
+            return FastSnapshots.FibonacciWeighted(bars, period);
         if (bars.Count == 0)
             return Array.Empty<double>();
         var weights = new BigInteger[period];
@@ -71,13 +80,16 @@ public static class WindowedSincSnapshot
         IReadOnlyList<Bar> bars,
         int period = 14,
         int taps = 21,
-        SincWindow window = SincWindow.Hann
+        SincWindow window = SincWindow.Hann,
+        IndicatorNumerics numerics = IndicatorNumerics.Exact
     )
     {
         FixedKernelSnapshotInput.Validate(bars);
         ValidateParameters(period, taps, window);
         if (bars.Count == 0) return Array.Empty<double>();
         var weights = CreateWeights(period, taps, window, out var mass);
+        if (numerics == IndicatorNumerics.Fast)
+            return FastSnapshots.WindowedSinc(bars, weights, mass.Mean(1));
         var output = new double[bars.Count];
         for (var i = 0; i < bars.Count; i++)
         {
@@ -147,7 +159,7 @@ internal static class FixedKernelSnapshotInput
     internal static void Validate(IReadOnlyList<Bar> bars)
     {
         if (bars is null) throw new ArgumentNullException(nameof(bars));
-        foreach (var bar in bars)
+        foreach (var bar in BarRun.Of(bars))
             if (!FrameworkCompatibility.IsFinite(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
     }

@@ -31,17 +31,17 @@ internal static class BalanceOfPowerComparison
         IIndicator indicator = missingRanges
             ? new BalanceOfPowerWithValidity(period)
             : new BalanceOfPower(1);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Outputs[0]].ToArray();
+        var values = run.Held(indicator.Outputs[0]);
         if (!missingRanges)
             return new(0, values);
-        var present = run[indicator.Outputs[1]].ToArray();
-        return Mask(values.Select((v, i) => present[i] > 0 ? (double?)v : null).ToArray(), period);
+        var present = run[indicator.Outputs[1]];
+        return Mask(values.WherePresent(present), period);
     }
 
     private static ComparisonSeries Mask(double?[] values, int period) =>

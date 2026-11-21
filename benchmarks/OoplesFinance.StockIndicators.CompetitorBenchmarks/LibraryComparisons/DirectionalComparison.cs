@@ -94,16 +94,16 @@ internal static class DirectionalComparison
     )
     {
         var indicator = new WindowDirectionalMeasure(measure, p, lag);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Value].ToArray();
-        var present = run[indicator.IsDefined].ToArray();
+        var values = run[indicator.Value];
+        var present = run[indicator.IsDefined];
         return VolumePriceComparison.Mask(
-            values.Select((v, i) => present[i] > 0 ? (double?)v : null).ToArray()
+            values.WherePresent(present)
         );
     }
 

@@ -63,8 +63,8 @@ internal static class StochasticSmaComparison
     internal static ComparisonSeries Owned(Bar[] bars, int p, string variant, int k, int d)
     {
         var indicator = Indicator(p, variant, k, d);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -79,11 +79,10 @@ internal static class StochasticSmaComparison
                     var present =
                         variant == "Raw"
                             ? Enumerable.Repeat(1d, bars.Length).ToArray()
-                            : run[indicator.Outputs[slot + count]].ToArray();
+                            : run.Held(indicator.Outputs[slot + count]);
                     return run[indicator.Outputs[slot]]
                         .ToArray()
-                        .Select((v, i) => present[i] > 0 ? (double?)v : null)
-                        .ToArray();
+                        .WherePresent(present);
                 })
                 .ToArray()
         );

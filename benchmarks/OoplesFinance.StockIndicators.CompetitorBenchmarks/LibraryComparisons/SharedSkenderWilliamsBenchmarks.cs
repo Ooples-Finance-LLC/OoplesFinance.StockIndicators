@@ -41,7 +41,7 @@ public class SharedSkenderWilliamsBenchmarks
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
             var indicator = new WilliamsR(Period); using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
         }
     }
     private static void CheckNative(IReadOnlyList<WilliamsResult> actual, ComparisonOutput expected)

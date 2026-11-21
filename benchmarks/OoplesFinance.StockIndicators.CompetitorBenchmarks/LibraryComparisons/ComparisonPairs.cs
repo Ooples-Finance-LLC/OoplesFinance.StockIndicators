@@ -31,9 +31,9 @@ internal sealed record ComparisonPair(string Id, string Indicator, Func<Competit
             "Ema" => new OoplesFinance.StockIndicators.Indicators.Ema(period),
             _ => throw new InvalidOperationException("No Ooples runner registered for " + Id)
         };
-        using var run = new StockIndicatorBuilder().ConfigureSource(OoplesFinance.StockIndicators.Indicators.Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
-        return new(Math.Min(period - 1, data.Count), run[indicator.Outputs[0]].ToArray());
+        return new(Math.Min(period - 1, data.Count), run.Held(indicator.Outputs[0]));
     }
 }
 

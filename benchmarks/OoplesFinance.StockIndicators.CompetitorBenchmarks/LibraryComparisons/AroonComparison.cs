@@ -64,17 +64,20 @@ internal static class AroonComparison
     private static ComparisonSeries Owned(string id, CompetitorData data, int period)
     {
         var indicator = Create(id, period);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
         var values = Empty(data.Count);
+        var compared = OutputNames(id);
         for (var slot = 0; slot < 3; slot++)
         {
-            var row = run[indicator.Outputs[slot]].ToArray();
-            var present = run[indicator.Outputs[slot + 3]].ToArray();
+            // Only the outputs the pair compares are read, as the competitor arm fills only those.
+            if (Array.IndexOf(compared, Names[slot]) < 0) continue;
+            var row = run[indicator.Outputs[slot]];
+            var present = run[indicator.Outputs[slot + 3]];
             for (var i = 0; i < data.Count; i++)
                 values[slot][i] = present[i] > 0 ? row[i] : null;
         }

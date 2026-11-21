@@ -35,15 +35,15 @@ internal static class StrictHaramiComparison
     )
     {
         var indicator = Create(name, period, shadows);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
         return new(
             name == "Harami" ? Math.Min(1, data.Count) : 0,
-            run[indicator.Outputs[0]].ToArray()
+            run.Held(indicator.Outputs[0])
         );
     }
 

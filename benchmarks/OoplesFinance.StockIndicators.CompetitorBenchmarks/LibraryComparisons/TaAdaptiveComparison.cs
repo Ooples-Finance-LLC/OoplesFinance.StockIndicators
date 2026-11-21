@@ -53,16 +53,16 @@ internal static class TaAdaptiveComparison
             fastFlat: true,
             outputDelay: 1L + suppression
         );
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var v = run[indicator.Average].ToArray();
-        var f = run[indicator.AverageIsDefined].ToArray();
+        var v = run[indicator.Average];
+        var f = run[indicator.AverageIsDefined];
         return TradyAdaptiveComparison.Series(
-            v.Select((x, i) => f[i] > 0 ? (double?)x : null).ToArray()
+            v.WherePresent(f)
         );
     }
 

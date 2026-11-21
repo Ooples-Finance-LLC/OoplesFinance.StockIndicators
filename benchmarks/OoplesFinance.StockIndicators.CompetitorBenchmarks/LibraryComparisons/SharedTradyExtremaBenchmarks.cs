@@ -85,7 +85,7 @@ public class SharedTradyExtremaBenchmarks
         : new OoplesFinance.StockIndicators.Indicators.LowestLow(Period);
     private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         if (reference) builder.ConfigureBehavior(_ => { });
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Extrema benchmark did not dispatch GPU work.");

@@ -30,7 +30,7 @@ public class SmaFusionBenchmarks
     }
 
     private Task<IIndicatorRun> Build(IIndicator indicator, bool projected) =>
-        new StockIndicatorBuilder().ConfigureSource(projected ? Bars.From(_bars, bar => bar) : Bars.From(_bars))
+        ComparisonBuilder.Create().ConfigureSource(projected ? Bars.From(_bars, bar => bar) : Bars.From(_bars))
             .ConfigureIndicators(indicator).BuildAsync();
 
     private async Task<int> Run(bool projected)

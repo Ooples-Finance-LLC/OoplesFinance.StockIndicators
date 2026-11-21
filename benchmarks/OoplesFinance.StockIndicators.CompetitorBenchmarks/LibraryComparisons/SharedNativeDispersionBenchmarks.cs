@@ -61,7 +61,7 @@ public class SharedNativeDispersionBenchmarks
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
             var indicator = Create(); using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
         }
     }
     public readonly record struct NativeResult(double[]? Values = null, IReadOnlyList<decimal?>? Nullable = null);

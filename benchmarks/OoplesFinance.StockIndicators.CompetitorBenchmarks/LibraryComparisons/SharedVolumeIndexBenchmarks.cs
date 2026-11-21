@@ -29,8 +29,8 @@ public class SharedVolumeIndexBenchmarks
         {
             var owner = Create();
             using var run = Build(owner, mode);
-            AsinFeasibilityBenchmarks.RequireSame(expected.Values.Select((v, i) => present[i] ? v : 0).ToArray(), run[owner.Value].ToArray());
-            AsinFeasibilityBenchmarks.RequireSame(present.Select(p => p ? 1d : 0d).ToArray(), run[owner.IsDefined].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected.Values.Select((v, i) => present[i] ? v : 0).ToArray(), run.Held(owner.Value));
+            AsinFeasibilityBenchmarks.RequireSame(present.Select(p => p ? 1d : 0d).ToArray(), run.Held(owner.IsDefined));
         }
     }
 

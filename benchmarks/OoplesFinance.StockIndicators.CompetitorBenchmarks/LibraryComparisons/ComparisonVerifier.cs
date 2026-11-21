@@ -1503,6 +1503,11 @@ internal static class ComparisonVerifier
     internal static void Compare(ComparisonSeries expected, ComparisonSeries actual, string context,
         OoplesFinance.StockIndicators.Validation.IndicatorErrorBudget? errorBudget = null)
     {
+        // The opt-in fast mode promises agreement to rounding, not bit equality, so a budget written for
+        // the exact route is widened to that promise and no further.
+        var fast = ComparisonBuilder.Numerics == OoplesFinance.StockIndicators.Builder.IndicatorNumerics.Fast;
+        if (errorBudget is not null && fast)
+            errorBudget = new(Math.Max(errorBudget.AbsoluteTolerance, 1e-9), Math.Max(errorBudget.RelativeTolerance, 1e-9));
         if (expected.Outputs.Count != actual.Outputs.Count || expected.Outputs.Keys.Except(actual.Outputs.Keys, StringComparer.Ordinal).Any())
             throw new InvalidOperationException(context + ": output names differ.");
         foreach (var (name, wantedOutput) in expected.Outputs)
@@ -1512,6 +1517,17 @@ internal static class ComparisonVerifier
             ValidateShape(actualOutput, context + "/" + name);
             if (actualOutput.Values.Length != wantedOutput.Values.Length || actualOutput.FirstValid != wantedOutput.FirstValid)
                 throw new InvalidOperationException(context + "/" + name + ": output alignment differs.");
+            // Without a budget the exact route is held to 1e-12 of each value. The fast route is held to
+            // 1e-9 of the output's own scale: a running total carries the rounding of its largest terms,
+            // which is not small beside a value that has since come back toward zero.
+            var fastAllowance = 0d;
+            if (fast && errorBudget is null)
+            {
+                for (var index = wantedOutput.FirstValid; index < wantedOutput.Values.Length; index++)
+                    if ((wantedOutput.Present?[index] ?? true) && double.IsFinite(wantedOutput.Values[index]))
+                        fastAllowance = Math.Max(fastAllowance, Math.Abs(wantedOutput.Values[index]));
+                fastAllowance *= 1e-9;
+            }
             for (var index = wantedOutput.FirstValid; index < wantedOutput.Values.Length; index++)
             {
                 var value = actualOutput.Values[index];
@@ -1526,7 +1542,7 @@ internal static class ComparisonVerifier
                         throw new InvalidOperationException($"{context}/{name}, bar {index}: absent values must use the NaN placeholder.");
                     continue;
                 }
-                if (!double.IsFinite(wanted) || !double.IsFinite(value) || (errorBudget is null ? Math.Abs(value - wanted) > 1e-10 + 1e-12 * Math.Abs(wanted) : !errorBudget.Accepts(wanted, value)))
+                if (!double.IsFinite(wanted) || !double.IsFinite(value) || (errorBudget is null ? Math.Abs(value - wanted) > 1e-10 + 1e-12 * Math.Abs(wanted) + fastAllowance : !errorBudget.Accepts(wanted, value)))
                     throw new InvalidOperationException($"{context}/{name}, bar {index}: expected {wanted:R}, got {value:R}.");
             }
         }

@@ -54,7 +54,7 @@ public class SharedPriceVolumeDetailsBenchmarks
         {
             using var run = Build(owner, mode);
             for (int slot = 0; slot < expected.Length; slot++)
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot], run[owner.Outputs[slot]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot], run.Held(owner.Outputs[slot]));
         }
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;

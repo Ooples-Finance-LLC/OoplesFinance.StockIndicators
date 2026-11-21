@@ -1,4 +1,6 @@
 using System.Numerics;
+using OoplesFinance.StockIndicators.Builder;
+using OoplesFinance.StockIndicators.Indicators.Fast;
 using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Indicators;
@@ -19,6 +21,9 @@ public static class ParabolicStopSnapshots
     private static BigInteger Increase(BigInteger factor, BigInteger step, BigInteger maximum) =>
         RocBankValue.RoundUnits(BigInteger.Min(factor + step, maximum), 1);
 
+    // Whether a + b exceeds c + d, decided without rounding either sum.
+    internal static bool SumIsGreater(double a, double b, double c, double d) => U(a) + U(b) > U(c) + U(d);
+
     private static double Publish(BigInteger value)
     {
         var result = ExactMeanAccumulator.UnitRatio(value, 1);
@@ -32,16 +37,40 @@ public static class ParabolicStopSnapshots
         if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (parameters.Any(v => !FrameworkCompatibility.IsFinite(v)))
             throw new ArgumentOutOfRangeException(nameof(parameters));
+        // An array or a list is read in place: asking the interface for every bar costs more than the stop.
+        if (bars is Bar[] array)
+        {
+            ValidateRows(array);
+            return;
+        }
+#if NET5_0_OR_GREATER
+        if (bars is List<Bar> list)
+        {
+            ValidateRows(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(list));
+            return;
+        }
+#endif
         foreach (var b in bars)
             if (!FrameworkCompatibility.IsFinite(b.High) || !FrameworkCompatibility.IsFinite(b.Low))
                 throw new ArgumentOutOfRangeException(nameof(bars));
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    private static void ValidateRows(ReadOnlySpan<Bar> bars)
+    {
+        // The bits gathered stay zero only while every high and low is finite.
+        long bits = 0;
+        for (var i = 0; i < bars.Length; i++)
+            bits |= FastMath.NonFiniteBits(bars[i].High) | FastMath.NonFiniteBits(bars[i].Low);
+        if (bits != 0) throw new ArgumentOutOfRangeException(nameof(bars));
     }
 
     /// <summary>Unsigned stop with directional-movement initialization and nonnegative acceleration/maximum.</summary>
     public static IReadOnlyList<double?> Classic(
         IReadOnlyList<Bar> bars,
         double acceleration = .02,
-        double maximum = .2
+        double maximum = .2,
+        IndicatorNumerics numerics = IndicatorNumerics.Exact
     ) =>
         CalculateClassic(
             bars,
@@ -53,7 +82,8 @@ public static class ParabolicStopSnapshots
             maximum,
             acceleration,
             acceleration,
-            maximum
+            maximum,
+            numerics
         );
 
     /// <summary>Signed stops with independent long/short acceleration, optional signed start, and reversal offset.</summary>
@@ -66,7 +96,8 @@ public static class ParabolicStopSnapshots
         double maximumLong = .2,
         double initialShort = .02,
         double stepShort = .02,
-        double maximumShort = .2
+        double maximumShort = .2,
+        IndicatorNumerics numerics = IndicatorNumerics.Exact
     ) =>
         CalculateClassic(
             bars,
@@ -78,7 +109,8 @@ public static class ParabolicStopSnapshots
             maximumLong,
             initialShort,
             stepShort,
-            maximumShort
+            maximumShort,
+            numerics
         );
 
     private static IReadOnlyList<double?> CalculateClassic(
@@ -91,7 +123,8 @@ public static class ParabolicStopSnapshots
         double maximumLong,
         double initialShort,
         double stepShort,
-        double maximumShort
+        double maximumShort,
+        IndicatorNumerics numerics
     )
     {
         Validate(
@@ -118,6 +151,19 @@ public static class ParabolicStopSnapshots
             }.Any(v => v < 0)
         )
             throw new ArgumentOutOfRangeException(nameof(initialLong));
+        if (numerics == IndicatorNumerics.Fast)
+            return FastSnapshots.ParabolicClassic(
+                bars,
+                signed,
+                start,
+                offset,
+                initialLong,
+                stepLong,
+                maximumLong,
+                initialShort,
+                stepShort,
+                maximumShort
+            );
         var result = new double?[bars.Count];
         if (bars.Count < 2)
             return result;
@@ -186,13 +232,16 @@ public static class ParabolicStopSnapshots
         IReadOnlyList<Bar> bars,
         double step = .02,
         double maximum = .2,
-        double? initialFactor = null
+        double? initialFactor = null,
+        IndicatorNumerics numerics = IndicatorNumerics.Exact
     )
     {
         var initial = initialFactor ?? step;
         Validate(bars, step, maximum, initial);
         if (step <= 0 || maximum < step || initial <= 0 || initial > maximum)
             throw new ArgumentOutOfRangeException(nameof(step));
+        if (numerics == IndicatorNumerics.Fast)
+            return FastSnapshots.ParabolicConfirmed(bars, step, maximum, initial);
         var result = new ConfirmedParabolicValue[bars.Count];
         if (bars.Count == 0)
             return result;
@@ -254,12 +303,15 @@ public static class ParabolicStopSnapshots
     public static IReadOnlyList<double?> FourBar(
         IReadOnlyList<Bar> bars,
         double step = .02,
-        double maximum = .2
+        double maximum = .2,
+        IndicatorNumerics numerics = IndicatorNumerics.Exact
     )
     {
         Validate(bars, step, maximum);
         if (step > maximum)
             throw new ArgumentOutOfRangeException(nameof(step));
+        if (numerics == IndicatorNumerics.Fast)
+            return FastSnapshots.ParabolicFourBar(bars, step, maximum);
         var result = new double?[bars.Count];
         if (bars.Count < 5)
             return result;

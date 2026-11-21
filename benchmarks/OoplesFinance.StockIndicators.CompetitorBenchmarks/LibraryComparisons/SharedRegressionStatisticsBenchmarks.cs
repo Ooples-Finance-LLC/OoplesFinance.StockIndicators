@@ -52,12 +52,12 @@ public class SharedRegressionStatisticsBenchmarks
             using var run = Build(indicator, history);
             var columns = Enumerable.Range(0, 5).Select(slot =>
             {
-                var values = run[indicator.Outputs[slot]].ToArray();
-                var present = run[indicator.Outputs[slot + 5]].ToArray();
+                var values = run.Held(indicator.Outputs[slot]);
+                var present = run.Held(indicator.Outputs[slot + 5]);
                 for (int i = 0; i < values.Length; i++)
                     if (present[i] is not (0 or 1) || present[i] == 0 && values[i] != 0)
                         throw new InvalidOperationException("Builder regression presence or missing placeholder differs.");
-                return values.Select((value, i) => present[i] > 0 ? (double?)value : null).ToArray();
+                return values.WherePresent(present);
             }).ToArray();
             CheckReference(expected, columns);
         }
@@ -161,7 +161,7 @@ public class SharedRegressionStatisticsBenchmarks
     internal IIndicator Create() => Operation == "Skender.GetSlope" ? new RegressionWithFinalLine(Period) : new WindowRegressionStatistics(Period);
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(history).ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         var run = builder.BuildAsync().GetAwaiter().GetResult();
         if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)

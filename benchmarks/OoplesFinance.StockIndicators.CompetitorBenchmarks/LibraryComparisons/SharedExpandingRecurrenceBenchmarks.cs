@@ -38,7 +38,7 @@ public class SharedExpandingRecurrenceBenchmarks
         {
             var indicator = Create();
             using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
         }
     }
 

@@ -49,9 +49,9 @@ public class SharedWilderStrengthBenchmarks
             var indicator = Create();
             using var run = Build(indicator, history);
             AsinFeasibilityBenchmarks.RequireSame(expected.Values.Select((v, i) => expected.Present![i] ? v : 0).ToArray(),
-                run[indicator.Value].ToArray());
+                run.Held(indicator.Value));
             AsinFeasibilityBenchmarks.RequireSame(expected.Present!.Select(v => v ? 1d : 0d).ToArray(),
-                run[indicator.IsDefined].ToArray());
+                run.Held(indicator.IsDefined));
         }
     }
 

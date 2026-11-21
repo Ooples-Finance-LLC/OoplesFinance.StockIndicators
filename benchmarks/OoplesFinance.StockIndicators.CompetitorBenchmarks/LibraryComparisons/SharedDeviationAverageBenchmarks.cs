@@ -35,7 +35,7 @@ public class SharedDeviationAverageBenchmarks
         {
             var root = new FilteredDeviationAverage(Period, .9);
             using var run = Build(root, mode);
-            Check(expected, run[root.Value].ToArray());
+            Check(expected, run.Held(root.Value));
         }
     }
 

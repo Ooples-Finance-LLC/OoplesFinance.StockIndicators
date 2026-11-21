@@ -19,13 +19,13 @@ internal static class NormalizedAtrComparison
     private static ComparisonSeries Ooples(CompetitorData data, int period)
     {
         var indicator = new NormalizedSeededAverageTrueRange(period);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(Math.Min(period, data.Count), run[indicator.Outputs[0]].ToArray());
+        return new(Math.Min(period, data.Count), run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Competitor(CompetitorData data, int period)

@@ -77,16 +77,16 @@ internal static class VariablePeriodComparison
             first,
             suppression
         );
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Average].ToArray();
-        var masks = run[indicator.IsDefined].ToArray();
+        var values = run[indicator.Average];
+        var masks = run[indicator.IsDefined];
         return VolumePriceComparison.Mask(
-            values.Select((v, i) => masks[i] > 0 ? (double?)v : null).ToArray()
+            values.WherePresent(masks)
         );
     }
 

@@ -33,7 +33,7 @@ public class SharedGapContinuationBenchmarks
         {
             var indicator = GapContinuationComparison.Create(_name, _name == "TasukiGap" ? 5 : 10);
             using var run = Build(indicator, mode);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator.Outputs[0]].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator.Outputs[0]));
         }
     }
 

@@ -163,8 +163,8 @@ internal static class EmaDifferenceSignalComparison
             variant == 1,
             Selection(variant)
         );
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -172,9 +172,9 @@ internal static class EmaDifferenceSignalComparison
         var rows = new double?[5][];
         for (var j = 0; j < 5; j++)
         {
-            var v = run[indicator.Outputs[j]].ToArray();
-            var present = run[indicator.Outputs[j + 5]].ToArray();
-            rows[j] = v.Select((x, i) => present[i] > 0 ? (double?)x : null).ToArray();
+            var v = run[indicator.Outputs[j]];
+            var present = run[indicator.Outputs[j + 5]];
+            rows[j] = v.WherePresent(present);
         }
         return Series(rows, variant);
     }

@@ -62,16 +62,16 @@ internal static class CircularComparison
     private static ComparisonSeries Owned(PriceCircularOperation operation, CompetitorData data)
     {
         var indicator = new PriceCircularTransform(operation);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Value].ToArray();
-        var flags = run[indicator.IsDefined].ToArray();
+        var values = run[indicator.Value];
+        var flags = run[indicator.IsDefined];
         return VolumePriceComparison.Mask(
-            values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray()
+            values.WherePresent(flags)
         );
     }
 

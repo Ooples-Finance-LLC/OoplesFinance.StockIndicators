@@ -34,7 +34,7 @@ public class SharedPriceCandleBenchmarks
         {
             using var run = Build(owner, mode);
             for (int slot = 0; slot < expected.Length; slot++)
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot], run[owner.Outputs[slot]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot], run.Held(owner.Outputs[slot]));
         }
     }
     internal static double[][] Reference(Bar[] bars, PriceCandlePattern owner)
