@@ -49,7 +49,7 @@ public static class RegressionChannelSnapshot
                 window.Update(bars[i], values);
             var width = RocBankValue.RoundUnits(
                 ExactVarianceWindow.Units(values[2]) * ExactVarianceWindow.Units(deviations),
-                System.Numerics.BigInteger.One << 1074
+                BigInteger.One << 1074
             );
             for (var j = 0; j < length; j++)
             {

@@ -43,7 +43,7 @@ internal static class DeviationRatioAdaptiveReference
                     ) / new ReferenceFraction(shortValues.Length);
                 var squaredRatio = shortVariance / longVariance;
                 var scale = new ReferenceFraction(1);
-                var power = new ReferenceFraction(System.Numerics.BigInteger.One << 512);
+                var power = new ReferenceFraction(BigInteger.One << 512);
                 var root = squaredRatio.SqrtToDouble();
                 while (double.IsInfinity(root))
                 {

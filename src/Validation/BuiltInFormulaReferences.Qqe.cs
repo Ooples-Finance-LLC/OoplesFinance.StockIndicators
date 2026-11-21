@@ -30,7 +30,7 @@ internal static partial class BuiltInFormulaReferences
                 {
                     var start = (int)Math.Max(0, i - period + 1); var sum = prefix[i + 1] - prefix[start];
                     result[i] = kind == 2 ? (moments[i + 1] - moments[start] + R(period - i - 1) * sum)
-                        / new ReferenceFraction(new System.Numerics.BigInteger(period) * (period + 1) / 2)
+                        / new ReferenceFraction(new BigInteger(period) * (period + 1) / 2)
                         : sum / R(Math.Min(i + 1L, period));
                 }
             }
