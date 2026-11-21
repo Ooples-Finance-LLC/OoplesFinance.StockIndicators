@@ -109,6 +109,13 @@ internal static partial class FastKernels
             case PriceTranscendentalOperation.NaturalLogarithm:
             case PriceTranscendentalOperation.CommonLogarithm:
                 var common = operation == PriceTranscendentalOperation.CommonLogarithm;
+                // A series of positive closes, as prices are, has a logarithm on every bar: no flags to write,
+                // and the logarithms are taken four at a time.
+                if (n == 0 || FastMath.Min(close) > 0)
+                {
+                    FastExponentials.Log(close, value, common);
+                    break;
+                }
                 Span<double> defined = outputs[1].AsSpan(0, n);
                 for (var i = 0; i < n; i++)
                 {

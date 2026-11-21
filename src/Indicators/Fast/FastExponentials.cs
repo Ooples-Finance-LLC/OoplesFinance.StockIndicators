@@ -1,7 +1,7 @@
 namespace OoplesFinance.StockIndicators.Indicators.Fast;
 
 /// <summary>
-/// The exponential and the three hyperbolic functions of a whole series, four values at a time.
+/// The exponential, the logarithm and the three hyperbolic functions of a whole series, four values at a time.
 /// </summary>
 /// <remarks>
 /// The exponential is the classical reduction to a power of two times the exponential of a remainder no
@@ -125,6 +125,33 @@ internal static class FastExponentials
         for (; i < input.Length; i++) output[i] = Math.Tanh(input[i]);
     }
 
+    /// <summary>The natural or the common logarithm of each value. Every value must be positive.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static void Log(ReadOnlySpan<double> input, Span<double> output, bool common)
+    {
+        var i = 0;
+#if !NETFRAMEWORK
+        if (Supported)
+        {
+            // Below the smallest normal number the exponent is not where it is read from.
+            var least = System.Runtime.Intrinsics.Vector256.Create(2.2250738585072014E-308);
+            var scale = System.Runtime.Intrinsics.Vector256.Create(0.43429448190325182765);
+            for (; i <= input.Length - 4; i += 4)
+            {
+                var x = System.Runtime.Intrinsics.Vector256.Create<double>(input.Slice(i, 4));
+                if (AnyBelow(x, least))
+                {
+                    for (var j = i; j < i + 4; j++) output[j] = common ? Math.Log10(input[j]) : Math.Log(input[j]);
+                    continue;
+                }
+                var value = LogOf(x);
+                System.Runtime.Intrinsics.Vector256.CopyTo(common ? value * scale : value, output.Slice(i, 4));
+            }
+        }
+#endif
+        for (; i < input.Length; i++) output[i] = common ? Math.Log10(input[i]) : Math.Log(input[i]);
+    }
+
 #if !NETFRAMEWORK
     // Beyond these a group is left to the runtime: the exponential nears overflow or the subnormal range, and
     // below the floor a hyperbolic sine or tangent is a difference of two nearly equal numbers.
@@ -184,6 +211,38 @@ internal static class FastExponentials
         var biased = System.Runtime.Intrinsics.X86.Avx2.Add(
             System.Runtime.Intrinsics.X86.Avx2.ConvertToVector256Int64(exponent), System.Runtime.Intrinsics.Vector256.Create(1023L));
         return System.Runtime.Intrinsics.Vector256.AsDouble(System.Runtime.Intrinsics.X86.Avx2.ShiftLeftLogical(biased, 52));
+    }
+
+    // The natural logarithm of four positive normal values: x = m 2^e with m in [1/2, 1), the fraction brought
+    // to within a square root of two of one, and then ln m as a rational function of (m - 1) / (m + 1)
+    // (the Cephes library's double-precision log, in the form it keeps for every exponent).
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+    private static System.Runtime.Intrinsics.Vector256<double> LogOf(System.Runtime.Intrinsics.Vector256<double> x)
+    {
+        var bits = System.Runtime.Intrinsics.Vector256.AsInt64(x);
+        var raised = System.Runtime.Intrinsics.X86.Avx2.ShiftRightLogical(bits, 52);
+        var exponents = System.Runtime.Intrinsics.X86.Avx2.PermuteVar8x32(System.Runtime.Intrinsics.Vector256.AsInt32(raised), System.Runtime.Intrinsics.Vector256.Create(0, 2, 4, 6, 0, 0, 0, 0));
+        var e = System.Runtime.Intrinsics.X86.Avx.ConvertToVector256Double(System.Runtime.Intrinsics.Vector256.GetLower(exponents)) - System.Runtime.Intrinsics.Vector256.Create(1022.0);
+        var m = System.Runtime.Intrinsics.Vector256.AsDouble(System.Runtime.Intrinsics.X86.Avx2.Or(System.Runtime.Intrinsics.X86.Avx2.And(bits, System.Runtime.Intrinsics.Vector256.Create(0x000FFFFFFFFFFFFFL)), System.Runtime.Intrinsics.Vector256.Create(0x3FE0000000000000L)));
+        var half = System.Runtime.Intrinsics.Vector256.Create(0.5);
+        var small = System.Runtime.Intrinsics.Vector256.LessThan(m, System.Runtime.Intrinsics.Vector256.Create(0.70710678118654752440));
+        e -= System.Runtime.Intrinsics.Vector256.ConditionalSelect(small, System.Runtime.Intrinsics.Vector256.Create(1.0), System.Runtime.Intrinsics.Vector256<double>.Zero);
+        var z = m - half;
+        var numerator = System.Runtime.Intrinsics.Vector256.ConditionalSelect(small, z, z - half);
+        var denominator = System.Runtime.Intrinsics.Vector256.ConditionalSelect(small, half * z + half, half * m + half);
+        var t = numerator / denominator;
+        var square = t * t;
+        var r = System.Runtime.Intrinsics.Vector256.Create(-7.89580278884799154124E-1);
+        r = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(r, square, System.Runtime.Intrinsics.Vector256.Create(1.63866645699558079767E1));
+        r = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(r, square, System.Runtime.Intrinsics.Vector256.Create(-6.41409952958715622951E1));
+        var q = square + System.Runtime.Intrinsics.Vector256.Create(-3.56722798256324312549E1);
+        q = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(q, square, System.Runtime.Intrinsics.Vector256.Create(3.12093766372244180303E2));
+        q = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(q, square, System.Runtime.Intrinsics.Vector256.Create(-7.69691943550460008604E2));
+        var value = t * (square * r / q);
+        // e ln 2, with ln 2 in two parts so that the larger one is exact.
+        value = System.Runtime.Intrinsics.X86.Fma.MultiplyAddNegated(e, System.Runtime.Intrinsics.Vector256.Create(2.121944400546905827679e-4), value);
+        value += t;
+        return System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(e, System.Runtime.Intrinsics.Vector256.Create(0.693359375), value);
     }
 #endif
 }

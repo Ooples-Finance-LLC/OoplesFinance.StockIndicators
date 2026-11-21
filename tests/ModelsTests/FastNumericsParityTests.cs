@@ -1454,6 +1454,37 @@ public sealed class FastNumericsParityTests
     }
 
     [Fact]
+    public void LogarithmsTakenFourAtATimeAgreeWithTheRuntimeToTheLastPlaces()
+    {
+        // Positive values from the smallest subnormal to the largest double, with values on both sides of one
+        // and of the square root of a half, where the reduction changes branch, at every length around a
+        // group of four. Four units in the last place is the most allowed.
+        var random = RandomHelper.CreateSeededRandom(29);
+        var specials = new[] { 4.9e-324, 1e-310, 2.2250738585072014E-308, 1e-300, 0.5, Math.BitDecrement(0.5), 0.7071067811865475, 0.7071067811865476,
+            Math.BitDecrement(1.0), 1.0, Math.BitIncrement(1.0), 2.0, 10.0, 1e300, double.MaxValue };
+        foreach (var common in new[] { false, true })
+        for (var length = 0; length <= 37; length++)
+        for (var round = 0; round < 200; round++)
+        {
+            var input = new double[length];
+            for (var i = 0; i < length; i++)
+                input[i] = random.Next(10) == 0 ? specials[random.Next(specials.Length)]
+                    : round % 3 == 0 ? 0.5 + random.NextDouble() * 1.5
+                    : round % 3 == 1 ? random.NextDouble() * 500
+                    : Math.Pow(10, random.NextDouble() * 600 - 300);
+            var actual = new double[length];
+            OoplesFinance.StockIndicators.Indicators.Fast.FastExponentials.Log(input, actual, common);
+            for (var i = 0; i < length; i++)
+            {
+                var expected = common ? Math.Log10(input[i]) : Math.Log(input[i]);
+                var allowed = 4 * (Math.BitIncrement(Math.Abs(expected)) - Math.Abs(expected));
+                Assert.True(Math.Abs(expected - actual[i]) <= allowed,
+                    $"{(common ? "log10" : "ln")}({input[i]:R}): expected {expected:R}, was {actual[i]:R}");
+            }
+        }
+    }
+
+    [Fact]
     public void TypicalPricesTakenFourAtATimeAreTheOnesTakenOneAtATime()
     {
         // Ordinary prices, prices a unit in the last place apart, sums that are exact and sums that are not,
