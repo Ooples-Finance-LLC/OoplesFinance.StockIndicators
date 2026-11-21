@@ -1413,6 +1413,47 @@ public sealed class FastNumericsParityTests
         }
     }
     [Fact]
+    public void ExponentialsTakenFourAtATimeAgreeWithTheRuntimeToTheLastPlaces()
+    {
+        // Values across the whole range a double's exponential has, at both signs, with the ones a group
+        // hands back to the runtime mixed in among them - next to zero, near overflow, and past it - and at
+        // every length around a group of four. Four units in the last place is the most allowed.
+        var random = RandomHelper.CreateSeededRandom(23);
+        var specials = new[] { 0.0, -0.0, 1e-300, -1e-9, 0.25, -0.49, 0.5, -0.5, 39.9, 40.1, 699.9, -700.0, 705.0, -708.0, 709.5, 710.5, -745.0, -750.0, 1e6, -1e6 };
+        (string Name, Action<double[], double[]> Fast, Func<double, double> One)[] functions =
+        [
+            ("exp", (x, y) => OoplesFinance.StockIndicators.Indicators.Fast.FastExponentials.Exp(x, y), Math.Exp),
+            ("sinh", (x, y) => OoplesFinance.StockIndicators.Indicators.Fast.FastExponentials.Sinh(x, y), Math.Sinh),
+            ("cosh", (x, y) => OoplesFinance.StockIndicators.Indicators.Fast.FastExponentials.Cosh(x, y), Math.Cosh),
+            ("tanh", (x, y) => OoplesFinance.StockIndicators.Indicators.Fast.FastExponentials.Tanh(x, y), Math.Tanh),
+        ];
+        foreach (var (name, fast, one) in functions)
+        for (var length = 0; length <= 37; length++)
+        for (var round = 0; round < 200; round++)
+        {
+            var input = new double[length];
+            var scale = round % 4 == 0 ? 1.0 : round % 4 == 1 ? 30.0 : round % 4 == 2 ? 300.0 : 699.0;
+            for (var i = 0; i < length; i++)
+                input[i] = random.Next(12) == 0 ? specials[random.Next(specials.Length)] : (random.NextDouble() * 2 - 1) * scale;
+            var actual = new double[length];
+            fast(input, actual);
+            for (var i = 0; i < length; i++)
+            {
+                var expected = one(input[i]);
+                if (double.IsInfinity(expected) || expected == 0)
+                {
+                    Assert.True(expected.Equals(actual[i]) || (expected == 0 && actual[i] == 0),
+                        $"{name}({input[i]:R}): expected {expected:R}, was {actual[i]:R}");
+                    continue;
+                }
+                var allowed = 4 * (Math.BitIncrement(Math.Abs(expected)) - Math.Abs(expected));
+                Assert.True(Math.Abs(expected - actual[i]) <= allowed,
+                    $"{name}({input[i]:R}): expected {expected:R}, was {actual[i]:R}");
+            }
+        }
+    }
+
+    [Fact]
     public void TypicalPricesTakenFourAtATimeAreTheOnesTakenOneAtATime()
     {
         // Ordinary prices, prices a unit in the last place apart, sums that are exact and sums that are not,

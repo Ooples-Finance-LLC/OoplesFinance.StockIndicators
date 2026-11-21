@@ -119,16 +119,16 @@ internal static partial class FastKernels
                 }
                 return;
             case PriceTranscendentalOperation.Exponential:
-                for (var i = 0; i < n; i++) value[i] = Math.Exp(close[i]);
+                FastExponentials.Exp(close, value);
                 break;
             case PriceTranscendentalOperation.HyperbolicSine:
-                for (var i = 0; i < n; i++) value[i] = Math.Sinh(close[i]);
+                FastExponentials.Sinh(close, value);
                 break;
             case PriceTranscendentalOperation.HyperbolicCosine:
-                for (var i = 0; i < n; i++) value[i] = Math.Cosh(close[i]);
+                FastExponentials.Cosh(close, value);
                 break;
             default:
-                for (var i = 0; i < n; i++) value[i] = Math.Tanh(close[i]);
+                FastExponentials.Tanh(close, value);
                 break;
         }
         outputs.Flag(1, 0);
