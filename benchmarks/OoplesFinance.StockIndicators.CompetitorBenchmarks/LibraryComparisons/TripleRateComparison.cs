@@ -147,8 +147,9 @@ internal static class TripleRateComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
+        // The TA-Lib pair is compared on the rate alone, and its arm builds that one series.
         var r = new double?[3][];
-        for (var j = 0; j < 3; j++)
+        for (var j = 0; j < (rateOnly ? 1 : 3); j++)
         {
             var values = run[indicator.Outputs[j]];
             var flags = run[indicator.Outputs[j + 3]];
