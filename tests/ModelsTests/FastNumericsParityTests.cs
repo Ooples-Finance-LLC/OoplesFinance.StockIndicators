@@ -1485,6 +1485,42 @@ public sealed class FastNumericsParityTests
     }
 
     [Fact]
+    public void CircularFunctionsTakenFourAtATimeAgreeWithTheRuntimeToTheLastPlaces()
+    {
+        // Values of every size the reduction takes, with multiples of half pi and of pi and their neighbours
+        // mixed in - where a sine or a cosine is next to nothing and a tangent next to a pole - and values
+        // past the reduction's reach, at every length around a group of four.
+        var random = RandomHelper.CreateSeededRandom(31);
+        var specials = new[] { 0.0, -0.0, 1e-300, 1e-9, Math.PI, -Math.PI, Math.PI / 2, 3 * Math.PI / 2, Math.BitIncrement(Math.PI), 100 * Math.PI,
+            355.0, 0.66, 2.414213562373095, 2.4142135623730954, 1.0, -1.0, 99999.9, 100000.1, 1e15, -1e300 };
+        (string Name, Action<double[], double[]> Fast, Func<double, double> One, int Units)[] functions =
+        [
+            ("sin", (x, y) => OoplesFinance.StockIndicators.Indicators.Fast.FastCircular.Direct(x, y, 0), Math.Sin, 4),
+            ("cos", (x, y) => OoplesFinance.StockIndicators.Indicators.Fast.FastCircular.Direct(x, y, 1), Math.Cos, 4),
+            ("tan", (x, y) => OoplesFinance.StockIndicators.Indicators.Fast.FastCircular.Direct(x, y, 2), Math.Tan, 6),
+            ("atan", (x, y) => OoplesFinance.StockIndicators.Indicators.Fast.FastCircular.Atan(x, y), Math.Atan, 4),
+        ];
+        foreach (var (name, fast, one, units) in functions)
+        for (var length = 0; length <= 37; length++)
+        for (var round = 0; round < 200; round++)
+        {
+            var input = new double[length];
+            var scale = round % 4 == 0 ? 1.0 : round % 4 == 1 ? 10.0 : round % 4 == 2 ? 500.0 : 90000.0;
+            for (var i = 0; i < length; i++)
+                input[i] = random.Next(12) == 0 ? specials[random.Next(specials.Length)] : (random.NextDouble() * 2 - 1) * scale;
+            var actual = new double[length];
+            fast(input, actual);
+            for (var i = 0; i < length; i++)
+            {
+                var expected = one(input[i]);
+                var allowed = units * (Math.BitIncrement(Math.Abs(expected)) - Math.Abs(expected));
+                Assert.True(Math.Abs(expected - actual[i]) <= allowed,
+                    $"{name}({input[i]:R}): expected {expected:R}, was {actual[i]:R}");
+            }
+        }
+    }
+
+    [Fact]
     public void TypicalPricesTakenFourAtATimeAreTheOnesTakenOneAtATime()
     {
         // Ordinary prices, prices a unit in the last place apart, sums that are exact and sums that are not,

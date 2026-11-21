@@ -55,17 +55,17 @@ internal static partial class FastKernels
                 break;
 #else
             case PriceCircularOperation.Sine:
-                for (var i = 0; i < n; i++) value[i] = Math.Sin(close[i]);
+                FastCircular.Direct(close, value, 0);
                 break;
             case PriceCircularOperation.Cosine:
-                for (var i = 0; i < n; i++) value[i] = Math.Cos(close[i]);
+                FastCircular.Direct(close, value, 1);
                 break;
             case PriceCircularOperation.Tangent:
-                for (var i = 0; i < n; i++) value[i] = Math.Tan(close[i]);
+                FastCircular.Direct(close, value, 2);
                 break;
 #endif
             case PriceCircularOperation.ArcTangent:
-                for (var i = 0; i < n; i++) value[i] = Math.Atan(close[i]);
+                FastCircular.Atan(close, value);
                 break;
             default:
                 var sine = operation == PriceCircularOperation.ArcSine;
