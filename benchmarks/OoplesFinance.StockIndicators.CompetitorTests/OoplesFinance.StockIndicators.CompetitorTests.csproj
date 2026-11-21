@@ -6,4 +6,9 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="4.0.0"><PrivateAssets>all</PrivateAssets></PackageReference>
     <ProjectReference Include="../OoplesFinance.StockIndicators.CompetitorBenchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks.csproj" />
   </ItemGroup>
+  <!-- These check the exact routes' contracts - bit-for-bit values, owned history, validation order - so a
+       builder here starts in the exact mode. A test of the fast mode asks for it by name. -->
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="OoplesFinance.StockIndicators.DefaultNumerics" Value="Exact" />
+  </ItemGroup>
 </Project>

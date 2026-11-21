@@ -334,7 +334,8 @@ public static class IndicatorValidation
             if (indicator.WarmupBars != warmup) throw new InvalidOperationException("Declared warmup changed between instances.");
             var input = bars.ToArray();
             using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(input))
-                .ConfigureIndicators(indicator).BuildAsync(cancellationToken).ConfigureAwait(false);
+                .ConfigureIndicators(indicator).ConfigureNumerics(IndicatorNumerics.Exact)
+                .BuildAsync(cancellationToken).ConfigureAwait(false);
             if (!input.SequenceEqual(bars)) throw new InvalidOperationException("The calculation modified its input bars.");
             var primary = indicator is IPrimaryOutputIndicator named ? named.PrimaryOutput : indicator.Outputs[0];
             var primaryValues = run[primary].ToArray();

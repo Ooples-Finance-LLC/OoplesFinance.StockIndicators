@@ -63,9 +63,27 @@ public sealed class StockIndicatorBuilder
         return this;
     }
 
-    private IndicatorNumerics _numerics;
+    /// <summary>
+    /// The application setting that names the arithmetic a builder starts with: <c>Exact</c> or <c>Fast</c>.
+    /// Set it in the project file as a <c>RuntimeHostConfigurationOption</c>, or with
+    /// <see cref="AppDomain.SetData(string, object)"/> before the first builder is created.
+    /// </summary>
+    public const string DefaultNumericsSetting = "OoplesFinance.StockIndicators.DefaultNumerics";
 
-    /// <summary>Selects exact (the default) or fast double arithmetic for finite array-backed builds.</summary>
+    // Read once: a builder is created far more often than an application changes its mind.
+    private static readonly IndicatorNumerics ConfiguredDefault =
+        DefaultNumericsFrom(AppDomain.CurrentDomain.GetData(DefaultNumericsSetting));
+
+    /// <summary>The arithmetic a setting's value selects; anything but a defined name selects fast.</summary>
+    internal static IndicatorNumerics DefaultNumericsFrom(object? setting) =>
+        setting is string name && Enum.TryParse<IndicatorNumerics>(name, true, out var chosen)
+            && chosen is IndicatorNumerics.Exact or IndicatorNumerics.Fast
+            ? chosen
+            : IndicatorNumerics.Fast;
+
+    private IndicatorNumerics _numerics = ConfiguredDefault;
+
+    /// <summary>Selects fast (the default) or exact arithmetic for finite array-backed builds.</summary>
     /// <remarks>
     /// Fast applies when every configured indicator has a fast kernel and the source is a bar array without
     /// warm-up; any other build keeps the exact route, and <see cref="LastExecution"/> says which one ran.

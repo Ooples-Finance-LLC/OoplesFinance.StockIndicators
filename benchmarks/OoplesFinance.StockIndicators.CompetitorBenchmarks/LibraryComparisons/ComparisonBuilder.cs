@@ -4,7 +4,7 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
 /// <summary>
 /// The builder every comparison measures. COMPARISON_NUMERICS selects the numeric mode for the whole
-/// process, so one run measures one mode: unset or Exact for the default route, Fast for the opt-in one.
+/// process, so one run measures one mode: unset or Exact for the exact route, Fast for the library default.
 /// </summary>
 internal static class ComparisonBuilder
 {

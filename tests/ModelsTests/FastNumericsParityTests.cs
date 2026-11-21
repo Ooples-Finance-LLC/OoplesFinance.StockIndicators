@@ -1087,6 +1087,41 @@ public sealed class FastNumericsParityTests
         }
     }
 
+    [Theory]
+    [InlineData(null, IndicatorNumerics.Fast)]
+    [InlineData("Fast", IndicatorNumerics.Fast)]
+    [InlineData("Exact", IndicatorNumerics.Exact)]
+    [InlineData("exact", IndicatorNumerics.Exact)]
+    [InlineData("", IndicatorNumerics.Fast)]
+    [InlineData("neither", IndicatorNumerics.Fast)]
+    [InlineData("0", IndicatorNumerics.Exact)]
+    [InlineData("7", IndicatorNumerics.Fast)]
+    public void ABuilderStartsFastUnlessTheApplicationNamesExact(string? setting, IndicatorNumerics expected) =>
+        Assert.Equal(expected, StockIndicatorBuilder.DefaultNumericsFrom(setting));
+
+    [Fact]
+    public void ASettingThatIsNotANameLeavesTheDefault() =>
+        Assert.Equal(IndicatorNumerics.Fast, StockIndicatorBuilder.DefaultNumericsFrom(1));
+
+    [Fact]
+    public async Task TheApplicationSettingDecidesWhereABuilderStarts()
+    {
+        // This project names Exact in its project file, which is what keeps the rest of its tests on the
+        // routes they were written against: a builder that is told nothing takes the exact route here.
+        Assert.Equal("Exact", AppDomain.CurrentDomain.GetData(StockIndicatorBuilder.DefaultNumericsSetting));
+        var bars = Walk(64, 11);
+        async Task<string> Route(IndicatorNumerics? numerics)
+        {
+            var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(new Sma(5));
+            if (numerics is { } chosen) builder.ConfigureNumerics(chosen);
+            using var run = await builder.BuildAsync();
+            return builder.LastExecution?.Reason ?? string.Empty;
+        }
+        var told = await Route(null);
+        Assert.Equal(await Route(IndicatorNumerics.Exact), told);
+        Assert.NotEqual(await Route(IndicatorNumerics.Fast), told);
+    }
+
     [Fact]
     public async Task FastValidatesOnlyTheFieldsItReads()
     {
