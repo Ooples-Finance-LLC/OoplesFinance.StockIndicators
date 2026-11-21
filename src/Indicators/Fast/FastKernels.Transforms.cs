@@ -78,10 +78,7 @@ internal static partial class FastKernels
                 }
                 if (outside == 0)
                 {
-                    if (sine)
-                        for (var i = 0; i < n; i++) value[i] = Math.Asin(close[i]);
-                    else
-                        for (var i = 0; i < n; i++) value[i] = Math.Acos(close[i]);
+                    FastCircular.Inverse(close, value, sine);
                     break;
                 }
                 Span<double> defined = outputs[1].AsSpan(0, n);

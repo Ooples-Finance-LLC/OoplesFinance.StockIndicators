@@ -1,6 +1,6 @@
 namespace OoplesFinance.StockIndicators.Indicators.Fast;
 
-/// <summary>The sine, cosine, tangent and inverse tangent of a whole series, four values at a time.</summary>
+/// <summary>The sine, cosine and tangent of a whole series and their inverses, four values at a time.</summary>
 /// <remarks>
 /// The direct functions take the value to within a quarter turn of zero - the nearest multiple of half pi
 /// taken off in three parts, each in one fused step - and then the sine and cosine of what is left as
@@ -115,6 +115,37 @@ internal static class FastCircular
         for (; i < input.Length; i++) output[i] = Math.Atan(input[i]);
     }
 
+    /// <summary>The inverse sine, or the inverse cosine, of each value. Every value must be in [-1, 1].</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static void Inverse(ReadOnlySpan<double> input, Span<double> output, bool sine)
+    {
+        var i = 0;
+#if !NETFRAMEWORK
+        if (Supported)
+        {
+            var half = System.Runtime.Intrinsics.Vector256.Create(0.5);
+            var quarterPi = System.Runtime.Intrinsics.Vector256.Create(0.78539816339744830962);
+            var more = System.Runtime.Intrinsics.Vector256.Create(6.123233995736765886130E-17);
+            for (; i <= input.Length - 4; i += 4)
+            {
+                var x = System.Runtime.Intrinsics.Vector256.Create<double>(input.Slice(i, 4));
+                if (sine)
+                {
+                    System.Runtime.Intrinsics.Vector256.CopyTo(AsinOf(x), output.Slice(i, 4));
+                    continue;
+                }
+                // Past a half the angle is twice the inverse sine of sqrt((1 - x) / 2), which keeps the digits
+                // of an angle near zero; below it, a quarter turn less the inverse sine.
+                var near = System.Runtime.Intrinsics.Vector256.GreaterThan(x, half);
+                var angle = AsinOf(System.Runtime.Intrinsics.Vector256.ConditionalSelect(near, System.Runtime.Intrinsics.Vector256.Sqrt(System.Runtime.Intrinsics.X86.Fma.MultiplyAddNegated(half, x, half)), x));
+                var far = quarterPi - angle + more + quarterPi;
+                System.Runtime.Intrinsics.Vector256.CopyTo(System.Runtime.Intrinsics.Vector256.ConditionalSelect(near, angle + angle, far), output.Slice(i, 4));
+            }
+        }
+#endif
+        for (; i < input.Length; i++) output[i] = sine ? Math.Asin(input[i]) : Math.Acos(input[i]);
+    }
+
     [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
     private static double One(double x, int operation) => operation == 0 ? Math.Sin(x) : operation == 1 ? Math.Cos(x) : Math.Tan(x);
 
@@ -124,5 +155,43 @@ internal static class FastCircular
     private const double Largest = 1e5, Nearest = 1e-8;
 
     private static bool Supported => System.Runtime.Intrinsics.X86.Avx2.IsSupported && System.Runtime.Intrinsics.X86.Fma.IsSupported;
+
+    // The inverse sine of four values in [-1, 1]: a rational function of the square below 0.625, and above it
+    // a quarter turn twice over less a rational function of 1 - |x| times sqrt(2 (1 - |x|)).
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+    private static System.Runtime.Intrinsics.Vector256<double> AsinOf(System.Runtime.Intrinsics.Vector256<double> signed)
+    {
+        var a = System.Runtime.Intrinsics.Vector256.Abs(signed);
+        var quarterPi = System.Runtime.Intrinsics.Vector256.Create(0.78539816339744830962);
+        var w = System.Runtime.Intrinsics.Vector256.Create(1.0) - a;
+        var r = System.Runtime.Intrinsics.Vector256.Create(2.967721961301243206100E-3);
+        r = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(r, w, System.Runtime.Intrinsics.Vector256.Create(-5.634242780008963776856E-1));
+        r = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(r, w, System.Runtime.Intrinsics.Vector256.Create(6.968710824104713396794E0));
+        r = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(r, w, System.Runtime.Intrinsics.Vector256.Create(-2.556901049652824852289E1));
+        r = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(r, w, System.Runtime.Intrinsics.Vector256.Create(2.853665548261061424989E1));
+        var s = w + System.Runtime.Intrinsics.Vector256.Create(-2.194779531642920639778E1);
+        s = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(s, w, System.Runtime.Intrinsics.Vector256.Create(1.470656354026814941758E2));
+        s = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(s, w, System.Runtime.Intrinsics.Vector256.Create(-3.838770957603691357202E2));
+        s = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(s, w, System.Runtime.Intrinsics.Vector256.Create(3.424398657913078477438E2));
+        var root = System.Runtime.Intrinsics.Vector256.Sqrt(w + w);
+        var upper = quarterPi - root;
+        upper -= System.Runtime.Intrinsics.X86.Fma.MultiplySubtract(root, w * r / s, System.Runtime.Intrinsics.Vector256.Create(6.123233995736765886130E-17));
+        upper += quarterPi;
+        var z = a * a;
+        var p = System.Runtime.Intrinsics.Vector256.Create(4.253011369004428248960E-3);
+        p = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(p, z, System.Runtime.Intrinsics.Vector256.Create(-6.019598008014123785661E-1));
+        p = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(p, z, System.Runtime.Intrinsics.Vector256.Create(5.444622390564711410273E0));
+        p = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(p, z, System.Runtime.Intrinsics.Vector256.Create(-1.626247967210700244449E1));
+        p = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(p, z, System.Runtime.Intrinsics.Vector256.Create(1.956261983317594739197E1));
+        p = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(p, z, System.Runtime.Intrinsics.Vector256.Create(-8.198089802484824371615E0));
+        var q = z + System.Runtime.Intrinsics.Vector256.Create(-1.474091372988853791896E1);
+        q = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(q, z, System.Runtime.Intrinsics.Vector256.Create(7.049610280856842141659E1));
+        q = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(q, z, System.Runtime.Intrinsics.Vector256.Create(-1.471791292232726029859E2));
+        q = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(q, z, System.Runtime.Intrinsics.Vector256.Create(1.395105614657485689735E2));
+        q = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(q, z, System.Runtime.Intrinsics.Vector256.Create(-4.918853881490881290097E1));
+        var lower = System.Runtime.Intrinsics.X86.Fma.MultiplyAdd(z * p / q, a, a);
+        var value = System.Runtime.Intrinsics.Vector256.ConditionalSelect(System.Runtime.Intrinsics.Vector256.GreaterThan(a, System.Runtime.Intrinsics.Vector256.Create(0.625)), upper, lower);
+        return System.Runtime.Intrinsics.Vector256.BitwiseOr(value, System.Runtime.Intrinsics.Vector256.BitwiseAnd(signed, System.Runtime.Intrinsics.Vector256.Create(-0.0)));
+    }
 #endif
 }
