@@ -67,6 +67,7 @@ public sealed class ExactIntegerTests
                 Assert.Equal(a >> shift, (Big)(x >> shift));
                 Assert.Equal(a << -shift, (Big)(x << -shift));
             }
+            Assert.Equal(a << int.MinValue, (Big)(x << int.MinValue));
             if (a >= long.MinValue && a <= long.MaxValue) Assert.Equal((long)a, (long)x);
             else Assert.Throws<OverflowException>(() => (long)x);
 

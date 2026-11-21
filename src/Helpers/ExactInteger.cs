@@ -187,6 +187,8 @@ internal readonly struct ExactInteger : IComparable, IComparable<ExactInteger>, 
 
     public static ExactInteger operator <<(ExactInteger value, int shift)
     {
+        // -int.MinValue overflows; Big splits that count the same way.
+        if (shift == int.MinValue) return value >> int.MaxValue >> 1;
         if (shift < 0) return value >> -shift;
         if (value.IsZero) return default;
         return new ExactInteger(value._mantissa, checked(value._exponent + shift), true);
@@ -195,6 +197,7 @@ internal readonly struct ExactInteger : IComparable, IComparable<ExactInteger>, 
     /// <summary>Arithmetic (flooring) right shift, as <see cref="Big"/>'s.</summary>
     public static ExactInteger operator >>(ExactInteger value, int shift)
     {
+        if (shift == int.MinValue) return value << int.MaxValue << 1;
         if (shift < 0) return value << -shift;
         if (value.IsZero) return default;
         if (shift <= value._exponent) return new ExactInteger(value._mantissa, value._exponent - shift, true);
