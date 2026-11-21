@@ -98,17 +98,48 @@ internal static partial class FastKernels
                 break;
             default:
                 var undefined = 0;
-                for (var i = 0; i < n; i++)
+                var at = 0;
+                long bits = 0;
+#if !NETFRAMEWORK
+                if (System.Numerics.Vector.IsHardwareAccelerated)
                 {
-                    var divisor = right[i];
-                    if (divisor == 0)
+                    // A vector of quotients at a time. A zero divisor's lane is taken anyway and then zeroed,
+                    // and a quotient that is not finite leaves bits in the difference it makes with itself.
+                    var width = System.Numerics.Vector<double>.Count;
+                    var none = System.Numerics.Vector<double>.Zero;
+                    var zeros = System.Numerics.Vector<long>.Zero;
+                    var unlike = System.Numerics.Vector<long>.Zero;
+                    for (; at <= n - width; at += width)
                     {
-                        value[i] = 0;
+                        var divisor = new System.Numerics.Vector<double>(right.Slice(at, width));
+                        var zero = System.Numerics.Vector.Equals(divisor, none);
+                        var quotient = System.Numerics.Vector.ConditionalSelect(zero,
+                            none, new System.Numerics.Vector<double>(left.Slice(at, width)) / divisor);
+                        quotient.CopyTo(value.Slice(at, width));
+                        zeros |= zero;
+                        unlike |= System.Numerics.Vector.AsVectorInt64(quotient - quotient);
+                    }
+                    if (zeros != System.Numerics.Vector<long>.Zero) undefined++;
+                    if (unlike != System.Numerics.Vector<long>.Zero) bits = 1;
+                }
+#endif
+                for (; at < n; at++)
+                {
+                    var divisor = right[at];
+                    if (divisor == 0) // NOSONAR an exact zero is the contract
+                    {
+                        value[at] = 0;
                         undefined++;
                     }
                     else
-                        value[i] = left[i] / divisor;
+                    {
+                        var quotient = left[at] / divisor;
+                        value[at] = quotient;
+                        bits |= FastMath.NonFiniteBits(quotient);
+                    }
                 }
+                // Every quotient was seen to be finite as it was taken, so the series needs no second look.
+                if (bits == 0) outputs.Verified(0);
                 if (undefined == 0) break;
                 // A zero divisor is rare enough that its flags are worked out only once one has been met.
                 Span<double> defined = outputs[1].AsSpan(0, n);
