@@ -117,7 +117,7 @@ internal static partial class FastKernels
                             none, new System.Numerics.Vector<double>(left.Slice(at, width)) / divisor);
                         quotient.CopyTo(value.Slice(at, width));
                         zeros |= zero;
-                        unlike |= System.Numerics.Vector.AsVectorInt64(quotient - quotient);
+                        unlike |= System.Numerics.Vector.AsVectorInt64(quotient - quotient); // NOSONAR x - x is the finite test
                     }
                     if (zeros != System.Numerics.Vector<long>.Zero) undefined++;
                     if (unlike != System.Numerics.Vector<long>.Zero) bits = 1;
