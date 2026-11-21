@@ -621,10 +621,12 @@ internal static partial class FastKernels
         value.Clear();
         outputs.Flag(1, period);
         if (n <= period) return;
-        double[] xs = FastMath.Allocate(n), ys = FastMath.Allocate(n);
-        Returns(market, xs);
-        Returns(evaluation, ys);
-        ReadOnlySpan<double> x = xs, y = ys;
+        // The two series of returns are borrowed: a build would otherwise allocate two more than it publishes.
+        var pool = System.Buffers.ArrayPool<double>.Shared;
+        double[] xs = pool.Rent(n), ys = pool.Rent(n);
+        Returns(market, xs.AsSpan(0, n));
+        Returns(evaluation, ys.AsSpan(0, n));
+        ReadOnlySpan<double> x = xs.AsSpan(0, n), y = ys.AsSpan(0, n);
         double sumX = 0, sumY = 0, sumXX = 0, sumXY = 0, passedXX = 0, passedXY = 0;
         var run = 0;
         // The bars that fill the first window, the last of which is the first to publish.
@@ -683,6 +685,8 @@ internal static partial class FastKernels
                     : AnchoredSlope(x.Slice(at - period + 1, period), y.Slice(at - period + 1, period));
             }
         }
+        pool.Return(xs);
+        pool.Return(ys);
     }
 
     // The slope the sums give for the window ending at a bar, or the anchored one where they cannot be trusted.
