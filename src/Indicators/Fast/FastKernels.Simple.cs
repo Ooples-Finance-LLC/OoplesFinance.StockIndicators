@@ -355,6 +355,8 @@ internal static partial class FastKernels
         Span<double> up = outputs[0].AsSpan(0, n), down = outputs[1].AsSpan(0, n), oscillator = outputs[2].AsSpan(0, n);
         var first = (int)Math.Min(size - 1, n);
         for (var slot = 3; slot < 6; slot++) outputs.Flag(slot, first);
+        // Every value published is zero or a whole number of hundredths over the period: finite as written.
+        for (var slot = 0; slot < 3; slot++) outputs.Verified(slot);
 #if !NETFRAMEWORK
         if (size <= AroonVectorLimit && (owner.OldestTie
             ? VectorAroon<OldestHighest>(high, low, up, down, oscillator, period, (int)size, first)
