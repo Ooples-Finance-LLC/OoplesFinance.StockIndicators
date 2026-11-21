@@ -83,7 +83,7 @@ internal readonly struct ExactInteger : IComparable, IComparable<ExactInteger>, 
     public static implicit operator ExactInteger(ushort value) => new((long)value);
     public static implicit operator ExactInteger(int value) => new((long)value);
     public static implicit operator ExactInteger(uint value) => new((long)value);
-    public static implicit operator ExactInteger(long value) => new((long)value);
+    public static implicit operator ExactInteger(long value) => new(value);
     public static implicit operator ExactInteger(ulong value) => new((Big)value);
     public static explicit operator ExactInteger(double value) => new((Big)value);
     public static explicit operator ExactInteger(float value) => new((Big)value);
