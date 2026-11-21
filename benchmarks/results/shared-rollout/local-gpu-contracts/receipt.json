@@ -1,5 +1,5 @@
 {
-  "source_sha256": "889ce92b16cb3bf4dfc01160788b623d5f9e680da1d8bc8337a2147c0ed8d1f7",
+  "source_sha256": "937b0809a924a3a5724d07ea3f1908a05ff82a985900a0f88bc5959d4a3495f9",
   "methods": [
     "OoplesFinance.StockIndicators.CompetitorTests.ScaledTrueRangeFixtureTests.AllocationProbeRetainsEagerCpuAndOptionalGpuArms",
     "OoplesFinance.StockIndicators.CompetitorTests.ScaledTrueRangeFixtureTests.EveryArmMatchesItsIndependentArithmeticAndRestoresSettings",
@@ -15,10 +15,10 @@
     "OoplesFinance.StockIndicators.CompetitorTests.SharedGpuVolumeWeightedPriceFixtureTests.DeviceColumnsMatchIndependentCpuAndNativeReferences"
   ],
   "passed_cases": 100,
-  "trx_sha256": "38a559c4c05ac26223325bced19e5c09128ae5231562a35436603f1bbec515ad",
+  "trx_sha256": "436fbb8cbcbb01d87dd26d10e76f340c6a4c38314f7f40ed8a814593e3dbcf1c",
   "host": "Windows-11-10.0.26300-SP0",
-  "device": "NVIDIA GeForce RTX 3090; driver 621.24; RequiredGPU OpenCL execution",
+  "device": "NVIDIA GeForce RTX 3090",
   "dotnet_info": ".NET SDK:\r\n Version:           10.0.403\r\n Commit:            5a2162bea6\r\n Workload version:  10.0.400-manifests.899c35d8\r\n MSBuild version:   18.9.15+5a2162bea\r\n\r\nRuntime Environment:\r\n OS Name:     Windows\r\n OS Version:  10.0.26300\r\n OS Platform: Windows\r\n RID:         win-x64\r\n Base Path:   C:\\Program Files\\dotnet\\sdk\\10.0.403\\\r\n\r\n.NET workloads installed:\r\nThere are no installed workloads to display.\r\nConfigured to use workload sets when installing new manifests.\r\nNo workload sets are installed. Run \"dotnet workload restore\" to install a workload set.\r\n\r\nHost:\r\n  Version:      10.0.14\r\n  Architecture: x64\r\n  Commit:       0427b9abbe\r\n\r\n.NET SDKs installed:\r\n  8.0.133 [C:\\Program Files\\dotnet\\sdk]\r\n  10.0.403 [C:\\Program Files\\dotnet\\sdk]\r\n\r\n.NET runtimes installed:\r\n  Microsoft.AspNetCore.App 8.0.33 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\r\n  Microsoft.AspNetCore.App 10.0.14 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]\r\n  Microsoft.NETCore.App 5.0.14 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\r\n  Microsoft.NETCore.App 8.0.0-rc.1.23419.4 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\r\n  Microsoft.NETCore.App 8.0.33 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\r\n  Microsoft.NETCore.App 9.0.22 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\r\n  Microsoft.NETCore.App 10.0.14 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]\r\n  Microsoft.WindowsDesktop.App 5.0.14 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\r\n  Microsoft.WindowsDesktop.App 8.0.0-rc.1.23420.5 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\r\n  Microsoft.WindowsDesktop.App 8.0.33 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\r\n  Microsoft.WindowsDesktop.App 9.0.22 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\r\n  Microsoft.WindowsDesktop.App 10.0.14 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]\r\n\r\nOther architectures found:\r\n  x86   [C:\\Program Files (x86)\\dotnet]\r\n    registered at [HKLM\\SOFTWARE\\dotnet\\Setup\\InstalledVersions\\x86\\InstallLocation]\r\n\r\nEnvironment variables:\r\n  DOTNET_CLI_TELEMETRY_OPTOUT              [1]\r\n  DOTNET_NOLOGO                            [1]\r\n  DOTNET_SKIP_FIRST_TIME_EXPERIENCE        [1]\r\n\r\nglobal.json file:\r\n  Not found\r\n\r\nLearn more:\r\n  https://aka.ms/dotnet/info\r\n\r\nDownload .NET:\r\n  https://aka.ms/dotnet/download\r\n",
-  "test_assembly_sha256": "6cf0e25b2b7a8bcb9c8a98b132fb644c1e7e7236e9f7c76bfd410332a6aaf8a4",
+  "test_assembly_sha256": "d17600f896e9f682f05b2266acd4a6f3369db5c888be5195ad6be9b7ed2bb92d",
   "note": "Actual RequiredGPU fixture execution; correctness evidence, not performance qualification."
 }
