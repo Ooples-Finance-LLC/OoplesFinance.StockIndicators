@@ -173,65 +173,119 @@ internal static partial class FastKernels
         // The comparison decides which side a whole bar's flow joins. A plain typical price is within a few
         // units of the exactly rounded one, so it settles every comparison that is not that close; the rest
         // are settled by the prices rounded exactly as the exact route rounds them.
-        double previous = (high[0] + low[0] + close[0]) / 3, previousScale = Math.Abs(high[0]) + Math.Abs(low[0]) + Math.Abs(close[0]);
-        double positive = 0, negative = 0;
-        // The largest flow so far. A side with no flow in the window is exactly zero, which a sum that has
-        // slid over larger flows no longer is: it is left a remainder far below them. A sum that small beside
-        // the largest flow is therefore taken afresh, which is exact for a window with none.
+        // The largest flow of the series. A side with no flow in the window is exactly zero, which a sum that
+        // has slid over larger flows no longer is: it is left a remainder far below them. A sum that small
+        // beside the largest flow is therefore taken afresh, which is exact for a window with none.
         double largest = 0;
-        for (var i = 1; i < n; i++)
+        var bar = 1;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
         {
-            double h = high[i], l = low[i], c = close[i];
-            double typical = (h + l + c) / 3, scale = Math.Abs(h) + Math.Abs(l) + Math.Abs(c);
-            var move = typical - previous;
-            if (!(Math.Abs(move) > 1e-15 * (scale + previousScale)))
-                move = FastMath.TypicalPrice(h, l, c).CompareTo(FastMath.TypicalPrice(high[i - 1], low[i - 1], close[i - 1]));
-            var flow = typical * volume[i];
-            double up = FastMath.KeepIf(flow, move > 0), down = FastMath.KeepIf(flow, move < 0);
-            previous = typical;
-            previousScale = scale;
-            ups[i] = up;
-            downs[i] = down;
-            largest = Math.Max(largest, Math.Abs(flow));
-            if (i > period && (i & RebuildMask) == 0)
+            // A vector of bars at a time, each beside the bar before it. A group with any comparison too
+            // close for the plain typical price to settle is left to the loop below.
+            var width = System.Numerics.Vector<double>.Count;
+            var third = new System.Numerics.Vector<double>(Third);
+            var margin = new System.Numerics.Vector<double>(1e-15);
+            var none = System.Numerics.Vector<double>.Zero;
+            var most = none;
+            for (; bar <= n - width; bar += width)
+            {
+                System.Numerics.Vector<double> h = new(high.Slice(bar, width)), l = new(low.Slice(bar, width)),
+                    c = new(close.Slice(bar, width));
+                System.Numerics.Vector<double> ph = new(high.Slice(bar - 1, width)), pl = new(low.Slice(bar - 1, width)),
+                    pc = new(close.Slice(bar - 1, width));
+                var typical = (h + l + c) * third;
+                var move = typical - (ph + pl + pc) * third;
+                var scales = System.Numerics.Vector.Abs(h) + System.Numerics.Vector.Abs(l) + System.Numerics.Vector.Abs(c)
+                    + (System.Numerics.Vector.Abs(ph) + System.Numerics.Vector.Abs(pl) + System.Numerics.Vector.Abs(pc));
+                if (!System.Numerics.Vector.GreaterThanAll(System.Numerics.Vector.Abs(move), margin * scales))
+                {
+                    for (var j = bar; j < bar + width; j++)
+                        largest = Math.Max(largest, FlowOf(high, low, close, volume, j, ups, downs));
+                    continue;
+                }
+                var flow = typical * new System.Numerics.Vector<double>(volume.Slice(bar, width));
+                System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.GreaterThan(move, none), flow, none)
+                    .CopyTo(ups.AsSpan(bar, width));
+                System.Numerics.Vector.ConditionalSelect(System.Numerics.Vector.LessThan(move, none), flow, none)
+                    .CopyTo(downs.AsSpan(bar, width));
+                most = System.Numerics.Vector.Max(most, System.Numerics.Vector.Abs(flow));
+            }
+            for (var j = 0; j < width; j++) largest = Math.Max(largest, most[j]);
+        }
+#endif
+        for (; bar < n; bar++) largest = Math.Max(largest, FlowOf(high, low, close, volume, bar, ups, downs));
+        // The sums are a pass of their own: the bars that fill the first window, then stretches that only
+        // slide, each begun on a sum taken afresh.
+        var slight = 1e-6 * largest;
+        double positive = 0, negative = 0;
+        var at = 1;
+        var filled = Math.Min(period, n - 1);
+        for (; at <= filled; at++)
+        {
+            positive += ups[at];
+            negative += downs[at];
+            if (at >= first) value[at] = Share(positive, negative, minimumTotalOne);
+        }
+        while (at < n)
+        {
+            if ((at & RebuildMask) == 0)
             {
                 positive = negative = 0;
-                for (var j = i - period + 1; j <= i; j++)
+                for (var j = at - period + 1; j <= at; j++)
                 {
                     positive += ups[j];
                     negative += downs[j];
                 }
+                if (at >= first) value[at] = Share(positive, negative, minimumTotalOne);
+                at++;
             }
-            else if (i > period)
+            var end = Math.Min(n, (at | RebuildMask) + 1);
+            for (; at < end; at++)
             {
-                positive += up - ups[i - period];
-                negative += down - downs[i - period];
+                positive += ups[at] - ups[at - period];
+                negative += downs[at] - downs[at - period];
+                if (!(Math.Abs(positive) > slight) || !(Math.Abs(negative) > slight))
+                {
+                    // Through copies, so that the sums themselves are never addressed and stay in registers.
+                    double fresh = positive, other = negative;
+                    Resum(ups, downs, at - period + 1, at, ref fresh, ref other);
+                    positive = fresh;
+                    negative = other;
+                }
+                if (at >= first) value[at] = Share(positive, negative, minimumTotalOne);
             }
-            else
-            {
-                positive += up;
-                negative += down;
-            }
-            var slight = 1e-6 * largest;
-            if (!(Math.Abs(positive) > slight) || !(Math.Abs(negative) > slight))
-            {
-                // Through copies, so that the sums themselves are never addressed and stay in registers.
-                double fresh = positive, other = negative;
-                Resum(ups, downs, Math.Max(i - period + 1, 1), i, ref fresh, ref other);
-                positive = fresh;
-                negative = other;
-            }
-            if (i < first) continue;
-            var total = positive + negative;
-            if (minimumTotalOne)
-            {
-                if (total >= 1) value[i] = 100 * positive / total;
-            }
-            else
-                value[i] = negative == 0 ? 100 : total == 0 ? double.NegativeInfinity : 100 * positive / total;
         }
         pool.Return(ups);
         pool.Return(downs);
+    }
+
+    private const double Third = 1.0 / 3;
+
+    // One bar's flow, written to the side its typical price moved to, and its size.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    private static double FlowOf(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close,
+        ReadOnlySpan<double> volume, int i, double[] ups, double[] downs)
+    {
+        double h = high[i], l = low[i], c = close[i], ph = high[i - 1], pl = low[i - 1], pc = close[i - 1];
+        var typical = (h + l + c) * Third;
+        var move = typical - (ph + pl + pc) * Third;
+        var scales = Math.Abs(h) + Math.Abs(l) + Math.Abs(c) + (Math.Abs(ph) + Math.Abs(pl) + Math.Abs(pc));
+        if (!(Math.Abs(move) > 1e-15 * scales))
+            move = FastMath.TypicalPrice(h, l, c).CompareTo(FastMath.TypicalPrice(ph, pl, pc));
+        var flow = typical * volume[i];
+        ups[i] = FastMath.KeepIf(flow, move > 0);
+        downs[i] = FastMath.KeepIf(flow, move < 0);
+        return Math.Abs(flow);
+    }
+
+    // The index for a window's two sums, or zero where the rule in force publishes none.
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+    private static double Share(double positive, double negative, bool minimumTotalOne)
+    {
+        var total = positive + negative;
+        if (minimumTotalOne) return total >= 1 ? 100 * positive / total : 0;
+        return negative == 0 ? 100 : total == 0 ? double.NegativeInfinity : 100 * positive / total; // NOSONAR exact zeros are the contract
     }
 
     // Out of line: it is taken only where a side of the window has next to no flow.
