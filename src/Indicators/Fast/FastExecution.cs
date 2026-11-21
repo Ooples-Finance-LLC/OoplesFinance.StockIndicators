@@ -294,6 +294,8 @@ internal static partial class FastExecution
         Bind<DojiStarCandle>(binders, t => (c, o) => FastKernels.ContainmentCandle(c, o[0], t.Period, ContainmentCandleKind.DojiStar));
         Bind<TristarCandle>(binders, t => (c, o) => FastKernels.GapContinuationCandle(c, o[0], t.Period, GapContinuationKind.Tristar));
         Bind<TasukiGapCandle>(binders, t => (c, o) => FastKernels.GapContinuationCandle(c, o[0], t.Period, GapContinuationKind.TasukiGap));
+        Bind<MatHoldCandle>(binders, t => (c, o) => FastKernels.FiveCandleContinuation(c, o[0], t.LongPeriod, t.ShortPeriod, true, t.Penetration));
+        Bind<RisingFallingThreeMethodsCandle>(binders, t => (c, o) => FastKernels.FiveCandleContinuation(c, o[0], t.LongPeriod, t.ShortPeriod, false, 0));
         Bind<UpDownSideGapThreeMethodsCandle>(binders, t => (c, o) => FastKernels.GapContinuationCandle(c, o[0], 0, GapContinuationKind.UpDownSideGapThreeMethods));
         Bind<WindowBetaStatistics>(binders, t => (c, o) => FastKernels.BetaStatistics(c, o, t));
         Bind<WindowReturnBeta>(binders, t => (c, o) => FastKernels.ReturnBeta(c, o[0], o, t));

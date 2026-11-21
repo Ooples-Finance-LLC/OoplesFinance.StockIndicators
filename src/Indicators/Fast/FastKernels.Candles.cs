@@ -1388,4 +1388,94 @@ internal static partial class FastKernels
             output[i] = white ? -100 : 100;
         }
     }
+
+    /// <summary>
+    /// The two five-candle continuation patterns: a long first body, three short ones that hold against it,
+    /// and a fifth that carries on. The mat hold is the rising one only, and lets the middle bodies sink a
+    /// set fraction into the first; the rising and falling three methods want them inside its range.
+    /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
+    internal static void FiveCandleContinuation(FastColumns columns, Span<double> output, int longPeriod, int shortPeriod,
+        bool matHold, double penetration)
+    {
+        double[] open = columns.Open, high = columns.High, low = columns.Low, close = columns.Close;
+        var n = close.Length;
+        output = output.Slice(0, n);
+        output.Clear();
+        // Each body is measured against the mean of the bodies before it, so each has a window of its own.
+        var beforeFirst = new CandleWindow(columns, CandleStatistic.Body, longPeriod);
+        var beforeSecond = new CandleWindow(columns, CandleStatistic.Body, shortPeriod);
+        var beforeThird = new CandleWindow(columns, CandleStatistic.Body, shortPeriod);
+        var beforeFourth = new CandleWindow(columns, CandleStatistic.Body, shortPeriod);
+        var beforeFifth = new CandleWindow(columns, CandleStatistic.Body, longPeriod);
+        var warmup = (long)Math.Max(longPeriod, shortPeriod) + 4;
+        for (var i = 0; i < n; i++)
+        {
+            if (i >= 5) beforeFirst.Include(i - 5);
+            if (i >= 4) beforeSecond.Include(i - 4);
+            if (i >= 3) beforeThird.Include(i - 3);
+            if (i >= 2) beforeFourth.Include(i - 2);
+            if (!matHold && i >= 1) beforeFifth.Include(i - 1);
+            if (i < warmup) continue;
+            int a = i - 4, b = i - 3, c = i - 2, d = i - 1;
+            // What the prices alone decide comes first: it rules out nearly every bar.
+            var white = close[a] >= open[a];
+            double topC = Math.Max(open[c], close[c]), topD = Math.Max(open[d], close[d]);
+            if (matHold)
+            {
+                if (!white || close[b] >= open[b] || close[i] < open[i] || close[b] <= close[a] || topC >= open[b]
+                    || topD >= topC || open[i] <= close[d] || close[i] <= Math.Max(Math.Max(high[b], high[c]), high[d]))
+                    continue;
+            }
+            else
+            {
+                if (white == (close[b] >= open[b]) || white == (close[c] >= open[c]) || white == (close[d] >= open[d])
+                    || white != (close[i] >= open[i]))
+                    continue;
+                if (!Overlaps(open, high, low, close, b, a) || !Overlaps(open, high, low, close, c, a)
+                    || !Overlaps(open, high, low, close, d, a))
+                    continue;
+                if (white
+                    ? !(close[c] < close[b] && close[d] < close[c] && open[i] > close[d] && close[i] > close[a])
+                    : !(close[c] > close[b] && close[d] > close[c] && open[i] < close[d] && close[i] < close[a]))
+                    continue;
+            }
+            if (beforeFirst.Compare(a, longPeriod, Math.Max(open[a], close[a]), Math.Min(open[a], close[a])) >= 0
+                || beforeSecond.Compare(b, shortPeriod, Math.Max(open[b], close[b]), Math.Min(open[b], close[b])) <= 0
+                || beforeThird.Compare(c, shortPeriod, topC, Math.Min(open[c], close[c])) <= 0
+                || beforeFourth.Compare(d, shortPeriod, topD, Math.Min(open[d], close[d])) <= 0)
+                continue;
+            if (matHold)
+            {
+                if (PenetrationAllowed(Math.Min(open[c], close[c]), open[a], close[a], penetration)
+                    && PenetrationAllowed(Math.Min(open[d], close[d]), open[a], close[a], penetration))
+                    output[i] = 100;
+                continue;
+            }
+            if (beforeFifth.Compare(i, longPeriod, Math.Max(open[i], close[i]), Math.Min(open[i], close[i])) < 0)
+                output[i] = white ? 100 : -100;
+        }
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    private static bool Overlaps(double[] open, double[] high, double[] low, double[] close, int bar, int first) =>
+        Math.Min(open[bar], close[bar]) < high[first] && Math.Max(open[bar], close[bar]) > low[first];
+
+    // Whether a body's bottom stays above the first close less the allowed fraction of the first body. Decided
+    // in floating point where the two sides are clearly apart, and exactly, product and all, where they are not.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    private static bool PenetrationAllowed(double bottom, double firstOpen, double firstClose, double penetration)
+    {
+        if (bottom >= firstClose) return false;
+        var gap = bottom - firstClose + penetration * (firstClose - firstOpen);
+        var margin = 1e-14 * (Math.Abs(bottom) + Math.Abs(firstClose) + penetration * (Math.Abs(firstClose) + Math.Abs(firstOpen)));
+        if (gap > margin) return true;
+        if (gap < -margin) return false;
+        var exact = new ExactMeanAccumulator();
+        exact.Add(bottom);
+        exact.Add(firstClose, -1);
+        exact.AddProduct(firstClose, penetration);
+        exact.AddProduct(firstOpen, penetration, -1);
+        return exact.Sign > 0;
+    }
 }

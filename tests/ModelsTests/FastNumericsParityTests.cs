@@ -590,6 +590,13 @@ public sealed class FastNumericsParityTests
         ("TristarCandle(1)", () => new TristarCandle(1)),
         ("TristarCandle(300)", () => new TristarCandle(300)),
         ("TasukiGapCandle()", () => new TasukiGapCandle()),
+        ("MatHoldCandle()", () => new MatHoldCandle()),
+        ("MatHoldCandle(1, 1, 0)", () => new MatHoldCandle(1, 1, 0)),
+        ("MatHoldCandle(3, 2, 0.9)", () => new MatHoldCandle(3, 2, 0.9)),
+        ("MatHoldCandle(300, 5, 0.5)", () => new MatHoldCandle(300, 5, 0.5)),
+        ("RisingFallingThreeMethodsCandle()", () => new RisingFallingThreeMethodsCandle()),
+        ("RisingFallingThreeMethodsCandle(1, 1)", () => new RisingFallingThreeMethodsCandle(1, 1)),
+        ("RisingFallingThreeMethodsCandle(2, 300)", () => new RisingFallingThreeMethodsCandle(2, 300)),
         ("TasukiGapCandle(1)", () => new TasukiGapCandle(1)),
         ("TasukiGapCandle(300)", () => new TasukiGapCandle(300)),
         ("UpDownSideGapThreeMethodsCandle()", () => new UpDownSideGapThreeMethodsCandle()),
@@ -1014,6 +1021,37 @@ public sealed class FastNumericsParityTests
                 if (bars.Length != 0)
                     Assert.Equal(bars[^1].Close, fast.Latest.Bar.Close);
             }
+        }
+    }
+
+    [Theory]
+    [InlineData(0, 100)]
+    [InlineData(1, 100)]
+    [InlineData(2, -100)]
+    public async Task FiveCandleContinuationsAreFoundOnBothRoutes(int shape, double expected)
+    {
+        // A random walk never draws one of these, so the parity cases above would pass on a kernel that
+        // found nothing. Here the five candles are laid down by hand: open, high, low, close.
+        double[][] candles = shape switch
+        {
+            // Mat hold: a long rise, a small fall that gaps above it, two more sinking into it, a breakout.
+            0 => [[100, 110.5, 99.5, 110], [112.3, 113, 111.5, 112], [109.9, 110.5, 109, 109.6], [109.5, 110, 109, 109.2], [109.5, 115.5, 109, 115]],
+            // Rising three methods: the three small falls stay inside the first candle's range.
+            1 => [[100, 110.5, 99.5, 110], [109, 109.2, 108.6, 108.7], [108.5, 108.6, 108.1, 108.2], [108, 108.1, 107.6, 107.7], [107.8, 112.5, 107.7, 112]],
+            // Falling three methods: the same, upside down.
+            _ => [[110, 110.5, 99.5, 100], [101, 101.4, 100.9, 101.3], [101.5, 101.9, 101.4, 101.8], [102, 102.4, 101.9, 102.3], [102.2, 102.3, 97.5, 98]],
+        };
+        var bars = Walk(64, 11);
+        for (var k = 0; k < 5; k++)
+            bars[40 + k] = new Bar(bars[40 + k].Time, candles[k][0], candles[k][1], candles[k][2], candles[k][3], 1000);
+        foreach (var numerics in new[] { IndicatorNumerics.Exact, IndicatorNumerics.Fast })
+        {
+            IIndicator pattern = shape == 0 ? new MatHoldCandle() : new RisingFallingThreeMethodsCandle();
+            using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(pattern)
+                .ConfigureNumerics(numerics).BuildAsync();
+            Assert.Equal(expected, run[pattern][44]);
+            Assert.Equal(0, run[pattern][43]);
+            Assert.Equal(0, run[pattern][45]);
         }
     }
 
