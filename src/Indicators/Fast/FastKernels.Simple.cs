@@ -1149,6 +1149,11 @@ internal static partial class FastKernels
             rightRun = i > 0 && right[i] == right[i - 1] ? rightRun + 1 : 1; // NOSONAR an exact tie is the contract
         }
         var block = Math.Max(64, period);
+        // The loop that slides the sums leaves each bar as a numerator here and a product of two variances
+        // there; the square root and the division, the slowest steps of all and tied to nothing before
+        // them, are then taken a vector of bars at a time.
+        var rented = System.Buffers.ArrayPool<double>.Shared.Rent(n);
+        var products = rented.AsSpan(0, n);
         // One division for the window instead of three a bar.
         var inverse = 1.0 / period;
         var at = period - 1;
@@ -1166,6 +1171,7 @@ internal static partial class FastKernels
             counted = false;
             var from = at - period + 1;
             var sums = PairSums.Of(left.Slice(from, period), right.Slice(from, period));
+            products[at] = 1;
             if (leftRun >= period || rightRun >= period)
             {
                 value[at] = 0;
@@ -1176,9 +1182,13 @@ internal static partial class FastKernels
                 double a = sums.Xx - sums.X * sums.X * inverse, b = sums.Yy - sums.Y * sums.Y * inverse;
                 // Where a variance is a small remainder even of a fresh sum of squares, the window is summed
                 // around its own means instead.
-                value[at] = !(a > 1e-4 * sums.Xx) || !(b > 1e-4 * sums.Yy)
-                    ? CenteredCorrelation(left.Slice(from, period), right.Slice(from, period))
-                    : (sums.Xy - sums.X * sums.Y * inverse) / Math.Sqrt(a * b);
+                if (!(a > 1e-4 * sums.Xx) || !(b > 1e-4 * sums.Yy))
+                    value[at] = CenteredCorrelation(left.Slice(from, period), right.Slice(from, period));
+                else
+                {
+                    value[at] = sums.Xy - sums.X * sums.Y * inverse;
+                    products[at] = a * b;
+                }
             }
             at++;
             // The rest of the block slides those sums, held where the compiler can keep them in registers.
@@ -1199,6 +1209,7 @@ internal static partial class FastKernels
                 if (leftRun >= period || rightRun >= period)
                 {
                     value[at] = 0;
+                    products[at] = 1;
                     withheld = true;
                     continue;
                 }
@@ -1210,9 +1221,19 @@ internal static partial class FastKernels
                     counted = true;
                     break;
                 }
-                value[at] = (sumXy - sumX * sumY * inverse) / Math.Sqrt(a * b);
+                value[at] = sumXy - sumX * sumY * inverse;
+                products[at] = a * b;
             }
         }
+        var finished = period - 1;
+        var width = System.Numerics.Vector<double>.Count;
+        var numerators = System.Runtime.InteropServices.MemoryMarshal.Cast<double, System.Numerics.Vector<double>>(value.Slice(finished));
+        var variances = System.Runtime.InteropServices.MemoryMarshal.Cast<double, System.Numerics.Vector<double>>(products.Slice(finished));
+        for (var group = 0; group < numerators.Length; group++)
+            numerators[group] /= System.Numerics.Vector.SquareRoot(variances[group]);
+        finished += numerators.Length * width;
+        for (; finished < n; finished++) value[finished] /= Math.Sqrt(products[finished]);
+        System.Buffers.ArrayPool<double>.Shared.Return(rented);
         if (!withheld || owner.FlatZero)
         {
             outputs.Flag(1, period - 1);
