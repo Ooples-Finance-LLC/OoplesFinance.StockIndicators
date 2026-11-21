@@ -355,6 +355,12 @@ internal static partial class FastKernels
         Span<double> up = outputs[0].AsSpan(0, n), down = outputs[1].AsSpan(0, n), oscillator = outputs[2].AsSpan(0, n);
         var first = (int)Math.Min(size - 1, n);
         for (var slot = 3; slot < 6; slot++) outputs.Flag(slot, first);
+#if !NETFRAMEWORK
+        if (size <= AroonVectorLimit && (owner.OldestTie
+            ? VectorAroon<OldestHighest>(high, low, up, down, oscillator, period, (int)size, first)
+            : VectorAroon<NewestHighest>(high, low, up, down, oscillator, period, (int)size, first)))
+            return;
+#endif
         if (size <= AroonFusedLimit && n > 0)
         {
             // One loop for each tie rule, so that the rule is compiled into the loop and not decided on every bar.
@@ -391,6 +397,87 @@ internal static partial class FastKernels
             oscillator[i] = percentages[period + 1 + (highest - lowest)];
         }
     }
+
+#if !NETFRAMEWORK
+    // Up to this window, searching every window outright is cheaper than following the extremes.
+    private const int AroonVectorLimit = 32;
+
+    // Short windows, eight bars at a time: each bar's window is searched from its oldest bar to its newest,
+    // neighbouring windows side by side. Nothing depends on what the prices do - no extreme to expire,
+    // no branch to guess - so a trend, which costs the loop below a search on every bar, costs nothing here.
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Kernel)]
+    private static bool VectorAroon<TRule>(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> up, Span<double> down,
+        Span<double> oscillator, int period, int size, int first)
+        where TRule : struct, IExtremeRule
+    {
+        var n = high.Length;
+        if (!System.Runtime.Intrinsics.X86.Avx.IsSupported || n - first < 8) return false;
+        up.Slice(0, first).Clear();
+        down.Slice(0, first).Clear();
+        oscillator.Slice(0, first).Clear();
+        // Entry k holds the percentage of k - period - 1.
+        var percentages = new double[2 * period + 3];
+        for (var k = 0; k < percentages.Length; k++) percentages[k] = WindowAroon.Percentage(k - period - 1L, period);
+        ref var highs = ref System.Runtime.InteropServices.MemoryMarshal.GetReference(high);
+        ref var lows = ref System.Runtime.InteropServices.MemoryMarshal.GetReference(low);
+        var one = System.Runtime.Intrinsics.Vector256.Create(1.0);
+        var i = first;
+        while (true)
+        {
+            // Two groups of four go through the search together: each waits on its own running extreme from
+            // one bar of the window to the next, and the processor fills that wait with the other group.
+            var oldest = i - size + 1;
+            var highest = System.Runtime.Intrinsics.Vector256.LoadUnsafe(ref highs, (nuint)oldest);
+            var lowest = System.Runtime.Intrinsics.Vector256.LoadUnsafe(ref lows, (nuint)oldest);
+            var highestNext = System.Runtime.Intrinsics.Vector256.LoadUnsafe(ref highs, (nuint)(oldest + 4));
+            var lowestNext = System.Runtime.Intrinsics.Vector256.LoadUnsafe(ref lows, (nuint)(oldest + 4));
+            var age = System.Runtime.Intrinsics.Vector256.Create((double)(size - 1));
+            System.Runtime.Intrinsics.Vector256<double> highAge = age, lowAge = age, highAgeNext = age, lowAgeNext = age;
+            for (var k = 1; k < size; k++)
+            {
+                age -= one;
+                var h = System.Runtime.Intrinsics.Vector256.LoadUnsafe(ref highs, (nuint)(oldest + k));
+                var l = System.Runtime.Intrinsics.Vector256.LoadUnsafe(ref lows, (nuint)(oldest + k));
+                var hNext = System.Runtime.Intrinsics.Vector256.LoadUnsafe(ref highs, (nuint)(oldest + k + 4));
+                var lNext = System.Runtime.Intrinsics.Vector256.LoadUnsafe(ref lows, (nuint)(oldest + k + 4));
+                // A later bar that only equals the extreme takes its place under one tie rule and not the other.
+                var newest = default(TRule).Newest;
+                highAge = System.Runtime.Intrinsics.X86.Avx.BlendVariable(highAge, age, newest ? System.Runtime.Intrinsics.X86.Avx.CompareGreaterThanOrEqual(h, highest) : System.Runtime.Intrinsics.X86.Avx.CompareGreaterThan(h, highest));
+                lowAge = System.Runtime.Intrinsics.X86.Avx.BlendVariable(lowAge, age, newest ? System.Runtime.Intrinsics.X86.Avx.CompareLessThanOrEqual(l, lowest) : System.Runtime.Intrinsics.X86.Avx.CompareLessThan(l, lowest));
+                highAgeNext = System.Runtime.Intrinsics.X86.Avx.BlendVariable(highAgeNext, age,
+                    newest ? System.Runtime.Intrinsics.X86.Avx.CompareGreaterThanOrEqual(hNext, highestNext) : System.Runtime.Intrinsics.X86.Avx.CompareGreaterThan(hNext, highestNext));
+                lowAgeNext = System.Runtime.Intrinsics.X86.Avx.BlendVariable(lowAgeNext, age,
+                    newest ? System.Runtime.Intrinsics.X86.Avx.CompareLessThanOrEqual(lNext, lowestNext) : System.Runtime.Intrinsics.X86.Avx.CompareLessThan(lNext, lowestNext));
+                highest = System.Runtime.Intrinsics.X86.Avx.Max(highest, h);
+                lowest = System.Runtime.Intrinsics.X86.Avx.Min(lowest, l);
+                highestNext = System.Runtime.Intrinsics.X86.Avx.Max(highestNext, hNext);
+                lowestNext = System.Runtime.Intrinsics.X86.Avx.Min(lowestNext, lNext);
+            }
+            AroonGroup(System.Runtime.Intrinsics.X86.Avx.ConvertToVector128Int32WithTruncation(highAge), System.Runtime.Intrinsics.X86.Avx.ConvertToVector128Int32WithTruncation(lowAge),
+                percentages, period, up.Slice(i, 4), down.Slice(i, 4), oscillator.Slice(i, 4));
+            AroonGroup(System.Runtime.Intrinsics.X86.Avx.ConvertToVector128Int32WithTruncation(highAgeNext), System.Runtime.Intrinsics.X86.Avx.ConvertToVector128Int32WithTruncation(lowAgeNext),
+                percentages, period, up.Slice(i + 4, 4), down.Slice(i + 4, 4), oscillator.Slice(i + 4, 4));
+            // The last eight bars are taken as a step of their own, over whatever the step before covered.
+            if (i == n - 8) break;
+            i = Math.Min(i + 8, n - 8);
+        }
+        return true;
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    private static void AroonGroup(System.Runtime.Intrinsics.Vector128<int> highAges, System.Runtime.Intrinsics.Vector128<int> lowAges,
+        double[] percentages, int period, Span<double> up, Span<double> down, Span<double> oscillator)
+    {
+        for (var lane = 0; lane < 4; lane++)
+        {
+            int sinceHigh = System.Runtime.Intrinsics.Vector128.GetElement(highAges, lane),
+                sinceLow = System.Runtime.Intrinsics.Vector128.GetElement(lowAges, lane);
+            up[lane] = percentages[2 * period + 1 - sinceHigh];
+            down[lane] = percentages[2 * period + 1 - sinceLow];
+            oscillator[lane] = percentages[period + 1 + (sinceLow - sinceHigh)];
+        }
+    }
+#endif
 
     private const int AroonTableLimit = 4096;
 

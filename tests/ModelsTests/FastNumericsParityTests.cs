@@ -1056,6 +1056,38 @@ public sealed class FastNumericsParityTests
     }
 
     [Fact]
+    public async Task AroonSearchedEightBarsAtATimeIsTheOneFollowedBarByBar()
+    {
+        // Every length around a step of eight, windows up to and past the vector limit, both tie rules, on
+        // prices coarse enough that equal extremes are the usual case: ties are where the rules differ.
+        var random = RandomHelper.CreateSeededRandom(71);
+        foreach (var period in new[] { 1, 2, 3, 7, 14, 31, 32, 33 })
+        foreach (var extra in new[] { true, false })
+        foreach (var oldest in new[] { true, false })
+        for (var length = 1; length <= period + 20; length++)
+        {
+            var bars = new Bar[length];
+            double close = 20;
+            for (var i = 0; i < length; i++)
+            {
+                close = Math.Max(1, close + random.Next(-2, 3));
+                bars[i] = new Bar(Day(i), close, close + random.Next(0, 3), Math.Max(.5, close - random.Next(0, 3)), close, 1);
+            }
+            var series = new double[2][][];
+            for (var route = 0; route < 2; route++)
+            {
+                var aroon = new WindowAroon(period, extra, oldest);
+                using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(aroon)
+                    .ConfigureNumerics(route == 0 ? IndicatorNumerics.Exact : IndicatorNumerics.Fast).BuildAsync();
+                series[route] = aroon.Outputs.Select(output => run[output].ToArray()).ToArray();
+            }
+            for (var slot = 0; slot < series[0].Length; slot++)
+                Assert.True(series[0][slot].AsSpan().SequenceEqual(series[1][slot]),
+                    $"WindowAroon({period}, {extra}, {oldest}) over {length} bars, output {slot}");
+        }
+    }
+
+    [Fact]
     public async Task FastValidatesOnlyTheFieldsItReads()
     {
         var bars = Walk(64, 11);
