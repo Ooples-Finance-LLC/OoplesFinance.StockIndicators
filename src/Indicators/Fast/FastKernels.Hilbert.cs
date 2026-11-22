@@ -246,7 +246,7 @@ internal static partial class FastKernels
                 continue;
             }
             period = .33 * hilbert.Period + .67 * period;
-            var count = Math.Min((int)(period + .5), i + 1);
+            var count = Math.Min(WholeBars(period), i + 1);
             means.Update(ring, price, count == 0 ? 1 : count, true);
             if (i >= 11) trendline[i] = means.Average;
             smooth[i] = hilbert.SmoothPrice;
@@ -280,7 +280,7 @@ internal static partial class FastKernels
                 continue;
             }
             period = .33 * hilbert.Period + .67 * period;
-            means.Update(ring, price, (int)(period + .5), true);
+            means.Update(ring, price, WholeBars(period), true);
             if (i >= publishFrom) value[i] = means.Average;
         }
     }
@@ -325,6 +325,18 @@ internal static partial class FastKernels
 
     private static readonly bool ProjectionsBuilt = BuildProjections();
 
+    // The smoothed cycle length to the nearest whole bar. The window that many bars long is what is
+    // measured, so a length within its own rounding of a half would have that rounding choose the window.
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+    private static int WholeBars(double period)
+    {
+        var shifted = period + .5;
+        var count = (int)shifted;
+        var over = shifted - count;
+        if (over < 1e-9 || over > 1 - 1e-9) throw FastUndecidedException.Raise();
+        return count;
+    }
+
     /// <summary>
     /// Dominant cycle phase, its sine and lead sine, or the trend-versus-cycle mode: the smoothed price
     /// projected onto one cycle of the measured period. Published from bar 63 plus the suppression.
@@ -358,7 +370,7 @@ internal static partial class FastKernels
                 continue;
             }
             period = .33 * hilbert.Period + .67 * period;
-            var count = (int)(period + .5);
+            var count = WholeBars(period);
             var anchor = hilbert.SmoothPrice;
             smooth[cursor] = anchor;
             // Measured from the newest value, so the sums carry the cycle and not the price level; the
