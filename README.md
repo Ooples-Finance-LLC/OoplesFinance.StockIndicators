@@ -225,6 +225,11 @@ or for a whole application, in its project file:
 An indicator without a fast kernel, a streaming source or a build with warm-up takes the exact route in either mode;
 `builder.LastExecution` says which one ran.
 
+So does a build in which rounding itself would decide a value: where a series sits in a range no wider than the
+rounding it carries, whether a distance grew by less than that, a recurrence that multiplies its own rounding bar
+after bar. Prices that move do not do this; a series that stands still or repeats exactly can. Such a build is
+calculated on the exact route, with its copy and its full validation, and the answer is the exact one.
+
 ### Features
 
 - **750+ Indicators**: Access all indicators via `indicators.Calculate(IndicatorName, params)` or typed methods

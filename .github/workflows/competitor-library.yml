@@ -156,8 +156,16 @@ jobs:
         with:
           name: competitor-binaries
           path: binaries
-      - name: Verify complete trajectories
+      # Both routes ship, so both are verified: the exact one a caller can ask for and the fast one a
+      # caller gets. The exact run writes the shard's evidence.
+      - name: Verify complete trajectories on the exact route
+        env:
+          COMPARISON_NUMERICS: Exact
         run: dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --verify-library-shard ${{ matrix.shard }} ${{ needs.build.outputs.count }} shard-${{ matrix.shard }}.json
+      - name: Verify complete trajectories on the fast route
+        env:
+          COMPARISON_NUMERICS: Fast
+        run: dotnet binaries/OoplesFinance.StockIndicators.CompetitorBenchmarks.dll --verify-library-shard ${{ matrix.shard }} ${{ needs.build.outputs.count }} fast-shard-${{ matrix.shard }}.json
       - uses: actions/upload-artifact@v7
         with:
           name: competitor-shard-${{ matrix.shard }}
