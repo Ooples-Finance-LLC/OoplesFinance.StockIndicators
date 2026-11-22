@@ -501,12 +501,25 @@ internal static partial class FastKernels
             intercepts[i] = level - slope * center;
             deviations[i] = Math.Sqrt(yy / count);
             line[i] = level + slope * (count - center);
-            if (yy == 0) continue;
+            if (SquaresAreFlat(yy, window, anchor + mean)) continue;
             fit[i] = xy / xx * (xy / yy);
             fitDefined[i] = 1;
         }
     }
 
+
+    // Whether a window's squared deviations are those of a flat window. Zero is, unless it is what prices
+    // too small to square came to: those, and squares that have begun to lose digits the same way, are not
+    // held here at all.
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+    private static bool SquaresAreFlat(double squares, ReadOnlySpan<double> window, double level)
+    {
+        if (squares >= 1e-290) return false;
+        if (squares != 0) throw FastUndecidedException.Raise();
+        foreach (var price in window)
+            if (price != level) throw FastUndecidedException.Raise();
+        return true;
+    }
 
     /// <summary>
     /// Least-squares fit of each full window with the intercept measured on the bar index of the whole
@@ -544,7 +557,7 @@ internal static partial class FastKernels
             slopes[i] = slope;
             intercepts[i] = level - slope * (center + (i - first));
             deviations[i] = Math.Sqrt(yy / period);
-            if (yy == 0) continue;
+            if (SquaresAreFlat(yy, window, anchor + mean)) continue;
             fit[i] = xy / xx * (xy / yy);
             fitDefined[i] = 1;
         }
