@@ -144,7 +144,12 @@ internal static partial class FastKernels
                 defined[i] = 0;
                 continue;
             }
-            var numerator = (realized ? squares : period * squares - sum * sum) * annual;
+            var mass = period * squares;
+            var spread = realized ? squares : mass - sum * sum;
+            // Returns that are all but equal leave of their squares only what the subtraction rounded to:
+            // a deviation under a thousandth of the returns themselves is not held in what is left.
+            if (!realized && mass != 0 && spread <= 1e-6 * mass) throw FastUndecidedException.Raise();
+            var numerator = spread * annual;
             value[i] = numerator > 0 ? Math.Sqrt(numerator / denominator) : 0;
         }
     }
