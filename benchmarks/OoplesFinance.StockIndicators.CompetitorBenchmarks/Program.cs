@@ -169,16 +169,29 @@ if (args.Length == 4 && args[0] == "--verify-library-shard")
     var shard = int.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture);
     var total = int.Parse(args[2], System.Globalization.CultureInfo.InvariantCulture);
     if (total < 1 || shard < 0 || shard >= total) throw new ArgumentOutOfRangeException(nameof(args));
+    // Every pair is checked before the shard fails, so one run names all of them and not only the first.
+    var failed = new List<string>();
     var results = ComparisonPairs.All.OrderBy(pair => pair.Id, StringComparer.Ordinal)
         .Where((_, index) => index % total == shard)
         .Select(pair =>
         {
             Console.WriteLine($"Shard {shard}/{total}: checking {pair.Id}...");
             var timer = System.Diagnostics.Stopwatch.StartNew();
-            var checkedValues = ComparisonVerifier.Verify(pair);
-            Console.WriteLine($"Shard {shard}/{total}: {pair.Id} passed {checkedValues} values in {timer.Elapsed.TotalSeconds:F1}s.");
+            var checkedValues = 0;
+            try
+            {
+                checkedValues = ComparisonVerifier.Verify(pair);
+                Console.WriteLine($"Shard {shard}/{total}: {pair.Id} passed {checkedValues} values in {timer.Elapsed.TotalSeconds:F1}s.");
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                failed.Add(pair.Id);
+                Console.WriteLine($"Shard {shard}/{total}: {pair.Id} FAILED: {ex}");
+            }
             return new { pair.Id, CheckedValues = checkedValues };
         }).ToArray();
+    if (failed.Count != 0)
+        throw new InvalidOperationException($"Shard {shard}/{total}: {failed.Count} comparison pairs failed: {string.Join(", ", failed)}");
     File.WriteAllText(args[3], System.Text.Json.JsonSerializer.Serialize(new { Shard = shard, Total = total, Results = results }));
     Console.WriteLine($"Shard {shard}/{total}: verified {results.Length} comparison pairs.");
     return;
@@ -190,6 +203,13 @@ if (args.Length > 0 && args[0] == "--api-catalog")
         new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
     if (args.Length == 2) File.WriteAllText(args[1], json + "\n");
     else Console.WriteLine(json);
+    return;
+}
+
+if (args.Length == 2 && args[0] == "--verify-library-pair")
+{
+    foreach (var pair in ComparisonPairs.All.Where(pair => pair.Id.Equals(args[1], StringComparison.OrdinalIgnoreCase)))
+        Console.WriteLine($"{pair.Id}: {ComparisonVerifier.Verify(pair)} independently checked values");
     return;
 }
 

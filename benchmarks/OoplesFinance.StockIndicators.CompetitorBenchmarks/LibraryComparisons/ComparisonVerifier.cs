@@ -1425,6 +1425,18 @@ internal static class ComparisonVerifier
 
     internal static int Check(ComparisonPair pair, CompetitorData data, int period, bool verifyIsolation = true)
     {
+        try { return CheckFixture(pair, data, period, verifyIsolation); }
+        catch (InvalidOperationException ex)
+        {
+            // Name the fixture: a pair is checked on dozens, and the message alone does not say which.
+            var closes = data.Closes;
+            throw new InvalidOperationException($"{ex.Message} [{closes.Length} bars, period {period}, closes " +
+                string.Join(" ", closes.Take(4).Select(v => v.ToString("R", System.Globalization.CultureInfo.InvariantCulture))) + " ...]", ex);
+        }
+    }
+
+    private static int CheckFixture(ComparisonPair pair, CompetitorData data, int period, bool verifyIsolation)
+    {
         var expected = pair.Reference?.Invoke(data, period) ?? Reference(data.Closes, period, pair.Indicator == "Wma");
         var declared = pair.OutputNames ?? ["Value"];
         if (!declared.OrderBy(key => key, StringComparer.Ordinal).SequenceEqual(expected.Outputs.Keys.OrderBy(key => key, StringComparer.Ordinal)))
