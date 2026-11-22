@@ -130,7 +130,7 @@ internal static partial class ValuesBarExecution
             else { o = Math.ScaleB(bar.Open, -grid); h = Math.ScaleB(bar.High, -grid); l = Math.ScaleB(bar.Low, -grid); v = Math.ScaleB(bar.Close, -grid); }
             if (!(Math.Abs(o) <= limit && Math.Abs(h) <= limit && Math.Abs(l) <= limit && Math.Abs(v) <= limit)) return false;
             long oi = (long)o, hi = (long)h, li = (long)l, ci = (long)v;
-            if (certify && ((double)oi != o || (double)hi != h || (double)li != l || (double)ci != v)) return false;
+            if (certify && ((double)oi != o || (double)hi != h || (double)li != l || (double)ci != v)) return false; // NOSONAR: S1244 - A scaled price is on the grid only when it equals its own integer part exactly.
             // A power-of-two shift is exact for a nonzero integral result;
             // reject any smaller nonzero input that underflowed to scaled zero.
             if (certify && ((oi == 0 && bar.Open != 0) || (hi == 0 && bar.High != 0)
