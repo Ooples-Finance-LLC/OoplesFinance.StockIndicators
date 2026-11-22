@@ -131,7 +131,6 @@ internal static class SharedCpuStates
         typeof(QuarticDynamicAverage),
         typeof(RangeAccelerationBands),
         typeof(RangeFractalAverage),
-        typeof(RetrospectiveFractals),
         typeof(RollingPivotLevels),
         typeof(RateOfChangeRmsBands),
         typeof(RateOfChangeWithAverage),
@@ -143,8 +142,6 @@ internal static class SharedCpuStates
         typeof(RollingPercentile),
         typeof(RollingPriceSum),
         typeof(RelativeVolatilityStrength),
-        typeof(RegressionWithFinalLine),
-        typeof(RegressionWithChannels),
         typeof(ScaledTrueRange),
         typeof(SeededAdaptiveAverage),
         typeof(SeededAtrTrailingStop),
@@ -230,6 +227,17 @@ internal static class SharedCpuStates
         typeof(ZeroSeedLaguerreFilter),
     };
 
+    // Whole-history families: an output is rewritten once the series ends, so no per-bar state can publish
+    // it. They run on the same route through a column writer, and are kept apart from the state families.
+    private static readonly HashSet<Type> Retrospective = new()
+    {
+        typeof(RegressionWithChannels),
+        typeof(RegressionWithFinalLine),
+        typeof(RetrospectiveFractals),
+    };
+
     internal static IEnumerable<Type> ReviewedTypes => Types;
-    internal static bool Contains(IIndicator indicator) => Types.Contains(indicator.GetType());
+    internal static IEnumerable<Type> RetrospectiveTypes => Retrospective;
+    internal static bool Contains(IIndicator indicator) =>
+        Types.Contains(indicator.GetType()) || Retrospective.Contains(indicator.GetType());
 }
