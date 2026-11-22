@@ -27,8 +27,16 @@ public sealed class SharedCatalogExecutionTests
                 var indicator = testCase.Factory();
                 Assert.Null(indicator.Source);
                 Assert.Empty(indicator.Components);
-                Assert.False(indicator is IBuiltInIndicator or IHistoricalIndicator);
+                Assert.False(indicator is IBuiltInIndicator);
                 Assert.Same(IndicatorInputDomain.Finite, IndicatorInputDomain.StableFor(indicator));
+                if (indicator is IHistoricalIndicator)
+                {
+                    // Complete-history families repaint, so they have no live state; their owned writers run the
+                    // whole input, and the parity theories compare them with the ordinary builder, which runs CalculateHistory.
+                    Assert.Null(indicator switch { IndicatorBase single => single.CreateState(), MultiOutputIndicatorBase multi => multi.CreateState(), _ => null });
+                    Assert.True(ValuesBarExecution.SupportsOwned(new[] { indicator }), testCase.ToString());
+                    continue;
+                }
                 var state = indicator switch
                 {
                     IndicatorBase single => single.CreateState(),

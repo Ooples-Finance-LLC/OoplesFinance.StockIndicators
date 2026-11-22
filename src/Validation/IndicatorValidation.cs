@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Builder;
+﻿using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Indicators;
 
 namespace OoplesFinance.StockIndicators.Validation;
@@ -106,6 +106,7 @@ public static class IndicatorValidation
         var isAverage = false;
         var checkCustomerReset = false;
         var includeNumericalExtremes = false;
+        var repaints = false;
         var includeWilliamsOverflowFixtures = false;
         var rateOfChangeOverflowPeriod = 0;
         var volumeRateOverflow = false;
@@ -156,6 +157,7 @@ public static class IndicatorValidation
             rangeOverflow = probe is IBuiltInIndicator rangeIndicator && rangeIndicator.BatchName is IndicatorName.Range or IndicatorName.TrueRange;
             includeWilliamsOverflowFixtures = probe is IBuiltInIndicator williams && williams.BatchName == IndicatorName.WilliamsR;
             includeNumericalExtremes = IncludesNumericalFixtures(probe);
+            repaints = probe is IHistoricalIndicator;
             inputDomain = IndicatorInputDomain.For(probe);
             warmup = probe.WarmupBars;
             startupPolicies = probe.Outputs.Select(output => probe is IIndicatorStartupContract startup
@@ -237,6 +239,10 @@ public static class IndicatorValidation
                 }
                 var prefixLength = overflow.Count == 0 ? accepted.Length : overflow.Min(value => value.Bar);
                 var checkedBars = prefixLength == accepted.Length ? accepted : accepted.Take(prefixLength).ToArray();
+                // A complete-history calculation repaints as bars are appended (blocks align to the final bar), so
+                // a prefix need not overflow where the whole series does, and may overflow elsewhere. Check the
+                // longest prefix whose own references stay finite, and require the whole series to be rejected.
+                if (repaints && overflow.Count != 0) checkedBars = LongestFinitePrefix(accepted, prefixLength);
                 var first = await Run(checkedBars).ConfigureAwait(false);
                 var second = await Run(checkedBars).ConfigureAwait(false);
                 if (first.Count != second.Count)
@@ -282,7 +288,9 @@ public static class IndicatorValidation
                 {
                     // Execute only through the first unrepresentable bar. A later exception cannot
                     // stand in for rejection at this bar, nor can an unrelated component failure.
-                    var rejectedBars = accepted.Take(prefixLength + 1).ToArray();
+                    // A repainting calculation runs whole, and completed series validate slot-major: it must
+                    // reject the first overflow of its lowest overflowing slot.
+                    var rejectedBars = repaints ? accepted : accepted.Take(prefixLength + 1).ToArray();
                     for (var replay = 0; replay < 2; replay++)
                     {
                         try
@@ -291,8 +299,9 @@ public static class IndicatorValidation
                             Add(fixture.Name, "OutputOverflow", "Accepted an output independently proven to overflow binary64.");
                         }
                         catch (IndicatorOutputException ex) when (ex.IndicatorType == testCase.IndicatorType
-                            && ex.BarIndex == prefixLength && overflow.Any(value => value.Bar == prefixLength
-                                && value.Slot == ex.OutputSlot && value.Value.Equals(ex.Value))) // NOSONAR: S1244 - Match the actual rejected output value to its exception evidence.
+                            && overflow.Any(value => value.Bar == ex.BarIndex && value.Slot == ex.OutputSlot
+                                && value.Value.Equals(ex.Value) // NOSONAR: S1244 - Match the actual rejected output value to its exception evidence.
+                                && (repaints ? value.Slot == overflow.Min(first => first.Slot) : value.Bar == prefixLength)))
                         {
                             if (overflowSlot.HasValue && (overflowSlot != ex.OutputSlot || overflowSign != Math.Sign(ex.Value)))
                                 Add(fixture.Name, "OutputOverflow", "Fresh runs rejected different output slots or signs.");
@@ -317,6 +326,17 @@ public static class IndicatorValidation
         }
         if (checkedValues == 0) Add("coverage", "Finite", "No output values were checked.");
         return Report();
+
+        Bar[] LongestFinitePrefix(Bar[] bars, int length)
+        {
+            for (; length > 0; length--)
+            {
+                var prefix = bars.Take(length).ToArray();
+                if (rules.Where(rule => rule.OverflowReference is not null)
+                    .All(rule => !rule.OverflowReference!(prefix).Any(double.IsInfinity))) return prefix;
+            }
+            return Array.Empty<Bar>();
+        }
 
         IIndicator Create()
         {
@@ -497,7 +517,7 @@ public static class IndicatorValidation
             LinearChannels or
             LinearTrailingStop or
             SupportResistance or
-            TimePriceIndicator or
+            TimePriceIndicator or RegressionWithChannels or RegressionWithFinalLine or RetrospectiveFractals or
             TrendExhaustionIndicator or
             VanillaABCDPattern or
             VixTradingSystem or
