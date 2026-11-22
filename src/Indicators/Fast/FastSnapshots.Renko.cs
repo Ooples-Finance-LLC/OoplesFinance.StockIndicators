@@ -116,13 +116,20 @@ internal static partial class FastSnapshots
     {
         var rows = Rows(bars);
         if (rows.Length <= period) return null;
-        double sum = 0;
-        for (var i = 1; i <= period; i++) sum += FastKernels.TrueRange(rows[i].High, rows[i].Low, rows[i - 1].Close);
-        var average = sum / period;
-        var weight = (period - 1.0) / period;
-        var share = 1.0 / period;
+        // The bricks' lattice is read off this number's decimal digits, so it is no place for an average
+        // that is right to rounding: forty and the number next to forty lay different lattices. Each step is
+        // rounded once from its exact sum, as the exact calculation rounds it.
+        var seed = new ExactMeanAccumulator();
+        for (var i = 1; i <= period; i++) seed.Add(FastKernels.TrueRange(rows[i].High, rows[i].Low, rows[i - 1].Close));
+        var average = seed.Mean(period);
         for (var i = period + 1; i < rows.Length; i++)
-            average = weight * average + share * FastKernels.TrueRange(rows[i].High, rows[i].Low, rows[i - 1].Close);
+        {
+            var range = FastKernels.TrueRange(rows[i].High, rows[i].Low, rows[i - 1].Close);
+            var step = new ExactMeanAccumulator();
+            step.Add(average, period - 1);
+            step.Add(range);
+            average = step.Mean(period);
+        }
         return average;
     }
 }
