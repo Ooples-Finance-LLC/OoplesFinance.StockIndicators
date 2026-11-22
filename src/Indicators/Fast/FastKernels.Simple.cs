@@ -909,6 +909,8 @@ internal static partial class FastKernels
         var c = -a * a;
         var half = (1 - b - c) / 2;
         var squares = new double[period];
+        // The filter itself, kept for the bars on which its squares are too small to hold.
+        var filters = new double[period];
         var average = close[0];
         output[0] = average;
         double previousZero = 0, filter = 0, older = 0, sum = 0, largest = 0;
@@ -919,14 +921,19 @@ internal static partial class FastKernels
             var price = close[i];
             var zero = price - average;
             var next = half * (zero + previousZero) + b * filter + c * older;
+            // A filter that has decayed into the subnormals reaches zero on a bar its last rounding decides,
+            // and the average steps differently from that bar on: there it is rounded once, from the exact sum.
+            if (Math.Abs(next) < FilterRoundedOnceBelow && (filter != 0 || older != 0 || zero + previousZero != 0))
+                next = FilterRoundedOnce(half, zero, previousZero, b, filter, c, older);
             var square = next * next;
             if (count == period) sum -= squares[slot];
             else count++;
             squares[slot] = square;
+            filters[slot] = next;
             slot = slot + 1 == period ? 0 : slot + 1;
             sum += square;
             largest = Math.Max(largest, square);
-            flat = square == 0 ? flat + 1 : 0;
+            flat = next == 0 ? flat + 1 : 0;
             // The running sum is rebuilt at intervals and whenever it has fallen far enough below what
             // passed through it that the rounding it kept could matter.
             if (++slid > RebuildMask || !(sum > largest * (1.0 / 1024)))
@@ -936,7 +943,11 @@ internal static partial class FastKernels
                 largest = sum;
                 slid = 0;
             }
-            var normalized = flat >= count || sum == 0 ? 0 : Math.Sqrt(square * period / sum);
+            // Squares below this have lost digits to underflow, or all of them: the ratio is then taken of the
+            // filter values against the largest of them, which is the same ratio.
+            var normalized = flat >= count ? 0
+                : sum < SquaresHoldAbove ? ScaledDeviationRatio(filters.AsSpan(0, count), next, period)
+                : Math.Sqrt(square * period / sum);
             var gain = Math.Max(.1, Math.Min(1, scaleFactor * normalized * 5 / period));
             average = gain * price + (1 - gain) * average;
             previousZero = zero;
@@ -946,6 +957,37 @@ internal static partial class FastKernels
         }
     }
 
+
+    private const double FilterRoundedOnceBelow = 1e-290;
+    private const double SquaresHoldAbove = 1e-250;
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static double FilterRoundedOnce(double half, double zero, double previousZero, double b, double filter,
+        double c, double older)
+    {
+        var exact = new ExactMeanAccumulator();
+        exact.AddProduct(half, zero);
+        exact.AddProduct(half, previousZero);
+        exact.AddProduct(b, filter);
+        exact.AddProduct(c, older);
+        return exact.Mean(1);
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static double ScaledDeviationRatio(ReadOnlySpan<double> filters, double current, int period)
+    {
+        double largest = 0;
+        foreach (var value in filters) largest = Math.Max(largest, Math.Abs(value));
+        if (largest == 0) return 0;
+        double sum = 0;
+        foreach (var value in filters)
+        {
+            var scaled = value / largest;
+            sum += scaled * scaled;
+        }
+        var ratio = current / largest;
+        return Math.Sqrt(ratio * ratio * period / sum);
+    }
 
     /// <summary>
     /// Price relative: the ratio of one price field to another, the mean of that ratio over a window, and
