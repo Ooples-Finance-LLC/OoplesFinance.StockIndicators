@@ -1,3 +1,4 @@
+using System.Numerics;
 using OoplesFinance.StockIndicators.Indicators;
 
 namespace OoplesFinance.StockIndicators.Validation;

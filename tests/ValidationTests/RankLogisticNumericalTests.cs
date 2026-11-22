@@ -64,7 +64,7 @@ public sealed class RankLogisticNumericalTests
         fit.Next(-double.MaxValue, true); fit.Next(double.MaxValue, true);
         var endpoint = fit.Next(double.MaxValue, true);
         Assert.True(double.IsPositiveInfinity(endpoint.Last));
-        Assert.True(endpoint.RoundedLastUnits > ExactVarianceWindow.Units(double.MaxValue));
+        Assert.True(endpoint.RoundedLastUnits.Big() > ExactConversions.Units(double.MaxValue));
         using var positive = new LogisticCorrelationWindow(3, 10);
         positive.Next(0, true); positive.Next(double.Epsilon, true);
         Assert.True(positive.Next(2 * double.Epsilon, true) > .9999);

@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
+using System.Numerics;
 // Already a significand/exponent pair with its own long fast path: compute on Big directly, not ExactInteger.
 using Big = System.Numerics.BigInteger;
 

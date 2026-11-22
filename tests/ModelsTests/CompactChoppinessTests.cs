@@ -14,7 +14,7 @@ public sealed class CompactChoppinessTests
         foreach (double a in values)
         foreach (double b in values)
         {
-            double expected = JrcWindow.LogRatio(ExactVarianceWindow.Units(a), ExactVarianceWindow.Units(b));
+            double expected = JrcWindow.LogRatio(ExactConversions.Units(a), ExactConversions.Units(b));
             double actual = ExactIntervalLogRatio.Calculate(JurikDyadic.FromDouble(a), JurikDyadic.FromDouble(b));
             Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
         }
@@ -28,7 +28,7 @@ public sealed class CompactChoppinessTests
         {
             double numerator = Math.ScaleB(1 + random.NextDouble(), random.Next(-1074, 1023));
             double denominator = Math.ScaleB(1 + random.NextDouble(), random.Next(-1074, 1023));
-            double expected = JrcWindow.LogRatio(ExactVarianceWindow.Units(numerator), ExactVarianceWindow.Units(denominator));
+            double expected = JrcWindow.LogRatio(ExactConversions.Units(numerator), ExactConversions.Units(denominator));
             double actual = ExactIntervalLogRatio.Calculate(JurikDyadic.FromDouble(numerator), JurikDyadic.FromDouble(denominator));
             Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
         }
@@ -43,7 +43,7 @@ public sealed class CompactChoppinessTests
             double boundary = Math.ScaleB(denominator, exponent);
             foreach (double numerator in new[] { Math.BitDecrement(boundary), boundary, Math.BitIncrement(boundary) })
             {
-                double expected = JrcWindow.LogRatio(ExactVarianceWindow.Units(numerator), ExactVarianceWindow.Units(denominator));
+                double expected = JrcWindow.LogRatio(ExactConversions.Units(numerator), ExactConversions.Units(denominator));
                 double actual = ExactIntervalLogRatio.Calculate(JurikDyadic.FromDouble(numerator), JurikDyadic.FromDouble(denominator));
                 Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
             }
@@ -61,7 +61,7 @@ public sealed class CompactChoppinessTests
             return (numerator, denominator);
         }).ToArray();
         var expected = inputs.Select(p => JrcWindow.LogRatio(
-            ExactVarianceWindow.Units(p.numerator), ExactVarianceWindow.Units(p.denominator))).ToArray();
+            ExactConversions.Units(p.numerator), ExactConversions.Units(p.denominator))).ToArray();
         var actual = new double[inputs.Length];
         for (int replay = 0; replay < 2; replay++)
         {

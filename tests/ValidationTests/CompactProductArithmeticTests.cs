@@ -10,15 +10,15 @@ public sealed class CompactProductArithmeticTests
     public void RoundedProductSumAllowsAliasedReadonlyOperandsWithoutMutation()
     {
         BigInteger grid = BigInteger.One << 1074;
-        BigInteger[] inputs = [0, 1, -1, ExactVarianceWindow.Units(1.3),
+        BigInteger[] inputs = [0, 1, -1, ExactConversions.Units(1.3),
             (BigInteger.One << 3000) + 1, -(BigInteger.One << 3000) - 1];
         foreach (BigInteger units in inputs)
         foreach (double factor in new[] { -1d, .2, 2, double.Epsilon })
         {
             var original = JurikDyadic.FromUnits(units);
             var result = JurikDyadic.SumProduct(in original, in original, factor);
-            BigInteger expected = RocBankValue.RoundUnits(units * (grid + ExactVarianceWindow.Units(factor)), grid);
-            Assert.Equal(expected, result.RoundedUnits());
+            BigInteger expected = ExactConversions.RoundUnits(units * (grid + ExactConversions.Units(factor)), grid);
+            Assert.Equal(expected, result.RoundedUnits().Big());
             // Compare unrounded values so a mutated low bit cannot hide behind
             // binary64 publication or extended-value rounding.
             var difference = original;

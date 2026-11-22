@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 namespace OoplesFinance.StockIndicators.Helpers;
 
 internal sealed class HendersonWindow : IDisposable

@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 using System.Numerics;
 using Number = OoplesFinance.StockIndicators.Helpers.MacZWindow.Number;
 

@@ -39,28 +39,28 @@ internal static class OriginalVolatilityStopSnapshot
         var reversals = new bool?[bars.Count];
         var initial = Math.Min(period, bars.Count);
         var bullish = bars[initial - 1].Close > bars[0].Close;
-        var extreme = ExactVarianceWindow.Units(bars[0].Close);
+        var extreme = ExactConversions.Units(bars[0].Close);
         var atr = new SeededAtrWindow(period);
         for (var i = 0; i < initial; i++)
         {
-            var price = ExactVarianceWindow.Units(bars[i].Close);
+            var price = ExactConversions.Units(bars[i].Close);
             extreme = bullish ? BigInteger.Max(extreme, price) : BigInteger.Min(extreme, price);
             atr.Add(bars[i]);
         }
         var firstStop = -1;
         for (var i = period; i < bars.Count; i++)
         {
-            var price = ExactVarianceWindow.Units(bars[i].Close);
+            var price = ExactConversions.Units(bars[i].Close);
             longSide[i] = bullish;
             if (atr.HasAverage)
             {
                 var average =
-                    ExactVarianceWindow.Units(atr.Average.Mantissa) << atr.Average.UpperShift;
-                var width = RocBankValue.RoundUnits(
-                    average * ExactVarianceWindow.Units(multiplier),
+                    ExactConversions.Units(atr.Average.Mantissa) << atr.Average.UpperShift;
+                var width = ExactConversions.RoundUnits(
+                    average * ExactConversions.Units(multiplier),
                     BigInteger.One << 1074
                 );
-                stops[i] = RocBankValue.RoundUnits(bullish ? extreme - width : extreme + width, 1);
+                stops[i] = ExactConversions.RoundUnits(bullish ? extreme - width : extreme + width, 1);
             }
             var reverse =
                 stops[i].HasValue && (bullish ? price < stops[i]!.Value : price > stops[i]!.Value);

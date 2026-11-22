@@ -67,9 +67,9 @@ public sealed class ConvolutionNumericalTests
     [Fact]
     public void SlopeToleranceRetainsItsAbsoluteFloorAndExtendedScale()
     {
-        var zero = ExactVarianceWindow.Units(0); var threshold = ExactVarianceWindow.Units(1e-12);
+        var zero = ExactConversions.Units(0); var threshold = ExactConversions.Units(1e-12);
         Assert.Equal(1, EhlersConvolutionWindow.Slope(threshold, zero)); Assert.Equal(-1, EhlersConvolutionWindow.Slope(2 * threshold, zero)); Assert.Equal(1, EhlersConvolutionWindow.Slope(-2 * threshold, zero));
-        var wide = ExactVarianceWindow.Units(double.MaxValue); Assert.Equal(-1, EhlersConvolutionWindow.Slope(2 * wide, wide)); Assert.Equal(1, EhlersConvolutionWindow.Slope(wide, 2 * wide)); Assert.Equal(1, EhlersConvolutionWindow.Slope(wide + 1, wide));
+        var wide = ExactConversions.Units(double.MaxValue); Assert.Equal(-1, EhlersConvolutionWindow.Slope(2 * wide, wide)); Assert.Equal(1, EhlersConvolutionWindow.Slope(wide, 2 * wide)); Assert.Equal(1, EhlersConvolutionWindow.Slope(wide + 1, wide));
     }
     [Fact]
     public void ExtremePeriodsAllocateOnlyObservedCorrelationHistory()

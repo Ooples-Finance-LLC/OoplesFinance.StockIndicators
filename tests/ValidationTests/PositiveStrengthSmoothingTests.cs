@@ -14,7 +14,7 @@ public sealed class PositiveStrengthSmoothingTests
         foreach (bool exponential in new[] { false, true })
         {
             var prior = new PositiveStrengthValue(mantissa, 0);
-            var units = ExactVarianceWindow.Units(change);
+            var units = ExactConversions.Units(change);
             var expected = exponential ? prior.UpdateExponential(units, 2) : prior.Update(units, 2);
             Assert.Equal(expected, prior.Update(change, 2, exponential));
         }
@@ -32,11 +32,11 @@ public sealed class PositiveStrengthSmoothingTests
         foreach (var signB in new[] { -1, 1 })
         {
             double current = signA * a, previous = signB * b;
-            var exact = ExactVarianceWindow.Units(current) - ExactVarianceWindow.Units(previous);
+            var exact = ExactConversions.Units(current) - ExactConversions.Units(previous);
             if (PositiveStrengthValue.TryDifference(current, previous, out var difference))
             {
                 Assert.True(double.IsFinite(difference));
-                Assert.Equal(exact, ExactVarianceWindow.Units(difference));
+                Assert.Equal(exact, ExactConversions.Units(difference));
                 if (exact.IsZero) Assert.Equal(0L, BitConverter.DoubleToInt64Bits(difference));
             }
         }
@@ -52,7 +52,7 @@ public sealed class PositiveStrengthSmoothingTests
         foreach (bool exponential in new[] { false, true })
         {
             var prior = new PositiveStrengthValue(mantissa, exponent);
-            var units = ExactVarianceWindow.Units(change);
+            var units = ExactConversions.Units(change);
             var expected = exponential ? prior.UpdateExponential(units, period) : prior.Update(units, period);
             Assert.Equal(expected, prior.Update(change, period, exponential));
         }
@@ -71,7 +71,7 @@ public sealed class PositiveStrengthSmoothingTests
         {
             var sum = new ExactMeanAccumulator();
             var units = BigInteger.Zero;
-            foreach (var value in values) { sum.Add(value); units += ExactVarianceWindow.Units(value); }
+            foreach (var value in values) { sum.Add(value); units += ExactConversions.Units(value); }
             var before = sum.Mean(1);
             Assert.Equal(PositiveStrengthValue.Seed(units, period), PositiveStrengthValue.Seed(sum, period));
             Assert.Equal(BitConverter.DoubleToInt64Bits(before), BitConverter.DoubleToInt64Bits(sum.Mean(1)));
@@ -100,7 +100,7 @@ public sealed class PositiveStrengthSmoothingTests
             // Zero updates must retain means even when they are too tiny to publish.
             foreach (var change in Enumerable.Repeat(0d, 37).Concat(changes))
             {
-                var units = ExactVarianceWindow.Units(change);
+                var units = ExactConversions.Units(change);
                 expected = exponential ? expected.UpdateExponential(units, period) : expected.Update(units, period);
                 actual = actual.Update(change, period, exponential);
                 Assert.Equal(expected, actual);

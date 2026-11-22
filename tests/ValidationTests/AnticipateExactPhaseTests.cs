@@ -49,11 +49,11 @@ public sealed class AnticipateExactPhaseTests
             for (var trial = 0; trial < 4; trial++)
             {
                 var values = Enumerable.Range(0, count).Select(_ => new BigInteger(random.Next(-50, 51))).ToArray();
-                Assert.Equal(Oracle(values, length), phase.Predict(values));
+                Assert.Equal(Oracle(values, length), phase.Predict((values).Exact()));
                 var direct = typeof(AnticipateExactPhase).GetMethod("Direct", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!;
                 var sum = values.Aggregate(BigInteger.Zero, (a,b)=>a+b);
                 Assert.Equal(Oracle(values, length), (double)direct.Invoke(phase,new object[]{values,values.Length,sum})!);
-                Assert.Equal(Oracle(values.Select(v => -v).ToArray(), length), phase.Predict(values.Select(v => -v).ToArray()));
+                Assert.Equal(Oracle(values.Select(v => -v).ToArray(), length), phase.Predict((values.Select(v => -v).ToArray()).Exact()));
             }
     }
     private static BigInteger Root(BigInteger value)
@@ -78,7 +78,7 @@ public sealed class AnticipateExactPhaseTests
                 foreach(var side in new[]{-8,8})
                 {
                     var history=a.Select((v,i)=>v*(rootB+side)+b[i]*rootA).ToArray();
-                    Assert.Equal(Oracle(history,length),phase.Predict(history));
+                    Assert.Equal(Oracle(history,length),phase.Predict((history).Exact()));
                 }
             }
         }
@@ -89,10 +89,10 @@ public sealed class AnticipateExactPhaseTests
         var phase = new AnticipateExactPhase(7);
         var small = new BigInteger[] { 1, -2, 3, -4, 1, 8, -5 };
         var expected = Oracle(small, 7);
-        Assert.Equal(expected, phase.Predict(small));
-        Assert.Equal(expected, phase.Predict(small.Select(v => v << 4096).ToArray()));
+        Assert.Equal(expected, phase.Predict((small).Exact()));
+        Assert.Equal(expected, phase.Predict((small.Select(v => v << 4096).ToArray()).Exact()));
         var offset = small.Select(v => (BigInteger.One << 4096) + v).ToArray();
-        Assert.Equal(expected, phase.Predict(offset));
+        Assert.Equal(expected, phase.Predict((offset).Exact()));
         var direct = typeof(AnticipateExactPhase).GetMethod("Direct", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!;
         Assert.Equal(expected, (double)direct.Invoke(phase,new object[]{offset,offset.Length,offset.Aggregate(BigInteger.Zero,(x,y)=>x+y)})!);
         Assert.NotEqual(0, expected);
@@ -100,20 +100,20 @@ public sealed class AnticipateExactPhaseTests
     [Fact]
     public void FullFlatAndUnresolvableWindowsNeedNoBasisAllocation()
     {
-        Assert.Equal(0, new AnticipateExactPhase(1).Predict(new BigInteger[] { 17 }));
-        Assert.Equal(0, new AnticipateExactPhase(2).Predict(new BigInteger[] { 17, -9 }));
-        Assert.Equal(0, new AnticipateExactPhase(7).Predict(Enumerable.Repeat(new BigInteger(17), 7).ToArray()));
-        Assert.Equal(0, new AnticipateExactPhase(int.MaxValue).Predict(new BigInteger[] { 0, 0 }));
+        Assert.Equal(0, new AnticipateExactPhase(1).Predict((new BigInteger[] { 17 }).Exact()));
+        Assert.Equal(0, new AnticipateExactPhase(2).Predict((new BigInteger[] { 17, -9 }).Exact()));
+        Assert.Equal(0, new AnticipateExactPhase(7).Predict((Enumerable.Repeat(new BigInteger(17), 7).ToArray()).Exact()));
+        Assert.Equal(0, new AnticipateExactPhase(int.MaxValue).Predict((new BigInteger[] { 0, 0 }).Exact()));
     }
     [Fact]
     public void CompleteBasisAndPeriodsBeyondProposedCapUseLinearStorage()
     {
-        new AnticipateExactPhase(3).Predict(new BigInteger[] { 1 });
+        new AnticipateExactPhase(3).Predict((new BigInteger[] { 1 }).Exact());
         var before = GC.GetAllocatedBytesForCurrentThread();
-        Assert.Equal(1, new AnticipateExactPhase(8192).Predict(new BigInteger[] { 1 }));
+        Assert.Equal(1, new AnticipateExactPhase(8192).Predict((new BigInteger[] { 1 }).Exact()));
         const int length = 4096, selected = 17;
         var history = Enumerable.Range(0, length).Select(i => Units(-Math.Sin(2 * Math.PI * (selected + i) / length))).ToArray();
-        Assert.Equal(-Math.Sin(2 * Math.PI * selected / length), new AnticipateExactPhase(length).Predict(history));
+        Assert.Equal(-Math.Sin(2 * Math.PI * selected / length), new AnticipateExactPhase(length).Predict((history).Exact()));
         Assert.True(GC.GetAllocatedBytesForCurrentThread() - before < 128_000_000);
     }
 }

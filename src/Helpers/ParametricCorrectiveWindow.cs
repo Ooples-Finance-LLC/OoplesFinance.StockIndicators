@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 namespace OoplesFinance.StockIndicators.Helpers;
 
 // Signed, time-dependent weights on the period-lagged input. Queues grow only with observed history.

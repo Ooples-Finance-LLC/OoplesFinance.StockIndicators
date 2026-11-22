@@ -98,10 +98,10 @@ public sealed class RegressionStateParityTests
         {
             output.Clear();
             output[5] = 1;
-            var value = ExactVarianceWindow.Units(bar.Close);
+            var value = ExactConversions.Units(bar.Close);
             if (_history.Count == period)
             {
-                var expired = ExactVarianceWindow.Units(_history.Dequeue());
+                var expired = ExactConversions.Units(_history.Dequeue());
                 _weighted -= _sum - expired;
                 _sum -= expired;
                 _squares -= expired * expired;

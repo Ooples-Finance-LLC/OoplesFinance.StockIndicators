@@ -20,7 +20,7 @@ public sealed class CompactRatioArithmeticTests
             BigInteger numerator = (BigInteger)integer * (negative ? -1 : 1), denominator = count;
             int shift = exponent + 1074;
             if (shift >= 0) numerator <<= shift; else denominator <<= -shift;
-            Assert.Equal(RocBankValue.RoundUnits(numerator, denominator), value.Rounded(count).RoundedUnits());
+            Assert.Equal(ExactConversions.RoundUnits(numerator, denominator), value.Rounded(count).RoundedUnits().Big());
             var expected = (new ReferenceFraction(numerator) / new ReferenceFraction(denominator << 1074)).ToDouble();
             Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(value.Mean(count)));
         }

@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 using System.Numerics;
 namespace OoplesFinance.StockIndicators.Helpers;
 // The binomial form of (1 - lag)^order, with zero prehistory and one final rounding.

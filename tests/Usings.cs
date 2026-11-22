@@ -5,3 +5,4 @@ global using System.Globalization;
 global using FluentAssertions;
 global using OoplesFinance.StockIndicators.Models;
 global using OoplesFinance.StockIndicators.Enums;
+global using System.Numerics;

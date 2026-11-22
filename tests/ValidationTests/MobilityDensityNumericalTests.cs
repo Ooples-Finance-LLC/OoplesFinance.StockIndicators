@@ -56,10 +56,10 @@ public sealed class MobilityDensityNumericalTests
             }).ToArray();
             var price = new BigInteger(random.Next(-25, 41)); var bins = random.Next(1, 21);
             var expected = Exhaustive(candles, price, bins).ToDouble();
-            Assert.Equal(expected, MobilityDensity.Evaluate(candles, price, bins).Publish());
+            Assert.Equal(expected, MobilityDensity.Evaluate((candles).Exact(), price, bins).Publish());
             var scale = BigInteger.One << 2100;
             var translated = candles.Select(c => (Low: (c.Low + 200) * scale, High: (c.High + 200) * scale)).ToArray();
-            Assert.Equal(expected, MobilityDensity.Evaluate(translated, (price + 200) * scale, bins).Publish());
+            Assert.Equal(expected, MobilityDensity.Evaluate((translated).Exact(), (price + 200) * scale, bins).Publish());
         }
     }
 
@@ -68,15 +68,15 @@ public sealed class MobilityDensityNumericalTests
     {
         var b = int.MaxValue;
         var points = new[] { (BigInteger.Zero, BigInteger.Zero), (new BigInteger(2), new BigInteger(2)) };
-        Assert.Equal(-100, MobilityDensity.Evaluate(points, BigInteger.One, b).Publish());
-        Assert.Equal(0, MobilityDensity.Evaluate(points, BigInteger.Zero, b).Publish());
-        Assert.Equal(0, MobilityDensity.Evaluate(points, new BigInteger(2), b).Publish());
+        Assert.Equal(-100, MobilityDensity.Evaluate((points).Exact(), BigInteger.One, b).Publish());
+        Assert.Equal(0, MobilityDensity.Evaluate((points).Exact(), BigInteger.Zero, b).Publish());
+        Assert.Equal(0, MobilityDensity.Evaluate((points).Exact(), new BigInteger(2), b).Publish());
         var uniform = new[] { (BigInteger.Zero, new BigInteger(2)) };
-        Assert.Equal(0, MobilityDensity.Evaluate(uniform, BigInteger.One, b).Publish());
+        Assert.Equal(0, MobilityDensity.Evaluate((uniform).Exact(), BigInteger.One, b).Publish());
         var mixture = new[] { (BigInteger.Zero, new BigInteger(2)), (new BigInteger(2), new BigInteger(2)) };
         var expected = (new ReferenceFraction(100) * new ReferenceFraction(b) / new ReferenceFraction((long)b + 1)).ToDouble();
-        Assert.Equal(expected, MobilityDensity.Evaluate(mixture, BigInteger.Zero, b).Publish());
-        Assert.Equal(0, MobilityDensity.Evaluate(mixture, BigInteger.Zero, 1).Publish());
+        Assert.Equal(expected, MobilityDensity.Evaluate((mixture).Exact(), BigInteger.Zero, b).Publish());
+        Assert.Equal(0, MobilityDensity.Evaluate((mixture).Exact(), BigInteger.Zero, 1).Publish());
     }
 
     [Fact]
@@ -89,13 +89,13 @@ public sealed class MobilityDensityNumericalTests
         var expected = (new ReferenceFraction(200) / new ReferenceFraction(6 * m - 1)).ToDouble();
         Assert.True(expected > 0);
         Assert.Equal(expected, Exhaustive(candles, m, 4).ToDouble());
-        Assert.Equal(expected, MobilityDensity.Evaluate(candles, m, 4).Publish());
+        Assert.Equal(expected, MobilityDensity.Evaluate((candles).Exact(), m, 4).Publish());
     }
 
     [Fact]
     public void EmptyAndFlatSamplesHaveNoDensityDifference()
     {
-        Assert.Equal(0, MobilityDensity.Evaluate(Array.Empty<(BigInteger, BigInteger)>(), BigInteger.One, 10).Publish());
-        Assert.Equal(0, MobilityDensity.Evaluate(new[] { (BigInteger.One, BigInteger.One) }, BigInteger.Zero, int.MaxValue).Publish());
+        Assert.Equal(0, MobilityDensity.Evaluate((Array.Empty<(BigInteger, BigInteger)>()).Exact(), BigInteger.One, 10).Publish());
+        Assert.Equal(0, MobilityDensity.Evaluate((new[] { (BigInteger.One, BigInteger.One) }).Exact(), BigInteger.Zero, int.MaxValue).Publish());
     }
 }

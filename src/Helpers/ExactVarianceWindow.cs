@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 using System.Numerics;
 
 namespace OoplesFinance.StockIndicators.Helpers;
@@ -15,9 +16,12 @@ internal sealed class ExactVarianceWindow : IDisposable
         var bits = BitConverter.DoubleToInt64Bits(value);
         var exponent = (int)((bits >> 52) & 2047);
         if (exponent == 2047) throw new ArgumentOutOfRangeException(nameof(value));
-        var integer = new BigInteger(bits & ((1L << 52) - 1));
-        if (exponent != 0) integer = (integer + (BigInteger.One << 52)) << (exponent - 1);
-        return bits < 0 ? -integer : integer;
+        // Signed 53-bit significand in a long, then one shift: ExactInteger strips its trailing zeros once and the
+        // shift only moves the exponent, so no full-width value is built, added or negated.
+        var significand = bits & ((1L << 52) - 1);
+        if (exponent != 0) significand |= 1L << 52;
+        var integer = new BigInteger(bits < 0 ? -significand : significand);
+        return exponent > 1 ? integer << (exponent - 1) : integer;
     }
 
     internal double Next(double value, bool commit)

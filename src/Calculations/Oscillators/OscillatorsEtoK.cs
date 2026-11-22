@@ -1,4 +1,5 @@
-﻿using OoplesFinance.StockIndicators.Compatibility;
+﻿using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
+using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;

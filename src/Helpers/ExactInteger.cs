@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 using System.Runtime.CompilerServices;
 using Big = System.Numerics.BigInteger;
 
@@ -197,6 +198,8 @@ internal readonly struct ExactInteger : IComparable, IComparable<ExactInteger>, 
     /// <summary>Arithmetic (flooring) right shift, as <see cref="Big"/>'s.</summary>
     public static ExactInteger operator >>(ExactInteger value, int shift)
     {
+        // -int.MinValue overflows; Big splits that count the same way. For a nonzero value the result has 2^31 bits,
+        // past the int exponent, so this throws OverflowException where Big allocates it.
         if (shift == int.MinValue) return value << int.MaxValue << 1;
         if (shift < 0) return value << -shift;
         if (value.IsZero) return default;
@@ -233,8 +236,16 @@ internal readonly struct ExactInteger : IComparable, IComparable<ExactInteger>, 
     };
 
     public bool Equals(ExactInteger other) => _exponent == other._exponent && _mantissa.Equals(other._mantissa);
-    public override bool Equals(object? obj) => obj is ExactInteger other && Equals(other);
-    public override int GetHashCode() => ToBig().GetHashCode();
+    // A boxed BigInteger is equal exactly when CompareTo(object) says so.
+    public override bool Equals(object? obj) => obj switch
+    {
+        ExactInteger other => Equals(other),
+        Big other => Equals(new ExactInteger(other)),
+        _ => false,
+    };
+
+    // The representation is canonical (an odd mantissa, or zero), so equal values hash alike without materializing.
+    public override int GetHashCode() => unchecked((_mantissa.GetHashCode() * 397) ^ _exponent);
 
     public static bool operator ==(ExactInteger left, ExactInteger right) => left.Equals(right);
     public static bool operator !=(ExactInteger left, ExactInteger right) => !left.Equals(right);

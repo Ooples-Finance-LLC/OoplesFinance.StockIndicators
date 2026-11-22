@@ -56,11 +56,11 @@ public sealed class CompactPhaseAdaptiveTests
         var state = (IWideAverageState)new SeededPhaseAdaptiveAverage(alpha, alpha, publishStartup: true).CreateState();
         BigInteger grid = BigInteger.One << 1074;
         BigInteger mother = 0, following = 0, seed = 0;
-        BigInteger gain = ExactVarianceWindow.Units(alpha), followingGain = ExactVarianceWindow.Units(.5 * alpha);
-        BigInteger huge = ExactVarianceWindow.Units(double.MaxValue) << 64;
-        BigInteger[] prices = [ExactVarianceWindow.Units(100), ExactVarianceWindow.Units(101),
-            ExactVarianceWindow.Units(99), ExactVarianceWindow.Units(102), ExactVarianceWindow.Units(98),
-            ExactVarianceWindow.Units(103), huge, -huge, 1, -1, 0, ExactVarianceWindow.Units(101)];
+        BigInteger gain = ExactConversions.Units(alpha), followingGain = ExactConversions.Units(.5 * alpha);
+        BigInteger huge = ExactConversions.Units(double.MaxValue) << 64;
+        BigInteger[] prices = [ExactConversions.Units(100), ExactConversions.Units(101),
+            ExactConversions.Units(99), ExactConversions.Units(102), ExactConversions.Units(98),
+            ExactConversions.Units(103), huge, -huge, 1, -1, 0, ExactConversions.Units(101)];
         var output = new double[4];
         for (int i = 0; i < 2 * prices.Length; i++)
         {
@@ -68,15 +68,15 @@ public sealed class CompactPhaseAdaptiveTests
             if (i < 6)
             {
                 seed += price;
-                mother = following = RocBankValue.RoundUnits(seed, i + 1);
+                mother = following = ExactConversions.RoundUnits(seed, i + 1);
             }
             else
             {
-                mother = RocBankValue.RoundUnits(price * gain + mother * (grid - gain), grid);
-                following = RocBankValue.RoundUnits(mother * followingGain + following * (grid - followingGain), grid);
+                mother = ExactConversions.RoundUnits(price * gain + mother * (grid - gain), grid);
+                following = ExactConversions.RoundUnits(mother * followingGain + following * (grid - followingGain), grid);
             }
             state.UpdateUnits(price, output);
-            Assert.Equal(mother, state.RoundedUnits);
+            Assert.Equal(mother, state.RoundedUnits.Big());
             Assert.Equal(BitConverter.DoubleToInt64Bits(ExactMeanAccumulator.UnitRatio(mother, 1)),
                 BitConverter.DoubleToInt64Bits(output[0]));
             Assert.Equal(BitConverter.DoubleToInt64Bits(ExactMeanAccumulator.UnitRatio(following, 1)),

@@ -169,7 +169,7 @@ public sealed class TechnicalRatingsNumericalTests
     [Fact]
     public void ExtendedAveragesRetainTheirUpperExponent()
     {
-        var units=ExactVarianceWindow.Units(double.MaxValue);
+        var units=ExactConversions.Units(double.MaxValue);
         var twice=TechnicalRatingValue.Ratio(2*units,BigInteger.One);
         foreach(var kind in new[]{MovingAvgType.SimpleMovingAverage,MovingAvgType.WeightedMovingAverage,MovingAvgType.ExponentialMovingAverage,MovingAvgType.WildersSmoothingMethod})
         {
