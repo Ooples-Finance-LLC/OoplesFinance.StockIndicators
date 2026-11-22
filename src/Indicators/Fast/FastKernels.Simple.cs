@@ -855,6 +855,10 @@ internal static partial class FastKernels
         var period = owner.Period;
         long start = 1;
         var previous = close[0];
+        // How far rounding can have moved the average so far: each step multiplies what it was handed by
+        // the recurrence's own slope and adds its own. Where the price swings far enough that the slope is
+        // steeper than one, that grows without limit, and the digits published would be the rounding's.
+        double carried = 0;
         var first = 0;
         if (immediate)
         {
@@ -868,17 +872,25 @@ internal static partial class FastKernels
             if (!immediate && previous == 0)
             {
                 previous = price;
+                carried = 0;
                 start = (long)i + period;
                 continue;
             }
             double next;
-            if (previous == 0) next = price / scale;
+            if (previous == 0)
+            {
+                next = price / scale;
+                carried = 0;
+            }
             else if (price == 0) next = previous > 0 ? double.NegativeInfinity : double.PositiveInfinity;
             else
             {
                 var ratio = previous / price;
                 var square = ratio * ratio;
                 next = previous + (price - previous) * (square * square) / scale;
+                var slope = 1 + (4 * square * ratio - 5 * square * square) / scale;
+                carried = Math.Abs(slope) * carried + 8 * Ulp * (Math.Abs(previous) + Math.Abs(next));
+                if (carried > 1e-10 * Math.Max(Math.Abs(next), Math.Abs(price))) throw FastUndecidedException.Raise();
             }
             if (double.IsInfinity(next) || double.IsNaN(next))
             {
