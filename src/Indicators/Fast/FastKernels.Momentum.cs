@@ -348,6 +348,8 @@ internal static partial class FastKernels
         }
     }
 
+    private const double BandsHeld = 1.0 / (1 << 22);
+
     /// <summary>
     /// Deviation bands around the window mean with the close's position between them, its z-score and the
     /// band width over the mean. A flat window has no position or z-score, and a zero mean has no width.
@@ -379,6 +381,9 @@ internal static partial class FastKernels
             lower[i] = center - half;
             if (half != 0)
             {
+                // The centre is right to its last digit or the one beside it. Bands narrower than a few million
+                // of those would publish that digit as the close's position between them.
+                if (Math.Abs(half) < BandsHeld * Math.Abs(center)) throw FastUndecidedException.Raise();
                 position[i] = (close[i] - center + half) / (2 * half);
                 positionDefined[i] = 1;
             }
