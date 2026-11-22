@@ -47,7 +47,11 @@ internal readonly struct ExactInteger : IComparable, IComparable<ExactInteger>, 
         _mantissa = value >> zeros;
         _exponent = zeros;
     }
-    public ExactInteger(ulong value) : this((Big)value) { }
+    public ExactInteger(ulong value)
+    {
+        // Values below 2^63 normalize on the long path, without a Big buffer.
+        this = value <= long.MaxValue ? new ExactInteger((long)value) : new ExactInteger((Big)value);
+    }
     public ExactInteger(double value) : this(new Big(value)) { }
     public ExactInteger(float value) : this(new Big(value)) { }
     public ExactInteger(decimal value) : this(new Big(value)) { }
@@ -85,7 +89,7 @@ internal readonly struct ExactInteger : IComparable, IComparable<ExactInteger>, 
     public static implicit operator ExactInteger(int value) => new((long)value);
     public static implicit operator ExactInteger(uint value) => new((long)value);
     public static implicit operator ExactInteger(long value) => new(value);
-    public static implicit operator ExactInteger(ulong value) => new((Big)value);
+    public static implicit operator ExactInteger(ulong value) => new(value);
     public static explicit operator ExactInteger(double value) => new((Big)value);
     public static explicit operator ExactInteger(float value) => new((Big)value);
     public static explicit operator ExactInteger(decimal value) => new((Big)value);
@@ -114,7 +118,13 @@ internal readonly struct ExactInteger : IComparable, IComparable<ExactInteger>, 
         if (value._exponent < 63 && BitLength(Big.Abs(value._mantissa)) + value._exponent <= 62) return (long)value._mantissa << value._exponent;
         return (long)value.ToBig();
     }
-    public static explicit operator ulong(ExactInteger value) => (ulong)value.ToBig();
+    public static explicit operator ulong(ExactInteger value)
+    {
+        if (value._exponent == 0) return (ulong)value._mantissa;
+        // 0 < m·2^e < 2^64 fits; negatives and wider values take Big's checked conversion.
+        if (value.Sign > 0 && value._exponent < 64 && BitLength(value._mantissa) + value._exponent <= 64) return (ulong)value._mantissa << value._exponent;
+        return (ulong)value.ToBig();
+    }
     public static explicit operator int(ExactInteger value) => (int)value.ToBig();
     public static explicit operator uint(ExactInteger value) => (uint)value.ToBig();
     public static explicit operator short(ExactInteger value) => (short)value.ToBig();

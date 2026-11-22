@@ -61,7 +61,8 @@ public sealed class ExactIntegerTests
         var values = new List<Big>
         {
             Big.Zero, Big.One, Big.MinusOne, 2, -2, 3, 1L << 40, long.MaxValue, long.MinValue, (Big)long.MaxValue + 1,
-            int.MaxValue, int.MinValue, (Big)ulong.MaxValue, Big.One << 1074, -(Big.One << 1074), (Big.One << 2000) - 1,
+            int.MaxValue, int.MinValue, (Big)ulong.MaxValue, (Big)ulong.MaxValue - 13, Big.One << 63, Big.One << 64,
+            Big.One << 1074, -(Big.One << 1074), (Big.One << 2000) - 1,
         };
         for (var i = 0; i < 40; i++)
         {
@@ -128,6 +129,12 @@ public sealed class ExactIntegerTests
             else Assert.Throws<OverflowException>(() => x >> int.MinValue);
             if (a >= long.MinValue && a <= long.MaxValue) Assert.Equal((long)a, (long)x);
             else Assert.Throws<OverflowException>(() => (long)x);
+            if (a.Sign >= 0 && a <= ulong.MaxValue)
+            {
+                Assert.Equal((ulong)a, (ulong)x);
+                Assert.Equal(x, (ExactInteger)(ulong)a);
+            }
+            else Assert.Throws<OverflowException>(() => (ulong)x);
             if (a >= int.MinValue && a <= int.MaxValue) Assert.Equal((int)a, (int)x);
             else Assert.Throws<OverflowException>(() => (int)x);
             if (Big.Abs(a) <= new Big(decimal.MaxValue)) Assert.Equal((decimal)a, (decimal)x);
@@ -186,12 +193,9 @@ public sealed class ExactIntegerTests
     [Fact]
     public void Shifting_left_by_2_to_the_31_overflows_where_BigInteger_allocates_it()
     {
-        // The one place ExactInteger is not BigInteger: a result of 2^31 or more bits. BigInteger allocates it (256 MB
-        // here); ExactInteger's exponent is an int, so it throws OverflowException instead. No window produces a
-        // count past 2^31 bits, and a throw is preferable to a silent wrap.
-#if NET5_0_OR_GREATER
-        Assert.Equal(1L << 31, (Big.One >> int.MinValue).GetBitLength() - 1);
-#endif
+        // The one place ExactInteger is not BigInteger: a result of 2^31 or more bits. Older BigInteger allocates it
+        // (256 MB; .NET 10 throws as well); ExactInteger's exponent is an int, so it always throws OverflowException.
+        // No window produces a count past 2^31 bits, and a throw is preferable to a silent wrap.
         Assert.Throws<OverflowException>(() => (ExactInteger)Big.One >> int.MinValue);
         Assert.Throws<OverflowException>(() => (ExactInteger)Big.One << int.MaxValue << 1);
     }

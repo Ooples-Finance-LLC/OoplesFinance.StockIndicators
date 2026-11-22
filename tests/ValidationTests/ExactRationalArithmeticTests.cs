@@ -10,8 +10,8 @@ public sealed class ExactRationalArithmeticTests
     private static ReferenceFraction Exact(Number value)
     {
         const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
-        var coefficient = (BigInteger)typeof(Number).GetField("_coefficient", flags)!.GetValue(value)!;
-        var denominator = (BigInteger)typeof(Number).GetField("_denominator", flags)!.GetValue(value)!;
+        var coefficient = ((OoplesFinance.StockIndicators.Helpers.ExactInteger)typeof(Number).GetField("_coefficient", flags)!.GetValue(value)!).Big();
+        var denominator = ((OoplesFinance.StockIndicators.Helpers.ExactInteger)typeof(Number).GetField("_denominator", flags)!.GetValue(value)!).Big();
         var exponent = (int)typeof(Number).GetField("_exponent", flags)!.GetValue(value)!;
         if (denominator.IsZero) denominator = BigInteger.One;
         return exponent >= 0

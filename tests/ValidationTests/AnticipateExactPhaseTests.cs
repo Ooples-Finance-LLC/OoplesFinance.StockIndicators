@@ -52,7 +52,7 @@ public sealed class AnticipateExactPhaseTests
                 Assert.Equal(Oracle(values, length), phase.Predict((values).Exact()));
                 var direct = typeof(AnticipateExactPhase).GetMethod("Direct", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!;
                 var sum = values.Aggregate(BigInteger.Zero, (a,b)=>a+b);
-                Assert.Equal(Oracle(values, length), (double)direct.Invoke(phase,new object[]{values,values.Length,sum})!);
+                Assert.Equal(Oracle(values, length), (double)direct.Invoke(phase,new object[]{values.Exact(),values.Length,(ExactInteger)sum})!);
                 Assert.Equal(Oracle(values.Select(v => -v).ToArray(), length), phase.Predict((values.Select(v => -v).ToArray()).Exact()));
             }
     }
@@ -94,7 +94,7 @@ public sealed class AnticipateExactPhaseTests
         var offset = small.Select(v => (BigInteger.One << 4096) + v).ToArray();
         Assert.Equal(expected, phase.Predict((offset).Exact()));
         var direct = typeof(AnticipateExactPhase).GetMethod("Direct", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!;
-        Assert.Equal(expected, (double)direct.Invoke(phase,new object[]{offset,offset.Length,offset.Aggregate(BigInteger.Zero,(x,y)=>x+y)})!);
+        Assert.Equal(expected, (double)direct.Invoke(phase,new object[]{offset.Exact(),offset.Length,(ExactInteger)offset.Aggregate(BigInteger.Zero,(x,y)=>x+y)})!);
         Assert.NotEqual(0, expected);
     }
     [Fact]
