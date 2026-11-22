@@ -926,6 +926,13 @@ internal static partial class FastKernels
         var average = close[0];
         output[0] = average;
         double previousZero = 0, filter = 0, older = 0, sum = 0, largest = 0;
+        // How a small error in the average travels on, followed beside the average itself: into the
+        // distance, through the filter, into the gain while that is between its limits, and back into the
+        // average, with a fresh unit of rounding added every bar. Over prices that move it stays a few units.
+        // Where the filter has all but cancelled, the gain is a ratio of what is left of it, and the error
+        // grows a bar at a time until the digits published would be its own.
+        double errorAverage = 0, errorZero = 0, errorFilter = 0, errorOlder = 0;
+        var gainRate = scaleFactor * 5 / period;
         // Consecutive bars whose filter is exactly zero: a window of them has a sum of exactly zero.
         int flat = 0, slot = 0, count = 0, slid = 0;
         for (var i = 1; i < n; i++)
@@ -960,8 +967,18 @@ internal static partial class FastKernels
             var normalized = flat >= count ? 0
                 : sum < SquaresHoldAbove ? ScaledDeviationRatio(filters.AsSpan(0, count), next, period)
                 : Math.Sqrt(square * period / sum);
-            var gain = Math.Max(.1, Math.Min(1, scaleFactor * normalized * 5 / period));
+            var free = gainRate * normalized;
+            var gain = Math.Max(.1, Math.Min(1, free));
+            var errorNext = half * (-errorAverage + errorZero) + b * errorFilter + c * errorOlder;
+            double errorGain = 0;
+            if (free > .1 && free < 1 && next != 0)
+                errorGain = gainRate * (normalized / next) * (1 - normalized * normalized / period) * errorNext;
+            errorZero = -errorAverage;
+            errorAverage = (1 - gain) * errorAverage + zero * errorGain + 8 * Ulp * (Math.Abs(average) + Math.Abs(price));
+            errorOlder = errorFilter;
+            errorFilter = errorNext;
             average = gain * price + (1 - gain) * average;
+            if (!(Math.Abs(errorAverage) <= 1e-10 * Math.Max(Math.Abs(average), Math.Abs(price)))) throw FastUndecidedException.Raise();
             previousZero = zero;
             older = filter;
             filter = next;

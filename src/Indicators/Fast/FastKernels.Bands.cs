@@ -69,6 +69,22 @@ internal static partial class FastKernels
         return a + b + (c + d);
     }
 
+    // The count times the sum of squared distances from the mean, of a full ring with nothing missing.
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static double CentredSpread(double[] ring)
+    {
+        double sum = 0;
+        foreach (var value in ring) sum += value - ring[0];
+        var mean = ring[0] + sum / ring.Length;
+        double squares = 0;
+        foreach (var value in ring)
+        {
+            var distance = value - mean;
+            squares += distance * distance;
+        }
+        return ring.Length * squares;
+    }
+
     /// <summary>
     /// Volatility of the window's log returns: their sample deviation, or the root of their mean square
     /// for the realized form, optionally annualized by 252. A return across a zero or a sign change is
@@ -146,9 +162,14 @@ internal static partial class FastKernels
             }
             var mass = period * squares;
             var spread = realized ? squares : mass - sum * sum;
-            // Returns that are all but equal leave of their squares only what the subtraction rounded to:
-            // a deviation under a thousandth of the returns themselves is not held in what is left.
-            if (!realized && mass != 0 && spread <= 1e-6 * mass) throw FastUndecidedException.Raise();
+            // Returns that are all but equal leave of their squares only what the subtraction rounded to. They
+            // are then measured from their own mean, which holds a deviation down to a millionth of the
+            // returns themselves, and equal returns exactly; below that there is nothing held to publish.
+            if (!realized && mass != 0 && spread <= 1e-6 * mass)
+            {
+                spread = CentredSpread(ring);
+                if (spread != 0 && spread <= 1e-12 * mass) throw FastUndecidedException.Raise();
+            }
             var numerator = spread * annual;
             value[i] = numerator > 0 ? Math.Sqrt(numerator / denominator) : 0;
         }

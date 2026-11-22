@@ -389,7 +389,7 @@ internal static partial class FastKernels
             imaginary += anchor * CosineResidue[count];
             // Both sums are of terms the size of the cycle. Where they cancel to nothing against the price
             // itself there is no cycle in the window to take a phase of, only what the sums rounded to.
-            if (Math.Abs(real) + Math.Abs(imaginary) <= 1e-9 * Math.Abs(anchor)) throw FastUndecidedException.Raise();
+            if (count > 0 && Math.Abs(real) + Math.Abs(imaginary) <= 1e-9 * Math.Abs(anchor)) throw FastUndecidedException.Raise();
             var phase = imaginary != 0 ? Math.Atan(real / imaginary) * 180 / Math.PI
                 : previousPhase + (real < 0 ? -90 : real > 0 ? 90 : 0);
             phase += 90;
