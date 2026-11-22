@@ -172,7 +172,11 @@ internal static partial class FastKernels
         {
             var at = j + period - 1;
             double high = highest[at], low = lowest[at];
-            raw[j] = high == low ? 0 : 100 * (packed[at] - low) / (high - low); // NOSONAR an exact tie is the contract
+            // The index runs from 0 to 100. A range it holds is divided out; a narrower one is its rounding.
+            // A window of one bar is its own range: flat by construction, with nothing for rounding to decide.
+            if (period == 1) { raw[j] = 0; continue; }
+            if (high - low < 100 * FastUndecidedException.RangeHeld) throw FastUndecidedException.Raise();
+            raw[j] = 100 * (packed[at] - low) / (high - low);
         }
         pool.Return(strength);
         pool.Return(highest);

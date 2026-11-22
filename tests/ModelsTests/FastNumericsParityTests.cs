@@ -952,6 +952,27 @@ public sealed class FastNumericsParityTests
         Assert.Empty(missing);
     }
 
+    [Fact]
+    public async Task OnlyNamedNarrowWindowsLeaveMovingPricesToTheExactRoute()
+    {
+        // Leaving a build to the exact route is for values rounding would decide. On prices that move, that
+        // is a window of a bar or two, where two neighbouring values can be all there is to a range. A kernel
+        // that began leaving ordinary builds would still agree with the exact route, so it is counted here.
+        var left = new SortedSet<string>(StringComparer.Ordinal);
+        foreach (var (fixture, bars) in Fixtures().Where(f => f.Name.StartsWith("walk", StringComparison.Ordinal)))
+        foreach (var (name, create) in Cases())
+        {
+            var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(create())
+                .ConfigureNumerics(IndicatorNumerics.Fast);
+            using var run = await builder.BuildAsync();
+            if (builder.FastLeftUndecided) left.Add(name);
+        }
+        Assert.Equal(NarrowWindowCases, left);
+    }
+
+    private static readonly string[] NarrowWindowCases =
+        ["SingleStochasticCycle(2, 3, 5)", "SmoothedStochasticRsi(2, 2, 2, 2)"];
+
     [Theory]
     [MemberData(nameof(CaseNames))]
     public async Task FastAgreesWithExactOnEveryOutput(string name)
@@ -960,10 +981,6 @@ public sealed class FastNumericsParityTests
         foreach (var (fixture, bars) in Fixtures())
         {
             var exactIndicator = create();
-            // Over bars that do not move a strength index is one value in real arithmetic, and where it sits in
-            // its own range is then decided by how each route rounds its decaying averages: zero on one bar and
-            // a hundred on the next, on either route. There is nothing there for the two to agree on.
-            if (fixture == FlatStretch && exactIndicator is ClassicStochasticRsi or SmoothedStochasticRsi) continue;
             // Some indicators have no finite value on some fixtures (a division by a close of exactly zero).
             // The exact route rejects those; the fast route must reject them at the same bar with the same value.
             IndicatorOutputException? rejection = null;
@@ -998,7 +1015,10 @@ public sealed class FastNumericsParityTests
                     continue;
                 }
                 using var fast = await builder.BuildAsync();
-                Assert.True(builder.LastExecution?.Reason.StartsWith("Fast", StringComparison.Ordinal), where + ": did not take the fast route");
+                // A kernel that meets a value its own rounding would decide leaves the build to the exact
+                // route, and says so. Which builds may do that is held by the test below.
+                Assert.True(builder.FastLeftUndecided || builder.LastExecution?.Reason.StartsWith("Fast", StringComparison.Ordinal) == true,
+                    where + ": did not take the fast route");
                 Assert.Equal(bars.Length, fast.BarCount);
                 Assert.Equal(exactIndicator.Outputs.Count, indicator.Outputs.Count);
                 for (var slot = 0; slot < indicator.Outputs.Count; slot++)
@@ -1465,7 +1485,25 @@ public sealed class FastNumericsParityTests
         // turn on once has to give way to one written bar by bar.
         yield return (FlatStretch, Walk(300, 53).Select((bar, i) =>
             i is >= 120 and < 170 ? new Bar(bar.Time, 50, 50, 50, 50, 1000) : bar).ToArray());
+        // Plain shapes a price series does take, on bars with no range, at lengths around the usual windows:
+        // the ones the library verification checks every pair on.
+        foreach (var count in new[] { 4, 11, 33, 93, 150 })
+        foreach (var shape in Shapes)
+            yield return ($"{shape} {count}", Enumerable.Range(0, count).Select(i =>
+            {
+                var close = shape switch
+                {
+                    "negative" => -100d - i / 8d,
+                    "descending" => 100d - i / 8d,
+                    "ramp" => 100d + i / 8d,
+                    "alternating" => i % 2 == 0 ? 80d : 120d,
+                    _ => i == count / 2 ? 200d : 100d,
+                };
+                return new Bar(Day(i), close, close, close, close, 1000);
+            }).ToArray());
     }
+
+    private static readonly string[] Shapes = ["negative", "descending", "ramp", "alternating", "impulse"];
 
     private const string FlatStretch = "flat stretch";
 

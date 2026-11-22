@@ -669,9 +669,12 @@ internal static partial class FastKernels
             if (had)
             {
                 expandingDefined[i] = 1;
-                // The averages carry a few units of rounding, which is not growth on a flat series.
+                // The averages carry a few units of rounding: a change no larger than that is neither growth
+                // nor its absence here.
                 var noise = 16 * Ulp * (Math.Abs(a[i]) + Math.Abs(b[i]));
-                if (has && sign * (current - previous) > noise) expanding[i] = 1;
+                var change = sign * (current - previous);
+                if (has && Math.Abs(change) <= noise) throw FastUndecidedException.Raise();
+                if (has && change > 0) expanding[i] = 1;
             }
             had = has;
             previous = current;

@@ -594,7 +594,7 @@ internal static partial class FastKernels
                 size = FastMath.Larger(size, Math.Abs(fastAverage[start + k]) + Math.Abs(difference[k]));
                 difference[k] = fastAverage[start + k] - difference[k];
             }
-            var noise = 64 * Ulp * size;
+            var held = FastUndecidedException.RangeHeld * size;
             Span<double> lowest = rentedLow.AsSpan(0, count), highest = rentedHigh.AsSpan(0, count);
             RollingExtreme(difference, lowest, cycle, false);
             RollingExtreme(difference, highest, cycle, true);
@@ -602,7 +602,9 @@ internal static partial class FastKernels
             for (var k = cycle - 1; k < count; k++)
             {
                 var range = highest[k] - lowest[k];
-                var position = range > noise ? 100 * (difference[k] - lowest[k]) / range : 0;
+                // A window of one bar is its own range: flat by construction, with nothing for rounding to decide.
+                if (cycle > 1 && !(range > held)) throw FastUndecidedException.Raise();
+                var position = cycle == 1 ? 0 : 100 * (difference[k] - lowest[k]) / range;
                 if (k >= cycle + 1)
                 {
                     value[start + k] = (a + b + position) / 3;

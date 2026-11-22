@@ -116,8 +116,12 @@ public sealed class StockIndicatorBuilder
         return history;
     }
 
+    /// <summary>Whether the last build asked for the fast route and a kernel left it to the exact one.</summary>
+    internal bool FastLeftUndecided { get; private set; }
+
     private Indicators.IIndicatorRun? TryBuildFast(Indicators.IBarSource source, bool latestOnly, CancellationToken cancellationToken)
     {
+        FastLeftUndecided = false;
         if (_numerics != IndicatorNumerics.Fast || _executionBackend == IndicatorExecutionBackend.Gpu
             || !CanUseDirectFusedExecution
             || Indicators.Fast.FastExecution.Plan(_configuredIndicators) is not { } kernels)
@@ -138,7 +142,19 @@ public sealed class StockIndicatorBuilder
         cancellationToken.ThrowIfCancellationRequested();
         // The run keeps its own list: the builder's can be added to after this build.
         var indicators = _configuredIndicators.ToArray();
-        var outputs = Indicators.Fast.FastExecution.Execute(columns, indicators, kernels, cancellationToken, out var warmup);
+        double[][][] outputs;
+        int warmup;
+        try
+        {
+            outputs = Indicators.Fast.FastExecution.Execute(columns, indicators, kernels, cancellationToken, out warmup);
+        }
+        catch (Indicators.Fast.FastUndecidedException)
+        {
+            // A kernel met a value its own rounding would decide. The exact route has an answer, so the
+            // build is its, as a build with no kernel is.
+            FastLeftUndecided = true;
+            return null;
+        }
         LastExecution = FastExecutionInfo;
         if (!latestOnly)
         {

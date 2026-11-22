@@ -174,9 +174,12 @@ internal static partial class FastKernels
             var filled = owner.StochasticPeriod - 1;
             for (var k = filled; k < count; k++)
             {
-                // The strength carries a few units of rounding; a range no wider than that is a flat one.
+                // The strength runs from 0 to 100. A range it holds is divided out; a narrower one is its rounding.
                 var range = highest[k] - lowest[k];
-                highest[k] = range <= 64 * Ulp * Math.Abs(highest[k]) ? 0 : 100 * (series[k] - lowest[k]) / range;
+                // A window of one bar is its own range: flat by construction, with nothing for rounding to decide.
+                if (owner.StochasticPeriod == 1) { highest[k] = 0; continue; }
+                if (range < 100 * FastUndecidedException.RangeHeld) throw FastUndecidedException.Raise();
+                highest[k] = 100 * (series[k] - lowest[k]) / range;
             }
             var raw = highest.Slice(filled);
             var at = from + filled;
