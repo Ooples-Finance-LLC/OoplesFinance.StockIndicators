@@ -4,7 +4,8 @@ namespace OoplesFinance.StockIndicators.CompetitorBenchmarks;
 
 /// <summary>
 /// The builder every comparison measures. COMPARISON_NUMERICS selects the numeric mode for the whole
-/// process, so one run measures one mode: unset or Exact for the exact route, Fast for the library default.
+/// process, so one run measures one mode. Unset, it is the mode a builder told nothing starts in here: Fast,
+/// or Exact where the application pins it, as the contract tests do.
 /// </summary>
 internal static class ComparisonBuilder
 {
@@ -67,8 +68,13 @@ internal static class ComparisonBuilder
         });
     }
 
+    private static IndicatorNumerics ApplicationDefault() =>
+        AppContext.GetData(StockIndicatorBuilder.DefaultNumericsSetting) is string name
+            && Enum.TryParse<IndicatorNumerics>(name, ignoreCase: true, out var pinned) && Enum.IsDefined(pinned)
+            ? pinned : IndicatorNumerics.Fast;
+
     private static IndicatorNumerics Parse(string? text) =>
-        string.IsNullOrEmpty(text) ? IndicatorNumerics.Exact
+        string.IsNullOrEmpty(text) ? ApplicationDefault()
         : Enum.TryParse<IndicatorNumerics>(text, ignoreCase: true, out var numerics) && Enum.IsDefined(numerics) ? numerics
         : throw new InvalidOperationException("COMPARISON_NUMERICS must be Exact or Fast.");
 

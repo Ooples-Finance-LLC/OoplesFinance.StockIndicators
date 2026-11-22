@@ -34,7 +34,7 @@ on:
         description: 'Numeric mode the Ooples arm is measured in'
         type: choice
         required: false
-        default: Exact
+        default: Fast
         options: [Exact, Fast]
       scoreboard:
         description: 'Only time the pairs whose id contains this text, both arms interleaved, and skip the checks'
@@ -49,7 +49,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: competitor-${{ github.workflow }}-${{ github.ref }}-${{ inputs.numerics || 'Exact' }}
+  group: competitor-${{ github.workflow }}-${{ github.ref }}-${{ inputs.numerics || 'Fast' }}
   cancel-in-progress: true
 jobs:
   build:
@@ -182,7 +182,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
-      COMPARISON_NUMERICS: ${{ inputs.numerics || 'Exact' }}
+      COMPARISON_NUMERICS: ${{ inputs.numerics || 'Fast' }}
       SCOREBOARD_FILTER: ${{ inputs.scoreboard }}
       RUNTIME_SWITCHES: ${{ inputs.runtime_switches }}
       AIDOTNET_DISABLE_GPU: '1'
@@ -219,7 +219,7 @@ jobs:
     env:
       COMPARISON_SHARD: ${{ matrix.shard }}
       COMPARISON_SHARDS: ${{ needs.build.outputs.count }}
-      COMPARISON_NUMERICS: ${{ inputs.numerics || 'Exact' }}
+      COMPARISON_NUMERICS: ${{ inputs.numerics || 'Fast' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -270,7 +270,7 @@ jobs:
           --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
       - name: Link the consolidated report in the workflow summary
         env:
-          COMPARISON_NUMERICS: ${{ inputs.numerics || 'Exact' }}
+          COMPARISON_NUMERICS: ${{ inputs.numerics || 'Fast' }}
         run: |
           python - <<'PY'
           import json, os
