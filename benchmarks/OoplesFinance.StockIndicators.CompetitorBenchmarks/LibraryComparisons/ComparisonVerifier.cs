@@ -1426,7 +1426,7 @@ internal static class ComparisonVerifier
     internal static int Check(ComparisonPair pair, CompetitorData data, int period, bool verifyIsolation = true)
     {
         try { return CheckFixture(pair, data, period, verifyIsolation); }
-        catch (InvalidOperationException ex)
+        catch (Exception ex) when (ex is InvalidOperationException or OoplesFinance.StockIndicators.Validation.IndicatorOutputException)
         {
             // Name the fixture: a pair is checked on dozens, and the message alone does not say which.
             var closes = data.Closes;

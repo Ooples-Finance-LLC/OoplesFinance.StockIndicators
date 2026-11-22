@@ -41,7 +41,10 @@ internal static partial class FastKernels
         for (var i = 0; i < n; i++)
         {
             // (i - centre)^2 - (peak - centre)^2, factored so the nearest weight cannot round away from one.
-            var exponent = (i - peak) * (i + peak - 2 * center) * scale;
+            // A bar as near the centre as the nearest one weighs one whatever the width, an infinite
+            // squared width included, where zero times it would be no number at all.
+            var distance = (i - peak) * (i + peak - 2 * center);
+            var exponent = distance == 0 ? 0 : distance * scale;
             var weight = exponent >= 746 ? 0 : Math.Exp(-exponent);
             weights[i] = weight;
             total += weight;
