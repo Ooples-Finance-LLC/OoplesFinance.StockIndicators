@@ -190,7 +190,7 @@ if (args.Length == 4 && args[0] == "--verify-library-shard")
             }
             return new { pair.Id, CheckedValues = checkedValues };
         }).ToArray();
-    if (failed.Count != 0)
+    if (failed.Count != 0) // NOSONAR: S2583 - The projection above adds to the list as it is enumerated.
         throw new InvalidOperationException($"Shard {shard}/{total}: {failed.Count} comparison pairs failed: {string.Join(", ", failed)}");
     File.WriteAllText(args[3], System.Text.Json.JsonSerializer.Serialize(new { Shard = shard, Total = total, Results = results }));
     Console.WriteLine($"Shard {shard}/{total}: verified {results.Length} comparison pairs.");
