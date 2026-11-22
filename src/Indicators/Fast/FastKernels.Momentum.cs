@@ -522,7 +522,7 @@ internal static partial class FastKernels
         if (squares >= 1e-290) return false;
         if (squares != 0) throw FastUndecidedException.Raise();
         foreach (var price in window)
-            if (price != level) throw FastUndecidedException.Raise();
+            if (price != level) throw FastUndecidedException.Raise(); // NOSONAR: S1244 - Flat means every price is the level exactly.
         return true;
     }
 
