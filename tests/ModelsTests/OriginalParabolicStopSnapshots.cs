@@ -10,13 +10,13 @@ internal static class OriginalParabolicStopSnapshots
 {
     private static readonly BigInteger Grid = BigInteger.One << 1074;
 
-    private static BigInteger U(double v) => ExactVarianceWindow.Units(v);
+    private static BigInteger U(double v) => ExactConversions.Units(v);
 
     private static BigInteger Advance(BigInteger stop, BigInteger extreme, BigInteger factor) =>
-        RocBankValue.RoundUnits(stop * Grid + factor * (extreme - stop), Grid);
+        ExactConversions.RoundUnits(stop * Grid + factor * (extreme - stop), Grid);
 
     private static BigInteger Increase(BigInteger factor, BigInteger step, BigInteger maximum) =>
-        RocBankValue.RoundUnits(BigInteger.Min(factor + step, maximum), 1);
+        ExactConversions.RoundUnits(BigInteger.Min(factor + step, maximum), 1);
 
     private static double Publish(BigInteger value)
     {
@@ -156,7 +156,7 @@ internal static class OriginalParabolicStopSnapshots
                 stop = rising
                     ? BigInteger.Min(extreme, BigInteger.Min(priorLow, low))
                     : BigInteger.Max(extreme, BigInteger.Max(priorHigh, high));
-                stop = RocBankValue.RoundUnits(
+                stop = ExactConversions.RoundUnits(
                     stop * (Grid + (rising ? -U(offset) : U(offset))),
                     Grid
                 );

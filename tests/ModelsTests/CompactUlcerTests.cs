@@ -145,10 +145,10 @@ public sealed class CompactUlcerTests
                 if (present)
                     for (int j = i - period + 1; j <= i; j++)
                     {
-                        BigInteger units = ExactVarianceWindow.Units(prices[j]);
+                        BigInteger units = ExactConversions.Units(prices[j]);
                         peak = BigInteger.Max(peak, units);
                         if (peak.IsZero) { present = false; break; }
-                        BigInteger drawdown = RocBankValue.RoundUnits(100 * (units - peak) << 1074, peak);
+                        BigInteger drawdown = ExactConversions.RoundUnits(100 * (units - peak) << 1074, peak);
                         squares += drawdown * drawdown;
                     }
                 double expected = present ? ExactPopulationDeviation.RootRatio(squares, period) : 0;

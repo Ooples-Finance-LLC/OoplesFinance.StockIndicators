@@ -1,4 +1,5 @@
-﻿using OoplesFinance.StockIndicators.Compatibility;
+﻿using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
+using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -2358,7 +2359,7 @@ public static partial class Calculations
         {
             // The legacy batch path consumes the four ADX overrides, but not a fifth signal override.
             signals = GetMovingAverageList(stockData, maType, Math.Max(1, smoothLength), values);
-            var previous = new System.Numerics.BigInteger(); var previousSlope = new System.Numerics.BigInteger();
+            var previous = new BigInteger(); var previousSlope = new BigInteger();
             foreach (var value in signals) { var current = ExactVarianceWindow.Units(value); var slope = current - previous; trades?.Add(slope.Sign > 0 && slope > previousSlope ? Signal.StrongBuy : slope.Sign < 0 && slope < previousSlope ? Signal.StrongSell : slope.Sign > 0 ? Signal.Buy : slope.Sign < 0 ? Signal.Sell : Signal.None); previous = current; previousSlope = slope; }
         }
         stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ecsi", values }, { "Signal", signals } });

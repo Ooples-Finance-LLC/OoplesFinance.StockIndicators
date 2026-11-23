@@ -57,7 +57,7 @@ internal static class ConnorsStrengthReference
                     new Bar(bar.Time, streak, streak, streak, streak, 0),
                     streakOutput
                 );
-                change = previous > 0 ? (ExactVarianceWindow.Units(bar.Close) - ExactVarianceWindow.Units(previous), ExactVarianceWindow.Units(previous)) : (BigInteger.Zero, BigInteger.Zero);
+                change = previous > 0 ? (ReferenceFraction.Units(bar.Close) - ReferenceFraction.Units(previous), ReferenceFraction.Units(previous)) : (BigInteger.Zero, BigInteger.Zero);
             }
             if (returns.Count > rankPeriod)
                 returns.Dequeue();

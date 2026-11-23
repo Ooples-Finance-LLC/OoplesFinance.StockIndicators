@@ -34,7 +34,7 @@ internal static class OriginalZigZagSnapshot
             .ToArray();
         if (bars.Count == 0)
             return result;
-        BigInteger U(double v) => ExactVarianceWindow.Units(v);
+        BigInteger U(double v) => ExactConversions.Units(v);
         var threshold = U(percentChange);
         var grid = BigInteger.One << 1074;
         var highs = bars.Select(b => U(highLow ? b.High : b.Close)).ToArray();

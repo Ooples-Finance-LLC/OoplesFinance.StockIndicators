@@ -64,10 +64,10 @@ public sealed class EdgePreservingNumericalTests
     [Fact]
     public void PeakToleranceUsesRoundedRatioAndRejectsZeroPeaks()
     {
-        var unit = ExactVarianceWindow.Units(1); Assert.False(EdgePreservingWindow.NearPeak(unit, 0));
-        Assert.True(EdgePreservingWindow.NearPeak(unit, unit)); Assert.True(EdgePreservingWindow.NearPeak(ExactVarianceWindow.Units(1 - .5e-12), unit)); Assert.False(EdgePreservingWindow.NearPeak(ExactVarianceWindow.Units(1 - 2e-12), unit));
+        var unit = ExactConversions.Units(1); Assert.False(EdgePreservingWindow.NearPeak(unit, 0));
+        Assert.True(EdgePreservingWindow.NearPeak(unit, unit)); Assert.True(EdgePreservingWindow.NearPeak(ExactConversions.Units(1 - .5e-12), unit)); Assert.False(EdgePreservingWindow.NearPeak(ExactConversions.Units(1 - 2e-12), unit));
         Assert.True(EdgePreservingWindow.NearPeak(-unit, -unit)); Assert.False(EdgePreservingWindow.NearPeak(-2 * unit, -unit));
-        var wide = ExactVarianceWindow.Units(double.MaxValue) * 2; Assert.True(EdgePreservingWindow.NearPeak(wide, wide)); Assert.False(EdgePreservingWindow.NearPeak(wide, unit));
+        var wide = ExactConversions.Units(double.MaxValue) * 2; Assert.True(EdgePreservingWindow.NearPeak(wide, wide)); Assert.False(EdgePreservingWindow.NearPeak(wide, unit));
     }
     [Fact]
     public void ExtremePeriodsAllocateOnlyObservedPricesAndOffsets()

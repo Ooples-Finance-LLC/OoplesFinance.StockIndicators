@@ -33,8 +33,8 @@ public sealed class CompactConnorsTests(Xunit.Abstractions.ITestOutputHelper log
             double a = Next(), b = Math.Abs(Next()), c = Next(), d = Math.Abs(Next());
             if (b == 0) b = double.Epsilon;
             if (d == 0) d = double.Epsilon;
-            int expected = (ExactVarianceWindow.Units(a) * ExactVarianceWindow.Units(d)
-                - ExactVarianceWindow.Units(c) * ExactVarianceWindow.Units(b)).Sign;
+            int expected = (ExactConversions.Units(a) * ExactConversions.Units(d)
+                - ExactConversions.Units(c) * ExactConversions.Units(b)).Sign;
             Assert.Equal(expected, new ReturnKey(a, b).CompareTo(new ReturnKey(c, d)));
             Assert.Equal(-expected, new ReturnKey(c, d).CompareTo(new ReturnKey(a, b)));
             Assert.Equal(0, new ReturnKey(a, b).CompareTo(new ReturnKey(a, b)));
@@ -48,8 +48,8 @@ public sealed class CompactConnorsTests(Xunit.Abstractions.ITestOutputHelper log
             double.Epsilon, -double.Epsilon, double.MaxValue, -double.MaxValue, 1e-200, 1e200];
         (BigInteger N, BigInteger D) Ratio(double current, double previous) => previous == 0
             ? (BigInteger.One, BigInteger.One)
-            : (ExactVarianceWindow.Units(previous < 0 ? -current : current),
-                ExactVarianceWindow.Units(Math.Abs(previous)));
+            : (ExactConversions.Units(previous < 0 ? -current : current),
+                ExactConversions.Units(Math.Abs(previous)));
         foreach (double a in values)
         foreach (double b in values)
         foreach (double c in values)

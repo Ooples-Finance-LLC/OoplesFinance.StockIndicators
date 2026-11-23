@@ -10,7 +10,7 @@ public sealed class PowerWeightFractionArithmeticTests
     {
         if (denominator.Sign < 0) { numerator = -numerator; denominator = -denominator; }
         var divisor = BigInteger.GreatestCommonDivisor(BigInteger.Abs(numerator), denominator);
-        Assert.Equal((numerator / divisor, denominator / divisor), (actual.Numerator, actual.Denominator));
+        Assert.Equal((numerator / divisor, denominator / divisor), (actual.Numerator.Big(), actual.Denominator.Big()));
     }
     private static Fraction Make(BigInteger n, BigInteger d)
     {

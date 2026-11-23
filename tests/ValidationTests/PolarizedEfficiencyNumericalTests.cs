@@ -84,8 +84,8 @@ public sealed class PolarizedEfficiencyNumericalTests
         // Direct distance is5; walked path is1+1+sqrt(17).
         var expected = (new ReferenceFraction(500) / (new ReferenceFraction(2) + ReferenceFraction.FromDouble(Math.Sqrt(17)))).ToDouble();
         Assert.Equal(expected, Check(new[] { 0d, 0, 0, 4 }, 3, 1)[3]);
-        Assert.Equal(ExactVarianceWindow.Units(5), PolarizedEfficiencyWindow.Distance(3, 0, 4));
-        Assert.Equal(ExactVarianceWindow.Units(double.MaxValue) << 1, PolarizedEfficiencyWindow.Distance(double.MaxValue, -double.MaxValue, 1));
+        Assert.Equal(ExactConversions.Units(5), PolarizedEfficiencyWindow.Distance(3, 0, 4).Big());
+        Assert.Equal(ExactConversions.Units(double.MaxValue) << 1, PolarizedEfficiencyWindow.Distance(double.MaxValue, -double.MaxValue, 1).Big());
     }
     [Fact]
     public void ExtremeAndSubnormalPricesPreserveDirectionAndFinitePaths()

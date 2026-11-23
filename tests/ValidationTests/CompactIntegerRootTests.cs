@@ -44,7 +44,7 @@ public sealed class CompactIntegerRootTests
 
     private static void Check(BigInteger value)
     {
-        var root = ExactPopulationDeviation.IntegerRoot(value);
+        var root = ExactPopulationDeviation.IntegerRoot(value).Big();
         Assert.True(root * root <= value);
         Assert.True((root + 1) * (root + 1) > value);
         if (value.GetBitLength() <= 128)

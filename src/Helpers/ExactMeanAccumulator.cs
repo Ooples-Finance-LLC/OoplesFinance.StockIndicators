@@ -1,13 +1,16 @@
-﻿using System.Numerics;
+﻿using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
+using System.Numerics;
+// Already a significand/exponent pair with its own long fast path: compute on Big directly, not ExactInteger.
+using Big = System.Numerics.BigInteger;
 
 namespace OoplesFinance.StockIndicators.Helpers;
 
 // An exact integer times 2^(scale-1074). Ordinary price windows fit signed 64-bit
-// integers on their shared binary grid; wider exponent spans use BigInteger.
+// integers on their shared binary grid; wider exponent spans use Big.
 internal struct ExactMeanAccumulator
 {
     private long _small;
-    private BigInteger _large;
+    private Big _large;
     private int _scale;
     private bool _wide;
     private bool IsZero => _wide ? _large.IsZero : _small == 0;
@@ -37,13 +40,13 @@ internal struct ExactMeanAccumulator
         var absoluteWeight = Math.Abs((long)weight);
         if (magnitude <= long.MaxValue / absoluteWeight)
             AddSmall(signed * weight, scale);
-        else AddLarge(new BigInteger(signed) * weight, scale);
+        else AddLarge(new Big(signed) * weight, scale);
     }
 
     internal void Subtract(ExactMeanAccumulator value)
     {
         if (value._wide) AddLarge(-value._large, value._scale);
-        else if (value._small == long.MinValue) AddLarge(-new BigInteger(value._small), value._scale);
+        else if (value._small == long.MinValue) AddLarge(-new Big(value._small), value._scale);
         else AddSmall(-value._small, value._scale);
     }
 
@@ -61,7 +64,7 @@ internal struct ExactMeanAccumulator
         multiplier.Add(factor);
         if (IsZero || multiplier.IsZero) { this = default; return; }
         var scale = checked(_scale + multiplier._scale - 1074);
-        var product = (_wide ? _large : new BigInteger(_small)) * multiplier._small;
+        var product = (_wide ? _large : new Big(_small)) * multiplier._small;
         this = default;
         AddLarge(product, scale);
     }
@@ -70,13 +73,13 @@ internal struct ExactMeanAccumulator
     {
         if (IsZero || factor.IsZero) { this = default; return; }
         var scale = checked(_scale + factor._scale - 1074);
-        var product = (_wide ? _large : new BigInteger(_small))
-            * (factor._wide ? factor._large : new BigInteger(factor._small));
+        var product = (_wide ? _large : new Big(_small))
+            * (factor._wide ? factor._large : new Big(factor._small));
         this = default;
         AddLarge(product, scale);
     }
 
-    internal void Add(double value, BigInteger weight)
+    internal void Add(double value, Big weight)
     {
         if (weight >= int.MinValue && weight <= int.MaxValue)
         {
@@ -85,7 +88,7 @@ internal struct ExactMeanAccumulator
         }
         var term = new ExactMeanAccumulator();
         term.Add(value);
-        AddLarge(new BigInteger(term._small) * weight, term._scale);
+        AddLarge(new Big(term._small) * weight, term._scale);
     }
 
     internal readonly struct ProductFactor
@@ -115,7 +118,7 @@ internal struct ExactMeanAccumulator
         if (value.Mantissa == 0 || weight == 0) return;
         if (Math.Abs(value.Mantissa) <= long.MaxValue / Math.Abs((long)weight))
             AddSmall(value.Mantissa * weight, value.Scale);
-        else AddLarge(new BigInteger(value.Mantissa) * weight, value.Scale);
+        else AddLarge(new Big(value.Mantissa) * weight, value.Scale);
     }
 
 
@@ -141,7 +144,7 @@ internal struct ExactMeanAccumulator
         // term needs only comparison and multiplication, not another division.
         if (Math.Abs(price.Mantissa) <= coefficient.PartnerLimit)
             AddSmall(price.Mantissa * factor.Mantissa, scale);
-        else AddLarge(new BigInteger(price.Mantissa) * factor.Mantissa, scale);
+        else AddLarge(new Big(price.Mantissa) * factor.Mantissa, scale);
     }
 
     internal void AddProduct(double left, double right, int weight = 1) =>
@@ -160,7 +163,7 @@ internal struct ExactMeanAccumulator
                 return;
             }
         }
-        AddLarge(new BigInteger(a.Mantissa) * b.Mantissa * weight, scale);
+        AddLarge(new Big(a.Mantissa) * b.Mantissa * weight, scale);
     }
 
     // Callers have already excluded zero. Signed two's-complement integers have
@@ -178,7 +181,7 @@ internal struct ExactMeanAccumulator
 
     // Nonzero exact integers use the same power-of-two normalization as small
     // significands, including extended-range rounded returns.
-    internal static int TrailingBinaryZeros(BigInteger value)
+    internal static int TrailingBinaryZeros(Big value)
     {
 #if NETFRAMEWORK
         var bytes = value.ToByteArray();
@@ -186,7 +189,7 @@ internal struct ExactMeanAccumulator
         while (bytes[index] == 0) index++;
         return index * 8 + TrailingBinaryZeros((long)bytes[index]);
 #else
-        return (int)BigInteger.TrailingZeroCount(value);
+        return (int)Big.TrailingZeroCount(value);
 #endif
     }
 
@@ -217,29 +220,29 @@ internal struct ExactMeanAccumulator
             var value = numerator.Mean(Math.Abs(denominator._small));
             return denominator._small < 0 ? -value : value;
         }
-        var signed = _wide ? _large : new BigInteger(_small);
-        var divisor = denominator._wide ? denominator._large : new BigInteger(denominator._small);
+        var signed = _wide ? _large : new Big(_small);
+        var divisor = denominator._wide ? denominator._large : new Big(denominator._small);
         var negative = signed.Sign != divisor.Sign;
-        var magnitude = BigInteger.Abs(signed);
-        divisor = BigInteger.Abs(divisor);
+        var magnitude = Big.Abs(signed);
+        divisor = Big.Abs(divisor);
         var exponent = BitLength(magnitude) - BitLength(divisor);
         if (exponent >= 0 ? magnitude < (divisor << exponent) : (magnitude << -exponent) < divisor) exponent--;
         var grid = Math.Max(0, exponent + scale - 52);
         var shift = grid - scale;
         if (shift > 0) divisor <<= shift;
         else magnitude <<= -shift;
-        var mantissa = BigInteger.DivRem(magnitude, divisor, out var remainder);
+        var mantissa = Big.DivRem(magnitude, divisor, out var remainder);
         var halfway = (remainder << 1).CompareTo(divisor);
         if (halfway > 0 || halfway == 0 && !mantissa.IsEven) mantissa++;
         return Encode((ulong)mantissa, grid, negative);
     }
 
-    internal static double UnitRatio(BigInteger numerator, BigInteger denominator)
+    internal static double UnitRatio(Big numerator, Big denominator)
         => ScaledRatio(numerator, denominator, -1074);
 
     // Keep powers of two separate so ordinary prices do not require thousand-bit
     // numerators merely to represent their position on the binary64 grid.
-    internal static double ScaledRatio(BigInteger numerator, BigInteger denominator, int binaryExponent)
+    internal static double ScaledRatio(Big numerator, Big denominator, int binaryExponent)
     {
         if (denominator.Sign <= 0) throw new ArgumentOutOfRangeException(nameof(denominator));
 #if !NETFRAMEWORK
@@ -284,7 +287,7 @@ internal struct ExactMeanAccumulator
                 return;
             }
         }
-        AddLarge(new BigInteger(value), scale);
+        AddLarge(new Big(value), scale);
     }
 
     private static bool ShiftFits(long value, int shift, out long result)
@@ -294,11 +297,11 @@ internal struct ExactMeanAccumulator
         return (result >> shift) == value;
     }
 
-    private void AddLarge(BigInteger value, int scale)
+    private void AddLarge(Big value, int scale)
     {
         if (value.IsZero) return;
         var common = IsZero ? scale : Math.Min(_scale, scale);
-        var previous = _wide ? _large : new BigInteger(_small);
+        var previous = _wide ? _large : new Big(_small);
         var total = IsZero ? value : (previous << (_scale - common)) + (value << (scale - common));
         if (total.IsZero) { this = default; return; }
         // Discard only exact powers of two, so old tiny inputs do not permanently force
@@ -313,7 +316,7 @@ internal struct ExactMeanAccumulator
 
     internal void Square()
     {
-        var value = _wide ? _large : new BigInteger(_small);
+        var value = _wide ? _large : new Big(_small);
         var scale = checked(2 * _scale - 1074);
         this = default;
         AddLarge(value * value, scale);
@@ -323,9 +326,9 @@ internal struct ExactMeanAccumulator
     {
         if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
         if (IsZero) return 0;
-        var numerator = _wide ? _large : new BigInteger(_small);
+        var numerator = _wide ? _large : new Big(_small);
         if (numerator.Sign < 0) throw new ArithmeticException("A real square root requires a nonnegative mean.");
-        var divisor = new BigInteger(count);
+        var divisor = new Big(count);
         var exponent = BitLength(numerator) - BitLength(divisor);
         if (exponent >= 0 ? numerator < (divisor << exponent) : (numerator << -exponent) < divisor) exponent--;
         exponent += _scale - 1074;
@@ -335,7 +338,7 @@ internal struct ExactMeanAccumulator
         if (shift >= 0) numerator <<= shift;
         else divisor <<= -shift;
         var whole = numerator / divisor;
-        var root = whole.IsZero ? BigInteger.Zero : ExactPopulationDeviation.IntegerRoot(whole);
+        var root = whole.IsZero ? Big.Zero : (Big)ExactPopulationDeviation.IntegerRoot(whole);
         var midpoint = 2 * root + 1;
         var comparison = (4 * numerator).CompareTo(divisor * midpoint * midpoint);
         if (comparison > 0 || comparison == 0 && !root.IsEven) root++;
@@ -343,7 +346,7 @@ internal struct ExactMeanAccumulator
     }
 
     // Squared binary64 integers use units of 2^-2148 instead of 2^-1074.
-    internal static double SquaredUnitMean(BigInteger numerator, long count)
+    internal static double SquaredUnitMean(Big numerator, long count)
         => new ExactMeanAccumulator { _wide = true, _large = numerator, _scale = -1074 }.Mean(count);
 
     internal (double Mantissa, int Exponent) NormalizedMean(long count)
@@ -351,7 +354,7 @@ internal struct ExactMeanAccumulator
         if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
         if (IsZero) return (0, 0);
         var magnitude = _small < 0 ? unchecked((ulong)(~_small)) + 1 : (ulong)_small;
-        var bits = _wide ? BitLength(BigInteger.Abs(_large)) : BitLength(magnitude);
+        var bits = _wide ? BitLength(Big.Abs(_large)) : BitLength(magnitude);
         var exponent = checked(_scale - 1074 + bits - 1);
         var normalized = this;
         normalized._scale = 1075 - bits;
@@ -363,23 +366,23 @@ internal struct ExactMeanAccumulator
         if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
         if (IsZero) return 0;
         if (!_wide && TrySmallMean((ulong)count, out var value)) return value;
-        var signed = _wide ? _large : new BigInteger(_small);
-        var magnitude = BigInteger.Abs(signed);
+        var signed = _wide ? _large : new Big(_small);
+        var magnitude = Big.Abs(signed);
         if (count == 1) return RoundSum(magnitude, signed.Sign < 0);
-        var divisor = new BigInteger(count);
+        var divisor = new Big(count);
         var exponent = BitLength(magnitude) - BitLength(divisor);
         if (exponent >= 0 ? magnitude < (divisor << exponent) : (magnitude << -exponent) < divisor) exponent--;
         var grid = Math.Max(0, exponent + _scale - 52);
         var shift = grid - _scale;
         if (shift > 0) divisor <<= shift;
         else magnitude <<= -shift;
-        var mantissa = BigInteger.DivRem(magnitude, divisor, out var remainder);
+        var mantissa = Big.DivRem(magnitude, divisor, out var remainder);
         var halfway = (remainder << 1).CompareTo(divisor);
         if (halfway > 0 || halfway == 0 && !mantissa.IsEven) mantissa++;
         return Encode((ulong)mantissa, grid, signed.Sign < 0);
     }
 
-    private double RoundSum(BigInteger magnitude, bool negative)
+    private double RoundSum(Big magnitude, bool negative)
     {
         var grid = Math.Max(0, BitLength(magnitude) + _scale - 53);
         var shift = grid - _scale;
@@ -445,7 +448,7 @@ internal struct ExactMeanAccumulator
     {
 #if !NETFRAMEWORK
         // A compact numerator/divisor can need up to 116 bits to align the
-        // binary64 rounding grid. Keep that division off the BigInteger heap.
+        // binary64 rounding grid. Keep that division off the Big heap.
         // Very small subnormal scales may need more; retain the exact fallback.
         if (shift < 0 ? BitLength(magnitude) - shift <= 128 : BitLength(divisor) + shift <= 128)
         {
@@ -516,7 +519,7 @@ internal struct ExactMeanAccumulator
 #endif
     }
 
-    private static int BitLength(BigInteger value)
+    private static int BitLength(Big value)
     {
 #if !NETFRAMEWORK
         return checked((int)value.GetBitLength());
