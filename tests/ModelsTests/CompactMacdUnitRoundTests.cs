@@ -17,7 +17,7 @@ public sealed class CompactMacdUnitRoundTests
             var input = CompactMacdValue.FromUnits(units);
             Assert.Equal(RocBankValue.RoundUnits(units, 1), input.Round(1).Units);
         }
-        Assert.Equal(BigInteger.Zero, default(CompactMacdValue).Round(1).Units);
+        Assert.Equal(BigInteger.Zero, (default(CompactMacdValue).Round(1).Units).Big());
         BigInteger half = BigInteger.One << 126;
         var minimum = CompactMacdValue.FromUnits(-half + 1)
             + CompactMacdValue.FromUnits(-half - 1);
@@ -38,10 +38,10 @@ public sealed class CompactMacdUnitRoundTests
                 var slow = CompactMacdValue.Of(Math.ScaleB(random.NextDouble() * 2 - 1, exponent));
                 BigInteger oscillatorUnits = RocBankValue.RoundUnits(fast.Units - slow.Units, 1);
                 var oscillator = (fast - slow).Round(1);
-                Assert.Equal(oscillatorUnits, oscillator.Units);
+                Assert.Equal(oscillatorUnits, (oscillator.Units).Big());
                 signalUnits = RocBankValue.RoundUnits(signalUnits * 8 + oscillatorUnits * 2, 10);
                 signal = signal.AdvanceEma(oscillator, 9);
-                Assert.Equal(signalUnits, signal.Units);
+                Assert.Equal(signalUnits, (signal.Units).Big());
                 Assert.Equal(RocBankValue.RoundUnits(oscillatorUnits - signalUnits, 1),
                     (oscillator - signal).Round(1).Units);
             }

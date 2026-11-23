@@ -29,7 +29,7 @@ public sealed class MacZScalarArithmeticTests
         expected = e >= 0 ? expected * new ReferenceFraction(BigInteger.One << e)
             : expected / new ReferenceFraction(BigInteger.One << -e);
         var fraction = actual.ToFraction();
-        Assert.Equal(expected.Components, (fraction.Numerator, fraction.Denominator));
+        Assert.Equal(expected.Components, (fraction.Numerator.Big(), fraction.Denominator.Big()));
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public sealed class MacZScalarArithmeticTests
             actual = actual.Divide(23);
             expected = (expected * new ReferenceFraction(19) + new ReferenceFraction(i % 7 - 3)) / new ReferenceFraction(23);
             var fraction = actual.ToFraction();
-            Assert.Equal(expected.Components, (fraction.Numerator, fraction.Denominator));
+            Assert.Equal(expected.Components, (fraction.Numerator.Big(), fraction.Denominator.Big()));
             Assert.Equal(BitConverter.DoubleToInt64Bits(expected.ToDouble()), BitConverter.DoubleToInt64Bits(actual.Publish()));
         }
     }

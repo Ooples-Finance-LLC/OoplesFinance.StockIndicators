@@ -89,7 +89,7 @@ public sealed class FibonacciRollingSnapshotTests
             for (int lag = 0; lag < Math.Min(period, i + 1); lag++)
             {
                 var weight = weights[period - lag - 1];
-                sum += weight * ExactVarianceWindow.Units(prices[i - lag]);
+                sum += weight * ExactConversions.Units(prices[i - lag]);
                 mass += weight;
             }
             double expected = ExactMeanAccumulator.UnitRatio(sum, mass);

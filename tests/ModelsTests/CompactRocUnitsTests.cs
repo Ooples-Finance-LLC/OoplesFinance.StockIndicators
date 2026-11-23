@@ -117,6 +117,6 @@ public sealed class CompactRocUnitsTests
             expected = ExactVarianceWindow.Units(value) << shift;
             break;
         }
-        Assert.Equal(expected, RocBankValue.RoundUnits(numerator, denominator));
+        Assert.Equal(expected, (RocBankValue.RoundUnits(numerator, denominator)).Big());
     }
 }

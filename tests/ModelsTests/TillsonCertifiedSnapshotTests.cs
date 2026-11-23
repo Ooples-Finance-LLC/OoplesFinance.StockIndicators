@@ -30,7 +30,7 @@ public sealed class TillsonCertifiedSnapshotTests
             for (int replay = 0; replay < 2; replay++)
             {
                 state.Reset();
-                Assert.Equal(BigInteger.Zero, state.RoundedUnits);
+                Assert.Equal(BigInteger.Zero, (state.RoundedUnits).Big());
                 for (int i = 0; i < inputs.Length; i++)
                 {
                     state.UpdateUnits(inputs[i], output);
@@ -44,7 +44,7 @@ public sealed class TillsonCertifiedSnapshotTests
                         roundedUnits = BigInteger.DivRem(numerator << 1074, denominator, out var remainder);
                         Assert.Equal(BigInteger.Zero, remainder);
                     }
-                    Assert.Equal(roundedUnits, state.RoundedUnits);
+                    Assert.Equal(roundedUnits, (state.RoundedUnits).Big());
                 }
             }
         }

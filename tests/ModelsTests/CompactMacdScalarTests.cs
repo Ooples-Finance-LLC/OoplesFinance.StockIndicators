@@ -17,7 +17,7 @@ public sealed class CompactMacdScalarTests
         foreach (var units in Values())
         {
             var value = CompactMacdValue.FromUnits(units);
-            Assert.Equal(units * weight, value.Times(weight).Units);
+            Assert.Equal(units * weight, (value.Times(weight).Units).Big());
             Assert.Equal(value.Times(new BigInteger(weight)).Units, value.Times(weight).Units);
         }
     }

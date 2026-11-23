@@ -36,9 +36,9 @@ public sealed class CompactMacdFusedRecurrenceTests
             {
                 double price = Math.ScaleB((i % 2 == 0 ? 1 : -1) * (1.25 + Math.Sin(i) * .2), exponent);
                 var input = CompactMacdValue.Of(price);
-                expected = RocBankValue.RoundUnits(expected * (period - 1) + input.Units * 2, (long)period + 1);
+                expected = RocBankValue.RoundUnits(expected * (period - 1) + input.Units.Big() * 2, (long)period + 1).Big();
                 state = state.AdvanceEma(input, period);
-                Assert.Equal(expected, state.Units);
+                Assert.Equal(expected, (state.Units).Big());
             }
         }
         Assert.Throws<ArgumentOutOfRangeException>(() => default(CompactMacdValue).AdvanceEma(default, 0));

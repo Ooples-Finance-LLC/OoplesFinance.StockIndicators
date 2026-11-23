@@ -23,7 +23,7 @@ public sealed class PriceRelativeMeanTests
                 {
                     if (basis[j] == 0) { present = false; continue; }
                     double ratio = evaluation[j] == 0 ? 0 : evaluation[j] / basis[j];
-                    sum += ExactVarianceWindow.Units(ratio);
+                    sum += ExactConversions.Units(ratio);
                 }
                 Assert.Equal(present ? 1 : 0, output[4]);
                 double expected = present ? ExactMeanAccumulator.UnitRatio(sum, period) : 0;

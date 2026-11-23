@@ -13,8 +13,8 @@ public sealed class ParabolicClassicFastTests
         void Check(double stop, double extreme, double factor)
         {
             if (!CertifiedParabolicClassic.TryAdvance(stop, extreme, factor, out double actual)) return;
-            var a = ExactVarianceWindow.Units(stop); var b = ExactVarianceWindow.Units(extreme);
-            var f = ExactVarianceWindow.Units(factor);
+            var a = ExactConversions.Units(stop); var b = ExactConversions.Units(extreme);
+            var f = ExactConversions.Units(factor);
             double expected = ExactMeanAccumulator.UnitRatio(RocBankValue.RoundUnits(a * grid + f * (b - a), grid), 1);
             Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
         }

@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 // Frozen 4d0b4f3e reference for the rolling maximum replacement.
 using System.Numerics;
 using OoplesFinance.StockIndicators.Enums;

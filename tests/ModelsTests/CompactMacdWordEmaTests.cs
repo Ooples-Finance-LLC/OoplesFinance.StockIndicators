@@ -148,7 +148,7 @@ public sealed class CompactMacdWordEmaTests
     [Fact]
     public void UnsupportedDomainsRetainExactWideRecurrence()
     {
-        var inputs = new[] { BigInteger.Zero, BigInteger.One, -BigInteger.One,
+        var inputs = new BigInteger[] { BigInteger.Zero, BigInteger.One, -BigInteger.One,
             ExactVarianceWindow.Units(double.MaxValue), ExactVarianceWindow.Units(-double.MaxValue),
             ExactVarianceWindow.Units(100), ExactVarianceWindow.Units(-100),
             BigInteger.One << 2400, -(BigInteger.One << 2400), (BigInteger.One << 127) - 1 };
@@ -158,10 +158,10 @@ public sealed class CompactMacdWordEmaTests
         {
             BigInteger expected = RocBankValue.RoundUnits(prior * (period - 1) + input * 2, (long)period + 1);
             var actual = CompactMacdValue.FromUnits(prior).AdvanceEma(CompactMacdValue.FromUnits(input), period);
-            Assert.Equal(expected, actual.Units);
+            Assert.Equal(expected, (actual.Units).Big());
             var cached = new CompactMacdValue.EmaRecurrence(period).Advance(
                 CompactMacdValue.FromUnits(prior), CompactMacdValue.FromUnits(input));
-            Assert.Equal(expected, cached.Units);
+            Assert.Equal(expected, (cached.Units).Big());
         }
         foreach (var prior in inputs)
         foreach (var input in inputs)
@@ -171,7 +171,7 @@ public sealed class CompactMacdWordEmaTests
                 + input * weights.Alpha, weights.Denominator);
             var actual = CompactMacdValue.FromUnits(prior).AdvanceFixedEma(
                 CompactMacdValue.FromUnits(input), weights.Alpha, weights.Denominator);
-            Assert.Equal(expected, actual.Units);
+            Assert.Equal(expected, (actual.Units).Big());
         }
     }
 }

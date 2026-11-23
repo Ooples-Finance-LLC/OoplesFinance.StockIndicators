@@ -69,6 +69,6 @@ public sealed class ScaledRocUnitsTests
             expected = ExactVarianceWindow.Units(rounded) << overflowShift;
             break;
         }
-        Assert.Equal(expected, RocBankValue.RoundScaledUnits(numerator, denominator, scale));
+        Assert.Equal(expected, (RocBankValue.RoundScaledUnits(numerator, denominator, scale)).Big());
     }
 }

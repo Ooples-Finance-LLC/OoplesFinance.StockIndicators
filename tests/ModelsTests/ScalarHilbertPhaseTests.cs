@@ -12,9 +12,9 @@ public sealed class ScalarHilbertPhaseTests
 
     private static void Check(HilbertPhaseState state, IntegerPhase reference)
     {
-        Assert.Equal(reference.Smooth, state.SmoothPrice.RoundedUnits());
-        Assert.Equal(reference.InPhase, state.InPhase.RoundedUnits());
-        Assert.Equal(reference.Quadrature, state.Quadrature.RoundedUnits());
+        Assert.Equal(reference.Smooth, (state.SmoothPrice.RoundedUnits()).Big());
+        Assert.Equal(reference.InPhase, (state.InPhase.RoundedUnits()).Big());
+        Assert.Equal(reference.Quadrature, (state.Quadrature.RoundedUnits()).Big());
         Bits(reference.Period, state.Period);
         Bits(reference.Phase, state.Phase);
     }
@@ -82,17 +82,17 @@ public sealed class ScalarHilbertPhaseTests
         Assert.NotEqual(BigInteger.Zero, saved);
         var changed = snapshot;
         changed.Multiply(3);
-        Assert.NotEqual(saved, changed.RoundedUnits());
-        Assert.Equal(saved, state.InPhase.RoundedUnits());
+        Assert.NotEqual(saved, changed.RoundedUnits().Big());
+        Assert.Equal(saved, (state.InPhase.RoundedUnits()).Big());
         state.Update(BigInteger.One << 3000);
-        Assert.Equal(saved, snapshot.RoundedUnits());
+        Assert.Equal(saved, (snapshot.RoundedUnits()).Big());
         state.Reset();
-        Assert.Equal(BigInteger.Zero, state.InPhase.RoundedUnits());
-        Assert.Equal(BigInteger.Zero, state.Quadrature.RoundedUnits());
-        Assert.Equal(BigInteger.Zero, state.SmoothPrice.RoundedUnits());
+        Assert.Equal(BigInteger.Zero, (state.InPhase.RoundedUnits()).Big());
+        Assert.Equal(BigInteger.Zero, (state.Quadrature.RoundedUnits()).Big());
+        Assert.Equal(BigInteger.Zero, (state.SmoothPrice.RoundedUnits()).Big());
         Bits(0, state.Period);
         Bits(0, state.Phase);
-        Assert.Equal(saved, snapshot.RoundedUnits());
+        Assert.Equal(saved, (snapshot.RoundedUnits()).Big());
     }
 
     // Independent padded-integer arithmetic with absolute-history indexing:

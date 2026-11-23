@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 // Frozen b0b88694 kernel: independent oracle for value-only execution and unchanged default signals.
 using System.Numerics;
 namespace OoplesFinance.StockIndicators.Helpers;

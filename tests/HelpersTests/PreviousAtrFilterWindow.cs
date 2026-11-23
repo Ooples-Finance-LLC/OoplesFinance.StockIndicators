@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 // Frozen c822a6ff reference for the rolling minimum replacement.
 using System.Numerics;
 using OoplesFinance.StockIndicators.Streaming;

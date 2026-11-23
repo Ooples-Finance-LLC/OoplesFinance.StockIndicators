@@ -63,7 +63,7 @@ public sealed class TillsonCompactSnapshotTests
         for (int replay = 0; replay < 2; replay++)
         {
             state.Reset();
-            Assert.Equal(BigInteger.Zero, state.RoundedUnits);
+            Assert.Equal(BigInteger.Zero, (state.RoundedUnits).Big());
             for (int i = 0; i < inputs.Length; i++)
             {
                 state.UpdateUnits(inputs[i], output);

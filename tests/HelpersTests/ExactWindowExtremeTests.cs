@@ -29,8 +29,8 @@ public sealed class ExactWindowExtremeTests
             {
                 var value = i < 200 ? new BigInteger(100 - i) : i < 400 ? new BigInteger(i - 300)
                     : new BigInteger(i * 41 % 97 - 48) << (i % 7 * 256);
-                Assert.Equal(Scan(-value), window.Preview(-value));
-                Assert.Equal(Scan(value), window.Preview(value));
+                Assert.Equal(Scan(-value), (window.Preview(-value)).Big());
+                Assert.Equal(Scan(value), (window.Preview(value)).Big());
                 window.Commit(value);
                 if (history.Count == period) history.Dequeue();
                 history.Enqueue(value);

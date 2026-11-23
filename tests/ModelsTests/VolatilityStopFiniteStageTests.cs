@@ -24,7 +24,7 @@ public sealed class VolatilityStopFiniteStageTests
         foreach (bool bullish in new[] { false, true })
         {
             if (!VolatilityStopSnapshot.TryFiniteStop(new(average), multiplier, extreme, bullish, out var actual)) continue;
-            Assert.Equal(Expected(average, multiplier, extreme, bullish), actual);
+            Assert.Equal(Expected(average, multiplier, extreme, bullish), (actual).Big());
             accepted++;
         }
         Assert.True(accepted > 200);
@@ -43,7 +43,7 @@ public sealed class VolatilityStopFiniteStageTests
     public void WidthRoundsBeforeCancellationInsteadOfFusingStages()
     {
         Assert.True(VolatilityStopSnapshot.TryFiniteStop(new(.1), 3, .3, true, out var actual));
-        Assert.Equal(Expected(.1, 3, .3, true), actual);
+        Assert.Equal(Expected(.1, 3, .3, true), (actual).Big());
         Assert.NotEqual(ExactVarianceWindow.Units(Math.FusedMultiplyAdd(-.1, 3, .3)), actual);
     }
 
@@ -54,7 +54,7 @@ public sealed class VolatilityStopFiniteStageTests
         foreach (bool bullish in new[] { false, true })
         {
             Assert.True(VolatilityStopSnapshot.TryFiniteStop(new(0), 3, extreme, bullish, out var actual));
-            Assert.Equal(BigInteger.Zero, actual);
+            Assert.Equal(BigInteger.Zero, (actual).Big());
         }
     }
 

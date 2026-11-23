@@ -135,9 +135,9 @@ public sealed class CertifiedHilbertProjectionTests
         for (int lag = 0; lag < count; lag++)
         {
             double angle = lag * 2d * Math.PI / count;
-            var units = ExactVarianceWindow.Units(prices[(cursor - lag + 50) % 50]);
-            sineSum += units * ExactVarianceWindow.Units(Math.Sin(angle));
-            cosineSum += units * ExactVarianceWindow.Units(Math.Cos(angle));
+            var units = ExactConversions.Units(prices[(cursor - lag + 50) % 50]);
+            sineSum += units * ExactConversions.Units(Math.Sin(angle));
+            cosineSum += units * ExactConversions.Units(Math.Cos(angle));
         }
         Equal(ExactMeanAccumulator.UnitRatio(sineSum, BigInteger.One << 1074), real.Mean(1));
         Equal(ExactMeanAccumulator.UnitRatio(cosineSum, BigInteger.One << 1074), imaginary.Mean(1));

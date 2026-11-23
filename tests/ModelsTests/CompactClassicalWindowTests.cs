@@ -18,7 +18,7 @@ public sealed class CompactClassicalWindowTests
         var random = new Random(301026);
         var inputs = new List<BigInteger> { 0, -1, 0, 0, 1, -1, 3, -3 };
         inputs.AddRange(Enumerable.Range(0, 300).Select(i =>
-            ExactVarianceWindow.Units(100 + random.NextDouble() * 20)));
+            ExactConversions.Units(100 + random.NextDouble() * 20)));
         inputs.AddRange(new[] { BigInteger.One << 2400, -(BigInteger.One << 2400),
             (BigInteger.One << 127) - 1, -(BigInteger.One << 127),
             BigInteger.One << 1074, BigInteger.One, -BigInteger.One });
@@ -26,7 +26,7 @@ public sealed class CompactClassicalWindowTests
         for (int replay = 0; replay < 2; replay++)
         {
             state.Reset();
-            Assert.Equal(BigInteger.Zero, state.RoundedUnits);
+            Assert.Equal(BigInteger.Zero, (state.RoundedUnits).Big());
             var history = new List<BigInteger>();
             var outputs = new double[2];
             foreach (var input in inputs)

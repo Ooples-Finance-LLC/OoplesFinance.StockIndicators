@@ -38,7 +38,7 @@ public sealed class CompactMacdValueTests
                 BigInteger a = sign * ((BigInteger.One << exponent) + 1);
                 BigInteger b = -(a >> 1);
                 var left = CompactMacdValue.FromUnits(a); var right = CompactMacdValue.FromUnits(b);
-                Assert.Equal(a, left.Units);
+                Assert.Equal(a, (left.Units).Big());
                 var actual = (left.Times(denominator - factor.Mantissa) + right.Times(factor.Mantissa)).Round(denominator);
                 Assert.Equal(RocBankValue.RoundUnits(a * (denominator - factor.Mantissa) + b * factor.Mantissa, denominator), actual.Units);
                 if (!b.IsZero)
@@ -71,19 +71,19 @@ public sealed class CompactMacdValueTests
             BigInteger units = sign * ((BigInteger.One << width) + offset);
             var value = CompactMacdValue.FromUnits(units);
             foreach (int weight in new[] { -3, -1, 0, 1, 2, 3, int.MaxValue })
-                Assert.Equal(units * weight, value.Times(weight).Units);
+                Assert.Equal(units * weight, (value.Times(weight).Units).Big());
             foreach (int shift in new[] { 0, 1, 64, 127, 128, 1074 })
             {
                 var other = CompactMacdValue.FromUnits(BigInteger.One << shift);
-                Assert.Equal(units + (BigInteger.One << shift), (value + other).Units);
-                Assert.Equal(units - (BigInteger.One << shift), (value - other).Units);
+                Assert.Equal(units + (BigInteger.One << shift), ((value + other).Units).Big());
+                Assert.Equal(units - (BigInteger.One << shift), ((value - other).Units).Big());
             }
         }
         BigInteger half = BigInteger.One << 126;
         var minimum = CompactMacdValue.FromUnits(-half + 1) + CompactMacdValue.FromUnits(-half - 1);
-        Assert.Equal(-(BigInteger.One << 127), minimum.Units);
-        Assert.Equal(BigInteger.One << 127, minimum.Times(-1).Units);
-        Assert.Equal(BigInteger.One << 127, (default(CompactMacdValue) - minimum).Units);
+        Assert.Equal(-(BigInteger.One << 127), (minimum.Units).Big());
+        Assert.Equal(BigInteger.One << 127, (minimum.Times(-1).Units).Big());
+        Assert.Equal(BigInteger.One << 127, ((default(CompactMacdValue) - minimum).Units).Big());
         Assert.Equal(RocBankValue.RoundUnits(minimum.Units, 3), minimum.Round(3).Units);
     }
 
