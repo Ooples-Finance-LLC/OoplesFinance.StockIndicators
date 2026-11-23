@@ -11,8 +11,8 @@ public sealed class MacZScalarArithmeticTests
     {
         var type = typeof(MacZWindow.Number);
         object Read(string name) => type.GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(value)!;
-        var denominator = (BigInteger)Read("_denominator");
-        return ((BigInteger)Read("_coefficient"), (int)Read("_exponent"), denominator.IsZero ? BigInteger.One : denominator);
+        var denominator = ((ExactInteger)Read("_denominator")).Big();
+        return (((ExactInteger)Read("_coefficient")).Big(), (int)Read("_exponent"), denominator.IsZero ? BigInteger.One : denominator);
     }
 
     // Independent legacy multiply-first reduction also verifies the internal
