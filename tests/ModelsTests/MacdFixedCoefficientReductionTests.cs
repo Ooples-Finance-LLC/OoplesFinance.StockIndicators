@@ -73,7 +73,7 @@ public sealed class MacdFixedCoefficientReductionTests(ITestOutputHelper output)
         private BigInteger _sum;
         internal BigInteger Value { get; private set; }
         private readonly BigInteger _alpha = coefficient.HasValue
-            ? ExactVarianceWindow.Units(coefficient.Value)
+            ? ExactConversions.Units(coefficient.Value)
             : 0;
 
         public void Reset()
@@ -90,17 +90,17 @@ public sealed class MacdFixedCoefficientReductionTests(ITestOutputHelper output)
                 _sum += input;
                 if (_count == (first ? 1 : period))
                 {
-                    Value = RocBankValue.RoundUnits(_sum, first ? 1 : period);
+                    Value = ExactConversions.RoundUnits(_sum, first ? 1 : period);
                     _sum = 0;
                 }
                 return;
             }
             Value = coefficient.HasValue
-                ? RocBankValue.RoundUnits(
+                ? ExactConversions.RoundUnits(
                     Value * ((BigInteger.One << 1074) - _alpha) + input * _alpha,
                     BigInteger.One << 1074
                 )
-                : RocBankValue.RoundUnits(Value * (period - 1) + 2 * input, (long)period + 1);
+                : ExactConversions.RoundUnits(Value * (period - 1) + 2 * input, (long)period + 1);
         }
     }
 
@@ -133,20 +133,20 @@ public sealed class MacdFixedCoefficientReductionTests(ITestOutputHelper output)
         {
             output.Clear();
             _index++;
-            var input = ExactVarianceWindow.Units(bar.Close);
+            var input = ExactConversions.Units(bar.Close);
             _slow.Add(input);
             if (owner.FirstPrice || _index >= owner.SlowPeriod - owner.FastPeriod)
                 _fast.Add(input);
             var start = (long)owner.SlowPeriod - 1 + owner.Suppression;
             if (_index < start)
                 return;
-            var difference = RocBankValue.RoundUnits(_fast.Value - _slow.Value, 1);
+            var difference = ExactConversions.RoundUnits(_fast.Value - _slow.Value, 1);
             _signal.Add(difference);
             if (_index < start + owner.SignalPeriod - 1L + owner.Suppression)
                 return;
             Publish(difference, 0, output);
             Publish(_signal.Value, 1, output);
-            Publish(RocBankValue.RoundUnits(difference - _signal.Value, 1), 2, output);
+            Publish(ExactConversions.RoundUnits(difference - _signal.Value, 1), 2, output);
         }
     }
 }

@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 using System.Numerics;
 
 namespace OoplesFinance.StockIndicators.Helpers;
@@ -345,8 +346,8 @@ internal static class UltimatePowerWeights
         var extra = Math.Max(0, (Bits(value.Denominator) - Bits(value.Numerator) + 1) / 2);
         var precision = checked(bits + extra);
         var quotient = (value.Numerator << checked(2 * precision)) / value.Denominator;
-        var root = quotient.IsZero ? System.Numerics.BigInteger.Zero : ExactPopulationDeviation.IntegerRoot(quotient);
-        var scale = System.Numerics.BigInteger.One << precision;
+        var root = quotient.IsZero ? BigInteger.Zero : ExactPopulationDeviation.IntegerRoot(quotient);
+        var scale = BigInteger.One << precision;
         return new(new Fraction(root, scale), new Fraction(root + 1, scale));
     }
 }

@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
@@ -462,7 +463,7 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
     {
         if (!hasPrevious || deviation == 0) return default;
         var change = (TechnicalRatingValue)value - previous;
-        return new TechnicalRatingValue(System.Numerics.BigInteger.Abs(change.Units)) / deviation;
+        return new TechnicalRatingValue(BigInteger.Abs(change.Units)) / deviation;
     }
 
     public void Dispose()

@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ExactIntegerTests on the library's other targets: net8.0 and net48, which consumes the net461 build and so runs
+       the #if NETFRAMEWORK paths (TrailingZeros(long), the ToByteArray trailing-zero scan, the double fallback). The
+       main test project targets net10.0 only. The assembly name is the library's InternalsVisibleTo friend. -->
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net48</TargetFrameworks>
+    <AssemblyName>OoplesFinance.StockIndicators.Tests.Unit</AssemblyName>
+    <RootNamespace>OoplesFinance.StockIndicators.Tests.Unit</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <SignAssembly>False</SignAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Compile Include="..\ModelsTests\ExactIntegerTests.cs" Link="ExactIntegerTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <Reference Include="System.Numerics" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\OoplesFinance.StockIndicators.csproj" />
+  </ItemGroup>
+
+</Project>

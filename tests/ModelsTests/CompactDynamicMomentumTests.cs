@@ -23,7 +23,7 @@ public sealed class CompactDynamicMomentumTests(Xunit.Abstractions.ITestOutputHe
             }
             foreach (double ratio in ratios)
             {
-                BigInteger n = (BigInteger)baseline << 1074, d = ExactVarianceWindow.Units(ratio);
+                BigInteger n = (BigInteger)baseline << 1074, d = ExactConversions.Units(ratio);
                 int expected = n >= d * maximum ? maximum : n <= d * minimum ? minimum : (int)(n / d);
                 Assert.Equal(expected, DynamicMomentumPeriod.SelectExact(ratio, baseline, minimum, maximum));
             }

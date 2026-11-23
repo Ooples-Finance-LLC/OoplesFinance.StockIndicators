@@ -6,7 +6,7 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ModelsTests;
 public sealed class HilbertRoundedKernelTests
 {
     private static readonly BigInteger Grid = BigInteger.One << 1074;
-    private static BigInteger Units(double value) => ExactVarianceWindow.Units(value);
+    private static BigInteger Units(double value) => ExactConversions.Units(value);
     private static void EqualBits(double expected, double actual) =>
         Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
 

@@ -66,7 +66,7 @@ public sealed class SharedRollingPercentileTests
         foreach (int period in new[] { 1, 2, 3, 20, int.MaxValue })
         foreach (double percentile in new[] { -0d, 0d, double.Epsilon, .1, .25, .5, .9, Math.BitDecrement(1), 1 })
         {
-            var rank = ExactVarianceWindow.Units(percentile) * (period - 1);
+            var rank = ExactConversions.Units(percentile) * (period - 1);
             Assert.Equal(!(rank % (BigInteger.One << 1074)).IsZero,
                 new RollingPercentile(period, percentile, average).HasFractionalFullRank);
             var actual = new RollingPercentile.State(period, percentile, average);
@@ -153,7 +153,7 @@ public sealed class SharedRollingPercentileTests
         internal Original(int period, double percentile, bool average)
         {
             _period = period; _average = average;
-            var top = ExactVarianceWindow.Units(percentile); var bottom = BigInteger.One << 1074;
+            var top = ExactConversions.Units(percentile); var bottom = BigInteger.One << 1074;
             var gcd = BigInteger.GreatestCommonDivisor(top, bottom); _top = top / gcd; _bottom = bottom / gcd;
         }
         internal double Next(double value)

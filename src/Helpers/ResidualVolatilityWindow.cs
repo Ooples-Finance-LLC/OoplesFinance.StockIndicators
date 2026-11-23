@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 using Average = OoplesFinance.StockIndicators.Helpers.UnroundedMovingAverage;
 using System.Numerics;
 using OoplesFinance.StockIndicators.Streaming;

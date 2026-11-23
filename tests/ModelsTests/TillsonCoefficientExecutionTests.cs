@@ -17,14 +17,14 @@ public sealed class TillsonCoefficientExecutionTests
         foreach (int shift in new[] { 0, 1100 })
         {
             var state = (IWideAverageState)new TillsonAverage(3, factor, seed, 2).CreateState();
-            var values = Enumerable.Range(0, 35).Select(i => ExactVarianceWindow.Units((i * 13 % 31) - 15d) << shift).ToArray();
+            var values = Enumerable.Range(0, 35).Select(i => ExactConversions.Units((i * 13 % 31) - 15d) << shift).ToArray();
             var output = new double[2];
             foreach (var input in new[] { values, values.Reverse().ToArray() })
             {
                 var prices = input.Select(v => new ReferenceFraction(v) * ReferenceFraction.FromDouble(double.Epsilon)).ToArray();
                 var expected = TillsonReference.CalculateExtended(prices, 3, factor, seed, 2);
                 state.Reset();
-                Assert.Equal(BigInteger.Zero, state.RoundedUnits);
+                Assert.Equal(BigInteger.Zero, state.RoundedUnits.Big());
                 for (int i = 0; i < input.Length; i++)
                 {
                     state.UpdateUnits(input[i], output);

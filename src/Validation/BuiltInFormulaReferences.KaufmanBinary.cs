@@ -8,7 +8,7 @@ internal static partial class BuiltInFormulaReferences
         length = Math.Max(1, length);
         ReferenceFraction R(double x) => ReferenceFraction.FromDouble(x);
         var zero = R(0);
-        var prices = bars.Select(b => Helpers.ExactVarianceWindow.Units(b.Close)).ToArray();
+        var prices = bars.Select(b => ReferenceFraction.Units(b.Close)).ToArray();
         var averages = new BigInteger[prices.Length]; var changes = new BigInteger[prices.Length];
         var denominators = new BigInteger[prices.Length];
         var result = new double[prices.Length]; var lastFall = -1; var lastRise = -1;

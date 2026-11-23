@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
+using System;
 using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
@@ -654,25 +655,25 @@ internal sealed class Ehlers2PoleSuperSmootherFilterV2Smoother : IMovingAverageS
 
 internal sealed class EhlersSuperSmootherFilterEngine
 {
-    private readonly System.Numerics.BigInteger _gain, _feedback, _decay;
-    private System.Numerics.BigInteger _input, _previous, _older, _difference;
+    private readonly BigInteger _gain, _feedback, _decay;
+    private BigInteger _input, _previous, _older, _difference;
     public EhlersSuperSmootherFilterEngine(int length)
     {
         var angle = Math.Max(.01, Math.Min(.99, MathHelper.Sqrt2 * Math.PI / Math.Max(1, length)));
         var radius = ExactVarianceWindow.Units(Math.Exp(-angle)); var cosine = ExactVarianceWindow.Units(Math.Cos(angle));
         _feedback = 2 * radius * cosine; _decay = -radius * radius;
-        _gain = (System.Numerics.BigInteger.One << 2148) - _feedback - _decay;
+        _gain = (BigInteger.One << 2148) - _feedback - _decay;
     }
     public double Next(double value, bool isFinal) => Step(value, isFinal).Value;
     internal (double Value, Signal Signal) Step(double value, bool commit)
     {
         if (double.IsNaN(value) || double.IsInfinity(value)) throw new ArgumentOutOfRangeException(nameof(value));
         var input = ExactVarianceWindow.Units(value);
-        var result = RocBankValue.RoundUnits(_gain * (input + _input) + 2 * _feedback * _previous + 2 * _decay * _older, System.Numerics.BigInteger.One << 2149);
+        var result = RocBankValue.RoundUnits(_gain * (input + _input) + 2 * _feedback * _previous + 2 * _decay * _older, BigInteger.One << 2149);
         var difference = input - result;
         var signal = difference.Sign > 0 && difference > _difference ? Signal.StrongBuy : difference.Sign < 0 && difference < _difference ? Signal.StrongSell : difference.Sign > 0 ? Signal.Buy : difference.Sign < 0 ? Signal.Sell : Signal.None;
         if (commit) { _input = input; _older = _previous; _previous = result; _difference = difference; }
-        return (ExactMeanAccumulator.UnitRatio(result, System.Numerics.BigInteger.One), signal);
+        return (ExactMeanAccumulator.UnitRatio(result, BigInteger.One), signal);
     }
     public void Reset() { _input = _previous = _older = _difference = default; }
 }

@@ -34,7 +34,7 @@ public sealed class DftSpectrumNumericalTests
         foreach(var shift in new[]{0,2096,2097,2098,2130,4296,8592,13000})foreach(var sign in new[]{-1,1})foreach(var tail in new[]{-1,0,1})
         {
             var numerator=sign*((System.Numerics.BigInteger.One<<shift)+tail);var denominator=new System.Numerics.BigInteger(3);
-            Assert.Equal(RocBankValue.RoundUnits(numerator,denominator),DftSpectrumWindow.RoundPower(numerator,denominator));
+            Assert.Equal(ExactConversions.RoundUnits(numerator,denominator),DftSpectrumWindow.RoundPower(numerator,denominator).Big());
         }
     }
     [Fact]
