@@ -94,8 +94,8 @@ internal static class AlligatorComparison
     {
         var indicator = Indicator(gator, settings);
         var count = gator ? 4 : 3;
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -106,11 +106,10 @@ internal static class AlligatorComparison
                 .Range(0, count)
                 .Select(slot =>
                 {
-                    var presence = run[indicator.Outputs[slot + count]].ToArray();
+                    var presence = run.Held(indicator.Outputs[slot + count]);
                     return run[indicator.Outputs[slot]]
                         .ToArray()
-                        .Select((v, i) => presence[i] > 0 ? (double?)v : null)
-                        .ToArray();
+                        .WherePresent(presence);
                 })
                 .ToArray()
         );

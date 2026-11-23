@@ -34,7 +34,7 @@ public class SharedEngulfingBenchmarks
         {
             var indicator = new EngulfingPattern();
             using var run = Build(indicator, history, ordinary);
-            AsinFeasibilityBenchmarks.RequireSame(reference.Values, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(reference.Values, run.Held(indicator));
         }
     }
 
@@ -70,7 +70,7 @@ public class SharedEngulfingBenchmarks
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool ordinary = false,
         IndicatorExecutionBackend backend = IndicatorExecutionBackend.Cpu)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(history).ConfigureExecution(backend);
         if (ordinary) builder.ConfigureBehavior(_ => { });
         var result = builder.BuildAsync().GetAwaiter().GetResult();

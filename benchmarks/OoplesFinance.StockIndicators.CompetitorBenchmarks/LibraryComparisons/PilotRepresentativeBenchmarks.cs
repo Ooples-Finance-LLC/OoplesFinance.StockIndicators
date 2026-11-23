@@ -41,7 +41,7 @@ public class PilotRepresentativeBenchmarks
                     else _close.CopyTo(expected, 0);
                     for (var i = 0; i < expected.Length; i++) expected[i] = Math.Asin(expected[i]);
                 }
-                AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
             }
         }
     }
@@ -58,8 +58,8 @@ public class PilotRepresentativeBenchmarks
         return Case == "Asin" ? [new PriceCircularTransform(PriceCircularOperation.ArcSine)] : [new Sma(20)];
     }
 
-    private IIndicatorRun Build(IIndicator[] indicators, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicators)
+    private IIndicatorRun Build(IIndicator[] indicators, IndicatorHistoryMode history) => ComparisonBuilder.Create()
+        .ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicators)
         .ConfigureExecution(IndicatorExecutionBackend.Cpu).ConfigureHistory(history).BuildAsync().GetAwaiter().GetResult();
 
     [Benchmark] public IIndicatorRun CpuBuilder() => Build(Indicators(), IndicatorHistoryMode.Full);

@@ -145,8 +145,8 @@ internal static class AtrEnvelopeComparison
             Mode(variant),
             variant == 0
         );
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -154,9 +154,9 @@ internal static class AtrEnvelopeComparison
         var values = new double?[Names(variant).Length][];
         for (var slot = 0; slot < values.Length; slot++)
         {
-            var response = run[indicator.Outputs[slot]].ToArray();
-            var mask = run[indicator.Outputs[slot + 4]].ToArray();
-            values[slot] = response.Select((v, i) => mask[i] > 0 ? (double?)v : null).ToArray();
+            var response = run[indicator.Outputs[slot]];
+            var mask = run[indicator.Outputs[slot + 4]];
+            values[slot] = response.WherePresent(mask);
         }
         return Series(values, variant);
     }

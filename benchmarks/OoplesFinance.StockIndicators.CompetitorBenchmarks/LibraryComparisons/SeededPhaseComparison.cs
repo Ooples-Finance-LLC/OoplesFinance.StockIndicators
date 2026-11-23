@@ -37,8 +37,8 @@ internal static class SeededPhaseComparison
     internal static ComparisonSeries Owned(Bar[] bars, double fast, double slow, bool quan)
     {
         var indicator = new SeededPhaseAdaptiveAverage(fast, slow, quan, quan, !quan);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -46,9 +46,9 @@ internal static class SeededPhaseComparison
         var rows = new double?[2][];
         for (var j = 0; j < 2; j++)
         {
-            var v = run[indicator.Outputs[j]].ToArray();
-            var f = run[indicator.Outputs[j + 2]].ToArray();
-            rows[j] = v.Select((x, i) => f[i] > 0 ? (double?)x : null).ToArray();
+            var v = run[indicator.Outputs[j]];
+            var f = run[indicator.Outputs[j + 2]];
+            rows[j] = v.WherePresent(f);
         }
         return Series(rows);
     }

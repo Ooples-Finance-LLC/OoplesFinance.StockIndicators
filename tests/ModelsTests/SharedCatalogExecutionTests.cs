@@ -10,6 +10,13 @@ public sealed class SharedCatalogExecutionTests
         IndicatorValidationDiscovery.Discover(new[] { typeof(IIndicator).Assembly })
             .Where(c => SharedCpuStates.ReviewedTypes.Contains(c.IndicatorType)).ToArray();
 
+    private static readonly IReadOnlyList<IndicatorValidationCase> RetrospectiveCases =
+        IndicatorValidationDiscovery.Discover(new[] { typeof(IIndicator).Assembly })
+            .Where(c => SharedCpuStates.RetrospectiveTypes.Contains(c.IndicatorType)).ToArray();
+
+    public static IEnumerable<object[]> RetrospectiveConfigurations => RetrospectiveCases.Select(c => new object[] { c });
+    public static IEnumerable<object[]> RetrospectiveFamilies => RetrospectiveCases.GroupBy(c => c.IndicatorType)
+        .Select(g => new object[] { g.First() });
     public static IEnumerable<object[]> Configurations => ReviewedCases.Select(c => new object[] { c });
     public static IEnumerable<object[]> Families => ReviewedCases.GroupBy(c => c.IndicatorType)
         .Select(g => new object[] { g.First() });
@@ -40,6 +47,48 @@ public sealed class SharedCatalogExecutionTests
                 Assert.True(ValuesBarExecution.SupportsOwned(new[] { indicator }), testCase.ToString());
             }
         }
+    }
+
+    [Fact]
+    public void EveryWholeHistoryFamilyIsSealedStatelessAndRunsOnTheSharedRoute()
+    {
+        Assert.Empty(SharedCpuStates.RetrospectiveTypes.Intersect(SharedCpuStates.ReviewedTypes));
+        foreach (var type in SharedCpuStates.RetrospectiveTypes)
+        {
+            Assert.True(type.IsSealed, type.FullName);
+            var cases = RetrospectiveCases.Where(c => c.IndicatorType == type).ToArray();
+            Assert.NotEmpty(cases);
+            foreach (var testCase in cases)
+            {
+                var indicator = testCase.Factory();
+                Assert.Null(indicator.Source);
+                Assert.Empty(indicator.Components);
+                Assert.True(indicator is IHistoricalIndicator, testCase.ToString());
+                Assert.False(indicator is IBuiltInIndicator, testCase.ToString());
+                Assert.Same(IndicatorInputDomain.Finite, IndicatorInputDomain.StableFor(indicator));
+                Assert.True(ValuesBarExecution.SupportsOwned(new[] { indicator }), testCase.ToString());
+            }
+        }
+    }
+
+    [Theory, MemberData(nameof(RetrospectiveConfigurations))]
+    public async Task EveryWholeHistoryConfigurationPreservesOrdinaryBuilderResults(IndicatorValidationCase testCase)
+    {
+        var indicator = testCase.Factory();
+        var count = (int)Math.Min(512L, Math.Max(33L, (long)indicator.WarmupBars + 3));
+        await Compare(Input(count), indicator, testCase.ToString(), requireFused: true);
+    }
+
+    [Theory, MemberData(nameof(RetrospectiveFamilies))]
+    public async Task EveryWholeHistoryFamilyPreservesEmptySingleAndExceptionalInputs(IndicatorValidationCase testCase)
+    {
+        foreach (var count in new[] { 0, 1 })
+            await Compare(Input(count), testCase.Factory(), testCase.ToString(), requireFused: true);
+        var values = new[] { -0d, 0d, double.Epsilon, -double.Epsilon, double.MaxValue, -double.MaxValue, .125, 1d, -1d };
+        var bars = values.Select(v => new Bar(default, v, v, v, v, 1)).ToArray();
+        await Compare(bars, testCase.Factory(), testCase.ToString(), requireFused: true);
+        bars[^1] = new Bar(default, 1, 2, 0, 1, double.NaN);
+        await Compare(bars, testCase.Factory(), testCase.ToString(), requireFused: true);
     }
 
     [Theory, MemberData(nameof(Configurations))]

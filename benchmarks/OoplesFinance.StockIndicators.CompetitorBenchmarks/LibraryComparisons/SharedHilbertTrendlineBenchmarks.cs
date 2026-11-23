@@ -65,8 +65,8 @@ public class SharedHilbertTrendlineBenchmarks
             using var run = Build(indicator, history);
             for (int slot = 0; slot < Columns; slot++)
             {
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v ?? 0).ToArray(), run[indicator.Outputs[slot]].ToArray());
-                if (!_quan) AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v.HasValue ? 1d : 0).ToArray(), run[indicator.Outputs[slot + 3]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v ?? 0).ToArray(), run.Held(indicator.Outputs[slot]));
+                if (!_quan) AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v.HasValue ? 1d : 0).ToArray(), run.Held(indicator.Outputs[slot + 3]));
             }
         }
     }

@@ -36,8 +36,8 @@ public class PilotAsinSchedulingBenchmarks
                 throw new InvalidOperationException("Asin presence mismatch.");
     }
 
-    private IIndicatorRun Build(PriceCircularTransform asin) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(asin)
+    private IIndicatorRun Build(PriceCircularTransform asin) => ComparisonBuilder.Create()
+        .ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(asin)
         .ConfigureHistory(IndicatorHistoryMode.LatestOnly).BuildAsync().GetAwaiter().GetResult();
 
     [Benchmark]

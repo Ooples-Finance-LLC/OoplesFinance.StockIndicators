@@ -53,22 +53,22 @@ internal static class MeanErrorComparison
         IIndicator indicator = details
             ? new MovingAverageDiagnostics(period)
             : new WindowMeanAbsoluteDeviation(period);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
         if (!details)
-            return new(Math.Min(period - 1, data.Count), run[indicator.Outputs[0]].ToArray());
+            return new(Math.Min(period - 1, data.Count), run.Held(indicator.Outputs[0]));
         return Series(
             Enumerable
                 .Range(0, 4)
                 .Select(slot =>
                 {
-                    var values = run[indicator.Outputs[slot]].ToArray();
-                    var present = run[indicator.Outputs[slot + 4]].ToArray();
-                    return values.Select((v, i) => present[i] > 0 ? (double?)v : null).ToArray();
+                    var values = run[indicator.Outputs[slot]];
+                    var present = run[indicator.Outputs[slot + 4]];
+                    return values.WherePresent(present);
                 })
                 .ToArray()
         );

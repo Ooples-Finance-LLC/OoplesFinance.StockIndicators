@@ -51,15 +51,15 @@ internal static class DelayedHilbertTrendComparison
     internal static ComparisonSeries Owned(Bar[] bars, int suppression)
     {
         var owner = new DelayedHilbertTrendline(suppression);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(owner)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[owner.Trendline].ToArray();
-        var flags = run[owner.IsDefined].ToArray();
-        return Series(values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray());
+        var values = run[owner.Trendline];
+        var flags = run[owner.IsDefined];
+        return Series(values.WherePresent(flags));
     }
 
     private static ComparisonSeries Native(double[] prices)

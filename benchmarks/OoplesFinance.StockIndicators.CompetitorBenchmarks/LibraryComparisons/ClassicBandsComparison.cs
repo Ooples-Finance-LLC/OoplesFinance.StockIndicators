@@ -60,8 +60,8 @@ internal static class ClassicBandsComparison
     )
     {
         var indicator = new ClassicDeviationBands(p, up, down, method, first, suppression);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -71,9 +71,9 @@ internal static class ClassicBandsComparison
                 .Range(0, 3)
                 .Select(j =>
                 {
-                    var v = run[indicator.Outputs[j]].ToArray();
-                    var flags = run[indicator.Outputs[j + 3]].ToArray();
-                    return v.Select((x, i) => flags[i] > 0 ? (double?)x : null).ToArray();
+                    var v = run[indicator.Outputs[j]];
+                    var flags = run[indicator.Outputs[j + 3]];
+                    return v.WherePresent(flags);
                 })
                 .ToArray()
         );

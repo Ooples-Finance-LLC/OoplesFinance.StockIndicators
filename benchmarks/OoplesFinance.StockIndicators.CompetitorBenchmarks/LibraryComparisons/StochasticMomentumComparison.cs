@@ -70,8 +70,8 @@ internal static class StochasticMomentumComparison
     )
     {
         var indicator = Indicator(p, variant, first, second, signal);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -83,11 +83,10 @@ internal static class StochasticMomentumComparison
                 .Range(0, Names(variant).Length)
                 .Select(slot =>
                 {
-                    var present = run[indicator.Outputs[slot + flags]].ToArray();
+                    var present = run.Held(indicator.Outputs[slot + flags]);
                     return run[indicator.Outputs[slot]]
                         .ToArray()
-                        .Select((v, i) => present[i] > 0 ? (double?)v : null)
-                        .ToArray();
+                        .WherePresent(present);
                 })
                 .ToArray()
         );

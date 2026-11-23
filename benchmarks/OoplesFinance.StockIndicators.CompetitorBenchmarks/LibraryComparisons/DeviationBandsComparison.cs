@@ -61,8 +61,8 @@ internal static class DeviationBandsComparison
     internal static ComparisonSeries Owned(string id, Bar[] bars, int p, double factor)
     {
         var indicator = new WindowDeviationBands(p, factor, id != Ids[0]);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -73,9 +73,9 @@ internal static class DeviationBandsComparison
                 .Range(0, 6)
                 .Select(slot =>
                 {
-                    var v = run[indicator.Outputs[slot]].ToArray();
-                    var mask = run[indicator.Outputs[slot + 6]].ToArray();
-                    return v.Select((x, i) => mask[i] > 0 ? (double?)x : null).ToArray();
+                    var v = run[indicator.Outputs[slot]];
+                    var mask = run[indicator.Outputs[slot + 6]];
+                    return v.WherePresent(mask);
                 })
                 .ToArray()
         );

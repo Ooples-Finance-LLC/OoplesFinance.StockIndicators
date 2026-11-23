@@ -67,14 +67,14 @@ public class SharedAroonBenchmarks
             var indicator = AroonComparison.Create(Operation, Period);
             using var run = Build(indicator, history);
             for (int slot = 0; slot < 6; slot++)
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot], run[indicator.Outputs[slot]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot], run.Held(indicator.Outputs[slot]));
         }
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
     [Benchmark] public IIndicatorRun BuilderFull() => Build(AroonComparison.Create(Operation, Period), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(AroonComparison.Create(Operation, Period), IndicatorHistoryMode.LatestOnly);
-    internal IIndicatorRun Build(WindowAroon indicator, IndicatorHistoryMode history, bool gpu = false) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
+    internal IIndicatorRun Build(WindowAroon indicator, IndicatorHistoryMode history, bool gpu = false) => ComparisonBuilder.Create()
+        .ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
         .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
 
     public readonly record struct NativeResult(double[]? Up = null, double[]? Down = null, double[]? Osc = null,

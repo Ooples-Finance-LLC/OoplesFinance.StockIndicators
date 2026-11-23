@@ -32,9 +32,9 @@ internal static class TradyCandleComparison
     private static ComparisonSeries Ooples(string name, CompetitorData data, int period)
     {
         var indicator = Create(name, period);
-        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
-        return new(First(name, data.Count, period), run[indicator.Outputs[0]].ToArray());
+        return new(First(name, data.Count, period), run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Competitor(string name, CompetitorData data, int period)

@@ -70,8 +70,8 @@ public class SharedPathRatioBenchmarks
             var indicator = Create();
             using var run = Build(indicator, history);
             if (run.BarCount != Count) throw new InvalidOperationException("Builder path-ratio length differs.");
-            var values = run[indicator.Value].ToArray();
-            var presence = run[indicator.IsDefined].ToArray();
+            var values = run.Held(indicator.Value);
+            var presence = run.Held(indicator.IsDefined);
             if (values.Length != Count || presence.Length != Count) throw new InvalidOperationException("Builder path-ratio column length differs.");
             AsinFeasibilityBenchmarks.RequireSame(expected.Values.Select((v, i) => expected.Present![i] ? v : 0).ToArray(), values);
             AsinFeasibilityBenchmarks.RequireSame(expected.Present!.Select(v => v ? 1d : 0).ToArray(), presence);
@@ -119,7 +119,7 @@ public class SharedPathRatioBenchmarks
     internal WindowPathRatio Create() => new(Period, Absolute ? PathRatioConvention.AbsoluteFraction : PathRatioConvention.SignedPercent);
     internal IIndicatorRun Build(WindowPathRatio indicator, IndicatorHistoryMode history, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars))
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars))
             .ConfigureIndicators(indicator).ConfigureHistory(history)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Required GPU path ratio did not execute on the device.");

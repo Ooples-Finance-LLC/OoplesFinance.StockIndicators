@@ -1,6 +1,8 @@
 using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 using System.Globalization;
 using System.Numerics;
+using OoplesFinance.StockIndicators.Builder;
+using OoplesFinance.StockIndicators.Indicators.Fast;
 using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Indicators;
@@ -26,13 +28,14 @@ public static class RenkoSnapshot
     public static IEnumerable<RenkoBrick> Calculate(
         IReadOnlyList<Bar> bars,
         double brickSize = 1,
-        bool highLow = false
+        bool highLow = false,
+        IndicatorNumerics numerics = IndicatorNumerics.Exact
     )
     {
         Validate(bars);
         if (!FrameworkCompatibility.IsFinite(brickSize) || brickSize <= 0)
             throw new ArgumentOutOfRangeException(nameof(brickSize));
-        return Enumerate();
+        return numerics == IndicatorNumerics.Fast ? FastSnapshots.Renko(bars, brickSize, highLow) : Enumerate();
         IEnumerable<RenkoBrick> Enumerate()
         {
             if (bars.Count == 0)
@@ -119,14 +122,24 @@ public static class RenkoSnapshot
     public static IEnumerable<RenkoBrick> CalculateAtr(
         IReadOnlyList<Bar> bars,
         int period = 14,
-        bool highLow = false
+        bool highLow = false,
+        IndicatorNumerics numerics = IndicatorNumerics.Exact
     )
     {
         Validate(bars);
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
+        if (numerics == IndicatorNumerics.Fast)
+        {
+            // An absent or zero average makes no bricks, as below.
+            if (FastSnapshots.RenkoAtrSize(bars, period) is not double fastSize || fastSize == 0) // NOSONAR exact zero
+                return [];
+            if (!FrameworkCompatibility.IsFinite(fastSize))
+                throw new ArgumentOutOfRangeException(nameof(bars));
+            return FastSnapshots.Renko(bars, fastSize, highLow);
+        }
         var window = new SeededAtrWindow(period);
-        foreach (var bar in bars)
+        foreach (var bar in BarRun.Of(bars))
             window.Add(bar);
         if (!window.HasAverage)
             return [];
@@ -136,10 +149,53 @@ public static class RenkoSnapshot
         return Calculate(bars, size, highLow);
     }
 
+    /// <summary>
+    /// The lattice every brick edge lies on: the first close rounded to the brick's decimals, in whole
+    /// scaled units and in exact units, and the brick size in exact units.
+    /// </summary>
+    internal readonly record struct BrickGrid(BigInteger Scale, BigInteger Origin, BigInteger Base, BigInteger Step);
+
+    // The same scale, rounded first close and step the exact calculation above derives.
+    internal static BrickGrid Grid(double firstClose, double brickSize)
+    {
+        var text = brickSize.ToString("R", CultureInfo.InvariantCulture).Split('E', 'e');
+        var dot = text[0].IndexOf('.');
+        var digits = Math.Max(
+            0,
+            (dot < 0 ? 0 : text[0].Length - dot - 1)
+                - (text.Length == 1 ? 0 : int.Parse(text[1], CultureInfo.InvariantCulture))
+                - 1
+        );
+        var scale = BigInteger.Pow(10, digits);
+        var grid = BigInteger.One << 1074;
+        var n = ExactVarianceWindow.Units(firstClose) * scale;
+        var rounded = BigInteger.DivRem(BigInteger.Abs(n), grid, out var remainder);
+        if (2 * remainder > grid || 2 * remainder == grid && !rounded.IsEven)
+            rounded++;
+        var origin = rounded * n.Sign;
+        return new(scale, origin, origin * grid, ExactVarianceWindow.Units(brickSize) * scale);
+    }
+
+    // Whole bricks from the close to the nearer edge of the last brick, without rounding.
+    internal static long CloseBricksExact(double close, long upper, long lower, BrickGrid grid)
+    {
+        var price = ExactVarianceWindow.Units(close) * grid.Scale;
+        BigInteger top = grid.Base + upper * grid.Step, bottom = grid.Base + lower * grid.Step;
+        return checked((long)(price > top ? (price - top) / grid.Step : price < bottom ? (price - bottom) / grid.Step : 0));
+    }
+
+    // Whole bricks from the larger of the high's rise and the low's fall, without rounding.
+    internal static long RangeBricksExact(double high, double low, long upper, long lower, BrickGrid grid)
+    {
+        var up = ExactVarianceWindow.Units(high) * grid.Scale - (grid.Base + upper * grid.Step);
+        var down = grid.Base + lower * grid.Step - ExactVarianceWindow.Units(low) * grid.Scale;
+        return checked((long)((up >= down ? up : -down) / grid.Step));
+    }
+
     private static void Validate(IReadOnlyList<Bar> bars)
     {
         if (bars is null) throw new ArgumentNullException(nameof(bars));
-        foreach (var b in bars)
+        foreach (var b in BarRun.Of(bars))
             if (
                 !FrameworkCompatibility.IsFinite(b.High)
                 || !FrameworkCompatibility.IsFinite(b.Low)

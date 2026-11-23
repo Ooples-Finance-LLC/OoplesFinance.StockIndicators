@@ -49,8 +49,8 @@ public class SharedTradyBandsBenchmarks
             using var run = Build(indicator, history);
             for (int slot = 0; slot < 6; slot++)
             {
-                AsinFeasibilityBenchmarks.RequireSame(exact[slot].Select(v => v ?? 0).ToArray(), run[indicator.Outputs[slot]].ToArray());
-                AsinFeasibilityBenchmarks.RequireSame(exact[slot].Select(v => v.HasValue ? 1d : 0).ToArray(), run[indicator.Outputs[slot + 6]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(exact[slot].Select(v => v ?? 0).ToArray(), run.Held(indicator.Outputs[slot]));
+                AsinFeasibilityBenchmarks.RequireSame(exact[slot].Select(v => v.HasValue ? 1d : 0).ToArray(), run.Held(indicator.Outputs[slot + 6]));
             }
         }
     }

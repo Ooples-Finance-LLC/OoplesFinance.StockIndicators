@@ -56,8 +56,8 @@ internal static class SeededMomentumComparison
         IIndicator indicator = pmo
             ? new SeededPriceMomentum(p, s, g)
             : new SeededTrueStrength(p, s, g);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -65,9 +65,9 @@ internal static class SeededMomentumComparison
         var result = new double?[2][];
         for (var j = 0; j < 2; j++)
         {
-            var values = run[indicator.Outputs[j]].ToArray();
-            var present = run[indicator.Outputs[j + 2]].ToArray();
-            result[j] = values.Select((v, i) => present[i] > 0 ? (double?)v : null).ToArray();
+            var values = run[indicator.Outputs[j]];
+            var present = run[indicator.Outputs[j + 2]];
+            result[j] = values.WherePresent(present);
         }
         return Series(result, pmo);
     }

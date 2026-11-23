@@ -69,20 +69,20 @@ internal static class EnvelopeComparison
     )
     {
         var indicator = new WindowAverageEnvelope(period, percent, average);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var flags = run[indicator.IsDefined].ToArray();
+        var flags = run.Held(indicator.IsDefined);
         return Series(
             Enumerable
                 .Range(0, 3)
                 .Select(slot =>
                     run[indicator.Outputs[slot]]
                         .ToArray()
-                        .Select((v, i) => flags[i] > 0 ? (double?)v : null)
+                        .WherePresent(flags)
                         .ToArray()
                 )
                 .ToArray()

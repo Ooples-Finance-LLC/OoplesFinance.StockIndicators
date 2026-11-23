@@ -40,13 +40,13 @@ internal static class RangeAdaptiveComparison
     internal static ComparisonSeries Owned(Bar[] bars, int period, bool fractal, double scale = .9)
     {
         var owner = Indicator(period, fractal, scale);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(owner)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(0, run[owner.Outputs[0]].ToArray());
+        return new(0, run.Held(owner.Outputs[0]));
     }
 
     private static double NativeSum(double[] values)

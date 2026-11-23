@@ -78,16 +78,16 @@ internal static class ElementaryMathComparison
         IIndicator indicator = arithmetic.HasValue
             ? new CandleArithmetic(arithmetic.Value)
             : new PriceRoundingTransform(rounding!.Value);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Outputs[0]].ToArray();
-        var flags = run[indicator.Outputs[1]].ToArray();
+        var values = run[indicator.Outputs[0]];
+        var flags = run[indicator.Outputs[1]];
         return VolumePriceComparison.Mask(
-            values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray()
+            values.WherePresent(flags)
         );
     }
 

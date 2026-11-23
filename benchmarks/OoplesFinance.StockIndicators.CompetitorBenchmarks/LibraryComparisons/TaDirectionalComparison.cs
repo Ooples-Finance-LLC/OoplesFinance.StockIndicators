@@ -187,16 +187,16 @@ internal static class TaDirectionalComparison
     )
     {
         var indicator = new PriorSeededDirectionalMeasure(measure, p, unstable);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var flags = run[indicator.IsDefined].ToArray();
-        var values = run[indicator.Value].ToArray();
+        var flags = run[indicator.IsDefined];
+        var values = run[indicator.Value];
         return VolumePriceComparison.Mask(
-            values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray()
+            values.WherePresent(flags)
         );
     }
 

@@ -50,13 +50,13 @@ internal static class WindowRegressionComparison
     )
     {
         var indicator = new WindowLinearRegression(period, kind);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(Math.Min(period - 1, data.Count), run[indicator.Outputs[0]].ToArray());
+        return new(Math.Min(period - 1, data.Count), run.Held(indicator.Outputs[0]));
     }
 
     internal static TALib.Core.RetCode Native(

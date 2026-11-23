@@ -22,5 +22,5 @@ public class SharedVolatilityStopSnapshotBenchmarks
         ComparisonVerifier.Compare(pair.Reference!(data, 20), actual, "Volatility stop saved-baseline fixture", IndicatorErrorBudget.Exact);
     }
     // Saved period20/multiplier3 fixture; no native setup/timing calls.
-    [Benchmark] public IReadOnlyList<VolatilityStopValue> Snapshot() => VolatilityStopSnapshot.Calculate(_bars, 20);
+    [Benchmark] public IReadOnlyList<VolatilityStopValue> Snapshot() => VolatilityStopSnapshot.Calculate(_bars, 20, numerics: ComparisonBuilder.Numerics);
 }

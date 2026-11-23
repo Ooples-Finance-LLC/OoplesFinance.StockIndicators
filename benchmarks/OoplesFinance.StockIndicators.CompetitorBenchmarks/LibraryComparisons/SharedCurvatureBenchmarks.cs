@@ -36,8 +36,8 @@ public class SharedCurvatureBenchmarks
             using var run = Build(root, history);
             var outputs = CurvatureComparison.Names.Select((name, slot) =>
             {
-                var values = run[root.Outputs[slot]].ToArray();
-                var flags = run[root.Outputs[slot + 5]].ToArray();
+                var values = run.Held(root.Outputs[slot]);
+                var flags = run.Held(root.Outputs[slot + 5]);
                 for (int i = 0; i < Count; i++)
                     if (flags[i] is not (0 or 1) || flags[i] == 0 && values[i] != 0)
                         throw new InvalidOperationException("Curvature presence or placeholder differs.");

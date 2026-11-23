@@ -52,13 +52,13 @@ internal static class DispersionComparison
     )
     {
         var indicator = new WindowDispersion(period, kind, sample, multiplier);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(First(id, data.Count, period), run[indicator.Outputs[0]].ToArray());
+        return new(First(id, data.Count, period), run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Native(

@@ -53,8 +53,8 @@ internal static class AwesomeComparison
     private static ComparisonSeries Owned(CompetitorData data, int fast, int slow)
     {
         var indicator = new AwesomeWithDetails(fast, slow);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -64,10 +64,10 @@ internal static class AwesomeComparison
                 .Range(0, 2)
                 .Select(slot =>
                 {
-                    var flags = run[indicator.Outputs[slot + 2]].ToArray();
+                    var flags = run.Held(indicator.Outputs[slot + 2]);
                     return run[indicator.Outputs[slot]]
                         .ToArray()
-                        .Select((v, i) => flags[i] > 0 ? (double?)v : null)
+                        .WherePresent(flags)
                         .ToArray();
                 })
                 .ToArray()

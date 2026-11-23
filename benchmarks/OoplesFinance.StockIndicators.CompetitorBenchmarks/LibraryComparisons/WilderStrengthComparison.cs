@@ -93,17 +93,17 @@ internal static class WilderStrengthComparison
     )
     {
         var indicator = new WilderStrengthOscillator(period, convention, unstable);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var flags = run[indicator.IsDefined].ToArray();
+        var flags = run.Held(indicator.IsDefined);
         return VolumePriceComparison.Mask(
             run[indicator.Value]
                 .ToArray()
-                .Select((v, i) => flags[i] > 0 ? (double?)v : null)
+                .WherePresent(flags)
                 .ToArray()
         );
     }

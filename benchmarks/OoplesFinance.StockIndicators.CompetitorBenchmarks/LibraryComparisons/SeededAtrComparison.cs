@@ -51,21 +51,21 @@ internal static class SeededAtrComparison
         IIndicator indicator = details
             ? new AverageTrueRangeWithDetails(period)
             : new SeededAverageTrueRange(period);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
         if (!details)
-            return new(Math.Min(period, data.Count), run[indicator.Outputs[0]].ToArray());
+            return new(Math.Min(period, data.Count), run.Held(indicator.Outputs[0]));
         var values = Enumerable
             .Range(0, 3)
-            .Select(i => run[indicator.Outputs[i]].ToArray())
+            .Select(i => run.Held(indicator.Outputs[i]))
             .ToArray();
         var presence = Enumerable
             .Range(3, 3)
-            .Select(i => run[indicator.Outputs[i]].ToArray().Select(v => v > 0).ToArray())
+            .Select(i => run.Held(indicator.Outputs[i]).Select(v => v > 0).ToArray())
             .ToArray();
         return DetailSeries(values, presence, period);
     }

@@ -51,16 +51,16 @@ internal static class RegressionChannelComparison
     internal static ComparisonSeries Owned(Bar[] bars, int? period, double deviations)
     {
         var indicator = new RegressionWithChannels(period, deviations);
-        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicator)
+        using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(bars)).ConfigureIndicators(indicator)
             .BuildAsync().GetAwaiter().GetResult();
         var values = new double?[4][];
         for (int slot = 0; slot < 3; slot++)
         {
-            var column = run[indicator.Outputs[slot]].ToArray();
-            var mask = run[indicator.Outputs[slot + 4]].ToArray();
-            values[slot] = column.Select((value, i) => mask[i] > 0 ? (double?)value : null).ToArray();
+            var column = run[indicator.Outputs[slot]];
+            var mask = run[indicator.Outputs[slot + 4]];
+            values[slot] = column.WherePresent(mask);
         }
-        values[3] = run[indicator.BreakPoint].ToArray().Select(value => (double?)value).ToArray();
+        values[3] = run.Held(indicator.BreakPoint).Select(value => (double?)value).ToArray();
         return Series(values);
     }
 

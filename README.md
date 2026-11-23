@@ -194,6 +194,42 @@ var smaBuffer = runtime.GetSeries(sma);
 var values = smaBuffer.AsSpan(); // Zero-allocation access
 ```
 
+### Numerics: fast by default, exact on request
+
+A build over an array of bars uses ordinary IEEE 754 double arithmetic unless it is told otherwise. That is the mode
+that keeps pace with TA-Lib, Skender, QuanTAlib and Trady. It differs from the exact mode in three ways worth knowing:
+
+- Results agree with the exact mode to within ordinary floating-point rounding, not bit for bit, and the last bits
+  can differ between processors with and without fused multiply-add.
+- The source array is read where it is, not copied, so it must not be changed while the run is in use.
+- Only the input fields an indicator reads are validated.
+
+Ask for correctly rounded results, an owned copy of the history and full input validation by name:
+
+```csharp
+using var run = await new StockIndicatorBuilder()
+    .ConfigureSource(Bars.From(bars))
+    .ConfigureIndicators(sma)
+    .ConfigureNumerics(IndicatorNumerics.Exact)
+    .BuildAsync();
+```
+
+or for a whole application, in its project file:
+
+```xml
+<ItemGroup>
+  <RuntimeHostConfigurationOption Include="OoplesFinance.StockIndicators.DefaultNumerics" Value="Exact" />
+</ItemGroup>
+```
+
+An indicator without a fast kernel, a streaming source or a build with warm-up takes the exact route in either mode;
+`builder.LastExecution` says which one ran.
+
+So does a build in which rounding itself would decide a value: where a series sits in a range no wider than the
+rounding it carries, whether a distance grew by less than that, a recurrence that multiplies its own rounding bar
+after bar. Prices that move do not do this; a series that stands still or repeats exactly can. Such a build is
+calculated on the exact route, with its copy and its full validation, and the answer is the exact one.
+
 ### Features
 
 - **750+ Indicators**: Access all indicators via `indicators.Calculate(IndicatorName, params)` or typed methods

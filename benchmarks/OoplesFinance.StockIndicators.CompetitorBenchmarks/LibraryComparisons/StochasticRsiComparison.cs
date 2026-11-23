@@ -115,8 +115,8 @@ internal static class StochasticRsiComparison
     )
     {
         var indicator = Indicator(period, skender, stochastic, signal, smooth);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -128,10 +128,10 @@ internal static class StochasticRsiComparison
                 .Range(0, count)
                 .Select(slot =>
                 {
-                    var mask = run[indicator.Outputs[slot + count]].ToArray();
+                    var mask = run.Held(indicator.Outputs[slot + count]);
                     return run[indicator.Outputs[slot]]
                         .ToArray()
-                        .Select((v, i) => mask[i] > 0 ? (double?)v : null)
+                        .WherePresent(mask)
                         .ToArray();
                 })
                 .ToArray()

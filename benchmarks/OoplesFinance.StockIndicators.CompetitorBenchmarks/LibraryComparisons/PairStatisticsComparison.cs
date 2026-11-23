@@ -92,8 +92,8 @@ internal static class PairStatisticsComparison
         IIndicator indicator = full
             ? new WindowPairStatistics(period)
             : new WindowCorrelation(period, flatZero: true);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -102,9 +102,9 @@ internal static class PairStatisticsComparison
         var result = new double?[names.Length][];
         for (var slot = 0; slot < names.Length; slot++)
         {
-            var values = run[indicator.Outputs[slot]].ToArray();
-            var mask = run[indicator.Outputs[slot + names.Length]].ToArray();
-            result[slot] = values.Select((v, i) => mask[i] > 0 ? (double?)v : null).ToArray();
+            var values = run[indicator.Outputs[slot]];
+            var mask = run[indicator.Outputs[slot + names.Length]];
+            result[slot] = values.WherePresent(mask);
         }
         return RetrospectivePriceComparison.Series(names, result);
     }

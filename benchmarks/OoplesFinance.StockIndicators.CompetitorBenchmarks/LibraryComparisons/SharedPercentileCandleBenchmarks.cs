@@ -69,7 +69,7 @@ public class SharedPercentileCandleBenchmarks
         {
             var indicator = Create();
             using var run = Build(indicator, history, reference);
-            AsinFeasibilityBenchmarks.RequireSame(oracle, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(oracle, run.Held(indicator));
         }
     }
     private static IEnumerable<bool?> BooleanValues(object values) => values switch
@@ -116,7 +116,7 @@ public class SharedPercentileCandleBenchmarks
     private IIndicator Create() => PercentileCandleComparison.Create(Operation, Period);
     private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool reference = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history);
         if (reference) builder.ConfigureBehavior(_ => { });
         return builder.BuildAsync().GetAwaiter().GetResult();
     }

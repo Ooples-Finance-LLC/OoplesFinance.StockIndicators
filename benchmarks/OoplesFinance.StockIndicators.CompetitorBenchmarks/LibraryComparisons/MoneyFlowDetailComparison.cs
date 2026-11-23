@@ -45,17 +45,17 @@ internal static class MoneyFlowDetailComparison
     private static ComparisonSeries Owned(CompetitorData data, int period)
     {
         var indicator = new MoneyFlowWithDetails(period);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
         var fields = Enumerable
             .Range(0, 3)
-            .Select(slot => run[indicator.Outputs[slot]].ToArray())
+            .Select(slot => run.Held(indicator.Outputs[slot]))
             .ToArray();
-        var flags = run[indicator.CmfIsDefined].ToArray();
+        var flags = run.Held(indicator.CmfIsDefined);
         return Series(
             fields
                 .Select(

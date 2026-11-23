@@ -49,18 +49,19 @@ internal static class SmoothedAccumulationComparison
     )
     {
         var indicator = new SmoothedAccumulationOscillator(fast, slow, first, suppression, !first);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var rows = new double?[4][];
-        for (var j = 0; j < 4; j++)
+        // The first-value pair compares the oscillator alone, so that is all its arm reads.
+        var rows = new double?[first ? 1 : 4][];
+        for (var j = 0; j < rows.Length; j++)
         {
-            var values = run[indicator.Outputs[j]].ToArray();
-            var flags = run[indicator.Outputs[j + 4]].ToArray();
-            rows[j] = values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray();
+            var values = run[indicator.Outputs[j]];
+            var flags = run[indicator.Outputs[j + 4]];
+            rows[j] = values.WherePresent(flags);
         }
         return Series(rows, first);
     }

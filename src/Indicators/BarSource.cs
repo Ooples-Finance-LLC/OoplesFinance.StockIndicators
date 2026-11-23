@@ -80,6 +80,35 @@ public static class Bars
         return new EnumerableBarSource<Bar>(bars, bar => bar, bars as Bar[]);
     }
 
+    /// <summary>A finite source over columns the caller already has, read in place without copying.</summary>
+    /// <remarks>
+    /// Every column must have one element per bar. The arrays are borrowed, so they must not be changed while a
+    /// run built from this source is in use. A build that asks for fast numerics reads only the columns its
+    /// indicators need.
+    /// </remarks>
+    /// <param name="open">Opening prices.</param>
+    /// <param name="high">High prices.</param>
+    /// <param name="low">Low prices.</param>
+    /// <param name="close">Closing prices.</param>
+    /// <param name="volume">Volumes.</param>
+    /// <param name="times">Bar times, or <see langword="null"/> when the caller does not need them reported.</param>
+    /// <exception cref="ArgumentNullException">Thrown when a price or volume column is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when the columns differ in length.</exception>
+    public static IBarSource FromColumns(double[] open, double[] high, double[] low, double[] close, double[] volume,
+        DateTime[]? times = null)
+    {
+        if (open is null) throw new ArgumentNullException(nameof(open));
+        if (high is null) throw new ArgumentNullException(nameof(high));
+        if (low is null) throw new ArgumentNullException(nameof(low));
+        if (close is null) throw new ArgumentNullException(nameof(close));
+        if (volume is null) throw new ArgumentNullException(nameof(volume));
+        var count = close.Length;
+        if (open.Length != count || high.Length != count || low.Length != count || volume.Length != count
+            || (times is not null && times.Length != count))
+            throw new ArgumentException("Every column must have one element per bar.", nameof(close));
+        return new ColumnBarSource(new BarColumns(times, open, high, low, close, volume));
+    }
+
     /// <summary>
     /// The same finite source, primed with earlier bars the caller does not want reported.
     /// </summary>

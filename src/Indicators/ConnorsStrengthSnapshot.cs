@@ -34,7 +34,7 @@ public static class ConnorsStrengthSnapshot
             throw new ArgumentOutOfRangeException(nameof(streakPeriod));
         if (rankPeriod < 2)
             throw new ArgumentOutOfRangeException(nameof(rankPeriod));
-        foreach (var bar in bars)
+        foreach (var bar in BarRun.Of(bars))
             if (!FrameworkCompatibility.IsFinite(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var state = new ConnorsStrengthState(rsiPeriod, streakPeriod, rankPeriod);

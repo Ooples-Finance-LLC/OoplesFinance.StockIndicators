@@ -37,7 +37,7 @@ public class SharedHoltWinterBenchmarks
         {
             var indicator = new HoltWinterForecast(Period);
             using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
         }
     }
 

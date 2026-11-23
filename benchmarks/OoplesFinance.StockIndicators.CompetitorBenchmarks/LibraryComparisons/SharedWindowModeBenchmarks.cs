@@ -28,7 +28,7 @@ public class SharedWindowModeBenchmarks
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
             var indicator = new WindowMode(Period); using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
         }
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;

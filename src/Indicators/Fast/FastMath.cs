@@ -1,0 +1,501 @@
+namespace OoplesFinance.StockIndicators.Indicators.Fast;
+
+/// <summary>Allocation and vector primitives shared by the fast kernels.</summary>
+/// <remarks>
+/// The element-wise operations are written here over <see cref="System.Numerics.Vector{T}"/> rather than
+/// called from AiDotNet.Tensors: loading that assembly runs its GPU detection, which costs a CPU-only
+/// caller about two seconds on its first build. The .NET Framework target uses the scalar loops.
+/// </remarks>
+internal static class FastMath
+{
+    /// <summary>An output column. Kernels write every element, so it need not be cleared first.</summary>
+    /// <summary>
+    /// Compiles a method fully the first time it is called. A kernel is a loop over every bar, and the
+    /// runtime's quick first compilation leaves vector code several times slower than a plain loop for the
+    /// first few hundred milliseconds of use - which, for a caller that builds once, is all of it.
+    /// </summary>
+#if NETFRAMEWORK
+    internal const System.Runtime.CompilerServices.MethodImplOptions Hot = 0;
+#else
+    internal const System.Runtime.CompilerServices.MethodImplOptions Hot =
+        System.Runtime.CompilerServices.MethodImplOptions.AggressiveOptimization;
+#endif
+
+    /// <summary>
+    /// For a kernel a binder calls. Once the binder's own code is recompiled with a profile, the compiler
+    /// would inline a kernel it calls from one place, and the inlined copy is compiled as part of the
+    /// binder - without the full optimisation the kernel asked for, and several times slower.
+    /// </summary>
+    internal const System.Runtime.CompilerServices.MethodImplOptions Kernel =
+        Hot | System.Runtime.CompilerServices.MethodImplOptions.NoInlining;
+
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static double[] Allocate(int count) =>
+#if NETFRAMEWORK
+        new double[count];
+#else
+        GC.AllocateUninitializedArray<double>(count);
+#endif
+
+    /// <summary>One exponential step: weight * previous + scaled, where scaled is alpha * input.</summary>
+    /// <remarks>
+    /// Written so the only operation on the loop-carried value is a single fused multiply-add. The usual
+    /// previous + alpha * (input - previous) form chains a subtract, a multiply and an add through the
+    /// recurrence, which is three times the latency per bar.
+    /// </remarks>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+    internal static double Blend(double weight, double previous, double scaled)
+    {
+#if !NETFRAMEWORK
+        if (System.Runtime.Intrinsics.X86.Fma.IsSupported || System.Runtime.Intrinsics.Arm.AdvSimd.Arm64.IsSupported)
+            return Math.FusedMultiplyAdd(weight, previous, scaled);
+#endif
+        return weight * previous + scaled;
+    }
+
+    /// <summary>
+    /// Runs the exponential recurrence value = weight * value + alpha * input over
+    /// <paramref name="input"/> from <paramref name="start"/>, writing each value, and returns the last.
+    /// </summary>
+    /// <remarks>
+    /// Four bars at a time, each written from the value four bars back and a short sum of the inputs
+    /// between: the recurrence then carries one multiply-add per four bars instead of one per bar. The
+    /// values agree with the bar-by-bar recurrence to rounding, not bit for bit.
+    /// </remarks>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static double BlendRun(double weight, double alpha, ReadOnlySpan<double> input, Span<double> output, int start,
+        double value)
+    {
+        var i = start;
+        double weight2 = weight * weight, weight3 = weight2 * weight, weight4 = weight2 * weight2;
+        for (; i <= input.Length - 4; i += 4)
+        {
+            var source = input.Slice(i, 4);
+            var target = output.Slice(i, 4);
+            var s0 = alpha * source[0];
+            var p1 = Blend(weight, s0, alpha * source[1]);
+            var p2 = Blend(weight, p1, alpha * source[2]);
+            var p3 = Blend(weight, p2, alpha * source[3]);
+            target[0] = Blend(weight, value, s0);
+            target[1] = Blend(weight2, value, p1);
+            target[2] = Blend(weight3, value, p2);
+            value = Blend(weight4, value, p3);
+            target[3] = value;
+        }
+        for (; i < input.Length; i++)
+        {
+            value = Blend(weight, value, alpha * input[i]);
+            output[i] = value;
+        }
+        return value;
+    }
+
+    /// <summary>Zero for a finite value and nonzero for a NaN or an infinity, to be gathered with an OR.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+    internal static long NonFiniteBits(double value) => BitConverter.DoubleToInt64Bits(value - value); // NOSONAR x - x is the finite test
+
+    /// <summary>The value when <paramref name="keep"/> holds and positive zero otherwise, without a branch.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+    internal static double KeepIf(double value, bool keep)
+    {
+#if !NETFRAMEWORK
+        // A true bool is the byte 1, so its negation is a mask of all ones.
+        var mask = -(long)System.Runtime.CompilerServices.Unsafe.As<bool, byte>(ref keep);
+        return BitConverter.Int64BitsToDouble(BitConverter.DoubleToInt64Bits(value) & mask);
+#else
+        return keep ? value : 0;
+#endif
+    }
+
+    /// <summary>Sum of the distances of a run's values from a centre, in interleaved partial sums.</summary>
+    /// <remarks>
+    /// One running sum makes every value wait for the addition before it, which over a window costs more
+    /// than the distances themselves. The values are added in a different grouping than one at a time,
+    /// which moves the sum by rounding only: the distances are never negative, so nothing cancels.
+    /// </remarks>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+    internal static double DistanceSum(ReadOnlySpan<double> values, double centre)
+    {
+        var i = 0;
+        double sum = 0;
+#if !NETFRAMEWORK
+        var width = System.Numerics.Vector<double>.Count;
+        if (System.Numerics.Vector.IsHardwareAccelerated && values.Length >= width)
+        {
+            var middle = new System.Numerics.Vector<double>(centre);
+            System.Numerics.Vector<double> first = default, second = default;
+            for (; i <= values.Length - 2 * width; i += 2 * width)
+            {
+                first += System.Numerics.Vector.Abs(new System.Numerics.Vector<double>(values.Slice(i)) - middle);
+                second += System.Numerics.Vector.Abs(new System.Numerics.Vector<double>(values.Slice(i + width)) - middle);
+            }
+            if (i <= values.Length - width)
+            {
+                first += System.Numerics.Vector.Abs(new System.Numerics.Vector<double>(values.Slice(i)) - middle);
+                i += width;
+            }
+            sum = System.Numerics.Vector.Sum(first + second);
+        }
+#endif
+        for (; i < values.Length; i++) sum += Math.Abs(values[i] - centre);
+        return sum;
+    }
+
+    /// <summary>Sum of the products of two equally long runs, in four interleaved partial sums.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static double Dot(ReadOnlySpan<double> a, ReadOnlySpan<double> b)
+    {
+        b = b.Slice(0, a.Length);
+        var i = 0;
+        double sum = 0;
+#if !NETFRAMEWORK
+        var width = System.Numerics.Vector<double>.Count;
+        if (System.Numerics.Vector.IsHardwareAccelerated && a.Length >= 2 * width)
+        {
+            System.Numerics.Vector<double> first = default, second = default;
+            for (; i <= a.Length - 2 * width; i += 2 * width)
+            {
+                first += new System.Numerics.Vector<double>(a.Slice(i)) * new System.Numerics.Vector<double>(b.Slice(i));
+                second += new System.Numerics.Vector<double>(a.Slice(i + width))
+                    * new System.Numerics.Vector<double>(b.Slice(i + width));
+            }
+            sum = System.Numerics.Vector.Sum(first + second);
+        }
+#endif
+        for (; i < a.Length; i++) sum += a[i] * b[i];
+        return sum;
+    }
+
+    /// <summary>One of two indices, chosen without a branch: for a choice the data makes as good as at random.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+    internal static int Choose(bool first, int whenFirst, int otherwise)
+    {
+#if !NETFRAMEWORK
+        // A true bool is the byte 1, so its negation is a mask of all ones.
+        var mask = -(int)System.Runtime.CompilerServices.Unsafe.As<bool, byte>(ref first);
+        return (whenFirst & mask) | (otherwise & ~mask);
+#else
+        return first ? whenFirst : otherwise;
+#endif
+    }
+
+    /// <summary>The smaller of two finite values, without a branch.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+    internal static double Smaller(double a, double b)
+    {
+#if !NETFRAMEWORK
+        if (System.Runtime.Intrinsics.X86.Sse2.IsSupported)
+            return System.Runtime.Intrinsics.Vector128.ToScalar(System.Runtime.Intrinsics.X86.Sse2.MinScalar(
+                System.Runtime.Intrinsics.Vector128.CreateScalarUnsafe(a),
+                System.Runtime.Intrinsics.Vector128.CreateScalarUnsafe(b)));
+#endif
+        return a < b ? a : b;
+    }
+
+    /// <summary>
+    /// Replaces each value with the total of the values up to and including it, starting from
+    /// <paramref name="carry"/>, and returns the last total.
+    /// </summary>
+    /// <remarks>
+    /// One running total makes every bar wait for the addition before it. Four bars are totalled among
+    /// themselves instead, and only their sum joins the running total, so the total is waited on once in
+    /// four bars. The values are added in a different grouping than one at a time, which moves a total by
+    /// rounding only and leaves whole-number values, as volumes are, exactly as they were.
+    /// </remarks>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static double PrefixSum(Span<double> values, double carry)
+    {
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Runtime.Intrinsics.X86.Avx2.IsSupported && values.Length >= 8)
+        {
+            var zero = System.Runtime.Intrinsics.Vector256<double>.Zero;
+            var running = System.Runtime.Intrinsics.Vector256.Create(carry);
+            for (; i <= values.Length - 4; i += 4)
+            {
+                var block = System.Runtime.Intrinsics.Vector256.Create<double>(values.Slice(i, 4));
+                // [a, b, c, d] becomes [a, a + b, b + c, c + d] and then [a, a + b, a + b + c, a + b + c + d].
+                var pairs = block + System.Runtime.Intrinsics.X86.Avx.Blend(System.Runtime.Intrinsics.X86.Avx2.Permute4x64(block, 0x90), zero, 0x01);
+                var totals = pairs + System.Runtime.Intrinsics.X86.Avx.Permute2x128(pairs, pairs, 0x08);
+                System.Runtime.Intrinsics.Vector256.CopyTo(totals + running, values.Slice(i, 4));
+                running += System.Runtime.Intrinsics.X86.Avx2.Permute4x64(totals, 0xFF);
+            }
+            carry = System.Runtime.Intrinsics.Vector256.ToScalar(running);
+        }
+#endif
+        for (; i < values.Length; i++)
+        {
+            carry += values[i];
+            values[i] = carry;
+        }
+        return carry;
+    }
+
+    /// <summary>Whether every element is finite, checked a vector at a time.</summary>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static bool AllFinite(ReadOnlySpan<double> values)
+    {
+        // value - value is +0 for a finite value and NaN for an infinity or a NaN, so the OR of the
+        // differences' bits is zero only when every value is finite. Four accumulators and a bitwise OR
+        // keep the loop off the adder's latency, which a single running sum is bound by.
+        var i = 0;
+#if !NETFRAMEWORK
+        var width = System.Numerics.Vector<double>.Count;
+        if (System.Numerics.Vector.IsHardwareAccelerated && values.Length >= 4 * width)
+        {
+            System.Numerics.Vector<long> a = default, b = default, c = default, d = default;
+            for (; i <= values.Length - 4 * width; i += 4 * width)
+            {
+                var block = values.Slice(i, 4 * width);
+                var v0 = new System.Numerics.Vector<double>(block);
+                var v1 = new System.Numerics.Vector<double>(block.Slice(width));
+                var v2 = new System.Numerics.Vector<double>(block.Slice(2 * width));
+                var v3 = new System.Numerics.Vector<double>(block.Slice(3 * width));
+                a |= System.Numerics.Vector.AsVectorInt64(v0 - v0); // NOSONAR x - x is the finite test
+                b |= System.Numerics.Vector.AsVectorInt64(v1 - v1); // NOSONAR x - x is the finite test
+                c |= System.Numerics.Vector.AsVectorInt64(v2 - v2); // NOSONAR x - x is the finite test
+                d |= System.Numerics.Vector.AsVectorInt64(v3 - v3); // NOSONAR x - x is the finite test
+            }
+            if (!System.Numerics.Vector.EqualsAll(a | b | c | d, System.Numerics.Vector<long>.Zero)) return false;
+        }
+#endif
+        double tail = 0;
+        for (; i < values.Length; i++) tail += values[i] - values[i]; // NOSONAR x - x is the finite test
+        return tail == 0;
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static void Add(ReadOnlySpan<double> a, ReadOnlySpan<double> b, Span<double> result)
+    {
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            for (; i <= result.Length - width; i += width)
+                (new System.Numerics.Vector<double>(a.Slice(i, width)) + new System.Numerics.Vector<double>(b.Slice(i, width)))
+                    .CopyTo(result.Slice(i, width));
+        }
+#endif
+        for (; i < result.Length; i++) result[i] = a[i] + b[i];
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static void Subtract(ReadOnlySpan<double> a, ReadOnlySpan<double> b, Span<double> result)
+    {
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            for (; i <= result.Length - width; i += width)
+                (new System.Numerics.Vector<double>(a.Slice(i, width)) - new System.Numerics.Vector<double>(b.Slice(i, width)))
+                    .CopyTo(result.Slice(i, width));
+        }
+#endif
+        for (; i < result.Length; i++) result[i] = a[i] - b[i];
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static void Scale(ReadOnlySpan<double> a, double scalar, Span<double> result)
+    {
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            for (; i <= result.Length - width; i += width)
+                (new System.Numerics.Vector<double>(a.Slice(i, width)) * scalar).CopyTo(result.Slice(i, width));
+        }
+#endif
+        for (; i < result.Length; i++) result[i] = a[i] * scalar;
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static void Floor(ReadOnlySpan<double> input, Span<double> result)
+    {
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            for (; i <= result.Length - width; i += width)
+                System.Numerics.Vector.Floor(new System.Numerics.Vector<double>(input.Slice(i, width)))
+                    .CopyTo(result.Slice(i, width));
+        }
+#endif
+        for (; i < result.Length; i++) result[i] = Math.Floor(input[i]);
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static void Ceiling(ReadOnlySpan<double> input, Span<double> result)
+    {
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            for (; i <= result.Length - width; i += width)
+                System.Numerics.Vector.Ceiling(new System.Numerics.Vector<double>(input.Slice(i, width)))
+                    .CopyTo(result.Slice(i, width));
+        }
+#endif
+        for (; i < result.Length; i++) result[i] = Math.Ceiling(input[i]);
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static void Sqrt(ReadOnlySpan<double> input, Span<double> result)
+    {
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Numerics.Vector.IsHardwareAccelerated)
+        {
+            var width = System.Numerics.Vector<double>.Count;
+            for (; i <= result.Length - width; i += width)
+                System.Numerics.Vector.SquareRoot(new System.Numerics.Vector<double>(input.Slice(i, width)))
+                    .CopyTo(result.Slice(i, width));
+        }
+#endif
+        for (; i < result.Length; i++) result[i] = Math.Sqrt(input[i]);
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static double Min(ReadOnlySpan<double> input)
+    {
+        var minimum = input[0];
+        var i = 1;
+#if !NETFRAMEWORK
+        var width = System.Numerics.Vector<double>.Count;
+        if (System.Numerics.Vector.IsHardwareAccelerated && input.Length >= width)
+        {
+            var lowest = new System.Numerics.Vector<double>(input.Slice(0, width));
+            for (i = width; i <= input.Length - width; i += width)
+                lowest = System.Numerics.Vector.Min(lowest, new System.Numerics.Vector<double>(input.Slice(i, width)));
+            minimum = lowest[0];
+            for (var lane = 1; lane < width; lane++) minimum = Math.Min(minimum, lowest[lane]);
+        }
+#endif
+        for (; i < input.Length; i++) minimum = Math.Min(minimum, input[i]);
+        return minimum;
+    }
+
+    /// <summary>
+    /// The larger of two finite values as one instruction. Math.Max also orders NaN and signed zero, which
+    /// costs several more and, on a value carried from bar to bar, sets the pace of the whole loop.
+    /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining | FastMath.Hot)]
+    internal static double Larger(double a, double b)
+    {
+#if !NETFRAMEWORK
+        if (System.Runtime.Intrinsics.X86.Sse2.IsSupported)
+            return System.Runtime.Intrinsics.Vector128.ToScalar(System.Runtime.Intrinsics.X86.Sse2.MaxScalar(
+                System.Runtime.Intrinsics.Vector128.CreateScalarUnsafe(a),
+                System.Runtime.Intrinsics.Vector128.CreateScalarUnsafe(b)));
+#endif
+        return a > b ? a : b;
+    }
+
+    /// <summary>
+    /// The correctly rounded mean of the high, low and close: the value the exact route publishes, without
+    /// its arbitrary-precision sum.
+    /// </summary>
+    /// <remarks>
+    /// Indicators that compare typical prices need them rounded exactly, because two bars with equal sums
+    /// must compare equal. The three-way sum is kept as a rounded value and its exact residual, the quotient
+    /// is corrected by the exact remainder, and the result is accepted only when what is left is provably
+    /// inside the half-unit that makes it the nearest double. Anything closer to a tie than that, and any
+    /// residual that is not exact, takes the exact route's own calculation.
+    /// </remarks>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static double TypicalPrice(double high, double low, double close)
+    {
+#if !NETFRAMEWORK
+        var pair = high + low;
+        var virtualLow = pair - high;
+        var pairResidual = high - (pair - virtualLow) + (low - virtualLow);
+        var sum = pair + close;
+        var virtualClose = sum - pair;
+        var sumResidual = pair - (sum - virtualClose) + (close - virtualClose);
+        if (pairResidual == 0 && sumResidual == 0) return sum == 0 ? 0 : sum / 3;
+        var residual = pairResidual + sumResidual;
+        var quotient = sum / 3;
+        // sum - 3 * quotient is exact in one fused step; with the sum's residual it is what the quotient lacks.
+        var remainder = Math.FusedMultiplyAdd(-3, quotient, sum);
+        var lacking = remainder + residual;
+        var result = quotient + lacking / 3;
+        var left = quotient - result + lacking / 3;
+        var magnitude = Math.Abs(result);
+        var unit = Math.BitIncrement(magnitude) - magnitude;
+        // Exact residual sums, a result away from a power of two and from the subnormals, and a remaining
+        // distance clearly under half a unit: then no other double is nearer.
+        if (residual - pairResidual == sumResidual && lacking - remainder == residual // NOSONAR an exact tie is the contract
+            && magnitude > 1e-290 && magnitude < 1e290
+            && (BitConverter.DoubleToInt64Bits(result) & 0xFFFFFFFFFFFFFL) != 0
+            && Math.Abs(left) < 0.4999999 * unit)
+            return result;
+#endif
+        return Helpers.ExactTypicalPrice.Calculate(high, low, close);
+    }
+
+    /// <summary>Every bar's typical price, each rounded as <see cref="TypicalPrice"/> rounds it.</summary>
+    /// <remarks>
+    /// Four bars are taken at a time through the same steps, in the same order, as the one-bar form, so a bar
+    /// it accepts has the value that form gives it. A group with a bar it does not accept is handed to that
+    /// form whole.
+    /// </remarks>
+    [System.Runtime.CompilerServices.MethodImpl(FastMath.Hot)]
+    internal static void TypicalPrices(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close,
+        Span<double> output)
+    {
+        var n = output.Length;
+        high = high.Slice(0, n);
+        low = low.Slice(0, n);
+        close = close.Slice(0, n);
+        var i = 0;
+#if !NETFRAMEWORK
+        if (System.Runtime.Intrinsics.X86.Fma.IsSupported && System.Runtime.Intrinsics.X86.Avx2.IsSupported)
+        {
+            var three = System.Runtime.Intrinsics.Vector256.Create(3.0);
+            var zero = System.Runtime.Intrinsics.Vector256<double>.Zero;
+            System.Runtime.Intrinsics.Vector256<double> least = System.Runtime.Intrinsics.Vector256.Create(1e-290), most = System.Runtime.Intrinsics.Vector256.Create(1e290);
+            var nearHalf = System.Runtime.Intrinsics.Vector256.Create(0.4999999);
+            var fraction = System.Runtime.Intrinsics.Vector256.Create(0xFFFFFFFFFFFFFL);
+            var one = System.Runtime.Intrinsics.Vector256.Create(1L);
+            for (; i <= n - 4; i += 4)
+            {
+                System.Runtime.Intrinsics.Vector256<double> h = System.Runtime.Intrinsics.Vector256.Create<double>(high.Slice(i, 4)), l = System.Runtime.Intrinsics.Vector256.Create<double>(low.Slice(i, 4)),
+                    c = System.Runtime.Intrinsics.Vector256.Create<double>(close.Slice(i, 4));
+                var pair = h + l;
+                var virtualLow = pair - h;
+                var pairResidual = h - (pair - virtualLow) + (l - virtualLow);
+                var sum = pair + c;
+                var virtualClose = sum - pair;
+                var sumResidual = pair - (sum - virtualClose) + (c - virtualClose);
+                var quotient = sum / three;
+                // A sum with nothing left over is its own third, and a zero sum is a positive zero.
+                var whole = System.Runtime.Intrinsics.Vector256.Equals(pairResidual, zero) & System.Runtime.Intrinsics.Vector256.Equals(sumResidual, zero);
+                var plain = System.Runtime.Intrinsics.Vector256.AndNot(quotient, System.Runtime.Intrinsics.Vector256.Equals(sum, zero));
+                var residual = pairResidual + sumResidual;
+                var remainder = System.Runtime.Intrinsics.X86.Fma.MultiplyAddNegated(three, quotient, sum);
+                var lacking = remainder + residual;
+                var third = lacking / three;
+                var result = quotient + third;
+                var left = quotient - result + third;
+                var magnitude = System.Runtime.Intrinsics.Vector256.Abs(result);
+                var unit = System.Runtime.Intrinsics.Vector256.AsDouble(System.Runtime.Intrinsics.Vector256.AsInt64(magnitude) + one) - magnitude;
+                var accepted = System.Runtime.Intrinsics.Vector256.Equals(residual - pairResidual, sumResidual) & System.Runtime.Intrinsics.Vector256.Equals(lacking - remainder, residual)
+                    & System.Runtime.Intrinsics.Vector256.GreaterThan(magnitude, least) & System.Runtime.Intrinsics.Vector256.LessThan(magnitude, most)
+                    & System.Runtime.Intrinsics.Vector256.LessThan(System.Runtime.Intrinsics.Vector256.Abs(left), nearHalf * unit)
+                    & ~System.Runtime.Intrinsics.Vector256.AsDouble(System.Runtime.Intrinsics.Vector256.Equals(System.Runtime.Intrinsics.Vector256.AsInt64(result) & fraction, System.Runtime.Intrinsics.Vector256<long>.Zero));
+                if (System.Runtime.Intrinsics.Vector256.ExtractMostSignificantBits(whole | accepted) != 0xF)
+                {
+                    for (var bar = i; bar < i + 4; bar++) output[bar] = TypicalPrice(high[bar], low[bar], close[bar]);
+                    continue;
+                }
+                System.Runtime.Intrinsics.Vector256.CopyTo(System.Runtime.Intrinsics.Vector256.ConditionalSelect(whole, plain, result), output.Slice(i, 4));
+            }
+        }
+#endif
+        for (; i < n; i++) output[i] = TypicalPrice(high[i], low[i], close[i]);
+    }
+}

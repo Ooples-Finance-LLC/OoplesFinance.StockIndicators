@@ -62,8 +62,8 @@ internal static class RegressionStatisticsComparison
     private static ComparisonSeries Ooples(CompetitorData data, int period)
     {
         var indicator = new WindowRegressionStatistics(period);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -72,9 +72,9 @@ internal static class RegressionStatisticsComparison
             .Range(0, 5)
             .Select(slot =>
             {
-                var output = run[indicator.Outputs[slot]].ToArray();
-                var present = run[indicator.Outputs[slot + 5]].ToArray();
-                return output.Select((v, i) => present[i] > 0 ? (double?)v : null).ToArray();
+                var output = run[indicator.Outputs[slot]];
+                var present = run[indicator.Outputs[slot + 5]];
+                return output.WherePresent(present);
             })
             .ToArray();
         return Series(values);
@@ -95,13 +95,13 @@ internal static class RegressionStatisticsComparison
     private static ComparisonSeries Snapshot(CompetitorData data, int period)
     {
         var indicator = new RegressionWithFinalLine(period);
-        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
         return Series(Enumerable.Range(0, 5).Select(slot =>
         {
-            var output = run[indicator.Outputs[slot]].ToArray();
-            var presence = run[indicator.Outputs[slot + 5]].ToArray();
-            return output.Select((value, i) => presence[i] > 0 ? (double?)value : null).ToArray();
+            var output = run[indicator.Outputs[slot]];
+            var presence = run[indicator.Outputs[slot + 5]];
+            return output.WherePresent(presence);
         }).ToArray());
     }
 

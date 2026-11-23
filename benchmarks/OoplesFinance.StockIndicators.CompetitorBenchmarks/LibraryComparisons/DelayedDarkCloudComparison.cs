@@ -45,13 +45,13 @@ internal static class DelayedDarkCloudComparison
     private static ComparisonSeries Ooples(CompetitorData data, int period, int delay)
     {
         var indicator = new DelayedDarkCloudCoverPattern(period, delay);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(Math.Min(delay, data.Count), run[indicator.Outputs[0]].ToArray());
+        return new(Math.Min(delay, data.Count), run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Reference(CompetitorData data, int period, int delay)

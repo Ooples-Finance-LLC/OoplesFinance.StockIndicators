@@ -57,15 +57,15 @@ internal static class TradyAdaptiveComparison
     internal static ComparisonSeries Owned(Bar[] bars, int p, int fast, int slow)
     {
         var indicator = new SeededAdaptiveAverage(p, fast, slow, resetFlat: false);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var v = run[indicator.Average].ToArray();
-        var f = run[indicator.AverageIsDefined].ToArray();
-        return Series(v.Select((x, i) => f[i] > 0 ? (double?)x : null).ToArray());
+        var v = run[indicator.Average];
+        var f = run[indicator.AverageIsDefined];
+        return Series(v.WherePresent(f));
     }
 
     internal static decimal?[] DecimalReference(decimal?[] input, int p, int fast, int slow)

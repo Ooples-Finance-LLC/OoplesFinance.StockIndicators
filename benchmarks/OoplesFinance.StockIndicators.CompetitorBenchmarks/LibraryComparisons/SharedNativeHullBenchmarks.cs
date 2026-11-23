@@ -53,8 +53,8 @@ public class SharedNativeHullBenchmarks
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
             var hull = Create(); using var run = Build(hull, history);
-            AsinFeasibilityBenchmarks.RequireSame(exact.Values.Select((v, i) => exact.Present![i] ? v : 0).ToArray(), run[hull.Value].ToArray());
-            AsinFeasibilityBenchmarks.RequireSame(exact.Present!.Select(v => v ? 1d : 0).ToArray(), run[hull.IsDefined].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(exact.Values.Select((v, i) => exact.Present![i] ? v : 0).ToArray(), run.Held(hull.Value));
+            AsinFeasibilityBenchmarks.RequireSame(exact.Present!.Select(v => v ? 1d : 0).ToArray(), run.Held(hull.IsDefined));
         }
     }
     private static void CheckNative(object result, double[] expected, bool[] present)

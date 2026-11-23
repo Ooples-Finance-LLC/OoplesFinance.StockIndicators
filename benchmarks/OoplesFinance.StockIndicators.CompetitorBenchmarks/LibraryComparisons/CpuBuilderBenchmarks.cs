@@ -83,7 +83,7 @@ internal static class CpuBuilderWorkload
     internal static Task<IIndicatorRun> Build(CpuNativeWorkload work) => Build(work, Create(work.PairId));
     internal static Task<IIndicatorRun> Build(CpuNativeWorkload work, IIndicator indicator,
         IndicatorHistoryMode history = IndicatorHistoryMode.Full) =>
-        new StockIndicatorBuilder().ConfigureSource(Bars.From(work.Data.IndicatorBars))
+        ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(work.Data.IndicatorBars))
             .ConfigureIndicators(indicator).ConfigureHistory(history).BuildAsync();
 
     internal static void Verify(CpuNativeWorkload work, IndicatorHistoryMode history = IndicatorHistoryMode.Full)

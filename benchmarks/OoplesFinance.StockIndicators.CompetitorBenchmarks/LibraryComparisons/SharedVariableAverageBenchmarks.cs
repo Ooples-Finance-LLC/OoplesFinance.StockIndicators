@@ -30,8 +30,8 @@ public class SharedVariableAverageBenchmarks
             {
                 var column = expected.Outputs[names[slot]];
                 var present = column.Present!;
-                AsinFeasibilityBenchmarks.RequireSame(column.Values.Select((v, i) => present[i] ? v : 0).ToArray(), run[owner.Outputs[slot]].ToArray());
-                AsinFeasibilityBenchmarks.RequireSame(present.Select(p => p ? 1d : 0d).ToArray(), run[owner.Outputs[slot + names.Length]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(column.Values.Select((v, i) => present[i] ? v : 0).ToArray(), run.Held(owner.Outputs[slot]));
+                AsinFeasibilityBenchmarks.RequireSame(present.Select(p => p ? 1d : 0d).ToArray(), run.Held(owner.Outputs[slot + names.Length]));
             }
         }
     }

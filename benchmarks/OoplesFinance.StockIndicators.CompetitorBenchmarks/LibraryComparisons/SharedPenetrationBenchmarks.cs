@@ -33,7 +33,7 @@ public class SharedPenetrationBenchmarks
         {
             var indicator = PenetrationCandleComparison.Create(_name);
             using var run = Build(indicator, mode);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator.Outputs[0]].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator.Outputs[0]));
         }
     }
 

@@ -1,5 +1,7 @@
 using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 using System.Numerics;
+using OoplesFinance.StockIndicators.Builder;
+using OoplesFinance.StockIndicators.Indicators.Fast;
 using OoplesFinance.StockIndicators.Helpers;
 
 namespace OoplesFinance.StockIndicators.Indicators;
@@ -29,24 +31,45 @@ public static class ZigZagSnapshot
         internal ZigZagPointKind? PointType;
     }
 
+    // The reversal test of the calculation below on four doubles, without rounding: whether the move from
+    // b to a is at least the threshold percentage of the price, on the price's side of zero.
+    internal static bool ReversalExact(double a, double b, double price, double threshold)
+    {
+        var change = (ExactVarianceWindow.Units(a) - ExactVarianceWindow.Units(b)) * 100 * (BigInteger.One << 1074);
+        var bound = ExactVarianceWindow.Units(threshold) * ExactVarianceWindow.Units(price);
+        return price > 0 ? change >= bound : price < 0 && change <= bound;
+    }
+
+    // The first-move comparison of the calculation below, without rounding.
+    internal static int CompareFirstMoveExact(double high, double low, double firstHigh, double firstLow)
+    {
+        BigInteger top = ExactVarianceWindow.Units(firstHigh), bottom = ExactVarianceWindow.Units(firstLow);
+        var up = ExactVarianceWindow.Units(high) - bottom;
+        var down = top - ExactVarianceWindow.Units(low);
+        return (up * top).CompareTo(down * bottom) * bottom.Sign * top.Sign;
+    }
+
     /// <summary>Calculates all retrospective outputs using closes, or candle highs/lows when selected.</summary>
     /// <remarks>The first segment is absent except for its endpoint. Ratios use exact signed arithmetic; convex line interpolation rounds once.
     /// Zero reference prices cannot establish a percentage change. Recalculating with more bars can repaint the final segment.</remarks>
     public static IReadOnlyList<ZigZagValue> Calculate(
         IReadOnlyList<Bar> bars,
         double percentChange = 5,
-        bool highLow = false
+        bool highLow = false,
+        IndicatorNumerics numerics = IndicatorNumerics.Exact
     )
     {
         if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (!FrameworkCompatibility.IsFinite(percentChange) || percentChange <= 0)
             throw new ArgumentOutOfRangeException(nameof(percentChange));
-        foreach (var b in bars)
+        foreach (var b in BarRun.Of(bars))
             if (
                 !FrameworkCompatibility.IsFinite(b.Close)
                 || highLow && (!FrameworkCompatibility.IsFinite(b.High) || !FrameworkCompatibility.IsFinite(b.Low))
             )
                 throw new ArgumentOutOfRangeException(nameof(bars));
+        if (numerics == IndicatorNumerics.Fast)
+            return FastSnapshots.ZigZag(bars, percentChange, highLow);
         if (bars.Count == 0)
             return Array.Empty<ZigZagValue>();
         var result = new PendingRow[bars.Count];

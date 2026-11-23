@@ -74,8 +74,8 @@ internal static class CurvatureComparison
         var slope = new WindowLinearRegression(period, WindowRegressionOutput.Slope);
         var curvature = new WindowRegressionStatistics(period);
         curvature.Of(slope);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(curvature)
             .BuildAsync()
             .GetAwaiter()
@@ -85,9 +85,9 @@ internal static class CurvatureComparison
                 .Range(0, 5)
                 .Select(slot =>
                 {
-                    var values = run[curvature.Outputs[slot]].ToArray();
-                    var flags = run[curvature.Outputs[slot + 5]].ToArray();
-                    return values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray();
+                    var values = run[curvature.Outputs[slot]];
+                    var flags = run[curvature.Outputs[slot + 5]];
+                    return values.WherePresent(flags);
                 })
                 .ToArray()
         );

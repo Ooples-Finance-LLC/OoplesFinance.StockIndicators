@@ -35,7 +35,7 @@ public class SharedFractalBenchmarks
         {
             var root = new RangeFractalAverage(Period);
             using var run = Build(root, mode);
-            Check(expected, run[root.Value].ToArray());
+            Check(expected, run.Held(root.Value));
         }
     }
 

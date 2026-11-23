@@ -42,7 +42,7 @@ public class SharedNativeEmaBenchmarks
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
             var indicator = Create(); using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(exact, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(exact, run.Held(indicator));
         }
     }
 
