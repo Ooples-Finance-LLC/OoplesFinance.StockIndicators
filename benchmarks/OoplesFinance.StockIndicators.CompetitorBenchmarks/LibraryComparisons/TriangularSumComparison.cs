@@ -36,13 +36,13 @@ internal static class TriangularSumComparison
         IIndicator indicator = sum
             ? new RollingPriceSum(period)
             : new TriangularWindowAverage(period);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(Math.Min(period - 1, data.Count), run[indicator.Outputs[0]].ToArray());
+        return new(Math.Min(period - 1, data.Count), run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Quan(CompetitorData data, int period)

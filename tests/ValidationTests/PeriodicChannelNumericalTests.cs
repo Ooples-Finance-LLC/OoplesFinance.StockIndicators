@@ -42,7 +42,7 @@ public sealed class PeriodicChannelNumericalTests
             void Equal(ReferenceFraction expected, PeriodicChannelWindow.Number actual)
             {
                 var (numerator, denominator) = expected.Components;
-                Assert.Equal(numerator * actual.Denominator, actual.Numerator * denominator);
+                Assert.Equal(numerator * actual.Denominator.Big(), actual.Numerator.Big() * denominator);
                 Assert.Equal(System.Numerics.BigInteger.One, System.Numerics.BigInteger.GreatestCommonDivisor(System.Numerics.BigInteger.Abs(actual.Numerator), actual.Denominator));
                 Assert.Equal(expected.ToDouble(), actual.Publish());
             }

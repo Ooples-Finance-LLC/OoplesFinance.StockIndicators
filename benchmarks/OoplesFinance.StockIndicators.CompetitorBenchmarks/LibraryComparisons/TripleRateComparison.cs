@@ -141,18 +141,19 @@ internal static class TripleRateComparison
     )
     {
         var indicator = new TripleExponentialRate(p, mode, signal, suppression);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
+        // The TA-Lib pair is compared on the rate alone, and its arm builds that one series.
         var r = new double?[3][];
-        for (var j = 0; j < 3; j++)
+        for (var j = 0; j < (rateOnly ? 1 : 3); j++)
         {
-            var values = run[indicator.Outputs[j]].ToArray();
-            var flags = run[indicator.Outputs[j + 3]].ToArray();
-            r[j] = values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray();
+            var values = run[indicator.Outputs[j]];
+            var flags = run[indicator.Outputs[j + 3]];
+            r[j] = values.WherePresent(flags);
         }
         return Series(r, rateOnly);
     }

@@ -38,7 +38,7 @@ internal static class ZigZagComparison
                             (double?)r.RetraceLow
                         ))
                 ),
-            (d, _) => Series(ZigZagSnapshot.Calculate(d.IndicatorBars, percent, highLow)),
+            (d, _) => Series(ZigZagSnapshot.Calculate(d.IndicatorBars, percent, highLow, ComparisonBuilder.Numerics)),
             (d, _) => Series(Reference(d, percent, highLow, false)),
             ["ZigZag", "PointType", "RetraceHigh", "RetraceLow"],
             CompetitorReference: (d, _) => Series(Reference(d, percent, highLow, true)),

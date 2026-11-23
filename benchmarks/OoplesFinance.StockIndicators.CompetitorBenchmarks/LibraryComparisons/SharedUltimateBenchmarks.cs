@@ -66,7 +66,7 @@ public class SharedUltimateBenchmarks
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new WindowUltimateOscillator(7, 14, Period, zeroRangeContribution: IsTa), IndicatorHistoryMode.LatestOnly);
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars))
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars))
             .ConfigureIndicators(indicator).ConfigureHistory(history)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Required GPU Ultimate did not execute on the device.");

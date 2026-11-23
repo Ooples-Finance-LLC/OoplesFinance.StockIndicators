@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 //     Ooples Finance Stock Indicator Library
 //     https://ooples.github.io/OoplesFinance.StockIndicators/
 //
@@ -30,15 +31,15 @@ internal static class WilderSwingIndex
     {
         var o = ExactVarianceWindow.Units(open); var h = ExactVarianceWindow.Units(high); var l = ExactVarianceWindow.Units(low);
         var c = ExactVarianceWindow.Units(close); var po = ExactVarianceWindow.Units(prevOpen); var pc = ExactVarianceWindow.Units(prevClose);
-        var highMove = System.Numerics.BigInteger.Abs(h - pc); var lowMove = System.Numerics.BigInteger.Abs(l - pc);
-        var range = h - l; var body = System.Numerics.BigInteger.Abs(pc - po);
+        var highMove = BigInteger.Abs(h - pc); var lowMove = BigInteger.Abs(l - pc);
+        var range = h - l; var body = BigInteger.Abs(pc - po);
         var divisor = highMove >= lowMove && highMove >= range ? 4 * highMove - 2 * lowMove + body
             : lowMove >= highMove && lowMove >= range ? 4 * lowMove - 2 * highMove + body : 4 * range + body;
         var scale = limitMove > 0 ? ExactVarianceWindow.Units(limitMove) : range;
         var denominator = divisor * scale;
         if (denominator.IsZero) return default;
-        var numerator = 50 * (4 * (c - pc) + 2 * (c - o) + pc - po) * System.Numerics.BigInteger.Max(highMove, lowMove);
-        var units = RocBankValue.RoundUnits((numerator * denominator.Sign) << 1074, System.Numerics.BigInteger.Abs(denominator));
+        var numerator = 50 * (4 * (c - pc) + 2 * (c - o) + pc - po) * BigInteger.Max(highMove, lowMove);
+        var units = RocBankValue.RoundUnits((numerator * denominator.Sign) << 1074, BigInteger.Abs(denominator));
         var sum = new ExactMeanAccumulator(); sum.Add(double.Epsilon, units); return RocBankValue.Round(sum);
     }
 }

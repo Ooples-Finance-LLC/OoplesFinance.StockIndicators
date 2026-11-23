@@ -123,6 +123,7 @@ public static class IndicatorValidation
         var volumeZonePeriod = 0;
         var dayRangePeriod = 0;
         var moveTrackerOverflow = false;
+        var wholeHistory = false;
         var priceChannelPeriod = 0;
         var envelopePeriod = 0;
         IndicatorStartupPolicy[] startupPolicies = Array.Empty<IndicatorStartupPolicy>();
@@ -156,6 +157,7 @@ public static class IndicatorValidation
             rangeOverflow = probe is IBuiltInIndicator rangeIndicator && rangeIndicator.BatchName is IndicatorName.Range or IndicatorName.TrueRange;
             includeWilliamsOverflowFixtures = probe is IBuiltInIndicator williams && williams.BatchName == IndicatorName.WilliamsR;
             includeNumericalExtremes = IncludesNumericalFixtures(probe);
+            wholeHistory = probe is IHistoricalIndicator;
             inputDomain = IndicatorInputDomain.For(probe);
             warmup = probe.WarmupBars;
             startupPolicies = probe.Outputs.Select(output => probe is IIndicatorStartupContract startup
@@ -222,25 +224,21 @@ public static class IndicatorValidation
                         await CheckRejection(accepted[i], fixture.Name + "/bar-" + i).ConfigureAwait(false);
                         accepted[i] = inputDomain.ValidExample(accepted[i].Time);
                     }
-                var overflow = new List<(int Slot, int Bar, double Value)>();
-                foreach (var rule in rules.Where(rule => rule.OverflowReference is not null))
-                {
-                    var expected = rule.OverflowReference!(accepted);
-                    if (expected.Count != accepted.Length)
-                        throw new InvalidOperationException("Overflow reference output length differs.");
-                    var source = rule.OverflowSourceReference?.Invoke(accepted);
-                    if (source is not null && source.Count != accepted.Length)
-                        throw new InvalidOperationException("Overflow source reference output length differs.");
-                    for (var i = 0; i < expected.Count; i++)
-                        if (double.IsInfinity(expected[i]) || (double.IsNaN(expected[i])
-                            && source is not null && double.IsInfinity(source[i])))
-                        {
-                            overflow.Add((rule.ReferenceOutputSlot!.Value, i, expected[i]));
-                            break;
-                        }
-                }
+                var overflow = FirstOverflows(accepted);
                 var prefixLength = overflow.Count == 0 ? accepted.Length : overflow.Min(value => value.Bar);
                 var checkedBars = prefixLength == accepted.Length ? accepted : accepted.Take(prefixLength).ToArray();
+                // A whole-history indicator calculates a shortened series afresh, so the bars before an
+                // overflow are not an accepted prefix until their own reference is finite as well. The
+                // series it is cut from is the one independently proven to overflow.
+                var overflowing = accepted;
+                if (wholeHistory)
+                    for (var shorter = FirstOverflows(checkedBars); shorter.Count != 0; shorter = FirstOverflows(checkedBars))
+                    {
+                        overflowing = checkedBars;
+                        overflow = shorter;
+                        prefixLength = shorter.Min(value => value.Bar);
+                        checkedBars = checkedBars.Take(prefixLength).ToArray();
+                    }
                 var first = await Run(checkedBars).ConfigureAwait(false);
                 var second = await Run(checkedBars).ConfigureAwait(false);
                 if (first.Count != second.Count)
@@ -286,7 +284,9 @@ public static class IndicatorValidation
                 {
                     // Execute only through the first unrepresentable bar. A later exception cannot
                     // stand in for rejection at this bar, nor can an unrelated component failure.
-                    var rejectedBars = accepted.Take(prefixLength + 1).ToArray();
+                    // A whole-history indicator publishes nothing until the series ends, so it has no first
+                    // rejected bar in time: it must reject the overflowing series at a proven output.
+                    var rejectedBars = wholeHistory ? overflowing : accepted.Take(prefixLength + 1).ToArray();
                     for (var replay = 0; replay < 2; replay++)
                     {
                         try
@@ -295,8 +295,9 @@ public static class IndicatorValidation
                             Add(fixture.Name, "OutputOverflow", "Accepted an output independently proven to overflow binary64.");
                         }
                         catch (IndicatorOutputException ex) when (ex.IndicatorType == testCase.IndicatorType
-                            && ex.BarIndex == prefixLength && overflow.Any(value => value.Bar == prefixLength
-                                && value.Slot == ex.OutputSlot && value.Value.Equals(ex.Value))) // NOSONAR: S1244 - Match the actual rejected output value to its exception evidence.
+                            && (wholeHistory ? ProvenOverflow(rejectedBars, ex)
+                                : ex.BarIndex == prefixLength && overflow.Any(value => value.Bar == prefixLength
+                                    && value.Slot == ex.OutputSlot && value.Value.Equals(ex.Value)))) // NOSONAR: S1244 - Match the actual rejected output value to its exception evidence.
                         {
                             int? sign = double.IsNaN(ex.Value) ? null : Math.Sign(ex.Value);
                             if (overflowSlot.HasValue && (overflowSlot != ex.OutputSlot || overflowSign != sign))
@@ -323,6 +324,42 @@ public static class IndicatorValidation
         if (checkedValues == 0) Add("coverage", "Finite", "No output values were checked.");
         return Report();
 
+        List<(int Slot, int Bar, double Value)> FirstOverflows(Bar[] series)
+        {
+            var found = new List<(int Slot, int Bar, double Value)>();
+            foreach (var rule in rules)
+            {
+                if (rule.OverflowReference is not { } reference || rule.ReferenceOutputSlot is not { } slot) continue;
+                var expected = reference(series);
+                if (expected.Count != series.Length)
+                    throw new InvalidOperationException("Overflow reference output length differs.");
+                var source = rule.OverflowSourceReference?.Invoke(series);
+                if (source is not null && source.Count != series.Length)
+                    throw new InvalidOperationException("Overflow source reference output length differs.");
+                for (var i = 0; i < expected.Count; i++)
+                    if (double.IsInfinity(expected[i]) || (double.IsNaN(expected[i])
+                        && source is not null && double.IsInfinity(source[i])))
+                    {
+                        found.Add((slot, i, expected[i]));
+                        break;
+                    }
+            }
+            return found;
+        }
+
+        bool ProvenOverflow(Bar[] series, IndicatorOutputException rejection)
+        {
+            foreach (var rule in rules)
+            {
+                if (rule.OverflowReference is not { } reference || rule.ReferenceOutputSlot != rejection.OutputSlot) continue;
+                var expected = reference(series);
+                if (rejection.BarIndex >= 0 && rejection.BarIndex < expected.Count && double.IsInfinity(expected[rejection.BarIndex])
+                    && expected[rejection.BarIndex].Equals(rejection.Value)) // NOSONAR: S1244 - The rejected value must be the proven infinity, sign included.
+                    return true;
+            }
+            return false;
+        }
+
         IIndicator Create()
         {
             var indicator = testCase.Factory();
@@ -339,7 +376,8 @@ public static class IndicatorValidation
             if (indicator.WarmupBars != warmup) throw new InvalidOperationException("Declared warmup changed between instances.");
             var input = bars.ToArray();
             using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(input))
-                .ConfigureIndicators(indicator).BuildAsync(cancellationToken).ConfigureAwait(false);
+                .ConfigureIndicators(indicator).ConfigureNumerics(IndicatorNumerics.Exact)
+                .BuildAsync(cancellationToken).ConfigureAwait(false);
             if (!input.SequenceEqual(bars)) throw new InvalidOperationException("The calculation modified its input bars.");
             var primary = indicator is IPrimaryOutputIndicator named ? named.PrimaryOutput : indicator.Outputs[0];
             var primaryValues = run[primary].ToArray();
@@ -538,6 +576,7 @@ public static class IndicatorValidation
             GuppyCountBackLine or
             GOscillator or
             MultiVoteOnBalanceVolume
+            || probe is IHistoricalIndicator
             || CustomerStateValidation.RequiresCheck(probe) || probe is IBuiltInIndicator builtIn && builtIn.BatchName is
             IndicatorName.TrendImpulseFilter or IndicatorName.DetrendedSyntheticPrice or IndicatorName.TrendForceHistogram or IndicatorName.AwesomeOscillator or IndicatorName.AcceleratorOscillator or IndicatorName.ImpulseMovingAverageConvergenceDivergence or IndicatorName.ImpulsePercentagePriceOscillator or IndicatorName.StochasticMovingAverageConvergenceDivergenceOscillator or IndicatorName.TFSMboIndicator or IndicatorName.TFSMboPercentagePriceOscillator or IndicatorName.MovingAverageConvergenceDivergenceLeader or IndicatorName.PercentagePriceOscillatorLeader or IndicatorName.ReverseMovingAverageConvergenceDivergence or IndicatorName.DiNapoliMovingAverageConvergenceDivergence or IndicatorName.DiNapoliPercentagePriceOscillator or IndicatorName._4MovingAverageConvergenceDivergence or IndicatorName._4PercentagePriceOscillator or IndicatorName.LindaRaschke3_10Oscillator or IndicatorName.MirroredMovingAverageConvergenceDivergence or IndicatorName.MirroredPercentagePriceOscillator or IndicatorName.DidiIndex or IndicatorName.ErgodicMovingAverageConvergenceDivergence or IndicatorName.ErgodicPercentagePriceOscillator or IndicatorName.ElliottWaveOscillator or IndicatorName.VolumeMomentumOscillator or IndicatorName.VolumeOscillator or IndicatorName.NormalizedMacd or IndicatorName.MovingAverageConvergenceDivergence or IndicatorName.PercentageVolumeOscillator or IndicatorName.PercentagePriceOscillator or IndicatorName.DisparityIndex or IndicatorName.PerformanceIndex or IndicatorName.PercentageTrailingStops or IndicatorName.NickRypockTrailingReverse or IndicatorName.QmaSmaDifference or IndicatorName.MovingAverageDisplacedEnvelope or IndicatorName.ChandeForecastOscillator or IndicatorName.MeanAbsoluteErrorBands or IndicatorName.MeanAbsoluteDeviationBands or IndicatorName.InterquartileRangeBands or IndicatorName.RangeBands or IndicatorName.MidpointOscillator or IndicatorName.GuppyDistanceIndicator or IndicatorName.GuppyMultipleMovingAverage or IndicatorName.TypicalPriceVolatility or IndicatorName.DownsideDeviation or IndicatorName.CoefficientOfVariation or IndicatorName.Skewness or IndicatorName.StandardDeviationChannel or IndicatorName.RSquared or IndicatorName.LinearRegression or IndicatorName.SimpleMovingAverage or IndicatorName.ExponentialMovingAverage or IndicatorName.StandardDeviation or IndicatorName.ArnaudLegouxMovingAverage or IndicatorName.StandardError or IndicatorName.StandardErrorOfTheMean or IndicatorName.Variance or IndicatorName.SimplifiedLeastSquaresMovingAverage or IndicatorName.LeastSquaresMovingAverage or IndicatorName.LeoMovingAverage or IndicatorName.EhlersHammingMovingAverage or IndicatorName.DoubleExponentialMovingAverage or IndicatorName.TripleExponentialMovingAverage or IndicatorName.ZeroLagExponentialMovingAverage
             or IndicatorName.WellesWilderMovingAverage or IndicatorName.JsaMovingAverage or IndicatorName.VariableIndexDynamicAverage

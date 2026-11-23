@@ -88,8 +88,8 @@ public sealed class UltimatePowerWeightsNumericalTests
     {
         var tiny = Fraction.Of(double.Epsilon); Assert.Equal(double.Epsilon, tiny.Publish());
         Assert.Equal(-double.Epsilon, (-tiny).Publish());
-        Assert.Equal(new BigInteger(-1), new Fraction(-1, 3).Floor());
-        Assert.Equal(BigInteger.Zero, new Fraction(-1, 3).Ceiling());
+        Assert.Equal(new BigInteger(-1), new Fraction(-1, 3).Floor().Big());
+        Assert.Equal(BigInteger.Zero, new Fraction(-1, 3).Ceiling().Big());
         var bounds = new UltimatePowerWeights.Bounds(new Fraction(-1, 3), new Fraction(2, 3)).Round(96);
         Assert.True(bounds.Lower <= new Fraction(-1, 3) && bounds.Upper >= new Fraction(2, 3));
         var max = Fraction.Of(double.MaxValue); Assert.Equal(double.MaxValue, (max * max / max).Publish());

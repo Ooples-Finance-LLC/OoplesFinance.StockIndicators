@@ -19,10 +19,10 @@ internal static class ExtremaComparison
             ? (IIndicator)new LowestLow(period) : new HighestHigh(period), StringComparer.Ordinal);
         // TA-Lib extrema consume one scalar stream. Prepare identical OHLC bars from that
         // stream outside timing, then use the library's existing high/low window indicators.
-        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(data.CloseBars))
+        using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(data.CloseBars))
             .ConfigureIndicators(indicators.Values.ToArray()).BuildAsync().GetAwaiter().GetResult();
         return new(indicators.ToDictionary(pair => pair.Key,
-            pair => new ComparisonOutput(Math.Min(period - 1, data.Count), run[pair.Value.Outputs[0]].ToArray()), StringComparer.Ordinal));
+            pair => new ComparisonOutput(Math.Min(period - 1, data.Count), run.Held(pair.Value.Outputs[0])), StringComparer.Ordinal));
     }
 
     private static ComparisonSeries Competitor(string name, CompetitorData data, int period)

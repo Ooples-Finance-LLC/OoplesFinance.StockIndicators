@@ -32,14 +32,14 @@ internal static class DeviationRatioComparison
     internal static ComparisonSeries Owned(Bar[] bars, int p, int length, double alpha)
     {
         var indicator = new DeviationRatioAdaptiveAverage(p, length, alpha);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
         var values = run[indicator.Average].ToArray();
-        var present = run[indicator.IsDefined].ToArray();
+        var present = run.Held(indicator.IsDefined);
         for (var i = 0; i < values.Length; i++)
             if (present[i] == 0)
                 values[i] = double.NaN;

@@ -8,7 +8,7 @@ internal static class SharedBenchmarkSupport
 {
     // Keep source ownership, indicator registration, history and execution order identical.
     internal static IIndicatorRun BuildCpu(Bar[] bars, IIndicator indicator, IndicatorHistoryMode history) =>
-        new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicator)
+        ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(bars)).ConfigureIndicators(indicator)
             .ConfigureHistory(history).ConfigureExecution(IndicatorExecutionBackend.Cpu)
             .BuildAsync().GetAwaiter().GetResult();
 
@@ -55,19 +55,19 @@ internal static class SharedBenchmarkSupport
                 if (masks)
                 {
                     var present = reference.Present ?? reference.Values.Select((v, i) => i >= reference.FirstValid && !double.IsNaN(v)).ToArray();
-                    AsinFeasibilityBenchmarks.RequireSame(reference.Values.Select((v, i) => present[i] ? v : 0).ToArray(), run[owner.Outputs[slot]].ToArray());
-                    AsinFeasibilityBenchmarks.RequireSame(present.Select(p => p ? 1d : 0d).ToArray(), run[owner.Outputs[slot + names.Length]].ToArray());
+                    AsinFeasibilityBenchmarks.RequireSame(reference.Values.Select((v, i) => present[i] ? v : 0).ToArray(), run.Held(owner.Outputs[slot]));
+                    AsinFeasibilityBenchmarks.RequireSame(present.Select(p => p ? 1d : 0d).ToArray(), run.Held(owner.Outputs[slot + names.Length]));
                 }
                 else if (includeScalarStartup)
                 {
                     // Raw stochastic publishes fifty during startup and flat windows.
-                    AsinFeasibilityBenchmarks.RequireSame(reference.Values, run[owner.Outputs[slot]].ToArray());
+                    AsinFeasibilityBenchmarks.RequireSame(reference.Values, run.Held(owner.Outputs[slot]));
                 }
                 else
                 {
                     // Native scalar comparisons suppress startup; separate golden tests
                     // retain coverage of the builder's expanding-prefix values.
-                    AsinFeasibilityBenchmarks.RequireSame(reference.Values.Skip(reference.FirstValid).ToArray(), run[owner.Outputs[slot]].ToArray().Skip(reference.FirstValid).ToArray());
+                    AsinFeasibilityBenchmarks.RequireSame(reference.Values.Skip(reference.FirstValid).ToArray(), run.Held(owner.Outputs[slot]).Skip(reference.FirstValid).ToArray());
                 }
             }
         }
@@ -81,8 +81,8 @@ internal static class SharedBenchmarkSupport
             using var run = BuildCpu(bars, indicator, history);
             for (int slot = 0; slot < 2; slot++)
             {
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v ?? 0).ToArray(), run[indicator.Outputs[slot]].ToArray());
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v.HasValue ? 1d : 0).ToArray(), run[indicator.Outputs[slot + 2]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v ?? 0).ToArray(), run.Held(indicator.Outputs[slot]));
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v.HasValue ? 1d : 0).ToArray(), run.Held(indicator.Outputs[slot + 2]));
             }
         }
     }

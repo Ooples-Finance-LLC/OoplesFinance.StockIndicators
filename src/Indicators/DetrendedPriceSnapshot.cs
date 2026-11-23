@@ -21,7 +21,7 @@ public static class DetrendedPriceSnapshot
         if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (period < 1)
             throw new ArgumentOutOfRangeException(nameof(period));
-        foreach (var bar in bars)
+        foreach (var bar in BarRun.Of(bars))
             if (!FrameworkCompatibility.IsFinite(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         // Create each immutable row once, after its final presence is known.

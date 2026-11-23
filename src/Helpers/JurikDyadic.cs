@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 using System.Numerics;
 
 namespace OoplesFinance.StockIndicators.Helpers;
@@ -232,7 +233,7 @@ internal struct JurikDyadic
             Promote();
             if (_integer >= 0 && ExactPopulationDeviation.TryCompactScaledRoot(
                 (UInt128)_integer, (ulong)count, _exponent, out var result)) return result;
-            return ExactPopulationDeviation.ScaledRootRatio((System.Numerics.BigInteger)_integer, count, _exponent);
+            return ExactPopulationDeviation.ScaledRootRatio((BigInteger)_integer, count, _exponent);
         }
 #endif
         return Accumulator().SqrtMean(count);

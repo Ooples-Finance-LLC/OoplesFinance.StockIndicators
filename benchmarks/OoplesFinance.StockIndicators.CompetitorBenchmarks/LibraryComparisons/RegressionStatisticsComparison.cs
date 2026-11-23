@@ -62,8 +62,8 @@ internal static class RegressionStatisticsComparison
     private static ComparisonSeries Ooples(CompetitorData data, int period)
     {
         var indicator = new WindowRegressionStatistics(period);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -86,7 +86,7 @@ internal static class RegressionStatisticsComparison
     private static ComparisonSeries Snapshot(CompetitorData data, int period)
     {
         var indicator = new RegressionWithFinalLine(period);
-        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
         return PublishOwned(run, indicator);
     }

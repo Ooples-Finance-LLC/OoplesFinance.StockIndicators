@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 
@@ -24,7 +25,7 @@ public static class MedianAdaptiveSnapshot
             throw new ArgumentOutOfRangeException(nameof(period));
         if (!FrameworkCompatibility.IsFinite(threshold))
             throw new ArgumentOutOfRangeException(nameof(threshold));
-        foreach (var bar in bars)
+        foreach (var bar in BarRun.Of(bars))
             if (!FrameworkCompatibility.IsFinite(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var result = new double[bars.Count];

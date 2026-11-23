@@ -29,8 +29,8 @@ public class SharedSampleShapeBenchmarks
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
             var indicator = new WindowSampleShape(Period, Operation == "QuanTAlib.Kurtosis"); using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator.Value].ToArray());
-            AsinFeasibilityBenchmarks.RequireSame(expectedColumn.Present!.Select(v => v ? 1d : 0).ToArray(), run[indicator.IsDefined].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator.Value));
+            AsinFeasibilityBenchmarks.RequireSame(expectedColumn.Present!.Select(v => v ? 1d : 0).ToArray(), run.Held(indicator.IsDefined));
         }
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;

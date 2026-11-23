@@ -34,13 +34,13 @@ internal static class ExtrapolatedAverageComparison
             order,
             cascaded ? ExponentialSeedMode.Cascaded : ExponentialSeedMode.Shared
         );
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(First(period, order, cascaded, data.Count), run[indicator.Outputs[0]].ToArray());
+        return new(First(period, order, cascaded, data.Count), run.Held(indicator.Outputs[0]));
     }
 
     private static ComparisonSeries Competitor(CompetitorData data, int period, int order, bool ta)

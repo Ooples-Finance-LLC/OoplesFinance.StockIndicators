@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 
@@ -35,7 +36,7 @@ public static class KlingerVolumeSnapshot
             throw new ArgumentOutOfRangeException(nameof(slowPeriod));
         if (signalPeriod < 1)
             throw new ArgumentOutOfRangeException(nameof(signalPeriod));
-        foreach (var b in bars)
+        foreach (var b in BarRun.Of(bars))
             if (
                 !FrameworkCompatibility.IsFinite(b.High)
                 || !FrameworkCompatibility.IsFinite(b.Low)

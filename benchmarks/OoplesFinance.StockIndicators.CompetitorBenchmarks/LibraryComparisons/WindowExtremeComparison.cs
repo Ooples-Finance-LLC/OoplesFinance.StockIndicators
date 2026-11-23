@@ -40,8 +40,8 @@ internal static class WindowExtremeComparison
                         ? (IIndicator)new WindowRangeMidpoint(period, key == "MidPrice")
                         : new WindowExtremeIndex(period, key == "MaxIndex")
             );
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicators.Values.ToArray())
             .BuildAsync()
             .GetAwaiter()
@@ -51,7 +51,7 @@ internal static class WindowExtremeComparison
                 kv => kv.Key,
                 kv => new ComparisonOutput(
                     Math.Min(period - 1, data.Count),
-                    run[kv.Value.Outputs[0]].ToArray()
+                    run.Held(kv.Value.Outputs[0])
                 )
             )
         );

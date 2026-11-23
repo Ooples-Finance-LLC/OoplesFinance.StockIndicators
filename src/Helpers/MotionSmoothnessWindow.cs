@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 using System.Numerics;
 namespace OoplesFinance.StockIndicators.Helpers;
 internal sealed class MotionSmoothnessWindow

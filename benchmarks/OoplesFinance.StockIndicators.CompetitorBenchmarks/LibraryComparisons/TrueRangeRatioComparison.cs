@@ -114,8 +114,8 @@ internal static class TrueRangeRatioComparison
     internal static ComparisonSeries OwnedVortex(Bar[] bars, int p)
     {
         var indicator = new WindowVortex(p);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
@@ -123,9 +123,9 @@ internal static class TrueRangeRatioComparison
         var values = new double?[2][];
         for (var slot = 0; slot < 2; slot++)
         {
-            var response = run[indicator.Outputs[slot]].ToArray();
-            var mask = run[indicator.Outputs[slot + 2]].ToArray();
-            values[slot] = response.Select((v, i) => mask[i] > 0 ? (double?)v : null).ToArray();
+            var response = run[indicator.Outputs[slot]];
+            var mask = run[indicator.Outputs[slot + 2]];
+            values[slot] = response.WherePresent(mask);
         }
         return VortexSeries(values);
     }
@@ -133,16 +133,16 @@ internal static class TrueRangeRatioComparison
     internal static ComparisonSeries OwnedUltimate(Bar[] bars, int[] p, bool ta)
     {
         var indicator = new WindowUltimateOscillator(p[0], p[1], p[2], ta);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var response = run[indicator.Value].ToArray();
-        var mask = run[indicator.IsDefined].ToArray();
+        var response = run[indicator.Value];
+        var mask = run[indicator.IsDefined];
         return VolumePriceComparison.Mask(
-            response.Select((v, i) => mask[i] > 0 ? (double?)v : null).ToArray()
+            response.WherePresent(mask)
         );
     }
 

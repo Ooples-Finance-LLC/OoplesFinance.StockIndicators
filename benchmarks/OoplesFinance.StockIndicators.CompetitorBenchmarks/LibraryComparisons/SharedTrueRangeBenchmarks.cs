@@ -53,7 +53,7 @@ public class SharedTrueRangeBenchmarks
         foreach (bool gpu in new[] { false, true })
         {
             var indicator = new TrueRange(1); using var run = Build(indicator, history, gpu);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
         }
     }
     public readonly record struct NativeResult(double[]? Values = null, IEnumerable<TrResult>? Quotes = null, IReadOnlyList<decimal?>? Tuples = null);
@@ -107,7 +107,7 @@ public class SharedTrueRangeBenchmarks
     }
     private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator).ConfigureHistory(history)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         var run = builder.BuildAsync().GetAwaiter().GetResult();
         if (gpu && builder.LastExecution?.Backend != IndicatorExecutionBackend.Gpu)

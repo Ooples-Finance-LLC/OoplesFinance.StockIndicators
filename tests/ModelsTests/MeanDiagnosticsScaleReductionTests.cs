@@ -36,7 +36,7 @@ public sealed class MeanDiagnosticsScaleReductionTests(ITestOutputHelper output)
                 {
                     window.Add(price);
                     if (values.Count == period) values.Dequeue();
-                    values.Enqueue(ExactVarianceWindow.Units(price));
+                    values.Enqueue(ExactConversions.Units(price));
                     double mean = window.Mean;
                     var expected = Original(values, mean);
                     var actual = window.SignedRelativeError(mean);
@@ -56,7 +56,7 @@ public sealed class MeanDiagnosticsScaleReductionTests(ITestOutputHelper output)
         {
             double price = 100 + i / 8d + (i % 7) / 10d;
             window.Add(price);
-            values.Enqueue(ExactVarianceWindow.Units(price));
+            values.Enqueue(ExactConversions.Units(price));
         }
         double mean = window.Mean;
         double prior = 0, current = 0;
@@ -79,7 +79,7 @@ public sealed class MeanDiagnosticsScaleReductionTests(ITestOutputHelper output)
     // Frozen pre-change arithmetic, independent of the binary-scale reduction.
     private static (bool Defined, double Value) Original(Queue<BigInteger> values, double mean)
     {
-        var center = ExactVarianceWindow.Units(mean);
+        var center = ExactConversions.Units(mean);
         var numerator = BigInteger.Zero;
         var denominator = BigInteger.One;
         foreach (var value in values)

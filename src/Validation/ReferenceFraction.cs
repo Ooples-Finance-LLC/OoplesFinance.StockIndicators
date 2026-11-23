@@ -39,6 +39,14 @@ internal readonly struct ReferenceFraction : IComparable<ReferenceFraction>
     internal int Sign => _numerator.Sign;
     internal (BigInteger Numerator, BigInteger Denominator) Components => (_numerator, _denominator);
     internal ReferenceFraction Abs() => new(BigInteger.Abs(_numerator), _denominator, true);
+    /// <summary>The exact integer <paramref name="value"/> x 2^1074, computed from <see cref="FromDouble"/> so the
+    /// oracles never share the production fixed-point conversion they are checking.</summary>
+    internal static BigInteger Units(double value)
+    {
+        var exact = FromDouble(value);
+        return (exact._numerator << 1074) / exact._denominator;
+    }
+
     internal static ReferenceFraction FromDouble(double value)
     {
         if (double.IsNaN(value) || double.IsInfinity(value)) throw new ArgumentOutOfRangeException(nameof(value));

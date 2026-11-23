@@ -47,7 +47,7 @@ public class SharedTriangularBenchmarks
         {
             var indicator = new TriangularWindowAverage(Period);
             using var run = Build(indicator, mode, gpu);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
         }
     }
 

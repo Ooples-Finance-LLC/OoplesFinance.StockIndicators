@@ -29,11 +29,11 @@ public class SharedRegressionChannelBenchmarks
             {
                 var column = expected.Outputs[pair.OutputNames![slot]];
                 var values = column.Values.Select((v, i) => column.Present![i] ? v : 0).ToArray();
-                AsinFeasibilityBenchmarks.RequireSame(values, run[owner.Outputs[slot]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(values, run.Held(owner.Outputs[slot]));
                 if (Count > 0) AsinFeasibilityBenchmarks.RequireSame([values[^1]], [run.Latest[owner.Outputs[slot]]]);
                 if (slot == 3) continue;
                 var mask = column.Present!.Select(p => p ? 1d : 0d).ToArray();
-                AsinFeasibilityBenchmarks.RequireSame(mask, run[owner.Outputs[slot + 4]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(mask, run.Held(owner.Outputs[slot + 4]));
                 if (Count > 0) AsinFeasibilityBenchmarks.RequireSame([mask[^1]], [run.Latest[owner.Outputs[slot + 4]]]);
             }
         }

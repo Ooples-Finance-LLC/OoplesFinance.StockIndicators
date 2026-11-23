@@ -46,8 +46,8 @@ public class SharedTradyReturnBenchmarks
         foreach (var history in Enum.GetValues<IndicatorHistoryMode>())
         {
             var indicator = new RateOfChangeWithValidity(Period); using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(owned, run[indicator.Value].ToArray());
-            AsinFeasibilityBenchmarks.RequireSame(present, run[indicator.IsDefined].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(owned, run.Held(indicator.Value));
+            AsinFeasibilityBenchmarks.RequireSame(present, run.Held(indicator.IsDefined));
         }
     }
     private static void CheckNative(decimal?[] expected, IReadOnlyList<decimal?> actual)

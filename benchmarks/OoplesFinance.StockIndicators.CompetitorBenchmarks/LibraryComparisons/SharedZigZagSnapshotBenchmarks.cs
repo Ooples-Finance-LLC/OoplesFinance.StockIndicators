@@ -19,5 +19,5 @@ public class SharedZigZagSnapshotBenchmarks
             "ZigZag saved-baseline fixture", IndicatorErrorBudget.Exact);
     }
     // Original5percent/close inputs. No native setup or timing calls.
-    [Benchmark] public IReadOnlyList<ZigZagValue> Snapshot() => ZigZagSnapshot.Calculate(_bars);
+    [Benchmark] public IReadOnlyList<ZigZagValue> Snapshot() => ZigZagSnapshot.Calculate(_bars, numerics: ComparisonBuilder.Numerics);
 }

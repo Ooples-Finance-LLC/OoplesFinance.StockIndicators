@@ -38,8 +38,8 @@ public class SharedTaDirectionalBenchmarks
         {
             var indicator = new PriorSeededDirectionalMeasure(_measure, Period);
             using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected.Select(v => v ?? 0).ToArray(), run[indicator.Value].ToArray());
-            AsinFeasibilityBenchmarks.RequireSame(expected.Select(v => v.HasValue ? 1d : 0d).ToArray(), run[indicator.IsDefined].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected.Select(v => v ?? 0).ToArray(), run.Held(indicator.Value));
+            AsinFeasibilityBenchmarks.RequireSame(expected.Select(v => v.HasValue ? 1d : 0d).ToArray(), run.Held(indicator.IsDefined));
         }
     }
 
@@ -51,8 +51,8 @@ public class SharedTaDirectionalBenchmarks
     }
     [Benchmark] public IIndicatorRun BuilderFull() => Build(new PriorSeededDirectionalMeasure(_measure, Period), IndicatorHistoryMode.Full);
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(new PriorSeededDirectionalMeasure(_measure, Period), IndicatorHistoryMode.LatestOnly);
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_data.IndicatorBars)).ConfigureIndicators(indicator).ConfigureHistory(history)
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => ComparisonBuilder.Create()
+        .ConfigureSource(ComparisonBuilder.Source(_data.IndicatorBars)).ConfigureIndicators(indicator).ConfigureHistory(history)
         .ConfigureExecution(IndicatorExecutionBackend.Cpu).BuildAsync().GetAwaiter().GetResult();
 
     [Benchmark(Baseline = true)] public double[] NativeSingle() => Prefix(Count - _first);

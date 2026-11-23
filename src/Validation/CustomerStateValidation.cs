@@ -40,7 +40,8 @@ internal static class CustomerStateValidation
         var dependencies = indicator.Components.Concat(indicator.Source is null
             ? Array.Empty<IIndicator>() : new[] { indicator.Source }).ToArray();
         using var dependencyRun = dependencies.Length == 0 ? null : await new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars)).ConfigureIndicators(dependencies).BuildAsync(cancellationToken).ConfigureAwait(false);
+            .ConfigureSource(Bars.From(bars)).ConfigureIndicators(dependencies)
+            .ConfigureNumerics(IndicatorNumerics.Exact).BuildAsync(cancellationToken).ConfigureAwait(false);
         foreach (var dependency in dependencies)
             if (RequiresCheck(dependency))
                 await CheckResetAsync(dependency, bars, dependency.Outputs.Select(output =>

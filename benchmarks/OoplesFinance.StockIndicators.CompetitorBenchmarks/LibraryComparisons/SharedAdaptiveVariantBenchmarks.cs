@@ -44,8 +44,8 @@ public class SharedAdaptiveVariantBenchmarks
             {
                 var values = expected[slot].Select(v => v ?? 0).ToArray();
                 var present = expected[slot].Select(v => v.HasValue ? 1d : 0d).ToArray();
-                AsinFeasibilityBenchmarks.RequireSame(values, run[owner.Outputs[slot]].ToArray());
-                AsinFeasibilityBenchmarks.RequireSame(present, run[owner.Outputs[slot + 2]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(values, run.Held(owner.Outputs[slot]));
+                AsinFeasibilityBenchmarks.RequireSame(present, run.Held(owner.Outputs[slot + 2]));
                 if (Count > 0)
                 {
                     AsinFeasibilityBenchmarks.RequireSame([values[^1]], [run.Latest[owner.Outputs[slot]]]);

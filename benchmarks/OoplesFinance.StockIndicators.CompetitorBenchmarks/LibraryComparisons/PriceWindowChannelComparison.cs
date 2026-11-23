@@ -58,22 +58,22 @@ internal static class PriceWindowChannelComparison
             id == Ids[0] ? new PriorPriceChannel(period)
             : id == Ids[3] ? new WindowPriceRange(period)
             : new WilliamsR(period);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
         if (id != Ids[0])
-            return new(Math.Min(period - 1, data.Count), run[indicator.Outputs[0]].ToArray());
+            return new(Math.Min(period - 1, data.Count), run.Held(indicator.Outputs[0]));
         return Channel(
             Enumerable
                 .Range(0, 4)
                 .Select(slot =>
                 {
-                    var values = run[indicator.Outputs[slot]].ToArray();
-                    var presence = run[indicator.Outputs[slot + 4]].ToArray();
-                    return values.Select((v, i) => presence[i] > 0 ? (double?)v : null).ToArray();
+                    var values = run[indicator.Outputs[slot]];
+                    var presence = run[indicator.Outputs[slot + 4]];
+                    return values.WherePresent(presence);
                 })
                 .ToArray()
         );

@@ -37,8 +37,8 @@ public class SharedAsinBenchmarks
         {
             var indicator = new PriceCircularTransform(PriceCircularOperation.ArcSine);
             using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator.Value].ToArray());
-            AsinFeasibilityBenchmarks.RequireSame(Enumerable.Repeat(1d, Count).ToArray(), run[indicator.IsDefined].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator.Value));
+            AsinFeasibilityBenchmarks.RequireSame(Enumerable.Repeat(1d, Count).ToArray(), run.Held(indicator.IsDefined));
         }
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;

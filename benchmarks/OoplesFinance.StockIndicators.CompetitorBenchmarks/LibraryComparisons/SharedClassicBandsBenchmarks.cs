@@ -38,8 +38,8 @@ public class SharedClassicBandsBenchmarks
             for (int slot = 0; slot < 3; slot++)
             {
                 var column = exact.Outputs[ClassicBandsComparison.Names[slot]];
-                AsinFeasibilityBenchmarks.RequireSame(column.Values.Select((v, i) => column.Present![i] ? v : 0).ToArray(), run[indicator.Outputs[slot]].ToArray());
-                AsinFeasibilityBenchmarks.RequireSame(column.Present!.Select(v => v ? 1d : 0).ToArray(), run[indicator.Outputs[slot + 3]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(column.Values.Select((v, i) => column.Present![i] ? v : 0).ToArray(), run.Held(indicator.Outputs[slot]));
+                AsinFeasibilityBenchmarks.RequireSame(column.Present!.Select(v => v ? 1d : 0).ToArray(), run.Held(indicator.Outputs[slot + 3]));
             }
         }
     }

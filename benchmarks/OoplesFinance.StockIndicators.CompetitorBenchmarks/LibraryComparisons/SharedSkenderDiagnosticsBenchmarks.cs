@@ -71,13 +71,13 @@ public class SharedSkenderDiagnosticsBenchmarks : SharedSkenderBenchmarkBase
             {
                 var column = expected.Outputs[names[slot]];
                 var values = column.Values.Select((v, i) => column.Present![i] ? v : 0).ToArray();
-                AsinFeasibilityBenchmarks.RequireSame(values, run[owner.Outputs[slot]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(values, run.Held(owner.Outputs[slot]));
                 AsinFeasibilityBenchmarks.RequireSame([values[^1]], [run.Latest[owner.Outputs[slot]]]);
                 // BreakPoint has no presence column; envelopes share one flag.
                 int flag = flagSlots[slot];
                 if (flag < 0) continue;
                 var mask = column.Present!.Select(p => p ? 1d : 0d).ToArray();
-                AsinFeasibilityBenchmarks.RequireSame(mask, run[owner.Outputs[flag]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(mask, run.Held(owner.Outputs[flag]));
                 AsinFeasibilityBenchmarks.RequireSame([mask[^1]], [run.Latest[owner.Outputs[flag]]]);
             }
         }

@@ -96,18 +96,18 @@ public sealed class CompactHilbertPhaseTests(Xunit.Abstractions.ITestOutputHelpe
         {
             BigInteger units = sign * (((BigInteger.One << width) - 1) << shift);
             var value = JurikDyadic.FromUnits(units);
-            Assert.Equal(RocBankValue.RoundUnits(units, 1), value.RoundedUnits());
+            Assert.Equal(ExactConversions.RoundUnits(units, 1), value.RoundedUnits().Big());
             // Cancellation must retain every bit of the imported value, even
             // when the export alone would have rounded its low bits away.
             value.Subtract(JurikDyadic.FromUnits(units - 1));
-            Assert.Equal(BigInteger.One, value.RoundedUnits());
+            Assert.Equal(BigInteger.One, value.RoundedUnits().Big());
         }
-        Assert.Equal(BigInteger.Zero, JurikDyadic.FromUnits(0).RoundedUnits());
+        Assert.Equal(BigInteger.Zero, JurikDyadic.FromUnits(0).RoundedUnits().Big());
         foreach (int multiple in new[] { 1, 3, 5 })
         {
             var value = JurikDyadic.FromDouble(multiple * double.Epsilon);
             value.Multiply(.5);
-            Assert.Equal(RocBankValue.RoundUnits(multiple, 2), value.RoundedUnits());
+            Assert.Equal(ExactConversions.RoundUnits(multiple, 2), value.RoundedUnits().Big());
         }
     }
 }

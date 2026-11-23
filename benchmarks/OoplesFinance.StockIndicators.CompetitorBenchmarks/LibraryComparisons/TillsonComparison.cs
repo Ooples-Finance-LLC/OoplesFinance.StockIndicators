@@ -109,16 +109,16 @@ internal static class TillsonComparison
     )
     {
         var indicator = new TillsonAverage(p, factor, seed, suppression);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Value].ToArray();
-        var flags = run[indicator.IsDefined].ToArray();
+        var values = run[indicator.Value];
+        var flags = run[indicator.IsDefined];
         return VolumePriceComparison.Mask(
-            values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray()
+            values.WherePresent(flags)
         );
     }
 

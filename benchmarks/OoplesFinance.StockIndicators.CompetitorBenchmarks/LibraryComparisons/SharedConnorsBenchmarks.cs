@@ -50,8 +50,8 @@ public class SharedConnorsBenchmarks
             using var run = Build(indicator, history);
             for (int slot = 0; slot < 4; slot++)
             {
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v ?? 0).ToArray(), run[indicator.Outputs[slot]].ToArray());
-                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v.HasValue ? 1d : 0).ToArray(), run[indicator.Outputs[slot + 4]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v ?? 0).ToArray(), run.Held(indicator.Outputs[slot]));
+                AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v.HasValue ? 1d : 0).ToArray(), run.Held(indicator.Outputs[slot + 4]));
             }
         }
     }

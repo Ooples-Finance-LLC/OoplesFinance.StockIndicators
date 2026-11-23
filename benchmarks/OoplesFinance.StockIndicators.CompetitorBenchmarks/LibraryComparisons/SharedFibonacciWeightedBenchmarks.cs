@@ -29,7 +29,7 @@ public class SharedFibonacciWeightedBenchmarks
         {
             var indicator = new FibonacciWeightedAverage(Period);
             using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator));
         }
     }
 

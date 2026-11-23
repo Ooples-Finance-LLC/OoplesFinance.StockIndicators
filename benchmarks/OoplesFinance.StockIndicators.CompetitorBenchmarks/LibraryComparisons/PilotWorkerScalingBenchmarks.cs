@@ -60,8 +60,8 @@ public class PilotWorkerScalingBenchmarks
 
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _previousDop;
 
-    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => new StockIndicatorBuilder()
-        .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator)
+    private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history) => ComparisonBuilder.Create()
+        .ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator)
         .ConfigureExecution(IndicatorExecutionBackend.Cpu).ConfigureHistory(history).BuildAsync().GetAwaiter().GetResult();
 
     private IIndicatorRun Build(IndicatorHistoryMode history) => Build(IsSma ? new Sma(20)

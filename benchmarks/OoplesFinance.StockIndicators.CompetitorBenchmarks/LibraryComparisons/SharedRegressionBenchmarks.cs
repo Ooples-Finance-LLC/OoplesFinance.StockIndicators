@@ -32,7 +32,7 @@ public class SharedRegressionBenchmarks
         {
             var indicator = Create();
             using var run = Build(indicator, history);
-            var actual = run[indicator].ToArray();
+            var actual = run.Held(indicator);
             if (actual.Length != expected.Length) throw new InvalidOperationException("Regression output length mismatch.");
             AsinFeasibilityBenchmarks.RequireSame(expected, actual);
         }
@@ -87,8 +87,8 @@ public class SharedRegressionBenchmarks
     private IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode) => Build(indicator, mode, false, false);
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode mode, bool reference = false, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicator).ConfigureHistory(mode)
+        var builder = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicator).ConfigureHistory(mode)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         if (reference) builder.ConfigureBehavior(_ => { });
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Required GPU regression did not execute on the device.");

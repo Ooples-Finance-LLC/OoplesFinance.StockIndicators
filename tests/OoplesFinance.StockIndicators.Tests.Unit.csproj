@@ -25,6 +25,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Its own project (net8.0/net48); it links ModelsTests/ExactIntegerTests.cs. -->
+    <Compile Remove="ExactIntegerFrameworks/**" />
+    <None Remove="ExactIntegerFrameworks/**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CsvHelper" Version="34.1.0" />
     <PackageReference Include="FluentAssertions" Version="8.11.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
@@ -90,5 +96,11 @@
     <Compile Include="../benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PreservedKaufmanStressBatch.cs" Link="ModelsTests/PreservedKaufmanStressBatch.cs" />
     <Compile Include="../benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PreservedRsmkBatch.cs" Link="ModelsTests/PreservedRsmkBatch.cs" />
     <Compile Include="../benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PreservedSectorRotationBatch.cs" Link="ModelsTests/PreservedSectorRotationBatch.cs" />
+  </ItemGroup>
+
+  <!-- These check the exact routes' contracts - bit-for-bit values, owned history, validation order - so a
+       builder here starts in the exact mode. A test of the fast mode asks for it by name. -->
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="OoplesFinance.StockIndicators.DefaultNumerics" Value="Exact" />
   </ItemGroup>
 </Project>

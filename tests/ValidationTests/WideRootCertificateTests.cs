@@ -56,10 +56,12 @@ public sealed class WideRootCertificateTests
         var numerator = new BigInteger(ulong.MaxValue - 13);
         var denominator = new BigInteger((1UL << 63) + 159);
         var expected = Expected(numerator, denominator, 0);
-        for (var i = 0; i < 100; i++) ExactPopulationDeviation.ScaledRootRatio(numerator, denominator, 0);
+        // Converted once: the measured loop must hold only the library's own work.
+        ExactInteger exactNumerator = numerator, exactDenominator = denominator;
+        for (var i = 0; i < 100; i++) ExactPopulationDeviation.ScaledRootRatio(exactNumerator, exactDenominator, 0);
         var before = GC.GetAllocatedBytesForCurrentThread();
         double difference = 0;
-        for (var i = 0; i < 1000; i++) difference += ExactPopulationDeviation.ScaledRootRatio(numerator, denominator, 0) - expected;
+        for (var i = 0; i < 1000; i++) difference += ExactPopulationDeviation.ScaledRootRatio(exactNumerator, exactDenominator, 0) - expected;
         Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
         Assert.Equal(0, difference);
     }

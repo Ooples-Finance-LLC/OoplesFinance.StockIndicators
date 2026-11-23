@@ -87,8 +87,8 @@ internal static class ClassicStochasticComparison
     )
     {
         var owner = new ClassicStochastic(window, k, d, km, dm, first, suppression);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(owner)
             .BuildAsync()
             .GetAwaiter()
@@ -98,9 +98,9 @@ internal static class ClassicStochasticComparison
                 .Range(0, 2)
                 .Select(j =>
                 {
-                    var values = run[owner.Outputs[j]].ToArray();
-                    var flags = run[owner.Outputs[j + 2]].ToArray();
-                    return values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray();
+                    var values = run[owner.Outputs[j]];
+                    var flags = run[owner.Outputs[j + 2]];
+                    return values.WherePresent(flags);
                 })
                 .ToArray()
         );

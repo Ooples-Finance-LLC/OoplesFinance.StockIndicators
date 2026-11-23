@@ -80,6 +80,7 @@
          it public. Keeps it out of the library's public API. -->
     <InternalsVisibleTo Include="Ooples.Indicators" />
     <InternalsVisibleTo Include="OoplesFinance.StockIndicators.Tests.Unit" />
+    <InternalsVisibleTo Include="OoplesFinance.StockIndicators.CompetitorBenchmarks" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net461'">

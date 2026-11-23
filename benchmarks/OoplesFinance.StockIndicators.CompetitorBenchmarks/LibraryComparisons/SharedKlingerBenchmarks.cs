@@ -49,8 +49,8 @@ public class SharedKlingerBenchmarks
             using var run = Build(indicator, history);
             for (int slot = 0; slot < 2; slot++)
             {
-                var values = run[indicator.Outputs[slot]].ToArray();
-                var masks = run[indicator.Outputs[slot + 2]].ToArray();
+                var values = run.Held(indicator.Outputs[slot]);
+                var masks = run.Held(indicator.Outputs[slot + 2]);
                 AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v ?? 0).ToArray(), values);
                 AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v.HasValue ? 1d : 0).ToArray(), masks);
             }

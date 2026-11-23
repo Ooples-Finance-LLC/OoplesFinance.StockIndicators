@@ -68,8 +68,8 @@ public class SharedSeededAtrBenchmarks
                 {
                     var output = expected.Outputs[names[slot]];
                     var present = Enumerable.Range(0, Count).Select(i => output.Present?[i] ?? i >= output.FirstValid).ToArray();
-                    AsinFeasibilityBenchmarks.RequireSame(output.Values.Select((v, i) => present[i] ? v : 0).ToArray(), run[indicator.Outputs[slot]].ToArray());
-                    if (Details) AsinFeasibilityBenchmarks.RequireSame(present.Select(v => v ? 1d : 0d).ToArray(), run[indicator.Outputs[slot + 3]].ToArray());
+                    AsinFeasibilityBenchmarks.RequireSame(output.Values.Select((v, i) => present[i] ? v : 0).ToArray(), run.Held(indicator.Outputs[slot]));
+                    if (Details) AsinFeasibilityBenchmarks.RequireSame(present.Select(v => v ? 1d : 0d).ToArray(), run.Held(indicator.Outputs[slot + 3]));
                 }
             }
             Check(NativeSingle(), native);
@@ -93,8 +93,8 @@ public class SharedSeededAtrBenchmarks
     [Benchmark] public IIndicatorRun BuilderLatestOnly() => Build(Create(), IndicatorHistoryMode.LatestOnly);
     internal IIndicatorRun Build(IIndicator indicator, IndicatorHistoryMode history, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(_data.IndicatorBars)).ConfigureIndicators(indicator).ConfigureHistory(history)
+        var builder = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(_data.IndicatorBars)).ConfigureIndicators(indicator).ConfigureHistory(history)
             .ConfigureExecution(gpu ? IndicatorExecutionBackend.Gpu : IndicatorExecutionBackend.Cpu);
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Required GPU seeded ATR did not execute on the device.");
     }

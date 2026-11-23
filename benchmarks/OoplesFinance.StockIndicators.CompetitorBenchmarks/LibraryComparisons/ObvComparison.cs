@@ -66,17 +66,17 @@ internal static class ObvComparison
     )
     {
         var indicator = new SeededOnBalanceVolume(seed, averagePeriod);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Value].ToArray();
+        var values = run.Held(indicator.Value);
         if (!skender)
             return new(0, values);
         var average = run[indicator.Average].ToArray();
-        var present = run[indicator.AverageIsDefined].ToArray().Select(v => v > 0).ToArray();
+        var present = run.Held(indicator.AverageIsDefined).Select(v => v > 0).ToArray();
         for (var i = 0; i < data.Count; i++)
             if (!present[i])
                 average[i] = double.NaN;

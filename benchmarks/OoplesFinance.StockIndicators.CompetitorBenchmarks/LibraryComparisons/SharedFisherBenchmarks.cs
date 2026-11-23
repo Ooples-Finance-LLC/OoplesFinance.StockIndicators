@@ -46,8 +46,8 @@ public class SharedFisherBenchmarks
             using var run = Build(indicator, history);
             for (int slot = 0; slot < 2; slot++)
             {
-                var values = run[indicator.Outputs[slot]].ToArray();
-                var present = run[indicator.Outputs[slot + 2]].ToArray();
+                var values = run.Held(indicator.Outputs[slot]);
+                var present = run.Held(indicator.Outputs[slot + 2]);
                 if (values.Length != Count || present.Length != Count) throw new InvalidOperationException("Builder Fisher length differs.");
                 AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v ?? 0).ToArray(), values);
                 AsinFeasibilityBenchmarks.RequireSame(expected[slot].Select(v => v.HasValue ? 1d : 0).ToArray(), present);

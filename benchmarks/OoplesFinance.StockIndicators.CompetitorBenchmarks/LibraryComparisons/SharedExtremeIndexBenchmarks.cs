@@ -43,7 +43,7 @@ public class SharedExtremeIndexBenchmarks
         {
             using var run = Build(indicators, history, reference);
             for (int output = 0; output < indicators.Length; output++)
-                AsinFeasibilityBenchmarks.RequireSame(expected[output], run[indicators[output]].ToArray());
+                AsinFeasibilityBenchmarks.RequireSame(expected[output], run.Held(indicators[output]));
         }
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism = _priorDop;
@@ -91,7 +91,7 @@ public class SharedExtremeIndexBenchmarks
         ? [new(Period), new(Period, true)] : [new(Period, Operation == "MaxIndex")];
     internal IIndicatorRun Build(WindowExtremeIndex[] indicators, IndicatorHistoryMode history, bool reference = false, bool gpu = false)
     {
-        var builder = new StockIndicatorBuilder().ConfigureSource(Bars.From(_bars)).ConfigureIndicators(indicators).ConfigureHistory(history);
+        var builder = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(_bars)).ConfigureIndicators(indicators).ConfigureHistory(history);
         if (reference) builder.ConfigureBehavior(_ => { });
         if (gpu) builder.ConfigureExecution(IndicatorExecutionBackend.Gpu);
         return SharedBenchmarkSupport.BuildChecked(builder, gpu, "Index benchmark did not execute on the GPU.");

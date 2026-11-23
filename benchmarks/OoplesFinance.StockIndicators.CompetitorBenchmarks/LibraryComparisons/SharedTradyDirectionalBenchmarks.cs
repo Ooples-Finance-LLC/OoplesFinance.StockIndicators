@@ -33,8 +33,8 @@ public class SharedTradyDirectionalBenchmarks
         {
             var owner=Create();
             using var run=Build(owner,mode);
-            AsinFeasibilityBenchmarks.RequireSame(expected.Select(v => v??0).ToArray(),run[owner.Value].ToArray());
-            AsinFeasibilityBenchmarks.RequireSame(expected.Select(v => v.HasValue ? 1d : 0d).ToArray(),run[owner.IsDefined].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected.Select(v => v??0).ToArray(),run.Held(owner.Value));
+            AsinFeasibilityBenchmarks.RequireSame(expected.Select(v => v.HasValue ? 1d : 0d).ToArray(),run.Held(owner.IsDefined));
         }
     }
     [GlobalCleanup] public void Cleanup() => CpuParallelSettings.MaxDegreeOfParallelism=_priorDop;

@@ -36,9 +36,9 @@ internal static class SchaffCycleComparison
     internal static double?[] Owned(Bar[] bars, int cycle, int fast, int slow)
     {
         var indicator = new SingleStochasticCycle(cycle, fast, slow);
-        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(indicator)
+        using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(bars)).ConfigureIndicators(indicator)
             .BuildAsync().GetAwaiter().GetResult();
-        var values = run[indicator.Value].ToArray(); var present = run[indicator.IsDefined].ToArray();
+        var values = run.Held(indicator.Value); var present = run.Held(indicator.IsDefined);
         return values.Select((value, i) => present[i] == 1 ? (double?)value : null).ToArray(); // NOSONAR: S1244 - Presence columns are discrete 0/1 flags, not approximate measurements.
     }
 

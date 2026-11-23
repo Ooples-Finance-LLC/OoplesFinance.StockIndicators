@@ -36,8 +36,8 @@ public class SharedDeviationRatioBenchmarks
         {
             var indicator = Create();
             using var run = Build(indicator, history);
-            AsinFeasibilityBenchmarks.RequireSame(expected, run[indicator.Average].ToArray());
-            AsinFeasibilityBenchmarks.RequireSame(Enumerable.Repeat(1d, Count).ToArray(), run[indicator.IsDefined].ToArray());
+            AsinFeasibilityBenchmarks.RequireSame(expected, run.Held(indicator.Average));
+            AsinFeasibilityBenchmarks.RequireSame(Enumerable.Repeat(1d, Count).ToArray(), run.Held(indicator.IsDefined));
         }
     }
     private static DeviationRatioAdaptiveAverage Create() => new(Period, Length, Alpha);

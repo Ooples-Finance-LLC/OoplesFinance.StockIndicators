@@ -33,13 +33,13 @@ internal static class ZeroSeedLaguerreComparison
     private static ComparisonSeries Owned(CompetitorData data, double gamma)
     {
         var indicator = new ZeroSeedLaguerreFilter(gamma);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(0, run[indicator.Outputs[0]].ToArray());
+        return new(0, run.Held(indicator.Outputs[0]));
     }
 
     internal static ComparisonSeries Reference(CompetitorData data, double gamma, bool native) =>

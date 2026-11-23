@@ -43,13 +43,13 @@ internal static class PriceCandleComparison
     private static ComparisonSeries Ooples(CompetitorData data, bool marubozu, double threshold)
     {
         var indicator = new PriceCandlePattern(Kind(marubozu), threshold);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = indicator.Outputs.Select(output => run[output].ToArray()).ToArray();
+        var values = indicator.Outputs.Select(output => run.Held(output)).ToArray();
         var result = new Dictionary<string, ComparisonOutput>(StringComparer.Ordinal);
         for (var slot = 0; slot < Outputs.Length; slot++)
         {

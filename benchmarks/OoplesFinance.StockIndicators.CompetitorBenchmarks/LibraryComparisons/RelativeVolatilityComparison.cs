@@ -31,9 +31,9 @@ internal static class RelativeVolatilityComparison
     internal static double[] Owned(Bar[] bars, int period)
     {
         var indicator = new RelativeVolatilityStrength(period);
-        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
-        return run[indicator].ToArray();
+        return run.Held(indicator);
     }
 
     internal static double[] Reference(double[] prices, int period)

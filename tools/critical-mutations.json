@@ -699,8 +699,8 @@
     "id": "power-weight-rounded-to-double",
     "module": "power-mean-numerics",
     "file": "src/Helpers/ExactMeanAccumulator.cs",
-    "scope": "internal void Add(double value, BigInteger weight)",
-    "before": "AddLarge(new BigInteger(term._small) * weight, term._scale);",
+    "scope": "internal void Add(double value, Big weight)",
+    "before": "AddLarge(new Big(term._small) * weight, term._scale);",
     "after": "AddProduct(value, (double)weight);",
     "filter": "FullyQualifiedName~VeryLargePeriodsKeepExactIntegerWeights"
   },
@@ -11345,7 +11345,7 @@
     "module": "numerical",
     "file": "src/Helpers/HendersonWindow.cs",
     "before": "denominator.Add(1, _weights[lag]);",
-    "after": "denominator.Add(1, System.Numerics.BigInteger.Abs(_weights[lag]));",
+    "after": "denominator.Add(1, BigInteger.Abs(_weights[lag]));",
     "filter": "FullyQualifiedName~HendersonNumericalTests.FullConstantWindowsRetainUnitGainDespiteSignedWeights"
   },
   {
@@ -13259,7 +13259,7 @@
     "module": "numerical",
     "file": "src/Helpers/TillsonIe2Window.cs",
     "before": "+ ExactVarianceWindow.Units(mean)",
-    "after": "+ System.Numerics.BigInteger.Zero",
+    "after": "+ BigInteger.Zero",
     "filter": "FullyQualifiedName~TillsonIe2NumericalTests.RegressionChangesPreservePreviewResetAndCancellation"
   },
   {
@@ -14178,8 +14178,8 @@
     "id": "parametric-corrective-wrong-weight-origin",
     "module": "numerical",
     "file": "src/Helpers/ParametricCorrectiveWindow.cs",
-    "before": "new System.Numerics.BigInteger(_index) + 1",
-    "after": "new System.Numerics.BigInteger(_index) + 2",
+    "before": "new BigInteger(_index) + 1",
+    "after": "new BigInteger(_index) + 2",
     "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
   },
   {
@@ -17330,7 +17330,7 @@
     "id": "swing-signed-high-move",
     "module": "numerical",
     "file": "src/Helpers/WilderSwingIndex.cs",
-    "before": "System.Numerics.BigInteger.Abs(h - pc)",
+    "before": "BigInteger.Abs(h - pc)",
     "after": "h - pc",
     "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs"
   },
@@ -17378,8 +17378,8 @@
     "id": "swing-wrong-k",
     "module": "numerical",
     "file": "src/Helpers/WilderSwingIndex.cs",
-    "before": "System.Numerics.BigInteger.Max(highMove, lowMove)",
-    "after": "System.Numerics.BigInteger.Min(highMove, lowMove)",
+    "before": "BigInteger.Max(highMove, lowMove)",
+    "after": "BigInteger.Min(highMove, lowMove)",
     "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs"
   },
   {
@@ -44411,8 +44411,8 @@
     "module": "numerical",
     "file": "src/Streaming/StatefulIndicators.Batch9.cs",
     "scope": "internal sealed class EhlersSuperSmootherFilterEngine",
-    "before": "System.Numerics.BigInteger.One << 2149",
-    "after": "System.Numerics.BigInteger.One << 2148",
+    "before": "BigInteger.One << 2149",
+    "after": "BigInteger.One << 2148",
     "filter": "FullyQualifiedName~SuperSmootherNumericalTests.FeedbackRetainsWideAndSubnormalCancellation"
   },
   {

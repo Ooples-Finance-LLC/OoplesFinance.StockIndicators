@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 using System.Numerics;
 using OoplesFinance.StockIndicators.Helpers;
 
@@ -17,7 +18,7 @@ public static class RelativeVolatilitySnapshot
         if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (period < 2)
             throw new ArgumentOutOfRangeException(nameof(period));
-        foreach (var bar in bars)
+        foreach (var bar in BarRun.Of(bars))
             if (!FrameworkCompatibility.IsFinite(bar.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var up = new Leg(period);

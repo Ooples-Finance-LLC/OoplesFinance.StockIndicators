@@ -55,13 +55,13 @@ internal static class HoltWinterComparison
             factors is null ? new HoltWinterForecast(period)
             : derived ? new HoltWinterForecast(factors[0], factors[1], factors[2])
             : new HoltWinterForecast(period, factors[0], factors[1], factors[2]);
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(data.IndicatorBars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(data.IndicatorBars))
             .ConfigureIndicators(indicator)
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        return new(0, run[indicator.Outputs[0]].ToArray());
+        return new(0, run.Held(indicator.Outputs[0]));
     }
 
     internal static double[] Reference(double[] prices, int period, double[]? factors, bool native)

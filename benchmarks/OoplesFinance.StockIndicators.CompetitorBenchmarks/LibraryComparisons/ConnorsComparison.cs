@@ -49,14 +49,14 @@ internal static class ConnorsComparison
     internal static ComparisonSeries Owned(Bar[] bars, int rsi, int streak, int rank)
     {
         var indicator = new ConnorsStrength(rsi, streak, rank);
-        using var run = new StockIndicatorBuilder().ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create().ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(indicator).BuildAsync().GetAwaiter().GetResult();
         var columns = new double?[4][];
         for (int slot = 0; slot < 4; slot++)
         {
-            var values = run[indicator.Outputs[slot]].ToArray();
-            var present = run[indicator.Outputs[slot + 4]].ToArray();
-            columns[slot] = values.Select((value, i) => present[i] > 0 ? (double?)value : null).ToArray();
+            var values = run[indicator.Outputs[slot]];
+            var present = run[indicator.Outputs[slot + 4]];
+            columns[slot] = values.WherePresent(present);
         }
         return Series(columns);
     }

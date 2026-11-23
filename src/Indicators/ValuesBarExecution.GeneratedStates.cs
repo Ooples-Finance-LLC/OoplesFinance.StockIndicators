@@ -1,3 +1,4 @@
+using BigInteger = OoplesFinance.StockIndicators.Helpers.ExactInteger;
 #if !NETFRAMEWORK
 using OoplesFinance.StockIndicators.Helpers;
 
@@ -5558,14 +5559,14 @@ internal static partial class ValuesBarExecution
     {
         private readonly int _length;
         private readonly PooledRingBuffer<double> _values;
-        private readonly System.Numerics.BigInteger _squareWeight, _cubeWeight;
+        private readonly BigInteger _squareWeight, _cubeWeight;
         private readonly ExactMeanAccumulator _denominator;
         private ExactMeanAccumulator _sum, _linear, _square, _cube;
         public GeneratedCubicWeightedState(int length, int count)
         {
             _length = Math.Max(1, length);
             _values = new(Math.Min(_length, Math.Max(1, count)));
-            var n = new System.Numerics.BigInteger(_length);
+            var n = new BigInteger(_length);
             _squareWeight = n * n; _cubeWeight = _squareWeight * n;
             var triangular = n * (n + 1) / 2;
             var denominator = new ExactMeanAccumulator(); denominator.Add(1, triangular * triangular);
@@ -5836,7 +5837,7 @@ internal static partial class ValuesBarExecution
     private sealed class GeneratedEndPointState(int length, int count) : IIndicatorState, IDisposable
     {
         private readonly PooledRingBuffer<double> _history = new(Math.Min(length, Math.Max(1, count)));
-        private readonly System.Numerics.BigInteger _divisor = new System.Numerics.BigInteger(length) * (length - 7L) / 2;
+        private readonly BigInteger _divisor = new BigInteger(length) * (length - 7L) / 2;
         private ExactMeanAccumulator _sum, _weighted;
         public void Reset() { _history.Clear(); _sum = _weighted = default; }
         public double Update(in Bar bar)
@@ -6133,15 +6134,15 @@ internal static partial class ValuesBarExecution
 
     private sealed class GeneratedHawkeyeState : IMultiOutputState, IDisposable
     {
-        private static readonly System.Numerics.BigInteger Unit = System.Numerics.BigInteger.One << 1074;
-        private readonly System.Numerics.BigInteger _denominator;
+        private static readonly BigInteger Unit = BigInteger.One << 1074;
+        private readonly BigInteger _denominator;
         private readonly int _sign;
-        private System.Numerics.BigInteger _previousHigh, _previousLow, _previousMidpoint;
+        private BigInteger _previousHigh, _previousLow, _previousMidpoint;
         public GeneratedHawkeyeState(double divisor)
         {
             var units = ExactVarianceWindow.Units(divisor);
             _sign = units.Sign;
-            _denominator = units.IsZero ? System.Numerics.BigInteger.One : System.Numerics.BigInteger.Abs(units);
+            _denominator = units.IsZero ? BigInteger.One : BigInteger.Abs(units);
         }
         public void Reset() => _previousHigh = _previousLow = _previousMidpoint = default;
         public void Update(in Bar bar, Span<double> outputs)
@@ -7265,14 +7266,14 @@ internal static partial class ValuesBarExecution
     {
         private readonly int _length;
         private readonly PooledRingBuffer<double> _history;
-        private readonly System.Numerics.BigInteger _squareWeight;
+        private readonly BigInteger _squareWeight;
         private readonly ExactMeanAccumulator _denominator;
         private ExactMeanAccumulator _sum, _linear, _quadratic;
         public GeneratedSquareWeightState(int length, int count)
         {
             _length = Math.Max(1, length);
             _history = new(Math.Min(_length, Math.Max(1, count)));
-            var n = new System.Numerics.BigInteger(_length); _squareWeight = n * n;
+            var n = new BigInteger(_length); _squareWeight = n * n;
             var denominator = new ExactMeanAccumulator(); denominator.Add(1, n * (n + 1) * (2 * n + 1) / 6);
             _denominator = denominator;
         }
@@ -7609,13 +7610,13 @@ internal static partial class ValuesBarExecution
     {
         private readonly int _length;
         private readonly PooledRingBuffer<double> _history;
-        private readonly System.Numerics.BigInteger _divisor;
+        private readonly BigInteger _divisor;
         private readonly ExactMeanAccumulator _denominator;
         private ExactMeanAccumulator _sum, _aged;
         internal GeneratedSharpRollingState(int length, int count)
         {
             _length = Math.Max(1, length); _history = new(Math.Min(_length, Math.Max(1, count)));
-            _divisor = new System.Numerics.BigInteger(_length) * (_length + 1L);
+            _divisor = new BigInteger(_length) * (_length + 1L);
             var denominator = new ExactMeanAccumulator(); denominator.Add(1, _divisor); _denominator = denominator;
         }
         public void Reset() { _history.Clear(); _sum = _aged = default; }
@@ -7710,9 +7711,9 @@ internal static partial class ValuesBarExecution
         {
             length = Math.Max(2, length);
             _weights = new double[Math.Min(length, Math.Max(1, count))];
-            var d = new System.Numerics.BigInteger(length - 1);
+            var d = new BigInteger(length - 1);
             var cube = d * d * d; var fourth = cube * d; var linearStep = 2 * cube;
-            System.Numerics.BigInteger power = 0, first = 1, second = 14, third = 36, linear = 0;
+            BigInteger power = 0, first = 1, second = 14, third = 36, linear = 0;
             var mass = new ExactMeanAccumulator();
             for (var j = 0; j < length; j++)
             {
@@ -7772,7 +7773,7 @@ internal static partial class ValuesBarExecution
     {
         private readonly int _length;
         private readonly PooledRingBuffer<(double X, double Y)> _history;
-        private System.Numerics.BigInteger _x, _y, _xx, _yy, _xy;
+        private BigInteger _x, _y, _xx, _yy, _xy;
         private double _previous;
         internal GeneratedSurfaceRoughnessState(int length, int count)
         { _length = Math.Max(1, length); _history = new(Math.Min(_length, Math.Max(1, count))); }
@@ -7784,7 +7785,7 @@ internal static partial class ValuesBarExecution
             var expiredX = ExactVarianceWindow.Units(oldest.X); var expiredY = ExactVarianceWindow.Units(oldest.Y);
             var sx = _x + x - expiredX; var sy = _y + y - expiredY;
             var sxx = _xx + x * x - expiredX * expiredX; var syy = _yy + y * y - expiredY * expiredY; var sxy = _xy + x * y - expiredX * expiredY;
-            var n = new System.Numerics.BigInteger(full ? _history.Count : _history.Count + 1); var covariance = n * sxy - sx * sy;
+            var n = new BigInteger(full ? _history.Count : _history.Count + 1); var covariance = n * sxy - sx * sy;
             var xSpread = n * sxx - sx * sx; var ySpread = n * syy - sy * sy;
             var correlation = xSpread.IsZero || ySpread.IsZero ? 0 : covariance.Sign * ExactPopulationDeviation.RootRatio((covariance * covariance) << 2148, xSpread * ySpread);
             var result = 1 - ((correlation + 1) / 2);
@@ -8252,19 +8253,19 @@ internal static partial class ValuesBarExecution
     {
         private readonly struct Fraction
         {
-            internal readonly System.Numerics.BigInteger N;
-            private readonly System.Numerics.BigInteger _d;
-            internal System.Numerics.BigInteger D => _d.IsZero ? System.Numerics.BigInteger.One : _d;
-            internal Fraction(System.Numerics.BigInteger numerator, System.Numerics.BigInteger denominator)
+            internal readonly BigInteger N;
+            private readonly BigInteger _d;
+            internal BigInteger D => _d.IsZero ? BigInteger.One : _d;
+            internal Fraction(BigInteger numerator, BigInteger denominator)
             {
                 if (denominator.IsZero) throw new DivideByZeroException();
                 if (denominator.Sign < 0) { numerator = -numerator; denominator = -denominator; }
-                var gcd = System.Numerics.BigInteger.GreatestCommonDivisor(System.Numerics.BigInteger.Abs(numerator), denominator);
+                var gcd = BigInteger.GreatestCommonDivisor(BigInteger.Abs(numerator), denominator);
                 N = numerator / gcd; _d = denominator / gcd;
             }
             public static Fraction operator +(Fraction a, Fraction b)
             {
-                var common = System.Numerics.BigInteger.GreatestCommonDivisor(a.D, b.D);
+                var common = BigInteger.GreatestCommonDivisor(a.D, b.D);
                 return new Fraction(a.N * (b.D / common) + b.N * (a.D / common), a.D * (b.D / common));
             }
             public static Fraction operator -(Fraction a, Fraction b) => a + new Fraction(-b.N, b.D);
@@ -8286,11 +8287,11 @@ internal static partial class ValuesBarExecution
             if (MathHelper.IsValueNullOrInfinity(benchmark)) throw new ArgumentOutOfRangeException(nameof(benchmark));
             var target = Math.Pow(1 + benchmark, length / 360d) - 1;
             if (MathHelper.IsValueNullOrInfinity(target)) throw new ArgumentOutOfRangeException(nameof(benchmark), "The period benchmark must be finite and real.");
-            _benchmark = new Fraction(ExactVarianceWindow.Units(target), System.Numerics.BigInteger.One << 1074);
+            _benchmark = new Fraction(ExactVarianceWindow.Units(target), BigInteger.One << 1074);
             if (beta.HasValue)
             {
                 if (MathHelper.IsValueNullOrInfinity(beta.Value)) throw new ArgumentOutOfRangeException(nameof(beta));
-                _beta = new Fraction(ExactVarianceWindow.Units(beta.Value), System.Numerics.BigInteger.One << 1074);
+                _beta = new Fraction(ExactVarianceWindow.Units(beta.Value), BigInteger.One << 1074);
             }
             _potential = potential; var capacity = Math.Min(length, Math.Max(1, count)); _prices = new(capacity); _returns = new(capacity);
             _padding = Contributions(default); Reset();
@@ -8317,7 +8318,7 @@ internal static partial class ValuesBarExecution
             {
                 var count = Math.Min(_returns.Count + 1, _length);
                 var excess = new Fraction(up.N, up.D * count) - _benchmark;
-                result = beta.N.IsZero ? 0 : ExactMeanAccumulator.UnitRatio((excess.N * beta.D * beta.N.Sign) << 1074, excess.D * System.Numerics.BigInteger.Abs(beta.N));
+                result = beta.N.IsZero ? 0 : ExactMeanAccumulator.UnitRatio((excess.N * beta.D * beta.N.Sign) << 1074, excess.D * BigInteger.Abs(beta.N));
             }
             if (commit) { _prices.TryAdd(price, out _); _returns.TryAdd(current, out _); _up = up; _down = down; }
             return result;
@@ -8551,7 +8552,7 @@ internal static partial class ValuesBarExecution
         private readonly MacZWindow.Number _sensitivity;
         private readonly int _length;
         private readonly Queue<double> _history = new();
-        private System.Numerics.BigInteger _sum, _squares;
+        private BigInteger _sum, _squares;
         private MacZWindow.Number _p1, _p2, _p3;
         public GeneratedWaddahState(int fast, int slow, double sensitivity)
         {
@@ -8569,8 +8570,8 @@ internal static partial class ValuesBarExecution
             var t2 = (_lagFast.Next(lagDelta, true) - _lagSlow.Next(lagDelta, true)) * _sensitivity;
             var units = ExactVarianceWindow.Units(price); var sum = _sum + units; var squares = _squares + units * units;
             if (_history.Count == _length) { var old = ExactVarianceWindow.Units(_history.Peek()); sum -= old; squares -= old * old; }
-            var moment = _history.Count < _length - 1 ? System.Numerics.BigInteger.Zero : _length * squares - sum * sum;
-            var denominator = (System.Numerics.BigInteger)_length * _length;
+            var moment = _history.Count < _length - 1 ? BigInteger.Zero : _length * squares - sum * sum;
+            var denominator = (BigInteger)_length * _length;
             var width = ExactPopulationDeviation.RootRatio(16 * moment, denominator);
             var up = t1.Sign > 0 ? t1 : default; var down = t1.Sign < 0 ? t1.Times(-1) : default;
             if (_history.Count == _length) _history.Dequeue();

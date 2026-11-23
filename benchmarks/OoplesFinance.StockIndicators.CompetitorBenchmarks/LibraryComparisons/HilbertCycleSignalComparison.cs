@@ -73,8 +73,8 @@ internal static class HilbertCycleSignalComparison
     {
         var owner = Indicator(kind, suppression);
         var count = Names(kind).Length;
-        using var run = new StockIndicatorBuilder()
-            .ConfigureSource(Bars.From(bars))
+        using var run = ComparisonBuilder.Create()
+            .ConfigureSource(ComparisonBuilder.Source(bars))
             .ConfigureIndicators(owner)
             .BuildAsync()
             .GetAwaiter()
@@ -84,9 +84,9 @@ internal static class HilbertCycleSignalComparison
                 .Range(0, count)
                 .Select(j =>
                 {
-                    var values = run[owner.Outputs[j]].ToArray();
-                    var flags = run[owner.Outputs[j + count]].ToArray();
-                    return values.Select((v, i) => flags[i] > 0 ? (double?)v : null).ToArray();
+                    var values = run[owner.Outputs[j]];
+                    var flags = run[owner.Outputs[j + count]];
+                    return values.WherePresent(flags);
                 })
                 .ToArray(),
             kind

@@ -14,7 +14,7 @@ public static class HurstSnapshot
         if (bars is null) throw new ArgumentNullException(nameof(bars));
         if (period < 20)
             throw new ArgumentOutOfRangeException(nameof(period));
-        foreach (var b in bars)
+        foreach (var b in BarRun.Of(bars))
             if (!FrameworkCompatibility.IsFinite(b.Close))
                 throw new ArgumentOutOfRangeException(nameof(bars));
         var result = new HurstValue[bars.Count];
