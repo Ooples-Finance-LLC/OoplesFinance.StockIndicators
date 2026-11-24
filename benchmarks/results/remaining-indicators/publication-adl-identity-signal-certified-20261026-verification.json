@@ -1,0 +1,62 @@
+{
+  "input_head": "b33f68675e8944d7330c231aeb80477d2d5e200a",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/ValuesBarExecution.GeneratedStates.cs"
+  ],
+  "batch_note": "Local AdlValueState identity signal for normalized period1; reuse published line, preserving other periods, exact bits, failure order and lifecycle. Existing mixed-node/numerical regressions and A/D parity plus GPU/inventory required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-26T22:39:51.041597+00:00",
+  "unit": {
+    "passed": 24,
+    "class_counts": {
+      "PriceVolumeDetailsSharedExecutionTests": 12,
+      "SharedRecursiveStateTests": 8,
+      "CompactAccumulationDistributionExecutionTests": 3,
+      "AccumulationAliasNumericalTests": 1
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\adl-identity-signal\\unit\\unit.trx",
+    "sha256": "df7d61c20bce9e716e99c62baeb15c6feec32e56cf9db4521bc7411d2a35b68d",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-adl-identity-signal-certified-20261026-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 54,
+    "class_counts": {
+      "AccumulationDistributionComparisonTests": 17,
+      "MoneyFlowDetailComparisonTests": 9,
+      "SmoothedAccumulationComparisonTests": 8,
+      "SharedSmoothedAccumulationFixtureTests": 12,
+      "SharedAdlDetailsFixtureTests": 8
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\adl-identity-signal\\parity\\parity.trx",
+    "sha256": "32a4c9303694a44b3e69a9cc0a46041cd49fe4b9b9aa98bd03f1b1cb5e4b25df",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-adl-identity-signal-certified-20261026-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-adl-identity-signal-20261026\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4aec066b7b076cfbc2213ffb515e6f15721d3d49f0179948adf198eff861dd37",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-adl-identity-signal-20261026\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4aec066b7b076cfbc2213ffb515e6f15721d3d49f0179948adf198eff861dd37",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-adl-identity-signal-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4aec066b7b076cfbc2213ffb515e6f15721d3d49f0179948adf198eff861dd37",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-adl-identity-signal-20261026\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "4aec066b7b076cfbc2213ffb515e6f15721d3d49f0179948adf198eff861dd37"
+  },
+  "source_fingerprint_sha256": "c732f055f6d1c0ea87f7b2a417e87041ad1a907fcbf46763f99d3453b7e1b816",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Local AdlValueState identity signal for normalized period1; reuse published line, preserving other periods, exact bits, failure order and lifecycle. Existing mixed-node/numerical regressions and A/D parity plus GPU/inventory required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

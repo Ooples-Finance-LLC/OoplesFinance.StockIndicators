@@ -50,9 +50,7 @@ internal static class LogVolatilityComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Value];
-        var present = run[indicator.IsDefined];
-        return Series(values.WherePresent(present));
+        return NamedComparisonPublisher.Single(run[indicator.Value], run[indicator.IsDefined]);
     }
 
     internal static double?[] Reference(double[] prices, int p, bool realized, bool annual)

@@ -1,0 +1,33 @@
+{
+  "types": [
+    "StochasticMacdOscillator"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "f378919e7477ec8d1a797cf8f44acf23fee47eec",
+  "source_fingerprint_sha256": "2dc2d322d6c288e5c3625b64ad83c9244e9ccdc63e5dd395a057667b323f95dc",
+  "benchmark_fixture": {
+    "type": "RemainingStochasticMacdBenchmarks",
+    "operations": [
+      "StochasticMacdOscillator"
+    ]
+  },
+  "checks": {
+    "unit": 25,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "unit_class_counts": {
+    "SharedGeneratedStochasticMacdTests": 13,
+    "StochasticMacdNumericalTests": 12
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/publication-pivot-three-20261021-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-pivot-three-20261021-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

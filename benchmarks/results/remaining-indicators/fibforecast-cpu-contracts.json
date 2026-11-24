@@ -1,0 +1,38 @@
+{
+  "batch": "fibforecast-shared-execution",
+  "types": [
+    "FibonacciRetrace",
+    "ForecastOscillator"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 46,
+    "parity_passed": 8,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "fibforecast-unit-verified.trx.gz",
+        "passed_cases": 46,
+        "trx_sha256": "379d8bdd2b06770e2c39ee74eb98a181ebe8f2e1f7289d2d8b84fb09f7ac0e0c"
+      },
+      {
+        "file": "fibforecast-parity-verified.trx.gz",
+        "passed_cases": 8,
+        "trx_sha256": "ff5e4ef9c7a11d5688424fd39ec69e9b4ed27c550d084fe1f911fccc5492b4f3"
+      }
+    ],
+    "context": "Executed in the 6-facade sixth-stage working candidate with inherited unresolved MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "6c3a7fe967b37111d4cef55cd1e6a3c72b24117155de27d455b4956716760597",
+    "test_execution_input_sha256": {
+      "unit": "6c3a7fe967b37111d4cef55cd1e6a3c72b24117155de27d455b4956716760597",
+      "parity": "6c3a7fe967b37111d4cef55cd1e6a3c72b24117155de27d455b4956716760597"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "6c33eebf8c4520545e8767f584b4f3f051721d44"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

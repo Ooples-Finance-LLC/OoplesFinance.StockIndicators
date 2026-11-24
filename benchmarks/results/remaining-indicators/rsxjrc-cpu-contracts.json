@@ -1,0 +1,39 @@
+{
+  "batch": "rsxjrc-shared-execution",
+  "types": [
+    "JmaRsxClone",
+    "JrcFractalDimension"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 51,
+    "parity_passed": 8,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "rsxjrc-unit-verified.trx.gz",
+        "passed_cases": 51,
+        "trx_sha256": "f01ba9d9e54888063f3ea454f56c17b58d74a4b78c3b7f5d32164c852028f295"
+      },
+      {
+        "file": "rsxjrc-parity-verified.trx.gz",
+        "passed_cases": 8,
+        "trx_sha256": "dbb2235b30ab5383296dab284bcbbc0d5d33134d75fae67d909a0ba5dcc063ba"
+      }
+    ],
+    "context": "Executed in the 16-facade ninth-stage working candidate with unresolved Guppy and inherited MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "885d6998d7d92b1d255b8230456d80d926d72607b2c580df5aabbf04887df3d5",
+    "test_execution_input_sha256": {
+      "unit": "885d6998d7d92b1d255b8230456d80d926d72607b2c580df5aabbf04887df3d5",
+      "parity": "885d6998d7d92b1d255b8230456d80d926d72607b2c580df5aabbf04887df3d5"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "5a0991377a3189692ebab559a1338b20c957087e"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification",
+    "combined candidate retains unresolved Guppy and MACD failures"
+  ]
+}

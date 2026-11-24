@@ -1,0 +1,31 @@
+{
+  "types": [
+    "ShinoharaIntensityRatioA",
+    "ShinoharaIntensityRatioB"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "b5a53afaf6d0ef27daf7f4d3e6364050ea1689fc",
+  "combined_input_sha256": "7af25c42a3805b0d52f9f654d21d63ca22786d743a82c99fc09dce60591517f8",
+  "benchmark_fixture": {
+    "type": "RemainingShinoharaBenchmarks",
+    "operations": [
+      "ShinoharaIntensityRatioA",
+      "ShinoharaIntensityRatioB"
+    ]
+  },
+  "checks": {
+    "unit": 84,
+    "parity": 8,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/shinohara-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/shinohara-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "before_sha256": "c04fa38c7e8ad6a50d776774a87d90e26fc1255cb6c31c87e7e7857ba617f90b",
+  "candidate_sha256": "1dbc29054f4e730a3e4c35db101bc01b9f722d883b72ed61888344a9c32ac306",
+  "changed_baseline_rows": 6,
+  "unchanged_baseline_rows": 796,
+  "changed_builder_slots": 12,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 12,
+  "verdicts": {
+    "faster": 593,
+    "slower": 890,
+    "inconclusive": 53
+  },
+  "unchanged_rows": 796,
+  "run_id": "local-hilbert-bounded-products-control-20261023",
+  "imported_utc": "2026-10-24T17:08:27.262112+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "a19050b7fc99bcadb659d67113308b49923aea8bb5914b6f536eace652484354",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-bounded-products-certified-local-hilbert-bounded-products-control-20261023-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "12e736fccedde7ce55ac77ac158e2a0d85c037b37dea6acd2b56ac9b53f4ee7c",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-bounded-products-certified-local-hilbert-bounded-products-control-20261023-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "108b681c08f925129821f4f5b416f65d2061c8a0c6a6d4a47ea635e749c6e97d",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-bounded-products-certified-local-hilbert-bounded-products-control-20261023-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "7e0a3b0d18ba830597465f34eb5038aa556d2950933c7fdef4b5e6b4a47c2893",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-bounded-products-certified-local-hilbert-bounded-products-control-20261023-measurement.json.gz"
+    },
+    "stage-hilbert-bounded-products-report.py": {
+      "sha256": "e300804a36f9d796a30018606c2832bfb9ac7fa231cb4a186fb453abbc705aa5",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-bounded-products-certified-local-hilbert-bounded-products-control-20261023-stage-hilbert-bounded-products-report.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "10046c482ef03172bced25468db6e606c79016025c1a4b3b2debee5b361b8143",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-bounded-products-certified-local-hilbert-bounded-products-control-20261023-verify-approved-certified-report.py.gz"
+    },
+    "import-hilbert-bounded-products-report.py": {
+      "sha256": "866dde6f5dab1d3174991766711b7352ebcd50b67d97a3681a5f4f178f771a2d",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-bounded-products-certified-local-hilbert-bounded-products-control-20261023-import-hilbert-bounded-products-report.py.gz"
+    },
+    "archive-hilbert-bounded-products-control.py": {
+      "sha256": "83dcd4486d857a0dc4a4f34a423c0038edd5da3ea6d2c330c9daf8e5a6104635",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-bounded-products-certified-local-hilbert-bounded-products-control-20261023-archive-hilbert-bounded-products-control.py.gz"
+    },
+    "prove-hilbert-bounded-products-integration.py": {
+      "sha256": "8d6a09a5a1986b8432845dcadc266a3cb6d2c51b1ec6ecb3a9f53a50ad8b3431",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-bounded-products-certified-local-hilbert-bounded-products-control-20261023-prove-hilbert-bounded-products-integration.py.gz"
+    },
+    "archive-hilbert-bounded-products-report.py": {
+      "sha256": "c7f6d26e09fd56f987c84accca6a4ffab5eeca2ff7a0a8adc16d3a3aaabe54d4",
+      "archive": "benchmarks/results/remaining-indicators/hilbert-bounded-products-certified-local-hilbert-bounded-products-control-20261023-archive-hilbert-bounded-products-report.py.gz"
+    }
+  }
+}

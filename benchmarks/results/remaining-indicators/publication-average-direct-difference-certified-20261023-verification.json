@@ -1,0 +1,60 @@
+{
+  "input_head": "b23a83989092bd64685fb3c2dd726aab7b4a58b8",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/AwesomeWithDetails.cs",
+    "src/Indicators/MovingAverageDifference.cs",
+    "tests/ModelsTests/AverageDirectDifferenceTests.cs"
+  ],
+  "batch_note": "Use single correctlyrounded subtraction for published roundedmean differences in MovingAverageDifference and AwesomeWithDetails, preserving canonicalzero and NETFRAMEWORK paths.196extremepairs per3configurations withreset plus independent reference/sharedworker/longhistory/GPU/inventory checks. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-23T06:52:42.140723+00:00",
+  "unit": {
+    "passed": 14,
+    "class_counts": {
+      "AverageOscillatorSharedExecutionTests": 11,
+      "AverageDirectDifferenceTests": 3
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\average-direct-difference\\unit\\unit.trx",
+    "sha256": "4c839b3395ffa81e61a7d22e8533bee9480b8a04865f1de33af6621353b720f5",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-average-direct-difference-certified-20261023-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 36,
+    "class_counts": {
+      "AverageDifferenceComparisonTests": 17,
+      "SharedAverageOscillatorBenchmarkTests": 10,
+      "AwesomeComparisonTests": 9
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\average-direct-difference\\parity\\parity.trx",
+    "sha256": "a83140c19159337ef6f0ff1b3ea0fe4202407fc5067b725ad9f6e551c5862324",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-average-direct-difference-certified-20261023-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-average-direct-difference-20261023\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "723293d5dd35585c776dd6c373c0298e6127ce41bb9a5b850650535d7f6f2ba0",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-average-direct-difference-20261023\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "723293d5dd35585c776dd6c373c0298e6127ce41bb9a5b850650535d7f6f2ba0",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-average-direct-difference-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "723293d5dd35585c776dd6c373c0298e6127ce41bb9a5b850650535d7f6f2ba0",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-average-direct-difference-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "723293d5dd35585c776dd6c373c0298e6127ce41bb9a5b850650535d7f6f2ba0"
+  },
+  "source_fingerprint_sha256": "01c790a79bdae3e28ef6b8ba1f084f157abfddb23858ac5cf56eae5d2258c66f",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Use single correctlyrounded subtraction for published roundedmean differences in MovingAverageDifference and AwesomeWithDetails, preserving canonicalzero and NETFRAMEWORK paths.196extremepairs per3configurations withreset plus independent reference/sharedworker/longhistory/GPU/inventory checks. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

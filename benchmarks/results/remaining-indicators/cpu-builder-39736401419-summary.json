@@ -1,0 +1,23 @@
+{
+  "run_id": "39736401419",
+  "workflow_sha": "e7c05c22a7903f3d8c03d70cc5e8423751e27e44",
+  "source_sha": "29a41d8b7956a05812a5950631f07b84bcb04ee0",
+  "apis": 7,
+  "comparisons": 28,
+  "verdicts": {
+    "slower": 24,
+    "faster": 4
+  },
+  "receipt_files": [
+    "cpu-builder-39736401419-SharedFisherBenchmarks.json",
+    "cpu-builder-39736401419-SharedHoltWinterBenchmarks.json",
+    "cpu-builder-39736401419-SharedKlingerBenchmarks.json",
+    "cpu-builder-39736401419-SharedWilderStrengthBenchmarks.json",
+    "cpu-builder-39736401419-SharedEntropyBenchmarks.json",
+    "cpu-builder-39736401419-SharedReverseWilderBenchmarks.json"
+  ],
+  "changed_production_files_since_baseline": [
+    "src/Helpers/CertifiedMeanRelativeError.cs"
+  ],
+  "note": "Matched same-runner native serial/parallel comparison for each default-period fixture; no universal superiority claim."
+}

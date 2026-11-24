@@ -1,0 +1,40 @@
+{
+  "batch": "signalnoise-shared-execution",
+  "types": [
+    "EhlersSignalToNoiseRatioV1",
+    "EhlersSignalToNoiseRatioV2",
+    "EhlersAlternateSignalToNoiseRatio",
+    "EhlersEnhancedSignalToNoiseRatio"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 50,
+    "parity_passed": 16,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "signalnoise-unit-verified.trx.gz",
+        "passed_cases": 50,
+        "trx_sha256": "be87361d93bb0cfe9533ed9d32c44ec3e78c7af976df1e99fdca6659a077d744"
+      },
+      {
+        "file": "signalnoise-parity-verified.trx.gz",
+        "passed_cases": 16,
+        "trx_sha256": "72db6ca2900d440b5a0bf2a3090de5fe91e4ed7ed33e87aa1b317175dc5fe988"
+      }
+    ],
+    "context": "Executed in the combined 113-facade working candidate; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+    "test_execution_input_sha256": {
+      "unit": "54839491c1974bca029c0108d53ac0195d8fdbcdb65460c259321c5c095493ef",
+      "parity": "54839491c1974bca029c0108d53ac0195d8fdbcdb65460c259321c5c095493ef"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "b7e13308b78c1e23f9f21cbbd9323a7d9d6548ee"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

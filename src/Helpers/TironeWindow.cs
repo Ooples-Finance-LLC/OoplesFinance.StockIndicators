@@ -24,12 +24,25 @@ internal sealed class TironeWindow : IDisposable
     }
     internal double[] Next(double high,double low,double close,bool commit)
     {
+        var outputs = new double[8];
+        Next(high, low, close, commit, outputs);
+        return outputs;
+    }
+    internal void Next(double high, double low, double close, bool commit, Span<double> outputs)
+    {
+        if (outputs.Length < 8) throw new ArgumentException("Eight output slots are required.", nameof(outputs));
         var h=Extreme(_highs,high,true,commit);var l=Extreme(_lows,low,false,commit);if(commit)_index++;
         var range=Combine(new(h),new(l),-1);var third=Combine(range,default,divisor:3);var half=Combine(range,default,divisor:2);
         var total=new ExactMeanAccumulator();total.Add(h);total.Add(l);total.Add(close);var mean=RocBankValue.Round(total,count:3);
         var twice=new ExactMeanAccumulator();mean.AddTo(ref twice,2);var upper=twice;upper.Add(l,-1);var lower=twice;lower.Add(h,-1);
-        return new[]{Combine(new(h),third,-1).Publish(),Combine(new(l),half).Publish(),Combine(new(l),third).Publish(),mean.Publish(),
-            Combine(mean,range).Publish(),Combine(mean,range,-1).Publish(),RocBankValue.Round(upper).Publish(),RocBankValue.Round(lower).Publish()};
+        outputs[0] = Combine(new(h),third,-1).Publish();
+        outputs[1] = Combine(new(l),half).Publish();
+        outputs[2] = Combine(new(l),third).Publish();
+        outputs[3] = mean.Publish();
+        outputs[4] = Combine(mean,range).Publish();
+        outputs[5] = Combine(mean,range,-1).Publish();
+        outputs[6] = RocBankValue.Round(upper).Publish();
+        outputs[7] = RocBankValue.Round(lower).Publish();
     }
     internal void Reset(){_highs.Clear();_lows.Clear();_index=0;}
     public void Dispose()=>Reset();

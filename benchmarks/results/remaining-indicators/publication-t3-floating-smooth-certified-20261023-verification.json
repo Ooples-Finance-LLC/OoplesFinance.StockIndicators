@@ -1,0 +1,60 @@
+{
+  "input_head": "e2cc8e837e344a78c3045ce6e6038c9feed4f049",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedTillson.cs",
+    "tests/ModelsTests/TillsonFloatingSmoothingTests.cs"
+  ],
+  "batch_note": "Approved T3 continuation: floating residual intervals certify quotient rounding; ambiguous/out-of-range cases retain integer smoothing. Independent exact numerator tests and existing numerical, shared execution, long-history, GPU and inventory checks. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-23T11:12:29.135178+00:00",
+  "unit": {
+    "passed": 40,
+    "class_counts": {
+      "TillsonSharedExecutionTests": 12,
+      "CertifiedTillsonTests": 17,
+      "TillsonFloatingSmoothingTests": 7,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-floating-smooth\\unit\\unit.trx",
+    "sha256": "13bd1248c1b20721ce75eadc2b7a58e83e8dff1a5f0b8714def519f0cbe2dc7b",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-floating-smooth-certified-20261023-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 26,
+    "class_counts": {
+      "SharedTillsonBenchmarkTests": 16,
+      "TillsonComparisonTests": 10
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-floating-smooth\\parity\\parity.trx",
+    "sha256": "d18fdd8175f78aabed9f1b5111a67f87c16b19ffdebc49131ad1386a9fae3fa4",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-t3-floating-smooth-certified-20261023-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-floating-smooth-20261023\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "236249b2d5b3970ab96feb701971328614d5089d4d3bb1cb88b00288a8574807",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-floating-smooth-20261023\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "236249b2d5b3970ab96feb701971328614d5089d4d3bb1cb88b00288a8574807",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-floating-smooth-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "236249b2d5b3970ab96feb701971328614d5089d4d3bb1cb88b00288a8574807",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-floating-smooth-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "236249b2d5b3970ab96feb701971328614d5089d4d3bb1cb88b00288a8574807"
+  },
+  "source_fingerprint_sha256": "3dd71776a92437923b1c4597fa0ccda9a9db06a8c9ef584f45bfd46a07a1b485",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved T3 continuation: floating residual intervals certify quotient rounding; ambiguous/out-of-range cases retain integer smoothing. Independent exact numerator tests and existing numerical, shared execution, long-history, GPU and inventory checks. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

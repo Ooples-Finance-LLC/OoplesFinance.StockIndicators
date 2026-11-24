@@ -1,0 +1,26 @@
+{
+  "types": [
+    "GuppyDistanceIndicator",
+    "GuppyMultipleMovingAverage",
+    "MacdLine",
+    "MacdSignal",
+    "MacdHistogram"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "unit_class_counts": {
+    "SharedGeneratedGuppyRibbonsTests": 227,
+    "SharedGeneratedMacdAliasesTests": 56,
+    "DependentOutputRepresentabilityTests": 9,
+    "GuppyOverflowBoundaryTests": 4,
+    "OutputRepresentabilityTests": 11
+  },
+  "finite_smoothing": 1,
+  "parity_cases": 20,
+  "combined_input_sha256": "fb1954c7b44f966d73b187fc81c0d1b8d2d3ce2e49cf3bef08959fd8269c762a",
+  "evidence": "tenth-integrated-contracts.json",
+  "independent_repair_commit": "001872263f8f83a7158d5e728d67ffb566465d94",
+  "context": "307 numerical unit cases passed on tenth-stage combined production and were retained after an unrelated assertion-only correction; finite-smoothing and20 parity cases passed separately. Selective commit itself was not separately rebuilt.",
+  "pending": [
+    "controlled performance measurements"
+  ]
+}

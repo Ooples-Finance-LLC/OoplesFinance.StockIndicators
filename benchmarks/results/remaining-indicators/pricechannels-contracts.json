@@ -1,0 +1,47 @@
+{
+  "batch": "price-channels-shared-execution",
+  "types": [
+    "PriceChannel",
+    "PriceChannelMiddle",
+    "PriceChannelUpper",
+    "PriceChannelLower",
+    "PriceLineChannel",
+    "PriceCurveChannel"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact EMA and percentage bands for the four PriceChannel facades; reuse the exact Wilder drift kernel for line/curve channels. Preserve scalar middle-only behavior, rounded boundaries, long event ages, clamps, original fields, component/source fallback and ownership.",
+  "verification": {
+    "unit_passed": 228,
+    "fixture_passed": 24,
+    "discovery_passed": 120,
+    "gpu_passed": 100,
+    "contract_methods": 1459,
+    "hosted_methods": 1447,
+    "evidence": [
+      {
+        "file": "pricechannels-unit.trx.gz",
+        "passed_cases": 228,
+        "trx_sha256": "313922c5f2a71a6bd46635f69d112a68bf8c02b843fa6f7a53debfdfc18a0806"
+      },
+      {
+        "file": "pricechannels-fixture.trx.gz",
+        "passed_cases": 144,
+        "trx_sha256": "ca39c21f9b3f7164bc9153cc552a93a887c50514d09817dce5f62317cc68fa8b"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingPriceChannelBenchmarks",
+    "cases": 48,
+    "status": "prepared-not-measured",
+    "operations": [
+      "PriceChannel",
+      "PriceChannelMiddle",
+      "PriceChannelUpper",
+      "PriceChannelLower",
+      "PriceLineChannel",
+      "PriceCurveChannel"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

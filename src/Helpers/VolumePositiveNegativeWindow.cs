@@ -9,8 +9,20 @@ internal sealed class VolumePositiveNegativeWindow : IDisposable
     private readonly Queue<Number> _votes = new();
     private Number _sum, _previousPrice, _previousClose;
     private bool _started;
-    internal VolumePositiveNegativeWindow(MovingAvgType kind, int length, int smooth)
-    { _length = Math.Max(1, length); _volume = new(kind, _length); _range = new(kind, _length); _signal = new(kind, smooth); }
+    private readonly MovingAvgType _kind;
+    private readonly int _smooth;
+    private readonly bool _allowCertified;
+    private readonly List<(double High, double Low, double Close, double Volume, bool Selected)>? _replay;
+    private CertifiedVolumePositiveNegative? _certified;
+    internal long CertifiedCount { get; private set; }
+    internal int FallbackCount { get; private set; }
+    internal VolumePositiveNegativeWindow(MovingAvgType kind, int length, int smooth, bool allowCertified = true)
+    {
+        _length = Math.Max(1, length); _smooth = Math.Max(1, smooth); _kind = kind;
+        _volume = new(kind, _length); _range = new(kind, _length); _signal = new(kind, _smooth);
+        _allowCertified = allowCertified && CertifiedVolumePositiveNegative.Supports(kind);
+        if (_allowCertified) { _replay = new(); _certified = new(kind, _length, _smooth); }
+    }
     private static Number Abs(Number value) => value.Sign < 0 ? value.Times(-1) : value;
     private static Number Range(Number high, Number low, Number previous)
     {
@@ -28,6 +40,23 @@ internal sealed class VolumePositiveNegativeWindow : IDisposable
     }
     internal (double Line, double Signal) Next(double high, double low, double close, double volume, bool final, bool selected = false)
     {
+        StreamingInputValidation.Finite(high, nameof(high)); StreamingInputValidation.Finite(low, nameof(low));
+        StreamingInputValidation.Finite(close, nameof(close)); StreamingInputValidation.Finite(volume, nameof(volume));
+        if (_certified is not null)
+        {
+            if (_certified.TryNext(high, low, close, volume, final, selected, false, out var point))
+            {
+                if (final) { _replay!.Add((high, low, close, volume, selected)); CertifiedCount++; }
+                return (point.Line, point.Signal);
+            }
+            _certified = null; FallbackCount++;
+            foreach (var bar in _replay!) NextExact(bar.High, bar.Low, bar.Close, bar.Volume, true, bar.Selected);
+            _replay.Clear();
+        }
+        return NextExact(high, low, close, volume, final, selected);
+    }
+    private (double Line, double Signal) NextExact(double high, double low, double close, double volume, bool final, bool selected)
+    {
         var top = Number.Of(high); var bottom = Number.Of(low); var price = Number.Of(close); var size = Number.Of(volume);
         var typical = selected ? price : (top + bottom + price).Divide(3);
         var atr = _range.Next(Range(top, bottom, _started ? _previousClose : price), final);
@@ -41,13 +70,15 @@ internal sealed class VolumePositiveNegativeWindow : IDisposable
         }
         return (line.Publish(), signal.Publish());
     }
-    internal static (Dictionary<string, double[]> Outputs, Signal[] Signals) Calculate(StockData data, MovingAvgType kind, int length, int smooth)
+    internal static (Dictionary<string, double[]> Outputs, Signal[] Signals) Calculate(StockData data, MovingAvgType kind, int length, int smooth, bool allowCertified = true)
     {
         length = Math.Max(1, length); smooth = Math.Max(1, smooth);
         foreach (var series in new[] { data.OpenPrices, data.HighPrices, data.LowPrices, data.ClosePrices, data.Volumes, data.ChainedValues })
             foreach (var value in series) StreamingInputValidation.Finite(value, nameof(data));
         var selected = data.ChainedValues.Count > 0;
         var (close, high, low, _, _) = CalculationsHelper.GetInputValuesList(data);
+        if (allowCertified && !ComponentAverage.HasOverrides && CertifiedVolumePositiveNegative.Supports(kind)
+            && TryCalculateCertified(data, close, high, low, selected, kind, length, smooth, out var certified)) return certified;
         var prices = Enumerable.Range(0, data.Count).Select(i => selected ? Number.Of(close[i])
             : (Number.Of(data.HighPrices[i]) + Number.Of(data.LowPrices[i]) + Number.Of(data.ClosePrices[i])).Divide(3)).ToArray();
         var ranges = Enumerable.Range(0, data.Count).Select(i => Range(Number.Of(high[i]), Number.Of(low[i]), Number.Of(close[i == 0 ? 0 : i - 1]))).ToArray();
@@ -73,7 +104,31 @@ internal sealed class VolumePositiveNegativeWindow : IDisposable
         }
         return (new() { ["Vpni"] = line.Select(v => v.Publish()).ToArray(), ["Signal"] = signal.Select(v => v.Publish()).ToArray() }, trades);
     }
-    internal void Reset() { _volume.Reset(); _range.Reset(); _signal.Reset(); _votes.Clear(); _sum = _previousPrice = _previousClose = default; _started = false; }
+    private static bool TryCalculateCertified(StockData data, IReadOnlyList<double> close, IReadOnlyList<double> high,
+        IReadOnlyList<double> low, bool selected, MovingAvgType kind, int length, int smooth,
+        out (Dictionary<string, double[]> Outputs, Signal[] Signals) result)
+    {
+        result = default;
+        var state = new CertifiedVolumePositiveNegative(kind, length, smooth);
+        var lines = new double[data.Count]; var signals = new double[data.Count]; var trades = new Signal[data.Count];
+        for (var i = 0; i < data.Count; i++)
+        {
+            var typical = selected ? MacZWindow.Number.Of(close[i])
+                : (MacZWindow.Number.Of(data.HighPrices[i]) + MacZWindow.Number.Of(data.LowPrices[i]) + MacZWindow.Number.Of(data.ClosePrices[i])).Divide(3);
+            if (!state.TryNext(high[i], low[i], close[i], data.Volumes[i], true, selected, true, out var point, typical)) return false;
+            lines[i] = point.Line; signals[i] = point.Signal; trades[i] = point.Trade;
+        }
+        // Preserve the two component requests made by the exact batch path.
+        ComponentAverage.Take(Array.Empty<double>(), length);
+        ComponentAverage.Take(Array.Empty<double>(), smooth);
+        result = (new() { ["Vpni"] = lines, ["Signal"] = signals }, trades); return true;
+    }
+    internal void Reset()
+    {
+        _volume.Reset(); _range.Reset(); _signal.Reset(); _votes.Clear(); _sum = _previousPrice = _previousClose = default; _started = false;
+        _replay?.Clear(); CertifiedCount = 0; FallbackCount = 0;
+        _certified = _allowCertified ? new(_kind, _length, _smooth) : null;
+    }
     public void Dispose() { _volume.Dispose(); _range.Dispose(); _signal.Dispose(); }
     private sealed class Average : IDisposable
     {

@@ -86,6 +86,52 @@ public sealed class HilbertRoundedKernelTests
         Assert.False(HilbertRoundedKernel.TryProductSum(-1, 1, -c, d, out _));
     }
 
+    private static bool CheckFir(double value, double a, double b, double c)
+    {
+        if (!HilbertRoundedKernel.TryFir(value, a, b, c, out double actual)) return false;
+        var numerator = (Units(value) - Units(c)) * Units(.0962)
+                        + (Units(a) - Units(b)) * Units(.5769);
+        EqualBits(ExactMeanAccumulator.UnitRatio(numerator, Grid), actual);
+        return true;
+    }
+
+    [Fact]
+    public void FourTermFirMatchesIntegerReferenceWhenLagDifferencesAreNotRepresentable()
+    {
+        var random = new Random(261102);
+        double Next() => Math.ScaleB((random.NextDouble() - .5) * 2, random.Next(-420, 421));
+        int newlyCertified = 0;
+        for (int i = 0; i < 6000; i++)
+        {
+            double value = Next(), a = Next(), b = Next(), c = Next();
+            bool oldCertificate = HilbertRoundedKernel.TryExactSum(value, -c, out double outer)
+                                  && HilbertRoundedKernel.TryExactSum(a, -b, out double inner)
+                                  && HilbertRoundedKernel.TryProductSum(outer, .0962, inner, .5769, out _);
+            if (CheckFir(value, a, b, c) && !oldCertificate) newlyCertified++;
+            CheckFir(value, a, Math.BitIncrement(a), value);
+            CheckFir(value, a, Math.BitDecrement(a), Math.BitIncrement(value));
+        }
+        Assert.True(newlyCertified > 1000, $"Only {newlyCertified} additional FIR cases certified.");
+    }
+
+    [Fact]
+    public void FourTermFirRetainsFallbackOutsideTheResidualRange()
+    {
+        foreach (double value in new[] { double.Epsilon, Math.ScaleB(1, -600), Math.ScaleB(1, 600),
+                     double.MaxValue, double.PositiveInfinity, double.NaN })
+        {
+            Assert.False(HilbertRoundedKernel.TryFir(value, 1, -1, 1, out _));
+            Assert.False(HilbertRoundedKernel.TryFir(-value, 1, -1, 1, out _));
+        }
+        foreach (int exponent in new[] { -440, -200, 0, 200, 440 })
+        {
+            double value = Math.ScaleB(1, exponent);
+            CheckFir(value, -value, Math.BitIncrement(value), Math.BitDecrement(value));
+            CheckFir(-value, value, -Math.BitIncrement(value), -Math.BitDecrement(value));
+        }
+        CheckFir(-0d, 0, 0, -0d);
+    }
+
     [Fact]
     public void ExactSumAndSmoothingCertificatesMatchIntegerReference()
     {

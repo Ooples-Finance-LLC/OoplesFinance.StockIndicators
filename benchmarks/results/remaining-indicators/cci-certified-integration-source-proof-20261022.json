@@ -1,0 +1,34 @@
+{
+  "qualified_commit": "7eb7881a3d41d9a4ec689b69843283e4ff1b3c75",
+  "qualified_code": "c0242e57d4ed91090b8b60ce82e40d0b98b92422",
+  "matched_paths": [
+    "src",
+    "tests",
+    "examples",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "f8e8ea2eb5aba38437ce6117cdc1b865de9be6d7cde71a72fcc75a8bbc05a017",
+  "qualification_reused": {
+    "unit": 35,
+    "parity": 20,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-certified-20261022\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "306a12828e80c1073d4bafd6330167731c98bb69c61d457f3b8c7e77dad37f65",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-certified-20261022\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "306a12828e80c1073d4bafd6330167731c98bb69c61d457f3b8c7e77dad37f65",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-certified-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "306a12828e80c1073d4bafd6330167731c98bb69c61d457f3b8c7e77dad37f65",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-cci-certified-20261022\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "306a12828e80c1073d4bafd6330167731c98bb69c61d457f3b8c7e77dad37f65"
+  },
+  "control": "local-cci-certified-control-20261022",
+  "note": "Integrated executable sources and build inputs exactly match qualified candidate. Publishing checkout binaries remain older; preserved candidate DLL supplied the new measurement arm. No redundant production rebuild."
+}

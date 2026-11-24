@@ -1,0 +1,39 @@
+{
+  "batch": "stepped-channels-shared-execution",
+  "types": [
+    "EfficientTrendStepChannel",
+    "LinearChannels"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share exact EfficientTrendStep kernel while skipping unfillable efficiency/deviation windows; retain ordinary IEEE LinearChannels recurrence and boundary retention without intermediate series. Preserve defaults, clamps, startup, source fallback, ownership and validation priority.",
+  "verification": {
+    "unit_passed": 104,
+    "fixture_passed": 8,
+    "discovery_passed": 135,
+    "gpu_passed": 100,
+    "contract_methods": 1474,
+    "hosted_methods": 1462,
+    "evidence": [
+      {
+        "file": "steppedchannels-unit.trx.gz",
+        "passed_cases": 104,
+        "trx_sha256": "85fd4bcd8833cccfa8d2d12e1a845268f108b0c449a690da0f15c72874121b05"
+      },
+      {
+        "file": "steppedchannels-fixture.trx.gz",
+        "passed_cases": 143,
+        "trx_sha256": "5def118d73af5b282639dc810cabc5d34ed4d4a4c440cbf24bf79f2dad7181c4"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingSteppedChannelBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EfficientTrendStepChannel",
+      "LinearChannels"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

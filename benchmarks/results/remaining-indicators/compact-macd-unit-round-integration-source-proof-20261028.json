@@ -1,0 +1,34 @@
+{
+  "combined_code_source": "3a9d6fdb8205d6a1df9e79ee726ad332ac1fdc2d",
+  "individual_qualified_source": "5d47581eb9959a3ff7613b123d1b2d77c46cb24a",
+  "qualification_code_source": "4037fd97ed485a40c8f6adff81cbcc23d71faefb",
+  "source_fingerprint_sha256": "ae6de7aa4e22d45c2c8d71e22cf3b83c14764c39965a49ebc9c8c58b8ce27ca2",
+  "fresh_combined_tree_checks": {
+    "unit": 239,
+    "parity": 119,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-unit-round-20261028\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9bc486c9f6492d3a7ccd55bedf6037d7c85696adc68e98d72bdc4572f24ffb80",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-unit-round-20261028\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9bc486c9f6492d3a7ccd55bedf6037d7c85696adc68e98d72bdc4572f24ffb80",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-unit-round-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9bc486c9f6492d3a7ccd55bedf6037d7c85696adc68e98d72bdc4572f24ffb80",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-macd-unit-round-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "9bc486c9f6492d3a7ccd55bedf6037d7c85696adc68e98d72bdc4572f24ffb80"
+  },
+  "matched_source_files": [
+    "src",
+    "tests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config",
+    "scripts/run-competitor-contracts.py",
+    "scripts/verify-competitor-local-gpu.py",
+    "scripts/competitor-gpu-methods.json"
+  ],
+  "note": "Reused actual candidate qualification: every executable/build input matches the integration tree. Original GPU receipt and binary provenance are preserved; no new run is claimed."
+}

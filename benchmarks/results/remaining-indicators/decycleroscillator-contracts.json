@@ -1,0 +1,42 @@
+{
+  "batch": "generated-decycler-oscillators",
+  "types": [
+    "EhlersHighPassFilterV2",
+    "EhlersDecyclerOscillatorV1",
+    "EhlersDecyclerOscillatorV2"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing exact high-pass V2 and decycler oscillator kernels through shared owned execution. Preserve weighted-average defaults, fast/slow output order, extreme and equal periods, staged rounding, custom-component output or rejection behavior and disposal.",
+  "verification": {
+    "unit_passed": 192,
+    "fixture_passed": 12,
+    "discovery_passed": 40,
+    "gpu_passed": 100,
+    "contract_methods": 1375,
+    "hosted_methods": 1363,
+    "evidence": [
+      {
+        "file": "decycleroscillator-unit-repair.trx.gz",
+        "passed_cases": 1,
+        "trx_sha256": "b97905226a0fec6e591518d69a9a3693e35fe8a78a864bed67337945c700a3d4"
+      },
+      {
+        "file": "decycleroscillator-unit.trx.gz",
+        "passed_cases": 191,
+        "trx_sha256": "31cf52e69c2d0caa985dae27cd043b1566f9f0f5415e4ff8174852d188c04247"
+      },
+      {
+        "file": "decycleroscillator-fixture.trx.gz",
+        "passed_cases": 52,
+        "trx_sha256": "2628695c208f3780e6cf32f752c9ede2371ffd3b2e2627254a47a11e00372e20"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingDecyclerOscillatorBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun.",
+  "provenance": "Original unit run preserved 191 passes and one failed new-test expectation: the legacy builder rejects the supplied high-pass custom-average configuration. Only that test changed, to assert identical output or rejection behavior through the graph fallback. Its repaired case passed separately; production and fixture binaries are unchanged. Both raw TRX files are retained. No saved passing tests repeated."
+}

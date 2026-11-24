@@ -1,0 +1,34 @@
+{
+  "combined_code_source": "1e957778efbf8786a733d8c634fa25aed78ba2ae",
+  "individual_qualified_source": "059d5567d1ea1c8fe90db4c58f4e81ca85c9a0c6",
+  "qualification_code_source": "e1d05eb2d94330579011c47ce757a48a28804123",
+  "source_fingerprint_sha256": "41d286650e073a0a88a460dc137c6323ed97cbd33c5aa5966ba8ebe36b4aef6e",
+  "reused_candidate_checks": {
+    "unit": 64,
+    "parity": 45,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-word-products-20261030\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "dbe8fe8af25dd880fd75a9c550583e7e8ac9835d93d65e596beafe6bf055c6ce",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-word-products-20261030\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "dbe8fe8af25dd880fd75a9c550583e7e8ac9835d93d65e596beafe6bf055c6ce",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-word-products-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "dbe8fe8af25dd880fd75a9c550583e7e8ac9835d93d65e596beafe6bf055c6ce",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-afirma-word-products-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "dbe8fe8af25dd880fd75a9c550583e7e8ac9835d93d65e596beafe6bf055c6ce"
+  },
+  "matched_source_files": [
+    "src",
+    "tests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config",
+    "scripts/run-competitor-contracts.py",
+    "scripts/verify-competitor-local-gpu.py",
+    "scripts/competitor-gpu-methods.json"
+  ],
+  "note": "Reused actual candidate qualification: every executable/build input matches the integration tree. Original GPU receipt and binary provenance are preserved; no new run is claimed."
+}

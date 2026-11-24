@@ -87,9 +87,16 @@ public sealed class WindowFisherTransform : MultiOutputIndicatorBase, IIndicator
             var price = bar.Close;
             if (midpoint)
             {
-                var sum = JurikDyadic.FromDouble(bar.High);
-                sum.Add(bar.Low);
-                price = sum.Mean(2);
+#if !NETFRAMEWORK
+                if (ExactInputs.TryMidpoint(bar.High, bar.Low, out var middle))
+                    price = middle;
+                else
+#endif
+                {
+                    var sum = JurikDyadic.FromDouble(bar.High);
+                    sum.Add(bar.Low);
+                    price = sum.Mean(2);
+                }
             }
             _minimum.Add(price);
             _maximum.Add(price);
@@ -98,13 +105,21 @@ public sealed class WindowFisherTransform : MultiOutputIndicatorBase, IIndicator
                 _started = true;
                 return;
             }
-            var low = JurikDyadic.FromDouble(_minimum.Value);
-            var range = JurikDyadic.FromDouble(_maximum.Value);
-            range.Subtract(low);
-            var difference = JurikDyadic.FromDouble(price);
-            difference.Subtract(low);
-            var ratio = range.Sign == 0 ? 0 : difference.Ratio(range);
-            _position = range.Sign == 0 ? 0 : .33 * 2 * (ratio - .5) + .67 * _position;
+            double ratio;
+            bool flat;
+#if !NETFRAMEWORK
+            if (!ExactInputs.TryPosition(price, _minimum.Value, _maximum.Value, out ratio, out flat))
+#endif
+            {
+                var low = JurikDyadic.FromDouble(_minimum.Value);
+                var range = JurikDyadic.FromDouble(_maximum.Value);
+                range.Subtract(low);
+                var difference = JurikDyadic.FromDouble(price);
+                difference.Subtract(low);
+                flat = range.Sign == 0;
+                ratio = flat ? 0 : difference.Ratio(range);
+            }
+            _position = flat ? 0 : .33 * 2 * (ratio - .5) + .67 * _position;
             if (_position > .99)
                 _position = .999;
             if (_position < -.99)
@@ -115,4 +130,48 @@ public sealed class WindowFisherTransform : MultiOutputIndicatorBase, IIndicator
             output[0] = _fisher;
         }
     }
+
+#if !NETFRAMEWORK
+    internal static class ExactInputs
+    {
+        internal static bool TryMidpoint(double high, double low, out double midpoint)
+        {
+            double halfHigh = high * .5, halfLow = low * .5;
+            midpoint = 0;
+            // Normal halves are exact power-of-two scalings. Their sum rounds
+            // the exact midpoint once, including when high+low would overflow.
+            // Tiny inputs retain the original exact accumulator path.
+            const double twiceMinimumNormal = 4.450147717014403e-308;
+            if (!double.IsFinite(high) || !double.IsFinite(low)
+                || !(high == 0 || Math.Abs(high) >= twiceMinimumNormal)
+                || !(low == 0 || Math.Abs(low) >= twiceMinimumNormal))
+                return false;
+            double value = halfHigh + halfLow;
+            midpoint = value == 0 ? 0 : value; // NOSONAR: canonical exact zero.
+            return true;
+        }
+
+        internal static bool TryPosition(double price, double low, double high, out double ratio, out bool flat)
+        {
+            ratio = 0;
+            flat = false;
+            if (!TryDifference(high, low, out double range)) return false;
+            flat = range == 0;
+            if (flat) return true;
+            if (!TryDifference(price, low, out double difference)) return false;
+            // Both operands are the exact original differences. Binary64
+            // division therefore publishes the same once-rounded exact ratio.
+            ratio = difference == 0 ? 0 : difference / range;
+            return true;
+        }
+
+        private static bool TryDifference(double left, double right, out double value)
+        {
+            value = left - right;
+            double virtualRight = value - left;
+            double error = (left - (value - virtualRight)) + (-right - virtualRight);
+            return double.IsFinite(value) && error == 0; // NOSONAR: exact TwoSum certificate.
+        }
+    }
+#endif
 }

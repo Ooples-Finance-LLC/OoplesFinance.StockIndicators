@@ -7,17 +7,19 @@ internal static partial class ValuesBarExecution
 {
     internal static bool IsPointwise(IIndicator indicator) => indicator.Source is null && indicator.Components.Count == 0
         && indicator is PriceCircularTransform or PriceTranscendentalTransform or PriceRoundingTransform or CandleArithmetic
-            or MedianPrice or TypicalPrice or WeightedClose or FullTypicalPrice or DojiCandle or BullishCandle or BearishCandle
+            or MedianPrice or TypicalPrice or WeightedClose or FullTypicalPrice or AveragePrice or MidRange or HlcAverage or OhlcAverage
+            or DojiCandle or BullishCandle or BearishCandle
         || IsShadowDojiGraph(indicator);
 
     private static Bar FillPointwise(Bar[] source, double[][] output, IIndicator indicator,
         CancellationToken cancellation, OwnedBarBuffer? owned) => indicator switch
     {
         CandleArithmetic arithmetic => FillArithmetic(source, output, arithmetic, cancellation, owned),
-        MedianPrice => FillPointwiseKernel(source, output, indicator, new MedianPriceKernel(), cancellation, owned),
-        TypicalPrice => FillPointwiseKernel(source, output, indicator, new TypicalPriceKernel(), cancellation, owned),
+        MedianPrice or MidRange => FillPointwiseKernel(source, output, indicator, new MedianPriceKernel(), cancellation, owned),
+        TypicalPrice or HlcAverage => FillPointwiseKernel(source, output, indicator, new TypicalPriceKernel(), cancellation, owned),
         WeightedClose => FillPointwiseKernel(source, output, indicator, new WeightedCloseKernel(), cancellation, owned),
-        FullTypicalPrice => FillPointwiseKernel(source, output, indicator, new FullTypicalPriceKernel(), cancellation, owned),
+        FullTypicalPrice or OhlcAverage => FillPointwiseKernel(source, output, indicator, new FullTypicalPriceKernel(), cancellation, owned),
+        AveragePrice => FillPointwiseKernel(source, output, indicator, new AveragePriceKernel(), cancellation, owned),
         DojiCandle candle => FillPointwiseKernel(source, output, indicator, new DojiKernel(candle.BodyFraction), cancellation, owned),
         BullishCandle => FillPointwiseKernel(source, output, indicator, new CandlePolarityKernel(true), cancellation, owned),
         BearishCandle => FillPointwiseKernel(source, output, indicator, new CandlePolarityKernel(false), cancellation, owned),
@@ -26,22 +28,31 @@ internal static partial class ValuesBarExecution
         GravestoneDojiCandle candle => FillPointwiseKernel(source, output, indicator,
             new ShadowDojiKernel(candle.BodyFraction, candle.ShadowFraction, false), cancellation, owned),
         PriceCircularTransform { Operation: PriceCircularOperation.ArcSine } => FillAsin(source, output, cancellation, owned),
-        PriceCircularTransform { Operation: PriceCircularOperation.Sine } => FillPointwise<Sine, AllReal>(source, output, indicator, cancellation, owned),
-        PriceCircularTransform { Operation: PriceCircularOperation.Cosine } => FillPointwise<Cosine, AllReal>(source, output, indicator, cancellation, owned),
-        PriceCircularTransform { Operation: PriceCircularOperation.Tangent } => FillPointwise<Tangent, AllReal>(source, output, indicator, cancellation, owned),
-        PriceCircularTransform { Operation: PriceCircularOperation.ArcCosine } => FillPointwise<ArcCosine, UnitInterval>(source, output, indicator, cancellation, owned),
-        PriceCircularTransform { Operation: PriceCircularOperation.ArcTangent } => FillPointwise<ArcTangent, AllReal>(source, output, indicator, cancellation, owned),
-        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.NaturalLogarithm } => FillPointwise<Logarithm, Positive>(source, output, indicator, cancellation, owned),
-        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.CommonLogarithm } => FillPointwise<CommonLogarithm, Positive>(source, output, indicator, cancellation, owned),
-        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.Exponential } => FillPointwise<Exponential, AllReal>(source, output, indicator, cancellation, owned),
-        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.HyperbolicSine } => FillPointwise<HyperbolicSine, AllReal>(source, output, indicator, cancellation, owned),
-        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.HyperbolicCosine } => FillPointwise<HyperbolicCosine, AllReal>(source, output, indicator, cancellation, owned),
-        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.HyperbolicTangent } => FillPointwise<HyperbolicTangent, AllReal>(source, output, indicator, cancellation, owned),
+        PriceCircularTransform { Operation: PriceCircularOperation.Sine } => FillPointwise<Sine, AllReal>(source, output, indicator, cancellation, owned, FanoutParallelMinimum(source.Length, cancellation)),
+        PriceCircularTransform { Operation: PriceCircularOperation.Cosine } => FillPointwise<Cosine, AllReal>(source, output, indicator, cancellation, owned, FanoutParallelMinimum(source.Length, cancellation)),
+        PriceCircularTransform { Operation: PriceCircularOperation.Tangent } => FillPointwise<Tangent, AllReal>(source, output, indicator, cancellation, owned, FanoutParallelMinimum(source.Length, cancellation)),
+        PriceCircularTransform { Operation: PriceCircularOperation.ArcCosine } => FillPointwise<ArcCosine, UnitInterval>(source, output, indicator, cancellation, owned, FanoutParallelMinimum(source.Length, cancellation)),
+        PriceCircularTransform { Operation: PriceCircularOperation.ArcTangent } => FillPointwise<ArcTangent, AllReal>(source, output, indicator, cancellation, owned, FanoutParallelMinimum(source.Length, cancellation)),
+        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.NaturalLogarithm } => FillPointwise<Logarithm, Positive>(source, output, indicator, cancellation, owned, FanoutParallelMinimum(source.Length, cancellation)),
+        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.CommonLogarithm } => FillPointwise<CommonLogarithm, Positive>(source, output, indicator, cancellation, owned, FanoutParallelMinimum(source.Length, cancellation)),
+        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.Exponential } => FillPointwise<Exponential, AllReal>(source, output, indicator, cancellation, owned, 65536),
+        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.HyperbolicSine } => FillPointwise<HyperbolicSine, AllReal>(source, output, indicator, cancellation, owned, FanoutParallelMinimum(source.Length, cancellation)),
+        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.HyperbolicCosine } => FillPointwise<HyperbolicCosine, AllReal>(source, output, indicator, cancellation, owned, FanoutParallelMinimum(source.Length, cancellation)),
+        PriceTranscendentalTransform { Operation: PriceTranscendentalOperation.HyperbolicTangent } => FillPointwise<HyperbolicTangent, AllReal>(source, output, indicator, cancellation, owned, FanoutParallelMinimum(source.Length, cancellation)),
         PriceRoundingTransform { Operation: PriceRoundingOperation.Ceiling } => FillPointwise<Ceiling, AllReal>(source, output, indicator, cancellation, owned, 65536),
         PriceRoundingTransform { Operation: PriceRoundingOperation.Floor } => FillPointwise<Floor, AllReal>(source, output, indicator, cancellation, owned, 65536),
         PriceRoundingTransform { Operation: PriceRoundingOperation.SquareRoot } => FillPointwise<SquareRoot, Nonnegative>(source, output, indicator, cancellation, owned, 65536),
         _ => throw new InvalidOperationException("Unqualified pointwise indicator.")
     };
+
+    private static int FanoutParallelMinimum(int count, CancellationToken cancellation)
+    {
+        // Both limits select the same route outside this interval. Avoid probing
+        // topology for small inputs or before the kernel observes cancellation.
+        if (count is < 8192 or >= 65536 || cancellation.IsCancellationRequested) return 8192;
+        int physical = AiDotNet.Tensors.Helpers.CpuParallelSettings.PhysicalCoreCount;
+        return physical > 0 && WorkerCount() > physical ? 65536 : 8192;
+    }
 
     private interface IPointwiseMath
     {

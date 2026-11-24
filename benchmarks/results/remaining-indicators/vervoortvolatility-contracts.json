@@ -1,0 +1,37 @@
+{
+  "batch": "vervoort-volatility-shared-execution",
+  "types": [
+    "VervoortVolatilityBands"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact Vervoort volatility kernel once for three bands. Preserve directional range based on original Low, EMA stages, distinct lower multiplier, observed startup, huge periods, warmup, ownership and explicit average/source fallback.",
+  "verification": {
+    "unit_passed": 94,
+    "fixture_passed": 4,
+    "discovery_passed": 134,
+    "gpu_passed": 100,
+    "contract_methods": 1473,
+    "hosted_methods": 1461,
+    "evidence": [
+      {
+        "file": "vervoortvolatility-unit.trx.gz",
+        "passed_cases": 94,
+        "trx_sha256": "2778178eefac4f202da759632d360947375f768feb45c1bdb9da5f1d9e5994fa"
+      },
+      {
+        "file": "vervoortvolatility-fixture.trx.gz",
+        "passed_cases": 138,
+        "trx_sha256": "7065d5ee9078e2ac1e3713185cb2b9ad63d6d3c67f0d07f0ab94cf89beabd027"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVervoortVolatilityBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "VervoortVolatilityBands"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

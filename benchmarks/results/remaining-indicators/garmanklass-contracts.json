@@ -1,0 +1,37 @@
+{
+  "batch": "garman-klass-cached-terms",
+  "types": [
+    "GarmanKlassVolatility"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Cache stable per-candle Garman-Klass terms while retaining oldest-first sums; publish volatility once and reuse exact weighted smoothing for its seven-bar signal. Preserve period clamping, original candle fields, component/source fallback and ownership. Includes OHLC helper regression coverage.",
+  "verification": {
+    "unit_passed": 56,
+    "fixture_passed": 16,
+    "discovery_passed": 147,
+    "gpu_passed": 100,
+    "contract_methods": 1486,
+    "hosted_methods": 1474,
+    "evidence": [
+      {
+        "file": "garmanklass-unit.trx.gz",
+        "passed_cases": 56,
+        "trx_sha256": "1a308e38465849e78305bf6c4706634767a0cb86bd5a9bd96c0893f86356c614"
+      },
+      {
+        "file": "garmanklass-fixture.trx.gz",
+        "passed_cases": 163,
+        "trx_sha256": "9be0220fcaadcab193ee6eff9e9123bc2163b5f8b0b097d7eb1d383274333f80"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingGarmanKlassBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "GarmanKlassVolatility"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

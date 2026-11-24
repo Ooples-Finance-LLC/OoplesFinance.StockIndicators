@@ -1,0 +1,59 @@
+{
+  "batch": "ehlers-deviation-shared-execution",
+  "types": [
+    "EhlersDeviationScaledMovingAverage",
+    "EhlersFisherizedDeviationScaledOscillator",
+    "EhlersDeviationScaledSuperSmoother"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact deviation-scaled kernels for the moving average, Fisherized oscillator and super smoother. Preserve doubled-period overflow fallback, fixed hidden slow periods, Fisher hold behavior, ignored Poles, original fields, sources/components and ownership.",
+  "verification": {
+    "unit_passed": 40,
+    "fixture_passed": 12,
+    "discovery_passed": 149,
+    "gpu_passed": 100,
+    "contract_methods": 1488,
+    "hosted_methods": 1476,
+    "evidence": [
+      {
+        "file": "deviationfamily-unit.trx.gz",
+        "passed_cases": 40,
+        "trx_sha256": "1ee2e46d1126aa5c1bbef162cd0552c1e215c5b8968dcf316c04e6d5bfc4d326"
+      },
+      {
+        "file": "deviationfamily-fixture.trx.gz",
+        "passed_cases": 161,
+        "trx_sha256": "e61c29eabacc01d74c263d2a5cdc9cc2b05220f070204af0bc8791797744aef0"
+      }
+    ],
+    "integration": {
+      "base": "3007ebbf",
+      "integrated_candidate": "d7229fb8",
+      "evidence": [
+        {
+          "file": "deviation-residual-integration-unit.trx.gz",
+          "passed_cases": 46,
+          "trx_sha256": "a4f7caf19477aab6c1a837761dbd3f013183997d1824c5310004382c59f892e5"
+        },
+        {
+          "file": "deviation-residual-integration-fixture.trx.gz",
+          "passed_cases": 170,
+          "trx_sha256": "95edbb9792e379451717baac4f6d8519eab529a1521b3b00b4a9c3753d108b5a"
+        }
+      ],
+      "gpu_source_sha256": "cba95604d2b38ebe48bab2b6a9bb23adf0df31486b955170064916fb11c8ad60",
+      "interpretation": "Integrated residual states match the preserved candidate exactly. Prior Ehlers states and domain validation remain unchanged. Added cross-batch mixed-root coverage and revalidated 46 focused unit cases, 20 parity cases, 150 discovery cases and 100 GPU cases. Unchanged independent numerical cases retain their original archived evidence."
+    }
+  },
+  "benchmark_fixture": {
+    "type": "RemainingDeviationFamilyBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersDeviationScaledMovingAverage",
+      "EhlersFisherizedDeviationScaledOscillator",
+      "EhlersDeviationScaledSuperSmoother"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

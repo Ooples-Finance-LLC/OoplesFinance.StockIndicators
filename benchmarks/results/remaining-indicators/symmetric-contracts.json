@@ -1,0 +1,36 @@
+{
+  "batch": "generated-symmetric-triangular-filters",
+  "types": [
+    "SymmetricallyWeightedMovingAverage",
+    "EhlersTriangleMovingAverage",
+    "EhlersTriangleWindowIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "SymmetricWindowMean maintains exact weighted, total and two recent-half sums, replacing per-update tap scans while preserving odd/even weights, zero-padding and one final rounding. Shared execution bounds input history by source count and computes Triangle Window line/ROC together using its existing extended kernel. Independent batch tap calculation remains unchanged.",
+  "verification": {
+    "unit_passed": 99,
+    "fixture_passed": 12,
+    "discovery_passed": 46,
+    "gpu_passed": 100,
+    "contract_methods": 1381,
+    "hosted_methods": 1369,
+    "evidence": [
+      {
+        "file": "symmetric-unit.trx.gz",
+        "passed_cases": 99,
+        "trx_sha256": "6d7a99f2e63b6cd0a9063da9afa8779ddc76d0727ad7909276d10c46af46f07c"
+      },
+      {
+        "file": "symmetric-fixture.trx.gz",
+        "passed_cases": 58,
+        "trx_sha256": "74ac610115840cdee6fee5cef533b96c8b12c2846539cf3176d0ebcc2bd05c3d"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingSymmetricBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

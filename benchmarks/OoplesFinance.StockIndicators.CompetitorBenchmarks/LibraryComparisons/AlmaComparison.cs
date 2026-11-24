@@ -66,13 +66,7 @@ internal static class AlmaComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var flags = run.Held(indicator.IsDefined);
-        return VolumePriceComparison.Mask(
-            run[indicator.Value]
-                .ToArray()
-                .WherePresent(flags)
-                .ToArray()
-        );
+        return NamedComparisonPublisher.Single(run[indicator.Value], run[indicator.IsDefined]);
     }
 
     internal static ComparisonSeries Reference(

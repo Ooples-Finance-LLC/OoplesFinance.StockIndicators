@@ -70,6 +70,28 @@ public sealed class ContextReversalSharedExecutionTests(ITestOutputHelper log)
                 rule.Check(new IndicatorValidationContext("Mixed context reversal", bars, [run[root].ToArray()], 0));
         }
     }
+    [Theory]
+    [InlineData(2)] [InlineData(3)]
+    public async Task UpperShadowContextBoundariesPreserveSignalsAndFollowingState(int kind)
+    {
+        var bars = new List<Bar>();
+        foreach (double top in kind == 2 ? new[] { 3.125, 5, 6, 3.125 } : new[] { 12.125, 10.125, 9.125, 12.125 })
+        {
+            bars.Add(new(default, 10, 20, 0, 5, 1));
+            bars.Add(new(default, 10, 20, 0, 5, 1));
+            bars.Add(new(default, top - .125, top + 5, top - .125, top, 1));
+        }
+        var owner = Create(kind, 1);
+        var state = (IIndicatorState)owner.CreateState();
+        var actual = bars.Select(b => state.Update(b)).ToArray();
+        Assert.Equal(kind == 2 ? 100 : -100, actual[2]);
+        Assert.Equal(0, actual[5]); // Context equality must reject.
+        Assert.Equal(0, actual[8]); // A wrong-side context must reject.
+        Assert.Equal(kind == 2 ? 100 : -100, actual[11]);
+        await Check(bars.ToArray(), owner);
+        foreach (int count in new[] { 8191, 8192, 8193 })
+            await Check(Enumerable.Range(0, count).Select(i => bars[i % bars.Count]).ToArray(), Create(kind, 1));
+    }
     private static async Task Check(Bar[] bars, IndicatorBase owner)
     {
         var state = (IIndicatorState)owner.CreateState();

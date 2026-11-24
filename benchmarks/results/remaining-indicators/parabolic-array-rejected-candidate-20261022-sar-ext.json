@@ -1,0 +1,55 @@
+{
+  "runtime": ".NET 10.0.13 (10.0.13, 10.0.1326.50504)",
+  "rows": [
+    {
+      "pair": "TaLib.Functions.SarExt",
+      "bars": 1000,
+      "ooples": {
+        "mean_ns": 220996.5,
+        "lower_ns": 197453.26323874647,
+        "upper_ns": 244539.73676125353,
+        "allocated_bytes": 41912,
+        "samples": 10
+      },
+      "competitor": {
+        "mean_ns": 143849.77777777778,
+        "lower_ns": 140880.32646550474,
+        "upper_ns": 146819.22909005082,
+        "allocated_bytes": 42528,
+        "samples": 9
+      },
+      "competitor_over_ooples": 0.6509142804423499,
+      "verdict": "slower"
+    },
+    {
+      "pair": "TaLib.Functions.SarExt",
+      "bars": 10000,
+      "ooples": {
+        "mean_ns": 986902.8,
+        "lower_ns": 972090.0644242793,
+        "upper_ns": 1001715.5355757208,
+        "allocated_bytes": 419600,
+        "samples": 10
+      },
+      "competitor": {
+        "mean_ns": 275030.22222222225,
+        "lower_ns": 270085.1587837844,
+        "upper_ns": 279975.28566066007,
+        "allocated_bytes": 339528,
+        "samples": 9
+      },
+      "competitor_over_ooples": 0.27868015190778894,
+      "verdict": "slower"
+    }
+  ],
+  "source_sha": "cfb6d342a5fe35c2c48df46937d2ab3ddaf25e06",
+  "binary_run": 39721035437,
+  "workflow_sha": "8b93566d0b198f8521ed638debf60fe91b26aebc",
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/actions/runs/39721061988",
+  "report_sha256": "0f35ac807c4ade765e9a1354e06c2ac631d3fe3fc8ef93bf24158cc876e68694",
+  "benchmark_binary_sha256": "4a17244a21562ad915cfe1195fbbfd1453d1ac0d71c9a55b6043cd60d0abb8e9",
+  "production_binary_sha256": "837ed4455b99b38a301fb3051b2a85d3a1c2c9c6ae3e7b7acabfa276c6b9f631",
+  "note": "Source-pinned direct Parabolic comparison at both sizes. Retained confidence intervals determine the verdict; cross-run times are not controlled speedup evidence.",
+  "raw_evidence": "benchmarks/results/remaining-indicators/parabolic-array-rejected-candidate-20261022-sar-ext-raw.json.gz",
+  "disposition": "Not imported: production follow-up rejected after controlled same-runner10k regression confirmation. Retained as measured evidence, not current-source performance."
+}

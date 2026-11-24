@@ -4949,11 +4949,11 @@ internal static partial class IndicatorCompute
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var custom = ComponentAverage.HasOverrides;
-        using var means = context.Rent(input.Count);
-        if (custom) MovingAverage(data, maType, Math.Max(1, slowLength), SpanCompat.AsReadOnlySpan(input), means.WritableSpan);
+        using ComputeBuffer? means = custom ? context.Rent(input.Count) : null;
+        if (custom) MovingAverage(data, maType, Math.Max(1, slowLength), SpanCompat.AsReadOnlySpan(input), means!.Value.WritableSpan);
         var output = context.Rent(input.Count);
         using var window = new TrendIntensityWindow(maType, fastLength, slowLength);
-        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true, custom ? means.Span[i] : null);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true, custom ? means!.Value.Span[i] : null);
         return output;
     }
 
@@ -5051,17 +5051,17 @@ internal static partial class IndicatorCompute
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
-        using var means = context.Rent(input.Count);
+        using ComputeBuffer? means = custom ? context.Rent(input.Count) : null;
         if (custom)
         {
             using var line = context.Rent(input.Count); var cumulative = new TradeVolumeTotal();
             for (var i = 0; i < input.Count; i++) line.WritableSpan[i] = cumulative.Next(input[i], data.Volumes[i], true).Publish();
-            MovingAverage(data, maType, Math.Max(1, length), line.Span, means.WritableSpan);
+            MovingAverage(data, maType, Math.Max(1, length), line.Span, means!.Value.WritableSpan);
         }
         using var window = new TradeVolumeWindow(maType, length); var output = context.Rent(input.Count);
         for (var i = 0; i < input.Count; i++)
         {
-            var value = window.Next(input[i], data.Volumes[i], true, custom ? means.Span[i] : null);
+            var value = window.Next(input[i], data.Volumes[i], true, custom ? means!.Value.Span[i] : null);
             output.WritableSpan[i] = outputKey == "Signal" ? value.Signal : value.Line;
         }
         return output;
@@ -5108,7 +5108,8 @@ internal static partial class IndicatorCompute
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         using var window = new MoneyFlowPercentWindow(length, maType);
         var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
-        using var volumes = context.Rent(input.Count); using var flows = context.Rent(input.Count);
+        using ComputeBuffer? volumes = custom ? context.Rent(input.Count) : null;
+        using ComputeBuffer? flows = custom ? context.Rent(input.Count) : null;
         if (custom)
         {
             using var contributions = context.Rent(input.Count);
@@ -5117,11 +5118,11 @@ internal static partial class IndicatorCompute
                 var previous = i == 0 ? 0 : input[i - 1];
                 contributions.WritableSpan[i] = MoneyFlowAccumulationWindow.Flow(Math.Max(data.HighPrices[i], previous), Math.Min(data.LowPrices[i], previous), input[i], data.Volumes[i]).Publish();
             }
-            MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(data.Volumes), volumes.WritableSpan);
-            MovingAverage(data, maType, Math.Max(1, length), contributions.Span, flows.WritableSpan);
+            MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(data.Volumes), volumes!.Value.WritableSpan);
+            MovingAverage(data, maType, Math.Max(1, length), contributions.Span, flows!.Value.WritableSpan);
         }
         var output = context.Rent(input.Count);
-        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(data.HighPrices[i], data.LowPrices[i], input[i], data.Volumes[i], true, custom ? volumes.Span[i] : null, custom ? flows.Span[i] : null);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(data.HighPrices[i], data.LowPrices[i], input[i], data.Volumes[i], true, custom ? volumes!.Value.Span[i] : null, custom ? flows!.Value.Span[i] : null);
         return output;
     }
 
@@ -10421,14 +10422,17 @@ internal static partial class IndicatorCompute
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
         using var window = new GeneralizedDoubleWindow(maType, length, factor, initializeFallback: !custom);
-        using var first = context.Rent(input.Count); using var second = context.Rent(input.Count);
         if (custom)
         {
+            using var first = context.Rent(input.Count); using var second = context.Rent(input.Count);
             MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), first.WritableSpan);
             MovingAverage(data, maType, length, first.Span, second.WritableSpan);
+            var customResult = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) customResult.WritableSpan[i] = window.Next(input[i], true, first.Span[i], second.Span[i]);
+            return customResult;
         }
         var result = context.Rent(input.Count);
-        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true, custom ? first.Span[i] : null, custom ? second.Span[i] : null);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
         return result;
     }
 
@@ -12580,7 +12584,7 @@ internal static partial class IndicatorCompute
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         using var window = new VolumeWeightedWindow(maType, length, false);
         var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
-        using var mean = context.Rent(input.Count);
+        using var mean = context.Rent(external ? input.Count : 0);
         if (external) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), mean.WritableSpan);
         var output = context.Rent(input.Count);
         for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = external
@@ -13184,7 +13188,7 @@ internal static partial class IndicatorCompute
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         using var window = new VolumeAdjustedWindow(maType, length, factor, false);
         var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
-        using var mean = context.Rent(input.Count);
+        using var mean = context.Rent(external ? input.Count : 0);
         if (external) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), mean.WritableSpan);
         var output = context.Rent(input.Count);
         for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = external
@@ -14848,11 +14852,11 @@ internal static partial class IndicatorCompute
         int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
         var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data);
-        using var seed = context.Rent(input.Count);
         var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
-        if (external) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), seed.WritableSpan);
+        using ComputeBuffer? seed = external ? context.Rent(input.Count) : null;
+        if (external) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), seed!.Value.WritableSpan);
         var result = context.Rent(input.Count); using var window = new AdaptiveEmaWindow(maType, length, Math.Max(1, input.Count));
-        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], high[i], low[i], true, external ? seed.Span[i] : null);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], high[i], low[i], true, external ? seed!.Value.Span[i] : null);
         return result;
     }
 
@@ -15613,6 +15617,18 @@ internal static partial class IndicatorCompute
     {
         if (maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides)
         {
+            // A batch shorter than the window publishes only warmup zeros. Avoid
+            // allocating a period-sized ring, but retain exact-input validation.
+            if (Math.Max(1, length) > input.Length)
+            {
+                var warmup = new ExactMeanAccumulator();
+                for (var i = 0; i < input.Length; i++)
+                {
+                    warmup.Add(input[i]);
+                    output[i] = 0;
+                }
+                return;
+            }
             using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, length));
             for (var i = 0; i < input.Length; i++) output[i] = mean.Next(input[i], true);
         }
@@ -17358,19 +17374,20 @@ internal static partial class IndicatorCompute
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
         var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var count = input.Count; var period = AdaptiveZoneWindow.Period(length);
-        using var center = context.Rent(count); using var width = context.Rent(count);
         var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using ComputeBuffer? center = external ? context.Rent(count) : null;
+        using ComputeBuffer? width = external ? context.Rent(count) : null;
         if (external)
         {
             using var first = context.Rent(count); using var range = context.Rent(count); using var rangeFirst = context.Rent(count);
-            MovingAverage(data, maType, period, SpanCompat.AsReadOnlySpan(input), first.WritableSpan); MovingAverage(data, maType, period, first.Span, center.WritableSpan);
+            MovingAverage(data, maType, period, SpanCompat.AsReadOnlySpan(input), first.WritableSpan); MovingAverage(data, maType, period, first.Span, center!.Value.WritableSpan);
             for (var i = 0; i < count; i++) range.WritableSpan[i] = high[i] - low[i];
-            MovingAverage(data, maType, period, range.Span, rangeFirst.WritableSpan); MovingAverage(data, maType, period, rangeFirst.Span, width.WritableSpan);
+            MovingAverage(data, maType, period, range.Span, rangeFirst.WritableSpan); MovingAverage(data, maType, period, rangeFirst.Span, width!.Value.WritableSpan);
         }
         var result = context.Rent(count); using var window = new AdaptiveZoneWindow(maType, length, pct, Math.Max(1, count));
         for (var i = 0; i < count; i++)
         {
-            var point = external ? AdaptiveZoneWindow.Bands(new RocBankValue(center.Span[i]), new RocBankValue(width.Span[i]), pct) : window.Next(input[i], high[i], low[i], true);
+            var point = external ? AdaptiveZoneWindow.Bands(new RocBankValue(center!.Value.Span[i]), new RocBankValue(width!.Value.Span[i]), pct) : window.Next(input[i], high[i], low[i], true);
             result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle;
         }
         return result;
@@ -17883,13 +17900,19 @@ internal static partial class IndicatorCompute
             var superGmmaFast = fast[i].Mean(11);
             var superGmmaSlow = slow[i].Mean(16);
             oscillatorRaw[i] = GuppyRibbonArithmetic.Percent(superGmmaFast, superGmmaSlow);
-            output[i] = rawSum.Next(oscillatorRaw[i], true);
+            output[i] = FrameworkCompatibility.IsFinite(oscillatorRaw[i]) || smoothLength > 1
+                ? rawSum.Next(oscillatorRaw[i], true) : oscillatorRaw[i];
         }
 
         if (series == MacdSeries.Signal)
         {
-            // the signal is an average of the RAW oscillator, not of the smoothed one this arm just wrote
+            // The signal uses the raw oscillator. Preserve its finite prefix,
+            // then invalidate the dependent suffix without entering a finite-only kernel.
+            var finiteCount = 0;
+            while (finiteCount < count && FrameworkCompatibility.IsFinite(oscillatorRaw[finiteCount])) finiteCount++;
+            oscillatorRaw.Slice(finiteCount).Clear();
             MovingAverage(data, maType, Math.Max(1, signalLength), raw.Span, output);
+            output.Slice(finiteCount).Fill(double.NaN);
         }
 
         return buffer;
@@ -20379,13 +20402,13 @@ internal static partial class IndicatorCompute
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var custom = ComponentAverage.HasOverrides;
-        using var means = context.Rent(data.Count);
-        if (custom) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), means.WritableSpan);
+        using ComputeBuffer? means = custom ? context.Rent(data.Count) : null;
+        if (custom) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), means!.Value.WritableSpan);
         var output = context.Rent(data.Count);
         using var window = new RelativeVolumeWindow(maType, length);
         for (var i = 0; i < data.Count; i++)
         {
-            var (score, demand) = window.Next(input[i], data.Volumes[i], true, custom ? means.Span[i] : null);
+            var (score, demand) = window.Next(input[i], data.Volumes[i], true, custom ? means!.Value.Span[i] : null);
             output.WritableSpan[i] = demandPrice ? demand : score;
         }
         return output;

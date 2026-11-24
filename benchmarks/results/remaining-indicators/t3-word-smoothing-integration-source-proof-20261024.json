@@ -1,0 +1,34 @@
+{
+  "qualified_commit": "f78e671f4ee62f02f120740ab45e84594f189e93",
+  "qualified_code": "6740f677a92acabc22d4ad93e2fb61fb2d5ace36",
+  "matched_paths": [
+    "src",
+    "tests",
+    "examples",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "scripts",
+    ".github",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "source_fingerprint_sha256": "d4db82167e6cf13973b4e9a6d2044a51ebb067f8b1b033f042cb07746bd9f94f",
+  "qualification_reused": {
+    "unit": 44,
+    "parity": 26,
+    "gpu": 100,
+    "inventory": 8
+  },
+  "consumer_dll_hashes_rechecked": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-smoothing-20261024\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "29fbcf3029d958fe8915ac1ef37050322a55de3762b665931839b44a57ad7852",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-smoothing-20261024\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "29fbcf3029d958fe8915ac1ef37050322a55de3762b665931839b44a57ad7852",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-smoothing-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "29fbcf3029d958fe8915ac1ef37050322a55de3762b665931839b44a57ad7852",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-t3-word-smoothing-20261024\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "29fbcf3029d958fe8915ac1ef37050322a55de3762b665931839b44a57ad7852"
+  },
+  "control": "local-t3-word-smoothing-control-20261024",
+  "note": "Integrated executable sources and build inputs exactly match qualified candidate. Publishing checkout binaries remain older; preserved candidate DLL supplied the new measurement arm. No redundant production rebuild."
+}

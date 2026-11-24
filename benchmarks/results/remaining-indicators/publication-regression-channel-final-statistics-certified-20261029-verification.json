@@ -1,0 +1,66 @@
+{
+  "input_head": "da818bdb8c7b41b4c9e362f081eef394409409b6",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests/DeferredRegressionChannelFixtureTests.cs",
+    "src/Indicators/RegressionChannelSnapshot.cs",
+    "src/Indicators/RegressionWithChannels.cs",
+    "src/Indicators/WindowRegressionStatistics.cs",
+    "tests/ModelsTests/DeferredRegressionMomentTests.cs"
+  ],
+  "batch_note": "Extract unchanged exact moment accumulation from regression State.Update; two historical channel consumers calculate fitted outputs only at complete-block endpoints. Ordinary Update retains the identical calculation sequence. No arithmetic/rounding change. Shared state legacy differential, boundaries, eviction/reset, historical ownership/cancellation and native 1k/10k fixture checks; performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-30T09:16:44.382065+00:00",
+  "unit": {
+    "passed": 48,
+    "class_counts": {
+      "RegressionStatisticsSharedExecutionTests": 24,
+      "RegressionWithChannelsBuilderTests": 12,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "DeferredRegressionMomentTests": 3,
+      "RegressionStateParityTests": 5
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\regression-channel-final-statistics\\unit\\unit.trx",
+    "sha256": "d11bda01fe0fac620fbf8f308e3b2e622bececd670ff00773dcd0e43c8bc7c13",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-regression-channel-final-statistics-certified-20261029-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 23,
+    "class_counts": {
+      "RegressionChannelComparisonTests": 5,
+      "SharedRegressionChannelBenchmarkTests": 8,
+      "RegressionStatisticsComparisonTests": 8,
+      "DeferredRegressionChannelFixtureTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\regression-channel-final-statistics\\parity\\parity.trx",
+    "sha256": "72b1aeef07b1f3aaa98ce822ee06754dd5aa64679e86d8bfab64108e226c08a9",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-regression-channel-final-statistics-certified-20261029-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-regression-channel-final-statistics-20261029\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "6d1e6097c844cdf1b7a7bd83a014f944dc67e5b1696ad953676ace04c5e60986",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-regression-channel-final-statistics-20261029\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "6d1e6097c844cdf1b7a7bd83a014f944dc67e5b1696ad953676ace04c5e60986",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-regression-channel-final-statistics-20261029\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "6d1e6097c844cdf1b7a7bd83a014f944dc67e5b1696ad953676ace04c5e60986",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-regression-channel-final-statistics-20261029\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "6d1e6097c844cdf1b7a7bd83a014f944dc67e5b1696ad953676ace04c5e60986"
+  },
+  "source_fingerprint_sha256": "c544bbc458143242575b7c2ec6b0c4832f378dfb1baab3b024c77b0a955461d2",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Extract unchanged exact moment accumulation from regression State.Update; two historical channel consumers calculate fitted outputs only at complete-block endpoints. Ordinary Update retains the identical calculation sequence. No arithmetic/rounding change. Shared state legacy differential, boundaries, eviction/reset, historical ownership/cancellation and native 1k/10k fixture checks; performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

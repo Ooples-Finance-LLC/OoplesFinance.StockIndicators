@@ -1,0 +1,33 @@
+{
+  "types": [
+    "ConnorsRsi",
+    "ConnorsRelativeStrengthIndex",
+    "StochasticConnorsRelativeStrengthIndex"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "7fee96c3963f51847334179190e44a3f598cc4ce",
+  "combined_input_sha256": "66c8739c01ec3e29f34901b7c3390f747044d47e79f9f7648f20171f8a944e06",
+  "benchmark_fixture": {
+    "type": "RemainingConnorsFollowupsBenchmarks",
+    "operations": [
+      "ConnorsRsi",
+      "ConnorsRelativeStrengthIndex",
+      "StochasticConnorsRelativeStrengthIndex"
+    ]
+  },
+  "checks": {
+    "unit": 277,
+    "parity": 12,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/connors-followups-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/connors-followups-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

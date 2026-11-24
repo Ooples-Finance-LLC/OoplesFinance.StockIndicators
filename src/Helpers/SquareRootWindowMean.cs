@@ -6,10 +6,11 @@ internal sealed class SquareRootWindowMean : IDisposable
     private readonly double[] _weights;
     private readonly ExactMeanAccumulator _denominator;
 
-    internal SquareRootWindowMean(int length)
+    internal SquareRootWindowMean(int length, int capacityHint = int.MaxValue)
     {
-        _values = new PooledRingBuffer<double>(Math.Max(1, length));
-        _weights = Weights(_values.Capacity, out _denominator);
+        length = Math.Max(1, length);
+        _values = new PooledRingBuffer<double>(Math.Min(length, Math.Max(1, capacityHint)));
+        _weights = Weights(length, out _denominator);
     }
 
     private static double[] Weights(int length, out ExactMeanAccumulator denominator)

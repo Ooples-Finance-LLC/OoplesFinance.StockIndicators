@@ -59,9 +59,7 @@ internal static class McGinleyComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var v = run[indicator.Value];
-        var mask = run[indicator.IsDefined];
-        return Series(v.WherePresent(mask));
+        return NamedComparisonPublisher.Single(run[indicator.Value], run[indicator.IsDefined]);
     }
 
     internal static double?[] GridReference(double[] prices, int p, double factor, bool reset)

@@ -141,6 +141,16 @@ public sealed class ArnaudLegouxWindow : MultiOutputIndicatorBase, IIndicatorVal
             _denominator = default;
         }
 
+#if !NETFRAMEWORK
+        // The private batch path requests the original coefficients only after
+        // its first complete, validated window. Streaming startup is unchanged.
+        internal ExactMeanAccumulator.ProductFactor[] PrepareBatchWeights()
+        {
+            PrepareWeights(period);
+            return _weights;
+        }
+#endif
+
         private void PrepareWeights(int n)
         {
             if (_weights.Length == n)

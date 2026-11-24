@@ -1,0 +1,37 @@
+{
+  "batch": "wilson-shared-execution",
+  "types": [
+    "WilsonRelativePriceChannel"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share default EMA Wilson kernel across four band outputs through a span overload that avoids per-bar Number and double arrays. Preserve exact band and signal expressions, period clamps, threshold ordering, finite eligibility and component/source fallback. Existing allocating and batch reference routes retained.",
+  "verification": {
+    "unit_passed": 123,
+    "fixture_passed": 4,
+    "discovery_passed": 92,
+    "gpu_passed": 100,
+    "contract_methods": 1427,
+    "hosted_methods": 1415,
+    "evidence": [
+      {
+        "file": "wilson-unit.trx.gz",
+        "passed_cases": 123,
+        "trx_sha256": "d602a39d62359a18d2143b51ea46b96196c1cb4465f4920db53d613938904f81"
+      },
+      {
+        "file": "wilson-fixture.trx.gz",
+        "passed_cases": 96,
+        "trx_sha256": "69303d1925e87e6de9a3640a2fa8e6a498717b5570117226241fe93994b4e1e5"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingWilsonBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "WilsonRelativePriceChannel"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

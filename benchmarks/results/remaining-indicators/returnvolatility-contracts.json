@@ -1,0 +1,39 @@
+{
+  "batch": "return-volatility-shared-execution",
+  "types": [
+    "CloseToCloseVolatility",
+    "DownsideDeviation"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse translated two-pass logarithmic-return deviation and exact rational downside kernels; skip unfillable windows while preserving startup counts, clamps, signed prices, source fallback, ownership and validation priority.",
+  "verification": {
+    "unit_passed": 248,
+    "fixture_passed": 8,
+    "discovery_passed": 137,
+    "gpu_passed": 100,
+    "contract_methods": 1476,
+    "hosted_methods": 1464,
+    "evidence": [
+      {
+        "file": "returnvolatility-unit.trx.gz",
+        "passed_cases": 248,
+        "trx_sha256": "c667616f7502a5ffd3450f8e095ab56f60436e1acd131058b6e7e74f19d3ebb9"
+      },
+      {
+        "file": "returnvolatility-fixture.trx.gz",
+        "passed_cases": 145,
+        "trx_sha256": "0501de994abd0d9d600940740bb81993c861127e4f2d7b4bf5c6897b8376f901"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingReturnVolatilityBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "CloseToCloseVolatility",
+      "DownsideDeviation"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

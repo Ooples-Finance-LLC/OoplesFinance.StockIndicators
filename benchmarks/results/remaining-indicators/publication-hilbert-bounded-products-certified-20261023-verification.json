@@ -1,0 +1,58 @@
+{
+  "input_head": "894342a91060f5e114ab03a845f2e7b1766dddb4",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CertifiedHilbertProjection.cs"
+  ],
+  "batch_note": "Approved Hilbert refinement: remove redundant checked product and accumulator arithmetic within existing input/coefficient bounds. Preserve original remainder mask, exact publication and fallback. Existing signed, scale, cursor, count, cancellation and subnormal reference cases plus long-history parity required. Performance unqualified.",
+  "step": "complete",
+  "updated_utc": "2026-10-24T16:38:36.665260+00:00",
+  "unit": {
+    "passed": 18,
+    "class_counts": {
+      "HilbertRoundedKernelTests": 4,
+      "CompactHilbertPhaseTests": 11,
+      "CertifiedHilbertProjectionTests": 3
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\hilbert-bounded-products\\unit\\unit.trx",
+    "sha256": "0c234eb7cdee0a871dc6344a5b1d5c3e6a260841e31e9b3768521d625e50e9b2",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-hilbert-bounded-products-certified-20261023-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 43,
+    "class_counts": {
+      "HilbertCycleSignalComparisonTests": 11,
+      "SharedHilbertSignalBenchmarkTests": 32
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\hilbert-bounded-products\\parity\\parity.trx",
+    "sha256": "847d279125793cc6ed24ae143fa0731d4c2634b9c15ad07763b303618fc13e2e",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-hilbert-bounded-products-certified-20261023-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-bounded-products-20261023\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ef79b20b49fc7d64c07beee0717530d66dbce0aed6ec3d733ab1e6f58cf81586",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-bounded-products-20261023\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ef79b20b49fc7d64c07beee0717530d66dbce0aed6ec3d733ab1e6f58cf81586",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-bounded-products-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ef79b20b49fc7d64c07beee0717530d66dbce0aed6ec3d733ab1e6f58cf81586",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-hilbert-bounded-products-20261023\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "ef79b20b49fc7d64c07beee0717530d66dbce0aed6ec3d733ab1e6f58cf81586"
+  },
+  "source_fingerprint_sha256": "b27dd812e0494502b2fa5ce03f6fce0a5208a315fe01512866ef3d315115e225",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved Hilbert refinement: remove redundant checked product and accumulator arithmetic within existing input/coefficient bounds. Preserve original remainder mask, exact publication and fallback. Existing signed, scale, cursor, count, cancellation and subnormal reference cases plus long-history parity required. Performance unqualified. Correctness checks passed; controlled performance remains pending."
+}

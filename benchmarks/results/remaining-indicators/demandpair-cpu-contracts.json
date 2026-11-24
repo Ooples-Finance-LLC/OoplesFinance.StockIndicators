@@ -1,0 +1,38 @@
+{
+  "batch": "demandpair-shared-execution",
+  "types": [
+    "DemandIndex",
+    "DemandOscillator"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 28,
+    "parity_passed": 8,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "demandpair-unit-verified.trx.gz",
+        "passed_cases": 28,
+        "trx_sha256": "91c101f9c90ee0caeed15b4f0daf86f558ef4b4307a58e6a85f03d3ec4c842de"
+      },
+      {
+        "file": "demandpair-parity-verified.trx.gz",
+        "passed_cases": 8,
+        "trx_sha256": "53c891252d7851914de9817f6fb4a08d638c8ec8b6b10ae775bf65499cb8a3a0"
+      }
+    ],
+    "context": "Executed in the combined 113-facade working candidate; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+    "test_execution_input_sha256": {
+      "unit": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+      "parity": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "b7e13308b78c1e23f9f21cbbd9323a7d9d6548ee"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

@@ -2,6 +2,14 @@
 # Set default behavior to automatically normalize line endings.
 ###############################################################################
 * text=auto
+benchmarks/plans/hosted-rollout-20261101.json text eol=lf
+benchmarks/plans/hosted-repair-20261101.json text eol=lf
+benchmarks/plans/hosted-trix-20261102.json text eol=lf
+benchmarks/plans/hosted-trix-eager-20261102.json text eol=lf
+benchmarks/plans/hosted-trix-shared-jit-20261102.json text eol=lf
+benchmarks/plans/hosted-trix-direct-fill-20261102.json text eol=lf
+benchmarks/plans/hosted-trix-settled-20261102.json text eol=lf
+benchmarks/plans/hosted-trix-word-settled-20261102.json text eol=lf
 
 ###############################################################################
 # Set default behavior for command prompt diff.

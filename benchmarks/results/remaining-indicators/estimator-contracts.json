@@ -1,0 +1,36 @@
+{
+  "batch": "generated-estimators",
+  "types": [
+    "TillsonIE2",
+    "IIRLeastSquaresEstimate",
+    "HullEstimate"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact estimator kernels through shared owned execution. Tillson shared fitting uses existing compact exact moments and observed history for unfillable windows; its SMA and Hull WMA history are bounded by owned count. Default helper callers retain existing settings. Preserve Hull capped half-period and WMA/EMA composition, IIR gain/staged rounding, and custom Tillson graph fallback. Large-period startup and compact compound readings are verified.",
+  "verification": {
+    "unit_passed": 141,
+    "fixture_passed": 12,
+    "discovery_passed": 37,
+    "gpu_passed": 100,
+    "contract_methods": 1372,
+    "hosted_methods": 1360,
+    "evidence": [
+      {
+        "file": "estimator-unit.trx.gz",
+        "passed_cases": 141,
+        "trx_sha256": "5c023d35d8222d8b27dd8f4cf93822daaf237571300624006535d4d66309e0aa"
+      },
+      {
+        "file": "estimator-fixture.trx.gz",
+        "passed_cases": 49,
+        "trx_sha256": "438b64c046e1a4dedbf2044e837557b2f1f58f76ec73f4f8ef9f298762379fb3"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingEstimatorBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

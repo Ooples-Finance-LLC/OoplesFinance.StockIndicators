@@ -92,6 +92,12 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="../benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PreservedKaufmanStressBatch.cs" Link="ModelsTests/PreservedKaufmanStressBatch.cs" />
+    <Compile Include="../benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PreservedRsmkBatch.cs" Link="ModelsTests/PreservedRsmkBatch.cs" />
+    <Compile Include="../benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks/LibraryComparisons/PreservedSectorRotationBatch.cs" Link="ModelsTests/PreservedSectorRotationBatch.cs" />
+  </ItemGroup>
+
   <!-- These check the exact routes' contracts - bit-for-bit values, owned history, validation order - so a
        builder here starts in the exact mode. A test of the fast mode asks for it by name. -->
   <ItemGroup>

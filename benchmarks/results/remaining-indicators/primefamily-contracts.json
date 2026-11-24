@@ -1,0 +1,46 @@
+{
+  "batch": "prime-family-shared-execution",
+  "types": [
+    "PrimeNumberOscillator",
+    "PrimeNumberBands"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact PrimeOffsetWindow and PrimeBandWindow without intermediate series, preserving signed64 price domains, raw-first validation and root-order error priority, startup, clamps, source fallback, ownership and cancellation.",
+  "verification": {
+    "unit_passed": 101,
+    "fixture_passed": 8,
+    "discovery_passed": 136,
+    "gpu_passed": 100,
+    "contract_methods": 1475,
+    "hosted_methods": 1463,
+    "evidence": [
+      {
+        "file": "primefamily-unit.trx.gz",
+        "passed_cases": 101,
+        "trx_sha256": "d226072f60997159d4b725300a3770acc6d9276901c2c85a0211fac7e45b671f"
+      },
+      {
+        "file": "primefamily-fixture.trx.gz",
+        "passed_cases": 144,
+        "trx_sha256": "3b6c67393ae11ad0d247cc0b2e57adeca1f005aaef24ae08d735716f3fa84f0a"
+      },
+      {
+        "file": "primefamily-fixture-launch-failure.trx.gz",
+        "outcome": "Failed",
+        "superseded": true,
+        "trx_sha256": "8e136776d450c9ed051ee677bc0e6925bc2187b08deb0c77c2f0e69260ab0225",
+        "reason": "Isolated comparator lacked runtime dependency DLLs and testhost aborted. Copied already-built harness dependencies and reran the fixture. No production rebuild; not counted as passing evidence."
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingPrimeFamilyBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "PrimeNumberOscillator",
+      "PrimeNumberBands"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

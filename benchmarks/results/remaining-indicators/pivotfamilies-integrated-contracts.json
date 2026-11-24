@@ -1,0 +1,35 @@
+{
+  "types": [
+    "CamarillaPivotPoint",
+    "FibonacciPivotPoint",
+    "DemarkPivotPoint",
+    "FloorPivotPoint"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "eca490e954c43f33a6e95e147682f86555143171",
+  "combined_input_sha256": "d40c57fd1978c3dfeca42a5fce1db6d175953bb14aff5edbd8ec3cffe9910b6b",
+  "benchmark_fixture": {
+    "type": "RemainingPivotFamiliesBenchmarks",
+    "operations": [
+      "CamarillaPivotPoint",
+      "FibonacciPivotPoint",
+      "DemarkPivotPoint",
+      "FloorPivotPoint"
+    ]
+  },
+  "checks": {
+    "unit": 17,
+    "parity": 16,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/pivotfamilies-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/pivotfamilies-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

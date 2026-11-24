@@ -1,0 +1,73 @@
+{
+  "input_head": "b182d9208ad981ee6889fbd4cb57d4675cebce5b",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "step": "complete",
+  "updated_utc": "2026-10-30T16:02:21.181194+00:00",
+  "reviewed_source_changes": [
+    "src/Indicators/TillsonAverage.cs",
+    "tests/ModelsTests/TillsonCompactSnapshotTests.cs"
+  ],
+  "batch_note": "Approved T3 snapshot compact stage adaptation; exact wide polynomial publication preserved. Parent scalar qualification must pass first. Performance pending.",
+  "unit": {
+    "passed": 226,
+    "class_counts": {
+      "TillsonNumericalTests": 84,
+      "ClassicalFiniteDifferenceTests": 18,
+      "MacdSharedExecutionTests": 18,
+      "VariableAverageSharedExecutionTests": 12,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "ClassicStochasticSharedExecutionTests": 16,
+      "TillsonCompactSnapshotTests": 48,
+      "TillsonSharedExecutionTests": 12,
+      "ClassicAverageSharedExecutionTests": 14
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\tillson\\unit\\unit.trx",
+    "sha256": "ed78353bff946429c41126c0183f80cfd6e996ea1d11fb2baa7b1041d7a66d85",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-tillson-compact-snapshot-certified-20261030-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 145,
+    "class_counts": {
+      "ClassicMacdComparisonTests": 16,
+      "SharedTaAverageNativeBenchmarkTests": 26,
+      "SharedTillsonBenchmarkTests": 16,
+      "ClassicOscillatorComparisonTests": 11,
+      "ClassicStochasticComparisonTests": 16,
+      "ClassicStochasticRsiComparisonTests": 15,
+      "SharedTaMacdNativeBenchmarkTests": 15,
+      "TillsonComparisonTests": 10,
+      "VariablePeriodComparisonTests": 16,
+      "SharedClassicAverageBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\tillson\\parity\\parity.trx",
+    "sha256": "0cee8dc4ceb8e6bcdb17f8881555618f014e09e19e5e2f22f5a56058a8c9fca1",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-tillson-compact-snapshot-certified-20261030-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tillson-compact-snapshot-20261030\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "d49cac5f0298304baa40370eabb7a01d8fdd8e39731bca23007e2a297c7f8b85",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tillson-compact-snapshot-20261030\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "d49cac5f0298304baa40370eabb7a01d8fdd8e39731bca23007e2a297c7f8b85",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tillson-compact-snapshot-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "d49cac5f0298304baa40370eabb7a01d8fdd8e39731bca23007e2a297c7f8b85",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-tillson-compact-snapshot-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "d49cac5f0298304baa40370eabb7a01d8fdd8e39731bca23007e2a297c7f8b85"
+  },
+  "source_fingerprint_sha256": "983d14254346c84b87414bb49a1664545054feb457c1e0685b0bfd71c93bf63f",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved T3 snapshot compact stage adaptation; exact wide polynomial publication preserved. Parent scalar qualification must pass first. Performance pending. Correctness checks passed; controlled performance remains pending."
+}

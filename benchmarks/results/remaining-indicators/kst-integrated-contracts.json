@@ -1,0 +1,31 @@
+{
+  "types": [
+    "KnowSureThing",
+    "Kst"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "501a29627ba7c2836f65f1c48c797d386f591024",
+  "combined_input_sha256": "5ab002878049f9e6c6e06609139ce4f9110abac031da941aca34cc4c6931cfc6",
+  "benchmark_fixture": {
+    "type": "RemainingKstBenchmarks",
+    "operations": [
+      "KnowSureThing",
+      "Kst"
+    ]
+  },
+  "checks": {
+    "unit": 568,
+    "parity": 8,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/kst-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/kst-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

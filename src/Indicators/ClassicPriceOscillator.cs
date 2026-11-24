@@ -109,17 +109,24 @@ public sealed class ClassicPriceOscillator : MultiOutputIndicatorBase, IIndicato
 
     internal sealed class State : IMultiOutputState, IDisposable
     {
-        private readonly IMultiOutputState _fast,
+        private readonly ClassicMovingAverage.State _fast,
             _slow;
         private readonly bool _percentage;
+#if !NETFRAMEWORK
+        private readonly bool _finiteInputs;
+#endif
         private readonly double[] _f = new double[2],
             _s = new double[2];
 
         internal State(ClassicPriceOscillator owner)
         {
-            _fast = (IMultiOutputState)owner.Fast.CreateState();
-            _slow = (IMultiOutputState)owner.Slow.CreateState();
+            _fast = (ClassicMovingAverage.State)owner.Fast.CreateState();
+            _slow = (ClassicMovingAverage.State)owner.Slow.CreateState();
             _percentage = owner.Percentage;
+#if !NETFRAMEWORK
+            _finiteInputs = owner.SlowPeriod > 1
+                && owner.Method is (ClassicAverageMethod.Sma or ClassicAverageMethod.Wma or ClassicAverageMethod.Trima);
+#endif
         }
 
         public void Reset()
@@ -132,21 +139,58 @@ public sealed class ClassicPriceOscillator : MultiOutputIndicatorBase, IIndicato
 
         public void Dispose()
         {
-            if (_fast is IDisposable f)
-                f.Dispose();
-            if (_slow is IDisposable s)
-                s.Dispose();
+            _fast.Dispose();
+            _slow.Dispose();
         }
 
         public void Update(in Bar bar, Span<double> output)
         {
             output.Clear();
-            _fast.Update(bar, _f);
-            _slow.Update(bar, _s);
+#if !NETFRAMEWORK
+            if (_finiteInputs && double.IsFinite(bar.Close))
+            {
+                _fast.Update(in bar, _f);
+                _slow.Update(in bar, _s);
+            }
+            else
+#endif
+            {
+                // Composed engines and rejected closes keep the shared exact entry.
+                var input = ExactVarianceWindow.Units(bar.Close);
+                _fast.UpdateUnits(input, _f);
+                _slow.UpdateUnits(input, _s);
+            }
             if (_f[1] == 0 || _s[1] == 0)
                 return;
-            var f = ((IRoundedAverageUnits)_fast).RoundedUnits;
-            var s = ((IRoundedAverageUnits)_slow).RoundedUnits;
+#if !NETFRAMEWORK
+            if (!_percentage && double.IsFinite(_f[0]) && double.IsFinite(_s[0]))
+            {
+                // The averages are already rounded binary64 values. Subtraction
+                // rounds their exact difference once, just like the unit ratio.
+                double difference = _f[0] - _s[0];
+                output[0] = difference == 0 ? 0 : difference; // NOSONAR: canonical exact zero.
+                output[1] = 1;
+                return;
+            }
+            if (_percentage && double.IsFinite(_f[0]) && double.IsFinite(_s[0]))
+            {
+                double fast = _f[0], slow = _s[0];
+                double absoluteFast = Math.Abs(fast), absoluteSlow = Math.Abs(slow);
+                // Same-sign operands within a factor of two have an exact
+                // binary64 difference (Sterbenz), including gradual underflow.
+                // Certify normalization separately to avoid double rounding.
+                if ((fast >= 0) == (slow >= 0)
+                    && absoluteFast <= 2 * absoluteSlow && absoluteSlow <= 2 * absoluteFast
+                    && AwesomeWithDetails.Arithmetic.TryNormalize(fast - slow, slow, out var normalized))
+                {
+                    output[0] = normalized;
+                    output[1] = 1;
+                    return;
+                }
+            }
+#endif
+            var f = _fast.RoundedUnits;
+            var s = _slow.RoundedUnits;
             if (_percentage)
             {
                 var numerator = 100 * (f - s) << 1074;

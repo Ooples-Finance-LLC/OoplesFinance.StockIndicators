@@ -12,9 +12,9 @@ internal sealed class TrendTraderWindow : IDisposable
     private double _highest, _lowest;
     internal static void Validate(double mult, double step)
     { if (double.IsNaN(mult) || double.IsInfinity(mult)) throw new ArgumentOutOfRangeException(nameof(mult)); if (double.IsNaN(step) || double.IsInfinity(step)) throw new ArgumentOutOfRangeException(nameof(step)); }
-    internal TrendTraderWindow(MovingAvgType kind, int length, double mult, double step, bool external = false, int capacityHint = int.MaxValue)
+    internal TrendTraderWindow(MovingAvgType kind, int length, double mult, double step, bool external = false, int capacityHint = int.MaxValue, int maxInputCount = int.MaxValue)
     {
-        Validate(mult, step); _mult = mult; _step = step; length = Math.Max(1, length); _high = new(length); _low = new(length);
+        Validate(mult, step); _mult = mult; _step = step; length = Math.Max(1, length); var capacity = Math.Min(length, Math.Max(1, maxInputCount)); _high = new(capacity); _low = new(capacity);
         _atr = new(MovingAvgType.SimpleMovingAverage, 1, length, external ? MovingAvgType.SimpleMovingAverage : kind, capacityHint);
         if (!external) { if (StrengthWindow.Supports(kind)) _average = new(kind, length, capacityHint); else _fallback = MovingAverageSmootherFactory.Create(kind, length); }
     }

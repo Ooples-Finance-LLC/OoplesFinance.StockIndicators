@@ -1,0 +1,39 @@
+{
+  "batch": "predictionfamily-shared-execution",
+  "types": [
+    "EhlersMesaPredictIndicatorV1",
+    "EhlersMesaPredictIndicatorV2",
+    "EhlersAnticipateIndicator"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 64,
+    "parity_passed": 12,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "predictionfamily-unit-verified.trx.gz",
+        "passed_cases": 64,
+        "trx_sha256": "0b1585ed76a3db0994f5b3278ebfbb7f71454a79fb23fe651af7810b8dea0f2b"
+      },
+      {
+        "file": "predictionfamily-parity-verified.trx.gz",
+        "passed_cases": 12,
+        "trx_sha256": "42648b1126379717e4273f29dbde5b2ab154c32b42b802e9d7530f52a27e1608"
+      }
+    ],
+    "context": "Executed in the combined 113-facade working candidate; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+    "test_execution_input_sha256": {
+      "unit": "b2b1f08b943dd8cc72787bf0f3572442482f4dff9425b147dd6283bd3af2bd5a",
+      "parity": "b2b1f08b943dd8cc72787bf0f3572442482f4dff9425b147dd6283bd3af2bd5a"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "b7e13308b78c1e23f9f21cbbd9323a7d9d6548ee"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

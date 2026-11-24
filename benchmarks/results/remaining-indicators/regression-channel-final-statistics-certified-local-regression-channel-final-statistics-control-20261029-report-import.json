@@ -1,0 +1,64 @@
+{
+  "before_sha256": "21ddc4203854a8742376b75f8b753b5172e35ca74c587b169cb7e6fd789aa619",
+  "candidate_sha256": "cdccd3385826fe9184f56a25f795564c9e77d6517052b13f3248fc5d95e3cf05",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 4,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 4,
+  "verdicts": {
+    "faster": 602,
+    "slower": 886,
+    "inconclusive": 48
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-regression-channel-final-statistics-control-20261029",
+  "imported_utc": "2026-10-30T09:29:29.117511+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "6b7ea0567505a8345f59572eb3e34ffb38bd1e223cd9f922ddd661e1699050ae",
+      "archive": "benchmarks/results/remaining-indicators/regression-channel-final-statistics-certified-local-regression-channel-final-statistics-control-20261029-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "8b4a5e7d955c6b8eb77f5f08601d73059110d6e21d54189d682c36476284318d",
+      "archive": "benchmarks/results/remaining-indicators/regression-channel-final-statistics-certified-local-regression-channel-final-statistics-control-20261029-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "019661410b801b3d7695fc7aa9625126f366ed736c0cacfb54acc65467cd79a9",
+      "archive": "benchmarks/results/remaining-indicators/regression-channel-final-statistics-certified-local-regression-channel-final-statistics-control-20261029-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "108afca75d2bbf1ab0b8ebd73c2acdaebf56d3c66656b21e8c2251b5dd821405",
+      "archive": "benchmarks/results/remaining-indicators/regression-channel-final-statistics-certified-local-regression-channel-final-statistics-control-20261029-measurement.json.gz"
+    },
+    "regression_channel_final_acceptance.py": {
+      "sha256": "7689b763fed8e14d7dc7d651f4929d5b474f8887a1b73020af13b019ce3ec5f9",
+      "archive": "benchmarks/results/remaining-indicators/regression-channel-final-statistics-certified-local-regression-channel-final-statistics-control-20261029-regression_channel_final_acceptance.py.gz"
+    },
+    "stage-regression-channel-final-statistics-report-20261029.py": {
+      "sha256": "b2bced53cb3d964b6e0c5bc2e2d86acc4892446d6a19fe96d9560fededf811ed",
+      "archive": "benchmarks/results/remaining-indicators/regression-channel-final-statistics-certified-local-regression-channel-final-statistics-control-20261029-stage-regression-channel-final-statistics-report-20261029.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/regression-channel-final-statistics-certified-local-regression-channel-final-statistics-control-20261029-verify-approved-certified-report.py.gz"
+    },
+    "import-regression-channel-final-statistics-report-20261029.py": {
+      "sha256": "7634b921a53a3fc2f160820b30ede669e62c5acb2c6efc67754c7bbfe376541e",
+      "archive": "benchmarks/results/remaining-indicators/regression-channel-final-statistics-certified-local-regression-channel-final-statistics-control-20261029-import-regression-channel-final-statistics-report-20261029.py.gz"
+    },
+    "archive-regression-channel-final-statistics-control-20261029.py": {
+      "sha256": "13f2033a027452102b7bfa87f101f56ef571a6cb621cf098d391f628d6d400ae",
+      "archive": "benchmarks/results/remaining-indicators/regression-channel-final-statistics-certified-local-regression-channel-final-statistics-control-20261029-archive-regression-channel-final-statistics-control-20261029.py.gz"
+    },
+    "prove-regression-channel-final-statistics-integration-20261029.py": {
+      "sha256": "72aba0bc3a4d5e0faaf369f5b3867a1e56e211aa2f3a561346907f16dc16199b",
+      "archive": "benchmarks/results/remaining-indicators/regression-channel-final-statistics-certified-local-regression-channel-final-statistics-control-20261029-prove-regression-channel-final-statistics-integration-20261029.py.gz"
+    },
+    "archive-regression-channel-final-statistics-report-20261029.py": {
+      "sha256": "a2cf77a06422a115aba962ad71905ac1cbdf8d71af53049153313b0486360435",
+      "archive": "benchmarks/results/remaining-indicators/regression-channel-final-statistics-certified-local-regression-channel-final-statistics-control-20261029-archive-regression-channel-final-statistics-report-20261029.py.gz"
+    }
+  }
+}

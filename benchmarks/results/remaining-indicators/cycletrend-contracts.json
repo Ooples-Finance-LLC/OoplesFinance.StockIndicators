@@ -1,0 +1,37 @@
+{
+  "batch": "generated-cycle-trend-filters",
+  "types": [
+    "EhlersCyberCycle",
+    "EhlersCyberCycleOscillator",
+    "EhlersInstantaneousTrendlineV2",
+    "EhlersGaussianFilter"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse existing Cyber Cycle and instantaneous trend kernels, computing both trend outputs together. Compute all four Gaussian pole lanes in one shared bar pass with unchanged arithmetic and gains. Preserve period-derived and explicit alpha, nonfinite-alpha fallback, Gaussian pole selection, startup and checked warmup.",
+  "verification": {
+    "unit_passed": 114,
+    "fixture_passed": 16,
+    "discovery_passed": 42,
+    "gpu_passed": 100,
+    "contract_methods": 1377,
+    "hosted_methods": 1365,
+    "evidence": [
+      {
+        "file": "cycletrend-unit.trx.gz",
+        "passed_cases": 114,
+        "trx_sha256": "6d73da70f91277fac14e4b922e6b81c01eebd37b17f69e3141fe4e245e44feea"
+      },
+      {
+        "file": "cycletrend-fixture.trx.gz",
+        "passed_cases": 58,
+        "trx_sha256": "f1e186cb4a4fb0e128ca716a68bf111eff2499c23d4970f98583b880e7f7e1d0"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingCycleTrendBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -1,0 +1,38 @@
+{
+  "batch": "grover-shared-execution",
+  "types": [
+    "GroverLlorensActivator",
+    "GroverLlorensCycleOscillator"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 41,
+    "parity_passed": 8,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "grover-unit-verified.trx.gz",
+        "passed_cases": 41,
+        "trx_sha256": "ee0e8df789cdbf8f95dd489ed98552935c2430f4d4acb6fb65c29f6c0a067c87"
+      },
+      {
+        "file": "grover-parity-verified.trx.gz",
+        "passed_cases": 8,
+        "trx_sha256": "7be63028564afa1879b3fc9fffac70fe7dfd4b4c59d1292b0991a3b7a3547a58"
+      }
+    ],
+    "context": "Executed in the 16-facade eighth-stage working candidate with inherited unresolved MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7",
+    "test_execution_input_sha256": {
+      "unit": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7",
+      "parity": "defb1092a97b4f2eebb5f4f3d5fcf2e7b426d64a92bd780a0a8131410734efd7"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "b705fbf63a42ccc23dbb8a8b71a9acfa1444a798"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

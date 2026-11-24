@@ -40,6 +40,9 @@ internal static partial class BuiltInFormulaReferences
                 for (var g = 0; g < groups.Count; g++)
                 {
                     var ratio = (square / groups[g].Square).Components;
+                    // A nonsquare residue cannot represent a rational square.
+                    // Keep the independent integer-root proof for every survivor.
+                    if (!PeriodicSquareResidueCandidate(ratio.Numerator) || !PeriodicSquareResidueCandidate(ratio.Denominator)) continue;
                     var a = PeriodicRoot(ratio.Numerator); var b = PeriodicRoot(ratio.Denominator);
                     if (a * a != ratio.Numerator || b * b != ratio.Denominator) continue;
                     var weight = groups[g].Weight + new ReferenceFraction(xy.Sign * a) / new ReferenceFraction(b);
@@ -68,9 +71,13 @@ internal static partial class BuiltInFormulaReferences
             var center = line.Components;
             var widthNumerator = i == 0 ? BigInteger.Zero : errorNumerator;
             var widthDenominator = i == 0 ? BigInteger.One : errorDenominator * i;
+            // All seven bands share these exact products. Compute them once;
+            // the independent quotient rounding below remains unchanged.
+            var bandCenter = center.Numerator * widthDenominator;
+            var bandWidth = widthNumerator * center.Denominator;
+            var bandDenominator = center.Denominator * widthDenominator;
             foreach (var (key, multiple) in new[] { ("K", 0), ("Ap", 1), ("Bp", 2), ("Cp", 3), ("Al", -1), ("Bl", -2), ("Cl", -3) })
-                outputs[key][i] = PeriodicPublish(center.Numerator * widthDenominator + multiple * widthNumerator * center.Denominator,
-                    center.Denominator * widthDenominator);
+                outputs[key][i] = PeriodicPublish(bandCenter + multiple * bandWidth, bandDenominator);
             outputs["Os"][i] = PeriodicPublish(widthNumerator, widthDenominator);
             signals[i] = margin.Sign > 0 && margin.CompareTo(previous) > 0 ? Signal.StrongBuy
                 : margin.Sign < 0 && margin.CompareTo(previous) < 0 ? Signal.StrongSell
@@ -125,6 +132,15 @@ internal static partial class BuiltInFormulaReferences
             if (lower.Sign > 0) return 1;
             if (upper.Sign < 0) return -1;
         }
+    }
+
+    internal static bool PeriodicSquareResidueCandidate(BigInteger value)
+    {
+        if (value.Sign < 0) return false;
+        int binary = (int)(value & 63);
+        if (binary is not (0 or 1 or 4 or 9 or 16 or 17 or 25 or 33 or 36 or 41 or 49 or 57)) return false;
+        int odd = (int)(value % 63);
+        return odd is 0 or 1 or 4 or 7 or 9 or 16 or 18 or 22 or 25 or 28 or 36 or 37 or 43 or 46 or 49 or 58;
     }
 
     private static BigInteger PeriodicRoot(BigInteger value)

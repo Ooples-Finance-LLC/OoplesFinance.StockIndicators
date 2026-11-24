@@ -1,0 +1,36 @@
+{
+  "batch": "generated-double-recurrences",
+  "types": [
+    "GeneralizedDoubleEma",
+    "GeneralizedDoubleExponentialMovingAverage",
+    "DoubleExponentialSmoothing"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse generalized double EMA and double smoothing kernels through shared owned execution, preserve finite configurable volume factors and legacy nonfinite fallback. Rent generalized EMA intermediate arrays only for custom averages; the default compute path never reads them. Existing custom-stage sequencing tests passed. Double smoothing retains its fixed coefficients and ignored length parameter.",
+  "verification": {
+    "unit_passed": 134,
+    "fixture_passed": 12,
+    "discovery_passed": 32,
+    "gpu_passed": 100,
+    "contract_methods": 1367,
+    "hosted_methods": 1355,
+    "evidence": [
+      {
+        "file": "doublerecurrence-unit.trx.gz",
+        "passed_cases": 134,
+        "trx_sha256": "4970ce2b0b941aec9c709f0c8004e05c0d3154b7a388467a0a998a1b132c6efb"
+      },
+      {
+        "file": "doublerecurrence-fixture.trx.gz",
+        "passed_cases": 44,
+        "trx_sha256": "416c0b9470c3840bd5b4ed93792418e53e650269eda8569f01ee72a850c88bec"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingDoubleRecurrenceBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

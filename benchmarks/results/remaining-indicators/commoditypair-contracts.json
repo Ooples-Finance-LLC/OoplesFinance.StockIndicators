@@ -1,0 +1,39 @@
+{
+  "batch": "woodie-inverse-cci-shared-execution",
+  "types": [
+    "WoodieCommodityChannelIndex",
+    "EhlersCommodityChannelIndexInverseFisherTransform"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share Woodie fast/slow CCI and binary histogram subtraction over one typical-price calculation. Reuse weighted CCI and weighted signal for Ehlers inverse transform, preserving .1*(CCI-50), stage publication, tanh, finite positive constants and custom/source fallback. History allocations remain bounded by input size.",
+  "verification": {
+    "unit_passed": 234,
+    "fixture_passed": 8,
+    "discovery_passed": 90,
+    "gpu_passed": 100,
+    "contract_methods": 1425,
+    "hosted_methods": 1413,
+    "evidence": [
+      {
+        "file": "commoditypair-unit.trx.gz",
+        "passed_cases": 234,
+        "trx_sha256": "80064433bebc1d76fb700d3308064a0d4bc54ef672abcac672a82d6e45201990"
+      },
+      {
+        "file": "commoditypair-fixture.trx.gz",
+        "passed_cases": 98,
+        "trx_sha256": "9da55e93f026fcc2c4b1daac0d1eb15143b6fc2dfa5ea8b58aaee25a0ac7f2bb"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingCommodityPairBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "WoodieCommodityChannelIndex",
+      "EhlersCommodityChannelIndexInverseFisherTransform"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

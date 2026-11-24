@@ -159,10 +159,14 @@ public sealed class MovingAverageDifference : MultiOutputIndicatorBase, IIndicat
             var b = _second.Update(bar.Close);
             if (!_first.Ready || !_second.Ready)
                 return;
+#if !NETFRAMEWORK
+            output[0] = a == b ? 0 : a - b; // NOSONAR: S1244 - Exact equality defines canonical zero.
+#else
             var difference = new ExactMeanAccumulator();
             difference.Add(a);
             difference.Add(b, -1);
             output[0] = difference.Mean(1);
+#endif
             output[1] = 1;
         }
     }

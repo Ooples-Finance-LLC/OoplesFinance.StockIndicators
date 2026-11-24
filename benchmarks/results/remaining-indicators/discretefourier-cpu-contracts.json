@@ -1,0 +1,38 @@
+{
+  "batch": "discretefourier-shared-execution",
+  "types": [
+    "EhlersDiscreteFourierTransform",
+    "EhlersDiscreteFourierTransformSpectralEstimate"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 38,
+    "parity_passed": 8,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "discretefourier-unit-verified.trx.gz",
+        "passed_cases": 38,
+        "trx_sha256": "c2692caffcb58c6a2390dc6df54e6088933170030a5eb90c5630eb8b3157f8b6"
+      },
+      {
+        "file": "discretefourier-parity-verified.trx.gz",
+        "passed_cases": 8,
+        "trx_sha256": "47a516106b3655edc98006ebde526884a51cedcf4b2889c1e365b5b1c46247b4"
+      }
+    ],
+    "context": "Executed in the combined 113-facade working candidate; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "162f3d09e9581eb729d259ef6b347a1e8a43e98eca154dfb0ad97fb9cd6ca31f",
+    "test_execution_input_sha256": {
+      "unit": "54839491c1974bca029c0108d53ac0195d8fdbcdb65460c259321c5c095493ef",
+      "parity": "54839491c1974bca029c0108d53ac0195d8fdbcdb65460c259321c5c095493ef"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "b7e13308b78c1e23f9f21cbbd9323a7d9d6548ee"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

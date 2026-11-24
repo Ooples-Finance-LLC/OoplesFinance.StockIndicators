@@ -1,0 +1,39 @@
+{
+  "batch": "generated-ordered-volatility",
+  "types": [
+    "StdDev",
+    "HistoricalVolatility"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse RollingStandardDeviation chronological translated arithmetic and its exact exceptional fallback. StdDev shares its line with the guarded SimpleMovingAverageSmoother signal; HistoricalVolatility preserves stable log ratios, i>=period startup, and 100*deviation*sqrt(365). Unfillable windows are not allocated. Nonpositive StdDev stays on the legacy route; HistoricalVolatility normalizes periods as before.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 37,
+    "fixture_passed": 8,
+    "gpu_passed": 100,
+    "contract_methods": 1348,
+    "hosted_methods": 1336,
+    "unit_trx_sha256": "761bc22cb3e00821b01c1356a28159b1fcad88768c69fed9a99be6ae424a9a10",
+    "fixture_trx_sha256": "ed11f471aecac8a8ac6fbc562b77c1467920a930a257a5c8c54782c67f01777b",
+    "discovery_passed": 17,
+    "selected_comparator_passed": 25
+  },
+  "benchmark_fixture": {
+    "type": "RemainingOrderedVolatilityBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 16,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -1,0 +1,34 @@
+{
+  "types": [
+    "VervoortModifiedBollingerBandIndicator"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "7e86428ee3518415c5779ec0cf8ba715f7781999",
+  "source_fingerprint_sha256": "9aa8337f59fbdf2b8d11f56eb4c2f2a708d84faa586de8505694788ec9339f90",
+  "benchmark_fixture": {
+    "type": "RemainingVervoortModifiedBenchmarks",
+    "operations": [
+      "VervoortModifiedBollingerBandIndicator"
+    ]
+  },
+  "checks": {
+    "unit": 114,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "unit_class_counts": {
+    "SharedGeneratedVervoortModifiedTests": 11,
+    "VervoortModifiedNumericalTests": 88,
+    "VervoortModifiedCertifiedTests": 15
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/publication-certified-isolated-20261021-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-certified-isolated-20261021-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

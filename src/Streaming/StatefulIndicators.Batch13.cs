@@ -353,6 +353,15 @@ internal static class StreamingFractal
         OhlcvBar bar,
         out double? upFractal,
         out double? downFractal)
+        => Find(highs, lows, bar.High, bar.Low, out upFractal, out downFractal);
+
+    internal static void Find(
+        PooledRingBuffer<double> highs,
+        PooledRingBuffer<double> lows,
+        double high,
+        double low,
+        out double? upFractal,
+        out double? downFractal)
     {
         upFractal = null;
         downFractal = null;
@@ -370,7 +379,7 @@ internal static class StreamingFractal
         var prevHigh2 = EhlersStreamingWindow.GetOffsetValue(highs, 2);
         var prevHigh3 = EhlersStreamingWindow.GetOffsetValue(highs, 3);
         var prevHigh4 = EhlersStreamingWindow.GetOffsetValue(highs, 4);
-        if (prevHigh1 < prevHigh2 && bar.High < prevHigh2 && prevHigh3 < prevHigh2 && prevHigh4 < prevHigh2)
+        if (prevHigh1 < prevHigh2 && high < prevHigh2 && prevHigh3 < prevHigh2 && prevHigh4 < prevHigh2)
         {
             upFractal = prevHigh2;
         }
@@ -379,7 +388,7 @@ internal static class StreamingFractal
         var prevLow2 = EhlersStreamingWindow.GetOffsetValue(lows, 2);
         var prevLow3 = EhlersStreamingWindow.GetOffsetValue(lows, 3);
         var prevLow4 = EhlersStreamingWindow.GetOffsetValue(lows, 4);
-        if (prevLow1 > prevLow2 && bar.Low > prevLow2 && prevLow3 > prevLow2 && prevLow4 > prevLow2)
+        if (prevLow1 > prevLow2 && low > prevLow2 && prevLow3 > prevLow2 && prevLow4 > prevLow2)
         {
             downFractal = prevLow2;
         }

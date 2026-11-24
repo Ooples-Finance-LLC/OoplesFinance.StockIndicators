@@ -1,0 +1,42 @@
+{
+  "batch": "weighted-close-existing-shared-qualification",
+  "types": [
+    "WeightedClose"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Qualify existing shared pointwise WeightedCloseKernel and mixed pointwise batch dispatch. Existing PriceMean.Of(high,low,close,close) preserves exact mean arithmetic. No production changes; reused source-matched16c9662f production DLL.",
+  "verification": {
+    "unit_passed": 53,
+    "fixture_passed": 4,
+    "discovery_passed": 92,
+    "gpu_passed": 100,
+    "contract_methods": 1427,
+    "hosted_methods": 1415,
+    "evidence": [
+      {
+        "file": "weightedclose-unit.trx.gz",
+        "passed_cases": 53,
+        "trx_sha256": "3ad7ddbba63fb9f06ac775db17ef2dc3673b4d20954799bf3e7f843e1eba171a"
+      },
+      {
+        "file": "weightedclose-fixture.trx.gz",
+        "passed_cases": 96,
+        "trx_sha256": "a529708d87de231abfccd3c39d3c9005257079ea407f3a6068f9bae7e9313ee1"
+      }
+    ],
+    "production_binary_reuse": {
+      "source_commit": "16c9662fa78cb6fe99e655242410f86f06051ec9",
+      "production_sha256": "6e8f99599bab613c350d112fe8959ed7851a7a2292db801f1ffba37575f627f9",
+      "note": "Production source unchanged; reused verified integration binary for rebuilt unit/comparator outputs. GPU evidence refreshed for changed comparator sources."
+    }
+  },
+  "benchmark_fixture": {
+    "type": "RemainingWeightedCloseBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "WeightedClose"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

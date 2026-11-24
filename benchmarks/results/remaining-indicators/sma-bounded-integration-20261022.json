@@ -1,0 +1,22 @@
+{
+  "integrated_head": "32343c4e058214100f8c71045f10e813e520d861",
+  "qualified_head": "e4c3cbf1771d87c39ff05b28d7b7891b66e68b12",
+  "qualified_source": "805569ffb3534fd65d4601561b7ab362d3873690",
+  "compared_paths": [
+    "src",
+    "tests",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorBenchmarks",
+    "benchmarks/OoplesFinance.StockIndicators.CompetitorTests",
+    "scripts",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "global.json",
+    "NuGet.Config",
+    "nuget.config"
+  ],
+  "changed_files": [],
+  "correctness": "4 builds, 44 unit cases, 2 long-history parity, 100 GPU checks, 8 inventory tests. Exact source identity permits reuse; no extra builds or tests claimed.",
+  "performance_run": 39727929133,
+  "decision": "Both new 10k confidence intervals below both old intervals; 1k inconclusive. SMA remains slower than Skender."
+}

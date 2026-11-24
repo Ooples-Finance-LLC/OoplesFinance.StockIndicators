@@ -1,0 +1,101 @@
+{
+  "status": "sixth-stage-checks-passed-inherited-macd-failures-and-performance-pending",
+  "context": "Three new families in the combined working candidate; the isolated committed tree was not separately built or tested. Common GPU fixtures do not establish per-indicator GPU performance.",
+  "input_sha256": "03e74ec554b3b7c0ba896a19b60e36989ff77f0cf80ebcb5ca9760d753b6efec",
+  "validation_base_head": "8ce2a59fb813f7e8132147b16b52cfa7c99b8af9",
+  "family_check_counts": {
+    "unit": 116,
+    "parity": 24
+  },
+  "family_cpu_receipts": [
+    "foldedfisher-cpu-contracts.json",
+    "fibforecast-cpu-contracts.json",
+    "freedomcandles-cpu-contracts.json"
+  ],
+  "checks": {
+    "discovery": {
+      "status": "passed",
+      "verified_count": 235,
+      "log_sha256": "0ff0a531aaf15a5fd282db42ded2109bab2ce181df0d979e60f3ae5c7769d062"
+    },
+    "gpu": {
+      "status": "passed",
+      "verified_count": 100,
+      "log_sha256": "2ebf91986af73386ffc89d1172cf1f77b8c247234a8373bab6946b45dedf89c7"
+    },
+    "verify-gpu-partition": {
+      "status": "passed",
+      "verified_count": null,
+      "log_sha256": "4b0c8ff6249a39a38d1a5322deda5e065f8fac783730a614145251c553ccf3dc",
+      "result": "Verified 100 local GPU cases; 1564 methods remain assigned to hosted CI"
+    },
+    "inventory": {
+      "status": "passed",
+      "verified_count": 6,
+      "log_sha256": "09736f0e26ab7224bda356fdd95310f4392a6ff3e274c74d0dc67d946da36c56",
+      "result": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.388s\n\nOK"
+    }
+  },
+  "discovery_evidence": "sixth6-discovery.trx.gz",
+  "gpu_evidence": "sixth6-gpu-contracts.json",
+  "gpu_trx_evidence": "sixth6-gpu.trx.gz",
+  "inherited_failed_unit_cases": 3,
+  "inherited_failure_evidence": "combined113-known-macd-failures.trx.gz",
+  "pending": [
+    "inherited MACD unit-contract failures",
+    "raw timing and performance comparison",
+    "required hosted checks"
+  ],
+  "family_execution_inputs_sha256": {
+    "foldedfisher": {
+      "unit": "03e74ec554b3b7c0ba896a19b60e36989ff77f0cf80ebcb5ca9760d753b6efec",
+      "parity": "03e74ec554b3b7c0ba896a19b60e36989ff77f0cf80ebcb5ca9760d753b6efec"
+    },
+    "fibforecast": {
+      "unit": "03e74ec554b3b7c0ba896a19b60e36989ff77f0cf80ebcb5ca9760d753b6efec",
+      "parity": "03e74ec554b3b7c0ba896a19b60e36989ff77f0cf80ebcb5ca9760d753b6efec"
+    },
+    "freedomcandles": {
+      "unit": "03e74ec554b3b7c0ba896a19b60e36989ff77f0cf80ebcb5ca9760d753b6efec",
+      "parity": "03e74ec554b3b7c0ba896a19b60e36989ff77f0cf80ebcb5ca9760d753b6efec"
+    }
+  },
+  "family_rerun_evidence": {
+    "foldedfisher": [
+      {
+        "file": "sixth6-foldedfisher-unit-rerun.trx.gz",
+        "trx_sha256": "5f0f140b6a4de455019394fd69b8036ef1379c8ed6ff4f4054ae6957bfa73dbf",
+        "passed_cases": 33
+      },
+      {
+        "file": "sixth6-foldedfisher-parity-rerun.trx.gz",
+        "trx_sha256": "c0c6a798a031fe85e2c42b85a7b95ef2aa37f3f82f1306a4b83d2a9e2148e308",
+        "passed_cases": 8
+      }
+    ],
+    "fibforecast": [
+      {
+        "file": "sixth6-fibforecast-unit-rerun.trx.gz",
+        "trx_sha256": "c8cf16fccb1481cce84f0468ba61720485e7139b7d79817f1e9e808cea4984e5",
+        "passed_cases": 46
+      },
+      {
+        "file": "sixth6-fibforecast-parity-rerun.trx.gz",
+        "trx_sha256": "69f04404ad88fcac6410954b85664134574eb794890e4c9a957232987a883b57",
+        "passed_cases": 8
+      }
+    ],
+    "freedomcandles": [
+      {
+        "file": "sixth6-freedomcandles-unit-rerun.trx.gz",
+        "trx_sha256": "e3940a54e627fe195547174f9e150672164a79ddb1c637f3122516502ca4a1fe",
+        "passed_cases": 37
+      },
+      {
+        "file": "sixth6-freedomcandles-parity-rerun.trx.gz",
+        "trx_sha256": "1bbe7d886356e6aea2f5094264d4a217c14e9ee869a5358fcb7d9f4468a11cd5",
+        "passed_cases": 8
+      }
+    ]
+  }
+}

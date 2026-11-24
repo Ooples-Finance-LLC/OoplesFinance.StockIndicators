@@ -1,0 +1,34 @@
+{
+  "types": [
+    "VolumePositiveNegativeIndicator"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "622a65a0edbe80ea1213307fd3d74426a3ffe5fb",
+  "source_fingerprint_sha256": "2ae02ff79db2d792c72ccb7724f2644c9893c807f87e961d534c1567a9481afc",
+  "benchmark_fixture": {
+    "type": "RemainingVolumePositiveNegativeBenchmarks",
+    "operations": [
+      "VolumePositiveNegativeIndicator"
+    ]
+  },
+  "checks": {
+    "unit": 107,
+    "parity": 4,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "unit_class_counts": {
+    "VolumePositiveNegativeCertifiedTests": 11,
+    "VolumePositiveNegativeNumericalTests": 83,
+    "SharedGeneratedVolumePositiveNegativeTests": 13
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/publication-vpni-certified-20261021-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-vpni-certified-20261021-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

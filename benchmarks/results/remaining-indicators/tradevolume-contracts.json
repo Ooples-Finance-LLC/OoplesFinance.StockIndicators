@@ -1,0 +1,37 @@
+{
+  "batch": "trade-volume-shared-execution",
+  "types": [
+    "TradeVolumeIndex"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Compute cumulative trade volume and its default-SMA signal together using the existing exact fixed-0.5-tick kernel. Rent the raw mean buffer only for custom or unsupported averages, retaining callback ordering, startup and lifecycle.",
+  "verification": {
+    "unit_passed": 52,
+    "fixture_passed": 4,
+    "discovery_passed": 71,
+    "gpu_passed": 100,
+    "contract_methods": 1406,
+    "hosted_methods": 1394,
+    "evidence": [
+      {
+        "file": "tradevolume-unit.trx.gz",
+        "passed_cases": 52,
+        "trx_sha256": "6880afa5f42f9c0d2ae535c7adeca9abdb557fabd7866986fefaf6d7ec335e01"
+      },
+      {
+        "file": "tradevolume-fixture.trx.gz",
+        "passed_cases": 75,
+        "trx_sha256": "bcdd276578fd9aa232133eb85e3c94ae1dfcdd51640f9f60f7208d18491e03b9"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingTradeVolumeBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "TradeVolumeIndex"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

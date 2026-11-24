@@ -28,7 +28,8 @@ internal static partial class ValuesBarExecution
         || ContextReversalWindow(indicator) > 0 || TripleBodyWindow(indicator) > 0 || PenetrationWindow(indicator) > 0
         || StarReversalWindow(indicator) > 0 || GapContinuationWindow(indicator) > 0 || CrowSoldierWindow(indicator) > 0
         || ExhaustionWindowLength(indicator) > 0 || FiveContinuationWindow(indicator) > 0 || ExtendedReversalWindow(indicator) > 0
-        || HikkakeWindow(indicator) > 0 || DelayedCloudWindow(indicator) > 0 || IsRawDirectional(indicator);
+        || HikkakeWindow(indicator) > 0 || DelayedCloudWindow(indicator) > 0 || IsRawDirectional(indicator)
+        || RangeDojiWindow(indicator) > 0;
 
     private static bool IsRawDirectional(IIndicator indicator) => indicator is WindowDirectionalMeasure
         { Measure: DirectionalWindowMeasure.PositiveMovement or DirectionalWindowMeasure.NegativeMovement };
@@ -68,11 +69,14 @@ internal static partial class ValuesBarExecution
         HikkakeCandle or ModifiedHikkakeCandle
         && indicator.WarmupBars < int.MaxValue ? indicator.WarmupBars + 1 : 0;
 
-    private readonly struct HikkakeKernel(HikkakeState state) : IBoundedKernel<HikkakeKernel>
+    private readonly struct HikkakeKernel(HikkakeState state, ModifiedHikkakeSparseReplay? sparse) : IBoundedKernel<HikkakeKernel>
     {
-        public static HikkakeKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
-            new((HikkakeState)((IndicatorBase)indicator).CreateState()!);
-        public double Update(in Bar bar) => state.Update(in bar);
+        public static HikkakeKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
+        {
+            var state = (HikkakeState)((IndicatorBase)indicator).CreateState()!;
+            return new(state, indicator is ModifiedHikkakeCandle { Period: 5 } ? new(state) : null);
+        }
+        public double Update(in Bar bar) => sparse is null ? state.Update(in bar) : sparse.Update(in bar);
     }
 
     // Four prior anchors and complete threshold history restore the exact
@@ -186,7 +190,14 @@ internal static partial class ValuesBarExecution
     private readonly struct ContextReversalKernel(ContextReversalState state) : IBoundedKernel<ContextReversalKernel>
     {
         public static ContextReversalKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
-            new((ContextReversalState)((IndicatorBase)indicator).CreateState()!);
+            new(CreateState(target.Values[0].Length, indicator));
+        private static ContextReversalState CreateState(int count, IIndicator indicator)
+        {
+            var state = (ContextReversalState)((IndicatorBase)indicator).CreateState()!;
+            // The output length is the full batch, not a worker's short replay slice.
+            state.PreferPriceContext = count >= 8192 && (indicator is InvertedHammerCandle or ShootingStarCandle);
+            return state;
+        }
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
@@ -1018,8 +1029,22 @@ internal static partial class ValuesBarExecution
 
     private readonly struct StateWindowKernel(IIndicatorState state) : IBoundedKernel<StateWindowKernel>
     {
-        public static StateWindowKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target) =>
-            new((IIndicatorState)((IndicatorBase)indicator).CreateState()!);
+        public static StateWindowKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
+        {
+            var original = (IIndicatorState)((IndicatorBase)indicator).CreateState()!;
+            return new(indicator switch
+            {
+                GaussianWeightedAverage { Period: <= 64 } average =>
+                    new AnalyticGridBatchState(original, average.BatchCoefficient, average.Period, count, target),
+                SineWeightedAverage { Period: <= 64 } average =>
+                    new AnalyticGridBatchState(original, average.BatchCoefficient, average.Period, count, target),
+                // Fewer host CPUs produce larger regions; keep the unfunded
+                // small complete inputs original regardless of worker count.
+                WindowedSinc { Taps: <= 64 } sinc when target.Values[0].Length >= 2048 && count - sinc.Taps >= 128 =>
+                    new SincGridBatchState(original, sinc, count, target),
+                _ => original
+            });
+        }
         public double Update(in Bar bar) => state.Update(in bar);
     }
 
@@ -1199,16 +1224,24 @@ internal static partial class ValuesBarExecution
     private struct AlmaKernel(ArnaudLegouxWindow.State state, BoundedOutput target) : IBoundedKernel<AlmaKernel>
     {
         private int _index = target.Origin;
+        private AlmaGridBatchState? _batch;
         public static AlmaKernel Create(int period, int count, IIndicator indicator, in BoundedOutput target)
         {
             var alma = (ArnaudLegouxWindow)indicator;
             // Later workers never publish incomplete seed windows. Suppressing
             // those values also avoids rebuilding every expanding weight prefix.
-            return new(new(alma.Period, alma.Offset, alma.Sigma,
-                alma.FullWindowOnly || target.WriteStart > 0), target);
+            var state = new ArnaudLegouxWindow.State(alma.Period, alma.Offset, alma.Sigma,
+                alma.FullWindowOnly || target.WriteStart > 0);
+            var kernel = new AlmaKernel(state, target);
+            // Keep short regions, including LatestOnly replay windows, on the
+            // original path unless one full block follows the first full row.
+            if (alma.Period <= 64 && count - alma.Period >= 128)
+                kernel._batch = new(state, alma.Period, count, target);
+            return kernel;
         }
         public double Update(in Bar bar)
         {
+            if (_batch is not null) return _batch.Update(in bar);
             Span<double> values = stackalloc double[2];
             state.Update(in bar, values);
             int index = _index++;
@@ -1344,6 +1377,7 @@ internal static partial class ValuesBarExecution
             FillBoundedWindow<HikkakeKernel>(source, output, indicator, HikkakeWindow(indicator), cancellation, owned),
         _ when TasukiWindow(indicator) > 0 =>
             FillBoundedWindow<TasukiKernel>(source, output, indicator, TasukiWindow(indicator), cancellation, owned),
+        _ when RangeDojiWindow(indicator) > 0 => FillBoundedWindow<RangeDojiKernel>(source, output, indicator, RangeDojiWindow(indicator), cancellation, owned),
         _ => throw new InvalidOperationException("Unqualified bounded-window kernel.")
     };
 
@@ -1352,6 +1386,9 @@ internal static partial class ValuesBarExecution
     {
         cancellation.ThrowIfCancellationRequested();
         int chunks = period <= 4096 ? Math.Min(WorkerCount(), source.Length / period) : 1;
+        if (typeof(T) == typeof(SequenceKernel) && MatchingLowGridEligible(indicator, source.Length))
+            chunks = Math.Min(chunks, Math.Max(1, source.Length / 512));
+
         bool lockTaken = false;
         Bar[][]? tails = null;
         try
@@ -1404,6 +1441,15 @@ internal static partial class ValuesBarExecution
         int start, int end, int period, ReadOnlySpan<Bar> seed, ReadOnlySpan<Bar> tail,
         CancellationToken cancellation, IIndicator indicator) where T : struct, IBoundedKernel<T>
     {
+        if (typeof(T) == typeof(SequenceKernel) && MatchingLowGridEligible(indicator, source.Length)
+            && end - start + seed.Length >= 512)
+            return ComputeMatchingLowGrid(source, output[0], owned, start, end, seed, tail, cancellation, (MatchingLowCandle)indicator);
+
+        if (typeof(T) == typeof(StarReversalKernel) && indicator is AbandonedBabyCandle baby
+            && baby.LongPeriod <= 64 && baby.ShortPeriod <= 64 && baby.DojiPeriod <= 64)
+            return ComputeAbandonedBlocks(source, output[0], owned, start, end, period, seed, tail, cancellation, baby);
+        if (typeof(T) == typeof(TripleBodyKernel) && UsesTripleBodyBlocks(indicator))
+            return ComputeTripleBodyBlocks(source, output[0], owned, start, end, period, seed, tail, cancellation, indicator);
         if (typeof(T) == typeof(MoneyFlowKernel))
             return ComputeMoneyFlowColumn(source, output, owned, start, end, (WindowMoneyFlowIndex)indicator, seed, tail, cancellation);
         if (typeof(T) == typeof(UltimateKernel))

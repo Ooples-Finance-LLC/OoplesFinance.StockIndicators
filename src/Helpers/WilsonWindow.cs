@@ -25,9 +25,11 @@ internal sealed class WilsonWindow : IDisposable
     }
     private static Number Band(Number price, Number distance) => price - (price * distance).Divide(100);
     private static (Number Bull, Number Bear) Margins(Number price, Number[] bands)
+        => Margins(price, bands[0], bands[1], bands[2], bands[3]);
+    private static (Number Bull, Number Bear) Margins(Number price, Number s1, Number s2, Number u1, Number u2)
     {
-        var upper = (bands[2] - bands[3]).Sign < 0 ? bands[2] : bands[3];
-        var lower = (bands[0] - bands[1]).Sign > 0 ? bands[0] : bands[1];
+        var upper = (u1 - u2).Sign < 0 ? u1 : u2;
+        var lower = (s1 - s2).Sign > 0 ? s1 : s2;
         return (price - upper, price - lower);
     }
     private static Signal Trade(Number bull, Number bear, Number previousBull, Number previousBear)
@@ -43,6 +45,25 @@ internal sealed class WilsonWindow : IDisposable
         var trade = bands.Length == 4 ? Trade(margins.Bull, margins.Bear, _previousBull, _previousBear) : Signal.None;
         if (final) { _previous = current; _hasPrevious = true; _previousBull = margins.Bull; _previousBear = margins.Bear; }
         return (bands.Select(v => v.Publish()).ToArray(), trade);
+    }
+    internal Signal Next(double price, bool final, Span<double> lines)
+    {
+        if (_thresholds.Length != 4) throw new InvalidOperationException("Four thresholds are required.");
+        if (lines.Length < 4) throw new ArgumentException("Four output slots are required.", nameof(lines));
+        StreamingInputValidation.Finite(price, nameof(price));
+        var current = Number.Of(price); var delta = _hasPrevious ? current - _previous : default;
+        var gain = _gains.Next(delta.Sign > 0 ? delta : default, final);
+        var loss = _losses.Next(delta.Sign < 0 ? delta.Times(-1) : default, final);
+        var rsi = Rsi(gain, loss);
+        var s1 = Band(current, _smooth[0].Next(rsi - _thresholds[0], final));
+        var s2 = Band(current, _smooth[1].Next(rsi - _thresholds[1], final));
+        var u1 = Band(current, _smooth[2].Next(rsi - _thresholds[2], final));
+        var u2 = Band(current, _smooth[3].Next(rsi - _thresholds[3], final));
+        var margins = Margins(current, s1, s2, u1, u2);
+        var trade = Trade(margins.Bull, margins.Bear, _previousBull, _previousBear);
+        if (final) { _previous = current; _hasPrevious = true; _previousBull = margins.Bull; _previousBear = margins.Bear; }
+        lines[0] = s1.Publish(); lines[1] = s2.Publish(); lines[2] = u1.Publish(); lines[3] = u2.Publish();
+        return trade;
     }
     internal static (double[][] Lines, Signal[] Trades) Calculate(StockData data, MovingAvgType kind, int length, int smooth,
         double[] thresholds, bool fast = false)

@@ -1,0 +1,39 @@
+{
+  "batch": "volatility-bands-shared-execution",
+  "types": [
+    "KirshenbaumBands",
+    "SmoothedVolatilityBands"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact regression-error and smoothed-volatility kernels with input-bounded state; preserve EMA defaults, partial fit, seeds, staged rounding, derived-period overflow fallback, component/source fallback and ownership.",
+  "verification": {
+    "unit_passed": 182,
+    "fixture_passed": 8,
+    "discovery_passed": 127,
+    "gpu_passed": 100,
+    "contract_methods": 1466,
+    "hosted_methods": 1454,
+    "evidence": [
+      {
+        "file": "volatilitybands-unit.trx.gz",
+        "passed_cases": 182,
+        "trx_sha256": "a5beea349410411ea65d0670282902d01a14ab36b1f1461722cd1782650d90de"
+      },
+      {
+        "file": "volatilitybands-fixture.trx.gz",
+        "passed_cases": 135,
+        "trx_sha256": "5fba0e78553da547ff1437750234c8f9393efa688029c590cd63494476199da5"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingVolatilityBandBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "KirshenbaumBands",
+      "SmoothedVolatilityBands"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

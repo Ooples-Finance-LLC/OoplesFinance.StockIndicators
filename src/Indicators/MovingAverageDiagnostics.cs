@@ -126,8 +126,15 @@ public sealed class MovingAverageDiagnostics
                 return;
             var mean = _window.Mean;
             outputs[0] = mean;
-            outputs[1] = _window.AbsoluteError(mean);
-            outputs[2] = _window.SquaredError(mean);
+            if (_window.TryCertifiedDiagnostics(mean, out double absolute, out double squared, out double signedRelative))
+            {
+                outputs[1] = absolute;
+                outputs[2] = squared;
+                outputs[3] = signedRelative;
+                outputs[4] = outputs[5] = outputs[6] = outputs[7] = 1;
+                return;
+            }
+            (outputs[1], outputs[2]) = _window.AbsoluteAndSquaredError(mean);
             outputs[4] = outputs[5] = outputs[6] = 1;
             var relative = _window.SignedRelativeError(mean);
             outputs[3] = relative.Value;

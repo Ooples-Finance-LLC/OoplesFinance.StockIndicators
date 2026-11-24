@@ -1,0 +1,20 @@
+{
+  "run_id": "local-gpu-setup-batch2-20261022",
+  "run_url": "https://github.com/Ooples-Finance-LLC/OoplesFinance.StockIndicators/blob/c1cbecfa0e866f6a24432b31bb79e47edaacdb63/benchmarks/results/remaining-indicators/local-gpu-setup-batch2-20261022/manifest.json",
+  "source_sha": "0e62018ed67b73a18cd94c6320af6d0612a78af7",
+  "apis": 21,
+  "comparisons": 84,
+  "verdicts": {
+    "faster": 84
+  },
+  "receipt_files": [
+    "cpu-builder-local-gpu-setup-batch2-20261022-SharedHistoricalExtremaBenchmarks.json",
+    "cpu-builder-local-gpu-setup-batch2-20261022-SharedTradyExtremaBenchmarks.json",
+    "cpu-builder-local-gpu-setup-batch2-20261022-SharedTradyMomentumBenchmarks.json",
+    "cpu-builder-local-gpu-setup-batch2-20261022-SharedScaledTrueRangeBenchmarks.json",
+    "cpu-builder-local-gpu-setup-batch2-20261022-SharedTrueRangeBenchmarks.json"
+  ],
+  "changed_production_files_since_baseline": [],
+  "measurement_location": "Local Windows host; CPU timed paths with original required GPU setup. No hosted measurement claim.",
+  "archive_commit": "c1cbecfa0e866f6a24432b31bb79e47edaacdb63"
+}

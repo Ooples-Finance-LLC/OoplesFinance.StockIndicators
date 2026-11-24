@@ -30,20 +30,22 @@ internal readonly ref struct BarRun
     internal ref struct Enumerator
     {
         private readonly ReadOnlySpan<Bar> _rows;
-        private readonly IReadOnlyList<Bar>? _list;
-        private readonly int _count;
+        // Any other list is read the way it offers to be read from first to last: its indexer may cost a
+        // search on every call, and a caller may be counting what is asked of it.
+        private readonly IEnumerator<Bar>? _source;
         private int _index;
 
         internal Enumerator(ReadOnlySpan<Bar> rows, IReadOnlyList<Bar>? list)
         {
             _rows = rows;
-            _list = list;
-            _count = list?.Count ?? rows.Length;
+            _source = list?.GetEnumerator();
             _index = -1;
         }
 
-        public bool MoveNext() => ++_index < _count;
+        public bool MoveNext() => _source is { } source ? source.MoveNext() : ++_index < _rows.Length;
 
-        public readonly Bar Current => _list is { } list ? list[_index] : _rows[_index];
+        public readonly Bar Current => _source is { } source ? source.Current : _rows[_index];
+
+        public readonly void Dispose() => _source?.Dispose();
     }
 }

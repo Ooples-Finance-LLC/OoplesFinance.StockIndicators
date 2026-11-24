@@ -1,0 +1,66 @@
+{
+  "types": [
+    "RecursiveRelativeStrengthIndex",
+    "RecursiveStochastic",
+    "RelativeVigorIndex",
+    "Repulse",
+    "RangeIdentifier",
+    "RangeActionVerificationIndex",
+    "RatioOchlAverager",
+    "RelativeSpreadStrength",
+    "RetrospectiveCandlestickChart",
+    "ReverseEngineeringRsi",
+    "RetentionAccelerationFilter",
+    "RobustWeightingOscillator",
+    "ReverseMovingAverageConvergenceDivergence",
+    "SimpleCycle",
+    "SimplePriceZone",
+    "SigmaSpikes"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "base_head": "de96efd561e57b9db19b5b3d886c42dfe8404d0f",
+  "combined_input_sha256": "98fb331f3207b3108a621eecd205bea50c04c829ba52dbf09f6fcb3ca61d895e",
+  "manifest_sha256": "faa1026c0493a25a2f43f3f66c9030e05f6d6d7ad170485ae3565e5583b006ca",
+  "unit_class_counts": {
+    "SharedGeneratedRecursivePairTests": 41,
+    "SharedGeneratedOhlcOscillatorsTests": 38,
+    "SharedGeneratedRangeOhlcTests": 48,
+    "SharedGeneratedSpreadCandleTests": 66,
+    "SharedGeneratedReverseRsiTests": 32,
+    "SharedGeneratedRetentionRobustTests": 38,
+    "SharedGeneratedReverseMacdTests": 33,
+    "SharedGeneratedSimpleAndSigmaTests": 45
+  },
+  "parity_class_counts": {
+    "RemainingRecursivePairBenchmarkTests": 8,
+    "RemainingOhlcOscillatorsBenchmarkTests": 8,
+    "RemainingRangeOhlcBenchmarkTests": 12,
+    "RemainingSpreadCandleBenchmarkTests": 8,
+    "RemainingReverseRsiBenchmarkTests": 4,
+    "RemainingRetentionRobustBenchmarkTests": 8,
+    "RemainingReverseMacdBenchmarkTests": 4,
+    "RemainingSimpleAndSigmaBenchmarkTests": 12
+  },
+  "unique_check_counts": {
+    "unit": 341,
+    "finite_smoothing": 0,
+    "parity": 64,
+    "discovery": 299,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/fourteenth-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/fourteenth-integrated-parity.trx.gz",
+    "benchmarks/results/remaining-indicators/fourteenth-integrated-discovery.trx.gz"
+  ],
+  "production_sha256": "8ab740d1017138f2f8c60925012c185f0355864566c59ac861992e32a5110c29",
+  "fixture_sha256": "776cf2d436109e1b5146a20cf26cd19d3bef534e6a7f5dfeee46586f6e43c906",
+  "input_repairs": [],
+  "context": "Fresh scoped checks on combined working candidate. Selective commits are not separately rebuilt; source fingerprint identifies tested composition. Earlier numerical repairs retained.",
+  "pending": [
+    "controlled raw timing",
+    "remaining rollout"
+  ]
+}

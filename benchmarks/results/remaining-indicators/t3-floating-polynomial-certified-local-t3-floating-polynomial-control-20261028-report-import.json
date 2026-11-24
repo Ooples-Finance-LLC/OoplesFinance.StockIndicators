@@ -1,0 +1,64 @@
+{
+  "before_sha256": "5fc9b1a141705753bf4c0dd993326ccc36d355f61528c4cb7dce2fb6576cca93",
+  "candidate_sha256": "b3dabad3826d3711ac81f96603f0ff2f7edb576732ea6eab474f9e59bc52c957",
+  "changed_baseline_rows": 6,
+  "unchanged_baseline_rows": 796,
+  "changed_builder_slots": 12,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 12,
+  "verdicts": {
+    "faster": 602,
+    "slower": 886,
+    "inconclusive": 48
+  },
+  "unchanged_rows": 796,
+  "run_id": "local-t3-floating-polynomial-control-20261028",
+  "imported_utc": "2026-10-29T11:03:21.677933+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "57d3e780ea0bcb5944f1a33ce31db5da775234f4d87bdcfe0fd40ea08d68f402",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-polynomial-certified-local-t3-floating-polynomial-control-20261028-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "9f09f906d4ccdea13b1027fbbcc87425251c3c38d6457623bacd4062201e71a2",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-polynomial-certified-local-t3-floating-polynomial-control-20261028-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "6dff1cf226e3f8850debda0f0e841e8d070a0a7181b810f3f911c87316ffa81e",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-polynomial-certified-local-t3-floating-polynomial-control-20261028-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "ed2f0b061f936f5fa450fe9e4f6f6a01f642e3981252b3a84ada56352f06690a",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-polynomial-certified-local-t3-floating-polynomial-control-20261028-measurement.json.gz"
+    },
+    "t3_polynomial_acceptance.py": {
+      "sha256": "f64cc0b14f2411a18a3d12162534bad3ad11ca2b7e1dc8ce9895c0cda0cfed7d",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-polynomial-certified-local-t3-floating-polynomial-control-20261028-t3_polynomial_acceptance.py.gz"
+    },
+    "stage-t3-floating-polynomial-report-20261028.py": {
+      "sha256": "5f18639dd2baaace9fc021a89d65070beb8b53e5040386be8ff038028e887cdf",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-polynomial-certified-local-t3-floating-polynomial-control-20261028-stage-t3-floating-polynomial-report-20261028.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-polynomial-certified-local-t3-floating-polynomial-control-20261028-verify-approved-certified-report.py.gz"
+    },
+    "import-t3-floating-polynomial-report-20261028.py": {
+      "sha256": "cfa95578df3fc5925265202c4a761b5b8c93129862e747fc2a5e55e68665fba7",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-polynomial-certified-local-t3-floating-polynomial-control-20261028-import-t3-floating-polynomial-report-20261028.py.gz"
+    },
+    "archive-t3-floating-polynomial-control-20261028.py": {
+      "sha256": "68113aa900034e10e7b37074ca0f1ab9ca69d2727a2f7ee98d59d6f5fc98bc36",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-polynomial-certified-local-t3-floating-polynomial-control-20261028-archive-t3-floating-polynomial-control-20261028.py.gz"
+    },
+    "prove-t3-floating-polynomial-integration-20261028.py": {
+      "sha256": "13f7d83c3712f7a9ad0771726c41b01e6c100be53e18ccb51bc4a3bec2710d2b",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-polynomial-certified-local-t3-floating-polynomial-control-20261028-prove-t3-floating-polynomial-integration-20261028.py.gz"
+    },
+    "archive-t3-floating-polynomial-report-20261028.py": {
+      "sha256": "6526ebbc685446e607dbba81a55445f883f812ae20157b435584e236626412a3",
+      "archive": "benchmarks/results/remaining-indicators/t3-floating-polynomial-certified-local-t3-floating-polynomial-control-20261028-archive-t3-floating-polynomial-report-20261028.py.gz"
+    }
+  }
+}

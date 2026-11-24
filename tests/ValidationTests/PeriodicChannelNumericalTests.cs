@@ -9,6 +9,27 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 public sealed class PeriodicChannelNumericalTests
 {
     [Fact]
+    public void IndependentSquareScreenRetainsEverySquareResidueAndLargeExactRoots()
+    {
+        for (int i = 0; i < 4096; i++)
+        {
+            var root = new System.Numerics.BigInteger(i);
+            Assert.True(BuiltInFormulaReferences.PeriodicSquareResidueCandidate(root * root));
+        }
+        foreach (int power in new[] { 63, 64, 127, 1024, 4096 })
+        foreach (int offset in new[] { -3, -1, 0, 1, 3 })
+        {
+            var root = (System.Numerics.BigInteger.One << power) + offset;
+            Assert.True(BuiltInFormulaReferences.PeriodicSquareResidueCandidate(root * root));
+        }
+        foreach (int nonsquare in new[] { -1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 65, 4097 })
+            Assert.False(BuiltInFormulaReferences.PeriodicSquareResidueCandidate(nonsquare));
+        // Screening is conservative: 1009 survives, but the unchanged integer
+        // square-root equality check must still reject it as a square class.
+        Assert.True(BuiltInFormulaReferences.PeriodicSquareResidueCandidate(1009));
+    }
+
+    [Fact]
     public void LocalRationalArithmeticMatchesIndependentUncancelledFractions()
     {
         var values = new[] { 0d, 1, -1, 3, -7, double.Epsilon, -double.Epsilon, double.MaxValue, Math.BitIncrement(1d) };

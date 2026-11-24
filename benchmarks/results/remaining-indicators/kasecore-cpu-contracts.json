@@ -1,0 +1,39 @@
+{
+  "batch": "kasecore-shared-execution",
+  "types": [
+    "KaseIndicator",
+    "KaseConvergenceDivergence"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 53,
+    "parity_passed": 8,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "kasecore-unit-verified.trx.gz",
+        "passed_cases": 53,
+        "trx_sha256": "151b55664b89d3d1bec3195b9e4b80a8815ea0bd0208b6fac9728671d8bf757b"
+      },
+      {
+        "file": "kasecore-parity-verified.trx.gz",
+        "passed_cases": 8,
+        "trx_sha256": "ccdfbacb29407ce905ff6df06c066bc99a1106e556a514e3a3e462ebc70b0af5"
+      }
+    ],
+    "context": "Executed in the 16-facade ninth-stage working candidate with unresolved Guppy and inherited MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "885d6998d7d92b1d255b8230456d80d926d72607b2c580df5aabbf04887df3d5",
+    "test_execution_input_sha256": {
+      "unit": "885d6998d7d92b1d255b8230456d80d926d72607b2c580df5aabbf04887df3d5",
+      "parity": "885d6998d7d92b1d255b8230456d80d926d72607b2c580df5aabbf04887df3d5"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "5a0991377a3189692ebab559a1338b20c957087e"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification",
+    "combined candidate retains unresolved Guppy and MACD failures"
+  ]
+}

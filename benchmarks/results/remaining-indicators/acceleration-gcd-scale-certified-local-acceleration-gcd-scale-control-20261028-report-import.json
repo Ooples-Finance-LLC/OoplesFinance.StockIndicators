@@ -1,0 +1,64 @@
+{
+  "before_sha256": "8a1c4fa30821d30ae9c8a4d18a5ed584905392b9bd251fee085f09f0cffe7666",
+  "candidate_sha256": "5fc9b1a141705753bf4c0dd993326ccc36d355f61528c4cb7dce2fb6576cca93",
+  "changed_baseline_rows": 2,
+  "unchanged_baseline_rows": 800,
+  "changed_builder_slots": 4,
+  "added_builder_slots": 0,
+  "replaced_builder_slots": 4,
+  "verdicts": {
+    "faster": 602,
+    "slower": 886,
+    "inconclusive": 48
+  },
+  "unchanged_rows": 800,
+  "run_id": "local-acceleration-gcd-scale-control-20261028",
+  "imported_utc": "2026-10-29T01:19:40.996550+00:00",
+  "browser_verified": true,
+  "archives": {
+    "imported.json": {
+      "sha256": "33b15434c1863b78be0d46e19d2ec21c424bda8599b605e8fb7dd0366b53ef4b",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-gcd-scale-certified-local-acceleration-gcd-scale-control-20261028-imported.json.gz"
+    },
+    "browser-verification.json": {
+      "sha256": "0f4f8802ebdcaa9931d10043d2418c7ed12d2283086a8141778399c0d2737eba",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-gcd-scale-certified-local-acceleration-gcd-scale-control-20261028-browser-verification.json.gz"
+    },
+    "staged.json": {
+      "sha256": "a791f5881f7a6c964cc6db7098a67d28c20101754f1f0128256c1ac12f3680b6",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-gcd-scale-certified-local-acceleration-gcd-scale-control-20261028-staged.json.gz"
+    },
+    "measurement.json": {
+      "sha256": "9306483d8c6667903d85cde2cf3365c67cce8dc2ec27bc7a4cca08d4ea3fc815",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-gcd-scale-certified-local-acceleration-gcd-scale-control-20261028-measurement.json.gz"
+    },
+    "acceleration_gcd_acceptance.py": {
+      "sha256": "8af989ff2d7340770fee7c84373297dd0589f016696387877d7d1b9a32a99880",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-gcd-scale-certified-local-acceleration-gcd-scale-control-20261028-acceleration_gcd_acceptance.py.gz"
+    },
+    "stage-acceleration-gcd-scale-report-20261028.py": {
+      "sha256": "b76940ae813a902ef3614a25fac4e7ae5bef373469a762d75d9a09d080706a92",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-gcd-scale-certified-local-acceleration-gcd-scale-control-20261028-stage-acceleration-gcd-scale-report-20261028.py.gz"
+    },
+    "verify-approved-certified-report.py": {
+      "sha256": "caa456cb802b06d047e812b89ba935e53ab0d62ce80ed4802fde3ad2708ed541",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-gcd-scale-certified-local-acceleration-gcd-scale-control-20261028-verify-approved-certified-report.py.gz"
+    },
+    "import-acceleration-gcd-scale-report-20261028.py": {
+      "sha256": "7521635b758fc3172da98ea1600251efd2f5c179f020c601409182c637cad59a",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-gcd-scale-certified-local-acceleration-gcd-scale-control-20261028-import-acceleration-gcd-scale-report-20261028.py.gz"
+    },
+    "archive-acceleration-gcd-scale-control-20261028.py": {
+      "sha256": "e6e194a91f48fe34e70cdfcd87d023715f6eeb1d9aa85faf7c4d2631e0a9c340",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-gcd-scale-certified-local-acceleration-gcd-scale-control-20261028-archive-acceleration-gcd-scale-control-20261028.py.gz"
+    },
+    "prove-acceleration-gcd-scale-integration-20261028.py": {
+      "sha256": "5a72856dac1f360814ad4dd01bd5fe612bb482a6590e95b82d47a78110c5aa0f",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-gcd-scale-certified-local-acceleration-gcd-scale-control-20261028-prove-acceleration-gcd-scale-integration-20261028.py.gz"
+    },
+    "archive-acceleration-gcd-scale-report-20261028.py": {
+      "sha256": "a14e0d8b2f94aa016b9e239ab295a9393309afc71fc5b5bb553cc5ebc6d04553",
+      "archive": "benchmarks/results/remaining-indicators/acceleration-gcd-scale-certified-local-acceleration-gcd-scale-control-20261028-archive-acceleration-gcd-scale-report-20261028.py.gz"
+    }
+  }
+}

@@ -56,18 +56,11 @@ internal static class ElderRayComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var flags = run.Held(indicator.IsDefined);
-        return Series(
-            Enumerable
-                .Range(0, 3)
-                .Select(slot =>
-                    run[indicator.Outputs[slot]]
-                        .ToArray()
-                        .WherePresent(flags)
-                        .ToArray()
-                )
-                .ToArray()
-        );
+        var flags = run[indicator.IsDefined];
+        var outputs = new Dictionary<string, ComparisonOutput>(Names.Length);
+        for (int slot = 0; slot < Names.Length; slot++)
+            outputs.Add(Names[slot], NamedComparisonPublisher.Column(run[indicator.Outputs[slot]], flags));
+        return new(outputs);
     }
 
     private static ComparisonSeries Reference(CompetitorData data, int period, bool native)

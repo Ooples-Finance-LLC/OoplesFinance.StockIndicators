@@ -1,0 +1,43 @@
+{
+  "batch": "ehlers-correlation-family-shared-execution",
+  "types": [
+    "EhlersCorrelationTrendIndicator",
+    "EhlersCorrelationCycleIndicator",
+    "EhlersCorrelationAngleIndicator",
+    "EhlersMarketStateIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Publish both correlation axes together and stream exact phase unwrapping/market-state decisions without full intermediate histories; preserve zero padding, normalization, sources and lifecycle.",
+  "verification": {
+    "unit_passed": 49,
+    "fixture_passed": 16,
+    "discovery_passed": 166,
+    "gpu_passed": 100,
+    "contract_methods": 1507,
+    "hosted_methods": 1495,
+    "evidence": [
+      {
+        "file": "correlationfamily-unit.trx.gz",
+        "passed_cases": 49,
+        "trx_sha256": "64280ff8ce7934f06651d6edbc5f809d974cefdd2c02b751e69db22133769e93"
+      },
+      {
+        "file": "correlationfamily-fixture.trx.gz",
+        "passed_cases": 182,
+        "trx_sha256": "56b48211f8329f3fd925051b77cddff26568f370138259e4785311ad6536637e"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingCorrelationFamilyBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersCorrelationTrendIndicator",
+      "EhlersCorrelationCycleIndicator",
+      "EhlersCorrelationAngleIndicator",
+      "EhlersMarketStateIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

@@ -126,12 +126,29 @@ internal static partial class ValuesBarExecution
                 else if (total == 0) value = double.NegativeInfinity;
                 else if (positive != T.Zero) value = typeof(T) == typeof(long)
                     ? MoneyFlowPercentage.Calculate(long.CreateChecked(positive), long.CreateChecked(sum))
-                    : JurikDyadic.IntegerRatio(unchecked(100 * Int128.CreateChecked(positive)), total);
+                    : PublishWideMoneyFlowPercentage(Int128.CreateChecked(positive), total);
             }
             output[0][row] = value; output[1][row] = defined ? 1 : 0;
             RecordMoneyFlowOutput(ref region, row, value);
         }
         return region;
+    }
+
+    private static double PublishWideMoneyFlowPercentage(Int128 positive, Int128 total)
+    {
+        // The recurrence certificate reserves the factor-100 headroom.
+        Int128 numerator = unchecked(100 * positive);
+        const long exactLimit = 1L << 53;
+        if (numerator >= -exactLimit && numerator <= exactLimit
+            && total >= -exactLimit && total <= exactLimit)
+            return (double)numerator / (double)total;
+        bool negative = (numerator < 0) != (total < 0);
+        UInt128 top = unchecked((UInt128)(numerator < 0 ? -numerator : numerator));
+        UInt128 bottom = unchecked((UInt128)(total < 0 ? -total : total));
+        // Certify the estimate before doing a rounding-grid integer division.
+        if (CertifiedCompactRatio.TryDivide(top, bottom, 0, out double value))
+            return negative ? -value : value;
+        return JurikDyadic.IntegerRatio(numerator, total);
     }
 
     private struct MoneyFlowIntegerPair<T> where T : unmanaged

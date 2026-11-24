@@ -1,0 +1,38 @@
+{
+  "batch": "gopalgrand-shared-execution",
+  "types": [
+    "GopalakrishnanRangeIndex",
+    "GrandTrendForecasting"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 51,
+    "parity_passed": 8,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "gopalgrand-unit-verified.trx.gz",
+        "passed_cases": 51,
+        "trx_sha256": "bd7606ccd2716486105ec9e75559da21ff63f8ad266200d0b0a9250ce362eed5"
+      },
+      {
+        "file": "gopalgrand-parity-verified.trx.gz",
+        "passed_cases": 8,
+        "trx_sha256": "e349fa88093ff387d730a0afac56e05d338cee3f1447d6ac7cde225de654984b"
+      }
+    ],
+    "context": "Executed in the 5-facade seventh-stage working candidate with inherited unresolved MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "47436d00b4b73743e274239957521c32282302758fe1e26cd03ff3e2bf3474e7",
+    "test_execution_input_sha256": {
+      "unit": "47436d00b4b73743e274239957521c32282302758fe1e26cd03ff3e2bf3474e7",
+      "parity": "47436d00b4b73743e274239957521c32282302758fe1e26cd03ff3e2bf3474e7"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "051706ed439099a8800e47872826a75d21f85fef"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

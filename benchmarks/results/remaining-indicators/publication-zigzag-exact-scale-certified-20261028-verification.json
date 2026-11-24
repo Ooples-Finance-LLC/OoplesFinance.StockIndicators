@@ -1,0 +1,58 @@
+{
+  "input_head": "acf0b8030cf897135576c5f672e9ff23d559bce6",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Indicators/ZigZagSnapshot.cs",
+    "tests/ModelsTests/ZigZagExactScaleTests.cs"
+  ],
+  "batch_note": "Approved exact-scale ZigZag redesign: normalize price and reversal arithmetic by common powers of two, restore scale only at final rounding; preserve pivots, ties, all retrospective fields and wide-range arithmetic. Three boundary regressions plus original trajectory and long-history parity.",
+  "step": "complete",
+  "updated_utc": "2026-10-28T12:59:01.375095+00:00",
+  "unit": {
+    "passed": 11,
+    "class_counts": {
+      "ZigZagExactScaleTests": 3,
+      "ZigZagSnapshotSharedExecutionTests": 8
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\zigzag-exact-scale\\unit\\unit.trx",
+    "sha256": "209797d9b2a0dd067087483fe544e92e837caf5f88e75d39e1fa0e2970171068",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-zigzag-exact-scale-certified-20261028-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 13,
+    "class_counts": {
+      "SharedZigZagSnapshotBenchmarkTests": 6,
+      "ZigZagComparisonTests": 7
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\zigzag-exact-scale\\parity\\parity.trx",
+    "sha256": "64cbd49382ea8234c99d831426152467e28486aa9c3fee23a0fe9a8e2f6fdb8a",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-zigzag-exact-scale-certified-20261028-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-zigzag-exact-scale-20261028\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b633882f41bae27856a7bcfa18fdb7dd9a2877b854acc093c145568f8d4acf01",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-zigzag-exact-scale-20261028\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b633882f41bae27856a7bcfa18fdb7dd9a2877b854acc093c145568f8d4acf01",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-zigzag-exact-scale-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b633882f41bae27856a7bcfa18fdb7dd9a2877b854acc093c145568f8d4acf01",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-zigzag-exact-scale-20261028\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "b633882f41bae27856a7bcfa18fdb7dd9a2877b854acc093c145568f8d4acf01"
+  },
+  "source_fingerprint_sha256": "b6ea5cbb7454b3daf6852ce57aa73b00e1a7ba9e1a14d470ba56848ad12fc3a6",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Approved exact-scale ZigZag redesign: normalize price and reversal arithmetic by common powers of two, restore scale only at final rounding; preserve pivots, ties, all retrospective fields and wide-range arithmetic. Three boundary regressions plus original trajectory and long-history parity. Correctness checks passed; controlled performance remains pending."
+}

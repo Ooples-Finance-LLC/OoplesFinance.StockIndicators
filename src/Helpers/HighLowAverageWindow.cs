@@ -8,10 +8,12 @@ internal sealed class HighLowAverageWindow : IDisposable
     private readonly RollingWindowMin _low;
     private readonly RocBankAverage? _upper, _lower;
     private readonly IMovingAverageSmoother? _upperFallback, _lowerFallback;
-    internal HighLowAverageWindow(MovingAvgType kind, int length)
+    // A finite bound is valid only when the caller will publish no more than that many inputs.
+    internal HighLowAverageWindow(MovingAvgType kind, int length, int maxInputCount = int.MaxValue)
     {
-        length = Math.Max(1, length); _high = new(length); _low = new(length);
-        if (StrengthWindow.Supports(kind)) { _upper = new(kind, length, int.MaxValue); _lower = new(kind, length, int.MaxValue); }
+        length = Math.Max(1, length); var capacity = Math.Min(length, Math.Max(1, maxInputCount));
+        _high = new(capacity); _low = new(capacity);
+        if (StrengthWindow.Supports(kind)) { _upper = new(kind, length, capacity); _lower = new(kind, length, capacity); }
         else { _upperFallback = MovingAverageSmootherFactory.Create(kind, length); _lowerFallback = MovingAverageSmootherFactory.Create(kind, length); }
     }
     internal static double Midpoint(double upper, double lower)

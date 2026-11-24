@@ -55,6 +55,21 @@ class LocalGpuEvidenceTests(unittest.TestCase):
             (root / "src/reference.txt").write_text("new embedded reference")
             self.assertNotEqual(changed, gpu.source_fingerprint(root))
 
+    def test_fingerprint_ignores_only_the_marked_release_version(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            (root / "src").mkdir()
+            project = root / "src/Library.csproj"
+            text = ("<Version>1.1.0</Version> <!-- x-release-please-version -->\n"
+                    '<PackageReference Include="Dependency" Version="1.0.0" />\n')
+            project.write_text(text)
+            before = gpu.source_fingerprint(root)
+            project.write_text(text.replace("1.1.0", "2.0.0"))
+            self.assertEqual(before, gpu.source_fingerprint(root))
+            project.write_text(text.replace('Version="1.0.0"', 'Version="1.0.1"'))
+            self.assertNotEqual(before, gpu.source_fingerprint(root))
+
 
 if __name__ == "__main__":
     unittest.main()

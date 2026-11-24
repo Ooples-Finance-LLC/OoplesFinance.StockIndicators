@@ -1,0 +1,37 @@
+{
+  "batch": "disparity-shared-execution",
+  "types": [
+    "DisparityIndex"
+  ],
+  "status": "cpu-contracts-verified-gpu-and-performance-pending",
+  "implementation": "Shared incremental states preserve exact startup, original OHLC, output order, custom-source/average fallback and reset/disposal behavior while avoiding per-bar result dictionaries.",
+  "verification": {
+    "unit_passed": 16,
+    "parity_passed": 4,
+    "target": "Release/net10.0",
+    "evidence": [
+      {
+        "file": "disparity-unit-verified.trx.gz",
+        "passed_cases": 16,
+        "trx_sha256": "a1313b75406999b12093e13b6f9917cb2279f71d9d5e8afc079aa38489cb237d"
+      },
+      {
+        "file": "disparity-parity-verified.trx.gz",
+        "passed_cases": 4,
+        "trx_sha256": "04e786574f0e7dae9bf86b58e508903be718a62f45ed363655f5df3c91218912"
+      }
+    ],
+    "context": "Executed in the 14-facade follow-on working candidate with inherited unresolved MACD failures; the isolated committed tree was not separately built or tested.",
+    "current_combined_input_sha256": "766bf7006df16711e91b86c07f83e351dc2019699347abbc5c80a46aad3de270",
+    "test_execution_input_sha256": {
+      "unit": "766bf7006df16711e91b86c07f83e351dc2019699347abbc5c80a46aad3de270",
+      "parity": "766bf7006df16711e91b86c07f83e351dc2019699347abbc5c80a46aad3de270"
+    },
+    "reuse_note": "When the execution and current fingerprints differ, these are historical receipts retained under the recorded source-diff audits; they are not reruns of the current binary.",
+    "combined_validation_base_head": "ee7078a17110e39d923f1607a7ba4512a71c0799"
+  },
+  "pending": [
+    "raw timing and performance comparison",
+    "local GPU and shared discovery verification"
+  ]
+}

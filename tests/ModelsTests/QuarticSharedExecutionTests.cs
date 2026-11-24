@@ -11,6 +11,51 @@ public sealed class QuarticSharedExecutionTests(Xunit.Abstractions.ITestOutputHe
         new Bar(DateTime.UnixEpoch.AddMinutes(i), i, i + 1, i - 1, p, i + 2)).ToArray();
 
     [Theory]
+    [InlineData(1, .6)] [InlineData(20, .6)] [InlineData(int.MaxValue, 16d)]
+    public void CertifiedOrdinaryStepsMatchIndependentRationalBits(int period, double factor)
+    {
+        var state = new ValuesBarExecution.QuarticValueState(period, factor, McGinleyStartup.Immediate);
+        var random = new Random(71105);
+        int certified = 0, total = 0;
+        foreach (int exponent in new[] { -180, -20, 0, 7, 180 })
+        foreach (int sign in new[] { -1, 1 })
+        for (int i = 0; i < 64; i++)
+        {
+            double previous = Math.ScaleB(sign * (1 + random.NextDouble() / 8), exponent);
+            double value = previous * (1 + (random.NextDouble() - .5) / 4096);
+            total++;
+            if (!state.TryCertifiedNext(previous, value, out double actual)) continue;
+            certified++;
+            var expected = McGinleyReference.Values(BarsOf([previous, value]), period, factor,
+                McGinleyStartup.Immediate)[1];
+            Assert.True(expected.HasValue);
+            Assert.Equal(BitConverter.DoubleToInt64Bits(expected.GetValueOrDefault()), BitConverter.DoubleToInt64Bits(actual));
+        }
+        Assert.True(certified > total / 2, $"Only {certified}/{total} ordinary steps were certified.");
+    }
+
+    [Fact]
+    public void RoundingCellAndCancellationCasesRetainExactBits()
+    {
+        (double Previous, double Price, double Factor)[] steps = [(1d, Math.BitIncrement(1d), 2d),
+            (1d, Math.BitDecrement(1d), 2d), (-1d, Math.BitIncrement(-1d), 2d),
+            (-1d, Math.BitDecrement(-1d), 2d), (1d, .5d, 8d), (-1d, -.5d, 8d)];
+        foreach (var step in steps)
+        {
+            var bars = BarsOf([step.Previous, step.Price]);
+            var expected = McGinleyReference.Values(bars, 1, step.Factor, McGinleyStartup.Immediate);
+            var state = new ValuesBarExecution.QuarticValueState(1, step.Factor, McGinleyStartup.Immediate);
+            var actual = new double[2];
+            for (int i = 0; i < bars.Length; i++)
+            {
+                state.Update(in bars[i], actual);
+                Assert.Equal(expected[i].HasValue ? 1d : 0d, actual[1]);
+                Assert.Equal(BitConverter.DoubleToInt64Bits(expected[i] ?? 0), BitConverter.DoubleToInt64Bits(actual[0]));
+            }
+        }
+    }
+
+    [Theory]
     [InlineData(1, .6)] [InlineData(3, 2d)] [InlineData(20, .6)] [InlineData(int.MaxValue, 16d)]
     public async Task BothStartupModesAndOwnedHistoriesMatchOriginal(int period, double factor)
     {

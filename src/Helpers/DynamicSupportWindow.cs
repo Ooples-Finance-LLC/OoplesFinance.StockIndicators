@@ -9,7 +9,8 @@ internal sealed class DynamicSupportWindow : IDisposable
     internal DynamicSupportWindow(MovingAvgType kind, int length, bool external = false, int capacityHint = int.MaxValue)
     {
         length = Math.Max(1, length); _multiplier = Math.Sqrt(length);
-        _high = new(length); _low = new(length);
+        var capacity = Math.Min(length, Math.Max(1, capacityHint));
+        _high = new(capacity); _low = new(capacity);
         if (!external) _range = new(kind, length, length, kind, capacityHint);
     }
     internal (double Support, double Resistance, double Middle) Next(double high, double low, double close, bool commit, RocBankValue? suppliedAtr = null)

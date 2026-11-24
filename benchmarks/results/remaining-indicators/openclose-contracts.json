@@ -1,0 +1,39 @@
+{
+  "batch": "open-close-average-shared-execution",
+  "types": [
+    "ChandeQuickStick",
+    "DeltaMovingAverage"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact open-close averaging kernel for Chande Quick Stick and all three Delta Moving Average outputs. Preserve independent period/lag clamps, zero-padded lag, original open fields, extended arithmetic stages and component/source fallback.",
+  "verification": {
+    "unit_passed": 174,
+    "fixture_passed": 8,
+    "discovery_passed": 108,
+    "gpu_passed": 100,
+    "contract_methods": 1447,
+    "hosted_methods": 1435,
+    "evidence": [
+      {
+        "file": "openclose-unit.trx.gz",
+        "passed_cases": 174,
+        "trx_sha256": "11df283f4d12847747c5c7a134c3e6435029ddcbfbe66b649f3019ea0652fbc8"
+      },
+      {
+        "file": "openclose-fixture.trx.gz",
+        "passed_cases": 116,
+        "trx_sha256": "157aefc81ad494a24364cd23755d274544f9c2e487907e4e3f75e2d7b1f10272"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingOpenCloseBenchmarks",
+    "cases": 16,
+    "status": "prepared-not-measured",
+    "operations": [
+      "ChandeQuickStick",
+      "DeltaMovingAverage"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

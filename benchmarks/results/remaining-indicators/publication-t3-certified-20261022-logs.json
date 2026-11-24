@@ -1,0 +1,66 @@
+{
+  "publication-t3-certified-20261022-validate-t3-certified.py.gz": {
+    "sha256": "8c39418c4a3ce1a5a726336e7db1f480fc30f1a1c4388ee681eacaafd2d60314",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\validate-t3-certified.py"
+  },
+  "publication-t3-certified-20261022-archive-t3-certified.py.gz": {
+    "sha256": "78b70c56cc678db4c7173ea94d142a46f577429535414fa35138adecec5edc79",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\archive-t3-certified.py"
+  },
+  "publication-t3-certified-20261022-t3-build-unit-initial.log.gz": {
+    "sha256": "a089f84d431640f032db1081f183da4e864813933dbdd796bf23f99770413e74",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-build-unit-initial.log"
+  },
+  "publication-t3-certified-20261022-t3-build-unit.log.gz": {
+    "sha256": "0adca7b02e1a5e22e717f6a680c4acacb698e5e8493b8771958ea9d97c58e40b",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-build-unit.log"
+  },
+  "publication-t3-certified-20261022-build-benchmark.log.gz": {
+    "sha256": "d26d4ebd41902b7e6966f48ed36ba16541f1ff510dde4d9ab40b9e63646cb322",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-certified-attempt2\\build-benchmark.log"
+  },
+  "publication-t3-certified-20261022-build-comparator-initial-interrupted.log.gz": {
+    "sha256": "e05d86de27221c10d0a482ff33602db9d31f684f672441e049f9217b888efcb3",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-certified-attempt2\\build-comparator-initial-interrupted.log"
+  },
+  "publication-t3-certified-20261022-build-comparator.log.gz": {
+    "sha256": "f2539de900e4d727858eecb16f3ca12731c749fad800d8f782ae009e7c2e859d",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-certified-attempt2\\build-comparator.log"
+  },
+  "publication-t3-certified-20261022-diff-check.log.gz": {
+    "sha256": "01a83a0ffe1ed2c4bdac811dc5d42eb2045b7e9ac2c1901d8e7d51a16ad4644a",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-certified-attempt2\\diff-check.log"
+  },
+  "publication-t3-certified-20261022-discover-contracts.log.gz": {
+    "sha256": "c6756f6a9c8fbc4112c866f19013db22cf44427f1ce4e25104bb9df6f04ef3ea",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-certified-attempt2\\discover-contracts.log"
+  },
+  "publication-t3-certified-20261022-gpu-source-verification.log.gz": {
+    "sha256": "ca742dfdc8b42fdfa1bb300c53daf2c60e0340a52941e0ab8ed04a61e75836e1",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-certified-attempt2\\gpu-source-verification.log"
+  },
+  "publication-t3-certified-20261022-gpu.log.gz": {
+    "sha256": "6f05c89f84f56987a54f745339f3807d72e3f33e70a0fb4ae2de8262ff301e69",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-certified-attempt2\\gpu.log"
+  },
+  "publication-t3-certified-20261022-inventory-check.log.gz": {
+    "sha256": "9ecd64cdd669f78c32f313d22cd60e9661fa1e079ce9e3bf19ee49257933902b",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-certified-attempt2\\inventory-check.log"
+  },
+  "publication-t3-certified-20261022-inventory-tests.log.gz": {
+    "sha256": "49e9897e62b0a915435fffcc11fb7c712157855201c3a95533f03e89abe9967c",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-certified-attempt2\\inventory-tests.log"
+  },
+  "publication-t3-certified-20261022-inventory.log.gz": {
+    "sha256": "9ecd64cdd669f78c32f313d22cd60e9661fa1e079ce9e3bf19ee49257933902b",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-certified-attempt2\\inventory.log"
+  },
+  "publication-t3-certified-20261022-parity.log.gz": {
+    "sha256": "effb01ec36439754b513d2767d1afa8484c63a6f81462c94080bf9946451beac",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-certified-attempt2\\parity.log"
+  },
+  "publication-t3-certified-20261022-unit.log.gz": {
+    "sha256": "fb40d9253053cb2559aa85924ecc6c728366f50ec42ea1206ba61fc9d71f56aa",
+    "source": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\t3-certified-attempt2\\unit.log"
+  }
+}

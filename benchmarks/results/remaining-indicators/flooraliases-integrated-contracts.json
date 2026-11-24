@@ -1,0 +1,33 @@
+{
+  "types": [
+    "FloorPivotPointS1",
+    "FloorPivotPointR1",
+    "PivotPoint"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "5fe3952ec1a64c724c6199a4ed71ae1cd6a0e369",
+  "combined_input_sha256": "ca279aeec13e43b2eabb68e58a5595d84f2db3bbfc2ea9841c3959fc8812cfca",
+  "benchmark_fixture": {
+    "type": "RemainingFloorAliasesBenchmarks",
+    "operations": [
+      "FloorPivotPointS1",
+      "FloorPivotPointR1",
+      "PivotPoint"
+    ]
+  },
+  "checks": {
+    "unit": 73,
+    "parity": 12,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/flooraliases-integrated-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/flooraliases-integrated-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

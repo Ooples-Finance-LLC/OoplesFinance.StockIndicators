@@ -1,0 +1,38 @@
+{
+  "batch": "generated-adx-mass-chaikin",
+  "types": [
+    "Adx",
+    "MassIndex",
+    "ChaikinOscillator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse DirectionalIndexWindow with DI+/DI-/ADX output order, MassIndexWindow with its nine-period signal, and MoneyFlowAverageWindow. Plain default components only; custom averages retain graph execution.",
+  "verification": {
+    "production_build": "Release net10.0; 0 warnings/errors",
+    "unit_passed": 39,
+    "fixture_passed": 12,
+    "gpu_passed": 100,
+    "contract_methods": 1342,
+    "hosted_methods": 1330,
+    "unit_trx_sha256": "2e8a5193513e13d3cd7f7e8d4cc8af90ae09c0ad53decf6eca2712ee79a2eed4",
+    "fixture_trx_sha256": "c03965df160631f5227ec1684235ceff51e950dd75f83152a50844046d481174"
+  },
+  "benchmark_fixture": {
+    "type": "RemainingDirectionalFlowBenchmarks",
+    "counts": [
+      1000,
+      10000
+    ],
+    "histories": [
+      "Full",
+      "LatestOnly"
+    ],
+    "arms": [
+      "Legacy",
+      "Shared"
+    ],
+    "cases": 24,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

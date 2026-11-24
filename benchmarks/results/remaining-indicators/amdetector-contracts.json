@@ -1,0 +1,37 @@
+{
+  "batch": "am-detector-shared-execution",
+  "types": [
+    "EhlersAMDetector"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact open-close amplitude envelope and two SMA stages to publish line/signal together; preserve original open, wide distances, extrema expiration, startup, components/source fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 21,
+    "fixture_passed": 4,
+    "discovery_passed": 157,
+    "gpu_passed": 100,
+    "contract_methods": 1498,
+    "hosted_methods": 1486,
+    "evidence": [
+      {
+        "file": "amdetector-unit.trx.gz",
+        "passed_cases": 21,
+        "trx_sha256": "ff01eb94b86ed027665dd7d9a2927bba712e72665b802efb0e6c9332e3a94604"
+      },
+      {
+        "file": "amdetector-fixture.trx.gz",
+        "passed_cases": 161,
+        "trx_sha256": "2ae0488efd8a5c84cf732eb26392fb756665aa0c3847f884eef83de1cec68030"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAmDetectorBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersAMDetector"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

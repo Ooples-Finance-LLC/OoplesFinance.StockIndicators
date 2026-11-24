@@ -1,0 +1,35 @@
+{
+  "types": [
+    "ImpulseMovingAverageConvergenceDivergence",
+    "ImpulsePercentagePriceOscillator"
+  ],
+  "status": "contracts-verified-performance-pending",
+  "target": "Release/net10.0",
+  "candidate_commit": "1882f1990ec292a7c88cdb23bcf156a866b25ee0",
+  "source_fingerprint_sha256": "d7ef4d4d27ef0fc6c7a1b8ca0cbccdf9cceeb7060d4c57c9d2397f36b008af98",
+  "benchmark_fixture": {
+    "type": "RemainingImpulsePairBenchmarks",
+    "operations": [
+      "ImpulseMovingAverageConvergenceDivergence",
+      "ImpulsePercentagePriceOscillator"
+    ]
+  },
+  "checks": {
+    "unit": 55,
+    "parity": 8,
+    "gpu": 100,
+    "inventory": 6
+  },
+  "unit_class_counts": {
+    "SharedGeneratedImpulsePairTests": 23,
+    "ImpulseOscillatorNumericalTests": 32
+  },
+  "evidence": [
+    "benchmarks/results/remaining-indicators/publication-swenlin-pivot-20261021-unit.trx.gz",
+    "benchmarks/results/remaining-indicators/publication-swenlin-pivot-20261021-parity.trx.gz"
+  ],
+  "pending": [
+    "controlled timing",
+    "remaining rollout"
+  ]
+}

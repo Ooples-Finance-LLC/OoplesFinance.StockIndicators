@@ -1,0 +1,41 @@
+{
+  "batch": "ehlers-adaptive-cycle-shared-execution",
+  "types": [
+    "EhlersAdaptiveCyberCycle",
+    "EhlersAdaptiveCenterOfGravityOscillator",
+    "EhlersSmoothedAdaptiveMomentum"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse exact adaptive cyber, gravity and smoothed momentum kernels, preserving paired outputs, strict alpha validation, supported averages, source fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 51,
+    "fixture_passed": 12,
+    "discovery_passed": 169,
+    "gpu_passed": 100,
+    "contract_methods": 1510,
+    "hosted_methods": 1498,
+    "evidence": [
+      {
+        "file": "adaptivecycle-unit.trx.gz",
+        "passed_cases": 51,
+        "trx_sha256": "c5265b76159500634cf86e877c69c5ee00dcfc3896371ab82cf4dce2a4415c42"
+      },
+      {
+        "file": "adaptivecycle-fixture.trx.gz",
+        "passed_cases": 181,
+        "trx_sha256": "1505f928c4351f84abd55c7268dd4aa5d3d28e5ee423ec11b2d96ecf62812fa8"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingAdaptiveCycleBenchmarks",
+    "cases": 24,
+    "status": "prepared-not-measured",
+    "operations": [
+      "EhlersAdaptiveCyberCycle",
+      "EhlersAdaptiveCenterOfGravityOscillator",
+      "EhlersSmoothedAdaptiveMomentum"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

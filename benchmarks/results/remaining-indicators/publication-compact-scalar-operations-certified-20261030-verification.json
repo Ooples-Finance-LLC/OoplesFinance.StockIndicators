@@ -1,0 +1,89 @@
+{
+  "input_head": "94273dfc563dafbca57d3b8692b3f8f090dd6bfd",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-unit": "passed",
+    "unit": "passed",
+    "build-benchmark": "passed",
+    "build-comparator": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "reviewed_source_changes": [
+    "src/Helpers/CompactMacdValue.cs",
+    "tests/ModelsTests/CompactMacdScalarTests.cs"
+  ],
+  "batch_note": "Native scalar overloads avoid BigInteger argument conversion in approved compact MACD/classical kernels. Existing exact wide fallback retained; affected consumers and boundaries verified together. Performance pending.",
+  "step": "complete",
+  "updated_utc": "2026-10-30T15:45:57.947202+00:00",
+  "unit": {
+    "passed": 354,
+    "class_counts": {
+      "VariableAverageSharedExecutionTests": 12,
+      "ClassicalFiniteDifferenceTests": 18,
+      "CompactMacdFixedRecurrenceTests": 2,
+      "CompactClassicalWindowTests": 22,
+      "PpoNumericalTests": 71,
+      "MacdNumericalTests": 81,
+      "MacdSharedExecutionTests": 18,
+      "CompactRocUnitsTests": 5,
+      "CompactRatioArithmeticTests": 6,
+      "PvoNumericalTests": 46,
+      "ClassicAverageSharedExecutionTests": 14,
+      "SharedClassicBandsTests": 11,
+      "ClassicStochasticSharedExecutionTests": 16,
+      "ComparisonFrameworkCompatibilityTests": 4,
+      "CompactMacdScalarTests": 15,
+      "CompactMacdValueTests": 4,
+      "MacdFixedCoefficientReductionTests": 2,
+      "CompactMacdBitPublicationTests": 3,
+      "CompactMacdFusedRecurrenceTests": 2,
+      "CompactMacdUnitRoundTests": 2
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\scalar\\unit\\unit.trx",
+    "sha256": "59cbef8538060d86283c3767471dcc6222b535a6a135faa50c1b0be6862d3673",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-compact-scalar-operations-certified-20261030-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 301,
+    "class_counts": {
+      "ClassicAverageComparisonTests": 15,
+      "SharedTaStochasticNativeBenchmarkTests": 40,
+      "SharedTaMacdNativeBenchmarkTests": 46,
+      "SharedTaAdaptiveRateNativeBenchmarkTests": 13,
+      "ClassicMacdComparisonTests": 16,
+      "SharedClassicAverageBenchmarkTests": 6,
+      "VariablePeriodComparisonTests": 16,
+      "ClassicStochasticRsiComparisonTests": 15,
+      "ClassicStochasticComparisonTests": 16,
+      "SharedTradyMacdBenchmarkTests": 33,
+      "SharedMacdBenchmarkTests": 14,
+      "AlignedMacdComparisonTests": 10,
+      "SharedTaAverageNativeBenchmarkTests": 40,
+      "ClassicBandsComparisonTests": 10,
+      "ClassicOscillatorComparisonTests": 11
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\batched-optimization-20261030\\scalar\\parity\\parity.trx",
+    "sha256": "a1ec53ccd9a40ff6bd113fb4e474acfa289707c9c2cdd928d7c57cfa9494dfd7",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-compact-scalar-operations-certified-20261030-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-scalar-operations-20261030\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0ec92aff6035a5818c4372308296766cc0a73e749e0615395abdde87993c729d",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-scalar-operations-20261030\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0ec92aff6035a5818c4372308296766cc0a73e749e0615395abdde87993c729d",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-scalar-operations-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0ec92aff6035a5818c4372308296766cc0a73e749e0615395abdde87993c729d",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-compact-scalar-operations-20261030\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "0ec92aff6035a5818c4372308296766cc0a73e749e0615395abdde87993c729d"
+  },
+  "source_fingerprint_sha256": "3586f64743847f6a40e06554369bd89c47827e1aad29963dc4f11b38f3ec0838",
+  "inventory_tests_passed": 8,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Native scalar overloads avoid BigInteger argument conversion in approved compact MACD/classical kernels. Existing exact wide fallback retained; affected consumers and boundaries verified together. Performance pending. Correctness checks passed; controlled performance remains pending."
+}

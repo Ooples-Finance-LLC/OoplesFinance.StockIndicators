@@ -1,0 +1,37 @@
+{
+  "batch": "value-chart-shared-execution",
+  "types": [
+    "ValueChartIndicator"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Share four exact Value Chart coordinates with span publication and tuple intermediates; retain existing wrapper and whole-series median/close equality decision for custom ranges, including signed zeros and late differences. Preserve inert NumAtrs, callbacks, source fallback and lifecycle.",
+  "verification": {
+    "unit_passed": 122,
+    "fixture_passed": 4,
+    "discovery_passed": 85,
+    "gpu_passed": 100,
+    "contract_methods": 1420,
+    "hosted_methods": 1408,
+    "evidence": [
+      {
+        "file": "valuechart-unit.trx.gz",
+        "passed_cases": 122,
+        "trx_sha256": "e90bbed4e37f4b0cb2dce191478e9ca1dd563a2dc556ecfe1dde9cd85a10ebbc"
+      },
+      {
+        "file": "valuechart-fixture.trx.gz",
+        "passed_cases": 89,
+        "trx_sha256": "6397a1f0736fbddd4f1d922577e4146a4ce24b7706bee66e35cd54f2718e2f68"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingValueChartBenchmarks",
+    "cases": 8,
+    "status": "prepared-not-measured",
+    "operations": [
+      "ValueChartIndicator"
+    ]
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

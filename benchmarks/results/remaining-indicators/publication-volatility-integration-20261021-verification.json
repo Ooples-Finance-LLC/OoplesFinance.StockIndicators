@@ -1,0 +1,114 @@
+{
+  "input_head": "c596070561a7b44cad4618095029251595a35058",
+  "source": "C-drive recovery; committed source and compressed evidence retained",
+  "checks": {
+    "build-net461": "passed",
+    "build-net10": "passed",
+    "build-unit": "passed",
+    "build-comparator": "passed",
+    "unit": "passed",
+    "parity": "passed",
+    "gpu": "passed",
+    "discover-contracts": "passed",
+    "gpu-source-verification": "passed",
+    "inventory": "passed",
+    "inventory-check": "passed",
+    "inventory-tests": "passed",
+    "diff-check": "passed"
+  },
+  "drive": "C:",
+  "status": "checks-passed-review-and-publication-pending",
+  "parallel_batch_note": "Integrate qualified Volatility/Vervoort with published Swami/VPN/Kalman; retain numerical qualifications and verify shared dispatch, parity, and current-source GPU.",
+  "reused_numerical_qualifications": {
+    "7e86428ee3518415c5779ec0cf8ba715f7781999": {
+      "source_changes": [
+        "src/Helpers/CertifiedSwami.cs",
+        "src/Helpers/CertifiedVolumePositiveNegative.cs",
+        "src/Helpers/KalmanSmootherWindow.cs",
+        "src/Helpers/SwamiWindow.cs",
+        "src/Helpers/VolumePositiveNegativeWindow.cs",
+        "src/Indicators/ValuesBarExecution.GeneratedStates.cs",
+        "src/Indicators/ValuesBarExecution.KalmanSmoother.cs",
+        "src/Indicators/ValuesBarExecution.SwamiTdi.cs",
+        "src/Indicators/ValuesBarExecution.VolumePositiveNegative.cs"
+      ],
+      "qualification": {
+        "passed": 232,
+        "class_counts": {
+          "ComparisonFrameworkCompatibilityTests": 4,
+          "VervoortModifiedNumericalTests": 88,
+          "SharedGeneratedVolatilityMomentumTests": 13,
+          "VolatilityMomentumNumericalTests": 85,
+          "VervoortModifiedCertifiedTests": 15,
+          "SharedGeneratedVervoortModifiedTests": 11,
+          "VolatilityMomentumCertifiedTests": 16
+        },
+        "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\certified-isolated-publish\\unit\\unit.trx",
+        "sha256": "f53fa98cee36773802c1130a2821059ed28819fb20d9388825dc1bfec5d3fe28"
+      },
+      "note": "Only the other independently qualified family and reviewed dispatch additions changed; mathematical helpers and numerical assertions for this family are unchanged."
+    },
+    "5f67cf800e2fce50607a8dc4c9daf8ffc14a9493": {
+      "source_changes": [
+        "src/Helpers/CertifiedVervoortModified.cs",
+        "src/Helpers/CertifiedVolatilityMomentum.cs",
+        "src/Helpers/VervoortModifiedWindow.cs",
+        "src/Helpers/VolatilityMomentumWindow.cs",
+        "src/Indicators/ValuesBarExecution.GeneratedStates.cs",
+        "src/Indicators/ValuesBarExecution.VolatilityMomentum.cs"
+      ],
+      "qualification": {
+        "passed": 37,
+        "class_counts": {
+          "SharedGeneratedVolumePositiveNegativeTests": 13,
+          "SharedGeneratedSwamiTdiTests": 20,
+          "ComparisonFrameworkCompatibilityTests": 4
+        },
+        "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\swami-integration\\unit\\unit.trx",
+        "sha256": "621c2d0199fd8054c4a94f22e3c656b03c83711e13c2ca3032651cd76289714a"
+      },
+      "note": "Only the other independently qualified family and reviewed dispatch additions changed; mathematical helpers and numerical assertions for this family are unchanged."
+    }
+  },
+  "step": "complete",
+  "updated_utc": "2026-10-21T23:16:56.295460+00:00",
+  "unit": {
+    "passed": 71,
+    "class_counts": {
+      "SharedGeneratedKalmanSmootherTests": 10,
+      "SharedGeneratedVolatilityMomentumTests": 13,
+      "SharedGeneratedSwamiTdiTests": 20,
+      "SharedGeneratedVolumePositiveNegativeTests": 13,
+      "SharedGeneratedVervoortModifiedTests": 11,
+      "ComparisonFrameworkCompatibilityTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\volatility-integration\\unit\\unit.trx",
+    "sha256": "cdaeeddaca90a33e4585503aa10553b1f5dc1609951e77cdd9b296f88ccdcbd4",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-volatility-integration-20261021-unit.trx.gz"
+  },
+  "parity": {
+    "passed": 431,
+    "class_counts": {
+      "RemainingBenchmarkDiscoveryTests": 407,
+      "RemainingVolatilityMomentumBenchmarkTests": 4,
+      "RemainingVervoortModifiedBenchmarkTests": 4,
+      "RemainingSwamiTdiBenchmarkTests": 8,
+      "RemainingKalmanSmootherBenchmarkTests": 4,
+      "RemainingVolumePositiveNegativeBenchmarkTests": 4
+    },
+    "trx": "C:\\Users\\cheat\\StockIndicators-Recovery-20261021\\volatility-integration\\parity\\parity.trx",
+    "sha256": "b3ba1330b897d37ad58d1c4e5a97a29f616edad7eeac01ccf4031c6a4c71f73d",
+    "archived_file": "benchmarks/results/remaining-indicators/publication-volatility-integration-20261021-parity.trx.gz"
+  },
+  "gpu_passed": 100,
+  "production_dll_sha256": {
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mean-diagnostics-publish-20261021\\src\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "31dcd93db8a214118b09ff76ff29b407eddb01112915c4ce682e8f11663ada9d",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mean-diagnostics-publish-20261021\\tests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "31dcd93db8a214118b09ff76ff29b407eddb01112915c4ce682e8f11663ada9d",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mean-diagnostics-publish-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorBenchmarks\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "31dcd93db8a214118b09ff76ff29b407eddb01112915c4ce682e8f11663ada9d",
+    "C:\\Users\\cheat\\source\\repos\\Ooples-Finance-LLC\\si-mean-diagnostics-publish-20261021\\benchmarks\\OoplesFinance.StockIndicators.CompetitorTests\\bin\\Release\\net10.0\\OoplesFinance.StockIndicators.dll": "31dcd93db8a214118b09ff76ff29b407eddb01112915c4ce682e8f11663ada9d"
+  },
+  "source_fingerprint_sha256": "bdadd80d64ab59ee2a21ce3301a6b9437839f6d9d7a1117fefb14c1983c9d1aa",
+  "inventory_tests_passed": 6,
+  "performance": "Pending; correctness does not establish competitor speed.",
+  "evidence_note": "Merged-source integration checks supplement the unchanged source-pinned Volatility/Vervoort and published Swami/VPN/Kalman numerical qualifications. Counts overlap and must not be added as unique coverage."
+}

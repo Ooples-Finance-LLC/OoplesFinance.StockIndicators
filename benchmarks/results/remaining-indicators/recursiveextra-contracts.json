@@ -1,0 +1,37 @@
+{
+  "batch": "generated-recursive-averages-and-sums",
+  "types": [
+    "McNichollMovingAverage",
+    "WellRoundedMovingAverage",
+    "WellesWilderSummation",
+    "WildersSummationMethod"
+  ],
+  "status": "cpu-and-gpu-contracts-verified-performance-pending",
+  "implementation": "Reuse McNichollWindow with default EMA stages, WellRoundedWindow and WilderSummationWindow directly. Both summation facades share one state. McNicholl custom averages retain graph execution; extended stages and per-stage rounding are unchanged.",
+  "verification": {
+    "unit_passed": 44,
+    "fixture_passed": 16,
+    "discovery_passed": 23,
+    "gpu_passed": 100,
+    "contract_methods": 1358,
+    "hosted_methods": 1346,
+    "evidence": [
+      {
+        "file": "recursiveextra-unit.trx.gz",
+        "passed_cases": 44,
+        "trx_sha256": "94ba526cfb0bee0e4c0312b96987bfdbaad3a1294ccd2f5f1808969130f5d6dc"
+      },
+      {
+        "file": "recursiveextra-fixture.trx.gz",
+        "passed_cases": 39,
+        "trx_sha256": "ca9f3885791bff3229143c35a25b432fc46239b2be84a72b0045436eccabf9cd"
+      }
+    ]
+  },
+  "benchmark_fixture": {
+    "type": "RemainingRecursiveExtraBenchmarks",
+    "cases": 32,
+    "status": "prepared-not-measured"
+  },
+  "performance": "No measured latency/allocation claim; no competitor benchmarks rerun."
+}

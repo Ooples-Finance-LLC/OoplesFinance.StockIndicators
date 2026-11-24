@@ -84,11 +84,7 @@ internal static class ElementaryMathComparison
             .BuildAsync()
             .GetAwaiter()
             .GetResult();
-        var values = run[indicator.Outputs[0]];
-        var flags = run[indicator.Outputs[1]];
-        return VolumePriceComparison.Mask(
-            values.WherePresent(flags)
-        );
+        return PointwiseComparisonPublisher.Publish(run[indicator.Outputs[0]], run[indicator.Outputs[1]]);
     }
 
     private static ComparisonSeries Reference(
