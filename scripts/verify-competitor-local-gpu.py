@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / "benchmarks/results/shared-rollout/local-gpu-contracts"
 METHODS = ROOT / "scripts/competitor-gpu-methods.json"
 PROJECT = "benchmarks/OoplesFinance.StockIndicators.CompetitorTests"
+RELEASE_VERSION = b"x-release-please-version"
 spec = importlib.util.spec_from_file_location("contracts", ROOT / "scripts/run-competitor-contracts.py")
 contracts = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(contracts)
@@ -29,6 +30,8 @@ def source_fingerprint(root):
     for name in sorted(set(filter(None, listed))):
         # Source files are text; Git's platform line-ending conversion is immaterial.
         content = (root / name).read_bytes().replace(b"\r\n", b"\n")
+        # A release only rewrites the lines it marks as its version, which no contract reads.
+        content = b"\n".join(line for line in content.split(b"\n") if RELEASE_VERSION not in line)
         digest.update(name.encode() + b"\0" + hashlib.sha256(content).digest())
     return digest.hexdigest()
 
